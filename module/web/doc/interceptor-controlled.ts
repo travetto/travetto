@@ -1,17 +1,23 @@
-import { WebInterceptor, WebInterceptorCategory, WebChainedContext } from '@travetto/web';
+import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
 import { Injectable } from '@travetto/di';
+import { AppError } from '@travetto/runtime';
 
 @Injectable()
-export class SimpleLoggingInterceptor implements WebInterceptor {
+export class SimpleAuthInterceptor implements WebInterceptor {
 
   category: WebInterceptorCategory = 'terminal';
 
   async filter(ctx: WebChainedContext) {
-    const start = Date.now();
-    try {
+    if (ctx.request.headers.has('X-Auth')) {
       return await ctx.next();
-    } finally {
-      console.log('Request complete', { time: Date.now() - start });
+    } else {
+      // Or just -- throw new AppError('Missing auth', { category: 'authentication' });
+      return new WebResponse({
+        body: new AppError('Missing auth', { category: 'authentication' }),
+        context: {
+          httpStatusCode: 401
+        }
+      });
     }
   }
 }

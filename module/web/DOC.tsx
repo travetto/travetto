@@ -2,6 +2,7 @@
 import { d, c } from '@travetto/doc';
 import { CliCommand } from '@travetto/cli';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
+import { Injectable } from '@travetto/di';
 
 import { WebApplication } from './src/types/application.ts';
 import { Controller } from './src/decorator/controller.ts';
@@ -12,7 +13,7 @@ import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
 import { ResponseCacheInterceptor } from './src/interceptor/response-cache.ts';
 import { LoggingInterceptor, WebLogConfig } from './src/interceptor/logging.ts';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies.ts';
-import { WebConfig } from './src/config/web.ts';
+import { WebConfig } from './src/config.ts';
 import { WebRequest } from './src/types/request.ts';
 import { WebInterceptor } from './src/types/interceptor.ts';
 import { AsyncContextInterceptor } from './src/interceptor/context.ts';
@@ -25,6 +26,8 @@ import { CompressConfig, CompressInterceptor } from './src/interceptor/compress.
 import { AcceptsConfig, AcceptsInterceptor } from './src/interceptor/accepts.ts';
 import { DecompressConfig, DecompressInterceptor } from './src/interceptor/decompress.ts';
 import { EtagConfig, EtagInterceptor } from './src/interceptor/etag.ts';
+import { TrustProxyConfig, TrustProxyInterceptor } from './src/interceptor/trust-proxy.ts';
+
 
 const WebInterceptorContract = toConcrete<WebInterceptor>();
 const WebApplicationContract = toConcrete<WebApplication>();
@@ -41,6 +44,8 @@ export const text = <>
     <li>Defining an {Endpoint}s</li>
     <li>Using {WebInterceptorContract}s</li>
     <li>Creating a Custom {WebInterceptorContract}</li>
+    <li>Cookies</li>
+    <li>SSL Support</li>
     <li>Error Handling</li>
   </ul>
 
@@ -189,69 +194,91 @@ export const text = <>
 
     Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is (in order of execution):
 
-    <c.SubSection title={AsyncContextInterceptor.name}>
-      {AsyncContextInterceptor} is responsible for sharing context across the various layers that may be touched by a request.  This
+    <c.SubSection title='Order of Execution'>
+      <ol>
+        <li>global - Intended to run outside of the request flow - {AsyncContextInterceptor}</li>
+        <li>terminal - Handles once request and response are finished building - {LoggingInterceptor}, {RespondInterceptor}</li>
+        <li>pre-request - Prepares the request for running - {TrustProxyInterceptor}</li>
+        <li>request - Handles inbound request, validation, and body preparation - {DecompressInterceptor}, {AcceptsInterceptor}, {BodyParseInterceptor}, {CookiesInterceptor} </li>
+        <li>response - Prepares outbound response - {CompressInterceptor}, {CorsInterceptor}, {EtagInterceptor}, {ResponseCacheInterceptor} </li>
+        <li>application - Lives outside of the general request/response behavior, {d.mod('AuthWeb')} uses this for login and logout flows.</li>
+      </ol>
     </c.SubSection>
 
-    <c.SubSection title={LoggingInterceptor.name}>
-      {LoggingInterceptor} is used for logging the request/response, handling any error logging as needed. This interceptor can be noisy, and so can easily be disabled as needed by setting {d.input('web.log.applies: false')} in your config.
+    <c.SubSection title='Packaged Interceptors'>
 
-      <c.Code title='Web Log Config' src={WebLogConfig} />
-    </c.SubSection>
+      <c.SubSubSection title={AsyncContextInterceptor.name}>
+        {AsyncContextInterceptor} is responsible for sharing context across the various layers that may be touched by a request.  This
+      </c.SubSubSection>
 
-    <c.SubSection title={RespondInterceptor.name}>
-      {RespondInterceptor} is a basic catch-all that forces errors and data alike into a consistent format for sending back to the user.
-    </c.SubSection>
+      <c.SubSubSection title={LoggingInterceptor.name}>
+        {LoggingInterceptor} is used for logging the request/response, handling any error logging as needed. This interceptor can be noisy, and so can easily be disabled as needed by setting {d.input('web.log.applies: false')} in your config.
 
-    <c.SubSection title={AcceptsInterceptor.name}>
-      {AcceptsInterceptor} handles verifying the inbound request matches the allowed content-types. This acts as a standard gate-keeper for spurious input.
+        <c.Code title='Web Log Config' src={WebLogConfig} />
+      </c.SubSubSection>
 
-      <c.Code title='Accepts Config' src={AcceptsConfig} />
-    </c.SubSection>
+      <c.SubSubSection title={RespondInterceptor.name}>
+        {RespondInterceptor} is a basic catch-all that forces errors and data alike into a consistent format for sending back to the user.
+      </c.SubSubSection>
 
-    <c.SubSection title={DecompressInterceptor.name}>
-      {DecompressInterceptor} handles decompressing the inbound request, if supported.  This relies upon HTTP standards for content encoding, and negotiating the appropriate decompression scheme.
+      <c.SubSubSection title={TrustProxyInterceptor.name}>
+        {TrustProxyInterceptor} allows for overriding connection information (host, ip, protocol) using {d.input('X-Forwarded-*')} headers.  This allows for proxied requests to retain access to the "source" request information as necessary.
 
-      <c.Code title='Decompress Config' src={DecompressConfig} />
-    </c.SubSection>
+        <c.Code title='TrustProxy Config' src={TrustProxyConfig} />
+      </c.SubSubSection>
 
-    <c.SubSection title={CookiesInterceptor.name}>
-      {CookiesInterceptor} is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+      <c.SubSubSection title={AcceptsInterceptor.name}>
+        {AcceptsInterceptor} handles verifying the inbound request matches the allowed content-types. This acts as a standard gate-keeper for spurious input.
 
-      <c.Code title='Cookies Config' src={CookieConfig} />
-    </c.SubSection>
+        <c.Code title='Accepts Config' src={AcceptsConfig} />
+      </c.SubSubSection>
 
-    <c.SubSection title={BodyParseInterceptor.name}>
-      {BodyParseInterceptor} handles the inbound request, and converting the body payload into an appropriate format.
+      <c.SubSubSection title={DecompressInterceptor.name}>
+        {DecompressInterceptor} handles decompressing the inbound request, if supported.  This relies upon HTTP standards for content encoding, and negotiating the appropriate decompression scheme.
 
-      <c.Code title='Body Parse Config' src={BodyParseConfig} />
-    </c.SubSection>
+        <c.Code title='Decompress Config' src={DecompressConfig} />
+      </c.SubSubSection>
 
-    <c.SubSection title={CompressInterceptor.name}>
-      {CompressInterceptor} by default, will compress all valid outbound responses over a certain size, or for streams will cache every response. This relies on Node's {d.library('NodeZlib')} support for compression.
+      <c.SubSubSection title={CookiesInterceptor.name}>
+        {CookiesInterceptor} is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
-      <c.Code title='Compress Config' src={CompressConfig} />
-    </c.SubSection>
+        <c.Code title='Cookies Config' src={CookieConfig} />
+      </c.SubSubSection>
 
-    <c.SubSection title={EtagInterceptor.name}>
-      {EtagInterceptor} by default, will tag all cacheable HTTP responses, when the response value/length is known.  Streams, and other async data sources do not have a pre-defined length, and so are ineligible for etagging.
-      <c.Code title='ETag Config' src={EtagConfig} />
-    </c.SubSection>
+      <c.SubSubSection title={BodyParseInterceptor.name}>
+        {BodyParseInterceptor} handles the inbound request, and converting the body payload into an appropriate format.
 
-    <c.SubSection title={CorsInterceptor.name}>
-      {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, the {d.input('web.cors')} config space.
+        <c.Code title='Body Parse Config' src={BodyParseConfig} />
+      </c.SubSubSection>
 
-      <c.Code title='Cors Config' src={CorsConfig} />
-    </c.SubSection>
+      <c.SubSubSection title={CompressInterceptor.name}>
+        {CompressInterceptor} by default, will compress all valid outbound responses over a certain size, or for streams will cache every response. This relies on Node's {d.library('NodeZlib')} support for compression.
 
-    <c.SubSection title={ResponseCacheInterceptor.name}>
-      {ResponseCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
+        <c.Code title='Compress Config' src={CompressConfig} />
+      </c.SubSubSection>
+
+      <c.SubSubSection title={EtagInterceptor.name}>
+        {EtagInterceptor} by default, will tag all cacheable HTTP responses, when the response value/length is known.  Streams, and other async data sources do not have a pre-defined length, and so are ineligible for etagging.
+        <c.Code title='ETag Config' src={EtagConfig} />
+      </c.SubSubSection>
+
+      <c.SubSubSection title={CorsInterceptor.name}>
+        {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, the {d.input('web.cors')} config space.
+
+        <c.Code title='Cors Config' src={CorsConfig} />
+      </c.SubSubSection>
+
+      <c.SubSubSection title={ResponseCacheInterceptor.name}>
+        {ResponseCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
+      </c.SubSubSection>
     </c.SubSection>
 
     <c.SubSection title='Configuring Interceptors'>
       All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:
       <c.SubSubSection title='Enable/disable of individual interceptors via configuration'>
+        This applies only to interceptors that have opted in, to exposing a config, and tying that configuration to the applies logic.
         <c.Code title='Sample interceptor disabling configuration' src='doc/disable.yml' />
+        <c.Code title='Configurable Interceptor' src={TrustProxyConfig} />
       </c.SubSubSection>
       <c.SubSubSection title='Endpoint-enabled control via decorators'>
         <c.Code title='Sample controller with endpoint-level allow/deny' src='doc/controller-endpoint-deny.ts' />
@@ -259,24 +286,20 @@ export const text = <>
 
       The resolution logic is as follows:
       <ul>
-        <li>Determine if interceptor is disabled, this takes precedence.</li>
-        <li>Check the endpoint against the path allow/deny list.  If matched (positive or negative), this wins.</li>
-        <li>Finally check to see if the interceptor has custom applies logic.  If it does, match against the configuration for the endpoint.</li>
-        <li>By default, if nothing else matched, assume the interceptor is valid.</li>
+        <li>Check the resolved {Endpoint}/{Controller} overrides to see if an interceptor is explicitly allowed or disallowed</li>
+        <li>Default to {d.method('applies()')} logic for all available interceptors</li>
       </ul>
     </c.SubSection>
   </c.Section>
 
   <c.Section title='Creating a Custom WebInterceptor'>
-    Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {WebInterceptorContract} interface.  The interceptors are tied to the defined {WebRequest} object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+    Additionally it may be desirable to create a custom interceptor.  Interceptors can be registered with the {d.mod('Di')} by implementing the {WebInterceptorContract} interface and adding an {Injectable} decorator. A simple logging interceptor:
 
     <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
 
-    A {d.input('next')} parameter is also available to allow for controlling the flow of the request, either by stopping the flow of interceptors, or being able to determine when a request starts, and when it is ending.
+    When running an interceptor, if you chose to skip calling {d.method('ctx.next()')}, you will bypass all the downstream interceptors and return a response directly.
 
     <c.Code title='Defining a fully controlled Interceptor' src='doc/interceptor-controlled.ts' />
-
-    Currently {d.mod('WebUpload')} is implemented in this fashion, as well as {d.mod('AuthWeb')}.
   </c.Section>
 
   <c.Section title='Cookie Support'>
