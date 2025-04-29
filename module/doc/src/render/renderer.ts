@@ -151,7 +151,7 @@ export class DocRenderer {
     }
 
     const text = await this.#render(providers[fmt], this.#rootNode);
-    let cleaned = `${text.replace(/\n{3,100}/msg, '\n\n').trim()}\n`;
+    let cleaned = `${text?.replace(/\n{3,100}/msg, '\n\n').trim()}\n`;
     if (this.#root.wrap?.[fmt]) {
       cleaned = this.#root.wrap[fmt](cleaned);
     }

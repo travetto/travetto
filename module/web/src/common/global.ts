@@ -4,7 +4,7 @@ import { Runtime } from '@travetto/runtime';
 import { Controller } from '../decorator/controller.ts';
 import { ConditionalRegister, ConfigureInterceptor, Undocumented } from '../decorator/common.ts';
 import { Get, Options } from '../decorator/endpoint.ts';
-import { WebConfig } from '../config/web.ts';
+import { WebConfig } from '../config.ts';
 import { LoggingInterceptor, } from '../interceptor/logging.ts';
 
 @Undocumented()
@@ -25,12 +25,6 @@ export class GlobalHandler {
     };
   }
 
-  @ConditionalRegister(async () => {
-    const config = await DependencyRegistry.getInstance(WebConfig);
-    return config.optionsGlobalHandle;
-  })
   @Options('*all')
-  options(): string {
-    return '';
-  }
+  options(): void { }
 }

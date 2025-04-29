@@ -1,10 +1,10 @@
 {
-  "name": "@travetto/web-node",
+  "name": "@travetto/web-http",
   "version": "6.0.0-rc.1",
-  "description": "Node provider for the travetto web module.",
+  "description": "Web HTTP Support",
   "keywords": [
     "web",
-    "node",
+    "http",
     "travetto",
     "typescript"
   ],
@@ -21,14 +21,25 @@
   "main": "__index__.ts",
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/web-node"
+    "directory": "module/web-http"
   },
   "dependencies": {
-    "@travetto/web": "^6.0.0-rc.1",
-    "@travetto/web-http": "^6.0.0-rc.1"
+    "@travetto/web": "^6.0.0-rc.1"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^6.0.0-rc.1",
+    "@travetto/test": "^6.0.0-rc.1"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/test": {
+      "optional": true
+    },
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "travetto": {
-    "displayName": "Node Web Server"
+    "displayName": "Web HTTP Support"
   },
   "publishConfig": {
     "access": "public"

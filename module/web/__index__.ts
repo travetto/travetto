@@ -9,9 +9,7 @@ export * from './src/types/interceptor.ts';
 export * from './src/types/headers.ts';
 
 export * from './src/context.ts';
-
-export * from './src/config/web.ts';
-export * from './src/config/ssl.ts';
+export * from './src/config.ts';
 
 export * from './src/router/standard.ts';
 export * from './src/router/base.ts';
@@ -44,4 +42,3 @@ export * from './src/util/mime.ts';
 export * from './src/util/cookie.ts';
 export * from './src/util/common.ts';
 export * from './src/util/net.ts';
-export * from './src/util/ssl.ts';

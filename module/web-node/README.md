@@ -20,8 +20,9 @@ The module is an [http](https://nodejs.org/api/http.html) adapter for the [Web A
 import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter } from '@travetto/web';
+import { WebApplication, WebApplicationHandle, StandardWebRouter } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
+import { WebHttpUtil, WebHttpConfig } from '@travetto/web-http';
 
 import { NodeWebUtil } from './util.ts';
 
@@ -32,7 +33,7 @@ import { NodeWebUtil } from './util.ts';
 export class NodeWebApplication implements WebApplication {
 
   @Inject()
-  config: WebConfig;
+  serverConfig: WebHttpConfig;
 
   @Inject()
   router: StandardWebRouter;
@@ -46,14 +47,12 @@ export class NodeWebApplication implements WebApplication {
   async run(): Promise<WebApplicationHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
-    const server = await NetUtil.startHttpServer({
-      port: this.config.port,
-      bindAddress: this.config.bindAddress,
-      sslKeys: this.config.ssl?.active ? this.config.ssl.keys : undefined,
+    const server = await WebHttpUtil.startHttpServer({
+      ...this.serverConfig,
       handler: (req, res) => this.handler(req, res)
     });
 
-    console.log('Listening', { port: this.config.port });
+    console.log('Listening', { port: this.serverConfig.port });
 
     return server;
   }

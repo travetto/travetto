@@ -1,10 +1,8 @@
+import os from 'node:os';
 import net from 'node:net';
-import http from 'node:http';
-import https from 'node:https';
 import { spawn } from 'node:child_process';
 
 import { ExecUtil } from '@travetto/runtime';
-import { WebSslKeyPair } from '../types/core.ts';
 
 /** Net utilities */
 export class NetUtil {
@@ -47,25 +45,13 @@ export class NetUtil {
     });
   }
 
-  /** Start an http server */
-  static async startHttpServer(config: {
-    port: number;
-    bindAddress?: string;
-    sslKeys?: WebSslKeyPair;
-    handler?: (req: http.IncomingMessage, res: http.ServerResponse) => void;
-  }): Promise<http.Server> {
-    const { reject, resolve, promise } = Promise.withResolvers<void>();
-    const core = config.sslKeys ?
-      https.createServer(config.sslKeys!, config.handler) :
-      http.createServer(config.handler);
+  /**
+   * Get local address for listening
+   */
+  static getLocalAddress(): string {
+    const useIPv4 = !![...Object.values(os.networkInterfaces())]
+      .find(interfaces => interfaces?.find(nic => nic.family === 'IPv4'));
 
-    const server = core.listen(config.port, config.bindAddress)
-      .on('error', reject)
-      .on('listening', resolve);
-
-    await promise;
-    server.off('error', reject);
-
-    return server;
+    return useIPv4 ? '0.0.0.0' : '::';
   }
 }

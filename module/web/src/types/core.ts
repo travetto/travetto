@@ -31,4 +31,3 @@ export const WEB_INTERCEPTOR_CATEGORIES = [
  * High level categories with a defined ordering
  */
 export type WebInterceptorCategory = (typeof WEB_INTERCEPTOR_CATEGORIES)[number];
-export type WebSslKeyPair = { cert: string, key: string };

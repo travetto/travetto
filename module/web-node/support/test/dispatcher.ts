@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
+import { WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
+import { WebHttpConfig } from '@travetto/web-http';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -10,7 +11,7 @@ import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts
 export class FetchWebDispatcher implements WebDispatcher {
 
   @Inject()
-  config: WebConfig;
+  config: WebHttpConfig;
 
   async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
     const { path: finalPath, init } = await WebTestDispatchUtil.toFetchRequestInit(

@@ -7,7 +7,7 @@ import { WebResponse } from '../types/response.ts';
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 
-import { WebConfig } from '../config/web.ts';
+import { WebConfig } from '../config.ts';
 import { Cookie, CookieSetOptions } from '../types/cookie.ts';
 import { CookieJar } from '../util/cookie.ts';
 import { WebAsyncContext } from '../context.ts';
@@ -66,8 +66,9 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
   webAsyncContext: WebAsyncContext;
 
   finalizeConfig({ config }: WebInterceptorContext<CookieConfig>): CookieConfig {
-    config.secure ??= this.webConfig.ssl?.active;
-    config.domain ??= this.webConfig.hostname;
+    const url = new URL(this.webConfig.baseUrl ?? 'x://localhost');
+    config.secure ??= url.protocol === 'https';
+    config.domain ??= url.host;
     return config;
   }
 
