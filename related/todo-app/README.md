@@ -419,24 +419,14 @@ npx trv run:web
       WebAuthLoginConfig: { applies: false },
       WebAuthLogoutConfig: { applies: false },
       WebAuthVerifyConfig: { applies: false, permissions: [] },
-      WebConfig: {
-        serve: true,
-        port: 12555,
-        trustProxy: [],
-        hostname: 'localhost',
-        bindAddress: '0.0.0.0',
-        baseUrl: 'http://localhost:12555',
-        defaultMessage: true,
-        ssl: { active: false },
-        optionsGlobalHandle: true
-      },
+      WebConfig: { defaultMessage: true, baseUrl: 'http://localhost:12555' },
+      WebHttpConfig: { port: 12555, bindAddress: '0.0.0.0', ssl: false },
       WebLogConfig: { applies: true, showStackTrace: true },
-      WebRpcConfig: { clients: [] },
-      WebSslConfig: { active: false }
+      WebRpcConfig: { clients: [] }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:37] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:36] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

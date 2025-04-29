@@ -450,24 +450,14 @@ First we must start the application:
       WebAuthLoginConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthLogoutConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> applies: false, permissions: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-      WebConfig: <span class="token punctuation">{{'{'}}</span>
-        serve: true,
-        port: <span class="token number">12555</span>,
-        trustProxy: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-        hostname: <span class="token string">'localhost'</span>,
-        bindAddress: <span class="token string">'0.0.0.0'</span>,
-        baseUrl: <span class="token string">'http://localhost:12555'</span>,
-        defaultMessage: true,
-        ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
-        optionsGlobalHandle: <span class="token boolean">true</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      WebConfig: <span class="token punctuation">{{'{'}}</span> defaultMessage: true, baseUrl: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span>,
+      WebHttpConfig: <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span>, bindAddress: <span class="token string">'0.0.0.0'</span>, ssl: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      WebRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-      WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+      WebRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web-node:src/application.ts:37<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web-node:src/application.ts:36<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>

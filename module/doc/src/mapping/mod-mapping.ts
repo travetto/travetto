@@ -204,8 +204,8 @@ export const MOD_MAPPING = {
     description: 'Web integration for Connect-Like Resources'
   },
   WebHttp: {
-    name: '@travetto/web-http', folder: '@travetto/web-http', displayName: 'Web HTTP Support',
-    description: 'Web HTTP Support'
+    name: '@travetto/web-http', folder: '@travetto/web-http', displayName: 'Web HTTP Server Support',
+    description: 'Web HTTP Server Support'
   },
   WebNode: {
     name: '@travetto/web-node', folder: '@travetto/web-node', displayName: 'Node Web Server',

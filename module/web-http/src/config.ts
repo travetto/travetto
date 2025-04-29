@@ -25,6 +25,7 @@ export class WebHttpConfig {
   /**
    * Is SSL active
    */
+  @EnvVar('WEB_HTTP_SSL')
   ssl?: boolean;
 
   /**

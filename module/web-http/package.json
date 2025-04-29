@@ -1,7 +1,7 @@
 {
   "name": "@travetto/web-http",
   "version": "6.0.0-rc.1",
-  "description": "Web HTTP Support",
+  "description": "Web HTTP Server Support",
   "keywords": [
     "web",
     "http",
@@ -39,7 +39,7 @@
     }
   },
   "travetto": {
-    "displayName": "Web HTTP Support"
+    "displayName": "Web HTTP Server Support"
   },
   "publishConfig": {
     "access": "public"
