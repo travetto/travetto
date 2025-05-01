@@ -78,7 +78,7 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
   finalizeConfig({ config }: WebInterceptorContext<CookieConfig>): CookieConfig {
     const url = new URL(this.webConfig.baseUrl ?? 'x://localhost');
     config.secure ??= url.protocol === 'https';
-    config.domain ??= url.host;
+    config.domain ??= url.hostname;
     return config;
   }
 
