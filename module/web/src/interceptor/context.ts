@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';

@@ -3,9 +3,9 @@ import { castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
+import { CliUtil, RunResponse } from '@travetto/cli';
 
-import { WebApplication, WebApplicationHandle } from '../../../src/types/application.ts';
-import { WebDispatcher } from '../../../src/types.ts';
+import { WebDispatcher } from '../../../src/types/dispatch.ts';
 import { WebRequest, WebRequestContext } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 import { WebMessageInit } from '../../../src/types/message.ts';
@@ -33,10 +33,10 @@ export class WebTestConfig implements ConfigSource {
  */
 export abstract class BaseWebSuite {
 
-  #appHandle?: WebApplicationHandle;
+  #appHandle?: RunResponse;
   #dispatcher: WebDispatcher;
 
-  appType?: Class<WebApplication>;
+  appType?: Class<{ run: () => RunResponse }>;
   dispatcherType: Class<WebDispatcher>;
 
   @BeforeAll()
@@ -50,8 +50,10 @@ export abstract class BaseWebSuite {
 
   @AfterAll()
   async destroySever(): Promise<void> {
-    await this.#appHandle?.close?.();
-    this.#appHandle = undefined;
+    if (this.#appHandle) {
+      await CliUtil.listenForResponse(this.#appHandle);
+      this.#appHandle = undefined;
+    }
   }
 
   async request<T>(cfg: WebMessageInit<unknown, WebRequestContext>, throwOnError: boolean = true): Promise<WebResponse<T>> {

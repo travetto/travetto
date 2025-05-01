@@ -3,7 +3,7 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 import { DependencyRegistry } from '@travetto/di';
 import { RetargettingProxy } from '@travetto/registry';
 
-import { WebChainedFilter, WebChainedContext, WebFilter } from '../types.ts';
+import { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebRequest } from '../types/request.ts';

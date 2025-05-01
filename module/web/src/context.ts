@@ -4,6 +4,9 @@ import { AppError, castTo, Class, toConcrete } from '@travetto/runtime';
 
 import { WebRequest } from './types/request.ts';
 
+/**
+ * Shared Async Context, powering the @ContextParams
+ */
 @Injectable()
 export class WebAsyncContext {
 

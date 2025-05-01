@@ -3,7 +3,7 @@ import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInsta
 import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
-import { WebChainedFilter, WebFilter } from '../types.ts';
+import { WebChainedFilter, WebFilter } from '../types/filter.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
 

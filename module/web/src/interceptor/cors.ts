@@ -2,7 +2,7 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { HTTP_METHODS, HttpMethod, WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';

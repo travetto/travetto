@@ -3,7 +3,7 @@ import { Config } from '@travetto/config';
 
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 
 /**

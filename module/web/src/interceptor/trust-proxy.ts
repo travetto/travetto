@@ -5,7 +5,7 @@ import { castTo } from '@travetto/runtime';
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 
 @Config('web.trustProxy')
 export class TrustProxyConfig {

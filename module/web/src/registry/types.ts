@@ -2,7 +2,7 @@ import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
-import type { WebChainedFilter, WebFilter } from '../types.ts';
+import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
 import { HttpMethod } from '../types/core.ts';
 import { WebHeaders } from '../types/headers.ts';
 import { WebResponse } from '../types/response.ts';

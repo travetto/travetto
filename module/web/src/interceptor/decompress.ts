@@ -6,7 +6,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';

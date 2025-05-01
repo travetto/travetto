@@ -7,7 +7,7 @@ import { EndpointConfig } from '../registry/types.ts';
 
 import { WebResponse } from '../types/response.ts';
 import { HTTP_METHODS } from '../types/core.ts';
-import { WebFilterContext } from '../types.ts';
+import type { WebFilterContext } from '../types/filter.ts';
 import { WebConfig } from '../config.ts';
 
 import { BaseWebRouter } from './base.ts';
