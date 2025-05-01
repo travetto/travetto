@@ -2,9 +2,9 @@ import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { WebApplication, WebSslConfig } from '@travetto/web';
+import { WebServer, WebHttpConfig } from '@travetto/web-server';
 
-import './config-override';
+import '@travetto/web/doc/config-override';
 
 @CliCommand({ runTarget: true })
 export class SampleApp {
@@ -17,10 +17,10 @@ export class SampleApp {
   async main() {
     console.log('CUSTOM STARTUP');
     await RootRegistry.init();
-    const ssl = await DependencyRegistry.getInstance(WebSslConfig);
-    ssl.active = true;
+    const ssl = await DependencyRegistry.getInstance(WebHttpConfig);
+    ssl.ssl = true;
 
     // Configure server before running
-    return DependencyRegistry.runInstance(toConcrete<WebApplication>());
+    return DependencyRegistry.runInstance(toConcrete<WebServer>());
   }
 }

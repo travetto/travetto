@@ -348,7 +348,7 @@ npx trv run:web
       { priority: 999, source: 'memory://override' }
     ],
     active: {
-      AcceptsConfig: { applies: false, types: [] },
+      AcceptConfig: { applies: false, types: [] },
       ApiHostConfig: { servers: [ { url: 'http://localhost:12555' } ], openapi: '3.0.0' },
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
@@ -426,7 +426,7 @@ npx trv run:web
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:36] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:37] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

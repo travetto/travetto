@@ -3,7 +3,8 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { StandardWebRouter } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
-import { WebHttpUtil, WebHttpConfig, WebServer, WebServerHandle } from '@travetto/web-server';
+import { WebHttpUtil, WebHttpConfig, WebServer } from '@travetto/web-server';
+import { RunResponse } from '@travetto/cli';
 
 import { NodeWebUtil } from './util.ts';
 
@@ -25,7 +26,7 @@ export class NodeWebApplication implements WebServer {
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 
-  async run(): Promise<WebServerHandle> {
+  async run(): Promise<RunResponse> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
     const server = await WebHttpUtil.startHttpServer({

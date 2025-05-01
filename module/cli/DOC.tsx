@@ -144,7 +144,7 @@ export const text = <>
     <c.SubSection title='Dependency Injection'>
       If the goal is to run a more complex application, which may include depending on {d.mod('Di')}, we can take a look at {d.mod('Web')}'s target:
 
-      <c.Code title='Simple Run Target' src='../web/support/cli.run_web.ts' />
+      <c.Code title='Simple Run Target' src='../web-server/support/cli.run_web.ts' />
 
       As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {Runtime} {d.field('name')} defined in the {d.mod('Runtime')} module. <br />
 

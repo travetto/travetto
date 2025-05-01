@@ -44,7 +44,7 @@ Commands:
   repo:version      Version all changed dependencies
   repo:version-sync Enforces all packages to write out their versions and dependencies
   run:double        Doubles a number
-  run:web           Run a web server as an application
+  run:web           Run a web server
   scaffold          Command to run scaffolding
   service           Allows for running services
   test              Launch test framework and execute tests
@@ -462,13 +462,13 @@ If the goal is to run a more complex application, which may include depending on
 ```typescript
 import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
-import { CliCommand, CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliCommandShape, RunResponse } from '@travetto/cli';
+import { NetUtil } from '@travetto/web';
 
-import type { WebApplication, WebApplicationHandle } from '../src/types/application.ts';
-import { NetUtil } from '../src/util/net.ts';
+import type { WebServer } from '../src/types.ts';
 
 /**
- * Run a web server as an application
+ * Run a web server
  */
 @CliCommand({ runTarget: true, with: { debugIpc: true, canRestart: true, module: true, env: true } })
 export class RunWebCommand implements CliCommandShape {
@@ -485,13 +485,13 @@ export class RunWebCommand implements CliCommandShape {
     }
   }
 
-  async main(): Promise<WebApplicationHandle | void> {
+  async main(): Promise<RunResponse | void> {
     try {
-      return await DependencyRegistry.runInstance(toConcrete<WebApplication>());
+      return await DependencyRegistry.runInstance(toConcrete<WebServer>());
     } catch (err) {
       if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
-        return await DependencyRegistry.runInstance(toConcrete<WebApplication>());
+        return await DependencyRegistry.runInstance(toConcrete<WebServer>());
       }
       throw err;
     }

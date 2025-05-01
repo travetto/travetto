@@ -1,6 +1,6 @@
-export type WebSslKeyPair = { cert: string, key: string };
+import { RunResponse } from '@travetto/cli';
 
-export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
+export type WebSslKeyPair = { cert: string, key: string };
 
 /**
  * Defines the shape of the web server
@@ -8,5 +8,5 @@ export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 
  * @concrete
  */
 export interface WebServer {
-  run(): WebServerHandle | Promise<WebServerHandle>;
+  run(): RunResponse | Promise<RunResponse>;
 }

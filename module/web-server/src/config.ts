@@ -14,8 +14,7 @@ export class WebHttpConfig {
   /**
    * The port to run on
    */
-  @EnvVar('WEB_PORT')
-  @EnvVar('WEB_HTTP_PORT')
+  @EnvVar('WEB_HTTP_PORT', 'WEB_PORT')
   port: number = 3000;
 
   /**
