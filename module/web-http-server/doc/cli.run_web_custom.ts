@@ -2,7 +2,7 @@ import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { WebServer, WebHttpConfig } from '@travetto/web-server';
+import { WebHttpServer, WebHttpConfig } from '@travetto/web-http-server';
 
 import '@travetto/web/doc/config-override';
 
@@ -21,6 +21,6 @@ export class SampleApp {
     ssl.ssl = true;
 
     // Configure server before running
-    return DependencyRegistry.runInstance(toConcrete<WebServer>());
+    return DependencyRegistry.runInstance(toConcrete<WebHttpServer>());
   }
 }

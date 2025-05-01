@@ -3,9 +3,9 @@ import { CliCommand } from '@travetto/cli';
 import { c, d } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 
-import type { WebServer } from './src/types.ts';
+import type { WebHttpServer } from './src/types.ts';
 
-const WebServerContract = toConcrete<WebServer>();
+const WebServerContract = toConcrete<WebHttpServer>();
 
 export const text = <>
   <c.StdHeader />

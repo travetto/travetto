@@ -7,6 +7,6 @@ export type WebSslKeyPair = { cert: string, key: string };
  *
  * @concrete
  */
-export interface WebServer {
+export interface WebHttpServer {
   run(): RunResponse | Promise<RunResponse>;
 }

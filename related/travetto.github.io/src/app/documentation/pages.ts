@@ -128,8 +128,8 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/web-rpc/web-rpc.component').then(m => m.WebRpcComponent)
       },
       {
-        path: 'web-server', title: 'Server',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-server/web-server.component').then(m => m.WebServerComponent)
+        path: 'web-http-server', title: 'Server',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-http-server/web-http-server.component').then(m => m.WebHttpServerComponent)
       },
       {
         path: 'openapi', title: 'OpenAPI',

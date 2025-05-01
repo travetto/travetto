@@ -3,10 +3,10 @@ import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
   imports: [RouterLink, RouterModule],
-  selector: 'web-server',
-  templateUrl: './web-server.component.html',
+  selector: 'web-http-server',
+  templateUrl: './web-http-server.component.html',
   styles: ['']
 })
-export class WebServerComponent {
+export class WebHttpServerComponent {
 
 }
