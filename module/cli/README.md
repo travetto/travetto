@@ -44,7 +44,7 @@ Commands:
   repo:version      Version all changed dependencies
   repo:version-sync Enforces all packages to write out their versions and dependencies
   run:double        Doubles a number
-  run:web           Run a web server
+  run:web:http      Run a web server
   scaffold          Command to run scaffolding
   service           Allows for running services
   test              Launch test framework and execute tests
@@ -465,13 +465,13 @@ import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape, RunResponse } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
 
-import type { WebServer } from '../src/types.ts';
+import type { WebHttpServer } from '../src/types.ts';
 
 /**
  * Run a web server
  */
 @CliCommand({ runTarget: true, with: { debugIpc: true, canRestart: true, module: true, env: true } })
-export class RunWebCommand implements CliCommandShape {
+export class RunWebHttpCommand implements CliCommandShape {
 
   /** Port to run on */
   port?: number;
@@ -481,17 +481,17 @@ export class RunWebCommand implements CliCommandShape {
 
   preMain(): void {
     if (this.port) {
-      process.env.WEB_PORT = `${this.port}`;
+      process.env.WEB_HTTP_PORT = `${this.port}`;
     }
   }
 
   async main(): Promise<RunResponse | void> {
     try {
-      return await DependencyRegistry.runInstance(toConcrete<WebServer>());
+      return await DependencyRegistry.runInstance(toConcrete<WebHttpServer>());
     } catch (err) {
       if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
-        return await DependencyRegistry.runInstance(toConcrete<WebServer>());
+        return await DependencyRegistry.runInstance(toConcrete<WebHttpServer>());
       }
       throw err;
     }

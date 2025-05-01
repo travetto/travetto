@@ -22,7 +22,7 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { StandardWebRouter } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
-import { WebHttpUtil, WebHttpConfig, WebServer } from '@travetto/web-server';
+import { WebHttpUtil, WebHttpConfig, WebHttpServer } from '@travetto/web-http-server';
 import { RunResponse } from '@travetto/cli';
 
 import { NodeWebUtil } from './util.ts';
@@ -31,7 +31,7 @@ import { NodeWebUtil } from './util.ts';
  * A node http server
  */
 @Injectable()
-export class NodeWebApplication implements WebServer {
+export class NodeWebApplication implements WebHttpServer {
 
   @Inject()
   serverConfig: WebHttpConfig;
