@@ -16,7 +16,7 @@
   </figure>
 
 This module allows for a highly focused scenario, of supporting RPC operations within a <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> application.  The module takes care of producing the appropriate handler for the RPC commands along with the ability to generate the appropriate client to be used to interact with the RPC functionality.  The generated client uses Proxy-based objects, along with <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> magic to create a dynamic client that does not rely on generating a lot of code.
-<h2 id="cli-web-rpc">CLI - web:rpc</h2>
+<h2 id="cli-web-rpc-client">CLI - web:rpc-client</h2>
 
 The library will create the RPC client in one of three flavors: fetch, fetch + node, angular.
 
@@ -24,9 +24,9 @@ The library will create the RPC client in one of three flavors: fetch, fetch + n
     <figcaption class="terminal">Command Service
 
 </figcaption>
-    <pre><code class="language-bash">$ trv web:rpc <span class="token parameter variable">--help</span>
+    <pre><code class="language-bash">$ trv web:rpc-client <span class="token parameter variable">--help</span>
 
-Usage: web:rpc <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>type:config<span class="token operator">|</span><span class="token function">node</span><span class="token operator">|</span>web<span class="token operator">></span> <span class="token punctuation">[</span>output:string<span class="token punctuation">]</span>
+Usage: web:rpc-client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>type:config<span class="token operator">|</span><span class="token function">node</span><span class="token operator">|</span>web<span class="token operator">></span> <span class="token punctuation">[</span>output:string<span class="token punctuation">]</span>
 
 Options:
   -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>     Application environment

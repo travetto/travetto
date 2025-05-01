@@ -49,7 +49,7 @@ Commands:
   test              Launch test framework and execute tests
   test:watch        Invoke the test watcher
   web:http          Run a web server
-  web:rpc           Run client web operation
+  web:rpc-client    Generate the web-rpc client
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
