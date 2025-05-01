@@ -1,22 +1,30 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { AcceptsConfig, AcceptsInterceptor, WebRequest, WebResponse } from '@travetto/web';
+import { AcceptConfig, AcceptInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { RootRegistry } from '@travetto/registry';
 
+function unwrapError(err: unknown): unknown {
+  if (err instanceof WebResponse && err.body instanceof Error) {
+    throw err.body;
+  }
+  throw err;
+}
+
 @Suite()
-class AcceptsInterceptorSuite {
+class AcceptInterceptorSuite {
 
   @BeforeAll()
   async init() {
     await RootRegistry.init();
   }
 
+
   @Test()
   async basicTest() {
 
-    const interceptor = new AcceptsInterceptor();
-    interceptor.config = AcceptsConfig.from({
+    const interceptor = new AcceptInterceptor();
+    interceptor.config = AcceptConfig.from({
       types: ['text/plain', 'application/json']
     });
     interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
@@ -59,14 +67,14 @@ class AcceptsInterceptorSuite {
       }),
       next: async () => new WebResponse(),
       config: interceptor.config
-    }), /Content type.*violated/i);
+    }).catch(unwrapError), /Content type.*violated/i);
   }
 
   @Test()
   async wildCard() {
 
-    const interceptor = new AcceptsInterceptor();
-    interceptor.config = AcceptsConfig.from({
+    const interceptor = new AcceptInterceptor();
+    interceptor.config = AcceptConfig.from({
       types: ['text/*']
     });
     interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
@@ -119,8 +127,6 @@ class AcceptsInterceptorSuite {
       }),
       next: async () => new WebResponse(),
       config: interceptor.config
-    }), /Content type.*violated/i);
-
-
+    }).catch(unwrapError), /Content type.*violated/i);
   }
 }

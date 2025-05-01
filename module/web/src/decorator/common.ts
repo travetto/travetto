@@ -2,7 +2,7 @@ import { asConstructable, castTo, Class, TimeSpan } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
-import { AcceptsInterceptor } from '../interceptor/accepts.ts';
+import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebCommonUtil, CacheControlFlag } from '../util/common.ts';
 
@@ -67,9 +67,9 @@ export const DisableCacheControl = (): EndpointDecorator => CacheControl(0);
  */
 export function Accepts(types: [string, ...string[]]): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(
-    AcceptsInterceptor,
+    AcceptInterceptor,
     { types, applies: true },
-    { responseHeaders: { accepts: types[0] } }
+    { responseHeaders: { accepts: types.join(', ') } }
   );
 }
 

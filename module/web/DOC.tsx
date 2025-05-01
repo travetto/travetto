@@ -23,7 +23,7 @@ import { RespondInterceptor } from './src/interceptor/respond.ts';
 import { BaseWebMessage } from './src/types/message.ts';
 import { WebResponse } from './src/types/response.ts';
 import { CompressConfig, CompressInterceptor } from './src/interceptor/compress.ts';
-import { AcceptsConfig, AcceptsInterceptor } from './src/interceptor/accepts.ts';
+import { AcceptConfig, AcceptInterceptor } from './src/interceptor/accept.ts';
 import { DecompressConfig, DecompressInterceptor } from './src/interceptor/decompress.ts';
 import { EtagConfig, EtagInterceptor } from './src/interceptor/etag.ts';
 import { TrustProxyConfig, TrustProxyInterceptor } from './src/interceptor/trust-proxy.ts';
@@ -199,7 +199,7 @@ export const text = <>
         <li>global - Intended to run outside of the request flow - {AsyncContextInterceptor}</li>
         <li>terminal - Handles once request and response are finished building - {LoggingInterceptor}, {RespondInterceptor}</li>
         <li>pre-request - Prepares the request for running - {TrustProxyInterceptor}</li>
-        <li>request - Handles inbound request, validation, and body preparation - {DecompressInterceptor}, {AcceptsInterceptor}, {BodyParseInterceptor}, {CookiesInterceptor} </li>
+        <li>request - Handles inbound request, validation, and body preparation - {DecompressInterceptor}, {AcceptInterceptor}, {BodyParseInterceptor}, {CookiesInterceptor} </li>
         <li>response - Prepares outbound response - {CompressInterceptor}, {CorsInterceptor}, {EtagInterceptor}, {ResponseCacheInterceptor} </li>
         <li>application - Lives outside of the general request/response behavior, {d.mod('AuthWeb')} uses this for login and logout flows.</li>
       </ol>
@@ -227,10 +227,10 @@ export const text = <>
         <c.Code title='TrustProxy Config' src={TrustProxyConfig} />
       </c.SubSubSection>
 
-      <c.SubSubSection title={AcceptsInterceptor.name}>
-        {AcceptsInterceptor} handles verifying the inbound request matches the allowed content-types. This acts as a standard gate-keeper for spurious input.
+      <c.SubSubSection title={AcceptInterceptor.name}>
+        {AcceptInterceptor} handles verifying the inbound request matches the allowed content-types. This acts as a standard gate-keeper for spurious input.
 
-        <c.Code title='Accepts Config' src={AcceptsConfig} />
+        <c.Code title='Accept Config' src={AcceptConfig} />
       </c.SubSubSection>
 
       <c.SubSubSection title={DecompressInterceptor.name}>

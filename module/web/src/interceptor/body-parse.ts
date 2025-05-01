@@ -12,7 +12,7 @@ import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
 
-import { AcceptsInterceptor } from './accepts.ts';
+import { AcceptInterceptor } from './accept.ts';
 import { DecompressInterceptor } from './decompress.ts';
 
 /**
@@ -52,7 +52,7 @@ export class BodyParseConfig {
 @Injectable()
 export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
-  dependsOn = [AcceptsInterceptor, DecompressInterceptor];
+  dependsOn = [AcceptInterceptor, DecompressInterceptor];
   category: WebInterceptorCategory = 'request';
   parsers: Record<string, BodyContentParser> = {};
 

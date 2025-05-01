@@ -98,8 +98,8 @@ export class WebCommonUtil {
         new AppError(err.message, { details: err }) :
         new AppError(`${err}`);
 
-    const error: Error & { category?: ErrorCategory, status?: number, statusCode?: number } = body;
-    const statusCode = error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
+    const error: Error & { category?: ErrorCategory } = body;
+    const statusCode = ERROR_CATEGORY_STATUS[error.category!] ?? 500;
 
     return new WebResponse({ body, context: { httpStatusCode: statusCode } });
   }
