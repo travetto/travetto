@@ -183,7 +183,7 @@ export class Simple {
 ```
 
 ### ContextParam
-In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11).  These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8).  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11).  These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L11).  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
 **Code: Example ContextParam usage**
 ```typescript

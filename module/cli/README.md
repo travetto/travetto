@@ -44,11 +44,11 @@ Commands:
   repo:version      Version all changed dependencies
   repo:version-sync Enforces all packages to write out their versions and dependencies
   run:double        Doubles a number
-  run:web:http      Run a web server
   scaffold          Command to run scaffolding
   service           Allows for running services
   test              Launch test framework and execute tests
   test:watch        Invoke the test watcher
+  web:http          Run a web server
   web:rpc           Run client web operation
 ```
 
@@ -388,7 +388,7 @@ npx trv call:db --host localhost --port 3306 --username app --password <custom>
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") does expose a cli target `run:web` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -471,7 +471,7 @@ import type { WebHttpServer } from '../src/types.ts';
  * Run a web server
  */
 @CliCommand({ runTarget: true, with: { debugIpc: true, canRestart: true, module: true, env: true } })
-export class RunWebHttpCommand implements CliCommandShape {
+export class WebHttpCommand implements CliCommandShape {
 
   /** Port to run on */
   port?: number;

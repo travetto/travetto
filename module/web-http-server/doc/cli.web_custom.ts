@@ -4,7 +4,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { WebHttpServer, WebHttpConfig } from '@travetto/web-http-server';
 
-import '@travetto/web/doc/config-override';
+import './config-override.ts';
 
 @CliCommand({ runTarget: true })
 export class SampleApp {

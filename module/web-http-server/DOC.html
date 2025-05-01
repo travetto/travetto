@@ -24,7 +24,58 @@ By default, the framework provides a default <a target="_blank" class="source-li
     <figcaption class="terminal">Standard application
 
 </figcaption>
-    <pre><code class="language-bash">$ trv run:web:http</code></pre>
+    <pre><code class="language-bash">$ trv web:http
+
+node:internal/modules/cjs/loader:1408
+  throw err<span class="token punctuation">;</span>
+  ^
+
+Error: Cannot <span class="token function">find</span> module <span class="token string">'&lt;workspace-root>/module/web/doc-exec/.trv/compiler/node_modules/@travetto/manifest/__index__.js'</span>
+Require stack:
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js
+    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1405:15<span class="token punctuation">)</span>
+    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1061:19<span class="token punctuation">)</span>
+    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1066:22<span class="token punctuation">)</span>
+    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1215:37<span class="token punctuation">)</span>
+    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
+    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:235:24<span class="token punctuation">)</span>
+    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1491:12<span class="token punctuation">)</span>
+    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
+    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/compiler/src/compiler.ts:4:1<span class="token punctuation">)</span>
+    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1734:14<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
+  requireStack: <span class="token punctuation">[</span>
+    <span class="token string">'./doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js'</span>,
+    <span class="token string">'./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js'</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span>
+
+Node.js v23.11.0
+node:internal/modules/cjs/loader:1405
+  const err <span class="token operator">=</span> new Error<span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+              ^
+
+Error: Cannot <span class="token function">find</span> module <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js'</span>
+Require stack:
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js
+    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1405:15<span class="token punctuation">)</span>
+    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1061:19<span class="token punctuation">)</span>
+    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1066:22<span class="token punctuation">)</span>
+    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1215:37<span class="token punctuation">)</span>
+    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
+    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:235:24<span class="token punctuation">)</span>
+    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1491:12<span class="token punctuation">)</span>
+    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
+    at <span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/module.ts:107:98<span class="token punctuation">)</span>
+    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:105:5<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
+  requireStack: <span class="token punctuation">[</span>
+    <span class="token string">'./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js'</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span>
+
+Node.js v23.11.0</code></pre>
   </figure>
 
 <h3 id="creating-a-custom-cli-entry-point">Creating a Custom CLI Entry Point</h3>
@@ -33,7 +84,7 @@ To customize a Web server, you may need to construct an entry point using the <a
 
   <figure class="code">
     <figcaption class="code">Application entry point for Web Applications
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http-server/doc/cli.run_web_custom.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http-server/doc/cli.web_custom.ts">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env<span class="token punctuation">,</span> toConcrete <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
@@ -42,7 +93,7 @@ To customize a Web server, you may need to construct an entry point using the <a
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RootRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebHttpServer<span class="token punctuation">,</span> WebHttpConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web-http-server'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token string">'@travetto/web/doc/config-override'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token string">'./config-override.ts'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> runTarget<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
@@ -64,11 +115,62 @@ To customize a Web server, you may need to construct an entry point using the <a
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-And using the pattern established in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a> module, you would run your program using <code class="item command">npx trv run:web:custom</code>.
+And using the pattern established in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a> module, you would run your program using <code class="item command">npx trv web:custom</code>.
 
   <figure class="terminal">
     <figcaption class="terminal">Custom application
 
 </figcaption>
-    <pre><code class="language-bash">$ trv run:web:custom</code></pre>
+    <pre><code class="language-bash">$ trv web:custom
+
+node:internal/modules/cjs/loader:1408
+  throw err<span class="token punctuation">;</span>
+  ^
+
+Error: Cannot <span class="token function">find</span> module <span class="token string">'&lt;workspace-root>/module/web/doc-exec/.trv/compiler/node_modules/@travetto/manifest/__index__.js'</span>
+Require stack:
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js
+    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1405:15<span class="token punctuation">)</span>
+    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1061:19<span class="token punctuation">)</span>
+    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1066:22<span class="token punctuation">)</span>
+    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1215:37<span class="token punctuation">)</span>
+    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
+    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:235:24<span class="token punctuation">)</span>
+    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1491:12<span class="token punctuation">)</span>
+    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
+    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/compiler/src/compiler.ts:4:1<span class="token punctuation">)</span>
+    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1734:14<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
+  requireStack: <span class="token punctuation">[</span>
+    <span class="token string">'./doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js'</span>,
+    <span class="token string">'./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js'</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span>
+
+Node.js v23.11.0
+node:internal/modules/cjs/loader:1405
+  const err <span class="token operator">=</span> new Error<span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+              ^
+
+Error: Cannot <span class="token function">find</span> module <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js'</span>
+Require stack:
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js
+    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1405:15<span class="token punctuation">)</span>
+    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1061:19<span class="token punctuation">)</span>
+    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1066:22<span class="token punctuation">)</span>
+    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1215:37<span class="token punctuation">)</span>
+    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
+    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:235:24<span class="token punctuation">)</span>
+    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1491:12<span class="token punctuation">)</span>
+    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
+    at <span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/module.ts:107:98<span class="token punctuation">)</span>
+    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:105:5<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
+  requireStack: <span class="token punctuation">[</span>
+    <span class="token string">'./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js'</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span>
+
+Node.js v23.11.0</code></pre>
   </figure>

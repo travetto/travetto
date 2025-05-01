@@ -16,7 +16,7 @@ export const text = <>
 
     By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server. Currently, {d.mod('WebNode')} is the only module that provides a compatible {WebServerContract}.
 
-    <c.Execution title='Standard application' cmd='trv' args={['run:web:http']} config={{
+    <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{
       cwd: './doc-exec'
     }} />
 
@@ -24,11 +24,11 @@ export const text = <>
 
       To customize a Web server, you may need to construct an entry point using the {CliCommand} decorator. This could look like:
 
-      <c.Code title='Application entry point for Web Applications' src='doc/cli.run_web_custom.ts' />
+      <c.Code title='Application entry point for Web Applications' src='doc/cli.web_custom.ts' />
 
-      And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv run:web:custom')}.
+      And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv web:custom')}.
 
-      <c.Execution title='Custom application' cmd='trv' args={['run:web:custom']} config={{ cwd: './doc-exec' }} />
+      <c.Execution title='Custom application' cmd='trv' args={['web:custom']} config={{ cwd: './doc-exec' }} />
     </c.SubSection>
   </c.Section>
 </>;

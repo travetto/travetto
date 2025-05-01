@@ -1,17 +1,17 @@
-'@Application';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { WebApplication, WebApplicationHandle } from '@travetto/web';
+import { WebHttpServer } from '@travetto/web-http-server';
 import { ConfigurationService } from '@travetto/config';
+import { RunResponse } from '@travetto/cli';
 
 class Config {
   @InjectableFactory()
-  static target(): WebApplication {
+  static target(): WebHttpServer {
     return {
-      async run(): Promise<WebApplicationHandle> {
+      async run(): Promise<RunResponse> {
         await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
         console.log('Listening');
         return { on(): void { }, close(): void { } };
       }
-    } satisfies WebApplication;
+    } satisfies WebHttpServer;
   }
 }

@@ -20,7 +20,58 @@ By default, the framework provides a default [@CliCommand](https://github.com/tr
 
 **Terminal: Standard application**
 ```bash
-$ trv run:web:http
+$ trv web:http
+
+node:internal/modules/cjs/loader:1408
+  throw err;
+  ^
+
+Error: Cannot find module '<workspace-root>/module/web/doc-exec/.trv/compiler/node_modules/@travetto/manifest/__index__.js'
+Require stack:
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1405:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
+    at Function._load (node:internal/modules/cjs/loader:1215:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1491:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (<workspace-root>/module/compiler/src/compiler.ts:4:1)
+    at Module._compile (node:internal/modules/cjs/loader:1734:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js',
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js'
+  ]
+}
+
+Node.js v23.11.0
+node:internal/modules/cjs/loader:1405
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js'
+Require stack:
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1405:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
+    at Function._load (node:internal/modules/cjs/loader:1215:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1491:12)
+    at require (node:internal/modules/helpers:135:16)
+    at <anonymous> (./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/module.ts:107:98)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js'
+  ]
+}
+
+Node.js v23.11.0
 ```
 
 ### Creating a Custom CLI Entry Point
@@ -34,7 +85,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { WebHttpServer, WebHttpConfig } from '@travetto/web-http-server';
 
-import '@travetto/web/doc/config-override';
+import './config-override.ts';
 
 @CliCommand({ runTarget: true })
 export class SampleApp {
@@ -56,9 +107,60 @@ export class SampleApp {
 }
 ```
 
-And using the pattern established in the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") module, you would run your program using `npx trv run:web:custom`.
+And using the pattern established in the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") module, you would run your program using `npx trv web:custom`.
 
 **Terminal: Custom application**
 ```bash
-$ trv run:web:custom
+$ trv web:custom
+
+node:internal/modules/cjs/loader:1408
+  throw err;
+  ^
+
+Error: Cannot find module '<workspace-root>/module/web/doc-exec/.trv/compiler/node_modules/@travetto/manifest/__index__.js'
+Require stack:
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1405:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
+    at Function._load (node:internal/modules/cjs/loader:1215:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1491:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (<workspace-root>/module/compiler/src/compiler.ts:4:1)
+    at Module._compile (node:internal/modules/cjs/loader:1734:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js',
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js'
+  ]
+}
+
+Node.js v23.11.0
+node:internal/modules/cjs/loader:1405
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js'
+Require stack:
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1405:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
+    at Function._load (node:internal/modules/cjs/loader:1215:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1491:12)
+    at require (node:internal/modules/helpers:135:16)
+    at <anonymous> (./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/module.ts:107:98)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js'
+  ]
+}
+
+Node.js v23.11.0
 ```
