@@ -1,10 +1,10 @@
 {
-  "name": "@travetto/web-http",
+  "name": "@travetto/web-server",
   "version": "6.0.0-rc.1",
-  "description": "Web HTTP Server Support",
+  "description": "Web Server Support",
   "keywords": [
     "web",
-    "http",
+    "server",
     "travetto",
     "typescript"
   ],
@@ -21,7 +21,7 @@
   "main": "__index__.ts",
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/web-http"
+    "directory": "module/web-server"
   },
   "dependencies": {
     "@travetto/web": "^6.0.0-rc.1"
@@ -39,7 +39,7 @@
     }
   },
   "travetto": {
-    "displayName": "Web HTTP Server Support"
+    "displayName": "Web Server Support"
   },
   "publishConfig": {
     "access": "public"

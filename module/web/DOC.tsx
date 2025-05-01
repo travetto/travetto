@@ -1,10 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { CliCommand } from '@travetto/cli';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
-import { WebApplication } from './src/types/application.ts';
 import { Controller } from './src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch, Head, Options, Endpoint } from './src/decorator/endpoint.ts';
 import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param.ts';
@@ -30,7 +28,6 @@ import { TrustProxyConfig, TrustProxyInterceptor } from './src/interceptor/trust
 
 
 const WebInterceptorContract = toConcrete<WebInterceptor>();
-const WebApplicationContract = toConcrete<WebApplication>();
 
 export const text = <>
   <c.StdHeader />
@@ -38,7 +35,6 @@ export const text = <>
 
   This module will look at:
   <ul>
-    <li>Running a {WebApplicationContract}</li>
     <li>Request/Response Pattern</li>
     <li>Defining a {Controller}</li>
     <li>Defining an {Endpoint}s</li>
@@ -48,26 +44,6 @@ export const text = <>
     <li>SSL Support</li>
     <li>Error Handling</li>
   </ul>
-
-  <c.Section title='Running an App'>
-
-    By default, the framework provides a default {CliCommand} for {WebApplicationContract} that will follow default behaviors, and spin up the server. Currently, {d.mod('WebNode')} is the only module that provides a compatible {WebApplicationContract}.
-
-    <c.Execution title='Standard application' cmd='trv' args={['run:web']} config={{
-      cwd: './doc-exec'
-    }} />
-
-    <c.SubSection title='Creating a Custom CLI Entry Point'>
-
-      To customize a Web server, you may need to construct an entry point using the {CliCommand} decorator. This could look like:
-
-      <c.Code title='Application entry point for Web Applications' src='doc/cli.run_web_custom.ts' />
-
-      And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv run:web:custom')}.
-
-      <c.Execution title='Custom application' cmd='trv' args={['run:web:custom']} config={{ cwd: './doc-exec' }} />
-    </c.SubSection>
-  </c.Section>
 
   <c.Section title='Request/Response Pattern'>
     Unlike other frameworks (e.g. {d.library('Express')}, {d.library('Fastify')}), this module takes an approach that is similar to {d.library('AwsLambda')}'s model for requests and responses. What you can see here is that {WebRequest} and {WebResponse} are very simple objects, with the focus being on the {d.field('payload')} and {d.field('body')}.  This is intended to provide maximal compatibility with non-HTTP sources.  The driving goal is to support more than just standard HTTP servers but also allow for seamless integration with tools like event queues, web sockets, etc.

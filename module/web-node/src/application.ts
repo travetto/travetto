@@ -1,9 +1,9 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { WebApplication, WebApplicationHandle, StandardWebRouter } from '@travetto/web';
+import { StandardWebRouter } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
-import { WebHttpUtil, WebHttpConfig } from '@travetto/web-http';
+import { WebHttpUtil, WebHttpConfig, WebServer, WebServerHandle } from '@travetto/web-server';
 
 import { NodeWebUtil } from './util.ts';
 
@@ -11,7 +11,7 @@ import { NodeWebUtil } from './util.ts';
  * A node http server
  */
 @Injectable()
-export class NodeWebApplication implements WebApplication {
+export class NodeWebApplication implements WebServer {
 
   @Inject()
   serverConfig: WebHttpConfig;
@@ -25,7 +25,7 @@ export class NodeWebApplication implements WebApplication {
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 
-  async run(): Promise<WebApplicationHandle> {
+  async run(): Promise<WebServerHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
     const server = await WebHttpUtil.startHttpServer({

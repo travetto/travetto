@@ -1,1 +1,0 @@
-export type WebSslKeyPair = { cert: string, key: string };

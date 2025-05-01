@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@travetto/web": "^6.0.0-rc.1",
-    "@travetto/web-http": "^6.0.0-rc.1"
+    "@travetto/web-server": "^6.0.0-rc.1"
   },
   "travetto": {
     "displayName": "Node Web Server"

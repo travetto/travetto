@@ -11,9 +11,10 @@ import { WebSslUtil } from './ssl.ts';
  */
 @Config('web.http')
 export class WebHttpConfig {
-  /** 
+  /**
    * The port to run on
    */
+  @EnvVar('WEB_PORT')
   @EnvVar('WEB_HTTP_PORT')
   port: number = 3000;
 
