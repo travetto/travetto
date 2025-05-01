@@ -48,7 +48,7 @@ class CookiesInterceptorSuite {
       config: interceptor.config,
       next: async () => {
         const items = await DependencyRegistry.getInstance(WebAsyncContext);
-        await update?.(items.cookies);
+        await update?.(items.getByType(CookieJar));
         return new WebResponse({});
       }
     }));

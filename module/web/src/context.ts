@@ -3,13 +3,11 @@ import { Inject, Injectable } from '@travetto/di';
 import { AppError, castTo, Class, toConcrete } from '@travetto/runtime';
 
 import { WebRequest } from './types/request.ts';
-import { CookieJar } from './util/cookie.ts';
 
 @Injectable()
 export class WebAsyncContext {
 
   #request = new AsyncContextValue<WebRequest>(this);
-  #cookie = new AsyncContextValue<CookieJar>(this);
   #byType = new Map<string, () => unknown>();
 
   @Inject()
@@ -19,17 +17,8 @@ export class WebAsyncContext {
     return this.#request.get()!;
   }
 
-  get cookies(): CookieJar {
-    return this.#cookie.get()!;
-  }
-
-  set cookies(val: CookieJar) {
-    this.#cookie.set(val);
-  }
-
   postConstruct(): void {
     this.registerType(toConcrete<WebRequest>(), () => this.#request.get());
-    this.registerType(CookieJar, () => this.#cookie.get());
   }
 
   withContext<T>(request: WebRequest, next: () => Promise<T>): Promise<T> {
@@ -43,11 +32,15 @@ export class WebAsyncContext {
     this.#byType.set(cls.Ⲑid, provider);
   }
 
-  getByType<T>(cls: Class<T>): () => T {
+  getterByType<T>(cls: Class<T>): () => T {
     const item = this.#byType.get(cls.Ⲑid);
     if (!item) {
       throw new AppError('Unknown type for web context');
     }
     return castTo(item);
+  }
+
+  getByType<T>(cls: Class<T>): T {
+    return this.getterByType(cls)();
   }
 }
