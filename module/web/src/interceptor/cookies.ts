@@ -72,7 +72,7 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
   context: AsyncContext;
 
   postConstruct(): void {
-    this.webAsyncContext.registerType(CookieJar, () => this.#cookieJar.get());
+    this.webAsyncContext.registerSource(CookieJar, () => this.#cookieJar.get());
   }
 
   finalizeConfig({ config }: WebInterceptorContext<CookieConfig>): CookieConfig {

@@ -37,8 +37,8 @@ export class AuthContextInterceptor implements WebInterceptor {
 
   async postConstruct(): Promise<void> {
     this.codec ??= await DependencyRegistry.getInstance(toConcrete<PrincipalCodec>(), CommonPrincipalCodecSymbol);
-    this.webAsyncContext.registerType(toConcrete<Principal>(), () => this.authContext.principal);
-    this.webAsyncContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
+    this.webAsyncContext.registerSource(toConcrete<Principal>(), () => this.authContext.principal);
+    this.webAsyncContext.registerSource(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
   async filter(ctx: WebChainedContext): Promise<WebResponse> {

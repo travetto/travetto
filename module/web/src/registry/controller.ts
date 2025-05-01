@@ -33,7 +33,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
     const map = this.get(inst.constructor).contextParams;
     for (const [field, type] of Object.entries(map)) {
-      Object.defineProperty(inst, field, { get: ctx.getterByType(type) });
+      Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
   }
 

@@ -18,7 +18,7 @@ export class WebAsyncContext {
   }
 
   postConstruct(): void {
-    this.registerType(toConcrete<WebRequest>(), () => this.#request.get());
+    this.registerSource(toConcrete<WebRequest>(), () => this.#request.get());
   }
 
   withContext<T>(request: WebRequest, next: () => Promise<T>): Promise<T> {
@@ -28,11 +28,11 @@ export class WebAsyncContext {
     });
   }
 
-  registerType<T>(cls: Class<T>, provider: () => T): void {
+  registerSource<T>(cls: Class<T>, provider: () => T): void {
     this.#byType.set(cls.Ⲑid, provider);
   }
 
-  getterByType<T>(cls: Class<T>): () => T {
+  getSource<T>(cls: Class<T>): () => T {
     const item = this.#byType.get(cls.Ⲑid);
     if (!item) {
       throw new AppError('Unknown type for web context');
@@ -40,7 +40,7 @@ export class WebAsyncContext {
     return castTo(item);
   }
 
-  getByType<T>(cls: Class<T>): T {
-    return this.getterByType(cls)();
+  getValue<T>(cls: Class<T>): T {
+    return this.getSource(cls)();
   }
 }
