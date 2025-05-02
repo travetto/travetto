@@ -17,9 +17,11 @@ export class WebTestConfig implements ConfigSource {
       data: {
         web: {
           cookie: { secure: false },
-          ssl: { active: false },
           trustProxy: { ips: ['*'] },
-          port: -1,
+          http: {
+            ssl: { active: false },
+            port: -1,
+          }
         }
       },
       source: 'custom://test/web',
@@ -36,7 +38,7 @@ export abstract class BaseWebSuite {
   #appHandle?: RunResponse;
   #dispatcher: WebDispatcher;
 
-  appType?: Class<{ run: () => RunResponse }>;
+  appType?: Class<{ run: () => (RunResponse | Promise<RunResponse>) }>;
   dispatcherType: Class<WebDispatcher>;
 
   @BeforeAll()

@@ -11,8 +11,7 @@
     "@travetto/model-postgres": "^6.0.0-rc.1",
     "@travetto/model-redis": "^6.0.0-rc.1",
     "@travetto/model-s3": "^6.0.0-rc.1",
-    "@travetto/model-sqlite": "^6.0.0-rc.1",
-    "@travetto/web-node": "^6.0.0-rc.1"
+    "@travetto/model-sqlite": "^6.0.0-rc.1"
   },
   "travetto": {},
   "private": true

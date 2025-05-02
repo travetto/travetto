@@ -98,7 +98,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
       let received = Buffer.isBuffer(input) ? input.byteOffset : 0;
 
-      if (length && limit > length) {
+      if (length && length > limit) {
         throw WebError.for('Request Entity Too Large', 413, { length, limit });
       } else if (!iconv.encodingExists(encoding)) {
         throw WebError.for('Specified Encoding Not Supported', 415, { encoding });
