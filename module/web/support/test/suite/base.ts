@@ -53,7 +53,7 @@ export abstract class BaseWebSuite {
   @AfterAll()
   async destroySever(): Promise<void> {
     if (this.#appHandle) {
-      await CliUtil.listenForResponse(this.#appHandle);
+      await CliUtil.listenForResponse(this.#appHandle, false);
       this.#appHandle = undefined;
     }
   }

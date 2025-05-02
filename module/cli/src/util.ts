@@ -92,11 +92,15 @@ export class CliUtil {
   /**
    * Listen for a run response to finish
    */
-  static async listenForResponse(result: RunResponse): Promise<void> {
+  static async listenForResponse(result: RunResponse, graceful = true): Promise<void> {
     // Listen to result if non-empty
     if (result !== undefined && result !== null) {
       if ('close' in result) {
-        ShutdownManager.onGracefulShutdown(async () => result.close()); // Tie shutdown into app close
+        if (graceful) {
+          ShutdownManager.onGracefulShutdown(async () => result.close()); // Tie shutdown into app close
+        } else {
+          await result.close();
+        }
       }
       if ('wait' in result) {
         await result.wait(); // Wait for close signal

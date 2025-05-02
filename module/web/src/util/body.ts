@@ -1,3 +1,5 @@
+import iconv from 'iconv-lite';
+
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
@@ -5,6 +7,7 @@ import { Any, BinaryUtil, castTo, hasToJSON, Util } from '@travetto/runtime';
 
 import { WebBinaryBody, WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
+import { WebError } from '../types/error.ts';
 
 const WebRawStreamSymbol = Symbol();
 
@@ -175,6 +178,43 @@ export class WebBodyUtil {
       case 'text': return val;
       case 'json': return JSON.parse(val);
       case 'form': return Object.fromEntries(new URLSearchParams(val));
+    }
+  }
+
+  /**
+   * Read text from an input source
+   */
+  static async readText(input: Readable | Buffer, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
+    encoding ??= (Buffer.isBuffer(input) ? undefined : input.readableEncoding) ?? 'utf-8';
+
+    if (!iconv.encodingExists(encoding)) {
+      throw WebError.for('Specified Encoding Not Supported', 415, { encoding });
+    }
+
+    if (Buffer.isBuffer(input)) {
+      return { text: iconv.decode(input, encoding), read: input.byteLength };
+    }
+
+    let received = Buffer.isBuffer(input) ? input.byteOffset : 0;
+    const decoder = iconv.getDecoder(encoding);
+    const all: string[] = [];
+
+    try {
+      for await (const chunk of input.iterator({ destroyOnReturn: false })) {
+        received += Buffer.isBuffer(chunk) ? chunk.byteLength : (typeof chunk === 'string' ? chunk.length : chunk.length);
+        if (received > limit) {
+          throw WebError.for('Request Entity Too Large', 413, { received, limit });
+        }
+        all.push(decoder.write(chunk));
+      }
+      all.push(decoder.end() ?? '');
+      return { text: all.join(''), read: received };
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        throw WebError.for('Request Aborted', 400, { received });
+      } else {
+        throw err;
+      }
     }
   }
 }

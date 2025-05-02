@@ -1,8 +1,6 @@
-import iconv from 'iconv-lite';
-
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError, toConcrete } from '@travetto/runtime';
+import { toConcrete } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
 import { WebChainedContext } from '../types/filter.ts';
@@ -82,68 +80,44 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
+    const input = request.body;
+
+    if (!WebBodyUtil.isRaw(input)) {
+      return next();
+    }
+
+    const lengthRead = +(request.headers.get('Content-Length') || '');
+    const length = Number.isNaN(lengthRead) ? undefined : lengthRead;
+
+    const limit = config._limit ?? Number.MAX_SAFE_INTEGER;
+    if (length && length > limit) {
+      throw WebError.for('Request entity too large', 413, { length, limit });
+    }
+
     const contentType = request.headers.getContentType();
-    if (!contentType || !WebBodyUtil.isRaw(request.body)) {
+    if (!contentType) {
       return next();
     }
 
     const parserType = config.parsingTypes[contentType.full] ?? config.parsingTypes[contentType.type];
-    if (parserType) { // We have a stream, content type and a parser
-      const input = request.body;
-      const lengthRead = +(request.headers.get('Content-Length') || '');
-      const length = Number.isNaN(lengthRead) ? undefined : lengthRead;
-      const limit = config._limit ?? Number.MAX_SAFE_INTEGER;
-      const encoding = contentType.parameters.charset ??
-        (Buffer.isBuffer(input) ? undefined : input.readableEncoding) ?? 'utf-8';
-
-      let received = Buffer.isBuffer(input) ? input.byteOffset : 0;
-
-      if (length && length > limit) {
-        throw WebError.for('Request Entity Too Large', 413, { length, limit });
-      } else if (!iconv.encodingExists(encoding)) {
-        throw WebError.for('Specified Encoding Not Supported', 415, { encoding });
-      }
-
-      let text: string;
-      if (Buffer.isBuffer(input)) {
-        text = iconv.decode(input, encoding);
-      } else {
-        const decoder = iconv.getDecoder(encoding);
-        const all: string[] = [];
-        try {
-          for await (const chunk of input.iterator({ destroyOnReturn: false })) {
-            received += Buffer.isBuffer(chunk) ? chunk.byteLength : (typeof chunk === 'string' ? chunk.length : chunk.length);
-            if (received > limit) {
-              throw WebError.for('Request Entity Too Large', 413, { received, limit });
-            }
-            all.push(decoder.write(chunk));
-          }
-          all.push(decoder.end() ?? '');
-          text = all.join('');
-        } catch (err) {
-          if (err instanceof Error && err.name === 'AbortError') {
-            throw WebError.for('Request Aborted', 400, { length, received });
-          } else {
-            throw err;
-          }
-        }
-      }
-
-      if (length && text.length !== length) {
-        throw WebError.for('Request Size Did Not Match Content Length', 400, { length, received });
-      }
-
-      try {
-        request.body = parserType in this.parsers ?
-          this.parsers[parserType].parse(text) :
-          WebBodyUtil.parseBody(parserType, text);
-
-        return next();
-      } catch (err) {
-        throw new AppError('Malformed input', { category: 'data', cause: err });
-      }
+    if (!parserType) {
+      return next();
     }
 
-    return next();
+    const { text, read } = await WebBodyUtil.readText(input, limit, contentType.parameters.charset);
+
+    if (length && read !== length) {
+      throw WebError.for('Request size did not match Content-Length', 400, { length, read });
+    }
+
+    try {
+      request.body = parserType in this.parsers ?
+        this.parsers[parserType].parse(text) :
+        WebBodyUtil.parseBody(parserType, text);
+
+      return next();
+    } catch (err) {
+      throw WebError.for('Malformed input', 400, { cause: err });
+    }
   }
 }
