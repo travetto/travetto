@@ -1,6 +1,5 @@
-import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
+import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebError } from '@travetto/web';
 import { Injectable } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
 
 @Injectable()
 export class SimpleAuthInterceptor implements WebInterceptor {
@@ -11,13 +10,7 @@ export class SimpleAuthInterceptor implements WebInterceptor {
     if (ctx.request.headers.has('X-Auth')) {
       return await ctx.next();
     } else {
-      // Or just -- throw new AppError('Missing auth', { category: 'authentication' });
-      return new WebResponse({
-        body: new AppError('Missing auth', { category: 'authentication' }),
-        context: {
-          httpStatusCode: 401
-        }
-      });
+      throw WebError.for('Missing auth', 401, {}, 'authentication');
     }
   }
 }

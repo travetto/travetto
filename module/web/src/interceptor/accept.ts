@@ -1,6 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
 import { MimeUtil } from '../util/mime.ts';
@@ -11,6 +10,7 @@ import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
+import { WebError } from '../types/error.ts';
 
 @Config('web.accept')
 export class AcceptConfig {
@@ -50,19 +50,9 @@ export class AcceptInterceptor implements WebInterceptor<AcceptConfig> {
   validate(request: WebRequest, config: AcceptConfig): void {
     const contentType = request.headers.get('Content-Type');
     if (!contentType) {
-      throw new WebResponse({
-        body: new AppError('Content type was not specified', { category: 'data' }),
-        context: {
-          httpStatusCode: 416
-        }
-      });
+      throw WebError.for('Content type was not specified', 416);
     } else if (!config.matcher(contentType)) {
-      throw new WebResponse({
-        body: new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' }),
-        context: {
-          httpStatusCode: 406
-        }
-      });
+      throw WebError.for(`Content type ${contentType} violated ${config.types.join(', ')}`, 406);
     }
   }
 

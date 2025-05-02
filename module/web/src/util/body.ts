@@ -152,7 +152,7 @@ export class WebBodyUtil {
   /**
    * Set body and mark as unprocessed
    */
-  static markRaw(val: Readable | Buffer | undefined): typeof val {
+  static markRaw(val: WebBinaryBody | undefined): typeof val {
     if (val) {
       Object.defineProperty(val, WebRawStreamSymbol, { value: val });
     }
@@ -162,7 +162,7 @@ export class WebBodyUtil {
   /**
    * Is the input raw
    */
-  static isRaw(val: unknown): val is Readable | Buffer {
+  static isRaw(val: unknown): val is WebBinaryBody {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return !!val && ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebRawStreamSymbol] === val);
   }

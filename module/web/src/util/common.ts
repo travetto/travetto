@@ -27,6 +27,11 @@ const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
 };
 
 export class WebCommonUtil {
+  static #unitMapping: Record<string, number> = {
+    kb: 2 ** 10,
+    mb: 2 ** 20,
+    gb: 2 ** 30,
+  };
 
   static #buildEdgeMap<T, U extends OrderedState<T>>(items: List<U>): Map<T, Set<T>> {
     const edgeMap = new Map(items.map(x => [x.key, new Set(x.after ?? [])]));
@@ -98,8 +103,8 @@ export class WebCommonUtil {
         new AppError(err.message, { details: err }) :
         new AppError(`${err}`);
 
-    const error: Error & { category?: ErrorCategory } = body;
-    const statusCode = ERROR_CATEGORY_STATUS[error.category!] ?? 500;
+    const error: Error & { category?: ErrorCategory, details?: { statusCode: number } } = body;
+    const statusCode = error.details?.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
 
     return new WebResponse({ body, context: { httpStatusCode: statusCode } });
   }
@@ -125,5 +130,13 @@ export class WebCommonUtil {
     const delta = TimeUtil.asSeconds(value);
     const finalFlags = delta === 0 ? ['no-cache'] : flags;
     return [...finalFlags, `max-age=${delta}`].join(',');
+  }
+
+  /**
+   * Parse byte size
+   */
+  static parseByteSize(input: `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}`): number {
+    const [, num, unit] = input.toLowerCase().split(/(\d+)/);
+    return parseInt(num, 10) * (this.#unitMapping[unit] ?? 1);
   }
 }

@@ -4,7 +4,7 @@ import util from 'node:util';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError, castTo } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
 import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
@@ -13,6 +13,7 @@ import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
+import { WebError } from '../types/error.ts';
 
 const STREAM_DECOMPRESSORS = {
   gzip: zlib.createGunzip,
@@ -56,12 +57,7 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
     const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 
     if (!config.supportedEncodings.includes(encoding)) {
-      throw new WebResponse({
-        body: new AppError(`Unsupported Content-Encoding: ${encoding}`),
-        context: {
-          httpStatusCode: 415
-        }
-      });
+      throw WebError.for(`Unsupported Content-Encoding: ${encoding}`, 415);
     }
 
     if (encoding === 'identity') {

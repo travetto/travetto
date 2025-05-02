@@ -6,13 +6,14 @@ import Negotiator from 'negotiator';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError, castTo } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebBodyUtil } from '../util/body.ts';
+import { WebError } from '../types/error.ts';
 
 const COMPRESSORS = {
   gzip: createGzip,
@@ -73,10 +74,7 @@ export class CompressInterceptor implements WebInterceptor {
         .encoding([...supportedEncodings, ...preferredEncodings]));
 
     if (accepts && (!type || !accepts.includes(type))) {
-      throw new WebResponse({
-        body: new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
-        context: { httpStatusCode: 406 }
-      });
+      throw WebError.for(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`, 406);
     }
 
     if (type === 'identity' || !type) {
