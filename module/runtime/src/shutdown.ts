@@ -2,7 +2,6 @@ import { Env } from './env.ts';
 import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
 
-
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
  */
@@ -35,6 +34,8 @@ export class ShutdownManager {
    * Wait for graceful shutdown to run and complete
    */
   static async gracefulShutdown(code: number | string | undefined = process.exitCode): Promise<void> {
+    await Util.queueMacroTask(); // Force the event loop to wait one cycle
+
     if (code !== undefined) {
       process.exitCode = code;
     }

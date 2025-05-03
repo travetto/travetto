@@ -136,7 +136,8 @@ export class CompilerClient {
           }
         }
       } catch (err) {
-        if (!ctrl.signal.aborted) { throw err; }
+        const aborted = ctrl.signal.aborted || (typeof err === 'object' && err && 'code' in err && err.code === 'ECONNRESET');
+        if (!aborted) { throw err; }
       }
       signal.removeEventListener('abort', quit);
 

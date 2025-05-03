@@ -49,14 +49,18 @@ export class ExecUtil {
    * @param run The factory to produce the next running process
    * @param maxRetriesPerMinute The number of times to allow a retry within a minute
    */
-  static async withRestart(run: () => ChildProcess, maxRetriesPerMinute?: number): Promise<ExecutionResult> {
+  static async withRestart(
+    run: () => ChildProcess,
+    maxRetriesPerMinute?: number,
+    killSignal: 'SIGINT' | 'SIGTERM' = 'SIGINT'
+  ): Promise<ExecutionResult> {
     const maxRetries = maxRetriesPerMinute ?? 5;
     const restarts: number[] = [];
 
     for (; ;) {
       const proc = run();
 
-      const toKill = (): void => { proc.kill('SIGKILL'); };
+      const toKill = (): void => { proc.kill(killSignal); };
       const toMessage = (v: unknown): void => { proc.send?.(v!); };
 
       // Proxy kill requests
