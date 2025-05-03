@@ -38,7 +38,7 @@ export class WebHttpCommand implements CliCommandShape {
       }
       throw err;
     }
-    ShutdownManager.onGracefulShutdown(res.kill);
+    ShutdownManager.onGracefulShutdown(res.kill, this);
     return res.wait;
   }
 }
