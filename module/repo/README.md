@@ -108,7 +108,6 @@ global-test/model_auth-model
 global-test/model_auth-session
 global-test/model_cache
 global-test/model_web-upload
-global-test/openapi
 global-test/pack_app
 global-test/transformer-test
 module/auth
@@ -161,6 +160,7 @@ module/transformer
 module/web
 module/web-aws-lambda
 module/web-connect
+module/web-http-server
 module/web-node
 module/web-rpc
 module/web-upload
@@ -195,7 +195,6 @@ global-test/model_auth-model <workspace-root>/global-test/model_auth-model
 global-test/model_auth-session <workspace-root>/global-test/model_auth-session
        global-test/model_cache <workspace-root>/global-test/model_cache
   global-test/model_web-upload <workspace-root>/global-test/model_web-upload
-           global-test/openapi <workspace-root>/global-test/openapi
           global-test/pack_app <workspace-root>/global-test/pack_app
   global-test/transformer-test <workspace-root>/global-test/transformer-test
                    module/auth <workspace-root>/module/auth
@@ -249,6 +248,7 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
                     module/web <workspace-root>/module/web
          module/web-aws-lambda <workspace-root>/module/web-aws-lambda
             module/web-connect <workspace-root>/module/web-connect
+        module/web-http-server <workspace-root>/module/web-http-server
                module/web-node <workspace-root>/module/web-node
                 module/web-rpc <workspace-root>/module/web-rpc
              module/web-upload <workspace-root>/module/web-upload

@@ -14,7 +14,7 @@ export class TypescriptUtil {
     if (!(ctx.workspace.path in OPT_CACHE)) {
       let tsconfig = CommonUtil.resolveWorkspace(ctx, 'tsconfig.json');
 
-      if (!await fs.stat(tsconfig).then(_ => true, _ => false)) {
+      if (!await fs.stat(tsconfig).then(() => true, () => false)) {
         tsconfig = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerModuleFolder, 'tsconfig.trv.json');
       }
 

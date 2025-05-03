@@ -1,6 +1,5 @@
 import type { Writable } from 'node:stream';
 
-import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary } from '../types.ts';
 import { TestConsumer } from '../registry.ts';
 
@@ -16,7 +15,7 @@ export class JSONEmitter {
     this.#stream = stream;
   }
 
-  onEvent(event: TestEvent): void { }
+  onEvent(): void { }
 
   onSummary(summary: SuitesSummary): void {
     this.#stream.write(JSON.stringify(summary, undefined, 2));

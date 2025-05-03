@@ -31,13 +31,13 @@ export class ModelQueryUtil {
   /**
    * Verify result set is singular, and decide if failing on many should happen
    */
-  static verifyGetSingleCounts<T extends ModelType>(cls: Class<T>, failOnMany: boolean, res?: T[], where?: WhereClause<T>): T {
-    res = res ?? [];
-    if (res.length === 1 || res.length > 1 && !failOnMany) {
-      return res[0]!;
+  static verifyGetSingleCounts<T extends ModelType>(cls: Class<T>, failOnMany: boolean, result?: T[], where?: WhereClause<T>): T {
+    result = result ?? [];
+    if (result.length === 1 || result.length > 1 && !failOnMany) {
+      return result[0]!;
     }
     const requestedId = ((where && 'id' in where && typeof where.id === 'string') ? where.id : undefined);
-    if (res.length === 0) {
+    if (result.length === 0) {
       if (requestedId) {
         throw new NotFoundError(cls, requestedId);
       } else {
@@ -46,7 +46,7 @@ export class ModelQueryUtil {
         throw err;
       }
     } else {
-      throw new AppError(`Invalid number of results: ${res.length}`, { category: 'data' });
+      throw new AppError(`Invalid number of results: ${result.length}`, { category: 'data' });
     }
   }
 

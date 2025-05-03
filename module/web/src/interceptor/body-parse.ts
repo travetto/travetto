@@ -1,24 +1,27 @@
-import { Readable } from 'node:stream';
-
-import rawBody from 'raw-body';
-
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError, Primitive } from '@travetto/runtime';
+import { toConcrete } from '@travetto/runtime';
+import { Ignore } from '@travetto/schema';
 
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebRequest } from '../types/request.ts';
-import { WebInterceptorCategory, HTTP_METHODS } from '../types/core.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 
-import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
+import { WebCommonUtil } from '../util/common.ts';
 
-import { AcceptsInterceptor } from './accepts.ts';
+import { AcceptInterceptor } from './accept.ts';
 import { DecompressInterceptor } from './decompress.ts';
+import { WebError } from '../types/error.ts';
 
-type ParserType = 'json' | 'text' | 'form';
+/**
+ * @concrete
+ */
+export interface BodyContentParser {
+  type: string;
+  parse: (source: string) => unknown;
+};
 
 /**
  * Web body parse configuration
@@ -32,12 +35,24 @@ export class BodyParseConfig {
   /**
    * Max body size limit
    */
-  limit: string = '1mb';
+  limit: `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` = '1mb';
   /**
    * How to interpret different content types
    */
-  parsingTypes: Record<string, ParserType> = {};
+  parsingTypes: Record<string, string> = {
+    text: 'text',
+    'application/json': 'json',
+    'application/x-www-form-urlencoded': 'form'
+  };
+
+  @Ignore()
+  _limit: number | undefined;
+
+  postConstruct(): void {
+    this._limit = WebCommonUtil.parseByteSize(this.limit);
+  }
 }
+
 
 /**
  * Parses the body input content
@@ -45,62 +60,64 @@ export class BodyParseConfig {
 @Injectable()
 export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
-  dependsOn = [AcceptsInterceptor, DecompressInterceptor];
+  dependsOn = [AcceptInterceptor, DecompressInterceptor];
   category: WebInterceptorCategory = 'request';
+  parsers: Record<string, BodyContentParser> = {};
 
   @Inject()
   config: BodyParseConfig;
 
-  async read(req: WebRequest, body: Readable, limit: string | number): Promise<string> {
-    const cfg = req.headers.getContentType();
-    const encoding = cfg?.parameters.charset ?? 'utf8';
-    return rawBody(body, { limit, encoding });
-  }
-
-  detectParserType(req: WebRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
-    const { full = '', type } = req.headers.getContentType() ?? {};
-    if (!full) {
-      return;
-    } else if (full in parsingTypes) {
-      return parsingTypes[full];
-    } else if (/\bjson\b/.test(full)) {
-      return 'json';
-    } else if (full === 'application/x-www-form-urlencoded') {
-      return 'form';
-    } else if (type === 'text') {
-      return 'text';
+  async postConstruct(): Promise<void> {
+    // Load all the parser types
+    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<BodyContentParser>());
+    for (const instance of instances) {
+      this.parsers[instance.type] = instance;
     }
   }
 
-  parse(text: string, type: ParserType): Primitive | Record<string, string> | Object | unknown[] {
-    switch (type) {
-      case 'json': return JSON.parse(text);
-      case 'text': return text;
-      case 'form': return Object.fromEntries(new URLSearchParams(text));
-    }
+  applies({ endpoint, config }: WebInterceptorContext<BodyParseConfig>): boolean {
+    return config.applies && endpoint.allowsBody;
   }
 
-  applies(endpoint: EndpointConfig, config: BodyParseConfig): boolean {
-    return config.applies && HTTP_METHODS[endpoint.method].body;
-  }
+  async filter({ request, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
+    const input = request.body;
 
-  async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
-    const stream = WebBodyUtil.getRawStream(req.body);
-    if (!stream) { // No body to process
+    if (!WebBodyUtil.isRaw(input)) {
       return next();
     }
 
-    const parserType = this.detectParserType(req, config.parsingTypes);
+    const lengthRead = +(request.headers.get('Content-Length') || '');
+    const length = Number.isNaN(lengthRead) ? undefined : lengthRead;
+
+    const limit = config._limit ?? Number.MAX_SAFE_INTEGER;
+    if (length && length > limit) {
+      throw WebError.for('Request entity too large', 413, { length, limit });
+    }
+
+    const contentType = request.headers.getContentType();
+    if (!contentType) {
+      return next();
+    }
+
+    const parserType = config.parsingTypes[contentType.full] ?? config.parsingTypes[contentType.type];
     if (!parserType) {
       return next();
     }
 
+    const { text, read } = await WebBodyUtil.readText(input, limit, contentType.parameters.charset);
+
+    if (length && read !== length) {
+      throw WebError.for('Request size did not match Content-Length', 400, { length, read });
+    }
+
     try {
-      const text = await this.read(req, stream, config.limit);
-      req.body = this.parse(text, parserType);
+      request.body = parserType in this.parsers ?
+        this.parsers[parserType].parse(text) :
+        WebBodyUtil.parseBody(parserType, text);
+
       return next();
     } catch (err) {
-      throw new AppError('Malformed input', { category: 'data', cause: err });
+      throw WebError.for('Malformed input', 400, { cause: err });
     }
   }
 }

@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { configs } from '@eslint/js';
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import stylisticPlugin from '@stylistic/eslint-plugin';
+import unusedImports from 'eslint-plugin-unused-imports';
 
 import { Runtime } from '@travetto/runtime';
 
@@ -36,6 +37,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
         '@typescript-eslint': {
           rules: tsEslintPlugin.rules,
         },
+        'unused-imports': unusedImports,
         ...(Object.fromEntries(plugins.map(x => [x.name, x])))
       },
       rules: {
@@ -52,7 +54,8 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       plugins: {
         '@stylistic': {
           rules: stylisticPlugin.rules
-        }
+        },
+        'unused-imports': unusedImports,
       },
       rules: {
         ...Object.fromEntries(Object.entries(STD_RULES).filter(x => !x[0].startsWith('@typescript'))),
@@ -70,6 +73,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       rules: {
         'max-len': 0,
         'no-unused-private-class-members': 0,
+        '@typescript-eslint/no-unused-vars': 0,
         '@typescript-eslint/explicit-function-return-type': 0
       }
     },
@@ -87,6 +91,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       files: ['**/test/**/*.ts', '**/test/**/*.tsx', '**/support/test/**/*.ts', '**/support/test/**/*.tsx'],
       ignores: [...IGNORES, 'module/test/src/**'],
       rules: {
+        '@typescript-eslint/no-unused-vars': 0,
         '@typescript-eslint/explicit-function-return-type': 0
       }
     },

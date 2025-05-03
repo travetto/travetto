@@ -2,11 +2,7 @@ import assert from 'node:assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-
-import { Post, Get } from '../src/decorator/endpoint.ts';
-import { Controller } from '../src/decorator/controller.ts';
-import { ControllerRegistry } from '../src/registry/controller.ts';
-import { EndpointUtil } from '../src/util/endpoint.ts';
+import { Controller, ControllerRegistry, EndpointUtil, Get, Post } from '@travetto/web';
 
 @Controller('/')
 class EndpointController {

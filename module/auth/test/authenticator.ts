@@ -1,9 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-
-import { Authenticator } from '../src/types/authenticator.ts';
-import { AuthenticationError } from '../src/types/error.ts';
+import { AuthenticationError, Authenticator } from '@travetto/auth';
 
 type User = { username: string, password: string };
 

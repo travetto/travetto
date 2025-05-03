@@ -1,11 +1,17 @@
 import { Class } from '@travetto/runtime';
-import { ModelType, OptionalId } from '../types/model.ts';
+import { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
 
 /**
  * Interface for basic data interface
  * @concrete
  */
 export interface ModelBasicSupport<C = unknown> {
+
+  /**
+   * Id Source
+   */
+  idSource: ModelIdSource;
+
   /**
    * Get underlying client
    */

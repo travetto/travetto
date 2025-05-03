@@ -2,6 +2,7 @@ import assert from 'node:assert';
 
 import { TimeUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
@@ -9,8 +10,6 @@ import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
-
-import { MemoryModelConfig, MemoryModelService } from '../src/service.ts';
 
 const KB = 2 ** 20;
 

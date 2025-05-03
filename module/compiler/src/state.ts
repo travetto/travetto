@@ -143,7 +143,7 @@ export class CompilerState implements ts.CompilerHost {
         case 'ts': {
           const result = program.emit(
             program.getSourceFile(sourceFile)!,
-            (...args) => this.writeFile(...args), undefined, false,
+            (...args) => this.writeFile(args[0], args[1], args[2]), undefined, false,
             this.#transformerManager.get()
           );
           return result?.diagnostics?.length ? result.diagnostics : undefined;
@@ -251,10 +251,7 @@ export class CompilerState implements ts.CompilerHost {
   writeFile(
     outputFile: string,
     text: string,
-    bom: boolean,
-    onError?: (message: string) => void,
-    sourceFiles?: readonly ts.SourceFile[],
-    data?: ts.WriteFileCallbackData
+    bom: boolean
   ): void {
     if (outputFile.endsWith('package.json')) {
       text = CompilerUtil.rewritePackageJSON(this.#manifest, text);

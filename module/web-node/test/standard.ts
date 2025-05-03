@@ -1,11 +1,15 @@
 import { Suite } from '@travetto/test';
-import { StandardWebServerSuite } from '@travetto/web/support/test/suite/standard.ts';
+import { NodeWebServer } from '@travetto/web-node';
+import { DependencyRegistry } from '@travetto/di';
 
-import { NodeWebApplication } from '../src/application.ts';
-import { FetchWebDispatcher } from '../support/test/dispatcher.ts';
+import { StandardWebServerSuite } from '@travetto/web/support/test/suite/standard.ts';
+import { FetchWebDispatcher } from '@travetto/web-node/support/test/dispatcher.ts';
 
 @Suite()
 export class NodeWebStandardTest extends StandardWebServerSuite {
-  appType = NodeWebApplication;
   dispatcherType = FetchWebDispatcher;
+
+  serve() {
+    return DependencyRegistry.getInstance(NodeWebServer).then(v => v.serve()).then(v => v.kill);
+  }
 }

@@ -1,10 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-
-import { WebCommonUtil } from '../src/util/common.ts';
-
-const KEY = 'test';
+import { WebCommonUtil } from '@travetto/web';
 
 @Suite()
 export class WebCommonUtilTest {

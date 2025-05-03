@@ -5,12 +5,12 @@ import { RenderProvider, RenderState } from '../types.ts';
 import { RenderContext } from './context.ts';
 
 const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<string> => recurse();
-const ignore = async ({ recurse: _ }: RenderState<JSXElement, RenderContext>): Promise<string> => '';
+const ignore = async (_: RenderState<JSXElement, RenderContext>): Promise<string> => '';
 
 export const Markdown: RenderProvider<RenderContext> = {
   finalize: (text) => {
     text = text
-      .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, v) => v === 's' ? _ : `${link} ${v}`)
+      .replace(/(\[[^\]]{1,100}\]\([^)]{1,1000}\))([A-Za-z0-9$]{1,100})/g, (all, link, v) => v === 's' ? all : `${link} ${v}`)
       .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`);
     return text;
   },

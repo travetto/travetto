@@ -11,18 +11,17 @@ const PrincipalCodecContract = toConcrete<PrincipalCodec>();
 const AuthenticatorContract = toConcrete<Authenticator>();
 const AuthenticatorStateContract = toConcrete<AuthenticatorState>();
 const WebRequestContract = toConcrete<WebRequest>();
-const WebResponseContract = toConcrete<WebResponse>();
 
 export const text = <>
   <c.StdHeader />
-  This is a primary integration for the {d.mod('Auth')} module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate. <br />
+  This is a primary integration for the {d.mod('Auth')} module with the {d.mod('Web')} module. <br />
 
   The integration with the {d.mod('Web')} module touches multiple levels. Primarily:
 
   <ul>
     <li>Authenticating</li>
     <li>Maintaining Auth Context</li>
-    <li>Endpoint declaration</li>
+    <li>Endpoint Decoration</li>
     <li>Multi-Step Login</li>
   </ul>
 
@@ -31,13 +30,14 @@ export const text = <>
 
     <c.Code title='Structure for the Identity Source' src='@travetto/auth/src/types/authenticator.ts' />
 
-    The only required method to be defined is the {d.method('authenticate')} method.  This takes in a pre-principal payload and a filter context with a {WebRequestContract} and {WebResponseContract}, and is responsible for:
+    The only required method to be defined is the {d.method('authenticate')} method.  This takes in a pre-principal payload and a filter context with a {WebRequestContract}, and is responsible for:
 
     <ul>
       <li>Returning an {PrincipalContract} if authentication was successful</li>
       <li>Throwing an error if it failed</li>
       <li>Returning undefined if the authentication is multi-staged and has not completed yet</li>
     </ul>
+
     A sample auth provider would look like:
 
     <c.Code title='Sample Identity Source' src='doc/source.ts' />
@@ -50,11 +50,11 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Maintaining Auth Context'>
-    The {AuthContextInterceptor} acts as the bridge between the {d.mod('Auth')} and {d.mod('Web')} modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the {AuthContext} and the {WebRequestContract}/{WebResponseContract} object. The integration, leveraging {WebAuthConfig}'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the {d.library('JWT')} appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  <br />
+    The {AuthContextInterceptor} acts as the bridge between the {d.mod('Auth')} and {d.mod('Web')} modules.  It serves to take an authenticated principal (via the {WebRequest}/{WebResponse}) and integrate it into the {AuthContext}. Leveraging {WebAuthConfig}'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between using a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the {d.library('JWT')} appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  <br />
 
-    <strong>Note:</strong> When using cookies, the automatic renewal, and update, and seamless receipt and transmission all the {PrincipalContract} to act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. <br />
+    <strong>Note for Cookie Use:</strong> The automatic renewal, update, seamless receipt and transmission of the {PrincipalContract} cookie act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. <br />
 
-    The {PrincipalCodecContract} contract is the primary interface for reading and writing {PrincipalContract} data out of the {WebRequestContract}/{WebResponseContract}. This contract is flexible by design, allowing for all sorts of usage. {JWTPrincipalCodec} is the default {PrincipalCodecContract}, leveraging {d.library('JWT')}s for encoding/decoding the principal information.
+    The {PrincipalCodecContract} contract is the primary interface for reading and writing {PrincipalContract} data out of the {WebRequestContract}. This contract is flexible by design, allowing for all sorts of usage. {JWTPrincipalCodec} is the default {PrincipalCodecContract}, leveraging {d.library('JWT')}s for encoding/decoding the principal information.
 
     <c.Code src={JWTPrincipalCodec} startRe={/./} />
 
@@ -68,7 +68,7 @@ export const text = <>
 
   </c.Section>
 
-  <c.Section title='Endpoint Declaration'>
+  <c.Section title='Endpoint Decoration'>
     {Login} integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.<br />
 
     {Logout} integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.

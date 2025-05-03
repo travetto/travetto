@@ -1,7 +1,7 @@
 import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { Controller, Put, Get, ContextParam } from '@travetto/web';
-import { SessionContext, SessionData, SessionModelSymbol, SessionService } from '@travetto/auth-session';
+import { SessionContext, SessionData, SessionModelSymbol } from '@travetto/auth-session';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Authenticated } from '@travetto/auth-web';
 

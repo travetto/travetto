@@ -1,7 +1,11 @@
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { castTo } from '@travetto/runtime';
-import { EndpointConfig, WebChainedContext, WebInterceptor, WebInterceptorCategory, WebResponse } from '@travetto/web';
+
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebChainedContext } from '../types/filter.ts';
 
 @Config('web.trustProxy')
 export class TrustProxyConfig {
@@ -10,7 +14,7 @@ export class TrustProxyConfig {
    */
   applies = true;
   /**
-   * The accepted types
+   * The accepted ips
    */
   ips: string[] = [];
 }
@@ -23,24 +27,26 @@ export class TrustProxyInterceptor implements WebInterceptor<TrustProxyConfig> {
   @Inject()
   config: TrustProxyConfig;
 
-  applies(endpoint: EndpointConfig, config: TrustProxyConfig): boolean {
+  applies({ config }: WebInterceptorContext<TrustProxyConfig>): boolean {
     return config.applies;
   }
 
-  filter({ req, next, config }: WebChainedContext<TrustProxyConfig>): Promise<WebResponse> {
-    const forwardedFor = req.headers.get('X-Forwarded-For');
+  filter({ request, next, config }: WebChainedContext<TrustProxyConfig>): Promise<WebResponse> {
+    const forwardedFor = request.headers.get('X-Forwarded-For');
 
     if (forwardedFor) {
-      if (config.ips[0] === '*' || (req.connection.ip && config.ips.includes(req.connection.ip))) {
-        req.connection.protocol = castTo(req.headers.get('X-Forwarded-Proto')!) || req.connection.protocol;
-        req.connection.host = req.headers.get('X-Forwarded-Host') || req.connection.host;
-        req.connection.ip = forwardedFor;
+      const connection = request.context.connection ?? {};
+      if (config.ips[0] === '*' || (connection.ip && config.ips.includes(connection.ip))) {
+        connection.httpProtocol = castTo(request.headers.get('X-Forwarded-Proto')!) || connection.httpProtocol;
+        connection.host = request.headers.get('X-Forwarded-Host') || connection.host;
+        connection.ip = forwardedFor;
+        Object.assign(request.context, { connection });
       }
     }
 
-    req.headers.delete('X-Forwarded-For');
-    req.headers.delete('X-Forwarded-Proto');
-    req.headers.delete('X-Forwarded-Host');
+    request.headers.delete('X-Forwarded-For');
+    request.headers.delete('X-Forwarded-Proto');
+    request.headers.delete('X-Forwarded-Host');
 
     return next();
   }

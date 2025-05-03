@@ -1,6 +1,6 @@
 import { Class } from '@travetto/runtime';
 
-import { ModelType, OptionalId, ModelIdSource } from '../types/model.ts';
+import { ModelType, OptionalId } from '../types/model.ts';
 
 import { ModelBasicSupport } from './basic.ts';
 
@@ -9,11 +9,6 @@ import { ModelBasicSupport } from './basic.ts';
  * @concrete
  */
 export interface ModelCrudSupport extends ModelBasicSupport {
-
-  /**
-   * Id Source
-   */
-  idSource: ModelIdSource;
 
   /**
    * Update an item

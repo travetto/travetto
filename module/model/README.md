@@ -24,6 +24,12 @@ All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/modul
 **Code: Basic Contract**
 ```typescript
 export interface ModelBasicSupport<C = unknown> {
+
+  /**
+   * Id Source
+   */
+  idSource: ModelIdSource;
+
   /**
    * Get underlying client
    */
@@ -58,11 +64,6 @@ The [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types
 **Code: Crud Contract**
 ```typescript
 export interface ModelCrudSupport extends ModelBasicSupport {
-
-  /**
-   * Id Source
-   */
-  idSource: ModelIdSource;
 
   /**
    * Update an item
@@ -295,8 +296,8 @@ export abstract class BaseModelSuite<T> {
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
     const svc = await this.service;
     if (ModelBulkUtil.isSupported(svc)) {
-      const res = await svc.processBulk(cls, items.map(x => ({ insert: x })));
-      return res.counts.insert;
+      const result = await svc.processBulk(cls, items.map(x => ({ insert: x })));
+      return result.counts.insert;
     } else if (ModelCrudUtil.isSupported(svc)) {
       const out: Promise<M>[] = [];
       for (const el of items) {

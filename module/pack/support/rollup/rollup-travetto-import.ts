@@ -7,13 +7,16 @@ import { CoreRollupConfig } from '../../src/types.ts';
 
 type TNode = AstNode & { source?: { type: string }, callee?: TNode & { name?: string }, args?: TNode[] };
 
+/**
+ * Handles importing via non-static strings (e.g. ClassSource)
+ */
 export function travettoImportPlugin(config: CoreRollupConfig): Plugin {
   const fileSet = new Set(config.files);
 
   const out: Plugin = {
     name: 'travetto-import',
 
-    resolveDynamicImport(specifier, importer, options) {
+    resolveDynamicImport(specifier, _importer, _options) {
       const key = typeof specifier === 'string' ? specifier : '';
       if (config.ignore.has(key)) {
         return false;

@@ -1,0 +1,47 @@
+{
+  "name": "@travetto/web-http-server",
+  "version": "6.0.0-rc.1",
+  "description": "Web HTTP Server Support",
+  "keywords": [
+    "web",
+    "server",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/web-http-server"
+  },
+  "dependencies": {
+    "@travetto/web": "^6.0.0-rc.1"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^6.0.0-rc.1",
+    "@travetto/test": "^6.0.0-rc.1"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/test": {
+      "optional": true
+    },
+    "@travetto/cli": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "Web HTTP Server Support"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -2,12 +2,11 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { WebChainedContext } from '../types.ts';
-import { HTTP_METHODS, WebInterceptorCategory } from '../types/core.ts';
+import { WebChainedContext } from '../types/filter.ts';
+import { HTTP_METHODS, HttpMethod, WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
-import { EndpointConfig } from '../registry/types.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
 /**
@@ -26,7 +25,7 @@ export class CorsConfig {
   /**
    * Allowed http methods
    */
-  methods?: WebRequest['method'][];
+  methods?: HttpMethod[];
   /**
    * Allowed http headers
    */
@@ -56,7 +55,7 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
   @Inject()
   config: CorsConfig;
 
-  finalizeConfig(config: CorsConfig): CorsConfig {
+  finalizeConfig({ config }: WebInterceptorContext<CorsConfig>): CorsConfig {
     config.resolved = {
       origins: new Set(config.origins ?? []),
       methods: (config.methods ?? Object.keys(HTTP_METHODS)).join(',').toUpperCase(),
@@ -66,30 +65,30 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
     return config;
   }
 
-  applies(ep: EndpointConfig, config: CorsConfig): boolean {
+  applies({ config }: WebInterceptorContext<CorsConfig>): boolean {
     return config.applies;
   }
 
-  decorate(req: WebRequest, resolved: CorsConfig['resolved'], res: WebResponse,): WebResponse {
-    const origin = req.headers.get('Origin');
+  decorate(request: WebRequest, resolved: CorsConfig['resolved'], response: WebResponse,): WebResponse {
+    const origin = request.headers.get('Origin');
     if (resolved.origins.size === 0 || resolved.origins.has(origin!)) {
       for (const [k, v] of [
         ['Access-Control-Allow-Origin', origin || '*'],
         ['Access-Control-Allow-Credentials', `${resolved.credentials}`],
         ['Access-Control-Allow-Methods', resolved.methods],
-        ['Access-Control-Allow-Headers', resolved.headers || req.headers.get('Access-Control-Request-Headers') || '*'],
+        ['Access-Control-Allow-Headers', resolved.headers || request.headers.get('Access-Control-Request-Headers') || '*'],
       ]) {
-        res.headers.setIfAbsent(k, v);
+        response.headers.setIfAbsent(k, v);
       }
     }
-    return res;
+    return response;
   }
 
-  async filter({ req, config: { resolved }, next }: WebChainedContext<CorsConfig>): Promise<WebResponse> {
+  async filter({ request, config: { resolved }, next }: WebChainedContext<CorsConfig>): Promise<WebResponse> {
     try {
-      return this.decorate(req, resolved, await next());
+      return this.decorate(request, resolved, await next());
     } catch (err) {
-      throw this.decorate(req, resolved, WebCommonUtil.catchResponse(err));
+      throw this.decorate(request, resolved, WebCommonUtil.catchResponse(err));
     }
   }
 }

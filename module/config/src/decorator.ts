@@ -31,9 +31,10 @@ export function Config(ns: string) {
 /**
  * Allows for binding specific fields to environment variables as a top-level override
  */
-export function EnvVar(name: string) {
+export function EnvVar(name: string, ...others: string[]) {
   return (inst: ClassInstance, prop: string): void => {
     const env = SchemaRegistry.getOrCreatePendingMetadata<OverrideConfig>(inst.constructor, OverrideConfigSymbol, { ns: '', fields: {} });
-    env.fields[prop] = (): string | undefined => process.env[name];
+    env.fields[prop] = (): string | undefined =>
+      process.env[[name, ...others].find(x => !!process.env[x])!];
   };
 }

@@ -14,7 +14,7 @@ export interface MailTransport {
  * Transport that consumes messages without sending
  */
 export class NullTransport implements MailTransport {
-  async send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S> {
+  async send<S extends SentEmail = SentEmail>(): Promise<S> {
     return castTo({});
   }
 }

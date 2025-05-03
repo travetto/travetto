@@ -57,7 +57,7 @@ class $Runtime {
   /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */
   toolPath(...rel: string[]): string;
   /** Resolve single module path */
-  modulePath(modulePath: string): string;
+  modulePath(modulePath: string, overrides?: Record<string, string>): string;
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[];
   /** Get source for function */

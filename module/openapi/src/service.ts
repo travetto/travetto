@@ -46,7 +46,7 @@ export class OpenApiService {
     ControllerRegistry.on(() => this.resetSpec());
     SchemaRegistry.on(() => this.resetSpec());
 
-    if (!this.apiHostConfig.servers) {
+    if (!this.apiHostConfig.servers && this.webConfig.baseUrl) {
       this.apiHostConfig.servers = [{ url: this.webConfig.baseUrl }];
     }
 

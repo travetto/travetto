@@ -100,11 +100,11 @@ export class VisitorFactory<S extends State = State> {
           return state.finalize(file);
         }
 
-        let ret = this.visit(state, context, file);
+        let node = this.visit(state, context, file);
 
         // Process added content
         const changed = state.added.size;
-        let statements: ts.NodeArray<ts.Statement> | ts.Statement[] = ret.statements;
+        let statements: ts.NodeArray<ts.Statement> | ts.Statement[] = node.statements;
         while (state.added.size) {
           for (const [idx, all] of [...state.added].toSorted(([idxA], [idxB]) => idxB - idxA)) {
             statements = [
@@ -117,9 +117,9 @@ export class VisitorFactory<S extends State = State> {
         }
 
         if (changed) {
-          ret = CoreUtil.updateSource(context.factory, ret, statements);
+          node = CoreUtil.updateSource(context.factory, node, statements);
         }
-        return state.finalize(ret);
+        return state.finalize(node);
       } catch (err) {
         if (!(err instanceof Error)) {
           throw err;

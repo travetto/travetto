@@ -45,7 +45,7 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
    * Extract the passport auth context
    */
   getState(context?: WebFilterContext | undefined): AuthenticatorState | undefined {
-    return PassportUtil.readState<AuthenticatorState>(context!.req);
+    return context ? PassportUtil.readState<AuthenticatorState>(context.request) : undefined;
   }
 
   /**

@@ -53,9 +53,9 @@ export class ServiceRunner {
         if (!this.svc.ready?.url || !full) {
           return true;
         } else {
-          const req = await fetch(this.svc.ready.url, { method: 'GET' });
-          const text = await req.text();
-          if (req.ok && (this.svc.ready.test?.(text) ?? true)) {
+          const response = await fetch(this.svc.ready.url, { method: 'GET' });
+          const text = await response.text();
+          if (response.ok && (this.svc.ready.test?.(text) ?? true)) {
             return true;
           }
         }

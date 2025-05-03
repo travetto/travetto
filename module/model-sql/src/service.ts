@@ -12,6 +12,7 @@ import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier, ModelQuerySuggestSupport,
   ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
+  ModelQueryFacet,
 } from '@travetto/model-query';
 
 import { SQLModelConfig } from './config.ts';
@@ -182,9 +183,9 @@ export class SQLModelService implements
 
   @Connected()
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    const res = await this.query(cls, { where: castTo({ id }) });
-    if (res.length === 1) {
-      return await ModelCrudUtil.load(cls, res[0]);
+    const result = await this.query(cls, { where: castTo({ id }) });
+    if (result.length === 1) {
+      return await ModelCrudUtil.load(cls, result[0]);
     }
     throw new NotFoundError(cls, id);
   }
@@ -227,9 +228,9 @@ export class SQLModelService implements
       getStatements('update')
     ]);
 
-    const ret = await this.#dialect.bulkProcess(deletes, inserts, upserts, updates);
-    ret.insertedIds = addedIds;
-    return ret;
+    const result = await this.#dialect.bulkProcess(deletes, inserts, upserts, updates);
+    result.insertedIds = addedIds;
+    return result;
   }
 
   // Expiry
@@ -309,7 +310,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
     const col = this.#dialect.ident(field);
     const ttl = this.#dialect.ident('count');

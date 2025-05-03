@@ -1,16 +1,18 @@
 import router from 'find-my-way';
 
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
 
 import { EndpointConfig } from '../registry/types.ts';
 
 import { WebResponse } from '../types/response.ts';
-import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
-import { WebFilterContext } from '../types.ts';
-import { WebConfig } from '../config/web.ts';
+import { HTTP_METHODS } from '../types/core.ts';
+import type { WebFilterContext } from '../types/filter.ts';
+import { WebConfig } from '../config.ts';
 
 import { BaseWebRouter } from './base.ts';
+
+const DEFAULT_HTTP_METHOD = 'POST';
 
 /**
  * The web router
@@ -29,27 +31,29 @@ export class StandardWebRouter extends BaseWebRouter {
       const fullPath = ep.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
       const handler = (): void => { };
       this.#cache.set(handler, ep);
-      this.raw[HTTP_METHODS[ep.method].lower](fullPath, handler);
+      this.raw[HTTP_METHODS[ep.httpMethod ?? DEFAULT_HTTP_METHOD].lower](fullPath, handler);
     }
 
     return (): void => {
       for (const ep of endpoints ?? []) {
-        this.raw.off(ep.method, ep.fullPath);
+        this.raw.off(ep.httpMethod ?? DEFAULT_HTTP_METHOD, ep.fullPath);
       }
     };
   }
 
   /**
-   * Route and run the request
+   * Route and execute the request
    */
-  dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const method = castTo<HttpMethod>((req.method ?? 'GET').toUpperCase());
-    const { params, handler } = this.raw.find(method, req.path ?? '/') ?? {};
+  async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
+    const httpMethod = request.context.httpMethod ?? DEFAULT_HTTP_METHOD;
+    const { params, handler } = this.raw.find(httpMethod, request.context.path) ?? {};
     const endpoint = this.#cache.get(handler!);
     if (!endpoint) {
-      throw new AppError(`Unknown route ${req.method} ${req.path}`, { category: 'notfound' });
+      return new WebResponse({
+        body: new AppError(`Unknown endpoint ${httpMethod} ${request.context.path}`, { category: 'notfound' }),
+      });
     }
-    Object.assign(req, { params });
-    return endpoint.filter!({ req });
+    Object.assign(request.context, { pathParams: params });
+    return endpoint.filter!({ request });
   }
 }

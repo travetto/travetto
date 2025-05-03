@@ -4,10 +4,10 @@ import { DependencyRegistry } from '@travetto/di';
 import { ControllerConfig, EndpointConfig } from '../registry/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 
-import { WebRouter } from '../types/router.ts';
+import type { WebRouter } from '../types/dispatch.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebFilterContext } from '../types.ts';
+import type { WebFilterContext } from '../types/filter.ts';
 
 import { EndpointUtil } from '../util/endpoint.ts';
 

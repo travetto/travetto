@@ -1,14 +1,21 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { WebFilterContext } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
 
 import { ConnectRequest, ConnectResponse } from './connect';
 
 
 type Middleware = (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => void;
 
+/**
+ * Utilities for invoking express middleware with a WebFilterContext
+ */
 export class WebConnectUtil {
+  /**
+   * Invoke express middleware, and return the result as a promise.
+   *
+   * NOTE: If a response is written, then it is thrown as an "error"
+   */
   static async invoke<T>(ctx: WebFilterContext,
     handler: (
       req: IncomingMessage,
@@ -16,13 +23,13 @@ export class WebConnectUtil {
       next: (err: Error | null | undefined, value: T | undefined | null) => void
     ) => Middleware
   ): Promise<T | undefined> {
-    const connectReq = new ConnectRequest(ctx.req);
-    const connectRes = new ConnectResponse();
+    const connectReq = ConnectRequest.get(ctx.request);
+    const connectRes = ConnectResponse.get();
 
     const p = Promise.withResolvers<T | undefined>();
-    handler(castTo(connectReq), castTo(connectRes), (err, value) => err ? p.reject(err) : p.resolve(value!));
-    const ret = await p.promise;
+    handler(connectReq, connectRes, (err, value) => err ? p.reject(err) : p.resolve(value!));
+    const result = await p.promise;
     connectRes.throwIfSent();
-    return ret;
+    return result;
   }
 }

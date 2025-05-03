@@ -2,8 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-
-import { Schema } from '../src/decorator/schema.ts';
+import { Schema } from '@travetto/schema';
 
 @Schema({ subTypeField: 'flavor' })
 abstract class CustomBase {

@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
 import { Class } from '@travetto/runtime';
 
 import { Registry } from '../registry.ts';

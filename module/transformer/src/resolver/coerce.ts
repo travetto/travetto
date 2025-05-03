@@ -50,19 +50,19 @@ export class CoerceUtil {
 
     switch (type) {
       case Date: {
-        const res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
+        const value = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
           new Date(parseInt(`${input}`, 10)) : new Date(`${input}`);
-        if (strict && Number.isNaN(res.getTime())) {
+        if (strict && Number.isNaN(value.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
         }
-        return res;
+        return value;
       }
       case Number: {
-        const res = `${input}`.includes('.') ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
-        if (strict && Number.isNaN(res)) {
+        const value = `${input}`.includes('.') ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
+        if (strict && Number.isNaN(value)) {
           throw new Error(`Invalid numeric value: ${input}`);
         }
-        return res;
+        return value;
       }
       case BigInt: {
         try {

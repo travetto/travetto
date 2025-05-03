@@ -45,8 +45,8 @@ export class PackageManager {
         return !!found && found === mod.version;
       }
       case 'yarn': {
-        const res = JSON.parse(result.stdout);
-        return res.data !== undefined;
+        const parsed = JSON.parse(result.stdout);
+        return parsed.data !== undefined;
       }
     }
   }

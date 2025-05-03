@@ -1,5 +1,7 @@
-import { Controller, Get, QueryParam, WebRequest, ContextParam, WebResponse, CookieJar } from '@travetto/web';
-import { CookieGetOptions, CookieSetOptions } from '../src/types/cookie.ts';
+import {
+  Controller, Get, QueryParam, WebRequest, ContextParam,
+  WebResponse, CookieJar, CookieGetOptions, CookieSetOptions
+} from '@travetto/web';
 
 @Controller('/simple')
 export class SimpleEndpoints {
@@ -8,7 +10,7 @@ export class SimpleEndpoints {
   private setOptions: CookieSetOptions;
 
   @ContextParam()
-  req: WebRequest;
+  request: WebRequest;
 
   @ContextParam()
   cookies: CookieJar;

@@ -22,7 +22,7 @@ Supported features:
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11)
    *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
-   *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L12)
+   *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
    *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)
    *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12)
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
@@ -46,15 +46,6 @@ where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/modu
 
 **Code: Structure of MongoModelConfig**
 ```typescript
-import type mongo from 'mongodb';
-
-import { TimeSpan, TimeUtil, RuntimeResources, Runtime } from '@travetto/runtime';
-import { Config } from '@travetto/config';
-import { Field } from '@travetto/schema';
-
-/**
- * Mongo model config
- */
 @Config('model.mongo')
 export class MongoModelConfig {
   /**

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@travetto/di';
 import {
   BodyParseInterceptor, WebInterceptor, WebInterceptorCategory, WebChainedContext,
-  EndpointConfig, WebResponse, WebInternalSymbol, DecompressInterceptor,
+  WebResponse, DecompressInterceptor, WebInterceptorContext
 } from '@travetto/web';
 
 import { WebUploadConfig } from './config.ts';
@@ -21,7 +21,7 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
   /**
    * Produces final config object
    */
-  finalizeConfig(base: WebUploadConfig, inputs: Partial<WebUploadConfig>[]): WebUploadConfig {
+  finalizeConfig({ config: base }: WebInterceptorContext<WebUploadConfig>, inputs: Partial<WebUploadConfig>[]): WebUploadConfig {
     base.uploads ??= {};
     // Override the uploads object with all the data from the inputs
     for (const [k, cfg] of inputs.flatMap(el => Object.entries(el.uploads ?? {}))) {
@@ -30,19 +30,19 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
     return base;
   }
 
-  applies(ep: EndpointConfig, config: WebUploadConfig): boolean {
+  applies({ config }: WebInterceptorContext<WebUploadConfig>): boolean {
     return config.applies;
   }
 
-  async filter({ req, config, next }: WebChainedContext<WebUploadConfig>): Promise<WebResponse> {
+  async filter({ request, config, next }: WebChainedContext<WebUploadConfig>): Promise<WebResponse> {
     const uploads: FileMap = {};
 
     try {
-      for await (const item of WebUploadUtil.getUploads(req, config)) {
+      for await (const item of WebUploadUtil.getUploads(request, config)) {
         uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
       }
 
-      req[WebInternalSymbol].uploads = uploads;
+      WebUploadUtil.setRequestUploads(request, uploads);
 
       return await next();
     } finally {

@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, OnGetter, OnSetter
+  TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter
 } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
@@ -23,7 +23,7 @@ export class SchemaTransformer {
    * Track schema on start
    */
   @OnClass('Schema')
-  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta): ts.ClassDeclaration {
+  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     state[InSchemaSymbol] = true;
     state[AccessorsSymbol] = new Set();
     return node;

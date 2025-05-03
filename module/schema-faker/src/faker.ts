@@ -45,7 +45,7 @@ export class SchemaFaker {
       [/(desc|description)$/, faker.lorem.sentences.bind(null, 10)]
     ]),
     date: new Map([
-      [/dob|birth/, faker.date.past.bind(null, 60)],
+      [/dob|birth/, (): Date => faker.date.past({ years: 60 })],
       [/creat(e|ion)/, this.#between.bind(null, -200, -100)],
       [/(update|modif(y|ied))/, this.#between.bind(null, -100, -50)]
     ]),

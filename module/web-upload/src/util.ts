@@ -11,12 +11,14 @@ import { WebRequest, MimeUtil, WebBodyUtil } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { WebUploadConfig } from './config.ts';
+import { FileMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
 type UploadItem = { stream: Readable, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
 const RawFileSymbol = Symbol();
+const WebUploadSymbol = Symbol();
 
 /**
  * Web upload utilities
@@ -51,16 +53,15 @@ export class WebUploadUtil {
   /**
    * Get all the uploads, separating multipart from direct
    */
-  static async* getUploads(req: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    const bodyStream = WebBodyUtil.getRawStream(req.body);
-
-    if (!bodyStream) {
+  static async* getUploads(request: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
+    if (!WebBodyUtil.isRaw(request.body)) {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }
 
-    req.body = undefined;
+    const bodyStream = Buffer.isBuffer(request.body) ? Readable.from(request.body) : request.body;
+    request.body = undefined;
 
-    if (MULTIPART.has(req.headers.getContentType()?.full!)) {
+    if (MULTIPART.has(request.headers.getContentType()?.full!)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
       const itr = new AsyncQueue<UploadItem>();
@@ -68,12 +69,12 @@ export class WebUploadUtil {
       // Upload
       bodyStream.pipe(busboy({
         headers: {
-          'content-type': req.headers.get('Content-Type')!,
-          'content-disposition': req.headers.get('Content-Disposition')!,
-          'content-length': req.headers.get('Content-Length')!,
-          'content-range': req.headers.get('Content-Range')!,
-          'content-encoding': req.headers.get('Content-Encoding')!,
-          'content-transfer-encoding': req.headers.get('Content-Transfer-Encoding')!,
+          'content-type': request.headers.get('Content-Type')!,
+          'content-disposition': request.headers.get('Content-Disposition')!,
+          'content-length': request.headers.get('Content-Length')!,
+          'content-range': request.headers.get('Content-Range')!,
+          'content-encoding': request.headers.get('Content-Encoding')!,
+          'content-transfer-encoding': request.headers.get('Content-Transfer-Encoding')!,
         },
         limits: { fileSize: largestMax }
       })
@@ -84,7 +85,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: bodyStream, filename: req.headers.getFilename(), field: 'file' };
+      yield { stream: bodyStream, filename: request.headers.getFilename(), field: 'file' };
     }
   }
 
@@ -172,5 +173,19 @@ export class WebUploadUtil {
     if (config.cleanupFiles !== false) {
       await fs.rm(this.getUploadLocation(upload), { force: true });
     }
+  }
+
+  /**
+   * Get Uploads
+   */
+  static getRequestUploads(request: WebRequest & { [WebUploadSymbol]?: FileMap }): FileMap {
+    return request[WebUploadSymbol] ?? {};
+  }
+
+  /**
+   * Set Uploads
+   */
+  static setRequestUploads(request: WebRequest & { [WebUploadSymbol]?: FileMap }, uploads: FileMap): void {
+    request[WebUploadSymbol] ??= uploads;
   }
 }

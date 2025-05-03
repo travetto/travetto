@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { path, ManifestIndex } from '@travetto/manifest';
 
-import { ManagedType, AnyType, Type, ForeignType } from './resolver/types.ts';
+import { ManagedType, AnyType, ForeignType } from './resolver/types.ts';
 import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor.ts';
 import { SimpleResolver } from './resolver/service.ts';
 import { ImportManager } from './importer.ts';
@@ -222,9 +222,8 @@ export class TransformerState implements State {
   /**
    * Finalize the source file for emission
    */
-  finalize(ret: ts.SourceFile): ts.SourceFile {
-    ret = this.#imports.finalize(ret);
-    return ret;
+  finalize(source: ts.SourceFile): ts.SourceFile {
+    return this.#imports.finalize(source);
   }
 
   /**

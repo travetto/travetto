@@ -39,17 +39,22 @@ export const LIB_MAPPING = {
   UUID: { title: 'UUID', href: 'https://en.wikipedia.org/wiki/Universally_unique_identifier' },
 
   // Node
-  Process: { title: 'process', href: 'https://nodejs.org/api/process.html' },
-  ChildProcess: { title: 'child_process', href: 'https://nodejs.org/api/child_process.html' },
-  AsyncHooks: { title: 'async_hooks', href: 'https://nodejs.org/api/async_hooks.html' },
-  Http: { title: 'http', href: 'https://nodejs.org/api/http.html' },
-  Path: { title: 'http', href: 'https://nodejs.org/api/path.html' },
-  Https: { title: 'https', href: 'https://nodejs.org/api/https.html' },
-  Console: { title: 'console', href: 'https://nodejs.org/api/console.html' },
-  Assert: { title: 'assert', href: 'https://nodejs.org/api/assert.html' },
+  NodeProcess: { title: 'process', href: 'https://nodejs.org/api/process.html' },
+  NodeChildProcess: { title: 'child_process', href: 'https://nodejs.org/api/child_process.html' },
+  NodeAsyncHooks: { title: 'async_hooks', href: 'https://nodejs.org/api/async_hooks.html' },
+  NodeHttp: { title: 'http', href: 'https://nodejs.org/api/http.html' },
+  NodePath: { title: 'path', href: 'https://nodejs.org/api/path.html' },
+  NodeHttps: { title: 'https', href: 'https://nodejs.org/api/https.html' },
+  NodeConsole: { title: 'console', href: 'https://nodejs.org/api/console.html' },
+  NodeAssert: { title: 'assert', href: 'https://nodejs.org/api/assert.html' },
+  NodeEventEmitter: { title: 'EventEmitter', href: 'https://nodejs.org/api/events.html#class-eventemitter' },
+  NodeBuffer: { title: 'Buffer', href: 'https://nodejs.org/api/buffer.html' },
+  NodeZlib: { title: 'Buffer', href: 'https://nodejs.org/api/zlib.html' },
+  NodeFile: { title: 'Buffer', href: 'https://nodejs.org/api/buffer.html#class-file' },
 
   // Cloud
   AwsCloudwatch: { title: 'AWS Cloudwatch', href: 'https://aws.amazon.com/cloudwatch/' },
+  AwsLambda: { title: 'AWS Lambda', href: 'https://aws.amazon.com/lambda/' },
 
   // Utils
   Lodash: { title: 'lodash', href: 'https://lodash.com' },

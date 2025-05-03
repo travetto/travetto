@@ -88,8 +88,8 @@ export class RunnerUtil {
       ) :
       ((): boolean => true);
 
-    const res: TestConfig[] = countRes.valid ? JSON.parse(countRes.stdout) : [];
-    return res.filter(testFilter);
+    const parsed: TestConfig[] = countRes.valid ? JSON.parse(countRes.stdout) : [];
+    return parsed.filter(testFilter);
   }
 
   /**

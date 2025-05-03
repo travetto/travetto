@@ -3,12 +3,7 @@ import { Readable } from 'node:stream';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-
-import { Schema } from '../src/decorator/schema.ts';
-import { SchemaRegistry } from '../src/service/registry.ts';
-import { SchemaValidator } from '../src/validate/validator.ts';
-import { ValidationError } from '../src/validate/types.ts';
-import { ValidationResultError } from '../src/validate/error.ts';
+import { Schema, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { Address2 } from './models/address.ts';
 

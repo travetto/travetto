@@ -13,7 +13,9 @@ npm install @travetto/web-aws-lambda
 yarn add @travetto/web-aws-lambda
 ```
 
-The module provides support basic support with AWS lambdas.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers.
+This module provides an adapter between [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") and [AWS Lambda](https://aws.amazon.com/lambda/).  The event-driven invocation model for [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") aligns cleanly with [AWS Lambda](https://aws.amazon.com/lambda/)'s model for event-driven operation.  
+
+**NOTE:** The only caveat to consider, is that while the framework supports streams for responses, [AWS Lambda](https://aws.amazon.com/lambda/) does not. Any streaming result will be read and converted into a [Buffer](https://nodejs.org/api/buffer.html) before being sent back.
 
 ## CLI - Packaging Lambdas
 

@@ -8,14 +8,14 @@ import { TimeUtil } from './time.ts';
 export class ShutdownManager {
 
   static #registered = false;
-  static #handlers: { name?: string, handler: () => Promise<void> }[] = [];
+  static #handlers: { name?: string, handler: () => (void | Promise<void>) }[] = [];
 
   /**
    * On Shutdown requested
    * @param name name to log for
    * @param handler synchronous or asynchronous handler
    */
-  static onGracefulShutdown(handler: () => Promise<void>, name?: string | { constructor: Function }): () => void {
+  static onGracefulShutdown(handler: () => (void | Promise<void>), name?: string | { constructor: Function }): () => void {
     if (!this.#registered) {
       this.#registered = true;
       const done = (): void => { this.gracefulShutdown(0); };
@@ -34,6 +34,8 @@ export class ShutdownManager {
    * Wait for graceful shutdown to run and complete
    */
   static async gracefulShutdown(code: number | string | undefined = process.exitCode): Promise<void> {
+    await Util.queueMacroTask(); // Force the event loop to wait one cycle
+
     if (code !== undefined) {
       process.exitCode = code;
     }
@@ -42,13 +44,15 @@ export class ShutdownManager {
       console.debug('Graceful shutdown: started');
 
       const items = this.#handlers.splice(0, this.#handlers.length);
-      const handlers = Promise.all(items.map(({ name, handler }) => {
+      const handlers = Promise.all(items.map(async ({ name, handler }) => {
         if (name) {
           console.debug('Stopping', { name });
         }
-        return handler().catch(err => {
+        try {
+          return await handler();
+        } catch (err) {
           console.error('Error shutting down', { name, err });
-        });
+        }
       }));
 
       await Promise.race([

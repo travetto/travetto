@@ -1,17 +1,13 @@
-import { Injectable, Inject, InjectableFactory } from '../src/decorator.ts';
+import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { DbConfig, AltConfig, Empty } from './config.ts';
 
 export abstract class BasePattern { }
 
 @Injectable()
-export class SpecificPattern extends BasePattern {
-
-}
-
-export class BaseTypeTarget { }
+export class SpecificPattern extends BasePattern { }
 
 /**
- * @concrete #BaseTypeTarget
+ * @concrete
  */
 export interface BaseType {
   age: number;
@@ -109,9 +105,9 @@ class TestConfig {
     config.temp = 'any';
     config.empty = empty;
 
-    const ret = new Database();
-    ret.dbConfig = config;
-    return ret;
+    const db = new Database();
+    db.dbConfig = config;
+    return db;
   }
 
   @InjectableFactory(CustomInterfaceSymbol)

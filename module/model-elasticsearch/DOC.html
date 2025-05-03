@@ -15,14 +15,14 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/model-elasticsearch</code></pre>
   </figure>
 
-This module provides an <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a>-based implementation of the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>.  This source allows the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a>. In development mode, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L29">ElasticsearchModelService</a> will also modify the <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> schema in real time to minimize impact to development. <br><br>
+This module provides an <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a>-based implementation of the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>.  This source allows the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a>. In development mode, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L30">ElasticsearchModelService</a> will also modify the <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> schema in real time to minimize impact to development. <br><br>
 Supported features:
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64">Bulk</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11">Indexed</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11">Query Crud</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L12">Facet</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14">Facet</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10">Query</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12">Suggest</a></li>
 </ul>
@@ -50,19 +50,10 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 
   <figure class="code">
     <figcaption class="code">Structure of ElasticsearchModelConfig
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TimeSpan <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EsSchemaConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./internal/types.ts'</span><span class="token punctuation">;</span>
-
-<span class="token comment">/**
- * Elasticsearch model config
- */</span>
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.elasticsearch'</span><span class="token punctuation">)</span>
+    <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.elasticsearch'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ElasticsearchModelConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * List of hosts to support

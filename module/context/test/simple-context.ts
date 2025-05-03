@@ -3,10 +3,7 @@ import asyncHooks from 'node:async_hooks';
 import timers from 'node:timers/promises';
 
 import { BeforeEach, Suite, Test } from '@travetto/test';
-
-import { AsyncContext } from '../src/service.ts';
-import { WithAsyncContext } from '../src/decorator.ts';
-import { AsyncContextValue } from '../src/value.ts';
+import { AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
 
 @Suite()
 class VerifyContext {

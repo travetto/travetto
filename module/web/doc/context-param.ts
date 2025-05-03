@@ -4,7 +4,7 @@ import { CacheControl, ContextParam, Controller, Get, WebRequest, WebResponse } 
 class ContextController {
 
   @ContextParam()
-  req: WebRequest;
+  request: WebRequest;
 
   /**
    * Gets the ip of the user, ensure no caching
@@ -13,7 +13,7 @@ class ContextController {
   @Get('/ip')
   async getIp() {
     return new WebResponse({
-      body: { ip: this.req.connection.ip },
+      body: { ip: this.request.context.connection?.ip },
       headers: {
         'Content-Type': 'application/json+ip'
       }

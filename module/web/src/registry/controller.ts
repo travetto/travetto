@@ -3,7 +3,7 @@ import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInsta
 import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
-import { WebChainedFilter, WebFilter } from '../types.ts';
+import { WebChainedFilter, WebFilter } from '../types/filter.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
 
@@ -33,7 +33,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
     const map = this.get(inst.constructor).contextParams;
     for (const [field, type] of Object.entries(map)) {
-      Object.defineProperty(inst, field, { get: ctx.getByType(type) });
+      Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
   }
 
@@ -60,14 +60,16 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       id: `${cls.name}#${endpoint.name}`,
       path: '/',
       fullPath: '/',
-      method: 'GET',
+      cacheable: false,
+      allowsBody: false,
       class: cls,
       filters: [],
       params: [],
       interceptorConfigs: [],
       name: endpoint.name,
       endpoint,
-      responseHeaderMap: new WebHeaders()
+      responseHeaderMap: new WebHeaders(),
+      responseFinalizer: undefined
     };
 
     controllerConf.endpoints!.push(fieldConf);
@@ -213,13 +215,16 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param descriptor Prop descriptor
    * @param config The endpoint config
    */
-  registerPendingEndpoint(target: Class, descriptor: EndpointFunctionDescriptor, config: Partial<EndpointConfig>): typeof descriptor {
+  registerPendingEndpoint(target: Class, descriptor: EndpointFunctionDescriptor, config: Partial<EndpointConfig>): EndpointFunctionDescriptor {
     const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value!);
-    srcConf.method = config.method ?? srcConf.method;
+    srcConf.cacheable = config.cacheable ?? srcConf.cacheable;
+    srcConf.httpMethod = config.httpMethod ?? srcConf.httpMethod;
+    srcConf.allowsBody = config.allowsBody ?? srcConf.allowsBody;
     srcConf.path = config.path || srcConf.path;
     srcConf.responseType = config.responseType ?? srcConf.responseType;
     srcConf.requestType = config.requestType ?? srcConf.requestType;
     srcConf.params = (config.params ?? srcConf.params).map(x => ({ ...x }));
+    srcConf.responseFinalizer = config.responseFinalizer ?? srcConf.responseFinalizer;
 
     // Ensure path starts with '/'
     if (!srcConf.path.startsWith('/')) {

@@ -66,7 +66,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Console Management'>
-    This module provides logging functionality, built upon {d.library('Console')} operations. <br />
+    This module provides logging functionality, built upon {d.library('NodeConsole')} operations. <br />
 
     The supported operations are:
     <ul>
@@ -147,7 +147,7 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
   </c.Section>
 
   <c.Section title='Process Execution'>
-    {ExecUtil} exposes {d.method('getResult')} as a means to wrap {d.library('ChildProcess')}'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br />
+    {ExecUtil} exposes {d.method('getResult')} as a means to wrap {d.library('NodeChildProcess')}'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br />
 
     A simple example would be:
 

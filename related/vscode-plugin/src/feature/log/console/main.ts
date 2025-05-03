@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import { Activatible } from '../../../core/activation.ts';
 import { Workspace } from '../../../core/workspace.ts';
@@ -13,45 +12,13 @@ interface Link extends vscode.TerminalLink {
 }
 
 const MODULE_REGEX = /(@[a-z0-9\-]+\/[a-z0-9\-]+)[^\/]/gi;
-const FILE_CLASS_REGEX = /([a-z_\-\/@]+)[:\/]((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|￮#[$_a-z0-9]+)?/gi;
-const SUFFIXES = ['ts', 'js', 'tsx', 'jsx', 'd.ts'];
-const CLASS_SEP_REGEX = /[￮#]/;
+const FILE_CLASS_REGEX = /((?:@[a-z_\-]+[/])[a-z_\-]+)[:\/]((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|#[$_a-z0-9]+)?/gi;
 
 /**
  * Logging workspace
  */
 @Activatible('@travetto/log', true)
 export class LogFeature extends BaseFeature {
-
-  #importToFile = new Map<string, string | undefined>();
-
-  async getSourceFromImport(imp: string): Promise<string | undefined> {
-    if (!this.#importToFile.has(imp)) {
-      let file: undefined | string;
-      if (imp.startsWith(Workspace.moduleName)) {
-        const resolved = path.resolve(Workspace.path, imp.replace(Workspace.moduleName, '.'));
-        if (await fs.stat(resolved).catch(() => false)) {
-          file = resolved;
-        }
-      } else {
-        imp = imp.replace(/([.]d)?[.][tj]sx?$/, '');
-        const search = [imp];
-        if (!imp.includes('.')) {
-          search.push(...SUFFIXES.map(x => `${imp}.${x}`));
-        } else {
-          search.push(imp);
-        }
-        for (const sub of search) {
-          try {
-            file = Workspace.resolveImport(sub);
-            break;
-          } catch { }
-        }
-      }
-      this.#importToFile.set(imp, file);
-    }
-    return this.#importToFile.get(imp);
-  }
 
   /**
    * Handle a terminal link being clicked
@@ -81,9 +48,9 @@ export class LogFeature extends BaseFeature {
 
     for (const match of context.line.matchAll(FILE_CLASS_REGEX)) {
       const [full, mod, pth, suffix = ''] = match;
-      const sourceFile = await this.getSourceFromImport(`${mod}/${pth}`);
+      const sourceFile = Workspace.resolveManifestFileFromImport(`${mod}/${pth}`);
       if (sourceFile) {
-        const suffixType = CLASS_SEP_REGEX.test(suffix) ? 'class' : suffix.includes(':') ? 'file-numbered' : 'file';
+        const suffixType = suffix.includes('#') ? 'class' : suffix.includes(':') ? 'file-numbered' : 'file';
         const type = suffixType === 'class' ? 'Class' : 'File';
         out.push({
           startIndex: match.index!,
@@ -91,13 +58,13 @@ export class LogFeature extends BaseFeature {
           tooltip: `Travetto ${type}: ${mod}/${pth}${suffix}`,
           file: sourceFile,
           line: suffixType === 'file-numbered' ? suffix.split(':')[1] : undefined,
-          cls: suffixType === 'class' ? suffix.split(CLASS_SEP_REGEX)[1] : undefined
+          cls: suffixType === 'class' ? suffix.split('#')[1] : undefined
         });
       }
     }
     for (const match of context.line.matchAll(MODULE_REGEX)) {
       const [, mod] = match;
-      const file = await this.getSourceFromImport(`${mod}/package.json`);
+      const file = Workspace.resolveManifestFileFromImport(`${mod}/package.json`);
       if (file) {
         out.push({ startIndex: match.index!, length: mod.length, file });
       }

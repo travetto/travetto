@@ -59,7 +59,7 @@
       },
       "cwd": "${workspaceFolder}/related/todo-app",
       "args": [
-        "run:web"
+        "web:http"
       ]
     },
     {

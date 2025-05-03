@@ -1,8 +1,7 @@
 import { Suite } from '@travetto/test';
-import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
+import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
 
-import { ElasticsearchModelConfig } from '../src/config.ts';
-import { ElasticsearchModelService } from '../src/service.ts';
+import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
 
 @Suite()
 export class ElasticsearchQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {

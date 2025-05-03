@@ -1,3 +1,5 @@
+import iconv from 'iconv-lite';
+
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
@@ -5,7 +7,9 @@ import { Any, BinaryUtil, castTo, hasToJSON, Util } from '@travetto/runtime';
 
 import { WebBinaryBody, WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
-import { WebInternalSymbol } from '../types/core.ts';
+import { WebError } from '../types/error.ts';
+
+const WebRawStreamSymbol = Symbol();
 
 /**
  * Utility classes for supporting web body operations
@@ -101,13 +105,13 @@ export class WebBodyUtil {
   /**
    * Convert an existing web message to a binary web message
    */
-  static toBinaryMessage(message: WebMessage): WebMessage<WebBinaryBody> & { body: WebBinaryBody } {
+  static toBinaryMessage(message: WebMessage): Omit<WebMessage<WebBinaryBody>, 'context'> {
     const body = message.body;
     if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
       return castTo(message);
     }
 
-    const out: WebMessage<WebBinaryBody> = { headers: new WebHeaders(message.headers), body: null! };
+    const out: Omit<WebMessage<WebBinaryBody>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
     if (body instanceof Blob) {
       for (const [k, v] of this.getBlobHeaders(body)) {
         out.headers.set(k, v);
@@ -151,20 +155,66 @@ export class WebBodyUtil {
   /**
    * Set body and mark as unprocessed
    */
-  static markRaw(val: Readable | Buffer | undefined): typeof val {
+  static markRaw(val: WebBinaryBody | undefined): typeof val {
     if (val) {
-      Object.defineProperty(val, WebInternalSymbol, { value: val });
+      Object.defineProperty(val, WebRawStreamSymbol, { value: val });
     }
     return val;
   }
 
   /**
-   * Get unprocessed value as readable stream
+   * Is the input raw
    */
-  static getRawStream(val: unknown): Readable | undefined {
+  static isRaw(val: unknown): val is WebBinaryBody {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebInternalSymbol] === val) {
-      return WebBodyUtil.toReadable(val);
+    return !!val && ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebRawStreamSymbol] === val);
+  }
+
+  /**
+   * Simple parse support
+   */
+  static parseBody(type: string, val: string): unknown {
+    switch (type) {
+      case 'text': return val;
+      case 'json': return JSON.parse(val);
+      case 'form': return Object.fromEntries(new URLSearchParams(val));
+    }
+  }
+
+  /**
+   * Read text from an input source
+   */
+  static async readText(input: Readable | Buffer, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
+    encoding ??= (Buffer.isBuffer(input) ? undefined : input.readableEncoding) ?? 'utf-8';
+
+    if (!iconv.encodingExists(encoding)) {
+      throw WebError.for('Specified Encoding Not Supported', 415, { encoding });
+    }
+
+    if (Buffer.isBuffer(input)) {
+      return { text: iconv.decode(input, encoding), read: input.byteLength };
+    }
+
+    let received = Buffer.isBuffer(input) ? input.byteOffset : 0;
+    const decoder = iconv.getDecoder(encoding);
+    const all: string[] = [];
+
+    try {
+      for await (const chunk of input.iterator({ destroyOnReturn: false })) {
+        received += Buffer.isBuffer(chunk) ? chunk.byteLength : (typeof chunk === 'string' ? chunk.length : chunk.length);
+        if (received > limit) {
+          throw WebError.for('Request Entity Too Large', 413, { received, limit });
+        }
+        all.push(decoder.write(chunk));
+      }
+      all.push(decoder.end() ?? '');
+      return { text: all.join(''), read: received };
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        throw WebError.for('Request Aborted', 400, { received });
+      } else {
+        throw err;
+      }
     }
   }
 }

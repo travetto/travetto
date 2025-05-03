@@ -3,9 +3,9 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
+import { Item, Menu } from '@travetto/email-inky';
 
-import { renderJSX } from './util.ts';
-import { Item, Menu } from '../src/components.ts';
+import { renderJSX } from './util';
 
 @Suite('Menu')
 class MenuComponentTest {

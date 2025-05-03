@@ -2,10 +2,9 @@ import { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
+import { PostgreSQLDialect } from '@travetto/model-postgres';
 
 import { BaseSQLTest } from '@travetto/model-sql/support/test/query.ts';
-
-import { PostgreSQLDialect } from '../src/dialect.ts';
 
 class Config {
   @InjectableFactory({ primary: true })

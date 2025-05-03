@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
 import { DataUtil, SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
 import { Class } from '@travetto/runtime';
 
@@ -215,7 +216,7 @@ export class QueryVerifier {
    * Handle group by clause
    */
   static processGroupByClause(state: State, value: object): void {
-
+    // TODO: Handle group by?
   }
 
   /**

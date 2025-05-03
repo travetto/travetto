@@ -13,4 +13,35 @@ npm install @travetto/web-connect
 yarn add @travetto/web-connect
 ```
 
-This module provides basic integration for calling [connect](https://github.com/senchalabs/connect) related middleware.
+This module provides basic integration for calling [connect](https://github.com/senchalabs/connect) related middleware with [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection."). This logic is not intended to be exhaustive, but intended to provide a quick bridge.  This only consumer of this is [Web Auth Passport](https://github.com/travetto/travetto/tree/main/module/auth-web-passport#readme "Web authentication integration support for the Travetto framework") as it needs to bind the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) to standard contracts for [passport](http://passportjs.org). 
+
+This module is already most likely compatible with quite a bit of middleware, but will fail under any of the following conditions:
+   *  The calling code expects the request or response to be a proper [EventEmitter](https://nodejs.org/api/events.html#class-eventemitter)
+   *  The calling code expects the request/response sockets to be live.
+   *  The calling code modifies the shape of the objects (e.g. rewrites the close method on response).
+Barring these exceptions, gaps will be filled in as more use cases arise.  The above exceptions are non-negotiable as they are are enforced by the invocation method defined by [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.").
+
+**Code: Example of using the Connect Adaptor with Passport**
+```typescript
+async authenticate(input: object, ctx: WebFilterContext): Promise<Principal | undefined> {
+    const requestOptions = this.#passportOptions(ctx);
+    const options = {
+      session: this.session,
+      failWithError: true,
+      ...requestOptions,
+      state: PassportUtil.enhanceState(ctx, requestOptions.state)
+    };
+
+    const user = await WebConnectUtil.invoke<V>(ctx, (req, res, next) =>
+      passport.authenticate(this.#strategyName, options, next)(req, res)
+    );
+
+    if (user) {
+      delete user._raw;
+      delete user._json;
+      delete user.source;
+      return this.#toPrincipal(user, this.#strategyName);
+    }
+  }
+}
+```

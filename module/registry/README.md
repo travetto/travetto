@@ -69,7 +69,7 @@ export class SampleRegistry extends MetadataRegistry<Group, Child> {
 }
 ```
 
-The registry is a [MetadataRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/metadata.ts#L13) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
+The registry is a [MetadataRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/metadata.ts#L14) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
 
 ### Live Flow
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. 
@@ -84,16 +84,17 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
 
 #handleFileChanges(importFile: string, classes: Class[] = []): number {
     const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
+    const sourceFile = RuntimeIndex.getSourceFile(importFile);
 
     let prev = new Map<string, Class>();
-    if (this.#classes.has(importFile)) {
-      prev = new Map(this.#classes.get(importFile)!.entries());
+    if (this.#classes.has(sourceFile)) {
+      prev = new Map(this.#classes.get(sourceFile)!.entries());
     }
 
     const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
 
-    if (!this.#classes.has(importFile)) {
-      this.#classes.set(importFile, new Map());
+    if (!this.#classes.has(sourceFile)) {
+      this.#classes.set(sourceFile, new Map());
     }
 
     let changes = 0;
@@ -103,9 +104,9 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
       if (!next.has(k)) {
         changes += 1;
         this.emit({ type: 'removing', prev: prev.get(k)! });
-        this.#classes.get(importFile)!.delete(k);
+        this.#classes.get(sourceFile)!.delete(k);
       } else {
-        this.#classes.get(importFile)!.set(k, next.get(k)!);
+        this.#classes.get(sourceFile)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });

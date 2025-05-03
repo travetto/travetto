@@ -24,7 +24,8 @@
     "directory": "module/web-node"
   },
   "dependencies": {
-    "@travetto/web": "^6.0.0-rc.1"
+    "@travetto/web": "^6.0.0-rc.1",
+    "@travetto/web-http-server": "^6.0.0-rc.1"
   },
   "travetto": {
     "displayName": "Node Web Server"

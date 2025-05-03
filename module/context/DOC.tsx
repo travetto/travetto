@@ -5,7 +5,7 @@ import { AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/con
 
 export const text = <>
   <c.StdHeader />
-  This module provides a wrapper around node's {d.library('AsyncHooks')} to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow. <br />
+  This module provides a wrapper around node's {d.library('NodeAsyncHooks')} to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow. <br />
 
   The most common way of utilizing the context, is via the {WithAsyncContext} decorator.  The decorator requires the class it's being used in, to have a {AsyncContext} member, as it is the source of the contextual information. <br />
 

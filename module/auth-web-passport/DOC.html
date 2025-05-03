@@ -15,8 +15,9 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/auth-web-passport</code></pre>
   </figure>
 
-This is a primary integration for the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate. <br><br>
-Within the node ecosystem, the most prevalent auth framework is <a target="_blank" class="external-link" href="http://passportjs.org">passport</a>.  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> baked in. Registering and configuring a <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> strategy is fairly straightforward.
+This is a primary integration for the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> module. <br><br>
+Within the node ecosystem, the most prevalent auth framework is <a target="_blank" class="external-link" href="http://passportjs.org">passport</a>.  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> baked in. Registering and configuring a <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> strategy is fairly straightforward.<br><br>
+<strong>NOTE:</strong> Given that <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> is oriented around <a target="_blank" class="external-link" href="https://expressjs.com">express</a>, this module relies on <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web-connect" title="Web integration for Connect-Like Resources">Web Connect Support</a> as an adapter for the request/response handoff.  There are some limitations listed in the module, and those would translate to any <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> strategies that are being used.
 
   <figure class="code">
     <figcaption class="code">Sample Facebook/passport config
@@ -93,7 +94,7 @@ After that, the provider is no different than any other, and can be used accordi
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleAuth</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">ContextParam</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  req<span class="token operator">:</span> WebRequest<span class="token punctuation">;</span>
+  request<span class="token operator">:</span> WebRequest<span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">ContextParam</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   user<span class="token operator">:</span> Principal<span class="token punctuation">;</span>
@@ -118,7 +119,7 @@ After that, the provider is no different than any other, and can be used accordi
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/facebook/callback'</span><span class="token punctuation">)</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Login</span></span><span class="token punctuation">(</span>FbAuthSymbol<span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">fbLoginComplete</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> WebResponse<span class="token punctuation">.</span><span class="token function">redirect</span><span class="token punctuation">(</span><span class="token string">'/auth/self'</span><span class="token punctuation">,</span> <span class="token number">301</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> WebResponse<span class="token punctuation">.</span><span class="token function">redirect</span><span class="token punctuation">(</span><span class="token string">'/auth/self'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
@@ -130,7 +131,7 @@ After that, the provider is no different than any other, and can be used accordi
    */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">echo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">unknown</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>req<span class="token punctuation">.</span>body<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>request<span class="token punctuation">.</span>body<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

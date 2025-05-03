@@ -1,4 +1,4 @@
-import { WebInterceptor, WebInterceptorCategory, WebChainedContext, EndpointConfig, WebResponse } from '@travetto/web';
+import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse, WebInterceptorContext } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
@@ -30,7 +30,7 @@ export class AuthLogoutInterceptor implements WebInterceptor<WebAuthLogoutConfig
   @Inject()
   authContext: AuthContext;
 
-  applies(ep: EndpointConfig, config: WebAuthLogoutConfig): boolean {
+  applies({ config }: WebInterceptorContext<WebAuthLogoutConfig>): boolean {
     return config.applies;
   }
 

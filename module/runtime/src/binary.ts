@@ -43,8 +43,8 @@ export class BinaryUtil {
   static hash(src: string, len: number = -1): string {
     const hash = crypto.createHash('sha512');
     hash.update(src);
-    const ret = hash.digest('hex');
-    return len > 0 ? ret.substring(0, len) : ret;
+    const digest = hash.digest('hex');
+    return len > 0 ? digest.substring(0, len) : digest;
   }
 
   /**

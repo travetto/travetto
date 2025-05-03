@@ -18,7 +18,7 @@
   },
   "scripts": {
     "test": "npx trv test",
-    "start": "npx trv run:web"
+    "start": "npx trv web:http"
   },
   "dependencies": {
     "@travetto/auth-web": "^6.0.0-rc.3",

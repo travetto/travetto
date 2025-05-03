@@ -37,7 +37,7 @@ export class WorkPool {
   static DEFAULT_SIZE = Math.max(Math.trunc(WorkPool.MAX_SIZE * .75), 4);
 
   /** Build worker pool */
-  static #buildPool<I, O>(worker: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
+  static #buildPool<I, O>(input: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
     let pendingAcquires = 0;
 
     const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
@@ -47,13 +47,13 @@ export class WorkPool {
       async create() {
         try {
           pendingAcquires += 1;
-          const res: Worker<I, O> = {
+          const worker: Worker<I, O> = {
             id: Util.uuid(),
             active: true,
-            ...isWorkerFactory(worker) ? await worker() : { execute: worker }
+            ...isWorkerFactory(input) ? await input() : { execute: input }
           };
-          await res.init?.();
-          return res;
+          await worker.init?.();
+          return worker;
         } finally {
           pendingAcquires -= 1;
         }
@@ -142,14 +142,14 @@ export class WorkPool {
    */
   static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolConfig<I, O>): AsyncIterable<O> {
     const itr = new AsyncQueue<O>();
-    const res = this.run(worker, input, {
+    const result = this.run(worker, input, {
       ...opts,
       onComplete: (ev, inp, finishIdx) => {
         itr.add(ev);
         opts?.onComplete?.(ev, inp, finishIdx);
       }
     });
-    res.finally(() => itr.close());
+    result.finally(() => itr.close());
     return itr;
   }
 
@@ -162,14 +162,14 @@ export class WorkPool {
     total: number;
   }> {
     const itr = new AsyncQueue<{ idx: number, value: O, total: number }>();
-    const res = this.run(worker, input, {
+    const result = this.run(worker, input, {
       ...opts,
       onComplete: (ev, inp, finishIdx) => {
         itr.add({ value: ev, idx: finishIdx, total });
         opts?.onComplete?.(ev, inp, finishIdx);
       }
     });
-    res.finally(() => itr.close());
+    result.finally(() => itr.close());
     return itr;
   }
 }

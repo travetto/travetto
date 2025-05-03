@@ -310,23 +310,38 @@ To that end, the module supports two concepts:
 ### Type Adapters
 This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") module handles geo data.
 
-**Code: Simple Custom Type**
+**Code: Point Contract**
 ```typescript
-import { DataUtil } from '@travetto/schema';
-
 /**
- * @concrete #PointImpl
+ * Geometric Point as [number,number] with validation and binding support
+ *
+ * @concrete ./internal/types.ts#PointImpl
  */
 export type Point = [number, number];
+```
+
+**Code: Point Implementation**
+```typescript
+import { DataUtil } from '../data.ts';
 
 const InvalidSymbol = Symbol();
 
+/**
+ * Point Implementation
+ */
 export class PointImpl {
+
+  /**
+   * Validate we have an actual point
+   */
   static validateSchema(input: unknown): 'type' | undefined {
-    const ret = this.bindSchema(input);
-    return ret !== InvalidSymbol && ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
+    const bound = this.bindSchema(input);
+    return bound !== InvalidSymbol && bound && !isNaN(bound[0]) && !isNaN(bound[1]) ? undefined : 'type';
   }
 
+  /**
+   * Convert to tuple of two numbers
+   */
   static bindSchema(input: unknown): [number, number] | typeof InvalidSymbol | undefined {
     if (Array.isArray(input) && input.length === 2) {
       const [a, b] = input.map(x => DataUtil.coerceType(x, Number, false));
@@ -336,6 +351,8 @@ export class PointImpl {
     }
   }
 }
+
+Object.defineProperty(PointImpl, 'name', { value: 'Point' });
 ```
 
 What you can see here is that the `Point` type is now backed by a class that supports:
@@ -344,8 +361,7 @@ What you can see here is that the `Point` type is now backed by a class that sup
 
 **Code: Simple Custom Type Usage**
 ```typescript
-import { Schema } from '@travetto/schema';
-import { Point } from './custom-type.ts';
+import { Schema, Point } from '@travetto/schema';
 
 @Schema()
 export class LocationAware {
@@ -369,8 +385,8 @@ Validation Failed {
     "errors": [
       {
         "kind": "type",
-        "type": "PointImpl",
-        "message": "point is not a valid PointImpl",
+        "type": "Point",
+        "message": "point is not a valid Point",
         "path": "point"
       }
     ]

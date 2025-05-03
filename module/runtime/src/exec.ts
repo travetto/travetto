@@ -49,14 +49,18 @@ export class ExecUtil {
    * @param run The factory to produce the next running process
    * @param maxRetriesPerMinute The number of times to allow a retry within a minute
    */
-  static async withRestart(run: () => ChildProcess, maxRetriesPerMinute?: number): Promise<ExecutionResult> {
+  static async withRestart(
+    run: () => ChildProcess,
+    maxRetriesPerMinute?: number,
+    killSignal: 'SIGINT' | 'SIGTERM' = 'SIGINT'
+  ): Promise<ExecutionResult> {
     const maxRetries = maxRetriesPerMinute ?? 5;
     const restarts: number[] = [];
 
     for (; ;) {
       const proc = run();
 
-      const toKill = (): void => { proc.kill('SIGKILL'); };
+      const toKill = (): void => { proc.kill(killSignal); };
       const toMessage = (v: unknown): void => { proc.send?.(v!); };
 
       // Proxy kill requests
@@ -96,11 +100,11 @@ export class ExecUtil {
   static getResult(proc: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
   static getResult<T extends string | Buffer>(proc: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
     const _proc: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = proc;
-    const res = _proc[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
+    const result = _proc[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;
-      const finish = (result: ExecutionBaseResult): void => {
+      const finish = (finalResult: ExecutionBaseResult): void => {
         if (done) {
           return;
         }
@@ -114,7 +118,7 @@ export class ExecUtil {
         const final = {
           stdout: options.binary ? buffers.stdout : buffers.stdout.toString('utf8'),
           stderr: options.binary ? buffers.stderr : buffers.stderr.toString('utf8'),
-          ...result
+          ...finalResult
         };
 
         resolve(!final.valid ?
@@ -137,7 +141,7 @@ export class ExecUtil {
       }
     });
 
-    return castTo(options.catch ? res : res.then(v => {
+    return castTo(options.catch ? result : result.then(v => {
       if (v.valid) {
         return v;
       } else {

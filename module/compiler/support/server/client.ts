@@ -55,8 +55,8 @@ export class CompilerClient {
         ctrl.abort('TIMEOUT');
       })
       .catch(() => { });
-    const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
-    const out = { ok: res.ok, text: await res.text() };
+    const response = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+    const out = { ok: response.ok, text: await response.text() };
     timeoutCtrl.abort();
     return out;
   }
@@ -127,7 +127,7 @@ export class CompilerClient {
 
         for await (const line of rl.createInterface(response)) {
           if (line.trim().charAt(0) === '{') {
-            const val = JSON.parse(line);
+            const val: T = JSON.parse(line);
             if (cfg.until?.(val)) {
               await CommonUtil.queueMacroTask();
               ctrl.abort();
@@ -136,7 +136,8 @@ export class CompilerClient {
           }
         }
       } catch (err) {
-        if (!ctrl.signal.aborted) { throw err; }
+        const aborted = ctrl.signal.aborted || (typeof err === 'object' && err && 'code' in err && err.code === 'ECONNRESET');
+        if (!aborted) { throw err; }
       }
       signal.removeEventListener('abort', quit);
 

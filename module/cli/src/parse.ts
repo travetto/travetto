@@ -78,14 +78,31 @@ export class CliParseUtil {
   }
 
   /**
+   * Get a user-specified module if present
+   */
+  static getSpecifiedModule(schema: CliCommandSchema, args: string[]): string | undefined {
+    const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
+    const input = schema.flags.find(x => x.type === 'module');
+    const ENV_KEY = input?.flagNames?.filter(x => x.startsWith(ENV_PRE)).map(x => x.replace(ENV_PRE, ''))[0] ?? '';
+    const flags = new Set(input?.flagNames ?? []);
+    const check = (k?: string, v?: string): string | undefined => flags.has(k!) ? v : undefined;
+    return args.reduce(
+      (m, x, i, arr) =>
+        (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? m,
+      process.env[ENV_KEY]
+    );
+  }
+
+  /**
    * Read configuration file given flag
    */
-  static async readFlagFile(flag: string, mod: string): Promise<string[]> {
+  static async readFlagFile(flag: string, mod?: string): Promise<string[]> {
     const key = flag.replace(CONFIG_PRE, '');
+    const overrides = { '@': mod ?? Runtime.main.name };
 
     // We have a file
     const rel = (key.includes('/') ? key : `@#support/pack.${key}.flags`)
-      .replace(/^(@[^#]*)#(.*)$/, (_, imp, rest) => `${Runtime.modulePath(imp)}/${rest}`);
+      .replace(/^(@[^#]*)#(.*)$/, (_, imp, rest) => `${Runtime.modulePath(imp, overrides)}/${rest}`);
 
     const file = path.resolve(rel);
 
@@ -129,15 +146,7 @@ export class CliParseUtil {
    */
   static async expandArgs(schema: CliCommandSchema, args: string[]): Promise<string[]> {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
-    const input = schema.flags.find(x => x.type === 'module');
-    const ENV_KEY = input?.flagNames?.filter(x => x.startsWith(ENV_PRE)).map(x => x.replace(ENV_PRE, ''))[0] ?? '';
-    const flags = new Set(input?.flagNames ?? []);
-    const check = (k?: string, v?: string): string | undefined => flags.has(k!) ? v : undefined;
-    const mod = args.reduce(
-      (m, x, i, arr) =>
-        (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? m,
-      process.env[ENV_KEY] || Runtime.main.name
-    );
+    const mod = this.getSpecifiedModule(schema, args);
     return (await Promise.all(args.map((x, i) =>
       x.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(x, mod) : x))).flat();
   }

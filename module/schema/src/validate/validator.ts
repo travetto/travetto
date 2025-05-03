@@ -184,22 +184,22 @@ export class SchemaValidator {
    */
   static #prepareErrors(path: string, results: ValidationResult[]): ValidationError[] {
     const out: ValidationError[] = [];
-    for (const res of results) {
+    for (const result of results) {
       const err: ValidationError = {
-        ...res,
-        kind: res.kind,
-        value: res.value,
+        ...result,
+        kind: result.kind,
+        value: result.value,
         message: '',
-        re: CommonRegExpToName.get(res.re!) ?? res.re?.source ?? '',
+        re: CommonRegExpToName.get(result.re!) ?? result.re?.source ?? '',
         path,
-        type: (typeof res.type === 'function' ? res.type.name : res.type)
+        type: (typeof result.type === 'function' ? result.type.name : result.type)
       };
 
       if (!err.re) {
         delete err.re;
       }
 
-      const msg = res.message ?? (
+      const msg = result.message ?? (
         Messages.get(err.re ?? '') ??
         Messages.get(err.kind) ??
         Messages.get('default')!

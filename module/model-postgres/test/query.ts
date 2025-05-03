@@ -2,6 +2,7 @@ import { Suite } from '@travetto/test';
 import { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { PostgreSQLDialect } from '@travetto/model-postgres';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
@@ -9,8 +10,6 @@ import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts'
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
-
-import { PostgreSQLDialect } from '../src/dialect.ts';
 
 class Config {
   @InjectableFactory({ primary: true })

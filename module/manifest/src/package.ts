@@ -76,14 +76,14 @@ export class PackageUtil {
     if (forceRead) {
       delete this.#cache[modulePath];
     }
-    const res = this.#cache[modulePath] ??= ManifestFileUtil.readAsJsonSync(
+    const nodePackage = this.#cache[modulePath] ??= ManifestFileUtil.readAsJsonSync(
       modulePath.endsWith('.json') ? modulePath : path.resolve(modulePath, 'package.json'),
     );
 
-    res.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
+    nodePackage.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
 
-    res[PackagePathSymbol] = modulePath;
-    return res;
+    nodePackage[PackagePathSymbol] = modulePath;
+    return nodePackage;
   }
 
   /**
@@ -105,8 +105,8 @@ export class PackageUtil {
         switch (ctx.workspace.manager) {
           case 'yarn':
           case 'npm': {
-            const res = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
-            out = res.map(d => ({ path: path.resolve(ctx.workspace.path, d.location), name: d.name }));
+            const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
+            out = workspaces.map(d => ({ path: path.resolve(ctx.workspace.path, d.location), name: d.name }));
             break;
           }
         }

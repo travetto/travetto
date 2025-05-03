@@ -16,6 +16,7 @@ import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
   QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
+  ModelQueryFacet,
 } from '@travetto/model-query';
 
 import {
@@ -165,9 +166,9 @@ export class MongoModelService implements
     const store = await this.getStore(cls);
     const result = await store.findOne(this.getIdFilter(cls, id), {});
     if (result) {
-      const res = await this.postLoad(cls, result);
-      if (res) {
-        return res;
+      const finalized = await this.postLoad(cls, result);
+      if (finalized) {
+        return finalized;
       }
     }
     throw new NotFoundError(cls, id);
@@ -189,8 +190,8 @@ export class MongoModelService implements
     item = await ModelCrudUtil.preStore(cls, item, this);
     const id = this.preUpdate(item);
     const store = await this.getStore(cls);
-    const res = await store.replaceOne(this.getIdFilter(cls, id), item);
-    if (res.matchedCount === 0) {
+    const result = await store.replaceOne(this.getIdFilter(cls, id), item);
+    if (result.matchedCount === 0) {
       throw new NotFoundError(cls, id);
     }
     return this.postUpdate(item, id);
@@ -236,13 +237,13 @@ export class MongoModelService implements
 
     const id = item.id;
 
-    const res = await store.findOneAndUpdate(
+    const result = await store.findOneAndUpdate(
       this.getIdFilter(cls, id),
       operation,
       { returnDocument: 'after', includeResultMetadata: true }
     );
 
-    if (!res.value) {
+    if (!result.value) {
       throw new NotFoundError(cls, id);
     }
 
@@ -298,8 +299,8 @@ export class MongoModelService implements
   }
 
   async getBlobMeta(location: string): Promise<BlobMeta> {
-    const res = await this.#db.collection<{ metadata: BlobMeta }>(`${ModelBlobNamespace}.files`).findOne({ filename: location });
-    return res!.metadata;
+    const result = await this.#db.collection<{ metadata: BlobMeta }>(`${ModelBlobNamespace}.files`).findOne({ filename: location });
+    return result!.metadata;
   }
 
   async deleteBlob(location: string): Promise<void> {
@@ -353,7 +354,7 @@ export class MongoModelService implements
       }
     }
 
-    const res = await bulk.execute({});
+    const result = await bulk.execute({});
 
     // Restore all ids
     for (const op of operations) {
@@ -363,19 +364,19 @@ export class MongoModelService implements
       }
     }
 
-    for (const [index, _id] of TypedObject.entries<Record<string, string>>(res.upsertedIds)) {
+    for (const [index, _id] of TypedObject.entries<Record<string, string>>(result.upsertedIds)) {
       out.insertedIds.set(+index, MongoUtil.idToString(_id));
     }
 
     if (out.counts) {
-      out.counts.delete = res.deletedCount;
+      out.counts.delete = result.deletedCount;
       out.counts.update = operations.filter(x => x.update).length;
-      out.counts.insert = res.insertedCount;
+      out.counts.insert = result.insertedCount;
       out.counts.upsert = operations.filter(x => x.upsert).length;
     }
 
-    if (res.hasWriteErrors()) {
-      out.errors = res.getWriteErrors();
+    if (result.hasWriteErrors()) {
+      out.errors = result.getWriteErrors();
       for (const err of out.errors) {
         const op = operations[err.index];
         const k = TypedObject.keys(op)[0];
@@ -479,8 +480,8 @@ export class MongoModelService implements
     where.id = id;
 
     const filter = MongoUtil.extractWhereFilter(cls, where);
-    const res = await col.replaceOne(filter, item);
-    if (res.matchedCount === 0) {
+    const result = await col.replaceOne(filter, item);
+    if (result.matchedCount === 0) {
       throw new NotFoundError(cls, id);
     }
     return this.postUpdate(item, id);
@@ -491,8 +492,8 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const filter = MongoUtil.extractWhereFilter(cls, query.where, false);
-    const res = await col.deleteMany(filter);
-    return res.deletedCount ?? 0;
+    const result = await col.deleteMany(filter);
+    return result.deletedCount ?? 0;
   }
 
   async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
@@ -512,12 +513,12 @@ export class MongoModelService implements
       }, {});
 
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
-    const res = await col.updateMany(filter, castTo(final));
-    return res.matchedCount;
+    const result = await col.updateMany(filter, castTo(final));
+    return result.matchedCount;
   }
 
   // Facet
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);

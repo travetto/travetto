@@ -3,11 +3,8 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
+import { CacheControl, Controller, ControllerRegistry, Patch, SetHeaders } from '@travetto/web';
 
-import { ControllerRegistry } from '../src/registry/controller.ts';
-import { Controller } from '../src/decorator/controller.ts';
-import { Patch } from '../src/decorator/endpoint.ts';
-import { CacheControl, SetHeaders } from '../src/decorator/common.ts';
 
 @Controller('/test')
 class TestController {
@@ -50,7 +47,7 @@ export class ConfigureTest {
 
     const cacher = headers.get('Cache-Control');
     assert(typeof cacher !== 'function');
-    assert(cacher === 'max-age=0,no-cache');
+    assert(cacher === 'no-cache,max-age=0');
   }
 
   @Test()

@@ -39,11 +39,6 @@ where the [DynamoDBModelConfig](https://github.com/travetto/travetto/tree/main/m
 
 **Code: Structure of DynamoDBModelConfig**
 ```typescript
-import type dynamodb from '@aws-sdk/client-dynamodb';
-
-import { Config } from '@travetto/config';
-import { Field } from '@travetto/schema';
-
 @Config('model.dynamodb')
 export class DynamoDBModelConfig {
   @Field(Object)

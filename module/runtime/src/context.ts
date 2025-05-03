@@ -84,8 +84,9 @@ class $Runtime {
   }
 
   /** Resolve single module path */
-  modulePath(modulePath: string): string {
-    const [base, sub] = (this.#resourceOverrides?.[modulePath] ?? modulePath)
+  modulePath(modulePath: string, overrides?: Record<string, string>): string {
+    const combined = { ...this.#resourceOverrides, ...overrides };
+    const [base, sub] = (combined[modulePath] ?? modulePath)
       .replace(/^([^#]*)(#|$)/g, (_, v, r) => `${this.#moduleAliases[v] ?? v}${r}`)
       .split('#');
     return path.resolve(this.#idx.getModule(base)?.sourcePath ?? base, sub ?? '.');

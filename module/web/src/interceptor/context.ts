@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
@@ -17,7 +17,7 @@ export class AsyncContextInterceptor implements WebInterceptor {
   @Inject()
   context: WebAsyncContext;
 
-  filter(ctx: WebChainedContext): Promise<WebResponse> {
-    return this.context.withContext(ctx.req, ctx.next);
+  filter({ request, next }: WebChainedContext): Promise<WebResponse> {
+    return this.context.withContext(request, next);
   }
 }

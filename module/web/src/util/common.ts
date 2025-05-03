@@ -1,9 +1,17 @@
-import { AppError, ErrorCategory } from '@travetto/runtime';
+import { AppError, ErrorCategory, TimeSpan, TimeUtil } from '@travetto/runtime';
+
 import { WebResponse } from '../types/response.ts';
-import { HTTP_METHODS, HttpMethod, WebHeaders, WebHeadersInit } from '@travetto/web';
+import { WebRequest } from '../types/request.ts';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
+
+const WebRequestParamsSymbol = Symbol();
+
+export type CacheControlFlag =
+  'must-revalidate' | 'public' | 'private' | 'no-cache' |
+  'no-store' | 'no-transform' | 'proxy-revalidate' | 'immutable' |
+  'must-understand' | 'stale-if-error' | 'stale-while-revalidate';
 
 /**
  * Mapping from error category to standard http error codes
@@ -19,6 +27,11 @@ const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
 };
 
 export class WebCommonUtil {
+  static #unitMapping: Record<string, number> = {
+    kb: 2 ** 10,
+    mb: 2 ** 20,
+    gb: 2 ** 30,
+  };
 
   static #buildEdgeMap<T, U extends OrderedState<T>>(items: List<U>): Map<T, Set<T>> {
     const edgeMap = new Map(items.map(x => [x.key, new Set(x.after ?? [])]));
@@ -71,8 +84,10 @@ export class WebCommonUtil {
   /**
    * Get status code
    */
-  static getStatusCode(res: WebResponse): number {
-    return (res.headers.has('Content-Range') && res.statusCode === 200) ? 206 : res.statusCode ?? 200;
+  static getStatusCode(response: WebResponse): number {
+    return (response.headers.has('Content-Range') && response.context.httpStatusCode === 200) ?
+      206 :
+      response.context.httpStatusCode ?? 200;
   }
 
   /**
@@ -88,25 +103,40 @@ export class WebCommonUtil {
         new AppError(err.message, { details: err }) :
         new AppError(`${err}`);
 
-    const error: Error & { category?: ErrorCategory, status?: number, statusCode?: number } = body;
-    const statusCode = error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
+    const error: Error & { category?: ErrorCategory, details?: { statusCode: number } } = body;
+    const statusCode = error.details?.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
 
-    return new WebResponse({ body, statusCode });
+    return new WebResponse({ body, context: { httpStatusCode: statusCode } });
   }
 
   /**
-   * Generate common valid response
+   * Get request parameters
    */
-  static commonResponse(method: HttpMethod, body: unknown, extraHeaders: WebHeaders): WebResponse {
-    if (body instanceof WebResponse) {
-      return body;
-    } else {
-      const statusCode = (body === null || body === undefined) ? HTTP_METHODS[method].emptyStatusCode : 200;
-      const res = new WebResponse({ body, statusCode });
-      for (const [k, v] of extraHeaders) {
-        res.headers.set(k, v);
-      }
-      return res;
-    }
+  static getRequestParams(request: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }): unknown[] {
+    return request[WebRequestParamsSymbol] ?? [];
+  }
+
+  /**
+   * Set request parameters
+   */
+  static setRequestParams(request: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }, params: unknown[]): void {
+    request[WebRequestParamsSymbol] ??= params;
+  }
+
+  /**
+   * Get a cache control value
+   */
+  static getCacheControlValue(value: number | TimeSpan, flags: CacheControlFlag[] = []): string {
+    const delta = TimeUtil.asSeconds(value);
+    const finalFlags = delta === 0 ? ['no-cache'] : flags;
+    return [...finalFlags, `max-age=${delta}`].join(',');
+  }
+
+  /**
+   * Parse byte size
+   */
+  static parseByteSize(input: `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}`): number {
+    const [, num, unit] = input.toLowerCase().split(/(\d+)/);
+    return parseInt(num, 10) * (this.#unitMapping[unit] ?? 1);
   }
 }

@@ -1,12 +1,12 @@
 import { Suite } from '@travetto/test';
+import { RedisModelConfig, RedisModelService } from '@travetto/model-redis';
+
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
-import { RedisModelConfig } from '../src/config.ts';
-import { RedisModelService } from '../src/service.ts';
 
 @Suite()
 export class RedisBasicSuite extends ModelBasicSuite {

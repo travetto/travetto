@@ -256,7 +256,7 @@ Finally, we establish the controller at <code class="item path">src/web.ts</code
    */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token operator">:</span> TodoSearch<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -324,7 +324,7 @@ First we must start the application:
     <figcaption class="terminal">Start the Application
 
 </figcaption>
-    <pre><code class="language-bash">npx trv run:web</code></pre>
+    <pre><code class="language-bash">npx trv web:http</code></pre>
   </figure>
 
   <figure class="terminal">
@@ -376,7 +376,7 @@ First we must start the application:
       <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
-      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      AcceptConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       ApiHostConfig: <span class="token punctuation">{{'{'}}</span> servers: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>, openapi: <span class="token string">'3.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
       ApiInfoConfig: <span class="token punctuation">{{'{'}}</span> description: <span class="token string">''</span>, title: <span class="token string">'@travetto/todo-app'</span>, version: <span class="token string">'0.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
       ApiSpecConfig: <span class="token punctuation">{{'{'}}</span>
@@ -386,7 +386,15 @@ First we must start the application:
         exposeAllSchemas: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
       AuthConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      BodyParseConfig: <span class="token punctuation">{{'{'}}</span> applies: true, limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      BodyParseConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        limit: <span class="token string">'1mb'</span>,
+        parsingTypes: <span class="token punctuation">{{'{'}}</span>
+          text: <span class="token string">'text'</span>,
+          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
+          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
@@ -402,7 +410,6 @@ First we must start the application:
         output: <span class="token string">'&lt;workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log'</span>,
         writeSync: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
-      GetCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       JSONLogFormatterConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       LineLogFormatterConfig: <span class="token punctuation">{{'{'}}</span>
         plain: false,
@@ -428,6 +435,7 @@ First we must start the application:
         connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
         options: <span class="token punctuation">{{'{'}}</span> waitQueueTimeoutMS: <span class="token number">86400000</span> <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
+      ResponseCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: true, mode: <span class="token string">'deny'</span> <span class="token punctuation">{{'}'}}</span>,
       TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthConfig: <span class="token punctuation">{{'{'}}</span>
         applies: false,
@@ -439,25 +447,14 @@ First we must start the application:
       WebAuthLoginConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthLogoutConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> applies: false, permissions: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-      WebConfig: <span class="token punctuation">{{'{'}}</span>
-        serve: true,
-        port: <span class="token number">12555</span>,
-        trustProxy: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-        hostname: <span class="token string">'localhost'</span>,
-        bindAddress: <span class="token string">'0.0.0.0'</span>,
-        baseUrl: <span class="token string">'http://localhost:12555'</span>,
-        defaultMessage: true,
-        ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
-        optionsGlobalHandle: <span class="token boolean">true</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      WebConfig: <span class="token punctuation">{{'{'}}</span> defaultMessage: true, baseUrl: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span>,
+      WebHttpConfig: <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span>, bindAddress: <span class="token string">'0.0.0.0'</span>, ssl: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      WebRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-      WebSessionConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+      WebRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@travetto/web-node:src/application.ts:41<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@travetto/web-node:src/server.ts:36<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>

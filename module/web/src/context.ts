@@ -3,51 +3,47 @@ import { Inject, Injectable } from '@travetto/di';
 import { AppError, castTo, Class, toConcrete } from '@travetto/runtime';
 
 import { WebRequest } from './types/request.ts';
-import { CookieJar } from './util/cookie.ts';
 
+/**
+ * Shared Async Context, powering the @ContextParams
+ */
 @Injectable()
 export class WebAsyncContext {
 
-  #req = new AsyncContextValue<WebRequest>(this);
-  #cookie = new AsyncContextValue<CookieJar>(this);
+  #request = new AsyncContextValue<WebRequest>(this);
   #byType = new Map<string, () => unknown>();
 
   @Inject()
   context: AsyncContext;
 
-  get req(): WebRequest {
-    return this.#req.get()!;
-  }
-
-  get cookies(): CookieJar {
-    return this.#cookie.get()!;
-  }
-
-  set cookies(val: CookieJar) {
-    this.#cookie.set(val);
+  get request(): WebRequest {
+    return this.#request.get()!;
   }
 
   postConstruct(): void {
-    this.registerType(toConcrete<WebRequest>(), () => this.#req.get());
-    this.registerType(CookieJar, () => this.#cookie.get());
+    this.registerSource(toConcrete<WebRequest>(), () => this.#request.get());
   }
 
-  withContext<T>(req: WebRequest, next: () => Promise<T>): Promise<T> {
+  withContext<T>(request: WebRequest, next: () => Promise<T>): Promise<T> {
     return this.context.run(() => {
-      this.#req.set(req);
+      this.#request.set(request);
       return next();
     });
   }
 
-  registerType<T>(cls: Class<T>, provider: () => T): void {
+  registerSource<T>(cls: Class<T>, provider: () => T): void {
     this.#byType.set(cls.Ⲑid, provider);
   }
 
-  getByType<T>(cls: Class<T>): () => T {
+  getSource<T>(cls: Class<T>): () => T {
     const item = this.#byType.get(cls.Ⲑid);
     if (!item) {
       throw new AppError('Unknown type for web context');
     }
     return castTo(item);
+  }
+
+  getValue<T>(cls: Class<T>): T {
+    return this.getSource(cls)();
   }
 }

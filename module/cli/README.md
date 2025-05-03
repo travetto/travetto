@@ -44,12 +44,12 @@ Commands:
   repo:version      Version all changed dependencies
   repo:version-sync Enforces all packages to write out their versions and dependencies
   run:double        Doubles a number
-  run:web           Run a web server as an application
   scaffold          Command to run scaffolding
   service           Allows for running services
   test              Launch test framework and execute tests
   test:watch        Invoke the test watcher
-  web:rpc           Run client web operation
+  web:http          Run a web server
+  web:rpc-client    Generate the web-rpc client
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
@@ -388,7 +388,7 @@ npx trv call:db --host localhost --port 3306 --username app --password <custom>
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") does expose a cli target `run:web` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -423,7 +423,7 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
   /**
    * Action target of the command
    */
-  main(...args: T): OrProm<RunResponse>;
+  main(...args: T): OrProm<undefined | void>;
   /**
    * Run before main runs
    */
@@ -460,18 +460,19 @@ If the goal is to run a more complex application, which may include depending on
 
 **Code: Simple Run Target**
 ```typescript
-import { Runtime, toConcrete } from '@travetto/runtime';
+import { Runtime, ShutdownManager, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
+import { NetUtil } from '@travetto/web';
+import { RootRegistry } from '@travetto/registry';
 
-import type { WebApplication, WebApplicationHandle } from '../src/types/application.ts';
-import { NetUtil } from '../src/util/net.ts';
+import type { WebHttpServer } from '../src/types.ts';
 
 /**
- * Run a web server as an application
+ * Run a web server
  */
 @CliCommand({ runTarget: true, with: { debugIpc: true, canRestart: true, module: true, env: true } })
-export class RunWebCommand implements CliCommandShape {
+export class WebHttpCommand implements CliCommandShape {
 
   /** Port to run on */
   port?: number;
@@ -481,20 +482,26 @@ export class RunWebCommand implements CliCommandShape {
 
   preMain(): void {
     if (this.port) {
-      process.env.WEB_PORT = `${this.port}`;
+      process.env.WEB_HTTP_PORT = `${this.port}`;
     }
   }
 
-  async main(): Promise<WebApplicationHandle | void> {
+  async main(): Promise<void> {
+    await RootRegistry.init();
+    const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
+
+    let res;
     try {
-      return await DependencyRegistry.runInstance(toConcrete<WebApplication>());
+      res = await instance.serve();
     } catch (err) {
       if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
-        return await DependencyRegistry.runInstance(toConcrete<WebApplication>());
+        res = await instance.serve();
       }
       throw err;
     }
+    ShutdownManager.onGracefulShutdown(res.kill);
+    return res.wait;
   }
 }
 ```
@@ -504,7 +511,7 @@ As noted in the example above, `fields` is specified in this execution, with sup
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 ### Custom Validation
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L38) errors that are returned will be shared with the user, and fail to invoke the `main` method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L32) errors that are returned will be shared with the user, and fail to invoke the `main` method.
 
 **Code: CliValidationError**
 ```typescript

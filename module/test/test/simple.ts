@@ -5,9 +5,6 @@ import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach, Test, ExecutionError
 
 let a: unknown = 0; a = 1;
 
-const BIG = { age: 5 };
-const BIGGER: object = { age: 6 };
-
 class Alt {
   includes(o: unknown): boolean {
     return true;

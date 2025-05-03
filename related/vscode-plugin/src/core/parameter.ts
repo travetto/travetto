@@ -129,7 +129,7 @@ export class ParameterSelector {
     const exts: string[] = conf.param.fileExtensions ?? [];
 
     try {
-      return await new Promise<string | undefined>((resolve, reject) => {
+      return await new Promise<string | undefined>((resolve) => {
         const input = vscode.window.createQuickPick<{ label: string, description: string }>();
         input.placeholder = exts.length ? `${placeholder} (${exts.map(x => `.${x}`).join(', ')})` : placeholder;
 

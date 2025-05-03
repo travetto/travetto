@@ -187,7 +187,7 @@ export function Currency(): PropType<number> { return Precision(13, 2); }
  * @augments `@travetto/schema:Ignore`
  */
 export function Ignore(): PropertyDecorator {
-  return (target: Object, property: string | symbol) => { };
+  return () => { };
 }
 
 /**

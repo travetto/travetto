@@ -45,20 +45,10 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 
   <figure class="code">
     <figcaption class="code">Structure of S3ModelConfig
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L11">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> fromIni <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@aws-sdk/credential-provider-ini'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token class-name">s3</span> <span class="token keyword">from</span> <span class="token string">'@aws-sdk/client-s3'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config<span class="token punctuation">,</span> EnvVar <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field<span class="token punctuation">,</span> Required <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Runtime <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-
-<span class="token comment">/**
- * S3 Support as an Asset Source
- */</span>
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.s3'</span><span class="token punctuation">)</span>
+    <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.s3'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">S3ModelConfig</span> <span class="token punctuation">{{'{'}}</span>
   region <span class="token operator">=</span> <span class="token string">'us-east-1'</span><span class="token punctuation">;</span> <span class="token comment">// AWS Region</span>
   namespace <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span> <span class="token comment">// S3 Bucket folder</span>

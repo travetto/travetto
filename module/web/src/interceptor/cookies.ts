@@ -1,14 +1,14 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
+import { AsyncContext, AsyncContextValue } from '@travetto/context';
 
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 
-import { WebConfig } from '../config/web.ts';
-import { EndpointConfig } from '../registry/types.ts';
+import { WebConfig } from '../config.ts';
 import { Cookie, CookieSetOptions } from '../types/cookie.ts';
 import { CookieJar } from '../util/cookie.ts';
 import { WebAsyncContext } from '../context.ts';
@@ -55,6 +55,8 @@ export class CookieConfig implements CookieSetOptions {
 @Injectable()
 export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
 
+  #cookieJar = new AsyncContextValue<CookieJar>(this);
+
   category: WebInterceptorCategory = 'request';
 
   @Inject()
@@ -66,20 +68,30 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
   @Inject()
   webAsyncContext: WebAsyncContext;
 
-  finalizeConfig(config: CookieConfig): CookieConfig {
-    config.secure ??= this.webConfig.ssl?.active;
-    config.domain ??= this.webConfig.hostname;
+  @Inject()
+  context: AsyncContext;
+
+  postConstruct(): void {
+    this.webAsyncContext.registerSource(CookieJar, () => this.#cookieJar.get());
+  }
+
+  finalizeConfig({ config }: WebInterceptorContext<CookieConfig>): CookieConfig {
+    const url = new URL(this.webConfig.baseUrl ?? 'x://localhost');
+    config.secure ??= url.protocol === 'https';
+    config.domain ??= url.hostname;
     return config;
   }
 
-  applies(ep: EndpointConfig, config: CookieConfig): boolean {
+  applies({ config }: WebInterceptorContext<CookieConfig>): boolean {
     return config.applies;
   }
 
-  async filter({ req, config, next }: WebChainedContext<CookieConfig>): Promise<WebResponse> {
-    const jar = this.webAsyncContext.cookies = new CookieJar(req.headers.get('Cookie'), config);
-    const res = await next();
-    for (const c of jar.export()) { res.headers.append('Set-Cookie', c); }
-    return res;
+  async filter({ request, config, next }: WebChainedContext<CookieConfig>): Promise<WebResponse> {
+    const jar = new CookieJar(request.headers.get('Cookie'), config);
+    this.#cookieJar.set(jar);
+
+    const response = await next();
+    for (const c of jar.export()) { response.headers.append('Set-Cookie', c); }
+    return response;
   }
 }

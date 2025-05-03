@@ -3,10 +3,7 @@ import { PageableModelQuery } from '@travetto/model-query';
 
 import { QueryLanguageParser } from './parser.ts';
 
-const convert = <T>(k?: string, query?: boolean): T | undefined =>
-  !k || typeof k !== 'string' ? undefined : (/^[\{\[]/.test(k) ?
-    JSON.parse(k) :
-    (query ? QueryLanguageParser.parseToQuery(k) : undefined));
+const parse = <T>(k: string): T | undefined => !k || typeof k !== 'string' || !/^[\{\[]/.test(k) ? undefined : JSON.parse(k);
 
 @Schema()
 export class QueryLanguageModelQuery {
@@ -14,8 +11,11 @@ export class QueryLanguageModelQuery {
     return {
       ...(self.limit ? { limit: self.limit } : {}),
       ...(self.offset ? { offset: self.offset } : {}),
-      ...(self.sort ? { sort: convert(self.sort) } : {}),
-      ...(self.where ? { where: convert(self.where, true) } : {}),
+      ...(self.sort ? { sort: parse(self.sort) } : {}),
+      ...(self.where ? {
+        where: parse(self.where) ??
+          QueryLanguageParser.parseToQuery(self.where)
+      } : {}),
     };
   }
 

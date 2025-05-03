@@ -305,7 +305,7 @@ export class SQLModelUtil {
    * Build property path for a table/field given the current stack
    */
   static buildPath(list: VisitStack[]): string {
-    return list.map((el, i) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
+    return list.map((el) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
   }
 
   /**
@@ -328,7 +328,7 @@ export class SQLModelUtil {
 
     await Promise.all(all);
 
-    const ret = [...Object.values(ins)].toSorted((a, b) => a.stack.length - b.stack.length);
-    return ret;
+    const result = [...Object.values(ins)].toSorted((a, b) => a.stack.length - b.stack.length);
+    return result;
   }
 }

@@ -141,7 +141,8 @@ export const text = <>
     <c.SubSection title='Type Adapters'>
       This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the {d.mod('ModelQuery')} module handles geo data.
 
-      <c.Code title='Simple Custom Type' src='doc/custom-type.ts' />
+      <c.Code title='Point Contract' src='src/types.ts' startRe={/[/][*]/} />
+      <c.Code title='Point Implementation' src='src/internal/types.ts' />
 
       What you can see here is that the {d.input('Point')} type is now backed by a class that supports:
 

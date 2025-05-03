@@ -97,11 +97,11 @@ export class DocRunUtil {
     let final: string;
     try {
       const proc = this.spawn(cmd, args, config);
-      const res = await ExecUtil.getResult(proc, { catch: true });
-      if (!res.valid) {
-        throw new Error(res.stderr);
+      const result = await ExecUtil.getResult(proc, { catch: true });
+      if (!result.valid) {
+        throw new Error(result.stderr);
       }
-      final = util.stripVTControlCharacters(res.stdout).trim() || util.stripVTControlCharacters(res.stderr).trim();
+      final = util.stripVTControlCharacters(result.stdout).trim() || util.stripVTControlCharacters(result.stderr).trim();
     } catch (err) {
       if (err instanceof Error) {
         final = err.message;

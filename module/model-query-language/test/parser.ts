@@ -1,9 +1,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { QueryLanguageParser, QueryLanguageTokenizer } from '@travetto/model-query-language';
 
-import { QueryLanguageParser } from '../src/parser.ts';
-import { QueryLanguageTokenizer } from '../src/tokenizer.ts';
 
 type UserType<R = string> = { user: { address: { state: String, city: string }, role: R } };
 
@@ -50,8 +49,8 @@ export class QueryStringTest {
 
   @Test('Parser')
   async parseSimple() {
-    const res = QueryLanguageParser.parseToQuery('A == 5 and B == 6 or C == -7 and d == 8 or e == 10');
-    assert.deepStrictEqual(res, {
+    const parsed = QueryLanguageParser.parseToQuery('A == 5 and B == 6 or C == -7 and d == 8 or e == 10');
+    assert.deepStrictEqual(parsed, {
       $or: [
         {
           $and: [
@@ -130,8 +129,8 @@ export class QueryStringTest {
 
   @Test('Parse Unique Outputs')
   async parseUnique() {
-    const res = QueryLanguageParser.parseToQuery('a.b.c in [1,2,-3]');
-    assert.deepStrictEqual(res, {
+    const parsed = QueryLanguageParser.parseToQuery('a.b.c in [1,2,-3]');
+    assert.deepStrictEqual(parsed, {
       a: { b: { c: { $in: [1, 2, -3] } } }
     });
 
@@ -153,9 +152,9 @@ export class QueryStringTest {
 
   @Test('Parse complex')
   async parseComplex() {
-    const res = QueryLanguageParser.parseToQuery<UserType>(
+    const parsed = QueryLanguageParser.parseToQuery<UserType>(
       "user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')");
-    assert.deepStrictEqual(res, {
+    assert.deepStrictEqual(parsed, {
       $and: [
         { user: { role: { $in: ['admin', 'root'] } } },
         {
@@ -170,10 +169,10 @@ export class QueryStringTest {
 
   @Test('Parse Regex')
   async parseRegex() {
-    const res = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /^admin/');
-    assert.deepStrictEqual(res, { user: { role: { $regex: /^admin/ } } });
-    assert(res.user!.role!.$regex instanceof RegExp);
-    assert(res.user!.role!.$regex.toString() === '/^admin/');
+    const parsed = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /^admin/');
+    assert.deepStrictEqual(parsed, { user: { role: { $regex: /^admin/ } } });
+    assert(parsed.user!.role!.$regex instanceof RegExp);
+    assert(parsed.user!.role!.$regex.toString() === '/^admin/');
 
     const res2 = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>("user.role ~ 'admin'");
     assert.deepStrictEqual(res2, { user: { role: { $regex: /^admin/ } } });
@@ -183,21 +182,21 @@ export class QueryStringTest {
 
   @Test('Parse Regex with flags')
   async parseRegexWithFlags() {
-    const res = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /\badmin\b/i');
-    assert(res.user!.role!.$regex instanceof RegExp);
-    assert(res.user!.role!.$regex.toString() === '/\badmin\b/i');
+    const parsed = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /\badmin\b/i');
+    assert(parsed.user!.role!.$regex instanceof RegExp);
+    assert(parsed.user!.role!.$regex.toString() === '/\badmin\b/i');
   }
 
   @Test('Parse Regex with word boundaries')
   async parseRegexWithWordBoundaries() {
-    const res = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /\badmin\b/i');
-    assert(res.user!.role!.$regex instanceof RegExp);
-    assert(res.user!.role!.$regex.toString() === '/\badmin\b/i');
+    const parsed = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /\badmin\b/i');
+    assert(parsed.user!.role!.$regex instanceof RegExp);
+    assert(parsed.user!.role!.$regex.toString() === '/\badmin\b/i');
   }
 
   @Test('Relative date ranges')
   async parseRelativeDateRanges() {
-    const res = QueryLanguageParser.parseToQuery<{ createdAt: { $gt: string }, deleteAt: { $gt: string } }>('createdAt > -7d AND deleteAt > 0d');
-    assert.deepStrictEqual(res, { $and: [{ createdAt: { $gt: '-7d' } }, { deleteAt: { $gt: '0d' } }] });
+    const parsed = QueryLanguageParser.parseToQuery<{ createdAt: { $gt: string }, deleteAt: { $gt: string } }>('createdAt > -7d AND deleteAt > 0d');
+    assert.deepStrictEqual(parsed, { $and: [{ createdAt: { $gt: '-7d' } }, { deleteAt: { $gt: '0d' } }] });
   }
 }

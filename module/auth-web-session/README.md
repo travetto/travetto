@@ -13,18 +13,12 @@ npm install @travetto/auth-web-session
 yarn add @travetto/auth-web-session
 ```
 
-One of [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework")'s main responsibilities is being able to send and receive authentication/authorization information from the client. 
+One of [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework")'s main responsibility is being able to send, validate and receive authentication/authorization information from the client. 
 
-This module's responsibility is, to expose [Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-session#readme "Session provider for the travetto auth module.")'s data, within the scope of the request/response flow.
+This module's main responsibilities is to expose [Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-session#readme "Session provider for the travetto auth module.")'s data within the scope of an authenticated request flow.
 
 **Code: Anatomy of the Session Interceptor**
 ```typescript
-class WebSessionConfig { }
-
-/**
- * Loads session, and provides ability to create session as needed, persists when complete.
- */
-@Injectable()
 export class AuthSessionInterceptor implements WebInterceptor {
 
   category: WebInterceptorCategory = 'application';
@@ -37,14 +31,11 @@ export class AuthSessionInterceptor implements WebInterceptor {
   context: SessionContext;
 
   @Inject()
-  config: WebSessionConfig;
-
-  @Inject()
   webAsyncContext: WebAsyncContext;
 
   postConstruct(): void {
-    this.webAsyncContext.registerType(toConcrete<Session>(), () => this.context.get(true));
-    this.webAsyncContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
+    this.webAsyncContext.registerSource(toConcrete<Session>(), () => this.context.get(true));
+    this.webAsyncContext.registerSource(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
   async filter({ next }: WebChainedContext): Promise<WebResponse> {
@@ -58,7 +49,7 @@ export class AuthSessionInterceptor implements WebInterceptor {
 }
 ```
 
-Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L6) boundaries, the session state can be injected via params, or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14).
+Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L6) boundaries, the session state can be injected via [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61)s, injected as [SessionContext](https://github.com/travetto/travetto/tree/main/module/auth-session/src/context.ts#L11),  or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14).
 
 **Code: Sample Usage**
 ```typescript

@@ -2,11 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+import { Schema, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { Schema } from '../src/decorator/schema.ts';
 import { SpecialType } from './models/pointer.ts';
-import { SchemaValidator } from '../src/validate/validator.ts';
-import { ValidationResultError } from '../src/validate/error.ts';
 
 @Schema()
 class Custom {

@@ -132,7 +132,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='VSCode Integration'>
-    By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  {d.mod('Web')} does expose a cli target {d.input('run:web')} that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the {d.library('TravettoPlugin')}. This is achieved by setting the {d.input('runTarget')} field on the {CliCommand} decorator.  This means the target will be visible within the editor tooling.
+    By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  {d.mod('Web')} does expose a cli target {d.input('web:http')} that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the {d.library('TravettoPlugin')}. This is achieved by setting the {d.input('runTarget')} field on the {CliCommand} decorator.  This means the target will be visible within the editor tooling.
 
     <c.Code title='Simple Run Target' src='doc/cli.run_simple.ts' />
   </c.Section>
@@ -144,7 +144,7 @@ export const text = <>
     <c.SubSection title='Dependency Injection'>
       If the goal is to run a more complex application, which may include depending on {d.mod('Di')}, we can take a look at {d.mod('Web')}'s target:
 
-      <c.Code title='Simple Run Target' src='../web/support/cli.run_web.ts' />
+      <c.Code title='Simple Run Target' src='../web-http-server/support/cli.web_http.ts' />
 
       As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {Runtime} {d.field('name')} defined in the {d.mod('Runtime')} module. <br />
 

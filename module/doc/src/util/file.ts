@@ -2,6 +2,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 import { AppError, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { ManifestModuleFileType, ManifestModuleUtil } from '@travetto/manifest';
 
 const ESLINT_PATTERN = /\s{0,10}\/\/ eslint.{0,300}$/g;
 const ENV_KEY = /Env.([^.]{1,100})[.]key/g;
@@ -12,10 +13,18 @@ const ENV_KEY = /Env.([^.]{1,100})[.]key/g;
 export class DocFileUtil {
 
   static #decCache: Record<string, boolean> = {};
+  static #modFileTypeToLang: Record<ManifestModuleFileType, string | undefined> = {
+    ts: 'typescript',
+    js: 'javascript',
+    md: 'markdown',
+    json: 'json',
+    typings: 'typescript',
+    'package-json': 'json',
+    fixture: undefined,
+    unknown: undefined
+  };
   static #extToLang: Record<string, string> = {
-    '.ts': 'typescript',
-    '.tsx': 'typescript',
-    '.js': 'javascript',
+    '.yaml': 'yaml',
     '.yml': 'yaml',
     '.sh': 'bash',
   };
@@ -64,7 +73,8 @@ export class DocFileUtil {
 
     if (file !== undefined) {
       const ext = path.extname(file);
-      const language = this.#extToLang[ext] ?? ext.replace('.', '');
+      const type = ManifestModuleUtil.getFileType(file);
+      const language = this.#modFileTypeToLang[type] ?? this.#extToLang[ext] ?? ext.replace('.', '');
       return { content, file, language };
     } else {
       return { content, file: '', language: '' };
@@ -72,13 +82,13 @@ export class DocFileUtil {
   }
 
   static async readCodeSnippet(src: string | Function, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
-    const res = this.readSource(src);
-    const lines = res.content.split(/\n/);
+    const result = this.readSource(src);
+    const lines = result.content.split(/\n/);
     const startIdx = lines.findIndex(l => startPattern.test(l));
     if (startIdx < 0) {
       throw new Error(`Pattern ${startPattern.source} not found in ${src}`);
     }
-    return { file: res.file, startIdx, lines, language: res.language };
+    return { file: result.file, startIdx, lines, language: result.language };
   }
 
   /**
@@ -91,21 +101,21 @@ export class DocFileUtil {
       return this.#decCache[key];
     }
 
-    const res = await this.readSource(file);
-    const text = res.content.split(/\n/g);
+    const text = await this.readSource(file);
+    const lines = text.content.split(/\n/g);
 
-    const start = text.findIndex(x => new RegExp(`function ${name}\\b`).test(x));
-    let ret = false;
+    const start = lines.findIndex(x => new RegExp(`function ${name}\\b`).test(x));
+    let found = false;
     if (start > 0) {
       for (let i = start - 1; i > start - 3; i--) {
-        if (text[i].includes('@augments')) {
-          ret = true;
+        if (lines[i].includes('@augments')) {
+          found = true;
           break;
         }
       }
     }
-    this.#decCache[key] = ret;
-    return ret;
+    this.#decCache[key] = found;
+    return found;
   }
 
   /**

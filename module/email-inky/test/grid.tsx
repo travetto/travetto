@@ -3,9 +3,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Row, Column, BlockGrid } from '@travetto/email-inky';
 
 import { renderJSX } from './util.ts';
-import { Row, Column, BlockGrid } from '../src/components.ts';
 
 @Suite('Grid')
 class GridTest {

@@ -6,16 +6,15 @@ import Negotiator from 'negotiator';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError, castTo } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
-import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
+import { WebError } from '../types/error.ts';
 
-const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const COMPRESSORS = {
   gzip: createGzip,
   deflate: createDeflate,
@@ -55,66 +54,62 @@ export class CompressInterceptor implements WebInterceptor {
   @Inject()
   config: CompressConfig;
 
-  async compress(ctx: WebChainedContext, res: WebResponse): Promise<WebResponse> {
+  async compress(ctx: WebChainedContext, response: WebResponse): Promise<WebResponse> {
     const { raw = {}, preferredEncodings = [], supportedEncodings } = this.config;
-    const { req } = ctx;
+    const { request } = ctx;
 
-    res.headers.vary('Accept-Encoding');
+    response.headers.vary('Accept-Encoding');
 
     if (
-      !res.body ||
-      req.method === 'HEAD' ||
-      res.headers.has('Content-Encoding') ||
-      NO_TRANSFORM_REGEX.test(res.headers.get('Cache-Control')?.toString() ?? '')
+      !response.body ||
+      response.headers.has('Content-Encoding') ||
+      response.headers.get('Cache-Control')?.includes('no-transform')
     ) {
-      return res;
+      return response;
     }
 
-    const accepts = req.headers.get('Accept-Encoding');
+    const accepts = request.headers.get('Accept-Encoding');
     const type: WebCompressEncoding | undefined =
       castTo(new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
         .encoding([...supportedEncodings, ...preferredEncodings]));
 
     if (accepts && (!type || !accepts.includes(type))) {
-      throw new WebResponse({
-        body: new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
-        statusCode: 406
-      });
+      throw WebError.for(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`, 406);
     }
 
     if (type === 'identity' || !type) {
-      return res;
+      return response;
     }
 
-    const binaryRes = new WebResponse({ ...res, ...WebBodyUtil.toBinaryMessage(res) });
+    const binaryResponse = new WebResponse({ context: response.context, ...WebBodyUtil.toBinaryMessage(response) });
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
-    const len = Buffer.isBuffer(binaryRes.body) ? binaryRes.body.byteLength : undefined;
+    const len = Buffer.isBuffer(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
 
-    if (len !== undefined && len >= 0 && len < chunkSize) {
-      return binaryRes;
+    if (len !== undefined && len >= 0 && len < chunkSize || !binaryResponse.body) {
+      return binaryResponse;
     }
 
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
     const stream = COMPRESSORS[type](opts);
 
     // If we are compressing
-    binaryRes.headers.set('Content-Encoding', type);
+    binaryResponse.headers.set('Content-Encoding', type);
 
-    if (Buffer.isBuffer(binaryRes.body)) {
-      stream.end(binaryRes.body);
+    if (Buffer.isBuffer(binaryResponse.body)) {
+      stream.end(binaryResponse.body);
       const out = await buffer(stream);
-      binaryRes.body = out;
-      binaryRes.headers.set('Content-Length', `${out.byteLength}`);
+      binaryResponse.body = out;
+      binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
     } else {
-      binaryRes.body.pipe(stream);
-      binaryRes.body = stream;
-      binaryRes.headers.delete('Content-Length');
+      binaryResponse.body.pipe(stream);
+      binaryResponse.body = stream;
+      binaryResponse.headers.delete('Content-Length');
     }
 
-    return binaryRes;
+    return binaryResponse;
   }
 
-  applies(ep: EndpointConfig, config: CompressConfig): boolean {
+  applies({ config }: WebInterceptorContext<CompressConfig>): boolean {
     return config.applies;
   }
 

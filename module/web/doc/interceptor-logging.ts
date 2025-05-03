@@ -16,12 +16,12 @@ export class CustomLoggingInterceptor implements WebInterceptor {
     this.appender = appender;
   }
 
-  async filter({ req, next }: WebChainedContext) {
+  async filter({ request, next }: WebChainedContext) {
     try {
       return await next();
     } finally {
       // Write request to database
-      this.appender.write(req.method, req.path, req.query);
+      this.appender.write(request.context.httpMethod, request.context.path, request.context.httpQuery);
     }
   }
 }

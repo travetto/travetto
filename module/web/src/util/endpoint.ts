@@ -3,15 +3,17 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 import { DependencyRegistry } from '@travetto/di';
 import { RetargettingProxy } from '@travetto/registry';
 
-import { WebFilterContext, WebChainedFilter, WebChainedContext, WebFilter } from '../types.ts';
+import { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-
-import { WebInternalSymbol, WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
+import { WebRequest } from '../types/request.ts';
+import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
-
 import { WebCommonUtil } from './common.ts';
+
+
+const WebQueryExpandedSymbol = Symbol();
 
 /**
  * Endpoint specific utilities
@@ -45,7 +47,7 @@ export class EndpointUtil {
     return function filterChain(ctx: WebChainedContext, idx: number = 0): Promise<WebResponse> {
       const { filter, config } = filters[idx]!;
       const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
-      return filter({ req: ctx.req, next: chainedNext, config });
+      return filter({ request: ctx.request, next: chainedNext, config });
     };
   }
 
@@ -70,7 +72,7 @@ export class EndpointUtil {
       const cls = asConstructable<WebInterceptor>(inst).constructor;
       const inputs = (inputByClass.get(cls) ?? []).map(x => x[1]);
       const config = Object.assign({}, inst.config, ...inputs);
-      return [cls, inst.finalizeConfig?.(config, castTo(inputs)) ?? config];
+      return [cls, inst.finalizeConfig?.({ config, endpoint }, castTo(inputs)) ?? config];
     }));
 
     return interceptors.map(inst => [
@@ -82,21 +84,21 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(ctx: WebFilterContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(request: WebRequest, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
-      return param.extract(ctx, param);
+      return param.extract(request, param);
     }
 
     const name = param.name!;
-    const { req } = ctx;
     switch (param.location) {
-      case 'path': return req.params[name];
-      case 'header': return field.array ? req.headers.getList(name) : req.headers.get(name);
-      case 'body': return req.body;
+      case 'path': return request.context.pathParams?.[name];
+      case 'header': return field.array ? request.headers.getList(name) : request.headers.get(name);
+      case 'body': return request.body;
       case 'query': {
-        const q = req[WebInternalSymbol].expandedQuery ??= BindUtil.expandPaths(req.query);
+        const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
+        const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
       }
     }
@@ -108,14 +110,14 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(ctx: WebFilterContext, endpoint: EndpointConfig): Promise<unknown[]> {
+  static async extractParameters(endpoint: EndpointConfig, request: WebRequest): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = ctx.req[WebInternalSymbol]?.requestParams ?? [];
+    const vals = WebCommonUtil.getRequestParams(request);
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(ctx, c, fields[i], vals?.[i]));
+      const extracted = endpoint.params.map((c, i) => this.extractParameter(request, c, fields[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;
@@ -137,11 +139,16 @@ export class EndpointUtil {
   /**
    * Endpoint invocation code
    */
-  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebFilterContext): Promise<WebResponse> {
+  static async invokeEndpoint(endpoint: EndpointConfig, { request }: WebChainedContext): Promise<WebResponse> {
     try {
-      const params = await this.extractParameters(ctx, endpoint);
+      const params = await this.extractParameters(endpoint, request);
       const body = await endpoint.endpoint.apply(endpoint.instance, params);
-      return WebCommonUtil.commonResponse(ctx.req.method, body, endpoint.responseHeaderMap);
+      const headers = endpoint.responseHeaderMap;
+      const response = body instanceof WebResponse ? body : new WebResponse({ body, headers });
+      if (response === body) {
+        for (const [k, v] of headers) { response.headers.setIfAbsent(k, v); }
+      }
+      return endpoint.responseFinalizer?.(response) ?? response;
     } catch (err) {
       throw WebCommonUtil.catchResponse(err);
     }
@@ -166,7 +173,7 @@ export class EndpointUtil {
 
     const interceptorFilters =
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
-        .filter(([inst, cfg]) => inst.applies?.(endpoint, cfg) ?? true)
+        .filter(([inst, config]) => inst.applies?.({ endpoint, config }) ?? true)
         .map(([inst, config]) => ({ filter: inst.filter.bind(inst), config }));
 
     const endpointFilters = [
@@ -229,7 +236,7 @@ export class EndpointUtil {
         return [ep, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
       })
       .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
-      .map(([ep, _]) => ep);
+      .map(([ep,]) => ep);
   }
 
 

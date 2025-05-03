@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-
-import { TimeUtil } from '../src/time.ts';
+import { TimeUtil } from '@travetto/runtime';
 
 @Suite()
 class TimeSuite {

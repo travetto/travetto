@@ -1,11 +1,15 @@
 import { Suite } from '@travetto/test';
-import { SchemaWebServerSuite } from '@travetto/web/support/test/suite/schema.ts';
+import { NodeWebServer } from '@travetto/web-node';
+import { DependencyRegistry } from '@travetto/di';
 
-import { NodeWebApplication } from '../src/application.ts';
-import { FetchWebDispatcher } from '../support/test/dispatcher.ts';
+import { SchemaWebServerSuite } from '@travetto/web/support/test/suite/schema.ts';
+import { FetchWebDispatcher } from '@travetto/web-node/support/test/dispatcher.ts';
 
 @Suite()
 export class NodeSchemaTest extends SchemaWebServerSuite {
-  appType = NodeWebApplication;
   dispatcherType = FetchWebDispatcher;
+
+  async serve() {
+    return DependencyRegistry.getInstance(NodeWebServer).then(v => v.serve()).then(v => v.kill);
+  }
 }

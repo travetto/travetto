@@ -2,9 +2,11 @@ import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
-import type { WebChainedFilter, WebFilterContext, WebFilter } from '../types.ts';
+import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
 import { HttpMethod } from '../types/core.ts';
 import { WebHeaders } from '../types/headers.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebRequest } from '../types/request.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -102,7 +104,7 @@ export interface EndpointParamConfig {
    * Extract the value from request
    * @param context The http context with the endpoint param config
    */
-  extract?: (ctx: WebFilterContext, config: EndpointParamConfig) => unknown;
+  extract?: (ctx: WebRequest, config: EndpointParamConfig) => unknown;
   /**
    * Input prefix for parameter
    */
@@ -126,9 +128,17 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    */
   instance?: unknown;
   /**
-   * The HTTP method the endpoint is for
+   * Method alias for the endpoint
    */
-  method: HttpMethod;
+  httpMethod?: HttpMethod;
+  /**
+   * Is this endpoint cacheable
+   */
+  cacheable: boolean;
+  /**
+   * Does this endpoint allow a body
+   */
+  allowsBody: boolean;
   /**
    * The path of the endpoint
    */
@@ -161,6 +171,10 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    * Response header map
    */
   responseHeaderMap: WebHeaders;
+  /**
+   * Response finalizer
+   */
+  responseFinalizer?: (res: WebResponse) => WebResponse;
 }
 
 /**

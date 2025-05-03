@@ -40,16 +40,6 @@ where the [S3ModelConfig](https://github.com/travetto/travetto/tree/main/module/
 
 **Code: Structure of S3ModelConfig**
 ```typescript
-import { fromIni } from '@aws-sdk/credential-provider-ini';
-import type s3 from '@aws-sdk/client-s3';
-
-import { Config, EnvVar } from '@travetto/config';
-import { Field, Required } from '@travetto/schema';
-import { Runtime } from '@travetto/runtime';
-
-/**
- * S3 Support as an Asset Source
- */
 @Config('model.s3')
 export class S3ModelConfig {
   region = 'us-east-1'; // AWS Region

@@ -29,7 +29,7 @@
     "@travetto/config": "^6.0.0-rc.1",
     "@travetto/model": "^6.0.0-rc.1",
     "@travetto/model-query": "^6.0.0-rc.1",
-    "mongodb": "^6.15.0"
+    "mongodb": "^6.16.0"
   },
   "travetto": {
     "displayName": "MongoDB Model Support"

@@ -12,8 +12,8 @@ async function init() {
 
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.spawn('trv', ['run:web'], {
-    env: { ...process.env, WEB_LOG_PATHS: '!*', WEB_PORT: `${port}`, WEB_SSL: '0' }
+  const cmd = DocRunUtil.spawn('trv', ['web:http'], {
+    env: { ...process.env, WEB_HTTP_PORT: `${port}`, WEB_HTTP_SSL: '0', WEB_BASE_URL: `http://localhost:${port}` }
   });
 
   ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); });
@@ -135,7 +135,7 @@ $ npx trv lint:register
       First we must start the application:
 
       <c.Terminal
-        title='Start the Application' src='npx trv run:web'
+        title='Start the Application' src='npx trv web:http'
       />
 
       <c.Terminal title='Application Startup' src={startupOutput} />

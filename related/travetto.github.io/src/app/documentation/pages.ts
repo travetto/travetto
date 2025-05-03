@@ -112,7 +112,7 @@ export const PAGES = [
     loadComponent: (): Promise<Type<unknown>> => import('./gen/web/web.component').then(m => m.WebComponent),
     subs: [
       {
-        path: 'web-node', title: 'Noe',
+        path: 'web-node', title: 'Node',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/web-node/web-node.component').then(m => m.WebNodeComponent)
       },
       {
@@ -124,8 +124,12 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/web-upload/web-upload.component').then(m => m.WebUploadComponent)
       },
       {
-        path: 'web-rpc', title: 'Web RPC',
+        path: 'web-rpc', title: 'RPC',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/web-rpc/web-rpc.component').then(m => m.WebRpcComponent)
+      },
+      {
+        path: 'web-http-server', title: 'Server',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-http-server/web-http-server.component').then(m => m.WebHttpServerComponent)
       },
       {
         path: 'openapi', title: 'OpenAPI',

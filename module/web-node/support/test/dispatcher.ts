@@ -1,8 +1,6 @@
-import { buffer } from 'node:stream/consumers';
-
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebFilterContext, WebResponse, WebDispatcher, WebBodyUtil } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
+import { WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
+import { WebHttpConfig } from '@travetto/web-http-server';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -13,28 +11,15 @@ import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts
 export class FetchWebDispatcher implements WebDispatcher {
 
   @Inject()
-  config: WebConfig;
+  config: WebHttpConfig;
 
-  async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const { query, method, headers, path } = req;
-
-    let q = '';
-    if (query && Object.keys(query).length) {
-      const pairs = Object.entries(query).map<[string, string]>(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`]);
-      q = `?${new URLSearchParams(pairs).toString()}`;
-    }
-
-    const finalPath = `${path}${q}`;
-    const stream = WebBodyUtil.getRawStream(req.body);
-    const body: RequestInit['body'] = stream ? await buffer(stream) : castTo(req.body);
-
-    const res = await fetch(`http://localhost:${this.config.port}${finalPath}`, { method, body, headers });
-
-    return WebTestDispatchUtil.finalizeResponseBody(
-      new WebResponse({
-        body: Buffer.from(await res.arrayBuffer()),
-        statusCode: res.status, headers: res.headers
-      })
+  async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
+    const { path: finalPath, init } = await WebTestDispatchUtil.toFetchRequestInit(
+      await WebTestDispatchUtil.applyRequestBody(request)
+    );
+    const response = await fetch(`http://localhost:${this.config.port}${finalPath}`, init);
+    return await WebTestDispatchUtil.finalizeResponseBody(
+      await WebTestDispatchUtil.fromFetchResponse(response)
     );
   }
 }

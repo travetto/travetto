@@ -255,7 +255,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     assert(await svc.queryCount(Location, {}) === 25);
 
-    const ret = await svc.query(Location, {
+    const result = await svc.query(Location, {
       limit: 100,
       where: {
         point: {
@@ -264,7 +264,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       }
     });
 
-    assert(ret.length === 25);
+    assert(result.length === 25);
 
     const rad = await svc.query(Location, {
       limit: 100,

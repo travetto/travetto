@@ -134,7 +134,7 @@ export class SimpleResolver implements TransformResolver {
         result.comment = DocUtil.describeDocs(type).description;
 
         if ('tsTypeArguments' in result) {
-          result.typeArguments = result.tsTypeArguments!.map((elType, i) => resolve(elType, type.aliasSymbol, depth + 1));
+          result.typeArguments = result.tsTypeArguments!.map((elType) => resolve(elType, type.aliasSymbol, depth + 1));
           delete result.tsTypeArguments;
         }
         if ('tsFieldTypes' in result) {
@@ -146,7 +146,7 @@ export class SimpleResolver implements TransformResolver {
           delete result.tsFieldTypes;
         }
         if ('tsSubTypes' in result) {
-          result.subTypes = result.tsSubTypes!.map((elType, i) => resolve(elType, type.aliasSymbol, depth + 1));
+          result.subTypes = result.tsSubTypes!.map((elType) => resolve(elType, type.aliasSymbol, depth + 1));
           delete result.tsSubTypes;
         }
         if (finalize) {

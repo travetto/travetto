@@ -13,9 +13,11 @@ npm install @travetto/auth-web-passport
 yarn add @travetto/auth-web-passport
 ```
 
-This is a primary integration for the [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate. 
+This is a primary integration for the [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") module. 
 
 Within the node ecosystem, the most prevalent auth framework is [passport](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for [passport](http://passportjs.org) baked in. Registering and configuring a [passport](http://passportjs.org) strategy is fairly straightforward.
+
+**NOTE:** Given that [passport](http://passportjs.org) is oriented around [express](https://expressjs.com), this module relies on [Web Connect Support](https://github.com/travetto/travetto/tree/main/module/web-connect#readme "Web integration for Connect-Like Resources") as an adapter for the request/response handoff.  There are some limitations listed in the module, and those would translate to any [passport](http://passportjs.org) strategies that are being used.
 
 **Code: Sample Facebook/passport config**
 ```typescript
@@ -85,7 +87,7 @@ import { FbAuthSymbol } from './conf.ts';
 export class SampleAuth {
 
   @ContextParam()
-  req: WebRequest;
+  request: WebRequest;
 
   @ContextParam()
   user: Principal;
@@ -110,7 +112,7 @@ export class SampleAuth {
   @Get('/facebook/callback')
   @Login(FbAuthSymbol)
   async fbLoginComplete() {
-    return WebResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self');
   }
 
   @Post('/logout')
@@ -122,7 +124,7 @@ export class SampleAuth {
    */
   @Post('/')
   async echo(): Promise<unknown> {
-    return this.req.body;
+    return this.request.body;
   }
 }
 ```

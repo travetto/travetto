@@ -1,27 +1,35 @@
 import { Readable } from 'node:stream';
 import zlib from 'node:zlib';
+import util from 'node:util';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError, castTo } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
 
-import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
+import { WebError } from '../types/error.ts';
 
-const DECOMPRESSORS = {
+const STREAM_DECOMPRESSORS = {
   gzip: zlib.createGunzip,
   deflate: zlib.createInflate,
   br: zlib.createBrotliDecompress,
   identity: (): Readable => null!
 };
 
-type WebDecompressEncoding = keyof typeof DECOMPRESSORS;
+const BUFFER_DECOMPRESSORS = {
+  gzip: util.promisify(zlib.gunzip),
+  deflate: util.promisify(zlib.inflate),
+  br: util.promisify(zlib.brotliDecompress),
+  identity: (): Readable => null!
+};
+
+type WebDecompressEncoding = keyof typeof BUFFER_DECOMPRESSORS;
 
 /**
  * Web body parse configuration
@@ -45,17 +53,22 @@ export class DecompressConfig {
 export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
 
 
-  static decompress(headers: WebHeaders, stream: Readable, config: DecompressConfig): Readable {
+  static async decompress(headers: WebHeaders, input: Buffer | Readable, config: DecompressConfig): Promise<typeof input> {
     const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 
     if (!config.supportedEncodings.includes(encoding)) {
-      throw new WebResponse({
-        body: new AppError(`Unsupported Content-Encoding: ${encoding}`),
-        statusCode: 415
-      });
+      throw WebError.for(`Unsupported Content-Encoding: ${encoding}`, 415);
     }
 
-    return encoding === 'identity' ? stream : stream.pipe(DECOMPRESSORS[encoding]());
+    if (encoding === 'identity') {
+      return input;
+    }
+
+    if (Buffer.isBuffer(input)) {
+      return BUFFER_DECOMPRESSORS[encoding](input);
+    } else {
+      return input.pipe(STREAM_DECOMPRESSORS[encoding]());
+    }
   }
 
   dependsOn = [];
@@ -64,16 +77,14 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
   @Inject()
   config: DecompressConfig;
 
-  applies(endpoint: EndpointConfig, config: DecompressConfig): boolean {
+  applies({ config }: WebInterceptorContext<DecompressConfig>): boolean {
     return config.applies;
   }
 
-  async filter({ req, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
-    if (req.body === undefined) {
-      const stream = WebBodyUtil.getRawStream(req.body);
-      if (stream) {
-        req.body = WebBodyUtil.markRaw(DecompressInterceptor.decompress(req.headers, stream, config));
-      }
+  async filter({ request, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
+    if (WebBodyUtil.isRaw(request.body)) {
+      const updatedBody = await DecompressInterceptor.decompress(request.headers, request.body, config);
+      request.body = WebBodyUtil.markRaw(updatedBody);
     }
     return next();
   }

@@ -233,7 +233,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(search: TodoSearch): Promise<Todo[]> {
-    return await this._svc.getAll(search);
+    return this._svc.getAll(search);
   }
 
   /**
@@ -298,7 +298,7 @@ First we must start the application:
 
 **Terminal: Start the Application**
 ```bash
-npx trv run:web
+npx trv web:http
 ```
 
 **Terminal: Application Startup**
@@ -348,7 +348,7 @@ npx trv run:web
       { priority: 999, source: 'memory://override' }
     ],
     active: {
-      AcceptsConfig: { applies: false, types: [] },
+      AcceptConfig: { applies: false, types: [] },
       ApiHostConfig: { servers: [ { url: 'http://localhost:12555' } ], openapi: '3.0.0' },
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
@@ -358,7 +358,15 @@ npx trv run:web
         exposeAllSchemas: false
       },
       AuthConfig: { maxAge: '1h', rollingRenew: true },
-      BodyParseConfig: { applies: true, limit: '1mb', parsingTypes: {} },
+      BodyParseConfig: {
+        applies: true,
+        limit: '1mb',
+        parsingTypes: {
+          text: 'text',
+          'application/json': 'json',
+          'application/x-www-form-urlencoded': 'form'
+        }
+      },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       CompressConfig: {
         applies: true,
@@ -374,7 +382,6 @@ npx trv run:web
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
-      GetCacheConfig: { applies: true },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -400,6 +407,7 @@ npx trv run:web
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
+      ResponseCacheConfig: { applies: true, mode: 'deny' },
       TrustProxyConfig: { applies: true, ips: [] },
       WebAuthConfig: {
         applies: false,
@@ -411,25 +419,14 @@ npx trv run:web
       WebAuthLoginConfig: { applies: false },
       WebAuthLogoutConfig: { applies: false },
       WebAuthVerifyConfig: { applies: false, permissions: [] },
-      WebConfig: {
-        serve: true,
-        port: 12555,
-        trustProxy: [],
-        hostname: 'localhost',
-        bindAddress: '0.0.0.0',
-        baseUrl: 'http://localhost:12555',
-        defaultMessage: true,
-        ssl: { active: false },
-        optionsGlobalHandle: true
-      },
+      WebConfig: { defaultMessage: true, baseUrl: 'http://localhost:12555' },
+      WebHttpConfig: { port: 12555, bindAddress: '0.0.0.0', ssl: false },
       WebLogConfig: { applies: true, showStackTrace: true },
-      WebRpcConfig: { clients: [] },
-      WebSessionConfig: {},
-      WebSslConfig: { active: false }
+      WebRpcConfig: { clients: [] }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:41] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/server.ts:36] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

@@ -1,12 +1,6 @@
 import { Class } from '@travetto/runtime';
 
 type OrProm<T> = T | Promise<T>;
-
-export type RunResponse =
-  { wait(): Promise<unknown> } |
-  { on(event: 'close', cb: Function): unknown } |
-  { close: () => (void | Promise<void>) } | void | undefined;
-
 type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
 type ParsedArg = { type: 'arg', input: string, array?: boolean, index: number };
 type ParsedUnknown = { type: 'unknown', input: string };
@@ -63,7 +57,7 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
   /**
    * Action target of the command
    */
-  main(...args: T): OrProm<RunResponse>;
+  main(...args: T): OrProm<undefined | void>;
   /**
    * Run before main runs
    */

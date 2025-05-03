@@ -29,12 +29,6 @@ While the expiry is not necessarily a hard requirement, the implementation witho
 
 **Code: Sample usage of Session Service**
 ```typescript
-class WebSessionConfig { }
-
-/**
- * Loads session, and provides ability to create session as needed, persists when complete.
- */
-@Injectable()
 export class AuthSessionInterceptor implements WebInterceptor {
 
   category: WebInterceptorCategory = 'application';
@@ -47,14 +41,11 @@ export class AuthSessionInterceptor implements WebInterceptor {
   context: SessionContext;
 
   @Inject()
-  config: WebSessionConfig;
-
-  @Inject()
   webAsyncContext: WebAsyncContext;
 
   postConstruct(): void {
-    this.webAsyncContext.registerType(toConcrete<Session>(), () => this.context.get(true));
-    this.webAsyncContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
+    this.webAsyncContext.registerSource(toConcrete<Session>(), () => this.context.get(true));
+    this.webAsyncContext.registerSource(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
   async filter({ next }: WebChainedContext): Promise<WebResponse> {

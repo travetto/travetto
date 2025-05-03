@@ -8,7 +8,7 @@ import { RuntimeResources } from '@travetto/runtime';
 export class UIController {
 
   @ContextParam()
-  req: WebRequest;
+  request: WebRequest;
 
   @Get('/')
   @Produces('text/html')
@@ -19,12 +19,12 @@ export class UIController {
   @Get('js/*')
   @Produces('application/javascript')
   getJs(): Promise<Readable> {
-    return RuntimeResources.readStream(this.req.path);
+    return RuntimeResources.readStream(this.request.context.path);
   }
 
   @Get('css/*')
   @Produces('text/css')
   getCss(): Promise<Readable> {
-    return RuntimeResources.readStream(this.req.path);
+    return RuntimeResources.readStream(this.request.context.path);
   }
 }

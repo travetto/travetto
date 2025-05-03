@@ -65,7 +65,7 @@ export class WorkspaceResultsManager {
    */
   getLocation(target: vscode.TextDocument | TestWatchEvent | string): string | undefined {
     if (typeof target === 'string') {
-      return Workspace.workspaceIndex.getSourceFile(target);
+      return Workspace.resolveManifestFileFromImport(target);
     } else if ('fileName' in target) {
       return target.fileName;
     } else if ('import' in target) {

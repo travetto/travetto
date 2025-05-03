@@ -3,8 +3,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Button } from '@travetto/email-inky';
 
-import { Button } from '../src/components.ts';
 import { renderJSX } from './util.ts';
 
 const SPACER_16 = <table className="spacer">

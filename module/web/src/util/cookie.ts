@@ -14,7 +14,7 @@ export class CookieJar {
     const c: Cookie = { name, value };
     for (const p of parts.slice(1)) {
       // eslint-disable-next-line prefer-const
-      let [k, v] = p.split(/\s{0,4}=\s{0,4}/);
+      let [k, v = ''] = p.split(/\s{0,4}=\s{0,4}/);
       if (v[0] === '"') {
         v = v.slice(1, -1);
       }
@@ -27,36 +27,35 @@ export class CookieJar {
     return c;
   }
 
-  static toHeaderValue(c: Cookie): string {
-    if (!c.value) {
-      c.expires = new Date(0);
-      c.maxAge = undefined;
-    }
-    if (c.maxAge) {
-      c.expires = new Date(Date.now() + c.maxAge);
-    }
-
+  static toHeaderValue(c: Cookie, response = true): string {
     const header = [pair(c.name, c.value)];
+    if (response) {
+      if (!c.value) {
+        c.expires = new Date(0);
+        c.maxAge = undefined;
+      }
+      if (c.maxAge) {
+        c.expires = new Date(Date.now() + c.maxAge);
+      }
 
-    if (c.path) { header.push(pair('path', c.path)); }
-    if (c.expires) { header.push(pair('expires', c.expires.toUTCString())); }
-    if (c.domain) { header.push(pair('domain', c.domain)); }
-    if (c.priority) { header.push(pair('priority', c.priority.toLowerCase())); }
-    if (c.sameSite) { header.push(pair('samesite', c.sameSite.toLowerCase())); }
-    if (c.secure) { header.push('secure'); }
-    if (c.httpOnly) { header.push('httponly'); }
-    if (c.partitioned) { header.push('partitioned'); }
-
+      if (c.path) { header.push(pair('path', c.path)); }
+      if (c.expires) { header.push(pair('expires', c.expires.toUTCString())); }
+      if (c.domain) { header.push(pair('domain', c.domain)); }
+      if (c.priority) { header.push(pair('priority', c.priority.toLowerCase())); }
+      if (c.sameSite) { header.push(pair('samesite', c.sameSite.toLowerCase())); }
+      if (c.secure) { header.push('secure'); }
+      if (c.httpOnly) { header.push('httponly'); }
+      if (c.partitioned) { header.push('partitioned'); }
+    }
     return header.join(';');
   }
 
   #secure?: boolean;
   #grip?: keygrip;
   #cookies: Record<string, Cookie> = {};
-  #modified: Record<string, Cookie> = {};
 
-  constructor(input?: string | null | undefined | Cookie[] | CookieJar, options?: { grip?: keygrip, secure?: boolean }) {
-    this.#grip = options?.grip;
+  constructor(input?: string | string[] | null | undefined | Cookie[] | CookieJar, options?: { keys?: string[], secure?: boolean }) {
+    this.#grip = options?.keys?.length ? new keygrip(options.keys) : undefined;
     this.#secure = options?.secure ?? false;
     if (input instanceof CookieJar) {
       this.#cookies = { ...input.#cookies };
@@ -78,8 +77,9 @@ export class CookieJar {
     sc.signed = false;
     sc.secure = c.secure;
 
-    if (index > 1) {
+    if (index >= 1) {
       sc.value = this.#grip.sign(key);
+      sc.response = true;
       return sc;
     }
   }
@@ -116,9 +116,10 @@ export class CookieJar {
   }
 
   set(c: Cookie): void {
-    this.#modified[c.name] = c;
+    this.#cookies[c.name] = c;
     c.secure ??= this.#secure;
     c.signed ??= !!this.#grip;
+    c.response = true;
 
     if (c.value === null || c.value === undefined) {
       c.maxAge = -1;
@@ -127,11 +128,18 @@ export class CookieJar {
 
     if (c.signed) {
       const sc = this.#signCookie(c);
-      this.#modified[sc.name] = sc;
+      this.#cookies[sc.name] = sc;
+      sc.response = true;
     }
   }
 
-  export(): string[] {
-    return Object.values(this.#modified).map(CookieJar.toHeaderValue);
+  export(response = true): string[] {
+    return this.getAll()
+      .filter(x => !response || x.response)
+      .map(c => CookieJar.toHeaderValue(c, response));
+  }
+
+  getAll(): Cookie[] {
+    return Object.values(this.#cookies);
   }
 }

@@ -1,14 +1,13 @@
-import { WebHeaders } from './headers.ts';
-import { WebMessage, WebMessageInit } from './message.ts';
+import { BaseWebMessage } from './message.ts';
 
-export interface WebResponseInput<B> extends WebMessageInit<B> {
-  statusCode?: number;
-};
+export interface WebResponseContext {
+  httpStatusCode?: number;
+}
 
 /**
  * Web Response as a simple object
  */
-export class WebResponse<B = unknown> implements WebMessage<B> {
+export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseContext> {
 
   /**
     * Build the redirect
@@ -16,15 +15,6 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
     * @param statusCode Status code
     */
   static redirect(location: string, statusCode = 302): WebResponse<undefined> {
-    return new WebResponse({ statusCode, headers: { Location: location } });
-  }
-
-  statusCode?: number;
-  body: B;
-  readonly headers: WebHeaders;
-
-  constructor(o: WebResponseInput<B> = {}) {
-    Object.assign(this, o);
-    this.headers = new WebHeaders(o.headers);
+    return new WebResponse({ context: { httpStatusCode: statusCode }, headers: { Location: location } });
   }
 }

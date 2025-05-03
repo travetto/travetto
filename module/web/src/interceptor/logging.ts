@@ -1,11 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
-import { WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
-import { EndpointConfig } from '../registry/types.ts';
 
 /**
  * Web logging configuration
@@ -33,40 +32,40 @@ export class LoggingInterceptor implements WebInterceptor {
   @Inject()
   config: WebLogConfig;
 
-  applies(ep: EndpointConfig, config: WebLogConfig): boolean {
+  applies({ config }: WebInterceptorContext<WebLogConfig>): boolean {
     return config.applies;
   }
 
-  async filter({ req, next }: WebChainedContext): Promise<WebResponse> {
+  async filter({ request, next }: WebChainedContext): Promise<WebResponse> {
     const createdDate = Date.now();
-    const res = await next();
+    const response = await next();
     const duration = Date.now() - createdDate;
 
-    const reqLog = {
-      method: req.method,
-      path: req.path,
-      query: { ...req.query },
-      params: req.params,
-      statusCode: res.statusCode,
+    const err = response.body instanceof Error ? response.body : undefined;
+    const code = response.context.httpStatusCode ??= (!!err ? 500 : 200);
+
+    const logMessage = {
+      method: request.context.httpMethod,
+      path: request.context.path,
+      query: request.context.httpQuery,
+      params: request.context.pathParams,
+      statusCode: code,
       duration,
     };
 
-    const err = res.body instanceof Error ? res.body : undefined;
-    const code = res.statusCode ?? (!!err ? 500 : 200);
-
     if (code < 400) {
-      console.info('Request', reqLog);
+      console.info('Request', logMessage);
     } else if (code < 500) {
-      console.warn('Request', reqLog);
+      console.warn('Request', logMessage);
     } else {
-      console.error('Request', reqLog);
+      console.error('Request', logMessage);
     }
 
     if (this.config.showStackTrace && err) {
       console.error(err.message, { error: err });
     }
 
-    return res;
+    return response;
   }
 }
 

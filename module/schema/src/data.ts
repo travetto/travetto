@@ -49,26 +49,26 @@ export class DataUtil {
     const isSimpA = !isEmptyA && this.isSimpleValue(a);
     const isSimpB = !isEmptyB && this.isSimpleValue(b);
 
-    let ret: unknown;
+    let value: unknown;
 
     if (isEmptyA || isEmptyB) { // If no `a`, `b` always wins
       if (mode === 'replace' || b === null || !isEmptyB) {
-        ret = isEmptyB ? b : this.shallowClone(b);
+        value = isEmptyB ? b : this.shallowClone(b);
       } else if (!isEmptyA) {
-        ret = this.shallowClone(a);
+        value = this.shallowClone(a);
       } else {
-        ret = undefined;
+        value = undefined;
       }
     } else {
       if (isArrA !== isArrB || isSimpA !== isSimpB) {
         throw new Error(`Cannot merge differing types ${a} and ${b}`);
       }
       if (Array.isArray(b)) { // Arrays
-        ret = a; // Write onto A
+        value = a; // Write onto A
         if (mode === 'replace') {
-          ret = b;
+          value = b;
         } else {
-          const retArr: unknown[] = castTo(ret);
+          const retArr: unknown[] = castTo(value);
           const bArr = b;
           for (let i = 0; i < bArr.length; i++) {
             retArr[i] = this.#deepAssignRaw(retArr[i], bArr[i], mode);
@@ -76,19 +76,19 @@ export class DataUtil {
         }
       } else if (isSimpB) { // Scalars
         const match = typeof a === typeof b;
-        ret = b;
+        value = b;
 
         if (!match) { // If types do not match
           if (mode === 'strict') { // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
           } else if (mode === 'coerce') { // Force on coerce
-            ret = this.coerceType(b, asConstructable(a).constructor, false);
+            value = this.coerceType(b, asConstructable(a).constructor, false);
           }
         }
       } else { // Object merge
-        ret = a;
+        value = a;
         const bObj: Record<string, unknown> = castTo(b);
-        const retObj: Record<string, unknown> = castTo(ret);
+        const retObj: Record<string, unknown> = castTo(value);
 
         for (const key of Object.keys(bObj)) {
           if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
@@ -98,7 +98,7 @@ export class DataUtil {
         }
       }
     }
-    return ret;
+    return value;
   }
 
   /**
@@ -142,11 +142,11 @@ export class DataUtil {
 
     switch (type) {
       case Date: {
-        let res: Date | undefined;
+        let value: Date | undefined;
         if (typeof input === 'object' && 'toDate' in input && typeof input.toDate === 'function') {
-          res = castTo(input.toDate());
+          value = castTo(input.toDate());
         } else {
-          res = input instanceof Date ?
+          value = input instanceof Date ?
             input :
             typeof input === 'number' ?
               new Date(input) :
@@ -154,17 +154,17 @@ export class DataUtil {
                 new Date(parseInt(input, 10)) :
                 new Date(input.toString());
         }
-        if (strict && res && Number.isNaN(res.getTime())) {
+        if (strict && value && Number.isNaN(value.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
         }
-        return res;
+        return value;
       }
       case Number: {
-        const res = `${input}`.includes('.') ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
-        if (strict && Number.isNaN(res)) {
+        const value = `${input}`.includes('.') ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
+        if (strict && Number.isNaN(value)) {
           throw new Error(`Invalid numeric value: ${input}`);
         }
-        return res;
+        return value;
       }
       case BigInt: {
         if (typeof input === 'bigint') {

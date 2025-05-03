@@ -4,9 +4,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Runtime } from '@travetto/runtime';
-
-import { Container, If, Unless, Summary, Title, Value, InkyTemplate } from '../src/components.ts';
-import { prepare } from '../src/wrapper.ts';
+import { Container, If, InkyTemplate, Summary, Title, Unless, Value, prepare } from '@travetto/email-inky';
 
 @Suite('InkyTemplate')
 class ContainerTest {

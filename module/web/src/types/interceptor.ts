@@ -1,9 +1,11 @@
 import type { Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
-import type { WebChainedContext } from '../types.ts';
+import type { WebChainedContext } from './filter.ts';
 import { WebResponse } from './response.ts';
 import { WebInterceptorCategory } from './core.ts';
+
+export type WebInterceptorContext<C = unknown> = { endpoint: EndpointConfig, config: C };
 
 /**
  * Web interceptor structure
@@ -35,13 +37,14 @@ export interface WebInterceptor<C = unknown> {
   /**
    * Determines the current endpoint is applicable for the interceptor
    * @param endpoint The endpoint to check
+   * @param config The root configuration
    */
-  applies?(endpoint: EndpointConfig, config: C): boolean;
+  applies?(context: WebInterceptorContext<C>): boolean;
 
   /**
    * Finalize config before use
    */
-  finalizeConfig?(config: C, inputs: Partial<C>[]): C;
+  finalizeConfig?(context: WebInterceptorContext<C>, inputs: Partial<C>[]): C;
 
   /**
    * Process the request

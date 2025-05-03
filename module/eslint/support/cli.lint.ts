@@ -42,7 +42,7 @@ export class LintCommand implements CliCommandShape {
       files = [];
     }
 
-    const res = await ExecUtil.getResult(spawn('npx', [
+    const result = await ExecUtil.getResult(spawn('npx', [
       'eslint',
       '--cache',
       '--cache-location', Runtime.toolPath('.eslintcache'),
@@ -55,6 +55,6 @@ export class LintCommand implements CliCommandShape {
       shell: false
     }), { catch: true });
 
-    process.exitCode = res.code;
+    process.exitCode = result.code;
   }
 }

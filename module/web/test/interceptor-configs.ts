@@ -5,19 +5,11 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { RootRegistry } from '@travetto/registry';
-
-import { ConfigureInterceptor } from '../src/decorator/common.ts';
-import { Controller } from '../src/decorator/controller.ts';
-import { Get } from '../src/decorator/endpoint.ts';
-import { WebInterceptor } from '../src/types/interceptor.ts';
-import { WebInterceptorCategory } from '../src/types/core.ts';
-import { ControllerRegistry } from '../src/registry/controller.ts';
-import { WebChainedContext } from '../src/types.ts';
-import { CorsInterceptor } from '../src/interceptor/cors.ts';
-import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
-import { EndpointConfig } from '../src/registry/types.ts';
-import { WebRequest } from '../src/types/request.ts';
-import { StandardWebRouter } from '@travetto/web';
+import {
+  ConfigureInterceptor, Controller, ControllerRegistry, CorsInterceptor, Get,
+  ResponseCacheInterceptor, StandardWebRouter, WebChainedContext, WebInterceptor,
+  WebInterceptorCategory, WebInterceptorContext, WebRequest
+} from '@travetto/web';
 
 @Injectable()
 @Config('web.custom')
@@ -36,11 +28,11 @@ class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
   @Inject()
   config: CustomInterceptorConfig;
 
-  applies(endpoint: EndpointConfig, config: CustomInterceptorConfig) {
+  applies({ endpoint, config }: WebInterceptorContext<CustomInterceptorConfig>) {
     return config.applies || /opt-in/.test(`${endpoint.fullPath}`);
   }
 
-  async filter({ req, config, next }: WebChainedContext<CustomInterceptorConfig>) {
+  async filter({ config, next }: WebChainedContext<CustomInterceptorConfig>) {
     const out = await next();
     out.headers.set('Name', config.name);
     return out;
@@ -50,7 +42,7 @@ class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
 @Controller('/test-interceptor')
 @ConfigureInterceptor(CustomInterceptor, { applies: true })
 @ConfigureInterceptor(CorsInterceptor, { applies: false })
-@ConfigureInterceptor(GetCacheInterceptor, { applies: false })
+@ConfigureInterceptor(ResponseCacheInterceptor, { applies: false })
 class TestController {
   @Get('/')
   async std() { }
@@ -73,7 +65,7 @@ class TestController {
 @Controller('/alt-test-interceptor')
 @ConfigureInterceptor(CustomInterceptor, { applies: false, name: 'greg' })
 @ConfigureInterceptor(CorsInterceptor, { applies: false })
-@ConfigureInterceptor(GetCacheInterceptor, { applies: false })
+@ConfigureInterceptor(ResponseCacheInterceptor, { applies: false })
 class AltTestController {
   @Get('/')
   async std() { }
@@ -99,8 +91,8 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = await endpoint.filter!({ req: new WebRequest({}) });
-    return res.headers.get('Name') ?? undefined;
+    const response = await endpoint.filter!({ request: new WebRequest({}) });
+    return response.headers.get('Name') ?? undefined;
   }
 
   @BeforeAll()

@@ -53,7 +53,7 @@ export class PackDockerCommand extends BasePackCommand {
   @Ignore()
   defaultUserId = 2000;
 
-  async validate(...args: string[]): Promise<CliValidationError[] | undefined> {
+  async validate(): Promise<CliValidationError[] | undefined> {
     const errs: CliValidationError[] = [];
     if (this.dockerPort?.length) {
       for (let i = 0; i < this.dockerPort.length; i++) {

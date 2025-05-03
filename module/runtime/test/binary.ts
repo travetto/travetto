@@ -4,9 +4,7 @@ import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-
-import { BinaryUtil } from '../src/binary.ts';
-import { BlobMeta } from '../src/types.ts';
+import { BinaryUtil, BlobMeta } from '@travetto/runtime';
 
 @Suite()
 export class BytesUtilTest {

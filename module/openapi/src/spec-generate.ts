@@ -290,7 +290,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Process controller endpoint
    */
   onEndpointEnd(ep: EndpointConfig, ctrl: ControllerConfig): void {
-    if (this.#config.skipEndpoints) {
+    if (this.#config.skipEndpoints || !ep.httpMethod) {
       return;
     }
 
@@ -312,12 +312,12 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const schema = SchemaRegistry.getMethodSchema(ep.class, ep.name);
     for (const field of schema) {
-      const res = this.#processEndpointParam(ep, ep.params[field.index!], field);
-      if (res) {
-        if ('parameters' in res) {
-          (op.parameters ??= []).push(...res.parameters);
+      const result = this.#processEndpointParam(ep, ep.params[field.index!], field);
+      if (result) {
+        if ('parameters' in result) {
+          (op.parameters ??= []).push(...result.parameters);
         } else {
-          op.requestBody ??= res.requestBody;
+          op.requestBody ??= result.requestBody;
         }
       }
     }
@@ -326,7 +326,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     this.#paths[key] = {
       ...(this.#paths[key] ?? {}),
-      [HTTP_METHODS[ep.method].lower]: op
+      [HTTP_METHODS[ep.httpMethod].lower]: op
     };
   }
 

@@ -4,12 +4,10 @@ import { AfterAll, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
 
-import { WebApplication, WebApplicationHandle } from '../../../src/types/application.ts';
-import { WebDispatcher } from '../../../src/types.ts';
-import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
+import { WebDispatcher } from '../../../src/types/dispatch.ts';
+import { WebRequest, WebRequestContext } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
-
-import { WebTestDispatchUtil } from '../dispatch-util.ts';
+import { WebMessageInit } from '../../../src/types/message.ts';
 
 @Injectable()
 export class WebTestConfig implements ConfigSource {
@@ -18,9 +16,11 @@ export class WebTestConfig implements ConfigSource {
       data: {
         web: {
           cookie: { secure: false },
-          ssl: { active: false },
           trustProxy: { ips: ['*'] },
-          port: -1
+          http: {
+            ssl: { active: false },
+            port: -1,
+          }
         }
       },
       source: 'custom://test/web',
@@ -34,31 +34,28 @@ export class WebTestConfig implements ConfigSource {
  */
 export abstract class BaseWebSuite {
 
-  #appHandle?: WebApplicationHandle;
+  #cleanup?: () => void;
   #dispatcher: WebDispatcher;
 
-  appType?: Class<WebApplication>;
+  serve?(): Promise<() => void>;
   dispatcherType: Class<WebDispatcher>;
 
   @BeforeAll()
   async initServer(): Promise<void> {
     await RootRegistry.init();
-    if (this.appType) {
-      this.#appHandle = await DependencyRegistry.getInstance(this.appType).then(v => v.run());
-    }
+    this.#cleanup = await this.serve?.();
     this.#dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
   }
 
   @AfterAll()
   async destroySever(): Promise<void> {
-    await this.#appHandle?.close?.();
-    this.#appHandle = undefined;
+    await this.#cleanup?.();
+    this.#cleanup = undefined;
   }
 
-  async request<T>(cfg: WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
-    const req = await WebTestDispatchUtil.applyRequestBody(new WebRequest(cfg));
-    const res = await this.#dispatcher.dispatch({ req });
-    if (throwOnError && res.statusCode && res.statusCode >= 400) { throw res.body; }
-    return castTo(res);
+  async request<T>(cfg: WebMessageInit<unknown, WebRequestContext>, throwOnError: boolean = true): Promise<WebResponse<T>> {
+    const response = await this.#dispatcher.dispatch({ request: new WebRequest(cfg) });
+    if (throwOnError && response.context.httpStatusCode && response.context.httpStatusCode >= 400) { throw response.body; }
+    return castTo(response);
   }
 }

@@ -9,20 +9,21 @@ export class NodeWebUtil {
   /**
    * Create a web request given a node IncomingMessage
    */
-  static toWebRequest(req: IncomingMessage, params?: Record<string, unknown>): WebRequest {
+  static toWebRequest(req: IncomingMessage): WebRequest {
     const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
     const [path, query] = (req.url ?? '/').split('?') ?? [];
     return new WebRequest({
-      connection: {
-        ip: req.socket.remoteAddress!,
-        host: req.headers.host,
-        protocol: secure ? 'https' : 'http',
-        port: req.socket.localPort
+      context: {
+        connection: {
+          ip: req.socket.remoteAddress!,
+          host: req.headers.host,
+          httpProtocol: secure ? 'https' : 'http',
+          port: req.socket.localPort
+        },
+        httpMethod: castTo(req.method?.toUpperCase()),
+        path,
+        httpQuery: Object.fromEntries(new URLSearchParams(query)),
       },
-      method: castTo(req.method?.toUpperCase()),
-      path,
-      query: Object.fromEntries(new URLSearchParams(query)),
-      params,
       headers: req.headers,
       body: WebBodyUtil.markRaw(req)
     });
@@ -32,14 +33,14 @@ export class NodeWebUtil {
    * Send WebResponse to ServerResponse
    */
   static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
-    const binaryRes = new WebResponse({ ...webRes, ...WebBodyUtil.toBinaryMessage(webRes) });
-    binaryRes.headers.forEach((v, k) => res.setHeader(k.toLowerCase(), v));
-    res.statusCode = WebCommonUtil.getStatusCode(binaryRes);
+    const binaryResponse = new WebResponse({ ...webRes, ...WebBodyUtil.toBinaryMessage(webRes) });
+    binaryResponse.headers.forEach((v, k) => res.setHeader(k.toLowerCase(), v));
+    res.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
 
-    if (BinaryUtil.isReadable(binaryRes.body)) {
-      await pipeline(binaryRes.body, res);
+    if (BinaryUtil.isReadable(binaryResponse.body)) {
+      await pipeline(binaryResponse.body, res);
     } else {
-      res.write(binaryRes.body);
+      res.write(binaryResponse.body);
       res.end();
     }
   }

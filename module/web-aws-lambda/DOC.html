@@ -15,7 +15,8 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/web-aws-lambda</code></pre>
   </figure>
 
-The module provides support basic support with AWS lambdas.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers.
+This module provides an adapter between <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> and <a target="_blank" class="external-link" href="https://aws.amazon.com/lambda/">AWS Lambda</a>.  The event-driven invocation model for <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> aligns cleanly with <a target="_blank" class="external-link" href="https://aws.amazon.com/lambda/">AWS Lambda</a>'s model for event-driven operation.  <br><br>
+<strong>NOTE:</strong> The only caveat to consider, is that while the framework supports streams for responses, <a target="_blank" class="external-link" href="https://aws.amazon.com/lambda/">AWS Lambda</a> does not. Any streaming result will be read and converted into a <a target="_blank" class="external-link" href="https://nodejs.org/api/buffer.html">Buffer</a> before being sent back.
 <h2 id="cli-packaging-lambdas">CLI - Packaging Lambdas</h2>
 
   <figure class="terminal">

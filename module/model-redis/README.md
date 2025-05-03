@@ -40,11 +40,6 @@ where the [RedisModelConfig](https://github.com/travetto/travetto/tree/main/modu
 
 **Code: Structure of RedisModelConfig**
 ```typescript
-import type redis from 'redis';
-
-import { Config } from '@travetto/config';
-import { Field } from '@travetto/schema';
-
 @Config('model.redis')
 export class RedisModelConfig {
 

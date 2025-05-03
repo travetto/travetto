@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { CommonRegExp } from '../src/validate/regexp.ts';
+import { CommonRegExp } from '@travetto/schema';
 
 @Suite()
 export class RegExpTest {

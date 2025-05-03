@@ -1,9 +1,7 @@
 import assert from 'node:assert';
-import { Suite, Test } from '@travetto/test';
 
-import { Registry } from '../src/registry.ts';
-import { MethodSource, } from '../src/source/method-source.ts';
-import { RootRegistry } from '../src/service/root.ts';
+import { Suite, Test } from '@travetto/test';
+import { MethodSource, Registry, RootRegistry } from '@travetto/registry';
 
 class Simple extends Registry {
 }

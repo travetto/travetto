@@ -3,13 +3,10 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { WebResponse } from '@travetto/web';
+import { AuthContextInterceptor, CommonPrincipalCodecSymbol, JWTPrincipalCodec, WebAuthConfig } from '@travetto/auth-web';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
-import { AuthContextInterceptor } from '../src/interceptors/context.ts';
-import { JWTPrincipalCodec } from '../src/codec.ts';
-import { WebAuthConfig } from '../src/config.ts';
-import { CommonPrincipalCodecSymbol } from '../src/types.ts';
 
 @Suite()
 @InjectableSuite()
@@ -26,10 +23,10 @@ export class CodecTest {
 
   @Test()
   async testHeader() {
-    const res = new WebResponse();
+    const response = new WebResponse();
     this.interceptor.config.mode = 'header';
 
-    await this.interceptor.codec.encode(res,
+    await this.interceptor.codec.encode(response,
       {
         id: 'true',
         details: {
@@ -38,17 +35,17 @@ export class CodecTest {
       }
     );
 
-    assert(res.headers.has('Authorization'));
+    assert(response.headers.has('Authorization'));
   }
 
   @Test()
   async testHeaderMissing() {
-    const res = new WebResponse();
+    const response = new WebResponse();
     this.interceptor.config.mode = 'header';
 
-    await this.interceptor.codec.encode(res, undefined);
+    await this.interceptor.codec.encode(response, undefined);
 
-    assert(!res.headers.has('Authorization'));
+    assert(!response.headers.has('Authorization'));
   }
 
   @Test()

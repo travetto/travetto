@@ -35,6 +35,11 @@ class TestRunnerFeature extends BaseFeature {
     }
   }
 
+  #restartServer(): void {
+    this.#stopServer(true);
+    this.#startServer();
+  }
+
   #startServer(): void {
     if (this.#server || Workspace.compilerState !== 'watch-start') { return; }
 
@@ -202,6 +207,7 @@ class TestRunnerFeature extends BaseFeature {
     this.register('line', (line?: number) => this.#launchTestDebugger(line));
     this.register('stop', () => this.#stopServer(true));
     this.register('start', () => this.#startServer());
+    this.register('restart', () => this.#restartServer());
     this.register('rerun', () => this.#rerunActive());
 
     Workspace.onCompilerState(state => (state === 'watch-start') ?

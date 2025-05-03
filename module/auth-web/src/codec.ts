@@ -2,7 +2,7 @@ import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt
 
 import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
-import { WebResponse, WebRequest, WebAsyncContext } from '@travetto/web';
+import { WebResponse, WebRequest, WebAsyncContext, CookieJar } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
@@ -49,15 +49,15 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     }
   }
 
-  token(req: WebRequest): AuthToken | undefined {
+  token(request: WebRequest): AuthToken | undefined {
     const value = (this.config.mode === 'header') ?
-      req.headers.getWithPrefix(this.config.header, this.config.headerPrefix) :
-      this.webAsyncContext.cookies.get(this.config.cookie, { signed: false });
+      request.headers.getWithPrefix(this.config.header, this.config.headerPrefix) :
+      this.webAsyncContext.getValue(CookieJar).get(this.config.cookie, { signed: false });
     return value ? { type: 'jwt', value } : undefined;
   }
 
-  async decode(req: WebRequest): Promise<Principal | undefined> {
-    const token = this.token(req);
+  async decode(request: WebRequest): Promise<Principal | undefined> {
+    const token = this.token(request);
     return token ? await this.verify(token.value) : undefined;
   }
 
@@ -79,14 +79,14 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     return jwt.toString();
   }
 
-  async encode(res: WebResponse, data: Principal | undefined): Promise<WebResponse> {
+  async encode(response: WebResponse, data: Principal | undefined): Promise<WebResponse> {
     const token = data ? await this.create(data) : undefined;
     const { header, headerPrefix, cookie } = this.config;
     if (this.config.mode === 'header') {
-      res.headers.setWithPrefix(header, token, headerPrefix);
+      response.headers.setWithPrefix(header, token, headerPrefix);
     } else {
-      this.webAsyncContext.cookies.set({ name: cookie, value: token, signed: false, expires: data?.expiresAt });
+      this.webAsyncContext.getValue(CookieJar).set({ name: cookie, value: token, signed: false, expires: data?.expiresAt });
     }
-    return res;
+    return response;
   }
 }

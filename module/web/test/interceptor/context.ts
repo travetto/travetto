@@ -17,18 +17,18 @@ class AsyncContextInterceptorSuite {
   async basicTest() {
     const interceptor = await DependencyRegistry.getInstance(AsyncContextInterceptor);
 
-    const req = new WebRequest({ method: 'GET' });
-    const res = await interceptor.filter({
-      req,
+    const request = new WebRequest({ context: { path: '/', httpMethod: 'GET' } });
+    const response = await interceptor.filter({
+      request,
       next: async () => {
         const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
-        req.headers.set('Modified', '1');
-        return new WebResponse({ body: ctx.req === req }); // We have the same instance
+        request.headers.set('Modified', '1');
+        return new WebResponse({ body: ctx.request === request }); // We have the same instance
       },
       config: {}
     });
 
-    assert(res.body === true);
-    assert(req.headers.get('Modified') === '1');
+    assert(response.body === true);
+    assert(request.headers.get('Modified') === '1');
   }
 }

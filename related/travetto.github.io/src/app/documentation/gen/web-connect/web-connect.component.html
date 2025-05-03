@@ -15,4 +15,38 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web-connect</code></pre>
   </figure>
 
-This module provides basic integration for calling <a target="_blank" class="external-link" href="https://github.com/senchalabs/connect">connect</a> related middleware.
+This module provides basic integration for calling <a target="_blank" class="external-link" href="https://github.com/senchalabs/connect">connect</a> related middleware with <a class="module-link" routerLink="/docs/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a>. This logic is not intended to be exhaustive, but intended to provide a quick bridge.  This only consumer of this is <a class="module-link" routerLink="/docs/auth-web-passport" title="Web authentication integration support for the Travetto framework">Web Auth Passport</a> as it needs to bind the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3">WebResponse</a> to standard contracts for <a target="_blank" class="external-link" href="http://passportjs.org">passport</a>. <br><br>
+This module is already most likely compatible with quite a bit of middleware, but will fail under any of the following conditions:
+<ul> <li>The calling code expects the request or response to be a proper <a target="_blank" class="external-link" href="https://nodejs.org/api/events.html#class-eventemitter">EventEmitter</a></li>
+<li>The calling code expects the request/response sockets to be live.</li>
+<li>The calling code modifies the shape of the objects (e.g. rewrites the close method on response).</li>
+</ul>
+Barring these exceptions, gaps will be filled in as more use cases arise.  The above exceptions are non-negotiable as they are are enforced by the invocation method defined by <a class="module-link" routerLink="/docs/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a>.
+
+  <figure class="code">
+    <figcaption class="code">Example of using the Connect Adaptor with Passport
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-web-passport/src/authenticator.ts#L55">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">async</span> <span class="token function">authenticate</span><span class="token punctuation">(</span>input<span class="token operator">:</span> object<span class="token punctuation">,</span> ctx<span class="token operator">:</span> WebFilterContext<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> requestOptions <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">#passportOptions</span><span class="token punctuation">(</span>ctx<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> options <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+      session<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>session<span class="token punctuation">,</span>
+      failWithError<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token operator">...</span>requestOptions<span class="token punctuation">,</span>
+      state<span class="token operator">:</span> PassportUtil<span class="token punctuation">.</span><span class="token function">enhanceState</span><span class="token punctuation">(</span>ctx<span class="token punctuation">,</span> requestOptions<span class="token punctuation">.</span>state<span class="token punctuation">)</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> WebConnectUtil<span class="token punctuation">.</span><span class="token generic-function"><span class="token function">invoke</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">V</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>ctx<span class="token punctuation">,</span> <span class="token punctuation">(</span>req<span class="token punctuation">,</span> res<span class="token punctuation">,</span> next<span class="token punctuation">)</span> <span class="token operator">=></span>
+      passport<span class="token punctuation">.</span><span class="token function">authenticate</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#strategyName<span class="token punctuation">,</span> options<span class="token punctuation">,</span> next<span class="token punctuation">)</span><span class="token punctuation">(</span>req<span class="token punctuation">,</span> res<span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>user<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">delete</span> user<span class="token punctuation">.</span>_raw<span class="token punctuation">;</span>
+      <span class="token keyword">delete</span> user<span class="token punctuation">.</span>_json<span class="token punctuation">;</span>
+      <span class="token keyword">delete</span> user<span class="token punctuation">.</span>source<span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">#toPrincipal</span><span class="token punctuation">(</span>user<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#strategyName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
