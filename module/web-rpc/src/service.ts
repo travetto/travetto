@@ -49,7 +49,7 @@ export class WebRpcClientGeneratorService {
     const clientOutputFile = path.resolve(config.output, path.basename(clientSourceFile));
     const clientSourceContents = await fs.readFile(clientSourceFile, 'utf8');
 
-    const flavorSourceFile = RuntimeIndex.getFromImport(`@travetto/web-rpc/support/client/rpc-${config.type}.ts`)!.sourceFile;
+    const flavorSourceFile = RuntimeIndex.getFromImport(`@travetto/web-rpc/support/client/rpc-${config.type}.ts`)?.sourceFile ?? '<unknown>';
     const flavorOutputFile = path.resolve(config.output, path.basename(flavorSourceFile));
     const flavorSourceContents = (await fs.readFile(flavorSourceFile, 'utf8').catch(() => ''))
       .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gsm, '')
@@ -57,7 +57,7 @@ export class WebRpcClientGeneratorService {
 
     const factoryOutputFile = path.resolve(config.output, 'factory.ts');
     const factorySourceContents = [
-      `import { ${clientFactory.name} } from './rpc.ts';`,
+      `import { ${clientFactory.name} } from './rpc';`,
       ...classes.map((n) => `import type { ${n.name} } from '${n.import}';`),
       '',
       `export const factory = ${clientFactory.name}<{`,
