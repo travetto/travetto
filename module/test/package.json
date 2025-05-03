@@ -1,6 +1,6 @@
 {
   "name": "@travetto/test",
-  "version": "6.0.0-rc.1",
+  "version": "6.0.0-rc.2",
   "description": "Declarative test framework",
   "keywords": [
     "unit-testing",
@@ -27,15 +27,15 @@
     "directory": "module/test"
   },
   "dependencies": {
-    "@travetto/registry": "^6.0.0-rc.1",
-    "@travetto/runtime": "^6.0.0-rc.1",
-    "@travetto/terminal": "^6.0.0-rc.1",
-    "@travetto/worker": "^6.0.0-rc.1",
+    "@travetto/registry": "^6.0.0-rc.2",
+    "@travetto/runtime": "^6.0.0-rc.2",
+    "@travetto/terminal": "^6.0.0-rc.2",
+    "@travetto/worker": "^6.0.0-rc.2",
     "yaml": "^2.7.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^6.0.0-rc.1",
-    "@travetto/transformer": "^6.0.0-rc.2"
+    "@travetto/cli": "^6.0.0-rc.2",
+    "@travetto/transformer": "^6.0.0-rc.3"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
