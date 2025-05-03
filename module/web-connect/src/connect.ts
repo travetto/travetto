@@ -50,6 +50,7 @@ export class ConnectResponse implements Pick<ServerResponse,
   #headersSent = false;
   #finished = false;
   #written: Buffer[] = [];
+  #onEndHandlers: (() => void)[] = [];
 
   constructor(response?: WebResponse) {
     this.#response = response ?? new WebResponse();
@@ -143,11 +144,19 @@ export class ConnectResponse implements Pick<ServerResponse,
     }
     this.#finished = true;
     cb?.();
+    for (const item of this.#onEndHandlers) {
+      item();
+    }
+    return this;
+  }
+
+  on(type: 'end', handler: () => void): this {
+    this.#onEndHandlers.push(handler);
     return this;
   }
 
   throwIfSent(): void {
-    if (!this.#headersSent) {
+    if (this.#headersSent) {
       this.#response.body = Buffer.concat(this.#written);
       throw this.#response;
     }

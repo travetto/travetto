@@ -27,6 +27,8 @@ export class WebConnectUtil {
     const connectRes = ConnectResponse.get();
 
     const p = Promise.withResolvers<T | undefined>();
+    connectRes.on('end', () => p.resolve(null!));
+
     handler(connectReq, connectRes, (err, value) => err ? p.reject(err) : p.resolve(value!));
     const result = await p.promise;
     connectRes.throwIfSent();
