@@ -9,7 +9,7 @@ import {
 @Controller('/rpc')
 @ExcludeInterceptors(val => !(val instanceof BodyParseInterceptor || val instanceof RespondInterceptor || val.category === 'global'))
 @Undocumented()
-export class WebRpController {
+export class WebRpcController {
 
   @Inject()
   ctx: WebAsyncContext;
