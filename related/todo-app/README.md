@@ -426,7 +426,7 @@ npx trv web:http
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:37] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/server.ts:36] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 
@@ -452,13 +452,11 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/create-todo.ts <key> <port>
 
-TypeError: fetch failed
-    at node:internal/deps/undici/undici:13510:13
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async Module.main (./doc/create-todo.ts:2:15)
-    at async MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:26:16)
-    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:57:20)
-    at async Function.run (<workspace-root>/module/cli/src/execute.ts:76:9)
+{
+  text: 'New Todo - <key>',
+  created: '2029-03-14T04:00:01.510Z',
+  id: '<uniqueId>'
+}
 ```
 
 Now create `support/list-todo.ts` with the following contents:
@@ -475,11 +473,11 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-TypeError: fetch failed
-    at node:internal/deps/undici/undici:13510:13
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async Module.main (./doc/list-todo.ts:2:15)
-    at async MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:26:16)
-    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:57:20)
-    at async Function.run (<workspace-root>/module/cli/src/execute.ts:76:9)
+[
+  {
+    id: '<uniqueId>',
+    text: 'New Todo - <key>',
+    created: '2029-03-14T04:00:01.814Z'
+  }
+]
 ```

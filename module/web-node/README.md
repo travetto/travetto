@@ -15,23 +15,9 @@ yarn add @travetto/web-node
 
 The module is an [http](https://nodejs.org/api/http.html) adapter for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides will run an [http](https://nodejs.org/api/http.html) or [https](https://nodejs.org/api/https.html) server using [Node](https://nodejs.org) primitives.
 
-**Code: Node Web Application**
+**Code: Node Web Server**
 ```typescript
-import { IncomingMessage, ServerResponse } from 'node:http';
-
-import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { StandardWebRouter } from '@travetto/web';
-import { ConfigurationService } from '@travetto/config';
-import { WebHttpUtil, WebHttpConfig, WebHttpServer } from '@travetto/web-http-server';
-import { Cancelable } from '@travetto/runtime';
-
-import { NodeWebUtil } from './util.ts';
-
-/**
- * A node http server
- */
-@Injectable()
-export class NodeWebApplication implements WebHttpServer {
+export class NodeWebServer implements WebHttpServer {
 
   @Inject()
   serverConfig: WebHttpConfig;
@@ -45,17 +31,17 @@ export class NodeWebApplication implements WebHttpServer {
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 
-  async serve(): Promise<Cancelable> {
+  async serve(): Promise<WebHttpServerHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
-    const server = await WebHttpUtil.startHttpServer({
+    const handle = await WebHttpUtil.startHttpServer({
       ...this.serverConfig,
       handler: (req, res) => this.handler(req, res)
     });
 
     console.log('Listening', { port: this.serverConfig.port });
 
-    return () => { server.close(); };
+    return handle;
   }
 }
 ```

@@ -54,10 +54,7 @@ export class ExecutionManager {
     await command.preMain?.();
 
     ConsoleManager.debug(Runtime.debug);
-    const result = await command.main(...boundArgs);
-    if (result) {
-      ShutdownManager.onGracefulShutdown(result);
-    }
+    await command.main(...boundArgs);
   }
 
   /**

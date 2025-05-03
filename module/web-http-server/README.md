@@ -103,8 +103,9 @@ export class SampleApp {
 
     // Configure server before running
     const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
-    const cleanup = await instance.serve();
-    ShutdownManager.onGracefulShutdown(cleanup);
+    const { wait, kill } = await instance.serve();
+    ShutdownManager.onGracefulShutdown(kill);
+    return wait;
   }
 }
 ```

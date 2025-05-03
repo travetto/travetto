@@ -1,7 +1,7 @@
 import { Env } from './env.ts';
 import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
-import { Cancelable } from './types.ts';
+
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
@@ -9,14 +9,14 @@ import { Cancelable } from './types.ts';
 export class ShutdownManager {
 
   static #registered = false;
-  static #handlers: { name?: string, handler: Cancelable }[] = [];
+  static #handlers: { name?: string, handler: () => (void | Promise<void>) }[] = [];
 
   /**
    * On Shutdown requested
    * @param name name to log for
    * @param handler synchronous or asynchronous handler
    */
-  static onGracefulShutdown(handler: Cancelable, name?: string | { constructor: Function }): () => void {
+  static onGracefulShutdown(handler: () => (void | Promise<void>), name?: string | { constructor: Function }): () => void {
     if (!this.#registered) {
       this.#registered = true;
       const done = (): void => { this.gracefulShutdown(0); };

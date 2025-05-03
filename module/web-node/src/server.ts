@@ -3,8 +3,7 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { StandardWebRouter } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
-import { WebHttpUtil, WebHttpConfig, WebHttpServer } from '@travetto/web-http-server';
-import { Cancelable } from '@travetto/runtime';
+import { WebHttpUtil, WebHttpConfig, WebHttpServer, WebHttpServerHandle } from '@travetto/web-http-server';
 
 import { NodeWebUtil } from './util.ts';
 
@@ -12,7 +11,7 @@ import { NodeWebUtil } from './util.ts';
  * A node http server
  */
 @Injectable()
-export class NodeWebApplication implements WebHttpServer {
+export class NodeWebServer implements WebHttpServer {
 
   @Inject()
   serverConfig: WebHttpConfig;
@@ -26,16 +25,16 @@ export class NodeWebApplication implements WebHttpServer {
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 
-  async serve(): Promise<Cancelable> {
+  async serve(): Promise<WebHttpServerHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
-    const server = await WebHttpUtil.startHttpServer({
+    const handle = await WebHttpUtil.startHttpServer({
       ...this.serverConfig,
       handler: (req, res) => this.handler(req, res)
     });
 
     console.log('Listening', { port: this.serverConfig.port });
 
-    return () => { server.close(); };
+    return handle;
   }
 }

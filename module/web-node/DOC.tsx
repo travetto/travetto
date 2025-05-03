@@ -1,12 +1,13 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { WebRequest, WebResponse } from '@travetto/web';
+import { NodeWebServer } from '@travetto/web-node';
 
 export const text = <>
   <c.StdHeader />
   The module is an {d.library('NodeHttp')} adapter for the {d.mod('Web')} module.  This module provides will run an {d.library('NodeHttp')} or {d.library('NodeHttps')} server using {d.library('Node')} primitives.
 
-  <c.Code title="Node Web Application" src="./src/application.ts"></c.Code>
+  <c.Code title="Node Web Server" src={NodeWebServer}></c.Code>
 
   In the handler code, you can see that the main work is:
   <ul>

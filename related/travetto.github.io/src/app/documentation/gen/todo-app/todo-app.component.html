@@ -457,7 +457,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web-node:src/application.ts:37<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web-node:src/server.ts:36<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>
@@ -487,13 +487,11 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
 </figcaption>
     <pre><code class="language-bash">$ trv main support/create-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-TypeError: fetch failed
-    at node:internal/deps/undici/undici:13510:13
-    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:105:5<span class="token punctuation">)</span>
-    at async Module.main <span class="token punctuation">(</span>./doc/create-todo.ts:2:15<span class="token punctuation">)</span>
-    at async MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:26:16<span class="token punctuation">)</span>
-    at async Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:57:20)</span>
-    at async Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:76:9<span class="token punctuation">)</span></code></pre>
+<span class="token punctuation">{{'{'}}</span>
+  text: <span class="token string">'New Todo - &lt;key>'</span>,
+  created: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
+  id: <span class="token string">'&lt;uniqueId>'</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 Now create <code class="item path">support/list-todo.ts</code> with the following contents:
@@ -515,13 +513,13 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 </figcaption>
     <pre><code class="language-bash">$ trv main support/list-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-TypeError: fetch failed
-    at node:internal/deps/undici/undici:13510:13
-    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:105:5<span class="token punctuation">)</span>
-    at async Module.main <span class="token punctuation">(</span>./doc/list-todo.ts:2:15<span class="token punctuation">)</span>
-    at async MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:26:16<span class="token punctuation">)</span>
-    at async Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:57:20)</span>
-    at async Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:76:9<span class="token punctuation">)</span></code></pre>
+<span class="token punctuation">[</span>
+  <span class="token punctuation">{{'{'}}</span>
+    id: <span class="token string">'&lt;uniqueId>'</span>,
+    text: <span class="token string">'New Todo - &lt;key>'</span>,
+    created: <span class="token string">'2029-03-14T04:00:01.814Z'</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">]</span></code></pre>
   </figure>
 
 </div>

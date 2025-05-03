@@ -1,5 +1,5 @@
 import { RootRegistry } from '@travetto/registry';
-import { castTo, Class, Cancelable } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
@@ -34,10 +34,10 @@ export class WebTestConfig implements ConfigSource {
  */
 export abstract class BaseWebSuite {
 
-  #cleanup?: Cancelable;
+  #cleanup?: () => void;
   #dispatcher: WebDispatcher;
 
-  serve?(): Promise<Cancelable>;
+  serve?(): Promise<() => void>;
   dispatcherType: Class<WebDispatcher>;
 
   @BeforeAll()
