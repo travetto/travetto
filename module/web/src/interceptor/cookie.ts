@@ -25,7 +25,7 @@ export class CookieConfig implements CookieSetOptions {
   /**
    * Are they signed
    */
-  signed = true;
+  signed?: boolean;
   /**
    * Supported only via http (not in JS)
    */
@@ -42,18 +42,22 @@ export class CookieConfig implements CookieSetOptions {
   /**
    * Is the cookie only valid for https
    */
-  secure?: boolean = false;
+  secure?: boolean;
   /**
    * The domain of the cookie
    */
   domain?: string;
+  /**
+   * The default path of the cookie
+   */
+  path: string = '/';
 }
 
 /**
  * Loads cookies from the request, verifies, exposes, and then signs and sets
  */
 @Injectable()
-export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
+export class CookieInterceptor implements WebInterceptor<CookieConfig> {
 
   #cookieJar = new AsyncContextValue<CookieJar>(this);
 
@@ -77,8 +81,9 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
 
   finalizeConfig({ config }: WebInterceptorContext<CookieConfig>): CookieConfig {
     const url = new URL(this.webConfig.baseUrl ?? 'x://localhost');
-    config.secure ??= url.protocol === 'https';
+    config.secure ??= url.protocol === 'https:';
     config.domain ??= url.hostname;
+    config.signed ??= !!config.keys?.length;
     return config;
   }
 
@@ -87,11 +92,11 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<CookieConfig>): Promise<WebResponse> {
-    const jar = new CookieJar(request.headers.get('Cookie'), config);
+    const jar = new CookieJar(config).importCookieHeader(request.headers.get('Cookie'));
     this.#cookieJar.set(jar);
 
     const response = await next();
-    for (const c of jar.export()) { response.headers.append('Set-Cookie', c); }
+    for (const c of jar.exportSetCookieHeader()) { response.headers.append('Set-Cookie', c); }
     return response;
   }
 }

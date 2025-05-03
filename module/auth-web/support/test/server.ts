@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
-import { Controller, Get, WebHeaders, WebResponse, Post } from '@travetto/web';
+import { Controller, Get, WebHeaders, WebResponse, Post, Cookie, CookieJar } from '@travetto/web';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
@@ -90,16 +90,16 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   @Inject()
   config: WebAuthConfig;
 
-  getCookie(headers: WebHeaders): string | undefined {
-    return headers.getSetCookie()[0];
+  getCookie(headers: WebHeaders): Cookie | undefined {
+    return new CookieJar().importSetCookieHeader(headers.getSetCookie()).getAll()[0];
   }
 
-  getCookieValue(headers: WebHeaders): string | undefined {
-    return this.getCookie(headers)?.split(';')[0];
+  getCookieHeader(headers: WebHeaders): string | undefined {
+    return new CookieJar().importSetCookieHeader(headers.getSetCookie()).exportCookieHeader();
   }
 
   getCookieExpires(headers: WebHeaders): Date | undefined {
-    const v = this.getCookie(headers)?.match('expires=([^;]+)(;|$)')?.[1];
+    const v = this.getCookie(headers)?.expires;
     return v ? new Date(v) : undefined;
   }
 
@@ -152,7 +152,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
       }
     }, false);
     assert(statusCode === 201);
-    const cookie = this.getCookieValue(headers);
+    const cookie = this.getCookieHeader(headers);
     assert(cookie);
 
     const { context: { httpStatusCode: lastStatus } } = await this.request({
@@ -225,7 +225,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
       }
     }, false);
     assert(statusCode === 201);
-    const cookie = this.getCookieValue(headers);
+    const cookie = this.getCookieHeader(headers);
     assert(cookie);
 
     const { body, context: { httpStatusCode: lastStatus } } = await this.request({
@@ -253,7 +253,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     assert(statusCode === 201);
 
     const start = Date.now();
-    const cookie = this.getCookieValue(headers);
+    const cookie = this.getCookieHeader(headers);
     assert(cookie);
 
     const expires = this.getCookieExpires(headers);

@@ -1,14 +1,26 @@
 import keygrip from 'keygrip';
 import { AppError, castKey, castTo } from '@travetto/runtime';
 
-import { Cookie, CookieGetOptions } from '../types/cookie.ts';
+import { Cookie, CookieGetOptions, CookieSetOptions } from '../types/cookie.ts';
 
 const pairText = (c: Cookie): string => `${c.name}=${c.value}`;
 const pair = (k: string, v: unknown): string => `${k}=${v}`;
 
+type CookieJarOptions = { keys?: string[] } & CookieSetOptions;
+
 export class CookieJar {
 
-  static fromHeaderValue(header: string): Cookie {
+  static parseCookieHeader(header: string): Cookie[] {
+    return header.split(/\s{0,4};\s{0,4}/g)
+      .map(x => x.trim())
+      .filter(x => !!x)
+      .map(item => {
+        const kv = item.split(/\s{0,4}=\s{0,4}/);
+        return { name: kv[0], value: kv[1] };
+      });
+  }
+
+  static parseSetCookieHeader(header: string): Cookie {
     const parts = header.split(/\s{0,4};\s{0,4}/g);
     const [name, value] = parts[0].split(/\s{0,4}=\s{0,4}/);
     const c: Cookie = { name, value };
@@ -27,119 +39,125 @@ export class CookieJar {
     return c;
   }
 
-  static toHeaderValue(c: Cookie, response = true): string {
-    const header = [pair(c.name, c.value)];
-    if (response) {
-      if (!c.value) {
-        c.expires = new Date(0);
-        c.maxAge = undefined;
-      }
-      if (c.maxAge) {
-        c.expires = new Date(Date.now() + c.maxAge);
-      }
-
-      if (c.path) { header.push(pair('path', c.path)); }
-      if (c.expires) { header.push(pair('expires', c.expires.toUTCString())); }
-      if (c.domain) { header.push(pair('domain', c.domain)); }
-      if (c.priority) { header.push(pair('priority', c.priority.toLowerCase())); }
-      if (c.sameSite) { header.push(pair('samesite', c.sameSite.toLowerCase())); }
-      if (c.secure) { header.push('secure'); }
-      if (c.httpOnly) { header.push('httponly'); }
-      if (c.partitioned) { header.push('partitioned'); }
-    }
-    return header.join(';');
+  static responseSuffix(c: Cookie): string[] {
+    const parts = [];
+    if (c.path) { parts.push(pair('path', c.path)); }
+    if (c.expires) { parts.push(pair('expires', c.expires.toUTCString())); }
+    if (c.domain) { parts.push(pair('domain', c.domain)); }
+    if (c.priority) { parts.push(pair('priority', c.priority.toLowerCase())); }
+    if (c.sameSite) { parts.push(pair('samesite', c.sameSite.toLowerCase())); }
+    if (c.secure) { parts.push('secure'); }
+    if (c.httpOnly) { parts.push('httponly'); }
+    if (c.partitioned) { parts.push('partitioned'); }
+    return parts;
   }
 
-  #secure?: boolean;
   #grip?: keygrip;
   #cookies: Record<string, Cookie> = {};
+  #setOptions: CookieSetOptions = {};
+  #deleteOptions: CookieSetOptions = { maxAge: 0, expires: undefined };
 
-  constructor(input?: string | string[] | null | undefined | Cookie[] | CookieJar, options?: { keys?: string[], secure?: boolean }) {
-    this.#grip = options?.keys?.length ? new keygrip(options.keys) : undefined;
-    this.#secure = options?.secure ?? false;
-    if (input instanceof CookieJar) {
-      this.#cookies = { ...input.#cookies };
-    } else if (Array.isArray(input)) {
-      this.#import(input);
-    } else {
-      this.#import(input?.split(/\s{0,4},\s{0,4}/) ?? []);
-    }
+  constructor({ keys, ...options }: CookieJarOptions = {}) {
+    this.#grip = keys?.length ? new keygrip(keys) : undefined;
+    this.#setOptions = {
+      secure: false,
+      path: '/',
+      signed: !!keys?.length,
+      ...options,
+    };
   }
 
-  #checkSignature(c: Cookie): Cookie | undefined {
-    if (!this.#grip) { return; }
-    const key = pairText(c);
-    const sc = this.#cookies[`${c.name}.sig`];
-    if (!sc.value) { return; }
-
-    const index = this.#grip.index(key, sc.value);
-    c.signed = index >= 0;
-    sc.signed = false;
-    sc.secure = c.secure;
-
-    if (index >= 1) {
-      sc.value = this.#grip.sign(key);
-      sc.response = true;
-      return sc;
+  #exportCookie(cookie: Cookie, response?: boolean): string[] {
+    const suffix = response ? CookieJar.responseSuffix(cookie) : null;
+    const payload = pairText(cookie);
+    const out = suffix ? [[payload, ...suffix].join(';')] : [payload];
+    if (cookie.signed) {
+      const sigPair = pair(`${cookie.name}.sig`, this.#grip!.sign(payload));
+      out.push(suffix ? [sigPair, ...suffix].join(';') : sigPair);
     }
+    return out;
   }
 
-  #signCookie(c: Cookie): Cookie {
-    if (!this.#grip) {
-      throw new AppError('.keys required for signed cookies');
-    } else if (!this.#secure && c.secure) {
-      throw new AppError('Cannot send secure cookie over unencrypted connection');
-    }
-    return { ...c, name: `${c.name}.sig`, value: this.#grip.sign(pairText(c)) };
-  }
-
-  #import(inputs: (string | Cookie)[]): void {
-    const toCheck = [];
-    for (const input of inputs) {
-      const c = typeof input === 'string' ? CookieJar.fromHeaderValue(input) : input;
-      this.#cookies[c.name] = c;
-      if (this.#grip && !c.name.endsWith('.sig')) {
-        toCheck.push(c);
+  import(cookies: Cookie[]): this {
+    const signatures: Record<string, string> = {};
+    for (const cookie of cookies) {
+      if (this.#setOptions.signed && cookie.name.endsWith('.sig')) {
+        signatures[cookie.name.replace(/[.]sig$/, '')] = cookie.value!;
+      } else {
+        this.#cookies[cookie.name] = { signed: false, ...cookie };
       }
     }
-    for (const c of toCheck) {
-      const sc = this.#checkSignature(c);
-      if (sc) {
-        this.set(sc);
+
+    for (const [name, value] of Object.entries(signatures)) {
+      const cookie = this.#cookies[name];
+      if (!cookie) {
+        continue;
+      }
+      cookie.signed = true;
+
+      const computed = pairText(cookie);
+      const index = this.#grip!.index(computed, value);
+
+      if (index < 0) {
+        delete this.#cookies[name];
+      } else if (index >= 1) {
+        cookie.response = true;
       }
     }
+    return this;
+  }
+
+  has(name: string, opts: CookieGetOptions = {}): boolean {
+    const needSigned = opts.signed ?? this.#setOptions.signed;
+    return name in this.#cookies && this.#cookies[name].signed === needSigned;
   }
 
   get(name: string, opts: CookieGetOptions = {}): string | undefined {
-    const c = this.#cookies[name];
-    return (c?.signed || !(opts.signed ?? !!this.#grip)) ? c?.value : undefined;
-  }
-
-  set(c: Cookie): void {
-    this.#cookies[c.name] = c;
-    c.secure ??= this.#secure;
-    c.signed ??= !!this.#grip;
-    c.response = true;
-
-    if (c.value === null || c.value === undefined) {
-      c.maxAge = -1;
-      c.expires = undefined;
-    }
-
-    if (c.signed) {
-      const sc = this.#signCookie(c);
-      this.#cookies[sc.name] = sc;
-      sc.response = true;
+    if (this.has(name, opts)) {
+      return this.#cookies[name]?.value;
     }
   }
 
-  export(response = true): string[] {
-    return this.getAll()
-      .filter(x => !response || x.response)
-      .map(c => CookieJar.toHeaderValue(c, response));
+  set(cookie: Cookie): void {
+    const alias = this.#cookies[cookie.name] = {
+      ...this.#setOptions,
+      ...cookie,
+      response: true,
+      ...(cookie.value === null || cookie.value === undefined) ? this.#deleteOptions : {},
+    };
+
+    if (!this.#setOptions.secure && alias.secure) {
+      throw new AppError('Cannot send secure cookie over unencrypted connection');
+    }
+
+    if (alias.signed && !this.#grip) {
+      throw new AppError('Signing keys required for signed cookies');
+    }
+
+    if (alias.maxAge !== undefined && !alias.expires) {
+      alias.expires = new Date(Date.now() + alias.maxAge);
+    }
   }
 
   getAll(): Cookie[] {
     return Object.values(this.#cookies);
+  }
+
+  importCookieHeader(header: string | null | undefined): this {
+    return this.import(CookieJar.parseCookieHeader(header ?? ''));
+  }
+
+  importSetCookieHeader(headers: string[] | null | undefined): this {
+    return this.import(headers?.map(CookieJar.parseSetCookieHeader) ?? []);
+  }
+
+  exportCookieHeader(): string {
+    return this.getAll().flatMap(c => this.#exportCookie(c)).join('; ');
+  }
+
+  exportSetCookieHeader(): string[] {
+    return this.getAll()
+      .filter(x => x.response)
+      .flatMap(c => this.#exportCookie(c, true));
   }
 }

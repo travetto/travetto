@@ -15,4 +15,4 @@ export type Cookie = {
 };
 
 export type CookieGetOptions = { signed?: boolean };
-export type CookieSetOptions = Omit<Cookie, 'name' | 'value'>;
+export type CookieSetOptions = Omit<Cookie, 'name' | 'value' | 'response'>;
