@@ -32,7 +32,7 @@
     "@travetto/schema": "^6.0.0-rc.2"
   },
   "peerDependencies": {
-    "@travetto/cli": "^6.0.0-rc.2",
+    "@travetto/cli": "^6.0.0-rc.3",
     "@travetto/test": "^6.0.0-rc.2"
   },
   "peerDependenciesMeta": {

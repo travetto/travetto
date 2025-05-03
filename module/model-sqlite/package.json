@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-sqlite",
-  "version": "6.0.0-rc.2",
+  "version": "6.0.0-rc.3",
   "description": "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
     "sql",
@@ -30,7 +30,7 @@
     "@travetto/context": "^6.0.0-rc.2",
     "@travetto/model": "^6.0.0-rc.2",
     "@travetto/model-query": "^6.0.0-rc.2",
-    "@travetto/model-sql": "^6.0.0-rc.2",
+    "@travetto/model-sql": "^6.0.0-rc.3",
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite3": "^11.9.1"
   },

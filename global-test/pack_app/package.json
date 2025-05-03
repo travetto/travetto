@@ -2,7 +2,7 @@
   "name": "@travetto-test/pack_app",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/cli": "^6.0.0-rc.2"
+    "@travetto/cli": "^6.0.0-rc.3"
   },
   "devDependencies": {
     "@travetto/compiler": "^6.0.0-rc.3",
