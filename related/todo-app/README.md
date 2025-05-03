@@ -452,11 +452,13 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/create-todo.ts <key> <port>
 
-{
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
-}
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Module.main (./doc/create-todo.ts:2:15)
+    at async MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:26:16)
+    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:57:20)
+    at async Function.run (<workspace-root>/module/cli/src/execute.ts:76:9)
 ```
 
 Now create `support/list-todo.ts` with the following contents:
@@ -473,11 +475,11 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Module.main (./doc/list-todo.ts:2:15)
+    at async MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:26:16)
+    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:57:20)
+    at async Function.run (<workspace-root>/module/cli/src/execute.ts:76:9)
 ```

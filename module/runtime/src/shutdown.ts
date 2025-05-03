@@ -1,6 +1,7 @@
 import { Env } from './env.ts';
 import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
+import { Cancelable } from './types.ts';
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
@@ -8,14 +9,14 @@ import { TimeUtil } from './time.ts';
 export class ShutdownManager {
 
   static #registered = false;
-  static #handlers: { name?: string, handler: () => Promise<void> }[] = [];
+  static #handlers: { name?: string, handler: Cancelable }[] = [];
 
   /**
    * On Shutdown requested
    * @param name name to log for
    * @param handler synchronous or asynchronous handler
    */
-  static onGracefulShutdown(handler: () => Promise<void>, name?: string | { constructor: Function }): () => void {
+  static onGracefulShutdown(handler: Cancelable, name?: string | { constructor: Function }): () => void {
     if (!this.#registered) {
       this.#registered = true;
       const done = (): void => { this.gracefulShutdown(0); };
@@ -42,13 +43,15 @@ export class ShutdownManager {
       console.debug('Graceful shutdown: started');
 
       const items = this.#handlers.splice(0, this.#handlers.length);
-      const handlers = Promise.all(items.map(({ name, handler }) => {
+      const handlers = Promise.all(items.map(async ({ name, handler }) => {
         if (name) {
           console.debug('Stopping', { name });
         }
-        return handler().catch(err => {
+        try {
+          return await handler();
+        } catch (err) {
           console.error('Error shutting down', { name, err });
-        });
+        }
       }));
 
       await Promise.race([

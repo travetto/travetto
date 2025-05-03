@@ -53,6 +53,8 @@ export function toConcrete<T extends unknown>(): Class<T> {
   return arguments[0];
 }
 
+export type Cancelable = () => (void | Promise<void>);
+
 /**
  * Range of bytes, inclusive
  */

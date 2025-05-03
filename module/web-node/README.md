@@ -23,7 +23,7 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { StandardWebRouter } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
 import { WebHttpUtil, WebHttpConfig, WebHttpServer } from '@travetto/web-http-server';
-import { RunResponse } from '@travetto/cli';
+import { Cancelable } from '@travetto/runtime';
 
 import { NodeWebUtil } from './util.ts';
 
@@ -45,7 +45,7 @@ export class NodeWebApplication implements WebHttpServer {
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 
-  async run(): Promise<RunResponse> {
+  async serve(): Promise<Cancelable> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
     const server = await WebHttpUtil.startHttpServer({
@@ -55,7 +55,7 @@ export class NodeWebApplication implements WebHttpServer {
 
     console.log('Listening', { port: this.serverConfig.port });
 
-    return server;
+    return () => { server.close(); };
   }
 }
 ```

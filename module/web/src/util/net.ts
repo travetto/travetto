@@ -12,17 +12,21 @@ export class NetUtil {
     return !!err && err instanceof Error && err.message.includes('EADDRINUSE');
   }
 
-  /** Free port if in use */
-  static async freePort(port: number): Promise<void> {
+  /** Get the port process id */
+  static async getPortProcessId(port: number): Promise<number | undefined> {
     const proc = spawn('lsof', ['-t', '-i', `tcp:${port}`]);
     const result = await ExecUtil.getResult(proc, { catch: true });
-    if (!result.valid) {
-      console.warn('Unable to kill process', result.stderr);
-      return;
-    }
     const [pid] = result.stdout.trim().split(/\n/g);
     if (pid && +pid > 0) {
-      process.kill(+pid);
+      return +pid;
+    }
+  }
+
+  /** Free port if in use */
+  static async freePort(port: number): Promise<void> {
+    const pid = await this.getPortProcessId(port);
+    if (pid) {
+      process.kill(pid);
     }
   }
 

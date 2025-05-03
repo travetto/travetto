@@ -486,7 +486,7 @@ By default, cli commands do not expose themselves to the VSCode extension, as th
 
   <figure class="code">
     <figcaption class="code">Anatomy of a Command
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L53">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L47">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliCommandShape<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
@@ -502,7 +502,7 @@ By default, cli commands do not expose themselves to the VSCode extension, as th
   <span class="token comment">/**
    * Action target of the command
    */</span>
-  <span class="token function">main</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span>RunResponse<span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span><span class="token keyword">undefined</span> <span class="token operator">|</span> <span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Run before main runs
    */</span>
@@ -543,10 +543,11 @@ If the goal is to run a more complex application, which may include depending on
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http-server/support/cli.web_http.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Runtime<span class="token punctuation">,</span> toConcrete <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Runtime<span class="token punctuation">,</span> ShutdownManager<span class="token punctuation">,</span> toConcrete <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand<span class="token punctuation">,</span> CliCommandShape<span class="token punctuation">,</span> RunResponse <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand<span class="token punctuation">,</span> CliCommandShape <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NetUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RootRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> WebHttpServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types.ts'</span><span class="token punctuation">;</span>
 
@@ -568,16 +569,21 @@ If the goal is to run a more complex application, which may include depending on
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>RunResponse <span class="token operator">|</span> <span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">await</span> RootRegistry<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> instance <span class="token operator">=</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token generic-function"><span class="token function">toConcrete</span><span class="token generic class-name"><span class="token operator">&lt;</span>WebHttpServer<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">let</span> res<span class="token punctuation">;</span>
     <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">return</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">runInstance</span><span class="token punctuation">(</span><span class="token generic-function"><span class="token function">toConcrete</span><span class="token generic class-name"><span class="token operator">&lt;</span>WebHttpServer<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      res <span class="token operator">=</span> <span class="token keyword">await</span> instance<span class="token punctuation">.</span><span class="token function">serve</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span>NetUtil<span class="token punctuation">.</span><span class="token function">isPortUsedError</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>killConflict<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
         <span class="token keyword">await</span> NetUtil<span class="token punctuation">.</span><span class="token function">freePort</span><span class="token punctuation">(</span>err<span class="token punctuation">.</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">runInstance</span><span class="token punctuation">(</span><span class="token generic-function"><span class="token function">toConcrete</span><span class="token generic class-name"><span class="token operator">&lt;</span>WebHttpServer<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        res <span class="token operator">=</span> <span class="token keyword">await</span> instance<span class="token punctuation">.</span><span class="token function">serve</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
       <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
+    ShutdownManager<span class="token punctuation">.</span><span class="token function">onGracefulShutdown</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
@@ -587,11 +593,11 @@ The <code class="item input">module</code> field is slightly more complex, but i
 
 <h3 id="custom-validation">Custom Validation</h3>
 
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L38">CliValidationError</a> errors that are returned will be shared with the user, and fail to invoke the <code class="item method">main</code> method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L32">CliValidationError</a> errors that are returned will be shared with the user, and fail to invoke the <code class="item method">main</code> method.
 
   <figure class="code">
     <figcaption class="code">CliValidationError
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L38">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L32">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliValidationError</span> <span class="token punctuation">{{'{'}}</span>

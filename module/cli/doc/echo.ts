@@ -9,7 +9,7 @@ export class CliEchoCommand implements CliCommandShape {
   /** Upper case */
   uppercase?: boolean;
 
-  async main(args: string[]) {
+  async main(args: string[]): Promise<void> {
     if (this.uppercase) {
       args = args.map(x => x.toUpperCase());
     }

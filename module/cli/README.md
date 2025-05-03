@@ -423,7 +423,7 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
   /**
    * Action target of the command
    */
-  main(...args: T): OrProm<RunResponse>;
+  main(...args: T): OrProm<undefined | void>;
   /**
    * Run before main runs
    */
@@ -460,10 +460,11 @@ If the goal is to run a more complex application, which may include depending on
 
 **Code: Simple Run Target**
 ```typescript
-import { Runtime, toConcrete } from '@travetto/runtime';
+import { Runtime, ShutdownManager, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
-import { CliCommand, CliCommandShape, RunResponse } from '@travetto/cli';
+import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
+import { RootRegistry } from '@travetto/registry';
 
 import type { WebHttpServer } from '../src/types.ts';
 
@@ -485,16 +486,21 @@ export class WebHttpCommand implements CliCommandShape {
     }
   }
 
-  async main(): Promise<RunResponse | void> {
+  async main(): Promise<void> {
+    await RootRegistry.init();
+    const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
+
+    let res;
     try {
-      return await DependencyRegistry.runInstance(toConcrete<WebHttpServer>());
+      res = await instance.serve();
     } catch (err) {
       if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
-        return await DependencyRegistry.runInstance(toConcrete<WebHttpServer>());
+        res = await instance.serve();
       }
       throw err;
     }
+    ShutdownManager.onGracefulShutdown(res);
   }
 }
 ```
@@ -504,7 +510,7 @@ As noted in the example above, `fields` is specified in this execution, with sup
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 ### Custom Validation
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L38) errors that are returned will be shared with the user, and fail to invoke the `main` method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L32) errors that are returned will be shared with the user, and fail to invoke the `main` method.
 
 **Code: CliValidationError**
 ```typescript

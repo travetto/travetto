@@ -1,9 +1,8 @@
 import { RootRegistry } from '@travetto/registry';
-import { castTo, Class } from '@travetto/runtime';
+import { castTo, Class, Cancelable } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
-import { CliUtil, RunResponse } from '@travetto/cli';
 
 import { WebDispatcher } from '../../../src/types/dispatch.ts';
 import { WebRequest, WebRequestContext } from '../../../src/types/request.ts';
@@ -35,27 +34,23 @@ export class WebTestConfig implements ConfigSource {
  */
 export abstract class BaseWebSuite {
 
-  #appHandle?: RunResponse;
+  #cleanup?: Cancelable;
   #dispatcher: WebDispatcher;
 
-  appType?: Class<{ run: () => (RunResponse | Promise<RunResponse>) }>;
+  serve?(): Promise<Cancelable>;
   dispatcherType: Class<WebDispatcher>;
 
   @BeforeAll()
   async initServer(): Promise<void> {
     await RootRegistry.init();
-    if (this.appType) {
-      this.#appHandle = await DependencyRegistry.getInstance(this.appType).then(v => v.run());
-    }
+    this.#cleanup = await this.serve?.();
     this.#dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
   }
 
   @AfterAll()
   async destroySever(): Promise<void> {
-    if (this.#appHandle) {
-      await CliUtil.listenForResponse(this.#appHandle, false);
-      this.#appHandle = undefined;
-    }
+    await this.#cleanup?.();
+    this.#cleanup = undefined;
   }
 
   async request<T>(cfg: WebMessageInit<unknown, WebRequestContext>, throwOnError: boolean = true): Promise<WebResponse<T>> {

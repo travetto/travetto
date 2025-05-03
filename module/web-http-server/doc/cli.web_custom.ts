@@ -1,4 +1,4 @@
-import { Env, toConcrete } from '@travetto/runtime';
+import { Env, ShutdownManager, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -21,6 +21,8 @@ export class SampleApp {
     ssl.ssl = true;
 
     // Configure server before running
-    return DependencyRegistry.runInstance(toConcrete<WebHttpServer>());
+    const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
+    const cleanup = await instance.serve();
+    ShutdownManager.onGracefulShutdown(cleanup);
   }
 }

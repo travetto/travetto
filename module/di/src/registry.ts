@@ -574,17 +574,6 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // Compute fields to be auto-wired
     return await this.resolveFieldDependencies(this.get(cls), o);
   }
-
-  /**
-   * Execute the run method of a given class
-   */
-  async runInstance<T extends { run(..._args: unknown[]): unknown }>(
-    cls: Class<T>, ...args: Parameters<T['run']>
-  ): Promise<Awaited<ReturnType<T['run']>>> {
-    await RootRegistry.init();
-    const inst = await this.getInstance<T>(cls);
-    return castTo<Awaited<ReturnType<T['run']>>>(inst.run(...args));
-  }
 }
 
 export const DependencyRegistry = new $DependencyRegistry();

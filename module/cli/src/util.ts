@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 
-import { Env, ExecUtil, ShutdownManager, Runtime } from '@travetto/runtime';
+import { Env, ExecUtil, Runtime } from '@travetto/runtime';
 
-import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types.ts';
+import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
@@ -11,7 +11,6 @@ const validEnv = (k: string): boolean => IPC_ALLOWED_ENV.has(k) || (!IPC_INVALID
 export class CliUtil {
   /**
    * Get a simplified version of a module name
-   * @returns
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
     const simple = (module ?? Runtime.main.name).replace(/[\/]/, '_').replace(/@/, '');
@@ -87,26 +86,5 @@ export class CliUtil {
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
     return await new Promise(r => process[channel].write(typeof data === 'string' ? data : JSON.stringify(data, null, 2), () => r()));
-  }
-
-  /**
-   * Listen for a run response to finish
-   */
-  static async listenForResponse(result: RunResponse, graceful = true): Promise<void> {
-    // Listen to result if non-empty
-    if (result !== undefined && result !== null) {
-      if ('close' in result) {
-        if (graceful) {
-          ShutdownManager.onGracefulShutdown(async () => result.close()); // Tie shutdown into app close
-        } else {
-          await result.close();
-        }
-      }
-      if ('wait' in result) {
-        await result.wait(); // Wait for close signal
-      } else if ('on' in result) {
-        await new Promise<void>(res => result.on('close', res)); // Wait for callback
-      }
-    }
   }
 }

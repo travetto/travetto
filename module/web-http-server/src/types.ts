@@ -1,4 +1,4 @@
-import { RunResponse } from '@travetto/cli';
+import { Cancelable } from '@travetto/runtime';
 
 export type WebSslKeyPair = { cert: string, key: string };
 
@@ -8,5 +8,5 @@ export type WebSslKeyPair = { cert: string, key: string };
  * @concrete
  */
 export interface WebHttpServer {
-  run(): RunResponse | Promise<RunResponse>;
+  serve(): Promise<Cancelable>;
 }

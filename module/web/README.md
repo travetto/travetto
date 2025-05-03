@@ -53,7 +53,7 @@ export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseConte
 }
 ```
 
-These objects do not represent the underlying sockets provided by various http servers, but in fact are simple wrappers that track the flow through the call stack of the various [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)s and the [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) handler.  One of the biggest departures here, is that the response is not an entity that is passed around from call-site to call-site, but is is solely a return-value.  This doesn't mean the return value has to be static and pre-allocated, on the contrary streams are still supported.  The difference here is that the streams/asynchronous values will be consumed until the response is sent back to the user. The [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L49) is a good reference for transforming a [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) that can either be a stream or a fixed value.
+These objects do not represent the underlying sockets provided by various http servers, but in fact are simple wrappers that track the flow through the call stack of the various [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)s and the [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) handler.  One of the biggest departures here, is that the response is not an entity that is passed around from call-site to call-site, but is is solely a return-value.  This doesn't mean the return value has to be static and pre-allocated, on the contrary streams are still supported.  The difference here is that the streams/asynchronous values will be consumed until the response is sent back to the user. The [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50) is a good reference for transforming a [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) that can either be a stream or a fixed value.
 
 ## Defining a Controller
 To start, we must define a [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9), which is only allowed on classes. Controllers can be configured with:
@@ -338,8 +338,8 @@ Out of the box, the web framework comes with a few interceptors, and more are co
    1. global - Intended to run outside of the request flow - [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L13)
    1. terminal - Handles once request and response are finished building - [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L28), [RespondInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L12)
    1. pre-request - Prepares the request for running - [TrustProxyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/trust-proxy.ts#L23)
-   1. request - Handles inbound request, validation, and body preparation - [DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L52), [AcceptInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L34), [BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L53), [CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L56) 
-   1. response - Prepares outbound response - [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L49), [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51), [EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L34), [ResponseCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30) 
+   1. request - Handles inbound request, validation, and body preparation - [DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53), [AcceptInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L34), [BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L61), [CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L56) 
+   1. response - Prepares outbound response - [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50), [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51), [EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L34), [ResponseCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30) 
    1. application - Lives outside of the general request/response behavior, [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") uses this for login and logout flows.
 
 ### Packaged Interceptors
@@ -405,7 +405,7 @@ export class AcceptConfig {
 ```
 
 #### DecompressInterceptor
-[DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L52) handles decompressing the inbound request, if supported.  This relies upon HTTP standards for content encoding, and negotiating the appropriate decompression scheme.
+[DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53) handles decompressing the inbound request, if supported.  This relies upon HTTP standards for content encoding, and negotiating the appropriate decompression scheme.
 
 **Code: Decompress Config**
 ```typescript
@@ -460,7 +460,7 @@ export class CookieConfig implements CookieSetOptions {
 ```
 
 #### BodyParseInterceptor
-[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L53) handles the inbound request, and converting the body payload into an appropriate format.
+[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L61) handles the inbound request, and converting the body payload into an appropriate format.
 
 **Code: Body Parse Config**
 ```typescript
@@ -472,7 +472,7 @@ export class BodyParseConfig {
   /**
    * Max body size limit
    */
-  limit: string = '1mb';
+  limit: `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` = '1mb';
   /**
    * How to interpret different content types
    */
@@ -481,11 +481,18 @@ export class BodyParseConfig {
     'application/json': 'json',
     'application/x-www-form-urlencoded': 'form'
   };
+
+  @Ignore()
+  _limit: number | undefined;
+
+  postConstruct(): void {
+    this._limit = WebCommonUtil.parseByteSize(this.limit);
+  }
 }
 ```
 
 #### CompressInterceptor
-[CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L49) by default, will compress all valid outbound responses over a certain size, or for streams will cache every response. This relies on Node's [Buffer](https://nodejs.org/api/zlib.html) support for compression.
+[CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50) by default, will compress all valid outbound responses over a certain size, or for streams will cache every response. This relies on Node's [Buffer](https://nodejs.org/api/zlib.html) support for compression.
 
 **Code: Compress Config**
 ```typescript
@@ -662,9 +669,8 @@ When running an interceptor, if you chose to skip calling `ctx.next()`, you will
 
 **Code: Defining a fully controlled Interceptor**
 ```typescript
-import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
+import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebError } from '@travetto/web';
 import { Injectable } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
 
 @Injectable()
 export class SimpleAuthInterceptor implements WebInterceptor {
@@ -675,13 +681,7 @@ export class SimpleAuthInterceptor implements WebInterceptor {
     if (ctx.request.headers.has('X-Auth')) {
       return await ctx.next();
     } else {
-      // Or just -- throw new AppError('Missing auth', { category: 'authentication' });
-      return new WebResponse({
-        body: new AppError('Missing auth', { category: 'authentication' }),
-        context: {
-          httpStatusCode: 401
-        }
-      });
+      throw WebError.for('Missing auth', 401, {}, 'authentication');
     }
   }
 }

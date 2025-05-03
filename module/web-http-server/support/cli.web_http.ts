@@ -1,7 +1,8 @@
-import { Runtime, toConcrete } from '@travetto/runtime';
+import { Runtime, ShutdownManager, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
-import { CliCommand, CliCommandShape, RunResponse } from '@travetto/cli';
+import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
+import { RootRegistry } from '@travetto/registry';
 
 import type { WebHttpServer } from '../src/types.ts';
 
@@ -23,15 +24,20 @@ export class WebHttpCommand implements CliCommandShape {
     }
   }
 
-  async main(): Promise<RunResponse | void> {
+  async main(): Promise<void> {
+    await RootRegistry.init();
+    const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
+
+    let res;
     try {
-      return await DependencyRegistry.runInstance(toConcrete<WebHttpServer>());
+      res = await instance.serve();
     } catch (err) {
       if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
-        return await DependencyRegistry.runInstance(toConcrete<WebHttpServer>());
+        res = await instance.serve();
       }
       throw err;
     }
+    ShutdownManager.onGracefulShutdown(res);
   }
 }

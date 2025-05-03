@@ -5,7 +5,6 @@ import { CliCommandRegistry } from './registry.ts';
 import { CliCommandSchemaUtil } from './schema.ts';
 import { CliUnknownCommandError, CliValidationResultError } from './error.ts';
 import { CliParseUtil } from './parse.ts';
-import { CliUtil } from './util.ts';
 import { CliCommandShape } from './types.ts';
 
 /**
@@ -56,7 +55,9 @@ export class ExecutionManager {
 
     ConsoleManager.debug(Runtime.debug);
     const result = await command.main(...boundArgs);
-    await CliUtil.listenForResponse(result);
+    if (result) {
+      ShutdownManager.onGracefulShutdown(result);
+    }
   }
 
   /**

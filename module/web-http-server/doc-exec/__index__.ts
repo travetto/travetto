@@ -1,17 +1,17 @@
+import { Cancelable } from '@travetto/runtime';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { WebHttpServer } from '@travetto/web-http-server';
 import { ConfigurationService } from '@travetto/config';
-import { RunResponse } from '@travetto/cli';
 
 class Config {
   @InjectableFactory()
   static target(): WebHttpServer {
     return {
-      async run(): Promise<RunResponse> {
+      async serve(): Promise<Cancelable> {
         await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
         console.log('Listening');
-        return { on(): void { }, close(): void { } };
+        return () => { };
       }
-    } satisfies WebHttpServer;
+    };
   }
 }
