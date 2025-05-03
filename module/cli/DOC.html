@@ -583,7 +583,7 @@ If the goal is to run a more complex application, which may include depending on
       <span class="token punctuation">{{'}'}}</span>
       <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
-    ShutdownManager<span class="token punctuation">.</span><span class="token function">onGracefulShutdown</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>kill<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    ShutdownManager<span class="token punctuation">.</span><span class="token function">onGracefulShutdown</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>kill<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> res<span class="token punctuation">.</span>wait<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

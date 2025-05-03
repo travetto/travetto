@@ -122,6 +122,7 @@ The equivalences for all of the [assert](https://nodejs.org/api/assert.html) ope
    *  `assert(a instanceof b)` as `assert.instanceOf(a, b)`
    *  `assert(a.includes(b))` as `assert.ok(a.includes(b))`
    *  `assert(/a/.test(b))` as `assert.ok(/a/.test(b))`
+
 In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse).  This is useful for testing error states or ensuring errors do not occur.
 
 ### Throws

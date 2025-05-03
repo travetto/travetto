@@ -18,7 +18,7 @@ export const text = <>
   <c.Section title={AsyncContextValue.name}>
     Within the framework that is a need to access context values, in a type safe fashion.  Additionally, we have the requirement to keep the data accesses isolated from other operations.  To this end, {AsyncContextValue} was created to support this use case.  This class represents the ability to define a simple read/write contract for a given context field.  It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
 
-    <c.Code src={AsyncContextValue} outline={true} title={`Source for ${AsyncContextValue.name}`} />
+    <c.Code src={AsyncContextValue} outline title={`Source for ${AsyncContextValue.name}`} />
 
     <c.Code title='Usage of context value within a service' src='doc/usage-value.ts' />
 

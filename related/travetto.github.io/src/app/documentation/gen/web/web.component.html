@@ -22,7 +22,6 @@ The module provides a declarative API for creating and describing a Web applicat
 <li>Using <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> s</li>
 <li>Creating a Custom <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a></li>
 <li>Cookies</li>
-<li>SSL Support</li>
 <li>Error Handling</li>
 </ul>
 
@@ -45,24 +44,59 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 
   <figure class="code">
     <figcaption class="code">Request Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L22">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"></code></pre>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> HttpMethod<span class="token punctuation">,</span> HttpProtocol <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./core.ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BaseWebMessage <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./message.ts'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">WebConnection</span> <span class="token punctuation">{{'{'}}</span>
+  host<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  port<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  ip<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  httpProtocol<span class="token operator">?</span><span class="token operator">:</span> HttpProtocol<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">WebRequestContext</span> <span class="token punctuation">{{'{'}}</span>
+  path<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  pathParams<span class="token operator">?</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">unknown</span><span class="token operator">></span><span class="token punctuation">;</span>
+  httpQuery<span class="token operator">?</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">unknown</span><span class="token operator">></span><span class="token punctuation">;</span>
+  httpMethod<span class="token operator">?</span><span class="token operator">:</span> HttpMethod<span class="token punctuation">;</span>
+  connection<span class="token operator">?</span><span class="token operator">:</span> WebConnection<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token comment">/**
+ * Web Request object
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebRequest<span class="token operator">&lt;</span><span class="token constant">B</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token keyword">extends</span> <span class="token class-name">BaseWebMessage<span class="token operator">&lt;</span><span class="token constant">B</span><span class="token punctuation">,</span> Readonly<span class="token operator">&lt;</span>WebRequestContext<span class="token operator">>></span></span> <span class="token punctuation">{{'{'}}</span>
+
+<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
   <figure class="code">
     <figcaption class="code">Response Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L10">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebResponse<span class="token operator">&lt;</span><span class="token constant">B</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token keyword">extends</span> <span class="token class-name">BaseWebMessage<span class="token operator">&lt;</span><span class="token constant">B</span><span class="token punctuation">,</span> WebResponseContext<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BaseWebMessage <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./message.ts'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">WebResponseContext</span> <span class="token punctuation">{{'{'}}</span>
+  httpStatusCode<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token comment">/**
+ * Web Response as a simple object
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebResponse<span class="token operator">&lt;</span><span class="token constant">B</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token keyword">extends</span> <span class="token class-name">BaseWebMessage<span class="token operator">&lt;</span><span class="token constant">B</span><span class="token punctuation">,</span> WebResponseContext<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
+
   <span class="token comment">/**
     * Build the redirect
     * &#64;param location Location to redirect to
     * &#64;param statusCode Status code
     */</span>
-  <span class="token keyword">static</span> <span class="token function">redirect</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> statusCode <span class="token operator">=</span> <span class="token number">302</span><span class="token punctuation">)</span><span class="token operator">:</span> WebResponse<span class="token operator">&lt;</span><span class="token keyword">undefined</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">redirect</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> statusCode <span class="token operator">=</span> <span class="token number">302</span><span class="token punctuation">)</span><span class="token operator">:</span> WebResponse<span class="token operator">&lt;</span><span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">WebResponse</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> context<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> httpStatusCode<span class="token operator">:</span> statusCode <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> headers<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> Location<span class="token operator">:</span> location <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -825,17 +859,6 @@ When running an interceptor, if you chose to skip calling <code class="item meth
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
-
-<h2 id="ssl-support">SSL Support</h2>
-
-Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
-<ul> <li>SSL support is configured</li>
-<li><a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-forge">node-forge</a> is installed</li>
-<li>Not running in prod</li>
-<li>No keys provided</li>
-</ul>
-This is useful for local development where you implicitly trust the cert. <br><br>
-SSL support can be enabled by setting <code class="item input">web.ssl.active: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8">RuntimeResources</a>.
 
 <h2 id="full-config">Full Config</h2>
 

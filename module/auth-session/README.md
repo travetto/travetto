@@ -25,6 +25,7 @@ Within the framework the sessions are stored against any [Data Modeling Support]
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")
    *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.")
    *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.")
+
 While the expiry is not necessarily a hard requirement, the implementation without it can be quite messy.  To that end, the ability to add [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) to the model provider would be the natural extension point if more expiry support is needed.
 
 **Code: Sample usage of Session Service**
@@ -63,4 +64,5 @@ The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-
    *  load
    *  read/modify
    *  persist
+
 And note, persist is intelligent enough to only update the data store if the expiration date has changed or if the data in the session has been modified.

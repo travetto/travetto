@@ -23,6 +23,7 @@ Oddly enough, colorizing output in a terminal is a fairly complex process.  The 
    *  1 - Basic color support, 16 colors
    *  2 - Enhanced color support, 225 colors, providing a fair representation of most colors
    *  3 - True color, 24bit color with R, G, B each getting 8-bits.  Can represent any color needed
+
 This module provides the ability to define color palettes using RGB colors, and additionally provides support for palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. 
 
 These palettes then are usable at runtime, with the module determining light or dark palettes, as well as falling back to the closest color value based on what the existing terminal supports.  This means a color like 'olivegreen', will get the proper output in 24bit color support, a close approximation in enhanced color support, fall back to green in basic color support, and will be color less at level 0.
@@ -74,6 +75,7 @@ Within the [Travetto](https://travetto.dev) framework, there are plenty of comma
    *  Progress Bars
    *  Waiting Indicators
    *  Streaming Content
+
 This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios.  You can see this pattern play out in the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework") progress output, or in [Pack](https://github.com/travetto/travetto/tree/main/module/pack#readme "Code packing utilities")'s output. 
 
 In these scenarios, the dynamic behaviors are dependent on having an interactive TTY.  When running without access to a proper stdin, the output will default to basic line printing.    This dynamic behavior can also be disabled using the environment variable `TRV_QUIET`.  When set to `1` will provide a minimal text-based experience.

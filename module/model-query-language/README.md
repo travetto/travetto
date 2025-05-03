@@ -25,6 +25,7 @@ This module provides a textual query language for the [Data Model Querying](http
    *  `in`, `not-in` - Supports checking if a field is in a list of literal values
    *  `and`, `&&` - Intersection of clauses
    *  `or`, `||` - Union of clauses
+
 All sub fields are dot separated for access, e.g. `user.address.city`.A query language version of the previous query could look like:
 
 **Code: Query language with boolean checks and exists check**

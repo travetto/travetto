@@ -90,6 +90,7 @@ Examples of mappings:
    *  `cli.test.ts` maps to `test`
    *  `cli.pack_docker.ts` maps to `pack:docker`
    *  `cli.email_template.ts` maps to `email:template`
+
 The pattern is that underscores(_) translate to colons (:), and the `cli.` prefix, and `.ts` suffix are dropped.
 
 ## Binding Flags
@@ -380,6 +381,7 @@ The flag files can be included in one of a few ways:
    *  `+=<name>` - This translates into `<mod>/support/<name>.flags`, which is a convenient shorthand.
    *  `+=<mod>/path/file.flags` - This is a path-related file that will be resolved from the module's location.
    *  `+=/path/file.flags` - This is an absolute path that will be read from the root of the file system.
+
 Ultimately, after resolution, the content of these files will be injected inline within the location.
 
 **Code: Final arguments after Flag File resolution**
@@ -500,7 +502,7 @@ export class WebHttpCommand implements CliCommandShape {
       }
       throw err;
     }
-    ShutdownManager.onGracefulShutdown(res.kill);
+    ShutdownManager.onGracefulShutdown(res.kill, this);
     return res.wait;
   }
 }

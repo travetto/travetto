@@ -167,3 +167,14 @@ Require stack:
 
 Node.js v23.11.0
 ```
+
+## SSL Support
+Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
+   *  SSL support is configured
+   *  [node-forge](https://www.npmjs.com/package/node-forge) is installed
+   *  Not running in prod
+   *  No keys provided
+
+This is useful for local development where you implicitly trust the cert. 
+
+SSL support can be enabled by setting `web.http.ssl: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).

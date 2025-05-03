@@ -23,8 +23,8 @@ export const Markdown: RenderProvider<RenderContext> = {
   hr: async () => '\n------------------\n',
   br: async () => '\n\n',
   em: async ({ recurse }) => `*${await recurse()}*`,
-  ul: async ({ recurse }) => `\n${await recurse()}`,
-  ol: async ({ recurse }) => `\n${await recurse()}`,
+  ul: async ({ recurse }) => `\n${await recurse()}\n`,
+  ol: async ({ recurse }) => `\n${await recurse()}\n`,
   li: async ({ recurse, stack }) => {
     const parent = stack.toReversed().find(x => x.type === 'ol' || x.type === 'ul');
     const depth = stack.filter(x => x.type === 'ol' || x.type === 'ul').length;

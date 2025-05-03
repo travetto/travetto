@@ -173,6 +173,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
    *  `{ $and: [] }` provides a grouping in which all sub clauses are require,
    *  `{ $or: [] }` provides a grouping in which at least one of the sub clauses is require,
    *  `{ $not: { } }` negates a clause
+
 A sample query for `User`'s might be:
 
 **Code: Using the query structure for specific queries**

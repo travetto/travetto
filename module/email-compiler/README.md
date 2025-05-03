@@ -19,6 +19,7 @@ This is primarily a set of command line tools for compiling and developing templ
 The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying asset paths, with the following paths (in order of precedence):
    1. `%ROOT%/resources/email`
    1. `@travetto/email-{engine}/resources/email`
+
 When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process will convert `.email.html` files into `.compiled.html`, `.compiled.text` and `.compiled.subject` suffixes to generate the outputs respectively.
 
 ## Template Extension

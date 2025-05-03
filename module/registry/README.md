@@ -23,6 +23,7 @@ The primary flow occurs on initialization of the application. At that point, the
    1. Initialize [RootRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10) and will automatically register/load all relevant files
    1. As files are imported, decorators within the files will record various metadata relevant to the respective registries
    1. When all files are processed, the [RootRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10) is finished, and it will signal to anything waiting on registered data that its free to use it.
+
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
 **Code: Sample Registry**

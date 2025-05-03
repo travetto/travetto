@@ -29,6 +29,7 @@ The [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "
    *  [express](https://expressjs.com)
    *  [koa](https://koajs.com/)
    *  [fastify](https://www.fastify.io/)
+
 The code will establish some basic endpoints, specifically, `GET / ` as the root endpoint.  This will return the contents of your `package.json` as an identification operation.
 
 ### Additional Web Features
@@ -51,6 +52,7 @@ The [Data Modeling Support](https://github.com/travetto/travetto/tree/main/modul
    *  [SQL](https://en.wikipedia.org/wiki/SQL)
    *  [DynamoDB](https://aws.amazon.com/dynamodb/)
    *  [Firestore](https://firebase.google.com/docs/firestore)
+
 A default model is constructed, a [Todo](https://github.com/travetto/travetto/tree/main/module/scaffold/doc/model.ts#L4) class:
 
 **Code: Todo Model**

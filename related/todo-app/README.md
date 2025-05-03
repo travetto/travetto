@@ -43,6 +43,7 @@ Let's create the model for the todo application.  The fields we will need should
    *  `text` as the actual todo information
    *  `created` the date the todo was created
    *  `completed` whether or not the todo was completed
+
 Create the file `src/model.ts`
 
 **Code: Models**
@@ -77,6 +78,7 @@ Next we establish the functionality for the service layer. The operations we nee
    *  Complete a todo
    *  Remove a todo
    *  Get all todos
+
 Now we need to create `src/service.ts`
 
 **Code: Service Definition**

@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { RuntimeResources, toConcrete } from '@travetto/runtime';
+import { toConcrete } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
 import { Controller } from './src/decorator/controller.ts';
@@ -41,7 +41,6 @@ export const text = <>
     <li>Using {WebInterceptorContract}s</li>
     <li>Creating a Custom {WebInterceptorContract}</li>
     <li>Cookies</li>
-    <li>SSL Support</li>
     <li>Error Handling</li>
   </ul>
 
@@ -49,8 +48,8 @@ export const text = <>
     Unlike other frameworks (e.g. {d.library('Express')}, {d.library('Fastify')}), this module takes an approach that is similar to {d.library('AwsLambda')}'s model for requests and responses. What you can see here is that {WebRequest} and {WebResponse} are very simple objects, with the focus being on the {d.field('payload')} and {d.field('body')}.  This is intended to provide maximal compatibility with non-HTTP sources.  The driving goal is to support more than just standard HTTP servers but also allow for seamless integration with tools like event queues, web sockets, etc.
 
     <c.Code title='Base Shape' src={BaseWebMessage} outline />
-    <c.Code title='Request Shape' src={WebRequest} outline />
-    <c.Code title='Response Shape' src={WebResponse} outline />
+    <c.Code title='Request Shape' src='./src/types/request.ts' />
+    <c.Code title='Response Shape' src='./src/types/response.ts' />
 
     These objects do not represent the underlying sockets provided by various http servers, but in fact are simple wrappers that track the flow through the call stack of the various {WebInterceptorContract}s and the {Endpoint} handler.  One of the biggest departures here, is that the response is not an entity that is passed around from call-site to call-site, but is is solely a return-value.  This doesn't mean the return value has to be static and pre-allocated, on the contrary streams are still supported.  The difference here is that the streams/asynchronous values will be consumed until the response is sent back to the user. The {CompressInterceptor} is a good reference for transforming a {WebResponse} that can either be a stream or a fixed value.
   </c.Section>
@@ -87,6 +86,7 @@ export const text = <>
     </ul>
 
     Similar to the Controller, each endpoint decorator handles the following config:
+
     <ul>
       <li>{d.input('title')} - The definition of the endpoint</li>
       <li>{d.input('description')} - High level description fo the endpoint</li>
@@ -282,21 +282,6 @@ export const text = <>
     {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {WebRequest} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
     <c.Code title='Sample Cookie Usage' src='doc/cookie-endpoints.ts' />
-  </c.Section>
-
-  <c.Section title='SSL Support'>
-    Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
-
-    <ul>
-      <li>SSL support is configured</li>
-      <li>{d.library('NodeForge')} is installed</li>
-      <li>Not running in prod</li>
-      <li>No keys provided</li>
-    </ul>
-
-    This is useful for local development where you implicitly trust the cert. <br />
-
-    SSL support can be enabled by setting {d.input('web.ssl.active: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by {RuntimeResources}.
   </c.Section>
 
   <c.Section title='Full Config'>

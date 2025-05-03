@@ -50,6 +50,6 @@ export const text = <>
   <c.Section title='Common Utilities'>
     The {AuthModelUtil} provides the following functionality:
 
-    <c.Code title='Auth util structure' src={AuthModelUtil} outline={true} />
+    <c.Code title='Auth util structure' src={AuthModelUtil} outline />
   </c.Section>
 </>;

@@ -25,6 +25,7 @@ Supported features:
    *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
    *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)
    *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12)
+
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
 
 **Code: Wiring up a custom Model Source**

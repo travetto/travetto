@@ -19,12 +19,14 @@ The config module provides support for loading application config on startup. Co
 The configuration information is comprised of:
    *  configuration files - [YAML](https://en.wikipedia.org/wiki/YAML), [JSON](https://www.json.org), and basic properties file
    *  configuration classes
+
 Config loading follows a defined resolution path, below is the order in increasing specificity (`ext` can be `yaml`, `yml`, `json`, `properties`):
    1. `resources/application.<ext>` - Priority `100` - Load the default `application.<ext>` if available.
    1. `resources/{env}.<ext>` - Priority `200` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
    1. `resources/*.<ext>` - Priority `300` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
    1. [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29) [ConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/types.ts#L11) - Priority `???` - These are custom config sources provided by the module, and are able to define their own priorities
    1. [OverrideConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/override.ts#L20) - Priority `999` - This is for [EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34) overrides, and is at the top priority for all built-in config sources.
+
 By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
 
 ### Mono Repo Support

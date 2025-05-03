@@ -19,6 +19,7 @@ This module is already most likely compatible with quite a bit of middleware, bu
    *  The calling code expects the request or response to be a proper [EventEmitter](https://nodejs.org/api/events.html#class-eventemitter)
    *  The calling code expects the request/response sockets to be live.
    *  The calling code modifies the shape of the objects (e.g. rewrites the close method on response).
+
 Barring these exceptions, gaps will be filled in as more use cases arise.  The above exceptions are non-negotiable as they are are enforced by the invocation method defined by [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.").
 
 **Code: Example of using the Connect Adaptor with Passport**

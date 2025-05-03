@@ -62,6 +62,7 @@ The only required method to be defined is the `authenticate` method.  This takes
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet
+
 A sample auth provider would look like:
 
 **Code: Sample Identity Source**

@@ -20,7 +20,6 @@ The module provides a declarative API for creating and describing a Web applicat
    *  Using [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)s
    *  Creating a Custom [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)
    *  Cookies
-   *  SSL Support
    *  Error Handling
 
 ## Request/Response Pattern
@@ -38,18 +37,53 @@ export class BaseWebMessage<B = unknown, C = unknown> implements WebMessage<B, C
 
 **Code: Request Shape**
 ```typescript
+import { HttpMethod, HttpProtocol } from './core.ts';
+import { BaseWebMessage } from './message.ts';
 
+export interface WebConnection {
+  host?: string;
+  port?: number;
+  ip?: string;
+  httpProtocol?: HttpProtocol;
+}
+
+export interface WebRequestContext {
+  path: string;
+  pathParams?: Record<string, unknown>;
+  httpQuery?: Record<string, unknown>;
+  httpMethod?: HttpMethod;
+  connection?: WebConnection;
+}
+
+/**
+ * Web Request object
+ */
+export class WebRequest<B = unknown> extends BaseWebMessage<B, Readonly<WebRequestContext>> {
+
+}
 ```
 
 **Code: Response Shape**
 ```typescript
+import { BaseWebMessage } from './message.ts';
+
+export interface WebResponseContext {
+  httpStatusCode?: number;
+}
+
+/**
+ * Web Response as a simple object
+ */
 export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseContext> {
+
   /**
     * Build the redirect
     * @param location Location to redirect to
     * @param statusCode Status code
     */
-  static redirect(location: string, statusCode = 302): WebResponse<undefined>;
+  static redirect(location: string, statusCode = 302): WebResponse<undefined> {
+    return new WebResponse({ context: { httpStatusCode: statusCode }, headers: { Location: location } });
+  }
 }
 ```
 
@@ -60,6 +94,7 @@ To start, we must define a [@Controller](https://github.com/travetto/travetto/tr
    *  `path` - The required context path the controller will operate atop
    *  `title` - The definition of the controller
    *  `description` - High level description fo the controller
+
 Additionally, the module is predicated upon [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), and so all standard injection techniques (constructor, fields) work for registering dependencies. 
 
 [JSDoc](http://usejsdoc.org/about-getting-started.html) comments can also be used to define the `title` attribute.
@@ -85,9 +120,11 @@ The most common pattern is to register HTTP-driven endpoints.  The HTTP methods 
    *  [@Patch](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L64)
    *  [@Head](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L76)
    *  [@Options](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L82)
+
 Similar to the Controller, each endpoint decorator handles the following config:
    *  `title` - The definition of the endpoint
    *  `description` - High level description fo the endpoint
+
 [JSDoc](http://usejsdoc.org/about-getting-started.html) comments can also be used to define the `title` attribute, as well as describing the parameters using `@param` tags in the comment. 
 
 The return type of the method will also be used to describe the `responseType` if not specified manually.
@@ -121,11 +158,13 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@QueryParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L43) - Query params - can be either a single value or bind to a whole object
    *  [@Body](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L55) - Request body
    *  [@HeaderParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L49) - Header values
+
 Each [@Param](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L24) can be configured to indicate:
    *  `name` - Name of param, field name, defaults to handler parameter name if necessary
    *  `description` - Description of param, pulled from [JSDoc](http://usejsdoc.org/about-getting-started.html), or defaults to name if empty
    *  `required?` - Is the field required?, defaults to whether or not the parameter itself is optional
    *  `type` - The class of the type to be enforced, pulled from parameter type
+
 [JSDoc](http://usejsdoc.org/about-getting-started.html) comments can also be used to describe parameters using `@param` tags in the comment.
 
 **Code: Full-fledged Controller with Endpoints**
@@ -719,16 +758,6 @@ export class SimpleEndpoints {
   }
 }
 ```
-
-## SSL Support
-Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
-   *  SSL support is configured
-   *  [node-forge](https://www.npmjs.com/package/node-forge) is installed
-   *  Not running in prod
-   *  No keys provided
-This is useful for local development where you implicitly trust the cert. 
-
-SSL support can be enabled by setting `web.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).
 
 ## Full Config
 The entire [WebConfig](https://github.com/travetto/travetto/tree/main/module/web/src/config.ts#L7) which will show the full set of valid configuration parameters for the web module.

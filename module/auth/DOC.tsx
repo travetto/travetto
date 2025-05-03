@@ -57,7 +57,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Authorization Services'>
-    <c.Code src={AuthService} title='Authorization Service' outline={true} />
+    <c.Code src={AuthService} title='Authorization Service' outline />
 
     The {AuthService} operates as the owner of the current auth state for a given "request". "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br />
 
@@ -75,7 +75,7 @@ export const text = <>
   <c.Section title='Authorization Context'>
     When working with framework's authentication, the authenticated information is exposed via the {AuthContext}, object. <br />
 
-    <c.Code src={AuthContext} outline={true} title='Auth Context Outline' />
+    <c.Code src={AuthContext} outline title='Auth Context Outline' />
 
   </c.Section>
 </>;

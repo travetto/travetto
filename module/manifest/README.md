@@ -171,6 +171,7 @@ The module files are a simple categorization of files into a predetermined set o
    *  `doc` - Documentation files. `DOC.tsx` and All .ts/.tsx files under the `doc/` folder
    *  `$transformer` - All .ts files under the pattern `support/transform*`.  These are used during compilation and never at runtime
    *  `bin` - Entry point .js files.  All .js files under the `bin/` folder
+
 Within each file there is a pattern of either a 3 or 4 element array:
 
 **Code: Sample file**

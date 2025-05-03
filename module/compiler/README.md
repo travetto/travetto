@@ -18,6 +18,7 @@ This module expands upon the [Typescript](https://typescriptlang.org) compiler, 
    *  Automatic conversion to either [Ecmascript Module](https://nodejs.org/api/esm.html) or [CommonJS](https://nodejs.org/api/modules.html) based on the [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) `type` value
    *  Removal of type only imports which can break [Ecmascript Module](https://nodejs.org/api/esm.html)-style output
    *  Automatic addition of `.js` extension to imports to also support  [Ecmascript Module](https://nodejs.org/api/esm.html)-style output
+
 Beyond the [Typescript](https://typescriptlang.org) compiler functionality, the module provides the primary entry point into the development process.
 
 ## CLI
@@ -33,6 +34,7 @@ The compiler cli supports the following operations:
    *  `event <log|progress|state>` - Watch events in realtime as newline delimited JSON
    *  `exec <file> [...args]` - Allow for compiling and executing an entrypoint file
    *  `manifest --prod [output]` - Generate the project manifest
+
 In addition to the normal output, the compiler supports an environment variable `TRV_BUILD` that supports the following values: `debug`, `info`, `warn` or `none`.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. `<other>` from above), the default level is `warn`.  Otherwise the default logging level is `info`.
 
 **Terminal: Sample trv output with debug logging**

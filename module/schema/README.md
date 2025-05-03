@@ -25,6 +25,7 @@ The module utilizes AST transformations to collect schema information, and facil
    *  `title` - definition of the schema
    *  `description` - detailed description of the schema
    *  `examples` - A set of examples as [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML)
+
 The `title` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L15) decorator.
 
 **Code: Sample User Schema**
@@ -85,11 +86,13 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L56) marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.
    *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L198) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
    *  [@SubTypeField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L204) allows for promoting a given field as the owner of the sub type discriminator (defaults to `type`).
+
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. 
 
 Just like the class, all fields can be defined with
    *  `description` - detailed description of the schema
    *  `examples` - A set of examples as [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML)
+
 And similarly, the `description` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L15) decorator.
 
 ### Parameters
