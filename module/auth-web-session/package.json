@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-web-session",
-  "version": "6.0.0-rc.5",
+  "version": "6.0.0-rc.6",
   "description": "Web authentication session integration support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -27,9 +27,9 @@
   "dependencies": {
     "@travetto/auth": "^6.0.0-rc.2",
     "@travetto/auth-session": "^6.0.0-rc.2",
-    "@travetto/auth-web": "^6.0.0-rc.5",
+    "@travetto/auth-web": "^6.0.0-rc.6",
     "@travetto/di": "^6.0.0-rc.2",
-    "@travetto/web": "^6.0.0-rc.3"
+    "@travetto/web": "^6.0.0-rc.4"
   },
   "travetto": {
     "displayName": "Web Auth Session"
