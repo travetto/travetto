@@ -6,7 +6,6 @@ export interface WebResponseContext {
 
 /**
  * Web Response as a simple object
- * @web_invalid_parameter
  */
 export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseContext> {
 

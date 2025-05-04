@@ -57,7 +57,6 @@ export interface WebRequestContext {
 
 /**
  * Web Request object
- * @web_contextual
  */
 export class WebRequest<B = unknown> extends BaseWebMessage<B, Readonly<WebRequestContext>> {
 
@@ -74,7 +73,6 @@ export interface WebResponseContext {
 
 /**
  * Web Response as a simple object
- * @web_invalid_parameter
  */
 export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseContext> {
 

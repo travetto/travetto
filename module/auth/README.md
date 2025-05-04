@@ -21,7 +21,7 @@ This module provides the high-level backdrop for managing security principals.  
    *  Authorization Context
 
 ## Standard Types
-The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8).
+The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7).
 
 **Code: Principal**
 ```typescript
@@ -57,7 +57,7 @@ export interface Principal<D = AnyMap> {
 }
 ```
 
-As referenced above, a [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
+As referenced above, a [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
 
 ## Authentication Contract
 
@@ -136,7 +136,7 @@ export class AuthService {
 
 The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates as the owner of the current auth state for a given "request". "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. 
 
-The service allows for storing and retrieving the active [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8), and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") makes heavy use of this state for enforcing endpoints when authentication is required. 
+The service allows for storing and retrieving the active [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7), and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") makes heavy use of this state for enforcing endpoints when authentication is required. 
 
 ### Login
 "Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates in this fashion, in which a set of credentials and potential [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9)s are submitted, and the service will attempt to authenticate.  

@@ -56,10 +56,10 @@ export class WebTransformer {
       config.name = '';
     }
 
-    if (paramType.key === 'managed' && paramType.original) {
-      if (DocUtil.hasDocTag(paramType.original, 'web_contextual')) {
+    if (paramType.key === 'managed') {
+      if (paramType.name === 'WebResponse') {
         throw new Error(`${paramType.name} must be registered using @ContextParam`);
-      } else if (DocUtil.hasDocTag(paramType.original, 'web_invalid_parameter')) {
+      } else if (paramType.name === 'WebRequest') {
         throw new Error(`${paramType.name} is an invalid endpoint parameter`);
       }
     }
