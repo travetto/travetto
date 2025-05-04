@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web",
-  "version": "6.0.0-rc.4",
+  "version": "6.0.0-rc.5",
   "description": "Declarative api for Web Applications with support for the dependency injection.",
   "keywords": [
     "web",
@@ -42,7 +42,7 @@
   },
   "peerDependencies": {
     "@travetto/cli": "^6.0.0-rc.3",
-    "@travetto/test": "^6.0.0-rc.2",
+    "@travetto/test": "^6.0.0-rc.3",
     "@travetto/transformer": "^6.0.0-rc.3"
   },
   "peerDependenciesMeta": {
