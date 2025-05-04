@@ -37,7 +37,6 @@
     "@types/negotiator": "^0.6.3",
     "find-my-way": "^9.3.0",
     "fresh": "^0.5.2",
-    "iconv-lite": "^0.6.3",
     "keygrip": "^1.1.0",
     "negotiator": "^1.0.0"
   },

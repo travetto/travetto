@@ -41,19 +41,12 @@ export class RunUtil {
 
     const output = `${WORKSPACE}/${Workspace.outputFolder}`;
 
+    const debugOverrides = vscode.workspace.getConfiguration('travetto.debugOptions');
+
     return {
       type: 'node',
       request: 'launch',
       name: config.name,
-      program: config.main.replace(Workspace.path, WORKSPACE),
-      args: (config.args ?? []).map(x => `${x}`),
-      env: {
-        ...Env.TRV_CAN_RESTART.export(false),
-        ...this.buildEnv(config.cliModule),
-        ...Env.TRV_DYNAMIC.export(true),
-        ...config.env ?? {},
-      },
-      cwd: WORKSPACE,
       sourceMaps: true,
       pauseForSourceMap: true,
       runtimeArgs: [],
@@ -63,6 +56,7 @@ export class RunUtil {
         '<node_internals>/**',
         'node:internals/**',
         'internal/**',
+        '**/@travetto/runtime/src/types.*',
         '**/@travetto/runtime/src/console.*',
         '**/@travetto/registry/src/proxy.*',
         '**/@travetto/log/src/**',
@@ -73,6 +67,16 @@ export class RunUtil {
       ],
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
+      ...(typeof debugOverrides === 'object' ? debugOverrides : {}),
+      program: config.main.replace(Workspace.path, WORKSPACE),
+      cwd: WORKSPACE,
+      args: (config.args ?? []).map(x => `${x}`),
+      env: {
+        ...Env.TRV_CAN_RESTART.export(false),
+        ...this.buildEnv(config.cliModule),
+        ...Env.TRV_DYNAMIC.export(true),
+        ...config.env ?? {},
+      },
     };
   }
 

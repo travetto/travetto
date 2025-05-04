@@ -57,6 +57,7 @@ export interface WebRequestContext {
 
 /**
  * Web Request object
+ * @web_contextual
  */
 export class WebRequest<B = unknown> extends BaseWebMessage<B, Readonly<WebRequestContext>> {
 
@@ -73,6 +74,7 @@ export interface WebResponseContext {
 
 /**
  * Web Response as a simple object
+ * @web_invalid_parameter
  */
 export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseContext> {
 
@@ -377,7 +379,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
    1. global - Intended to run outside of the request flow - [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L13)
    1. terminal - Handles once request and response are finished building - [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L28), [RespondInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L12)
    1. pre-request - Prepares the request for running - [TrustProxyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/trust-proxy.ts#L23)
-   1. request - Handles inbound request, validation, and body preparation - [DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53), [AcceptInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L34), [BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L61), [CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L56) 
+   1. request - Handles inbound request, validation, and body preparation - [DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53), [AcceptInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L34), [BodyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L57), [CookieInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L60) 
    1. response - Prepares outbound response - [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50), [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51), [EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L34), [ResponseCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30) 
    1. application - Lives outside of the general request/response behavior, [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") uses this for login and logout flows.
 
@@ -460,8 +462,8 @@ export class DecompressConfig {
 }
 ```
 
-#### CookiesInterceptor
-[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L56) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+#### CookieInterceptor
+[CookieInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L60) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
 **Code: Cookies Config**
 ```typescript
@@ -473,7 +475,7 @@ export class CookieConfig implements CookieSetOptions {
   /**
    * Are they signed
    */
-  signed = true;
+  signed?: boolean;
   /**
    * Supported only via http (not in JS)
    */
@@ -490,20 +492,24 @@ export class CookieConfig implements CookieSetOptions {
   /**
    * Is the cookie only valid for https
    */
-  secure?: boolean = false;
+  secure?: boolean;
   /**
    * The domain of the cookie
    */
   domain?: string;
+  /**
+   * The default path of the cookie
+   */
+  path: string = '/';
 }
 ```
 
-#### BodyParseInterceptor
-[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L61) handles the inbound request, and converting the body payload into an appropriate format.
+#### BodyInterceptor
+[BodyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L57) handles the inbound request, and converting the body payload into an appropriate format.
 
-**Code: Body Parse Config**
+**Code: Body Config**
 ```typescript
-export class BodyParseConfig {
+export class WebBodyConfig {
   /**
    * Parse request body
    */
@@ -523,10 +529,6 @@ export class BodyParseConfig {
 
   @Ignore()
   _limit: number | undefined;
-
-  postConstruct(): void {
-    this._limit = WebCommonUtil.parseByteSize(this.limit);
-  }
 }
 ```
 

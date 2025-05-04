@@ -24,7 +24,7 @@ export * from './src/registry/visitor.ts';
 export * from './src/registry/types.ts';
 
 export * from './src/interceptor/accept.ts';
-export * from './src/interceptor/body-parse.ts';
+export * from './src/interceptor/body.ts';
 export * from './src/interceptor/cors.ts';
 export * from './src/interceptor/cookie.ts';
 export * from './src/interceptor/compress.ts';

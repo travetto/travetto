@@ -6,7 +6,7 @@ import { Injectable } from '@travetto/di';
 import { Controller } from './src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch, Head, Options, Endpoint } from './src/decorator/endpoint.ts';
 import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param.ts';
-import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-parse.ts';
+import { BodyInterceptor, WebBodyConfig } from './src/interceptor/body.ts';
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
 import { ResponseCacheInterceptor } from './src/interceptor/response-cache.ts';
 import { LoggingInterceptor, WebLogConfig } from './src/interceptor/logging.ts';
@@ -175,7 +175,7 @@ export const text = <>
         <li>global - Intended to run outside of the request flow - {AsyncContextInterceptor}</li>
         <li>terminal - Handles once request and response are finished building - {LoggingInterceptor}, {RespondInterceptor}</li>
         <li>pre-request - Prepares the request for running - {TrustProxyInterceptor}</li>
-        <li>request - Handles inbound request, validation, and body preparation - {DecompressInterceptor}, {AcceptInterceptor}, {BodyParseInterceptor}, {CookieInterceptor} </li>
+        <li>request - Handles inbound request, validation, and body preparation - {DecompressInterceptor}, {AcceptInterceptor}, {BodyInterceptor}, {CookieInterceptor} </li>
         <li>response - Prepares outbound response - {CompressInterceptor}, {CorsInterceptor}, {EtagInterceptor}, {ResponseCacheInterceptor} </li>
         <li>application - Lives outside of the general request/response behavior, {d.mod('AuthWeb')} uses this for login and logout flows.</li>
       </ol>
@@ -221,10 +221,10 @@ export const text = <>
         <c.Code title='Cookies Config' src={CookieConfig} />
       </c.SubSubSection>
 
-      <c.SubSubSection title={BodyParseInterceptor.name}>
-        {BodyParseInterceptor} handles the inbound request, and converting the body payload into an appropriate format.
+      <c.SubSubSection title={BodyInterceptor.name}>
+        {BodyInterceptor} handles the inbound request, and converting the body payload into an appropriate format.
 
-        <c.Code title='Body Parse Config' src={BodyParseConfig} />
+        <c.Code title='Body Config' src={WebBodyConfig} />
       </c.SubSubSection>
 
       <c.SubSubSection title={CompressInterceptor.name}>

@@ -1,5 +1,4 @@
-import iconv from 'iconv-lite';
-
+import { TextDecoder } from 'node:util';
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
@@ -187,27 +186,33 @@ export class WebBodyUtil {
   static async readText(input: Readable | Buffer, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
     encoding ??= (Buffer.isBuffer(input) ? undefined : input.readableEncoding) ?? 'utf-8';
 
-    if (!iconv.encodingExists(encoding)) {
+    let decoder: TextDecoder;
+    try {
+      decoder = new TextDecoder(encoding);
+    } catch {
       throw WebError.for('Specified Encoding Not Supported', 415, { encoding });
     }
 
     if (Buffer.isBuffer(input)) {
-      return { text: iconv.decode(input, encoding), read: input.byteLength };
+      if (input.byteLength > limit) {
+        throw WebError.for('Request Entity Too Large', 413, { received: input.byteLength, limit });
+      }
+      return { text: decoder.decode(input), read: input.byteLength };
     }
 
     let received = Buffer.isBuffer(input) ? input.byteOffset : 0;
-    const decoder = iconv.getDecoder(encoding);
     const all: string[] = [];
 
     try {
-      for await (const chunk of input.iterator({ destroyOnReturn: false })) {
-        received += Buffer.isBuffer(chunk) ? chunk.byteLength : (typeof chunk === 'string' ? chunk.length : chunk.length);
+      for await (const chunk of castTo<AsyncIterable<string | Buffer>>(input.iterator({ destroyOnReturn: false }))) {
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, 'utf8');
+        received += buffer.byteLength;
         if (received > limit) {
           throw WebError.for('Request Entity Too Large', 413, { received, limit });
         }
-        all.push(decoder.write(chunk));
+        all.push(decoder.decode(buffer, { stream: true }));
       }
-      all.push(decoder.end() ?? '');
+      all.push(decoder.decode(Buffer.alloc(0), { stream: false }));
       return { text: all.join(''), read: received };
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {

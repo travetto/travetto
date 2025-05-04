@@ -2,14 +2,14 @@ import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
 import {
   HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry,
-  WebAsyncContext, Body, EndpointUtil, BodyParseInterceptor, Post, WebCommonUtil,
+  WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
   RespondInterceptor, DecompressInterceptor
 } from '@travetto/web';
 
 @Controller('/rpc')
 @ExcludeInterceptors(val => !(
   val instanceof DecompressInterceptor ||
-  val instanceof BodyParseInterceptor ||
+  val instanceof BodyInterceptor ||
   val instanceof RespondInterceptor ||
   val.category === 'global'
 ))

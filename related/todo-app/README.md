@@ -360,15 +360,6 @@ npx trv web:http
         exposeAllSchemas: false
       },
       AuthConfig: { maxAge: '1h', rollingRenew: true },
-      BodyParseConfig: {
-        applies: true,
-        limit: '1mb',
-        parsingTypes: {
-          text: 'text',
-          'application/json': 'json',
-          'application/x-www-form-urlencoded': 'form'
-        }
-      },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       CompressConfig: {
         applies: true,
@@ -376,7 +367,7 @@ npx trv web:http
         supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
       },
       ConsoleLogAppenderConfig: { logToLevel: true },
-      CookieConfig: { applies: true, signed: true, httpOnly: true, sameSite: 'lax', secure: false },
+      CookieConfig: { applies: true, httpOnly: true, sameSite: 'lax', path: '/' },
       CorsConfig: { applies: true },
       DecompressConfig: { applies: true, supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ] },
       EtagConfig: { applies: true },
@@ -421,6 +412,15 @@ npx trv web:http
       WebAuthLoginConfig: { applies: false },
       WebAuthLogoutConfig: { applies: false },
       WebAuthVerifyConfig: { applies: false, permissions: [] },
+      WebBodyConfig: {
+        applies: true,
+        limit: '1mb',
+        parsingTypes: {
+          text: 'text',
+          'application/json': 'json',
+          'application/x-www-form-urlencoded': 'form'
+        }
+      },
       WebConfig: { defaultMessage: true, baseUrl: 'http://localhost:12555' },
       WebHttpConfig: { port: 12555, bindAddress: '0.0.0.0', ssl: false },
       WebLogConfig: { applies: true, showStackTrace: true },
@@ -455,9 +455,20 @@ export async function main(key: string, port: number) {
 $ trv main support/create-todo.ts <key> <port>
 
 {
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
+  message: 'Validation errors have occurred',
+  category: 'data',
+  type: 'ValidationResultError',
+  at: '2029-03-14T04:00:01.510Z',
+  details: {
+    errors: [
+      {
+        kind: 'required',
+        active: true,
+        message: 'todo.text is required',
+        path: 'text'
+      }
+    ]
+  }
 }
 ```
 
@@ -475,11 +486,5 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+[]
 ```

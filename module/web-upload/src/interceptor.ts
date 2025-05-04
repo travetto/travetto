@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@travetto/di';
 import {
-  BodyParseInterceptor, WebInterceptor, WebInterceptorCategory, WebChainedContext,
+  BodyInterceptor, WebInterceptor, WebInterceptorCategory, WebChainedContext,
   WebResponse, DecompressInterceptor, WebInterceptorContext
 } from '@travetto/web';
 
@@ -12,7 +12,7 @@ import { FileMap } from './types.ts';
 export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
 
   category: WebInterceptorCategory = 'request';
-  runsBefore = [BodyParseInterceptor];
+  runsBefore = [BodyInterceptor];
   dependsOn = [DecompressInterceptor];
 
   @Inject()

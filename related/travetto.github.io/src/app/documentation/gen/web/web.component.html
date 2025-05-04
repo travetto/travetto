@@ -67,6 +67,7 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 
 <span class="token comment">/**
  * Web Request object
+ * &#64;web_contextual
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebRequest<span class="token operator">&lt;</span><span class="token constant">B</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token keyword">extends</span> <span class="token class-name">BaseWebMessage<span class="token operator">&lt;</span><span class="token constant">B</span><span class="token punctuation">,</span> Readonly<span class="token operator">&lt;</span>WebRequestContext<span class="token operator">>></span></span> <span class="token punctuation">{{'{'}}</span>
 
@@ -86,6 +87,7 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 
 <span class="token comment">/**
  * Web Response as a simple object
+ * &#64;web_invalid_parameter
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebResponse<span class="token operator">&lt;</span><span class="token constant">B</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token keyword">extends</span> <span class="token class-name">BaseWebMessage<span class="token operator">&lt;</span><span class="token constant">B</span><span class="token punctuation">,</span> WebResponseContext<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
 
@@ -416,7 +418,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 <ol> <li>global - Intended to run outside of the request flow - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L13">AsyncContextInterceptor</a></li>
 <li>terminal - Handles once request and response are finished building - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L28">LoggingInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L12">RespondInterceptor</a></li>
 <li>pre-request - Prepares the request for running - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/trust-proxy.ts#L23">TrustProxyInterceptor</a></li>
-<li>request - Handles inbound request, validation, and body preparation - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53">DecompressInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L34">AcceptInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L61">BodyParseInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L56">CookiesInterceptor</a> </li>
+<li>request - Handles inbound request, validation, and body preparation - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53">DecompressInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L34">AcceptInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L57">BodyInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L60">CookieInterceptor</a> </li>
 <li>response - Prepares outbound response - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50">CompressInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51">CorsInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L34">EtagInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30">ResponseCacheInterceptor</a> </li>
 <li>application - Lives outside of the general request/response behavior, <a class="module-link" routerLink="/docs/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> uses this for login and logout flows.</li>
 </ol>
@@ -518,13 +520,13 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<h4 id="cookiesinterceptor">CookiesInterceptor</h4>
+<h4 id="cookieinterceptor">CookieInterceptor</h4>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L56">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L60">CookieInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
   <figure class="code">
     <figcaption class="code">Cookies Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L20">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L20">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CookieConfig</span> <span class="token keyword">implements</span> <span class="token class-name">CookieSetOptions</span> <span class="token punctuation">{{'{'}}</span>
@@ -535,7 +537,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
   <span class="token comment">/**
    * Are they signed
    */</span>
-  signed <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+  signed<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Supported only via http (not in JS)
    */</span>
@@ -552,24 +554,28 @@ Out of the box, the web framework comes with a few interceptors, and more are co
   <span class="token comment">/**
    * Is the cookie only valid for https
    */</span>
-  secure<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  secure<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * The domain of the cookie
    */</span>
   domain<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The default path of the cookie
+   */</span>
+  path<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">'/'</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<h4 id="bodyparseinterceptor">BodyParseInterceptor</h4>
+<h4 id="bodyinterceptor">BodyInterceptor</h4>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L61">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L57">BodyInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.
 
   <figure class="code">
-    <figcaption class="code">Body Parse Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L30">Source</a></cite>
+    <figcaption class="code">Body Config
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L30">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BodyParseConfig</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebBodyConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Parse request body
    */</span>
@@ -589,10 +595,6 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Ignore</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   _limit<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
-
-  <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>_limit <span class="token operator">=</span> WebCommonUtil<span class="token punctuation">.</span><span class="token function">parseByteSize</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>limit<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

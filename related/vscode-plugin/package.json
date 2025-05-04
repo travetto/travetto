@@ -83,6 +83,15 @@
     "theme": "light"
   },
   "contributes": {
+    "configuration": {
+      "title": "Travetto",
+      "properties": {
+        "travetto.debugOptions": {
+          "type": "object",
+          "description": "Overrides for Debugging Options"
+        }
+      }
+    },
     "snippets": [
       {
         "language": "typescript",

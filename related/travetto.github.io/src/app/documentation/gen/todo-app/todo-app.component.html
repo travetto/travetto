@@ -389,15 +389,6 @@ First we must start the application:
         exposeAllSchemas: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
       AuthConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      BodyParseConfig: <span class="token punctuation">{{'{'}}</span>
-        applies: true,
-        limit: <span class="token string">'1mb'</span>,
-        parsingTypes: <span class="token punctuation">{{'{'}}</span>
-          text: <span class="token string">'text'</span>,
-          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
-          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
-        <span class="token punctuation">{{'}'}}</span>
-      <span class="token punctuation">{{'}'}}</span>,
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
@@ -405,7 +396,7 @@ First we must start the application:
         supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span>, <span class="token string">'deflate'</span> <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span>,
       ConsoleLogAppenderConfig: <span class="token punctuation">{{'{'}}</span> logToLevel: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      CookieConfig: <span class="token punctuation">{{'{'}}</span> applies: true, signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span>, secure: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
+      CookieConfig: <span class="token punctuation">{{'{'}}</span> applies: true, httpOnly: true, sameSite: <span class="token string">'lax'</span>, path: <span class="token string">'/'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       DecompressConfig: <span class="token punctuation">{{'{'}}</span> applies: true, supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
@@ -450,6 +441,15 @@ First we must start the application:
       WebAuthLoginConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthLogoutConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> applies: false, permissions: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      WebBodyConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        limit: <span class="token string">'1mb'</span>,
+        parsingTypes: <span class="token punctuation">{{'{'}}</span>
+          text: <span class="token string">'text'</span>,
+          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
+          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span> defaultMessage: true, baseUrl: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span>,
       WebHttpConfig: <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span>, bindAddress: <span class="token string">'0.0.0.0'</span>, ssl: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
@@ -488,9 +488,20 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
     <pre><code class="language-bash">$ trv main support/create-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
 <span class="token punctuation">{{'{'}}</span>
-  text: <span class="token string">'New Todo - &lt;key>'</span>,
-  created: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
-  id: <span class="token string">'&lt;uniqueId>'</span>
+  message: <span class="token string">'Validation errors have occurred'</span>,
+  category: <span class="token string">'data'</span>,
+  type: <span class="token string">'ValidationResultError'</span>,
+  at: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
+  details: <span class="token punctuation">{{'{'}}</span>
+    errors: <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span>
+        kind: <span class="token string">'required'</span>,
+        active: true,
+        message: <span class="token string">'todo.text is required'</span>,
+        path: <span class="token string">'text'</span>
+      <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -513,13 +524,7 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 </figcaption>
     <pre><code class="language-bash">$ trv main support/list-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-<span class="token punctuation">[</span>
-  <span class="token punctuation">{{'{'}}</span>
-    id: <span class="token string">'&lt;uniqueId>'</span>,
-    text: <span class="token string">'New Todo - &lt;key>'</span>,
-    created: <span class="token string">'2029-03-14T04:00:01.814Z'</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">]</span></code></pre>
+<span class="token punctuation">[</span><span class="token punctuation">]</span></code></pre>
   </figure>
 
 </div>

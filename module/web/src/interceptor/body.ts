@@ -24,10 +24,10 @@ export interface BodyContentParser {
 };
 
 /**
- * Web body parse configuration
+ * Web body  configuration
  */
-@Config('web.bodyParse')
-export class BodyParseConfig {
+@Config('web.body')
+export class WebBodyConfig {
   /**
    * Parse request body
    */
@@ -47,25 +47,21 @@ export class BodyParseConfig {
 
   @Ignore()
   _limit: number | undefined;
-
-  postConstruct(): void {
-    this._limit = WebCommonUtil.parseByteSize(this.limit);
-  }
 }
 
 
 /**
- * Parses the body input content
+ * Verifies content length, decodes character encodings, and parses body input string via the content type
  */
 @Injectable()
-export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
+export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
 
   dependsOn = [AcceptInterceptor, DecompressInterceptor];
   category: WebInterceptorCategory = 'request';
   parsers: Record<string, BodyContentParser> = {};
 
   @Inject()
-  config: BodyParseConfig;
+  config: WebBodyConfig;
 
   async postConstruct(): Promise<void> {
     // Load all the parser types
@@ -75,11 +71,11 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
     }
   }
 
-  applies({ endpoint, config }: WebInterceptorContext<BodyParseConfig>): boolean {
+  applies({ endpoint, config }: WebInterceptorContext<WebBodyConfig>): boolean {
     return config.applies && endpoint.allowsBody;
   }
 
-  async filter({ request, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
+  async filter({ request, config, next }: WebChainedContext<WebBodyConfig>): Promise<WebResponse> {
     const input = request.body;
 
     if (!WebBodyUtil.isRaw(input)) {
@@ -88,8 +84,8 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
     const lengthRead = +(request.headers.get('Content-Length') || '');
     const length = Number.isNaN(lengthRead) ? undefined : lengthRead;
+    const limit = config._limit ??= WebCommonUtil.parseByteSize(config.limit);
 
-    const limit = config._limit ?? Number.MAX_SAFE_INTEGER;
     if (length && length > limit) {
       throw WebError.for('Request entity too large', 413, { length, limit });
     }

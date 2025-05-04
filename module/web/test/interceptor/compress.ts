@@ -10,7 +10,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
 
 @Suite()
-class BodyParseInterceptorSuite {
+class CompressInterceptorSuite {
 
   @BeforeAll()
   async init() {

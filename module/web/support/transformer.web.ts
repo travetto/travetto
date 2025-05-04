@@ -50,6 +50,10 @@ export class WebTransformer {
         // Default to query for empty or regex endpoints
         detectedParamType = 'QueryParam';
       }
+    } else {
+      // Treat as schema, and see if endpoint supports a body for default behavior on untyped
+      detectedParamType = epDec.targets?.includes('@travetto/web:HttpRequestBody') ? 'Body' : 'QueryParam';
+      config.name = '';
     }
 
     if (paramType.key === 'managed' && paramType.original) {
