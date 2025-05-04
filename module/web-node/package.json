@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-node",
-  "version": "6.0.0-rc.5",
+  "version": "6.0.0-rc.6",
   "description": "Node provider for the travetto web module.",
   "keywords": [
     "web",
@@ -24,8 +24,8 @@
     "directory": "module/web-node"
   },
   "dependencies": {
-    "@travetto/web": "^6.0.0-rc.5",
-    "@travetto/web-http-server": "^6.0.0-rc.5"
+    "@travetto/web": "^6.0.0-rc.6",
+    "@travetto/web-http-server": "^6.0.0-rc.6"
   },
   "travetto": {
     "displayName": "Node Web Server"

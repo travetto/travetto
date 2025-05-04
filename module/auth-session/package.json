@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-session",
-  "version": "6.0.0-rc.3",
+  "version": "6.0.0-rc.4",
   "description": "Session provider for the travetto auth module.",
   "keywords": [
     "auth",
@@ -25,7 +25,7 @@
     "directory": "module/auth-session"
   },
   "dependencies": {
-    "@travetto/auth": "^6.0.0-rc.3",
+    "@travetto/auth": "^6.0.0-rc.4",
     "@travetto/config": "^6.0.0-rc.2",
     "@travetto/model": "^6.0.0-rc.2"
   },
