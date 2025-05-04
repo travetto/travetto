@@ -18,6 +18,7 @@ export interface WebRequestContext {
 
 /**
  * Web Request object
+ * @web_contextual
  */
 export class WebRequest<B = unknown> extends BaseWebMessage<B, Readonly<WebRequestContext>> {
 

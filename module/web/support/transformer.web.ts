@@ -44,19 +44,20 @@ export class WebTransformer {
       // If non-regex
       if (arg && ts.isStringLiteral(arg)) {
         const literal = LiteralUtil.toLiteral(arg);
-        if (typeof literal !== 'string') {
-          throw new Error(`Unexpected literal type: ${literal}`);
-        }
-        // If param name matches path param, default to @Path
+        // If param name matches path param, default to @PathParam
         detectedParamType = new RegExp(`:${name}\\b`).test(literal) ? 'PathParam' : 'QueryParam';
       } else {
         // Default to query for empty or regex endpoints
         detectedParamType = 'QueryParam';
       }
-    } else if (epDec.ident.getText() !== 'All') { // Treat all separate
-      // Treat as schema, and see if endpoint supports a body for default behavior on untyped
-      detectedParamType = epDec.targets?.includes('@travetto/web:HttpRequestBody') ? 'Body' : 'QueryParam';
-      config.name = '';
+    }
+
+    if (paramType.key === 'managed' && paramType.original) {
+      if (DocUtil.hasDocTag(paramType.original, 'web_contextual')) {
+        throw new Error(`${paramType.name} must be registered using @ContextParam`);
+      } else if (DocUtil.hasDocTag(paramType.original, 'web_invalid_parameter')) {
+        throw new Error(`${paramType.name} is an invalid endpoint parameter`);
+      }
     }
 
     node = SchemaTransformUtil.computeField(state, node, config);
