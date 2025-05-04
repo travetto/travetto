@@ -11,6 +11,12 @@ const isBlobMap = (x: any): x is Record<string, Blob> => x && typeof x === 'obje
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isBlobLike = (x: any): x is Record<string, Blob> | Blob => x instanceof Blob || isBlobMap(x);
 
+const extendHeaders = (base: RequestInit['headers'], toAdd: Record<string, string>): Headers => {
+  const headers = new Headers(base);
+  for (const [k, v] of Object.entries(toAdd)) { headers.set(k, v); }
+  return headers;
+};
+
 export type PreRequestHandler = (item: RequestInit) => Promise<RequestInit | undefined | void>;
 export type PostResponseHandler = (item: Response) => Promise<Response | undefined | void>;
 
@@ -66,11 +72,7 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   return {
     ...base,
     method: 'POST',
-    path: `${controller}:${endpoint}`,
-    headers: {
-      ...base.headers,
-      'Content-Type': 'application/json',
-    }
+    path: `${controller}:${endpoint}`
   };
 }
 
@@ -147,10 +149,7 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
   try {
     const { body, headers } = getBody(params);
     core.body = body;
-    core.headers = {
-      ...core.headers ?? {},
-      ...headers
-    };
+    core.headers = extendHeaders(core.headers, headers);
 
     for (const fn of request.preRequestHandlers ?? []) {
       const computed = await fn(core);
@@ -175,13 +174,14 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
       core.signal = AbortSignal.any(signals);
     }
 
+    const url = typeof request.url === 'string' ? new URL(request.url) : request.url;
+    if (request.core?.path) {
+      url.pathname = `${url.pathname}/${request.core.path}`.replaceAll('//', '/');
+    }
+
     let resolved: Response | undefined;
     for (let i = 0; i <= (core.retriesOnConnectFailure ?? 0); i += 1) {
       try {
-        const url = typeof request.url === 'string' ? new URL(request.url) : request.url;
-        if (request.core?.path) {
-          url.pathname = `${url.pathname}/${request.core.path}`.replaceAll('//', '/');
-        }
         resolved = await fetch(url, core);
         break;
       } catch (err) {
