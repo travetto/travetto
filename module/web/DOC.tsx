@@ -11,7 +11,7 @@ import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
 import { ResponseCacheInterceptor } from './src/interceptor/response-cache.ts';
 import { LoggingInterceptor, WebLogConfig } from './src/interceptor/logging.ts';
 import { CookieInterceptor, CookieConfig } from './src/interceptor/cookie.ts';
-import { WebConfig } from './src/config.ts';
+import { CookieJar } from './src/util/cookie.ts';
 import { WebRequest } from './src/types/request.ts';
 import { WebInterceptor } from './src/types/interceptor.ts';
 import { AsyncContextInterceptor } from './src/interceptor/context.ts';
@@ -279,12 +279,14 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Cookie Support'>
-    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {WebRequest} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+    Cookies are a unique element, within the framework, as they sit on the request and response flows.  Ideally we would separate these out, but given the support for key rotation, there is a scenario in which reading a cookie on the request, will result in a cookie needing to be written on the response.  Because of this, cookies are treated as being outside the normal {WebRequest} activity, and is exposed as the {ContextParam} {CookieJar}.  The {CookieJar} has a fairly basic contract:
+
+    <c.Code title='CookieJar contract' src={CookieJar} outline />
+
+    {d.method('.get()')}/{d.method('.set()')} will be the most commonly used methods, and should align with standard cookie reading/writing behavior.
 
     <c.Code title='Sample Cookie Usage' src='doc/cookie-endpoints.ts' />
   </c.Section>
 
-  <c.Section title='Full Config'>
-    The entire {WebConfig} which will show the full set of valid configuration parameters for the web module.
-  </c.Section>
+  <c.Section title='Error Handling'></c.Section>
 </>;

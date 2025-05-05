@@ -8,7 +8,7 @@ export const text = <>
 
   This module is already most likely compatible with quite a bit of middleware, but will fail under any of the following conditions:
   <ul>
-    <li>The calling code expects the request or response to be a proper {d.library('NodeEventEmitter')}, beyond {d.method(".on('close', callback)")}</li>
+    <li>The calling code expects the request or response to be a proper {d.library('NodeEventEmitter')}, beyond {d.method(".on('end', callback)")}</li>
     <li>The calling code expects the request/response sockets to be live.</li>
     <li>The calling code modifies the shape of the objects (e.g. rewrites the close method on response).</li>
   </ul>
