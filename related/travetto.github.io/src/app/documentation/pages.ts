@@ -154,7 +154,7 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-web-session/auth-web-session.component').then(m => m.AuthWebSessionComponent)
       },
       {
-        path: 'auth-session', title: 'Auth Session',
+        path: 'auth-session', title: 'Session',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-session/auth-session.component').then(m => m.AuthSessionComponent)
       }
     ]

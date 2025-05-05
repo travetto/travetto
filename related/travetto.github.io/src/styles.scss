@@ -1,4 +1,5 @@
-@import "reset.scss";
+@use "sass:color";
+@use "reset.scss";
 
 /* You can add global styles to this file, and also import other style files */
 
@@ -360,19 +361,19 @@ li {
       }
 
       &.install {
-        background-color: desaturate(darken(rgba(218, 165, 32, 1), 5%), 0%);
+        background-color: color.scale(color.adjust(rgb(218, 165, 32), $lightness: -5%), $saturation: 0%);
       }
 
       &.terminal {
-        background-color: desaturate(rgba(102, 102, 102, 1), 0%);
+        background-color: color.scale(rgba(102, 102, 102, 1), $saturation: 0%);
       }
 
       &.code {
-        background-color: desaturate(darken(rgba(0, 255, 0, 1), 20%), 0%);
+        background-color: color.scale(color.adjust(rgba(0, 255, 0, 1), $lightness: -20%), $saturation: 0%);
       }
 
       &.config {
-        background-color: desaturate(darken(rgba(0, 0, 255, 1), 20%), 40%);
+        background-color: color.scale(color.adjust(rgba(0, 0, 255, 1), $lightness: -20%), $saturation: -40%);
       }
     }
 
@@ -514,7 +515,7 @@ li {
       }
 
       &.path {
-        background-color: darken(pink, 30%);
+        background-color: color.adjust(pink, $lightness: -30%);
         color: white;
       }
 
@@ -594,7 +595,7 @@ li {
       display: block;
 
       &.active > a {
-        border-color: lighten(green, 10%);
+        border-color: color.adjust(green, $lightness: 10%);
       }
 
       a {
@@ -618,7 +619,7 @@ li {
           font-size: 0.8em;
 
           &.active a {
-            border-color: lighten(red, 10%);
+            border-color: color.adjust(red, $lightness: 10%);
           }
         }
       }

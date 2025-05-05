@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 @Component({
-  imports: [RouterLink, RouterModule],
+  imports: [RouterModule],
   selector: 'app-eslint',
   templateUrl: './eslint.component.html',
   styleUrls: []

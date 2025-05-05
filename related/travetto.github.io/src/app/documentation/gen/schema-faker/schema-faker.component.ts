@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 @Component({
-  imports: [RouterLink, RouterModule],
+  imports: [RouterModule],
   selector: 'app-schema-faker',
   templateUrl: './schema-faker.component.html',
   styleUrls: []
