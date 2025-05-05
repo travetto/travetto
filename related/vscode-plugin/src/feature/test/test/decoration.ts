@@ -1,7 +1,7 @@
-import vscode from 'vscode';
+import vscode, { ThemeColor } from 'vscode';
 import util from 'node:util';
 
-import type { TestResult, Assertion, TestConfig } from '@travetto/test';
+import type { TestResult, Assertion, TestConfig, TestLog } from '@travetto/test';
 
 import type { ErrorHoverAssertion, StatusUnknown, TestLevel } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
@@ -167,6 +167,25 @@ export class Decorations {
       gutterIconPath: img,
       gutterIconSize: size
     });
+  }
+
+  /**
+   * Build Test Log decoration
+   * @param log
+   */
+  static buildTestLog(log: TestLog): vscode.DecorationOptions {
+    const lines = log.message.split('\n');
+    return {
+      ...this.line(log.line),
+      ...lines.length > 1 ? { hoverMessage: `${log.message}` } : {},
+      renderOptions: {
+        after: {
+          textDecoration: ITALIC,
+          color: log.level === 'error' || log.level === 'warn' ? new ThemeColor('errorForeground') : undefined,
+          contentText: `  // ${log.level}: ${lines[0]}`
+        }
+      }
+    };
   }
 
   /**

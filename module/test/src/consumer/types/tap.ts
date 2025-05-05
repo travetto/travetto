@@ -134,9 +134,13 @@ export class TapEmitter implements TestConsumerShape {
 
       // Track output
       if (test.output) {
+        const groupedByLevel: Record<string, string[]> = {};
+        for (const log of test.output) {
+          (groupedByLevel[log.level] ??= []).push(log.message);
+        }
         for (const key of ['log', 'info', 'error', 'debug', 'warn']) {
-          if (test.output[key]) {
-            this.logMeta({ [key]: test.output[key] });
+          if (groupedByLevel[key]) {
+            this.logMeta({ [key]: groupedByLevel[key].join('\n') });
           }
         }
       }

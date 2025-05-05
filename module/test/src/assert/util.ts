@@ -105,7 +105,7 @@ export class AssertUtil {
     };
     const testResult: TestResult = {
       ...coreAll,
-      status: 'failed', error, duration: 0, durationTotal: 0, assertions: [assert], output: {}
+      status: 'failed', error, duration: 0, durationTotal: 0, assertions: [assert], output: []
     };
     const test: TestConfig = {
       ...coreAll,

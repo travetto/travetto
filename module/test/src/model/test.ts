@@ -1,7 +1,9 @@
-import type { Class, TimeSpan } from '@travetto/runtime';
+import type { Class, ConsoleEvent, TimeSpan } from '@travetto/runtime';
+
 import { Skip, TestCore } from './common.ts';
 
 export type ThrowableError = string | RegExp | Class<Error> | ((e: Error | string) => boolean | void | undefined);
+export type TestLog = { level: ConsoleEvent['level'], line: number, message: string };
 
 /**
  * Specific configuration for a test
@@ -106,7 +108,7 @@ export interface TestResult extends TestCore {
   /**
    * Logging output
    */
-  output: Record<string, string>;
+  output: TestLog[];
 }
 
 /**

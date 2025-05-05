@@ -6,7 +6,7 @@ import { TypedObject } from '@travetto/runtime';
 import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestWatchEvent } from '@travetto/test';
 
 import { Decorations } from './decoration.ts';
-import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown } from './types.ts';
+import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown, Result } from './types.ts';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
@@ -20,15 +20,15 @@ function isSuiteState(level: string, state: ResultState<unknown>): state is Suit
   return level === 'suite';
 }
 
-function isAssertion(level: string, state?: TestItem): state is Assertion {
+function isAssertion(level: string, result?: Result<TestItem>): result is Result<Assertion> {
   return level === 'assertion';
 }
 
-function isTestResult(level: string, state?: TestItem): state is TestResult {
+function isTestResult(level: string, result?: Result<TestItem>): result is Result<TestResult> {
   return level === 'test';
 }
 
-function isSuiteResult(level: string, state?: TestItem): state is SuiteResult {
+function isSuiteResult(level: string, result?: Result<TestItem>): result is Result<SuiteResult> {
   return level === 'suite';
 }
 
@@ -89,7 +89,7 @@ export class DocumentResultsManager {
    * @param type
    * @param decs
    */
-  setStyle(type: vscode.TextEditorDecorationType, decs: vscode.DecorationOptions[]): void {
+  setStyle(type: vscode.TextEditorDecorationType, decs: vscode.DecorationOptions[] = []): void {
     if (type) {
       for (const ed of this.#editors) {
         ed.setDecorations(type, decs);
@@ -107,6 +107,7 @@ export class DocumentResultsManager {
       for (const style of Object.values(suite.styles)) { style.dispose(); }
     }
     for (const test of Object.values(this.#results.test)) {
+      test.logStyle.dispose();
       for (const style of Object.values(test.styles)) { style.dispose(); }
       for (const style of Object.values(test.assertStyles)) { style.dispose(); }
     }
@@ -119,6 +120,7 @@ export class DocumentResultsManager {
     }
     if (test.decoration && test.status) {
       this.setStyle(test.styles[test.status], [test.decoration]);
+      this.setStyle(test.logStyle, test.logDecorations);
 
       const out: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
       for (const assertion of test.assertions) {
@@ -219,21 +221,13 @@ export class DocumentResultsManager {
    * Store results information
    * @param level The level of the results
    * @param key The test key
-   * @param status The status
-   * @param decoration UI Decoration
-   * @param src
+   * @param result The result
    */
-  store(
-    level: TestLevel,
-    key: string,
-    status: StatusUnknown,
-    decoration: vscode.DecorationOptions,
-    src?: TestItem
-  ): void {
-    if (isAssertion(level, src)) {
+  store(level: TestLevel, key: string, result: Result<TestItem>): void {
+    if (isAssertion(level, result)) {
       const el = this.#results.test[key];
       const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
-      el.assertions.push({ status, decoration, src });
+      el.assertions.push(result);
 
       for (const a of el.assertions) {
         groups[a.status].push(a.decoration);
@@ -242,21 +236,18 @@ export class DocumentResultsManager {
       for (const s of ['passed', 'failed', 'unknown'] as const) {
         this.setStyle(el.assertStyles[s], groups[s]);
       }
-    } else if (isSuiteResult(level, src)) {
+    } else if (isSuiteResult(level, result)) {
       const el = this.#results.suite[key];
-      el.src = src;
-      el.status = status;
-      el.decoration = decoration;
+      Object.assign(el, result);
 
       Object.keys(el.styles).forEach(x => {
-        this.setStyle(el.styles[x], x === status ? [decoration] : []);
+        this.setStyle(el.styles[x], x === result.status ? [el.decoration!] : []);
       });
-    } else if (isTestResult(level, src)) {
+    } else if (isTestResult(level, result)) {
       const el = this.#results.test[key];
-      el.src = src;
-      el.status = status;
-      el.decoration = decoration;
-      this.setStyle(el.styles[status], [decoration]);
+      Object.assign(el, result);
+      this.setStyle(el.styles[result.status], [result.decoration]);
+      this.setStyle(el.logStyle, result.logDecorations);
     }
   }
 
@@ -268,7 +259,7 @@ export class DocumentResultsManager {
     return {
       failed: Decorations.buildStyle(level, 'failed'),
       passed: Decorations.buildStyle(level, 'passed'),
-      unknown: Decorations.buildStyle(level, 'unknown')
+      unknown: Decorations.buildStyle(level, 'unknown'),
     };
   }
 
@@ -288,11 +279,13 @@ export class DocumentResultsManager {
     if (existing) {
       Object.values(existing.styles).forEach(x => x.dispose());
       if (isTestState(level, existing)) {
+        existing.logStyle.dispose();
         Object.values(existing.assertStyles).forEach(x => x.dispose());
       }
     }
     if (isTestState(level, base)) {
       base.assertions = [];
+      base.logStyle = Decorations.buildAssertStyle('unknown');
       base.assertStyles = this.genStyles('assertion');
       this.#results[level][key] = base;
     } else if (isSuiteState(level, base)) {
@@ -307,7 +300,7 @@ export class DocumentResultsManager {
   onSuite(suite: SuiteResult): void {
     const status = (suite.failed ? 'failed' : suite.passed ? 'passed' : 'skipped');
     this.reset('suite', suite.classId);
-    this.store('suite', suite.classId, status, Decorations.buildSuite(suite), suite);
+    this.store('suite', suite.classId, { status, decoration: Decorations.buildSuite(suite), src: suite });
   }
 
   /**
@@ -315,10 +308,12 @@ export class DocumentResultsManager {
    * @param test
    */
   onTest(test: TestResult): void {
-    const dec = Decorations.buildTest(test);
-    const status = test.status === 'skipped' ? 'unknown' : test.status;
-    this.store('test', `${test.classId}#${test.methodName}`, status, dec, test);
-
+    this.store('test', `${test.classId}#${test.methodName}`, {
+      status: test.status === 'skipped' ? 'unknown' : test.status,
+      decoration: Decorations.buildTest(test),
+      logDecorations: test.output.map(v => Decorations.buildTestLog(v)),
+      src: test
+    });
     this.refreshTest(`${test.classId}#${test.methodName}`);
     this.refreshDiagnostics();
   }
@@ -330,11 +325,10 @@ export class DocumentResultsManager {
   onAssertion(assertion: Assertion): void {
     const status = assertion.error ? 'failed' : 'passed';
     const key = `${assertion.classId}#${assertion.methodName}`;
-    const dec = Decorations.buildAssertion(assertion);
     if (status === 'failed') {
       this.#failedAssertions[Decorations.line(assertion.line).range.start.line] = assertion;
     }
-    this.store('assertion', key, status, dec, assertion);
+    this.store('assertion', key, { status, decoration: Decorations.buildAssertion(assertion), src: assertion });
   }
 
   /**
@@ -363,15 +357,14 @@ export class DocumentResultsManager {
           if (tests.find(x => x.src.methodName.includes('[['))) {
             this.refreshDiagnostics();
           }
-          this.store('suite', e.suite.classId, 'unknown', Decorations.buildSuite(e.suite), e.suite);
+          this.store('suite', e.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(e.suite), src: e.suite });
           break;
         }
         // Clear diags
         case 'test': {
           const key = `${e.test.classId}#${e.test.methodName}`;
           this.reset('test', key);
-          const dec = Decorations.buildTest(e.test);
-          this.store('test', key, 'unknown', dec, e.test);
+          this.store('test', key, { status: 'unknown', decoration: Decorations.buildTest(e.test), src: e.test });
           break;
         }
       }

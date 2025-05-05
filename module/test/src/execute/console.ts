@@ -1,6 +1,7 @@
 import util from 'node:util';
 
 import { ConsoleEvent, ConsoleListener, ConsoleManager } from '@travetto/runtime';
+import { TestLog } from '../model/test';
 
 /**
  * Console capturer.  Hooks into the Console manager, and collects the
@@ -9,26 +10,28 @@ import { ConsoleEvent, ConsoleListener, ConsoleManager } from '@travetto/runtime
 export class ConsoleCapture implements ConsoleListener {
   static #listener: ConsoleListener = ConsoleManager.get();
 
-  out: Record<string, string[]>;
+  out: TestLog[];
 
   start(): this {
-    this.out = {};
+    this.out = [];
     ConsoleManager.set(this);
     return this;
   }
 
-  log({ level, args }: ConsoleEvent): void {
-    (this.out[level] = this.out[level] ?? []).push(
-      args
+  log({ level, line, args }: ConsoleEvent): void {
+    this.out.push({
+      line,
+      level,
+      message: args
         .map((x => typeof x === 'string' ? x : util.inspect(x, false, 5)))
         .join(' ')
-    );
+    });
   }
 
-  end(): Record<string, string> {
-    const result = this.out ?? {};
-    this.out = {};
+  end(): TestLog[] {
+    const result = this.out ?? [];
+    this.out = [];
     ConsoleManager.set(ConsoleCapture.#listener);
-    return Object.fromEntries(Object.entries(result).map(([k, v]) => [k, v.join('\n')]));
+    return result;
   }
 }

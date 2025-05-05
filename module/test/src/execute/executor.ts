@@ -82,7 +82,7 @@ export class TestExecutor {
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
     result.skipped++;
-    this.#consumer.onEvent({ type: 'test', phase: 'after', test: { ...test, assertions: [], duration: 0, durationTotal: 0, output: {}, status: 'skipped' } });
+    this.#consumer.onEvent({ type: 'test', phase: 'after', test: { ...test, assertions: [], duration: 0, durationTotal: 0, output: [], status: 'skipped' } });
   }
 
   /**
@@ -126,7 +126,7 @@ export class TestExecutor {
       assertions: [],
       duration: 0,
       durationTotal: 0,
-      output: {},
+      output: [],
     };
 
     // Emit every assertion as it occurs

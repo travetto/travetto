@@ -63,6 +63,11 @@ export class XunitEmitter implements TestConsumerShape {
         body = `<failure type="${assertErr.text}" message="${encodeURIComponent(assertErr.message!)}"><![CDATA[${assertErr.error!.stack}]]></failure>`;
       }
 
+      const groupedByLevel: Record<string, string[]> = {};
+      for (const log of test.output) {
+        (groupedByLevel[log.level] ??= []).push(log.message);
+      }
+
       this.#tests.push(`
     <testcase
       name="${name}"
@@ -70,8 +75,8 @@ export class XunitEmitter implements TestConsumerShape {
       classname="${test.classId}"
     >
       ${body}
-      <system-out>${this.buildMeta({ log: test.output.log, info: test.output.info, debug: test.output.debug })}</system-out>
-      <system-err>${this.buildMeta({ error: test.output.error, warn: test.output.warn })}</system-err>
+      <system-out>${this.buildMeta({ log: groupedByLevel.log, info: groupedByLevel.info, debug: groupedByLevel.debug })}</system-out>
+      <system-err>${this.buildMeta({ error: groupedByLevel.error, warn: groupedByLevel.warn })}</system-err>
     </testcase>`
       );
     } else if (e.type === 'suite' && e.phase === 'after') {
