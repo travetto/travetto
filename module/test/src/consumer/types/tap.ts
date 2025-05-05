@@ -10,7 +10,7 @@ import { TestConsumer } from '../registry.ts';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer.ts';
 
 /**
-  * TAP Format consumer
+ * TAP Format consumer
  */
 @TestConsumer()
 export class TapEmitter implements TestConsumerShape {
