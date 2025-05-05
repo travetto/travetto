@@ -1,0 +1,18 @@
+{
+  "name": "@travetto-doc/web-rpc",
+  "dependencies": {
+    "@travetto/cli": "^6.0.0-rc.0",
+    "@travetto/web-rpc": "^6.0.0-rc.0"
+  },
+  "devDependencies": {
+    "@travetto/compiler": "^6.0.0-rc.0"
+  },
+  "travetto": {
+    "build": {
+      "isolated": true,
+      "includes": {
+        "@travetto/doc": "main"
+      }
+    }
+  }
+}

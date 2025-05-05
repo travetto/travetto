@@ -4,6 +4,7 @@ import { c, d } from '@travetto/doc';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
 
 import type { WebHttpServer } from './src/types.ts';
+import { WebHttpConfig } from './src/config.ts';
 
 const WebServerContract = toConcrete<WebHttpServer>();
 
@@ -18,6 +19,10 @@ export const text = <>
     <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{
       cwd: './doc-exec'
     }} />
+
+    <c.SubSection title="Configuration">
+      <c.Code title="Standard Web Http Config" src={WebHttpConfig} />
+    </c.SubSection>
 
     <c.SubSection title='Creating a Custom CLI Entry Point'>
 

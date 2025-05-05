@@ -33,3 +33,77 @@ Options:
   -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>  Module to run <span class="token keyword">for</span>
   -h, <span class="token parameter variable">--help</span>             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
+
+<h2 id="example">Example</h2>
+
+  <figure class="code">
+    <figcaption class="code">Example Controller
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-rpc/doc-exec/src/controller.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/draft'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DraftController</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/suggest/tags'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">getTags</span><span class="token punctuation">(</span>q<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token comment">/* To fill in */</span><span class="token punctuation">[</span>q <span class="token operator">??</span> <span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+This controller is a basic example of an invokable endpoint.
+
+  <figure class="config">
+    <figcaption class="config">resources/application.yml
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-rpc/doc-exec/resources/application.yml">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-yaml"><span class="token key atrule">web.rpc</span><span class="token punctuation">:</span>
+  <span class="token key atrule">clients</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> web
+      <span class="token key atrule">output</span><span class="token punctuation">:</span> ./api<span class="token punctuation">-</span>client</code></pre>
+  </figure>
+
+The configuration, while not necessary, makes it easy to consistently configure and generate the appropriate client.
+
+  <figure class="terminal">
+    <figcaption class="terminal">Example Client Generation
+
+</figcaption>
+    <pre><code class="language-bash">npx trv web:rpc-client config</code></pre>
+  </figure>
+
+You can manually invoke the client generation, but once configured, it will run automatically when running the web server as well.
+
+  <figure class="code">
+    <figcaption class="code">Example API Factory
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-rpc/doc-exec/api-client/factory.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> clientFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./rpc'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> DraftController <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../.trv/types/node_modules/@travetto-doc/web-rpc/src/controller.js'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> factory <span class="token operator">=</span> <span class="token generic-function"><span class="token function">clientFactory</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span>
+  DraftController<span class="token operator">:</span> DraftController<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span><span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+  </figure>
+
+The api factory relies on the type information generated by the compiler, and so this file is the only configuration needed to connect your controllers to the rpc functionality.
+
+  <figure class="code">
+    <figcaption class="code">Example Client Usage
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-rpc/doc-exec/ui/client.js">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> factory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../api-client/factory'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> client <span class="token operator">=</span> <span class="token function">factory</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token literal-property property">url</span><span class="token operator">:</span> <span class="token string">'http://localhost:3000'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+client<span class="token punctuation">.</span>DraftController<span class="token punctuation">.</span><span class="token function">getTags</span><span class="token punctuation">(</span><span class="token string">'prefix'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">result</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Found'</span><span class="token punctuation">,</span> result<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+  </figure>
+
+The usage here is extremely simple, but outlines the simplicity of what is needed to make RPC requests.

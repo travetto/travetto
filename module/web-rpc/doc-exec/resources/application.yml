@@ -1,0 +1,4 @@
+web.rpc:
+  clients:
+    - type: web
+      output: ./api-client

@@ -19,10 +19,10 @@ export class NodeWebServer implements WebHttpServer {
   @Inject()
   router: StandardWebRouter;
 
-  async handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
-    const webReq = NodeWebUtil.toWebRequest(req);
-    const webRes = await this.router.dispatch({ request: webReq });
-    await NodeWebUtil.respondToServerResponse(webRes, res);
+  async handler(nodeReq: IncomingMessage, nodeRes: ServerResponse): Promise<void> {
+    const request = NodeWebUtil.toWebRequest(nodeReq);
+    const response = await this.router.dispatch({ request });
+    await NodeWebUtil.respondToServerResponse(response, nodeRes);
   }
 
   async serve(): Promise<WebHttpServerHandle> {
