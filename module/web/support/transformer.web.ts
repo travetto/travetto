@@ -56,7 +56,7 @@ export class WebTransformer {
       config.name = '';
     }
 
-    if (paramType.key === 'managed') {
+    if (paramType.key === 'managed' && paramType.importName.startsWith('@travetto/')) {
       if (paramType.name === 'WebResponse') {
         throw new Error(`${paramType.name} must be registered using @ContextParam`);
       } else if (paramType.name === 'WebRequest') {

@@ -1,10 +1,9 @@
 {
   "name": "@travetto/web",
   "version": "6.0.0-rc.6",
-  "description": "Declarative api for Web Applications with support for the dependency injection.",
+  "description": "Declarative support creating for Web Applications",
   "keywords": [
     "web",
-    "dependency-injection",
     "decorators",
     "travetto",
     "typescript"
