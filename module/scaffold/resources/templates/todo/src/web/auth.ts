@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Redirect, ContextParam } from '@travetto/web';
+import { Controller, Get, Post, WebResponse, ContextParam } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
@@ -15,8 +15,8 @@ export class ApiController {
 
   @Post('/login')
   @Login(BasicAuthSymbol)
-  async getAll(): Promise<Redirect> {
-    return new Redirect('/auth/self', 301);
+  async getAll(): Promise<WebResponse> {
+    return WebResponse.redirect('/auth/self');
   }
 
   @Get('/self')
@@ -27,7 +27,7 @@ export class ApiController {
 
   @Get('/logout')
   @Logout()
-  async logout(): Promise<Redirect> {
-    return new Redirect('/auth/self', 301);
+  async logout(): Promise<WebResponse> {
+    return WebResponse.redirect('/auth/self');
   }
 }

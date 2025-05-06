@@ -24,7 +24,7 @@ export const FEATURES: Feature[] = [
   },
   {
     title: 'Web Framework',
-    package: '@travetto/web',
+    package: '@travetto/web-node',
     choices: [
       { title: 'Node', package: '@travetto/web-node' },
       { title: 'AWS Lambda', package: '@travetto/web-aws-lambda' },
@@ -33,7 +33,7 @@ export const FEATURES: Feature[] = [
       { title: 'OpenAPI', package: '@travetto/openapi' },
       { title: 'Logging', package: '@travetto/log' }
     ],
-    default: 'Express.js'
+    default: 'Node'
   },
   { title: 'Test Framework', package: '@travetto/test' },
   { title: 'ESLint Support', package: '@travetto/eslint' },

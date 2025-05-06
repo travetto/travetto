@@ -1,6 +1,6 @@
 # {{#modules.web}}
 web:
-  ssl:
+  http.ssl:
     active: false
   context:
     active: true
