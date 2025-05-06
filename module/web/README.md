@@ -20,7 +20,6 @@ The module provides a declarative API for creating and describing a Web applicat
    *  Using a [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)
    *  Creating a Custom [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)
    *  Cookies
-   *  Error Handling
 
 ## Request/Response Pattern
 Unlike other frameworks (e.g. [express](https://expressjs.com), [fastify](https://www.fastify.io/)), this module takes an approach that is similar to [AWS Lambda](https://aws.amazon.com/lambda/)'s model for requests and responses. What you can see here is that [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) are very simple objects, with the focus being on the `payload` and `body`.  This is intended to provide maximal compatibility with non-HTTP sources.  The driving goal is to support more than just standard HTTP servers but also allow for seamless integration with tools like event queues, web sockets, etc.
@@ -779,5 +778,3 @@ export class SimpleEndpoints {
   }
 }
 ```
-
-## Error Handling

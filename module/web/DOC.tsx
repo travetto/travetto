@@ -41,7 +41,6 @@ export const text = <>
     <li>Using a {WebInterceptorContract}</li>
     <li>Creating a Custom {WebInterceptorContract}</li>
     <li>Cookies</li>
-    <li>Error Handling</li>
   </ul>
 
   <c.Section title='Request/Response Pattern'>
@@ -287,6 +286,4 @@ export const text = <>
 
     <c.Code title='Sample Cookie Usage' src='doc/cookie-endpoints.ts' />
   </c.Section>
-
-  <c.Section title='Error Handling'></c.Section>
 </>;
