@@ -6,14 +6,13 @@ import { CliValidationError, CliCommandShape } from './types.ts';
 
 const COMMAND_PACKAGE = [
   [/^test(:watch)?$/, 'test', false],
-  [/^service$/, 'command', true],
-  [/^lint(:register)?$/, 'eslint', true],
+  [/^lint(:register)?$/, 'eslint', false],
   [/^model:(install|export)$/, 'model', true],
   [/^openapi:(spec|client)$/, 'openapi', true],
   [/^email:(compile|editor)$/, 'email-compiler', false],
   [/^pack(:zip|:docker)?$/, 'pack', false],
-  [/^web:http$/, 'web-http-server', false],
-  [/^web:rpc-client$/, 'web-rpc', false],
+  [/^web:http$/, 'web-http-server', true],
+  [/^web:rpc-client$/, 'web-rpc', true],
 ] as const;
 
 /**

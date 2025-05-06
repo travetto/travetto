@@ -24,16 +24,13 @@ export const FEATURES: Feature[] = [
   },
   {
     title: 'Web Framework',
-    package: '@travetto/web-node',
-    choices: [
-      { title: 'Node', package: '@travetto/web-node' },
-      { title: 'AWS Lambda', package: '@travetto/web-aws-lambda' },
-    ],
+    package: '@travetto/web',
     addons: [
+      { title: 'Web Node', package: '@travetto/web-node' },
+      { title: 'Web Http Server', package: '@travetto/web-http-server' },
       { title: 'OpenAPI', package: '@travetto/openapi' },
       { title: 'Logging', package: '@travetto/log' }
-    ],
-    default: 'Node'
+    ]
   },
   { title: 'Test Framework', package: '@travetto/test' },
   { title: 'ESLint Support', package: '@travetto/eslint' },

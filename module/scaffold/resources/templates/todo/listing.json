@@ -34,11 +34,6 @@
       "@travetto/auth-web"
     ]
   },
-  "src/web/primary.ts": {
-    "requires": [
-      "@travetto/web"
-    ]
-  },
   "test/model/todo.ts": {
     "requires": [
       "@travetto/model",
