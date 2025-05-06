@@ -57,8 +57,8 @@ export const text = async () => {
 
       Install
       <ul>
-        <li>{d.library('NodeDownload')} v20.x+ (required)</li>
-        <li>{d.library('MongoDownload')} 5.0+ (required, but 6+ recommended)</li>
+        <li>{d.library('NodeDownload')} v22.x+ (required)</li>
+        <li>{d.library('MongoDownload')} 6.0+ (required)</li>
         <li>{d.library('VSCodeDownload')} (recommended)</li>
         <li>{d.library('TravettoPlugin')} (recommended)</li>
       </ul>

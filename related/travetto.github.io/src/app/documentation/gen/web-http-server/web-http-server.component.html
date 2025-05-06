@@ -26,56 +26,119 @@ By default, the framework provides a default <a target="_blank" class="source-li
 </figcaption>
     <pre><code class="language-bash">$ trv web:http
 
-node:internal/modules/cjs/loader:1408
-  throw err<span class="token punctuation">;</span>
-  ^
-
-Error: Cannot <span class="token function">find</span> module <span class="token string">'&lt;workspace-root>/module/web/doc-exec/.trv/compiler/node_modules/&#64;travetto/manifest/__index__.js'</span>
-Require stack:
-- ./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/src/compiler.js
-- ./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.compiler.js
-    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1405:15<span class="token punctuation">)</span>
-    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1061:19<span class="token punctuation">)</span>
-    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1066:22<span class="token punctuation">)</span>
-    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1215:37<span class="token punctuation">)</span>
-    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
-    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:235:24<span class="token punctuation">)</span>
-    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1491:12<span class="token punctuation">)</span>
-    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
-    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/compiler/src/compiler.ts:4:1<span class="token punctuation">)</span>
-    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1734:14<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
-  requireStack: <span class="token punctuation">[</span>
-    <span class="token string">'./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/src/compiler.js'</span>,
-    <span class="token string">'./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.compiler.js'</span>
-  <span class="token punctuation">]</span>
+Initialized <span class="token punctuation">{{'{'}}</span>
+  manifest: <span class="token punctuation">{{'{'}}</span>
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'&#64;travetto-doc/web-http-server'</span>,
+      folder: <span class="token string">'./doc-exec'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'&#64;travetto-doc/web-http-server'</span>,
+      path: <span class="token string">'./doc-exec'</span>,
+      mono: false,
+      manager: <span class="token string">'npm'</span>,
+      type: <span class="token string">'commonjs'</span>,
+      defaultEnv: <span class="token string">'local'</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  runtime: <span class="token punctuation">{{'{'}}</span>
+    env: <span class="token string">'local'</span>,
+    debug: false,
+    production: false,
+    dynamic: false,
+    resourcePaths: <span class="token punctuation">[</span>
+      <span class="token string">'./doc-exec/resources'</span>
+    <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  config: <span class="token punctuation">{{'{'}}</span>
+    sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
+    active: <span class="token punctuation">{{'{'}}</span>
+      AcceptConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      CompressConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span>, <span class="token string">'deflate'</span> <span class="token punctuation">]</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      CookieConfig: <span class="token punctuation">{{'{'}}</span> applies: true, httpOnly: true, sameSite: <span class="token string">'lax'</span>, path: <span class="token string">'/'</span> <span class="token punctuation">{{'}'}}</span>,
+      CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      DecompressConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      ResponseCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: true, mode: <span class="token string">'deny'</span> <span class="token punctuation">{{'}'}}</span>,
+      TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      WebBodyConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        limit: <span class="token string">'1mb'</span>,
+        parsingTypes: <span class="token punctuation">{{'{'}}</span>
+          text: <span class="token string">'text'</span>,
+          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
+          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      WebConfig: <span class="token punctuation">{{'{'}}</span> defaultMessage: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebHttpConfig: <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span>, bindAddress: <span class="token string">'0.0.0.0'</span>, ssl: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
+Listening on port <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
 
-Node.js v23.11.0
-node:internal/modules/cjs/loader:1405
-  const err <span class="token operator">=</span> new Error<span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
-              ^
+<h3 id="configuration">Configuration</h3>
 
-Error: Cannot <span class="token function">find</span> module <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/cli/support/entry.trv.js'</span>
-Require stack:
-- ./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.main.js
-    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1405:15<span class="token punctuation">)</span>
-    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1061:19<span class="token punctuation">)</span>
-    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1066:22<span class="token punctuation">)</span>
-    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1215:37<span class="token punctuation">)</span>
-    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
-    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:235:24<span class="token punctuation">)</span>
-    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1491:12<span class="token punctuation">)</span>
-    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
-    at <span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/module.ts:107:98<span class="token punctuation">)</span>
-    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:105:5<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
-  requireStack: <span class="token punctuation">[</span>
-    <span class="token string">'./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.main.js'</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">{{'}'}}</span>
+  <figure class="code">
+    <figcaption class="code">Standard Web Http Config
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http-server/src/config.ts#L13">Source</a></cite>
 
-Node.js v23.11.0</code></pre>
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebHttpConfig</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * The port to run on
+   */</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'WEB_HTTP_PORT'</span><span class="token punctuation">)</span>
+  port<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">3000</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * The bind address, defaults to 0.0.0.0
+   */</span>
+  bindAddress<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * Is SSL active
+   */</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'WEB_HTTP_SSL'</span><span class="token punctuation">)</span>
+  ssl<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * SSL Keys
+   */</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Secret</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  sslKeys<span class="token operator">?</span><span class="token operator">:</span> WebSslKeyPair<span class="token punctuation">;</span>
+
+  <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>ssl <span class="token operator">??=</span> <span class="token operator">!</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token keyword">await</span> NetUtil<span class="token punctuation">.</span><span class="token function">getFreePort</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>bindAddress <span class="token operator">||=</span> <span class="token keyword">await</span> NetUtil<span class="token punctuation">.</span><span class="token function">getLocalAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>ssl<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token comment">// Clear out keys if ssl is not set</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys <span class="token operator">=</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">AppError</span><span class="token punctuation">(</span><span class="token string">'Default ssl keys are only valid for development use, please specify a config value at web.ssl.keys'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys <span class="token operator">=</span> <span class="token keyword">await</span> WebSslUtil<span class="token punctuation">.</span><span class="token function">generateKeyPair</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>key<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> <span class="token number">100</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token comment">// We have files or resources</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>key <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>key<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>cert <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>cert<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 <h3 id="creating-a-custom-cli-entry-point">Creating a Custom CLI Entry Point</h3>
@@ -126,56 +189,69 @@ And using the pattern established in the <a class="module-link" routerLink="/doc
 </figcaption>
     <pre><code class="language-bash">$ trv web:custom
 
-node:internal/modules/cjs/loader:1408
-  throw err<span class="token punctuation">;</span>
-  ^
-
-Error: Cannot <span class="token function">find</span> module <span class="token string">'&lt;workspace-root>/module/web/doc-exec/.trv/compiler/node_modules/&#64;travetto/manifest/__index__.js'</span>
-Require stack:
-- ./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/src/compiler.js
-- ./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.compiler.js
-    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1405:15<span class="token punctuation">)</span>
-    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1061:19<span class="token punctuation">)</span>
-    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1066:22<span class="token punctuation">)</span>
-    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1215:37<span class="token punctuation">)</span>
-    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
-    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:235:24<span class="token punctuation">)</span>
-    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1491:12<span class="token punctuation">)</span>
-    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
-    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/compiler/src/compiler.ts:4:1<span class="token punctuation">)</span>
-    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1734:14<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
-  requireStack: <span class="token punctuation">[</span>
-    <span class="token string">'./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/src/compiler.js'</span>,
-    <span class="token string">'./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.compiler.js'</span>
-  <span class="token punctuation">]</span>
+CUSTOM STARTUP
+Initialized <span class="token punctuation">{{'{'}}</span>
+  manifest: <span class="token punctuation">{{'{'}}</span>
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'&#64;travetto-doc/web-http-server'</span>,
+      folder: <span class="token string">'./doc-exec'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'&#64;travetto-doc/web-http-server'</span>,
+      path: <span class="token string">'./doc-exec'</span>,
+      mono: false,
+      manager: <span class="token string">'npm'</span>,
+      type: <span class="token string">'commonjs'</span>,
+      defaultEnv: <span class="token string">'local'</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  runtime: <span class="token punctuation">{{'{'}}</span>
+    env: <span class="token string">'prod'</span>,
+    debug: false,
+    production: true,
+    dynamic: false,
+    resourcePaths: <span class="token punctuation">[</span>
+      <span class="token string">'./doc-exec/resources'</span>
+    <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  config: <span class="token punctuation">{{'{'}}</span>
+    sources: <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">10</span>, source: <span class="token string">'direct'</span> <span class="token punctuation">{{'}'}}</span>,
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span>,
+    active: <span class="token punctuation">{{'{'}}</span>
+      AcceptConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      CompressConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span>, <span class="token string">'deflate'</span> <span class="token punctuation">]</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      CookieConfig: <span class="token punctuation">{{'{'}}</span> applies: true, httpOnly: true, sameSite: <span class="token string">'lax'</span>, path: <span class="token string">'/'</span> <span class="token punctuation">{{'}'}}</span>,
+      CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      DecompressConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      ResponseCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: true, mode: <span class="token string">'deny'</span> <span class="token punctuation">{{'}'}}</span>,
+      TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      WebBodyConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        limit: <span class="token string">'1mb'</span>,
+        parsingTypes: <span class="token punctuation">{{'{'}}</span>
+          text: <span class="token string">'text'</span>,
+          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
+          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      WebConfig: <span class="token punctuation">{{'{'}}</span> defaultMessage: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebHttpConfig: <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span>, bindAddress: <span class="token string">'0.0.0.0'</span>, ssl: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-
-Node.js v23.11.0
-node:internal/modules/cjs/loader:1405
-  const err <span class="token operator">=</span> new Error<span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
-              ^
-
-Error: Cannot <span class="token function">find</span> module <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/cli/support/entry.trv.js'</span>
-Require stack:
-- ./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.main.js
-    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1405:15<span class="token punctuation">)</span>
-    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1061:19<span class="token punctuation">)</span>
-    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1066:22<span class="token punctuation">)</span>
-    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1215:37<span class="token punctuation">)</span>
-    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
-    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:235:24<span class="token punctuation">)</span>
-    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1491:12<span class="token punctuation">)</span>
-    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
-    at <span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/module.ts:107:98<span class="token punctuation">)</span>
-    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:105:5<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
-  requireStack: <span class="token punctuation">[</span>
-    <span class="token string">'./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.main.js'</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">{{'}'}}</span>
-
-Node.js v23.11.0</code></pre>
+Listening on port <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 <h2 id="ssl-support">SSL Support</h2>

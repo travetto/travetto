@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/module/web/DOC.tsx and execute "npx trv doc" to rebuild -->
 # Web API
 
-## Declarative api for Web Applications with support for the dependency injection.
+## Declarative support creating for Web Applications
 
 **Install: @travetto/web**
 ```bash
@@ -16,8 +16,8 @@ yarn add @travetto/web
 The module provides a declarative API for creating and describing a Web application.  Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9)s that employ some combination of [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)s to help manage which functionality is executed before the [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) code, within the [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9). This module will look at:
    *  Request/Response Pattern
    *  Defining a [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9)
-   *  Defining an [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14)s
-   *  Using [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)s
+   *  Defining an [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14)
+   *  Using a [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)
    *  Creating a Custom [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)
    *  Cookies
    *  Error Handling
@@ -727,7 +727,28 @@ export class SimpleAuthInterceptor implements WebInterceptor {
 ```
 
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+Cookies are a unique element, within the framework, as they sit on the request and response flows.  Ideally we would separate these out, but given the support for key rotation, there is a scenario in which reading a cookie on the request, will result in a cookie needing to be written on the response.  Because of this, cookies are treated as being outside the normal [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) activity, and is exposed as the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L11).  The [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L11) has a fairly basic contract:
+
+**Code: CookieJar contract**
+```typescript
+export class CookieJar {
+  static parseCookieHeader(header: string): Cookie[];
+  static parseSetCookieHeader(header: string): Cookie;
+  static responseSuffix(c: Cookie): string[];
+  constructor({ keys, ...options }: CookieJarOptions = {});
+  import(cookies: Cookie[]): this;
+  has(name: string, opts: CookieGetOptions = {}): boolean;
+  get(name: string, opts: CookieGetOptions = {}): string | undefined;
+  set(cookie: Cookie): void;
+  getAll(): Cookie[];
+  importCookieHeader(header: string | null | undefined): this;
+  importSetCookieHeader(headers: string[] | null | undefined): this;
+  exportCookieHeader(): string;
+  exportSetCookieHeader(): string[];
+}
+```
+
+`.get()`/`.set()` will be the most commonly used methods, and should align with standard cookie reading/writing behavior.
 
 **Code: Sample Cookie Usage**
 ```typescript
@@ -759,5 +780,4 @@ export class SimpleEndpoints {
 }
 ```
 
-## Full Config
-The entire [WebConfig](https://github.com/travetto/travetto/tree/main/module/web/src/config.ts#L7) which will show the full set of valid configuration parameters for the web module.
+## Error Handling

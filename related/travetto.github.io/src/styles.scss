@@ -1,42 +1,6 @@
 @use "sass:color";
 @use "reset.scss";
 
-/* You can add global styles to this file, and also import other style files */
-
-h1,
-h2,
-h3,
-h4,
-h5,
-.toolbar a {
-  font-weight: normal;
-  font-family: "Julius Sans One", sans-serif;
-}
-
-* {
-  font-weight: 300;
-  font-family: "Source Sans Pro", sans-serif;
-}
-
-code {
-  font-weight: 300;
-  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-  span {
-    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-    font-weight: 300;
-  }
-}
-
-p,
-li {
-  line-height: 1em;
-  font-size: 1.25rem;
-}
-
-p {
-  margin-top: 0;
-}
-
 @mixin group($r, $g, $b) {
   background: #333
     linear-gradient(315deg, rgba($r, $g, $b, 0.7) 20px, rgba($r, $g, $b, 1) 30px, rgba($r, $g, $b, 1) 100%);
@@ -108,6 +72,27 @@ p {
   }
 }
 
+/* You can add global styles to this file, and also import other style files */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+.toolbar a {
+  font-weight: normal;
+  font-family: "Julius Sans One", sans-serif;
+}
+
+code {
+  font-family: "Source Sans Pro", sans-serif;
+  font-weight: 400;
+}
+
+p {
+  margin-top: 0;
+}
+
 body,
 html {
   padding: 0;
@@ -115,6 +100,8 @@ html {
   width: 100%;
   height: 100%;
   background-color: #fff;
+  font-weight: 300;
+  font-family: "Source Sans Pro", sans-serif;
 }
 
 html {
@@ -123,18 +110,18 @@ html {
 
 body {
   overflow: auto;
+  font-size: 18px;
+  line-height: 1.6rem;
 }
 
 p,
 li {
   color: #000;
-  line-height: 1.5em;
 }
 
 .documentation {
   min-width: 800px;
   padding: 0 1em;
-  line-height: 1.25em;
   word-break: break-word;
   padding-bottom: 1em;
 
@@ -239,14 +226,8 @@ li {
   a[class$="-link"] {
     display: inline-block;
 
-    font-size: 1em;
-    // @include group(120,120,120);
     font-family: "Source Sans Pro", sans-serif;
     padding: 0 0.25em;
-  }
-
-  a[class$="-link"] {
-    padding-left: 0.1em;
     text-decoration: none;
     font-weight: normal;
     color: #333;
@@ -292,7 +273,6 @@ li {
       @include materialIcon($size: 1.2em, $lineHeight: 1em, $padding: 0px);
       vertical-align: middle;
       color: white;
-      line-height: 1.25rem;
     }
   }
 
@@ -305,8 +285,6 @@ li {
     overflow: hidden;
 
     cite {
-      font-size: 1rem;
-      line-height: 1.3rem;
       text-decoration: none;
       font-style: normal;
       margin: 0px;
@@ -321,9 +299,9 @@ li {
     figcaption {
       display: block;
       position: relative;
-      font-size: 20px;
       line-height: 35px;
       font-family: "Source Sans Pro", sans-serif;
+      font-weight: 500;
       margin: 0px;
       padding: 0px;
       color: white;
@@ -383,12 +361,12 @@ li {
 
     code {
       line-height: 1.2;
-      font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
       margin: 0.2em;
       white-space: pre;
       word-spacing: normal;
       word-break: normal;
       font-weight: normal;
+      font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
 
       -moz-tab-size: 2;
       -o-tab-size: 2;
@@ -413,9 +391,15 @@ li {
 
       &[class*="language-"] {
         overflow-x: auto;
-        font-size: 13pt;
 
-        background: rgba(0, 0, 0, 0.8);
+        background-size: 100vw 500vh;
+        background-position: fixed, fixed, fixed, fixed, fixed;
+        background-repeat: repeat;
+        background-image: repeating-linear-gradient(315deg, #5885852e 92%, #073aff00 100%),
+          repeating-radial-gradient(75% 75% at 238% 218%, #75cbcb05 30%, #073aff14 39%),
+          radial-gradient(99% 99% at 109% 2%, #151212d9 0%, #073aff00 100%),
+          radial-gradient(99% 99% at 21% 78%, #141117ff 0%, #073aff00 100%),
+          radial-gradient(160% 154% at 711px -303px, #1b181cff 0%, #2c3655ff 100%);
         color: hsl(0, 0%, 95%);
 
         &.inline {
@@ -437,7 +421,7 @@ li {
           &.prolog,
           &.doctype,
           &.cdata {
-            color: hsl(30, 50%, 50%);
+            color: lightgreen;
 
             & > * {
               color: hsl(30, 50%, 50%) !important;
@@ -531,7 +515,6 @@ li {
   }
 
   code.item {
-    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
     color: #333;
     text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.3);
 
@@ -543,10 +526,6 @@ li {
 
   ul {
     list-style-type: circle;
-
-    li {
-      line-height: 1.5em;
-    }
   }
 }
 

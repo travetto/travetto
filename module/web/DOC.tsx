@@ -37,8 +37,8 @@ export const text = <>
   <ul>
     <li>Request/Response Pattern</li>
     <li>Defining a {Controller}</li>
-    <li>Defining an {Endpoint}s</li>
-    <li>Using {WebInterceptorContract}s</li>
+    <li>Defining an {Endpoint}</li>
+    <li>Using a {WebInterceptorContract}</li>
     <li>Creating a Custom {WebInterceptorContract}</li>
     <li>Cookies</li>
     <li>Error Handling</li>

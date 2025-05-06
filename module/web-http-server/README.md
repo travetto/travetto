@@ -22,56 +22,116 @@ By default, the framework provides a default [@CliCommand](https://github.com/tr
 ```bash
 $ trv web:http
 
-node:internal/modules/cjs/loader:1408
-  throw err;
-  ^
-
-Error: Cannot find module '<workspace-root>/module/web/doc-exec/.trv/compiler/node_modules/@travetto/manifest/__index__.js'
-Require stack:
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js
-    at Function._resolveFilename (node:internal/modules/cjs/loader:1405:15)
-    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
-    at Function._load (node:internal/modules/cjs/loader:1215:37)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
-    at Module.require (node:internal/modules/cjs/loader:1491:12)
-    at require (node:internal/modules/helpers:135:16)
-    at Object.<anonymous> (<workspace-root>/module/compiler/src/compiler.ts:4:1)
-    at Module._compile (node:internal/modules/cjs/loader:1734:14) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js'
-  ]
+Initialized {
+  manifest: {
+    main: {
+      name: '@travetto-doc/web-http-server',
+      folder: './doc-exec'
+    },
+    workspace: {
+      name: '@travetto-doc/web-http-server',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs',
+      defaultEnv: 'local'
+    }
+  },
+  runtime: {
+    env: 'local',
+    debug: false,
+    production: false,
+    dynamic: false,
+    resourcePaths: [
+      './doc-exec/resources'
+    ],
+    profiles: []
+  },
+  config: {
+    sources: [ { priority: 999, source: 'memory://override' } ],
+    active: {
+      AcceptConfig: { applies: false, types: [] },
+      CompressConfig: {
+        applies: true,
+        preferredEncodings: [ 'br', 'gzip', 'identity' ],
+        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
+      },
+      CookieConfig: { applies: true, httpOnly: true, sameSite: 'lax', path: '/' },
+      CorsConfig: { applies: true },
+      DecompressConfig: {
+        applies: true,
+        supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
+      },
+      EtagConfig: { applies: true },
+      ResponseCacheConfig: { applies: true, mode: 'deny' },
+      TrustProxyConfig: { applies: true, ips: [] },
+      WebBodyConfig: {
+        applies: true,
+        limit: '1mb',
+        parsingTypes: {
+          text: 'text',
+          'application/json': 'json',
+          'application/x-www-form-urlencoded': 'form'
+        }
+      },
+      WebConfig: { defaultMessage: true },
+      WebHttpConfig: { port: 3000, bindAddress: '0.0.0.0', ssl: false },
+      WebLogConfig: { applies: true, showStackTrace: true }
+    }
+  }
 }
+Listening on port { port: 3000 }
+```
 
-Node.js v23.11.0
-node:internal/modules/cjs/loader:1405
-  const err = new Error(message);
-              ^
+### Configuration
 
-Error: Cannot find module './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js'
-Require stack:
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js
-    at Function._resolveFilename (node:internal/modules/cjs/loader:1405:15)
-    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
-    at Function._load (node:internal/modules/cjs/loader:1215:37)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
-    at Module.require (node:internal/modules/cjs/loader:1491:12)
-    at require (node:internal/modules/helpers:135:16)
-    at <anonymous> (./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/module.ts:107:98)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js'
-  ]
+**Code: Standard Web Http Config**
+```typescript
+export class WebHttpConfig {
+  /**
+   * The port to run on
+   */
+  @EnvVar('WEB_HTTP_PORT')
+  port: number = 3000;
+
+  /**
+   * The bind address, defaults to 0.0.0.0
+   */
+  bindAddress: string = '';
+
+  /**
+   * Is SSL active
+   */
+  @EnvVar('WEB_HTTP_SSL')
+  ssl?: boolean;
+
+  /**
+   * SSL Keys
+   */
+  @Secret()
+  sslKeys?: WebSslKeyPair;
+
+  async postConstruct(): Promise<void> {
+    this.ssl ??= !!this.sslKeys;
+    this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
+    this.bindAddress ||= await NetUtil.getLocalAddress();
+
+    if (!this.ssl) {
+      // Clear out keys if ssl is not set
+      this.sslKeys = undefined;
+    } else if (!this.sslKeys) {
+      if (Runtime.production) {
+        throw new AppError('Default ssl keys are only valid for development use, please specify a config value at web.ssl.keys');
+      }
+      this.sslKeys = await WebSslUtil.generateKeyPair();
+    } else {
+      if (this.sslKeys.key.length < 100) { // We have files or resources
+        this.sslKeys.key = (await RuntimeResources.read(this.sslKeys.key, true)).toString('utf8');
+        this.sslKeys.cert = (await RuntimeResources.read(this.sslKeys.cert, true)).toString('utf8');
+      }
+    }
+  }
 }
-
-Node.js v23.11.0
 ```
 
 ### Creating a Custom CLI Entry Point
@@ -116,56 +176,69 @@ And using the pattern established in the [Command Line Interface](https://github
 ```bash
 $ trv web:custom
 
-node:internal/modules/cjs/loader:1408
-  throw err;
-  ^
-
-Error: Cannot find module '<workspace-root>/module/web/doc-exec/.trv/compiler/node_modules/@travetto/manifest/__index__.js'
-Require stack:
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js
-    at Function._resolveFilename (node:internal/modules/cjs/loader:1405:15)
-    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
-    at Function._load (node:internal/modules/cjs/loader:1215:37)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
-    at Module.require (node:internal/modules/cjs/loader:1491:12)
-    at require (node:internal/modules/helpers:135:16)
-    at Object.<anonymous> (<workspace-root>/module/compiler/src/compiler.ts:4:1)
-    at Module._compile (node:internal/modules/cjs/loader:1734:14) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/src/compiler.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.compiler.js'
-  ]
+CUSTOM STARTUP
+Initialized {
+  manifest: {
+    main: {
+      name: '@travetto-doc/web-http-server',
+      folder: './doc-exec'
+    },
+    workspace: {
+      name: '@travetto-doc/web-http-server',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs',
+      defaultEnv: 'local'
+    }
+  },
+  runtime: {
+    env: 'prod',
+    debug: false,
+    production: true,
+    dynamic: false,
+    resourcePaths: [
+      './doc-exec/resources'
+    ],
+    profiles: []
+  },
+  config: {
+    sources: [
+      { priority: 10, source: 'direct' },
+      { priority: 999, source: 'memory://override' }
+    ],
+    active: {
+      AcceptConfig: { applies: false, types: [] },
+      CompressConfig: {
+        applies: true,
+        preferredEncodings: [ 'br', 'gzip', 'identity' ],
+        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
+      },
+      CookieConfig: { applies: true, httpOnly: true, sameSite: 'lax', path: '/' },
+      CorsConfig: { applies: true },
+      DecompressConfig: {
+        applies: true,
+        supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
+      },
+      EtagConfig: { applies: true },
+      ResponseCacheConfig: { applies: true, mode: 'deny' },
+      TrustProxyConfig: { applies: true, ips: [] },
+      WebBodyConfig: {
+        applies: true,
+        limit: '1mb',
+        parsingTypes: {
+          text: 'text',
+          'application/json': 'json',
+          'application/x-www-form-urlencoded': 'form'
+        }
+      },
+      WebConfig: { defaultMessage: true },
+      WebHttpConfig: { port: 3000, bindAddress: '0.0.0.0', ssl: true },
+      WebLogConfig: { applies: true, showStackTrace: true }
+    }
+  }
 }
-
-Node.js v23.11.0
-node:internal/modules/cjs/loader:1405
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js'
-Require stack:
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js
-    at Function._resolveFilename (node:internal/modules/cjs/loader:1405:15)
-    at defaultResolveImpl (node:internal/modules/cjs/loader:1061:19)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1066:22)
-    at Function._load (node:internal/modules/cjs/loader:1215:37)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
-    at Module.require (node:internal/modules/cjs/loader:1491:12)
-    at require (node:internal/modules/helpers:135:16)
-    at <anonymous> (./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/module.ts:107:98)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.main.js'
-  ]
-}
-
-Node.js v23.11.0
+Listening on port { port: 3000 }
 ```
 
 ## SSL Support
