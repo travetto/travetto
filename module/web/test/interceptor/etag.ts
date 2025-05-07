@@ -72,10 +72,18 @@ class EtagInterceptorSuite {
         }
       }),
       config: { ...interceptor.config, cacheable: true },
-      next: async () => new WebResponse({ body: data })
+      next: async () => new WebResponse({
+        body: data, headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': '1000'
+        }
+      })
     });
 
     assert(get2.context.httpStatusCode === 304);
+    assert(get2.headers.has('Content-Type'));
+    assert(get2.headers.has('Etag'));
+    assert(!get2.headers.has('Content-Length'));
   }
 
   @Test()

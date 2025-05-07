@@ -2,6 +2,8 @@ import { BaseWebMessage } from './message.ts';
 
 export interface WebResponseContext {
   httpStatusCode?: number;
+  private?: boolean;
+  cacheableAge?: number;
 }
 
 /**

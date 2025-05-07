@@ -4,6 +4,7 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
+import { BinaryUtil, castTo } from '@travetto/runtime';
 
 import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
@@ -52,21 +53,22 @@ export class EtagInterceptor implements WebInterceptor {
   addTag(ctx: WebChainedContext<EtagConfig>, response: WebResponse): WebResponse {
     const { request } = ctx;
 
-    const statusCode = response.context.httpStatusCode;
+    const statusCode = response.context.httpStatusCode ?? 200;
 
-    if (statusCode && (statusCode >= 300 && statusCode !== 304)) {
+    if (
+      (response.context.cacheableAge ?? 1) <= 0 || // Response isn't cacheable
+      (statusCode >= 300 && statusCode !== 304) || // Ignore redirects
+      BinaryUtil.isReadableStream(response.body) // Ignore streams (unknown length)
+    ) {
       return response;
     }
 
     const binaryResponse = new WebResponse({ ...response, ...WebBodyUtil.toBinaryMessage(response) });
-    if (!Buffer.isBuffer(binaryResponse.body)) {
-      return binaryResponse;
-    }
-
-    const tag = this.computeTag(binaryResponse.body);
+    const tag = this.computeTag(castTo<Buffer>(binaryResponse.body));
     binaryResponse.headers.set('ETag', `${ctx.config.weak ? 'W/' : ''}"${tag}"`);
 
-    if (ctx.config.cacheable &&
+    if (
+      ctx.config.cacheable &&
       fresh({
         'if-modified-since': request.headers.get('If-Modified-Since')!,
         'if-none-match': request.headers.get('If-None-Match')!,
@@ -76,7 +78,12 @@ export class EtagInterceptor implements WebInterceptor {
         'last-modified': binaryResponse.headers.get('Last-Modified')!
       })
     ) {
-      return new WebResponse({ context: { httpStatusCode: 304 } });
+      // Remove length for the 304
+      binaryResponse.headers.delete('Content-Length');
+      return new WebResponse({
+        context: { ...response.context, httpStatusCode: 304 },
+        headers: binaryResponse.headers
+      });
     }
 
     return binaryResponse;

@@ -5,7 +5,6 @@ import { WebChainedContext } from '../types/filter.ts';
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
-
 import { WebCommonUtil } from '../util/common.ts';
 
 import { EtagInterceptor } from './etag.ts';
@@ -16,11 +15,6 @@ export class ResponseCacheConfig {
    * Generate response cache headers
    */
   applies = true;
-
-  /**
-   * Determines how we cache
-   */
-  mode: 'allow' | 'deny' = 'deny';
 }
 
 /**
@@ -36,12 +30,22 @@ export class ResponseCacheInterceptor implements WebInterceptor {
   config: ResponseCacheConfig;
 
   applies({ config, endpoint }: WebInterceptorContext<ResponseCacheConfig>): boolean {
-    return !!endpoint.cacheable && config.applies && config.mode === 'deny';
+    return config.applies &&
+      !!endpoint.cacheable &&
+      !endpoint.responseHeaders.has('Cache-Control') &&
+      (endpoint.responseContext?.cacheableAge ?? 1) > 0;
   }
 
   async filter({ next }: WebChainedContext<ResponseCacheConfig>): Promise<WebResponse> {
     const response = await next();
-    response.headers.setIfAbsent('Cache-Control', WebCommonUtil.getCacheControlValue(0));
+    if (!response.headers.has('Cache-Control')) {
+      response.headers.set('Cache-Control', WebCommonUtil.getCacheControlValue(
+        response.context.cacheableAge ?? 0,
+        [
+          response.context.private ? 'private' : 'public',
+        ]
+      ));
+    }
     return response;
   }
 }
