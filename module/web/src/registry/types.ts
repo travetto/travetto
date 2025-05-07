@@ -77,7 +77,7 @@ interface CoreConfig {
   /**
    * Response headers
    */
-  responseHeaders: WebHeaders;
+  responseHeaders?: Record<string, string>;
   /**
    * Partial response context
    */
@@ -175,6 +175,10 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    * Response finalizer
    */
   responseFinalizer?: (res: WebResponse) => WebResponse;
+  /**
+   * Response headers finalized
+   */
+  finalizedResponseHeaders: WebHeaders;
 }
 
 /**

@@ -50,7 +50,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       externalName: cls.name.replace(/(Controller|Web|Service)$/, ''),
       endpoints: [],
       contextParams: {},
-      responseHeaders: new WebHeaders()
+      responseHeaders: {}
     };
   }
 
@@ -69,7 +69,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       interceptorConfigs: [],
       name: endpoint.name,
       endpoint,
-      responseHeaders: new WebHeaders(),
+      responseHeaders: {},
+      finalizedResponseHeaders: new WebHeaders(),
       responseFinalizer: undefined
     };
 
@@ -207,14 +208,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
     dest.documented = src.documented ?? dest.documented;
+    dest.responseHeaders = { ...src.responseHeaders, ...dest.responseHeaders };
     dest.responseContext = { ...src.responseContext, ...dest.responseContext };
-    const headers = src.responseHeaders ?? dest.responseHeaders ?? new WebHeaders();
-    if (src.responseHeaders && dest.responseHeaders) {
-      for (const [k, v] of dest.responseHeaders) {
-        dest.responseHeaders.set(k, v);
-      }
-    }
-    dest.responseHeaders = headers;
   }
 
   /**
@@ -274,7 +269,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       this.#endpointsById.set(ep.id, ep);
       // Store full path from base for use in other contexts
       ep.fullPath = `/${final.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
-      ep.responseHeaders = new WebHeaders([...final.responseHeaders.entries(), ...ep.responseHeaders.entries()]);
+      ep.finalizedResponseHeaders = new WebHeaders({ ...final.responseHeaders, ...ep.responseHeaders });
       ep.responseContext = { ...final.responseContext, ...ep.responseContext };
     }
 

@@ -3,7 +3,6 @@ import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/ru
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
-import { WebHeaders } from '../types/headers.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebCommonUtil, CacheControlFlag } from '../util/common.ts';
 
@@ -32,8 +31,8 @@ export function Undocumented(): EndpointDecorator { return register({ documented
  * Set response headers on success
  * @param headers The response headers to set
  */
-export function SetHeaders(headers: Record<string, string>): EndpointDecorator {
-  return register({ responseHeaders: new WebHeaders(headers) });
+export function SetHeaders(headers: EndpointConfig['responseHeaders']): EndpointDecorator {
+  return register({ responseHeaders: headers });
 }
 
 /**
@@ -65,7 +64,7 @@ export function Accepts(types: [string, ...string[]]): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(
     AcceptInterceptor,
     { types, applies: true },
-    { responseHeaders: new WebHeaders({ accepts: types.join(', ') }) }
+    { responseHeaders: { accepts: types.join(', ') } }
   );
 }
 

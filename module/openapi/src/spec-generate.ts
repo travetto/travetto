@@ -267,7 +267,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const complex = field.type && SchemaRegistry.has(field.type);
     if (param.location) {
       if (param.location === 'body') {
-        const acceptsMime = ep.responseHeaderMap.get('accepts');
+        const acceptsMime = ep.finalizedResponseHeaders.get('accepts');
         return {
           requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, acceptsMime)
         };
@@ -305,7 +305,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       parameters: []
     };
 
-    const contentTypeMime = ep.responseHeaderMap.get('content-type');
+    const contentTypeMime = ep.finalizedResponseHeaders.get('content-type');
     const pConf = this.#getEndpointBody(ep.responseType, contentTypeMime);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;

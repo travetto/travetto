@@ -31,8 +31,8 @@ export class ResponseCacheInterceptor implements WebInterceptor {
 
   applies({ config, endpoint }: WebInterceptorContext<ResponseCacheConfig>): boolean {
     return config.applies &&
-      !!endpoint.cacheable &&
-      !endpoint.responseHeaders.has('Cache-Control') &&
+      endpoint.cacheable &&
+      !endpoint.finalizedResponseHeaders.has('Cache-Control') &&
       (endpoint.responseContext?.cacheableAge ?? 1) > 0;
   }
 
