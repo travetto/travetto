@@ -42,7 +42,7 @@ export class ResponseCacheInterceptor implements WebInterceptor {
       response.headers.set('Cache-Control', WebCommonUtil.getCacheControlValue(
         response.context.cacheableAge ?? 0,
         [
-          response.context.private ? 'private' : 'public',
+          response.context.isPrivate ? 'private' : 'public',
         ]
       ));
     }

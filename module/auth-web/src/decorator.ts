@@ -16,7 +16,7 @@ export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
     applies: true
   }, {
     responseContext: {
-      private: true
+      isPrivate: true
     }
   });
 }
@@ -33,7 +33,7 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
     applies: true,
   }, {
     responseContext: {
-      private: true
+      isPrivate: true
     }
   });
 }
@@ -56,7 +56,7 @@ export function Unauthenticated(): EndpointDecorator {
 export function Logout(): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(AuthLogoutInterceptor, { applies: true }, {
     responseContext: {
-      private: true
+      isPrivate: true
     }
   });
 }

@@ -9,6 +9,8 @@ type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
 
 const WebRequestParamsSymbol = Symbol();
 
+export type ByteInput = `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` | number;
+
 export type CacheControlFlag =
   'must-revalidate' | 'public' | 'private' | 'no-cache' |
   'no-store' | 'no-transform' | 'proxy-revalidate' | 'immutable' |
@@ -136,7 +138,10 @@ export class WebCommonUtil {
   /**
    * Parse byte size
    */
-  static parseByteSize(input: `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}`): number {
+  static parseByteSize(input: ByteInput): number {
+    if (typeof input === 'number') {
+      return input;
+    }
     const [, num, unit] = input.toLowerCase().split(/(\d+)/);
     return parseInt(num, 10) * (this.#unitMapping[unit] ?? 1);
   }

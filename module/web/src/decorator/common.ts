@@ -52,8 +52,17 @@ export function CacheControl(value: number | TimeSpan, flags: CacheControlFlag[]
  * Set the max-age of a response based on the config
  * @param value The value for the duration
  */
-export function CacheableResponse(value: number | TimeSpan): EndpointDecorator {
-  return register({ responseContext: { cacheableAge: TimeUtil.asSeconds(value) } });
+export function CacheableResponse(input: TimeSpan | number | { maxAge?: number | TimeSpan, isPrivate?: boolean }): EndpointDecorator {
+  if (typeof input === 'string' || typeof input === 'number') {
+    input = { maxAge: input };
+  }
+  const { maxAge, isPrivate } = input;
+  return register({
+    responseContext: {
+      ...maxAge !== undefined ? { cacheableAge: TimeUtil.asSeconds(maxAge) } : {},
+      ...isPrivate !== undefined ? { isPrivate } : {}
+    }
+  });
 }
 
 /**

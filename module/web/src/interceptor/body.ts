@@ -9,7 +9,7 @@ import { WebInterceptorCategory } from '../types/core.ts';
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
-import { WebCommonUtil } from '../util/common.ts';
+import { ByteInput, WebCommonUtil } from '../util/common.ts';
 
 import { AcceptInterceptor } from './accept.ts';
 import { DecompressInterceptor } from './decompress.ts';
@@ -35,7 +35,7 @@ export class WebBodyConfig {
   /**
    * Max body size limit
    */
-  limit: `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` = '1mb';
+  limit: ByteInput = '1mb';
   /**
    * How to interpret different content types
    */

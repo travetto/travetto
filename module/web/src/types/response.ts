@@ -2,7 +2,7 @@ import { BaseWebMessage } from './message.ts';
 
 export interface WebResponseContext {
   httpStatusCode?: number;
-  private?: boolean;
+  isPrivate?: boolean;
   cacheableAge?: number;
 }
 
