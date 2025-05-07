@@ -27,7 +27,7 @@ export class ConfigureTest {
   }
 
   getHeaders(cls: Class, idx: number) {
-    return ControllerRegistry.get(cls).endpoints[idx].responseHeaders;
+    return ControllerRegistry.get(cls).endpoints[idx].finalizedResponseHeaders;
   }
 
   @Test()

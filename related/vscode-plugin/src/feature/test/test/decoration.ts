@@ -188,7 +188,7 @@ export class Decorations {
         after: {
           textDecoration: ITALIC,
           color: log.level === 'error' || log.level === 'warn' ? new ThemeColor('errorForeground') : undefined,
-          contentText: `  // ${log.level}: ${lines[0].substring(0, 30)}`
+          contentText: `  // ${log.level}: ${lines[0].substring(0, 30)}${lines[0].length > 30 ? '...' : ''}`
         }
       }
     };
