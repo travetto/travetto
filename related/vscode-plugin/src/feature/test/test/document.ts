@@ -7,6 +7,7 @@ import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestW
 
 import { Decorations } from './decoration.ts';
 import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown, Result } from './types.ts';
+import { Workspace } from '../../../core/workspace.ts';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
@@ -311,7 +312,9 @@ export class DocumentResultsManager {
     this.store('test', `${test.classId}#${test.methodName}`, {
       status: test.status === 'skipped' ? 'unknown' : test.status,
       decoration: Decorations.buildTest(test),
-      logDecorations: test.output.map(v => Decorations.buildTestLog(v)),
+      logDecorations: test.output
+        .filter(x => Workspace.resolveImport(`${x.module}/${x.modulePath}`) === this.#file)
+        .map(v => Decorations.buildTestLog(v)),
       src: test
     });
     this.refreshTest(`${test.classId}#${test.methodName}`);
