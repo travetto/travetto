@@ -68,6 +68,8 @@ import { BaseWebMessage } from './message.ts';
 
 export interface WebResponseContext {
   httpStatusCode?: number;
+  isPrivate?: boolean;
+  cacheableAge?: number;
 }
 
 /**
@@ -112,13 +114,13 @@ class SimpleController {
 Once the controller is declared, each method of the controller is a candidate for being an endpoint.  By design, everything is asynchronous, and so async/await is natively supported. 
 
 The most common pattern is to register HTTP-driven endpoints.  The HTTP methods that are currently supported:
-   *  [@Get](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L43)
-   *  [@Post](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L50)
-   *  [@Put](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L57)
-   *  [@Delete](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L70)
-   *  [@Patch](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L64)
-   *  [@Head](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L76)
-   *  [@Options](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L82)
+   *  [@Get](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L42)
+   *  [@Post](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L49)
+   *  [@Put](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L56)
+   *  [@Delete](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L69)
+   *  [@Patch](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L63)
+   *  [@Head](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L75)
+   *  [@Options](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L81)
 
 Similar to the Controller, each endpoint decorator handles the following config:
    *  `title` - The definition of the endpoint
@@ -249,7 +251,7 @@ class ContextController {
 }
 ```
 
-**Note**: When referencing the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the [CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L55) decorator is used to ensure that the response is not cached.
+**Note**: When referencing the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the [CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L48) decorator is used to ensure that the response is not cached.
 
 ### Validating Inputs
 The module provides high level access for [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") support, via decorators, for validating and typing request inputs. 
@@ -377,7 +379,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
    1. terminal - Handles once request and response are finished building - [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L28), [RespondInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L12)
    1. pre-request - Prepares the request for running - [TrustProxyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/trust-proxy.ts#L23)
    1. request - Handles inbound request, validation, and body preparation - [DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53), [AcceptInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L34), [BodyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L57), [CookieInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L60) 
-   1. response - Prepares outbound response - [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50), [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51), [EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L34), [ResponseCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30) 
+   1. response - Prepares outbound response - [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50), [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51), [EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L43), [CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) 
    1. application - Lives outside of the general request/response behavior, [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") uses this for login and logout flows.
 
 ### Packaged Interceptors
@@ -514,7 +516,7 @@ export class WebBodyConfig {
   /**
    * Max body size limit
    */
-  limit: `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` = '1mb';
+  limit: ByteSizeInput = '1mb';
   /**
    * How to interpret different content types
    */
@@ -555,7 +557,7 @@ export class CompressConfig {
 ```
 
 #### EtagInterceptor
-[EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L34) by default, will tag all cacheable HTTP responses, when the response value/length is known.  Streams, and other async data sources do not have a pre-defined length, and so are ineligible for etagging.
+[EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L43) by default, will tag all cacheable HTTP responses, when the response value/length is known.  Streams, and other async data sources do not have a pre-defined length, and so are ineligible for etagging.
 
 **Code: ETag Config**
 ```typescript
@@ -568,9 +570,16 @@ export class EtagConfig {
    * Should we generate a weak etag
    */
   weak?: boolean;
+  /**
+   * Threshold for tagging avoids tagging small responses
+   */
+  minimumSize: ByteSizeInput = '10kb';
 
   @Ignore()
   cacheable?: boolean;
+
+  @Ignore()
+  _minimumSize: number | undefined;
 }
 ```
 
@@ -611,8 +620,8 @@ export class CorsConfig {
 }
 ```
 
-#### ResponseCacheInterceptor
-[ResponseCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30) by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting `web.getCache.applies: <boolean>` in your config.  This interceptor applies by default.
+#### CacheControlInterceptor
+[CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting `web.getCache.applies: <boolean>` in your config.  This interceptor applies by default.
 
 ### Configuring Interceptors
 All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:

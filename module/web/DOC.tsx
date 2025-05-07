@@ -8,7 +8,7 @@ import { Get, Post, Put, Delete, Patch, Head, Options, Endpoint } from './src/de
 import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param.ts';
 import { BodyInterceptor, WebBodyConfig } from './src/interceptor/body.ts';
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
-import { ResponseCacheInterceptor } from './src/interceptor/cache-control.ts';
+import { CacheControlInterceptor } from './src/interceptor/cache-control.ts';
 import { LoggingInterceptor, WebLogConfig } from './src/interceptor/logging.ts';
 import { CookieInterceptor, CookieConfig } from './src/interceptor/cookie.ts';
 import { CookieJar } from './src/util/cookie.ts';
@@ -175,7 +175,7 @@ export const text = <>
         <li>terminal - Handles once request and response are finished building - {LoggingInterceptor}, {RespondInterceptor}</li>
         <li>pre-request - Prepares the request for running - {TrustProxyInterceptor}</li>
         <li>request - Handles inbound request, validation, and body preparation - {DecompressInterceptor}, {AcceptInterceptor}, {BodyInterceptor}, {CookieInterceptor} </li>
-        <li>response - Prepares outbound response - {CompressInterceptor}, {CorsInterceptor}, {EtagInterceptor}, {ResponseCacheInterceptor} </li>
+        <li>response - Prepares outbound response - {CompressInterceptor}, {CorsInterceptor}, {EtagInterceptor}, {CacheControlInterceptor} </li>
         <li>application - Lives outside of the general request/response behavior, {d.mod('AuthWeb')} uses this for login and logout flows.</li>
       </ol>
     </c.SubSection>
@@ -243,8 +243,8 @@ export const text = <>
         <c.Code title='Cors Config' src={CorsConfig} />
       </c.SubSubSection>
 
-      <c.SubSubSection title={ResponseCacheInterceptor.name}>
-        {ResponseCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
+      <c.SubSubSection title={CacheControlInterceptor.name}>
+        {CacheControlInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
       </c.SubSubSection>
     </c.SubSection>
 

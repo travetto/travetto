@@ -251,7 +251,7 @@ This implementation is not suitable for production, but shows the general patter
 ## Endpoint Decoration
 [@Login](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L13) integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
-[@Logout](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L48) integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
+[@Logout](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L56) integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
 
 **Code: Using provider with endpoints**
 ```typescript
@@ -287,7 +287,7 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L25) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L37) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) is accessible as a resource that can be exposed as a [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on an [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29) class.
+[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L29) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L45) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) is accessible as a resource that can be exposed as a [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on an [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29) class.
 
 ## Multi-Step Login
 When authenticating, with a multi-step process, it is useful to share information between steps.  The `authenticatorState` of [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14) field is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins. This information can also be injected into a web endpoint method, using the [AuthenticatorState](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9) type;
