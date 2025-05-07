@@ -6,17 +6,19 @@ import { CacheControl, Controller, Get, Patch } from '@travetto/web';
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher';
 
+@CacheControl('1w')
 @Controller('/test/response')
 class TestResponseCache {
+  @CacheControl({ isPrivate: true, cacheableAge: 0 })
   @Get('/uncached')
   getUnCached() {
     return 'hello';
   }
 
-  @CacheControl(0)
+  @CacheControl({ isPrivate: true })
   @Get('/uncached/override')
   getUnCachedOverride() {
-    return 'hello';
+    return 'hellozz';
   }
 
   @CacheControl('1d', { isPrivate: true })
@@ -84,6 +86,8 @@ class CacheControlInterceptorSuite extends BaseWebSuite {
       }
     });
 
-    assert(!response.headers.has('Cache-Control'));
+    console.log(response.headers);
+    assert(response.headers.has('Cache-Control'));
+    assert('private,max-age=604800' === response.headers.get('Cache-Control'));
   }
 }
