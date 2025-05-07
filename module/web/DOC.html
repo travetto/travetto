@@ -700,7 +700,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h4 id="cachecontrolinterceptor">CacheControlInterceptor</h4>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23">CacheControlInterceptor</a> by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting <code class="item input">web.getCache.applies: &lt;boolean&gt;</code> in your config.  This interceptor applies by default.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23">CacheControlInterceptor</a> by default, enforces whatever caching policy is established on a given endpoint.  This only applies to cacheable requests (<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L42">@Get</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L75">@Head</a>).  Additionally, the interceptor retains knowledge if an endpoint is private, or not, and affects the caching header accordingly.  This can be managed by setting <code class="item input">web.cache.applies: &lt;boolean&gt;</code> in your config.
 
 <h3 id="configuring-interceptors">Configuring Interceptors</h3>
 

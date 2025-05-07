@@ -621,7 +621,7 @@ export class CorsConfig {
 ```
 
 #### CacheControlInterceptor
-[CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting `web.getCache.applies: <boolean>` in your config.  This interceptor applies by default.
+[CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) by default, enforces whatever caching policy is established on a given endpoint.  This only applies to cacheable requests ([@Get](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L42)/[@Head](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L75)).  Additionally, the interceptor retains knowledge if an endpoint is private, or not, and affects the caching header accordingly.  This can be managed by setting `web.cache.applies: <boolean>` in your config.
 
 ### Configuring Interceptors
 All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:

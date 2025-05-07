@@ -244,7 +244,7 @@ export const text = <>
       </c.SubSubSection>
 
       <c.SubSubSection title={CacheControlInterceptor.name}>
-        {CacheControlInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
+        {CacheControlInterceptor} by default, enforces whatever caching policy is established on a given endpoint.  This only applies to cacheable requests ({Get}/{Head}).  Additionally, the interceptor retains knowledge if an endpoint is private, or not, and affects the caching header accordingly.  This can be managed by setting {d.input('web.cache.applies: <boolean>')} in your config.
       </c.SubSubSection>
     </c.SubSection>
 
