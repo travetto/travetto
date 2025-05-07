@@ -8,7 +8,7 @@ import { Get, Post, Put, Delete, Patch, Head, Options, Endpoint } from './src/de
 import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param.ts';
 import { BodyInterceptor, WebBodyConfig } from './src/interceptor/body.ts';
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
-import { ResponseCacheInterceptor } from './src/interceptor/response-cache.ts';
+import { ResponseCacheInterceptor } from './src/interceptor/cache-control.ts';
 import { LoggingInterceptor, WebLogConfig } from './src/interceptor/logging.ts';
 import { CookieInterceptor, CookieConfig } from './src/interceptor/cookie.ts';
 import { CookieJar } from './src/util/cookie.ts';

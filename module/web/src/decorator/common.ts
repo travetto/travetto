@@ -39,18 +39,20 @@ export function SetHeaders(headers: EndpointConfig['responseHeaders']): Endpoint
  */
 export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'Content-Type': mime }); }
 
+type CacheControlInput = { maxAge: number | TimeSpan, isPrivate?: boolean };
+
 /**
  * Set the max-age of a response based on the config
  * @param value The value for the duration
  */
-export function CacheableResponse(input: TimeSpan | number | { maxAge?: number | TimeSpan, isPrivate?: boolean }): EndpointDecorator {
+export function CacheControl(input: TimeSpan | number | CacheControlInput, extra?: Omit<CacheControlInput, 'maxAge'>): EndpointDecorator {
   if (typeof input === 'string' || typeof input === 'number') {
-    input = { maxAge: input };
+    input = { ...extra, maxAge: input };
   }
   const { maxAge, isPrivate } = input;
   return register({
     responseContext: {
-      ...maxAge !== undefined ? { cacheableAge: TimeUtil.asSeconds(maxAge) } : {},
+      cacheableAge: TimeUtil.asSeconds(maxAge),
       ...isPrivate !== undefined ? { isPrivate } : {}
     }
   });

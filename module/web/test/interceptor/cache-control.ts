@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { CacheableResponse, Controller, Get, Patch } from '@travetto/web';
+import { CacheControl, Controller, Get, Patch } from '@travetto/web';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher';
@@ -13,13 +13,13 @@ class TestResponseCache {
     return 'hello';
   }
 
-  @CacheableResponse(0)
+  @CacheControl(0)
   @Get('/uncached/override')
   getUnCachedOverride() {
     return 'hello';
   }
 
-  @CacheableResponse({ maxAge: '1d', isPrivate: true })
+  @CacheControl('1d', { isPrivate: true })
   @Get('/cached')
   getCached() {
     return 'hello';
@@ -32,7 +32,7 @@ class TestResponseCache {
 }
 
 @Suite()
-class ResponseCacheInterceptorSuite extends BaseWebSuite {
+class CacheControlInterceptorSuite extends BaseWebSuite {
 
   dispatcherType = LocalRequestDispatcher;
 

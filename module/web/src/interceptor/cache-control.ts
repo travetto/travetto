@@ -9,7 +9,7 @@ import { WebResponse } from '../types/response.ts';
 import { EtagInterceptor } from './etag.ts';
 
 @Config('web.cache')
-export class ResponseCacheConfig {
+export class CacheControlConfig {
   /**
    * Generate response cache headers
    */
@@ -20,19 +20,19 @@ export class ResponseCacheConfig {
  * Determines if we should cache all get requests
  */
 @Injectable()
-export class ResponseCacheInterceptor implements WebInterceptor {
+export class CacheControlInterceptor implements WebInterceptor {
 
   category: WebInterceptorCategory = 'response';
   dependsOn = [EtagInterceptor];
 
   @Inject()
-  config: ResponseCacheConfig;
+  config: CacheControlConfig;
 
-  applies({ config, endpoint }: WebInterceptorContext<ResponseCacheConfig>): boolean {
+  applies({ config, endpoint }: WebInterceptorContext<CacheControlConfig>): boolean {
     return config.applies && endpoint.cacheable;
   }
 
-  async filter({ next }: WebChainedContext<ResponseCacheConfig>): Promise<WebResponse> {
+  async filter({ next }: WebChainedContext<CacheControlConfig>): Promise<WebResponse> {
     const response = await next();
     if (!response.headers.has('Cache-Control') && response.context.cacheableAge !== undefined) {
       response.headers.set('Cache-Control',
