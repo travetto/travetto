@@ -1,4 +1,4 @@
-import { AppError, ErrorCategory, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { AppError, ErrorCategory } from '@travetto/runtime';
 
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
@@ -10,11 +10,6 @@ type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
 const WebRequestParamsSymbol = Symbol();
 
 export type ByteSizeInput = `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` | number;
-
-export type CacheControlFlag =
-  'must-revalidate' | 'public' | 'private' | 'no-cache' |
-  'no-store' | 'no-transform' | 'proxy-revalidate' | 'immutable' |
-  'must-understand' | 'stale-if-error' | 'stale-while-revalidate';
 
 /**
  * Mapping from error category to standard http error codes
@@ -124,15 +119,6 @@ export class WebCommonUtil {
    */
   static setRequestParams(request: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }, params: unknown[]): void {
     request[WebRequestParamsSymbol] ??= params;
-  }
-
-  /**
-   * Get a cache control value
-   */
-  static getCacheControlValue(value: number | TimeSpan, flags: CacheControlFlag[] = []): string {
-    const delta = TimeUtil.asSeconds(value);
-    const finalFlags = delta === 0 ? ['no-store'] : flags;
-    return [...finalFlags, `max-age=${delta}`].join(',');
   }
 
   /**

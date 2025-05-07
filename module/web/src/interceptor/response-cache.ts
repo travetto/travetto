@@ -5,7 +5,6 @@ import { WebChainedContext } from '../types/filter.ts';
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebCommonUtil } from '../util/common.ts';
 
 import { EtagInterceptor } from './etag.ts';
 
@@ -30,21 +29,21 @@ export class ResponseCacheInterceptor implements WebInterceptor {
   config: ResponseCacheConfig;
 
   applies({ config, endpoint }: WebInterceptorContext<ResponseCacheConfig>): boolean {
-    return config.applies &&
-      endpoint.cacheable &&
-      !endpoint.finalizedResponseHeaders.has('Cache-Control') &&
-      (endpoint.responseContext?.cacheableAge ?? 1) > 0;
+    return config.applies && endpoint.cacheable;
   }
 
   async filter({ next }: WebChainedContext<ResponseCacheConfig>): Promise<WebResponse> {
     const response = await next();
-    if (!response.headers.has('Cache-Control')) {
-      response.headers.set('Cache-Control', WebCommonUtil.getCacheControlValue(
-        response.context.cacheableAge ?? 0,
-        [
-          response.context.isPrivate ? 'private' : 'public',
-        ]
-      ));
+    if (!response.headers.has('Cache-Control') && response.context.cacheableAge !== undefined) {
+      response.headers.set('Cache-Control',
+        (response.context.cacheableAge <= 0 ?
+          ['no-store', 'max-age=0'] :
+          [
+            `max-age=${response.context.cacheableAge}`,
+            response.context.isPrivate ? 'private' : 'public'
+          ]
+        ).join(',')
+      );
     }
     return response;
   }

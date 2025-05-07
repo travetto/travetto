@@ -4,7 +4,6 @@ import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-import { WebCommonUtil, CacheControlFlag } from '../util/common.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: EndpointFunctionDescriptor) {
@@ -39,14 +38,6 @@ export function SetHeaders(headers: EndpointConfig['responseHeaders']): Endpoint
  * Specifies content type for response
  */
 export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'Content-Type': mime }); }
-
-/**
- * Set the max-age of a response based on the config
- * @param value The value for the duration
- */
-export function CacheControl(value: number | TimeSpan, flags: CacheControlFlag[] = []): EndpointDecorator {
-  return SetHeaders({ 'Cache-Control': WebCommonUtil.getCacheControlValue(value, flags) });
-}
 
 /**
  * Set the max-age of a response based on the config
