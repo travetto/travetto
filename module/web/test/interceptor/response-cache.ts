@@ -19,7 +19,7 @@ class TestResponseCache {
     return 'hello';
   }
 
-  @CacheableResponse('1d')
+  @CacheableResponse({ maxAge: '1d', isPrivate: true })
   @Get('/cached')
   getCached() {
     return 'hello';
@@ -60,6 +60,7 @@ class ResponseCacheInterceptorSuite extends BaseWebSuite {
 
     assert(response.headers.has('Cache-Control'));
     assert(/max-age/.test(response.headers.get('Cache-Control')!));
+    assert(/private/.test(response.headers.get('Cache-Control')!));
   }
 
   @Test()
