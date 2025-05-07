@@ -20,7 +20,6 @@ export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
   };
 }
 
-
 function HttpEndpoint(method: HttpMethod, path: string): EndpointFunctionDecorator {
   const { body: allowsBody, cacheable, emptyStatusCode } = HTTP_METHODS[method];
   return Endpoint({

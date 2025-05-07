@@ -18,10 +18,9 @@ export class ConsoleCapture implements ConsoleListener {
     return this;
   }
 
-  log({ level, line, args }: ConsoleEvent): void {
+  log({ args, scope: _, ...rest }: ConsoleEvent): void {
     this.out.push({
-      line,
-      level,
+      ...rest,
       message: args
         .map((x => typeof x === 'string' ? x : util.inspect(x, false, 5)))
         .join(' ')

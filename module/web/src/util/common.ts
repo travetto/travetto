@@ -2,11 +2,14 @@ import { AppError, ErrorCategory, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
+import { WebError } from '../types/error.ts';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
 
 const WebRequestParamsSymbol = Symbol();
+
+export type ByteInput = `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` | number;
 
 export type CacheControlFlag =
   'must-revalidate' | 'public' | 'private' | 'no-cache' |
@@ -103,7 +106,7 @@ export class WebCommonUtil {
         new AppError(err.message, { details: err }) :
         new AppError(`${err}`);
 
-    const error: Error & { category?: ErrorCategory, details?: { statusCode: number } } = body;
+    const error: Error & Partial<WebError> = body;
     const statusCode = error.details?.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
 
     return new WebResponse({ body, context: { httpStatusCode: statusCode } });
@@ -128,14 +131,17 @@ export class WebCommonUtil {
    */
   static getCacheControlValue(value: number | TimeSpan, flags: CacheControlFlag[] = []): string {
     const delta = TimeUtil.asSeconds(value);
-    const finalFlags = delta === 0 ? ['no-cache'] : flags;
+    const finalFlags = delta === 0 ? ['no-store'] : flags;
     return [...finalFlags, `max-age=${delta}`].join(',');
   }
 
   /**
    * Parse byte size
    */
-  static parseByteSize(input: `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}`): number {
+  static parseByteSize(input: ByteInput): number {
+    if (typeof input === 'number') {
+      return input;
+    }
     const [, num, unit] = input.toLowerCase().split(/(\d+)/);
     return parseInt(num, 10) * (this.#unitMapping[unit] ?? 1);
   }

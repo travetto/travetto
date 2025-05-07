@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { CacheControl, ConfigureInterceptor, Controller, Get, Patch, ResponseCacheInterceptor } from '@travetto/web';
+import { CacheableResponse, Controller, Get, Patch } from '@travetto/web';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher';
@@ -13,13 +13,13 @@ class TestResponseCache {
     return 'hello';
   }
 
-  @ConfigureInterceptor(ResponseCacheInterceptor, { mode: 'allow' })
+  @CacheableResponse(0)
   @Get('/uncached/override')
   getUnCachedOverride() {
     return 'hello';
   }
 
-  @CacheControl('1d')
+  @CacheableResponse({ maxAge: '1d', isPrivate: true })
   @Get('/cached')
   getCached() {
     return 'hello';
@@ -46,7 +46,7 @@ class ResponseCacheInterceptorSuite extends BaseWebSuite {
     });
 
     assert(response.headers.has('Cache-Control'));
-    assert(/no-cache/.test(response.headers.get('Cache-Control')!));
+    assert(/no-store/.test(response.headers.get('Cache-Control')!));
   }
 
   @Test()
@@ -60,6 +60,7 @@ class ResponseCacheInterceptorSuite extends BaseWebSuite {
 
     assert(response.headers.has('Cache-Control'));
     assert(/max-age/.test(response.headers.get('Cache-Control')!));
+    assert(/private/.test(response.headers.get('Cache-Control')!));
   }
 
   @Test()

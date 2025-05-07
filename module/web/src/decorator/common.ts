@@ -1,4 +1,4 @@
-import { asConstructable, castTo, Class, TimeSpan } from '@travetto/runtime';
+import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
@@ -41,25 +41,29 @@ export function SetHeaders(headers: EndpointConfig['responseHeaders']): Endpoint
 export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'Content-Type': mime }); }
 
 /**
- * Specifies if endpoint should be conditional
- */
-export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator {
-  return register({ conditional: handler });
-}
-
-/**
  * Set the max-age of a response based on the config
  * @param value The value for the duration
- * @param unit The unit of measurement
  */
 export function CacheControl(value: number | TimeSpan, flags: CacheControlFlag[] = []): EndpointDecorator {
   return SetHeaders({ 'Cache-Control': WebCommonUtil.getCacheControlValue(value, flags) });
 }
 
 /**
- * Disable cache control, ensuring endpoint will not cache
+ * Set the max-age of a response based on the config
+ * @param value The value for the duration
  */
-export const DisableCacheControl = (): EndpointDecorator => CacheControl(0);
+export function CacheableResponse(input: TimeSpan | number | { maxAge?: number | TimeSpan, isPrivate?: boolean }): EndpointDecorator {
+  if (typeof input === 'string' || typeof input === 'number') {
+    input = { maxAge: input };
+  }
+  const { maxAge, isPrivate } = input;
+  return register({
+    responseContext: {
+      ...maxAge !== undefined ? { cacheableAge: TimeUtil.asSeconds(maxAge) } : {},
+      ...isPrivate !== undefined ? { isPrivate } : {}
+    }
+  });
+}
 
 /**
  * Define an endpoint to support specific input types
@@ -78,6 +82,13 @@ export function Accepts(types: [string, ...string[]]): EndpointDecorator {
  */
 export const ConfigureInterceptor =
   ControllerRegistry.createInterceptorConfigDecorator.bind(ControllerRegistry);
+
+/**
+ * Specifies if endpoint should be conditional
+ */
+export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator {
+  return register({ conditional: handler });
+}
 
 /**
  * Registers an interceptor exclusion filter
