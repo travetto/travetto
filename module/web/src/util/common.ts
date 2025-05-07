@@ -9,7 +9,7 @@ type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
 
 const WebRequestParamsSymbol = Symbol();
 
-export type ByteInput = `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` | number;
+export type ByteSizeInput = `${number}${'mb' | 'kb' | 'gb' | 'b' | ''}` | number;
 
 export type CacheControlFlag =
   'must-revalidate' | 'public' | 'private' | 'no-cache' |
@@ -138,7 +138,7 @@ export class WebCommonUtil {
   /**
    * Parse byte size
    */
-  static parseByteSize(input: ByteInput): number {
+  static parseByteSize(input: ByteSizeInput): number {
     if (typeof input === 'number') {
       return input;
     }

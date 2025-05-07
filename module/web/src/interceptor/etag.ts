@@ -12,7 +12,7 @@ import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { CompressInterceptor } from './compress.ts';
 import { WebBodyUtil } from '../util/body.ts';
-import { ByteInput, WebCommonUtil } from '../util/common.ts';
+import { ByteSizeInput, WebCommonUtil } from '../util/common.ts';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -27,7 +27,7 @@ export class EtagConfig {
   /**
    * Threshold for tagging avoids tagging small responses
    */
-  minimumSize: ByteInput = '10kb';
+  minimumSize: ByteSizeInput = '10kb';
 
   @Ignore()
   cacheable?: boolean;
