@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 import path from 'node:path';
 import fs from 'node:fs';
 
-import { type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import { IndexedFile, IndexedModule, type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil } from '@travetto/manifest';
 import type { CompilerStateType } from '@travetto/compiler/support/types.ts';
 
 const SUFFIXES = ['.ts', '.js', '.tsx', '.jsx', '.d.ts'];
@@ -103,13 +103,6 @@ export class Workspace {
     }
   }
 
-  static getDocumentEditor(editor?: vscode.TextEditor | vscode.TextDocument): vscode.TextEditor | undefined {
-    editor = editor && !this.isEditor(editor) ? this.getEditor(editor) : editor;
-    if (editor && editor.document) {
-      return editor;
-    }
-  }
-
   /** Show a message for a limited time, with the ability to dismiss */
   static async showEphemeralMessage(text: string, duration = 3000): Promise<void> {
     await vscode.window.withProgress({
@@ -121,6 +114,27 @@ export class Workspace {
     });
   }
 
+  static reloadManifest() {
+    this.workspaceIndex.reinitForModule(this.workspaceIndex.mainModule.name);
+  }
+
+  /**
+   * Get a manifest index file, by file name
+   */
+  static resolveManifestIndexFileFromFile(file: string): [IndexedModule, IndexedFile] | undefined {
+    let mod = this.workspaceIndex.getModuleFromSource(file);
+    if (!mod) {
+      this.reloadManifest();
+      mod = this.workspaceIndex.getModuleFromSource(file);
+    }
+
+    const entry = this.workspaceIndex.getEntry(file);
+
+    if (mod && entry) {
+      return [mod, entry];
+    }
+  }
+
   /**
    * Try to get file location from import, relying on manifest
    */
@@ -128,8 +142,8 @@ export class Workspace {
     let resolved = this.#importToFile[imp];
 
     // Special provision for local files
-    if (!resolved && imp.startsWith(Workspace.moduleName)) {
-      const local = path.resolve(Workspace.path, imp.replace(Workspace.moduleName, '.'));
+    if (!resolved && imp.startsWith(this.moduleName)) {
+      const local = path.resolve(this.path, imp.replace(this.moduleName, '.'));
       if (fs.existsSync(local)) {
         resolved = local;
       }
@@ -139,7 +153,7 @@ export class Workspace {
 
     for (let i = 0; i < 2 && !resolved; i += 1) {
       if (i === 1) {
-        this.workspaceIndex.reinitForModule(this.workspaceIndex.mainModule.name);
+        this.reloadManifest();
       }
 
       resolved ??= this.workspaceIndex.getFromImport(imp)?.sourceFile;

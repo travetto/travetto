@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import vscode from 'vscode';
 
 import { TypedObject } from '@travetto/runtime';
@@ -8,8 +7,6 @@ import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestW
 import { Decorations } from './decoration.ts';
 import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown, Result } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
-
-export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
 type TestItem = Assertion | TestResult | TestConfig | SuiteResult | SuiteConfig;
 
@@ -33,8 +30,6 @@ function isSuiteResult(level: string, result?: Result<TestItem>): result is Resu
   return level === 'suite';
 }
 
-type LineAtDoc = Pick<vscode.TextDocument, 'lineAt'>;
-
 /**
  * Test results manager
  */
@@ -42,14 +37,30 @@ export class DocumentResultsManager {
 
   #results: AllState = { suite: {}, test: {} };
   #failedAssertions: Record<number, Assertion> = {};
-  #diagnostics: vscode.Diagnostic[] = [];
-  #editors = new Set<vscode.TextEditor>();
   #document: vscode.TextDocument;
-  #file: string;
+  #editor?: vscode.TextEditor;
   active = false;
 
-  constructor(file: string) {
-    this.#file = file;
+  constructor(doc: vscode.TextDocument) {
+    this.#document = doc;
+  }
+
+  get editor(): vscode.TextEditor | undefined {
+    return this.#editor;
+  }
+
+  set editor(ed: vscode.TextEditor | undefined) {
+    if (ed !== this.#editor || ed === undefined) {
+      this.#editor = ed;
+      if (ed) {
+        this.refresh();
+      }
+    }
+  }
+
+  clear() {
+    this.#results = { suite: {}, test: {} };
+    this.#failedAssertions = {};
   }
 
   /**
@@ -64,46 +75,20 @@ export class DocumentResultsManager {
   }
 
   /**
-   * Support a new editor for results updating
-   * @param e
-   */
-  addEditor(e: vscode.TextEditor): void {
-    if (!this.#editors.has(e)) {
-      this.#editors.add(e);
-      this.#document = e.document;
-      this.refresh();
-    }
-  }
-
-  /**
-   * Remove an editor
-   * @param e
-   */
-  removeEditor(e: vscode.TextEditor): void {
-    if (!this.#editors.has(e)) {
-      this.#editors.delete(e);
-    }
-  }
-
-  /**
    * Set all styles for all open editors
    * @param type
    * @param decs
    */
   setStyle(type: vscode.TextEditorDecorationType, decs: vscode.DecorationOptions[] = []): void {
-    if (type) {
-      for (const ed of this.#editors) {
-        ed.setDecorations(type, decs);
-      }
+    if (type && this.#editor) {
+      this.#editor.setDecorations(type, decs);
     }
   }
 
   /**
-   * Shutdown results manager
+   * Cleanup styles
    */
   dispose(): void {
-    this.#editors.clear();
-
     for (const suite of Object.values(this.#results.suite)) {
       for (const style of Object.values(suite.styles)) { style.dispose(); }
     }
@@ -112,7 +97,6 @@ export class DocumentResultsManager {
       for (const style of Object.values(test.styles)) { style.dispose(); }
       for (const style of Object.values(test.assertStyles)) { style.dispose(); }
     }
-    testDiagnostics.set(vscode.Uri.file(this.#file), []);
   }
 
   refreshTest(test: TestState | string): void {
@@ -137,6 +121,9 @@ export class DocumentResultsManager {
    * Refresh all results
    */
   refresh(): void {
+    if (!this.#editor) {
+      return;
+    }
     for (const suite of Object.values(this.#results.suite)) {
       if (suite.decoration && suite.status) {
         this.setStyle(suite.styles[suite.status], [suite.decoration]);
@@ -145,77 +132,6 @@ export class DocumentResultsManager {
     for (const test of Object.values(this.#results.test)) {
       this.refreshTest(test);
     }
-  }
-
-  findDocument(file: string): LineAtDoc {
-    const content = readFileSync(file, 'utf8');
-    const lines = content.split(/\n/g);
-    const self: LineAtDoc = {
-      lineAt(line: number | vscode.Position) {
-        if (typeof line !== 'number') {
-          line = line.line;
-        }
-        const offset = (lines[line].length - lines[line].trimStart().length);
-        return {
-          text: lines[line],
-          rangeIncludingLineBreak: new vscode.Range(line, offset, line, lines[line].length + 1),
-          lineNumber: line,
-          range: new vscode.Range(line, offset, line, lines[line].length),
-          isEmptyOrWhitespace: false,
-          firstNonWhitespaceCharacterIndex: offset
-        };
-      }
-    };
-    return self;
-  }
-
-  /**
-   * Refresh global diagnostics
-   */
-  refreshDiagnostics(): void {
-    let document: LineAtDoc = this.#document;
-
-    this.#diagnostics = Object.values(this.#results.test)
-      .filter(x => x.status === 'failed')
-      .reduce<vscode.Diagnostic[]>((acc, ts) => {
-        for (const as of ts.assertions) {
-          if (as.status !== 'failed' || as.src.classId === 'unknown') {
-            continue;
-          }
-          const { bodyFirst } = Decorations.buildErrorHover(as.src);
-          const rng = as.decoration!.range;
-
-          document ??= this.findDocument(this.#file);
-
-          const diagRng = new vscode.Range(
-            new vscode.Position(rng.start.line,
-              document.lineAt(rng.start.line).firstNonWhitespaceCharacterIndex
-            ),
-            rng.end
-          );
-          const diag = new vscode.Diagnostic(diagRng, `${ts.src.classId.split(/[^a-z-/]+/i).pop()}.${ts.src.methodName} - ${bodyFirst}`, vscode.DiagnosticSeverity.Error);
-          diag.source = '@travetto/test';
-          acc.push(diag);
-        }
-        if (ts.status === 'failed' && ts.assertions.length === 0) {
-          document ??= this.findDocument(this.#file);
-          const rng = ts.decoration!.range!;
-          const diagRng = new vscode.Range(
-            new vscode.Position(rng.start?.line,
-              document.lineAt(rng.start.line).firstNonWhitespaceCharacterIndex
-            ),
-            rng.end
-          );
-          if ('error' in ts.src && ts.src.error) {
-            const err = ts.src.error.message.split(/\n/).shift();
-            const diag = new vscode.Diagnostic(diagRng, `${ts.src.classId.split(/[^a-z-/]+/i).pop()}.${ts.src.methodName} - ${err}`, vscode.DiagnosticSeverity.Error);
-            diag.source = '@travetto/test';
-            acc.push(diag);
-          }
-        }
-        return acc;
-      }, []);
-    testDiagnostics.set(vscode.Uri.file(this.#file), this.#diagnostics);
   }
 
   /**
@@ -313,12 +229,11 @@ export class DocumentResultsManager {
       status: test.status === 'skipped' ? 'unknown' : test.status,
       decoration: Decorations.buildTest(test),
       logDecorations: test.output
-        .filter(x => Workspace.resolveImport(`${x.module}/${x.modulePath}`) === this.#file)
+        .filter(x => Workspace.resolveImport(`${x.module}/${x.modulePath}`) === this.#document.fileName)
         .map(v => Decorations.buildTestLog(v)),
       src: test
     });
     this.refreshTest(`${test.classId}#${test.methodName}`);
-    this.refreshDiagnostics();
   }
 
   /**
@@ -355,10 +270,6 @@ export class DocumentResultsManager {
           const tests = Object.values(this.#results.test).filter(x => x.src.classId === e.suite.classId);
           for (const test of tests) {
             this.reset('test', `${test.src.classId}#${test.src.methodName}`);
-          }
-          // Internal methods for before/after all/each
-          if (tests.find(x => x.src.methodName.includes('[['))) {
-            this.refreshDiagnostics();
           }
           this.store('suite', e.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(e.suite), src: e.suite });
           break;

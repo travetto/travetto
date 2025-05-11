@@ -6,57 +6,26 @@ import { Log } from '../../../core/log.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
 import { DocumentResultsManager } from './document.ts';
-import { StatusUnknown } from './types.ts';
+import { DiagnosticManager } from './diagnostic.ts';
 
 /**
  * Manages results for the entire workspace, including the statusbar
  */
 export class WorkspaceResultsManager {
-  #status: vscode.StatusBarItem;
-  #results: Map<string, DocumentResultsManager> = new Map();
-  #window: typeof vscode.window;
+  #results = new Map<vscode.TextDocument, DocumentResultsManager>();
+  #filenameMap = new Map<string, vscode.TextDocument>();
   #log: Log;
+  #diagnostics: DiagnosticManager;
+  #active?: [vscode.TextEditor, vscode.TextDocument];
 
   constructor(log: Log, window: typeof vscode.window) {
     this.#log = log;
-    this.#window = window;
-    this.#status = this.#window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    this.#status.command = 'workbench.action.showErrorsWarnings';
+    this.#diagnostics = new DiagnosticManager(window);
   }
 
-  /**
-   * Get totals from the runner
-   */
-  getTotals(): Record<StatusUnknown, number> {
-    const totals: Record<StatusUnknown, number> = {
-      skipped: 0,
-      failed: 0,
-      passed: 0,
-      unknown: 0
-    };
-    for (const mgr of this.#results.values()) {
-      const test = mgr.getTotals();
-      totals.skipped += test.skipped;
-      totals.failed += test.failed;
-      totals.passed += test.passed;
-      totals.unknown += test.unknown;
-    }
-    return totals;
-  }
-
-  /**
-   * Set overall status
-   * @param message
-   * @param color
-   */
-  setStatus(message: string, color?: string): void {
-    if (!message) {
-      this.#status.hide();
-    } else {
-      this.#status.color = color || '#fff';
-      this.#status.text = message;
-      this.#status.show();
-    }
+  openDocument(document: vscode.TextDocument) {
+    this.#filenameMap.set(document.fileName, document);
+    this.getResults(document)?.refresh();
   }
 
   /**
@@ -81,29 +50,20 @@ export class WorkspaceResultsManager {
 
   /**
    * Get test results
-   * @param target
+   * @param document
    */
-  getResults(target: vscode.TextDocument | TestWatchEvent): DocumentResultsManager | undefined {
-    const file = this.getLocation(target);
-    this.#log.debug('Results manager', { file, target: 'fileName' in target ? target.fileName : undefined });
-    if (file) {
-      if (!this.#results.has(file)) {
-        const rm = new DocumentResultsManager(file);
-        this.#log.debug('Generating results manager', { file });
-        this.#results.set(file, rm);
+  getResults(document: vscode.TextDocument): DocumentResultsManager | undefined {
+    if (document && !this.#results.has(document)) {
+      const rm = new DocumentResultsManager(document);
+      this.#filenameMap.set(document.fileName, document);
+      this.#log.debug('File is active', { file: document.fileName });
+      this.#results.set(document, rm);
+      if (vscode.window.activeTextEditor?.document === document) {
+        rm.editor = vscode.window.activeTextEditor;
       }
-      return this.#results.get(file)!;
     }
-  }
 
-  updateTotals(): void {
-    const totals = this.getTotals();
-    this.setStatus(
-      totals.failed === 0 ?
-        `Passed ${totals.passed}` :
-        `Failed ${totals.failed}/${totals.failed + totals.passed}`,
-      totals.failed ? '#f33' : '#8f8'
-    );
+    return this.#results.get(document!)!;
   }
 
   /**
@@ -111,8 +71,14 @@ export class WorkspaceResultsManager {
    * @param ev
    */
   onEvent(ev: TestWatchEvent): void {
-    this.getResults(ev)?.onEvent(ev);
-    this.updateTotals();
+    const file = this.getLocation(ev);
+    if (file) {
+      const document = this.#filenameMap.get(file);
+      if (document) {
+        this.#results.get(document)?.onEvent(ev);
+      }
+    }
+    this.#diagnostics.onEvent(ev);
   }
 
   /**
@@ -120,9 +86,9 @@ export class WorkspaceResultsManager {
    */
   resetAll(): void {
     // Remove all state
-    this.setStatus('');
     const entries = [...this.#results.entries()];
     this.#results.clear();
+    this.#diagnostics.reset();
     for (const [, v] of entries) {
       v.dispose();
     }
@@ -131,12 +97,27 @@ export class WorkspaceResultsManager {
   /**
    * Start tracking an editor
    */
-  trackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
-    editor = Workspace.getDocumentEditor(editor);
-    if (editor && editor.document) {
+  setEditor(editor?: vscode.TextEditor): boolean {
+    // Unset editor
+    if (this.#active) {
+      const results = this.getResults(this.#active[1]);
+      if (results && results.editor !== editor) {
+        results.editor = undefined;
+      }
+      this.#active = undefined;
+    }
+
+    // Bind to new value
+    if (editor?.document) {
+      this.#active = [editor, editor.document];
+
       try {
-        this.getResults(editor.document)?.addEditor(editor);
-        this.#log.info('Tracking', editor.document.fileName);
+        const results = this.getResults(editor.document);
+        if (results) {
+          results.editor = editor;
+          this.#log.info('Tracking', editor.document.fileName);
+          return results.getListOfTests().length > 0;
+        }
       } catch (err) {
         if (err instanceof Error) {
           this.#log.error(err.message, err);
@@ -145,26 +126,19 @@ export class WorkspaceResultsManager {
         }
       }
     }
+    return false;
   }
 
   /**
    * Stop tracking
    */
-  untrackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
-    editor = Workspace.getDocumentEditor(editor);
-    if (editor && this.#results.has(editor.document.fileName)) {
-      this.#results.get(editor.document.fileName)!.dispose();
-      this.#results.delete(editor.document.fileName);
-      this.#log.info('Untrack', editor.document.fileName);
+  reset(document: vscode.TextDocument): void {
+    if (this.#results.has(document)) {
+      this.#log.debug('File is freed', { file: document.fileName });
+      this.#results.get(document)?.dispose();
+      this.#results.delete(document);
+      this.#filenameMap.delete(document.fileName);
     }
-  }
-
-  /**
-   * Stop tracking
-   */
-  reset(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
-    this.untrackEditor(editor);
-    this.updateTotals();
-    this.trackEditor(editor);
+    this.#diagnostics.clear(document.fileName);
   }
 }

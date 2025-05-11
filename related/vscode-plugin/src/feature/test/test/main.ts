@@ -58,13 +58,6 @@ class TestRunnerFeature extends BaseFeature {
     this.#server = spawn('node', [RunUtil.cliFile, 'test:watch', '--format', 'exec', '--mode', 'change'], config)
       .on('message', (ev: TestWatchEvent) => {
         switch (ev.type) {
-          case 'ready': {
-            // Trigger all visible editors on start
-            for (const editor of vscode.window.visibleTextEditors) {
-              this.onChangedActiveEditor(editor);
-            }
-            return;
-          }
           case 'log': this.log.info('[Log  ]', ev.message); return;
           case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
         }
@@ -84,16 +77,9 @@ class TestRunnerFeature extends BaseFeature {
     if (!file) {
       return;
     }
-    const mod = Workspace.workspaceIndex.getModuleFromSource(file);
-    if (mod) {
-      const entry = Workspace.workspaceIndex.getEntry(file);
-      if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
-        return mod;
-      }
-      return;
-    }
-    if (/test\/.*[.][tj]sx?$/.test(file)) {
-      return Workspace.workspaceIndex.findModuleForArbitraryFile(file);
+    const [mod, entry] = Workspace.resolveManifestIndexFileFromFile(file) ?? [];
+    if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
+      return mod;
     }
   }
 
@@ -124,8 +110,10 @@ class TestRunnerFeature extends BaseFeature {
     const editor = vscode.window.activeTextEditor;
     if (this.#isTestDoc(editor)) {
       this.#startServer();
-      this.#consumer.reset(editor);
-      this.#runFile(editor!.document.fileName);
+      const doc = editor.document;
+      this.#consumer.reset(doc);
+      this.#consumer.getResults(doc);
+      this.#runFile(doc.fileName);
     }
   }
 
@@ -138,7 +126,7 @@ class TestRunnerFeature extends BaseFeature {
    * Launch a test from the current location
    */
   async #launchTestDebugger(line?: number): Promise<void> {
-    const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
+    const editor = vscode.window.activeTextEditor;
     if (!editor || !this.#isTestDoc(editor)) {
       return;
     }
@@ -165,11 +153,11 @@ class TestRunnerFeature extends BaseFeature {
   /**
    * Build code lenses for a given document
    */
-  buildCodeLenses(doc: vscode.TextDocument): vscode.CodeLens[] {
-    return (this.#consumer.getResults(doc)?.getListOfTests() || [])
-      .filter(v => v.lineStart < doc.lineCount && doc.lineAt(v.lineStart - 1).text.includes('@Test'))
+  buildCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
+    return (this.#consumer.getResults(document)?.getListOfTests() || [])
+      .filter(v => v.lineStart < document.lineCount && document.lineAt(v.lineStart - 1).text.includes('@Test'))
       .map(v => ({
-        range: doc.lineAt(v.lineStart - 1).range,
+        range: document.lineAt(v.lineStart - 1).range,
         isResolved: true,
         command: {
           command: this.commandName('line'),
@@ -182,22 +170,24 @@ class TestRunnerFeature extends BaseFeature {
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
     if (editor && this.#isTestDoc(editor)) {
       this.#startServer();
-      this.#consumer.trackEditor(editor);
-      if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
+
+      if (!this.#consumer.setEditor(editor)) {
         this.#runFile(editor.document.fileName);
       }
+    } else {
+      this.#consumer.setEditor(undefined);
     }
   }
 
-  async onOpenTextDocument(doc: vscode.TextDocument): Promise<void> {
-    if (this.#isTestDoc(doc)) {
+  async onOpenTextDocument(document: vscode.TextDocument): Promise<void> {
+    if (this.#isTestDoc(document)) {
       this.#startServer();
-      this.#consumer.trackEditor(doc);
+      this.#consumer.openDocument(document);
     }
   }
 
-  async onCloseTextDocument(doc: vscode.TextDocument): Promise<void> {
-    this.#consumer.untrackEditor(doc);
+  async onCloseTextDocument(document: vscode.TextDocument): Promise<void> {
+    this.#consumer.reset(document);
   }
 
   /**
