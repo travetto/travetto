@@ -21,19 +21,19 @@
     "start": "npx trv web:http"
   },
   "dependencies": {
-    "@travetto/auth-web": "^6.0.0",
-    "@travetto/auth-web-session": "^6.0.0",
+    "@travetto/auth-web": "^6.0.1",
+    "@travetto/auth-web-session": "^6.0.1",
     "@travetto/cli": "^6.0.0",
     "@travetto/email-inky": "^6.0.0",
     "@travetto/log": "^6.0.0",
     "@travetto/model-mongo": "^6.0.0",
-    "@travetto/openapi": "^6.0.0",
-    "@travetto/web-node": "^6.0.0",
-    "@travetto/web-rpc": "^6.0.0",
+    "@travetto/openapi": "^6.0.1",
+    "@travetto/web-node": "^6.0.1",
+    "@travetto/web-rpc": "^6.0.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@travetto/compiler": "^6.0.0",
+    "@travetto/compiler": "^6.0.1",
     "@travetto/email-compiler": "^6.0.0",
     "@travetto/pack": "^6.0.0"
   },

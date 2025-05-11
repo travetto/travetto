@@ -34,7 +34,7 @@
     "@travetto/model-query": "^6.0.0"
   },
   "peerDependencies": {
-    "@travetto/test": "^6.0.0"
+    "@travetto/test": "^6.0.1"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
