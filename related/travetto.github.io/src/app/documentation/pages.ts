@@ -16,10 +16,6 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/log/log.component').then(m => m.LogComponent)
       },
       {
-        path: 'context', title: 'Context',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/context/context.component').then(m => m.ContextComponent)
-      },
-      {
         path: 'schema-faker', title: 'Schema Faker',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/schema-faker/schema-faker.component').then(m => m.SchemaFakerComponent)
       },
@@ -54,10 +50,6 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-dynamodb/model-dynamodb.component').then(m => m.ModelDynamodbComponent)
       },
       {
-        path: 'model-elasticsearch', title: 'Elasticsearch',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-elasticsearch/model-elasticsearch.component').then(m => m.ModelElasticsearchComponent)
-      },
-      {
         path: 'model-file', title: 'File',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-file/model-file.component').then(m => m.ModelFileComponent)
       },
@@ -70,16 +62,26 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-memory/model-memory.component').then(m => m.ModelMemoryComponent)
       },
       {
-        path: 'model-mongo', title: 'Mongo',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-mongo/model-mongo.component').then(m => m.ModelMongoComponent)
-      },
-      {
         path: 'model-redis', title: 'Redis',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-redis/model-redis.component').then(m => m.ModelRedisComponent)
       },
       {
         path: 'model-s3', title: 'S3',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-s3/model-s3.component').then(m => m.ModelS3Component)
+      },
+    ]
+  },
+  {
+    path: 'model-query', title: 'Model Query',
+    loadComponent: (): Promise<Type<unknown>> => import('./gen/model-query/model-query.component').then(m => m.ModelQueryComponent),
+    subs: [
+      {
+        path: 'model-elasticsearch', title: 'Elasticsearch',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-elasticsearch/model-elasticsearch.component').then(m => m.ModelElasticsearchComponent)
+      },
+      {
+        path: 'model-mongo', title: 'Mongo',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-mongo/model-mongo.component').then(m => m.ModelMongoComponent)
       },
       {
         path: 'model-sql', title: 'SQL',
@@ -96,10 +98,6 @@ export const PAGES = [
       {
         path: 'model-sqlite', title: 'Sqlite',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-sqlite/model-sqlite.component').then(m => m.ModelSqliteComponent)
-      },
-      {
-        path: 'model-query', title: 'Query',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-query/model-query.component').then(m => m.ModelQueryComponent)
       },
       {
         path: 'model-query-language', title: 'Query Language',
@@ -156,6 +154,10 @@ export const PAGES = [
       {
         path: 'auth-session', title: 'Session',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-session/auth-session.component').then(m => m.AuthSessionComponent)
+      },
+      {
+        path: 'auth-model', title: 'Model',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-model/auth-model.component').then(m => m.AuthModelComponent)
       }
     ]
   },
@@ -186,6 +188,10 @@ export const PAGES = [
       {
         path: 'config', title: 'Config ',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/config/config.component').then(m => m.ConfigComponent)
+      },
+      {
+        path: 'context', title: 'Context',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/context/context.component').then(m => m.ContextComponent)
       },
       {
         path: 'cli', title: 'CLI Support',
