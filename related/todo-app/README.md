@@ -360,6 +360,7 @@ npx trv web:http
         exposeAllSchemas: false
       },
       AuthConfig: { maxAge: '1h', rollingRenew: true },
+      CacheControlConfig: { applies: true },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       CompressConfig: {
         applies: true,
@@ -370,7 +371,7 @@ npx trv web:http
       CookieConfig: { applies: true, httpOnly: true, sameSite: 'lax', path: '/' },
       CorsConfig: { applies: true },
       DecompressConfig: { applies: true, supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ] },
-      EtagConfig: { applies: true },
+      EtagConfig: { applies: true, minimumSize: '10kb' },
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
@@ -400,7 +401,6 @@ npx trv web:http
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
-      ResponseCacheConfig: { applies: true, mode: 'deny' },
       TrustProxyConfig: { applies: true, ips: [] },
       WebAuthConfig: {
         applies: false,

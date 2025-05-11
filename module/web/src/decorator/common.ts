@@ -1,10 +1,9 @@
-import { asConstructable, castTo, Class, TimeSpan } from '@travetto/runtime';
+import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-import { WebCommonUtil, CacheControlFlag } from '../util/common.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: EndpointFunctionDescriptor) {
@@ -40,26 +39,24 @@ export function SetHeaders(headers: EndpointConfig['responseHeaders']): Endpoint
  */
 export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'Content-Type': mime }); }
 
-/**
- * Specifies if endpoint should be conditional
- */
-export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator {
-  return register({ conditional: handler });
-}
+type CacheControlInput = { cacheableAge?: number | TimeSpan, isPrivate?: boolean };
 
 /**
  * Set the max-age of a response based on the config
  * @param value The value for the duration
- * @param unit The unit of measurement
  */
-export function CacheControl(value: number | TimeSpan, flags: CacheControlFlag[] = []): EndpointDecorator {
-  return SetHeaders({ 'Cache-Control': WebCommonUtil.getCacheControlValue(value, flags) });
+export function CacheControl(input: TimeSpan | number | CacheControlInput, extra?: Omit<CacheControlInput, 'cacheableAge'>): EndpointDecorator {
+  if (typeof input === 'string' || typeof input === 'number') {
+    input = { ...extra, cacheableAge: input };
+  }
+  const { cacheableAge, isPrivate } = input;
+  return register({
+    responseContext: {
+      ...(cacheableAge !== undefined ? { cacheableAge: TimeUtil.asSeconds(cacheableAge) } : {}),
+      ...isPrivate !== undefined ? { isPrivate } : {}
+    }
+  });
 }
-
-/**
- * Disable cache control, ensuring endpoint will not cache
- */
-export const DisableCacheControl = (): EndpointDecorator => CacheControl(0);
 
 /**
  * Define an endpoint to support specific input types
@@ -78,6 +75,13 @@ export function Accepts(types: [string, ...string[]]): EndpointDecorator {
  */
 export const ConfigureInterceptor =
   ControllerRegistry.createInterceptorConfigDecorator.bind(ControllerRegistry);
+
+/**
+ * Specifies if endpoint should be conditional
+ */
+export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator {
+  return register({ conditional: handler });
+}
 
 /**
  * Registers an interceptor exclusion filter

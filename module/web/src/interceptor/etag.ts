@@ -4,6 +4,7 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
+import { BinaryUtil } from '@travetto/runtime';
 
 import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
@@ -11,6 +12,7 @@ import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { CompressInterceptor } from './compress.ts';
 import { WebBodyUtil } from '../util/body.ts';
+import { ByteSizeInput, WebCommonUtil } from '../util/common.ts';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -22,9 +24,16 @@ export class EtagConfig {
    * Should we generate a weak etag
    */
   weak?: boolean;
+  /**
+   * Threshold for tagging avoids tagging small responses
+   */
+  minimumSize: ByteSizeInput = '10kb';
 
   @Ignore()
   cacheable?: boolean;
+
+  @Ignore()
+  _minimumSize: number | undefined;
 }
 
 /**
@@ -52,21 +61,32 @@ export class EtagInterceptor implements WebInterceptor {
   addTag(ctx: WebChainedContext<EtagConfig>, response: WebResponse): WebResponse {
     const { request } = ctx;
 
-    const statusCode = response.context.httpStatusCode;
+    const statusCode = response.context.httpStatusCode ?? 200;
 
-    if (statusCode && (statusCode >= 300 && statusCode !== 304)) {
+    if (
+      (statusCode >= 300 && statusCode !== 304) || // Ignore redirects
+      BinaryUtil.isReadableStream(response.body) // Ignore streams (unknown length)
+    ) {
       return response;
     }
 
     const binaryResponse = new WebResponse({ ...response, ...WebBodyUtil.toBinaryMessage(response) });
-    if (!Buffer.isBuffer(binaryResponse.body)) {
+
+    const body = binaryResponse.body;
+    if (!Buffer.isBuffer(body)) {
       return binaryResponse;
     }
 
-    const tag = this.computeTag(binaryResponse.body);
+    const minSize = ctx.config._minimumSize ??= WebCommonUtil.parseByteSize(ctx.config.minimumSize);
+    if (body.length < minSize) {
+      return binaryResponse;
+    }
+
+    const tag = this.computeTag(body);
     binaryResponse.headers.set('ETag', `${ctx.config.weak ? 'W/' : ''}"${tag}"`);
 
-    if (ctx.config.cacheable &&
+    if (
+      ctx.config.cacheable &&
       fresh({
         'if-modified-since': request.headers.get('If-Modified-Since')!,
         'if-none-match': request.headers.get('If-None-Match')!,
@@ -76,7 +96,12 @@ export class EtagInterceptor implements WebInterceptor {
         'last-modified': binaryResponse.headers.get('Last-Modified')!
       })
     ) {
-      return new WebResponse({ context: { httpStatusCode: 304 } });
+      // Remove length for the 304
+      binaryResponse.headers.delete('Content-Length');
+      return new WebResponse({
+        context: { ...response.context, httpStatusCode: 304 },
+        headers: binaryResponse.headers
+      });
     }
 
     return binaryResponse;

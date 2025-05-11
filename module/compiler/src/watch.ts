@@ -117,13 +117,14 @@ export class CompilerWatcher {
     const relativeFile = file.includes(moduleRoot) ? file.split(`${moduleRoot}/`)[1] : file;
     const folderKey = ManifestModuleUtil.getFolderKey(relativeFile);
     const fileType = ManifestModuleUtil.getFileType(relativeFile);
+    const roleType = ManifestModuleUtil.getFileRole(relativeFile)!;
 
     const manifestModuleFiles = manifest.modules[moduleName].files[folderKey] ??= [];
     const idx = manifestModuleFiles.findIndex(x => x[0] === relativeFile);
     const wrappedIdx = idx < 0 ? manifestModuleFiles.length : idx;
 
     switch (action) {
-      case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now()]; break;
+      case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now(), roleType]; break;
       case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
     }
   }

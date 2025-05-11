@@ -81,6 +81,8 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 
 <span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">WebResponseContext</span> <span class="token punctuation">{{'{'}}</span>
   httpStatusCode<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  isPrivate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  cacheableAge<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
 <span class="token comment">/**
@@ -128,13 +130,13 @@ Additionally, the module is predicated upon <a class="module-link" routerLink="/
 
 Once the controller is declared, each method of the controller is a candidate for being an endpoint.  By design, everything is asynchronous, and so async/await is natively supported. <br><br>
 The most common pattern is to register HTTP-driven endpoints.  The HTTP methods that are currently supported:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L43">&#64;Get</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L50">&#64;Post</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L57">&#64;Put</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L70">&#64;Delete</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L64">&#64;Patch</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L76">&#64;Head</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L82">&#64;Options</a></li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L42">&#64;Get</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L49">&#64;Post</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L56">&#64;Put</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L69">&#64;Delete</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L63">&#64;Patch</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L75">&#64;Head</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L81">&#64;Options</a></li>
 </ul>
 Similar to the Controller, each endpoint decorator handles the following config:
 <ul> <li><code class="item input">title</code> - The definition of the endpoint</li>
@@ -275,7 +277,7 @@ In addition to endpoint parameters (i.e. user-provided inputs), there may also b
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<p class="note"><strong>Note</strong> When referencing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L55">CacheControl</a> decorator is used to ensure that the response is not cached.</p>
+<p class="note"><strong>Note</strong> When referencing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L48">CacheControl</a> decorator is used to ensure that the response is not cached.</p>
 
 <h3 id="validating-inputs">Validating Inputs</h3>
 
@@ -416,7 +418,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 <li>terminal - Handles once request and response are finished building - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L28">LoggingInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L12">RespondInterceptor</a></li>
 <li>pre-request - Prepares the request for running - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/trust-proxy.ts#L23">TrustProxyInterceptor</a></li>
 <li>request - Handles inbound request, validation, and body preparation - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53">DecompressInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L34">AcceptInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L57">BodyInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L60">CookieInterceptor</a> </li>
-<li>response - Prepares outbound response - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50">CompressInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51">CorsInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L34">EtagInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30">ResponseCacheInterceptor</a> </li>
+<li>response - Prepares outbound response - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50">CompressInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51">CorsInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L43">EtagInterceptor</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23">CacheControlInterceptor</a> </li>
 <li>application - Lives outside of the general request/response behavior, <a class="module-link" routerLink="/docs/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> uses this for login and logout flows.</li>
 </ol>
 
@@ -580,7 +582,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
   <span class="token comment">/**
    * Max body size limit
    */</span>
-  limit<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token builtin">number</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token string">'mb'</span> <span class="token operator">|</span> <span class="token string">'kb'</span> <span class="token operator">|</span> <span class="token string">'gb'</span> <span class="token operator">|</span> <span class="token string">'b'</span> <span class="token operator">|</span> <span class="token string">''</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span> <span class="token operator">=</span> <span class="token string">'1mb'</span><span class="token punctuation">;</span>
+  limit<span class="token operator">:</span> ByteSizeInput <span class="token operator">=</span> <span class="token string">'1mb'</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * How to interpret different content types
    */</span>
@@ -626,11 +628,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h4 id="etaginterceptor">EtagInterceptor</h4>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L34">EtagInterceptor</a> by default, will tag all cacheable HTTP responses, when the response value/length is known.  Streams, and other async data sources do not have a pre-defined length, and so are ineligible for etagging.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L43">EtagInterceptor</a> by default, will tag all cacheable HTTP responses, when the response value/length is known.  Streams, and other async data sources do not have a pre-defined length, and so are ineligible for etagging.
 
   <figure class="code">
     <figcaption class="code">ETag Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L16">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L18">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">EtagConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -642,9 +644,16 @@ Out of the box, the web framework comes with a few interceptors, and more are co
    * Should we generate a weak etag
    */</span>
   weak<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Threshold for tagging avoids tagging small responses
+   */</span>
+  minimumSize<span class="token operator">:</span> ByteSizeInput <span class="token operator">=</span> <span class="token string">'10kb'</span><span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Ignore</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   cacheable<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Ignore</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  _minimumSize<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -689,9 +698,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<h4 id="responsecacheinterceptor">ResponseCacheInterceptor</h4>
+<h4 id="cachecontrolinterceptor">CacheControlInterceptor</h4>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30">ResponseCacheInterceptor</a> by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting <code class="item input">web.getCache.applies: &lt;boolean&gt;</code> in your config.  This interceptor applies by default.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23">CacheControlInterceptor</a> by default, enforces whatever caching policy is established on a given endpoint using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L48">CacheControl</a> decorator.   Additionally, the interceptor retains knowledge if it is running on a private endpoint, or not.  If the endpoint is deemed private it affects the caching header accordingly. If the endpoint directly returns a <code class="item input">Cache-Control</code> header, that takes precedence and all other logic is ignored. <br><br>
+This can be managed by setting <code class="item input">web.cache.applies: &lt;boolean&gt;</code> in your config. <br><br>
+<strong>Note</strong>: The <a class="module-link" routerLink="/docs/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> module will mark endpoints as private if they require authentication.
 
 <h3 id="configuring-interceptors">Configuring Interceptors</h3>
 

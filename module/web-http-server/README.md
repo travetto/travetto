@@ -51,6 +51,7 @@ Initialized {
     sources: [ { priority: 999, source: 'memory://override' } ],
     active: {
       AcceptConfig: { applies: false, types: [] },
+      CacheControlConfig: { applies: true },
       CompressConfig: {
         applies: true,
         preferredEncodings: [ 'br', 'gzip', 'identity' ],
@@ -62,8 +63,7 @@ Initialized {
         applies: true,
         supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
       },
-      EtagConfig: { applies: true },
-      ResponseCacheConfig: { applies: true, mode: 'deny' },
+      EtagConfig: { applies: true, minimumSize: '10kb' },
       TrustProxyConfig: { applies: true, ips: [] },
       WebBodyConfig: {
         applies: true,
@@ -209,6 +209,7 @@ Initialized {
     ],
     active: {
       AcceptConfig: { applies: false, types: [] },
+      CacheControlConfig: { applies: true },
       CompressConfig: {
         applies: true,
         preferredEncodings: [ 'br', 'gzip', 'identity' ],
@@ -220,8 +221,7 @@ Initialized {
         applies: true,
         supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
       },
-      EtagConfig: { applies: true },
-      ResponseCacheConfig: { applies: true, mode: 'deny' },
+      EtagConfig: { applies: true, minimumSize: '10kb' },
       TrustProxyConfig: { applies: true, ips: [] },
       WebBodyConfig: {
         applies: true,

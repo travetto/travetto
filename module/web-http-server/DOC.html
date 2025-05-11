@@ -55,6 +55,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       AcceptConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      CacheControlConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
         preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
@@ -66,8 +67,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
         applies: true,
         supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span>,
-      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      ResponseCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: true, mode: <span class="token string">'deny'</span> <span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: true, minimumSize: <span class="token string">'10kb'</span> <span class="token punctuation">{{'}'}}</span>,
       TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebBodyConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
@@ -222,6 +222,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       AcceptConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      CacheControlConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
         preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
@@ -233,8 +234,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
         applies: true,
         supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span>,
-      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      ResponseCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: true, mode: <span class="token string">'deny'</span> <span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: true, minimumSize: <span class="token string">'10kb'</span> <span class="token punctuation">{{'}'}}</span>,
       TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebBodyConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,

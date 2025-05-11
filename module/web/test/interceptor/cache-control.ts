@@ -1,25 +1,27 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { CacheControl, ConfigureInterceptor, Controller, Get, Patch, ResponseCacheInterceptor } from '@travetto/web';
+import { CacheControl, Controller, Get, Patch, SetHeaders, WebResponse } from '@travetto/web';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher';
 
+@CacheControl('1w')
 @Controller('/test/response')
 class TestResponseCache {
+  @CacheControl({ isPrivate: true, cacheableAge: 0 })
   @Get('/uncached')
   getUnCached() {
     return 'hello';
   }
 
-  @ConfigureInterceptor(ResponseCacheInterceptor, { mode: 'allow' })
+  @CacheControl({ isPrivate: true })
   @Get('/uncached/override')
   getUnCachedOverride() {
-    return 'hello';
+    return 'hellozz';
   }
 
-  @CacheControl('1d')
+  @CacheControl('1d', { isPrivate: true })
   @Get('/cached')
   getCached() {
     return 'hello';
@@ -29,10 +31,25 @@ class TestResponseCache {
   getPatched() {
     return 'hello';
   }
+
+  @Get('/special')
+  @SetHeaders({
+    'Cache-Control': 'orange'
+  })
+  getSpecial() {
+    return 'hello';
+  }
+
+  @Get('/special2')
+  getSpecial2() {
+    return new WebResponse({
+      headers: { 'cache-CONTROL': 'blue' }
+    });
+  }
 }
 
 @Suite()
-class ResponseCacheInterceptorSuite extends BaseWebSuite {
+class CacheControlInterceptorSuite extends BaseWebSuite {
 
   dispatcherType = LocalRequestDispatcher;
 
@@ -46,7 +63,7 @@ class ResponseCacheInterceptorSuite extends BaseWebSuite {
     });
 
     assert(response.headers.has('Cache-Control'));
-    assert(/no-cache/.test(response.headers.get('Cache-Control')!));
+    assert(/no-store/.test(response.headers.get('Cache-Control')!));
   }
 
   @Test()
@@ -60,6 +77,7 @@ class ResponseCacheInterceptorSuite extends BaseWebSuite {
 
     assert(response.headers.has('Cache-Control'));
     assert(/max-age/.test(response.headers.get('Cache-Control')!));
+    assert(/private/.test(response.headers.get('Cache-Control')!));
   }
 
   @Test()
@@ -83,6 +101,30 @@ class ResponseCacheInterceptorSuite extends BaseWebSuite {
       }
     });
 
-    assert(!response.headers.has('Cache-Control'));
+    assert(response.headers.has('Cache-Control'));
+    assert('private,max-age=604800' === response.headers.get('Cache-Control'));
+  }
+
+  @Test()
+  async testSpecial() {
+    const response = await this.request({
+      context: {
+        path: '/test/response/special',
+        httpMethod: 'GET'
+      }
+    });
+
+    assert(response.headers.has('Cache-Control'));
+    assert('orange' === response.headers.get('Cache-Control'));
+
+    const response2 = await this.request({
+      context: {
+        path: '/test/response/special2',
+        httpMethod: 'GET'
+      }
+    });
+
+    assert(response2.headers.has('Cache-Control'));
+    assert('blue' === response2.headers.get('Cache-Control'));
   }
 }

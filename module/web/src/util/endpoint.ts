@@ -143,10 +143,15 @@ export class EndpointUtil {
     try {
       const params = await this.extractParameters(endpoint, request);
       const body = await endpoint.endpoint.apply(endpoint.instance, params);
-      const headers = endpoint.responseHeaderMap;
-      const response = body instanceof WebResponse ? body : new WebResponse({ body, headers });
-      if (response === body) {
-        for (const [k, v] of headers) { response.headers.setIfAbsent(k, v); }
+      const headers = endpoint.finalizedResponseHeaders;
+      let response: WebResponse;
+      if (body instanceof WebResponse) {
+        for (const [k, v] of headers) { body.headers.setIfAbsent(k, v); }
+        // Rewrite context
+        Object.assign(body.context, { ...endpoint.responseContext, ...body.context });
+        response = body;
+      } else {
+        response = new WebResponse({ body, headers, context: { ...endpoint.responseContext } });
       }
       return endpoint.responseFinalizer?.(response) ?? response;
     } catch (err) {

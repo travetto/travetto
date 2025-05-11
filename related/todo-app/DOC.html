@@ -386,6 +386,7 @@ First we must start the application:
         exposeAllSchemas: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
       AuthConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      CacheControlConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
@@ -396,7 +397,7 @@ First we must start the application:
       CookieConfig: <span class="token punctuation">{{'{'}}</span> applies: true, httpOnly: true, sameSite: <span class="token string">'lax'</span>, path: <span class="token string">'/'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       DecompressConfig: <span class="token punctuation">{{'{'}}</span> applies: true, supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: true, minimumSize: <span class="token string">'10kb'</span> <span class="token punctuation">{{'}'}}</span>,
       FileLogAppenderConfig: <span class="token punctuation">{{'{'}}</span>
         output: <span class="token string">'&lt;workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log'</span>,
         writeSync: <span class="token boolean">false</span>
@@ -426,7 +427,6 @@ First we must start the application:
         connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
         options: <span class="token punctuation">{{'{'}}</span> waitQueueTimeoutMS: <span class="token number">86400000</span> <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
-      ResponseCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: true, mode: <span class="token string">'deny'</span> <span class="token punctuation">{{'}'}}</span>,
       TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthConfig: <span class="token punctuation">{{'{'}}</span>
         applies: false,

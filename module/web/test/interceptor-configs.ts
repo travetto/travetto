@@ -7,7 +7,7 @@ import { Config } from '@travetto/config';
 import { RootRegistry } from '@travetto/registry';
 import {
   ConfigureInterceptor, Controller, ControllerRegistry, CorsInterceptor, Get,
-  ResponseCacheInterceptor, StandardWebRouter, WebChainedContext, WebInterceptor,
+  CacheControlInterceptor, StandardWebRouter, WebChainedContext, WebInterceptor,
   WebInterceptorCategory, WebInterceptorContext, WebRequest
 } from '@travetto/web';
 
@@ -42,7 +42,7 @@ class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
 @Controller('/test-interceptor')
 @ConfigureInterceptor(CustomInterceptor, { applies: true })
 @ConfigureInterceptor(CorsInterceptor, { applies: false })
-@ConfigureInterceptor(ResponseCacheInterceptor, { applies: false })
+@ConfigureInterceptor(CacheControlInterceptor, { applies: false })
 class TestController {
   @Get('/')
   async std() { }
@@ -65,7 +65,7 @@ class TestController {
 @Controller('/alt-test-interceptor')
 @ConfigureInterceptor(CustomInterceptor, { applies: false, name: 'greg' })
 @ConfigureInterceptor(CorsInterceptor, { applies: false })
-@ConfigureInterceptor(ResponseCacheInterceptor, { applies: false })
+@ConfigureInterceptor(CacheControlInterceptor, { applies: false })
 class AltTestController {
   @Get('/')
   async std() { }

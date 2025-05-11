@@ -5,7 +5,7 @@ import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
 import { HttpMethod } from '../types/core.ts';
 import { WebHeaders } from '../types/headers.ts';
-import { WebResponse } from '../types/response.ts';
+import { WebResponse, WebResponseContext } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
@@ -78,6 +78,10 @@ interface CoreConfig {
    * Response headers
    */
   responseHeaders?: Record<string, string>;
+  /**
+   * Partial response context
+   */
+  responseContext?: Partial<WebResponseContext>;
 }
 
 /**
@@ -168,13 +172,13 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    */
   fullPath: string;
   /**
-   * Response header map
-   */
-  responseHeaderMap: WebHeaders;
-  /**
    * Response finalizer
    */
   responseFinalizer?: (res: WebResponse) => WebResponse;
+  /**
+   * Response headers finalized
+   */
+  finalizedResponseHeaders: WebHeaders;
 }
 
 /**

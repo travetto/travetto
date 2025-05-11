@@ -50,6 +50,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       externalName: cls.name.replace(/(Controller|Web|Service)$/, ''),
       endpoints: [],
       contextParams: {},
+      responseHeaders: {}
     };
   }
 
@@ -68,7 +69,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       interceptorConfigs: [],
       name: endpoint.name,
       endpoint,
-      responseHeaderMap: new WebHeaders(),
+      responseHeaders: {},
+      finalizedResponseHeaders: new WebHeaders(),
       responseFinalizer: undefined
     };
 
@@ -199,7 +201,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param src Root describable (controller, endpoint)
    * @param dest Target (controller, endpoint)
    */
-  mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>): void {
+  mergeCommon(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>): void {
     dest.filters = [...(dest.filters ?? []), ...(src.filters ?? [])];
     dest.interceptorConfigs = [...(dest.interceptorConfigs ?? []), ...(src.interceptorConfigs ?? [])];
     dest.interceptorExclude = dest.interceptorExclude ?? src.interceptorExclude;
@@ -207,6 +209,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     dest.description = src.description || dest.description;
     dest.documented = src.documented ?? dest.documented;
     dest.responseHeaders = { ...src.responseHeaders, ...dest.responseHeaders };
+    dest.responseContext = { ...src.responseContext, ...dest.responseContext };
   }
 
   /**
@@ -231,7 +234,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       srcConf.path = `/${srcConf.path}`;
     }
 
-    this.mergeDescribable(config, srcConf);
+    this.mergeCommon(config, srcConf);
 
     return descriptor;
   }
@@ -252,7 +255,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     srcConf.contextParams = { ...srcConf.contextParams, ...config.contextParams };
 
 
-    this.mergeDescribable(config, srcConf);
+    this.mergeCommon(config, srcConf);
   }
 
   /**
@@ -266,7 +269,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       this.#endpointsById.set(ep.id, ep);
       // Store full path from base for use in other contexts
       ep.fullPath = `/${final.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
-      ep.responseHeaderMap = new WebHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
+      ep.finalizedResponseHeaders = new WebHeaders({ ...final.responseHeaders, ...ep.responseHeaders });
+      ep.responseContext = { ...final.responseContext, ...ep.responseContext };
     }
 
     if (this.has(final.basePath)) {

@@ -33,8 +33,9 @@
   .tools         { grid-row: 2;     @extend .left-third;  @extend .group-lib;      }
   .auth          { grid-row: 2;     @extend .mid-third;   @extend .group-lib;      }
   .email         { grid-row: 2;     @extend .right-third; @extend .group-lib;      }
-  .model         { grid-row: 3;     @extend .left-half;   @extend .group-core;     }
-  .web           { grid-row: 3;     @extend .right-half;  @extend .group-core;     }
+  .model         { grid-row: 3;     @extend .left-third;  @extend .group-core;     }
+  .model-query   { grid-row: 3;     @extend .mid-third;   @extend .group-core;     }
+  .web           { grid-row: 3;     @extend .right-third; @extend .group-core;     }
   .core          { grid-row: 4;     @extend .full;        @extend .group-system-2  }  
   .foundation    { grid-row: 5;     @extend .full;        @extend .group-system;   }  
 }

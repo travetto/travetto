@@ -27,7 +27,7 @@ export class ConfigureTest {
   }
 
   getHeaders(cls: Class, idx: number) {
-    return ControllerRegistry.get(cls).endpoints[idx].responseHeaderMap;
+    return ControllerRegistry.get(cls).endpoints[idx].finalizedResponseHeaders;
   }
 
   @Test()
@@ -47,7 +47,7 @@ export class ConfigureTest {
 
     const cacher = headers.get('Cache-Control');
     assert(typeof cacher !== 'function');
-    assert(cacher === 'no-cache,max-age=0');
+    assert(cacher === 'no-store,max-age=0');
   }
 
   @Test()
