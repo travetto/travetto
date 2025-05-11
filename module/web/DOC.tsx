@@ -244,7 +244,10 @@ export const text = <>
       </c.SubSubSection>
 
       <c.SubSubSection title={CacheControlInterceptor.name}>
-        {CacheControlInterceptor} by default, enforces whatever caching policy is established on a given endpoint.  This only applies to cacheable requests ({Get}/{Head}).  Additionally, the interceptor retains knowledge if an endpoint is private, or not, and affects the caching header accordingly.  This can be managed by setting {d.input('web.cache.applies: <boolean>')} in your config.
+        {CacheControlInterceptor} by default, enforces whatever caching policy is established on a given endpoint using the {CacheControl} decorator.   Additionally, the interceptor retains knowledge if it is running on a private endpoint, or not.  If the endpoint is deemed private it affects the caching header accordingly. If the endpoint directly returns a {d.input('Cache-Control')} header, that takes precedence and all other logic is ignored. <br />
+        This can be managed by setting {d.input('web.cache.applies: <boolean>')} in your config. <br />
+        <strong>Note</strong>: The {d.mod('AuthWeb')} module will mark endpoints as private if they require authentication.
+
       </c.SubSubSection>
     </c.SubSection>
 

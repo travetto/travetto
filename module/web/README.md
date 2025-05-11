@@ -621,7 +621,11 @@ export class CorsConfig {
 ```
 
 #### CacheControlInterceptor
-[CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) by default, enforces whatever caching policy is established on a given endpoint.  This only applies to cacheable requests ([@Get](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L42)/[@Head](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L75)).  Additionally, the interceptor retains knowledge if an endpoint is private, or not, and affects the caching header accordingly.  This can be managed by setting `web.cache.applies: <boolean>` in your config.
+[CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) by default, enforces whatever caching policy is established on a given endpoint using the [CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L48) decorator.   Additionally, the interceptor retains knowledge if it is running on a private endpoint, or not.  If the endpoint is deemed private it affects the caching header accordingly. If the endpoint directly returns a `Cache-Control` header, that takes precedence and all other logic is ignored. 
+
+This can be managed by setting `web.cache.applies: <boolean>` in your config. 
+
+**Note**: The [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") module will mark endpoints as private if they require authentication.
 
 ### Configuring Interceptors
 All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:
