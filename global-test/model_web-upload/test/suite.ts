@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Controller, Get, Post, WebRequest, ContextParam } from '@travetto/web';
+import { Controller, Get, Post, WebRequest, ContextParam, WebHeaderUtil } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
@@ -62,7 +62,7 @@ class TestUploadController {
 
   @Get('*')
   async get() {
-    const range = this.request.headers.getRange();
+    const range = WebHeaderUtil.getRange(this.request.headers);
     return await this.service.getBlob(this.request.context.path.replace(/^\/test\/upload\//, ''), range);
   }
 }

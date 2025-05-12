@@ -31,11 +31,7 @@
     "@travetto/registry": "^6.0.0",
     "@travetto/runtime": "^6.0.0",
     "@travetto/schema": "^6.0.0",
-    "@types/fresh": "^0.5.2",
-    "@types/negotiator": "^0.6.3",
-    "find-my-way": "^9.3.0",
-    "fresh": "^0.5.2",
-    "negotiator": "^1.0.0"
+    "find-my-way": "^9.3.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^6.0.0",

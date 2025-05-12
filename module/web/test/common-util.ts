@@ -43,4 +43,35 @@ export class WebCommonUtilTest {
     ]);
     assert.deepStrictEqual(ordered2.map(x => x.key), ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
   }
+
+
+  @Test()
+  validateMimesAllowDeny() {
+    const validator = WebCommonUtil.mimeTypeMatcher(['!image/tiff', 'image/*']);
+
+    assert(validator('image/png'));
+    assert(!validator('image/tiff'));
+    assert(!validator('image'));
+    assert(!validator('img'));
+  }
+
+  @Test()
+  validateDeny() {
+    const validator = WebCommonUtil.mimeTypeMatcher(['!image/tiff']);
+
+    assert(validator('image/png'));
+    assert(!validator('image/tiff'));
+    assert(validator('image'));
+    assert(validator('img'));
+  }
+
+  @Test()
+  validateAllow() {
+    const validator = WebCommonUtil.mimeTypeMatcher(['image/*']);
+
+    assert(validator('image/png'));
+    assert(validator('image/tiff'));
+    assert(!validator('image'));
+    assert(!validator('img'));
+  }
 }

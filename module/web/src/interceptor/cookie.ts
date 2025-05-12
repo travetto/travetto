@@ -29,7 +29,7 @@ export class CookieConfig implements CookieSetOptions {
   /**
    * Supported only via http (not in JS)
    */
-  httpOnly = true;
+  httponly = true;
   /**
    * Enforce same site policy
    */

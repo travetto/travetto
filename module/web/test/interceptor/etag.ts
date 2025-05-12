@@ -123,7 +123,7 @@ class EtagInterceptorSuite {
         context: { path: '/', httpMethod: 'GET' },
         headers: {
           'If-Modified-Since': TimeUtil.fromNow('1y').toUTCString(),
-          Etag: `"${interceptor.computeTag(data)}"`
+          'If-None-Match': `"${interceptor.computeTag(data)}"`
         }
       }),
       config: { ...interceptor.config, cacheable: true },
@@ -141,7 +141,7 @@ class EtagInterceptorSuite {
         context: { path: '/', httpMethod: 'GET' },
         headers: {
           'If-Modified-Since': TimeUtil.fromNow('-1y').toUTCString(),
-          Etag: `"${interceptor.computeTag(data)}"`
+          'If-None-Match': `"${interceptor.computeTag(data)}"`
         }
       }),
       config: { ...interceptor.config, cacheable: true },
@@ -152,6 +152,6 @@ class EtagInterceptorSuite {
       })
     });
 
-    assert(get2.context.httpStatusCode !== 304);
+    assert(get2.context.httpStatusCode === 304);
   }
 }

@@ -2,7 +2,6 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 
-import { MimeUtil } from '../util/mime.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
 import { WebChainedContext } from '../types/filter.ts';
@@ -39,7 +38,7 @@ export class AcceptInterceptor implements WebInterceptor<AcceptConfig> {
   config: AcceptConfig;
 
   finalizeConfig({ config }: WebInterceptorContext<AcceptConfig>): AcceptConfig {
-    config.matcher = MimeUtil.matcher(config.types ?? []);
+    config.matcher = WebCommonUtil.mimeTypeMatcher(config.types ?? []);
     return config;
   }
 

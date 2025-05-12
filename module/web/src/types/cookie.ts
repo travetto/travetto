@@ -9,7 +9,7 @@ export type Cookie = {
   priority?: 'low' | 'medium' | 'high';
   sameSite?: 'strict' | 'lax' | 'none';
   secure?: boolean;
-  httpOnly?: boolean;
+  httponly?: boolean;
   partitioned?: boolean;
   response?: boolean;
 };
