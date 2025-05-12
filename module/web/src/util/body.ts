@@ -1,6 +1,5 @@
 import { TextDecoder } from 'node:util';
 import { Readable } from 'node:stream';
-import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { Any, BinaryUtil, castTo, hasToJSON, Util } from '@travetto/runtime';
 
@@ -14,20 +13,6 @@ const WebRawStreamSymbol = Symbol();
  * Utility classes for supporting web body operations
  */
 export class WebBodyUtil {
-
-  /**
-   * Convert a node binary input to a buffer
-   */
-  static async toBuffer(src: WebBinaryBody): Promise<Buffer> {
-    return Buffer.isBuffer(src) ? src : toBuffer(src);
-  }
-
-  /**
-   * Convert a node binary input to a readable
-   */
-  static toReadable(src: WebBinaryBody): Readable {
-    return Buffer.isBuffer(src) ? Readable.from(src) : src;
-  }
 
   /**
    * Generate multipart body
