@@ -26,34 +26,30 @@ export class ConfigureTest {
     await RootRegistry.init();
   }
 
-  getHeaders(cls: Class, idx: number) {
-    return ControllerRegistry.get(cls).endpoints[idx].finalizedResponseHeaders;
+  getEndpoint(cls: Class, idx: number) {
+    return ControllerRegistry.get(cls).endpoints[idx];
   }
 
   @Test()
   async verifyMaxAge() {
-    const headers = this.getHeaders(TestController, 0);
-    assert(headers.has('Cache-Control'));
-
-    const cacher = headers.get('Cache-Control');
-    assert(typeof cacher !== 'function');
-    assert(cacher === 'max-age=1');
+    const endpoint = this.getEndpoint(TestController, 0);
+    assert(endpoint.responseContext?.cacheableAge === 1);
+    assert(endpoint.responseContext?.isPrivate !== true);
+    assert(!endpoint.finalizedResponseHeaders?.has('Cache-Control'));
   }
 
   @Test()
   async verifyBadMaxAge() {
-    const headers = this.getHeaders(TestController, 1);
-    assert(headers.has('Cache-Control'));
-
-    const cacher = headers.get('Cache-Control');
-    assert(typeof cacher !== 'function');
-    assert(cacher === 'no-store,max-age=0');
+    const endpoint = this.getEndpoint(TestController, 1);
+    assert(!endpoint.finalizedResponseHeaders.has('Cache-Control'));
+    assert(endpoint.responseContext?.cacheableAge === 0);
   }
 
   @Test()
   async setMultipleHeaderS() {
-    const headers = this.getHeaders(TestController, 1);
-    assert(headers.has('Cache-Control'));
+    const { finalizedResponseHeaders: headers } = this.getEndpoint(TestController, 1);
+    assert(!headers.has('Cache-Control'));
     assert(headers.has('Content-Type'));
+    assert(headers?.get('Content-Type') === '20');
   }
 }

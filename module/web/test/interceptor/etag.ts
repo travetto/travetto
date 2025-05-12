@@ -17,6 +17,7 @@ class EtagInterceptorSuite {
   async post() {
     const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
+    interceptor.config.minimumSize = 1;
 
     const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
 
@@ -48,6 +49,7 @@ class EtagInterceptorSuite {
   async get() {
     const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
+    interceptor.config.minimumSize = 1;
 
     const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
 
@@ -112,6 +114,7 @@ class EtagInterceptorSuite {
   async testExpires() {
     const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
+    interceptor.config.minimumSize = 1;
 
     const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
 

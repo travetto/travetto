@@ -1,7 +1,7 @@
-import keygrip from 'keygrip';
 import { AppError, castKey, castTo } from '@travetto/runtime';
 
 import { Cookie, CookieGetOptions, CookieSetOptions } from '../types/cookie.ts';
+import { KeyGrip } from './keygrip.ts';
 
 const pairText = (c: Cookie): string => `${c.name}=${c.value}`;
 const pair = (k: string, v: unknown): string => `${k}=${v}`;
@@ -52,13 +52,13 @@ export class CookieJar {
     return parts;
   }
 
-  #grip?: keygrip;
+  #grip?: KeyGrip;
   #cookies: Record<string, Cookie> = {};
   #setOptions: CookieSetOptions = {};
   #deleteOptions: CookieSetOptions = { maxAge: 0, expires: undefined };
 
   constructor({ keys, ...options }: CookieJarOptions = {}) {
-    this.#grip = keys?.length ? new keygrip(keys) : undefined;
+    this.#grip = keys?.length ? new KeyGrip(keys) : undefined;
     this.#setOptions = {
       secure: false,
       path: '/',

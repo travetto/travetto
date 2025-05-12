@@ -20,6 +20,9 @@ export class WebTestConfig implements ConfigSource {
           http: {
             ssl: { active: false },
             port: -1,
+          },
+          etag: {
+            minimumSize: 1
           }
         }
       },
