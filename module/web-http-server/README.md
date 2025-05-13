@@ -54,10 +54,9 @@ Initialized {
       CacheControlConfig: { applies: true },
       CompressConfig: {
         applies: true,
-        preferredEncodings: [ 'br', 'gzip', 'identity' ],
         supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
       },
-      CookieConfig: { applies: true, httpOnly: true, sameSite: 'lax', path: '/' },
+      CookieConfig: { applies: true, httponly: true, sameSite: 'lax', path: '/' },
       CorsConfig: { applies: true },
       DecompressConfig: {
         applies: true,
@@ -212,10 +211,9 @@ Initialized {
       CacheControlConfig: { applies: true },
       CompressConfig: {
         applies: true,
-        preferredEncodings: [ 'br', 'gzip', 'identity' ],
         supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
       },
-      CookieConfig: { applies: true, httpOnly: true, sameSite: 'lax', path: '/' },
+      CookieConfig: { applies: true, httponly: true, sameSite: 'lax', path: '/' },
       CorsConfig: { applies: true },
       DecompressConfig: {
         applies: true,
