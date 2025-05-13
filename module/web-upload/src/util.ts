@@ -61,7 +61,7 @@ export class WebUploadUtil {
     const bodyStream = Buffer.isBuffer(request.body) ? Readable.from(request.body) : request.body;
     request.body = undefined;
 
-    const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type') ?? '');
+    const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
 
     if (MULTIPART.has(contentType.value)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
@@ -87,7 +87,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition') ?? '').parameters.filename;
+      const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition')).parameters.filename;
       yield { stream: bodyStream, filename, field: 'file' };
     }
   }

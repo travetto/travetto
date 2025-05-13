@@ -91,7 +91,7 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
       throw WebError.for('Request entity too large', 413, { length, limit });
     }
 
-    const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type') ?? '');
+    const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
     if (!contentType.value) {
       return next();
     }

@@ -49,7 +49,10 @@ export class WebHeaderUtil {
    * Parse header segment
    * @input input
    */
-  static parseHeaderSegment(input: string): WebParsedHeader {
+  static parseHeaderSegment(input: string | null | undefined): WebParsedHeader {
+    if (!input) {
+      return { value: '', parameters: {} };
+    }
     const [rv, ...parts] = input.split(SPLIT_SEMI);
     const item: WebParsedHeader = { value: '', parameters: {} };
     const value = rv.charCodeAt(0) === QUOTE ? rv.slice(1, -1) : rv;
@@ -121,7 +124,7 @@ export class WebHeaderUtil {
     if (!headers.has('Range')) {
       return;
     }
-    const { parameters } = this.parseHeaderSegment(headers.get('Range')!);
+    const { parameters } = this.parseHeaderSegment(headers.get('Range'));
     if ('bytes' in parameters) {
       const [start, end] = parameters.bytes.split('-')
         .map(x => x ? parseInt(x, 10) : undefined);
