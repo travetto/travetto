@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import { Writable } from 'node:stream';
 import { HttpError } from 'http-errors';
-import type mustache from 'mustache';
+import keygrip from 'keygrip';
 
 import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
@@ -21,7 +21,7 @@ class Source {
   }
 
   @InjectableFactory()
-  static extends(): typeof mustache {
+  static extends(): keygrip {
     return castTo({});
   }
 
@@ -64,7 +64,7 @@ class Child {
   stream2: Writable;
 
   @Inject()
-  ctx: typeof mustache;
+  ctx: keygrip;
 }
 
 @Suite()
