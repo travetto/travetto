@@ -17,6 +17,7 @@ class EtagInterceptorSuite {
   async post() {
     const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
+    interceptor.config.minimumSize = 1;
 
     const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
 
@@ -48,6 +49,7 @@ class EtagInterceptorSuite {
   async get() {
     const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
+    interceptor.config.minimumSize = 1;
 
     const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
 
@@ -112,6 +114,7 @@ class EtagInterceptorSuite {
   async testExpires() {
     const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
+    interceptor.config.minimumSize = 1;
 
     const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
 
@@ -120,7 +123,7 @@ class EtagInterceptorSuite {
         context: { path: '/', httpMethod: 'GET' },
         headers: {
           'If-Modified-Since': TimeUtil.fromNow('1y').toUTCString(),
-          Etag: `"${interceptor.computeTag(data)}"`
+          'If-None-Match': `"${interceptor.computeTag(data)}"`
         }
       }),
       config: { ...interceptor.config, cacheable: true },
@@ -138,7 +141,7 @@ class EtagInterceptorSuite {
         context: { path: '/', httpMethod: 'GET' },
         headers: {
           'If-Modified-Since': TimeUtil.fromNow('-1y').toUTCString(),
-          Etag: `"${interceptor.computeTag(data)}"`
+          'If-None-Match': `"${interceptor.computeTag(data)}"`
         }
       }),
       config: { ...interceptor.config, cacheable: true },
@@ -149,6 +152,6 @@ class EtagInterceptorSuite {
       })
     });
 
-    assert(get2.context.httpStatusCode !== 304);
+    assert(get2.context.httpStatusCode === 304);
   }
 }

@@ -25,6 +25,7 @@
         "Fastify",
         "Firestore",
         "fnames",
+        "httponly",
         "ilike",
         "Inno",
         "iregex",

@@ -76,7 +76,15 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   };
 }
 
-export function getBody(inputs: unknown[]): { body: FormData | string, headers: Record<string, string> } {
+export function getBody(inputs: unknown[], isBodyRequest: boolean): { body: FormData | string | undefined, headers: Record<string, string> } {
+  if (!isBodyRequest) {
+    return {
+      body: undefined,
+      headers: {
+        'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(JSON.stringify(inputs)))
+      }
+    };
+  }
   // If we do not have a blob, simple output
   if (!inputs.some(isBlobLike)) {
     return {
@@ -147,8 +155,10 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
   let core = request.core!;
 
   try {
-    const { body, headers } = getBody(params);
-    core.body = body;
+    const { body, headers } = getBody(params, /^(post|put|patch)$/i.test(request.core?.method ?? 'POST'));
+    if (body) {
+      core.body = body;
+    }
     core.headers = extendHeaders(core.headers, headers);
 
     for (const fn of request.preRequestHandlers ?? []) {

@@ -6,7 +6,7 @@ import type { TestResult, Assertion, TestConfig, TestLog } from '@travetto/test'
 import type { ErrorHoverAssertion, StatusUnknown, TestLevel } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
-const MAX_LOG_LENGTH = 100;
+const MAX_LOG_LENGTH = 60;
 
 /**
  * Make a color
@@ -176,12 +176,14 @@ export class Decorations {
    * @param log
    */
   static buildTestLog(log: TestLog): vscode.DecorationOptions {
-    const lines = log.message.split('\n');
+    const lines = log.message.trim().split('\n');
     let hoverMessage: string | undefined;
 
     if (lines.length > 1 || lines[0].length > MAX_LOG_LENGTH) {
       hoverMessage = ['```', log.message ?? '', '```', ''].join('\n');
     }
+
+    const message = [lines[0].substring(0, MAX_LOG_LENGTH), lines[0].length > MAX_LOG_LENGTH ? '...' : ''].join('');
 
     return {
       ...this.line(log.line),
@@ -190,7 +192,7 @@ export class Decorations {
         after: {
           textDecoration: ITALIC,
           color: log.level === 'error' || log.level === 'warn' ? new ThemeColor('errorForeground') : undefined,
-          contentText: `  // ${log.level}: ${lines[0].substring(0, MAX_LOG_LENGTH)}${lines[0].length > 30 ? '...' : ''}`
+          contentText: `  // ${log.level}: ${message}`
         }
       }
     };

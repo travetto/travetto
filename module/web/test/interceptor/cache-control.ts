@@ -18,7 +18,7 @@ class TestResponseCache {
   @CacheControl({ isPrivate: true })
   @Get('/uncached/override')
   getUnCachedOverride() {
-    return 'hellozz';
+    return 'hello-zz';
   }
 
   @CacheControl('1d', { isPrivate: true })

@@ -1,4 +1,4 @@
-import { AppError, ErrorCategory } from '@travetto/runtime';
+import { AppError, ErrorCategory, Util } from '@travetto/runtime';
 
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
@@ -31,6 +31,12 @@ export class WebCommonUtil {
     gb: 2 ** 30,
   };
 
+  static #convert(rule: string): RegExp {
+    const core = (rule.endsWith('/*') || !rule.includes('/')) ?
+      `${rule.replace(/[/].{0,20}$/, '')}\/.*` : rule;
+    return new RegExp(`^${core}[ ]{0,10}(;|$)`);
+  }
+
   static #buildEdgeMap<T, U extends OrderedState<T>>(items: List<U>): Map<T, Set<T>> {
     const edgeMap = new Map(items.map(x => [x.key, new Set(x.after ?? [])]));
 
@@ -47,6 +53,19 @@ export class WebCommonUtil {
       }
     }
     return edgeMap;
+  }
+
+
+  /**
+   * Build matcher
+   */
+  static mimeTypeMatcher(rules: string[] | string = []): (contentType: string) => boolean {
+    return Util.allowDeny<RegExp, [string]>(
+      rules,
+      this.#convert.bind(this),
+      (regex, mime) => regex.test(mime),
+      k => k
+    );
   }
 
   /**

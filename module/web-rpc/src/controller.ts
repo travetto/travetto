@@ -3,7 +3,7 @@ import { Any, AppError, Util } from '@travetto/runtime';
 import {
   HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry,
   WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
-  RespondInterceptor, DecompressInterceptor
+  RespondInterceptor, DecompressInterceptor, Get
 } from '@travetto/web';
 
 @Controller('/rpc')
@@ -18,6 +18,14 @@ export class WebRpcController {
 
   @Inject()
   ctx: WebAsyncContext;
+
+  /**
+   * Allow for get-based requests
+   */
+  @Get('/:target')
+  async onGetRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string): Promise<unknown> {
+    return this.onRequest(target, paramInput);
+  }
 
   /**
    * RPC main entrypoint

@@ -1,4 +1,5 @@
-import { buffer as toBuffer } from 'node:stream/consumers';
+import { buffer } from 'node:stream/consumers';
+import { Readable } from 'node:stream';
 
 import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
@@ -9,6 +10,8 @@ import { DecompressInterceptor } from '../../src/interceptor/decompress.ts';
 import { WebBodyUtil } from '../../src/util/body.ts';
 import { WebCommonUtil } from '../../src/util/common.ts';
 
+const toBuffer = (src: Buffer | Readable) => Buffer.isBuffer(src) ? src : buffer(src);
+
 /**
  * Utilities for supporting custom test dispatchers
  */
@@ -18,7 +21,7 @@ export class WebTestDispatchUtil {
     if (request.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(request);
       sample.headers.forEach((v, k) => request.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      request.body = WebBodyUtil.markRaw(await WebBodyUtil.toBuffer(sample.body!));
+      request.body = WebBodyUtil.markRaw(await toBuffer(sample.body!));
     }
     Object.assign(request.context, { httpQuery: BindUtil.flattenPaths(request.context.httpQuery ?? {}) });
     return request;
@@ -31,7 +34,7 @@ export class WebTestDispatchUtil {
 
     if (decompress) {
       if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
-        const bufferResult = result = await WebBodyUtil.toBuffer(result);
+        const bufferResult = result = await toBuffer(result);
         if (bufferResult.length) {
           try {
             result = await DecompressInterceptor.decompress(
@@ -74,7 +77,7 @@ export class WebTestDispatchUtil {
 
     const body: RequestInit['body'] =
       WebBodyUtil.isRaw(request.body) ?
-        Buffer.isBuffer(request.body) ? request.body : await toBuffer(request.body) :
+        await toBuffer(request.body) :
         castTo(request.body);
 
     return { path: finalPath, init: { headers, method, body } };

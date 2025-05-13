@@ -7,7 +7,7 @@ import { Readable, Transform } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
-import { WebRequest, MimeUtil, WebBodyUtil } from '@travetto/web';
+import { WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { WebUploadConfig } from './config.ts';
@@ -61,7 +61,9 @@ export class WebUploadUtil {
     const bodyStream = Buffer.isBuffer(request.body) ? Readable.from(request.body) : request.body;
     request.body = undefined;
 
-    if (MULTIPART.has(request.headers.getContentType()?.full!)) {
+    const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
+
+    if (MULTIPART.has(contentType.value)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
       const itr = new AsyncQueue<UploadItem>();
@@ -85,7 +87,8 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: bodyStream, filename: request.headers.getFilename(), field: 'file' };
+      const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition')).parameters.filename;
+      yield { stream: bodyStream, filename, field: 'file' };
     }
   }
 
@@ -100,7 +103,7 @@ export class WebUploadUtil {
 
     const location = path.resolve(uniqueDir, filename);
     const remove = (): Promise<void> => fs.rm(location).catch(() => { });
-    const mimeCheck = config.matcher ??= MimeUtil.matcher(config.types);
+    const mimeCheck = config.matcher ??= WebCommonUtil.mimeTypeMatcher(config.types);
 
     try {
       const target = createWriteStream(location);

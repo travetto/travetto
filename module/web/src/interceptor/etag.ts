@@ -1,5 +1,4 @@
 import crypto from 'node:crypto';
-import fresh from 'fresh';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -13,6 +12,7 @@ import { WebInterceptorCategory } from '../types/core.ts';
 import { CompressInterceptor } from './compress.ts';
 import { WebBodyUtil } from '../util/body.ts';
 import { ByteSizeInput, WebCommonUtil } from '../util/common.ts';
+import { WebHeaderUtil } from '../util/header.ts';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -85,17 +85,7 @@ export class EtagInterceptor implements WebInterceptor {
     const tag = this.computeTag(body);
     binaryResponse.headers.set('ETag', `${ctx.config.weak ? 'W/' : ''}"${tag}"`);
 
-    if (
-      ctx.config.cacheable &&
-      fresh({
-        'if-modified-since': request.headers.get('If-Modified-Since')!,
-        'if-none-match': request.headers.get('If-None-Match')!,
-        'cache-control': request.headers.get('Cache-Control')!,
-      }, {
-        etag: binaryResponse.headers.get('ETag')!,
-        'last-modified': binaryResponse.headers.get('Last-Modified')!
-      })
-    ) {
+    if (ctx.config.cacheable && WebHeaderUtil.isFresh(request.headers, binaryResponse.headers)) {
       // Remove length for the 304
       binaryResponse.headers.delete('Content-Length');
       return new WebResponse({

@@ -1,19 +1,17 @@
 import { buffer } from 'node:stream/consumers';
 import { BrotliOptions, constants, createBrotliCompress, createDeflate, createGzip, ZlibOptions } from 'node:zlib';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-import Negotiator from 'negotiator';
-
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { castTo } from '@travetto/runtime';
 
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebBodyUtil } from '../util/body.ts';
 import { WebError } from '../types/error.ts';
+
+import { WebBodyUtil } from '../util/body.ts';
+import { WebHeaderUtil } from '../util/header.ts';
 
 const COMPRESSORS = {
   gzip: createGzip,
@@ -34,10 +32,6 @@ export class CompressConfig {
    */
   raw?: (ZlibOptions & BrotliOptions) | undefined;
   /**
-   * Preferred encodings
-   */
-  preferredEncodings?: WebCompressEncoding[] = ['br', 'gzip', 'identity'];
-  /**
    * Supported encodings
    */
   supportedEncodings: WebCompressEncoding[] = ['br', 'gzip', 'identity', 'deflate'];
@@ -55,10 +49,10 @@ export class CompressInterceptor implements WebInterceptor {
   config: CompressConfig;
 
   async compress(ctx: WebChainedContext, response: WebResponse): Promise<WebResponse> {
-    const { raw = {}, preferredEncodings = [], supportedEncodings } = this.config;
+    const { raw = {}, supportedEncodings } = this.config;
     const { request } = ctx;
 
-    response.headers.vary('Accept-Encoding');
+    response.headers.append('Vary', 'Accept-Encoding');
 
     if (
       !response.body ||
@@ -69,15 +63,13 @@ export class CompressInterceptor implements WebInterceptor {
     }
 
     const accepts = request.headers.get('Accept-Encoding');
-    const type: WebCompressEncoding | undefined =
-      castTo(new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
-        .encoding([...supportedEncodings, ...preferredEncodings]));
+    const type = WebHeaderUtil.negotiateHeader(accepts ?? '*', supportedEncodings);
 
-    if (accepts && (!type || !accepts.includes(type))) {
+    if (!type) {
       throw WebError.for(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`, 406);
     }
 
-    if (type === 'identity' || !type) {
+    if (type === 'identity') {
       return response;
     }
 

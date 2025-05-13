@@ -1,18 +1,13 @@
-import { Any, ByteRange, castTo } from '@travetto/runtime';
-import { MimeType, MimeUtil } from '../util/mime.ts';
+import { Any, castTo } from '@travetto/runtime';
 
 type Prim = number | boolean | string;
 type HeaderValue = Prim | Prim[] | readonly Prim[];
 export type WebHeadersInit = Headers | Record<string, undefined | null | HeaderValue> | [string, HeaderValue][];
 
-const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
-
 /**
  * Simple Headers wrapper with additional logic for common patterns
  */
 export class WebHeaders extends Headers {
-
-  #parsedType?: MimeType;
 
   constructor(o?: WebHeadersInit) {
     const passed = (o instanceof Headers);
@@ -53,42 +48,6 @@ export class WebHeaders extends Headers {
   forEach(set: (v: string | string[], k: string, headers: WebHeaders) => void): void {
     for (const [k, v] of this.entries()) {
       set(k === 'set-cookie' ? this.getSetCookie() : v, k, this);
-    }
-  }
-
-  /**
-   * Vary a value
-   */
-  vary(value: string): void {
-    this.append('Vary', value);
-  }
-
-  /**
-   * Get the fully parsed content type
-   */
-  getContentType(): MimeType | undefined {
-    return this.#parsedType ??= MimeUtil.parse(this.get('Content-Type')!);
-  }
-
-  /**
-   * Read the filename from the content disposition
-   */
-  getFilename(): string | undefined {
-    const [, match] = (this.get('Content-Disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
-    return match;
-  }
-
-  /**
-   * Get requested byte range for a given request
-   */
-  getRange(chunkSize: number = 100 * 1024): ByteRange | undefined {
-    const rangeHeader = this.get('Range');
-    if (rangeHeader) {
-      const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
-        .map(x => x ? parseInt(x, 10) : undefined);
-      if (start !== undefined) {
-        return { start, end: end ?? (start + chunkSize) };
-      }
     }
   }
 

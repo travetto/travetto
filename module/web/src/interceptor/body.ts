@@ -14,6 +14,7 @@ import { ByteSizeInput, WebCommonUtil } from '../util/common.ts';
 import { AcceptInterceptor } from './accept.ts';
 import { DecompressInterceptor } from './decompress.ts';
 import { WebError } from '../types/error.ts';
+import { WebHeaderUtil } from '../util/header.ts';
 
 /**
  * @concrete
@@ -90,12 +91,13 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
       throw WebError.for('Request entity too large', 413, { length, limit });
     }
 
-    const contentType = request.headers.getContentType();
-    if (!contentType) {
+    const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
+    if (!contentType.value) {
       return next();
     }
 
-    const parserType = config.parsingTypes[contentType.full] ?? config.parsingTypes[contentType.type];
+    const [baseType,] = contentType.value.split('/');
+    const parserType = config.parsingTypes[contentType.value] ?? config.parsingTypes[baseType];
     if (!parserType) {
       return next();
     }

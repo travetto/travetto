@@ -362,13 +362,9 @@ npx trv web:http
       AuthConfig: { maxAge: '1h', rollingRenew: true },
       CacheControlConfig: { applies: true },
       CommonLoggerConfig: { format: 'line', output: 'console' },
-      CompressConfig: {
-        applies: true,
-        preferredEncodings: [ 'br', 'gzip', 'identity' ],
-        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
-      },
+      CompressConfig: { applies: true, supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ] },
       ConsoleLogAppenderConfig: { logToLevel: true },
-      CookieConfig: { applies: true, httpOnly: true, sameSite: 'lax', path: '/' },
+      CookieConfig: { applies: true, httponly: true, sameSite: 'lax', path: '/' },
       CorsConfig: { applies: true },
       DecompressConfig: { applies: true, supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ] },
       EtagConfig: { applies: true, minimumSize: '10kb' },
