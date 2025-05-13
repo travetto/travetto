@@ -6,7 +6,7 @@ import { WebHeaders } from '../types/headers.ts';
 export type WebParsedHeader = { value: string, parameters: Record<string, string>, q?: number };
 
 const SPLIT_EQ = /[ ]{0,10}=[ ]{0,10}/g;
-const SPLIT_COMMA = /[ ]{0,10},[ ]{0,10}/;
+const SPLIT_COMMA = /[ ]{0,10},[ ]{0,10}/g;
 const SPLIT_SEMI = /[ ]{0,10};[ ]{0,10}/g;
 const QUOTE = '"'.charCodeAt(0);
 
