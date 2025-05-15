@@ -17,7 +17,6 @@ export class NodeWebServer implements WebHttpServer {
 
   async serve(): Promise<WebHttpServerHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
-    const handle = await WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router, });
-    return handle;
+    return WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router, });
   }
 }
