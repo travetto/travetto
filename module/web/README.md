@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/module/web/DOC.tsx and execute "npx trv doc" to rebuild -->
 # Web API
 
-## Declarative support creating for Web Applications
+## Declarative support for creating Web Applications
 
 **Install: @travetto/web**
 ```bash

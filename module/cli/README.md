@@ -390,7 +390,7 @@ npx trv call:db --host localhost --port 3306 --username app --password <custom>
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -458,7 +458,7 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
 ```
 
 ### Dependency Injection
-If the goal is to run a more complex application, which may include depending on [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), we can take a look at [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.")'s target:
+If the goal is to run a more complex application, which may include depending on [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), we can take a look at [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications")'s target:
 
 **Code: Simple Run Target**
 ```typescript
@@ -555,14 +555,14 @@ Options:
 
 Available Services
 --------------------
- * dynamodb@2.5.3
+ * dynamodb@2.6.1
  * elasticsearch@8.17.0
  * firestore@latest
  * mongodb@8.0
- * mysql@9.1
- * postgresql@17.2
- * redis@7.4
- * s3@3.12.0
+ * mysql@9.3
+ * postgresql@17.5
+ * redis@8.0
+ * s3@4.2.0
 ```
 
 A sample of all services available to the entire framework:
@@ -573,14 +573,14 @@ $ trv service status
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           2.5.3    Running 93af422e793a
+dynamodb           2.6.1    Running 93af422e793a
 elasticsearch     8.17.0    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              8.0    Running 5513eba6734e
-mysql                9.1    Running 307bc66d442a
-postgresql          17.2    Running e78291e71040
-redis                7.4    Running 77ba279b4e30
-s3                3.12.0    Running fdacfc55b9e3
+mysql                9.3    Running 307bc66d442a
+postgresql          17.5    Running e78291e71040
+redis                8.0    Running 77ba279b4e30
+s3                 4.2.0    Running fdacfc55b9e3
 ```
 
 ### Defining new Services

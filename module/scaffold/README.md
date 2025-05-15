@@ -25,7 +25,7 @@ $ npx @travetto/scaffold@<version-or-tag>
 The generator will ask about enabling the following features:
 
 ## Web Application
-The [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") provides the necessary integration for exposing web apis.  When selecting the `web` feature, you will need to specify which backend you want to include with your application, the default being [express](https://expressjs.com).  Currently you can select from:
+The [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") provides the necessary integration for exposing web apis.  When selecting the `web` feature, you will need to specify which backend you want to include with your application, the default being [express](https://expressjs.com).  Currently you can select from:
    *  [express](https://expressjs.com)
    *  [koa](https://koajs.com/)
    *  [fastify](https://www.fastify.io/)

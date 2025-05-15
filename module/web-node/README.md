@@ -13,7 +13,7 @@ npm install @travetto/web-node
 yarn add @travetto/web-node
 ```
 
-The module is an [http](https://nodejs.org/api/http.html) adapter for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides will run an [http](https://nodejs.org/api/http.html) or [https](https://nodejs.org/api/https.html) server using [Node](https://nodejs.org) primitives.
+The module is an [http](https://nodejs.org/api/http.html) adapter for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module.  This module provides will run an [http](https://nodejs.org/api/http.html) or [https](https://nodejs.org/api/https.html) server using [Node](https://nodejs.org) primitives.
 
 **Code: Node Web Server**
 ```typescript
