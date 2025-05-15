@@ -1,13 +1,16 @@
+import { ConfigurationService } from '@travetto/config';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { StandardWebRouter } from '@travetto/web';
-import { ConfigurationService } from '@travetto/config';
-import { WebHttpUtil, WebHttpConfig, WebHttpServer, WebHttpServerHandle } from '@travetto/web-http-server';
+
+import { WebHttpConfig } from './config.ts';
+import { WebHttpUtil } from './http.ts';
+import { WebHttpServer, WebHttpServerHandle } from './types.ts';
 
 /**
- * A node http server
+ * The default node http server
  */
-@Injectable()
-export class NodeWebServer implements WebHttpServer {
+@Injectable(Symbol())
+export class DefaultWebServer implements WebHttpServer {
 
   @Inject()
   serverConfig: WebHttpConfig;
