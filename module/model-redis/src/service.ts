@@ -41,7 +41,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * #streamValues(op: 'scan' | 'sScan' | 'zScan', search: RedisScan, count = 100): AsyncIterable<string[]> {
-    let prevCursor = 0;
+    let prevCursor = '0';
     let done = false;
 
     const flags = { COUNT: count, ...('match' in search ? { MATCH: search.match } : {}) };
@@ -60,7 +60,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
       yield results;
 
-      if (cursor === 0) {
+      if (cursor === '0') {
         done = true;
       }
     }

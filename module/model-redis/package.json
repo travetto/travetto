@@ -28,7 +28,7 @@
     "@travetto/cli": "^6.0.0",
     "@travetto/config": "^6.0.0",
     "@travetto/model": "^6.0.0",
-    "redis": "^4.7.0"
+    "redis": "^5.0.1"
   },
   "travetto": {
     "displayName": "Redis Model Support"

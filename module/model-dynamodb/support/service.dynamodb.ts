@@ -1,6 +1,6 @@
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.DYNAMODB_VERSION || '2.5.3';
+const version = process.env.DYNAMODB_VERSION || '2.6.1';
 
 export const service: ServiceDescriptor = {
   name: 'dynamodb',

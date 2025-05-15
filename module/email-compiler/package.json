@@ -32,11 +32,11 @@
     "@travetto/image": "^6.0.0",
     "@travetto/runtime": "^6.0.0",
     "@travetto/worker": "^6.0.0",
-    "@types/inline-css": "^3.0.3",
+    "@types/inline-css": "^3.0.4",
     "html-entities": "^2.6.0",
     "inline-css": "^4.0.3",
     "purgecss": "^7.0.2",
-    "sass": "^1.87.0"
+    "sass": "^1.88.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^6.0.0"

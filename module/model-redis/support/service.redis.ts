@@ -1,6 +1,6 @@
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.REDIS_VERSION || '7.4';
+const version = process.env.REDIS_VERSION || '8.0';
 
 export const service: ServiceDescriptor = {
   name: 'redis',

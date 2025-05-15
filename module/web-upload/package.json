@@ -28,7 +28,7 @@
     "@fastify/busboy": "^3.1.1",
     "@travetto/config": "^6.0.0",
     "@travetto/web": "^6.0.2",
-    "file-type": "^20.4.1",
+    "file-type": "^20.5.0",
     "mime": "^4.0.7"
   },
   "peerDependencies": {
