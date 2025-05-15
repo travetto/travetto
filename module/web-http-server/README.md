@@ -78,7 +78,7 @@ Initialized {
         httpVersion: '1.1',
         port: 3000,
         bindAddress: '0.0.0.0',
-        tls: false
+        ssl: false
       },
       WebLogConfig: { applies: true, showStackTrace: true }
     }
@@ -126,8 +126,11 @@ export class WebHttpConfig {
   @Ignore()
   fetchUrl: string;
 
+  @Ignore()
+  fetchUrl: string;
+
   async postConstruct(): Promise<void> {
-    this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
+    this.ssl ??= (this.httpVersion === '2' || !!this.sslKeys);
     this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
     this.bindAddress ||= await NetUtil.getLocalAddress();
 
@@ -146,7 +149,7 @@ export class WebHttpConfig {
       }
     }
 
-    this.fetchUrl = `${this.tls ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;
+    this.fetchUrl = `${this.ssl ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;
   }
 }
 ```
@@ -253,7 +256,7 @@ Initialized {
         httpVersion: '1.1',
         port: 3000,
         bindAddress: '0.0.0.0',
-        tls: true
+        ssl: true
       },
       WebLogConfig: { applies: true, showStackTrace: true }
     }
