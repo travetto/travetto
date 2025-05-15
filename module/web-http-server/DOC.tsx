@@ -2,10 +2,10 @@
 import { CliCommand } from '@travetto/cli';
 import { c, d } from '@travetto/doc';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
-import { NodeWebServer } from '@travetto/web-node';
 
 import type { WebHttpServer } from './src/types.ts';
 import { WebHttpConfig } from './src/config.ts';
+import { DefaultWebServer } from './src/default.ts';
 
 const WebServerContract = toConcrete<WebHttpServer>();
 
@@ -14,7 +14,7 @@ export const text = <>
   This module provides basic support for running {d.library('NodeHttp')}, {d.library('NodeHttps')} and {d.library('NodeHttp2')} servers, along support for ssl key generation during development.
 
   <c.Section title='Default Server'>
-    <c.Code title="Node Web Server" src={NodeWebServer}></c.Code>
+    <c.Code title="Node Web Server" src={DefaultWebServer}></c.Code>
     This module provides a default implementation of the {WebServerContract} interface, which is used by the framework to run a web server. This is a production ready server built around {d.library('Node')}'s built in http support.
   </c.Section>
 

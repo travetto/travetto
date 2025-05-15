@@ -26,7 +26,6 @@ export const FEATURES: Feature[] = [
     title: 'Web Framework',
     package: '@travetto/web',
     addons: [
-      { title: 'Web Node', package: '@travetto/web-node' },
       { title: 'Web Http Server', package: '@travetto/web-http-server' },
       { title: 'OpenAPI', package: '@travetto/openapi' },
       { title: 'Logging', package: '@travetto/log' }

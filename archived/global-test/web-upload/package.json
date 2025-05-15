@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "dependencies": {
     "@travetto/web-aws-lambda": "^6.0.0-rc.1",
-    "@travetto/web-node": "^6.0.0-rc.1",
+    "@travetto/web-http-server": "^6.0.0-rc.1",
     "@travetto/web-upload": "^6.0.0-rc.1"
   },
   "travetto": {},
