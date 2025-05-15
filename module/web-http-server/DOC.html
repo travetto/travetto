@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/web-http-server</code></pre>
   </figure>
 
-This module provides basic for running <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a> and <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a> servers.  It provides support for ssl key generation during development as well.
+This module provides basic for running <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a>. <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a>  and <a target="_blank" class="external-link" href="https://nodejs.org/api/http2.html">https</a> servers, along with support for tls key generation during development.
 <h2 id="running-a-server">Running a Server</h2>
 
 By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10">WebHttpServer</a> that will follow default behaviors, and spin up the server. Currently, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web-node" title="Node provider for the travetto web module.">Node Web Server</a> is the only module that provides a compatible <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10">WebHttpServer</a>.
@@ -78,7 +78,12 @@ Initialized <span class="token punctuation">{{'{'}}</span>
         <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span> defaultMessage: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      WebHttpConfig: <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span>, bindAddress: <span class="token string">'0.0.0.0'</span>, ssl: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
+      WebHttpConfig: <span class="token punctuation">{{'{'}}</span>
+        httpVersion: <span class="token string">'1.1'</span>,
+        port: <span class="token number">3000</span>,
+        bindAddress: <span class="token string">'0.0.0.0'</span>,
+        tls: <span class="token boolean">false</span>
+      <span class="token punctuation">{{'}'}}</span>,
       WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -94,6 +99,14 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebHttpConfig</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token comment">/**
+   * What version of HTTP to use
+   * Version 2 requires SSL for direct browser access
+   */</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'WEB_HTTP_VERSION'</span><span class="token punctuation">)</span>
+  httpVersion<span class="token operator">:</span> <span class="token string">'1.1'</span> <span class="token operator">|</span> <span class="token string">'2'</span> <span class="token operator">=</span> <span class="token string">'1.1'</span><span class="token punctuation">;</span>
+
   <span class="token comment">/**
    * The port to run on
    */</span>
@@ -106,36 +119,41 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
   bindAddress<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
-   * Is SSL active
+   * Is TLS active
    */</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'WEB_HTTP_SSL'</span><span class="token punctuation">)</span>
-  ssl<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'WEB_HTTP_TLS'</span><span class="token punctuation">)</span>
+  tls<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
-   * SSL Keys
+   * TLS Keys
    */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Secret</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  sslKeys<span class="token operator">?</span><span class="token operator">:</span> WebSslKeyPair<span class="token punctuation">;</span>
+  tlsKeys<span class="token operator">?</span><span class="token operator">:</span> WebSecureKeyPair<span class="token punctuation">;</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Ignore</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  fetchUrl<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>ssl <span class="token operator">??=</span> <span class="token operator">!</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>tls <span class="token operator">??=</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>httpVersion <span class="token operator">===</span> <span class="token string">'2'</span> <span class="token operator">||</span> <span class="token operator">!</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token keyword">await</span> NetUtil<span class="token punctuation">.</span><span class="token function">getFreePort</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>bindAddress <span class="token operator">||=</span> <span class="token keyword">await</span> NetUtil<span class="token punctuation">.</span><span class="token function">getLocalAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>ssl<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>tls<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token comment">// Clear out keys if ssl is not set</span>
-      <span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys <span class="token operator">=</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys <span class="token operator">=</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
         <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">AppError</span><span class="token punctuation">(</span><span class="token string">'Default ssl keys are only valid for development use, please specify a config value at web.ssl.keys'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
-      <span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys <span class="token operator">=</span> <span class="token keyword">await</span> WebSslUtil<span class="token punctuation">.</span><span class="token function">generateKeyPair</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys <span class="token operator">=</span> <span class="token keyword">await</span> WebSslUtil<span class="token punctuation">.</span><span class="token function">generateKeyPair</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>key<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> <span class="token number">100</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token comment">// We have files or resources</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>key <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>key<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>cert <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>sslKeys<span class="token punctuation">.</span>cert<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> <span class="token number">100</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token comment">// We have files or resources</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>cert <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>cert<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span>fetchUrl <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>tls <span class="token operator">?</span> <span class="token string">'https'</span> <span class="token operator">:</span> <span class="token string">'http'</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">://</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>bindAddress<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
@@ -169,7 +187,7 @@ To customize a Web server, you may need to construct an entry point using the <a
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'CUSTOM STARTUP'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">await</span> RootRegistry<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">const</span> ssl <span class="token operator">=</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span>WebHttpConfig<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    ssl<span class="token punctuation">.</span>ssl <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    ssl<span class="token punctuation">.</span>tls <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
 
     <span class="token comment">// Configure server before running</span>
     <span class="token keyword">const</span> instance <span class="token operator">=</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token generic-function"><span class="token function">toConcrete</span><span class="token generic class-name"><span class="token operator">&lt;</span>WebHttpServer<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -244,7 +262,12 @@ Initialized <span class="token punctuation">{{'{'}}</span>
         <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span> defaultMessage: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      WebHttpConfig: <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span>, bindAddress: <span class="token string">'0.0.0.0'</span>, ssl: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebHttpConfig: <span class="token punctuation">{{'{'}}</span>
+        httpVersion: <span class="token string">'1.1'</span>,
+        port: <span class="token number">3000</span>,
+        bindAddress: <span class="token string">'0.0.0.0'</span>,
+        tls: <span class="token boolean">true</span>
+      <span class="token punctuation">{{'}'}}</span>,
       WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>

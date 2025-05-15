@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@travetto/di';
 import { WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
-import { WebHttpConfig } from '@travetto/web-http-server';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
+
+import { WebHttpConfig } from '../../src/config.ts';
 
 /**
  * Support for invoking http requests against the server

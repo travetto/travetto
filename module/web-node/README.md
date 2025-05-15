@@ -25,22 +25,9 @@ export class NodeWebServer implements WebHttpServer {
   @Inject()
   router: StandardWebRouter;
 
-  async handler(nodeReq: IncomingMessage, nodeRes: ServerResponse): Promise<void> {
-    const request = NodeWebUtil.toWebRequest(nodeReq);
-    const response = await this.router.dispatch({ request });
-    await NodeWebUtil.respondToServerResponse(response, nodeRes);
-  }
-
   async serve(): Promise<WebHttpServerHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
-
-    const handle = await WebHttpUtil.startHttpServer({
-      ...this.serverConfig,
-      handler: (req, res) => this.handler(req, res)
-    });
-
-    console.log('Listening', { port: this.serverConfig.port });
-
+    const handle = await WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router, });
     return handle;
   }
 }

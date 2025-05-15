@@ -10,7 +10,7 @@ const WebServerContract = toConcrete<WebHttpServer>();
 
 export const text = <>
   <c.StdHeader />
-  This module provides basic for running {d.library('NodeHttp')} and {d.library('NodeHttps')} servers.  It provides support for ssl key generation during development as well.
+  This module provides basic for running {d.library('NodeHttp')}. {d.library('NodeHttps')}  and {d.library('NodeHttp2')} servers, along with support for tls key generation during development.
 
   <c.Section title='Running a Server'>
 

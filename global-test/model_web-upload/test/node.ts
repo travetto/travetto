@@ -2,7 +2,7 @@ import { Suite } from '@travetto/test';
 import { NodeWebServer } from '@travetto/web-node';
 import { DependencyRegistry } from '@travetto/di';
 
-import { FetchWebDispatcher } from '@travetto/web-node/support/test/dispatcher.ts';
+import { FetchWebDispatcher } from '@travetto/web-http-server/support/test/dispatcher.ts';
 
 import { ModelBlobWebUploadServerSuite } from './suite.ts';
 

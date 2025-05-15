@@ -1,4 +1,4 @@
-export type WebSslKeyPair = { cert: string, key: string };
+export type WebSecureKeyPair = { cert: string, key: string };
 
 export type WebHttpServerHandle = { wait: Promise<void>, kill: () => void };
 

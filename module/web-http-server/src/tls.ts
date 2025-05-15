@@ -1,7 +1,7 @@
 import { PackageUtil } from '@travetto/manifest';
 import { Runtime } from '@travetto/runtime';
 
-import { WebSslKeyPair } from './types.ts';
+import { WebSecureKeyPair } from './types.ts';
 
 /**
  * Utils for generating key pairs
@@ -12,7 +12,7 @@ export class WebSslUtil {
    * Generate SSL key pair on demand
    * @param subj The subject for the app
    */
-  static async generateKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'WEB', CN: 'DEV' }): Promise<WebSslKeyPair> {
+  static async generateKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'WEB', CN: 'DEV' }): Promise<WebSecureKeyPair> {
     let forge;
 
     try {

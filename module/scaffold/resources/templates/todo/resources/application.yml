@@ -1,7 +1,7 @@
 # {{#modules.web}}
 web:
-  http.ssl:
-    active: false
+  http:
+    tls: false
   context:
     active: true
   cors:
