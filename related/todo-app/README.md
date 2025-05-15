@@ -418,13 +418,13 @@ npx trv web:http
         }
       },
       WebConfig: { defaultMessage: true, baseUrl: 'http://localhost:12555' },
-      WebHttpConfig: { port: 12555, bindAddress: '0.0.0.0', ssl: false },
+      WebHttpConfig: { httpVersion: '1.1', port: 12555, bindAddress: '0.0.0.0', tls: false },
       WebLogConfig: { applies: true, showStackTrace: true },
       WebRpcConfig: { clients: [] }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/server.ts:36] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-http-server:src/http.ts:58] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

@@ -10,7 +10,7 @@ const WebServerContract = toConcrete<WebHttpServer>();
 
 export const text = <>
   <c.StdHeader />
-  This module provides basic for running {d.library('NodeHttp')} and {d.library('NodeHttps')} servers.  It provides support for ssl key generation during development as well.
+  This module provides basic for running {d.library('NodeHttp')}. {d.library('NodeHttps')}  and {d.library('NodeHttp2')} servers, along with support for tls key generation during development.
 
   <c.Section title='Running a Server'>
 
@@ -36,11 +36,11 @@ export const text = <>
     </c.SubSection>
   </c.Section>
 
-  <c.Section title='SSL Support'>
-    Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
+  <c.Section title='TLS Support'>
+    Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
 
     <ul>
-      <li>SSL support is configured</li>
+      <li>TLS support is configured</li>
       <li>{d.library('NodeForge')} is installed</li>
       <li>Not running in prod</li>
       <li>No keys provided</li>
@@ -48,6 +48,6 @@ export const text = <>
 
     This is useful for local development where you implicitly trust the cert. <br />
 
-    SSL support can be enabled by setting {d.input('web.http.ssl: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by {RuntimeResources}.
+    TLS support can be enabled by setting {d.input('web.http.tls: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by {RuntimeResources}.
   </c.Section>
 </>;

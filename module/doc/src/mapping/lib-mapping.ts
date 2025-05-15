@@ -45,6 +45,7 @@ export const LIB_MAPPING = {
   NodeHttp: { title: 'http', href: 'https://nodejs.org/api/http.html' },
   NodePath: { title: 'path', href: 'https://nodejs.org/api/path.html' },
   NodeHttps: { title: 'https', href: 'https://nodejs.org/api/https.html' },
+  NodeHttp2: { title: 'http2', href: 'https://nodejs.org/api/http2.html' },
   NodeConsole: { title: 'console', href: 'https://nodejs.org/api/console.html' },
   NodeAssert: { title: 'assert', href: 'https://nodejs.org/api/assert.html' },
   NodeEventEmitter: { title: 'EventEmitter', href: 'https://nodejs.org/api/events.html#class-eventemitter' },

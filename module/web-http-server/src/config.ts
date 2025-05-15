@@ -1,16 +1,24 @@
 import { Config, EnvVar } from '@travetto/config';
-import { Secret } from '@travetto/schema';
+import { Ignore, Secret } from '@travetto/schema';
 import { AppError, Runtime, RuntimeResources } from '@travetto/runtime';
 import { NetUtil } from '@travetto/web';
 
-import { WebSslKeyPair } from './types.ts';
-import { WebSslUtil } from './ssl.ts';
+import { WebSecureKeyPair } from './types.ts';
+import { WebSslUtil } from './tls.ts';
 
 /**
  * Web HTTP configuration
  */
 @Config('web.http')
 export class WebHttpConfig {
+
+  /**
+   * What version of HTTP to use
+   * Version 2 requires SSL for direct browser access
+   */
+  @EnvVar('WEB_HTTP_VERSION')
+  httpVersion: '1.1' | '2' = '1.1';
+
   /**
    * The port to run on
    */
@@ -23,35 +31,40 @@ export class WebHttpConfig {
   bindAddress: string = '';
 
   /**
-   * Is SSL active
+   * Is TLS active
    */
-  @EnvVar('WEB_HTTP_SSL')
-  ssl?: boolean;
+  @EnvVar('WEB_HTTP_TLS')
+  tls?: boolean;
 
   /**
-   * SSL Keys
+   * TLS Keys
    */
   @Secret()
-  sslKeys?: WebSslKeyPair;
+  tlsKeys?: WebSecureKeyPair;
+
+  @Ignore()
+  fetchUrl: string;
 
   async postConstruct(): Promise<void> {
-    this.ssl ??= !!this.sslKeys;
+    this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
     this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
     this.bindAddress ||= await NetUtil.getLocalAddress();
 
-    if (!this.ssl) {
+    if (!this.tls) {
       // Clear out keys if ssl is not set
-      this.sslKeys = undefined;
-    } else if (!this.sslKeys) {
+      this.tlsKeys = undefined;
+    } else if (!this.tlsKeys) {
       if (Runtime.production) {
         throw new AppError('Default ssl keys are only valid for development use, please specify a config value at web.ssl.keys');
       }
-      this.sslKeys = await WebSslUtil.generateKeyPair();
+      this.tlsKeys = await WebSslUtil.generateKeyPair();
     } else {
-      if (this.sslKeys.key.length < 100) { // We have files or resources
-        this.sslKeys.key = (await RuntimeResources.read(this.sslKeys.key, true)).toString('utf8');
-        this.sslKeys.cert = (await RuntimeResources.read(this.sslKeys.cert, true)).toString('utf8');
+      if (this.tlsKeys.key.length < 100) { // We have files or resources
+        this.tlsKeys.key = (await RuntimeResources.read(this.tlsKeys.key, true)).toString('utf8');
+        this.tlsKeys.cert = (await RuntimeResources.read(this.tlsKeys.cert, true)).toString('utf8');
       }
     }
+
+    this.fetchUrl = `${this.tls ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;
   }
 }

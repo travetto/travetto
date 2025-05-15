@@ -15,7 +15,7 @@ export class WebHeaders extends Headers {
 
     if (o && !passed) {
       for (const [k, v] of (Array.isArray(o) ? o : Object.entries(o))) {
-        if (v !== undefined && v !== null) {
+        if (v !== undefined && v !== null && !k.startsWith(':')) {
           this.append(k, castTo(v));
         }
       }

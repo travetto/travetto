@@ -3,7 +3,8 @@ api.spec:
 
 web:
   cors: { active : true }
-  ssl: { active: true }
+  http:
+    tls: false
 
 web.client:
   providers:

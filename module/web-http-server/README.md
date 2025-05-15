@@ -13,7 +13,7 @@ npm install @travetto/web-http-server
 yarn add @travetto/web-http-server
 ```
 
-This module provides basic for running [http](https://nodejs.org/api/http.html) and [https](https://nodejs.org/api/https.html) servers.  It provides support for ssl key generation during development as well.
+This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html)  and [http2](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.
 
 ## Running a Server
 By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10) that will follow default behaviors, and spin up the server. Currently, [Node Web Server](https://github.com/travetto/travetto/tree/main/module/web-node#readme "Node provider for the travetto web module.") is the only module that provides a compatible [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10).
@@ -74,7 +74,12 @@ Initialized {
         }
       },
       WebConfig: { defaultMessage: true },
-      WebHttpConfig: { port: 3000, bindAddress: '0.0.0.0', ssl: false },
+      WebHttpConfig: {
+        httpVersion: '1.1',
+        port: 3000,
+        bindAddress: '0.0.0.0',
+        tls: false
+      },
       WebLogConfig: { applies: true, showStackTrace: true }
     }
   }
@@ -87,6 +92,14 @@ Listening on port { port: 3000 }
 **Code: Standard Web Http Config**
 ```typescript
 export class WebHttpConfig {
+
+  /**
+   * What version of HTTP to use
+   * Version 2 requires SSL for direct browser access
+   */
+  @EnvVar('WEB_HTTP_VERSION')
+  httpVersion: '1.1' | '2' = '1.1';
+
   /**
    * The port to run on
    */
@@ -99,36 +112,41 @@ export class WebHttpConfig {
   bindAddress: string = '';
 
   /**
-   * Is SSL active
+   * Is TLS active
    */
-  @EnvVar('WEB_HTTP_SSL')
-  ssl?: boolean;
+  @EnvVar('WEB_HTTP_TLS')
+  tls?: boolean;
 
   /**
-   * SSL Keys
+   * TLS Keys
    */
   @Secret()
-  sslKeys?: WebSslKeyPair;
+  tlsKeys?: WebSecureKeyPair;
+
+  @Ignore()
+  fetchUrl: string;
 
   async postConstruct(): Promise<void> {
-    this.ssl ??= !!this.sslKeys;
+    this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
     this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
     this.bindAddress ||= await NetUtil.getLocalAddress();
 
-    if (!this.ssl) {
+    if (!this.tls) {
       // Clear out keys if ssl is not set
-      this.sslKeys = undefined;
-    } else if (!this.sslKeys) {
+      this.tlsKeys = undefined;
+    } else if (!this.tlsKeys) {
       if (Runtime.production) {
         throw new AppError('Default ssl keys are only valid for development use, please specify a config value at web.ssl.keys');
       }
-      this.sslKeys = await WebSslUtil.generateKeyPair();
+      this.tlsKeys = await WebSslUtil.generateKeyPair();
     } else {
-      if (this.sslKeys.key.length < 100) { // We have files or resources
-        this.sslKeys.key = (await RuntimeResources.read(this.sslKeys.key, true)).toString('utf8');
-        this.sslKeys.cert = (await RuntimeResources.read(this.sslKeys.cert, true)).toString('utf8');
+      if (this.tlsKeys.key.length < 100) { // We have files or resources
+        this.tlsKeys.key = (await RuntimeResources.read(this.tlsKeys.key, true)).toString('utf8');
+        this.tlsKeys.cert = (await RuntimeResources.read(this.tlsKeys.cert, true)).toString('utf8');
       }
     }
+
+    this.fetchUrl = `${this.tls ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;
   }
 }
 ```
@@ -158,7 +176,7 @@ export class SampleApp {
     console.log('CUSTOM STARTUP');
     await RootRegistry.init();
     const ssl = await DependencyRegistry.getInstance(WebHttpConfig);
-    ssl.ssl = true;
+    ssl.tls = true;
 
     // Configure server before running
     const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
@@ -231,7 +249,12 @@ Initialized {
         }
       },
       WebConfig: { defaultMessage: true },
-      WebHttpConfig: { port: 3000, bindAddress: '0.0.0.0', ssl: true },
+      WebHttpConfig: {
+        httpVersion: '1.1',
+        port: 3000,
+        bindAddress: '0.0.0.0',
+        tls: true
+      },
       WebLogConfig: { applies: true, showStackTrace: true }
     }
   }
@@ -239,13 +262,13 @@ Initialized {
 Listening on port { port: 3000 }
 ```
 
-## SSL Support
-Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
-   *  SSL support is configured
+## TLS Support
+Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
+   *  TLS support is configured
    *  [node-forge](https://www.npmjs.com/package/node-forge) is installed
    *  Not running in prod
    *  No keys provided
 
 This is useful for local development where you implicitly trust the cert. 
 
-SSL support can be enabled by setting `web.http.ssl: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).
+TLS support can be enabled by setting `web.http.tls: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).

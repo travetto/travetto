@@ -64,30 +64,11 @@ export class WebTestDispatchUtil {
     return response;
   }
 
-  static async toFetchRequestInit(request: WebRequest): Promise<{ init: RequestInit, path: string }> {
-    const { context: { httpQuery: query, httpMethod: method, path }, headers } = request;
-
-    let q = '';
-    if (query && Object.keys(query).length) {
-      const pairs = Object.fromEntries(Object.entries(query).map(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`] as const));
-      q = `?${new URLSearchParams(pairs).toString()}`;
+  static buildPath(request: WebRequest): string {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(request.context.httpQuery ?? {})) {
+      params.set(k, v === null || v === undefined ? '' : `${v}`);
     }
-
-    const finalPath = `${path}${q}`;
-
-    const body: RequestInit['body'] =
-      WebBodyUtil.isRaw(request.body) ?
-        await toBuffer(request.body) :
-        castTo(request.body);
-
-    return { path: finalPath, init: { headers, method, body } };
-  }
-
-  static async fromFetchResponse(response: Response): Promise<WebResponse> {
-    return new WebResponse({
-      body: Buffer.from(await response.arrayBuffer()),
-      context: { httpStatusCode: response.status },
-      headers: response.headers
-    });
+    return [request.context.path, params.toString()].join('?').replace(/[?]$/, '');
   }
 }

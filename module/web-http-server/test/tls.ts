@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { WebSslUtil } from '../src/ssl.ts';
+import { WebSslUtil } from '../src/tls.ts';
 
 @Suite()
-export class SSLTest {
+export class TlsTest {
   @Test()
   async verify() {
     const result = await WebSslUtil.generateKeyPair();
