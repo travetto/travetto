@@ -193,7 +193,7 @@ export const MOD_MAPPING = {
   },
   Web: {
     name: '@travetto/web', folder: '@travetto/web', displayName: 'Web API',
-    description: 'Declarative support for creating Web Applications'
+    description: 'Declarative support creating for Web Applications'
   },
   WebAwsLambda: {
     name: '@travetto/web-aws-lambda', folder: '@travetto/web-aws-lambda', displayName: 'Web AWS Lambda',
@@ -206,10 +206,6 @@ export const MOD_MAPPING = {
   WebHttpServer: {
     name: '@travetto/web-http-server', folder: '@travetto/web-http-server', displayName: 'Web HTTP Server Support',
     description: 'Web HTTP Server Support'
-  },
-  WebNode: {
-    name: '@travetto/web-node', folder: '@travetto/web-node', displayName: 'Node Web Server',
-    description: 'Node provider for the travetto web module.'
   },
   WebRpc: {
     name: '@travetto/web-rpc', folder: '@travetto/web-rpc', displayName: 'Web RPC Support',
