@@ -75,11 +75,8 @@ export class WebHttpConfig {
   @Ignore()
   fetchUrl: string;
 
-  @Ignore()
-  fetchUrl: string;
-
   async postConstruct(): Promise<void> {
-    this.ssl ??= (this.httpVersion === '2' || !!this.sslKeys);
+    this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
     this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
     this.bindAddress ||= await NetUtil.getLocalAddress();
 
@@ -98,7 +95,7 @@ export class WebHttpConfig {
       }
     }
 
-    this.fetchUrl = `${this.ssl ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;
+    this.fetchUrl = `${this.tls ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;
   }
 }
 ```
