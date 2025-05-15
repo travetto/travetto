@@ -13,81 +13,30 @@ npm install @travetto/web-http-server
 yarn add @travetto/web-http-server
 ```
 
-This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html)  and [https](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.
+This module provides basic support for running [http](https://nodejs.org/api/http.html), [https](https://nodejs.org/api/https.html) and [http2](https://nodejs.org/api/http2.html) servers, along support for ssl key generation during development.
 
-## Running a Server
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10) that will follow default behaviors, and spin up the server. Currently, [Node Web Server](https://github.com/travetto/travetto/tree/main/module/web-node#readme "Node provider for the travetto web module.") is the only module that provides a compatible [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10).
+## Default Server
 
-**Terminal: Standard application**
-```bash
-$ trv web:http
+**Code: Node Web Server**
+```typescript
+export class DefaultWebServer implements WebHttpServer {
 
-Initialized {
-  manifest: {
-    main: {
-      name: '@travetto-doc/web-http-server',
-      folder: './doc-exec'
-    },
-    workspace: {
-      name: '@travetto-doc/web-http-server',
-      path: './doc-exec',
-      mono: false,
-      manager: 'npm',
-      type: 'commonjs',
-      defaultEnv: 'local'
-    }
-  },
-  runtime: {
-    env: 'local',
-    debug: false,
-    production: false,
-    dynamic: false,
-    resourcePaths: [
-      './doc-exec/resources'
-    ],
-    profiles: []
-  },
-  config: {
-    sources: [ { priority: 999, source: 'memory://override' } ],
-    active: {
-      AcceptConfig: { applies: false, types: [] },
-      CacheControlConfig: { applies: true },
-      CompressConfig: {
-        applies: true,
-        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
-      },
-      CookieConfig: { applies: true, httponly: true, sameSite: 'lax', path: '/' },
-      CorsConfig: { applies: true },
-      DecompressConfig: {
-        applies: true,
-        supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
-      },
-      EtagConfig: { applies: true, minimumSize: '10kb' },
-      TrustProxyConfig: { applies: true, ips: [] },
-      WebBodyConfig: {
-        applies: true,
-        limit: '1mb',
-        parsingTypes: {
-          text: 'text',
-          'application/json': 'json',
-          'application/x-www-form-urlencoded': 'form'
-        }
-      },
-      WebConfig: { defaultMessage: true },
-      WebHttpConfig: {
-        httpVersion: '1.1',
-        port: 3000,
-        bindAddress: '0.0.0.0',
-        ssl: false
-      },
-      WebLogConfig: { applies: true, showStackTrace: true }
-    }
+  @Inject()
+  serverConfig: WebHttpConfig;
+
+  @Inject()
+  router: StandardWebRouter;
+
+  async serve(): Promise<WebHttpServerHandle> {
+    await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
+    return WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router, });
   }
 }
-Listening on port { port: 3000 }
 ```
 
-### Configuration
+This module provides a default implementation of the [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10) interface, which is used by the framework to run a web server. This is a production ready server built around [Node](https://nodejs.org)'s built in http support.
+
+## Configuration
 
 **Code: Standard Web Http Config**
 ```typescript
@@ -154,6 +103,28 @@ export class WebHttpConfig {
 }
 ```
 
+This configuration points to the specific controls you may want while running an http server.
+
+## Running a Server
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10) that will follow default behaviors, and spin up the server.
+
+**Terminal: Standard application**
+```bash
+$ trv web:http
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at node:net:2205:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3000
+}
+```
+
 ### Creating a Custom CLI Entry Point
 To customize a Web server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator. This could look like:
 
@@ -196,73 +167,23 @@ And using the pattern established in the [Command Line Interface](https://github
 ```bash
 $ trv web:custom
 
-CUSTOM STARTUP
-Initialized {
-  manifest: {
-    main: {
-      name: '@travetto-doc/web-http-server',
-      folder: './doc-exec'
-    },
-    workspace: {
-      name: '@travetto-doc/web-http-server',
-      path: './doc-exec',
-      mono: false,
-      manager: 'npm',
-      type: 'commonjs',
-      defaultEnv: 'local'
-    }
-  },
-  runtime: {
-    env: 'prod',
-    debug: false,
-    production: true,
-    dynamic: false,
-    resourcePaths: [
-      './doc-exec/resources'
+InjectionError: Dependency has multiple candidates: [@travetto/web-http-server:src/types#WebHttpServer][@travetto-doc/web-http-server:__index__#Config#target,@travetto/web-http-server:src/default#DefaultWebServer]
+    at $DependencyRegistry.resolveTarget (<workspace-root>/module/di/src/registry.ts:76:23)
+    at $DependencyRegistry.getInstance (<workspace-root>/module/di/src/registry.ts:286:45)
+    at SampleApp.main (./doc/cli.web_custom.ts:24:47)
+    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:57:5)
+    at async Function.run (<workspace-root>/module/cli/src/execute.ts:73:9) {
+  type: 'InjectionError',
+  category: 'notfound',
+  at: '2029-03-14T04:00:00.618Z',
+  details: {
+    qualifiers: [
+      '@travetto-doc/web-http-server:__index__#Config#target',
+      '@travetto/web-http-server:src/default#DefaultWebServer'
     ],
-    profiles: []
-  },
-  config: {
-    sources: [
-      { priority: 10, source: 'direct' },
-      { priority: 999, source: 'memory://override' }
-    ],
-    active: {
-      AcceptConfig: { applies: false, types: [] },
-      CacheControlConfig: { applies: true },
-      CompressConfig: {
-        applies: true,
-        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
-      },
-      CookieConfig: { applies: true, httponly: true, sameSite: 'lax', path: '/' },
-      CorsConfig: { applies: true },
-      DecompressConfig: {
-        applies: true,
-        supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
-      },
-      EtagConfig: { applies: true, minimumSize: '10kb' },
-      TrustProxyConfig: { applies: true, ips: [] },
-      WebBodyConfig: {
-        applies: true,
-        limit: '1mb',
-        parsingTypes: {
-          text: 'text',
-          'application/json': 'json',
-          'application/x-www-form-urlencoded': 'form'
-        }
-      },
-      WebConfig: { defaultMessage: true },
-      WebHttpConfig: {
-        httpVersion: '1.1',
-        port: 3000,
-        bindAddress: '0.0.0.0',
-        ssl: true
-      },
-      WebLogConfig: { applies: true, showStackTrace: true }
-    }
+    target: '@travetto/web-http-server:src/types#WebHttpServer'
   }
 }
-Listening on port { port: 3000 }
 ```
 
 ## TLS Support

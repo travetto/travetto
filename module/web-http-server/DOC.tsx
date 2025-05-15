@@ -24,7 +24,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Running a Server'>
-    By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server. Currently, {d.mod('WebNode')} is the only module that provides a compatible {WebServerContract}.
+    By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
 
     <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{
       cwd: './doc-exec'

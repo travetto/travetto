@@ -193,7 +193,7 @@ export const MOD_MAPPING = {
   },
   Web: {
     name: '@travetto/web', folder: '@travetto/web', displayName: 'Web API',
-    description: 'Declarative support creating for Web Applications'
+    description: 'Declarative support for creating Web Applications'
   },
   WebAwsLambda: {
     name: '@travetto/web-aws-lambda', folder: '@travetto/web-aws-lambda', displayName: 'Web AWS Lambda',
