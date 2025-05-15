@@ -9,7 +9,7 @@ import { WebHttpServer, WebHttpServerHandle } from './types.ts';
 /**
  * The default node http server
  */
-@Injectable(Symbol())
+@Injectable({ target: DefaultWebServer })
 export class DefaultWebServer implements WebHttpServer {
 
   @Inject()
