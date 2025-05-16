@@ -33,19 +33,19 @@
     "start": "npx trvc start"
   },
   "devDependencies": {
-    "@travetto/cli": "~6.0.0.rc-1",
-    "@travetto/compiler": "~6.0.0.rc-1",
-    "@travetto/doc": "~6.0.0.rc-1",
-    "@travetto/email-compiler": "~6.0.0.rc-1",
-    "@travetto/log": "~6.0.0.rc-1",
-    "@travetto/pack": "~6.0.0.rc-1",
-    "@travetto/test": "~6.0.0.rc-1",
-    "@types/node": "^22.15.2",
-    "@types/vscode": "^1.99.1"
+    "@travetto/cli": "~6.0.0",
+    "@travetto/compiler": "~6.0.0",
+    "@travetto/doc": "~6.0.0",
+    "@travetto/email-compiler": "~6.0.0",
+    "@travetto/log": "~6.0.0",
+    "@travetto/pack": "~6.0.0",
+    "@travetto/test": "~6.0.0",
+    "@types/node": "^22.15.18",
+    "@types/vscode": "^1.100.0"
   },
   "dependencies": {
-    "@travetto/registry": "~6.0.0.rc-1",
-    "@travetto/runtime": "~6.0.0.rc-1"
+    "@travetto/registry": "~6.0.0",
+    "@travetto/runtime": "~6.0.0"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
