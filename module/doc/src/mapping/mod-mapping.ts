@@ -207,10 +207,6 @@ export const MOD_MAPPING = {
     name: '@travetto/web-http-server', folder: '@travetto/web-http-server', displayName: 'Web HTTP Server Support',
     description: 'Web HTTP Server Support'
   },
-  WebNode: {
-    name: '@travetto/web-node', folder: '@travetto/web-node', displayName: 'Node Web Server',
-    description: 'Node provider for the travetto web module.'
-  },
   WebRpc: {
     name: '@travetto/web-rpc', folder: '@travetto/web-rpc', displayName: 'Web RPC Support',
     description: 'RPC support for a Web Application'

@@ -5,6 +5,7 @@ import { NetUtil } from '@travetto/web';
 import { RootRegistry } from '@travetto/registry';
 
 import type { WebHttpServer } from '../src/types.ts';
+import { DefaultWebServer } from '../src/default.ts';
 
 /**
  * Run a web server
@@ -26,7 +27,13 @@ export class WebHttpCommand implements CliCommandShape {
 
   async main(): Promise<void> {
     await RootRegistry.init();
-    const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
+    let instanceTypes = await DependencyRegistry.getCandidateTypes(toConcrete<WebHttpServer>());
+
+    if (instanceTypes.length === 0) {
+      instanceTypes = await DependencyRegistry.getCandidateTypes(DefaultWebServer);
+    }
+
+    const instance = await DependencyRegistry.getInstance(instanceTypes[0].class, instanceTypes[0].qualifier);
 
     let res;
     try {
