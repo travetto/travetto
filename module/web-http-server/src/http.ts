@@ -2,6 +2,7 @@ import http from 'node:http';
 import http2 from 'node:http2';
 import https from 'node:https';
 import { pipeline } from 'node:stream/promises';
+import { TLSSocket } from 'node:tls';
 
 import { WebBodyUtil, WebCommonUtil, WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
 import { BinaryUtil, castTo } from '@travetto/runtime';
@@ -69,7 +70,7 @@ export class WebHttpUtil {
    * Create a web request given a node IncomingMessage
    */
   static toWebRequest(req: http.IncomingMessage | http2.Http2ServerRequest): WebRequest {
-    const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
+    const secure = req.socket instanceof TLSSocket;
     const [path, query] = (req.url ?? '/').split('?') ?? [];
     return new WebRequest({
       context: {
