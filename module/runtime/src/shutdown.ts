@@ -41,6 +41,8 @@ export class ShutdownManager {
     }
 
     if (this.#handlers.length) {
+      process.stdout.write('-'.repeat(process.stdout.getWindowSize()[0] - 20));
+      process.stdout.write('\n'); // Ensure a new line before shutdown messages after a ctrl-c
       console.debug('Graceful shutdown: started');
 
       const items = this.#handlers.splice(0, this.#handlers.length);

@@ -74,6 +74,7 @@ export class WebHttpUtil {
       if (!target.listening) {
         return;
       }
+      console.debug('Stopping http server');
       target.close();
       if (immediate) {
         for (const connection of activeConnections) {
