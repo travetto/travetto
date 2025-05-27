@@ -1,3 +1,4 @@
+import net from 'node:net';
 import http from 'node:http';
 import http2 from 'node:http2';
 import https from 'node:https';
@@ -5,9 +6,9 @@ import { pipeline } from 'node:stream/promises';
 import { TLSSocket } from 'node:tls';
 
 import { WebBodyUtil, WebCommonUtil, WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
-import { BinaryUtil, castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
 
-import { WebHttpServerHandle, WebSecureKeyPair } from './types.ts';
+import { WebSecureKeyPair, WebServerHandle } from './types.ts';
 
 type WebHttpServerConfig = {
   httpVersion?: '1.1' | '2';
@@ -16,6 +17,7 @@ type WebHttpServerConfig = {
   sslKeys?: WebSecureKeyPair;
   dispatcher: WebDispatcher;
   logStartup?: boolean;
+  signal?: AbortSignal;
 };
 
 export class WebHttpUtil {
@@ -23,7 +25,7 @@ export class WebHttpUtil {
   /**
    * Start an http server
    */
-  static async startHttpServer(config: WebHttpServerConfig): Promise<WebHttpServerHandle & { server: http.Server | http2.Http2Server }> {
+  static async startHttpServer(config: WebHttpServerConfig): Promise<WebServerHandle<http.Server | http2.Http2Server>> {
     const { reject, resolve, promise } = Promise.withResolvers<void>();
 
     const handler = async (req: http.IncomingMessage | http2.Http2ServerRequest, res: http.ServerResponse | http2.Http2ServerResponse): Promise<void> => {
@@ -47,6 +49,15 @@ export class WebHttpUtil {
       }
     }
 
+    const complete = new Promise<void>(r => target.on('close', r));
+
+    // Track connections for shutdown
+    const activeConnections = new Set<net.Socket | http2.Http2Stream>();
+    target.on('connection', (socket: net.Socket | http2.Http2Stream) => {
+      activeConnections.add(socket);
+      socket.on('close', () => activeConnections.delete(socket));
+    });
+
     target.listen(config.port, config.bindAddress)
       .on('error', reject)
       .on('listening', resolve);
@@ -59,11 +70,26 @@ export class WebHttpUtil {
       console.log('Listening', { port: config.port });
     }
 
-    return {
-      kill: () => target.close(),
-      wait: new Promise<void>(close => target.on('close', close)),
-      server: target
-    };
+
+    async function stop(immediate?: boolean): Promise<void> {
+      if (!target.listening) {
+        return;
+      }
+      target.close();
+      if (immediate) {
+        for (const connection of activeConnections) {
+          if (!connection.destroyed) {
+            connection.destroy();
+          }
+        }
+      }
+      return complete;
+    }
+
+    ShutdownManager.onGracefulShutdown(stop.bind(null, false));
+    config.signal?.addEventListener('abort', stop.bind(null, true));
+
+    return { target, complete, stop };
   }
 
   /**

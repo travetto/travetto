@@ -58,4 +58,18 @@ export class NetUtil {
 
     return useIPv4 ? '0.0.0.0' : '::';
   }
+
+  /**
+   * Free a port if it is in use, typically used to resolve port conflicts.
+   * @param err The error that may indicate a port conflict
+   * @returns Returns true if the port was freed, false if not handled
+   */
+  static async freePortOnConflict(err: unknown): Promise<boolean> {
+    if (NetUtil.isPortUsedError(err) && typeof err.port === 'number') {
+      await NetUtil.freePort(err.port);
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

@@ -31,7 +31,7 @@ export class ConfigurationService {
    * Get a sub tree of the config, or everything if namespace is not passed
    * @param ns The namespace of the config to search for, can be dotted for accessing sub namespaces
    */
-  #get(ns?: string): Record<string, unknown> {
+  #get<T extends Record<string, unknown> = Record<string, unknown>>(ns?: string): T {
     const parts = (ns ? ns.split('.') : []);
     let sub: Record<string, unknown> = this.#storage;
 
@@ -40,7 +40,7 @@ export class ConfigurationService {
       sub = castTo(sub[next]);
     }
 
-    return sub;
+    return castTo(sub);
   }
 
   /**
@@ -76,9 +76,9 @@ export class ConfigurationService {
     this.#specs = specs.map(({ data: _, ...v }) => v);
 
     // Initialize Secrets
-    const userSpecified = (this.#get('config')?.secrets ?? []);
-    for (const el of Array.isArray(userSpecified) ? userSpecified : [userSpecified]) {
-      if (el !== undefined && el !== null && typeof el === 'string') {
+    const { secrets = [] } = this.#get<{ secrets?: string | string[] }>('config') ?? {};
+    for (const el of [secrets].flat()) {
+      if (typeof el === 'string') {
         if (el.startsWith('/')) {
           this.#secrets.push(DataUtil.coerceType(el, RegExp, true));
         } else {
@@ -140,13 +140,10 @@ export class ConfigurationService {
   }
 
   /**
-   * Log current configuration state
+   * Produce the visible configuration state and runtime information
    */
-  async initBanner(): Promise<void> {
-    const ogDepth = util.inspect.defaultOptions.depth;
-    util.inspect.defaultOptions.depth = 100;
-
-    console.log('Initialized', {
+  async initBanner(): Promise<string> {
+    return util.inspect({
       manifest: {
         main: Runtime.main,
         workspace: Runtime.workspace
@@ -160,7 +157,10 @@ export class ConfigurationService {
         profiles: Env.TRV_PROFILES.list ?? []
       },
       config: await this.exportActive()
+    }, {
+      depth: 100,
+      colors: false, // Colors are not useful in logs
+      compact: false,
     });
-    util.inspect.defaultOptions.depth = ogDepth;
   }
 }

@@ -1,17 +1,20 @@
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { WebHttpConfig, WebHttpServer, WebHttpServerHandle } from '@travetto/web-http-server';
+import { InjectableFactory } from '@travetto/di';
+import { WebHttpConfig, WebHttpServer, WebServerHandle } from '@travetto/web-http-server';
 import { ConfigurationService } from '@travetto/config';
 
 class Config {
   @InjectableFactory()
-  static target(config: WebHttpConfig): WebHttpServer {
+  static target(config: WebHttpConfig, configService: ConfigurationService): WebHttpServer {
     return {
-      async serve(): Promise<WebHttpServerHandle> {
-        await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
+      async serve(): Promise<WebServerHandle> {
         console.log('Listening on port', { port: config.port });
-        const { promise: wait, resolve: kill } = Promise.withResolvers<void>();
-        return { wait, kill };
-      }
+        console.log('Initialized', await configService.initBanner());
+        return {
+          target: null!,
+          complete: Promise.resolve(),
+          stop: async (): Promise<void> => { },
+        };
+      },
     };
   }
 }
