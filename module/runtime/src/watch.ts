@@ -33,6 +33,6 @@ export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: A
 
   if (cfg?.restartOnExit) {
     // We are done, request restart
-    await ShutdownManager.gracefulShutdown(ExecUtil.RESTART_EXIT_CODE);
+    await ShutdownManager.gracefulShutdown('watch-restart', ExecUtil.RESTART_EXIT_CODE);
   }
 }

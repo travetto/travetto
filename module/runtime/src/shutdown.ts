@@ -18,8 +18,10 @@ export class ShutdownManager {
   static onGracefulShutdown(handler: () => (void | Promise<void>), name?: string | { constructor: Function }): () => void {
     if (!this.#registered) {
       this.#registered = true;
-      const done = (): void => { this.gracefulShutdown(0); };
-      process.on('SIGUSR2', done).on('SIGTERM', done).on('SIGINT', done);
+      process
+        .on('SIGUSR2', () => this.gracefulShutdown('SIGUSR2', 0))
+        .on('SIGTERM', () => this.gracefulShutdown('SIGTERM', 0))
+        .on('SIGINT', () => this.gracefulShutdown('SIGINT', 0));
     }
     this.#handlers.push({ handler, name: typeof name === 'string' ? name : name?.constructor?.Ⲑid });
     return () => {
@@ -33,17 +35,23 @@ export class ShutdownManager {
   /**
    * Wait for graceful shutdown to run and complete
    */
-  static async gracefulShutdown(code: number | string | undefined = process.exitCode): Promise<void> {
+  static async gracefulShutdown(source: string, code?: number): Promise<void> {
     await Util.queueMacroTask(); // Force the event loop to wait one cycle
 
     if (code !== undefined) {
       process.exitCode = code;
+    } else if (process.exitCode !== undefined) {
+      code = +process.exitCode;
+    } else {
+      process.exitCode = code = 0; // Default to 0 if no code provided
     }
 
     if (this.#handlers.length) {
-      process.stdout.write('-'.repeat(process.stdout.getWindowSize()[0] - 20));
-      process.stdout.write('\n'); // Ensure a new line before shutdown messages after a ctrl-c
-      console.debug('Graceful shutdown: started');
+      if (source === 'SIGINT') { // If we are shutting down due to SIGINT, break away from the ctrl c
+        process.stdout.write('\n');
+      }
+
+      console.debug('Graceful shutdown: started', { source });
 
       const items = this.#handlers.splice(0, this.#handlers.length);
       const handlers = Promise.all(items.map(async ({ name, handler }) => {
