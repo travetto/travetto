@@ -10,13 +10,17 @@ import { BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
 
 import { WebSecureKeyPair, WebServerHandle } from './types.ts';
 
+type HttpServer = http.Server | http2.Http2Server;
+type HttpResponse = http.ServerResponse | http2.Http2ServerResponse;
+type HttpRequest = http.IncomingMessage | http2.Http2ServerRequest;
+type HttpSocket = net.Socket | http2.Http2Stream;
+
 type WebHttpServerConfig = {
   httpVersion?: '1.1' | '2';
   port: number;
   bindAddress: string;
   sslKeys?: WebSecureKeyPair;
   dispatcher: WebDispatcher;
-  logStartup?: boolean;
   signal?: AbortSignal;
 };
 
@@ -25,16 +29,16 @@ export class WebHttpUtil {
   /**
    * Start an http server
    */
-  static async startHttpServer(config: WebHttpServerConfig): Promise<WebServerHandle<http.Server | http2.Http2Server>> {
+  static async startHttpServer(config: WebHttpServerConfig): Promise<WebServerHandle<HttpServer>> {
     const { reject, resolve, promise } = Promise.withResolvers<void>();
 
-    const handler = async (req: http.IncomingMessage | http2.Http2ServerRequest, res: http.ServerResponse | http2.Http2ServerResponse): Promise<void> => {
+    const handler = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
       const request = this.toWebRequest(req);
       const response = await config.dispatcher.dispatch({ request });
       this.respondToServerResponse(response, res);
     };
 
-    let target: http.Server | http2.Http2Server;
+    let target: HttpServer;
     if (config.httpVersion === '2') {
       if (config.sslKeys) {
         target = http2.createSecureServer(config.sslKeys, handler);
@@ -52,8 +56,8 @@ export class WebHttpUtil {
     const complete = new Promise<void>(r => target.on('close', r));
 
     // Track connections for shutdown
-    const activeConnections = new Set<net.Socket | http2.Http2Stream>();
-    target.on('connection', (socket: net.Socket | http2.Http2Stream) => {
+    const activeConnections = new Set<HttpSocket>();
+    target.on('connection', (socket: HttpSocket) => {
       activeConnections.add(socket);
       socket.on('close', () => activeConnections.delete(socket));
     });
@@ -65,11 +69,6 @@ export class WebHttpUtil {
     await promise;
 
     target.off('error', reject);
-
-    if (config.logStartup ?? true) {
-      console.log('Listening', { port: config.port });
-    }
-
 
     async function stop(immediate?: boolean): Promise<void> {
       if (!target.listening) {
@@ -95,7 +94,7 @@ export class WebHttpUtil {
   /**
    * Create a web request given a node IncomingMessage
    */
-  static toWebRequest(req: http.IncomingMessage | http2.Http2ServerRequest): WebRequest {
+  static toWebRequest(req: HttpRequest): WebRequest {
     const secure = req.socket instanceof TLSSocket;
     const [path, query] = (req.url ?? '/').split('?') ?? [];
     return new WebRequest({
@@ -118,7 +117,7 @@ export class WebHttpUtil {
   /**
    * Send WebResponse to ServerResponse
    */
-  static async respondToServerResponse(webRes: WebResponse, res: http.ServerResponse | http2.Http2ServerResponse): Promise<void> {
+  static async respondToServerResponse(webRes: WebResponse, res: HttpResponse): Promise<void> {
     const binaryResponse = new WebResponse({ context: webRes.context, ...WebBodyUtil.toBinaryMessage(webRes) });
     binaryResponse.headers.forEach((v, k) => res.setHeader(k, v));
     res.statusCode = WebCommonUtil.getStatusCode(binaryResponse);

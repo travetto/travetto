@@ -158,9 +158,9 @@ export class ConfigurationService {
       },
       config: await this.exportActive()
     }, {
+      ...util.inspect.defaultOptions,
       depth: 100,
       colors: false, // Colors are not useful in logs
-      compact: false,
     });
   }
 }

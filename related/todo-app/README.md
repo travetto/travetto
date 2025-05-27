@@ -305,7 +305,7 @@ npx trv web:http
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:149] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/web-node:src/server.ts:23] Initialized {
   manifest: {
     main: {
       name: '@travetto/todo-app',
@@ -335,13 +335,21 @@ npx trv web:http
   },
   config: {
     sources: [
-      { priority: 100, source: 'file://application', detail: 'resources/application.yaml' },
+      {
+        priority: 100,
+        source: 'file://application',
+        detail: 'resources/application.yaml'
+      },
       {
         priority: 101,
         source: 'file://application',
         detail: 'related/todo-app/resources/application.yml'
       },
-      { priority: 200, source: 'file://local', detail: 'resources/local.yml' },
+      {
+        priority: 200,
+        source: 'file://local',
+        detail: 'resources/local.yml'
+      },
       {
         priority: 201,
         source: 'file://local',
@@ -351,8 +359,15 @@ npx trv web:http
     ],
     active: {
       AcceptConfig: { applies: false, types: [] },
-      ApiHostConfig: { servers: [ { url: 'http://localhost:12555' } ], openapi: '3.0.0' },
-      ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
+      ApiHostConfig: {
+        servers: [ { url: 'http://localhost:12555' } ],
+        openapi: '3.0.0'
+      },
+      ApiInfoConfig: {
+        description: '',
+        title: '@travetto/todo-app',
+        version: '0.0.0'
+      },
       ApiSpecConfig: {
         output: './openapi.yml',
         persist: false,
@@ -362,11 +377,17 @@ npx trv web:http
       AuthConfig: { maxAge: '1h', rollingRenew: true },
       CacheControlConfig: { applies: true },
       CommonLoggerConfig: { format: 'line', output: 'console' },
-      CompressConfig: { applies: true, supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ] },
+      CompressConfig: {
+        applies: true,
+        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
+      },
       ConsoleLogAppenderConfig: { logToLevel: true },
       CookieConfig: { applies: true, httponly: true, sameSite: 'lax', path: '/' },
       CorsConfig: { applies: true },
-      DecompressConfig: { applies: true, supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ] },
+      DecompressConfig: {
+        applies: true,
+        supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
+      },
       EtagConfig: { applies: true, minimumSize: '10kb' },
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
@@ -418,13 +439,18 @@ npx trv web:http
         }
       },
       WebConfig: { defaultMessage: true, baseUrl: 'http://localhost:12555' },
-      WebHttpConfig: { httpVersion: '1.1', port: 12555, bindAddress: '0.0.0.0', tls: false },
+      WebHttpConfig: {
+        httpVersion: '1.1',
+        port: 12555,
+        bindAddress: '0.0.0.0',
+        tls: false
+      },
       WebLogConfig: { applies: true, showStackTrace: true },
       WebRpcConfig: { clients: [] }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-http-server:src/http.ts:58] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/server.ts:24] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

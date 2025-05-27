@@ -20,7 +20,8 @@ export class NodeWebServer implements WebHttpServer {
 
   async serve(): Promise<WebServerHandle> {
     const handle = await WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router, });
-    console.log('Initialized', this.configService.initBanner());
+    console.log('Initialized', await this.configService.initBanner());
+    console.log('Listening', { port: this.serverConfig.port });
     return handle;
   }
 }

@@ -463,7 +463,7 @@ If the goal is to run a more complex application, which may include depending on
 
 **Code: Simple Run Target**
 ```typescript
-import { Runtime, ShutdownManager, toConcrete } from '@travetto/runtime';
+import { Runtime, toConcrete, Util } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
@@ -493,18 +493,13 @@ export class WebHttpCommand implements CliCommandShape {
     await RootRegistry.init();
     const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
 
-    let res;
-    try {
-      res = await instance.serve();
-    } catch (err) {
-      if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
-        await NetUtil.freePort(err.port);
-        res = await instance.serve();
-      }
-      throw err;
-    }
-    ShutdownManager.onGracefulShutdown(res.kill, this);
-    return res.wait;
+    const handle = await Util.acquireWithRetry(
+      () => instance.serve(),
+      NetUtil.freePortOnConflict,
+      this.killConflict && !Runtime.production ? 5 : 1
+    );
+
+    await handle.complete;
   }
 }
 ```
