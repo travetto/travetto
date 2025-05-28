@@ -36,7 +36,7 @@ export class ShutdownManager {
    * @param source The source of the shutdown request, for logging purposes
    * @param handler synchronous or asynchronous handler
    */
-  static onGracefulShutdown(handler: () => (void | Promise<void>), scope: string): () => void {
+  static onGracefulShutdown(handler: () => (void | Promise<void>), scope?: string): () => void {
     this.#ensureExitListeners();
     this.#handlers.push({ handler, scope });
     return () => {
@@ -64,13 +64,17 @@ export class ShutdownManager {
     const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.val) ?? 2000;
     const items = this.#handlers.splice(0, this.#handlers.length);
     console.debug('Graceful shutdown: started', { source, timeout, count: items.length });
-    const handlers = Promise.all(items.map(async ({ scope: name, handler }) => {
-      console.debug('Stopping', { name });
+    const handlers = Promise.all(items.map(async ({ scope, handler }) => {
+      if (scope) {
+        console.debug('Stopping', { scope });
+      }
       try {
         await handler();
-        console.debug('Stopped', { name });
+        if (scope) {
+          console.debug('Stopped', { scope });
+        }
       } catch (err) {
-        console.error('Error stopping', { name, err });
+        console.error('Error stopping', { err, scope });
       }
     }));
 

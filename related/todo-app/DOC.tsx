@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement, DocRunUtil } from '@travetto/doc';
 import { Model, ModelType } from '@travetto/model';
-import { Env, ShutdownManager, Util, RuntimeIndex, castTo, toConcrete, LOG_LOCATION } from '@travetto/runtime';
+import { Env, ShutdownManager, Util, RuntimeIndex, castTo, toConcrete } from '@travetto/runtime';
 
 const TodoRoot = d.ref('Todo App', RuntimeIndex.mainModule.outputPath);
 
@@ -16,7 +16,7 @@ async function init() {
     env: { ...process.env, WEB_HTTP_PORT: `${port}`, WEB_HTTP_TLS: '0', WEB_BASE_URL: `http://localhost:${port}` }
   });
 
-  ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); }, LOG_LOCATION());
+  ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); });
 
   cmd.stdout?.on('data', v =>
     startupBuffer.push(Buffer.from(v)));

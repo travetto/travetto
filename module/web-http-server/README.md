@@ -156,7 +156,7 @@ To customize a Web server, you may need to construct an entry point using the [@
 
 **Code: Application entry point for Web Applications**
 ```typescript
-import { Env, ShutdownManager, toConcrete } from '@travetto/runtime';
+import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -180,9 +180,8 @@ export class SampleApp {
 
     // Configure server before running
     const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
-    const { wait, kill } = await instance.serve();
-    ShutdownManager.onGracefulShutdown(kill);
-    return wait;
+    const { complete } = await instance.serve();
+    return complete;
   }
 }
 ```

@@ -1,6 +1,6 @@
 import tty from 'node:tty';
 
-import { LOG_LOCATION, ShutdownManager } from '@travetto/runtime';
+import { ShutdownManager } from '@travetto/runtime';
 
 type State = { output: tty.WriteStream, height: number, width: number };
 type TermCoord = { x: number, y: number };
@@ -48,7 +48,7 @@ export class TerminalWriter {
     if (output.isTTY) {
       if (on && !this.#cleanup) {
         const exit = (): Promise<void> => this.reset().commit(false);
-        const free = ShutdownManager.onGracefulShutdown(exit, LOG_LOCATION());
+        const free = ShutdownManager.onGracefulShutdown(exit);
         process.on('exit', exit);
         this.#cleanup = (): undefined => { free(); process.off('exit', exit); };
       } else if (!on) {

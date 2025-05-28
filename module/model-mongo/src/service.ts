@@ -21,7 +21,7 @@ import {
 
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
-  castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil, LOG_LOCATION
+  castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
@@ -107,7 +107,7 @@ export class MongoModelService implements
       writeConcern: { w: 1 }
     });
     await ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onGracefulShutdown(() => this.client.close(), LOG_LOCATION());
+    ShutdownManager.onGracefulShutdown(() => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }
 

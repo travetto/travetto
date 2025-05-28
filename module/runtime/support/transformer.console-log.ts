@@ -78,17 +78,6 @@ export class ConsoleLogTransformer {
   @OnCall()
   static onLogCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
     if (!ts.isPropertyAccessExpression(node.expression)) {
-      if (ts.isIdentifier(node.expression) && node.expression.escapedText === 'LOG_LOCATION') {
-        const type = state.resolveType(node.expression);
-        if ('importName' in type && type.importName === CONSOLE_IMPORT) {
-          return state.factory.updateCallExpression(node, node.expression, node.typeArguments, [
-            state.fromLiteral([
-              state.importName,
-              `${state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1}`,
-            ].join(':'))
-          ]);
-        }
-      }
       return node;
     }
 
@@ -102,24 +91,24 @@ export class ConsoleLogTransformer {
 
     const level = name.escapedText!;
 
-    if (!VALID_LEVELS[level]) {
+    if (VALID_LEVELS[level]) {
+      const ident = state.imported ??= state.importFile(CONSOLE_IMPORT).ident;
+      return state.factory.updateCallExpression(
+        node,
+        state.createAccess(ident, 'log'),
+        node.typeArguments,
+        [
+          LiteralUtil.fromLiteral(state.factory, {
+            level: state.factory.createStringLiteral(VALID_LEVELS[level]),
+            import: state.getModuleIdentifier(),
+            line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
+            scope: state.scope?.map(x => x.name).join(':'),
+            args: node.arguments.slice(0)
+          }),
+        ]
+      );
+    } else {
       return node;
     }
-
-    const ident = state.imported ??= state.importFile(CONSOLE_IMPORT).ident;
-    return state.factory.updateCallExpression(
-      node,
-      state.createAccess(ident, 'log'),
-      node.typeArguments,
-      [
-        LiteralUtil.fromLiteral(state.factory, {
-          level: state.factory.createStringLiteral(VALID_LEVELS[level]),
-          import: state.getModuleIdentifier(),
-          line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
-          scope: state.scope?.map(x => x.name).join(':'),
-          args: node.arguments.slice(0)
-        }),
-      ]
-    );
   }
 }

@@ -1,4 +1,4 @@
-import { ShutdownManager, Class, TimeSpan, TimeUtil, Util, castTo, hasFunction, LOG_LOCATION } from '@travetto/runtime';
+import { ShutdownManager, Class, TimeSpan, TimeUtil, Util, castTo, hasFunction } from '@travetto/runtime';
 
 import { ModelRegistry } from '../registry/model.ts';
 import { ModelExpirySupport } from '../types/expiry.ts';
@@ -37,7 +37,7 @@ export class ModelExpiryUtil {
       const running = new AbortController();
       const cullInterval = TimeUtil.asMillis(svc.config?.cullRate ?? '10m');
 
-      ShutdownManager.onGracefulShutdown(async () => running.abort(), LOG_LOCATION());
+      ShutdownManager.onGracefulShutdown(async () => running.abort());
 
       (async (): Promise<void> => {
         await Util.nonBlockingTimeout(1000);

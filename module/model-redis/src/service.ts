@@ -1,6 +1,6 @@
 import { createClient } from '@redis/client';
 
-import { ShutdownManager, type Class, type DeepPartial, LOG_LOCATION } from '@travetto/runtime';
+import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
   NotFoundError, ExistsError, ModelIndexedSupport, OptionalId,
@@ -171,7 +171,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     this.client = createClient(this.config.client);
     await this.client.connect();
     await ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onGracefulShutdown(() => this.client.destroy(), LOG_LOCATION());
+    ShutdownManager.onGracefulShutdown(() => this.client.destroy());
     for (const el of ModelRegistry.getClasses()) {
       for (const idx of ModelRegistry.get(el).indices ?? []) {
         switch (idx.type) {

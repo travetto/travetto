@@ -1,7 +1,7 @@
 import { ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 
-import { LOG_LOCATION, ShutdownManager, Util } from '@travetto/runtime';
+import { ShutdownManager, Util } from '@travetto/runtime';
 
 /**
  * Channel that represents ipc communication
@@ -17,7 +17,7 @@ export class IpcChannel<V = unknown> {
     this.parentId = proc instanceof ChildProcess ? process.pid : process.ppid;
 
     // Close on shutdown
-    ShutdownManager.onGracefulShutdown(() => this.destroy(), LOG_LOCATION());
+    ShutdownManager.onGracefulShutdown(() => this.destroy());
 
     this.proc.on('message', (ev: { type: string }) => {
       console.debug('Received', { pid: this.parentId, id: this.id, type: ev.type });
