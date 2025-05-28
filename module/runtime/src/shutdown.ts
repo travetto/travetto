@@ -1,6 +1,7 @@
 import { Env } from './env.ts';
 import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
+import { Class, ClassInstance } from './types.ts';
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
@@ -8,22 +9,34 @@ import { TimeUtil } from './time.ts';
 export class ShutdownManager {
 
   static #registered = false;
-  static #handlers: { name?: string, handler: () => (void | Promise<void>) }[] = [];
+  static #handlers: { scope?: string, handler: () => (void | Promise<void>) }[] = [];
+
+  static #ensureExitListeners(): void {
+    if (this.#registered) {
+      return;
+    }
+    this.#registered = true;
+    const cleanup = (signal: string): void => {
+      this.gracefulShutdown(signal).then(() => process.exit(0));
+    };
+    if (process.stdout.isTTY) {
+      process.once('SIGINT', () => process.stdout.write('\n')); // Ensure we get a newline on ctrl-c
+    }
+    process.once('SIGUSR2', cleanup);
+    process.once('SIGTERM', cleanup);
+    process.once('SIGINT', cleanup);
+  }
 
   /**
    * On Shutdown requested
-   * @param name name to log for
+   * @param source The source of the shutdown request, for logging purposes
    * @param handler synchronous or asynchronous handler
    */
-  static onGracefulShutdown(handler: () => (void | Promise<void>), name?: string | { constructor: Function }): () => void {
-    if (!this.#registered) {
-      this.#registered = true;
-      process
-        .on('SIGUSR2', () => this.gracefulShutdown('SIGUSR2', 0))
-        .on('SIGTERM', () => this.gracefulShutdown('SIGTERM', 0))
-        .on('SIGINT', () => this.gracefulShutdown('SIGINT', 0));
-    }
-    this.#handlers.push({ handler, name: typeof name === 'string' ? name : name?.constructor?.Ⲑid });
+  static onGracefulShutdown(handler: () => (void | Promise<void>), source: Class | Function | ClassInstance, extra?: string | Function): () => void {
+    this.#ensureExitListeners();
+    const sourceFn = typeof source === 'object' ? source.constructor : source;
+    const scope = [sourceFn.name, typeof extra === 'function' ? extra.name : ''].filter(x => x).join(':');
+    this.#handlers.push({ handler, scope });
     return () => {
       const idx = this.#handlers.findIndex(x => x.handler === handler);
       if (idx >= 0) {
@@ -35,37 +48,37 @@ export class ShutdownManager {
   /**
    * Wait for graceful shutdown to run and complete
    */
-  static async gracefulShutdown(source: string, code?: number): Promise<void> {
+  static async gracefulShutdown(source: string): Promise<void> {
+    if (!this.#handlers.length) {
+      return;
+    }
+
+    console.trace('Graceful shutdown requested', { source, pid: process.pid });
+
     await Util.queueMacroTask(); // Force the event loop to wait one cycle
 
-    if (this.#handlers.length) {
-      if (source === 'SIGINT') { // If we are shutting down due to SIGINT, break away from the ctrl c
-        process.stdout.write('\n');
+    const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.val) ?? 2000;
+    const items = this.#handlers.splice(0, this.#handlers.length);
+    console.debug('Graceful shutdown: started', { source, timeout, count: items.length });
+    const handlers = Promise.all(items.map(async ({ scope: name, handler }) => {
+      console.debug('Stopping', { name });
+      try {
+        await handler();
+        console.debug('Stopped', { name });
+      } catch (err) {
+        console.error('Error stopping', { name, err });
       }
+    }));
 
-      console.debug('Graceful shutdown: started', { source });
+    const winner = await Promise.race([
+      Util.nonBlockingTimeout(timeout).then(() => this), // Wait N seconds and then give up if not done
+      handlers,
+    ]);
 
-      const items = this.#handlers.splice(0, this.#handlers.length);
-      const handlers = Promise.all(items.map(async ({ name, handler }) => {
-        if (name) {
-          console.debug('Stopping', { name });
-        }
-        try {
-          return await handler();
-        } catch (err) {
-          console.error('Error shutting down', { name, err });
-        }
-      }));
-
-      await Promise.race([
-        Util.nonBlockingTimeout(TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.val) ?? 2000), // Wait 2s and then force finish
-        handlers,
-      ]);
-
+    if (winner !== this) {
       console.debug('Graceful shutdown: completed');
-    }
-    if (code !== undefined) {
-      process.exit(code);
+    } else {
+      console.debug('Graceful shutdown: timed-out', { timeout });
     }
   }
 }

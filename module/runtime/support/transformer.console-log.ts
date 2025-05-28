@@ -85,24 +85,24 @@ export class ConsoleLogTransformer {
 
     const level = name.escapedText!;
 
-    if (VALID_LEVELS[level]) {
-      const ident = state.imported ??= state.importFile(CONSOLE_IMPORT).ident;
-      return state.factory.updateCallExpression(
-        node,
-        state.createAccess(ident, 'log'),
-        node.typeArguments,
-        [
-          LiteralUtil.fromLiteral(state.factory, {
-            level: state.factory.createStringLiteral(VALID_LEVELS[level]),
-            import: state.getModuleIdentifier(),
-            line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
-            scope: state.scope?.map(x => x.name).join(':'),
-            args: node.arguments.slice(0)
-          }),
-        ]
-      );
-    } else {
+    if (!VALID_LEVELS[level]) {
       return node;
     }
+
+    const ident = state.imported ??= state.importFile(CONSOLE_IMPORT).ident;
+    return state.factory.updateCallExpression(
+      node,
+      state.createAccess(ident, 'log'),
+      node.typeArguments,
+      [
+        LiteralUtil.fromLiteral(state.factory, {
+          level: state.factory.createStringLiteral(VALID_LEVELS[level]),
+          import: state.getModuleIdentifier(),
+          line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
+          scope: state.scope?.map(x => x.name).join(':'),
+          args: node.arguments.slice(0)
+        }),
+      ]
+    );
   }
 }

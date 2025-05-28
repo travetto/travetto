@@ -33,6 +33,7 @@ export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: A
 
   if (cfg?.restartOnExit) {
     // We are done, request restart
-    await ShutdownManager.gracefulShutdown('@travetto/runtime:watch-restart', ExecUtil.RESTART_EXIT_CODE);
+    await ShutdownManager.gracefulShutdown('@travetto/runtime:watchCompiler');
+    process.exit(ExecUtil.RESTART_EXIT_CODE);
   }
 }
