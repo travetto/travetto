@@ -1,7 +1,7 @@
 import { createPool } from 'mysql2';
 import { PoolConnection, Pool, OkPacket, ResultSetHeader } from 'mysql2/promise';
 
-import { castTo, ShutdownManager } from '@travetto/runtime';
+import { castTo, LOG_LOCATION, ShutdownManager } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';
@@ -41,7 +41,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
     }).promise();
 
     // Close mysql
-    ShutdownManager.onGracefulShutdown(() => this.#pool.end(), this);
+    ShutdownManager.onGracefulShutdown(() => this.#pool.end(), LOG_LOCATION());
   }
 
   /**

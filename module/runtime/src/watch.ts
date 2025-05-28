@@ -2,6 +2,7 @@ import { RuntimeIndex } from './manifest-index.ts';
 import { ExecUtil } from './exec.ts';
 import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
+import { LOG_LOCATION } from './console.ts';
 
 export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, time: number };
 
@@ -17,7 +18,7 @@ export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: A
   });
 
   const ctrl = new AbortController();
-  const remove = ShutdownManager.onGracefulShutdown(async () => ctrl.abort(), watchCompiler);
+  const remove = ShutdownManager.onGracefulShutdown(async () => ctrl.abort(), LOG_LOCATION());
 
   await client.waitForState(['compile-end', 'watch-start'], undefined, ctrl.signal);
 

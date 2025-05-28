@@ -4,7 +4,7 @@ import path from 'node:path';
 import sqlDb, { type Database, Options } from 'better-sqlite3';
 import { Pool, createPool } from 'generic-pool';
 
-import { ShutdownManager, Util, Runtime } from '@travetto/runtime';
+import { ShutdownManager, Util, Runtime, LOG_LOCATION } from '@travetto/runtime';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
@@ -69,7 +69,7 @@ export class SqliteConnection extends Connection<Database> {
     }, { max: 1 });
 
     // Close postgres
-    ShutdownManager.onGracefulShutdown(() => this.#pool.clear(), this);
+    ShutdownManager.onGracefulShutdown(() => this.#pool.clear(), LOG_LOCATION());
   }
 
   async execute<T = unknown>(conn: Database, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {

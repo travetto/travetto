@@ -1,6 +1,9 @@
 import ts from 'typescript';
 
-import { TransformerState, OnCall, LiteralUtil, OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction } from '@travetto/transformer';
+import {
+  TransformerState, OnCall, LiteralUtil, OnClass, AfterClass, OnMethod, AfterMethod,
+  AfterFunction, OnFunction, OnStaticMethod, AfterStaticMethod
+} from '@travetto/transformer';
 
 const CONSOLE_IMPORT = '@travetto/runtime/src/console.ts';
 
@@ -39,6 +42,8 @@ export class ConsoleLogTransformer {
     return node;
   }
 
+
+  @OnStaticMethod()
   @OnMethod()
   static startMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {
     this.initState(state);
@@ -50,6 +55,7 @@ export class ConsoleLogTransformer {
     return node;
   }
 
+  @AfterStaticMethod()
   @AfterMethod()
   static leaveMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {
     state.scope.pop();
@@ -72,6 +78,17 @@ export class ConsoleLogTransformer {
   @OnCall()
   static onLogCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
     if (!ts.isPropertyAccessExpression(node.expression)) {
+      if (ts.isIdentifier(node.expression) && node.expression.escapedText === 'LOG_LOCATION') {
+        const type = state.resolveType(node.expression);
+        if ('importName' in type && type.importName === CONSOLE_IMPORT) {
+          return state.factory.updateCallExpression(node, node.expression, node.typeArguments, [
+            state.fromLiteral([
+              state.importName,
+              `${state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1}`,
+            ].join(':'))
+          ]);
+        }
+      }
       return node;
     }
 

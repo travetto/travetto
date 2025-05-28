@@ -32,6 +32,9 @@ export interface ConsoleListener {
 
 const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
 
+// Simple method we will replace with the actual location (file, line) via the transformer
+export const LOG_LOCATION = function (): string { return arguments[0]; };
+
 /**
  * Provides a general abstraction against the console.* methods to allow for easier capture and redirection.
  *

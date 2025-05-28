@@ -6,7 +6,7 @@ import { pipeline } from 'node:stream/promises';
 import { TLSSocket } from 'node:tls';
 
 import { WebBodyUtil, WebCommonUtil, WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
-import { BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
+import { BinaryUtil, castTo, LOG_LOCATION, ShutdownManager } from '@travetto/runtime';
 
 import { WebSecureKeyPair, WebServerHandle } from './types.ts';
 
@@ -86,7 +86,7 @@ export class WebHttpUtil {
       return complete;
     }
 
-    ShutdownManager.onGracefulShutdown(() => stop(false), WebHttpUtil, WebHttpUtil.startHttpServer);
+    ShutdownManager.onGracefulShutdown(() => stop(false), LOG_LOCATION());
     config.signal?.addEventListener('abort', () => stop(true));
 
     return { target, complete, stop };

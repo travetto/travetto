@@ -1,7 +1,6 @@
 import { Env } from './env.ts';
 import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
-import { Class, ClassInstance } from './types.ts';
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
@@ -37,10 +36,8 @@ export class ShutdownManager {
    * @param source The source of the shutdown request, for logging purposes
    * @param handler synchronous or asynchronous handler
    */
-  static onGracefulShutdown(handler: () => (void | Promise<void>), source: Class | Function | ClassInstance, extra?: string | Function): () => void {
+  static onGracefulShutdown(handler: () => (void | Promise<void>), scope: string): () => void {
     this.#ensureExitListeners();
-    const sourceFn = typeof source === 'object' ? source.constructor : source;
-    const scope = [sourceFn.name, typeof extra === 'function' ? extra.name : ''].filter(x => x).join(':');
     this.#handlers.push({ handler, scope });
     return () => {
       const idx = this.#handlers.findIndex(x => x.handler === handler);
