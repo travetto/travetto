@@ -5,24 +5,30 @@ import { RuntimeResources, toConcrete } from '@travetto/runtime';
 
 import type { WebHttpServer } from './src/types.ts';
 import { WebHttpConfig } from './src/config.ts';
+import { DefaultWebServer } from './src/default.ts';
 
 const WebServerContract = toConcrete<WebHttpServer>();
 
 export const text = <>
   <c.StdHeader />
-  This module provides basic for running {d.library('NodeHttp')}. {d.library('NodeHttps')}  and {d.library('NodeHttp2')} servers, along with support for tls key generation during development.
+  This module provides basic support for running {d.library('NodeHttp')}, {d.library('NodeHttps')} and {d.library('NodeHttp2')} servers, along support for ssl key generation during development.
+
+  <c.Section title='Default Server'>
+    <c.Code title="Node Web Server" src={DefaultWebServer}></c.Code>
+    This module provides a default implementation of the {WebServerContract} interface, which is used by the framework to run a web server. This is a production ready server built around {d.library('Node')}'s built in http support.
+  </c.Section>
+
+  <c.Section title="Configuration">
+    <c.Code title="Standard Web Http Config" src={WebHttpConfig} />
+    This configuration points to the specific controls you may want while running an http server.
+  </c.Section>
 
   <c.Section title='Running a Server'>
-
-    By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server. Currently, {d.mod('WebNode')} is the only module that provides a compatible {WebServerContract}.
+    By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
 
     <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{
       cwd: './doc-exec'
     }} />
-
-    <c.SubSection title="Configuration">
-      <c.Code title="Standard Web Http Config" src={WebHttpConfig} />
-    </c.SubSection>
 
     <c.SubSection title='Creating a Custom CLI Entry Point'>
 

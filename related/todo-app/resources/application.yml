@@ -2,9 +2,10 @@ api.spec:
   output: ./openapi.yml
 
 web:
-  cors: { active : true }
-  http:
-    tls: false
+  cors: { active : true }  
+  http: 
+    tls: true
+    httpVersion: 1.1
 
 web.client:
   providers:

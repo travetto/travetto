@@ -161,7 +161,6 @@ module/web
 module/web-aws-lambda
 module/web-connect
 module/web-http-server
-module/web-node
 module/web-rpc
 module/web-upload
 module/worker
@@ -249,7 +248,6 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
          module/web-aws-lambda <workspace-root>/module/web-aws-lambda
             module/web-connect <workspace-root>/module/web-connect
         module/web-http-server <workspace-root>/module/web-http-server
-               module/web-node <workspace-root>/module/web-node
                 module/web-rpc <workspace-root>/module/web-rpc
              module/web-upload <workspace-root>/module/web-upload
                  module/worker <workspace-root>/module/worker
