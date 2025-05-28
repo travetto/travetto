@@ -93,7 +93,7 @@ export class WebHttpUtil {
   }
 
   /**
-   * Create a web request given a node IncomingMessage
+   * Create a WebRequest given an incoming http request
    */
   static toWebRequest(req: HttpRequest): WebRequest {
     const secure = req.socket instanceof TLSSocket;
@@ -116,7 +116,7 @@ export class WebHttpUtil {
   }
 
   /**
-   * Send WebResponse to ServerResponse
+   * Send WebResponse to outbound http response
    */
   static async respondToServerResponse(webRes: WebResponse, res: HttpResponse): Promise<void> {
     const binaryResponse = new WebResponse({ context: webRes.context, ...WebBodyUtil.toBinaryMessage(webRes) });
