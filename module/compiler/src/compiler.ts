@@ -97,8 +97,6 @@ export class Compiler {
     const avg = total / durations.length;
     const sorted = [...durations].sort((a, b) => a - b);
     const median = sorted[Math.floor(sorted.length / 2)];
-    const variance = durations.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / durations.length;
-    const stdDev = Math.sqrt(variance);
 
     // Find the 5 slowest files
     const slowest = [...metrics]
@@ -111,7 +109,6 @@ export class Compiler {
       totalTime: total,
       averageTime: Math.round(avg),
       medianTime: median,
-      stdDev: Math.round(stdDev),
       slowest
     });
   }
