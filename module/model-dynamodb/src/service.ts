@@ -1,6 +1,6 @@
 import {
-  AttributeDefinition, AttributeValue, DynamoDB, GlobalSecondaryIndex,
-  KeySchemaElement, PutItemCommandInput, PutItemCommandOutput
+  type AttributeDefinition, type AttributeValue, DynamoDB, type GlobalSecondaryIndex,
+  type KeySchemaElement, type PutItemCommandInput, type PutItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
 import { LOG_LOCATION, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';

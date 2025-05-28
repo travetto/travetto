@@ -88,6 +88,35 @@ export class Compiler {
   }
 
   /**
+   * Log compilation statistics
+   */
+  logStatistics(metrics: CompileEmitEvent[]): void {
+    // Simple metrics
+    const durations = metrics.map(x => x.duration);
+    const total = durations.reduce((a, b) => a + b, 0);
+    const avg = total / durations.length;
+    const sorted = [...durations].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    const variance = durations.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / durations.length;
+    const stdDev = Math.sqrt(variance);
+
+    // Find the 5 slowest files
+    const slowest = [...metrics]
+      .sort((a, b) => b.duration - a.duration)
+      .slice(0, 5)
+      .map(x => ({ file: x.file, duration: x.duration }));
+
+    log.debug('Compilation Statistics', {
+      files: metrics.length,
+      totalTime: total,
+      averageTime: Math.round(avg),
+      medianTime: median,
+      stdDev: Math.round(stdDev),
+      slowest
+    });
+  }
+
+  /**
    * Compile in a single pass, only emitting dirty files
    */
   getCompiler(): CompileEmitter {
@@ -100,11 +129,12 @@ export class Compiler {
   async * emit(files: string[], emitter: CompileEmitter): AsyncIterable<CompileEmitEvent> {
     let i = 0;
     let lastSent = Date.now();
-
     for (const file of files) {
+      const start = Date.now();
       const err = await emitter(file);
+      const duration = Date.now() - start;
       const imp = file.includes('node_modules/') ? file.split('node_modules/')[1] : file;
-      yield { file: imp, i: i += 1, err, total: files.length };
+      yield { file: imp, i: i += 1, err, total: files.length, duration };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
         EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
@@ -135,6 +165,8 @@ export class Compiler {
 
     EventUtil.sendEvent('state', { state: 'compile-start' });
 
+    const metrics: CompileEmitEvent[] = [];
+
     if (this.#dirtyFiles.length) {
       for await (const ev of this.emit(this.#dirtyFiles, emitter)) {
         if (ev.err) {
@@ -142,6 +174,7 @@ export class Compiler {
           failure ??= compileError;
           EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
         }
+        metrics.push(ev);
       }
       if (this.#signal.aborted) {
         log.debug('Compilation aborted');
@@ -158,6 +191,10 @@ export class Compiler {
     }
 
     EventUtil.sendEvent('state', { state: 'compile-end' });
+
+    if (process.env.TRV_BUILD?.includes('debug')) {
+      this.logStatistics(metrics);
+    }
 
     if (this.#watch && !this.#signal.aborted) {
       log.info('Watch is ready');
@@ -190,7 +227,6 @@ export class Compiler {
           });
         }
         EventUtil.sendEvent('state', { state: 'watch-end' });
-
       } catch (err) {
         if (err instanceof Error) {
           this.#shutdown(err instanceof CompilerReset ? 'reset' : 'error', err);
