@@ -1,4 +1,4 @@
-import { createClient } from 'redis';
+import { createClient } from '@redis/client';
 
 import { ShutdownManager, type Class, type DeepPartial, LOG_LOCATION } from '@travetto/runtime';
 import {

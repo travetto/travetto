@@ -96,7 +96,7 @@ export class Compiler {
     const total = durations.reduce((a, b) => a + b, 0);
     const avg = total / durations.length;
     const sorted = [...durations].sort((a, b) => a - b);
-    const median = sorted[Math.floor(sorted.length / 2)];
+    const median = sorted[Math.trunc(sorted.length / 2)];
 
     // Find the 5 slowest files
     const slowest = [...metrics]
@@ -126,11 +126,16 @@ export class Compiler {
   async * emit(files: string[], emitter: CompileEmitter): AsyncIterable<CompileEmitEvent> {
     let i = 0;
     let lastSent = Date.now();
+
+    await emitter(files[0]); // Prime
+
     for (const file of files) {
       const start = Date.now();
       const err = await emitter(file);
       const duration = Date.now() - start;
-      const imp = file.includes('node_modules/') ? file.split('node_modules/')[1] : file;
+      const nodeModSep = 'node_modules/';
+      const nodeModIdx = file.lastIndexOf(nodeModSep);
+      const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSep.length) : file;
       yield { file: imp, i: i += 1, err, total: files.length, duration };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
@@ -189,7 +194,7 @@ export class Compiler {
 
     EventUtil.sendEvent('state', { state: 'compile-end' });
 
-    if (process.env.TRV_BUILD?.includes('debug')) {
+    if (process.env.TRV_BUILD === 'debug' && metrics.length) {
       this.logStatistics(metrics);
     }
 
