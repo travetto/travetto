@@ -38,14 +38,6 @@ export class ShutdownManager {
   static async gracefulShutdown(source: string, code?: number): Promise<void> {
     await Util.queueMacroTask(); // Force the event loop to wait one cycle
 
-    if (code !== undefined) {
-      process.exitCode = code;
-    } else if (process.exitCode !== undefined) {
-      code = +process.exitCode;
-    } else {
-      process.exitCode = code = 0; // Default to 0 if no code provided
-    }
-
     if (this.#handlers.length) {
       if (source === 'SIGINT') { // If we are shutting down due to SIGINT, break away from the ctrl c
         process.stdout.write('\n');
@@ -73,7 +65,7 @@ export class ShutdownManager {
       console.debug('Graceful shutdown: completed');
     }
     if (code !== undefined) {
-      process.exit();
+      process.exit(code);
     }
   }
 }
