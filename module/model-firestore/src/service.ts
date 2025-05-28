@@ -1,6 +1,6 @@
 import { DocumentData, FieldValue, Firestore, PartialWithFieldValue, Query } from '@google-cloud/firestore';
 
-import { LOG_LOCATION, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
@@ -41,7 +41,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async postConstruct(): Promise<void> {
     this.client = new Firestore(this.config);
-    ShutdownManager.onGracefulShutdown(() => this.client.terminate(), LOG_LOCATION());
+    ShutdownManager.onGracefulShutdown(() => this.client.terminate());
   }
 
   // Storage

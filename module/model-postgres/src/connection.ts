@@ -1,6 +1,6 @@
 import { type Pool, type PoolClient, default as pg } from 'pg';
 
-import { LOG_LOCATION, castTo, ShutdownManager } from '@travetto/runtime';
+import { castTo, ShutdownManager } from '@travetto/runtime';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
@@ -45,7 +45,7 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
     );
 
     // Close postgres
-    ShutdownManager.onGracefulShutdown(() => this.#pool.end(), LOG_LOCATION());
+    ShutdownManager.onGracefulShutdown(() => this.#pool.end());
   }
 
   async execute<T = unknown>(conn: PoolClient, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {

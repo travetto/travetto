@@ -6,8 +6,7 @@ import {
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
 } from '@travetto/model';
 import {
-  ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject,
-  asConstructable, LOG_LOCATION
+  ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable
 } from '@travetto/runtime';
 import { SchemaChange, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
@@ -120,7 +119,7 @@ export class ElasticsearchModelService implements
     this.manager = new IndexManager(this.config, this.client);
 
     await ModelStorageUtil.registerModelChangeListener(this.manager);
-    ShutdownManager.onGracefulShutdown(() => this.client.close(), LOG_LOCATION());
+    ShutdownManager.onGracefulShutdown(() => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }
 
