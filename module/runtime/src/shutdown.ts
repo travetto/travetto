@@ -10,6 +10,7 @@ export class ShutdownManager {
 
   static #registered = false;
   static #handlers: { scope?: string, handler: () => (void | Promise<void>) }[] = [];
+  static #pending: (PromiseWithResolvers<void> & { time: number }) | undefined;
 
   static #ensureExitListeners(): void {
     if (this.#registered) {
@@ -17,14 +18,18 @@ export class ShutdownManager {
     }
     this.#registered = true;
     const cleanup = (signal: string): void => {
+      if (this.#pending && (Date.now() - this.#pending.time) > 500) {
+        console.warn('Shutdown already in progress, exiting immediately', { signal });
+        process.exit(0); // Quit immediately
+      }
       this.gracefulShutdown(signal).then(() => process.exit(0));
     };
     if (process.stdout.isTTY) {
-      process.once('SIGINT', () => process.stdout.write('\n')); // Ensure we get a newline on ctrl-c
+      process.on('SIGINT', () => process.stdout.write('\n')); // Ensure we get a newline on ctrl-c
     }
-    process.once('SIGUSR2', cleanup);
-    process.once('SIGTERM', cleanup);
-    process.once('SIGINT', cleanup);
+    process.on('SIGUSR2', cleanup);
+    process.on('SIGTERM', cleanup);
+    process.on('SIGINT', cleanup);
   }
 
   /**
@@ -49,11 +54,13 @@ export class ShutdownManager {
    * Wait for graceful shutdown to run and complete
    */
   static async gracefulShutdown(source: string): Promise<void> {
-    if (!this.#handlers.length) {
+    if (this.#pending) {
+      return this.#pending.promise;
+    } else if (!this.#handlers.length) {
       return;
     }
 
-    console.trace('Graceful shutdown requested', { source, pid: process.pid });
+    this.#pending = { ...Promise.withResolvers<void>(), time: Date.now() };
 
     await Util.queueMacroTask(); // Force the event loop to wait one cycle
 
@@ -80,5 +87,7 @@ export class ShutdownManager {
     } else {
       console.debug('Graceful shutdown: timed-out', { timeout });
     }
+
+    this.#pending.resolve();
   }
 }

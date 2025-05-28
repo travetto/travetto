@@ -51,28 +51,37 @@ export class ExecUtil {
    */
   static async withRestart(
     run: () => ChildProcess,
-    maxRetriesPerMinute?: number,
-    killSignal: 'SIGINT' | 'SIGTERM' = 'SIGINT'
+    config?: { maxRetriesPerMinute?: number, relayInterrupt?: boolean }
   ): Promise<ExecutionResult> {
-    const maxRetries = maxRetriesPerMinute ?? 5;
+    const maxRetries = config?.maxRetriesPerMinute ?? 5;
+    const relayInterrupt = config?.relayInterrupt ?? false;
+
     const restarts: number[] = [];
+
+    if (!relayInterrupt) {
+      process.removeAllListeners('SIGINT'); // Remove any existing listeners
+      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
+    }
 
     for (; ;) {
       const proc = run();
-
-      const toKill = (): void => { proc.kill(killSignal); };
+      const interrupt = (): void => { proc.kill('SIGINT'); };
       const toMessage = (v: unknown): void => { proc.send?.(v!); };
 
       // Proxy kill requests
       process.on('message', toMessage);
-      process.on('SIGINT', toKill);
+      if (relayInterrupt) {
+        process.on('SIGINT', interrupt);
+      }
       proc.on('message', v => process.send?.(v));
 
       const result = await this.getResult(proc, { catch: true });
       if (result.code !== this.RESTART_EXIT_CODE) {
         return result;
       } else {
-        process.off('SIGINT', toKill);
+        if (relayInterrupt) {
+          process.off('SIGINT', interrupt);
+        }
         process.off('message', toMessage);
         restarts.unshift(Date.now());
         if (restarts.length === maxRetries) {
