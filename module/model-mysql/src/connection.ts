@@ -41,7 +41,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
     }).promise();
 
     // Close mysql
-    ShutdownManager.onGracefulShutdown(() => this.#pool.end(), this);
+    ShutdownManager.onGracefulShutdown(() => this.#pool.end());
   }
 
   /**

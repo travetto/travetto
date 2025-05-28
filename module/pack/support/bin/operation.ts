@@ -161,7 +161,6 @@ export class PackOperation {
     const title = 'Writing entry scripts';
     for (const sh of [ShellCommands.posix, ShellCommands.win32]) {
       const { ext, contents } = sh.script(
-
         sh.callCommandWithAllArgs('node', cfg.mainFile, ...cfg.entryArguments), true
       );
       const file = `${cfg.mainName}${ext}`;

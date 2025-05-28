@@ -1,9 +1,7 @@
 import assert from 'node:assert';
-// eslint-disable-next-line @typescript-eslint/naming-convention
-import Keygrip from 'keygrip';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse } from '@travetto/web';
+import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse, KeyGrip } from '@travetto/web';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { AsyncContext } from '@travetto/context';
@@ -62,7 +60,7 @@ class CookiesInterceptorSuite {
 
   @Test()
   async testSigned() {
-    const grip = new Keygrip(['billy']);
+    const grip = new KeyGrip(['billy']);
     const headers = await this.testCookies(
       `age=100; age.sig=${grip.sign('age=100')}`,
       jar => {
@@ -84,7 +82,7 @@ class CookiesInterceptorSuite {
 
   @Test()
   async testRotating() {
-    const grip = new Keygrip(['billy']);
+    const grip = new KeyGrip(['billy']);
     const headers = await this.testCookies(
       `age=100; age.sig=${grip.sign('age=100')}`,
       jar => { },
@@ -101,7 +99,7 @@ class CookiesInterceptorSuite {
 
   @Test()
   async testInvalidSigned() {
-    const grip = new Keygrip(['billy']);
+    const grip = new KeyGrip(['billy']);
     const headers = await this.testCookies(
       `age=100; age.sig=${grip.sign('age=100')}`,
       jar => {

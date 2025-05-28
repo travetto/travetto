@@ -1,6 +1,6 @@
 import {
-  AttributeDefinition, AttributeValue, DynamoDB, GlobalSecondaryIndex,
-  KeySchemaElement, PutItemCommandInput, PutItemCommandOutput
+  type AttributeDefinition, type AttributeValue, DynamoDB, type GlobalSecondaryIndex,
+  type KeySchemaElement, type PutItemCommandInput, type PutItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
 import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
@@ -185,7 +185,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async postConstruct(): Promise<void> {
     this.client = new DynamoDB({ ...this.config.client });
     await ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onGracefulShutdown(async () => this.client.destroy(), this);
+    ShutdownManager.onGracefulShutdown(async () => this.client.destroy());
   }
 
   // Storage

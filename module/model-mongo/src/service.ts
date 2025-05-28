@@ -107,7 +107,7 @@ export class MongoModelService implements
       writeConcern: { w: 1 }
     });
     await ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onGracefulShutdown(() => this.client.close(), this);
+    ShutdownManager.onGracefulShutdown(() => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }
 

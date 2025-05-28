@@ -1,6 +1,9 @@
 import ts from 'typescript';
 
-import { TransformerState, OnCall, LiteralUtil, OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction } from '@travetto/transformer';
+import {
+  TransformerState, OnCall, LiteralUtil, OnClass, AfterClass, OnMethod, AfterMethod,
+  AfterFunction, OnFunction, OnStaticMethod, AfterStaticMethod
+} from '@travetto/transformer';
 
 const CONSOLE_IMPORT = '@travetto/runtime/src/console.ts';
 
@@ -39,6 +42,8 @@ export class ConsoleLogTransformer {
     return node;
   }
 
+
+  @OnStaticMethod()
   @OnMethod()
   static startMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {
     this.initState(state);
@@ -50,6 +55,7 @@ export class ConsoleLogTransformer {
     return node;
   }
 
+  @AfterStaticMethod()
   @AfterMethod()
   static leaveMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {
     state.scope.pop();

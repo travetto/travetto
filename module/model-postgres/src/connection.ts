@@ -45,7 +45,7 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
     );
 
     // Close postgres
-    ShutdownManager.onGracefulShutdown(() => this.#pool.end(), this);
+    ShutdownManager.onGracefulShutdown(() => this.#pool.end());
   }
 
   async execute<T = unknown>(conn: PoolClient, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {

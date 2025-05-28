@@ -17,7 +17,7 @@ export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: A
   });
 
   const ctrl = new AbortController();
-  const remove = ShutdownManager.onGracefulShutdown(async () => ctrl.abort(), watchCompiler);
+  const remove = ShutdownManager.onGracefulShutdown(async () => ctrl.abort());
 
   await client.waitForState(['compile-end', 'watch-start'], undefined, ctrl.signal);
 
@@ -33,6 +33,7 @@ export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: A
 
   if (cfg?.restartOnExit) {
     // We are done, request restart
-    await ShutdownManager.gracefulShutdown(ExecUtil.RESTART_EXIT_CODE);
+    await ShutdownManager.gracefulShutdown('@travetto/runtime:watchCompiler');
+    process.exit(ExecUtil.RESTART_EXIT_CODE);
   }
 }

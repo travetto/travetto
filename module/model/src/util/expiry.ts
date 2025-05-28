@@ -37,7 +37,7 @@ export class ModelExpiryUtil {
       const running = new AbortController();
       const cullInterval = TimeUtil.asMillis(svc.config?.cullRate ?? '10m');
 
-      ShutdownManager.onGracefulShutdown(async () => running.abort(), this);
+      ShutdownManager.onGracefulShutdown(async () => running.abort());
 
       (async (): Promise<void> => {
         await Util.nonBlockingTimeout(1000);

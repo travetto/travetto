@@ -16,7 +16,7 @@ yarn add @travetto/web-http-server
 This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html)  and [http2](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.
 
 ## Running a Server
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10) that will follow default behaviors, and spin up the server. Currently, [Node Web Server](https://github.com/travetto/travetto/tree/main/module/web-node#readme "Node provider for the travetto web module.") is the only module that provides a compatible [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L10).
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L19) that will follow default behaviors, and spin up the server. Currently, [Node Web Server](https://github.com/travetto/travetto/tree/main/module/web-node#readme "Node provider for the travetto web module.") is the only module that provides a compatible [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http-server/src/types.ts#L19).
 
 **Terminal: Standard application**
 ```bash
@@ -156,7 +156,7 @@ To customize a Web server, you may need to construct an entry point using the [@
 
 **Code: Application entry point for Web Applications**
 ```typescript
-import { Env, ShutdownManager, toConcrete } from '@travetto/runtime';
+import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -180,9 +180,8 @@ export class SampleApp {
 
     // Configure server before running
     const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
-    const { wait, kill } = await instance.serve();
-    ShutdownManager.onGracefulShutdown(kill);
-    return wait;
+    const { complete } = await instance.serve();
+    return complete;
   }
 }
 ```
