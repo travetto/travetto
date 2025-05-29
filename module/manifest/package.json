@@ -23,7 +23,7 @@
   ],
   "main": "__index__.ts",
   "engines": {
-    "node": ">=23.0.0"
+    "node": ">=24.0.0"
   },
   "dependencies": {
     "@types/node": "^22.15.18"
