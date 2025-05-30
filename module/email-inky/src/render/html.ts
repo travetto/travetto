@@ -84,7 +84,7 @@ export const Html: RenderProvider<RenderContext> = {
 
     let expander = '';
 
-    const parent = stack[stack.length - 1];
+    const parent = stack.at(-1)!;
     const sibs = getKids(parent).filter(x => isOfType(x, 'Column'));
     const colCount = sibs.length || 1;
 
@@ -94,7 +94,7 @@ export const Html: RenderProvider<RenderContext> = {
         elParent.columnVisited = true;
         if (sibs.length) {
           sibs[0].props.className = classStr(sibs[0].props.className ?? '', 'first');
-          sibs[sibs.length - 1].props.className = classStr(sibs[sibs.length - 1].props.className ?? '', 'last');
+          sibs.at(-1)!.props.className = classStr(sibs.at(-1)!.props.className ?? '', 'last');
         }
       }
     } else {

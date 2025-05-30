@@ -68,7 +68,7 @@ export class ServiceRunner {
   }
 
   async #hasImage(): Promise<boolean> {
-    const result = await ExecUtil.getResult(spawn('docker', ['image', 'inspect', this.svc.image], { shell: false }), { catch: true });
+    const result = await ExecUtil.getResult(spawn('docker', ['image', 'inspect', this.svc.image]), { catch: true });
     return result.valid;
   }
 
@@ -96,15 +96,15 @@ export class ServiceRunner {
       await fs.mkdir(item, { recursive: true });
     }
 
-    return (await ExecUtil.getResult(spawn('docker', args, { shell: false, stdio: [0, 'pipe', 2] }))).stdout;
+    return (await ExecUtil.getResult(spawn('docker', args, { stdio: [0, 'pipe', 2] }))).stdout;
   }
 
   async #getContainerId(): Promise<string | undefined> {
-    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=trv-${this.svc.name}`], { shell: false }))).stdout.trim();
+    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=trv-${this.svc.name}`]))).stdout.trim();
   }
 
   async #killContainer(cid: string): Promise<void> {
-    await ExecUtil.getResult(spawn('docker', ['kill', cid], { shell: false }));
+    await ExecUtil.getResult(spawn('docker', ['kill', cid]));
   }
 
   async * action(op: ServiceAction): AsyncIterable<['success' | 'failure' | 'message', string]> {

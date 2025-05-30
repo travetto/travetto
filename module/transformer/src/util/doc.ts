@@ -44,7 +44,7 @@ export class DocUtil {
       const docs = this.hasJSDoc(node) ? node.jsDoc : undefined;
 
       if (docs) {
-        const top = docs[docs.length - 1];
+        const top = docs.at(-1)!;
         if (ts.isJSDoc(top)) {
           out.description = this.getDocComment(top, out.description);
         }

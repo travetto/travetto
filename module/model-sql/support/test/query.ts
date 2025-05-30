@@ -67,8 +67,8 @@ export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
 
     const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
-      const field: FieldConfig = castTo(stack[stack.length - 1]);
-      const parent: FieldConfig = castTo(stack[stack.length - 2]);
+      const field: FieldConfig = castTo(stack.at(-1));
+      const parent: FieldConfig = castTo(stack.at(-2));
       return `${field.owner ? field.owner.name : parent.name}.${field.name}`;
     };
 
@@ -80,7 +80,7 @@ export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
   async testRegEx() {
     const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
-      const field: FieldConfig = castTo(stack[stack.length - 1]);
+      const field: FieldConfig = castTo(stack.at(-1));
       return `${field.owner?.name}.${field.name}`;
     };
 

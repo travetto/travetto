@@ -114,7 +114,7 @@ export class QueryLanguageParser {
             stack.push(top = []);
           } else {
             const group = stack.pop()!;
-            top = stack[stack.length - 1];
+            top = stack.at(-1)!;
             this.condense(group, 'or');
             top.push(group[0]);
             this.unary(top);

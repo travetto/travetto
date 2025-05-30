@@ -53,7 +53,7 @@ export class SQLModelUtil {
    * Get all available fields at current stack path
    */
   static getFieldsByLocation(stack: VisitStack[]): FieldCacheEntry {
-    const top = stack[stack.length - 1];
+    const top = stack.at(-1)!;
     const cls = SchemaRegistry.get(top.type);
 
     if (cls && this.SCHEMA_FIELDS_CACHE.has(cls.class)) {
@@ -171,8 +171,8 @@ export class SQLModelUtil {
       },
       onSub: (config) => {
         const { config: field } = config;
-        const topObj: Record<string, unknown> = castTo(pathObj[pathObj.length - 1]);
-        const top = config.path[config.path.length - 1];
+        const topObj: Record<string, unknown> = castTo(pathObj.at(-1));
+        const top = config.path.at(-1)!;
 
         if (field.name in topObj) {
           const value = topObj[field.name];
@@ -199,7 +199,7 @@ export class SQLModelUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
-        const topObj: Record<string, unknown> = castTo(pathObj[pathObj.length - 1]);
+        const topObj: Record<string, unknown> = castTo(pathObj.at(-1));
         const value = topObj[field.name];
         return handler.onSimple({ ...config, value });
       }
@@ -294,7 +294,7 @@ export class SQLModelUtil {
    * Build table name via stack path
    */
   static buildTable(list: VisitStack[]): string {
-    const top = list[list.length - 1];
+    const top = list.at(-1)!;
     if (!top[TableSymbol]) {
       top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
     }

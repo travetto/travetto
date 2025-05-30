@@ -14,7 +14,6 @@ export class PackAppSuite {
     assert(Runtime.mainSourcePath.endsWith('pack_app'));
     const proc = spawn('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
       cwd: Runtime.mainSourcePath,
-      shell: false,
       env: { PATH: process.env.PATH, ...Env.TRV_DYNAMIC.export(false) }
     });
 

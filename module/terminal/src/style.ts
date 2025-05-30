@@ -27,7 +27,7 @@ export class StyleUtil {
     if (typeof input === 'string') {
       return chalk.hex(input);
     } else {
-      let style: chalk.Chalk = chalk;
+      let style = chalk;
       for (const key of TypedObject.keys(input)) {
         switch (key) {
           case 'text': style = style.hex(input[key]!); break;
@@ -103,7 +103,7 @@ export class StyleUtil {
           return `${values[i] ?? ''}${final ?? ''}`;
         });
         if (values.length > keys.length) {
-          out.push(values[values.length - 1]);
+          out.push(values.at(-1)!);
         }
         return out.join('');
       }

@@ -57,7 +57,6 @@ export class Context {
     const proc = spawn(cmd, args, {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
-      shell: false,
       env: { PATH: process.env.PATH },
     });
 

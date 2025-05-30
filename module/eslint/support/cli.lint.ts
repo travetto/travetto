@@ -52,7 +52,6 @@ export class LintCommand implements CliCommandShape {
     ], {
       cwd: Runtime.workspace.path,
       stdio: 'inherit',
-      shell: false
     }), { catch: true });
 
     process.exitCode = result.code;

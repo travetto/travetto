@@ -75,7 +75,7 @@ export class ExecUtilTest {
 
     const result = await ExecUtil.withRestart(() => spawn('/bin/bash', ['-c',
       `(( $(grep -ch '^' '${file}') == 4)) && (exit 0) || (echo 1 >> '${file}'; exit 200)`
-    ], { shell: false }));
+    ]));
     assert(result);
     assert(result.code === 0);
     const lines = await (await fs.readFile(file, 'utf8')).split('\n');

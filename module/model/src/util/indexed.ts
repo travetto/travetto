@@ -39,7 +39,7 @@ export class ModelIndexedUtil {
     cls: Class<T>, idx: IndexConfig<T> | string, item: DeepPartial<T>, opts: ComputeConfig = {}
   ): { fields: IndexFieldPart[], sorted: IndexSortPart | undefined } {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
-    const sortField = cfg.type === 'sorted' ? cfg.fields[cfg.fields.length - 1] : undefined;
+    const sortField = cfg.type === 'sorted' ? cfg.fields.at(-1) : undefined;
 
     const fields: IndexFieldPart[] = [];
     let sortDir: number = 0;

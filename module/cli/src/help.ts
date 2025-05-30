@@ -76,7 +76,7 @@ export class HelpUtil {
     const descWidth = Math.max(...descWidths);
 
     const helpText = await (command.help?.() ?? []);
-    if (helpText.length && helpText[helpText.length - 1] !== '') {
+    if (helpText.length && helpText.at(-1) !== '') {
       helpText.push('');
     }
 

@@ -131,7 +131,7 @@ export class MongoUtil {
         } else if (firstKey && '$geoWithin' in v) {
           const coords: [number, number][] = castTo(v.$geoWithin);
           const first = coords[0];
-          const last = coords[coords.length - 1];
+          const last = coords.at(-1)!;
           // Connect if not
           if (first[0] !== last[0] || first[1] !== last[1]) {
             coords.push(first);

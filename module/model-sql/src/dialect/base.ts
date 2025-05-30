@@ -286,7 +286,7 @@ export abstract class SQLDialect implements DialectState {
    * Remove a sql column
    */
   getDropColumnSQL(stack: VisitStack[]): string {
-    const field = stack[stack.length - 1];
+    const field = stack.at(-1)!;
     return `ALTER TABLE ${this.parentTable(stack)} DROP COLUMN ${this.ident(field.name)};`;
   }
 
@@ -294,7 +294,7 @@ export abstract class SQLDialect implements DialectState {
    * Add a sql column
    */
   getAddColumnSQL(stack: VisitStack[]): string {
-    const field: FieldConfig = castTo(stack[stack.length - 1]);
+    const field: FieldConfig = castTo(stack.at(-1));
     return `ALTER TABLE ${this.parentTable(stack)} ADD COLUMN ${this.getColumnDefinition(field)};`;
   }
 
@@ -385,7 +385,7 @@ export abstract class SQLDialect implements DialectState {
    */
   resolveName(stack: VisitStack[]): string {
     const path = this.namespaceParent(stack);
-    const name = stack[stack.length - 1].name;
+    const name = stack.at(-1)!.name;
     const cache = this.getAliasCache(stack, this.namespace);
     const base = cache.get(path)!;
     return this.alias(name, base.alias);
@@ -630,7 +630,7 @@ ${this.getLimitSQL(cls, query)}`;
   }
 
   getCreateTableSQL(stack: VisitStack[]): string {
-    const config = stack[stack.length - 1];
+    const config = stack.at(-1)!;
     const parent = stack.length > 1;
     const array = parent && config.array;
     const fields = SchemaRegistry.has(config.type) ?
@@ -752,7 +752,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    * Get INSERT sql for a given instance and a specific stack location
    */
   getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']): string | undefined {
-    const config = stack[stack.length - 1];
+    const config = stack.at(-1)!;
     const columns = SQLModelUtil.getFieldsByLocation(stack).local
       .filter(x => !SchemaRegistry.has(x.type))
       .toSorted((a, b) => a.name.localeCompare(b.name));
@@ -767,7 +767,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         if (el.value === null || el.value === undefined) {
           continue;
         } else if (Array.isArray(el.value)) {
-          const name = el.stack[el.stack.length - 1].name;
+          const name = el.stack.at(-1)!.name;
           for (const sel of el.value) {
             newInstances.push({
               stack: el.stack,
@@ -836,7 +836,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
    * Simple data base updates
    */
   getUpdateSQL(stack: VisitStack[], data: Record<string, unknown>, where?: WhereClause<unknown>): string {
-    const { type } = stack[stack.length - 1];
+    const { type } = stack.at(-1)!;
     const { localMap } = SQLModelUtil.getFieldsByLocation(stack);
     return `
 UPDATE ${this.table(stack)} ${this.rootAlias}
@@ -849,7 +849,7 @@ SET
   }
 
   getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>): string {
-    const { type } = stack[stack.length - 1];
+    const { type } = stack.at(-1)!;
     return `
 DELETE
 FROM ${this.table(stack)} ${this.rootAlias}
@@ -860,7 +860,7 @@ ${this.getWhereSQL(type, where)};`;
   * Get elements by ids
   */
   getSelectRowsByIdsSQL(stack: VisitStack[], ids: string[], select: FieldConfig[] = []): string {
-    const config = stack[stack.length - 1];
+    const config = stack.at(-1)!;
     const orderBy = !config.array ?
       '' :
       `ORDER BY ${this.rootAlias}.${this.idxField.name} ASC`;
@@ -889,7 +889,7 @@ ${this.getWhereSQL(cls, where!)}`;
     const selectStack: (SelectClause<T> | undefined)[] = [];
 
     const buildSet = (children: unknown[], field?: FieldConfig): Record<string, unknown> =>
-      SQLModelUtil.collectDependents(this, stack[stack.length - 1], children, field);
+      SQLModelUtil.collectDependents(this, stack.at(-1)!, children, field);
 
     await SQLModelUtil.visitSchema(SchemaRegistry.get(cls), {
       onRoot: async (config) => {
@@ -899,9 +899,9 @@ ${this.getWhereSQL(cls, where!)}`;
         await config.descend();
       },
       onSub: async ({ config, descend, fields, path }) => {
-        const top = stack[stack.length - 1];
+        const top = stack.at(-1)!;
         const ids = Object.keys(top);
-        const selectTop = selectStack[selectStack.length - 1];
+        const selectTop = selectStack.at(-1)!;
         const fieldKey = castKey<RetainFields<T>>(config.name);
         const subSelectTop: SelectClause<T> | undefined = castTo(selectTop?.[fieldKey]);
 
@@ -937,7 +937,7 @@ ${this.getWhereSQL(cls, where!)}`;
         }
       },
       onSimple: async ({ config, path }): Promise<void> => {
-        const top = stack[stack.length - 1];
+        const top = stack.at(-1)!;
         const ids = Object.keys(top);
         if (ids.length) {
           const { records: matching } = await this.executeSQL(this.getSelectRowsByIdsSQL(
@@ -956,7 +956,7 @@ ${this.getWhereSQL(cls, where!)}`;
    * Delete all ids
    */
   async deleteByIds(stack: VisitStack[], ids: string[]): Promise<number> {
-    return this.deleteAndGetCount<ModelType>(stack[stack.length - 1].type, {
+    return this.deleteAndGetCount<ModelType>(stack.at(-1)!.type, {
       where: {
         [stack.length === 1 ? this.idField.name : this.pathField.name]: {
           $in: ids

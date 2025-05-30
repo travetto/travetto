@@ -97,7 +97,6 @@ export class CliRunUtil {
   static async #startCli(command: string, args: string[], action: string): Promise<{ stdout: string, stderr: string }> {
     const proc = spawn('node', [RunUtil.cliFile, command, ...args], {
       stdio: [0, 'pipe', 'pipe', 'ignore'],
-      shell: false,
       cwd: Workspace.path,
       env: { ...process.env, ...RunUtil.buildEnv(), ...Env.TRV_QUIET.export(true) }
     });

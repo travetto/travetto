@@ -31,7 +31,6 @@ export class DocAngularCommand {
           const proc = spawn('trv', ['doc'], {
             timeout: 20000,
             cwd: mod.sourceFolder,
-            shell: false,
             env: {
               ...process.env,
               ...Env.TRV_MODULE.export(mod.name),
