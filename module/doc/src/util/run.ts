@@ -74,7 +74,6 @@ export class DocRunUtil {
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
     return spawn(cmd, args, {
       cwd: config.cwd ?? this.cwd(config),
-      shell: '/bin/bash',
       env: {
         ...process.env,
         ...Env.DEBUG.export(false),
