@@ -27,16 +27,24 @@ type WebHttpServerConfig = {
 export class WebHttpUtil {
 
   /**
+   * Build a simple request handler
+   * @param dispatcher
+   */
+  static buildHandler(dispatcher: WebDispatcher): (req: HttpRequest, res: HttpResponse) => Promise<void> {
+    return async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+      const request = this.toWebRequest(req);
+      const response = await dispatcher.dispatch({ request });
+      this.respondToServerResponse(response, res);
+    };
+  }
+
+  /**
    * Start an http server
    */
   static async startHttpServer(config: WebHttpServerConfig): Promise<WebServerHandle<HttpServer>> {
     const { reject, resolve, promise } = Promise.withResolvers<void>();
 
-    const handler = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-      const request = this.toWebRequest(req);
-      const response = await config.dispatcher.dispatch({ request });
-      this.respondToServerResponse(response, res);
-    };
+    const handler = this.buildHandler(config.dispatcher);
 
     let target: HttpServer;
     if (config.httpVersion === '2') {
