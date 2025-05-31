@@ -16,4 +16,4 @@ export interface ModelType {
   id: string;
 }
 
-export type OptionalId<T extends { id: string }> = Omit<T, 'id'> & { id?: string };
+export type OptionalId<T extends ModelType> = Omit<T, 'id'> & { id?: string };
