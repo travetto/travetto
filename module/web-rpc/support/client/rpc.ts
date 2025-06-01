@@ -25,6 +25,8 @@ export type RpcRequest = {
     timeout?: number;
     retriesOnConnectFailure?: number;
     path?: string;
+    controller?: string;
+    endpoint?: string;
   };
   url: URL | string;
   consumeJSON?: <T>(text?: unknown) => (T | Promise<T>);
@@ -72,7 +74,9 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   return {
     ...base,
     method: 'POST',
-    path: `${controller}:${endpoint}`
+    path: `${controller}:${endpoint}`,
+    controller,
+    endpoint
   };
 }
 
