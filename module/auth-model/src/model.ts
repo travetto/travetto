@@ -1,4 +1,4 @@
-import { Util, Class, TimeUtil, Runtime } from '@travetto/runtime';
+import { Util, Class, TimeUtil, Runtime, castTo } from '@travetto/runtime';
 import { ModelCrudSupport, ModelType, NotFoundError, OptionalId, ModelStorageUtil } from '@travetto/model';
 import { Principal, Authenticator, Authorizer, AuthenticationError } from '@travetto/auth';
 
@@ -93,7 +93,6 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
     if (hash !== ident.hash) {
       throw new AuthenticationError('Invalid password');
     } else {
-      delete ident.password;
       return ident;
     }
   }
@@ -123,13 +122,8 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
     }
 
     const fields = await AuthModelUtil.generatePassword(ident.password!);
-
-    ident.password = undefined; // Clear it out on set
-
-    Object.assign(user, this.fromPrincipal(fields));
-
-    const res: T = await this.#modelService.create(this.#cls, user);
-    return res;
+    const output: Partial<T> = { ...user, ...this.fromPrincipal(fields) };
+    return await this.#modelService.create(this.#cls, this.#cls.from(castTo(output)));
   }
 
   /**
@@ -154,9 +148,8 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
     }
 
     const fields = await AuthModelUtil.generatePassword(password);
-    Object.assign(user, this.fromPrincipal(fields));
-
-    return await this.#modelService.update(this.#cls, user);
+    const output: Partial<T> = { ...user, ...this.fromPrincipal(fields) };
+    return await this.#modelService.update(this.#cls, this.#cls.from(castTo(output)));
   }
 
   /**
@@ -171,10 +164,8 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
     ident.resetToken = await AuthModelUtil.generateHash(Util.uuid(), salt, 25000, 32);
     ident.resetExpires = TimeUtil.fromNow(1, 'h');
 
-    Object.assign(user, this.fromPrincipal(ident));
-
-    await this.#modelService.update(this.#cls, user);
-
+    const output: Partial<T> = { ...user, ...this.fromPrincipal(ident) };
+    await this.#modelService.update(this.#cls, this.#cls.from(castTo(output)));
     return ident;
   }
 

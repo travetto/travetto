@@ -75,6 +75,23 @@ export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PreP
 }
 
 /**
+ * Prevent a field from being persisted
+ */
+export function Transient<T>() {
+  return function <K extends string, C extends Partial<Record<K, T>>>(tgt: C, prop: K): void {
+    ModelRegistry.registerDataHandlers(asConstructable(tgt).constructor, {
+      prePersist: [{
+        scope: 'all',
+        handler: (inst): void => {
+          const cInst: Record<K, T> = castTo(inst);
+          delete cInst[prop];
+        }
+      }]
+    });
+  };
+}
+
+/**
  * Model class decorator for post-load behavior
  */
 export function PostLoad<T>(handler: DataHandler<T>) {

@@ -16,6 +16,27 @@
   </figure>
 
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>, which is used for data model validation.
+<h2 id="a-simple-model">A Simple Model</h2>
+
+A model can be simply defined by usage of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> decorator, which opts it into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> contracts, as well as making it available to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/model.ts#L14">ModelRegistry</a>.
+
+  <figure class="code">
+    <figcaption class="code">Basic Structure
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/doc-exec/src/sample.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Model <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Model</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleModel</span> <span class="token punctuation">{{'{'}}</span>
+  id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+Once the model is defined, it can be leveraged with any of the services that implement the various model storage contracts.  These contracts allow for persisting and fetching of the associated model object.
+
 <h2 id="contracts">Contracts</h2>
 
 The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8">Blob</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64">Bulk</a>.

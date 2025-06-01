@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import {
   ModelBasicSupport, ModelBlobSupport, ModelBulkSupport, ModelCrudSupport,
-  ModelExpirySupport, ModelIndexedSupport, ModelType
+  ModelExpirySupport, ModelIndexedSupport, ModelRegistry, ModelType
 } from '@travetto/model';
 
 import { Model } from './src/registry/decorator.ts';
@@ -36,6 +36,14 @@ const ModelImplementations = () => {
 export const text = <>
   <c.StdHeader />
   This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the {d.mod('Schema')}, which is used for data model validation.
+
+  <c.Section title='A Simple Model'>
+    A model can be simply defined by usage of the {Model} decorator, which opts it into the {d.mod('Schema')} contracts, as well as making it available to the {ModelRegistry}.
+
+    <c.Code src='./doc-exec/src/sample.ts' title='Basic Structure' />
+
+    Once the model is defined, it can be leveraged with any of the services that implement the various model storage contracts.  These contracts allow for persisting and fetching of the associated model object.
+  </c.Section>
 
   <c.Section title='Contracts'>
 

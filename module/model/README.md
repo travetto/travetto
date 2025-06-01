@@ -15,6 +15,23 @@ yarn add @travetto/model
 
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
+## A Simple Model
+A model can be simply defined by usage of the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which opts it into the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") contracts, as well as making it available to the [ModelRegistry](https://github.com/travetto/travetto/tree/main/module/model/src/registry/model.ts#L14).
+
+**Code: Basic Structure**
+```typescript
+import { Model } from '@travetto/model';
+
+@Model()
+export class SampleModel {
+  id: string;
+  name: string;
+  age: number;
+}
+```
+
+Once the model is defined, it can be leveraged with any of the services that implement the various model storage contracts.  These contracts allow for persisting and fetching of the associated model object.
+
 ## Contracts
 The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64).
 
