@@ -7,27 +7,29 @@ import { ManifestModuleFileType, ManifestModuleUtil } from '@travetto/manifest';
 const ESLINT_PATTERN = /\s{0,10}\/\/ eslint.{0,300}$/g;
 const ENV_KEY = /Env.([^.]{1,100})[.]key/g;
 
+const MOD_FILE_TO_LANG: Record<ManifestModuleFileType, string | undefined> = {
+  ts: 'typescript',
+  js: 'javascript',
+  md: 'markdown',
+  json: 'json',
+  typings: 'typescript',
+  'package-json': 'json',
+  fixture: undefined,
+  unknown: undefined
+};
+
+const EXT_TO_LANG: Record<string, string> = {
+  '.yaml': 'yaml',
+  '.yml': 'yaml',
+  '.sh': 'bash',
+};
+
 /**
  * Standard file utilities
  */
 export class DocFileUtil {
 
   static #decCache: Record<string, boolean> = {};
-  static #modFileTypeToLang: Record<ManifestModuleFileType, string | undefined> = {
-    ts: 'typescript',
-    js: 'javascript',
-    md: 'markdown',
-    json: 'json',
-    typings: 'typescript',
-    'package-json': 'json',
-    fixture: undefined,
-    unknown: undefined
-  };
-  static #extToLang: Record<string, string> = {
-    '.yaml': 'yaml',
-    '.yml': 'yaml',
-    '.sh': 'bash',
-  };
 
   static isFile(src: string): boolean {
     return /^[@:A-Za-z0-9\/\\\-_.]+[.]([a-z]{2,10})$/.test(src);
@@ -74,7 +76,7 @@ export class DocFileUtil {
     if (file !== undefined) {
       const ext = path.extname(file);
       const type = ManifestModuleUtil.getFileType(file);
-      const language = this.#modFileTypeToLang[type] ?? this.#extToLang[ext] ?? ext.replace('.', '');
+      const language = MOD_FILE_TO_LANG[type] ?? EXT_TO_LANG[ext] ?? ext.replace('.', '');
       return { content, file, language };
     } else {
       return { content, file: '', language: '' };

@@ -10,13 +10,13 @@ export type TermStyleFn = (input: TemplatePrim) => string;
 type TermStyledTemplate<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
 export type ColorLevel = 0 | 1 | 2 | 3;
 
-export class StyleUtil {
+const DARK_ANSI_256 = new Set([
+  0, 1, 2, 3, 4, 5, 6, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 52, 53, 54,
+  55, 56, 58, 59, 60, 64, 65, 66, 70, 76, 88, 89, 90, 91, 92, 94, 95, 96, 100, 101, 106, 112, 124, 125, 126, 127, 128, 130, 136, 142,
+  148, 160, 161, 162, 163, 164, 166, 172, 178, 184, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243
+]);
 
-  static #darkAnsi256 = new Set([
-    0, 1, 2, 3, 4, 5, 6, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 52, 53, 54,
-    55, 56, 58, 59, 60, 64, 65, 66, 70, 76, 88, 89, 90, 91, 92, 94, 95, 96, 100, 101, 106, 112, 124, 125, 126, 127, 128, 130, 136, 142,
-    148, 160, 161, 162, 163, 164, 166, 172, 178, 184, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243
-  ]);
+export class StyleUtil {
 
   static #scheme: { key: string, dark: boolean } = { key: '', dark: true };
 
@@ -50,7 +50,7 @@ export class StyleUtil {
     }
 
     const [, bg = '0'] = key.split(';');
-    const dark = this.#darkAnsi256.has(+bg);
+    const dark = DARK_ANSI_256.has(+bg);
     Object.assign(this.#scheme, { key, dark });
     return dark;
   }

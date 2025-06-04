@@ -24,13 +24,13 @@ const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
   unavailable: 503,
 };
 
-export class WebCommonUtil {
-  static #unitMapping: Record<string, number> = {
-    kb: 2 ** 10,
-    mb: 2 ** 20,
-    gb: 2 ** 30,
-  };
+const UNIT_MAPPING: Record<string, number> = {
+  kb: 2 ** 10,
+  mb: 2 ** 20,
+  gb: 2 ** 30,
+};
 
+export class WebCommonUtil {
   static #convert(rule: string): RegExp {
     const core = (rule.endsWith('/*') || !rule.includes('/')) ?
       `${rule.replace(/[/].{0,20}$/, '')}\/.*` : rule;
@@ -148,6 +148,6 @@ export class WebCommonUtil {
       return input;
     }
     const [, num, unit] = input.toLowerCase().split(/(\d+)/);
-    return parseInt(num, 10) * (this.#unitMapping[unit] ?? 1);
+    return parseInt(num, 10) * (UNIT_MAPPING[unit] ?? 1);
   }
 }

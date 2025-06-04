@@ -46,16 +46,11 @@ const fieldToInput = (x: FieldConfig): CliCommandInput => ({
  */
 export class CliCommandSchemaUtil {
 
-  static #schemas = new Map<Class, CliCommandSchema>();
-
   /**
    * Get schema for a given command
    */
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
     const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
-    if (this.#schemas.has(cls)) {
-      return this.#schemas.get(cls)!;
-    }
 
     // Ensure finalized
     const parent = SchemaRegistry.getParentClass(cls);
@@ -112,7 +107,7 @@ export class CliCommandSchemaUtil {
       title: fullSchema.title ?? cls.name,
       description: fullSchema.description ?? ''
     };
-    this.#schemas.set(cls, cfg);
+
     return cfg;
   }
 

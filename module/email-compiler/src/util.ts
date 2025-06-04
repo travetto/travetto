@@ -13,29 +13,30 @@ type Tokenized = {
 
 const SUPPORT_SRC = /(?:support|src)\//;
 
+const HTML_CSS_IMAGE_URLS = [
+  /(?<pre><img[^>]src=\s{0,10}["'])(?<src>[^"{}]{1,1000})/g,
+  /(?<pre>background(?:-image)?:\s{0,10}url[(]['"]?)(?<src>[^"'){}]{1,1000})/g
+];
+
+const EXT = /[.]email[.]tsx$/;
+
 /**
  * Email compile tools
  */
 export class EmailCompileUtil {
-  static #HTML_CSS_IMAGE_URLS = [
-    /(?<pre><img[^>]src=\s{0,10}["'])(?<src>[^"{}]{1,1000})/g,
-    /(?<pre>background(?:-image)?:\s{0,10}url[(]['"]?)(?<src>[^"'){}]{1,1000})/g
-  ];
-
-  static #EXT = /[.]email[.]tsx$/;
 
   /**
    * Is file a template?
    */
   static isTemplateFile(file: string): boolean {
-    return this.#EXT.test(file);
+    return EXT.test(file);
   }
 
   /**
    * Generate singular output path given a file
    */
   static buildOutputPath(file: string, suffix: string, prefix?: string): string {
-    const res = (SUPPORT_SRC.test(file) ? file.split(SUPPORT_SRC)[1] : file).replace(this.#EXT, suffix);
+    const res = (SUPPORT_SRC.test(file) ? file.split(SUPPORT_SRC)[1] : file).replace(EXT, suffix);
     return prefix ? path.join(prefix, res) : res;
   }
 
@@ -133,7 +134,7 @@ export class EmailCompileUtil {
    * Inline image sources
    */
   static async inlineImages(html: string, opts: EmailTemplateResource): Promise<string> {
-    const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
+    const { tokens, finalize } = await this.tokenizeResources(html, HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Buffer | Promise<Buffer>][] = [];
 
     for (const [token, src] of tokens) {

@@ -18,7 +18,7 @@ type FieldCacheEntry = {
  */
 export class SQLModelUtil {
 
-  static SCHEMA_FIELDS_CACHE = new Map<Class, FieldCacheEntry>();
+  static #schemaFieldsCache = new Map<Class, FieldCacheEntry>();
 
   /**
    * Creates a new visitation stack with the class as the root
@@ -56,8 +56,8 @@ export class SQLModelUtil {
     const top = stack.at(-1)!;
     const cls = SchemaRegistry.get(top.type);
 
-    if (cls && this.SCHEMA_FIELDS_CACHE.has(cls.class)) {
-      return this.SCHEMA_FIELDS_CACHE.get(cls.class)!;
+    if (cls && this.#schemaFieldsCache.has(cls.class)) {
+      return this.#schemaFieldsCache.get(cls.class)!;
     }
 
     if (!cls) { // If a simple type, it is it's own field
@@ -96,7 +96,7 @@ export class SQLModelUtil {
     ret.local.reduce((acc, f) => (acc[f.name] = f) && acc, ret.localMap);
     ret.foreign.reduce((acc, f) => (acc[f.name] = f) && acc, ret.foreignMap);
 
-    this.SCHEMA_FIELDS_CACHE.set(cls.class, ret);
+    this.#schemaFieldsCache.set(cls.class, ret);
 
     return ret;
   }

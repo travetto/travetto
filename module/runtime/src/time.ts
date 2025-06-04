@@ -14,16 +14,16 @@ const TIME_UNITS = {
 export type TimeSpan = `${number}${keyof typeof TIME_UNITS}`;
 export type TimeUnit = keyof typeof TIME_UNITS;
 
-export class TimeUtil {
+const TIME_PATTERN = new RegExp(`^(?<amount>-?[0-9.]+)(?<unit>${Object.keys(TIME_UNITS).join('|')})$`);
 
-  static #timePattern = new RegExp(`^(?<amount>-?[0-9.]+)(?<unit>${Object.keys(TIME_UNITS).join('|')})$`);
+export class TimeUtil {
 
   /**
    * Test to see if a string is valid for relative time
    * @param val
    */
   static isTimeSpan(val: string): val is TimeSpan {
-    return this.#timePattern.test(val);
+    return TIME_PATTERN.test(val);
   }
 
   /**
@@ -35,7 +35,7 @@ export class TimeUtil {
     if (amount instanceof Date) {
       return amount.getTime();
     } else if (typeof amount === 'string') {
-      const groups: { amount?: string, unit?: TimeUnit } = amount.match(this.#timePattern)?.groups ?? {};
+      const groups: { amount?: string, unit?: TimeUnit } = amount.match(TIME_PATTERN)?.groups ?? {};
       const amountStr = groups.amount ?? `${amount}`;
       unit = groups.unit ?? unit ?? 'ms';
       if (!TIME_UNITS[unit]) {
