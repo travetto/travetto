@@ -104,8 +104,7 @@ export class PackageUtil {
         let out: PackageWorkspaceEntry[];
         switch (ctx.workspace.manager) {
           case 'pnpm': {
-            const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'pnpm ls -r --depth -1');
-            out = [];
+            out = await this.#exec<{ path: string, name: string }[]>(rootPath, 'pnpm ls -r --depth -1');
             break;
           }
           case 'yarn':
