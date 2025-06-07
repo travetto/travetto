@@ -103,6 +103,11 @@ export class PackageUtil {
       .catch(async () => {
         let out: PackageWorkspaceEntry[];
         switch (ctx.workspace.manager) {
+          case 'pnpm': {
+            const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'pnpm ls -r --depth -1');
+            out = [];
+            break;
+          }
           case 'yarn':
           case 'npm': {
             const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
@@ -123,6 +128,7 @@ export class PackageUtil {
     switch (ctx.workspace.manager) {
       case 'npm': install = `npm i ${prod ? '' : '--save-dev '}${pkg}`; break;
       case 'yarn': install = `yarn add ${prod ? '' : '--dev '}${pkg}`; break;
+      case 'pnpm': install = `pnpm add ${prod ? '' : '--dev '}${pkg}`; break;
     }
     return install;
   }

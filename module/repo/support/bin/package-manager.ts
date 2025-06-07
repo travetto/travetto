@@ -59,6 +59,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
+      case 'pnpm':
       case 'yarn':
         args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...mods];
         break;
@@ -73,6 +74,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
+      case 'pnpm':
       case 'yarn':
         args = ['pack', '--dry-run'];
         break;
@@ -92,6 +94,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
+      case 'pnpm':
       case 'yarn':
         args = ['publish', '--tag', versionTag, '--access', 'public'];
         break;

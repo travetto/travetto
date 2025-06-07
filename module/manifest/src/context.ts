@@ -11,6 +11,7 @@ type Pkg = Package & { path: string };
 const toPort = (pth: string): number => (Math.abs([...pth].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
 const toPosix = (pth: string): string => pth.replaceAll('\\', '/');
 const readPackage = (file: string): Pkg => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: toPosix(path.dirname(file)) });
+const PACKAGE_MANAGERS = [{ file: 'pnpm-lock.yaml', type: 'pnpm' }, { file: 'yarn.lock', type: 'yarn' }] as const;
 
 /** Find package */
 function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
@@ -58,7 +59,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: existsSync(path.resolve(workspace.path, 'yarn.lock')) ? 'yarn' : 'npm',
+      manager: PACKAGE_MANAGERS.find(x => existsSync(path.resolve(workspace.path, x.file)))?.type ?? 'npm',
       type: workspace.type ?? 'commonjs',
       defaultEnv: workspace.travetto?.defaultEnv ?? 'local'
     },

@@ -149,7 +149,10 @@ export class CompilerWatcher {
   async #listenWorkspace(): Promise<void> {
     const lib = await import('@parcel/watcher');
     const ignore = await this.#getWatchIgnores();
-    const packageFiles = new Set(['package-lock.json', 'yarn.lock', 'package.json'].map(x => path.resolve(this.#root, x)));
+    const packageFiles = new Set([
+      'package-lock.json', 'yarn.lock', 'package.json',
+      'pnpm-lock.yaml', 'pnpm-workspace.yaml'
+    ].map(x => path.resolve(this.#root, x)));
 
     log.debug('Ignore Globs', ignore);
     log.debug('Watching', this.#root);

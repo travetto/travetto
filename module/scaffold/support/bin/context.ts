@@ -187,6 +187,7 @@ export class Context {
 
     yield cliTpl`${{ type: 'Installing dependencies' }} `;
     switch (this.packageManager) {
+      case 'pnpm': await this.#exec('pnpm', ['i']); break;
       case 'npm': await this.#exec('npm', ['i']); break;
       case 'yarn': await this.#exec('yarn', []); break;
       default: throw new Error(`Unknown package manager: ${this.packageManager} `);
@@ -194,6 +195,7 @@ export class Context {
 
     yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
     switch (this.packageManager) {
+      case 'pnpm': await this.#exec('pnpm', ['up', '--latest']); break;
       case 'npm': await this.#exec('npm', ['update', '-S']); break;
       case 'yarn': await this.#exec('yarn', ['upgrade']); break;
       default: throw new Error(`Unknown package manager: ${this.packageManager} `);

@@ -17,6 +17,7 @@ export const FEATURES: Feature[] = [
     title: 'Package Manager',
     choices: [
       { title: 'NPM', field: 'packageManager', value: 'npm' },
+      { title: 'PNPM', field: 'packageManager', value: 'pnpm' },
       { title: 'Yarn', field: 'packageManager', value: 'yarn' }
     ],
     required: true,
