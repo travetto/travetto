@@ -7,3 +7,4 @@ publicHoistPattern:
 disallowWorkspaceCycles: true
 includeWorkspaceRoot: true
 nodeLinker: hoisted
+dangerouslyAllowAllBuilds: true
