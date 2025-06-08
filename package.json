@@ -51,8 +51,5 @@
     "rollup-plugin-visualizer": "^5.14.0",
     "whatwg-url": "^14.2.0"
   },
-  "version": "0.0.0",
-  "pnpm": {
-    "neverBuiltDependencies": []
-  }
+  "version": "0.0.0"
 }
