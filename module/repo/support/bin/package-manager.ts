@@ -34,13 +34,14 @@ export class PackageManager {
    * Validate published result
    */
   static validatePublishedResult(ctx: Ctx, mod: IndexedModule, result: ExecutionResult<string>): boolean {
+    if (!result.valid && !result.stderr.includes('E404')) {
+      throw new Error(result.stderr);
+    }
+
     switch (ctx.workspace.manager) {
       case 'npm':
       case 'pnpm':
       case 'yarn': {
-        if (!result.valid && !result.stderr.includes('E404')) {
-          throw new Error(result.stderr);
-        }
         const parsed = JSON.parse(result.stdout);
         return parsed.data.dist?.integrity !== undefined;
       }
