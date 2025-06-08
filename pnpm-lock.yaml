@@ -4,13 +4,199 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+pnpmfileChecksum: sha256-PuuUGtZd5InvgO77iN667N/mb9v6Pk9SeaqTAVZ2dEI=
+
 importers:
 
   .:
-    devDependencies:
+    dependencies:
+      '@travetto-test/model_auth-model':
+        specifier: workspace:*
+        version: link:global-test/model_auth-model
+      '@travetto-test/model_auth-session':
+        specifier: workspace:*
+        version: link:global-test/model_auth-session
+      '@travetto-test/model_cache':
+        specifier: workspace:*
+        version: link:global-test/model_cache
+      '@travetto-test/model_web-upload':
+        specifier: workspace:*
+        version: link:global-test/model_web-upload
+      '@travetto-test/pack_app':
+        specifier: workspace:*
+        version: link:global-test/pack_app
+      '@travetto-test/transformer':
+        specifier: workspace:*
+        version: link:global-test/transformer-test
+      '@travetto/auth':
+        specifier: workspace:*
+        version: link:module/auth
+      '@travetto/auth-model':
+        specifier: workspace:*
+        version: link:module/auth-model
+      '@travetto/auth-session':
+        specifier: workspace:*
+        version: link:module/auth-session
+      '@travetto/auth-web':
+        specifier: workspace:*
+        version: link:module/auth-web
+      '@travetto/auth-web-passport':
+        specifier: workspace:*
+        version: link:module/auth-web-passport
+      '@travetto/auth-web-session':
+        specifier: workspace:*
+        version: link:module/auth-web-session
+      '@travetto/cache':
+        specifier: workspace:*
+        version: link:module/cache
+      '@travetto/cli':
+        specifier: workspace:*
+        version: link:module/cli
+      '@travetto/compiler':
+        specifier: workspace:*
+        version: link:module/compiler
+      '@travetto/config':
+        specifier: workspace:*
+        version: link:module/config
+      '@travetto/context':
+        specifier: workspace:*
+        version: link:module/context
+      '@travetto/di':
+        specifier: workspace:*
+        version: link:module/di
+      '@travetto/doc':
+        specifier: workspace:*
+        version: link:module/doc
+      '@travetto/email':
+        specifier: workspace:*
+        version: link:module/email
+      '@travetto/email-compiler':
+        specifier: workspace:*
+        version: link:module/email-compiler
+      '@travetto/email-inky':
+        specifier: workspace:*
+        version: link:module/email-inky
+      '@travetto/email-nodemailer':
+        specifier: workspace:*
+        version: link:module/email-nodemailer
+      '@travetto/eslint':
+        specifier: workspace:*
+        version: link:module/eslint
+      '@travetto/image':
+        specifier: workspace:*
+        version: link:module/image
+      '@travetto/log':
+        specifier: workspace:*
+        version: link:module/log
+      '@travetto/manifest':
+        specifier: workspace:*
+        version: link:module/manifest
+      '@travetto/model':
+        specifier: workspace:*
+        version: link:module/model
+      '@travetto/model-dynamodb':
+        specifier: workspace:*
+        version: link:module/model-dynamodb
+      '@travetto/model-elasticsearch':
+        specifier: workspace:*
+        version: link:module/model-elasticsearch
+      '@travetto/model-file':
+        specifier: workspace:*
+        version: link:module/model-file
+      '@travetto/model-firestore':
+        specifier: workspace:*
+        version: link:module/model-firestore
+      '@travetto/model-memory':
+        specifier: workspace:*
+        version: link:module/model-memory
+      '@travetto/model-mongo':
+        specifier: workspace:*
+        version: link:module/model-mongo
+      '@travetto/model-mysql':
+        specifier: workspace:*
+        version: link:module/model-mysql
+      '@travetto/model-postgres':
+        specifier: workspace:*
+        version: link:module/model-postgres
+      '@travetto/model-query':
+        specifier: workspace:*
+        version: link:module/model-query
+      '@travetto/model-query-language':
+        specifier: workspace:*
+        version: link:module/model-query-language
+      '@travetto/model-redis':
+        specifier: workspace:*
+        version: link:module/model-redis
+      '@travetto/model-s3':
+        specifier: workspace:*
+        version: link:module/model-s3
+      '@travetto/model-sql':
+        specifier: workspace:*
+        version: link:module/model-sql
+      '@travetto/model-sqlite':
+        specifier: workspace:*
+        version: link:module/model-sqlite
+      '@travetto/openapi':
+        specifier: workspace:*
+        version: link:module/openapi
+      '@travetto/pack':
+        specifier: workspace:*
+        version: link:module/pack
+      '@travetto/registry':
+        specifier: workspace:*
+        version: link:module/registry
       '@travetto/repo':
-        specifier: ^6.0.0
-        version: 6.0.0
+        specifier: workspace:*
+        version: link:module/repo
+      '@travetto/runtime':
+        specifier: workspace:*
+        version: link:module/runtime
+      '@travetto/scaffold':
+        specifier: workspace:*
+        version: link:module/scaffold
+      '@travetto/schema':
+        specifier: workspace:*
+        version: link:module/schema
+      '@travetto/schema-faker':
+        specifier: workspace:*
+        version: link:module/schema-faker
+      '@travetto/terminal':
+        specifier: workspace:*
+        version: link:module/terminal
+      '@travetto/test':
+        specifier: workspace:*
+        version: link:module/test
+      '@travetto/todo-app':
+        specifier: workspace:*
+        version: link:related/todo-app
+      '@travetto/transformer':
+        specifier: workspace:*
+        version: link:module/transformer
+      '@travetto/web':
+        specifier: workspace:*
+        version: link:module/web
+      '@travetto/web-aws-lambda':
+        specifier: workspace:*
+        version: link:module/web-aws-lambda
+      '@travetto/web-connect':
+        specifier: workspace:*
+        version: link:module/web-connect
+      '@travetto/web-http-server':
+        specifier: workspace:*
+        version: link:module/web-http-server
+      '@travetto/web-node':
+        specifier: workspace:*
+        version: link:module/web-node
+      '@travetto/web-rpc':
+        specifier: workspace:*
+        version: link:module/web-rpc
+      '@travetto/web-upload':
+        specifier: workspace:*
+        version: link:module/web-upload
+      '@travetto/worker':
+        specifier: workspace:*
+        version: link:module/worker
+    devDependencies:
       '@types/node-forge':
         specifier: ^1.3.11
         version: 1.3.11
@@ -33,203 +219,32 @@ importers:
         specifier: ^14.2.0
         version: 14.2.0
 
-  global-test/model_auth-model:
-    dependencies:
-      '@travetto/auth-model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-dynamodb':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-elasticsearch':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-firestore':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-mongo':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-mysql':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-postgres':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-redis':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-s3':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sqlite':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  global-test/model_auth-model: {}
 
-  global-test/model_auth-session:
-    dependencies:
-      '@travetto/auth-session':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-dynamodb':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-elasticsearch':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-firestore':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-mongo':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-mysql':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-postgres':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-redis':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-s3':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sqlite':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  global-test/model_auth-session: {}
 
-  global-test/model_cache:
-    dependencies:
-      '@travetto/cache':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-dynamodb':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-elasticsearch':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-firestore':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-mongo':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-mysql':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-postgres':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-redis':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-s3':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sqlite':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  global-test/model_cache: {}
 
-  global-test/model_web-upload:
-    dependencies:
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web-aws-lambda':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/pack@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web-node':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web-upload':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  global-test/model_web-upload: {}
 
-  global-test/pack_app:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-    devDependencies:
-      '@travetto/compiler':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))
-      '@travetto/pack':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  global-test/pack_app: {}
 
   global-test/transformer-test: {}
 
-  module/auth:
-    dependencies:
-      '@travetto/context':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/auth: {}
 
-  module/auth-model:
-    dependencies:
-      '@travetto/auth':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/auth-model: {}
 
-  module/auth-session:
-    dependencies:
-      '@travetto/auth':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/auth-session: {}
 
   module/auth-web:
     dependencies:
-      '@travetto/auth':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       njwt:
         specifier: ^2.0.1
         version: 2.0.1
 
   module/auth-web-passport:
     dependencies:
-      '@travetto/auth':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/auth-web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web-connect':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       '@types/passport':
         specifier: ^1.0.17
         version: 1.0.17
@@ -244,101 +259,30 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
 
-  module/auth-web-session:
-    dependencies:
-      '@travetto/auth':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/auth-session':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/auth-web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/auth-web-session: {}
 
-  module/cache:
-    dependencies:
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/transformer':
-        specifier: ^6.0.0
-        version: 6.0.0
+  module/cache: {}
 
-  module/cli:
-    dependencies:
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/terminal':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
+  module/cli: {}
 
   module/compiler:
     dependencies:
       '@parcel/watcher':
         specifier: ^2.5.1
         version: 2.5.1
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/manifest':
-        specifier: ^6.0.0
-        version: 6.0.0
-      '@travetto/transformer':
-        specifier: ^6.0.0
-        version: 6.0.0
 
   module/config:
     dependencies:
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       yaml:
         specifier: ^2.8.0
         version: 2.8.0
 
-  module/context:
-    dependencies:
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/context: {}
 
-  module/di:
-    dependencies:
-      '@travetto/registry':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/transformer':
-        specifier: ^6.0.0
-        version: 6.0.0
+  module/di: {}
 
   module/doc:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       '@types/prismjs':
         specifier: ^1.26.5
         version: 1.26.5
@@ -348,15 +292,6 @@ importers:
 
   module/email:
     dependencies:
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       '@types/mustache':
         specifier: ^4.2.6
         version: 4.2.6
@@ -366,27 +301,6 @@ importers:
 
   module/email-compiler:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/email':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/image':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/worker':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       '@types/inline-css':
         specifier: ^3.0.4
         version: 3.0.4
@@ -405,31 +319,12 @@ importers:
 
   module/email-inky:
     dependencies:
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/email':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       foundation-emails:
         specifier: ^2.4.0
         version: 2.4.0
-    devDependencies:
-      '@travetto/email-compiler':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)(debug@4.4.1)
 
   module/email-nodemailer:
     dependencies:
-      '@travetto/email':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       '@types/nodemailer':
         specifier: ^6.4.17
         version: 6.4.17
@@ -449,12 +344,6 @@ importers:
       '@stylistic/eslint-plugin':
         specifier: ^4.2.0
         version: 4.4.1(eslint@9.28.0)(typescript@5.8.3)
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       '@types/eslint':
         specifier: ^9.6.1
         version: 9.6.1
@@ -473,24 +362,11 @@ importers:
 
   module/image:
     dependencies:
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       sharp:
         specifier: ^0.34.1
         version: 0.34.2
 
-  module/log:
-    dependencies:
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/terminal':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
+  module/log: {}
 
   module/manifest:
     dependencies:
@@ -498,182 +374,44 @@ importers:
         specifier: ^22.15.18
         version: 22.15.30
 
-  module/model:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/registry':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/model: {}
 
   module/model-dynamodb:
     dependencies:
       '@aws-sdk/client-dynamodb':
         specifier: ^3.810.0
         version: 3.826.0
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
 
   module/model-elasticsearch:
     dependencies:
       '@elastic/elasticsearch':
         specifier: ^8.18.2
         version: 8.18.2
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
 
-  module/model-file:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/model-file: {}
 
   module/model-firestore:
     dependencies:
       '@google-cloud/firestore':
         specifier: ^7.11.1
         version: 7.11.1
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
 
-  module/model-memory:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/model-memory: {}
 
   module/model-mongo:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       mongodb:
         specifier: ^6.16.0
         version: 6.17.0
 
   module/model-mysql:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sql':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       mysql2:
         specifier: ^3.14.1
         version: 3.14.1
 
   module/model-postgres:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sql':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       '@types/pg':
         specifier: ^8.15.1
         version: 8.15.4
@@ -681,50 +419,15 @@ importers:
         specifier: ^8.16.0
         version: 8.16.0
 
-  module/model-query:
-    dependencies:
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/model-query: {}
 
-  module/model-query-language:
-    dependencies:
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/model-query-language: {}
 
   module/model-redis:
     dependencies:
       '@redis/client':
         specifier: ^5.1.1
         version: 5.5.6
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
 
   module/model-s3:
     dependencies:
@@ -737,54 +440,11 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.810.0
         version: 3.826.0
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
 
-  module/model-sql:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/model-sql: {}
 
   module/model-sqlite:
     dependencies:
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sql':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
@@ -794,18 +454,6 @@ importers:
 
   module/openapi:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       openapi3-ts:
         specifier: ^4.4.0
         version: 4.4.0
@@ -827,48 +475,16 @@ importers:
       '@rollup/plugin-terser':
         specifier: ^0.4.4
         version: 0.4.4(rollup@4.42.0)
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/terminal':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       rollup:
         specifier: ^4.40.2
         version: 4.42.0
 
-  module/registry:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/transformer':
-        specifier: ^6.0.0
-        version: 6.0.0
+  module/registry: {}
 
-  module/repo:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/worker':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
+  module/repo: {}
 
   module/runtime:
     dependencies:
-      '@travetto/manifest':
-        specifier: ^6.0.0
-        version: 6.0.0
-      '@travetto/transformer':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
@@ -878,12 +494,6 @@ importers:
 
   module/scaffold:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       enquirer:
         specifier: ^2.4.1
         version: 2.4.1
@@ -891,69 +501,32 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
     devDependencies:
-      '@travetto/model':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       '@types/mustache':
         specifier: ^4.2.6
         version: 4.2.6
 
-  module/schema:
-    dependencies:
-      '@travetto/registry':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/transformer':
-        specifier: ^6.0.0
-        version: 6.0.0
+  module/schema: {}
 
   module/schema-faker:
     dependencies:
       '@faker-js/faker':
         specifier: ^9.8.0
         version: 9.8.0
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
 
   module/terminal:
     dependencies:
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
 
   module/test:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/registry':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/terminal':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/transformer':
-        specifier: ^6.0.0
-        version: 6.0.0
-      '@travetto/worker':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       yaml:
         specifier: ^2.8.0
         version: 2.8.0
 
   module/transformer:
     dependencies:
-      '@travetto/manifest':
-        specifier: ^6.0.0
-        version: 6.0.0
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -963,114 +536,29 @@ importers:
 
   module/web:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/registry':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/transformer':
-        specifier: ^6.0.0
-        version: 6.0.0
       find-my-way:
         specifier: ^9.3.0
         version: 9.3.0
 
   module/web-aws-lambda:
     dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/pack':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       '@types/aws-lambda':
         specifier: ^8.10.149
         version: 8.10.149
 
-  module/web-connect:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/web-connect: {}
 
-  module/web-http-server:
-    dependencies:
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/web-http-server: {}
 
-  module/web-node:
-    dependencies:
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web-http-server':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/web-node: {}
 
-  module/web-rpc:
-    dependencies:
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
+  module/web-rpc: {}
 
   module/web-upload:
     dependencies:
       '@fastify/busboy':
         specifier: ^3.1.1
         version: 3.1.1
-      '@travetto/config':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       file-type:
         specifier: ^20.5.0
         version: 20.5.0
@@ -1080,55 +568,15 @@ importers:
 
   module/worker:
     dependencies:
-      '@travetto/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
       generic-pool:
         specifier: ^3.9.0
         version: 3.9.0
 
   related/todo-app:
     dependencies:
-      '@travetto/auth-web':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/auth-web-session':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/cli':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/email-inky':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/log':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-mongo':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/openapi':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web-node':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web-rpc':
-        specifier: ^6.0.2
-        version: 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
       vue:
         specifier: ^3.5.13
         version: 3.5.16(typescript@5.8.3)
-    devDependencies:
-      '@travetto/compiler':
-        specifier: ^6.0.1
-        version: 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))
-      '@travetto/email-compiler':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)(debug@4.4.1)
-      '@travetto/pack':
-        specifier: ^6.0.0
-        version: 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
 
 packages:
 
@@ -1691,38 +1139,9 @@ packages:
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
-  '@redis/bloom@1.2.0':
-    resolution: {integrity: sha512-HG2DFjYKbpNmVXsa0keLHp/3leGJz1mjh09f2RLGGLQZzSHpkmZWuwJbAvo3QcRY8p80m5+ZdXZdYOSBLlp7Cg==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-
-  '@redis/client@1.6.1':
-    resolution: {integrity: sha512-/KCsg3xSlR+nCK8/8ZYSknYxvXHwubJrU82F3Lm1Fp6789VQ0/3RJKfsmRXjqfaTA++23CvC3hqmqe/2GEt6Kw==}
-    engines: {node: '>=14'}
-
   '@redis/client@5.5.6':
     resolution: {integrity: sha512-M3Svdwt6oSfyfQdqEr0L2HOJH2vK7GgCFx1NfAQvpWAT4+ljoT1L5S5cKT3dA9NJrxrOPDkdoTPWJnIrGCOcmw==}
     engines: {node: '>= 18'}
-
-  '@redis/graph@1.1.1':
-    resolution: {integrity: sha512-FEMTcTHZozZciLRl6GiiIB4zGm5z5F3F6a6FZCyrfxdKOhFlGkiAqlexWMBzCi4DcRoyiOsuLfW+cjlGWyExOw==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-
-  '@redis/json@1.0.7':
-    resolution: {integrity: sha512-6UyXfjVaTBTJtKNG4/9Z8PSpKE6XgSyEb8iwaqDcy+uKrd/DGYHTWkUdnQDyzm727V7p21WUMhsqz5oy65kPcQ==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-
-  '@redis/search@1.2.0':
-    resolution: {integrity: sha512-tYoDBbtqOVigEDMAcTGsRlMycIIjwMCgD8eR2t0NANeQmgK/lvxNAvYyb6bZDD4frHRhIHkJu2TBRvB0ERkOmw==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
-
-  '@redis/time-series@1.1.0':
-    resolution: {integrity: sha512-c1Q99M5ljsIuc4YdaCwfUEXsofakb9c8+Zse2qxTadu8TalLXuAESzLvFAvNVbkmSlvlzIQOLpBCmWI9wTOt+g==}
-    peerDependencies:
-      '@redis/client': ^1.0.0
 
   '@rollup/plugin-commonjs@28.0.3':
     resolution: {integrity: sha512-pyltgilam1QPdn+Zd9gaCfOLcnjMEJ9gV+bTw6/r73INdvzf1ah9zLIJBm+kW7R6IUFIQ1YO+VqZtYxZNWFPEQ==}
@@ -2100,292 +1519,6 @@ packages:
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
-
-  '@travetto/auth-model@6.0.0':
-    resolution: {integrity: sha512-FyLE92b9EaWop+y2Y8+JtmhJcL4o9gzmL6I71Wz8HsXDv2l4RtnmqMfy+moJgaTAU2jLFpmo2wAMN8lOVerChg==}
-    peerDependencies:
-      '@travetto/test': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/test':
-        optional: true
-
-  '@travetto/auth-session@6.0.0':
-    resolution: {integrity: sha512-pks/u/iAHf7zjOkiGtyIpT7HZSYSlhvJUKfCwafONj8xYeI4vx7lrd9pD+KPkosYMN/otqbN45Qp9MLnxesC7A==}
-    peerDependencies:
-      '@travetto/test': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/test':
-        optional: true
-
-  '@travetto/auth-web-session@6.0.2':
-    resolution: {integrity: sha512-9oiAOLb9Z8RuEh1EXHU6lys2CbGaLLr3896cmZMlvXmT0K5Nh3WBaBs9TnkjIVu8FjPGQSDTnnaiOnMh3ZMCgA==}
-
-  '@travetto/auth-web@6.0.2':
-    resolution: {integrity: sha512-qFX9UzhGKOt5RXtNjIVoF9SbAzloFmle8vPY0UBRJX5Nkpe0UyDo9GSwmQTsPk9lOvlZaDUEDhVqNlUqvOfCIw==}
-    peerDependencies:
-      '@travetto/test': ^6.0.1
-    peerDependenciesMeta:
-      '@travetto/test':
-        optional: true
-
-  '@travetto/auth@6.0.0':
-    resolution: {integrity: sha512-3VVaUxJc3ssCh0qHA1ov0hiaUEvHt+7hQ+qVw90NMv3fK41WCwrLYpByGSgNX6immftqD+aZwsHZ8UP5tpAonQ==}
-
-  '@travetto/cache@6.0.0':
-    resolution: {integrity: sha512-CEKXAjaOUs+o6IcREg4K+bEfiCcWObdAAzdsdo718eiofLv6PUShK+A6hddtPa7ZuaOYfNkidJtrYmqp8VM0iQ==}
-    peerDependencies:
-      '@travetto/test': ^6.0.0
-      '@travetto/transformer': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/test':
-        optional: true
-      '@travetto/transformer':
-        optional: true
-
-  '@travetto/cli@6.0.0':
-    resolution: {integrity: sha512-E7Q+2S+7On9Xi+o8nn/oZVBOYPCyNiPHVw5eVdwP1Irm+Y677Nmtt96bnlIvVTPp+s+5BytAyO32zPy+7mKvYA==}
-    hasBin: true
-
-  '@travetto/compiler@6.0.1':
-    resolution: {integrity: sha512-ggbX5DQ94lekTlnZ2oxMPMDhzru3PE+Td1IYfvtt/Lm8mpm5Dg3WN8iOjiQ71xEUA6C3Cig3+tcP/cF90DS1Tg==}
-    hasBin: true
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-
-  '@travetto/config@6.0.0':
-    resolution: {integrity: sha512-6TSIjgU8n+LeX5n+6/IuOBv9jn5H9ahe3Z7Pc17qEoHJPdv956xIZSONuL/UQTtJLO30sOMfbYCpZf6y6amnCg==}
-
-  '@travetto/context@6.0.0':
-    resolution: {integrity: sha512-WPw3sd9/7fG+nD+22lNrxnbJxq50RN3IzMvQ6Sp6zHwaOM/41/ySYruMX0X+W+xi+H2p28yxnmb5a1d9s7/VJw==}
-    peerDependencies:
-      '@travetto/test': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/test':
-        optional: true
-
-  '@travetto/di@6.0.0':
-    resolution: {integrity: sha512-aYo0hstRgMGWdsciAEIMXM6V5E8UtzEJckCD7qWNZxeJxka2qJ8JQt2nrHNMDQ7jpwTQx9XDy0X/lxYXLcYY+A==}
-    peerDependencies:
-      '@travetto/transformer': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/transformer':
-        optional: true
-
-  '@travetto/email-compiler@6.0.0':
-    resolution: {integrity: sha512-1/vENPLapnEcxOXQ2c4MlKCNF8XA/3fvOfZnaSUPOBvxRS74+DFJ8qjvF8Z3xWt3pRhcaKMk50BOlsYYuoHVLQ==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-
-  '@travetto/email-inky@6.0.0':
-    resolution: {integrity: sha512-N1TkRAiME0vZOaxsdvy7D2Y76GY5yB9m6rd/P6XuSNnrLk9gMUxlnNHQdL1vf7Wh2wXZDUxPgoxO7sEcOju9bw==}
-    peerDependencies:
-      '@travetto/cli': '*'
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-
-  '@travetto/email@6.0.0':
-    resolution: {integrity: sha512-Hy8xIeTICE+6gobRAm2O6lkNY0sOoiXuZ2GLqPppUjUmwFw0lUb/BccCyi63G9eYoDTGmqibc+uIMzl3ch30MQ==}
-
-  '@travetto/image@6.0.0':
-    resolution: {integrity: sha512-FLF20UpfxBvCHLpoZ2gPdV1bcFwUrFJzD6DtZwcfNwr51I/PNe/GN65KjCPwqD0jak/xyC59kn6NR7rFmdcH8w==}
-
-  '@travetto/log@6.0.0':
-    resolution: {integrity: sha512-H1OXWJ4+JnYhmlQslhatiV/5GAR1W4Qeo5vyJF+3bFJHv+PURbZlwRIEKIKRqBodcqa/Zsc/PbvJVXGo3Tbvsw==}
-
-  '@travetto/manifest@6.0.0':
-    resolution: {integrity: sha512-WIDJTEvhRWiwhScGbBdeQoRzE38Di2GuXEzAV0Vus+G3cSrcUkQcUrreo0EGJrw9QCEEHisHcGcP7sEdHGdgCw==}
-    engines: {node: '>=23.0.0'}
-
-  '@travetto/model-dynamodb@6.0.0':
-    resolution: {integrity: sha512-AMviTdk5Xd3Y7XWXIcF/w/k4jp64DF34VMkm6C77XOQ9x/eGS6AwMg9G04rT7hofvBtv24SeRhoIMIJekpS44A==}
-
-  '@travetto/model-elasticsearch@6.0.0':
-    resolution: {integrity: sha512-xYcvmfxKIX3oxAp0DrZOCI+pIE0osWzLEU3J/9PsM/f6OfYSTx+ffckw5v1BTx3eKM9+5IGZoQkjXM34ARDeOg==}
-
-  '@travetto/model-firestore@6.0.0':
-    resolution: {integrity: sha512-95V+wXOOvfpist4Nh4nWWTxtivSSL3/p5k1zsGixQ+tJ/w7tob1h9VA+/1MQLa5jan2pwOElsuJvtxIUOktYLQ==}
-
-  '@travetto/model-mongo@6.0.0':
-    resolution: {integrity: sha512-7zACBRzpSK7QMX+VMV6f7pmymcVHNUFY9mKiez0erHO7mpntFrMusTPdbrQ8A0IJSje+I7Sh6KBprG5F7JRqKQ==}
-
-  '@travetto/model-mysql@6.0.0':
-    resolution: {integrity: sha512-TtELW6JTYvpUVxxBzllLEXtTTkbwX/Q2KxeeJ+Vm54AjX0T/NAAJN/fyVNAw33l0inewR6vGaHtwxm8i1XdIEw==}
-
-  '@travetto/model-postgres@6.0.0':
-    resolution: {integrity: sha512-sT3lzqNs2iXV6Q1RORZDb7JcYx9gHL3Qu6EEoZNHy/c7pAvmWr/PLTlL9EGhK19u6/1xu+bMxVkCftm7u65ojw==}
-
-  '@travetto/model-query@6.0.0':
-    resolution: {integrity: sha512-mJx69OqVci0bLgD7Jl3jARH/6GbMxBUzZTlyQugRsPNQrg+9eaRiB7c7u6/RK/zQ0H45zM1+O8Mn2yrl53JtjA==}
-    peerDependencies:
-      '@travetto/test': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/test':
-        optional: true
-
-  '@travetto/model-redis@6.0.0':
-    resolution: {integrity: sha512-3u94cz4C1Qx6hiGDlQX3OX+4JAOklNoI9UIcsCZDwfV4TtlTvkKuYW8ZolpLn1H43M8vNhkYSZhI0FX61TaE/A==}
-
-  '@travetto/model-s3@6.0.0':
-    resolution: {integrity: sha512-fjAed1SrNc9AWAeCX0pnN4AAuszmP8/TLjg0zXfPfVAD7yt2kCAaTwfXgMnVXwxaNDTlbwHw6Zx1h0V4V9sv+w==}
-
-  '@travetto/model-sql@6.0.0':
-    resolution: {integrity: sha512-KIx/pK+XUg1XMGUHv3vtgnnib42cuDGJnzv5fK754wAeHU1qLwckxVunDBMU2mEZojO5k/8YtAuLmZ0X/yIBLA==}
-    peerDependencies:
-      '@travetto/test': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/test':
-        optional: true
-
-  '@travetto/model-sqlite@6.0.0':
-    resolution: {integrity: sha512-lScf4yYGxgg/Zd/PGvc64Sg8lkrgnexup2p5X18Lvt1NDkhxpZimhC3Gp47O8s8WVPg8sFgQIqFZ6vNU39CZ1w==}
-
-  '@travetto/model@6.0.0':
-    resolution: {integrity: sha512-Ldo4R3zHyuaRSDMXYwCnBEqAya0PG39wif2lFhxejPMs60AXKvLWnFGvA2MhSOD4bXE/T0nmvQHtKb+VdB8GAw==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-      '@travetto/test': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-      '@travetto/test':
-        optional: true
-
-  '@travetto/openapi@6.0.2':
-    resolution: {integrity: sha512-3nICWcnfsJt2oOyvwXmYEaNmtuyR+3rzgul20ZKue4gLr8VHIEoNlkPpCl+vtM5V/K1+mzsJh+c0GnOqV1kBYA==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-
-  '@travetto/pack@6.0.0':
-    resolution: {integrity: sha512-EZT9ueDJBwIgxCEvDrRemhTTOrOIkg+UjRscpvgYQPZqlHBokUxqpzj+tIzF/r1yzxD4Fd/JmF7OmSOsPGp4fg==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-
-  '@travetto/registry@6.0.0':
-    resolution: {integrity: sha512-QHHep2RRPMC9LGuaTogCNViEYj7JtD/HJvGfvTX5qIXIzScaJXsrQEOP3KDc1sMfwRJAnAc7xGJbI1hJMpX/GA==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-      '@travetto/transformer': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-      '@travetto/transformer':
-        optional: true
-
-  '@travetto/repo@6.0.0':
-    resolution: {integrity: sha512-8Y3Kqg6/LP5vDqLg0KGTgQ9YJbEyLGTcPAfHMbkq7pE25bVBqV4r8qkosfBX6H9px8W+dcKb1qKQJYzGuiYzgg==}
-
-  '@travetto/runtime@6.0.0':
-    resolution: {integrity: sha512-X45z0GOVtDSU3GWAAUbRKPCqNoMjvbZV7IkbPVSgcyA3zZ8rxrWS8zoq+NPiyH15a25jwQb7UbOGRr+wXQiuyA==}
-    peerDependencies:
-      '@travetto/transformer': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/transformer':
-        optional: true
-
-  '@travetto/schema@6.0.0':
-    resolution: {integrity: sha512-pQfcFzKOOj1yhwQATXQjBFxH/9iBlLoFhszGV4i6t4QhtETyDQJ2V/aSyDCwo9irviZeYn9xsobL5boQEMYiJw==}
-    peerDependencies:
-      '@travetto/transformer': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/transformer':
-        optional: true
-
-  '@travetto/terminal@6.0.0':
-    resolution: {integrity: sha512-vhTkpqLZPlF+GZzDU31mYkUOuW9aVsT2cTwLRE+iBL35dG6RXbIToxUbtl/+ATYC1JetaRZzPlEW+6Cdv685AA==}
-
-  '@travetto/test@6.0.1':
-    resolution: {integrity: sha512-22sFy3y9QiOvnFcufiiWd3V/y1OhhU2JErdZGqKswUF9sS73MlUroOwEijfeu+2WDi5uiHeB9F40QPzpviToBw==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-      '@travetto/transformer': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-      '@travetto/transformer':
-        optional: true
-
-  '@travetto/transformer@6.0.0':
-    resolution: {integrity: sha512-DJ/eN2PFvUoJvdNSZQ6xNiSwLPL/OO7dG/eO/Vh/VXTjeR5176d73wAv+rijn2wPIrKe5+8Brhhn+Gv58qXGSQ==}
-
-  '@travetto/web-aws-lambda@6.0.2':
-    resolution: {integrity: sha512-rXRQBcu6n88fYNqWSgatscIKALoBV4WXKIYJta/B6W0fDFuHDd0j1d2kLECDHnp6JsNOdlUW/HqQbiKu+dgRfw==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-      '@travetto/pack': ^6.0.0
-      '@travetto/test': ^6.0.1
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-      '@travetto/pack':
-        optional: true
-      '@travetto/test':
-        optional: true
-
-  '@travetto/web-connect@6.0.2':
-    resolution: {integrity: sha512-pzjhNMW8ZGfuRqNlyqd1ezyeUA90nsv4J3cLb3lI2/gLwevuINPEFl8LC9dt4gSxMZe7CnlWU1d+EaS2xx44NA==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-      '@travetto/test': ^6.0.1
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-      '@travetto/test':
-        optional: true
-
-  '@travetto/web-http-server@6.0.2':
-    resolution: {integrity: sha512-ea/IBMLq3V8TWVwhB5D+FNceyHj+V26tr5//JkGjv6WRsjPjT32a9RFNCKazJHQPEpeMIi4DPQaPQIRADDYk9Q==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-      '@travetto/test': ^6.0.1
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-      '@travetto/test':
-        optional: true
-
-  '@travetto/web-node@6.0.2':
-    resolution: {integrity: sha512-S/gfZaCarFvoT23hh+uuEL0KQ8Eza/9i0gjhxNrQZ6f/jC2BFJN9bZFU8jDMHHyz6k3DUtDjT5//pQwX37Nbfw==}
-
-  '@travetto/web-rpc@6.0.2':
-    resolution: {integrity: sha512-p2QUzrNf4Il8+EqQCjLjkLoOhPM2JyoZOZkcdvRhCcuOISmHbDfnhYa1ZrDfnRxoFfsOuKSXnaQdwMBmVJSUHw==}
-
-  '@travetto/web-upload@6.0.2':
-    resolution: {integrity: sha512-Rrw77kbX8eJ9m3EtbdegvTpMdvlmO+5yTneFHtx2rkUMjZIvzN4b0fLK1N451niVShZH7F0xyYPB2h04qUb+TA==}
-    peerDependencies:
-      '@travetto/test': ^6.0.1
-    peerDependenciesMeta:
-      '@travetto/test':
-        optional: true
-
-  '@travetto/web@6.0.2':
-    resolution: {integrity: sha512-hs2Zjzf83r6xqGoQq2ebXKIge5pz0+k5IBkJ0/BKNhKJHLsqw4UVnmbu+tk4wGcDuUYrOQgCgVvdEz3DeVKEJw==}
-    peerDependencies:
-      '@travetto/cli': ^6.0.0
-      '@travetto/test': ^6.0.1
-      '@travetto/transformer': ^6.0.0
-    peerDependenciesMeta:
-      '@travetto/cli':
-        optional: true
-      '@travetto/test':
-        optional: true
-      '@travetto/transformer':
-        optional: true
-
-  '@travetto/worker@6.0.0':
-    resolution: {integrity: sha512-6DV0kPCf6oReqhvpP9ASAzuqLLRr3RHLaENcSVMqvhos+ksGA/LoK6glraQEZ6iVRI2npyR4xiuK0UIHBsA3kQ==}
 
   '@types/aws-lambda@8.10.149':
     resolution: {integrity: sha512-NXSZIhfJjnXqJgtS7IwutqIF/SOy1Wz5Px4gUY1RWITp3AYTyuJS4xaXr/bIJY1v15XMzrJ5soGnPM+7uigZjA==}
@@ -3633,10 +2766,6 @@ packages:
   pause@0.0.1:
     resolution: {integrity: sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg==}
 
-  peek-readable@7.0.0:
-    resolution: {integrity: sha512-nri2TO5JE3/mRryik9LlHFT53cgHfRK0Lt0BAZQXku/AW3E6XLt2GaY8siWi7dvW/m1z0ecn+J+bpDa9ZN3IsQ==}
-    engines: {node: '>=18'}
-
   pg-cloudflare@1.2.5:
     resolution: {integrity: sha512-OOX22Vt0vOSRrdoUPKJ8Wi2OpE/o/h9T8X1s4qSkCedbNah9ei2W2765be8iMVxQUsvgT7zIAT2eIa9fs5+vtg==}
 
@@ -3761,9 +2890,6 @@ packages:
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
-
-  redis@4.7.1:
-    resolution: {integrity: sha512-S1bJDnqLftzHXHP8JsT5II/CtHWQrASX5K96REjWjlmWKrviSOLWmM7QnRLstAWsu1VBBV1ffV6DzCvxNP0UJQ==}
 
   remote-content@4.0.1:
     resolution: {integrity: sha512-W2lDnjK4k1vAJg7UZArH/rkNYJqZuteHkX1jS7tO9TJUiLhDcu2Ejvj97gK/XbZNDhzld0sn11OW8vihin4cAg==}
@@ -3939,8 +3065,8 @@ packages:
   strnum@1.1.2:
     resolution: {integrity: sha512-vrN+B7DBIoTTZjnPNewwhx6cBA/H+IS7rfW68n7XxC1y7uoiGQBxaKzqucGUgavX15dJgiGztLJ8vxuEzwqBdA==}
 
-  strtok3@10.2.2:
-    resolution: {integrity: sha512-Xt18+h4s7Z8xyZ0tmBoRmzxcop97R4BAh+dXouUDCYn+Em+1P3qpkUfI5ueWLT8ynC5hZ+q4iPEmGG1urvQGBg==}
+  strtok3@10.3.1:
+    resolution: {integrity: sha512-3JWEZM6mfix/GCJBBUrkA8p2Id2pBkyTkVCJKto55w080QBKZ+8R171fGrbiSp+yMO/u6F8/yUh7K4V9K+YCnw==}
     engines: {node: '>=18'}
 
   stubs@3.0.0:
@@ -4110,9 +3236,6 @@ packages:
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
-
-  yallist@4.0.0:
-    resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
   yaml@2.8.0:
     resolution: {integrity: sha512-4lLa/EcQCB0cJkyts+FpIRx5G/llPxfP6VQU5KByHEhLxY3IJCH0f0Hy1MHI8sClTvsIb8qwRJ6R/ZdlDJ/leQ==}
@@ -5061,35 +4184,9 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@redis/bloom@1.2.0(@redis/client@1.6.1)':
-    dependencies:
-      '@redis/client': 1.6.1
-
-  '@redis/client@1.6.1':
-    dependencies:
-      cluster-key-slot: 1.1.2
-      generic-pool: 3.9.0
-      yallist: 4.0.0
-
   '@redis/client@5.5.6':
     dependencies:
       cluster-key-slot: 1.1.2
-
-  '@redis/graph@1.1.1(@redis/client@1.6.1)':
-    dependencies:
-      '@redis/client': 1.6.1
-
-  '@redis/json@1.0.7(@redis/client@1.6.1)':
-    dependencies:
-      '@redis/client': 1.6.1
-
-  '@redis/search@1.2.0(@redis/client@1.6.1)':
-    dependencies:
-      '@redis/client': 1.6.1
-
-  '@redis/time-series@1.1.0(@redis/client@1.6.1)':
-    dependencies:
-      '@redis/client': 1.6.1
 
   '@rollup/plugin-commonjs@28.0.3(rollup@4.42.0)':
     dependencies:
@@ -5555,558 +4652,6 @@ snapshots:
   '@tokenizer/token@0.3.0': {}
 
   '@tootallnate/once@2.0.0': {}
-
-  '@travetto/auth-model@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/auth': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/auth-session@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/auth': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/auth-web-session@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/auth': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/auth-session': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/auth-web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/auth-web@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/auth': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      njwt: 2.0.1
-    optionalDependencies:
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/auth@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/context': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/cache@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/transformer': 6.0.0
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - supports-color
-
-  '@travetto/cli@6.0.0':
-    dependencies:
-      '@travetto/schema': 6.0.0(@travetto/cli@6.0.0)
-      '@travetto/terminal': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/cli@6.0.0(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/schema': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/terminal': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/compiler@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))':
-    dependencies:
-      '@parcel/watcher': 2.5.1
-      '@travetto/manifest': 6.0.0
-      '@travetto/transformer': 6.0.0
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-
-  '@travetto/config@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      yaml: 2.8.0
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/context@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/di@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/registry': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/transformer': 6.0.0
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - supports-color
-
-  '@travetto/email-compiler@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)(debug@4.4.1)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/email': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/image': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/worker': 6.0.0(@travetto/transformer@6.0.0)
-      '@types/inline-css': 3.0.4
-      html-entities: 2.6.0
-      inline-css: 4.0.3(debug@4.4.1)
-      purgecss: 7.0.2
-      sass: 1.89.1
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - debug
-      - supports-color
-
-  '@travetto/email-inky@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/email': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      foundation-emails: 2.4.0
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/email@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      '@types/mustache': 4.2.6
-      mustache: 4.2.0
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/image@6.0.0(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      sharp: 0.34.2
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/log@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/terminal': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/manifest@6.0.0':
-    dependencies:
-      '@types/node': 22.15.30
-
-  '@travetto/model-dynamodb@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@aws-sdk/client-dynamodb': 3.826.0
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - aws-crt
-      - supports-color
-
-  '@travetto/model-elasticsearch@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@elastic/elasticsearch': 8.18.2
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@75lb/nature'
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/model-firestore@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@google-cloud/firestore': 7.11.1
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - encoding
-      - supports-color
-
-  '@travetto/model-mongo@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      mongodb: 6.17.0
-    transitivePeerDependencies:
-      - '@aws-sdk/credential-providers'
-      - '@mongodb-js/zstd'
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - gcp-metadata
-      - kerberos
-      - mongodb-client-encryption
-      - snappy
-      - socks
-      - supports-color
-
-  '@travetto/model-mysql@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sql': 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      mysql2: 3.14.1
-    transitivePeerDependencies:
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/model-postgres@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sql': 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@types/pg': 8.15.4
-      pg: 8.16.0
-    transitivePeerDependencies:
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - pg-native
-      - supports-color
-
-  '@travetto/model-query@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/model-redis@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      redis: 4.7.1
-    transitivePeerDependencies:
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/model-s3@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@aws-sdk/client-s3': 3.826.0
-      '@aws-sdk/credential-provider-ini': 3.826.0
-      '@aws-sdk/s3-request-presigner': 3.826.0
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - aws-crt
-      - supports-color
-
-  '@travetto/model-sql@6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/model-sqlite@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-query': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/model-sql': 6.0.0(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@types/better-sqlite3': 7.6.13
-      better-sqlite3: 11.10.0
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/model@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/registry': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/openapi@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      openapi3-ts: 4.4.0
-      yaml: 2.8.0
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/pack@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@rollup/plugin-commonjs': 28.0.3(rollup@4.42.0)
-      '@rollup/plugin-json': 6.1.0(rollup@4.42.0)
-      '@rollup/plugin-node-resolve': 16.0.1(rollup@4.42.0)
-      '@rollup/plugin-terser': 0.4.4(rollup@4.42.0)
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/terminal': 6.0.0(@travetto/transformer@6.0.0)
-      rollup: 4.42.0
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/registry@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/transformer': 6.0.0
-    transitivePeerDependencies:
-      - supports-color
-
-  '@travetto/registry@6.0.0(@travetto/cli@6.0.0)':
-    dependencies:
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/cli': 6.0.0
-    transitivePeerDependencies:
-      - supports-color
-
-  '@travetto/repo@6.0.0':
-    dependencies:
-      '@travetto/cli': 6.0.0
-      '@travetto/worker': 6.0.0(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/runtime@6.0.0(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/manifest': 6.0.0
-      '@types/debug': 4.1.12
-      debug: 4.4.1
-    optionalDependencies:
-      '@travetto/transformer': 6.0.0
-    transitivePeerDependencies:
-      - supports-color
-
-  '@travetto/schema@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/registry': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/transformer': 6.0.0
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - supports-color
-
-  '@travetto/schema@6.0.0(@travetto/cli@6.0.0)':
-    dependencies:
-      '@travetto/registry': 6.0.0(@travetto/cli@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - supports-color
-
-  '@travetto/terminal@6.0.0(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      chalk: 5.4.1
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/registry': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/terminal': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/worker': 6.0.0(@travetto/transformer@6.0.0)
-      yaml: 2.8.0
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/transformer': 6.0.0
-    transitivePeerDependencies:
-      - supports-color
-
-  '@travetto/transformer@6.0.0':
-    dependencies:
-      '@travetto/manifest': 6.0.0
-      tslib: 2.8.1
-      typescript: 5.8.3
-
-  '@travetto/web-aws-lambda@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/pack@6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@types/aws-lambda': 8.10.149
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/pack': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/web-connect@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/web-http-server@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/web-node@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web-http-server': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/web-rpc@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/schema': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/test'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/web-upload@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@fastify/busboy': 3.1.1
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/web': 6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      file-type: 20.5.0
-      mime: 4.0.7
-    optionalDependencies:
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-    transitivePeerDependencies:
-      - '@travetto/cli'
-      - '@travetto/transformer'
-      - supports-color
-
-  '@travetto/web@6.0.2(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/config': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/context': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/test@6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/di': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/registry': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/schema': 6.0.0(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      find-my-way: 9.3.0
-    optionalDependencies:
-      '@travetto/cli': 6.0.0(@travetto/transformer@6.0.0)
-      '@travetto/test': 6.0.1(@travetto/cli@6.0.0(@travetto/transformer@6.0.0))(@travetto/transformer@6.0.0)
-      '@travetto/transformer': 6.0.0
-    transitivePeerDependencies:
-      - supports-color
-
-  '@travetto/worker@6.0.0(@travetto/transformer@6.0.0)':
-    dependencies:
-      '@travetto/runtime': 6.0.0(@travetto/transformer@6.0.0)
-      generic-pool: 3.9.0
-    transitivePeerDependencies:
-      - '@travetto/transformer'
-      - supports-color
 
   '@types/aws-lambda@8.10.149': {}
 
@@ -6879,7 +5424,7 @@ snapshots:
   file-type@20.5.0:
     dependencies:
       '@tokenizer/inflate': 0.2.7
-      strtok3: 10.2.2
+      strtok3: 10.3.1
       token-types: 6.0.0
       uint8array-extras: 1.4.0
     transitivePeerDependencies:
@@ -7444,8 +5989,6 @@ snapshots:
 
   pause@0.0.1: {}
 
-  peek-readable@7.0.0: {}
-
   pg-cloudflare@1.2.5:
     optional: true
 
@@ -7586,15 +6129,6 @@ snapshots:
       util-deprecate: 1.0.2
 
   readdirp@4.1.2: {}
-
-  redis@4.7.1:
-    dependencies:
-      '@redis/bloom': 1.2.0(@redis/client@1.6.1)
-      '@redis/client': 1.6.1
-      '@redis/graph': 1.1.1(@redis/client@1.6.1)
-      '@redis/json': 1.0.7(@redis/client@1.6.1)
-      '@redis/search': 1.2.0(@redis/client@1.6.1)
-      '@redis/time-series': 1.1.0(@redis/client@1.6.1)
 
   remote-content@4.0.1(debug@4.4.1):
     dependencies:
@@ -7800,10 +6334,9 @@ snapshots:
 
   strnum@1.1.2: {}
 
-  strtok3@10.2.2:
+  strtok3@10.3.1:
     dependencies:
       '@tokenizer/token': 0.3.0
-      peek-readable: 7.0.0
 
   stubs@3.0.0: {}
 
@@ -7965,8 +6498,6 @@ snapshots:
   xtend@4.0.2: {}
 
   y18n@5.0.8: {}
-
-  yallist@4.0.0: {}
 
   yaml@2.8.0: {}
 

@@ -4,3 +4,6 @@ packages:
    - 'related/todo-app'
 publicHoistPattern: 
    - '*'
+disallowWorkspaceCycles: true
+includeWorkspaceRoot: true
+nodeLinker: hoisted
