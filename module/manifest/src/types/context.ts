@@ -1,4 +1,4 @@
-import type { NodeModuleType, NodePackageManager } from './common.ts';
+import type { NodeModuleType, NodePackageManager, NodePackageRunner } from './common.ts';
 
 export type ManifestContext = {
   workspace: {
@@ -12,6 +12,8 @@ export type ManifestContext = {
     type: NodeModuleType;
     /** The package manager of the workspace */
     manager: NodePackageManager;
+    /** The package runner of the workspace */
+    runner: NodePackageRunner;
     /** The default env name */
     defaultEnv: string;
   };

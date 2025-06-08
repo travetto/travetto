@@ -22,10 +22,9 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
-        args = ['show', `${mod.name}@${mod.version}`, 'version', '--json'];
-        break;
       case 'yarn':
-        args = ['info', `${mod.name}@${mod.version}`, 'dist.integrity', '--json'];
+      case 'pnpm':
+        args = ['info', `${mod.name}@${mod.version}`, '--json'];
         break;
     }
     return spawn(ctx.workspace.manager, args, { cwd: mod.sourceFolder });
@@ -36,17 +35,14 @@ export class PackageManager {
    */
   static validatePublishedResult(ctx: Ctx, mod: IndexedModule, result: ExecutionResult<string>): boolean {
     switch (ctx.workspace.manager) {
-      case 'npm': {
+      case 'npm':
+      case 'pnpm':
+      case 'yarn': {
         if (!result.valid && !result.stderr.includes('E404')) {
           throw new Error(result.stderr);
         }
-        const item: (string[] | string) = result.stdout ? JSON.parse(result.stdout) : [];
-        const found = Array.isArray(item) ? item.pop() : item;
-        return !!found && found === mod.version;
-      }
-      case 'yarn': {
         const parsed = JSON.parse(result.stdout);
-        return parsed.data !== undefined;
+        return parsed.data.dist?.integrity !== undefined;
       }
     }
   }
