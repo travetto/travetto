@@ -24,7 +24,7 @@ function findPackage(base, pred) {
   );
 
   if (!pkg) {
-    throw new Error('Could not find a package.json');
+    return;
   } else if (!pred(pkg) && packages.length) {
     // We never matched, lets fallback to the first package.json found
     pkg = packages[0];
@@ -34,15 +34,14 @@ function findPackage(base, pred) {
 }
 
 function collectModules() {
-  const root = findPackage(process.cwd(), pkg => !!pkg && (
-    !!pkg.workspaces ||
-    !!pkg.travetto?.build?.isolated ||
-    existsSync(path.resolve(pkg.path, 'pnpm-workspace.yaml'))
-  )).path;
-  const json = cp.execSync('pnpm ls -r --depth -1 --json', { cwd: root, encoding: 'utf8' });
+  const workspaceRoot = findPackage(process.cwd(), pkg => !!pkg && existsSync(path.resolve(pkg.path, 'pnpm-workspace.yaml')))?.path;
+  if (!workspaceRoot) {
+    return {};
+  }
+  const json = cp.execSync('pnpm ls -r --depth -1 --json', { cwd: workspaceRoot, encoding: 'utf8' });
   const mods = Object.fromEntries(JSON.parse(json).map(x => [x.name, x]));
   for (const k of Object.keys(mods)) {
-    if (mods[k].path === root) {
+    if (mods[k].path === workspaceRoot) {
       mods[k].root = true;
     }
   }
@@ -59,7 +58,7 @@ function readPackage(pkg, context) {
 
   if (workspacesMods[pkg.name].root) { // Monorepo root
     for (const name of Object.keys(workspacesMods)) {
-      if (!workspacesMods[name].root) {
+      if (name !== pkg.name) {
         (pkg.dependencies ??= {})[name] = 'workspace:*';
       }
     }
