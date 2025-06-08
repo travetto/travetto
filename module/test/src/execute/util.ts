@@ -71,7 +71,7 @@ export class RunnerUtil {
    */
   static async getTestDigest(globs: string[] = ['**/*.ts'], tags?: string[]): Promise<TestConfig[]> {
     const countRes = await ExecUtil.getResult(
-      spawn('npx', ['trv', 'test:digest', '-o', 'json', ...globs], {
+      spawn(Runtime.workspace.runner, ['trv', 'test:digest', '-o', 'json', ...globs], {
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
       }),
       { catch: true }

@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 import path from 'node:path';
 import fs from 'node:fs';
 
-import { IndexedFile, IndexedModule, type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import { IndexedFile, IndexedModule, type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, type NodePackageRunner, PackageUtil } from '@travetto/manifest';
 import type { CompilerStateType } from '@travetto/compiler/support/types.ts';
 
 const SUFFIXES = ['.ts', '.js', '.tsx', '.jsx', '.d.ts'];
@@ -19,12 +19,26 @@ export class Workspace {
   static #compilerState: CompilerStateType = 'closed';
   static #compilerStateListeners: ((ev: CompilerStateType) => void)[] = [];
   static #importToFile: Record<string, string | undefined> = {};
+  static #cliFile: string;
+  static #compilerCliFile: string;
 
   static readonly folder: vscode.WorkspaceFolder;
+
+  static get cliFile(): string {
+    return this.#cliFile ??= this.resolveImport('@travetto/cli/bin/trv.js');
+  }
+
+  static get compilerCliFile(): string {
+    return this.#compilerCliFile ??= this.resolveImport('@travetto/compiler/bin/trvc.js');
+  }
 
   static onCompilerState(handler: (ev: CompilerStateType) => void): void {
     this.#compilerStateListeners.push(handler);
     handler(this.compilerState);
+  }
+
+  static get nodePackageRunner(): NodePackageRunner {
+    return this.#manifestContext.workspace.runner;
   }
 
   static set compilerState(state: CompilerStateType) {

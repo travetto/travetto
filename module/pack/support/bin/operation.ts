@@ -51,12 +51,11 @@ export class PackOperation {
    * Invoke bundler (rollup) to produce output in workspace folder
    */
   static async * bundle(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const cwd = RuntimeIndex.outputRoot;
-    const out = RuntimeIndex.manifest.build.outputFolder;
+    const cwd = RuntimeIndex.getModule(cfg.module)!.outputPath;
 
-    const bundleCommand = ['npx', 'rollup', '-c', RuntimeIndex.resolveFileImport(cfg.rollupConfiguration)];
+    const bundleCommand = [Runtime.workspace.runner, 'rollup', '-c', RuntimeIndex.resolveFileImport(cfg.rollupConfiguration)];
 
-    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${out}/`)[1];
+    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile;
 
     const env = {
       ...Object.fromEntries(([
@@ -225,7 +224,7 @@ export class PackOperation {
    */
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const out = path.resolve(cfg.buildDir, cfg.manifestFile);
-    const cmd = ['npx', 'trvc', 'manifest', '--prod', out];
+    const cmd = [Runtime.workspace.runner, 'trvc', 'manifest', '--prod', out];
     const env = { ...Env.TRV_MODULE.export(cfg.module) };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: cfg.manifestFile }}`);
