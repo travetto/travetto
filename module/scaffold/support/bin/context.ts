@@ -68,6 +68,11 @@ export class Context {
     return ExecUtil.getResult(proc).then(() => { });
   }
 
+  #packageExec(cmd: string, args: string[]): Promise<void> {
+    const handler = this.packageManager === 'pnpm' ? 'pnpm' : 'npx';
+    return this.#exec(handler, [cmd, ...args]);
+  }
+
   get selfPath(): string {
     return RuntimeIndex.getModule('@travetto/scaffold')!.sourcePath;
   }
@@ -189,23 +194,23 @@ export class Context {
     switch (this.packageManager) {
       case 'pnpm': await this.#exec('pnpm', ['i']); break;
       case 'npm': await this.#exec('npm', ['i']); break;
-      case 'yarn': await this.#exec('yarn', []); break;
+      case 'yarn': await this.#exec('yarn', ['i']); break;
       default: throw new Error(`Unknown package manager: ${this.packageManager} `);
     }
 
     yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
     switch (this.packageManager) {
-      case 'pnpm': await this.#exec('pnpm', ['up', '--latest']); break;
+      case 'pnpm': await this.#exec('pnpm', ['update', '--latest']); break;
       case 'npm': await this.#exec('npm', ['update', '-S']); break;
       case 'yarn': await this.#exec('yarn', ['upgrade']); break;
       default: throw new Error(`Unknown package manager: ${this.packageManager} `);
     }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
-    await this.#exec('npx', ['trvc', 'build']);
+    await this.#packageExec('trvc', ['build']);
     if (this.#devDependencies.includes('@travetto/eslint')) {
-      yield cliTpl`${{ type: 'ESLint Registration' }} `;
-      await this.#exec('npx', ['trv', 'lint:register']);
+      yield cliTpl`${{ type: 'Lint Registration' }} `;
+      await this.#packageExec('trv', ['lint:register']);
     }
 
     yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDir }} `;
