@@ -12,7 +12,11 @@
 
 <span class="token comment"># or</span>
 
-<span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web-connect</code></pre>
+<span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web-connect
+
+<span class="token comment"># or</span>
+
+<span class="token function">pnpm</span> <span class="token function">add</span> &#64;travetto/web-connect</code></pre>
   </figure>
 
 This module provides basic integration for calling <a target="_blank" class="external-link" href="https://github.com/senchalabs/connect">connect</a> related middleware with <a class="module-link" routerLink="/docs/web" title="Declarative support for creating Web Applications">Web API</a>. This logic is not intended to be exhaustive, but intended to provide a quick bridge.  This only consumer of this is <a class="module-link" routerLink="/docs/auth-web-passport" title="Web authentication integration support for the Travetto framework">Web Auth Passport</a> as it needs to bind the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3">WebResponse</a> to standard contracts for <a target="_blank" class="external-link" href="http://passportjs.org">passport</a>. <br><br>

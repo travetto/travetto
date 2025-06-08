@@ -11,6 +11,10 @@ npm install @travetto/model-redis
 # or
 
 yarn add @travetto/model-redis
+
+# or
+
+pnpm add @travetto/model-redis
 ```
 
 This module provides an [redis](https://redis.io)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [redis](https://redis.io). 

@@ -11,6 +11,10 @@ npm install @travetto/test
 # or
 
 yarn add @travetto/test
+
+# or
+
+pnpm add @travetto/test
 ```
 
 This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the following formats:

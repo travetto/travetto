@@ -11,6 +11,10 @@ npm install @travetto/web-aws-lambda
 # or
 
 yarn add @travetto/web-aws-lambda
+
+# or
+
+pnpm add @travetto/web-aws-lambda
 ```
 
 This module provides an adapter between [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") and [AWS Lambda](https://aws.amazon.com/lambda/).  The event-driven invocation model for [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") aligns cleanly with [AWS Lambda](https://aws.amazon.com/lambda/)'s model for event-driven operation.  

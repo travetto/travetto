@@ -11,6 +11,10 @@ npm install @travetto/model-file
 # or
 
 yarn add @travetto/model-file
+
+# or
+
+pnpm add @travetto/model-file
 ```
 
 This module provides an file-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). Supported features:

@@ -11,6 +11,10 @@ npm install @travetto/transformer
 # or
 
 yarn add @travetto/transformer
+
+# or
+
+pnpm add @travetto/transformer
 ```
 
 This module provides support for enhanced AST transformations, and declarative transformer registration, with common patterns to support all the transformers used throughout the framework. Transformations are located by `support/transformer.<name>.ts` as the filename. 

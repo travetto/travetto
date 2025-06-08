@@ -11,6 +11,10 @@ npm install @travetto/model-sqlite
 # or
 
 yarn add @travetto/model-sqlite
+
+# or
+
+pnpm add @travetto/model-sqlite
 ```
 
 This module provides a [SQLite](https://www.sqlite.org/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L32) will also modify the database schema in real time to minimize impact to development. 

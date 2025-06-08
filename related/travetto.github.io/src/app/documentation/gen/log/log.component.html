@@ -12,7 +12,11 @@
 
 <span class="token comment"># or</span>
 
-<span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/log</code></pre>
+<span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/log
+
+<span class="token comment"># or</span>
+
+<span class="token function">pnpm</span> <span class="token function">add</span> &#64;travetto/log</code></pre>
   </figure>
 
 This module provides logging functionality, building upon <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L43">ConsoleManager</a> in the <a class="module-link" routerLink="/docs/runtime" title="Runtime for travetto applications.">Runtime</a> module.  This is all ultimately built upon <a target="_blank" class="external-link" href="https://nodejs.org/api/console.html">console</a> operations. The logging infrastructure is built upon the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> system, and so new loggers can be created that rely upon dependency injected services and sources.

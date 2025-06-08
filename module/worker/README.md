@@ -11,6 +11,10 @@ npm install @travetto/worker
 # or
 
 yarn add @travetto/worker
+
+# or
+
+pnpm add @travetto/worker
 ```
 
 This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.

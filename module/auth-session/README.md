@@ -11,6 +11,10 @@ npm install @travetto/auth-session
 # or
 
 yarn add @travetto/auth-session
+
+# or
+
+pnpm add @travetto/auth-session
 ```
 
 This is a module that adds session support to the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") framework, via [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage.  The concept here, is that the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module provides the solid foundation for ensuring authentication to the system, and transitively to the session data. The [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) provides a session identifier, which refers to a unique authentication session.  Each login will produce a novel session id.  This id provides the contract between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and[Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-session#readme "Session provider for the travetto auth module.").  

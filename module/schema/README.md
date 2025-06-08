@@ -11,6 +11,10 @@ npm install @travetto/schema
 # or
 
 yarn add @travetto/schema
+
+# or
+
+pnpm add @travetto/schema
 ```
 
 This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support"), [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework"), [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications"), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to provide validation on correctness of input, whether it is a web request, command line inputs, or a configuration file. 

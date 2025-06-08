@@ -11,6 +11,10 @@ npm install @travetto/terminal
 # or
 
 yarn add @travetto/terminal
+
+# or
+
+pnpm add @travetto/terminal
 ```
 
 This module provides basic support for interacting with the terminal, and provides the basis for output colorization and the basic command line interactions.  The functionality can be broken down into:

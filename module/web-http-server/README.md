@@ -11,6 +11,10 @@ npm install @travetto/web-http-server
 # or
 
 yarn add @travetto/web-http-server
+
+# or
+
+pnpm add @travetto/web-http-server
 ```
 
 This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html)  and [http2](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.

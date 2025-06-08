@@ -11,6 +11,10 @@ npm install @travetto/config
 # or
 
 yarn add @travetto/config
+
+# or
+
+pnpm add @travetto/config
 ```
 
 The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [yaml](https://github.com/eemeli/yaml).  Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) functionality applies.

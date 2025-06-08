@@ -11,6 +11,10 @@ npm install @travetto/cache
 # or
 
 yarn add @travetto/cache
+
+# or
+
+pnpm add @travetto/cache
 ```
 
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.").  The code aims to handle use cases surrounding common/basic usage.
@@ -24,6 +28,10 @@ npm install @travetto/model-{provider}
 # or
 
 yarn add @travetto/model-{provider}
+
+# or
+
+pnpm add @travetto/model-{provider}
 ```
 Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10):
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb

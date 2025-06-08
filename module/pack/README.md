@@ -11,6 +11,10 @@ npm install @travetto/pack
 # or
 
 yarn add @travetto/pack
+
+# or
+
+pnpm add @travetto/pack
 ```
 
 This module provides the necessary tools to produce deliverable output for [Travetto](https://travetto.dev) based projects.  The main interaction with this module is through the command line interface, and the operations it provides.  Under the covers, the code bundling is performed by [Rollup](https://rollupjs.org/), with specific configuration to support the frameworks runtime expectations. 

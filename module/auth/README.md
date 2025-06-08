@@ -11,6 +11,10 @@ npm install @travetto/auth
 # or
 
 yarn add @travetto/auth
+
+# or
+
+pnpm add @travetto/auth
 ```
 
 This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:

@@ -11,6 +11,10 @@ npm install @travetto/auth-web
 # or
 
 yarn add @travetto/auth-web
+
+# or
+
+pnpm add @travetto/auth-web
 ```
 
 This is a primary integration for the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module. 

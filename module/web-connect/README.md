@@ -11,6 +11,10 @@ npm install @travetto/web-connect
 # or
 
 yarn add @travetto/web-connect
+
+# or
+
+pnpm add @travetto/web-connect
 ```
 
 This module provides basic integration for calling [connect](https://github.com/senchalabs/connect) related middleware with [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications"). This logic is not intended to be exhaustive, but intended to provide a quick bridge.  This only consumer of this is [Web Auth Passport](https://github.com/travetto/travetto/tree/main/module/auth-web-passport#readme "Web authentication integration support for the Travetto framework") as it needs to bind the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) to standard contracts for [passport](http://passportjs.org). 

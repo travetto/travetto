@@ -11,6 +11,10 @@ npm install @travetto/auth-web-passport
 # or
 
 yarn add @travetto/auth-web-passport
+
+# or
+
+pnpm add @travetto/auth-web-passport
 ```
 
 This is a primary integration for the [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") module. 

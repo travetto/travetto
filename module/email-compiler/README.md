@@ -11,6 +11,10 @@ npm install @travetto/email-compiler
 # or
 
 yarn add @travetto/email-compiler
+
+# or
+
+pnpm add @travetto/email-compiler
 ```
 
 This is primarily a set of command line tools for compiling and developing templates.  The inputs are compiled files, generally under the `support/` folder, that represents the necessary input for the email compilation.  [Email Inky Templates](https://github.com/travetto/travetto/tree/main/module/email-inky#readme "Email Inky templating module") shows this pattern by leveraging [JSX](https://en.wikipedia.org/wiki/JSX_(JavaScript)) bindings for the [inky](https://github.com/zurb/inky) framework, allowing for compile-time checked templates.

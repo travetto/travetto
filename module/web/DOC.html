@@ -12,7 +12,11 @@
 
 <span class="token comment"># or</span>
 
-<span class="token function">yarn</span> <span class="token function">add</span> @travetto/web</code></pre>
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/web
+
+<span class="token comment"># or</span>
+
+<span class="token function">pnpm</span> <span class="token function">add</span> @travetto/web</code></pre>
   </figure>
 
 The module provides a declarative API for creating and describing a Web application.  Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9">@Controller</a> s that employ some combination of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> s to help manage which functionality is executed before the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> code, within the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9">@Controller</a>. This module will look at:

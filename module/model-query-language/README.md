@@ -11,6 +11,10 @@ npm install @travetto/model-query-language
 # or
 
 yarn add @travetto/model-query-language
+
+# or
+
+pnpm add @travetto/model-query-language
 ```
 
 This module provides a textual query language for the [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") interface. The language itself is fairly simple, boolean logic, with parenthetical support.The operators supported are:

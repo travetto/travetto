@@ -11,6 +11,10 @@ npm install @travetto/repo
 # or
 
 yarn add @travetto/repo
+
+# or
+
+pnpm add @travetto/repo
 ```
 
 The repo module aims to provide concise monorepo based tools.  The monorepo support within the [Travetto](https://travetto.dev) framework, is based on [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)/[Yarn](https://yarnpg.com) workspaces.  This module is not a requirement for monorepo support, but provides some quality of life improvements for:

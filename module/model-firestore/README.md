@@ -11,6 +11,10 @@ npm install @travetto/model-firestore
 # or
 
 yarn add @travetto/model-firestore
+
+# or
+
+pnpm add @travetto/model-firestore
 ```
 
 This module provides an [Firestore](https://firebase.google.com/docs/firestore)-based implementation of the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [Firestore](https://firebase.google.com/docs/firestore). 

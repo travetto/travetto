@@ -11,6 +11,10 @@ npm install @travetto/eslint
 # or
 
 yarn add @travetto/eslint
+
+# or
+
+pnpm add @travetto/eslint
 ```
 
 [ESLint](https://eslint.org/) is the standard for linting [Typescript](https://typescriptlang.org) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) code.  This module provides some standard linting patterns and the ability to create custom rules. Due to the fact that the framework supports both [CommonJS](https://nodejs.org/api/modules.html) and [Ecmascript Module](https://nodejs.org/api/esm.html) formats, a novel solution was required to allow [ESLint](https://eslint.org/) to load [Ecmascript Module](https://nodejs.org/api/esm.html) files.

@@ -11,6 +11,10 @@ npm install @travetto/cli
 # or
 
 yarn add @travetto/cli
+
+# or
+
+pnpm add @travetto/cli
 ```
 
 The cli module represents the primary entry point for execution within the framework. One of the main goals for this module is extensibility, as adding new entry points is meant to be trivial. The framework leverages this module for exposing all executable tools and entry points.  To see a high level listing of all supported commands, invoke `trv --help`

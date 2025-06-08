@@ -11,6 +11,10 @@ npm install @travetto/web-upload
 # or
 
 yarn add @travetto/web-upload
+
+# or
+
+pnpm add @travetto/web-upload
 ```
 
 This module provides a clean and direct mechanism for processing uploads, built upon [@fastify/busboy](https://github.com/fastify/busboy). The module also provides some best practices with respect to temporary file management.

@@ -11,6 +11,10 @@ npm install @travetto/model-sql
 # or
 
 yarn add @travetto/model-sql
+
+# or
+
+pnpm add @travetto/model-sql
 ```
 
 The current SQL client support stands at:

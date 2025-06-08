@@ -11,6 +11,10 @@ npm install @travetto/compiler
 # or
 
 yarn add @travetto/compiler
+
+# or
+
+pnpm add @travetto/compiler
 ```
 
 This module expands upon the [Typescript](https://typescriptlang.org) compiler, with the additional features:

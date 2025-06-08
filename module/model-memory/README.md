@@ -11,6 +11,10 @@ npm install @travetto/model-memory
 # or
 
 yarn add @travetto/model-memory
+
+# or
+
+pnpm add @travetto/model-memory
 ```
 
 This module provides a memory-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). Supported features:

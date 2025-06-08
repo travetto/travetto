@@ -11,6 +11,10 @@ npm install @travetto/manifest
 # or
 
 yarn add @travetto/manifest
+
+# or
+
+pnpm add @travetto/manifest
 ```
 
 This module aims to be the boundary between the file system and the code.  The module provides:
@@ -55,7 +59,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
     "name": "@travetto/mono-repo",
     "path": "<generated>",
     "mono": true,
-    "manager": "npm",
+    "manager": "pnpm",
     "type": "commonjs",
     "defaultEnv": "local"
   },

@@ -317,7 +317,7 @@ npx trv web:http
       name: '@travetto/mono-repo',
       path: '<workspace-root>',
       mono: true,
-      manager: 'npm',
+      manager: 'pnpm',
       type: 'commonjs',
       defaultEnv: 'local'
     }

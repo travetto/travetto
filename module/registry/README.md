@@ -11,6 +11,10 @@ npm install @travetto/registry
 # or
 
 yarn add @travetto/registry
+
+# or
+
+pnpm add @travetto/registry
 ```
 
 This module is the backbone for all "discovered" and "registered" behaviors within the framework. This is primarily used for building modules within the framework and not directly useful for application development.

@@ -11,6 +11,10 @@ npm install @travetto/auth-web-session
 # or
 
 yarn add @travetto/auth-web-session
+
+# or
+
+pnpm add @travetto/auth-web-session
 ```
 
 One of [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework")'s main responsibility is being able to send, validate and receive authentication/authorization information from the client. 

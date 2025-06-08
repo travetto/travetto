@@ -11,6 +11,10 @@ npm install @travetto/model
 # or
 
 yarn add @travetto/model
+
+# or
+
+pnpm add @travetto/model
 ```
 
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.

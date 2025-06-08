@@ -11,6 +11,10 @@ npm install @travetto/email-inky
 # or
 
 yarn add @travetto/email-inky
+
+# or
+
+pnpm add @travetto/email-inky
 ```
 
 This module provides [inky](https://github.com/zurb/inky) support via [JSX](https://en.wikipedia.org/wiki/JSX_(JavaScript)) tags for integration with the [Email Compilation Support](https://github.com/travetto/travetto/tree/main/module/email-compiler#readme "Email compiling module") engine.

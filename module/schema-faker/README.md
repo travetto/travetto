@@ -11,6 +11,10 @@ npm install @travetto/schema-faker
 # or
 
 yarn add @travetto/schema-faker
+
+# or
+
+pnpm add @travetto/schema-faker
 ```
 
 In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon [faker](https://github.com/faker-js/faker), mapping data types, and various field names into specific [faker](https://github.com/faker-js/faker) generation routines. 

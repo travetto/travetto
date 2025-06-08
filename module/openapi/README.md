@@ -11,6 +11,10 @@ npm install @travetto/openapi
 # or
 
 yarn add @travetto/openapi
+
+# or
+
+pnpm add @travetto/openapi
 ```
 
 In the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap. 

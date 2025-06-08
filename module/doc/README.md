@@ -11,6 +11,10 @@ npm install @travetto/doc
 # or
 
 yarn add @travetto/doc
+
+# or
+
+pnpm add @travetto/doc
 ```
 
 This module provides the ability to generate documentation in [HTML](https://en.wikipedia.org/wiki/HTML) and/or [Markdown](https://en.wikipedia.org/wiki/Markdown).  The module relies on integrating with the source of the project, and providing a fully referenced code-base.  This allows for automatic updates when code is changed and/or refactored.
@@ -120,7 +124,11 @@ $ trv doc -o html
 
 <span class="token comment"># or</span>
 
-<span class="token function">yarn</span> <span class="token function">add</span> @travetto-doc/doc</code></pre>
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto-doc/doc
+
+<span class="token comment"># or</span>
+
+<span class="token function">pnpm</span> <span class="token function">add</span> @travetto-doc/doc</code></pre>
   </figure>
 
 Sample documentation for fictional module.  This module fictitiously relies upon <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> functionality.

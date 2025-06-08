@@ -11,6 +11,10 @@ npm install @travetto/auth-model
 # or
 
 yarn add @travetto/auth-model
+
+# or
+
+pnpm add @travetto/auth-model
 ```
 
 This module supports the integration between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module and the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). 
@@ -24,6 +28,10 @@ npm install @travetto/model-{provider}
 # or
 
 yarn add @travetto/model-{provider}
+
+# or
+
+pnpm add @travetto/model-{provider}
 ```
 Currently, the following are packages that provide [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11):
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb

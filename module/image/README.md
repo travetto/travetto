@@ -11,6 +11,10 @@ npm install @travetto/image
 # or
 
 yarn add @travetto/image
+
+# or
+
+pnpm add @travetto/image
 ```
 
 This module provides functionality for image resizing, and image optimization. This is primarily meant to be used in conjunction with other modules, like the [Email Compilation Support](https://github.com/travetto/travetto/tree/main/module/email-compiler#readme "Email compiling module") module. It can also be invoked directly as needed (as it can be very handy for batch processing images on the command line). 

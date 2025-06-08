@@ -11,6 +11,10 @@ npm install @travetto/log
 # or
 
 yarn add @travetto/log
+
+# or
+
+pnpm add @travetto/log
 ```
 
 This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L43) in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. The logging infrastructure is built upon the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") system, and so new loggers can be created that rely upon dependency injected services and sources.

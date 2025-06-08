@@ -11,6 +11,10 @@ npm install @travetto/di
 # or
 
 yarn add @travetto/di
+
+# or
+
+pnpm add @travetto/di
 ```
 
 [Dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of [Typescript](https://typescriptlang.org) and type erasure of interfaces, dependency injection only supports `class`es as a type signifier. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
