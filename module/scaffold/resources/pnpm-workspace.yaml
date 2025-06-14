@@ -1,0 +1,7 @@
+packages:
+   - 'module/*'
+publicHoistPattern: 
+   - '*'
+includeWorkspaceRoot: true
+nodeLinker: hoisted
+dangerouslyAllowAllBuilds: true

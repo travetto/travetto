@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const help = `
-npx trvc [command]
+trvc [command]
 
 Available Commands:
  * start|watch                - Run the compiler in watch mode

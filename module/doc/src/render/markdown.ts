@@ -60,6 +60,10 @@ npm install ${el.props.pkg}
 # or
 
 yarn add ${el.props.pkg}
+
+# or
+
+pnpm add ${el.props.pkg}
 \`\`\`
 `,
   Code: async ({ context, el, props }) => {

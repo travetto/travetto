@@ -80,7 +80,7 @@ export class PackageUtil {
       modulePath.endsWith('.json') ? modulePath : path.resolve(modulePath, 'package.json'),
     );
 
-    nodePackage.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
+    nodePackage.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx/pnpm execution
 
     nodePackage[PackagePathSymbol] = modulePath;
     return nodePackage;
@@ -103,6 +103,10 @@ export class PackageUtil {
       .catch(async () => {
         let out: PackageWorkspaceEntry[];
         switch (ctx.workspace.manager) {
+          case 'pnpm': {
+            out = await this.#exec<{ path: string, name: string }[]>(rootPath, 'pnpm ls -r --depth -1 --json');
+            break;
+          }
           case 'yarn':
           case 'npm': {
             const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
@@ -123,6 +127,7 @@ export class PackageUtil {
     switch (ctx.workspace.manager) {
       case 'npm': install = `npm i ${prod ? '' : '--save-dev '}${pkg}`; break;
       case 'yarn': install = `yarn add ${prod ? '' : '--dev '}${pkg}`; break;
+      case 'pnpm': install = `pnpm add ${prod ? '' : '--dev '}${pkg}`; break;
     }
     return install;
   }

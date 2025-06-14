@@ -12,14 +12,14 @@
   "license": "MIT",
   "scripts": {
     "prestart": "npm ci",
-    "pretest": "npx trv service start",
+    "pretest": "trv service start",
     "start": "trvc clean; trvc start",
     "test": "trv test -f tap-summary",
     "lint": "trv lint",
     "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm package-lock.json; npm i",
     "vscode:package": "cd related/vscode-plugin; npm run package",
-    "version": "npx trv repo:version",
-    "preversion": "npx trv doc:angular"
+    "version": "trv repo:version",
+    "preversion": "trv doc:angular"
   },
   "travetto": {
     "build": {
@@ -43,7 +43,6 @@
     "debug": "$debug"
   },
   "devDependencies": {
-    "@travetto/repo": "^6.0.0",
     "@types/node-forge": "^1.3.11",
     "@types/vscode": "^1.100.0",
     "chalk": "^5.4.1",

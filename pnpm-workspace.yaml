@@ -1,0 +1,10 @@
+packages:
+   - 'module/*'
+   - 'global-test/*'
+   - 'related/todo-app'
+publicHoistPattern: 
+   - '*'
+disallowWorkspaceCycles: true
+includeWorkspaceRoot: true
+nodeLinker: hoisted
+dangerouslyAllowAllBuilds: true

@@ -57,6 +57,10 @@ npm install ${el.props.pkg}
 # or
 
 yarn add ${el.props.pkg}
+
+# or
+
+pnpm add ${el.props.pkg}
 `, 'bash');
 
     return `\n

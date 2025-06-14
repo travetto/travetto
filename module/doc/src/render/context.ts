@@ -57,7 +57,7 @@ export class RenderContext {
    * Get rebuilt comment
    */
   get rebuildStamp(): string {
-    return `Please modify ${this.file.replace(this.repoRoot, this.baseUrl)} and execute "npx trv doc" to rebuild`;
+    return `Please modify ${this.file.replace(this.repoRoot, this.baseUrl)} and execute "trv doc" to rebuild`;
   }
 
   /**

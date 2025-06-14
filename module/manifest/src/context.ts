@@ -11,6 +11,11 @@ type Pkg = Package & { path: string };
 const toPort = (pth: string): number => (Math.abs([...pth].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
 const toPosix = (pth: string): string => pth.replaceAll('\\', '/');
 const readPackage = (file: string): Pkg => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: toPosix(path.dirname(file)) });
+const PACKAGE_MANAGERS = [
+  { file: 'pnpm-lock.yaml', type: 'pnpm', runner: 'pnpm' },
+  { file: 'yarn.lock', type: 'yarn', runner: 'npx' },
+  { file: 'package-lock.json', type: 'npm', runner: 'npx' },
+] as const;
 
 /** Find package */
 function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
@@ -45,7 +50,11 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
  * Gets build context
  */
 export function getManifestContext(root: string = process.cwd()): ManifestContext {
-  const workspace = findPackage(root, pkg => !!pkg?.workspaces || !!pkg?.travetto?.build?.isolated);
+  const workspace = findPackage(root, pkg => !!pkg && (
+    !!pkg.workspaces ||
+    !!pkg.travetto?.build?.isolated ||
+    existsSync(path.resolve(pkg.path, 'pnpm-workspace.yaml'))
+  ));
   const build = workspace.travetto?.build ?? {};
   const resolve = createRequire(path.resolve(workspace.path, 'node_modules')).resolve.bind(null);
   const wsPrefix = `${workspace.path}/`;
@@ -53,12 +62,15 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
     readPackage(resolve(`${process.env.TRV_MODULE}/package.json`)) :
     findPackage(root, pkg => !!pkg) ?? workspace;
 
+  const manager = PACKAGE_MANAGERS.find(x => existsSync(path.resolve(workspace.path, x.file)));
+
   return {
     workspace: {
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: existsSync(path.resolve(workspace.path, 'yarn.lock')) ? 'yarn' : 'npm',
+      manager: manager?.type ?? 'npm',
+      runner: manager?.runner ?? 'npx',
       type: workspace.type ?? 'commonjs',
       defaultEnv: workspace.travetto?.defaultEnv ?? 'local'
     },

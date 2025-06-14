@@ -55,7 +55,7 @@ export class DocCommand implements CliCommandShape {
     const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
     for await (const { action, file } of watchCompiler({ restartOnExit: true })) {
       if (action === 'update' && file === this.input) {
-        const proc = spawn('npx', ['trv', ...args], {
+        const proc = spawn(Runtime.workspace.runner, ['trv', ...args], {
           cwd: Runtime.mainSourcePath,
           env: { ...process.env, ...Env.TRV_QUIET.export(true) },
           stdio: 'inherit'
