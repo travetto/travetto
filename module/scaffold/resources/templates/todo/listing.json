@@ -2,6 +2,16 @@
   "package.json.txt": {
     "rename": "package.json"
   },
+  "pnpm-workspace.yaml": {
+    "requires": [
+      "pnpm"
+    ]
+  },
+  ".pnpmfile.cjs": {
+    "requires": [
+      "pnpm"
+    ]
+  },
   "tsconfig.json.txt": {
     "rename": "tsconfig.json"
   },
