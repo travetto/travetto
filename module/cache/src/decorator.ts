@@ -25,9 +25,9 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
     const handler = _descriptor.value!.bind(castTo(target));
+    // Allows for DI to run, as the service will not be bound until after the decorator is run
     _descriptor.value = castTo(function (this: typeof target) {
-      // Allows for DI to run, as the service will not be bound until after the decorator is run
-      return this[field].cache(this, propertyKey, handler, [...arguments]) as Promise<R>;
+      return this[field].cache(this, propertyKey, handler, [...arguments]);
     });
     Object.defineProperty(_descriptor.value, 'name', { value: propertyKey, writable: false });
   };
@@ -46,9 +46,9 @@ export function EvictCache<F extends string, U extends Record<F, CacheService>>(
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[EvictConfigSymbol] ??= {})[propertyKey] = config;
     const handler = _descriptor.value!.bind(castTo(target));
+    // Allows for DI to run, as the service will not be bound until after the decorator is run
     _descriptor.value = castTo(function (this: typeof target) {
-      // Allows for DI to run, as the service will not be bound until after the decorator is run
-      return this[field].evict(this, propertyKey, handler, [...arguments]) as Promise<R>;
+      return this[field].evict(this, propertyKey, handler, [...arguments]);
     });
     Object.defineProperty(_descriptor.value, 'name', { value: propertyKey, writable: false });
   };
