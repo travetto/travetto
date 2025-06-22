@@ -24,13 +24,13 @@
     "directory": "module/eslint"
   },
   "dependencies": {
-    "@eslint/js": "^9.26.0",
-    "@stylistic/eslint-plugin": "^4.2.0",
+    "@eslint/js": "^9.29.0",
+    "@stylistic/eslint-plugin": "^4.4.1",
     "@travetto/runtime": "^6.0.0",
     "@types/eslint": "^9.6.1",
-    "@typescript-eslint/eslint-plugin": "^8.32.1",
-    "@typescript-eslint/parser": "^8.32.1",
-    "eslint": "^9.26.0",
+    "@typescript-eslint/eslint-plugin": "^8.34.1",
+    "@typescript-eslint/parser": "^8.34.1",
+    "eslint": "^9.29.0",
     "eslint-plugin-unused-imports": "^4.1.4"
   },
   "peerDependencies": {

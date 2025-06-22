@@ -25,10 +25,10 @@
     "directory": "module/model-redis"
   },
   "dependencies": {
+    "@redis/client": "^5.5.6",
     "@travetto/cli": "^6.0.0",
     "@travetto/config": "^6.0.0",
-    "@travetto/model": "^6.0.0",
-    "@redis/client": "^5.1.1"
+    "@travetto/model": "^6.0.0"
   },
   "travetto": {
     "displayName": "Redis Model Support"

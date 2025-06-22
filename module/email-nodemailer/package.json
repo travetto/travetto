@@ -26,10 +26,10 @@
   "dependencies": {
     "@travetto/email": "^6.0.0",
     "@types/nodemailer": "^6.4.17",
-    "nodemailer": "^6.10.1"
+    "nodemailer": "^7.0.3"
   },
   "devDependencies": {
-    "@aws-sdk/client-ses": "^3.810.0"
+    "@aws-sdk/client-ses": "^3.830.0"
   },
   "travetto": {
     "displayName": "Email Nodemailer Support"

@@ -1,11 +1,11 @@
 {
   "name": "@travetto-doc/web-http-server",
   "dependencies": {
-    "@travetto/cli": "^6.0.0-rc.0",
-    "@travetto/web-http-server": "^6.0.0-rc.0"
+    "@travetto/cli": "^6.0.0",
+    "@travetto/web-http-server": "^6.0.0"
   },
   "devDependencies": {
-    "@travetto/compiler": "^6.0.0-rc.0"
+    "@travetto/compiler": "^6.0.0"
   },
   "travetto": {
     "build": {
