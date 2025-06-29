@@ -51,13 +51,34 @@ export class SchemaTransformer {
     delete state[InSchemaSymbol];
     delete state[AccessorsSymbol];
 
+    const schemaMethods = state.readDocTag(node, 'schemaMethods');
+    let members = node.members;
+
+    if (schemaMethods) {
+      const methodSet = new Set(schemaMethods.flatMap(x => x.split(/\s*,\s*/g)));
+      members = state.factory.createNodeArray(
+        node.members.map(x => ts.isMethodDeclaration(x) && methodSet.has(x.name.getText()) ?
+          state.factory.updateMethodDeclaration(
+            x,
+            x.modifiers,
+            x.asteriskToken,
+            x.name,
+            x.questionToken,
+            x.typeParameters,
+            x.parameters.map(y => SchemaTransformUtil.computeField(state, y)),
+            x.type,
+            x.body
+          ) : x)
+      );
+    }
+
     return state.factory.updateClassDeclaration(
       node,
       modifiers,
       node.name,
       node.typeParameters,
       node.heritageClauses,
-      node.members
+      members
     );
   }
 
