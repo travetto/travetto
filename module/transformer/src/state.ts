@@ -130,6 +130,16 @@ export class TransformerState implements State {
   }
 
   /**
+   * Read all JSDoc tags as a list, with split support
+   */
+  readDocTagList(node: ts.Declaration, name: string): string[] {
+    return this.readDocTag(node, name)
+      .flatMap(x => x.split(/\s*,\s*/g))
+      .map(x => x.replace(/`/g, ''))
+      .filter(x => !!x);
+  }
+
+  /**
    * Import a decorator, generally to handle erasure
    */
   importDecorator(pth: string, name: string): ts.PropertyAccessExpression | undefined {

@@ -1,7 +1,8 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter
+  TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter,
+  DecoratorUtil
 } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
@@ -50,11 +51,16 @@ export class SchemaTransformer {
 
     delete state[InSchemaSymbol];
     delete state[AccessorsSymbol];
-
-    const schemaMethods = state.readDocTag(node, 'schemaMethods');
     let members = node.members;
 
-    if (schemaMethods) {
+    const schemaMethods = [
+      ...node.modifiers?.filter(x => ts.isDecorator(x))
+        .flatMap(x => state.getDeclarations(DecoratorUtil.getDecoratorIdent(x))) ?? [],
+      node
+    ]
+      .flatMap(v => state.readDocTagList(v, 'schemaMethods'));
+
+    if (schemaMethods.length) {
       const methodSet = new Set(schemaMethods.flatMap(x => x.split(/\s*,\s*/g)));
       members = state.factory.createNodeArray(
         node.members.map(x => ts.isMethodDeclaration(x) && methodSet.has(x.name.getText()) ?
