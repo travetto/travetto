@@ -1,6 +1,6 @@
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.POSTGRESQL_VERSION || '17.5';
+const version = process.env.POSTGRESQL_VERSION || '17.6';
 
 export const service: ServiceDescriptor = {
   name: 'postgresql',
