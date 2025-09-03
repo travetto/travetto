@@ -40,8 +40,8 @@
     "@travetto/log": "~6.0.0",
     "@travetto/pack": "~6.0.0",
     "@travetto/test": "~6.0.0",
-    "@types/node": "^24.0.3",
-    "@types/vscode": "^1.100.0"
+    "@types/node": "^24.3.0",
+    "@types/vscode": "^1.103.0"
   },
   "dependencies": {
     "@travetto/registry": "~6.0.0",
