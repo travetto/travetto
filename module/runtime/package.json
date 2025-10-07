@@ -27,7 +27,7 @@
   "dependencies": {
     "@travetto/manifest": "^6.0.0",
     "@types/debug": "^4.1.12",
-    "debug": "^4.4.1"
+    "debug": "^4.4.3"
   },
   "peerDependencies": {
     "@travetto/transformer": "^6.0.0"
