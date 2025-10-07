@@ -1,6 +1,6 @@
 {
   "name": "@travetto/compiler",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "description": "The compiler infrastructure for the Travetto framework",
   "keywords": [
     "compiler",
