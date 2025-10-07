@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-mysql",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
     "sql",
@@ -27,12 +27,12 @@
     "directory": "module/model-mysql"
   },
   "dependencies": {
-    "@travetto/cli": "^6.0.0",
-    "@travetto/config": "^6.0.0",
-    "@travetto/context": "^6.0.0",
-    "@travetto/model": "^6.0.0",
-    "@travetto/model-query": "^6.0.0",
-    "@travetto/model-sql": "^6.0.0",
+    "@travetto/cli": "^6.0.1",
+    "@travetto/config": "^6.0.1",
+    "@travetto/context": "^6.0.1",
+    "@travetto/model": "^6.0.1",
+    "@travetto/model-query": "^6.0.1",
+    "@travetto/model-sql": "^6.0.1",
     "mysql2": "^3.15.1"
   },
   "travetto": {
