@@ -22,7 +22,6 @@ export class CompilerServer {
   #listenersAll = new Set<http.ServerResponse>();
   #listeners: Partial<Record<CompilerEventType | 'all', Record<string, http.ServerResponse>>> = {};
   #shutdown = new AbortController();
-  signal = this.#shutdown.signal;
   info: CompilerServerInfo;
   #client: CompilerClient;
   #url: string;
@@ -51,6 +50,10 @@ export class CompilerServer {
     }, (req, res) => this.#onRequest(req, res));
 
     setMaxListeners(1000, this.signal);
+  }
+
+  get signal(): AbortSignal {
+    return this.#shutdown.signal;
   }
 
   get mode(): CompilerMode {
