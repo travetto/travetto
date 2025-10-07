@@ -49,13 +49,13 @@ export class ScaffoldCommand implements CliCommandShape {
     return feature.choices?.find(x => x.title === response.choice);
   }
 
-  async * #resolveFeatures(features: Feature[], chosen = false): AsyncGenerator<Feature> {
+  async * #resolveFeatures(features: Feature[], chosen = false, depth = 0): AsyncGenerator<Feature> {
     for (const feat of features) {
       if (!chosen && !feat.required) {
         const ans = await prompt<{ choice: boolean | string }>([{
           type: 'confirm',
           name: 'choice',
-          message: `Include ${feat.title} support?`,
+          message: `${'='.repeat(depth * 2)}${depth > 0 ? '| ' : ''}Include ${feat.title} support?`,
           initial: true
         }]);
 
@@ -67,11 +67,13 @@ export class ScaffoldCommand implements CliCommandShape {
       if (feat.choices) {
         const choice = await this.#chooseFeature(feat);
         if (choice) {
-          yield* this.#resolveFeatures([choice], true);
+          yield* this.#resolveFeatures([choice], true, depth);
         } else {
           throw new Error(`Invalid choice: ${feat}`);
         }
       }
+
+      yield* this.#resolveFeatures(feat.addons ?? [], false, depth + 1);
 
       yield feat;
     }

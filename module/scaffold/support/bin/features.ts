@@ -22,25 +22,25 @@ export const FEATURES: Feature[] = [
     required: true,
     default: 'npm'
   },
+  { title: 'Logging', package: '@travetto/log', required: true },
   {
     title: 'Web Framework',
     package: '@travetto/web',
     addons: [
-      { title: 'Web Node', package: '@travetto/web-node' },
-      { title: 'Web Http Server', package: '@travetto/web-http-server' },
-      { title: 'OpenAPI', package: '@travetto/openapi' },
-      { title: 'Logging', package: '@travetto/log' }
+      { title: 'Web Node', package: '@travetto/web-node', required: true },
+      { title: 'Web Http Server', package: '@travetto/web-http-server', required: true },
+      { title: 'OpenAPI', package: '@travetto/openapi', required: true },
+      {
+        title: 'Web Authentication',
+        package: '@travetto/auth-web',
+        addons: [
+          { title: 'Session Support', package: ['@travetto/auth-session', '@travetto/auth-web-session', '@travetto/model-memory'] },
+        ]
+      },
     ]
   },
   { title: 'Test Framework', package: '@travetto/test' },
   { title: 'ESLint Support', package: '@travetto/eslint' },
-  {
-    title: 'Web Authentication',
-    package: '@travetto/auth-web',
-    addons: [
-      { title: 'Session Support', package: ['@travetto/auth-session', '@travetto/auth-web-session', '@travetto/model-memory'] },
-    ]
-  },
   {
     title: 'Data Modelling',
     package: '@travetto/model',

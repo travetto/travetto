@@ -116,14 +116,18 @@ export class Context {
       PackageUtil.resolveImport('@travetto/manifest/package.json')
     );
 
-    const context = Object.assign({
-      frameworkVersion: frameworkVersion.replace(/[.]\d+$/, '.0'),
-      name: this.name,
-      modules,
-      moduleNames,
-      dependencies: [...new Set(this.#dependencies)].toSorted((a, b) => a.localeCompare(b)),
-      devDependencies: [...new Set(this.#devDependencies)].toSorted((a, b) => a.localeCompare(b)),
-    }, ...this.#featureContexts);
+    const context = Object.assign(
+      {
+        frameworkVersion: frameworkVersion.replace(/[.]\d+$/, '.0'),
+        name: this.name,
+        modules,
+        moduleNames,
+        dependencies: [...new Set(this.#dependencies)].toSorted((a, b) => a.localeCompare(b)),
+        devDependencies: [...new Set(this.#devDependencies)].toSorted((a, b) => a.localeCompare(b)),
+      },
+      ...this.#featureContexts,
+      ...moduleNames.map(x => ({ [`module_${x}`]: true }))
+    );
 
     return context;
   }
