@@ -2,7 +2,7 @@ import {
   Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
   asFull, castKey, TypedFunction, hasFunction, AppError
 } from '@travetto/runtime';
-import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
+import { RootRegistry, ChangeEvent, Registry } from '@travetto/registry';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, PostConstructHandler } from './types.ts';
 import { InjectionError } from './error.ts';
@@ -22,7 +22,7 @@ const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDe
 /**
  * Dependency registry
  */
-class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
+class $DependencyRegistry extends Registry<InjectableConfig> {
   pendingFinalize: Class[] = [];
 
   defaultSymbols = new Set<symbol>();

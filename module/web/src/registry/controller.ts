@@ -1,6 +1,6 @@
 import { DependencyRegistry } from '@travetto/di';
 import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInstance } from '@travetto/runtime';
-import { MetadataRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
 import { WebChainedFilter, WebFilter } from '../types/filter.ts';
@@ -21,7 +21,7 @@ type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
 /**
  * Controller registry
  */
-class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
+class $ControllerRegistry extends Registry<ControllerConfig, EndpointConfig> {
 
   #endpointsById = new Map<string, EndpointConfig>();
 

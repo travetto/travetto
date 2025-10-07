@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { MetadataRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 interface Group {
   class: Class;
@@ -15,7 +15,7 @@ function isComplete(o: Partial<Group>): o is Group {
   return !!o;
 }
 
-export class SampleRegistry extends MetadataRegistry<Group, Child> {
+export class SampleRegistry extends Registry<Group, Child> {
   /**
    * Finalize class after all metadata is collected
    */

@@ -1,5 +1,5 @@
 import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey } from '@travetto/runtime';
-import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
+import { Registry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types.ts';
 import { SchemaChangeListener } from './changes.ts';
@@ -13,7 +13,7 @@ const classToSubTypeName = (cls: Class): string => cls.name
 /**
  * Schema registry for listening to changes
  */
-class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
+class $SchemaRegistry extends Registry<ClassConfig, FieldConfig> {
 
   #accessorDescriptors = new Map<Class, Map<string, PropertyDescriptor>>();
   #subTypes = new Map<Class, Map<string, Class>>();
@@ -34,7 +34,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
       while (conf && !conf.baseType) {
         parent = this.getParentClass(parent)!;
-        conf = this.get(parent) ?? this.pending.get(MetadataRegistry.id(parent));
+        conf = this.get(parent) ?? this.pending.get(Registry.id(parent));
       }
 
       this.#baseSchema.set(cls, conf ? parent : cls);

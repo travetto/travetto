@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import { Any, Class } from '@travetto/runtime';
 
 import { Registry } from '../registry.ts';
 import { ClassSource } from '../source/class-source.ts';
@@ -7,7 +7,7 @@ import { ChangeEvent } from '../types.ts';
 /**
  * The root registry that controls all registries
  */
-class $RootRegistry extends Registry {
+class $RootRegistry extends Registry<Any> {
   constructor() {
     super(new ClassSource());
   }

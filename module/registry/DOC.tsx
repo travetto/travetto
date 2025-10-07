@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { MetadataRegistry } from './src/service/metadata.ts';
+import { Registry } from './src/registry.ts';
 import { RootRegistry } from './src/service/root.ts';
 import { DynamicFileLoader } from './src/internal/file-loader.ts';
 
@@ -25,7 +25,7 @@ export const text = <>
 
       <c.Code title='Sample Registry' src='doc/registry.ts' />
 
-      The registry is a {MetadataRegistry} that similar to the {d.mod('Schema')}'s Schema registry and {d.mod('Di')}'s Dependency registry.
+      The registry is a {Registry} that similar to the {d.mod('Schema')}'s Schema registry and {d.mod('Di')}'s Dependency registry.
     </c.SubSection>
     <c.SubSection title='Live Flow'>
       At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. <br />

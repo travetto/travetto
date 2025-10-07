@@ -1,5 +1,5 @@
 import { SchemaRegistry } from '@travetto/schema';
-import { MetadataRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
 
@@ -11,7 +11,7 @@ import { IndexNotSupported } from '../error/invalid-index.ts';
 /**
  * Registry for all models, built on the Metadata registry
  */
-class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
+class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
   /**
    * All stores names
    */
@@ -83,7 +83,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
 
     const parent = this.getParentClass(cls);
     if (parent && parent !== cls) {
-      const pCfg = this.get(parent) ?? this.pending.get(MetadataRegistry.id(parent));
+      const pCfg = this.get(parent) ?? this.pending.get(Registry.id(parent));
       config.prePersist = [...pCfg?.prePersist ?? [], ...config.prePersist ?? []];
       config.postLoad = [...pCfg?.postLoad ?? [], ...config.postLoad ?? []];
     }
@@ -108,7 +108,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
 
       while (conf && !conf.baseType) {
         parent = this.getParentClass(parent)!;
-        conf = this.get(parent) ?? this.pending.get(MetadataRegistry.id(parent));
+        conf = this.get(parent) ?? this.pending.get(Registry.id(parent));
       }
 
       this.baseModels.set(cls, conf ? parent : cls);
