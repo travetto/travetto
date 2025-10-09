@@ -23,6 +23,7 @@ The merging of Root + Metadata Registry into a single registry represents the ma
 
 This newly combined registry will have zero knowledge of the various use cases, and will only concern itself with "classes" though functions will be supported in the future.  Functions can be thought of as a "class with a single function/constructor". 
 
+### Lifecycle Clarity
 The registry will operate with the following patterns:
 
 #### Registration
@@ -42,7 +43,7 @@ After each service is considered internally consistent, there is opportunity for
 #### Live Registration
 Live registration is the above process, but only for the newly added classes.  One of the key pieces here is that the previous state will be preserved until finalization.
 
-#### Eventing
+### Eventing
 During the above lifecycle events there will be opportunities to emit various events, replacing the per registry event handling.  This will allow for discrete/focused events that each data type is responsible is for.
  * Web listens for updated controllers
  * OpenAPI listens for updated controllers/schemas
@@ -56,3 +57,7 @@ The following transformers will be rewritten as purely decorators, with any nece
 * Dependency Injection - Will need to record the constructor details, and store metadata for qualifiers
 * Web - Will need to move most of the logic to finalization, and ensure we are recording all the necessary details (e.g. Promise and inner type for methods).
 * Documentation - Method/classes utilize a common pattern for all classes to apply basic documentation
+
+
+### Externalized Helpers
+Currently DI, Model, Schema, Test, Controller all have registries that rely on their own unique scoping.  
