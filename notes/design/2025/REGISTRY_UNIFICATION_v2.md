@@ -60,4 +60,7 @@ The following transformers will be rewritten as purely decorators, with any nece
 
 
 ### Externalized Helpers
-Currently DI, Model, Schema, Test, Controller all have registries that rely on their own unique scoping.  
+Currently DI, Model, Schema, Test, Controller all have registries that rely on their own unique scoping. There will need to be helpers to create a curated view of the registry, for the specific queries needed. Additionally some indices may need to be created for performance reasons, when asking specific questions or looking up key information (e.g. schema/model as they are used a runtime).
+
+## Unchanged
+The user experience of decorators and the associated functionality will remain unchanged and invisible to end users.  This is primarily an internal refactoring preparing for the future.
