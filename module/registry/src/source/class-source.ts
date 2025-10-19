@@ -17,7 +17,11 @@ function isClass(cls: Function): cls is Class {
 export class ClassSource implements ChangeSource<Class> {
 
   #classes = new Map<string, Map<string, Class>>();
-  #emitter = new EventEmitter();
+  #emitter = new EventEmitter<{
+    change: [ChangeEvent<Class>];
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    'unchanged-import': [string];
+  }>();
   #listening: Promise<void> | undefined;
 
   /**
@@ -28,8 +32,9 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Flush classes
    */
-  #flush(): void {
-    for (const cls of flushPendingFunctions().filter(isClass)) {
+  #flush(): Class[] {
+    const flushed = flushPendingFunctions().filter(isClass);
+    for (const cls of flushed) {
       const src = Runtime.getSourceFile(cls);
       if (!this.#classes.has(src)) {
         this.#classes.set(src, new Map());
@@ -37,6 +42,7 @@ export class ClassSource implements ChangeSource<Class> {
       this.#classes.get(src)!.set(cls.Ⲑid, cls);
       this.emit({ type: 'added', curr: cls });
     }
+    return flushed;
   }
 
   #removeFile(file: string): void {
@@ -85,7 +91,7 @@ export class ClassSource implements ChangeSource<Class> {
           const nextHash = describeFunction(next.get(k)!)?.hash;
           if (prevHash !== nextHash) {
             changes += 1;
-            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
+            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
           }
         }
       }
@@ -118,7 +124,11 @@ export class ClassSource implements ChangeSource<Class> {
    */
   emit(e: ChangeEvent<Class>): void {
     if (this.trace) {
-      console.debug('Emitting change', { type: e.type, curr: e.curr?.Ⲑid, prev: e.prev?.Ⲑid });
+      console.debug('Emitting change', {
+        type: e.type,
+        curr: (e.type !== 'removing' ? e.curr?.Ⲑid : undefined),
+        prev: (e.type !== 'added' ? e.prev?.Ⲑid : undefined)
+      });
     }
     this.#emitter.emit('change', e);
   }
@@ -126,7 +136,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Initialize
    */
-  async init(): Promise<void> {
+  async init(): Promise<Class[]> {
     if (Runtime.dynamic && !this.#listening) {
       this.#listening = (async (): Promise<void> => {
         for await (const ev of await DynamicFileLoader.listen()) {
@@ -158,7 +168,7 @@ export class ClassSource implements ChangeSource<Class> {
     }
 
     // Flush all load events
-    this.#flush();
+    return this.#flush();
   }
 
   /**
@@ -166,6 +176,13 @@ export class ClassSource implements ChangeSource<Class> {
    */
   on(callback: ChangeHandler<Class>): void {
     this.#emitter.on('change', callback);
+  }
+
+  /**
+   * Add callback for change events
+   */
+  off(callback: ChangeHandler<Class>): void {
+    this.#emitter.off('change', callback);
   }
 
   /**

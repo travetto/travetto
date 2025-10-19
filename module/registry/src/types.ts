@@ -1,11 +1,10 @@
 /**
  * A change event
  */
-export interface ChangeEvent<T> {
-  type: 'changed' | 'added' | 'removing';
-  prev?: T;
-  curr?: T;
-}
+export type ChangeEvent<T> =
+  { type: 'changed', prev: T, curr: T } |
+  { type: 'added', curr: T } |
+  { type: 'removing', prev: T };
 
 /**
  * Change handler
