@@ -1,7 +1,7 @@
 import { castTo, Class, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
-import { RegistryAdapter, RegistryItem } from './types';
+import { RegistryAdapter, RegistryItem, RegistryAdapterConstructor } from './types';
 
 class Registry {
 
@@ -26,20 +26,20 @@ class Registry {
     return item;
   }
 
-  #adapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(cls: Class, adapterCls: Class<RegistryAdapter<C, M, F>>): RegistryAdapter<C, M, F> {
+  #adapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(cls: Class, adapterCls: RegistryAdapterConstructor<C, M, F>): RegistryAdapter<C, M, F> {
     const item = this.#item(cls);
     if (!this.#itemsByAdapter.has(adapterCls)) {
       this.#itemsByAdapter.set(adapterCls, new Set());
     }
     this.#itemsByAdapter.get(adapterCls)!.add(item);
-    return this.#item(cls).get(adapterCls);
+    return this.#item(cls).get(adapterCls, cls);
   }
 
   #removeItem(cls: Class): void {
     const item = this.#items.get(cls);
     if (item) {
       for (const adapter of item.adapters.values()) {
-        adapter.unregister(item.cls);
+        adapter.unregister();
         // Remove from itemsByAdapter map
         this.#itemsByAdapter.get(castTo(adapter.constructor))?.delete(item);
       }
@@ -113,28 +113,28 @@ class Registry {
     return this.#idToCls.get(id);
   }
 
-  register<C extends {}>(adapterCls: Class<RegistryAdapter<C>>, cls: Class, data?: Partial<C>): void {
-    this.#adapter(cls, adapterCls).register(adapterCls, data ?? {});
+  register<C extends {}>(adapterCls: RegistryAdapterConstructor<C>, cls: Class, data?: Partial<C>): void {
+    this.#adapter(cls, adapterCls).register(data ?? {});
   }
 
-  registerField<F extends {}>(adapterCls: Class<RegistryAdapter<{}, {}, F>>, cls: Class, field: string | symbol, data: Partial<F>): void {
-    this.#adapter(cls, adapterCls).registerField(adapterCls, field, data ?? {});
+  registerField<F extends {}>(adapterCls: RegistryAdapterConstructor<{}, {}, F>, cls: Class, field: string | symbol, data: Partial<F>): void {
+    this.#adapter(cls, adapterCls).registerField(field, data ?? {});
   }
 
-  registerMethod<M extends {}>(adapterCls: Class<RegistryAdapter<{}, M, {}>>, cls: Class, method: string | symbol, data: Partial<M>): void {
-    this.#adapter(cls, adapterCls).registerMethod(adapterCls, method, data ?? {});
+  registerMethod<M extends {}>(adapterCls: RegistryAdapterConstructor<{}, M, {}>, cls: Class, method: string | symbol, data: Partial<M>): void {
+    this.#adapter(cls, adapterCls).registerMethod(method, data ?? {});
   }
 
-  get<C extends {}>(adapterCls: Class<RegistryAdapter<C>>, cls: Class): C {
-    return this.#adapter(cls, adapterCls).get(cls);
+  get<C extends {}>(adapterCls: RegistryAdapterConstructor<C>, cls: Class): C {
+    return this.#adapter(cls, adapterCls).get();
   }
 
-  getField<F extends {}>(adapterCls: Class<RegistryAdapter<{}, {}, F>>, cls: Class, field: string | symbol): F {
-    return this.#adapter(cls, adapterCls).getField(cls, field);
+  getField<F extends {}>(adapterCls: RegistryAdapterConstructor<{}, {}, F>, cls: Class, field: string | symbol): F {
+    return this.#adapter(cls, adapterCls).getField(field);
   }
 
-  getMethod<M extends {}>(adapterCls: Class<RegistryAdapter<{}, M, {}>>, cls: Class, method: string | symbol): M {
-    return this.#adapter(cls, adapterCls).getMethod(cls, method);
+  getMethod<M extends {}>(adapterCls: RegistryAdapterConstructor<{}, M, {}>, cls: Class, method: string | symbol): M {
+    return this.#adapter(cls, adapterCls).getMethod(method);
   }
 }
 

@@ -1,20 +1,24 @@
 import { castTo, Class } from '@travetto/runtime';
 
+export interface RegistryAdapterConstructor<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
+  new(cls: Class): RegistryAdapter<C, M, F>;
+}
+
 /**
  * Interface for registry adapters to implement
  */
 export interface RegistryAdapter<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
-  register(cls: Class, data: Partial<C>): void;
-  registerField(cls: Class, field: string | symbol, data: Partial<F>): void;
-  registerMethod(cls: Class, method: string | symbol, data: Partial<M>): void;
-  unregister(cls: Class): void;
+  register(data: Partial<C>): void;
+  registerField(field: string | symbol, data: Partial<F>): void;
+  registerMethod(method: string | symbol, data: Partial<M>): void;
+  unregister(): void;
 
-  prepareFinalize(cls: Class): void;
-  finalize(cls: Class): void;
+  prepareFinalize(): void;
+  finalize(): void;
 
-  get(cls: Class): C;
-  getField(cls: Class, field: string | symbol): F;
-  getMethod(cls: Class, method: string | symbol): M;
+  get(): C;
+  getField(field: string | symbol): F;
+  getMethod(method: string | symbol): M;
 };
 
 /**
@@ -30,25 +34,25 @@ export class RegistryItem {
   }
 
   get<C extends {} = {}, M extends {} = {}, F extends {} = {}>(
-    cls: Class<RegistryAdapter<C, M, F>>
+    adapterClass: RegistryAdapterConstructor<C, M, F>,
+    cls: Class
   ): RegistryAdapter<C, M, F> {
-    if (!this.adapters.has(cls)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const adapter = new (cls as { new(): RegistryAdapter<C, M, F> })();
-      this.adapters.set(cls, adapter);
+    if (!this.adapters.has(adapterClass)) {
+      const adapter = new adapterClass(cls);
+      this.adapters.set(adapterClass, adapter);
     }
-    return castTo(this.adapters.get(cls)!);
+    return castTo(this.adapters.get(adapterClass)!);
   }
 
   prepareFinalize(): void {
     for (const adapter of this.adapters.values()) {
-      adapter.prepareFinalize(this.cls);
+      adapter.prepareFinalize();
     }
   }
 
   finalize(): void {
     for (const adapter of this.adapters.values()) {
-      adapter.finalize(this.cls);
+      adapter.finalize();
     }
     this.finalized = true;
   }
