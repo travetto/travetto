@@ -28,8 +28,15 @@ export interface DescribableConfig {
 /**
  * Basic structure for a method configuration
  */
-export interface SchemaMethodConfig {
-  fields: FieldConfig[];
+export interface MethodConfig extends DescribableConfig {
+  /**
+   * The parameters of the method
+   */
+  parameters: FieldConfig[];
+
+  /**
+   * Validators to run for th method
+   */
   validators: MethodValidatorFn<unknown[]>[];
 }
 
@@ -94,9 +101,9 @@ export interface ClassConfig extends DescribableConfig {
    */
   metadata?: Record<symbol, unknown>;
   /**
-   * Method parameter configs
+   * Method configs
    */
-  methods: Record<string, SchemaMethodConfig>;
+  methods: Record<string, MethodConfig>;
 }
 
 /**

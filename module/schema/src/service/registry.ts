@@ -1,7 +1,7 @@
 import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey } from '@travetto/runtime';
 import { Registry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types.ts';
+import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, MethodConfig } from './types.ts';
 import { SchemaChangeListener } from './changes.ts';
 import { MethodValidatorFn } from '../validate/types.ts';
 
@@ -218,7 +218,7 @@ class $SchemaRegistry extends Registry<ClassConfig, FieldConfig> {
    * @param method
    */
   getMethodSchema<T>(cls: Class<T>, method: string): FieldConfig[] {
-    return (this.get(cls)?.methods?.[method] ?? {}).fields?.filter(x => !!x).toSorted((a, b) => a.index! - b.index!) ?? [];
+    return (this.get(cls)?.methods?.[method] ?? {}).parameters?.filter(x => !!x).toSorted((a, b) => a.index! - b.index!) ?? [];
   }
 
   /**
@@ -249,9 +249,9 @@ class $SchemaRegistry extends Registry<ClassConfig, FieldConfig> {
    * @param target
    * @param method
    */
-  registerPendingMethod(target: Class, method: string): SchemaMethodConfig {
+  registerPendingMethod(target: Class, method: string): MethodConfig {
     const methods = this.getOrCreatePending(target)!.methods!;
-    return (methods[method] ??= { fields: [], validators: [] });
+    return (methods[method] ??= { parameters: [], validators: [] });
   }
 
   /**
@@ -262,7 +262,7 @@ class $SchemaRegistry extends Registry<ClassConfig, FieldConfig> {
    * @param config The config to register
    */
   registerPendingParamFacet(target: Class, method: string, idx: number, config: Partial<FieldConfig>): Class {
-    const params = this.registerPendingMethod(target, method).fields;
+    const params = this.registerPendingMethod(target, method).parameters;
     if (config.name === '') {
       delete config.name;
     }
