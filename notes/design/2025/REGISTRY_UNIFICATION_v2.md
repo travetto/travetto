@@ -64,3 +64,7 @@ Currently DI, Model, Schema, Test, Controller all have registries that rely on t
 
 ## Unchanged
 The user experience of decorators and the associated functionality will remain unchanged and invisible to end users.  This is primarily an internal refactoring preparing for the future.
+
+
+## Indices
+Once the metadata adapters have been "finalized" there is an indexing process that needs to run across all the data to create or update the various indices needed to function.  The index will need to be able to respond to changes as they come in.  The decorators should also register the index on use, to ensure its aware of changes post load. 

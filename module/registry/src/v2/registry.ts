@@ -1,7 +1,7 @@
 import { castTo, Class, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
-import { RegistryAdapter, RegistryItem, RegistryAdapterConstructor } from './types';
+import { RegistryAdapter, RegistryItem, RegistryIndex } from './types';
 
 class Registry {
 
@@ -12,8 +12,7 @@ class Registry {
 
   #items: Map<Class, RegistryItem> = new Map();
   #idToCls: Map<string, Class> = new Map();
-  #itemsByAdapter = new Map<Class<RegistryAdapter>, Set<RegistryItem>>();
-
+  #itemsByIndex = new Map<RegistryIndex, Set<RegistryItem>>();
   #changeSource = new ClassSource();
 
   #item(cls: Class): RegistryItem {
@@ -26,13 +25,13 @@ class Registry {
     return item;
   }
 
-  #adapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(cls: Class, adapterCls: RegistryAdapterConstructor<C, M, F>): RegistryAdapter<C, M, F> {
+  #adapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(cls: Class, index: RegistryIndex<C, M, F>): RegistryAdapter<C, M, F> {
     const item = this.#item(cls);
-    if (!this.#itemsByAdapter.has(adapterCls)) {
-      this.#itemsByAdapter.set(adapterCls, new Set());
+    if (!this.#itemsByIndex.has(index)) {
+      this.#itemsByIndex.set(index, new Set());
     }
-    this.#itemsByAdapter.get(adapterCls)!.add(item);
-    return this.#item(cls).get(adapterCls, cls);
+    this.#itemsByIndex.get(index)!.add(item);
+    return this.#item(cls).get(index, cls);
   }
 
   #removeItem(cls: Class): void {
@@ -40,8 +39,8 @@ class Registry {
     if (item) {
       for (const adapter of item.adapters.values()) {
         adapter.unregister();
-        // Remove from itemsByAdapter map
-        this.#itemsByAdapter.get(castTo(adapter.constructor))?.delete(item);
+        // Remove from itemsByIndex map
+        this.#itemsByIndex.get(castTo(adapter.constructor))?.delete(item);
       }
       this.#items.delete(item.cls);
       this.#idToCls.delete(item.cls.Ⲑid);
@@ -49,12 +48,6 @@ class Registry {
   }
 
   #finalizeItems(classes: Class[]): void {
-    for (const cls of classes) {
-      const item = this.#item(cls);
-      if (!item.finalized) {
-        item.prepareFinalize();
-      }
-    }
     for (const cls of classes) {
       const item = this.#item(cls);
       if (!item.finalized) {
@@ -113,28 +106,28 @@ class Registry {
     return this.#idToCls.get(id);
   }
 
-  register<C extends {}>(adapterCls: RegistryAdapterConstructor<C>, cls: Class, data?: Partial<C>): void {
-    this.#adapter(cls, adapterCls).register(data ?? {});
+  register<C extends {}>(index: RegistryIndex<C>, cls: Class, data?: Partial<C>): void {
+    this.#adapter(cls, index).register(data ?? {});
   }
 
-  registerField<F extends {}>(adapterCls: RegistryAdapterConstructor<{}, {}, F>, cls: Class, field: string | symbol, data: Partial<F>): void {
-    this.#adapter(cls, adapterCls).registerField(field, data ?? {});
+  registerField<F extends {}>(index: RegistryIndex<{}, {}, F>, cls: Class, field: string | symbol, data: Partial<F>): void {
+    this.#adapter(cls, index).registerField(field, data ?? {});
   }
 
-  registerMethod<M extends {}>(adapterCls: RegistryAdapterConstructor<{}, M, {}>, cls: Class, method: string | symbol, data: Partial<M>): void {
-    this.#adapter(cls, adapterCls).registerMethod(method, data ?? {});
+  registerMethod<M extends {}>(index: RegistryIndex<{}, M, {}>, cls: Class, method: string | symbol, data: Partial<M>): void {
+    this.#adapter(cls, index).registerMethod(method, data ?? {});
   }
 
-  get<C extends {}>(adapterCls: RegistryAdapterConstructor<C>, cls: Class): C {
-    return this.#adapter(cls, adapterCls).get();
+  get<C extends {}>(index: RegistryIndex<C>, cls: Class): C {
+    return this.#adapter(cls, index).get();
   }
 
-  getField<F extends {}>(adapterCls: RegistryAdapterConstructor<{}, {}, F>, cls: Class, field: string | symbol): F {
-    return this.#adapter(cls, adapterCls).getField(field);
+  getField<F extends {}>(index: RegistryIndex<{}, {}, F>, cls: Class, field: string | symbol): F {
+    return this.#adapter(cls, index).getField(field);
   }
 
-  getMethod<M extends {}>(adapterCls: RegistryAdapterConstructor<{}, M, {}>, cls: Class, method: string | symbol): M {
-    return this.#adapter(cls, adapterCls).getMethod(method);
+  getMethod<M extends {}>(index: RegistryIndex<{}, M, {}>, cls: Class, method: string | symbol): M {
+    return this.#adapter(cls, index).getMethod(method);
   }
 }
 
