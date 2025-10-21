@@ -35,7 +35,7 @@ export class RegistryItem {
     this.cls = cls;
   }
 
-  get<C extends {} = {}, M extends {} = {}, F extends {} = {}>(
+  adapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(
     index: RegistryIndex<C, M, F>,
     cls: Class
   ): RegistryAdapter<C, M, F> {

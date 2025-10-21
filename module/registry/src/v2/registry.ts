@@ -31,7 +31,7 @@ class Registry {
       this.#itemsByIndex.set(index, new Set());
     }
     this.#itemsByIndex.get(index)!.add(item);
-    return this.#item(cls).get(index, cls);
+    return this.#item(cls).adapter(index, cls);
   }
 
   #removeItem(cls: Class): void {
