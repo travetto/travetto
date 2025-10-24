@@ -32,7 +32,7 @@ export interface MethodConfig extends DescribableConfig {
   /**
    * The parameters of the method
    */
-  parameters: FieldConfig[];
+  parameters: ParameterConfig[];
 
   /**
    * Validators to run for th method
@@ -47,21 +47,7 @@ export interface SchemaConfig {
   /**
    * List of all fields
    */
-  [key: string]: FieldConfig;
-}
-
-/**
- * Specific view configuration for a schema
- */
-export interface ViewConfig {
-  /**
-   * The schema config
-   */
-  schema: SchemaConfig;
-  /**
-   * The list of all fields in the view
-   */
-  fields: string[];
+  [key: string | symbol]: FieldConfig;
 }
 
 /**
@@ -75,11 +61,11 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * List of all views
    */
-  views: Record<string, ViewConfig>;
+  views: Record<string, SchemaConfig>;
   /**
-   * Composite of all views
+   * Field configurations
    */
-  totalView: ViewConfig;
+  fields: SchemaConfig;
   /**
    * Global validators
    */
@@ -103,21 +89,18 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * Method configs
    */
-  methods: Record<string, MethodConfig>;
+  methods: Record<string | symbol, MethodConfig>;
 }
 
-/**
- * Field configuration
- */
-export interface FieldConfig extends DescribableConfig {
+export interface InputConfig extends DescribableConfig {
   /**
    * Owner class
    */
-  owner?: Class;
+  owner: Class;
   /**
    * Field name
    */
-  name: string;
+  name: string | symbol;
   /**
    * List of aliases
    */
@@ -129,14 +112,6 @@ export interface FieldConfig extends DescribableConfig {
     bindSchema?(input: unknown): undefined | unknown;
     validateSchema?(input: unknown): string | undefined;
   };
-  /**
-   * View name for validation when dealing with complex types
-   */
-  view?: string;
-  /**
-   * The position of the field if ordered
-   */
-  index?: number;
   /**
    * Is the field an array
    */
@@ -181,6 +156,30 @@ export interface FieldConfig extends DescribableConfig {
    * Default value
    */
   default?: Primitive | [];
+}
+
+/**
+ * Parameter configuration for methods
+ */
+export interface ParameterConfig extends InputConfig {
+  /**
+   * The position of the field if ordered
+   */
+  index: number;
+  /**
+   * Method the parameter belongs to
+   */
+  method: string | symbol;
+}
+
+/**
+ * Field configuration
+ */
+export interface FieldConfig extends InputConfig {
+  /**
+   * View name for validation when dealing with complex types
+   */
+  view?: string;
   /**
    * Is the field readonly, or write only?, defaults to no restrictions
    */

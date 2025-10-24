@@ -1,9 +1,9 @@
-import { castTo, Class, Util } from '@travetto/runtime';
+import { AppError, castTo, Class, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
-import { RegistryAdapter, RegistryItem, RegistryIndex } from './types';
+import { RegistryAdapter, RegistryItem, RegistryIndex, RegistryIndexClass } from './types';
 
-class Registry {
+class $Registry {
 
   #resolved = false;
   #initialized?: Promise<unknown>;
@@ -12,8 +12,9 @@ class Registry {
 
   #items: Map<Class, RegistryItem> = new Map();
   #idToCls: Map<string, Class> = new Map();
-  #itemsByIndex = new Map<RegistryIndex, Set<RegistryItem>>();
+  #itemsByIndex = new Map<RegistryIndexClass, Set<RegistryItem>>();
   #changeSource = new ClassSource();
+  #indexes = new Map<RegistryIndexClass, RegistryIndex>();
 
   #item(cls: Class): RegistryItem {
     let item = this.#items.get(cls);
@@ -25,13 +26,19 @@ class Registry {
     return item;
   }
 
-  #adapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(cls: Class, index: RegistryIndex<C, M, F>): RegistryAdapter<C, M, F> {
-    const item = this.#item(cls);
-    if (!this.#itemsByIndex.has(index)) {
-      this.#itemsByIndex.set(index, new Set());
+  #adapter<C extends {}, M extends {}, F extends {}, T extends RegistryAdapter<C, M, F>>(indexCls: RegistryIndexClass<C, M, F>, cls: Class): T {
+    if (!this.#indexes.has(indexCls)) {
+      this.#indexes.set(indexCls, new indexCls());
     }
-    this.#itemsByIndex.get(index)!.add(item);
-    return this.#item(cls).adapter(index, cls);
+
+    const index: RegistryIndex<C, M, F> = castTo(this.#indexes.get(indexCls));
+
+    const item = this.#item(cls);
+    if (!this.#itemsByIndex.has(indexCls)) {
+      this.#itemsByIndex.set(indexCls, new Set());
+    }
+    this.#itemsByIndex.get(indexCls)!.add(item);
+    return castTo(this.#item(cls).adapter(index, cls));
   }
 
   #removeItem(cls: Class): void {
@@ -102,33 +109,13 @@ class Registry {
     return this.#initialized ??= this.#init();
   }
 
-  getRegisteredById(id: string): Class | undefined {
-    return this.#idToCls.get(id);
-  }
-
-  register<C extends {}>(index: RegistryIndex<C>, cls: Class, data?: Partial<C>): void {
-    this.#adapter(cls, index).register(data ?? {});
-  }
-
-  registerField<F extends {}>(index: RegistryIndex<{}, {}, F>, cls: Class, field: string | symbol, data: Partial<F>): void {
-    this.#adapter(cls, index).registerField(field, data ?? {});
-  }
-
-  registerMethod<M extends {}>(index: RegistryIndex<{}, M, {}>, cls: Class, method: string | symbol, data: Partial<M>): void {
-    this.#adapter(cls, index).registerMethod(method, data ?? {});
-  }
-
-  get<C extends {}>(index: RegistryIndex<C>, cls: Class): C {
-    return this.#adapter(cls, index).get();
-  }
-
-  getField<F extends {}>(index: RegistryIndex<{}, {}, F>, cls: Class, field: string | symbol): F {
-    return this.#adapter(cls, index).getField(field);
-  }
-
-  getMethod<M extends {}>(index: RegistryIndex<{}, M, {}>, cls: Class, method: string | symbol): M {
-    return this.#adapter(cls, index).getMethod(method);
+  get<C extends {}, M extends {}, F extends {}, T extends RegistryAdapter<C, M, F>>(indexCls: RegistryIndexClass<C, M, F>, clsOrId: Class | string): T {
+    const cls = typeof clsOrId === 'string' ? this.#idToCls.get(clsOrId) : clsOrId;
+    if (!cls) {
+      throw new AppError(`Unknown class ${clsOrId}`);
+    }
+    return this.#adapter(indexCls, cls);
   }
 }
 
-export const RegistryV2 = new Registry();
+export const RegistryV2 = new $Registry();

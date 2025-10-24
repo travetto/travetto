@@ -218,7 +218,7 @@ class $SchemaRegistry extends Registry<ClassConfig, FieldConfig> {
    * @param method
    */
   getMethodSchema<T>(cls: Class<T>, method: string): FieldConfig[] {
-    return (this.get(cls)?.methods?.[method] ?? {}).parameters?.filter(x => !!x).toSorted((a, b) => a.index! - b.index!) ?? [];
+    return (this.get(cls)?.methods?.[method] ?? {}).fields?.filter(x => !!x).toSorted((a, b) => a.index! - b.index!) ?? [];
   }
 
   /**
@@ -251,7 +251,7 @@ class $SchemaRegistry extends Registry<ClassConfig, FieldConfig> {
    */
   registerPendingMethod(target: Class, method: string): MethodConfig {
     const methods = this.getOrCreatePending(target)!.methods!;
-    return (methods[method] ??= { parameters: [], validators: [] });
+    return (methods[method] ??= { fields: [], validators: [] });
   }
 
   /**
@@ -262,7 +262,7 @@ class $SchemaRegistry extends Registry<ClassConfig, FieldConfig> {
    * @param config The config to register
    */
   registerPendingParamFacet(target: Class, method: string, idx: number, config: Partial<FieldConfig>): Class {
-    const params = this.registerPendingMethod(target, method).parameters;
+    const params = this.registerPendingMethod(target, method).fields;
     if (config.name === '') {
       delete config.name;
     }

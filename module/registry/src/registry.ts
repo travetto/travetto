@@ -336,7 +336,7 @@ export abstract class Registry<C extends { class: Class }, M = unknown, F = Func
    */
   onEvent(event: ChangeEvent<Class>): void {
     if (this.trace) {
-      console.debug('Received', { id: this.constructor.Ⲑid, type: event.type, targetId: (event.curr ?? event.prev)!.Ⲑid });
+      // console.debug('Received', { id: this.constructor.Ⲑid, type: event.type, targetId: (event.curr ?? event.prev)!.Ⲑid });
     }
 
     switch (event.type) {

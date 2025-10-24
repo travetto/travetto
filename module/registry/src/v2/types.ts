@@ -2,6 +2,10 @@ import { castTo, Class } from '@travetto/runtime';
 import { ChangeEvent } from '../types';
 
 
+export type RegistryIndexClass<C extends {} = {}, M extends {} = {}, F extends {} = {}> = {
+  new(): RegistryIndex<C, M, F>;
+};
+
 export interface RegistryIndex<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
   process(events: ChangeEvent<Class>): void;
   adapter(cls: Class): RegistryAdapter<C, M, F>;
@@ -11,9 +15,9 @@ export interface RegistryIndex<C extends {} = {}, M extends {} = {}, F extends {
  * Interface for registry adapters to implement
  */
 export interface RegistryAdapter<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
-  register(data: Partial<C>): void;
-  registerField(field: string | symbol, data: Partial<F>): void;
-  registerMethod(method: string | symbol, data: Partial<M>): void;
+  register(data: Partial<C>): C;
+  registerField(field: string | symbol, data: Partial<F>): F;
+  registerMethod(method: string | symbol, data: Partial<M>): M;
   unregister(): void;
 
   finalize(): void;

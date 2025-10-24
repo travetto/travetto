@@ -1,0 +1,130 @@
+import { RegistryAdapter } from '@travetto/registry';
+import { Class } from '@travetto/runtime';
+
+import { ClassConfig, MethodConfig, FieldConfig, ClassList, ParameterConfig, InputConfig } from './types';
+
+function combineInputs<T extends InputConfig>(field: T, ...configs: Partial<T>[]): T {
+  for (const config of configs) {
+    Object.assign(field, {
+      ...config,
+      ...config.aliases ? { aliases: [...field.aliases ?? [], ...config.aliases ?? []] } : {},
+      ...config.specifiers ? { specifiers: [...field.specifiers ?? [], ...config.specifiers ?? []] } : {},
+      ...config.enum ? {
+        enum: {
+          message: field.enum?.message ?? config.enum?.message,
+          values: [...field.enum?.values ?? [], ...config.enum?.values ?? []].toSorted()
+        }
+      } : {}
+    });
+  }
+  return field;
+}
+
+export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig, FieldConfig> {
+
+  #cls: Class;
+  #config: ClassConfig;
+
+  constructor(cls: Class) {
+    this.#cls = cls;
+  }
+
+  register(data: Partial<ClassConfig>): ClassConfig {
+    this.#config ??= {
+      methods: {},
+      class: this.#cls,
+      views: {},
+      validators: [],
+      fields: {},
+      subTypeField: 'type'
+    };
+    return Object.assign(this.#config, data);
+  }
+
+  registerField(field: string | symbol, data: Partial<FieldConfig>): FieldConfig {
+    const config = this.register({});
+    const cfg = config.fields[field] ??= { array: false, name: field, type: null!, owner: this.#cls };
+    combineInputs(cfg, data);
+    return cfg;
+  }
+
+  registerMethod(method: string | symbol, data: Partial<MethodConfig>): MethodConfig {
+    const config = this.register({});
+    const cfg = config.methods![method] ??= { parameters: [], validators: [] };
+    Object.assign(cfg, data);
+    return cfg;
+  }
+
+  /**
+   * Register a partial config for a pending method param
+   * @param prop The method name
+   * @param idx The param index
+   * @param config The config to register
+   */
+  registerPendingParamFacet(method: string | symbol, idx: number, config: Partial<ParameterConfig>): ParameterConfig {
+    const params = this.registerMethod(method, {}).parameters;
+
+    if (config.name === '') {
+      delete config.name;
+    }
+
+    return params[idx] = combineInputs(params[idx],
+      {
+        name: `${idx}`,
+        method,
+        index: idx,
+        owner: this.#cls,
+      },
+      config
+    );
+  }
+
+  /**
+   * Register pending field configuration
+   * @param method Method name
+   * @param idx Param index
+   * @param type Param type
+   * @param conf Extra config
+   */
+  registerPendingParamConfig(method: string | symbol, idx: number, type: ClassList, conf?: Partial<ParameterConfig>): ParameterConfig {
+    return this.registerPendingParamFacet(method, idx, {
+      ...conf,
+      array: Array.isArray(type),
+      type: Array.isArray(type) ? type[0] : type,
+    });
+  }
+
+  /**
+   * Register pending field configuration
+   * @param prop Property name
+   * @param type Param type
+   * @param conf Extra config
+   */
+  registerPendingFieldConfig(prop: string | symbol, type: ClassList, conf?: Partial<FieldConfig>): FieldConfig {
+    return this.registerField(prop, {
+      array: Array.isArray(type),
+      type: Array.isArray(type) ? type[0] : type,
+      ...(conf ?? {})
+    });
+  }
+
+  unregister(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  finalize(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  get(): ClassConfig {
+    return this.#config;
+  }
+
+  getField(field: string | symbol): FieldConfig {
+    return this.#config.fields[field];
+  }
+
+  getMethod(method: string | symbol): MethodConfig {
+    return this.#config.methods[method];
+  }
+}
