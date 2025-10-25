@@ -1,17 +1,18 @@
 import { Any, ClassInstance } from '@travetto/runtime';
+import { RegistryV2 } from '@travetto/registry';
 
-import { SchemaRegistry } from '../service/registry.ts';
 import { CommonRegExp } from '../validate/regexp.ts';
-import { ClassList, FieldConfig } from '../service/types.ts';
+import { FieldConfig } from '../service/types.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
 function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
   return (t: ClassInstance, k: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
-      SchemaRegistry.registerPendingParamFacet(t.constructor, k, idx, obj);
+      RegistryV2.get(SchemaRegistryIndex, t.constructor).registerParameter(t.constructor, idx, obj);
     } else {
-      SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
+      RegistryV2.get(SchemaRegistryIndex, t.constructor).registerField(k, obj);
     }
   };
 }
@@ -22,12 +23,22 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
  * @param config The field configuration
  * @augments `@travetto/schema:Field`
  */
-export function Field(type: ClassList, ...config: Partial<FieldConfig>[]) {
-  return (f: ClassInstance, k: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
+export function Field(type: Pick<FieldConfig, 'type' | 'array'>, ...config: Partial<FieldConfig>[]) {
+  return (f: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
-      SchemaRegistry.registerPendingParamConfig(f.constructor, k, idx, type, Object.assign({}, ...config));
+      RegistryV2.get(SchemaRegistryIndex, f.constructor).registerParameter(f.constructor, idx, {
+        type: type.type,
+        array: type.array ?? false,
+        name: k,
+        ...config,
+      });
     } else {
-      SchemaRegistry.registerPendingFieldConfig(f.constructor, k, type, Object.assign({}, ...config));
+      RegistryV2.get(SchemaRegistryIndex, f.constructor).registerField(k, {
+        type: type.type,
+        array: type.array ?? false,
+        name: k,
+        ...config,
+      });
     }
   };
 }
@@ -203,6 +214,6 @@ export function Specifier(...specifiers: string[]): PropType<unknown> { return p
  */
 export function SubTypeField(): ((t: ClassInstance, k: string) => void) {
   return (t: ClassInstance, k: string): void => {
-    SchemaRegistry.register(t.constructor, { subTypeField: k });
+    RegistryV2.get(SchemaRegistryIndex, t.constructor).register({ subTypeField: k });
   };
 }

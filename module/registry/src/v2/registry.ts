@@ -1,7 +1,7 @@
 import { AppError, castTo, Class, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
-import { RegistryAdapter, RegistryItem, RegistryIndex, RegistryIndexClass } from './types';
+import { RegistryItem, RegistryIndex, RegistryIndexClass } from './types';
 
 class $Registry {
 
@@ -26,7 +26,7 @@ class $Registry {
     return item;
   }
 
-  #adapter<C extends {}, M extends {}, F extends {}, T extends RegistryAdapter<C, M, F>>(indexCls: RegistryIndexClass<C, M, F>, cls: Class): T {
+  #adapter<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(indexCls: T, cls: Class): ReturnType<InstanceType<T>['adapter']> {
     if (!this.#indexes.has(indexCls)) {
       this.#indexes.set(indexCls, new indexCls());
     }
@@ -109,7 +109,7 @@ class $Registry {
     return this.#initialized ??= this.#init();
   }
 
-  get<C extends {}, M extends {}, F extends {}, T extends RegistryAdapter<C, M, F>>(indexCls: RegistryIndexClass<C, M, F>, clsOrId: Class | string): T {
+  get<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(indexCls: T, clsOrId: Class | string): ReturnType<InstanceType<T>['adapter']> {
     const cls = typeof clsOrId === 'string' ? this.#idToCls.get(clsOrId) : clsOrId;
     if (!cls) {
       throw new AppError(`Unknown class ${clsOrId}`);

@@ -2,8 +2,6 @@ import { Any, Class, Primitive } from '@travetto/runtime';
 
 import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
-export type ClassList = Class | [Class];
-
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
@@ -98,10 +96,6 @@ export interface InputConfig extends DescribableConfig {
    */
   owner: Class;
   /**
-   * Field name
-   */
-  name: string | symbol;
-  /**
    * List of aliases
    */
   aliases?: string[];
@@ -163,6 +157,10 @@ export interface InputConfig extends DescribableConfig {
  */
 export interface ParameterConfig extends InputConfig {
   /**
+   * Parameter name
+   */
+  name?: string | symbol;
+  /**
    * The position of the field if ordered
    */
   index: number;
@@ -176,6 +174,10 @@ export interface ParameterConfig extends InputConfig {
  * Field configuration
  */
 export interface FieldConfig extends InputConfig {
+  /**
+   * Field name
+   */
+  name: string | symbol;
   /**
    * View name for validation when dealing with complex types
    */

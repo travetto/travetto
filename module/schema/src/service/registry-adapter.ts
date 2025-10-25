@@ -1,7 +1,7 @@
 import { RegistryAdapter } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
 
-import { ClassConfig, MethodConfig, FieldConfig, ClassList, ParameterConfig, InputConfig } from './types';
+import { ClassConfig, MethodConfig, FieldConfig, ParameterConfig, InputConfig } from './types';
 
 function combineInputs<T extends InputConfig>(field: T, ...configs: Partial<T>[]): T {
   for (const config of configs) {
@@ -50,7 +50,7 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
 
   registerMethod(method: string | symbol, data: Partial<MethodConfig>): MethodConfig {
     const config = this.register({});
-    const cfg = config.methods![method] ??= { parameters: [], validators: [] };
+    const cfg = config.methods[method] ??= { parameters: [], validators: [] };
     Object.assign(cfg, data);
     return cfg;
   }
@@ -61,51 +61,11 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
    * @param idx The param index
    * @param config The config to register
    */
-  registerPendingParamFacet(method: string | symbol, idx: number, config: Partial<ParameterConfig>): ParameterConfig {
+  registerParameter(method: string | symbol, idx: number, config: Partial<ParameterConfig>): ParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
-
-    if (config.name === '') {
-      delete config.name;
-    }
-
-    return params[idx] = combineInputs(params[idx],
-      {
-        name: `${idx}`,
-        method,
-        index: idx,
-        owner: this.#cls,
-      },
-      config
-    );
-  }
-
-  /**
-   * Register pending field configuration
-   * @param method Method name
-   * @param idx Param index
-   * @param type Param type
-   * @param conf Extra config
-   */
-  registerPendingParamConfig(method: string | symbol, idx: number, type: ClassList, conf?: Partial<ParameterConfig>): ParameterConfig {
-    return this.registerPendingParamFacet(method, idx, {
-      ...conf,
-      array: Array.isArray(type),
-      type: Array.isArray(type) ? type[0] : type,
-    });
-  }
-
-  /**
-   * Register pending field configuration
-   * @param prop Property name
-   * @param type Param type
-   * @param conf Extra config
-   */
-  registerPendingFieldConfig(prop: string | symbol, type: ClassList, conf?: Partial<FieldConfig>): FieldConfig {
-    return this.registerField(prop, {
-      array: Array.isArray(type),
-      type: Array.isArray(type) ? type[0] : type,
-      ...(conf ?? {})
-    });
+    const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
+    combineInputs(cfg, config);
+    return cfg;
   }
 
   unregister(): void {
