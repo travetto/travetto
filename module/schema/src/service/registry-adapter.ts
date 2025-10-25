@@ -3,21 +3,45 @@ import { Class } from '@travetto/runtime';
 
 import { ClassConfig, MethodConfig, FieldConfig, ParameterConfig, InputConfig } from './types';
 
-function combineInputs<T extends InputConfig>(field: T, ...configs: Partial<T>[]): T {
+function combineInputs<T extends InputConfig>(base: T, ...configs: Partial<T>[]): T {
   for (const config of configs) {
-    Object.assign(field, {
+    Object.assign(base, {
       ...config,
-      ...config.aliases ? { aliases: [...field.aliases ?? [], ...config.aliases ?? []] } : {},
-      ...config.specifiers ? { specifiers: [...field.specifiers ?? [], ...config.specifiers ?? []] } : {},
+      ...config.aliases ? { aliases: [...base.aliases ?? [], ...config.aliases ?? []] } : {},
+      ...config.specifiers ? { specifiers: [...base.specifiers ?? [], ...config.specifiers ?? []] } : {},
       ...config.enum ? {
         enum: {
-          message: field.enum?.message ?? config.enum?.message,
-          values: [...field.enum?.values ?? [], ...config.enum?.values ?? []].toSorted()
+          message: base.enum?.message ?? config.enum?.message,
+          values: [...base.enum?.values ?? [], ...config.enum?.values ?? []].toSorted()
         }
       } : {}
     });
   }
-  return field;
+  return base;
+}
+
+function combineMethods<T extends MethodConfig>(base: T, ...configs: Partial<T>[]): T {
+  for (const config of configs) {
+    Object.assign(base, {
+      ...config,
+      validators: [
+        ...base.validators,
+        ...(config.validators ?? [])
+      ]
+    });
+  }
+  return base;
+}
+
+function combineClasses<T extends ClassConfig>(base: T, ...configs: Partial<T>[]): T {
+  for (const config of configs) {
+    Object.assign(base, {
+      ...config,
+      ...config.views ? { views: { ...base.views, ...config.views } } : {},
+      ...config.validators ? { validators: { ...base.validators, ...config.validators } } : {},
+    });
+  }
+  return base;
 }
 
 export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig, FieldConfig> {
@@ -29,7 +53,7 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
     this.#cls = cls;
   }
 
-  register(data: Partial<ClassConfig> = {}): ClassConfig {
+  register(...data: Partial<ClassConfig>[]): ClassConfig {
     const cfg = this.#config ??= {
       methods: {},
       class: this.#cls,
@@ -38,11 +62,7 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
       fields: {},
       subTypeField: 'type'
     };
-    Object.assign(cfg, {
-      ...data,
-      ...data.views ? { views: { ...cfg.views, ...data.views } } : {},
-      ...data.validators ? { validators: { ...cfg.validators, ...data.validators } } : {},
-    });
+    combineClasses(cfg, ...data);
     return cfg;
   }
 
@@ -53,16 +73,10 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
     return cfg;
   }
 
-  registerMethod(method: string | symbol, data: Partial<MethodConfig> = {}): MethodConfig {
+  registerMethod(method: string | symbol, ...data: Partial<MethodConfig>[]): MethodConfig {
     const config = this.register({});
     const cfg = config.methods[method] ??= { parameters: [], validators: [] };
-    Object.assign(cfg, {
-      ...data,
-      validators: [
-        ...cfg.validators,
-        ...(data.validators ?? [])
-      ]
-    });
+    combineMethods(cfg, ...data);
     return cfg;
   }
 
@@ -72,10 +86,10 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
    * @param idx The param index
    * @param data The config to register
    */
-  registerParameter(method: string | symbol, idx: number, data: Partial<ParameterConfig> = {}): ParameterConfig {
+  registerParameter(method: string | symbol, idx: number, ...data: Partial<ParameterConfig>[]): ParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
     const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
-    combineInputs(cfg, data);
+    combineInputs(cfg, ...data);
     return cfg;
   }
 
