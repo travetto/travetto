@@ -166,7 +166,10 @@ export class SchemaTransformUtil {
     const existing = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
     if (!existing) {
       const resolved = this.toConcreteType(state, typeExpr, node, config.root);
-      params.push(resolved);
+      params.push(LiteralUtil.fromLiteral(state.factory, {
+        array: ts.isArrayLiteralExpression(resolved),
+        type: ts.isArrayLiteralExpression(resolved) ? resolved.elements[0] : resolved
+      }));
       if (attrs.length) {
         params.push(state.factory.createObjectLiteralExpression(attrs));
       }

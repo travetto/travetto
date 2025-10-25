@@ -1,9 +1,6 @@
 import ts from 'typescript';
 
-import {
-  TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter,
-  DecoratorUtil
-} from '@travetto/transformer';
+import { TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
 
@@ -49,34 +46,13 @@ export class SchemaTransformer {
       })));
     }
 
+    const members = state.factory.createNodeArray(
+      node.members.map(x => ts.isMethodDeclaration(x) ?
+        this.processSchemaMethod(state, x) : x)
+    );
+
     delete state[InSchemaSymbol];
     delete state[AccessorsSymbol];
-    let members = node.members;
-
-    const schemaMethods = [
-      ...node.modifiers?.filter(x => ts.isDecorator(x))
-        .flatMap(x => state.getDeclarations(DecoratorUtil.getDecoratorIdent(x))) ?? [],
-      node
-    ]
-      .flatMap(v => state.readDocTagList(v, 'schemaMethods'));
-
-    if (schemaMethods.length) {
-      const methodSet = new Set(schemaMethods.flatMap(x => x.split(/\s*,\s*/g)));
-      members = state.factory.createNodeArray(
-        node.members.map(x => ts.isMethodDeclaration(x) && methodSet.has(x.name.getText()) ?
-          state.factory.updateMethodDeclaration(
-            x,
-            x.modifiers,
-            x.asteriskToken,
-            x.name,
-            x.questionToken,
-            x.typeParameters,
-            x.parameters.map(y => SchemaTransformUtil.computeField(state, y)),
-            x.type,
-            x.body
-          ) : x)
-      );
-    }
 
     return state.factory.updateClassDeclaration(
       node,
@@ -85,6 +61,27 @@ export class SchemaTransformer {
       node.typeParameters,
       node.heritageClauses,
       members
+    );
+  }
+
+  /**
+   * Handle explicitly registered methods
+   */
+  static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
+    if (!state[InSchemaSymbol]) {
+      return node;
+    }
+
+    return state.factory.updateMethodDeclaration(
+      node,
+      node.modifiers,
+      node.asteriskToken,
+      node.name,
+      node.questionToken,
+      node.typeParameters,
+      node.parameters.map(y => SchemaTransformUtil.computeField(state, y)),
+      node.type,
+      node.body
     );
   }
 
