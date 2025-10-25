@@ -59,7 +59,7 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * List of all views
    */
-  views: Record<string, SchemaConfig>;
+  views: Record<string, ViewFieldsConfig<Any>>;
   /**
    * Field configurations
    */

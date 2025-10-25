@@ -29,8 +29,8 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
     this.#cls = cls;
   }
 
-  register(data: Partial<ClassConfig>): ClassConfig {
-    this.#config ??= {
+  register(data: Partial<ClassConfig> = {}): ClassConfig {
+    const cfg = this.#config ??= {
       methods: {},
       class: this.#cls,
       views: {},
@@ -38,20 +38,31 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
       fields: {},
       subTypeField: 'type'
     };
-    return Object.assign(this.#config, data);
+    Object.assign(cfg, {
+      ...data,
+      ...data.views ? { views: { ...cfg.views, ...data.views } } : {},
+      ...data.validators ? { validators: { ...cfg.validators, ...data.validators } } : {},
+    });
+    return cfg;
   }
 
-  registerField(field: string | symbol, data: Partial<FieldConfig>): FieldConfig {
+  registerField(field: string | symbol, data: Partial<FieldConfig> = {}): FieldConfig {
     const config = this.register({});
     const cfg = config.fields[field] ??= { array: false, name: field, type: null!, owner: this.#cls };
     combineInputs(cfg, data);
     return cfg;
   }
 
-  registerMethod(method: string | symbol, data: Partial<MethodConfig>): MethodConfig {
+  registerMethod(method: string | symbol, data: Partial<MethodConfig> = {}): MethodConfig {
     const config = this.register({});
     const cfg = config.methods[method] ??= { parameters: [], validators: [] };
-    Object.assign(cfg, data);
+    Object.assign(cfg, {
+      ...data,
+      validators: [
+        ...cfg.validators,
+        ...(data.validators ?? [])
+      ]
+    });
     return cfg;
   }
 
@@ -59,12 +70,12 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
    * Register a partial config for a pending method param
    * @param prop The method name
    * @param idx The param index
-   * @param config The config to register
+   * @param data The config to register
    */
-  registerParameter(method: string | symbol, idx: number, config: Partial<ParameterConfig>): ParameterConfig {
+  registerParameter(method: string | symbol, idx: number, data: Partial<ParameterConfig> = {}): ParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
     const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
-    combineInputs(cfg, config);
+    combineInputs(cfg, data);
     return cfg;
   }
 

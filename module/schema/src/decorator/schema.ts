@@ -1,9 +1,10 @@
 import { Any, castTo, Class, ClassInstance, DeepPartial } from '@travetto/runtime';
+import { RegistryV2 } from '@travetto/registry';
 
 import { BindUtil } from '../bind-util.ts';
-import { SchemaRegistry } from '../service/registry.ts';
 import { ClassConfig, ViewFieldsConfig } from '../service/types.ts';
 import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 /**
  * Register a class as a Schema
@@ -15,7 +16,7 @@ export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeF
     target.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
     };
-    SchemaRegistry.register(target, cfg);
+    RegistryV2.get(SchemaRegistryIndex, target).register(cfg);
     return target;
   };
 }
@@ -27,7 +28,7 @@ export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeF
  */
 export const Validator = <T>(fn: ValidatorFn<T, string>) =>
   (target: Class<T>, _k?: string): void => {
-    SchemaRegistry.getOrCreatePending(target).validators!.push(castTo(fn));
+    RegistryV2.get(SchemaRegistryIndex, target).register({ validators: [castTo(fn)] });
   };
 
 /**
@@ -37,7 +38,7 @@ export const Validator = <T>(fn: ValidatorFn<T, string>) =>
  */
 export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
   return (target: ClassInstance, k: string, _prop: TypedPropertyDescriptor<T>): void => {
-    SchemaRegistry.registerPendingMethod(target.constructor, k).validators!.push(castTo(fn));
+    RegistryV2.get(SchemaRegistryIndex, target).registerMethod(k, { validators: [castTo(fn)] });
   };
 }
 
@@ -48,7 +49,7 @@ export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodVal
  */
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
   return (target: Class<Partial<T>>): void => {
-    SchemaRegistry.registerPendingView(target, name, fields);
+    RegistryV2.get(SchemaRegistryIndex, target).register({ views: { [name]: fields } });
   };
 }
 
@@ -59,6 +60,6 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
  */
 export function SubType<T>(name: string) {
   return (target: Class<Partial<T>>): void => {
-    SchemaRegistry.register(target, { subTypeName: name });
+    RegistryV2.get(SchemaRegistryIndex, target).register({ subTypeName: name });
   };
 }

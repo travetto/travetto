@@ -10,9 +10,9 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
   return (t: ClassInstance, k: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
-      RegistryV2.get(SchemaRegistryIndex, t.constructor).registerParameter(t.constructor, idx, obj);
+      RegistryV2.get(SchemaRegistryIndex, t).registerParameter(t.constructor, idx, obj);
     } else {
-      RegistryV2.get(SchemaRegistryIndex, t.constructor).registerField(k, obj);
+      RegistryV2.get(SchemaRegistryIndex, t).registerField(k, obj);
     }
   };
 }
@@ -26,17 +26,15 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
 export function Field(type: Pick<FieldConfig, 'type' | 'array'>, ...config: Partial<FieldConfig>[]) {
   return (f: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
-      RegistryV2.get(SchemaRegistryIndex, f.constructor).registerParameter(f.constructor, idx, {
+      RegistryV2.get(SchemaRegistryIndex, f).registerParameter(k, idx, {
         type: type.type,
         array: type.array ?? false,
-        name: k,
         ...config,
       });
     } else {
-      RegistryV2.get(SchemaRegistryIndex, f.constructor).registerField(k, {
+      RegistryV2.get(SchemaRegistryIndex, f).registerField(k, {
         type: type.type,
         array: type.array ?? false,
-        name: k,
         ...config,
       });
     }
@@ -214,6 +212,6 @@ export function Specifier(...specifiers: string[]): PropType<unknown> { return p
  */
 export function SubTypeField(): ((t: ClassInstance, k: string) => void) {
   return (t: ClassInstance, k: string): void => {
-    RegistryV2.get(SchemaRegistryIndex, t.constructor).register({ subTypeField: k });
+    RegistryV2.get(SchemaRegistryIndex, t).register({ subTypeField: k });
   };
 }
