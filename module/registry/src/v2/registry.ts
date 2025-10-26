@@ -1,7 +1,7 @@
 import { AppError, castTo, Class, ClassInstance, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
-import { RegistryItem, RegistryIndex, RegistryIndexClass } from './types';
+import { RegistryItem, RegistryIndex, RegistryIndexClass, ClassOrId } from './types';
 
 class $Registry {
 
@@ -12,7 +12,7 @@ class $Registry {
 
   #items: Map<Class, RegistryItem> = new Map();
   #idToCls: Map<string, Class> = new Map();
-  #itemsByIndex = new Map<RegistryIndexClass, Set<RegistryItem>>();
+  #itemsByIndex = new Map<RegistryIndexClass, Map<Class, RegistryItem>>();
   #changeSource = new ClassSource();
   #indexes = new Map<RegistryIndexClass, RegistryIndex>();
 
@@ -35,9 +35,9 @@ class $Registry {
 
     const item = this.#item(cls);
     if (!this.#itemsByIndex.has(indexCls)) {
-      this.#itemsByIndex.set(indexCls, new Set());
+      this.#itemsByIndex.set(indexCls, new Map());
     }
-    this.#itemsByIndex.get(indexCls)!.add(item);
+    this.#itemsByIndex.get(indexCls)!.set(cls, item);
     return castTo(this.#item(cls).adapter(index, cls));
   }
 
@@ -47,7 +47,7 @@ class $Registry {
       for (const adapter of item.adapters.values()) {
         adapter.unregister();
         // Remove from itemsByIndex map
-        this.#itemsByIndex.get(castTo(adapter.constructor))?.delete(item);
+        this.#itemsByIndex.get(adapter.indexCls)?.delete(item.cls);
       }
       this.#items.delete(item.cls);
       this.#idToCls.delete(item.cls.Ⲑid);
@@ -78,15 +78,32 @@ class $Registry {
       this.#finalizeItems(added);
 
       this.#changeSource.on(e => {
-        if (e.type === 'removing' || e.type === 'changed') {
-          this.#removeItem(e.prev);
-        }
         if (e.type === 'added' || e.type === 'changed') {
           this.#finalizeItems([e.curr]);
+        }
+        for (const index of this.#indexes.values()) { // Visit every index
+          if (('curr' in e && index.has(e.curr)) || ('prev' in e && index.has(e.prev))) {
+            index.process([e]);
+          }
+        }
+        if (e.type === 'removing' || e.type === 'changed') {
+          this.#removeItem(e.prev);
         }
       });
     } finally {
       this.#resolved = true;
+    }
+  }
+
+  #toCls(clsOrId: Class | string | ClassInstance): Class {
+    if (typeof clsOrId === 'string') {
+      const cls = this.#idToCls.get(clsOrId);
+      if (!cls) {
+        throw new AppError(`Unknown class id ${clsOrId}`);
+      }
+      return cls;
+    } else {
+      return 'Ⲑid' in clsOrId ? clsOrId : clsOrId.constructor;
     }
   }
 
@@ -111,17 +128,33 @@ class $Registry {
 
   get<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
     indexCls: T,
-    clsOrId: Class | string | ClassInstance
+    clsOrId: ClassOrId
   ): ReturnType<InstanceType<T>['adapter']> {
-
-    const cls = typeof clsOrId === 'string' ?
-      this.#idToCls.get(clsOrId) :
-      ('Ⲑid' in clsOrId ? clsOrId : clsOrId.constructor);
-
-    if (!cls) {
-      throw new AppError(`Unknown class ${clsOrId}`);
-    }
+    const cls = this.#toCls(clsOrId);
     return this.#adapter(indexCls, cls);
+  }
+
+  getAll<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+    indexCls: T
+  ): Class[] {
+    return Array.from(this.#itemsByIndex.get(indexCls)?.keys() ?? []);
+  }
+
+  index<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+    indexCls: T
+  ): InstanceType<T> {
+    return castTo(this.#indexes.get(indexCls));
+  }
+
+  /**
+   * Is class found by id or by Class
+   */
+  has<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+    indexCls: T,
+    clsOrId: ClassOrId
+  ): boolean {
+    const cls = this.#toCls(clsOrId);
+    return this.#itemsByIndex.get(indexCls)?.has(cls) ?? false;
   }
 }
 

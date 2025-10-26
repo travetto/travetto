@@ -1,22 +1,23 @@
 import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
+import { RegistryV2 } from '@travetto/registry';
 
-import { FieldConfig, SchemaConfig } from '../service/types.ts';
+import { InputConfig, SchemaConfig } from '../service/types.ts';
 import { SchemaRegistry } from '../service/registry.ts';
 import { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 import { Messages } from './messages.ts';
 import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
 import { DataUtil } from '../data.ts';
 import { CommonRegExpToName } from './regexp.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
  * @param base The starting type or config
  * @param o The value to use for the polymorphic check
  */
-function resolveSchema<T>(base: Class<T>, o: T, view?: string): SchemaConfig {
-  return SchemaRegistry.getViewSchema(
-    SchemaRegistry.resolveInstanceType(base, o), view
-  ).schema;
+function resolveSchema<T>(base: Class<T>, o: T): SchemaConfig {
+  const target = RegistryV2.index(SchemaRegistryIndex).resolveInstanceType(base, o);
+  return RegistryV2.get(SchemaRegistryIndex, target).getView();
 }
 
 function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
@@ -53,25 +54,26 @@ export class SchemaValidator {
   }
 
   /**
-   * Validate a single field config against a passed in value
-   * @param fieldSchema The field schema configuration
+   * Validate a single input config against a passed in value
+   * @param input The input schema configuration
    * @param val The raw value, could be an array or not
    * @param relative The relative path of object traversal
    */
-  static #validateFieldSchema(fieldSchema: FieldConfig, val: unknown, relative: string = ''): ValidationError[] {
-    const path = `${relative}${relative ? '.' : ''}${fieldSchema.name}`;
+  static #validateFieldSchema(input: InputConfig, val: unknown, relative: string = ''): ValidationError[] {
+    const key = 'name' in input ? input.name : ('index' in input ? input.index : 'unknown');
+    const path = `${relative}${relative ? '.' : ''}${key}`;
     const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
 
     if (!hasValue) {
-      if (fieldSchema.required && fieldSchema.required.active) {
-        return this.#prepareErrors(path, [{ kind: 'required', ...fieldSchema.required }]);
+      if (input.required && input.required.active) {
+        return this.#prepareErrors(path, [{ kind: 'required', ...input.required }]);
       } else {
         return [];
       }
     }
 
-    const { type, array, view } = fieldSchema;
-    const complex = SchemaRegistry.has(type);
+    const { type, array } = input;
+    const complex = RegistryV2.has(SchemaRegistryIndex, type);
 
     if (type === Object) {
       return [];
@@ -82,34 +84,34 @@ export class SchemaValidator {
       let errors: ValidationError[] = [];
       if (complex) {
         for (let i = 0; i < val.length; i++) {
-          const subErrors = this.#validateSchema(resolveSchema(type, val[i], view), val[i], `${path}[${i}]`);
+          const subErrors = this.#validateSchema(resolveSchema(type, val[i]), val[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
         for (let i = 0; i < val.length; i++) {
-          const subErrors = this.#validateField(fieldSchema, val[i]);
+          const subErrors = this.#validateInput(input, val[i]);
           errors.push(...this.#prepareErrors(`${path}[${i}]`, subErrors));
         }
       }
       return errors;
     } else if (complex) {
-      return this.#validateSchema(resolveSchema(type, val, view), val, path);
+      return this.#validateSchema(resolveSchema(type, val), val, path);
     } else {
-      const fieldErrors = this.#validateField(fieldSchema, val);
+      const fieldErrors = this.#validateInput(input, val);
       return this.#prepareErrors(path, fieldErrors);
     }
   }
 
   /**
    * Validate the range for a number, date
-   * @param field The config to validate against
+   * @param input The config to validate against
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static #validateRange(field: FieldConfig, key: 'min' | 'max', value: string | number | Date): boolean {
-    const f = field[key]!;
+  static #validateRange(input: InputConfig, key: 'min' | 'max', value: string | number | Date): boolean {
+    const f = input[key]!;
     const valueNum = (typeof value === 'string') ?
-      (field.type === Date ? Date.parse(value) : parseInt(value, 10)) :
+      (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
       (value instanceof Date ? value.getTime() : value);
 
     const boundary = (typeof f.n === 'number' ? f.n : f.n.getTime());
@@ -119,54 +121,54 @@ export class SchemaValidator {
   /**
    * Validate a given field by checking all the appropriate constraints
    *
-   * @param field The config of the field to validate
+   * @param input The config of the field to validate
    * @param value The actual value
    */
-  static #validateField(field: FieldConfig, value: unknown): ValidationResult[] {
-    const criteria: ([string, FieldConfig[ValidationKindCore]] | [string])[] = [];
+  static #validateInput(input: InputConfig, value: unknown): ValidationResult[] {
+    const criteria: ([string, InputConfig[ValidationKindCore]] | [string])[] = [];
 
     if (
-      (field.type === String && (typeof value !== 'string')) ||
-      (field.type === Number && ((typeof value !== 'number') || Number.isNaN(value))) ||
-      (field.type === Date && (!(value instanceof Date) || Number.isNaN(value.getTime()))) ||
-      (field.type === Boolean && typeof value !== 'boolean')
+      (input.type === String && (typeof value !== 'string')) ||
+      (input.type === Number && ((typeof value !== 'number') || Number.isNaN(value))) ||
+      (input.type === Date && (!(value instanceof Date) || Number.isNaN(value.getTime()))) ||
+      (input.type === Boolean && typeof value !== 'boolean')
     ) {
       criteria.push(['type']);
-      return [{ kind: 'type', type: field.type.name.toLowerCase() }];
+      return [{ kind: 'type', type: input.type.name.toLowerCase() }];
     }
 
-    if (field.type?.validateSchema) {
-      const kind = field.type.validateSchema(value);
+    if (input.type?.validateSchema) {
+      const kind = input.type.validateSchema(value);
       switch (kind) {
         case undefined: break;
-        case 'type': return [{ kind, type: field.type.name }];
+        case 'type': return [{ kind, type: input.type.name }];
         default:
           criteria.push([kind]);
       }
     }
 
-    if (field.match && !field.match.re.test(`${value}`)) {
-      criteria.push(['match', field.match]);
+    if (input.match && !input.match.re.test(`${value}`)) {
+      criteria.push(['match', input.match]);
     }
 
-    if (field.minlength && `${value}`.length < field.minlength.n) {
-      criteria.push(['minlength', field.minlength]);
+    if (input.minlength && `${value}`.length < input.minlength.n) {
+      criteria.push(['minlength', input.minlength]);
     }
 
-    if (field.maxlength && `${value}`.length > field.maxlength.n) {
-      criteria.push(['maxlength', field.maxlength]);
+    if (input.maxlength && `${value}`.length > input.maxlength.n) {
+      criteria.push(['maxlength', input.maxlength]);
     }
 
-    if (field.enum && !field.enum.values.includes(castTo(value))) {
-      criteria.push(['enum', field.enum]);
+    if (input.enum && !input.enum.values.includes(castTo(value))) {
+      criteria.push(['enum', input.enum]);
     }
 
-    if (field.min && (!isRangeValue(value) || this.#validateRange(field, 'min', value))) {
-      criteria.push(['min', field.min]);
+    if (input.min && (!isRangeValue(value) || this.#validateRange(input, 'min', value))) {
+      criteria.push(['min', input.min]);
     }
 
-    if (field.max && (!isRangeValue(value) || this.#validateRange(field, 'max', value))) {
-      criteria.push(['max', field.max]);
+    if (input.max && (!isRangeValue(value) || this.#validateRange(input, 'max', value))) {
+      criteria.push(['max', input.max]);
     }
 
     const errors: ValidationResult[] = [];
@@ -261,7 +263,7 @@ export class SchemaValidator {
 
     // Validate using standard behaviors
     const errors = [
-      ...this.#validateSchema(config.schema, o, ''),
+      ...this.#validateSchema(config.fields, o, ''),
       ... await this.#validateClassLevel(cls, o, view)
     ];
     if (errors.length) {
@@ -313,13 +315,17 @@ export class SchemaValidator {
    */
   static async validateMethod<T>(cls: Class<T>, method: string, params: unknown[], prefixes: (string | undefined)[] = []): Promise<void> {
     const errors: ValidationError[] = [];
-    for (const field of SchemaRegistry.getMethodSchema(cls, method)) {
-      const i = field.index!;
+    for (const param of RegistryV2.get(SchemaRegistryIndex, cls).getMethod(method).parameters) {
+      const i = param.index;
       errors.push(...[
-        ... this.#validateFieldSchema(field, params[i]),
-        ... await this.#validateClassLevel(field.type, params[i])
+        ... this.#validateFieldSchema(param, params[i]),
+        ... await this.#validateClassLevel(param.type, params[i])
       ].map(x => {
-        x.path = !prefixes[i] ? x.path.replace(`${field.name}.`, '') : x.path.replace(field.name, prefixes[i]!);
+        if (param.name && typeof param.name === 'string') {
+          x.path = !prefixes[i] ?
+            x.path.replace(`${param.name}.`, '') :
+            x.path.replace(param.name, prefixes[i]!);
+        }
         return x;
       }));
     }

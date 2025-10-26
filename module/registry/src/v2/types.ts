@@ -1,20 +1,23 @@
-import { castTo, Class } from '@travetto/runtime';
+import { castTo, Class, ClassInstance } from '@travetto/runtime';
 import { ChangeEvent } from '../types';
 
+export type ClassOrId = Class | string | ClassInstance;
 
 export type RegistryIndexClass<C extends {} = {}, M extends {} = {}, F extends {} = {}> = {
   new(): RegistryIndex<C, M, F>;
 };
 
 export interface RegistryIndex<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
-  process(events: ChangeEvent<Class>): void;
+  process(events: ChangeEvent<Class>[]): void;
   adapter(cls: Class): RegistryAdapter<C, M, F>;
+  has(cls: ClassOrId): boolean;
 }
 
 /**
  * Interface for registry adapters to implement
  */
 export interface RegistryAdapter<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
+  indexCls: RegistryIndexClass<C, M, F>;
   register(...data: Partial<C>[]): C;
   registerField(field: string | symbol, ...data: Partial<F>[]): F;
   registerMethod(method: string | symbol, ...data: Partial<M>[]): M;
@@ -45,6 +48,7 @@ export class RegistryItem {
   ): RegistryAdapter<C, M, F> {
     if (!this.adapters.has(index)) {
       const adapter = index.adapter(cls);
+      adapter.indexCls = castTo(index.constructor);
       this.adapters.set(index, adapter);
     }
     return castTo(this.adapters.get(index)!);

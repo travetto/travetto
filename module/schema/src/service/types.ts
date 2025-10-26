@@ -49,6 +49,14 @@ export interface SchemaConfig {
 }
 
 /**
+ * View configuration
+ */
+export type ViewConfig = {
+  fields: SchemaConfig;
+  names: (string | symbol)[];
+};
+
+/**
  * Class configuration
  */
 export interface ClassConfig extends DescribableConfig {
@@ -92,6 +100,10 @@ export interface ClassConfig extends DescribableConfig {
 
 export interface InputConfig extends DescribableConfig {
   /**
+   * Key name for validation when dealing with complex types
+   */
+  view?: string;
+  /**
    * Owner class
    */
   owner: Class;
@@ -109,7 +121,7 @@ export interface InputConfig extends DescribableConfig {
   /**
    * Is the field an array
    */
-  array: boolean;
+  array?: boolean;
   /**
    * Does the field have a specialization
    */
@@ -178,10 +190,6 @@ export interface FieldConfig extends InputConfig {
    * Field name
    */
   name: string | symbol;
-  /**
-   * View name for validation when dealing with complex types
-   */
-  view?: string;
   /**
    * Is the field readonly, or write only?, defaults to no restrictions
    */

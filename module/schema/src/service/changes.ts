@@ -108,25 +108,24 @@ class $SchemaChangeListener {
    * @param prev The previous class config
    * @param curr The current class config
    */
-  emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>): void {
+  emitFieldChanges(ev: ChangeEvent<ClassConfig>): void {
+    const prev = 'prev' in ev ? ev.prev : undefined;
+    const curr = 'curr' in ev ? ev.curr : undefined;
 
-    const prevView = prev?.totalView || { fields: [], schema: {} };
-    const currView = curr!.totalView;
-
-    const prevFields = new Set(prevView.fields);
-    const currFields = new Set(currView.fields);
+    const prevFields = new Set(Object.keys(prev?.fields ?? {}));
+    const currFields = new Set(Object.keys(curr?.fields ?? {}));
 
     const changes: ChangeEvent<FieldConfig>[] = [];
 
     for (const c of currFields) {
-      if (!prevFields.has(c)) {
-        changes.push({ curr: currView.schema[c], type: 'added' });
+      if (!prevFields.has(c) && curr) {
+        changes.push({ curr: curr.fields[c], type: 'added' });
       }
     }
 
     for (const c of prevFields) {
-      if (!currFields.has(c)) {
-        changes.push({ prev: prevView.schema[c], type: 'removing' });
+      if (!currFields.has(c) && prev) {
+        changes.push({ prev: prev.fields[c], type: 'removing' });
       }
     }
 
@@ -134,14 +133,14 @@ class $SchemaChangeListener {
     const compareTypes = (a: Class, b: Class): boolean => a.Ⲑid ? a.Ⲑid === b.Ⲑid : a === b;
 
     for (const c of currFields) {
-      if (prevFields.has(c)) {
-        const prevSchema = prevView.schema[c];
-        const currSchema = currView.schema[c];
+      if (prevFields.has(c) && prev && curr) {
+        const prevSchema = prev.fields[c];
+        const currSchema = curr.fields[c];
         if (
           JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
           !compareTypes(prevSchema.type, currSchema.type)
         ) {
-          changes.push({ prev: prevView.schema[c], curr: currView.schema[c], type: 'changed' });
+          changes.push({ prev: prev.fields[c], curr: curr.fields[c], type: 'changed' });
         }
       }
     }

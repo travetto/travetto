@@ -1,9 +1,9 @@
-import { RegistryAdapter } from '@travetto/registry';
-import { Class } from '@travetto/runtime';
+import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
+import { AppError, castKey, castTo, Class } from '@travetto/runtime';
 
-import { ClassConfig, MethodConfig, FieldConfig, ParameterConfig, InputConfig } from './types';
+import { ClassConfig, MethodConfig, FieldConfig, ParameterConfig, InputConfig, SchemaConfig } from './types';
 
-function combineInputs<T extends InputConfig>(base: T, ...configs: Partial<T>[]): T {
+function combineInputs<T extends InputConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     Object.assign(base, {
       ...config,
@@ -20,7 +20,7 @@ function combineInputs<T extends InputConfig>(base: T, ...configs: Partial<T>[])
   return base;
 }
 
-function combineMethods<T extends MethodConfig>(base: T, ...configs: Partial<T>[]): T {
+function combineMethods<T extends MethodConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     Object.assign(base, {
       ...config,
@@ -33,12 +33,21 @@ function combineMethods<T extends MethodConfig>(base: T, ...configs: Partial<T>[
   return base;
 }
 
-function combineClasses<T extends ClassConfig>(base: T, ...configs: Partial<T>[]): T {
+function combineClasses<T extends ClassConfig>(base: T, configs: Partial<T>[], inherited: boolean = false): T {
   for (const config of configs) {
     Object.assign(base, {
       ...config,
       ...config.views ? { views: { ...base.views, ...config.views } } : {},
       ...config.validators ? { validators: { ...base.validators, ...config.validators } } : {},
+      ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
+      ...!inherited ? {
+        baseType: config.baseType ?? base.baseType,
+        subTypeName: config.subTypeName ?? base.subTypeName,
+      } : {},
+      methods: { ...base.methods, ...config.methods },
+      fields: { ...base.fields, ...config.fields },
+      title: config.title || base.title,
+      subTypeField: config.subTypeField ?? base.subTypeField,
     });
   }
   return base;
@@ -48,6 +57,10 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
 
   #cls: Class;
   #config: ClassConfig;
+  #views: Map<string, SchemaConfig> = new Map();
+  #accessorDescriptors: Map<string, PropertyDescriptor> = new Map();
+
+  indexCls: RegistryIndexClass<ClassConfig, MethodConfig, FieldConfig>;
 
   constructor(cls: Class) {
     this.#cls = cls;
@@ -62,34 +75,34 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
       fields: {},
       subTypeField: 'type'
     };
-    combineClasses(cfg, ...data);
+    combineClasses(cfg, data);
     return cfg;
   }
 
   registerField(field: string | symbol, data: Partial<FieldConfig> = {}): FieldConfig {
     const config = this.register({});
     const cfg = config.fields[field] ??= { array: false, name: field, type: null!, owner: this.#cls };
-    combineInputs(cfg, data);
+    combineInputs(cfg, [data]);
     return cfg;
   }
 
   registerMethod(method: string | symbol, ...data: Partial<MethodConfig>[]): MethodConfig {
     const config = this.register({});
     const cfg = config.methods[method] ??= { parameters: [], validators: [] };
-    combineMethods(cfg, ...data);
+    combineMethods(cfg, data);
     return cfg;
   }
 
   /**
    * Register a partial config for a pending method param
-   * @param prop The method name
+   * @param method The method name
    * @param idx The param index
    * @param data The config to register
    */
   registerParameter(method: string | symbol, idx: number, ...data: Partial<ParameterConfig>[]): ParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
     const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
-    combineInputs(cfg, ...data);
+    combineInputs(cfg, data);
     return cfg;
   }
 
@@ -97,8 +110,43 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
     throw new Error('Method not implemented.');
   }
 
-  finalize(): void {
-    throw new Error('Method not implemented.');
+  finalize(parent?: ClassConfig): void {
+    const config = this.#config;
+
+    if (parent) {
+      combineClasses(config, [parent], true);
+    }
+
+    if (config.subTypeName && config.subTypeField in config.fields) {
+      const field = config.fields[config.subTypeField];
+      config.fields[config.subTypeField] = {
+        ...field,
+        enum: {
+          values: [config.subTypeName],
+          message: `${config.subTypeField} can only be '${config.subTypeName}'`,
+        }
+      };
+    }
+
+    // Compute views on install
+    for (const view of Object.keys(config.views)) {
+      const fields = config.views[view];
+      const withoutSet = 'without' in fields ? new Set<string>(fields.without) : undefined;
+      const fieldList = withoutSet ?
+        Object.keys(config.fields).filter(x => !withoutSet.has(x)) :
+        ('with' in fields ? fields.with : []);
+
+      this.#views.set(view,
+        fieldList.reduce<SchemaConfig>((acc, v) => {
+          acc[v] = config.fields[v];
+          return acc;
+        }, {})
+      );
+    }
+
+    for (const method of Object.values(config.methods)) {
+      method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
+    }
   }
 
   get(): ClassConfig {
@@ -111,5 +159,41 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
 
   getMethod(method: string | symbol): MethodConfig {
     return this.#config.methods[method];
+  }
+
+  getView(view?: string): SchemaConfig {
+    if (!view) {
+      return this.#config.fields;
+    }
+    if (!this.#views.has(view)) {
+      throw new AppError(`Unknown view ${view} for class ${this.#cls.name}`);
+    }
+    return this.#views.get(view)!;
+  }
+
+  /**
+  * Provides the prototype-derived descriptor for a property
+  */
+  getAccessorDescriptor(field: string): PropertyDescriptor {
+    if (!this.#accessorDescriptors.has(field)) {
+      let proto = this.#cls.prototype;
+      while (proto && !Object.hasOwn(proto, field)) {
+        proto = proto.prototype;
+      }
+      this.#accessorDescriptors.set(field, Object.getOwnPropertyDescriptor(proto, field)!);
+    }
+    return this.#accessorDescriptors.get(field)!;
+  }
+
+  /**
+   * Ensure type is set properly
+   */
+  ensureInstanceTypeField<T>(o: T): T {
+    const config = this.#config;
+    const typeField = castKey<T>(config.subTypeField);
+    if (config.subTypeName && !!config.fields[typeField] && !o[typeField]) {  // Do we have a type field defined
+      o[typeField] = castTo(config.subTypeName); // Assign if missing
+    }
+    return o;
   }
 }
