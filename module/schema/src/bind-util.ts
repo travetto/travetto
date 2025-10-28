@@ -1,5 +1,4 @@
 import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
 
 import { DataUtil } from './data.ts';
 import { InputConfig, ParameterConfig, SchemaConfig } from './service/types.ts';
@@ -145,12 +144,12 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = RegistryV2.index(SchemaRegistryIndex).resolveInstanceType<T>(cons, asFull<T>(data));
+    const cls = SchemaRegistryIndex.index().resolveInstanceType<T>(cons, asFull<T>(data));
     if (data instanceof cls) {
       return castTo(data);
     } else {
       const tgt = classConstruct<T & { type?: string }>(cls);
-      RegistryV2.get(SchemaRegistryIndex, cls).ensureInstanceTypeField(tgt);
+      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(tgt);
 
       for (const k of TypedObject.keys(tgt)) { // Do not retain undefined fields
         if (tgt[k] === undefined) {
@@ -173,7 +172,7 @@ export class BindUtil {
     delete cfg.view;
 
     if (!!data && isInstance<T>(data)) {
-      const adapter = RegistryV2.get(SchemaRegistryIndex, cons);
+      const adapter = SchemaRegistryIndex.get(cons);
       const conf = adapter.get();
 
       // If no configuration
@@ -227,7 +226,7 @@ export class BindUtil {
               }
             }
 
-            if (RegistryV2.has(SchemaRegistryIndex, field.type)) {
+            if (SchemaRegistryIndex.has(field.type)) {
               if (field.array && Array.isArray(v)) {
                 v = v.map(el => this.bindSchema(field.type, el, cfg));
               } else {
@@ -269,7 +268,7 @@ export class BindUtil {
     if (!cfg.required && (val === undefined || val === null)) {
       return val;
     }
-    const complex = RegistryV2.has(SchemaRegistryIndex, cfg.type);
+    const complex = SchemaRegistryIndex.has(cfg.type);
     const bindCfg: BindConfig | undefined = (complex && 'view' in cfg && typeof cfg.view === 'string') ? { view: cfg.view } : undefined;
     if (cfg.array) {
       const valArr = !Array.isArray(val) ? [val] : val;
@@ -311,7 +310,7 @@ export class BindUtil {
    * @returns
    */
   static coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = true): unknown[] {
-    const paramConfigs = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(method).parameters;
+    const paramConfigs = SchemaRegistryIndex.get(cls).getMethod(method).parameters;
     return this.coerceParameters(paramConfigs, params, applyDefaults);
   }
 }

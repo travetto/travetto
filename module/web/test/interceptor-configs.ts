@@ -4,7 +4,7 @@ import { Class, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import {
   ConfigureInterceptor, Controller, ControllerRegistry, CorsInterceptor, Get,
   CacheControlInterceptor, StandardWebRouter, WebChainedContext, WebInterceptor,
@@ -97,7 +97,7 @@ class TestInterceptorConfigSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await RegistryV2.init();
     await DependencyRegistry.getInstance(toConcrete<StandardWebRouter>());
   }
 

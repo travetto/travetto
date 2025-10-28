@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, ShouldThrow } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 
 @Suite('cycle')
@@ -14,7 +14,7 @@ class CycleTest {
       const A = await import('./cycle/a.ts');
       const B = await import('./cycle/b.ts');
       assert(B !== undefined);
-      await RootRegistry.init();
+      await RegistryV2.init();
 
       const { ABC } = await import('./cycle/a.ts');
       const result = await DependencyRegistry.getInstance(ABC);

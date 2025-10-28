@@ -285,7 +285,7 @@ export abstract class Registry<C extends { class: Class }, M = unknown, F = Func
    */
   verifyInitialized(): void {
     if (!this.#resolved) {
-      throw new Error(`${this.constructor.name} has not been initialized, you probably need to call RootRegistry.init()`);
+      throw new Error(`${this.constructor.name} has not been initialized, you probably need to call RegistryV2.init()`);
     }
   }
 

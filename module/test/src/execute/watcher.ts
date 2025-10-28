@@ -1,4 +1,4 @@
-import { RootRegistry, MethodSource } from '@travetto/registry';
+import { RegistryV2, MethodSource } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
 
@@ -25,7 +25,7 @@ export class TestWatcher {
 
     await SuiteRegistry.init();
     SuiteRegistry.listen(RootRegistry);
-    await RootRegistry.init();
+    await RegistryV2.init();
 
     const events: TestRun[] = [];
 
@@ -71,7 +71,7 @@ export class TestWatcher {
     });
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    RootRegistry.onNonClassChanges(imp => itr.add({ import: imp }));
+    RegistryV2.onNonClassChanges(imp => itr.add({ import: imp }));
 
     process.on('message', ev => {
       if (typeof ev === 'object' && ev && 'type' in ev && ev.type === 'run-test') {

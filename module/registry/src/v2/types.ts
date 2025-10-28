@@ -22,7 +22,6 @@ export interface RegistryAdapter<C extends {} = {}, M extends {} = {}, F extends
   registerField(field: string | symbol, ...data: Partial<F>[]): F;
   registerMethod(method: string | symbol, ...data: Partial<M>[]): M;
   unregister(): void;
-
   finalize(): void;
 
   get(): C;

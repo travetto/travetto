@@ -1,7 +1,6 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
 import { DataUtil, ValidationResultError, ValidationError, SchemaRegistryIndex } from '@travetto/schema';
 import { Class } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
 
 import { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
 
@@ -53,7 +52,7 @@ export class QueryVerifier {
    * Handle generic clauses
    */
   static processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler): void {
-    const view = RegistryV2.get(SchemaRegistryIndex, cls).get().fields;
+    const view = SchemaRegistryIndex.get(cls).get().fields;
 
     if (val === undefined || val === null) {
       state.log('Value cannot be undefined or null');

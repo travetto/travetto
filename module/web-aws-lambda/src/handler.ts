@@ -2,7 +2,7 @@ import type lambda from 'aws-lambda';
 
 import { Runtime, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 import { StandardWebRouter } from '@travetto/web';
 
@@ -18,7 +18,7 @@ export class AwsLambdaWebHandler {
 
     return async (event, context) => {
       if (!this.inst) {
-        await RootRegistry.init();
+        await RegistryV2.init();
         await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
         this.inst = await DependencyRegistry.getInstance(AwsLambdaWebHandler);
       }

@@ -1,5 +1,4 @@
 import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
 
 import { InputConfig, SchemaConfig } from '../service/types.ts';
 import { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
@@ -15,8 +14,8 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  * @param o The value to use for the polymorphic check
  */
 function resolveSchema<T>(base: Class<T>, o: T): SchemaConfig {
-  const target = RegistryV2.index(SchemaRegistryIndex).resolveInstanceType(base, o);
-  return RegistryV2.get(SchemaRegistryIndex, target).getView();
+  const target = SchemaRegistryIndex.index().resolveInstanceType(base, o);
+  return SchemaRegistryIndex.get(target).getView();
 }
 
 function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
@@ -72,7 +71,7 @@ export class SchemaValidator {
     }
 
     const { type, array } = input;
-    const complex = RegistryV2.has(SchemaRegistryIndex, type);
+    const complex = SchemaRegistryIndex.has(type);
 
     if (type === Object) {
       return [];
@@ -218,7 +217,7 @@ export class SchemaValidator {
    * Validate the class level validations
    */
   static async #validateClassLevel<T>(cls: Class<T>, o: T, view?: string): Promise<ValidationError[]> {
-    const schema = RegistryV2.get(SchemaRegistryIndex, cls).get();
+    const schema = SchemaRegistryIndex.get(cls).get();
     if (!schema) {
       return [];
     }
@@ -256,9 +255,9 @@ export class SchemaValidator {
     if (isClassInstance(o) && !(o instanceof cls || cls.Ⲑid === o.constructor.Ⲑid)) {
       throw new TypeMismatchError(cls.name, o.constructor.name);
     }
-    cls = RegistryV2.index(SchemaRegistryIndex).resolveInstanceType(cls, o);
+    cls = SchemaRegistryIndex.index().resolveInstanceType(cls, o);
 
-    const config = RegistryV2.get(SchemaRegistryIndex, cls).getView(view);
+    const config = SchemaRegistryIndex.get(cls).getView(view);
 
     // Validate using standard behaviors
     const errors = [
@@ -314,7 +313,7 @@ export class SchemaValidator {
    */
   static async validateMethod<T>(cls: Class<T>, method: string | symbol, params: unknown[], prefixes: (string | symbol | undefined)[] = []): Promise<void> {
     const errors: ValidationError[] = [];
-    const config = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(method);
+    const config = SchemaRegistryIndex.get(cls).getMethod(method);
 
     for (const param of config.parameters) {
       const i = param.index;

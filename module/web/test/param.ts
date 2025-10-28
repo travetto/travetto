@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RegistryV2, RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 import {
@@ -91,7 +91,7 @@ export class EndpointParameterTest {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()
@@ -179,7 +179,7 @@ export class EndpointParameterTest {
   @Test()
   async testAliasing() {
     const ep = EndpointParameterTest.getEndpoint('/alias', 'POST');
-    const { parameters: params } = RegistryV2.get(SchemaRegistryIndex, ep.class).getMethod(ep.name);
+    const { parameters: params } = SchemaRegistryIndex.get(ep.class).getMethod(ep.name);
     assert(params[0].description === 'User name');
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, {
       context: {
@@ -195,12 +195,12 @@ export class EndpointParameterTest {
     }), ['blue']);
 
     const ep2 = EndpointParameterTest.getEndpoint('/alias2', 'POST');
-    const { parameters: params2 } = RegistryV2.get(SchemaRegistryIndex, ep2.class).getMethod(ep2.name);
+    const { parameters: params2 } = SchemaRegistryIndex.get(ep2.class).getMethod(ep2.name);
     assert(params2[0].description === 'User\'s name');
     assert(ep2.params[0].name === 'nm');
 
     const ep3 = EndpointParameterTest.getEndpoint('/alias3', 'POST');
-    const { parameters: params3 } = RegistryV2.get(SchemaRegistryIndex, ep3.class).getMethod(ep3.name);
+    const { parameters: params3 } = SchemaRegistryIndex.get(ep3.class).getMethod(ep3.name);
     assert(params3[0].description === 'User\'s name');
     assert(ep3.params[0].name === 'nm');
   }
@@ -362,8 +362,6 @@ export class EndpointParameterTest {
 
   @Test()
   async realWorldUserInterface() {
-    await RootRegistry.init();
-
     const ep = EndpointParameterTest.getEndpoint('/interface-prefix', 'GET');
     await assert.rejects(() => EndpointParameterTest.extract(ep, {
       context: {

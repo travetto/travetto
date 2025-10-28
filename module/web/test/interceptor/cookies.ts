@@ -3,14 +3,14 @@ import assert from 'node:assert';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse, KeyGrip } from '@travetto/web';
 import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { AsyncContext } from '@travetto/context';
 
 @Suite()
 class CookiesInterceptorSuite {
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   async testCookies(

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam, Undocumented } from '@travetto/web';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { OpenapiVisitor } from '@travetto/openapi';
@@ -86,7 +86,7 @@ class IgnoredCont {
 export class GenerateSuite {
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { EtagInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { TimeUtil } from '@travetto/runtime';
 
@@ -10,7 +10,7 @@ import { TimeUtil } from '@travetto/runtime';
 class EtagInterceptorSuite {
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RegistryV2, RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { Schema, SchemaRegistryIndex, SchemaValidator } from '@travetto/schema';
 
 @Schema()
@@ -25,7 +25,7 @@ class EdgeCases {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()
@@ -60,7 +60,7 @@ class EdgeCases {
 
   @Test()
   async testEmpty() {
-    const cfg = RegistryV2.get(SchemaRegistryIndex, WithEmptyObject).getView();
+    const cfg = SchemaRegistryIndex.get(WithEmptyObject).getView();
     assert(cfg);
     assert('empty' in cfg);
     assert(cfg.empty.type === Object);
@@ -68,10 +68,10 @@ class EdgeCases {
 
   @Test()
   async testSingle() {
-    const cfg = RegistryV2.get(SchemaRegistryIndex, SingleField).getView();
+    const cfg = SchemaRegistryIndex.get(SingleField).getView();
     assert(cfg);
     assert('single' in cfg);
     assert(cfg.single.type !== Object);
-    assert(RegistryV2.get(SchemaRegistryIndex, cfg.single.type).getView().field.type === Number);
+    assert(SchemaRegistryIndex.get(cfg.single.type).getView().field.type === Number);
   }
 }

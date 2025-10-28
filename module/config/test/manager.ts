@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Test, Suite, BeforeEach } from '@travetto/test';
 import { ValidationResultError } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
 import { Config, ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
 
@@ -68,7 +68,7 @@ export class ManagerTest {
   @BeforeEach()
   async before() {
     Env.TRV_RESOURCES.add('@#test/fixtures');
-    await RootRegistry.init();
+    await RegistryV2.init();
     this.config = await DependencyRegistry.getInstance(ConfigurationService);
   }
 

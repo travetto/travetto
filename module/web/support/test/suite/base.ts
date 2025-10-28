@@ -1,4 +1,4 @@
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
@@ -45,7 +45,7 @@ export abstract class BaseWebSuite {
 
   @BeforeAll()
   async initServer(): Promise<void> {
-    await RootRegistry.init();
+    await RegistryV2.init();
     this.#cleanup = await this.serve?.();
     this.#dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
   }

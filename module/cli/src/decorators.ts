@@ -1,6 +1,5 @@
 import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
 import { FieldConfig, SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 import { CliCommandRegistry } from './registry.ts';
@@ -100,7 +99,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       }
     });
 
-    const adapter = RegistryV2.getForRegister(SchemaRegistryIndex, target);
+    const adapter = SchemaRegistryIndex.getForRegister(target);
     const config = adapter.get();
 
     for (const { name, field: { type, ...field } } of VALID_FIELDS) {
@@ -146,7 +145,7 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fil
       aliases.push(...cfg.envVars.map(CliParseUtil.toEnvField));
     }
     if (typeof prop === 'string') {
-      RegistryV2.getForRegister(SchemaRegistryIndex, target.constructor).registerField(prop, {
+      SchemaRegistryIndex.getForRegister(target.constructor).registerField(prop, {
         aliases,
         description: cfg.desc,
         specifiers: cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : undefined

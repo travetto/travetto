@@ -3,7 +3,6 @@ import util from 'node:util';
 import { AppError, toConcrete, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { ParserManager } from './parser/parser.ts';
 import { ConfigData } from './parser/types.ts';
@@ -107,7 +106,7 @@ export class ConfigurationService {
     const out: Record<string, ConfigData> = {};
     for (const [el, inst] of configs) {
       const data = BindUtil.bindSchemaToObject<ConfigData>(
-        inst.constructor, {}, inst, { filterInput: f => !f.secret, filterValue: v => v !== undefined }
+        inst.constructor, {}, inst, { filterInput: f => 'secret' in f && !f.secret, filterValue: v => v !== undefined }
       );
       out[el.class.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
@@ -119,7 +118,7 @@ export class ConfigurationService {
    */
   async bindTo<T>(cls: Class<T>, item: T, namespace: string, validate = true): Promise<T> {
     const classId = cls.Ⲑid;
-    if (!RegistryV2.has(SchemaRegistryIndex, cls)) {
+    if (!SchemaRegistryIndex.has(cls)) {
       throw new AppError(`${classId} is not a valid schema class, config is not supported`);
     }
     BindUtil.bindSchemaToObject(cls, item, this.#get(namespace));

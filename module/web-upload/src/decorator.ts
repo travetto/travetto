@@ -1,7 +1,6 @@
 import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
 import { ControllerRegistry, EndpointParamConfig, Param } from '@travetto/web';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { WebUploadInterceptor } from './interceptor.ts';
 import { WebUploadConfig } from './config.ts';
@@ -28,7 +27,7 @@ export function Upload(
 
   const finalConf = { ...param };
 
-  return (inst: ClassInstance, prop: string, idx: number): void => {
+  return (inst: ClassInstance, prop: string | symbol, idx: number): void => {
     // Register field
     ControllerRegistry.registerEndpointInterceptorConfig(
       inst.constructor, inst[prop], WebUploadInterceptor,
@@ -50,7 +49,7 @@ export function Upload(
     return Param('body', {
       ...finalConf,
       extract: (request, config) => {
-        const input = RegistryV2.get(SchemaRegistryIndex, inst.constructor).getMethod(prop).parameters[idx];
+        const input = SchemaRegistryIndex.get(inst.constructor).getMethod(prop).parameters[idx];
 
         if (!input) {
           throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);

@@ -4,7 +4,6 @@ import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { WhereClause, SelectClause, SortClause, Query, ModelQueryUtil } from '@travetto/model-query';
 import { IndexConfig, ModelType, ModelRegistry } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { EsSchemaConfig } from './types.ts';
 
@@ -66,7 +65,7 @@ export class ElasticsearchQueryUtil {
    */
   static extractWhereTermQuery<T>(cls: Class<T>, o: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
     const items = [];
-    const schema = RegistryV2.get(SchemaRegistryIndex, cls).getView();
+    const schema = SchemaRegistryIndex.get(cls).getView();
 
     for (const key of TypedObject.keys(o)) {
       const top = o[key];
@@ -223,7 +222,7 @@ export class ElasticsearchQueryUtil {
       });
     }
     if (subType) {
-      const { subTypeField, subTypeName } = RegistryV2.get(SchemaRegistryIndex, cls).get();
+      const { subTypeField, subTypeName } = SchemaRegistryIndex.get(cls).get();
       clauses.push({
         term: { [subTypeField]: { value: subTypeName! } }
       });

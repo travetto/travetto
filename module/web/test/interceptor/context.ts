@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { AsyncContextInterceptor, WebRequest, WebResponse, WebAsyncContext } from '@travetto/web';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -10,7 +10,7 @@ class AsyncContextInterceptorSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()

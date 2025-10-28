@@ -15,6 +15,26 @@ const classToSubTypeName = (cls: Class): string => cls.name
  */
 export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodConfig, FieldConfig> {
 
+  static getForRegister(clsOrId: ClassOrId): SchemaAdapter {
+    return RegistryV2.getForRegister(this, clsOrId);
+  }
+
+  static get(clsOrId: ClassOrId): Omit<SchemaAdapter, `register${string}` | 'finalize' | 'unregister'> {
+    return RegistryV2.get(this, clsOrId);
+  }
+
+  static getAll(): Class[] {
+    return RegistryV2.getAll(this);
+  }
+
+  static index(): SchemaRegistryIndex {
+    return RegistryV2.index(this);
+  }
+
+  static has(clsOrId: ClassOrId): boolean {
+    return RegistryV2.has(this, clsOrId);
+  }
+
   #baseSchema = new Map<Class, Class>();
   #subTypes = new Map<Class, Map<string, Class>>();
 
@@ -82,13 +102,13 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
 
   get(cls: ClassOrId, finalizedOnly = true): ClassConfig {
     return (finalizedOnly ?
-      RegistryV2.get(SchemaRegistryIndex, cls) :
-      RegistryV2.getForRegister(SchemaRegistryIndex, cls)
+      SchemaRegistryIndex.get(cls) :
+      SchemaRegistryIndex.getForRegister(cls)
     ).get();
   }
 
   has(cls: ClassOrId): boolean {
-    return RegistryV2.has(SchemaRegistryIndex, cls);
+    return SchemaRegistryIndex.has(cls);
   }
 
   /**

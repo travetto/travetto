@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
 
 import { NameConfig, TestConfig } from './shared.ts';
@@ -18,7 +18,7 @@ export class EnvConfigTest {
       NAME_ACTIVE: 'false'
     });
     Env.TRV_RESOURCES.add('@#test/fixtures');
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()

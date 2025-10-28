@@ -1,10 +1,10 @@
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { SchemaValidator } from '@travetto/schema';
 
 import { LocationAware } from './custom-type-usage.ts';
 
 export async function main(): Promise<void> {
-  await RootRegistry.init();
+  await RegistryV2.init();
 
   const la = LocationAware.from({
     name: 'bob',

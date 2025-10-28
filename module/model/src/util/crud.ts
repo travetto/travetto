@@ -1,6 +1,5 @@
 import { castTo, Class, Util, asConstructable, AppError, hasFunction } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { ModelRegistry } from '../registry/model.ts';
 import { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
@@ -78,7 +77,7 @@ export class ModelCrudUtil {
 
     const config = ModelRegistry.get(asConstructable(item).constructor);
     if (config.subType) { // Sub-typing, assign type
-      RegistryV2.get(SchemaRegistryIndex, cls).ensureInstanceTypeField(item);
+      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
     }
 
     item = await this.prePersist(cls, item, scope);

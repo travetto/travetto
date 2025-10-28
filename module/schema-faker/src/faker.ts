@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 
-import { RegistryV2 } from '@travetto/registry';
 import { Class, TimeUtil } from '@travetto/runtime';
 import { BindUtil, FieldConfig, CommonRegExp, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -175,7 +174,7 @@ export class SchemaFaker {
         return this.#date(cfg);
       } else if (typ === Boolean) {
         return faker.datatype.boolean();
-      } else if (RegistryV2.has(SchemaRegistryIndex, typ)) {
+      } else if (SchemaRegistryIndex.has(typ)) {
         return this.generate(typ);
       }
     }
@@ -187,7 +186,7 @@ export class SchemaFaker {
    * @param view The view to define specifically
    */
   static generate<T>(cls: Class<T>, view?: string): T {
-    const cfg = RegistryV2.get(SchemaRegistryIndex, cls).getView(view);
+    const cfg = SchemaRegistryIndex.get(cls).getView(view);
     const out: Record<string, unknown> = {};
 
     for (const [f, fieldConfig] of Object.entries(cfg.fields)) {

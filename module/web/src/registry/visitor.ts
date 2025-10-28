@@ -1,5 +1,4 @@
 import { Class } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
@@ -11,7 +10,7 @@ import { ControllerRegistry } from './controller.ts';
 export class ControllerVisitUtil {
 
   static #onSchemaEvent(visitor: ControllerVisitor, type?: Class): unknown | Promise<unknown> {
-    return type && RegistryV2.has(SchemaRegistryIndex, type) ? visitor.onSchema?.(RegistryV2.get(SchemaRegistryIndex, type).get()) : undefined;
+    return type && SchemaRegistryIndex.has(type) ? visitor.onSchema?.(SchemaRegistryIndex.get(type).get()) : undefined;
   }
 
   static async visitController(visitor: ControllerVisitor, cls: Class, options: ControllerVisitorOptions = {}): Promise<void> {
@@ -32,7 +31,7 @@ export class ControllerVisitUtil {
         continue;
       }
 
-      const { parameters: params } = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(endpoint.name);
+      const { parameters: params } = SchemaRegistryIndex.get(cls).getMethod(endpoint.name);
       await visitor.onEndpointStart?.(endpoint, controller, params);
       await this.#onSchemaEvent(visitor, endpoint.responseType?.type);
       await this.#onSchemaEvent(visitor, endpoint.requestType?.type);

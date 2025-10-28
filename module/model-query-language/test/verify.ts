@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { castTo, Class } from '@travetto/runtime';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema } from '@travetto/schema';
@@ -32,7 +32,7 @@ export class VerifyTest {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()

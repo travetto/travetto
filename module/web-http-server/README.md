@@ -159,7 +159,7 @@ To customize a Web server, you may need to construct an entry point using the [@
 import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { WebHttpServer, WebHttpConfig } from '@travetto/web-http-server';
 
 import './config-override.ts';

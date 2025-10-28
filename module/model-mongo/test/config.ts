@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { Suite, Test } from '@travetto/test';
 import { MongoModelConfig } from '@travetto/model-mongo';
 
@@ -8,7 +8,7 @@ import { MongoModelConfig } from '@travetto/model-mongo';
 class MongoConfigSuite {
   @Test()
   async simpleTest() {
-    await RootRegistry.init();
+    await RegistryV2.init();
 
     const config = new MongoModelConfig();
     assert(config);
@@ -26,7 +26,7 @@ class MongoConfigSuite {
 
   @Test()
   async simpleTestWithDefaults() {
-    await RootRegistry.init();
+    await RegistryV2.init();
 
     const config = new MongoModelConfig();
     assert(config);

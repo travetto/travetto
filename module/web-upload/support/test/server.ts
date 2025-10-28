@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { BinaryUtil, castTo } from '@travetto/runtime';
 import { Controller, Post } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
@@ -63,7 +63,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   @BeforeAll()
   async init() {
     this.fixture = new TestFixtures(['@travetto/asset']);
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()

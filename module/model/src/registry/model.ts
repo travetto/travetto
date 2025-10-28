@@ -1,5 +1,5 @@
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { Registry, RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
 
@@ -72,7 +72,7 @@ class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
     const config = asFull(this.pending.get(cls.Ⲑid)!);
 
-    const schema = RegistryV2.getForRegister(SchemaRegistryIndex, cls).get();
+    const schema = SchemaRegistryIndex.getForRegister(cls).get();
     const view = schema.fields;
     delete view.id.required; // Allow ids to be optional
 

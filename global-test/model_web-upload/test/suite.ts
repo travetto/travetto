@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Controller, Get, Post, WebRequest, ContextParam, WebHeaderUtil } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, FileMap } from '@travetto/web-upload';
@@ -92,7 +92,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @BeforeAll()
   async init() {
     this.fixture = new TestFixtures(['@travetto/model', '@travetto/web-upload']);
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test()

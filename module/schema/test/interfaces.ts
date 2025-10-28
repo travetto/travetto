@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RegistryV2, RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { Schema, SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { Address2 } from './models/address.ts';
@@ -34,12 +34,12 @@ class ViewsTest {
 
   @BeforeAll()
   ready() {
-    return RootRegistry.init();
+    return RegistryV2.init();
   }
 
   @Test()
   async testRegister() {
-    assert(RegistryV2.get(SchemaRegistryIndex, User).getView().address.type);
+    assert(SchemaRegistryIndex.get(User).getView().address.type);
   }
 
   @Test('Url and message')

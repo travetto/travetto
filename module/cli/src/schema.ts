@@ -1,6 +1,5 @@
 import { castKey, castTo, Class } from '@travetto/runtime';
 import { BindUtil, InputConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { CliCommandRegistry } from './registry.ts';
 import { ParsedState, CliCommandInput, CliCommandSchema, CliCommandShape } from './types.ts';
@@ -53,20 +52,22 @@ export class CliCommandSchemaUtil {
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
     const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
 
-    // Ensure finalized
-    const parent = RegistryV2.index(SchemaRegistryIndex).getParentClass(cls);
-    if (parent?.Ⲑid) {
-      RegistryV2.index(SchemaRegistryIndex).process([{ type: 'added', curr: parent }]);
-    }
-    RegistryV2.index(SchemaRegistryIndex).process([{ type: 'added', curr: cls }]);
+    const schemaIndex = SchemaRegistryIndex.index();
 
-    const schema = await RegistryV2.get(SchemaRegistryIndex, cls).getView();
+    // Ensure finalized
+    const parent = schemaIndex.getParentClass(cls);
+    if (parent?.Ⲑid) {
+      schemaIndex.process([{ type: 'added', curr: parent }]);
+    }
+    schemaIndex.process([{ type: 'added', curr: cls }]);
+
+    const schema = await SchemaRegistryIndex.get(cls).getView();
     const flags = Object.values(schema.schema).map(fieldToInput);
 
     // Add help command
     flags.push({ name: 'help', flagNames: ['h'], description: 'display help for command', type: 'boolean' });
 
-    const method = RegistryV2.get(SchemaRegistryIndex, cls).getMethod('main').parameters.map(fieldToInput);
+    const method = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(fieldToInput);
 
     const used = new Set(flags
       .flatMap(f => f.flagNames ?? [])
@@ -99,7 +100,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const fullSchema = RegistryV2.get(SchemaRegistryIndex, cls).get();
+    const fullSchema = SchemaRegistryIndex.get(cls).get();
     const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getByClass(cls)!;
     const cfg: CliCommandSchema = {
       ...meta,
@@ -151,7 +152,7 @@ export class CliCommandSchemaUtil {
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
     const cls = CliCommandRegistry.getClass(cmd);
-    const paramNames = RegistryV2.get(SchemaRegistryIndex, cls).getMethod('main').parameters.map(x => x.name!);
+    const paramNames = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(x => x.name!);
 
     const validators = [
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),

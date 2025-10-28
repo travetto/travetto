@@ -1,7 +1,7 @@
 import { asConstructable, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
 import { BindUtil, ParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
-import { RegistryV2, RetargettingProxy } from '@travetto/registry';
+import { RetargettingProxy } from '@travetto/registry';
 
 import { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
@@ -116,7 +116,7 @@ export class EndpointUtil {
     const vals = WebCommonUtil.getRequestParams(request);
 
     try {
-      const { parameters } = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(method);
+      const { parameters } = SchemaRegistryIndex.get(cls).getMethod(method);
       const extracted = endpoint.params.map((c, i) => this.extractParameter(request, c, parameters[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));

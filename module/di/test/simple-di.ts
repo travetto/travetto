@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { toConcrete } from '@travetto/runtime';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 
@@ -29,7 +29,7 @@ class DiTest {
   @Test('run')
   async run() {
     console.log('starting');
-    await RootRegistry.init();
+    await RegistryV2.init();
     let inst = await DependencyRegistry.getInstance(ServiceInherit);
     inst.doWork();
     assert.ok(inst.db);
@@ -60,7 +60,7 @@ class DiTest2 {
 
   @BeforeAll()
   async beforeAll() {
-    await RootRegistry.init();
+    await RegistryV2.init();
   }
 
   @Test('run')

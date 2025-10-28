@@ -1,5 +1,4 @@
 import { Any, ClassInstance } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
 
 import { CommonRegExp } from '../validate/regexp.ts';
 import { FieldConfig } from '../service/types.ts';
@@ -10,9 +9,9 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
   return (t: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
-      RegistryV2.getForRegister(SchemaRegistryIndex, t).registerParameter(t.constructor, idx, obj);
+      SchemaRegistryIndex.getForRegister(t).registerParameter(t.constructor, idx, obj);
     } else {
-      RegistryV2.getForRegister(SchemaRegistryIndex, t).registerField(k, obj);
+      SchemaRegistryIndex.getForRegister(t).registerField(k, obj);
     }
   };
 }
@@ -26,13 +25,13 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
 export function Field(type: Pick<FieldConfig, 'type' | 'array'>, ...config: Partial<FieldConfig>[]) {
   return (f: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
-      RegistryV2.getForRegister(SchemaRegistryIndex, f).registerParameter(k, idx, {
+      SchemaRegistryIndex.getForRegister(f).registerParameter(k, idx, {
         type: type.type,
         array: type.array ?? false,
         ...config,
       });
     } else {
-      RegistryV2.getForRegister(SchemaRegistryIndex, f).registerField(k, {
+      SchemaRegistryIndex.getForRegister(f).registerField(k, {
         type: type.type,
         array: type.array ?? false,
         ...config,
@@ -212,6 +211,6 @@ export function Specifier(...specifiers: string[]): PropType<unknown> { return p
  */
 export function SubTypeField(): ((t: ClassInstance, k: string) => void) {
   return (t: ClassInstance, k: string): void => {
-    RegistryV2.getForRegister(SchemaRegistryIndex, t).register({ subTypeField: k });
+    SchemaRegistryIndex.getForRegister(t).register({ subTypeField: k });
   };
 }

@@ -1,7 +1,6 @@
 import { ModelRegistry, ModelType } from '@travetto/model';
 import { castTo, Class, hasFunction } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { PageableModelQuery, Query } from '../model/query.ts';
 import { ValidStringFields, WhereClauseRaw } from '../model/where-clause.ts';
@@ -33,7 +32,7 @@ export class ModelQuerySuggestUtil {
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
     if (config.subType) {
-      const { subTypeField, subTypeName } = RegistryV2.get(SchemaRegistryIndex, cls).get();
+      const { subTypeField, subTypeName } = SchemaRegistryIndex.get(cls).get();
       clauses.push({ [subTypeField]: subTypeName });
     }
 
@@ -90,7 +89,7 @@ export class ModelQuerySuggestUtil {
       ...(query ?? {}),
       select: castTo({
         [field]: true, ...(config.subType ? {
-          [RegistryV2.get(SchemaRegistryIndex, cls).get().subTypeField]: true
+          [SchemaRegistryIndex.get(cls).get().subTypeField]: true
         } : {})
       })
     });

@@ -1,6 +1,6 @@
 import { Class } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2 } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
 
 import { ModelBlobUtil } from '../../src/util/blob.ts';
@@ -17,7 +17,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
     SuiteRegistry.registerPendingListener(
       target,
       async function (this: T & { [Loaded]?: boolean }) {
-        await RootRegistry.init();
+        await RegistryV2.init();
 
         if (!this[Loaded]) {
           const config = await DependencyRegistry.getInstance(this.configClass);

@@ -16,7 +16,7 @@ export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeF
     target.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
     };
-    RegistryV2.getForRegister(SchemaRegistryIndex, target).register({ ...cfg });
+    SchemaRegistryIndex.getForRegister(target).register({ ...cfg });
     return target;
   };
 }
@@ -28,7 +28,7 @@ export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeF
  */
 export const Validator = <T>(fn: ValidatorFn<T, string>) =>
   (target: Class<T>, _k?: string): void => {
-    RegistryV2.getForRegister(SchemaRegistryIndex, target).register({ validators: [castTo(fn)] });
+    SchemaRegistryIndex.getForRegister(target).register({ validators: [castTo(fn)] });
   };
 
 /**
@@ -38,7 +38,7 @@ export const Validator = <T>(fn: ValidatorFn<T, string>) =>
  */
 export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
   return (target: ClassInstance, k: string, _prop: TypedPropertyDescriptor<T>): void => {
-    RegistryV2.getForRegister(SchemaRegistryIndex, target).registerMethod(k, { validators: [castTo(fn)] });
+    SchemaRegistryIndex.getForRegister(target).registerMethod(k, { validators: [castTo(fn)] });
   };
 }
 
@@ -49,7 +49,7 @@ export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodVal
  */
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
   return (target: Class<Partial<T>>): void => {
-    RegistryV2.getForRegister(SchemaRegistryIndex, target).register({ views: { [name]: fields } });
+    SchemaRegistryIndex.getForRegister(target).register({ views: { [name]: fields } });
   };
 }
 
@@ -60,6 +60,6 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
  */
 export function SubType<T>(name: string) {
   return (target: Class<Partial<T>>): void => {
-    RegistryV2.getForRegister(SchemaRegistryIndex, target).register({ subTypeName: name });
+    SchemaRegistryIndex.getForRegister(target).register({ subTypeName: name });
   };
 }

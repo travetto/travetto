@@ -2,7 +2,6 @@ import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { ClassConfig, FieldConfig, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types.ts';
 import { TableSymbol, VisitStack } from './types.ts';
@@ -55,7 +54,7 @@ export class SQLModelUtil {
    */
   static getFieldsByLocation(stack: VisitStack[]): FieldCacheEntry {
     const top = stack.at(-1)!;
-    const conf = RegistryV2.get(SchemaRegistryIndex, top.type).get();
+    const conf = SchemaRegistryIndex.get(top.type).get();
 
     if (conf && this.#schemaFieldsCache.has(conf.class)) {
       return this.#schemaFieldsCache.get(conf.class)!;
@@ -76,7 +75,7 @@ export class SQLModelUtil {
     if (model && (model.baseType ?? model.subType)) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(conf.class))) {
-        const typeConf = RegistryV2.get(SchemaRegistryIndex, type).get();
+        const typeConf = SchemaRegistryIndex.get(type).get();
         for (const [fieldName, field] of Object.entries<FieldConfig>(typeConf.fields)) {
           if (!fieldMap.has(fieldName)) {
             fieldMap.add(fieldName);
@@ -89,8 +88,8 @@ export class SQLModelUtil {
     const ret: FieldCacheEntry = {
       localMap: {},
       foreignMap: {},
-      local: fields.filter(x => !RegistryV2.has(SchemaRegistryIndex, x.type) && !x.array),
-      foreign: fields.filter(x => RegistryV2.has(SchemaRegistryIndex, x.type) || x.array)
+      local: fields.filter(x => !SchemaRegistryIndex.has(x.type) && !x.array),
+      foreign: fields.filter(x => SchemaRegistryIndex.has(x.type) || x.array)
     };
 
     ret.local.reduce((acc, f) => (acc[f.name] = f) && acc, ret.localMap);
@@ -110,7 +109,7 @@ export class SQLModelUtil {
 
     const descend = (): void => {
       for (const field of foreign) {
-        if (RegistryV2.has(SchemaRegistryIndex, field.type)) {
+        if (SchemaRegistryIndex.has(field.type)) {
           this.visitSchemaSync(field, handler, { path });
         } else {
           handler.onSimple({
@@ -138,7 +137,7 @@ export class SQLModelUtil {
 
     const descend = async (): Promise<void> => {
       for (const field of foreign) {
-        if (RegistryV2.has(SchemaRegistryIndex, field.type)) {
+        if (SchemaRegistryIndex.has(field.type)) {
           await this.visitSchema(field, handler, { path });
         } else {
           await handler.onSimple({
@@ -162,7 +161,7 @@ export class SQLModelUtil {
    */
   static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T | OptionalId<T>, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>): void {
     const pathObj: unknown[] = [instance];
-    this.visitSchemaSync(RegistryV2.get(SchemaRegistryIndex, cls).get(), {
+    this.visitSchemaSync(SchemaRegistryIndex.get(cls).get(), {
       onRoot: (config) => {
         const { path } = config;
         path[0].name = instance.id!;
@@ -222,7 +221,7 @@ export class SQLModelUtil {
       if (typeof k === 'string' && !DataUtil.isPlainObject(select[k]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
-            toGet = new Set(Object.keys(RegistryV2.get(SchemaRegistryIndex, cls).get().fields));
+            toGet = new Set(Object.keys(SchemaRegistryIndex.get(cls).get().fields));
           }
           toGet.delete(k);
         } else {
@@ -238,7 +237,7 @@ export class SQLModelUtil {
    */
   static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
     return sort.map((cl: Record<string, unknown>) => {
-      let schema: ClassConfig = RegistryV2.get(SchemaRegistryIndex, cls).get();
+      let schema: ClassConfig = SchemaRegistryIndex.get(cls).get();
       const stack = this.classToStack(cls);
       let found: OrderBy | undefined;
       while (!found) {
@@ -250,7 +249,7 @@ export class SQLModelUtil {
           found = { stack, asc: val === 1 };
         } else {
           stack.push(field);
-          schema = RegistryV2.get(SchemaRegistryIndex, field.type).get();
+          schema = SchemaRegistryIndex.get(field.type).get();
           cl = castTo(val);
         }
       }
@@ -263,7 +262,7 @@ export class SQLModelUtil {
    */
   static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: FieldConfig): Record<string, T> {
     if (field) {
-      const isSimple = RegistryV2.has(SchemaRegistryIndex, field.type);
+      const isSimple = SchemaRegistryIndex.has(field.type);
       for (const el of v) {
         const parentKey: string = castTo(el[castKey<T>(dct.parentPathField.name)]);
         const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
