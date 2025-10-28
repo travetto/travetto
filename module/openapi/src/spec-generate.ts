@@ -216,7 +216,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
         const extra: Record<string, unknown> = {};
         if (describeFunction(cls)?.abstract) {
-          const map = SchemaRegistryIndex.index().getSubTypesForClass(cls);
+          const map = SchemaRegistryIndex.instance().getSubTypesForClass(cls);
           if (map) {
             extra.oneOf = map
               .filter(x => !describeFunction(x)?.abstract)

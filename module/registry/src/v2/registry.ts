@@ -165,7 +165,7 @@ class $Registry {
     return Array.from(this.#itemsByIndex.get(indexCls)?.keys() ?? []);
   }
 
-  index<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  instance<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
     indexCls: T
   ): InstanceType<T> {
     return castTo(this.#indexes.get(indexCls));

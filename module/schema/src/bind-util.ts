@@ -144,7 +144,7 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = SchemaRegistryIndex.index().resolveInstanceType<T>(cons, asFull<T>(data));
+    const cls = SchemaRegistryIndex.instance().resolveInstanceType<T>(cons, asFull<T>(data));
     if (data instanceof cls) {
       return castTo(data);
     } else {

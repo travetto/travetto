@@ -27,8 +27,8 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     return RegistryV2.getAll(this);
   }
 
-  static index(): SchemaRegistryIndex {
-    return RegistryV2.index(this);
+  static instance(): SchemaRegistryIndex {
+    return RegistryV2.instance(this);
   }
 
   static has(clsOrId: ClassOrId): boolean {

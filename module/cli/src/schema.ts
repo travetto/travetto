@@ -52,7 +52,7 @@ export class CliCommandSchemaUtil {
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
     const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
 
-    const schemaIndex = SchemaRegistryIndex.index();
+    const schemaIndex = SchemaRegistryIndex.instance();
 
     // Ensure finalized
     const parent = schemaIndex.getParentClass(cls);
