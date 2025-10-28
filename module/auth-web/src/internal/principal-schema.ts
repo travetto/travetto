@@ -1,6 +1,7 @@
-import { Schema, SchemaRegistry } from '@travetto/schema';
-import { toConcrete, AnyMap, asFull } from '@travetto/runtime';
+import { Schema, SchemaRegistryIndex } from '@travetto/schema';
+import { toConcrete, AnyMap } from '@travetto/runtime';
 import { Principal } from '@travetto/auth';
+import { RegistryV2 } from '@travetto/registry';
 
 @Schema()
 export class PrincipalSchema implements Principal {
@@ -13,7 +14,6 @@ export class PrincipalSchema implements Principal {
   permissions?: string[] | undefined;
 }
 
-SchemaRegistry.mergeConfigs(
-  asFull(SchemaRegistry.getOrCreatePending(toConcrete<Principal>())),
-  SchemaRegistry.getOrCreatePending(PrincipalSchema)
+RegistryV2.getForRegister(SchemaRegistryIndex, toConcrete<Principal>()).register(
+  RegistryV2.getForRegister(SchemaRegistryIndex, PrincipalSchema).get()
 );

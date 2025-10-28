@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
-import { SchemaRegistry, UnknownType } from '@travetto/schema';
+import { RegistryV2, RootRegistry } from '@travetto/registry';
+import { SchemaRegistryIndex, UnknownType } from '@travetto/schema';
 
 import { Unknowable } from './models/unknown.ts';
 
@@ -12,7 +12,7 @@ export class UnknownTest {
   @Test()
   async basic() {
     await RootRegistry.init();
-    const config = SchemaRegistry.getViewSchema(Unknowable).schema.value;
+    const config = RegistryV2.get(SchemaRegistryIndex, Unknowable).getView().value;
     assert(config.type === UnknownType);
   }
 }

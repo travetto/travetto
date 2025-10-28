@@ -1,5 +1,6 @@
 import { castTo, Runtime } from '@travetto/runtime';
-import { SchemaRegistry } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { TestConsumerRegistry } from '../../src/consumer/registry.ts';
 import type { RunState } from '../../src/execute/types.ts';
@@ -35,7 +36,7 @@ export async function selectConsumer(inst: { format?: string }) {
 
   const cls = inst.constructor;
 
-  SchemaRegistry.get(castTo(cls)).totalView.schema.format.enum = {
+  RegistryV2.getForRegister(SchemaRegistryIndex, castTo(cls)).get().fields.format.enum = {
     message: `{path} is only allowed to be "${types.join('" or "')}"`,
     values: types
   };

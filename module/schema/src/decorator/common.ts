@@ -2,10 +2,9 @@ import { Class, ClassInstance } from '@travetto/runtime';
 import { RegistryV2 } from '@travetto/registry';
 
 import { DescribableConfig } from '../service/types.ts';
-import { SchemaRegistry } from '../service/registry.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
-function isClassInstance(o: Class | ClassInstance, property?: string): o is ClassInstance {
+function isClassInstance(o: Class | ClassInstance, property?: string | symbol): o is ClassInstance {
   return !!property;
 }
 
@@ -15,18 +14,16 @@ function isClassInstance(o: Class | ClassInstance, property?: string): o is Clas
  * @augments `@travetto/schema:Describe`
  */
 export function Describe(config: Partial<DescribableConfig>) {
-  return (target: Class | ClassInstance, property?: string, descOrIdx?: PropertyDescriptor | number): void => {
+  return (target: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
+    const adapter = RegistryV2.getForRegister(SchemaRegistryIndex, target);
     if (isClassInstance(target, property)) {
       if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
-        RegistryV2.get(SchemaRegistryIndex, target).registerParameter(property!, descOrIdx, {
-          name: property!,
-          ...config
-        });
+        adapter.registerParameter(property!, descOrIdx, { ...config });
       } else {
-        RegistryV2.get(SchemaRegistryIndex, target).registerField(property!, config);
+        adapter.registerField(property!, config);
       }
     } else {
-      SchemaRegistry.register(target, config);
+      adapter.register(target, config);
     }
   };
 }

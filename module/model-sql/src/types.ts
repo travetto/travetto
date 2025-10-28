@@ -6,6 +6,6 @@ export type VisitStack = {
   [TableSymbol]?: string;
   array?: boolean;
   type: Class;
-  name: string;
+  name: string | symbol;
   index?: number;
 };

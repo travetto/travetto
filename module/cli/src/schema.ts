@@ -1,5 +1,6 @@
 import { castKey, castTo, Class } from '@travetto/runtime';
-import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, InputConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { CliCommandRegistry } from './registry.ts';
 import { ParsedState, CliCommandInput, CliCommandSchema, CliCommandShape } from './types.ts';
@@ -10,7 +11,7 @@ const SHORT_FLAG = /^-[a-z]/i;
 
 const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
 
-function baseType(x: FieldConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
+function baseType(x: InputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
   switch (x.type) {
     case Date: return { type: 'date' };
     case Boolean: return { type: 'boolean' };
@@ -29,9 +30,9 @@ function baseType(x: FieldConfig): Pick<CliCommandInput, 'type' | 'fileExtension
   return { type: 'string' };
 }
 
-const fieldToInput = (x: FieldConfig): CliCommandInput => ({
+const fieldToInput = (x: InputConfig): CliCommandInput => ({
   ...baseType(x),
-  name: x.name,
+  ...(('name' in x && typeof x.name === 'string') ? { name: x.name } : { name: '' }),
   description: x.description,
   array: x.array,
   required: x.required?.active,
@@ -53,19 +54,19 @@ export class CliCommandSchemaUtil {
     const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
 
     // Ensure finalized
-    const parent = SchemaRegistry.getParentClass(cls);
+    const parent = RegistryV2.index(SchemaRegistryIndex).getParentClass(cls);
     if (parent?.Ⲑid) {
-      SchemaRegistry.onInstall(parent, { type: 'added', curr: parent });
+      RegistryV2.index(SchemaRegistryIndex).process([{ type: 'added', curr: parent }]);
     }
-    SchemaRegistry.onInstall(cls, { type: 'added', curr: cls });
+    RegistryV2.index(SchemaRegistryIndex).process([{ type: 'added', curr: cls }]);
 
-    const schema = await SchemaRegistry.getViewSchema(cls);
+    const schema = await RegistryV2.get(SchemaRegistryIndex, cls).getView();
     const flags = Object.values(schema.schema).map(fieldToInput);
 
     // Add help command
     flags.push({ name: 'help', flagNames: ['h'], description: 'display help for command', type: 'boolean' });
 
-    const method = SchemaRegistry.getMethodSchema(cls, 'main').map(fieldToInput);
+    const method = RegistryV2.get(SchemaRegistryIndex, cls).getMethod('main').parameters.map(fieldToInput);
 
     const used = new Set(flags
       .flatMap(f => f.flagNames ?? [])
@@ -98,7 +99,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const fullSchema = SchemaRegistry.get(cls);
+    const fullSchema = RegistryV2.get(SchemaRegistryIndex, cls).get();
     const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getByClass(cls)!;
     const cfg: CliCommandSchema = {
       ...meta,
@@ -150,7 +151,7 @@ export class CliCommandSchemaUtil {
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
     const cls = CliCommandRegistry.getClass(cmd);
-    const paramNames = SchemaRegistry.getMethodSchema(cls, 'main').map(x => x.name);
+    const paramNames = RegistryV2.get(SchemaRegistryIndex, cls).getMethod('main').parameters.map(x => x.name!);
 
     const validators = [
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),

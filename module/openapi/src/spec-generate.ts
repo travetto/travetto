@@ -5,8 +5,8 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
-import { Class, describeFunction } from '@travetto/runtime';
-import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver, InputConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { AppError, Class, describeFunction } from '@travetto/runtime';
+import { FieldConfig, ClassConfig, SchemaNameResolver, InputConfig, SchemaRegistryIndex } from '@travetto/schema';
 import { RegistryV2 } from '@travetto/registry';
 
 import { ApiSpecConfig } from './config.ts';
@@ -50,17 +50,18 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Convert schema to a set of dotted parameters
    */
   #schemaToDotParams(location: 'query' | 'header', input: InputConfig, prefix: string = '', rootField: InputConfig = input): ParameterObject[] {
-    const viewConf = RegistryV2.has(SchemaRegistryIndex, input.type) &&
-      RegistryV2.get(SchemaRegistryIndex, input.type).getView(input.view);
+    const viewConf = RegistryV2.has(SchemaRegistryIndex, input.type) ?
+      RegistryV2.get(SchemaRegistryIndex, input.type).getView(input.view) :
+      undefined;
 
     const schemaConf = viewConf && viewConf.schema;
     if (!schemaConf) {
-      throw new Error(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
+      throw new AppError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
 
     const params: ParameterObject[] = [];
     for (const sub of Object.values(schemaConf)) {
-      if (SchemaRegistry.has(sub.type) || SchemaRegistry.hasPending(sub.type)) {
+      if (RegistryV2.has(SchemaRegistryIndex, sub.type)) {
         const suffix = (sub.array) ? '[]' : '';
         params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${sub.name}${suffix}` : `${sub.name}${suffix}.`, rootField));
       } else {
@@ -91,8 +92,8 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     }
     const out: Record<string, unknown> = {};
     // Handle nested types
-    if (SchemaRegistry.has(field.type)) {
-      const id = this.#nameResolver.getName(SchemaRegistry.get(field.type));
+    if (RegistryV2.has(SchemaRegistryIndex, field.type)) {
+      const id = this.#nameResolver.getName(RegistryV2.get(SchemaRegistryIndex, field.type).get());
       // Exposing
       this.#schemas[id] = this.#allSchemas[id];
       out.$ref = `${DEFINITION}/${id}`;
@@ -195,7 +196,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const typeId = this.#nameResolver.getName(type);
 
     if (!this.#allSchemas[typeId]) {
-      const config = SchemaRegistry.get(cls);
+      const config = RegistryV2.get(SchemaRegistryIndex, cls).get();
       if (config) {
         this.#allSchemas[typeId] = {
           title: config.title || config.description,
@@ -208,20 +209,20 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         const required: string[] = [];
 
         for (const fieldName of Object.keys(def.fields)) {
-          if (SchemaRegistry.has(def.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistry.get(def.fields[fieldName].type));
+          if (RegistryV2.has(SchemaRegistryIndex, def.fields[fieldName].type)) {
+            this.onSchema(RegistryV2.get(SchemaRegistryIndex, def.fields[fieldName].type).get());
           }
           properties[fieldName] = this.#processSchemaField(def.fields[fieldName], required);
         }
 
         const extra: Record<string, unknown> = {};
         if (describeFunction(cls)?.abstract) {
-          const map = SchemaRegistry.getSubTypesForClass(cls);
+          const map = RegistryV2.index(SchemaRegistryIndex).getSubTypesForClass(cls);
           if (map) {
             extra.oneOf = map
               .filter(x => !describeFunction(x)?.abstract)
               .map(c => {
-                this.onSchema(SchemaRegistry.get(c));
+                this.onSchema(RegistryV2.get(SchemaRegistryIndex, c).get());
                 return this.#getType(c);
               });
           }
@@ -252,7 +253,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: ''
       };
     } else {
-      const cls = SchemaRegistry.get(body.type);
+      const cls = RegistryV2.get(SchemaRegistryIndex, body.type).get();
       const typeId = cls ? this.#nameResolver.getName(cls) : body.type.name;
       const typeRef = cls ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {
@@ -274,7 +275,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     { parameters: ParameterObject[] } |
     undefined
   ) {
-    const complex = input.type && SchemaRegistry.has(input.type);
+    const complex = input.type && RegistryV2.has(SchemaRegistryIndex, input.type);
     if (param.location) {
       if (param.location === 'body') {
         const acceptsMime = ep.finalizedResponseHeaders.get('accepts');

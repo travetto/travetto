@@ -1,7 +1,9 @@
 import { faker } from '@faker-js/faker';
 
+import { RegistryV2 } from '@travetto/registry';
 import { Class, TimeUtil } from '@travetto/runtime';
-import { BindUtil, SchemaRegistry, FieldConfig, CommonRegExp } from '@travetto/schema';
+import { BindUtil, FieldConfig, CommonRegExp, SchemaRegistryIndex } from '@travetto/schema';
+
 
 /**
  * Provide a faker utility for generating content
@@ -29,7 +31,7 @@ export class SchemaFaker {
       [/l(ast)?name/, faker.person.lastName],
       [/^ip(add(ress)?)?$/, faker.internet.ip],
       [/^ip(add(ress)?)?(v?)6$/, faker.internet.ipv6],
-      [/^username$/, faker.internet.userName],
+      [/^username$/, faker.internet.username],
       [/^domain(name)?$/, faker.internet.domainName],
       [/^file(path|name)?$/, faker.system.filePath],
       [/^street(1)?$/, faker.location.streetAddress],
@@ -82,9 +84,7 @@ export class SchemaFaker {
     let max = cfg.max && typeof cfg.max.n === 'number' ? cfg.max.n : undefined;
     let precision = cfg.precision;
 
-    const name = cfg.name.toUpperCase();
-
-    if (/(price|amt|amount)$/.test(name)) {
+    if (/(price|amt|amount)$/i.test(cfg.name.toString())) {
       precision = [13, 2];
     }
 
@@ -113,7 +113,7 @@ export class SchemaFaker {
    * @param cfg Field config
    */
   static #date(cfg: FieldConfig): Date {
-    const name = cfg.name.toUpperCase();
+    const name = cfg.name.toString().toLowerCase();
     const min = cfg.min && typeof cfg.min.n !== 'number' ? cfg.min.n : undefined;
     const max = cfg.max && typeof cfg.max.n !== 'number' ? cfg.max.n : undefined;
 
@@ -134,7 +134,7 @@ export class SchemaFaker {
    * @param cfg Field config
    */
   static #string(cfg: FieldConfig): string {
-    const name = cfg.name.toLowerCase();
+    const name = cfg.name.toString().toLowerCase();
 
     if (cfg.match) {
       const mre = cfg.match && cfg.match.re;
@@ -175,7 +175,7 @@ export class SchemaFaker {
         return this.#date(cfg);
       } else if (typ === Boolean) {
         return faker.datatype.boolean();
-      } else if (SchemaRegistry.has(typ)) {
+      } else if (RegistryV2.has(SchemaRegistryIndex, typ)) {
         return this.generate(typ);
       }
     }
@@ -187,14 +187,13 @@ export class SchemaFaker {
    * @param view The view to define specifically
    */
   static generate<T>(cls: Class<T>, view?: string): T {
-    const cfg = SchemaRegistry.getViewSchema(cls, view);
+    const cfg = RegistryV2.get(SchemaRegistryIndex, cls).getView(view);
     const out: Record<string, unknown> = {};
 
-    for (const f of cfg.fields) {
+    for (const [f, fieldConfig] of Object.entries(cfg.fields)) {
       if (f === 'type' || f === 'id') { // Do not set primary fields
         continue;
       }
-      const fieldConfig = cfg.schema[f];
       if (!fieldConfig.required && (Math.random() < .5)) {
         continue;
       }

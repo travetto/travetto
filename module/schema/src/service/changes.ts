@@ -33,7 +33,7 @@ export interface SchemaChangeEvent {
 }
 
 /**
- * Schema change listener.  Handles all changes that occur via the SchemaRegistry
+ * Schema change listener.  Handles all changes that occur via the SchemaRegistryIndex
  */
 class $SchemaChangeListener {
 

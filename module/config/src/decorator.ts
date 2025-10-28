@@ -1,6 +1,7 @@
 import { Class, ClassInstance } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
-import { SchemaRegistry } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { OverrideConfig, OverrideConfigSymbol } from './source/override.ts';
 import { ConfigurationService, ConfigBaseType } from './service.ts';
@@ -15,7 +16,8 @@ export function Config(ns: string) {
     const og: Function = target.prototype.postConstruct;
     // Declare as part of global config
     (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(ConfigBaseType);
-    const env = SchemaRegistry.getOrCreatePendingMetadata<OverrideConfig>(target, OverrideConfigSymbol, { ns, fields: {} });
+    const env = RegistryV2.getForRegister(SchemaRegistryIndex, target)
+      .registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns, fields: {} });
     env.ns = ns;
 
     target.prototype.postConstruct = async function (): Promise<void> {
@@ -33,7 +35,8 @@ export function Config(ns: string) {
  */
 export function EnvVar(name: string, ...others: string[]) {
   return (inst: ClassInstance, prop: string): void => {
-    const env = SchemaRegistry.getOrCreatePendingMetadata<OverrideConfig>(inst.constructor, OverrideConfigSymbol, { ns: '', fields: {} });
+    const env = RegistryV2.getForRegister(SchemaRegistryIndex, inst.constructor)
+      .registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns: '', fields: {} });
     env.fields[prop] = (): string | undefined =>
       process.env[[name, ...others].find(x => !!process.env[x])!];
   };

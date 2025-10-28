@@ -1,5 +1,6 @@
 import { AppError, asConstructable, castTo, Class } from '@travetto/runtime';
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistryIndex } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { ModelType } from '../types/model.ts';
 import { ModelRegistry } from './model.ts';
@@ -16,7 +17,7 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
       conf = { store: conf };
     }
     ModelRegistry.register(target, conf);
-    SchemaRegistry.register(target, { baseType: conf.baseType });
+    RegistryV2.getForRegister(SchemaRegistryIndex, target).register({ baseType: conf.baseType });
     return target;
   };
 }

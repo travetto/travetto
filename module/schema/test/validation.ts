@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { RegistryV2, RootRegistry } from '@travetto/registry';
 import { asFull, castTo } from '@travetto/runtime';
-import { SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
+import { SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,
@@ -201,10 +201,10 @@ class Validation {
 
   @Test()
   async verifyMultipleNested() {
-    const schema = SchemaRegistry.getViewSchema(Ccccz);
-    assert(schema.fields.includes('c'));
-    assert(schema.fields.includes('b'));
-    assert(schema.fields.includes('a'));
+    const schema = RegistryV2.get(SchemaRegistryIndex, Ccccz).getView();
+    assert('c' in schema);
+    assert('b' in schema);
+    assert('a' in schema);
   }
 
   @Test()

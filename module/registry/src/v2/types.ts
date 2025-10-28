@@ -1,4 +1,4 @@
-import { castTo, Class, ClassInstance } from '@travetto/runtime';
+import { AppError, castTo, Class, ClassInstance } from '@travetto/runtime';
 import { ChangeEvent } from '../types';
 
 export type ClassOrId = Class | string | ClassInstance;
@@ -42,9 +42,23 @@ export class RegistryItem {
     this.cls = cls;
   }
 
+  readonlyAdapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(
+    index: RegistryIndex<C, M, F>,
+    cls: Class,
+  ): RegistryAdapter<C, M, F> {
+    const value = this.adapters.get(index);
+    if (!value) {
+      throw new AppError(`Class ${cls} is not registered in index ${index.constructor.name}`);
+    }
+    if (!this.finalized) {
+      throw new AppError(`Class ${cls} is not accessible until finalized in index ${index.constructor.name}`);
+    }
+    return castTo(value);
+  }
+
   adapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(
     index: RegistryIndex<C, M, F>,
-    cls: Class
+    cls: Class,
   ): RegistryAdapter<C, M, F> {
     if (!this.adapters.has(index)) {
       const adapter = index.adapter(cls);

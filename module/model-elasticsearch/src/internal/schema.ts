@@ -2,7 +2,8 @@ import { estypes } from '@elastic/elasticsearch';
 
 import { Class, toConcrete } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model';
-import { Point, DataUtil, SchemaRegistry } from '@travetto/schema';
+import { Point, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { EsSchemaConfig } from './types.ts';
 
@@ -75,13 +76,11 @@ export class ElasticsearchSchemaUtil {
    * Build a mapping for a given class
    */
   static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    const schema = SchemaRegistry.getViewSchema(cls);
+    const schema = RegistryV2.get(SchemaRegistryIndex, cls).getView();
 
     const props: Record<string, estypes.MappingProperty> = {};
 
-    for (const field of schema.fields) {
-      const conf = schema.schema[field];
-
+    for (const [field, conf] of Object.entries(schema)) {
       if (conf.type === PointImpl) {
         props[field] = { type: 'geo_point' };
       } else if (conf.type === Number) {
@@ -136,7 +135,7 @@ export class ElasticsearchSchemaUtil {
         props[field] = { type: 'keyword', ...text };
       } else if (conf.type === Object) {
         props[field] = { type: 'object', dynamic: true };
-      } else if (SchemaRegistry.has(conf.type)) {
+      } else if (RegistryV2.has(SchemaRegistryIndex, conf.type)) {
         props[field] = {
           type: conf.array ? 'nested' : 'object',
           ...this.generateSingleMapping(conf.type, config)

@@ -1,5 +1,5 @@
-import { SchemaRegistry } from '@travetto/schema';
-import { Registry } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
+import { Registry, RegistryV2 } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
 
@@ -33,7 +33,7 @@ class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
 
   constructor() {
     // Listen to schema and dependency
-    super(SchemaRegistry, DependencyRegistry);
+    super(DependencyRegistry);
   }
 
   getInitialNameMapping(): Map<string, Class[]> {
@@ -72,8 +72,8 @@ class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
     const config = asFull(this.pending.get(cls.Ⲑid)!);
 
-    const schema = SchemaRegistry.get(cls);
-    const view = schema.totalView.schema;
+    const schema = RegistryV2.getForRegister(SchemaRegistryIndex, cls).get();
+    const view = schema.fields;
     delete view.id.required; // Allow ids to be optional
 
     if (schema.subTypeField in view && this.getBaseModel(cls) !== cls) {

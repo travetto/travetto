@@ -2,7 +2,6 @@ import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/ru
 import { RegistryV2 } from '@travetto/registry';
 
 import { InputConfig, SchemaConfig } from '../service/types.ts';
-import { SchemaRegistry } from '../service/registry.ts';
 import { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 import { Messages } from './messages.ts';
 import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
@@ -219,7 +218,7 @@ export class SchemaValidator {
    * Validate the class level validations
    */
   static async #validateClassLevel<T>(cls: Class<T>, o: T, view?: string): Promise<ValidationError[]> {
-    const schema = SchemaRegistry.get(cls);
+    const schema = RegistryV2.get(SchemaRegistryIndex, cls).get();
     if (!schema) {
       return [];
     }
@@ -257,13 +256,13 @@ export class SchemaValidator {
     if (isClassInstance(o) && !(o instanceof cls || cls.Ⲑid === o.constructor.Ⲑid)) {
       throw new TypeMismatchError(cls.name, o.constructor.name);
     }
-    cls = SchemaRegistry.resolveInstanceType(cls, o);
+    cls = RegistryV2.index(SchemaRegistryIndex).resolveInstanceType(cls, o);
 
-    const config = SchemaRegistry.getViewSchema(cls, view);
+    const config = RegistryV2.get(SchemaRegistryIndex, cls).getView(view);
 
     // Validate using standard behaviors
     const errors = [
-      ...this.#validateSchema(config.fields, o, ''),
+      ...this.#validateSchema(config, o, ''),
       ... await this.#validateClassLevel(cls, o, view)
     ];
     if (errors.length) {
@@ -313,9 +312,11 @@ export class SchemaValidator {
    * @param method The method being invoked
    * @param params The params to validate
    */
-  static async validateMethod<T>(cls: Class<T>, method: string, params: unknown[], prefixes: (string | undefined)[] = []): Promise<void> {
+  static async validateMethod<T>(cls: Class<T>, method: string | symbol, params: unknown[], prefixes: (string | symbol | undefined)[] = []): Promise<void> {
     const errors: ValidationError[] = [];
-    for (const param of RegistryV2.get(SchemaRegistryIndex, cls).getMethod(method).parameters) {
+    const config = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(method);
+
+    for (const param of config.parameters) {
       const i = param.index;
       errors.push(...[
         ... this.#validateFieldSchema(param, params[i]),
@@ -324,12 +325,12 @@ export class SchemaValidator {
         if (param.name && typeof param.name === 'string') {
           x.path = !prefixes[i] ?
             x.path.replace(`${param.name}.`, '') :
-            x.path.replace(param.name, prefixes[i]!);
+            x.path.replace(param.name, prefixes[i]!.toString());
         }
         return x;
       }));
     }
-    for (const validator of SchemaRegistry.getMethodValidators(cls, method)) {
+    for (const validator of config.validators) {
       const res = await validator(...params);
       if (res) {
         if (Array.isArray(res)) {

@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
-import { SchemaRegistry } from '@travetto/schema';
+import { RegistryV2, RootRegistry } from '@travetto/registry';
 import { Controller, ControllerRegistry, Get, PathParam } from '@travetto/web';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 /**
  * Test Controller For Fun
@@ -41,7 +41,7 @@ export class ConfigureTest {
     assert(config.endpoints.length === 1);
 
     const ep = config.endpoints[0];
-    const params = SchemaRegistry.getMethodSchema(ep.class, ep.name);
+    const { parameters: params } = RegistryV2.get(SchemaRegistryIndex, ep.class).getMethod(ep.name);
     assert(ep.httpMethod === 'GET');
     assert(ep.name === 'getUser');
     assert(ep.endpoint === TestController.prototype.getUser);

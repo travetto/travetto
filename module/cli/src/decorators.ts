@@ -1,5 +1,6 @@
 import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
-import { FieldConfig, SchemaRegistry } from '@travetto/schema';
+import { FieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 import { CliCommandRegistry } from './registry.ts';
@@ -99,16 +100,17 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       }
     });
 
-    const pendingCls = SchemaRegistry.getOrCreatePending(target);
+    const adapter = RegistryV2.getForRegister(SchemaRegistryIndex, target);
+    const config = adapter.get();
 
     for (const { name, field: { type, ...field } } of VALID_FIELDS) {
-      SchemaRegistry.registerPendingFieldConfig(target, name, type!, field);
+      adapter.registerField(name, field, { type });
     }
 
     const runtimeModule = cfg.runtimeModule ?? (cfg.with?.module ? 'current' : undefined);
 
     if (runtimeModule) { // Validate module
-      (pendingCls.validators ??= []).push(async ({ module: mod }: Partial<CliCommandShapeFields>) => {
+      (config.validators ??= []).push(async ({ module: mod }: Partial<CliCommandShapeFields>) => {
         const runModule = (runtimeModule === 'command' ? commandModule : mod) || Runtime.main.name;
 
         // If we need to run as a specific module
@@ -144,8 +146,9 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fil
       aliases.push(...cfg.envVars.map(CliParseUtil.toEnvField));
     }
     if (typeof prop === 'string') {
-      SchemaRegistry.registerPendingFieldFacet(target.constructor, prop, {
-        aliases, description: cfg.desc,
+      RegistryV2.getForRegister(SchemaRegistryIndex, target.constructor).registerField(prop, {
+        aliases,
+        description: cfg.desc,
         specifiers: cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : undefined
       });
     }

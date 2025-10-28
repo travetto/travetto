@@ -1,6 +1,7 @@
 import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
 import { ControllerRegistry, EndpointParamConfig, Param } from '@travetto/web';
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistryIndex } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { WebUploadInterceptor } from './interceptor.ts';
 import { WebUploadConfig } from './config.ts';
@@ -19,7 +20,7 @@ const FileMapContract = toConcrete<FileMap>();
  */
 export function Upload(
   param: string | Partial<EndpointParamConfig> & UploadConfig = {},
-): (inst: ClassInstance, prop: string, idx: number) => void {
+): (inst: ClassInstance, prop: string | symbol, idx: number) => void {
 
   if (typeof param === 'string') {
     param = { name: param };
@@ -49,17 +50,17 @@ export function Upload(
     return Param('body', {
       ...finalConf,
       extract: (request, config) => {
-        const field = SchemaRegistry.getMethodSchema(inst.constructor, prop)[idx];
+        const input = RegistryV2.get(SchemaRegistryIndex, inst.constructor).getMethod(prop).parameters[idx];
 
-        if (!field) {
+        if (!input) {
           throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
-        if (!(field.type === Blob || field.type === File || field.type === FileMapContract)) {
-          throw new AppError(`Cannot use upload decorator with ${field.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
+        if (!(input.type === Blob || input.type === File || input.type === FileMapContract)) {
+          throw new AppError(`Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
-        const isMap = field.type === FileMapContract;
+        const isMap = input.type === FileMapContract;
         const map = WebUploadUtil.getRequestUploads(request);
         return isMap ? map : map[config.name!];
       }

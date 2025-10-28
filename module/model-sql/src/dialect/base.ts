@@ -1,8 +1,9 @@
 /* eslint-disable @stylistic/indent */
-import { DataUtil, SchemaRegistry, FieldConfig, Schema, type Point } from '@travetto/schema';
+import { DataUtil, FieldConfig, Schema, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields, ModelQueryUtil } from '@travetto/model-query';
 import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
+import { RegistryV2 } from '@travetto/registry';
 
 import { SQLModelUtil } from '../util.ts';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
@@ -24,6 +25,7 @@ class Total {
 function makeField(name: string, type: Class, required: boolean, extra: Partial<FieldConfig>): FieldConfig {
   return {
     name,
+    owner: null!,
     type,
     array: false,
     ...(required ? { required: { active: true } } : {}),
@@ -160,7 +162,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Identify a name or field (escape it)
    */
-  abstract ident(name: string | FieldConfig): string;
+  abstract ident(name: string | symbol | FieldConfig): string;
 
   quote(text: string): string {
     return `'${text.replace(/[']/g, "''")}'`;
@@ -204,7 +206,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, "''"));
     }
-    throw new AppError(`Unknown value type for field ${conf.name}, ${value}`, { category: 'data' });
+    throw new AppError(`Unknown value type for field ${conf.name.toString()}, ${value}`, { category: 'data' });
   }
 
   /**
@@ -341,7 +343,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Alias a field for usage
    */
-  alias(field: string | FieldConfig, alias: string = this.rootAlias): string {
+  alias(field: string | symbol | FieldConfig, alias: string = this.rootAlias): string {
     return `${alias}.${this.ident(field)}`;
   }
 
@@ -358,7 +360,7 @@ export abstract class SQLDialect implements DialectState {
     const clauses = new Map<string, Alias>();
     let idx = 0;
 
-    SQLModelUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+    SQLModelUtil.visitSchemaSync(RegistryV2.get(SchemaRegistryIndex, cls).get(), {
       onRoot: ({ descend, path }) => {
         const table = resolve(path);
         clauses.set(table, { alias: this.rootAlias, path });
@@ -366,12 +368,12 @@ export abstract class SQLDialect implements DialectState {
       },
       onSub: ({ descend, config, path }) => {
         const table = resolve(path);
-        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
+        clauses.set(table, { alias: `${config.name.toString().charAt(0)}${idx++}`, path });
         return descend();
       },
       onSimple: ({ config, path }) => {
         const table = resolve(path);
-        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
+        clauses.set(table, { alias: `${config.name.toString().charAt(0)}${idx++}`, path });
       }
     });
 
@@ -406,10 +408,11 @@ export abstract class SQLDialect implements DialectState {
         throw new Error(`Unknown field: ${key}`);
       }
       const sStack = [...stack, field];
-      if (key in foreignMap && field.array && !SchemaRegistry.has(field.type)) {
+      if (key in foreignMap && field.array && !RegistryV2.has(SchemaRegistryIndex, field.type)) {
         // If dealing with simple external
         sStack.push({
           name: field.name,
+          owner: null!,
           type: field.type
         });
       }
@@ -633,7 +636,7 @@ ${this.getLimitSQL(cls, query)}`;
     const config = stack.at(-1)!;
     const parent = stack.length > 1;
     const array = parent && config.array;
-    const fields = SchemaRegistry.has(config.type) ?
+    const fields = RegistryV2.has(SchemaRegistryIndex, config.type) ?
       [...SQLModelUtil.getFieldsByLocation(stack).local] :
       (array ? [castTo<FieldConfig>(config)] : []);
 
@@ -688,7 +691,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getCreateAllTablesSQL(cls: Class): string[] {
     const out: string[] = [];
-    SQLModelUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+    SQLModelUtil.visitSchemaSync(RegistryV2.get(SchemaRegistryIndex, cls).get(), {
       onRoot: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
       onSub: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
       onSimple: ({ path }) => out.push(this.getCreateTableSQL(path))
@@ -727,7 +730,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getDropAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
-    SQLModelUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+    SQLModelUtil.visitSchemaSync(RegistryV2.get(SchemaRegistryIndex, cls).get(), {
       onRoot: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
       onSub: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
       onSimple: ({ path }) => out.push(this.getDropTableSQL(path))
@@ -740,7 +743,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
-    SQLModelUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+    SQLModelUtil.visitSchemaSync(RegistryV2.get(SchemaRegistryIndex, cls).get(), {
       onRoot: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
       onSub: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
       onSimple: ({ path }) => out.push(this.getTruncateTableSQL(path))
@@ -754,8 +757,8 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']): string | undefined {
     const config = stack.at(-1)!;
     const columns = SQLModelUtil.getFieldsByLocation(stack).local
-      .filter(x => !SchemaRegistry.has(x.type))
-      .toSorted((a, b) => a.name.localeCompare(b.name));
+      .filter(x => !RegistryV2.has(SchemaRegistryIndex, x.type))
+      .toSorted((a, b) => a.name.toString().localeCompare(b.name.toString()));
     const columnNames = columns.map(c => c.name);
 
     const hasParent = stack.length > 1;
@@ -787,7 +790,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return;
     }
 
-    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, castTo<Record<string, unknown>>(inst.value)[c.name])));
+    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, castTo<Record<string | symbol, unknown>>(inst.value)[c.name])));
 
     columnNames.push(this.pathField.name);
     if (hasParent) {
@@ -863,7 +866,7 @@ ${this.getWhereSQL(type, where)};`;
     const config = stack.at(-1)!;
     const orderBy = !config.array ?
       '' :
-      `ORDER BY ${this.rootAlias}.${this.idxField.name} ASC`;
+      `ORDER BY ${this.rootAlias}.${this.idxField.name.toString()} ASC`;
 
     const idField = (stack.length > 1 ? this.parentPathField : this.idField);
 
@@ -891,7 +894,7 @@ ${this.getWhereSQL(cls, where!)}`;
     const buildSet = (children: unknown[], field?: FieldConfig): Record<string, unknown> =>
       SQLModelUtil.collectDependents(this, stack.at(-1)!, children, field);
 
-    await SQLModelUtil.visitSchema(SchemaRegistry.get(cls), {
+    await SQLModelUtil.visitSchema(RegistryV2.get(SchemaRegistryIndex, cls).get(), {
       onRoot: async (config) => {
         const res = buildSet(items); // Already filtered by initial select query
         selectStack.push(select);
@@ -990,10 +993,10 @@ ${this.getWhereSQL(cls, where!)}`;
 
       await Promise.all([
         ...upserts.filter(x => x.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string, string>>(v.value)[idx]))
+          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string | symbol, string>>(v.value)[idx]))
         ),
         ...updates.filter(x => x.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string, string>>(v.value)[idx]))
+          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string | symbol, string>>(v.value)[idx]))
         ),
       ]);
     }

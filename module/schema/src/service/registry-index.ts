@@ -22,6 +22,13 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     this.#baseSchema.delete(cls);
   }
 
+  #finalize(cls: Class): ClassConfig {
+    const parent = this.getParentClass(cls);
+    const parentConfig = parent ? this.get(parent) : undefined;
+    this.adapter(cls).finalize(parentConfig);
+    return this.get(cls);
+  }
+
   #recomputeSubTypes(): void {
     this.#subTypes.clear();
     const all = RegistryV2.getAll(SchemaRegistryIndex);
@@ -61,6 +68,11 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
         this.#onAdded(event);
       }
     }
+    for (const event of events) {
+      if (event.type === 'added' || event.type === 'changed') {
+        this.#finalize(event.curr);
+      }
+    }
     this.#recomputeSubTypes();
   }
 
@@ -68,8 +80,11 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     return new SchemaAdapter(cls);
   }
 
-  get(cls: ClassOrId): ClassConfig {
-    return RegistryV2.get(SchemaRegistryIndex, cls).get();
+  get(cls: ClassOrId, finalizedOnly = true): ClassConfig {
+    return (finalizedOnly ?
+      RegistryV2.get(SchemaRegistryIndex, cls) :
+      RegistryV2.getForRegister(SchemaRegistryIndex, cls)
+    ).get();
   }
 
   has(cls: ClassOrId): boolean {
@@ -196,12 +211,5 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
         onField(field, _path);
       }
     }
-  }
-
-  onInstallFinalize(cls: Class): ClassConfig {
-    const parent = this.getParentClass(cls);
-    const parentConfig = parent ? this.get(parent) : undefined;
-    this.adapter(cls).finalize(parentConfig);
-    return this.get(cls);
   }
 }

@@ -26,7 +26,10 @@ class $Registry {
     return item;
   }
 
-  #adapter<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(indexCls: T, cls: Class): ReturnType<InstanceType<T>['adapter']> {
+  #adapter<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+    indexCls: T,
+    cls: Class,
+  ): ReturnType<InstanceType<T>['adapter']> {
     if (!this.#indexes.has(indexCls)) {
       this.#indexes.set(indexCls, new indexCls());
     }
@@ -39,6 +42,20 @@ class $Registry {
     }
     this.#itemsByIndex.get(indexCls)!.set(cls, item);
     return castTo(this.#item(cls).adapter(index, cls));
+  }
+
+  #readonlyAdapter<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+    indexCls: T,
+    cls: Class,
+  ): Extract<ReturnType<InstanceType<T>['adapter']>, 'get' | `get${string}`> {
+    if (!this.#indexes.has(indexCls)) {
+      throw new AppError(`Class ${cls} is not registered in index ${indexCls}`);
+    }
+    if (!this.#indexes.get(indexCls)!.has(cls)) {
+      throw new AppError(`Class ${cls} is not registered in index ${indexCls}`);
+    }
+    const index: RegistryIndex<C, M, F> = castTo(this.#indexes.get(indexCls));
+    return castTo(this.#item(cls).readonlyAdapter(index, cls));
   }
 
   #removeItem(cls: Class): void {
@@ -126,12 +143,20 @@ class $Registry {
     return this.#initialized ??= this.#init();
   }
 
-  get<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  getForRegister<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
     indexCls: T,
     clsOrId: ClassOrId
   ): ReturnType<InstanceType<T>['adapter']> {
     const cls = this.#toCls(clsOrId);
     return this.#adapter(indexCls, cls);
+  }
+
+  get<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+    indexCls: T,
+    clsOrId: ClassOrId
+  ): Omit<ReturnType<InstanceType<T>['adapter']>, `register${string}` | 'finalize'> {
+    const cls = this.#toCls(clsOrId);
+    return this.#readonlyAdapter(indexCls, cls);
   }
 
   getAll<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(

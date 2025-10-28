@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
-import { Schema, SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { RegistryV2, RootRegistry } from '@travetto/registry';
+import { Schema, SchemaRegistryIndex, SchemaValidator } from '@travetto/schema';
 
 @Schema()
 export class OptionalAsUnion {
@@ -60,18 +60,18 @@ class EdgeCases {
 
   @Test()
   async testEmpty() {
-    const cfg = SchemaRegistry.getViewSchema(WithEmptyObject);
+    const cfg = RegistryV2.get(SchemaRegistryIndex, WithEmptyObject).getView();
     assert(cfg);
-    assert(cfg.fields.includes('empty'));
-    assert(cfg.schema.empty.type === Object);
+    assert('empty' in cfg);
+    assert(cfg.empty.type === Object);
   }
 
   @Test()
   async testSingle() {
-    const cfg = SchemaRegistry.getViewSchema(SingleField);
+    const cfg = RegistryV2.get(SchemaRegistryIndex, SingleField).getView();
     assert(cfg);
-    assert(cfg.fields.includes('single'));
-    assert(cfg.schema.single.type !== Object);
-    assert(SchemaRegistry.getViewSchema(cfg.schema.single.type).schema.field.type === Number);
+    assert('single' in cfg);
+    assert(cfg.single.type !== Object);
+    assert(RegistryV2.get(SchemaRegistryIndex, cfg.single.type).getView().field.type === Number);
   }
 }

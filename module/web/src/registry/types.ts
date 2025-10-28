@@ -1,5 +1,5 @@
 import type { Any, Class, TypedFunction } from '@travetto/runtime';
-import type { FieldConfig, ClassConfig } from '@travetto/schema';
+import type { FieldConfig, ClassConfig, InputConfig, ParameterConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
@@ -218,8 +218,8 @@ export interface ControllerVisitor<T = unknown> {
   onControllerStart?(controller: ControllerConfig): Promise<unknown> | unknown;
   onControllerEnd?(controller: ControllerConfig): Promise<unknown> | unknown;
 
-  onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: FieldConfig[]): Promise<unknown> | unknown;
-  onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: FieldConfig[]): Promise<unknown> | unknown;
+  onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: ParameterConfig[]): Promise<unknown> | unknown;
+  onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: ParameterConfig[]): Promise<unknown> | unknown;
 
   onSchema?(schema: ClassConfig): Promise<unknown> | unknown;
 

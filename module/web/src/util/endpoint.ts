@@ -1,7 +1,7 @@
 import { asConstructable, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
-import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, ParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
-import { RetargettingProxy } from '@travetto/registry';
+import { RegistryV2, RetargettingProxy } from '@travetto/registry';
 
 import { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
@@ -84,7 +84,7 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(request: WebRequest, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(request: WebRequest, param: EndpointParamConfig, field: ParameterConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
@@ -116,8 +116,8 @@ export class EndpointUtil {
     const vals = WebCommonUtil.getRequestParams(request);
 
     try {
-      const fields = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(request, c, fields[i], vals?.[i]));
+      const { parameters } = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(method);
+      const extracted = endpoint.params.map((c, i) => this.extractParameter(request, c, parameters[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;

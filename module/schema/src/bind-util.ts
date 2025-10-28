@@ -184,7 +184,7 @@ export class BindUtil {
       } else {
         let viewConf: SchemaConfig = conf.fields;
         if (view) {
-          viewConf = RegistryV2.get(SchemaRegistryIndex, cons).getView(view);
+          viewConf = adapter.getView(view);
           if (!viewConf) {
             throw new Error(`View not found: ${view.toString()}`);
           }
@@ -244,7 +244,7 @@ export class BindUtil {
 
           if (field.accessor) {
             Object.defineProperty(obj, schemaFieldName, {
-              ...RegistryV2.get(SchemaRegistryIndex, cons).getAccessorDescriptor(schemaFieldName),
+              ...adapter.getAccessorDescriptor(schemaFieldName),
               enumerable: true
             });
           }

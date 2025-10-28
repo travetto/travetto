@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Schema, SchemaRegistry, ValidationResultError, Validator } from '@travetto/schema';
+import { Schema, SchemaRegistryIndex, ValidationResultError, Validator } from '@travetto/schema';
 import { Controller, Post, Get, ControllerRegistry, WebResponse, PathParam, QueryParam, HttpMethod } from '@travetto/web';
+import { RegistryV2 } from '@travetto/registry';
 
 import { BaseWebSuite } from './base.ts';
 
@@ -252,7 +253,7 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyShapeClass() {
     const ep = getEndpoint('/classShape/:shape', 'GET');
     assert(ep.responseType);
-    assert(SchemaRegistry.has(ep.responseType!.type));
+    assert(RegistryV2.has(SchemaRegistryIndex, ep.responseType!.type));
   }
 
   @Test()

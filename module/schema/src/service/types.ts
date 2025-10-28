@@ -21,6 +21,10 @@ export interface DescribableConfig {
    * List of examples
    */
   examples?: string[];
+  /**
+   * Metadata that is related to the schema structure
+   */
+  metadata?: Record<symbol, unknown>;
 }
 
 /**
@@ -31,7 +35,6 @@ export interface MethodConfig extends DescribableConfig {
    * The parameters of the method
    */
   parameters: ParameterConfig[];
-
   /**
    * Validators to run for th method
    */
@@ -88,10 +91,6 @@ export interface ClassConfig extends DescribableConfig {
    * The field the subtype is determined by
    */
   subTypeField: string;
-  /**
-   * Metadata that is related to the schema structure
-   */
-  metadata?: Record<symbol, unknown>;
   /**
    * Method configs
    */

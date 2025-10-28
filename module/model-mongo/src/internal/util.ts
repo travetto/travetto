@@ -5,7 +5,8 @@ import {
 import { AppError, castTo, Class, toConcrete, TypedObject } from '@travetto/runtime';
 import { type DistanceUnit, type PageableModelQuery, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
-import { DataUtil, SchemaRegistry, type Point } from '@travetto/schema';
+import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 const PointImpl = toConcrete<Point>();
 
@@ -80,14 +81,14 @@ export class MongoUtil {
 
   /**/
   static extractSimple<T>(base: Class<T> | undefined, o: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
-    const schema = base ? SchemaRegistry.get(base) : undefined;
+    const schema = base ? RegistryV2.get(SchemaRegistryIndex, base).getView() : undefined;
     const out: Record<string, unknown> = {};
     const sub = o;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;
       const v: Record<string, unknown> = castTo(sub[key]);
-      const subField = schema?.totalView.schema[key];
+      const subField = schema?.[key];
 
       const isPlain = v && DataUtil.isPlainObject(v);
       const firstKey = isPlain ? Object.keys(v)[0] : '';
@@ -152,7 +153,7 @@ export class MongoUtil {
   static getExtraIndices<T extends ModelType>(cls: Class<T>): BasicIdx[] {
     const out: BasicIdx[] = [];
     const textFields: string[] = [];
-    SchemaRegistry.visitFields(cls, (field, path) => {
+    RegistryV2.index(SchemaRegistryIndex).visitFields(cls, (field, path) => {
       if (field.type === PointImpl) {
         const name = [...path, field].map(x => x.name).join('.');
         out.push({ [name]: '2d' });
