@@ -10,7 +10,6 @@ export type RegistryIndexClass<C extends {} = {}, M extends {} = {}, F extends {
 export interface RegistryIndex<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
   process(events: ChangeEvent<Class>[]): void;
   adapter(cls: Class): RegistryAdapter<C, M, F>;
-  has(cls: ClassOrId): boolean;
 }
 
 /**
@@ -24,7 +23,7 @@ export interface RegistryAdapter<C extends {} = {}, M extends {} = {}, F extends
   unregister(): void;
   finalize(): void;
 
-  get(): C;
+  getClass(): C;
   getField(field: string | symbol): F;
   getMethod(method: string | symbol): M;
 }

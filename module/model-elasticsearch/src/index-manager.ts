@@ -1,7 +1,7 @@
 import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
-import { ModelRegistry, ModelType, ModelStorageSupport } from '@travetto/model';
+import { ModelRegistryIndex, ModelType, ModelStorageSupport } from '@travetto/model';
 import { SchemaChange } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config.ts';
@@ -24,7 +24,7 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   getStore(cls: Class): string {
-    return ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
+    return ModelRegistryIndex.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
   }
 
   /**
@@ -98,7 +98,7 @@ export class IndexManager implements ModelStorageSupport {
    * Build an index if missing
    */
   async createIndexIfMissing(cls: Class): Promise<void> {
-    cls = ModelRegistry.getBaseModel(cls);
+    cls = ModelRegistryIndex.getBaseModel(cls);
     const ident = this.getIdentity(cls);
     try {
       await this.#client.search(ident);
@@ -186,7 +186,7 @@ export class IndexManager implements ModelStorageSupport {
 
       await this.#client.indices.putMapping({
         index,
-        body: schema
+        ...schema,
       });
     }
   }

@@ -5,7 +5,7 @@ import { SuiteRegistry, TestFixtures } from '@travetto/test';
 
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
-import { ModelRegistry } from '../../src/registry/model.ts';
+import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
 const Loaded = Symbol();
 
@@ -38,8 +38,8 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
         if (ModelStorageUtil.isSupported(service)) {
           await service.createStorage();
           if (service.createModel) {
-            await Promise.all(ModelRegistry.getClasses()
-              .filter(x => x === ModelRegistry.getBaseModel(x))
+            await Promise.all(ModelRegistryIndex.getClasses()
+              .filter(x => x === ModelRegistryIndex.getBaseModel(x))
               .map(m => service.createModel!(m)));
           }
         }
@@ -51,7 +51,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       async function (this: T) {
         const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
         if (ModelStorageUtil.isSupported(service)) {
-          const models = ModelRegistry.getClasses().filter(m => m === ModelRegistry.getBaseModel(m));
+          const models = ModelRegistryIndex.getClasses().filter(m => m === ModelRegistryIndex.getBaseModel(m));
 
           if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
             await service.truncateBlob();
@@ -74,8 +74,8 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
         const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
         if (ModelStorageUtil.isSupported(service)) {
           if (service.deleteModel) {
-            for (const m of ModelRegistry.getClasses()) {
-              if (m === ModelRegistry.getBaseModel(m)) {
+            for (const m of ModelRegistryIndex.getClasses()) {
+              if (m === ModelRegistryIndex.getBaseModel(m)) {
                 await service.deleteModel(m);
               }
             }

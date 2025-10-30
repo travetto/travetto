@@ -54,6 +54,14 @@ export function toConcrete<T extends unknown>(): Class<T> {
 }
 
 /**
+ * Find parent class for a given class object
+ */
+export function getParentClass(cls: Class): Class | null {
+  const parent: Class = Object.getPrototypeOf(cls);
+  return parent.name && parent !== Object ? parent : null;
+}
+
+/**
  * Range of bytes, inclusive
  */
 export type ByteRange = { start: number, end?: number };

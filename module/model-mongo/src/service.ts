@@ -7,7 +7,7 @@ import {
 } from 'mongodb';
 
 import {
-  ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
+  ModelRegistryIndex, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
   NotFoundError, ExistsError, ModelBlobSupport,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil,
@@ -128,7 +128,7 @@ export class MongoModelService implements
 
   async establishIndices<T extends ModelType>(cls: Class<T>): Promise<void> {
     const col = await this.getStore(cls);
-    const creating = MongoUtil.getIndices(cls, ModelRegistry.get(cls).indices);
+    const creating = MongoUtil.getIndices(cls, ModelRegistryIndex.getClassConfig(cls).indices);
     if (creating.length) {
       console.debug('Creating indexes', { indices: creating });
       for (const el of creating) {
@@ -158,7 +158,7 @@ export class MongoModelService implements
    * Get mongo collection
    */
   async getStore<T extends ModelType>(cls: Class<T>): Promise<Collection<T>> {
-    return this.#db.collection(ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
+    return this.#db.collection(ModelRegistryIndex.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
   }
 
   // Crud
@@ -430,7 +430,7 @@ export class MongoModelService implements
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
-    const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     const where = this.getWhereFilter(
       cls,

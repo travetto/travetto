@@ -35,7 +35,7 @@ export async function selectConsumer(inst: { format?: string }) {
 
   const cls = inst.constructor;
 
-  SchemaRegistryIndex.getForRegister(castTo(cls)).get().fields.format.enum = {
+  SchemaRegistryIndex.getForRegister(castTo(cls)).getClass().fields.format.enum = {
     message: `{path} is only allowed to be "${types.join('" or "')}"`,
     values: types
   };

@@ -2,7 +2,7 @@ import { estypes } from '@elastic/elasticsearch';
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { WhereClause, SelectClause, SortClause, Query, ModelQueryUtil } from '@travetto/model-query';
-import { IndexConfig, ModelType, ModelRegistry } from '@travetto/model';
+import { IndexConfig, ModelType, ModelRegistryIndex } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types.ts';
@@ -209,7 +209,7 @@ export class ElasticsearchQueryUtil {
     if (search && Object.keys(search).length) {
       clauses.push(search);
     }
-    const { expiresAt, subType } = ModelRegistry.get(cls);
+    const { expiresAt, subType } = ModelRegistryIndex.getClassConfig(cls);
     if (checkExpiry && expiresAt) {
       clauses.push({
         bool: {
@@ -222,7 +222,7 @@ export class ElasticsearchQueryUtil {
       });
     }
     if (subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.get(cls).get();
+      const { subTypeField, subTypeName } = SchemaRegistryIndex.getClassConfig(cls);
       clauses.push({
         term: { [subTypeField]: { value: subTypeName! } }
       });

@@ -152,7 +152,7 @@ export class MongoUtil {
   static getExtraIndices<T extends ModelType>(cls: Class<T>): BasicIdx[] {
     const out: BasicIdx[] = [];
     const textFields: string[] = [];
-    SchemaRegistryIndex.instance().visitFields(cls, (field, path) => {
+    SchemaRegistryIndex.visitFields(cls, (field, path) => {
       if (field.type === PointImpl) {
         const name = [...path, field].map(x => x.name).join('.');
         out.push({ [name]: '2d' });

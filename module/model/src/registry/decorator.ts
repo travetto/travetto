@@ -2,8 +2,8 @@ import { AppError, asConstructable, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelType } from '../types/model.ts';
-import { ModelRegistry } from './model.ts';
 import { DataHandler, IndexConfig, ModelOptions, PrePersistScope } from './types.ts';
+import { ModelRegistryIndex } from './registry-index.ts';
 
 /**
  * Model decorator, extends `@Schema`
@@ -15,7 +15,7 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
     if (typeof conf === 'string') {
       conf = { store: conf };
     }
-    ModelRegistry.register(target, conf);
+    ModelRegistryIndex.getForRegister(target).register(conf);
     SchemaRegistryIndex.getForRegister(target).register({ baseType: conf.baseType });
     return target;
   };
@@ -29,7 +29,7 @@ export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
     throw new AppError('Cannot create an index with the id field');
   }
   return function (target: Class<T>): void {
-    ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
+    ModelRegistryIndex.getForRegister(target).register({ indices });
   };
 }
 
@@ -39,7 +39,7 @@ export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K): void => {
-    ModelRegistry.register(asConstructable(tgt).constructor, { expiresAt: prop });
+    ModelRegistryIndex.getForRegister(asConstructable(tgt).constructor).register({ expiresAt: prop });
   };
 }
 
@@ -48,7 +48,7 @@ export function ExpiresAt() {
  */
 export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 'all') {
   return function (tgt: Class<T>): void {
-    ModelRegistry.registerDataHandlers(tgt, {
+    ModelRegistryIndex.getForRegister(tgt).register({
       prePersist: [{
         scope,
         handler: castTo(handler)
@@ -62,7 +62,7 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
  */
 export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(tgt: C, prop: K): void {
-    ModelRegistry.registerDataHandlers(asConstructable(tgt).constructor, {
+    ModelRegistryIndex.getForRegister(asConstructable(tgt).constructor).register({
       prePersist: [{
         scope,
         handler: (inst): void => {
@@ -79,7 +79,7 @@ export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PreP
  */
 export function Transient<T>() {
   return function <K extends string, C extends Partial<Record<K, T>>>(tgt: C, prop: K): void {
-    ModelRegistry.registerDataHandlers(asConstructable(tgt).constructor, {
+    ModelRegistryIndex.getForRegister(asConstructable(tgt).constructor).register({
       prePersist: [{
         scope: 'all',
         handler: (inst): void => {
@@ -96,6 +96,6 @@ export function Transient<T>() {
  */
 export function PostLoad<T>(handler: DataHandler<T>) {
   return function (tgt: Class<T>): void {
-    ModelRegistry.registerDataHandlers(tgt, { postLoad: [castTo(handler)] });
+    ModelRegistryIndex.getForRegister(tgt).register({ postLoad: [castTo(handler)] });
   };
 }

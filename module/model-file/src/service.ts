@@ -9,7 +9,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
-  ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
+  ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistryIndex,
   NotFoundError, OptionalId, ExistsError, ModelBlobSupport,
   ModelCrudUtil, ModelExpiryUtil, ModelBlobUtil
 } from '@travetto/model';
@@ -66,7 +66,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async #resolveName<T extends ModelType>(cls: Class<T> | string, suffix?: Suffix, id?: string): Promise<string> {
-    const name = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
+    const name = typeof cls === 'string' ? cls : ModelRegistryIndex.getStore(cls);
     let resolved = path.resolve(this.config.folder, this.config.namespace, name);
     if (id) {
       resolved = path.resolve(resolved, id.replace(/^[/]/, '').substring(0, 3));
@@ -94,7 +94,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   checkExpiry<T extends ModelType>(cls: Class<T>, item: T): T {
-    const { expiresAt } = ModelRegistry.get(cls);
+    const { expiresAt } = ModelRegistryIndex.getClassConfig(cls);
     if (expiresAt && ModelExpiryUtil.getExpiryState(cls, item).expired) {
       throw new NotFoundError(cls, item.id);
     }

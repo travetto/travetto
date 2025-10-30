@@ -1,4 +1,4 @@
-import { ModelRegistry, ModelType } from '@travetto/model';
+import { ModelRegistryIndex, ModelType } from '@travetto/model';
 import { castTo, Class, hasFunction } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -27,12 +27,12 @@ export class ModelQuerySuggestUtil {
    * Build suggest query on top of query language
    */
   static getSuggestQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>): Query<T> {
-    const config = ModelRegistry.get(cls);
+    const config = ModelRegistryIndex.getClassConfig(cls);
     const limit = query?.limit ?? 10;
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
     if (config.subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.get(cls).get();
+      const { subTypeField, subTypeName } = SchemaRegistryIndex.getClassConfig(cls);
       clauses.push({ [subTypeField]: subTypeName });
     }
 
@@ -84,12 +84,12 @@ export class ModelQuerySuggestUtil {
    * Build suggestion query
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
-    const config = ModelRegistry.get(cls);
+    const config = ModelRegistryIndex.getClassConfig(cls);
     return this.getSuggestQuery<T>(cls, castTo(field), prefix, {
       ...(query ?? {}),
       select: castTo({
         [field]: true, ...(config.subType ? {
-          [SchemaRegistryIndex.get(cls).get().subTypeField]: true
+          [SchemaRegistryIndex.get(cls).getClass().subTypeField]: true
         } : {})
       })
     });

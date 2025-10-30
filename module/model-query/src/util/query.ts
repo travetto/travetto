@@ -1,5 +1,5 @@
 import { Class, AppError, TimeUtil, castTo, hasFunction } from '@travetto/runtime';
-import { ModelType, ModelRegistry, NotFoundError } from '@travetto/model';
+import { ModelType, NotFoundError, ModelRegistryIndex } from '@travetto/model';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WhereClause, WhereClauseRaw } from '../model/where-clause.ts';
@@ -56,9 +56,9 @@ export class ModelQueryUtil {
   static getWhereClause<T extends ModelType>(cls: Class<T>, q: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
     const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
 
-    const conf = ModelRegistry.get(cls);
+    const conf = ModelRegistryIndex.getClassConfig(cls);
     if (conf.subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.get(cls).get();
+      const { subTypeField, subTypeName } = SchemaRegistryIndex.getClassConfig(cls);
       clauses.push(castTo({ [subTypeField]: subTypeName }));
     }
     if (checkExpiry && conf.expiresAt) {

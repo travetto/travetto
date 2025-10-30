@@ -2,7 +2,7 @@ import { createClient } from '@redis/client';
 
 import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
-  ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
+  ModelCrudSupport, ModelExpirySupport, ModelRegistryIndex, ModelType, ModelStorageSupport,
   NotFoundError, ExistsError, ModelIndexedSupport, OptionalId,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
 } from '@travetto/model';
@@ -27,7 +27,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   constructor(config: RedisModelConfig) { this.config = config; }
 
   #resolveKey(cls: Class | string, id?: string, extra?: string): string {
-    let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
+    let key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStore(cls);
     if (id) {
       key = `${key}:${id}`;
     }
@@ -71,7 +71,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
-    for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
+    for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
       const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
       const fullKey = this.#resolveKey(cls, idx.name, key);
       switch (idx.type) {
@@ -82,7 +82,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
-    for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
+    for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
       const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
       const fullKey = this.#resolveKey(cls, idx.name, key);
 
@@ -95,7 +95,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async #store<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'delete'): Promise<void> {
     const key = this.#resolveKey(cls, item.id);
-    const config = ModelRegistry.get(cls);
+    const config = ModelRegistryIndex.getClassConfig(cls);
     const existing = await this.get(cls, item.id).catch(() => undefined);
 
     // Store with indices
@@ -149,7 +149,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body);
     const fullKey = this.#resolveKey(cls, idxCfg.name, key);
     let id: string | undefined;
@@ -172,8 +172,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     await this.client.connect();
     await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onGracefulShutdown(() => this.client.destroy());
-    for (const el of ModelRegistry.getClasses()) {
-      for (const idx of ModelRegistry.get(el).indices ?? []) {
+    for (const el of ModelRegistryIndex.getClasses()) {
+      for (const idx of ModelRegistryIndex.getClassConfig(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
             console.error('Unique indices are not supported in redis for', { cls: el.Ⲑid, idx: idx.name });
@@ -309,7 +309,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     let stream: AsyncIterable<string[]>;
 

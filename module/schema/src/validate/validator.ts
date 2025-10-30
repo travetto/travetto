@@ -14,7 +14,7 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  * @param o The value to use for the polymorphic check
  */
 function resolveSchema<T>(base: Class<T>, o: T): SchemaConfig {
-  const target = SchemaRegistryIndex.instance().resolveInstanceType(base, o);
+  const target = SchemaRegistryIndex.resolveInstanceType(base, o);
   return SchemaRegistryIndex.get(target).getView();
 }
 
@@ -217,7 +217,7 @@ export class SchemaValidator {
    * Validate the class level validations
    */
   static async #validateClassLevel<T>(cls: Class<T>, o: T, view?: string): Promise<ValidationError[]> {
-    const schema = SchemaRegistryIndex.get(cls).get();
+    const schema = SchemaRegistryIndex.getClassConfig(cls);
     if (!schema) {
       return [];
     }
@@ -255,7 +255,7 @@ export class SchemaValidator {
     if (isClassInstance(o) && !(o instanceof cls || cls.Ⲑid === o.constructor.Ⲑid)) {
       throw new TypeMismatchError(cls.name, o.constructor.name);
     }
-    cls = SchemaRegistryIndex.instance().resolveInstanceType(cls, o);
+    cls = SchemaRegistryIndex.resolveInstanceType(cls, o);
 
     const config = SchemaRegistryIndex.get(cls).getView(view);
 

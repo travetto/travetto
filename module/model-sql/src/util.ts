@@ -1,6 +1,6 @@
 import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
-import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
+import { ModelRegistryIndex, ModelType, OptionalId } from '@travetto/model';
 import { ClassConfig, FieldConfig, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types.ts';
@@ -54,7 +54,7 @@ export class SQLModelUtil {
    */
   static getFieldsByLocation(stack: VisitStack[]): FieldCacheEntry {
     const top = stack.at(-1)!;
-    const conf = SchemaRegistryIndex.get(top.type).get();
+    const conf = SchemaRegistryIndex.getClassConfig(top.type);
 
     if (conf && this.#schemaFieldsCache.has(conf.class)) {
       return this.#schemaFieldsCache.get(conf.class)!;
@@ -68,14 +68,14 @@ export class SQLModelUtil {
       };
     }
 
-    const model = ModelRegistry.get(conf.class)!;
+    const model = ModelRegistryIndex.getClassConfig(conf.class)!;
     const fields = Object.values(conf.fields).map(field => ({ ...field }));
 
     // Polymorphic
     if (model && (model.baseType ?? model.subType)) {
       const fieldMap = new Set(fields.map(f => f.name));
-      for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(conf.class))) {
-        const typeConf = SchemaRegistryIndex.get(type).get();
+      for (const type of ModelRegistryIndex.getClassesByBaseType(conf.class)) {
+        const typeConf = SchemaRegistryIndex.getClassConfig(type);
         for (const [fieldName, field] of Object.entries<FieldConfig>(typeConf.fields)) {
           if (!fieldMap.has(fieldName)) {
             fieldMap.add(fieldName);
@@ -161,7 +161,7 @@ export class SQLModelUtil {
    */
   static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T | OptionalId<T>, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>): void {
     const pathObj: unknown[] = [instance];
-    this.visitSchemaSync(SchemaRegistryIndex.get(cls).get(), {
+    this.visitSchemaSync(SchemaRegistryIndex.getClassConfig(cls), {
       onRoot: (config) => {
         const { path } = config;
         path[0].name = instance.id!;
@@ -221,7 +221,7 @@ export class SQLModelUtil {
       if (typeof k === 'string' && !DataUtil.isPlainObject(select[k]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
-            toGet = new Set(Object.keys(SchemaRegistryIndex.get(cls).get().fields));
+            toGet = new Set(Object.keys(SchemaRegistryIndex.getClassConfig(cls).fields));
           }
           toGet.delete(k);
         } else {
@@ -237,7 +237,7 @@ export class SQLModelUtil {
    */
   static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
     return sort.map((cl: Record<string, unknown>) => {
-      let schema: ClassConfig = SchemaRegistryIndex.get(cls).get();
+      let schema: ClassConfig = SchemaRegistryIndex.getClassConfig(cls);
       const stack = this.classToStack(cls);
       let found: OrderBy | undefined;
       while (!found) {
@@ -249,7 +249,7 @@ export class SQLModelUtil {
           found = { stack, asc: val === 1 };
         } else {
           stack.push(field);
-          schema = SchemaRegistryIndex.get(field.type).get();
+          schema = SchemaRegistryIndex.getClassConfig(field.type);
           cl = castTo(val);
         }
       }
@@ -295,7 +295,7 @@ export class SQLModelUtil {
   static buildTable(list: VisitStack[]): string {
     const top = list.at(-1)!;
     if (!top[TableSymbol]) {
-      top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
+      top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistryIndex.getStore(el.type) : el.name).join('_');
     }
     return top[TableSymbol]!;
   }

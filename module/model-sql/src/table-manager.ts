@@ -1,13 +1,14 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
-import { ModelRegistry } from '@travetto/model';
+import { ModelRegistryIndex } from '@travetto/model';
 import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 import { SchemaChange } from '@travetto/schema';
 
 import { Connected, Transactional } from './connection/decorator.ts';
 import { SQLDialect } from './dialect/base.ts';
-import { SQLModelUtil, VisitStack } from './util.ts';
+import { SQLModelUtil } from './util.ts';
 import { Connection } from './connection/base.ts';
+import { VisitStack } from './types.ts';
 
 /**
  * Manage creation/updating of all tables
@@ -34,7 +35,7 @@ export class TableManager {
     for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
       out.push(op);
     }
-    const indices = ModelRegistry.get(cls).indices;
+    const indices = ModelRegistryIndex.getClassConfig(cls).indices;
     if (indices) {
       for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         out.push(op);
@@ -53,7 +54,7 @@ export class TableManager {
     for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
       await this.#exec(op);
     }
-    const indices = ModelRegistry.get(cls).indices;
+    const indices = ModelRegistryIndex.getClassConfig(cls).indices;
     if (indices) {
       for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {

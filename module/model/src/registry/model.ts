@@ -72,7 +72,7 @@ class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
     const config = asFull(this.pending.get(cls.Ⲑid)!);
 
-    const schema = SchemaRegistryIndex.getForRegister(cls).get();
+    const schema = SchemaRegistryIndex.getForRegister(cls).getClass();
     const view = schema.fields;
     delete view.id.required; // Allow ids to be optional
 

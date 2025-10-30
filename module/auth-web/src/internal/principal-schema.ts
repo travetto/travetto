@@ -14,5 +14,5 @@ export class PrincipalSchema implements Principal {
 }
 
 SchemaRegistryIndex.getForRegister(toConcrete<Principal>()).register(
-  SchemaRegistryIndex.get(PrincipalSchema).get()
+  SchemaRegistryIndex.get(PrincipalSchema).getClass()
 );

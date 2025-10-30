@@ -1,7 +1,9 @@
+import { EventEmitter } from 'node:events';
 import { AppError, castTo, Class, ClassInstance, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
 import { RegistryItem, RegistryIndex, RegistryIndexClass, ClassOrId } from './types';
+import { ChangeEvent } from '../types';
 
 class $Registry {
 
@@ -15,6 +17,13 @@ class $Registry {
   #itemsByIndex = new Map<RegistryIndexClass, Map<Class, RegistryItem>>();
   #changeSource = new ClassSource();
   #indexes = new Map<RegistryIndexClass, RegistryIndex>();
+
+  #emitter = new EventEmitter<{ event: [ChangeEvent<Class>] }>();
+
+  #matchesEvent(event: ChangeEvent<Class>, matches: RegistryIndexClass): boolean {
+    return ('curr' in event && this.has(matches, event.curr)) ||
+      ('prev' in event && this.has(matches, event.prev));
+  }
 
   #item(cls: Class): RegistryItem {
     let item = this.#items.get(cls);
@@ -48,10 +57,7 @@ class $Registry {
     indexCls: T,
     cls: Class,
   ): Extract<ReturnType<InstanceType<T>['adapter']>, 'get' | `get${string}`> {
-    if (!this.#indexes.has(indexCls)) {
-      throw new AppError(`Class ${cls} is not registered in index ${indexCls}`);
-    }
-    if (!this.#indexes.get(indexCls)!.has(cls)) {
+    if (!this.has(indexCls, cls)) {
       throw new AppError(`Class ${cls} is not registered in index ${indexCls}`);
     }
     const index: RegistryIndex<C, M, F> = castTo(this.#indexes.get(indexCls));
@@ -99,10 +105,13 @@ class $Registry {
           this.#finalizeItems([e.curr]);
         }
         for (const index of this.#indexes.values()) { // Visit every index
-          if (('curr' in e && index.has(e.curr)) || ('prev' in e && index.has(e.prev))) {
+          if (this.#matchesEvent(e, castTo(index.constructor))) {
             index.process([e]);
           }
         }
+
+        this.#emitter.emit('event', e);
+
         if (e.type === 'removing' || e.type === 'changed') {
           this.#removeItem(e.prev);
         }
@@ -180,6 +189,17 @@ class $Registry {
   ): boolean {
     const cls = this.#toCls(clsOrId);
     return this.#itemsByIndex.get(indexCls)?.has(cls) ?? false;
+  }
+
+  /**
+   * Listen for changes
+   */
+  listen(handler: (event: ChangeEvent<Class>) => void, matches?: RegistryIndexClass): void {
+    this.#emitter.on('event', (event) => {
+      if (!matches || this.#matchesEvent(event, matches)) {
+        handler(event);
+      }
+    });
   }
 }
 

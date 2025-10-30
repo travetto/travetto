@@ -2,11 +2,11 @@ import { castTo, Class, DeepPartial, hasFunction, TypedObject } from '@travetto/
 
 import { IndexNotSupported } from '../error/invalid-index.ts';
 import { NotFoundError } from '../error/not-found.ts';
-import { ModelRegistry } from '../registry/model.ts';
 import type { IndexConfig } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
 import type { ModelIndexedSupport } from '../types/indexed.ts';
 import type { ModelType, OptionalId } from '../types/model.ts';
+import { ModelRegistryIndex } from '../registry/registry-index.ts';
 
 type ComputeConfig = {
   includeSortInFields?: boolean;
@@ -38,7 +38,7 @@ export class ModelIndexedUtil {
   static computeIndexParts<T extends ModelType>(
     cls: Class<T>, idx: IndexConfig<T> | string, item: DeepPartial<T>, opts: ComputeConfig = {}
   ): { fields: IndexFieldPart[], sorted: IndexSortPart | undefined } {
-    const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
+    const cfg = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
     const sortField = cfg.type === 'sorted' ? cfg.fields.at(-1) : undefined;
 
     const fields: IndexFieldPart[] = [];
@@ -115,7 +115,7 @@ export class ModelIndexedUtil {
   ): { type: string, key: string, sort?: number | Date } {
     const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(opts ?? {}), includeSortInFields: false });
     const key = fields.map(({ value }) => value).map(x => `${x}`).join(opts?.sep ?? DEFAULT_SEP);
-    const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
+    const cfg = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
     return !sorted ? { type: cfg.type, key } : { type: cfg.type, key, sort: sorted.value };
   }
 

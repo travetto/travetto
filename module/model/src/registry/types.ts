@@ -56,11 +56,11 @@ export class ModelOptions<T extends ModelType = ModelType> {
   /**
    * Does the model support expiry
    */
-  expiresAt: string;
+  expiresAt?: string;
   /**
    * Auto create in development mode
    */
-  autoCreate: boolean;
+  autoCreate?: boolean;
   /**
    * Pre-persist handlers
    */

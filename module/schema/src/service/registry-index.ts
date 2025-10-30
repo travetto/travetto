@@ -1,5 +1,5 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { FieldConfig, ClassConfig, MethodConfig } from './types.ts';
 import { SchemaAdapter } from './registry-adapter.ts';
@@ -23,16 +23,28 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     return RegistryV2.get(this, clsOrId);
   }
 
+  static getClassConfig(clsOrId: ClassOrId): ClassConfig {
+    return RegistryV2.get(this, clsOrId).getClass();
+  }
+
   static getAll(): Class[] {
     return RegistryV2.getAll(this);
   }
 
-  static instance(): SchemaRegistryIndex {
-    return RegistryV2.instance(this);
-  }
-
   static has(clsOrId: ClassOrId): boolean {
     return RegistryV2.has(this, clsOrId);
+  }
+
+  static getSubTypesForClass(cls: Class): Class[] | undefined {
+    return RegistryV2.instance(this).getSubTypesForClass(cls);
+  }
+
+  static resolveInstanceType<T>(cls: Class<T>, o: T): Class {
+    return RegistryV2.instance(this).resolveInstanceType(cls, o);
+  }
+
+  static visitFields<T>(cls: Class<T>, onField: (field: FieldConfig, path: FieldConfig[]) => void): void {
+    return RegistryV2.instance(this).visitFields(cls, onField);
   }
 
   #baseSchema = new Map<Class, Class>();
@@ -43,10 +55,10 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
   }
 
   #finalize(cls: Class): ClassConfig {
-    const parent = this.getParentClass(cls);
-    const parentConfig = parent ? this.get(parent) : undefined;
+    const parent = getParentClass(cls);
+    const parentConfig = parent ? this.getClassConfig(parent) : undefined;
     this.adapter(cls).finalize(parentConfig);
-    return this.get(cls);
+    return this.getClassConfig(cls);
   }
 
   #recomputeSubTypes(): void {
@@ -58,10 +70,12 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
   }
 
   #onChanged(event: ChangeEvent<Class> & { type: 'changed' }): void {
-    SchemaChangeListener.emitFieldChanges({
-      type: 'changed',
-      curr: this.get(event.curr),
-      prev: this.get(event.prev)
+    Util.queueMacroTask().then(() => {
+      SchemaChangeListener.emitFieldChanges({
+        type: 'changed',
+        curr: this.getClassConfig(event.curr),
+        prev: this.getClassConfig(event.prev)
+      });
     });
     this.#removeClassData(event.prev);
   }
@@ -72,9 +86,11 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
   }
 
   #onAdded(event: ChangeEvent<Class> & { type: 'added' }): void {
-    SchemaChangeListener.emitFieldChanges({
-      type: 'added',
-      curr: this.get(event.curr)
+    Util.queueMacroTask().then(() => {
+      SchemaChangeListener.emitFieldChanges({
+        type: 'added',
+        curr: this.getClassConfig(event.curr)
+      });
     });
   }
 
@@ -100,23 +116,8 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     return new SchemaAdapter(cls);
   }
 
-  get(cls: ClassOrId, finalizedOnly = true): ClassConfig {
-    return (finalizedOnly ?
-      SchemaRegistryIndex.get(cls) :
-      SchemaRegistryIndex.getForRegister(cls)
-    ).get();
-  }
-
-  has(cls: ClassOrId): boolean {
-    return SchemaRegistryIndex.has(cls);
-  }
-
-  /**
-   * Find parent class for a given class object
-   */
-  getParentClass(cls: Class): Class | null {
-    const parent: Class = Object.getPrototypeOf(cls);
-    return parent.name && parent !== Object ? parent : null;
+  getClassConfig(cls: ClassOrId): ClassConfig {
+    return SchemaRegistryIndex.get(cls).getClass();
   }
 
   /**
@@ -124,12 +125,12 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
    */
   getBaseSchema(cls: Class): Class {
     if (!this.#baseSchema.has(cls)) {
-      let conf = this.get(cls);
+      let conf = this.getClassConfig(cls);
       let parent = cls;
 
       while (conf && !conf.baseType) {
-        parent = this.getParentClass(parent)!;
-        conf = this.get(parent);
+        parent = getParentClass(parent)!;
+        conf = this.getClassConfig(parent);
       }
 
       this.#baseSchema.set(cls, conf ? parent : cls);
@@ -143,11 +144,11 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
    * @param o Actual instance
    */
   resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    cls = this.get(cls.Ⲑid).class; // Resolve by id to handle any stale references
+    cls = this.getClassConfig(cls.Ⲑid).class; // Resolve by id to handle any stale references
 
     const base = this.getBaseSchema(cls);
-    const clsSchema = this.get(cls);
-    const baseSchema = this.get(base);
+    const clsSchema = this.getClassConfig(cls);
+    const baseSchema = this.getClassConfig(base);
 
     if (clsSchema.subTypeName || baseSchema.baseType) { // We have a sub type
       const type = castTo<string>(o[castKey<T>(baseSchema.subTypeField)]) ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
@@ -177,7 +178,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
    */
   registerSubTypes(cls: Class, name?: string): void {
     // Mark as subtype
-    const config = (this.get(cls) ?? this.get(cls));
+    const config = (this.getClassConfig(cls) ?? this.getClassConfig(cls));
     let base: Class | undefined = this.getBaseSchema(cls);
 
     if (!this.#subTypes.has(base)) {
@@ -185,14 +186,14 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     }
 
     if (base !== cls || config.baseType) {
-      config.subTypeField = (this.get(base) ?? this.get(base)).subTypeField;
+      config.subTypeField = (this.getClassConfig(base) ?? this.getClassConfig(base)).subTypeField;
       config.subTypeName = name ?? config.subTypeName ?? classToSubTypeName(cls);
       this.#subTypes.get(base)!.set(config.subTypeName!, cls);
     }
     if (base !== cls) {
       while (base && base.Ⲑid) {
         this.#subTypes.get(base)!.set(config.subTypeName!, cls);
-        const parent = this.getParentClass(base);
+        const parent = getParentClass(base);
         base = parent ? this.getBaseSchema(parent) : undefined;
       }
     }
@@ -205,13 +206,13 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
    * @param path The path within the object hierarchy
    */
   trackSchemaDependencies(cls: Class, curr: Class = cls, path: FieldConfig[] = []): void {
-    const config = this.get(curr);
+    const config = this.getClassConfig(curr);
 
-    SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
+    SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.getClassConfig(cls));
 
     // Read children
     for (const field of Object.values(config.fields)) {
-      if (this.has(field.type) && field.type !== cls) {
+      if (SchemaRegistryIndex.has(field.type) && field.type !== cls) {
         this.trackSchemaDependencies(cls, field.type, [...path, field]);
       }
     }
@@ -221,11 +222,11 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
    * Visit fields recursively
    */
   visitFields<T>(cls: Class<T>, onField: (field: FieldConfig, path: FieldConfig[]) => void, _path: FieldConfig[] = [], root = cls): void {
-    const fields = this.has(cls) ?
-      Object.values(this.get(cls).fields) :
+    const fields = SchemaRegistryIndex.has(cls) ?
+      Object.values(this.getClassConfig(cls).fields) :
       [];
     for (const field of fields) {
-      if (this.has(field.type)) {
+      if (SchemaRegistryIndex.has(field.type)) {
         this.visitFields(field.type, onField, [..._path, field], root);
       } else {
         onField(field, _path);

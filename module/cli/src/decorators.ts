@@ -100,7 +100,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     });
 
     const adapter = SchemaRegistryIndex.getForRegister(target);
-    const config = adapter.get();
+    const config = adapter.getClass();
 
     for (const { name, field: { type, ...field } } of VALID_FIELDS) {
       adapter.registerField(name, field, { type });

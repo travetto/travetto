@@ -6,7 +6,7 @@ import {
 import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
-  ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
+  ModelCrudSupport, ModelExpirySupport, ModelRegistryIndex, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError, ExistsError,
   IndexNotSupported, OptionalId,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
@@ -37,7 +37,7 @@ function toValue(val: unknown): AttributeValue | undefined {
 
 async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: string): Promise<T> {
   const item = await ModelCrudUtil.load(cls, doc);
-  if (ModelRegistry.get(cls).expiresAt) {
+  if (ModelRegistryIndex.getClassConfig(cls).expiresAt) {
     const expiry = ModelExpiryUtil.getExpiryState(cls, item);
     if (!expiry.expired) {
       return item;
@@ -61,7 +61,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   constructor(config: DynamoDBModelConfig) { this.config = config; }
 
   #resolveTable(cls: Class): string {
-    let table = ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
+    let table = ModelRegistryIndex.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
     if (this.config.namespace) {
       table = `${this.config.namespace}_${table}`;
     }
@@ -69,7 +69,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
-    const config = ModelRegistry.get(cls);
+    const config = ModelRegistryIndex.getClassConfig(cls);
     let expiry: number | undefined;
 
     if (config.expiresAt) {
@@ -147,7 +147,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   #computeIndexConfig<T extends ModelType>(cls: Class<T>): { indices?: GlobalSecondaryIndex[], attributes: AttributeDefinition[] } {
-    const config = ModelRegistry.get(cls);
+    const config = ModelRegistryIndex.getClassConfig(cls);
     const attributes: AttributeDefinition[] = [];
     const indices: GlobalSecondaryIndex[] = [];
 
@@ -215,7 +215,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       GlobalSecondaryIndexes: idx.indices
     });
 
-    if (ModelRegistry.get(cls).expiresAt) {
+    if (ModelRegistryIndex.getClassConfig(cls).expiresAt) {
       await this.client.updateTimeToLive({
         TableName: table,
         TimeToLiveSpecification: { AttributeName: EXP_ATTR, Enabled: true }
@@ -259,7 +259,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async deleteStorage(): Promise<void> {
-    for (const model of ModelRegistry.getClasses()) {
+    for (const model of ModelRegistryIndex.getClasses()) {
       await this.client.deleteTable({
         TableName: this.#resolveTable(model)
       }).catch(() => { });
@@ -288,7 +288,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     item = await ModelCrudUtil.preStore(cls, item, this);
-    if (ModelRegistry.get(cls).expiresAt) {
+    if (ModelRegistryIndex.getClassConfig(cls).expiresAt) {
       await this.get(cls, item.id);
     }
     await this.#putItem(cls, item.id, item, 'update');
@@ -360,7 +360,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body);
 
@@ -405,7 +405,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const cfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const cfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, cfg, body, { emptySortValue: null });
 
     const idxName = simpleName(idx);

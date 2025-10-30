@@ -1,7 +1,7 @@
 import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
-  NotFoundError, ModelRegistry, ExistsError, OptionalId, ModelIdSource,
+  NotFoundError, ModelRegistryIndex, ExistsError, OptionalId, ModelIdSource,
   ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
 import { castTo, Class } from '@travetto/runtime';
@@ -243,7 +243,7 @@ export class SQLModelService implements
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
     const { records: res } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
-    if (ModelRegistry.has(cls)) {
+    if (ModelRegistryIndex.has(cls)) {
       await this.#dialect.fetchDependents(cls, res, query && query.select);
     }
 

@@ -144,7 +144,7 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = SchemaRegistryIndex.instance().resolveInstanceType<T>(cons, asFull<T>(data));
+    const cls = SchemaRegistryIndex.resolveInstanceType<T>(cons, asFull<T>(data));
     if (data instanceof cls) {
       return castTo(data);
     } else {
@@ -173,7 +173,7 @@ export class BindUtil {
 
     if (!!data && isInstance<T>(data)) {
       const adapter = SchemaRegistryIndex.get(cons);
-      const conf = adapter.get();
+      const conf = adapter.getClass();
 
       // If no configuration
       if (!conf) {

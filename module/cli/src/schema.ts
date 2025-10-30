@@ -1,5 +1,6 @@
-import { castKey, castTo, Class } from '@travetto/runtime';
+import { castKey, castTo, Class, getParentClass } from '@travetto/runtime';
 import { BindUtil, InputConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { CliCommandRegistry } from './registry.ts';
 import { ParsedState, CliCommandInput, CliCommandSchema, CliCommandShape } from './types.ts';
@@ -52,10 +53,10 @@ export class CliCommandSchemaUtil {
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
     const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
 
-    const schemaIndex = SchemaRegistryIndex.instance();
+    const schemaIndex = RegistryV2.instance(SchemaRegistryIndex);
 
     // Ensure finalized
-    const parent = schemaIndex.getParentClass(cls);
+    const parent = getParentClass(cls);
     if (parent?.Ⲑid) {
       schemaIndex.process([{ type: 'added', curr: parent }]);
     }
@@ -100,7 +101,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const fullSchema = SchemaRegistryIndex.get(cls).get();
+    const fullSchema = SchemaRegistryIndex.get(cls).getClass();
     const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getByClass(cls)!;
     const cfg: CliCommandSchema = {
       ...meta,

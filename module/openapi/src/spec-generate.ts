@@ -92,7 +92,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const out: Record<string, unknown> = {};
     // Handle nested types
     if (SchemaRegistryIndex.has(field.type)) {
-      const id = this.#nameResolver.getName(SchemaRegistryIndex.get(field.type).get());
+      const id = this.#nameResolver.getName(SchemaRegistryIndex.getClassConfig(field.type));
       // Exposing
       this.#schemas[id] = this.#allSchemas[id];
       out.$ref = `${DEFINITION}/${id}`;
@@ -195,7 +195,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const typeId = this.#nameResolver.getName(type);
 
     if (!this.#allSchemas[typeId]) {
-      const config = SchemaRegistryIndex.get(cls).get();
+      const config = SchemaRegistryIndex.get(cls).getClass();
       if (config) {
         this.#allSchemas[typeId] = {
           title: config.title || config.description,
@@ -209,19 +209,19 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
         for (const fieldName of Object.keys(def.fields)) {
           if (SchemaRegistryIndex.has(def.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistryIndex.get(def.fields[fieldName].type).get());
+            this.onSchema(SchemaRegistryIndex.get(def.fields[fieldName].type).getClass());
           }
           properties[fieldName] = this.#processSchemaField(def.fields[fieldName], required);
         }
 
         const extra: Record<string, unknown> = {};
         if (describeFunction(cls)?.abstract) {
-          const map = SchemaRegistryIndex.instance().getSubTypesForClass(cls);
+          const map = SchemaRegistryIndex.getSubTypesForClass(cls);
           if (map) {
             extra.oneOf = map
               .filter(x => !describeFunction(x)?.abstract)
               .map(c => {
-                this.onSchema(SchemaRegistryIndex.get(c).get());
+                this.onSchema(SchemaRegistryIndex.get(c).getClass());
                 return this.#getType(c);
               });
           }
@@ -252,7 +252,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: ''
       };
     } else {
-      const cls = SchemaRegistryIndex.get(body.type).get();
+      const cls = SchemaRegistryIndex.get(body.type).getClass();
       const typeId = cls ? this.#nameResolver.getName(cls) : body.type.name;
       const typeRef = cls ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {

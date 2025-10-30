@@ -2,8 +2,8 @@ import { Client, errors, estypes } from '@elastic/elasticsearch';
 
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
-  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry, OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
+  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistryIndex, OptionalId,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
 import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
 import { SchemaChange, BindUtil } from '@travetto/schema';
@@ -95,7 +95,7 @@ export class ElasticsearchModelService implements
 
     item = await ModelCrudUtil.load(cls, item);
 
-    const { expiresAt } = ModelRegistry.get(cls);
+    const { expiresAt } = ModelRegistryIndex.getClassConfig(cls);
 
     if (expiresAt) {
       const expiry = ModelExpiryUtil.getExpiryState(cls, item);
@@ -167,7 +167,7 @@ export class ElasticsearchModelService implements
         ...this.manager.getIdentity(cls),
         id,
         refresh: true,
-        body: clean
+        body: castTo<T & { id: never }>(clean)
       });
 
       return this.postUpdate(clean, id);
@@ -184,7 +184,7 @@ export class ElasticsearchModelService implements
 
     const id = this.preUpdate(o);
 
-    if (ModelRegistry.get(cls).expiresAt) {
+    if (ModelRegistryIndex.getClassConfig(cls).expiresAt) {
       await this.get(cls, id);
     }
 
@@ -193,7 +193,7 @@ export class ElasticsearchModelService implements
       id,
       op_type: 'index',
       refresh: true,
-      body: o
+      body: castTo<T & { id: never }>(o)
     });
 
     return this.postUpdate(o, id);
@@ -209,10 +209,8 @@ export class ElasticsearchModelService implements
       ...this.manager.getIdentity(cls),
       id,
       refresh: true,
-      body: {
-        doc: item,
-        doc_as_upsert: true
-      }
+      doc: item,
+      doc_as_upsert: true
     });
 
     return this.postUpdate(item, id);
@@ -230,9 +228,7 @@ export class ElasticsearchModelService implements
         ...this.manager.getIdentity(cls),
         id,
         refresh: true,
-        body: {
-          script
-        }
+        script,
       });
     } catch (err) {
       if (err instanceof Error && /document_missing_exception/.test(err.message)) {
@@ -385,7 +381,7 @@ export class ElasticsearchModelService implements
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    const cfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const cfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     let search = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,
@@ -455,7 +451,7 @@ export class ElasticsearchModelService implements
     }
     query.where = where;
 
-    if (ModelRegistry.get(cls).expiresAt) {
+    if (ModelRegistryIndex.getClassConfig(cls).expiresAt) {
       await this.get(cls, id);
     }
 
@@ -545,17 +541,15 @@ export class ElasticsearchModelService implements
 
     const q = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
 
-    const search = {
-      body: {
-        query: q.query ?? { ['match_all']: {} },
-        aggs: { [field]: { terms: { field, size: 100 } } }
-      },
+    const search: estypes.SearchRequest = {
+      query: q.query ?? { ['match_all']: {} },
+      aggs: { [field]: { terms: { field, size: 100 } } },
       size: 0
     };
 
     const result = await this.execSearch(cls, search);
     const { buckets } = castTo<estypes.AggregationsStringTermsAggregate>('buckets' in result.aggregations![field] ? result.aggregations![field] : { buckets: [] });
-    const out = Array.isArray(buckets) ? buckets.map(b => ({ key: b.key, count: b.doc_count })) : [];
+    const out = Array.isArray(buckets) ? buckets.map(b => ({ key: b.key!.toString(), count: b.doc_count })) : [];
     return out;
   }
 }

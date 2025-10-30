@@ -199,7 +199,7 @@ export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig,
     }
   }
 
-  get(): ClassConfig {
+  getClass(): ClassConfig {
     return this.#config;
   }
 

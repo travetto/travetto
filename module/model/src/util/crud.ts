@@ -1,7 +1,7 @@
 import { castTo, Class, Util, asConstructable, AppError, hasFunction } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
-import { ModelRegistry } from '../registry/model.ts';
+import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
 import { NotFoundError } from '../error/not-found.ts';
 import { ExistsError } from '../error/exists.ts';
@@ -47,7 +47,7 @@ export class ModelCrudUtil {
       resolvedInput = input;
     }
 
-    const result = ModelRegistry.getBaseModel(cls).from(resolvedInput);
+    const result = ModelRegistryIndex.getBaseModel(cls).from(resolvedInput);
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
       if (onTypeMismatch === 'notfound') {
@@ -75,7 +75,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = ModelRegistry.get(asConstructable(item).constructor);
+    const config = ModelRegistryIndex.get(asConstructable(item).constructor).getClass();
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
     }
@@ -105,7 +105,7 @@ export class ModelCrudUtil {
    * Ensure subtype is not supported
    */
   static ensureNotSubType(cls: Class): void {
-    if (ModelRegistry.get(cls).subType) {
+    if (ModelRegistryIndex.get(cls).getClass().subType) {
       throw new SubTypeNotSupportedError(cls);
     }
   }
@@ -114,7 +114,7 @@ export class ModelCrudUtil {
    * Pre persist behavior
    */
   static async prePersist<T>(cls: Class<T>, item: T, scope: PrePersistScope): Promise<T> {
-    const config = ModelRegistry.get(cls);
+    const config = ModelRegistryIndex.get(cls).getClass();
     for (const state of (config.prePersist ?? [])) {
       if (state.scope === scope || scope === 'all' || state.scope === 'all') {
         const handler: DataHandler<T> = castTo(state.handler);
@@ -131,7 +131,7 @@ export class ModelCrudUtil {
    * Post load behavior
    */
   static async postLoad<T>(cls: Class<T>, item: T): Promise<T> {
-    const config = ModelRegistry.get(cls);
+    const config = ModelRegistryIndex.get(cls).getClass();
     for (const handler of castTo<DataHandler<T>[]>(config.postLoad ?? [])) {
       item = await handler(item) ?? item;
     }

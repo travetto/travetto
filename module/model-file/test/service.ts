@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { TimeUtil } from '@travetto/runtime';
-import { ModelRegistry } from '@travetto/model';
+import { ModelRegistryIndex } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { FileModelConfig, FileModelService } from '@travetto/model-file';
 
@@ -39,7 +39,7 @@ export class FileExpirySuite extends ModelExpirySuite {
   async ensureCulled() {
     const service = await this.service;
     const config = await DependencyRegistry.getInstance(this.configClass);
-    const store = ModelRegistry.getStore(ExpiryUser);
+    const store = ModelRegistryIndex.getStore(ExpiryUser);
     const folder = `${config.folder}/${config.namespace}/${store}`;
 
     const countFiles = () => fs.stat(folder)
