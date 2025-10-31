@@ -6,7 +6,7 @@ export type FunctionMetadata = FunctionMetadataTag & {
   import: string;
   module: string;
   modulePath: string;
-  methods?: Record<string, FunctionMetadataTag>;
+  methods?: Record<string | symbol, FunctionMetadataTag>;
   class?: boolean;
   abstract?: boolean;
 };

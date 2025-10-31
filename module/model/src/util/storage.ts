@@ -33,7 +33,7 @@ export class ModelStorageUtil {
 
     // If listening for model add/removes/updates
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
-      RegistryV2.listen(ev => {
+      RegistryV2.onClassChange(ev => {
         switch (ev.type) {
           case 'added': checkType(ev.curr) ? storage.createModel?.(ev.curr) : undefined; break;
           case 'changed': checkType(ev.curr, false) ? storage.changeModel?.(ev.curr) : undefined; break;

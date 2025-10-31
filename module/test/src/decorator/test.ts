@@ -1,7 +1,7 @@
 import { ClassInstance } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../registry/suite.ts';
 import { TestConfig, ThrowableError } from '../model/test.ts';
+import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * The `@AssertCheck` indicates that a function's assert calls should be transformed
@@ -21,16 +21,12 @@ export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description?: string | Partial<TestConfig>, ...rest: Partial<TestConfig>[]): MethodDecorator {
-  const extra: Partial<TestConfig> = {};
-  const descriptionString = (description && typeof description !== 'string') ?
-    Object.assign(extra, description).description :
-    description;
-
-  for (const r of [...rest, { description: descriptionString }]) {
-    Object.assign(extra, r);
-  }
   return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistry.registerField(inst.constructor, descriptor.value, extra);
+    SuiteRegistryIndex.getForRegister(inst.constructor).registerMethod(prop, descriptor.value,
+      ...(typeof description !== 'string' && description) ? [description] : [],
+      ...rest,
+      ...(typeof description === 'string') ? [{ description }] : []
+    );
     return descriptor;
   };
 }
@@ -41,7 +37,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
  */
 export function ShouldThrow(state: ThrowableError): MethodDecorator {
   return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistry.registerField(inst.constructor, descriptor.value, { shouldThrow: state });
+    SuiteRegistryIndex.getForRegister(inst.constructor).registerMethod(prop, descriptor.value, { shouldThrow: state });
     return descriptor;
   };
 }
@@ -52,7 +48,7 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
  */
 export function Timeout(ms: number): MethodDecorator {
   return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistry.registerField(inst.constructor, descriptor.value, { timeout: ms });
+    SuiteRegistryIndex.getForRegister(inst.constructor).registerMethod(prop, descriptor.value, { timeout: ms });
     return descriptor;
   };
 }

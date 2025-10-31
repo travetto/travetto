@@ -1,8 +1,8 @@
 import { AssertionError } from 'node:assert';
 
 import { Env, TimeUtil, Runtime, castTo } from '@travetto/runtime';
+import { RegistryV2 } from '@travetto/registry';
 
-import { SuiteRegistry } from '../registry/suite.ts';
 import { TestConfig, TestResult, TestRun } from '../model/test.ts';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
 import { TestConsumerShape } from '../consumer/types.ts';
@@ -13,6 +13,7 @@ import { TestPhaseManager } from './phase.ts';
 import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
 import { ExecutionError } from './error.ts';
+import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
 
@@ -55,7 +56,7 @@ export class TestExecutor {
    * This method should never throw under any circumstances.
    */
   async #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
-    const suite = SuiteRegistry.get(test.class);
+    const suite = SuiteRegistryIndex.getClassConfig(test.class);
 
     // Ensure all the criteria below are satisfied before moving forward
     return Barrier.awaitOperation(test.timeout || TEST_TIMEOUT, async () => {
@@ -251,10 +252,10 @@ export class TestExecutor {
     }
 
     // Initialize registry (after loading the above)
-    await SuiteRegistry.init();
+    await RegistryV2.init();
 
     // Convert inbound arguments to specific tests to run
-    const suites = SuiteRegistry.getSuiteTests(run);
+    const suites = SuiteRegistryIndex.getSuiteTests(run);
     if (!suites.length) {
       console.warn('Unable to find suites for ', run);
     }

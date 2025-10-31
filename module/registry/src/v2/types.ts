@@ -20,8 +20,7 @@ export interface RegistryAdapter<C extends {} = {}, M extends {} = {}, F extends
   register(...data: Partial<C>[]): C;
   registerField(field: string | symbol, ...data: Partial<F>[]): F;
   registerMethod(method: string | symbol, ...data: Partial<M>[]): M;
-  unregister(): void;
-  finalize(): void;
+  finalize(parent?: C): void;
 
   getClass(): C;
   getField(field: string | symbol): F;

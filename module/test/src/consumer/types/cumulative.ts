@@ -6,8 +6,8 @@ import type { TestConsumerShape } from '../types.ts';
 import type { TestEvent } from '../../model/event.ts';
 import type { TestResult } from '../../model/test.ts';
 import type { SuiteResult } from '../../model/suite.ts';
-import { SuiteRegistry } from '../../registry/suite.ts';
 import { DelegatingConsumer } from './delegating.ts';
+import { SuiteRegistryIndex } from '../../registry/registry-index.ts';
 
 /**
  * Cumulative Summary consumer
@@ -30,7 +30,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     // Was only loading to verify existence (TODO: double-check)
     if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
       (this.#state[test.classId] ??= {})[test.methodName] = test.status;
-      const SuiteCls = SuiteRegistry.getClasses().find(x => x.Ⲑid === test.classId);
+      const SuiteCls = SuiteRegistryIndex.getClasses().find(x => x.Ⲑid === test.classId);
       return SuiteCls ? this.computeTotal(SuiteCls) : this.removeClass(test.classId);
     } else {
       return this.removeClass(test.classId);
@@ -51,7 +51,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    * Compute totals
    */
   computeTotal(cls: Class): SuiteResult {
-    const suite = SuiteRegistry.get(cls);
+    const suite = SuiteRegistryIndex.getClassConfig(cls);
     const total = suite.tests.reduce((acc, x) => {
       const status = this.#state[x.classId][x.methodName] ?? 'unknown';
       acc[status] += 1;

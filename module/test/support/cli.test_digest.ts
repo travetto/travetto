@@ -1,7 +1,8 @@
 import { CliCommand } from '@travetto/cli';
 import { Env, Runtime, describeFunction } from '@travetto/runtime';
+import { RegistryV2 } from '@travetto/registry';
 
-import { SuiteRegistry } from '../src/registry/suite.ts';
+import { SuiteRegistryIndex } from '../src/registry/registry-index.ts';
 import { RunnerUtil } from '../src/execute/util.ts';
 
 @CliCommand({ hidden: true })
@@ -24,11 +25,11 @@ export class TestDigestCommand {
       }
     }
 
-    await SuiteRegistry.init();
+    await RegistryV2.init();
 
-    const suites = SuiteRegistry.getClasses();
+    const suites = SuiteRegistryIndex.getClasses();
     const all = suites
-      .map(c => SuiteRegistry.get(c))
+      .map(c => SuiteRegistryIndex.getClassConfig(c))
       .filter(c => !describeFunction(c.class).abstract)
       .flatMap(c => c.tests);
 

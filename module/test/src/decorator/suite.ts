@@ -1,7 +1,7 @@
 import { castTo, Class, ClassInstance, describeFunction } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../registry/suite.ts';
 import { SuiteConfig } from '../model/suite.ts';
+import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 
@@ -14,47 +14,56 @@ export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassDecorator {
-  const extra: Partial<SuiteConfig> = {};
-  const descriptionString = description && typeof description !== 'string' ?
-    Object.assign(extra, description).description :
-    description;
-
-  for (const r of rest) {
-    Object.assign(extra, r);
-  }
-
   const dec = (target: Class): typeof target => {
-    const cfg = { description: descriptionString, ...extra };
-    if (describeFunction(target).abstract) {
-      cfg.skip = true;
-    }
-    SuiteRegistry.register(target, cfg);
+    const isAbstract = describeFunction(target).abstract;
+    SuiteRegistryIndex.getForRegister(target).register(
+      ...(typeof description !== 'string' && description ? [description] : []),
+      ...rest,
+      ...isAbstract ? [{ skip: true }] : [],
+      ...(typeof description === 'string' ? [{ description }] : []),
+    );
     return target;
   };
 
   return castTo(dec);
 }
 
-function listener(phase: SuitePhase) {
+/**
+ * Registers function to run before any tests are run
+ */
+export function BeforeAll() {
   return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
+    SuiteRegistryIndex.getForRegister(inst.constructor).register(descriptor.value, { beforeAll: [descriptor.value] });
     return descriptor;
   };
 }
 
 /**
- * Registers function to run before any tests are run
- */
-export const BeforeAll = listener.bind(null, 'beforeAll');
-/**
  * Registers function to run before each test is run
  */
-export const BeforeEach = listener.bind(null, 'beforeEach');
+export function BeforeEach() {
+  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(inst.constructor).register(descriptor.value, { beforeEach: [descriptor.value] });
+    return descriptor;
+  };
+}
+
 /**
  * Registers function to run after all tests are run
  */
-export const AfterAll = listener.bind(null, 'afterAll');
+export function AfterAll() {
+  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(inst.constructor).register(descriptor.value, { afterAll: [descriptor.value] });
+    return descriptor;
+  };
+}
+
 /**
  * Registers function to run after each test is run
  */
-export const AfterEach = listener.bind(null, 'afterEach');
+export function AfterEach() {
+  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(inst.constructor).register(descriptor.value, { afterEach: [descriptor.value] });
+    return descriptor;
+  };
+}

@@ -1,7 +1,7 @@
 import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
-import { FieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { FieldConfig, SchemaRegistryIndex, ValidationError } from '@travetto/schema';
 
-import { CliCommandShape, CliCommandShapeFields } from './types.ts';
+import { CliCommandShape } from './types.ts';
 import { CliCommandRegistry } from './registry.ts';
 import { CliModuleUtil } from './module.ts';
 import { CliParseUtil } from './parse.ts';
@@ -100,7 +100,6 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     });
 
     const adapter = SchemaRegistryIndex.getForRegister(target);
-    const config = adapter.getClass();
 
     for (const { name, field: { type, ...field } } of VALID_FIELDS) {
       adapter.registerField(name, field, { type });
@@ -109,21 +108,23 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     const runtimeModule = cfg.runtimeModule ?? (cfg.with?.module ? 'current' : undefined);
 
     if (runtimeModule) { // Validate module
-      (config.validators ??= []).push(async ({ module: mod }: Partial<CliCommandShapeFields>) => {
-        const runModule = (runtimeModule === 'command' ? commandModule : mod) || Runtime.main.name;
+      adapter.register({
+        validators: [async ({ module: mod }): Promise<ValidationError | undefined> => {
+          const runModule = (runtimeModule === 'command' ? commandModule : mod) || Runtime.main.name;
 
-        // If we need to run as a specific module
-        if (runModule !== Runtime.main.name) {
-          try {
-            RuntimeIndex.reinitForModule(runModule);
-          } catch {
-            return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: '.' };
+          // If we need to run as a specific module
+          if (runModule !== Runtime.main.name) {
+            try {
+              RuntimeIndex.reinitForModule(runModule);
+            } catch {
+              return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: '.' };
+            }
           }
-        }
 
-        if (!(await CliModuleUtil.moduleHasDependency(runModule, commandModule))) {
-          return { source: 'flag', message: `${runModule} does not have ${commandModule} as a dependency`, kind: 'custom', path: '.' };
-        }
+          if (!(await CliModuleUtil.moduleHasDependency(runModule, commandModule))) {
+            return { source: 'flag', message: `${runModule} does not have ${commandModule} as a dependency`, kind: 'custom', path: '.' };
+          }
+        }],
       });
     }
   };

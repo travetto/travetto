@@ -73,7 +73,7 @@ function combineClasses<T extends ClassConfig>(base: T, configs: Partial<T>[], i
   return base;
 }
 
-export class SchemaAdapter implements RegistryAdapter<ClassConfig, MethodConfig, FieldConfig> {
+export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig, MethodConfig, FieldConfig> {
 
   #cls: Class;
   #config: ClassConfig;

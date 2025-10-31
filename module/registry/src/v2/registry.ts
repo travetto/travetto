@@ -4,6 +4,7 @@ import { AppError, castTo, Class, ClassInstance, Util } from '@travetto/runtime'
 import { ClassSource } from '../source/class-source';
 import { RegistryItem, RegistryIndex, RegistryIndexClass, ClassOrId } from './types';
 import { ChangeEvent } from '../types';
+import { MethodSource } from '../source/method-source';
 
 class $Registry {
 
@@ -15,7 +16,8 @@ class $Registry {
   #items: Map<Class, RegistryItem> = new Map();
   #idToCls: Map<string, Class> = new Map();
   #itemsByIndex = new Map<RegistryIndexClass, Map<Class, RegistryItem>>();
-  #changeSource = new ClassSource();
+  #classSource = new ClassSource();
+  #methodSource?: MethodSource;
   #indexes = new Map<RegistryIndexClass, RegistryIndex>();
 
   #emitter = new EventEmitter<{ event: [ChangeEvent<Class>] }>();
@@ -23,6 +25,11 @@ class $Registry {
   #matchesEvent(event: ChangeEvent<Class>, matches: RegistryIndexClass): boolean {
     return ('curr' in event && this.has(matches, event.curr)) ||
       ('prev' in event && this.has(matches, event.prev));
+  }
+
+  #matchesMethodEvent(event: ChangeEvent<[Class, Function]>, matches: RegistryIndexClass): boolean {
+    return ('curr' in event && this.has(matches, event.curr[0])) ||
+      ('prev' in event && this.has(matches, event.prev[0]));
   }
 
   #item(cls: Class): RegistryItem {
@@ -68,7 +75,6 @@ class $Registry {
     const item = this.#items.get(cls);
     if (item) {
       for (const adapter of item.adapters.values()) {
-        adapter.unregister();
         // Remove from itemsByIndex map
         this.#itemsByIndex.get(adapter.indexCls)?.delete(item.cls);
       }
@@ -97,10 +103,10 @@ class $Registry {
         console.debug('Initializing', { uid: this.#uid });
       }
 
-      const added = await this.#changeSource.init();
+      const added = await this.#classSource.init();
       this.#finalizeItems(added);
 
-      this.#changeSource.on(e => {
+      this.#classSource.on(e => {
         if (e.type === 'added' || e.type === 'changed') {
           this.#finalizeItems([e.curr]);
         }
@@ -194,9 +200,25 @@ class $Registry {
   /**
    * Listen for changes
    */
-  listen(handler: (event: ChangeEvent<Class>) => void, matches?: RegistryIndexClass): void {
+  onClassChange(handler: (event: ChangeEvent<Class>) => void, matches?: RegistryIndexClass): void {
     this.#emitter.on('event', (event) => {
       if (!matches || this.#matchesEvent(event, matches)) {
+        handler(event);
+      }
+    });
+  }
+
+  onNonClassChanges(handler: (file: string) => void): void {
+    this.#classSource.onNonClassChanges(handler);
+  }
+
+  onMethodChange(
+    handler: (event: ChangeEvent<[Class, Function]>) => void,
+    matches?: RegistryIndexClass,
+  ): void {
+    const src = this.#methodSource ??= new MethodSource(this.#classSource);
+    src.on(event => {
+      if (!matches || this.#matchesMethodEvent(event, matches)) {
         handler(event);
       }
     });

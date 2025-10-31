@@ -17,7 +17,7 @@ function combineClasses(target: ClassType, sources: Partial<ClassType>[]): Class
   return target;
 }
 
-export class ModelAdapter implements RegistryAdapter<ModelOptions<ModelType>> {
+export class ModelRegistryAdapter implements RegistryAdapter<ModelOptions<ModelType>> {
   #cls: Class;
   #config: ModelOptions<ModelType>;
   indexCls: RegistryIndexClass<ModelOptions<ModelType>>;

@@ -2,7 +2,7 @@ import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/reg
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { FieldConfig, ClassConfig, MethodConfig } from './types.ts';
-import { SchemaAdapter } from './registry-adapter.ts';
+import { SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
 const classToSubTypeName = (cls: Class): string => cls.name
@@ -15,11 +15,11 @@ const classToSubTypeName = (cls: Class): string => cls.name
  */
 export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodConfig, FieldConfig> {
 
-  static getForRegister(clsOrId: ClassOrId): SchemaAdapter {
+  static getForRegister(clsOrId: ClassOrId): SchemaRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static get(clsOrId: ClassOrId): Omit<SchemaAdapter, `register${string}` | 'finalize' | 'unregister'> {
+  static get(clsOrId: ClassOrId): Omit<SchemaRegistryAdapter, `register${string}` | 'finalize' | 'unregister'> {
     return RegistryV2.get(this, clsOrId);
   }
 
@@ -112,8 +112,8 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     this.#recomputeSubTypes();
   }
 
-  adapter(cls: Class): SchemaAdapter {
-    return new SchemaAdapter(cls);
+  adapter(cls: Class): SchemaRegistryAdapter {
+    return new SchemaRegistryAdapter(cls);
   }
 
   getClassConfig(cls: ClassOrId): ClassConfig {

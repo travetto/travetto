@@ -4,7 +4,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { IndexConfig, IndexType, ModelOptions } from './types';
 import { ModelType } from '../types/model';
-import { ModelAdapter } from './registry-adapter';
+import { ModelRegistryAdapter } from './registry-adapter';
 import { IndexNotSupported } from '../error/invalid-index';
 import { NotFoundError } from '../error/not-found';
 
@@ -15,11 +15,11 @@ type ClassType = ModelOptions<ModelType>;
  */
 export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>> {
 
-  static getForRegister(clsOrId: ClassOrId): ModelAdapter {
+  static getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static get(clsOrId: ClassOrId): Omit<ModelAdapter, `register${string}` | 'finalize' | 'unregister'> {
+  static get(clsOrId: ClassOrId): Omit<ModelRegistryAdapter, `register${string}` | 'finalize' | 'unregister'> {
     return RegistryV2.get(this, clsOrId);
   }
 
@@ -119,8 +119,8 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     this.#clear();
   }
 
-  adapter(cls: Class): ModelAdapter {
-    return new ModelAdapter(cls);
+  adapter(cls: Class): ModelRegistryAdapter {
+    return new ModelRegistryAdapter(cls);
   }
 
   getInitialNameMapping(): Map<string, Class[]> {
