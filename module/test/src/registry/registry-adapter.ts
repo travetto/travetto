@@ -1,5 +1,5 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
-import { asFull, Class, classConstruct, describeFunction, Runtime } from '@travetto/runtime';
+import { AppError, asFull, Class, classConstruct, describeFunction, Runtime } from '@travetto/runtime';
 
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
@@ -74,7 +74,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig, TestCo
   }
 
   registerField(): {} {
-    throw new Error('Method not implemented.');
+    throw new AppError('Method not implemented.');
   }
 
   registerMethod(method: string | symbol, ...data: Partial<TestConfig>[]): TestConfig {
@@ -118,10 +118,14 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig, TestCo
   }
 
   getField(): {} {
-    throw new Error('Method not implemented.');
+    throw new AppError('Method not implemented.');
   }
 
   getMethod(method: string | symbol): TestConfig {
-    return this.#tests.get(method)!;
+    const test = this.#tests.get(method);
+    if (!test) {
+      throw new AppError(`Test not registered: ${String(method)} on ${this.#cls.name}`);
+    }
+    return test;
   }
 }
