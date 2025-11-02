@@ -27,7 +27,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     return RegistryV2.get(this, clsOrId).getClass();
   }
 
-  static getAll(): Class<ModelType>[] {
+  static getClasses(): Class<ModelType>[] {
     return RegistryV2.getAll(this);
   }
 
@@ -49,10 +49,6 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
 
   static getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexConfig<T> & { type: K[number] } {
     return RegistryV2.instance(this).getIndex(cls, name, supportedTypes);
-  }
-
-  static getClasses(): Class<ModelType>[] {
-    return RegistryV2.getAll(this);
   }
 
   static getClassesByBaseType<T extends ModelType>(cls: Class<T>): Class<T>[] {
@@ -125,7 +121,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
 
   getInitialNameMapping(): Map<string, Class[]> {
     if (this.#initialModelNameMapping.size === 0) {
-      for (const cls of ModelRegistryIndex.getAll()) {
+      for (const cls of ModelRegistryIndex.getClasses()) {
         const store = this.get(cls).store ?? cls.name;
         if (!this.#initialModelNameMapping.has(store)) {
           this.#initialModelNameMapping.set(store, []);

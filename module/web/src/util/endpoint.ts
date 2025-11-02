@@ -9,7 +9,7 @@ import { WebInterceptor } from '../types/interceptor.ts';
 import { WebRequest } from '../types/request.ts';
 import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
-import { ControllerRegistry } from '../registry/controller.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { WebCommonUtil } from './common.ts';
 
 
@@ -202,7 +202,7 @@ export class EndpointUtil {
    * Get bound endpoints, honoring the conditional status
    */
   static async getBoundEndpoints(c: Class): Promise<EndpointConfig[]> {
-    const config = ControllerRegistry.get(c);
+    const config = ControllerRegistryIndex.getClassConfig(c);
 
     // Skip registering conditional controllers
     if (config.conditional && !await config.conditional()) {

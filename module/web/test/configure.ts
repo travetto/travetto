@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RegistryV2 } from '@travetto/registry';
-import { Controller, ControllerRegistry, Get, PathParam } from '@travetto/web';
+import { Controller, ControllerRegistryIndex, Get, PathParam } from '@travetto/web';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 /**
@@ -31,7 +31,7 @@ export class ConfigureTest {
 
   @Test()
   async verifyConfiguration() {
-    const config = ControllerRegistry.get(TestController);
+    const config = ControllerRegistryIndex.getClassConfig(TestController);
     assert.ok(config);
 
     assert(config.class === TestController);

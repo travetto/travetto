@@ -1,9 +1,9 @@
 import { Class, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
+import { ControllerRegistryIndex } from '@travetto/web';
+import { RegistryV2 } from '@travetto/registry';
 
 import { ControllerConfig, EndpointConfig } from '../registry/types.ts';
-import { ControllerRegistry } from '../registry/controller.ts';
-
 import type { WebRouter } from '../types/dispatch.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebResponse } from '../types/response.ts';
@@ -20,7 +20,7 @@ export abstract class BaseWebRouter implements WebRouter {
   #interceptors: WebInterceptor[];
 
   async #register(c: Class): Promise<void> {
-    const config = ControllerRegistry.get(c);
+    const config = ControllerRegistryIndex.getClassConfig(c);
 
     let endpoints = await EndpointUtil.getBoundEndpoints(c);
     endpoints = EndpointUtil.orderEndpoints(endpoints);
@@ -45,21 +45,23 @@ export abstract class BaseWebRouter implements WebRouter {
     console.debug('Sorting interceptors', { count: names.length, names });
 
     // Register all active
-    for (const c of ControllerRegistry.getClasses()) {
+    for (const c of ControllerRegistryIndex.getClasses()) {
       await this.#register(c);
     }
 
     // Listen for updates
-    ControllerRegistry.on(async e => {
-      console.debug('Registry event', { type: e.type, target: (e.curr ?? e.prev)?.Ⲑid });
-      if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
+    RegistryV2.onClassChange(async e => {
+      const targetCls = ('curr' in e ? e.curr : null) ?? ('prev' in e ? e.prev : null);
+      console.debug('Registry event', { type: e.type, target: targetCls?.Ⲑid });
+
+      if ('prev' in e && e.prev) {
         this.#cleanup.get(e.prev.Ⲑid)?.();
         this.#cleanup.delete(e.prev.Ⲑid);
       }
-      if (e.curr) {
+      if ('curr' in e && e.curr) {
         await this.#register(e.curr);
       }
-    });
+    }, ControllerRegistryIndex);
   }
 
   abstract register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<() => void>;

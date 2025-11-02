@@ -20,7 +20,7 @@ export type OverrideConfig = {
 export class OverrideConfigSource implements ConfigSource {
   #build(): ConfigData {
     const out: ConfigData = {};
-    for (const cls of SchemaRegistryIndex.getAll()) {
+    for (const cls of SchemaRegistryIndex.getClasses()) {
       const { ns, fields = {} } = SchemaRegistryIndex.get(cls).getMetadata<OverrideConfig>(OverrideConfigSymbol) ?? {};
       for (const [key, value] of Object.entries(fields)) {
         const val = value();

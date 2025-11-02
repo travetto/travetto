@@ -92,6 +92,25 @@ class $Registry {
     }
   }
 
+  process(events: ChangeEvent<Class>[]): void {
+    for (const e of events) {
+      if (e.type === 'added' || e.type === 'changed') {
+        this.#finalizeItems([e.curr]);
+      }
+      for (const index of this.#indexes.values()) { // Visit every index
+        if (this.#matchesEvent(e, castTo(index.constructor))) {
+          index.process([e]);
+        }
+      }
+
+      this.#emitter.emit('event', e);
+
+      if (e.type === 'removing' || e.type === 'changed') {
+        this.#removeItem(e.prev);
+      }
+    }
+  }
+
   /**
    * Run initialization
    */
@@ -106,22 +125,7 @@ class $Registry {
       const added = await this.#classSource.init();
       this.#finalizeItems(added);
 
-      this.#classSource.on(e => {
-        if (e.type === 'added' || e.type === 'changed') {
-          this.#finalizeItems([e.curr]);
-        }
-        for (const index of this.#indexes.values()) { // Visit every index
-          if (this.#matchesEvent(e, castTo(index.constructor))) {
-            index.process([e]);
-          }
-        }
-
-        this.#emitter.emit('event', e);
-
-        if (e.type === 'removing' || e.type === 'changed') {
-          this.#removeItem(e.prev);
-        }
-      });
+      this.#classSource.on(e => this.process([e]));
     } finally {
       this.#resolved = true;
     }

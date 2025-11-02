@@ -1,16 +1,19 @@
-import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { asConstructable, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
-  return function <T>(target: T | Class<T>, property?: string, descriptor?: EndpointFunctionDescriptor) {
-    if (descriptor) {
-      return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, config);
+  return function <T>(target: T | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
+    if (property) {
+      return ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).registerMethod(property, {
+        endpoint: descriptor!.value,
+      }, config);
     } else {
-      return ControllerRegistry.registerPending(castTo(target), config);
+      return ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).register(config);
     }
   };
 }

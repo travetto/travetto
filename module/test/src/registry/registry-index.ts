@@ -34,10 +34,6 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig, TestConfig
     return RegistryV2.getAll(SuiteRegistryIndex);
   }
 
-  static register(cls: Class, config: SuiteConfig): void {
-    RegistryV2.getForRegister(SuiteRegistryIndex, cls).register(config);
-  }
-
   adapter(cls: Class): SuiteRegistryAdapter {
     return new SuiteRegistryAdapter(cls);
   }

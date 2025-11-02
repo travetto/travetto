@@ -23,7 +23,7 @@ export class ModelCandidateUtil {
   static async #getModels(models?: string[]): Promise<Class<ModelType>[]> {
     const names = new Set(models ?? []);
     const all = names.has('*');
-    return ModelRegistryIndex.getAll()
+    return ModelRegistryIndex.getClasses()
       .map(x => ModelRegistryIndex.getBaseModel(x))
       .filter(x => !models || all || names.has(ModelRegistryIndex.getStore(x)));
   }

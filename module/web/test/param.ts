@@ -4,7 +4,7 @@ import { RegistryV2 } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 import {
-  ContextParam, Controller, ControllerRegistry, EndpointConfig, EndpointUtil,
+  ContextParam, Controller, ControllerRegistryIndex, EndpointConfig, EndpointUtil,
   Get, HeaderParam, HttpMethod, PathParam, Post, QueryParam, WebHeaders, WebRequest
 } from '@travetto/web';
 
@@ -82,7 +82,7 @@ class ParamController {
 @Suite()
 export class EndpointParameterTest {
   static getEndpoint(path: string, method: HttpMethod) {
-    return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
+    return ControllerRegistryIndex.getClassConfig(ParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
   }
 
   static async extract(ep: EndpointConfig, request: Partial<WebRequest>): Promise<unknown[]> {

@@ -3,7 +3,8 @@ import { Any, AppError, Util } from '@travetto/runtime';
 import {
   HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry,
   WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
-  RespondInterceptor, DecompressInterceptor, Get
+  RespondInterceptor, DecompressInterceptor, Get,
+  ControllerRegistryIndex
 } from '@travetto/web';
 
 @Controller('/rpc')
@@ -32,7 +33,7 @@ export class WebRpcController {
    */
   @Post('/:target')
   async onRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
-    const endpoint = ControllerRegistry.getEndpointById(target);
+    const endpoint = ControllerRegistryIndex.getEndpointById(target);
 
     if (!endpoint || !endpoint.filter) {
       throw new AppError('Unknown endpoint', { category: 'notfound' });

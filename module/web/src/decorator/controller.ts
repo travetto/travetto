@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { ControllerRegistry } from '../registry/controller.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * Decorator to register a new web controller
@@ -8,6 +8,6 @@ import { ControllerRegistry } from '../registry/controller.ts';
  */
 export function Controller(path: string) {
   return function <T>(target: Class<T>): void {
-    ControllerRegistry.registerPending(target, { basePath: path, class: target, });
+    ControllerRegistryIndex.getForRegister(target).register({ basePath: path, class: target, });
   };
 }

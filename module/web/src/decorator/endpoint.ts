@@ -1,8 +1,8 @@
 import { asConstructable } from '@travetto/runtime';
 
-import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, EndpointFunctionDescriptor, EndpointIOType } from '../registry/types.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 
 type EndpointFunctionDecorator = <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
 
@@ -13,10 +13,12 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
   return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    const result = ControllerRegistry.registerPendingEndpoint(
-      asConstructable(target).constructor, descriptor, config
+    ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).registerMethod(
+      prop,
+      { endpoint: descriptor.value },
+      config
     );
-    return result;
+    return descriptor;
   };
 }
 
@@ -86,7 +88,8 @@ export function Options(path = '/'): EndpointFunctionDecorator { return HttpEndp
  */
 export function ResponseType(responseType: EndpointIOType): EndpointFunctionDecorator {
   return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, { responseType });
+    ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).registerMethod(property, { endpoint: descriptor.value }, { responseType });
+    return descriptor;
   };
 }
 
@@ -96,6 +99,7 @@ export function ResponseType(responseType: EndpointIOType): EndpointFunctionDeco
  */
 export function RequestType(requestType: EndpointIOType): EndpointFunctionDecorator {
   return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, { requestType });
+    ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).registerMethod(property, { endpoint: descriptor.value }, { requestType });
+    return descriptor;
   };
 }

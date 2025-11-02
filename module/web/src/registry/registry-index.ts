@@ -1,13 +1,37 @@
-import { ChangeEvent, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { Class, ClassInstance } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 
-import { ControllerRegistryAdapter } from './registery-adapter';
+import { ControllerRegistryAdapter } from './registry-adapter';
 import { ControllerConfig, EndpointConfig } from './types';
 import { WebAsyncContext } from '../context';
 
 
 export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig, EndpointConfig> {
+
+  static getForRegister(clsOrId: ClassOrId): ControllerRegistryAdapter {
+    return RegistryV2.getForRegister(this, clsOrId);
+  }
+
+  static get(clsOrId: ClassOrId): Omit<ControllerRegistryAdapter, `register${string}` | 'finalize' | 'unregister'> {
+    return RegistryV2.get(this, clsOrId);
+  }
+
+  static getClassConfig(clsOrId: ClassOrId): ControllerConfig {
+    return RegistryV2.get(this, clsOrId).getClass();
+  }
+
+  static getClasses(): Class[] {
+    return RegistryV2.getAll(this);
+  }
+
+  static has(clsOrId: ClassOrId): boolean {
+    return RegistryV2.has(this, clsOrId);
+  }
+
+  static getEndpointById(id: string): EndpointConfig | undefined {
+    return RegistryV2.instance(ControllerRegistryIndex).getEndpointById(id);
+  }
 
   #endpointsById = new Map<string, EndpointConfig>();
 

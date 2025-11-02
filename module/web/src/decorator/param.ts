@@ -1,19 +1,9 @@
 import { asConstructable, Class, ClassInstance } from '@travetto/runtime';
 
-import { ControllerRegistry } from '../registry/controller.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointParamConfig } from '../registry/types.ts';
 
 type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx: number) => void;
-
-/**
- * Get the param configuration
- * @param location The location of the parameter
- * @param extra Any additional configuration for the param config
- */
-export const paramConfig = (location: EndpointParamConfig['location'], extra: string | Partial<EndpointParamConfig>): EndpointParamConfig => ({
-  location,
-  ...((typeof extra === 'string' ? { name: extra } : extra))
-});
 
 /**
  * Define a parameter
@@ -22,10 +12,17 @@ export const paramConfig = (location: EndpointParamConfig['location'], extra: st
  * @augments `@travetto/web:Param`
  */
 export function Param(location: EndpointParamConfig['location'], extra: string | Partial<EndpointParamConfig>): ParamDecorator {
-  const param = paramConfig(location, extra);
   return (target: ClassInstance, propertyKey: string | symbol, idx: number): void => {
     const handler = target.constructor.prototype[propertyKey];
-    ControllerRegistry.registerEndpointParameter(target.constructor, handler, param, idx);
+    ControllerRegistryIndex.getForRegister(target.constructor).registerMethod(propertyKey, {
+      endpoint: handler,
+      params: [{
+        index: idx,
+        location,
+        name: typeof extra === 'string' ? extra : extra.name,
+        ...(typeof extra !== 'string' ? extra : {})
+      }]
+    });
   };
 }
 
@@ -59,6 +56,9 @@ export function Body(param: Partial<EndpointParamConfig> = {}): ParamDecorator {
  * @augments `@travetto/web:ContextParam`
  */
 export function ContextParam(config?: { target: Class }) {
-  return (inst: unknown, field: string): void =>
-    ControllerRegistry.registerControllerContextParam(asConstructable(inst).constructor, field, config!.target);
+  return (inst: unknown, field: string | symbol): void => {
+    ControllerRegistryIndex.getForRegister(asConstructable(inst).constructor).register({
+      contextParams: { [field]: config!.target }
+    });
+  };
 }

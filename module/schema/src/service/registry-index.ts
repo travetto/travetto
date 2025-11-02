@@ -27,7 +27,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     return RegistryV2.get(this, clsOrId).getClass();
   }
 
-  static getAll(): Class[] {
+  static getClasses(): Class[] {
     return RegistryV2.getAll(this);
   }
 

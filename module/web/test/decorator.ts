@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RegistryV2 } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
-import { CacheControl, Controller, ControllerRegistry, Patch, SetHeaders } from '@travetto/web';
+import { CacheControl, Controller, ControllerRegistryIndex, Patch, SetHeaders } from '@travetto/web';
 
 
 @Controller('/test')
@@ -27,7 +27,7 @@ export class ConfigureTest {
   }
 
   getEndpoint(cls: Class, idx: number) {
-    return ControllerRegistry.get(cls).endpoints[idx];
+    return ControllerRegistryIndex.getClassConfig(cls).endpoints[idx];
   }
 
   @Test()

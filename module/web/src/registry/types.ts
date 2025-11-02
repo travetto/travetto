@@ -1,5 +1,5 @@
 import type { Any, Class, TypedFunction } from '@travetto/runtime';
-import type { FieldConfig, ClassConfig, InputConfig, ParameterConfig } from '@travetto/schema';
+import type { ClassConfig, ParameterConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
@@ -92,6 +92,10 @@ export interface EndpointParamConfig {
    * Name of the parameter
    */
   name?: string;
+  /**
+   * Index of parameter
+   */
+  index: number;
   /**
    * Raw text of parameter at source
    */
@@ -200,7 +204,7 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
   /**
    * Context parameters to bind at create
    */
-  contextParams: Record<string, Class>;
+  contextParams: Record<string | symbol, Class>;
 }
 
 /**

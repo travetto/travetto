@@ -2,9 +2,10 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 
 import { Inject, Injectable } from '@travetto/di';
-import { ControllerRegistry } from '@travetto/web';
+import { ControllerRegistryIndex } from '@travetto/web';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
+import { RegistryV2 } from '@travetto/registry';
 
 import { clientFactory } from '../support/client/rpc.ts';
 import { WebRpcClient, WebRpcConfig } from './config.ts';
@@ -21,16 +22,16 @@ export class WebRpcClientGeneratorService {
     if (!this.config.clients.length || !Runtime.dynamic) {
       return;
     }
-    ControllerRegistry.on(() => this.render());
+    RegistryV2.onClassChange(() => this.render(), ControllerRegistryIndex);
   }
 
   async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {
-    return ControllerRegistry.getClasses()
+    return ControllerRegistryIndex.getClasses()
       .filter(x => {
         const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(x));
         return entry && entry.role === 'std';
       })
-      .filter(x => ControllerRegistry.get(x).documented !== false)
+      .filter(x => ControllerRegistryIndex.getClassConfig(x).documented !== false)
       .map(x => {
         const imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(x));
         const base = Runtime.workspaceRelative(RuntimeIndex.manifest.build.typesFolder);
