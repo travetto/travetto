@@ -1,17 +1,17 @@
-import { WhereClauseRaw, RetainFields } from './where-clause.ts';
+import { WhereClauseRaw, RetainQueryPrimitiveFields } from './where-clause.ts';
 
 type SelectClauseRaw<T> = {
   [P in keyof T]?:
-  T[P] extends object ? SelectClauseRaw<RetainFields<T[P]>> : (1 | 0 | boolean);
+  T[P] extends object ? SelectClauseRaw<RetainQueryPrimitiveFields<T[P]>> : (1 | 0 | boolean);
 };
 
 type GroupClauseRaw<T> = {
-  [P in keyof T]?: T[P] extends object ? GroupClauseRaw<RetainFields<T[P]>> : (1 | 0 | boolean);
+  [P in keyof T]?: T[P] extends object ? GroupClauseRaw<RetainQueryPrimitiveFields<T[P]>> : (1 | 0 | boolean);
 };
 
 type SortClauseRaw<T> = {
   [P in keyof T]?:
-  T[P] extends object ? SortClauseRaw<RetainFields<T[P]>> : 1 | -1;
+  T[P] extends object ? SortClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | -1;
 };
 
 type QueryOptionsRaw<T> = {
@@ -34,28 +34,28 @@ type PageableModelQueryRaw<T> = ModelQueryRaw<T> & QueryOptionsRaw<T>;
 /**
  * Type of a full query
  */
-export type Query<T> = QueryRaw<RetainFields<T>>;
+export type Query<T> = QueryRaw<RetainQueryPrimitiveFields<T>>;
 /**
  * Query with support for pagination (limit, offset)
  */
-export type PageableModelQuery<T> = PageableModelQueryRaw<RetainFields<T>>;
+export type PageableModelQuery<T> = PageableModelQueryRaw<RetainQueryPrimitiveFields<T>>;
 /**
  * Standard query options (limit, offset)
  */
-export type QueryOptions<T> = QueryOptionsRaw<RetainFields<T>>;
+export type QueryOptions<T> = QueryOptionsRaw<RetainQueryPrimitiveFields<T>>;
 /**
  * Select clause
  */
-export type SelectClause<T> = SelectClauseRaw<RetainFields<T>>;
+export type SelectClause<T> = SelectClauseRaw<RetainQueryPrimitiveFields<T>>;
 /**
  * Sort clause
  */
-export type SortClause<T> = SortClauseRaw<RetainFields<T>>;
+export type SortClause<T> = SortClauseRaw<RetainQueryPrimitiveFields<T>>;
 /**
  * Group clause
  */
-export type GroupClause<T> = GroupClauseRaw<RetainFields<T>>;
+export type GroupClause<T> = GroupClauseRaw<RetainQueryPrimitiveFields<T>>;
 /**
  * Model query, requiring a model object
  */
-export type ModelQuery<T> = ModelQueryRaw<RetainFields<T>>;
+export type ModelQuery<T> = ModelQueryRaw<RetainQueryPrimitiveFields<T>>;

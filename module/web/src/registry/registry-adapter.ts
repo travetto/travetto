@@ -1,8 +1,9 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
-import { AppError, asFull, Class } from '@travetto/runtime';
+import { AppError, asFull, castTo, Class, RetainPrimitiveFields } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
 
 import { ControllerConfig, EndpointConfig } from './types';
+import type { WebInterceptor } from '../types/interceptor.ts';
 
 function combineCommon<T extends ControllerConfig | EndpointConfig>(base: T, override: Partial<T>): T {
   base.filters = [...(base.filters ?? []), ...(override.filters ?? [])];
@@ -99,6 +100,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
         allowsBody: false,
         class: this.#cls,
         filters: [],
+        name: method.toString(),
         params: [],
         interceptorConfigs: [],
         responseHeaders: {},
@@ -141,5 +143,22 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
 
   getField(): {} {
     throw new AppError('Method not implemented.');
+  }
+
+  registerInterceptorConfig<T extends WebInterceptor>(
+    cls: Class<T>,
+    cfg: Partial<RetainPrimitiveFields<T['config']>>,
+    extra?: Partial<EndpointConfig & ControllerConfig>
+  ): ControllerConfig {
+    return this.register({ interceptorConfigs: [[cls, castTo(cfg)]], ...extra });
+  }
+
+  registerEndpointInterceptorConfig<T extends WebInterceptor>(
+    prop: string | symbol,
+    cls: Class<T>,
+    cfg: Partial<RetainPrimitiveFields<T['config']>>,
+    extra?: Partial<EndpointConfig>
+  ): EndpointConfig {
+    return this.registerMethod(prop, { interceptorConfigs: [[cls, castTo(cfg)]], ...extra });
   }
 }

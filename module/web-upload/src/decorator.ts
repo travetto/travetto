@@ -1,5 +1,5 @@
 import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, EndpointParamConfig, Param } from '@travetto/web';
+import { ControllerRegistryIndex, EndpointParamConfig, Param } from '@travetto/web';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor.ts';
@@ -29,8 +29,9 @@ export function Upload(
 
   return (inst: ClassInstance, prop: string | symbol, idx: number): void => {
     // Register field
-    ControllerRegistry.registerEndpointInterceptorConfig(
-      inst.constructor, inst[prop], WebUploadInterceptor,
+    ControllerRegistryIndex.getForRegister(inst.constructor).registerEndpointInterceptorConfig(
+      prop,
+      WebUploadInterceptor,
       {
         applies: true,
         maxSize: finalConf.maxSize,

@@ -1,4 +1,4 @@
-import { asConstructable, Class, ClassInstance } from '@travetto/runtime';
+import { Class, ClassInstance } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointParamConfig } from '../registry/types.ts';
@@ -57,7 +57,7 @@ export function Body(param: Partial<EndpointParamConfig> = {}): ParamDecorator {
  */
 export function ContextParam(config?: { target: Class }) {
   return (inst: unknown, field: string | symbol): void => {
-    ControllerRegistryIndex.getForRegister(asConstructable(inst).constructor).register({
+    ControllerRegistryIndex.getForRegister(inst).register({
       contextParams: { [field]: config!.target }
     });
   };

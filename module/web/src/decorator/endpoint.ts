@@ -1,5 +1,3 @@
-import { asConstructable } from '@travetto/runtime';
-
 import { EndpointConfig, EndpointFunctionDescriptor, EndpointIOType } from '../registry/types.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
@@ -13,7 +11,7 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
   return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).registerMethod(
+    ControllerRegistryIndex.getForRegister(target).registerMethod(
       prop,
       { endpoint: descriptor.value },
       config
@@ -88,7 +86,7 @@ export function Options(path = '/'): EndpointFunctionDecorator { return HttpEndp
  */
 export function ResponseType(responseType: EndpointIOType): EndpointFunctionDecorator {
   return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).registerMethod(property, { endpoint: descriptor.value }, { responseType });
+    ControllerRegistryIndex.getForRegister(target).registerMethod(property, { endpoint: descriptor.value }, { responseType });
     return descriptor;
   };
 }
@@ -99,7 +97,7 @@ export function ResponseType(responseType: EndpointIOType): EndpointFunctionDeco
  */
 export function RequestType(requestType: EndpointIOType): EndpointFunctionDecorator {
   return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).registerMethod(property, { endpoint: descriptor.value }, { requestType });
+    ControllerRegistryIndex.getForRegister(target).registerMethod(property, { endpoint: descriptor.value }, { requestType });
     return descriptor;
   };
 }

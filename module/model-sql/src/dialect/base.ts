@@ -1,7 +1,7 @@
 /* eslint-disable @stylistic/indent */
 import { DataUtil, FieldConfig, Schema, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } from '@travetto/runtime';
-import { SelectClause, Query, SortClause, WhereClause, RetainFields, ModelQueryUtil } from '@travetto/model-query';
+import { SelectClause, Query, SortClause, WhereClause, RetainQueryPrimitiveFields, ModelQueryUtil } from '@travetto/model-query';
 import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
 
 import { SQLModelUtil } from '../util.ts';
@@ -904,7 +904,7 @@ ${this.getWhereSQL(cls, where!)}`;
         const top = stack.at(-1)!;
         const ids = Object.keys(top);
         const selectTop = selectStack.at(-1)!;
-        const fieldKey = castKey<RetainFields<T>>(config.name);
+        const fieldKey = castKey<RetainQueryPrimitiveFields<T>>(config.name);
         const subSelectTop: SelectClause<T> | undefined = castTo(selectTop?.[fieldKey]);
 
         // See if a selection exists at all

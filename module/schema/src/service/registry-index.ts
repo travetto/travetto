@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { FieldConfig, ClassConfig, MethodConfig } from './types.ts';
@@ -19,7 +19,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static get(clsOrId: ClassOrId): Omit<SchemaRegistryAdapter, `register${string}` | 'finalize' | 'unregister'> {
+  static get(clsOrId: ClassOrId): Omit<SchemaRegistryAdapter, RegistrationMethods> {
     return RegistryV2.get(this, clsOrId);
   }
 

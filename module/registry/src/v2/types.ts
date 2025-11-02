@@ -7,6 +7,8 @@ export type RegistryIndexClass<C extends {} = {}, M extends {} = {}, F extends {
   new(): RegistryIndex<C, M, F>;
 };
 
+export type RegistrationMethods = `register${string}` | 'finalize';
+
 export interface RegistryIndex<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
   process(events: ChangeEvent<Class>[]): void;
   adapter(cls: Class): RegistryAdapter<C, M, F>;

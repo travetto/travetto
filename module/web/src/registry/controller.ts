@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInstance } from '@travetto/runtime';
+import { type Class, asFull, castTo, asConstructable, ClassInstance, RetainPrimitiveFields } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
@@ -8,15 +8,6 @@ import { WebInterceptor } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
 
 import { WebAsyncContext } from '../context.ts';
-
-type ValidFieldNames<T> = {
-  [K in keyof T]:
-  (T[K] extends (Primitive | undefined) ? K :
-    (T[K] extends (Function | undefined) ? never :
-      K))
-}[keyof T];
-
-type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
 
 /**
  * Controller registry
@@ -181,7 +172,7 @@ class $ControllerRegistry extends Registry<ControllerConfig, EndpointConfig> {
    */
   createInterceptorConfigDecorator<T extends WebInterceptor>(
     cls: Class<T>,
-    cfg: Partial<RetainFields<T['config']>>,
+    cfg: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: EndpointFunctionDescriptor): void => {

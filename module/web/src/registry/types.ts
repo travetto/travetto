@@ -16,7 +16,7 @@ export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunctio
  */
 export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
-  (<U>(target: U, prop: string, descriptor?: EndpointFunctionDescriptor) => void)
+  (<U>(target: U, prop: string | symbol, descriptor?: EndpointFunctionDescriptor) => void)
 );
 
 /**

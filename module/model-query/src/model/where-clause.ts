@@ -1,18 +1,10 @@
-import type { Primitive, TimeSpan } from '@travetto/runtime';
+import type { Primitive, RetainPrimitiveFields, TimeSpan } from '@travetto/runtime';
 import { Point } from '@travetto/schema';
 
 export type QueryPrimitive = Primitive | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
-
-export type ValidFieldNames<T> = {
-  [K in keyof T]:
-  (T[K] extends (QueryPrimitive | undefined) ? K :
-    (T[K] extends (Function | undefined) ? never :
-      K))
-}[keyof T];
-
-export type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
+export type RetainQueryPrimitiveFields<T> = RetainPrimitiveFields<T, Point>;
 
 type General<T> = {
   $eq?: T;
@@ -38,7 +30,7 @@ type ArrayField<T> =
   { $ne?: T | T[] } |
   { $all?: T[] } |
   { $in?: T[] } |
-  PropWhereClause<RetainFields<T>> |
+  PropWhereClause<RetainQueryPrimitiveFields<T>> |
   T | T[];
 
 type StringField = { $regex?: RegExp | string };
@@ -58,7 +50,7 @@ export type PropWhereClause<T> = {
         (T[P] extends (Date | undefined) ? (General<Date> | ScalarField<Date> | ComparableField<Date | TimeSpan> | Date) :
           (T[P] extends (Point | undefined) ? (General<Point> | ScalarField<Point> | GeoField | Point) :
             (T[P] extends ((infer U)[] | undefined) ? ArrayField<U> :
-              (T[P] extends (object | undefined) ? PropWhereClause<RetainFields<T[P]>> : never)))))));
+              (T[P] extends (object | undefined) ? PropWhereClause<RetainQueryPrimitiveFields<T[P]>> : never)))))));
 };
 
 /**
@@ -73,7 +65,7 @@ export type WhereClauseRaw<T> =
 /**
  * Full where clause, typed against the input type T
  */
-export type WhereClause<T> = WhereClauseRaw<RetainFields<T>>;
+export type WhereClause<T> = WhereClauseRaw<RetainQueryPrimitiveFields<T>>;
 
 /**
  * Provides all the valid string type fields from a given type T

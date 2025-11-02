@@ -1,4 +1,4 @@
-import { ControllerRegistry, EndpointDecorator } from '@travetto/web';
+import { ControllerRegistryIndex, EndpointDecorator } from '@travetto/web';
 
 import { AuthVerifyInterceptor } from './interceptors/verify.ts';
 import { AuthLoginInterceptor } from './interceptors/login.ts';
@@ -11,7 +11,7 @@ import { AuthLogoutInterceptor } from './interceptors/logout.ts';
  * @augments `@travetto/auth:Authenticate`
  */
 export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthLoginInterceptor, {
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthLoginInterceptor, {
     providers: [source, ...sources],
     applies: true
   }, {
@@ -27,7 +27,7 @@ export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
  * @augments `@travetto/auth:Authenticated`
  */
 export function Authenticated(permissions: string[] = []): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'authenticated',
     permissions,
     applies: true,
@@ -43,7 +43,7 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
  * @augments `@travetto/auth:Unauthenticated`
  */
 export function Unauthenticated(): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'unauthenticated',
     applies: true
   });
@@ -54,7 +54,7 @@ export function Unauthenticated(): EndpointDecorator {
  * @augments `@travetto/auth:Logout`
  */
 export function Logout(): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthLogoutInterceptor, { applies: true }, {
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthLogoutInterceptor, { applies: true }, {
     responseContext: {
       isPrivate: true
     }

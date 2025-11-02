@@ -24,6 +24,15 @@ export type DeepPartial<T> = {
     (T[P] extends Any[] ? (DeepPartial<T[P][number]> | null | undefined)[] : DeepPartial<T[P]>));
 };
 
+type ValidPrimitiveFields<T, Z = undefined> = {
+  [K in keyof T]:
+  (T[K] extends (Primitive | Z | undefined) ? K :
+    (T[K] extends (Function | undefined) ? never :
+      K))
+}[keyof T];
+
+export type RetainPrimitiveFields<T, Z = undefined> = Pick<T, ValidPrimitiveFields<T, Z>>;
+
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(o: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;

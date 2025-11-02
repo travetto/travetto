@@ -1,19 +1,18 @@
-import { asConstructable, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
-import { ControllerRegistry } from '../registry/controller.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
     if (property) {
-      return ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).registerMethod(property, {
+      return ControllerRegistryIndex.getForRegister(target).registerMethod(property, {
         endpoint: descriptor!.value,
       }, config);
     } else {
-      return ControllerRegistryIndex.getForRegister(asConstructable(target).constructor).register(config);
+      return ControllerRegistryIndex.getForRegister(target).register(config);
     }
   };
 }
@@ -66,7 +65,7 @@ export function CacheControl(input: TimeSpan | number | CacheControlInput, extra
  * @param types The list of mime types to allow/deny
  */
 export function Accepts(types: [string, ...string[]]): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(
     AcceptInterceptor,
     { types, applies: true },
     { responseHeaders: { accepts: types.join(', ') } }
@@ -77,7 +76,7 @@ export function Accepts(types: [string, ...string[]]): EndpointDecorator {
  * Allows for configuring interceptor-level support at an endpoint or controller level
  */
 export const ConfigureInterceptor =
-  ControllerRegistry.createInterceptorConfigDecorator.bind(ControllerRegistry);
+  ControllerRegistryIndex.createInterceptorConfigDecorator.bind(ControllerRegistryIndex);
 
 /**
  * Specifies if endpoint should be conditional

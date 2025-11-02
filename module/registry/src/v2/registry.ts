@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 import { AppError, castTo, Class, ClassInstance, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
-import { RegistryItem, RegistryIndex, RegistryIndexClass, ClassOrId } from './types';
+import { RegistryItem, RegistryIndex, RegistryIndexClass, ClassOrId, RegistrationMethods } from './types';
 import { ChangeEvent } from '../types';
 import { MethodSource } from '../source/method-source';
 
@@ -173,7 +173,7 @@ class $Registry {
   get<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
     indexCls: T,
     clsOrId: ClassOrId
-  ): Omit<ReturnType<InstanceType<T>['adapter']>, `register${string}` | 'finalize'> {
+  ): Omit<ReturnType<InstanceType<T>['adapter']>, RegistrationMethods> {
     const cls = this.#toCls(clsOrId);
     return this.#readonlyAdapter(indexCls, cls);
   }
