@@ -1,0 +1,218 @@
+import { ChangeEvent, RegistryIndex } from '@travetto/registry';
+import { castKey, castTo, Class, classConstruct } from '@travetto/runtime';
+
+import { ClassTarget, Dependency, InjectableConfig } from '../types';
+import { DependencyRegistryAdapter } from './registry-adapter';
+import { DependencyClassId, DependencyTargetId, hasPostConstruct, hasPreDestroy, PrimaryCandidateSymbol, ResolutionType, Resolved } from './types';
+import { InjectionError } from '../error';
+
+
+export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> {
+  defaultSymbols = new Set<symbol>();
+
+  instances = new Map<DependencyTargetId, Map<symbol, unknown>>();
+  instancePromises = new Map<DependencyTargetId, Map<symbol, Promise<unknown>>>();
+
+  factories = new Map<DependencyTargetId, Map<Class, InjectableConfig>>();
+
+  targetToClass = new Map<DependencyTargetId, Map<symbol, string>>();
+  classToTarget = new Map<DependencyClassId, Map<symbol, DependencyTargetId>>();
+
+  process(events: ChangeEvent<Class>[]): void {
+
+  }
+
+  adapter(cls: Class): DependencyRegistryAdapter {
+    return new DependencyRegistryAdapter(cls);
+  }
+
+
+  /**
+   * Resolve the target given a qualifier
+   * @param target
+   * @param qualifier
+   */
+  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
+    const qualifiers = this.targetToClass.get(target.Ⲑid) ?? new Map<symbol, string>();
+
+    let cls: string | undefined;
+
+    if (qualifier && qualifiers.has(qualifier)) {
+      cls = qualifiers.get(qualifier);
+    } else {
+      const resolved = [...qualifiers.keys()];
+      if (!qualifier) {
+        // If primary found
+        if (qualifiers.has(PrimaryCandidateSymbol)) {
+          qualifier = PrimaryCandidateSymbol;
+        } else {
+          // If there is only one default symbol
+          const filtered = resolved.filter(x => !!x).filter(x => this.defaultSymbols.has(x));
+          if (filtered.length === 1) {
+            qualifier = filtered[0];
+          } else if (filtered.length > 1) {
+            // If dealing with sub types, prioritize exact matches
+            const exact = this
+              .getCandidateTypes(castTo<Class>(target))
+              .filter(x => x.class === target);
+            if (exact.length === 1) {
+              qualifier = exact[0].qualifier;
+            } else {
+              if (resolution === 'any') {
+                qualifier = filtered[0];
+              } else {
+                throw new InjectionError('Dependency has multiple candidates', target, filtered);
+              }
+            }
+          }
+        }
+      }
+
+      if (!qualifier) {
+        throw new InjectionError('Dependency not found', target);
+      } else if (!qualifiers.has(qualifier)) {
+        if (!this.defaultSymbols.has(qualifier) && resolution === 'loose') {
+          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: target.Ⲑid });
+          return this.resolveTarget(target);
+        }
+        throw new InjectionError('Dependency not found', target, [qualifier]);
+      } else {
+        cls = qualifiers.get(qualifier!)!;
+      }
+    }
+
+    const config: InjectableConfig<T> = castTo(this.get(cls!));
+    return {
+      qualifier,
+      config,
+      id: (config.factory ? config.target : config.class).Ⲑid
+    };
+  }
+
+  /**
+   * Retrieve all dependencies
+   */
+  async fetchDependencies<T>(managed: InjectableConfig<T>, deps?: Dependency[], keys?: string[]): Promise<unknown[]> {
+    if (!deps || !deps.length) {
+      return [];
+    }
+
+    const promises = deps.map(async (x, i) => {
+      try {
+        return await this.getInstance(x.target, x.qualifier, x.resolution);
+      } catch (err) {
+        if (x.optional && err instanceof InjectionError && err.category === 'notfound') {
+          return undefined;
+        } else {
+          if (err && err instanceof Error) {
+            err.message = `${err.message} via=${managed.class.Ⲑid}[${keys?.[i] ?? 'constructor'}]`;
+          }
+          throw err;
+        }
+      }
+    });
+
+    return await Promise.all(promises);
+  }
+
+  /**
+   * Resolve all field dependencies
+   */
+  async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T): Promise<void> {
+    const keys = Object.keys(config.dependencies.fields ?? {})
+      .filter(k => instance[castKey<T>(k)] === undefined); // Filter out already set ones
+
+    // And auto-wire
+    if (keys.length) {
+      const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]), keys);
+      for (let i = 0; i < keys.length; i++) {
+        instance[castKey<T>(keys[i])] = castTo(deps[i]);
+      }
+    }
+  }
+
+  /**
+   * Actually construct an instance while resolving the dependencies
+   */
+  async construct<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
+    const managed = this.resolveTarget(target, qualifier).config;
+
+    // Only fetch constructor values
+    const consValues = await this.fetchDependencies(managed, managed.dependencies.cons);
+
+    // Create instance
+    const inst = managed.factory ?
+      managed.factory(...consValues) :
+      classConstruct(managed.class, consValues);
+
+    // And auto-wire fields
+    await this.resolveFieldDependencies(managed, inst);
+
+    // If factory with field properties on the sub class
+    if (managed.factory) {
+      const resolved = this.get(inst);
+
+      if (resolved) {
+        await this.resolveFieldDependencies(resolved, inst);
+      }
+    }
+
+    // Run post construct, if it wasn't passed in, otherwise it was already created
+    if (hasPostConstruct(inst) && !consValues.includes(inst)) {
+      await inst.postConstruct();
+    }
+
+    // Run post constructors
+    for (const op of Object.values(managed.postConstruct)) {
+      await op(inst);
+    }
+
+    return inst;
+  }
+
+  /**
+   * Create the instance
+   */
+  async createInstance<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
+    const classId = this.resolveTarget(target, qualifier).id;
+
+    if (!this.instances.has(classId)) {
+      this.instances.set(classId, new Map());
+      this.instancePromises.set(classId, new Map());
+    }
+
+    if (this.instancePromises.get(classId)!.has(qualifier)) {
+      return castTo(this.instancePromises.get(classId)!.get(qualifier));
+    }
+
+    const instancePromise = this.construct(target, qualifier);
+    this.instancePromises.get(classId)!.set(qualifier, instancePromise);
+    try {
+      const instance = await instancePromise;
+      this.instances.get(classId)!.set(qualifier, instance);
+      return instance;
+    } catch (err) {
+      // Clear it out, don't save failed constructions
+      this.instancePromises.get(classId)!.delete(qualifier);
+      throw err;
+    }
+  }
+
+  /**
+   * Destroy an instance
+   */
+  destroyInstance(cls: Class, qualifier: symbol): void {
+    const classId = cls.Ⲑid;
+
+    const activeInstance = this.instances.get(classId)!.get(qualifier);
+    if (hasPreDestroy(activeInstance)) {
+      activeInstance.preDestroy();
+    }
+
+    this.defaultSymbols.delete(qualifier);
+    this.instances.get(classId)!.delete(qualifier);
+    this.instancePromises.get(classId)!.delete(qualifier);
+    this.classToTarget.get(classId)!.delete(qualifier);
+    console.debug('On uninstall', { id: classId, qualifier: qualifier.toString(), classId });
+  }
+}
