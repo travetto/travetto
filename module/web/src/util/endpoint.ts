@@ -116,7 +116,7 @@ export class EndpointUtil {
     const vals = WebCommonUtil.getRequestParams(request);
 
     try {
-      const { parameters } = SchemaRegistryIndex.get(cls).getMethod(method);
+      const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, method);
       const extracted = endpoint.params.map((c, i) => this.extractParameter(request, c, parameters[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
@@ -202,7 +202,7 @@ export class EndpointUtil {
    * Get bound endpoints, honoring the conditional status
    */
   static async getBoundEndpoints(c: Class): Promise<EndpointConfig[]> {
-    const config = ControllerRegistryIndex.getClassConfig(c);
+    const config = ControllerRegistryIndex.getController(c);
 
     // Skip registering conditional controllers
     if (config.conditional && !await config.conditional()) {

@@ -173,7 +173,7 @@ export class BindUtil {
 
     if (!!data && isInstance<T>(data)) {
       const adapter = SchemaRegistryIndex.get(cons);
-      const conf = adapter.getClass();
+      const conf = adapter.get();
 
       // If no configuration
       if (!conf) {
@@ -183,7 +183,7 @@ export class BindUtil {
       } else {
         let viewConf: SchemaConfig = conf.fields;
         if (view) {
-          viewConf = adapter.getView(view);
+          viewConf = adapter.getSchema(view);
           if (!viewConf) {
             throw new Error(`View not found: ${view.toString()}`);
           }
@@ -310,7 +310,7 @@ export class BindUtil {
    * @returns
    */
   static coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = true): unknown[] {
-    const paramConfigs = SchemaRegistryIndex.get(cls).getMethod(method).parameters;
+    const paramConfigs = SchemaRegistryIndex.getMethodConfig(cls, method).parameters;
     return this.coerceParameters(paramConfigs, params, applyDefaults);
   }
 }

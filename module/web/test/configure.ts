@@ -31,7 +31,7 @@ export class ConfigureTest {
 
   @Test()
   async verifyConfiguration() {
-    const config = ControllerRegistryIndex.getClassConfig(TestController);
+    const config = ControllerRegistryIndex.getController(TestController);
     assert.ok(config);
 
     assert(config.class === TestController);
@@ -41,7 +41,7 @@ export class ConfigureTest {
     assert(config.endpoints.length === 1);
 
     const ep = config.endpoints[0];
-    const { parameters: params } = SchemaRegistryIndex.get(ep.class).getMethod(ep.name);
+    const { parameters: params } = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
     assert(ep.httpMethod === 'GET');
     assert(ep.name === 'getUser');
     assert(ep.endpoint === TestController.prototype.getUser);

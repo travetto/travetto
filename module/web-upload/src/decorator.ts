@@ -50,7 +50,7 @@ export function Upload(
     return Param('body', {
       ...finalConf,
       extract: (request, config) => {
-        const input = SchemaRegistryIndex.get(inst.constructor).getMethod(prop).parameters[idx];
+        const input = SchemaRegistryIndex.getMethodConfig(inst.constructor, prop).parameters[idx];
 
         if (!input) {
           throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);

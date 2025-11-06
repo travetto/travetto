@@ -29,7 +29,7 @@ export class TestDigestCommand {
 
     const suites = SuiteRegistryIndex.getClasses();
     const all = suites
-      .map(c => SuiteRegistryIndex.getClassConfig(c))
+      .map(c => SuiteRegistryIndex.getSuiteConfig(c))
       .filter(c => !describeFunction(c.class).abstract)
       .flatMap(c => c.tests);
 

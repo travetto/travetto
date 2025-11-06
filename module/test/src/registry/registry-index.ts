@@ -5,10 +5,12 @@ import { SuiteConfig } from '../model/suite.ts';
 import { TestConfig, TestRun } from '../model/test.ts';
 import { SuiteRegistryAdapter } from './registry-adapter.ts';
 
+type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
+
 /**
  * Test Suite registry
  */
-export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig, TestConfig> {
+export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
 
   static getForRegister(clsOrId: ClassOrId): SuiteRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
@@ -22,12 +24,12 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig, TestConfig
     return RegistryV2.instance(SuiteRegistryIndex).getByClassAndMethod(cls, method);
   }
 
-  static getSuiteTests(run: TestRun): { suite: SuiteConfig, tests: TestConfig[] }[] {
+  static getSuiteTests(run: TestRun): SuiteTests[] {
     return RegistryV2.instance(SuiteRegistryIndex).getSuiteTests(run);
   }
 
-  static getClassConfig(cls: Class): SuiteConfig {
-    return RegistryV2.get(SuiteRegistryIndex, cls).getClass();
+  static getSuiteConfig(cls: Class): SuiteConfig {
+    return RegistryV2.get(SuiteRegistryIndex, cls).get();
   }
 
   static getClasses(): Class[] {
@@ -43,7 +45,7 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig, TestConfig
   }
 
   get(target: Class): SuiteConfig {
-    return SuiteRegistryIndex.getClassConfig(target);
+    return SuiteRegistryIndex.getSuiteConfig(target);
   }
 
   has(target: Class): boolean {
@@ -60,7 +62,7 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig, TestConfig
   /**
    * Get run parameters from provided input
    */
-  getSuiteTests(run: TestRun): { suite: SuiteConfig, tests: TestConfig[] }[] {
+  getSuiteTests(run: TestRun): SuiteTests[] {
     const clsId = run.classId;
     const imp = run.import;
     const methodNames = run.methodNames ?? [];

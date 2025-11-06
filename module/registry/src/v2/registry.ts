@@ -42,7 +42,7 @@ class $Registry {
     return item;
   }
 
-  #adapter<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  #adapter<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     cls: Class,
   ): ReturnType<InstanceType<T>['adapter']> {
@@ -50,7 +50,7 @@ class $Registry {
       this.#indexes.set(indexCls, new indexCls());
     }
 
-    const index: RegistryIndex<C, M, F> = castTo(this.#indexes.get(indexCls));
+    const index: RegistryIndex<C> = castTo(this.#indexes.get(indexCls));
 
     const item = this.#item(cls);
     if (!this.#itemsByIndex.has(indexCls)) {
@@ -60,14 +60,14 @@ class $Registry {
     return castTo(this.#item(cls).adapter(index, cls));
   }
 
-  #readonlyAdapter<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  #readonlyAdapter<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     cls: Class,
   ): Extract<ReturnType<InstanceType<T>['adapter']>, 'get' | `get${string}`> {
     if (!this.has(indexCls, cls)) {
       throw new AppError(`Class ${cls} is not registered in index ${indexCls}`);
     }
-    const index: RegistryIndex<C, M, F> = castTo(this.#indexes.get(indexCls));
+    const index: RegistryIndex<C> = castTo(this.#indexes.get(indexCls));
     return castTo(this.#item(cls).readonlyAdapter(index, cls));
   }
 
@@ -162,7 +162,7 @@ class $Registry {
     return this.#initialized ??= this.#init();
   }
 
-  getForRegister<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  getForRegister<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     clsOrId: ClassOrId
   ): ReturnType<InstanceType<T>['adapter']> {
@@ -170,7 +170,7 @@ class $Registry {
     return this.#adapter(indexCls, cls);
   }
 
-  get<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  get<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     clsOrId: ClassOrId
   ): Omit<ReturnType<InstanceType<T>['adapter']>, RegistrationMethods> {
@@ -178,13 +178,13 @@ class $Registry {
     return this.#readonlyAdapter(indexCls, cls);
   }
 
-  getAll<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  getAll<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T
   ): Class[] {
     return Array.from(this.#itemsByIndex.get(indexCls)?.keys() ?? []);
   }
 
-  instance<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  instance<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T
   ): InstanceType<T> {
     return castTo(this.#indexes.get(indexCls));
@@ -193,7 +193,7 @@ class $Registry {
   /**
    * Is class found by id or by Class
    */
-  has<C extends {}, M extends {}, F extends {}, T extends RegistryIndexClass<C, M, F>>(
+  has<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     clsOrId: ClassOrId
   ): boolean {

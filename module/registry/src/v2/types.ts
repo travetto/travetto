@@ -3,30 +3,25 @@ import { ChangeEvent } from '../types';
 
 export type ClassOrId = Class | string | ClassInstance;
 
-export type RegistryIndexClass<C extends {} = {}, M extends {} = {}, F extends {} = {}> = {
-  new(): RegistryIndex<C, M, F>;
+export type RegistryIndexClass<C extends {} = {}> = {
+  new(): RegistryIndex<C>;
 };
 
-export type RegistrationMethods = `register${string}` | 'finalize';
+export type RegistrationMethods = `register${string}` | `finalize${string}`;
 
-export interface RegistryIndex<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
+export interface RegistryIndex<C extends {}> {
   process(events: ChangeEvent<Class>[]): void;
-  adapter(cls: Class): RegistryAdapter<C, M, F>;
+  adapter(cls: Class): RegistryAdapter<C>;
 }
 
 /**
  * Interface for registry adapters to implement
  */
-export interface RegistryAdapter<C extends {} = {}, M extends {} = {}, F extends {} = {}> {
-  indexCls: RegistryIndexClass<C, M, F>;
+export interface RegistryAdapter<C extends {}> {
+  indexCls: RegistryIndexClass<C>;
   register(...data: Partial<C>[]): C;
-  registerField(field: string | symbol, ...data: Partial<F>[]): F;
-  registerMethod(method: string | symbol, ...data: Partial<M>[]): M;
   finalize(parent?: C): void;
-
-  getClass(): C;
-  getField(field: string | symbol): F;
-  getMethod(method: string | symbol): M;
+  get(): C;
 }
 
 /**
@@ -35,16 +30,16 @@ export interface RegistryAdapter<C extends {} = {}, M extends {} = {}, F extends
 export class RegistryItem {
   cls: Class;
   finalized: boolean = false;
-  adapters = new Map<RegistryIndex, RegistryAdapter>();
+  adapters = new Map<RegistryIndex<{}>, RegistryAdapter<{}>>();
 
   constructor(cls: Class) {
     this.cls = cls;
   }
 
-  readonlyAdapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(
-    index: RegistryIndex<C, M, F>,
+  readonlyAdapter<C extends {} = {}>(
+    index: RegistryIndex<C>,
     cls: Class,
-  ): RegistryAdapter<C, M, F> {
+  ): RegistryAdapter<C> {
     const value = this.adapters.get(index);
     if (!value) {
       throw new AppError(`Class ${cls} is not registered in index ${index.constructor.name}`);
@@ -55,10 +50,10 @@ export class RegistryItem {
     return castTo(value);
   }
 
-  adapter<C extends {} = {}, M extends {} = {}, F extends {} = {}>(
-    index: RegistryIndex<C, M, F>,
+  adapter<C extends {} = {}>(
+    index: RegistryIndex<C>,
     cls: Class,
-  ): RegistryAdapter<C, M, F> {
+  ): RegistryAdapter<C> {
     if (!this.adapters.has(index)) {
       const adapter = index.adapter(cls);
       adapter.indexCls = castTo(index.constructor);

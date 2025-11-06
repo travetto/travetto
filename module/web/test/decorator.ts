@@ -27,7 +27,7 @@ export class ConfigureTest {
   }
 
   getEndpoint(cls: Class, idx: number) {
-    return ControllerRegistryIndex.getClassConfig(cls).endpoints[idx];
+    return ControllerRegistryIndex.getController(cls).endpoints[idx];
   }
 
   @Test()

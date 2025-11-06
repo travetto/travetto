@@ -1,5 +1,5 @@
 import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
-import { AppError, Class, describeFunction } from '@travetto/runtime';
+import { Class, describeFunction } from '@travetto/runtime';
 
 import { ModelOptions } from './types';
 import { ModelType } from '../types/model';
@@ -39,19 +39,6 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelOptions<ModelT
     return cfg;
   }
 
-  registerField(_field: string | symbol, ..._data: Partial<{}>[]): {} {
-    throw new AppError('Method not implemented.');
-  }
-
-
-  registerMethod(_method: string | symbol, ..._data: Partial<{}>[]): {} {
-    throw new AppError('Method not implemented.');
-  }
-
-  unregister(): void {
-
-  }
-
   finalize(parent?: ClassType): void {
     const config = this.#config;
     if (parent) {
@@ -60,15 +47,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelOptions<ModelT
     }
   }
 
-  getClass(): ClassType {
+  get(): ClassType {
     return this.#config;
-  }
-
-  getField(_field: string | symbol): {} {
-    throw new Error('Method not implemented.');
-  }
-
-  getMethod(_method: string | symbol): {} {
-    throw new Error('Method not implemented.');
   }
 }

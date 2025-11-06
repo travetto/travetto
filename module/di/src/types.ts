@@ -61,10 +61,6 @@ export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
    */
   class: Class<T>;
   /**
-   * Factory function for the injectable
-   */
-  factory?: (...args: unknown[]) => T;
-  /**
    * List of dependencies as fields or as constructor arguments
    */
   dependencies: {
@@ -86,9 +82,9 @@ export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
  */
 export interface InjectableFactoryConfig<T = unknown> extends CoreTarget<T> {
   /**
-   * Src of the factory method
+   * Factory function for the injectable
    */
-  src: Class<T>;
+  factory: (...args: unknown[]) => T;
   /**
    * List of all dependencies as function arguments
    */

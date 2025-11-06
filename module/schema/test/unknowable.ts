@@ -12,7 +12,7 @@ export class UnknownTest {
   @Test()
   async basic() {
     await RegistryV2.init();
-    const config = SchemaRegistryIndex.get(Unknowable).getView().value;
+    const config = SchemaRegistryIndex.getSchemaConfig(Unknowable).value;
     assert(config.type === UnknownType);
   }
 }

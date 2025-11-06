@@ -690,7 +690,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getCreateAllTablesSQL(cls: Class): string[] {
     const out: string[] = [];
-    SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.get(cls).getClass(), {
+    SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.getClassConfig(cls), {
       onRoot: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
       onSub: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
       onSimple: ({ path }) => out.push(this.getCreateTableSQL(path))
@@ -729,7 +729,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getDropAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
-    SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.get(cls).getClass(), {
+    SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.getClassConfig(cls), {
       onRoot: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
       onSub: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
       onSimple: ({ path }) => out.push(this.getDropTableSQL(path))
@@ -742,7 +742,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
-    SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.get(cls).getClass(), {
+    SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.getClassConfig(cls), {
       onRoot: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
       onSub: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
       onSimple: ({ path }) => out.push(this.getTruncateTableSQL(path))
@@ -893,7 +893,7 @@ ${this.getWhereSQL(cls, where!)}`;
     const buildSet = (children: unknown[], field?: FieldConfig): Record<string, unknown> =>
       SQLModelUtil.collectDependents(this, stack.at(-1)!, children, field);
 
-    await SQLModelUtil.visitSchema(SchemaRegistryIndex.get(cls).getClass(), {
+    await SQLModelUtil.visitSchema(SchemaRegistryIndex.getClassConfig(cls), {
       onRoot: async (config) => {
         const res = buildSet(items); // Already filtered by initial select query
         selectStack.push(select);

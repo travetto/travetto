@@ -73,14 +73,14 @@ function combineClasses<T extends ClassConfig>(base: T, configs: Partial<T>[], i
   return base;
 }
 
-export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig, MethodConfig, FieldConfig> {
+export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
 
   #cls: Class;
   #config: ClassConfig;
   #views: Map<string, SchemaConfig> = new Map();
   #accessorDescriptors: Map<string, PropertyDescriptor> = new Map();
 
-  indexCls: RegistryIndexClass<ClassConfig, MethodConfig, FieldConfig>;
+  indexCls: RegistryIndexClass<ClassConfig>;
 
   constructor(cls: Class) {
     this.#cls = cls;
@@ -199,7 +199,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig, Metho
     }
   }
 
-  getClass(): ClassConfig {
+  get(): ClassConfig {
     return this.#config;
   }
 
@@ -211,7 +211,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig, Metho
     return this.#config.methods[method];
   }
 
-  getView(view?: string): SchemaConfig {
+  getSchema(view?: string): SchemaConfig {
     if (!view) {
       return this.#config.fields;
     }

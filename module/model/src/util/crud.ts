@@ -75,7 +75,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = ModelRegistryIndex.get(asConstructable(item).constructor).getClass();
+    const config = ModelRegistryIndex.get(asConstructable(item).constructor).get();
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
     }
@@ -105,7 +105,7 @@ export class ModelCrudUtil {
    * Ensure subtype is not supported
    */
   static ensureNotSubType(cls: Class): void {
-    if (ModelRegistryIndex.get(cls).getClass().subType) {
+    if (ModelRegistryIndex.get(cls).get().subType) {
       throw new SubTypeNotSupportedError(cls);
     }
   }
@@ -114,7 +114,7 @@ export class ModelCrudUtil {
    * Pre persist behavior
    */
   static async prePersist<T>(cls: Class<T>, item: T, scope: PrePersistScope): Promise<T> {
-    const config = ModelRegistryIndex.get(cls).getClass();
+    const config = ModelRegistryIndex.get(cls).get();
     for (const state of (config.prePersist ?? [])) {
       if (state.scope === scope || scope === 'all' || state.scope === 'all') {
         const handler: DataHandler<T> = castTo(state.handler);
@@ -131,7 +131,7 @@ export class ModelCrudUtil {
    * Post load behavior
    */
   static async postLoad<T>(cls: Class<T>, item: T): Promise<T> {
-    const config = ModelRegistryIndex.get(cls).getClass();
+    const config = ModelRegistryIndex.get(cls).get();
     for (const handler of castTo<DataHandler<T>[]>(config.postLoad ?? [])) {
       item = await handler(item) ?? item;
     }

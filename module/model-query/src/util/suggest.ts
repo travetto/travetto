@@ -89,7 +89,7 @@ export class ModelQuerySuggestUtil {
       ...(query ?? {}),
       select: castTo({
         [field]: true, ...(config.subType ? {
-          [SchemaRegistryIndex.get(cls).getClass().subTypeField]: true
+          [SchemaRegistryIndex.getClassConfig(cls).subTypeField]: true
         } : {})
       })
     });

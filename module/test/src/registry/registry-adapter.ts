@@ -42,8 +42,8 @@ function combineMethods(suite: SuiteConfig, baseConfig: TestConfig, ...subConfig
   return baseConfig;
 }
 
-export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig, TestConfig> {
-  indexCls: RegistryIndexClass<SuiteConfig, TestConfig>;
+export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
+  indexCls: RegistryIndexClass<SuiteConfig>;
   #cls: Class;
   #config: SuiteConfig;
   #tests: Map<string | symbol, TestConfig> = new Map();
@@ -71,10 +71,6 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig, TestCo
     }
     combineClasses(this.#config, ...data);
     return this.#config;
-  }
-
-  registerField(): {} {
-    throw new AppError('Method not implemented.');
   }
 
   registerMethod(method: string | symbol, ...data: Partial<TestConfig>[]): TestConfig {
@@ -113,12 +109,8 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig, TestCo
     }
   }
 
-  getClass(): SuiteConfig {
+  get(): SuiteConfig {
     return this.#config;
-  }
-
-  getField(): {} {
-    throw new AppError('Method not implemented.');
   }
 
   getMethod(method: string | symbol): TestConfig {

@@ -62,13 +62,13 @@ export class CliCommandSchemaUtil {
     }
     schemaIndex.process([{ type: 'added', curr: cls }]);
 
-    const schema = await SchemaRegistryIndex.get(cls).getView();
+    const schema = await SchemaRegistryIndex.getSchemaConfig(cls);
     const flags = Object.values(schema.schema).map(fieldToInput);
 
     // Add help command
     flags.push({ name: 'help', flagNames: ['h'], description: 'display help for command', type: 'boolean' });
 
-    const method = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(fieldToInput);
+    const method = SchemaRegistryIndex.getMethodConfig(cls, 'main').parameters.map(fieldToInput);
 
     const used = new Set(flags
       .flatMap(f => f.flagNames ?? [])
@@ -101,7 +101,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const fullSchema = SchemaRegistryIndex.get(cls).getClass();
+    const fullSchema = SchemaRegistryIndex.getClassConfig(cls);
     const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getByClass(cls)!;
     const cfg: CliCommandSchema = {
       ...meta,
@@ -153,7 +153,7 @@ export class CliCommandSchemaUtil {
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
     const cls = CliCommandRegistry.getClass(cmd);
-    const paramNames = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(x => x.name!);
+    const paramNames = SchemaRegistryIndex.getMethodConfig(cls, 'main').parameters.map(x => x.name!);
 
     const validators = [
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),

@@ -201,7 +201,7 @@ class Validation {
 
   @Test()
   async verifyMultipleNested() {
-    const schema = SchemaRegistryIndex.get(Ccccz).getView();
+    const schema = SchemaRegistryIndex.getSchemaConfig(Ccccz);
     assert('c' in schema);
     assert('b' in schema);
     assert('a' in schema);

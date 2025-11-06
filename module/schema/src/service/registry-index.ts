@@ -1,7 +1,7 @@
 import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
-import { FieldConfig, ClassConfig, MethodConfig } from './types.ts';
+import { FieldConfig, ClassConfig, SchemaConfig, MethodConfig } from './types.ts';
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
@@ -13,7 +13,7 @@ const classToSubTypeName = (cls: Class): string => cls.name
 /**
  * Schema registry index for managing schema configurations across classes
  */
-export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodConfig, FieldConfig> {
+export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
 
   static getForRegister(clsOrId: ClassOrId): SchemaRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
@@ -24,7 +24,15 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
   }
 
   static getClassConfig(clsOrId: ClassOrId): ClassConfig {
-    return RegistryV2.get(this, clsOrId).getClass();
+    return RegistryV2.get(this, clsOrId).get();
+  }
+
+  static getSchemaConfig(clsOrId: ClassOrId, view?: string): SchemaConfig {
+    return RegistryV2.get(this, clsOrId).getSchema(view);
+  }
+
+  static getMethodConfig(clsOrId: ClassOrId, method: string | symbol): MethodConfig {
+    return RegistryV2.get(this, clsOrId).getMethod(method);
   }
 
   static getClasses(): Class[] {
@@ -117,7 +125,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig, MethodCon
   }
 
   getClassConfig(cls: ClassOrId): ClassConfig {
-    return SchemaRegistryIndex.get(cls).getClass();
+    return SchemaRegistryIndex.get(cls).get();
   }
 
   /**

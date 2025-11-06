@@ -50,7 +50,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    */
   #schemaToDotParams(location: 'query' | 'header', input: InputConfig, prefix: string = '', rootField: InputConfig = input): ParameterObject[] {
     const viewConf = SchemaRegistryIndex.has(input.type) ?
-      SchemaRegistryIndex.get(input.type).getView(input.view) :
+      SchemaRegistryIndex.getSchemaConfig(input.type, input.view) :
       undefined;
 
     const schemaConf = viewConf && viewConf.schema;
@@ -195,7 +195,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const typeId = this.#nameResolver.getName(type);
 
     if (!this.#allSchemas[typeId]) {
-      const config = SchemaRegistryIndex.get(cls).getClass();
+      const config = SchemaRegistryIndex.getClassConfig(cls);
       if (config) {
         this.#allSchemas[typeId] = {
           title: config.title || config.description,
@@ -209,7 +209,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
         for (const fieldName of Object.keys(def.fields)) {
           if (SchemaRegistryIndex.has(def.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistryIndex.get(def.fields[fieldName].type).getClass());
+            this.onSchema(SchemaRegistryIndex.getClassConfig(def.fields[fieldName].type));
           }
           properties[fieldName] = this.#processSchemaField(def.fields[fieldName], required);
         }
@@ -221,7 +221,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
             extra.oneOf = map
               .filter(x => !describeFunction(x)?.abstract)
               .map(c => {
-                this.onSchema(SchemaRegistryIndex.get(c).getClass());
+                this.onSchema(SchemaRegistryIndex.getClassConfig(c));
                 return this.#getType(c);
               });
           }
@@ -252,7 +252,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: ''
       };
     } else {
-      const cls = SchemaRegistryIndex.get(body.type).getClass();
+      const cls = SchemaRegistryIndex.getClassConfig(body.type);
       const typeId = cls ? this.#nameResolver.getName(cls) : body.type.name;
       const typeRef = cls ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {
@@ -320,7 +320,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 
-    const schema = SchemaRegistryIndex.get(ep.class).getMethod(ep.name);
+    const schema = SchemaRegistryIndex.get(ep.class).getMethodConfig(ep.name);
     for (const param of schema.parameters) {
       const result = this.#processEndpointParam(ep, ep.params[param.index], param);
       if (result) {

@@ -24,7 +24,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   }
 
   static getClassConfig(clsOrId: ClassOrId): ClassType {
-    return RegistryV2.get(this, clsOrId).getClass();
+    return RegistryV2.get(this, clsOrId).get();
   }
 
   static getClasses(): Class<ModelType>[] {
@@ -85,7 +85,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     this.adapter(cls).finalize(parentConfig);
 
     // Finalize
-    const schema = SchemaRegistryIndex.getForRegister(cls).getClass();
+    const schema = SchemaRegistryIndex.getForRegister(cls).get();
     const view = schema.fields;
     delete view.id.required; // Allow ids to be optional
 
@@ -133,7 +133,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   }
 
   get(cls: ClassOrId): ModelOptions<ModelType> {
-    return ModelRegistryIndex.get(cls).getClass();
+    return ModelRegistryIndex.get(cls).get();
   }
 
   has(cls: ClassOrId): boolean {

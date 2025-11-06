@@ -8,3 +8,4 @@ export const hasPostConstruct = hasFunction<{ postConstruct: () => Promise<unkno
 export const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDestroy');
 export const PrimaryCandidateSymbol = Symbol();
 export type ResolutionType = 'strict' | 'loose' | 'any';
+export class AutoCreate { }

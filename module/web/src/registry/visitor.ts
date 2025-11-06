@@ -20,7 +20,7 @@ export class ControllerVisitUtil {
 
     options.skipUndocumented ??= true;
 
-    const controller = ControllerRegistryIndex.getClassConfig(cls);
+    const controller = ControllerRegistryIndex.getController(cls);
     if (controller.documented === false && options.skipUndocumented) {
       return;
     }
@@ -31,7 +31,7 @@ export class ControllerVisitUtil {
         continue;
       }
 
-      const { parameters: params } = SchemaRegistryIndex.get(cls).getMethod(endpoint.name);
+      const { parameters: params } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.name);
       await visitor.onEndpointStart?.(endpoint, controller, params);
       await this.#onSchemaEvent(visitor, endpoint.responseType?.type);
       await this.#onSchemaEvent(visitor, endpoint.requestType?.type);

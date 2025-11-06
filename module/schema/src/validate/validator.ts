@@ -15,7 +15,7 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  */
 function resolveSchema<T>(base: Class<T>, o: T): SchemaConfig {
   const target = SchemaRegistryIndex.resolveInstanceType(base, o);
-  return SchemaRegistryIndex.get(target).getView();
+  return SchemaRegistryIndex.getSchemaConfig(target);
 }
 
 function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
@@ -257,7 +257,7 @@ export class SchemaValidator {
     }
     cls = SchemaRegistryIndex.resolveInstanceType(cls, o);
 
-    const config = SchemaRegistryIndex.get(cls).getView(view);
+    const config = SchemaRegistryIndex.getSchemaConfig(cls, view);
 
     // Validate using standard behaviors
     const errors = [
@@ -313,7 +313,7 @@ export class SchemaValidator {
    */
   static async validateMethod<T>(cls: Class<T>, method: string | symbol, params: unknown[], prefixes: (string | symbol | undefined)[] = []): Promise<void> {
     const errors: ValidationError[] = [];
-    const config = SchemaRegistryIndex.get(cls).getMethod(method);
+    const config = SchemaRegistryIndex.getMethodConfig(cls, method);
 
     for (const param of config.parameters) {
       const i = param.index;

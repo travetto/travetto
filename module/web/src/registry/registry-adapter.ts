@@ -63,8 +63,8 @@ function combineEndpointConfigs(ctrl: ControllerConfig, base: EndpointConfig, ..
 /**
  * Adapter for controller registry
  */
-export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConfig, EndpointConfig> {
-  indexCls: RegistryIndexClass<ControllerConfig, EndpointConfig, {}>;
+export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConfig> {
+  indexCls: RegistryIndexClass<ControllerConfig>;
 
   #config: ControllerConfig;
   #endpoints: Map<string | symbol, EndpointConfig> = new Map();
@@ -115,10 +115,6 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     return this.#endpoints.get(method)!;
   }
 
-  registerField(): {} {
-    throw new AppError('Method not implemented.');
-  }
-
   finalize(): void {
     // Merge into controller
     for (const ep of this.#config.endpoints) {
@@ -129,7 +125,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     }
   }
 
-  getClass(): ControllerConfig {
+  get(): ControllerConfig {
     return this.#config;
   }
 
@@ -139,10 +135,6 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
       throw new AppError(`Endpoint not registered: ${String(method)} on ${this.#cls.name}`);
     }
     return endpoint;
-  }
-
-  getField(): {} {
-    throw new AppError('Method not implemented.');
   }
 
   registerInterceptorConfig<T extends WebInterceptor>(

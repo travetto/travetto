@@ -51,7 +51,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    * Compute totals
    */
   computeTotal(cls: Class): SuiteResult {
-    const suite = SuiteRegistryIndex.getClassConfig(cls);
+    const suite = SuiteRegistryIndex.getSuiteConfig(cls);
     const total = suite.tests.reduce((acc, x) => {
       const status = this.#state[x.classId][x.methodName] ?? 'unknown';
       acc[status] += 1;

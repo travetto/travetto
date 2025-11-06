@@ -60,7 +60,7 @@ class EdgeCases {
 
   @Test()
   async testEmpty() {
-    const cfg = SchemaRegistryIndex.get(WithEmptyObject).getView();
+    const cfg = SchemaRegistryIndex.getSchemaConfig(WithEmptyObject);
     assert(cfg);
     assert('empty' in cfg);
     assert(cfg.empty.type === Object);
@@ -68,10 +68,10 @@ class EdgeCases {
 
   @Test()
   async testSingle() {
-    const cfg = SchemaRegistryIndex.get(SingleField).getView();
+    const cfg = SchemaRegistryIndex.getSchemaConfig(SingleField);
     assert(cfg);
     assert('single' in cfg);
     assert(cfg.single.type !== Object);
-    assert(SchemaRegistryIndex.get(cfg.single.type).getView().field.type === Number);
+    assert(SchemaRegistryIndex.getSchemaConfig(cfg.single.type).field.type === Number);
   }
 }

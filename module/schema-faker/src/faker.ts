@@ -186,7 +186,7 @@ export class SchemaFaker {
    * @param view The view to define specifically
    */
   static generate<T>(cls: Class<T>, view?: string): T {
-    const cfg = SchemaRegistryIndex.get(cls).getView(view);
+    const cfg = SchemaRegistryIndex.get(cls).getSchema(view);
     const out: Record<string, unknown> = {};
 
     for (const [f, fieldConfig] of Object.entries(cfg.fields)) {

@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { Class, ClassInstance, RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -7,18 +7,14 @@ import { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
 import { WebAsyncContext } from '../context';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
-export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig, EndpointConfig> {
+export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> {
 
   static getForRegister(clsOrId: ClassOrId): ControllerRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static get(clsOrId: ClassOrId): Omit<ControllerRegistryAdapter, RegistrationMethods> {
-    return RegistryV2.get(this, clsOrId);
-  }
-
-  static getClassConfig(clsOrId: ClassOrId): ControllerConfig {
-    return RegistryV2.get(this, clsOrId).getClass();
+  static getController(clsOrId: ClassOrId): ControllerConfig {
+    return RegistryV2.get(this, clsOrId).get();
   }
 
   static getClasses(): Class[] {
@@ -56,7 +52,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig, 
 
   async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
-    const map = this.getClassConfig(inst.constructor).contextParams;
+    const map = this.getController(inst.constructor).contextParams;
     for (const [field, type] of Object.entries(map)) {
       Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
@@ -69,13 +65,13 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig, 
    * @param type The context type to bind to field
    */
   registerControllerContextParam<T>(target: Class, field: string, type: Class<T>): void {
-    const controllerConfig = this.getClassConfig(target);
+    const controllerConfig = this.getController(target);
     controllerConfig.contextParams![field] = type;
     DependencyRegistry.registerPostConstructHandler(target, 'ContextParam', inst => this.#bindContextParams(inst));
   }
 
-  getClassConfig(cls: Class): ControllerConfig {
-    return RegistryV2.get(ControllerRegistryIndex, cls).getClass();
+  getController(cls: Class): ControllerConfig {
+    return RegistryV2.get(ControllerRegistryIndex, cls).get();
   }
 
   getEndpointById(id: string): EndpointConfig | undefined {
@@ -89,7 +85,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig, 
   process(events: ChangeEvent<Class>[]): void {
     for (const evt of events) {
       if (evt.type !== 'removing') {
-        for (const ep of this.getClassConfig(evt.curr).endpoints) {
+        for (const ep of this.getController(evt.curr).endpoints) {
           this.#endpointsById.set(ep.id, ep);
         }
       } else {
