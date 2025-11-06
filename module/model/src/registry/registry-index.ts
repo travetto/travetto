@@ -37,11 +37,11 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     return RegistryV2.instance(this).getBaseModelClass(cls);
   }
 
-  static getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): (IndexConfig<T> & { type: K[number] })[] {
+  static getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
     return RegistryV2.instance(this).getIndices(cls, supportedTypes);
   }
 
-  static getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexConfig<T> & { type: K[number] } {
+  static getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
     return RegistryV2.instance(this).getIndex(cls, name, supportedTypes);
   }
 
@@ -234,7 +234,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   /**
    * Get Indices
    */
-  getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): (IndexResult<T, K>)[] {
+  getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
     return (this.getModelOptions(cls).indices ?? []).filter((x): x is IndexConfig<T> => !supportedTypes || supportedTypes.includes(x.type));
   }
 
