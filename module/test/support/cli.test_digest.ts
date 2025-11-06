@@ -27,7 +27,7 @@ export class TestDigestCommand {
 
     await RegistryV2.init();
 
-    const suites = SuiteRegistryIndex.getClasses();
+    const suites = RegistryV2.getClasses(SuiteRegistryIndex);
     const all = suites
       .map(c => SuiteRegistryIndex.getSuiteConfig(c))
       .filter(c => !describeFunction(c.class).abstract)

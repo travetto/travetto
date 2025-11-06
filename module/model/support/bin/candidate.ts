@@ -1,5 +1,6 @@
 import { toConcrete, Class } from '@travetto/runtime';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
+import { RegistryV2 } from '@travetto/registry';
 
 import type { ModelStorageSupport } from '../../src/types/storage.ts';
 import type { ModelType } from '../../src/types/model.ts';
@@ -23,7 +24,7 @@ export class ModelCandidateUtil {
   static async #getModels(models?: string[]): Promise<Class<ModelType>[]> {
     const names = new Set(models ?? []);
     const all = names.has('*');
-    return ModelRegistryIndex.getClasses()
+    return RegistryV2.getClasses(ModelRegistryIndex)
       .map(x => ModelRegistryIndex.getBaseModel(x))
       .filter(x => !models || all || names.has(ModelRegistryIndex.getStore(x)));
   }

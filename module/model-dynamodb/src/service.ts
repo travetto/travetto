@@ -3,6 +3,7 @@ import {
   type KeySchemaElement, type PutItemCommandInput, type PutItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
+import { RegistryV2 } from '@travetto/registry';
 import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
@@ -259,7 +260,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async deleteStorage(): Promise<void> {
-    for (const model of ModelRegistryIndex.getClasses()) {
+    for (const model of RegistryV2.getClasses(ModelRegistryIndex)) {
       await this.client.deleteTable({
         TableName: this.#resolveTable(model)
       }).catch(() => { });

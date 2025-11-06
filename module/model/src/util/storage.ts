@@ -46,7 +46,7 @@ export class ModelStorageUtil {
     await storage.createStorage();
 
     if (storage.createModel) {
-      for (const cls of ModelRegistryIndex.getClasses()) {
+      for (const cls of RegistryV2.getClasses(ModelRegistryIndex)) {
         if (checkType(cls)) {
           await storage.createModel(cls);
         }

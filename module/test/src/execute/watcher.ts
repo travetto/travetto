@@ -52,7 +52,7 @@ export class TestWatcher {
         return;
       }
 
-      const conf = SuiteRegistryIndex.getByClassAndMethod(cls, method)!;
+      const conf = SuiteRegistryIndex.getTestConfig(cls, method)!;
       if (event.type !== 'removing') {
         if (conf) {
           const run: TestRun = {

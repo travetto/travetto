@@ -18,7 +18,7 @@ class $Registry {
   #itemsByIndex = new Map<RegistryIndexClass, Map<Class, RegistryItem>>();
   #classSource = new ClassSource();
   #methodSource?: MethodSource;
-  #indexes = new Map<RegistryIndexClass, RegistryIndex>();
+  #indexes = new Map<RegistryIndexClass, RegistryIndex<{}>>();
 
   #emitter = new EventEmitter<{ event: [ChangeEvent<Class>] }>();
 
@@ -178,7 +178,7 @@ class $Registry {
     return this.#readonlyAdapter(indexCls, cls);
   }
 
-  getAll<C extends {}, T extends RegistryIndexClass<C>>(
+  getClasses<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T
   ): Class[] {
     return Array.from(this.#itemsByIndex.get(indexCls)?.keys() ?? []);

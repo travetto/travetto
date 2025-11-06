@@ -18,7 +18,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   }
 
   static getClasses(): Class[] {
-    return RegistryV2.getAll(this);
+    return RegistryV2.getClasses(this);
   }
 
   static has(clsOrId: ClassOrId): boolean {

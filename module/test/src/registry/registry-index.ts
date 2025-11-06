@@ -20,8 +20,8 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
     return RegistryV2.has(SuiteRegistryIndex, cls);
   }
 
-  static getByClassAndMethod(cls: Class, method: Function): TestConfig | undefined {
-    return RegistryV2.instance(SuiteRegistryIndex).getByClassAndMethod(cls, method);
+  static getTestConfig(cls: Class, method: Function): TestConfig | undefined {
+    return RegistryV2.instance(SuiteRegistryIndex).getTestConfig(cls, method);
   }
 
   static getSuiteTests(run: TestRun): SuiteTests[] {
@@ -30,10 +30,6 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
 
   static getSuiteConfig(cls: Class): SuiteConfig {
     return RegistryV2.get(SuiteRegistryIndex, cls).get();
-  }
-
-  static getClasses(): Class[] {
-    return RegistryV2.getAll(SuiteRegistryIndex);
   }
 
   adapter(cls: Class): SuiteRegistryAdapter {
@@ -56,7 +52,7 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses(): Class[] {
-    return RegistryV2.getAll(SuiteRegistryIndex).filter(c => !describeFunction(c).abstract);
+    return RegistryV2.getClasses(SuiteRegistryIndex).filter(c => !describeFunction(c).abstract);
   }
 
   /**
@@ -102,7 +98,7 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
   /**
    * Find a test configuration given class and optionally a method
    */
-  getByClassAndMethod(cls: Class, method: Function): TestConfig | undefined {
+  getTestConfig(cls: Class, method: Function): TestConfig | undefined {
     if (this.has(cls)) {
       const conf = this.get(cls);
       return conf.tests.find(x => x.methodName === method.name);

@@ -1,5 +1,6 @@
 import { castTo, Class, Util, asConstructable, AppError, hasFunction } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
@@ -75,9 +76,9 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = ModelRegistryIndex.get(asConstructable(item).constructor).get();
+    const config = ModelRegistryIndex.getClassConfig(asConstructable(item).constructor);
     if (config.subType) { // Sub-typing, assign type
-      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
+      RegistryV2.get(SchemaRegistryIndex, cls).ensureInstanceTypeField(item);
     }
 
     item = await this.prePersist(cls, item, scope);
@@ -105,7 +106,7 @@ export class ModelCrudUtil {
    * Ensure subtype is not supported
    */
   static ensureNotSubType(cls: Class): void {
-    if (ModelRegistryIndex.get(cls).get().subType) {
+    if (ModelRegistryIndex.getClassConfig(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
   }
@@ -114,7 +115,7 @@ export class ModelCrudUtil {
    * Pre persist behavior
    */
   static async prePersist<T>(cls: Class<T>, item: T, scope: PrePersistScope): Promise<T> {
-    const config = ModelRegistryIndex.get(cls).get();
+    const config = ModelRegistryIndex.getClassConfig(cls);
     for (const state of (config.prePersist ?? [])) {
       if (state.scope === scope || scope === 'all' || state.scope === 'all') {
         const handler: DataHandler<T> = castTo(state.handler);
@@ -131,7 +132,7 @@ export class ModelCrudUtil {
    * Post load behavior
    */
   static async postLoad<T>(cls: Class<T>, item: T): Promise<T> {
-    const config = ModelRegistryIndex.get(cls).get();
+    const config = ModelRegistryIndex.getClassConfig(cls);
     for (const handler of castTo<DataHandler<T>[]>(config.postLoad ?? [])) {
       item = await handler(item) ?? item;
     }

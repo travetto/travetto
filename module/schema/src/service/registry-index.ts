@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { FieldConfig, ClassConfig, SchemaConfig, MethodConfig } from './types.ts';
@@ -19,10 +19,6 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static get(clsOrId: ClassOrId): Omit<SchemaRegistryAdapter, RegistrationMethods> {
-    return RegistryV2.get(this, clsOrId);
-  }
-
   static getClassConfig(clsOrId: ClassOrId): ClassConfig {
     return RegistryV2.get(this, clsOrId).get();
   }
@@ -33,10 +29,6 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
 
   static getMethodConfig(clsOrId: ClassOrId, method: string | symbol): MethodConfig {
     return RegistryV2.get(this, clsOrId).getMethod(method);
-  }
-
-  static getClasses(): Class[] {
-    return RegistryV2.getAll(this);
   }
 
   static has(clsOrId: ClassOrId): boolean {
@@ -71,7 +63,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
 
   #recomputeSubTypes(): void {
     this.#subTypes.clear();
-    const all = RegistryV2.getAll(SchemaRegistryIndex);
+    const all = RegistryV2.getClasses(SchemaRegistryIndex);
     for (const el of all) {
       this.registerSubTypes(el);
     }
@@ -125,7 +117,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
   }
 
   getClassConfig(cls: ClassOrId): ClassConfig {
-    return SchemaRegistryIndex.get(cls).get();
+    return RegistryV2.get(SchemaRegistryIndex, cls).get();
   }
 
   /**

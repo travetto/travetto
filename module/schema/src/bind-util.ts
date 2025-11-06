@@ -1,4 +1,5 @@
 import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
+import { RegistryV2 } from '@travetto/registry';
 
 import { DataUtil } from './data.ts';
 import { InputConfig, ParameterConfig, SchemaConfig } from './service/types.ts';
@@ -149,7 +150,7 @@ export class BindUtil {
       return castTo(data);
     } else {
       const tgt = classConstruct<T & { type?: string }>(cls);
-      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(tgt);
+      RegistryV2.get(SchemaRegistryIndex, cls).ensureInstanceTypeField(tgt);
 
       for (const k of TypedObject.keys(tgt)) { // Do not retain undefined fields
         if (tgt[k] === undefined) {
@@ -172,7 +173,7 @@ export class BindUtil {
     delete cfg.view;
 
     if (!!data && isInstance<T>(data)) {
-      const adapter = SchemaRegistryIndex.get(cons);
+      const adapter = RegistryV2.get(SchemaRegistryIndex, cons);
       const conf = adapter.get();
 
       // If no configuration
@@ -181,15 +182,15 @@ export class BindUtil {
           obj[k] = data[k];
         }
       } else {
-        let viewConf: SchemaConfig = conf.fields;
+        let schema: SchemaConfig = conf.fields;
         if (view) {
-          viewConf = adapter.getSchema(view);
-          if (!viewConf) {
+          schema = adapter.getSchema(view);
+          if (!schema) {
             throw new Error(`View not found: ${view.toString()}`);
           }
         }
 
-        for (const [schemaFieldName, field] of Object.entries(viewConf)) {
+        for (const [schemaFieldName, field] of Object.entries(schema)) {
           let inboundField: string | undefined = undefined;
           if (field.access === 'readonly' || cfg.filterInput?.(field) === false) {
             continue; // Skip trying to write readonly fields

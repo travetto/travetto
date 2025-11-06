@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { AppError, castTo, Class, getParentClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -19,16 +19,12 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static get(clsOrId: ClassOrId): Omit<ModelRegistryAdapter, RegistrationMethods> {
-    return RegistryV2.get(this, clsOrId);
-  }
-
   static getClassConfig(clsOrId: ClassOrId): ClassType {
     return RegistryV2.get(this, clsOrId).get();
   }
 
   static getClasses(): Class<ModelType>[] {
-    return RegistryV2.getAll(this);
+    return RegistryV2.getClasses(this);
   }
 
   static has(clsOrId: ClassOrId): boolean {
@@ -121,7 +117,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
 
   getInitialNameMapping(): Map<string, Class[]> {
     if (this.#initialModelNameMapping.size === 0) {
-      for (const cls of ModelRegistryIndex.getClasses()) {
+      for (const cls of RegistryV2.getClasses(ModelRegistryIndex)) {
         const store = this.get(cls).store ?? cls.name;
         if (!this.#initialModelNameMapping.has(store)) {
           this.#initialModelNameMapping.set(store, []);
@@ -133,7 +129,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   }
 
   get(cls: ClassOrId): ModelOptions<ModelType> {
-    return ModelRegistryIndex.get(cls).get();
+    return RegistryV2.get(ModelRegistryIndex, cls).get();
   }
 
   has(cls: ClassOrId): boolean {
@@ -164,7 +160,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   getAllClassesByBaseType(): Map<Class, Class[]> {
     if (!this.#baseModelGrouped.size) {
       const out = new Map<Class, Class[]>();
-      for (const cls of RegistryV2.getAll(ModelRegistryIndex)) {
+      for (const cls of RegistryV2.getClasses(ModelRegistryIndex)) {
         const conf = this.get(cls);
         if (conf.baseType) {
           continue;
