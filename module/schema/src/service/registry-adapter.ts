@@ -156,10 +156,6 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
     return cfg;
   }
 
-  unregister(): void {
-    throw new Error('Method not implemented.');
-  }
-
   finalize(parent?: ClassConfig): void {
     const config = this.#config;
 
