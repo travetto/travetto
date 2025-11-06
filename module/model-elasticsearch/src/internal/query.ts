@@ -209,7 +209,7 @@ export class ElasticsearchQueryUtil {
     if (search && Object.keys(search).length) {
       clauses.push(search);
     }
-    const { expiresAt, subType } = ModelRegistryIndex.getModelOptions(cls);
+    const { expiresAt, subType } = ModelRegistryIndex.getConfig(cls);
     if (checkExpiry && expiresAt) {
       clauses.push({
         bool: {

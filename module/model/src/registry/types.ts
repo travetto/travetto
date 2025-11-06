@@ -17,9 +17,9 @@ export type DataHandler<T = unknown> = (inst: T) => (Promise<T | void> | T | voi
 export type PrePersistScope = 'full' | 'partial' | 'all';
 
 /**
- * Model options
+ * Model config
  */
-export class ModelOptions<T extends ModelType = ModelType> {
+export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Class for model
    */

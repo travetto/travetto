@@ -31,7 +31,7 @@ export class WebRpcClientGeneratorService {
         const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(x));
         return entry && entry.role === 'std';
       })
-      .filter(x => ControllerRegistryIndex.getControllerConfig(x).documented !== false)
+      .filter(x => ControllerRegistryIndex.getConfig(x).documented !== false)
       .map(x => {
         const imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(x));
         const base = Runtime.workspaceRelative(RuntimeIndex.manifest.build.typesFolder);

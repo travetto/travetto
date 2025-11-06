@@ -95,7 +95,7 @@ export class ElasticsearchModelService implements
 
     item = await ModelCrudUtil.load(cls, item);
 
-    const { expiresAt } = ModelRegistryIndex.getModelOptions(cls);
+    const { expiresAt } = ModelRegistryIndex.getConfig(cls);
 
     if (expiresAt) {
       const expiry = ModelExpiryUtil.getExpiryState(cls, item);
@@ -184,7 +184,7 @@ export class ElasticsearchModelService implements
 
     const id = this.preUpdate(o);
 
-    if (ModelRegistryIndex.getModelOptions(cls).expiresAt) {
+    if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, id);
     }
 
@@ -451,7 +451,7 @@ export class ElasticsearchModelService implements
     }
     query.where = where;
 
-    if (ModelRegistryIndex.getModelOptions(cls).expiresAt) {
+    if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, id);
     }
 

@@ -35,7 +35,7 @@ export class TableManager {
     for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
       out.push(op);
     }
-    const indices = ModelRegistryIndex.getModelOptions(cls).indices;
+    const indices = ModelRegistryIndex.getConfig(cls).indices;
     if (indices) {
       for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         out.push(op);
@@ -54,7 +54,7 @@ export class TableManager {
     for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
       await this.#exec(op);
     }
-    const indices = ModelRegistryIndex.getModelOptions(cls).indices;
+    const indices = ModelRegistryIndex.getConfig(cls).indices;
     if (indices) {
       for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {

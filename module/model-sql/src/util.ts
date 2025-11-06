@@ -68,7 +68,7 @@ export class SQLModelUtil {
       };
     }
 
-    const model = ModelRegistryIndex.getModelOptions(conf.class)!;
+    const model = ModelRegistryIndex.getConfig(conf.class)!;
     const fields = Object.values(conf.fields).map(field => ({ ...field }));
 
     // Polymorphic

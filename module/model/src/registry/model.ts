@@ -3,7 +3,7 @@ import { Registry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
 
-import { IndexConfig, IndexType, ModelOptions } from './types.ts';
+import { IndexConfig, IndexType, ModelConfig } from './types.ts';
 import { NotFoundError } from '../error/not-found.ts';
 import { ModelType } from '../types/model.ts';
 import { IndexNotSupported } from '../error/invalid-index.ts';
@@ -11,7 +11,7 @@ import { IndexNotSupported } from '../error/invalid-index.ts';
 /**
  * Registry for all models, built on the Metadata registry
  */
-class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
+class $ModelRegistry extends Registry<ModelConfig<ModelType>> {
   /**
    * All stores names
    */
@@ -49,7 +49,7 @@ class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
     return this.initialModelNameMapping;
   }
 
-  createPending(cls: Class): Partial<ModelOptions<ModelType>> {
+  createPending(cls: Class): Partial<ModelConfig<ModelType>> {
     return {
       class: cls,
       indices: [],
@@ -60,7 +60,7 @@ class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
     };
   }
 
-  registerDataHandlers(cls: Class, pConfig?: Partial<ModelOptions<ModelType>>): void {
+  registerDataHandlers(cls: Class, pConfig?: Partial<ModelConfig<ModelType>>): void {
     const cfg = this.getOrCreatePending(cls);
     this.register(cls, {
       ...cfg,
@@ -69,10 +69,10 @@ class $ModelRegistry extends Registry<ModelOptions<ModelType>> {
     });
   }
 
-  onInstallFinalize(cls: Class): ModelOptions<ModelType> {
+  onInstallFinalize(cls: Class): ModelConfig<ModelType> {
     const config = asFull(this.pending.get(cls.Ⲑid)!);
 
-    const schema = SchemaRegistryIndex.getForRegister(cls).getClass();
+    const schema = SchemaRegistryIndex.getForRegister(cls).get();
     const view = schema.fields;
     delete view.id.required; // Allow ids to be optional
 

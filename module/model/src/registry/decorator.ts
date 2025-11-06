@@ -2,7 +2,7 @@ import { AppError, asConstructable, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelType } from '../types/model.ts';
-import { DataHandler, IndexConfig, ModelOptions, PrePersistScope } from './types.ts';
+import { DataHandler, IndexConfig, ModelConfig, PrePersistScope } from './types.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
 
 /**
@@ -10,7 +10,7 @@ import { ModelRegistryIndex } from './registry-index.ts';
  *
  * @augments `@travetto/schema:Schema`
  */
-export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
+export function Model(conf: Partial<ModelConfig<ModelType>> | string = {}) {
   return function <T extends ModelType, U extends Class<T>>(target: U): U {
     if (typeof conf === 'string') {
       conf = { store: conf };

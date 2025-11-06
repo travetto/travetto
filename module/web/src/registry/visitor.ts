@@ -21,7 +21,7 @@ export class ControllerVisitUtil {
 
     options.skipUndocumented ??= true;
 
-    const controller = ControllerRegistryIndex.getControllerConfig(cls);
+    const controller = ControllerRegistryIndex.getConfig(cls);
     if (controller.documented === false && options.skipUndocumented) {
       return;
     }

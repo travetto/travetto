@@ -27,7 +27,7 @@ export class ModelQuerySuggestUtil {
    * Build suggest query on top of query language
    */
   static getSuggestQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>): Query<T> {
-    const config = ModelRegistryIndex.getModelOptions(cls);
+    const config = ModelRegistryIndex.getConfig(cls);
     const limit = query?.limit ?? 10;
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
@@ -84,7 +84,7 @@ export class ModelQuerySuggestUtil {
    * Build suggestion query
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
-    const config = ModelRegistryIndex.getModelOptions(cls);
+    const config = ModelRegistryIndex.getConfig(cls);
     return this.getSuggestQuery<T>(cls, castTo(field), prefix, {
       ...(query ?? {}),
       select: castTo({

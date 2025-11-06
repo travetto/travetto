@@ -27,7 +27,7 @@ export class ModelStorageUtil {
       if (enforceBase && ModelRegistryIndex.getBaseModelClass(cls) !== cls) {
         return false;
       }
-      const { autoCreate } = ModelRegistryIndex.getModelOptions(cls) ?? {};
+      const { autoCreate } = ModelRegistryIndex.getConfig(cls) ?? {};
       return autoCreate ?? false;
     };
 

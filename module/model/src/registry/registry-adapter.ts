@@ -1,12 +1,9 @@
 import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { Class, describeFunction } from '@travetto/runtime';
 
-import { ModelOptions } from './types';
-import { ModelType } from '../types/model';
+import { ModelConfig } from './types';
 
-type ClassType = ModelOptions<ModelType>;
-
-function combineClasses(target: ClassType, sources: Partial<ClassType>[]): ClassType {
+function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): ModelConfig {
   for (const source of sources) {
     Object.assign(target, source, {
       indices: [...(target.indices || []), ...(source.indices || [])],
@@ -17,16 +14,16 @@ function combineClasses(target: ClassType, sources: Partial<ClassType>[]): Class
   return target;
 }
 
-export class ModelRegistryAdapter implements RegistryAdapter<ModelOptions<ModelType>> {
+export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   #cls: Class;
-  #config: ModelOptions<ModelType>;
-  indexCls: RegistryIndexClass<ModelOptions<ModelType>>;
+  #config: ModelConfig;
+  indexCls: RegistryIndexClass<ModelConfig>;
 
   constructor(cls: Class) {
     this.#cls = cls;
   }
 
-  register(...data: Partial<ClassType>[]): ClassType {
+  register(...data: Partial<ModelConfig>[]): ModelConfig {
     const cfg = this.#config ??= {
       class: this.#cls,
       indices: [],
@@ -39,7 +36,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelOptions<ModelT
     return cfg;
   }
 
-  finalize(parent?: ClassType): void {
+  finalize(parent?: ModelConfig): void {
     const config = this.#config;
     if (parent) {
       config.postLoad = [...parent.postLoad ?? [], ...config.postLoad ?? []];
@@ -47,7 +44,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelOptions<ModelT
     }
   }
 
-  get(): ClassType {
+  get(): ModelConfig {
     return this.#config;
   }
 }

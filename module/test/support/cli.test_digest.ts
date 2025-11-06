@@ -29,7 +29,7 @@ export class TestDigestCommand {
 
     const suites = RegistryV2.getClasses(SuiteRegistryIndex);
     const all = suites
-      .map(c => SuiteRegistryIndex.getSuiteConfig(c))
+      .map(c => SuiteRegistryIndex.getConfig(c))
       .filter(c => !describeFunction(c.class).abstract)
       .flatMap(c => c.tests);
 

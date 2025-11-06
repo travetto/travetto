@@ -84,7 +84,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
 
   #getExpiryConfig<T extends ModelType>(cls: Class<T>, item: T): { Expires?: Date } {
-    if (ModelRegistryIndex.getModelOptions(cls).expiresAt) {
+    if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item);
       if (expiresAt) {
         return { Expires: expiresAt };
@@ -196,7 +196,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async head<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {
     try {
       const result = await this.client.headObject(this.#q(cls, id));
-      const { expiresAt } = ModelRegistryIndex.getModelOptions(cls);
+      const { expiresAt } = ModelRegistryIndex.getConfig(cls);
       if (expiresAt && result.ExpiresString && Date.parse(result.ExpiresString) < Date.now()) {
         return false;
       }
@@ -218,7 +218,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         const body = await toText(castTo(result.Body));
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
-          const { expiresAt } = ModelRegistryIndex.getModelOptions(cls);
+          const { expiresAt } = ModelRegistryIndex.getConfig(cls);
           if (expiresAt) {
             const expiry = ModelExpiryUtil.getExpiryState(cls, output);
             if (!expiry.expired) {

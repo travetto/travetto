@@ -28,7 +28,7 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
     return RegistryV2.instance(SuiteRegistryIndex).getSuiteTests(run);
   }
 
-  static getSuiteConfig(cls: Class): SuiteConfig {
+  static getConfig(cls: Class): SuiteConfig {
     return RegistryV2.get(SuiteRegistryIndex, cls).get();
   }
 
@@ -41,11 +41,11 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
   }
 
   get(target: Class): SuiteConfig {
-    return SuiteRegistryIndex.getSuiteConfig(target);
+    return RegistryV2.get(SuiteRegistryIndex, target).get();
   }
 
   has(target: Class): boolean {
-    return SuiteRegistryIndex.has(target);
+    return RegistryV2.has(SuiteRegistryIndex, target);
   }
 
   /**

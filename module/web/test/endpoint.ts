@@ -68,7 +68,7 @@ export class RouterUtilTest {
 
   @Test()
   async testOrder() {
-    const controller = ControllerRegistryIndex.getControllerConfig(EndpointController);
+    const controller = ControllerRegistryIndex.getConfig(EndpointController);
     const endpoints = EndpointUtil.orderEndpoints(controller.endpoints);
 
     assert.deepStrictEqual(endpoints.map(x => x.path), [

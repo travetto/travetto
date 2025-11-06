@@ -13,12 +13,8 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getControllerConfig(clsOrId: ClassOrId): ControllerConfig {
+  static getConfig(clsOrId: ClassOrId): ControllerConfig {
     return RegistryV2.get(this, clsOrId).get();
-  }
-
-  static has(clsOrId: ClassOrId): boolean {
-    return RegistryV2.has(this, clsOrId);
   }
 
   static getEndpointConfigById(id: string): EndpointConfig | undefined {

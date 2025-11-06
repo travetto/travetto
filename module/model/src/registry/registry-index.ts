@@ -2,26 +2,24 @@ import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/reg
 import { AppError, castTo, Class, getParentClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { IndexConfig, IndexType, ModelOptions } from './types';
+import { IndexConfig, IndexType, ModelConfig } from './types';
 import { ModelType } from '../types/model';
 import { ModelRegistryAdapter } from './registry-adapter';
 import { IndexNotSupported } from '../error/invalid-index';
 import { NotFoundError } from '../error/not-found';
-
-type ClassType = ModelOptions<ModelType>;
 
 type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & { type: K[number] };
 
 /**
  * Model registry index for managing model configurations across classes
  */
-export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>> {
+export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
 
   static getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getModelOptions(clsOrId: ClassOrId): ClassType {
+  static getConfig(clsOrId: ClassOrId): ModelConfig {
     return RegistryV2.get(this, clsOrId).get();
   }
 
@@ -73,7 +71,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
    */
   #initialModelNameMapping = new Map<string, Class[]>();
 
-  #finalize(cls: Class): ModelOptions<ModelType> {
+  #finalize(cls: Class): ModelConfig {
     const parent = getParentClass(cls);
     const parentConfig = parent ? this.getModelOptions(parent) : undefined;
     this.adapter(cls).finalize(parentConfig);
@@ -126,7 +124,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     return this.#initialModelNameMapping;
   }
 
-  getModelOptions(cls: ClassOrId): ModelOptions<ModelType> {
+  getModelOptions(cls: ClassOrId): ModelConfig<ModelType> {
     return RegistryV2.get(ModelRegistryIndex, cls).get();
   }
 

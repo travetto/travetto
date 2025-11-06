@@ -151,7 +151,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     ModelExpiryUtil.registerCull(this);
 
     for (const el of RegistryV2.getClasses(ModelRegistryIndex)) {
-      for (const idx of ModelRegistryIndex.getModelOptions(el).indices ?? []) {
+      for (const idx of ModelRegistryIndex.getConfig(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
             console.error('Unique indices are not supported for', { cls: el.Ⲑid, idx: idx.name });
@@ -168,7 +168,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (store.has(id)) {
       const res = await ModelCrudUtil.load(cls, store.get(id)!);
       if (res) {
-        if (ModelRegistryIndex.getModelOptions(cls).expiresAt) {
+        if (ModelRegistryIndex.getConfig(cls).expiresAt) {
           if (!ModelExpiryUtil.getExpiryState(cls, res).expired) {
             return res;
           }
@@ -303,7 +303,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async createModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    for (const idx of ModelRegistryIndex.getModelOptions(cls).indices ?? []) {
+    for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
       if (idx.type === 'sorted' || idx.type === 'unsorted') {
         this.#indices[idx.type].set(indexName(cls, idx), new Map());
       }

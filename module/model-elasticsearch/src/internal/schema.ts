@@ -55,7 +55,7 @@ export class ElasticsearchSchemaUtil {
    * Build one or more mappings depending on the polymorphic state
    */
   static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    return ModelRegistryIndex.getModelOptions(cls).baseType ?
+    return ModelRegistryIndex.getConfig(cls).baseType ?
       this.generateAllMapping(cls, config) :
       this.generateSingleMapping(cls, config);
   }

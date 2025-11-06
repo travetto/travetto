@@ -56,7 +56,7 @@ export class TestExecutor {
    * This method should never throw under any circumstances.
    */
   async #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
-    const suite = SuiteRegistryIndex.getSuiteConfig(test.class);
+    const suite = SuiteRegistryIndex.getConfig(test.class);
 
     // Ensure all the criteria below are satisfied before moving forward
     return Barrier.awaitOperation(test.timeout || TEST_TIMEOUT, async () => {
