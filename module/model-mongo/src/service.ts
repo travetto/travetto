@@ -128,7 +128,7 @@ export class MongoModelService implements
 
   async establishIndices<T extends ModelType>(cls: Class<T>): Promise<void> {
     const col = await this.getStore(cls);
-    const creating = MongoUtil.getIndices(cls, ModelRegistryIndex.getClassConfig(cls).indices);
+    const creating = MongoUtil.getIndices(cls, ModelRegistryIndex.getModelOptions(cls).indices);
     if (creating.length) {
       console.debug('Creating indexes', { indices: creating });
       for (const el of creating) {

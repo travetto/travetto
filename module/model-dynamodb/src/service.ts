@@ -38,7 +38,7 @@ function toValue(val: unknown): AttributeValue | undefined {
 
 async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: string): Promise<T> {
   const item = await ModelCrudUtil.load(cls, doc);
-  if (ModelRegistryIndex.getClassConfig(cls).expiresAt) {
+  if (ModelRegistryIndex.getModelOptions(cls).expiresAt) {
     const expiry = ModelExpiryUtil.getExpiryState(cls, item);
     if (!expiry.expired) {
       return item;
@@ -70,7 +70,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
-    const config = ModelRegistryIndex.getClassConfig(cls);
+    const config = ModelRegistryIndex.getModelOptions(cls);
     let expiry: number | undefined;
 
     if (config.expiresAt) {
@@ -148,7 +148,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   #computeIndexConfig<T extends ModelType>(cls: Class<T>): { indices?: GlobalSecondaryIndex[], attributes: AttributeDefinition[] } {
-    const config = ModelRegistryIndex.getClassConfig(cls);
+    const config = ModelRegistryIndex.getModelOptions(cls);
     const attributes: AttributeDefinition[] = [];
     const indices: GlobalSecondaryIndex[] = [];
 
@@ -216,7 +216,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       GlobalSecondaryIndexes: idx.indices
     });
 
-    if (ModelRegistryIndex.getClassConfig(cls).expiresAt) {
+    if (ModelRegistryIndex.getModelOptions(cls).expiresAt) {
       await this.client.updateTimeToLive({
         TableName: table,
         TimeToLiveSpecification: { AttributeName: EXP_ATTR, Enabled: true }
@@ -289,7 +289,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     item = await ModelCrudUtil.preStore(cls, item, this);
-    if (ModelRegistryIndex.getClassConfig(cls).expiresAt) {
+    if (ModelRegistryIndex.getModelOptions(cls).expiresAt) {
       await this.get(cls, item.id);
     }
     await this.#putItem(cls, item.id, item, 'update');

@@ -82,7 +82,7 @@ class ParamController {
 @Suite()
 export class EndpointParameterTest {
   static getEndpoint(path: string, method: HttpMethod) {
-    return ControllerRegistryIndex.getController(ParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
+    return ControllerRegistryIndex.getControllerConfig(ParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
   }
 
   static async extract(ep: EndpointConfig, request: Partial<WebRequest>): Promise<unknown[]> {

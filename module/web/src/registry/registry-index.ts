@@ -13,20 +13,16 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getController(clsOrId: ClassOrId): ControllerConfig {
+  static getControllerConfig(clsOrId: ClassOrId): ControllerConfig {
     return RegistryV2.get(this, clsOrId).get();
-  }
-
-  static getClasses(): Class[] {
-    return RegistryV2.getClasses(this);
   }
 
   static has(clsOrId: ClassOrId): boolean {
     return RegistryV2.has(this, clsOrId);
   }
 
-  static getEndpointById(id: string): EndpointConfig | undefined {
-    return RegistryV2.instance(ControllerRegistryIndex).getEndpointById(id);
+  static getEndpointConfigById(id: string): EndpointConfig | undefined {
+    return RegistryV2.instance(ControllerRegistryIndex).getEndpointConfigById(id);
   }
 
   /**
@@ -52,7 +48,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
 
   async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
-    const map = this.getController(inst.constructor).contextParams;
+    const map = this.getControllerConfig(inst.constructor).contextParams;
     for (const [field, type] of Object.entries(map)) {
       Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
@@ -65,16 +61,16 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
    * @param type The context type to bind to field
    */
   registerControllerContextParam<T>(target: Class, field: string, type: Class<T>): void {
-    const controllerConfig = this.getController(target);
+    const controllerConfig = this.getControllerConfig(target);
     controllerConfig.contextParams![field] = type;
     DependencyRegistry.registerPostConstructHandler(target, 'ContextParam', inst => this.#bindContextParams(inst));
   }
 
-  getController(cls: Class): ControllerConfig {
+  getControllerConfig(cls: Class): ControllerConfig {
     return RegistryV2.get(ControllerRegistryIndex, cls).get();
   }
 
-  getEndpointById(id: string): EndpointConfig | undefined {
+  getEndpointConfigById(id: string): EndpointConfig | undefined {
     return this.#endpointsById.get(id.replace(':', '#'));
   }
 
@@ -85,7 +81,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   process(events: ChangeEvent<Class>[]): void {
     for (const evt of events) {
       if (evt.type !== 'removing') {
-        for (const ep of this.getController(evt.curr).endpoints) {
+        for (const ep of this.getControllerConfig(evt.curr).endpoints) {
           this.#endpointsById.set(ep.id, ep);
         }
       } else {

@@ -19,12 +19,8 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getClassConfig(clsOrId: ClassOrId): ClassType {
+  static getModelOptions(clsOrId: ClassOrId): ClassType {
     return RegistryV2.get(this, clsOrId).get();
-  }
-
-  static getClasses(): Class<ModelType>[] {
-    return RegistryV2.getClasses(this);
   }
 
   static has(clsOrId: ClassOrId): boolean {
@@ -35,7 +31,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     return RegistryV2.instance(this).getStore(cls);
   }
 
-  static getBaseModel<T extends ModelType>(cls: Class<T>): Class<T> {
+  static getBaseModelClass<T extends ModelType>(cls: Class<T>): Class<T> {
     return RegistryV2.instance(this).getBaseModel(cls);
   }
 

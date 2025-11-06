@@ -104,7 +104,7 @@ class SchemaAPI {
 }
 
 function getEndpoint(path: string, method: HttpMethod) {
-  return ControllerRegistryIndex.getController(SchemaAPI)
+  return ControllerRegistryIndex.getControllerConfig(SchemaAPI)
     .endpoints.find(x => x.path === path && x.httpMethod === method)!;
 }
 

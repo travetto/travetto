@@ -36,7 +36,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
             await service.createStorage();
             if (service.createModel) {
               await Promise.all(RegistryV2.getClasses(ModelRegistryIndex)
-                .filter(x => x === ModelRegistryIndex.getBaseModel(x))
+                .filter(x => x === ModelRegistryIndex.getBaseModelClass(x))
                 .map(m => service.createModel!(m)));
             }
           }
@@ -46,7 +46,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
         async function (this: T) {
           const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
-            const models = RegistryV2.getClasses(ModelRegistryIndex).filter(m => m === ModelRegistryIndex.getBaseModel(m));
+            const models = RegistryV2.getClasses(ModelRegistryIndex).filter(m => m === ModelRegistryIndex.getBaseModelClass(m));
 
             if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
               await service.truncateBlob();
@@ -68,7 +68,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
           if (ModelStorageUtil.isSupported(service)) {
             if (service.deleteModel) {
               for (const m of RegistryV2.getClasses(ModelRegistryIndex)) {
-                if (m === ModelRegistryIndex.getBaseModel(m)) {
+                if (m === ModelRegistryIndex.getBaseModelClass(m)) {
                   await service.deleteModel(m);
                 }
               }

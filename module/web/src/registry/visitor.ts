@@ -1,5 +1,6 @@
 import { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
 import { ControllerRegistryIndex } from './registry-index.ts';
@@ -20,7 +21,7 @@ export class ControllerVisitUtil {
 
     options.skipUndocumented ??= true;
 
-    const controller = ControllerRegistryIndex.getController(cls);
+    const controller = ControllerRegistryIndex.getControllerConfig(cls);
     if (controller.documented === false && options.skipUndocumented) {
       return;
     }
@@ -44,7 +45,7 @@ export class ControllerVisitUtil {
   }
 
   static async visit<T = unknown>(visitor: ControllerVisitor<T>, options: ControllerVisitorOptions = {}): Promise<T> {
-    for (const cls of ControllerRegistryIndex.getClasses()) {
+    for (const cls of RegistryV2.getClasses(ControllerRegistryIndex)) {
       await this.visitController(visitor, cls, options);
     }
     return await visitor.onComplete?.() ?? undefined!;

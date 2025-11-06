@@ -20,7 +20,7 @@ export abstract class BaseWebRouter implements WebRouter {
   #interceptors: WebInterceptor[];
 
   async #register(c: Class): Promise<void> {
-    const config = ControllerRegistryIndex.getController(c);
+    const config = ControllerRegistryIndex.getControllerConfig(c);
 
     let endpoints = await EndpointUtil.getBoundEndpoints(c);
     endpoints = EndpointUtil.orderEndpoints(endpoints);
@@ -45,7 +45,7 @@ export abstract class BaseWebRouter implements WebRouter {
     console.debug('Sorting interceptors', { count: names.length, names });
 
     // Register all active
-    for (const c of ControllerRegistryIndex.getClasses()) {
+    for (const c of RegistryV2.getClasses(ControllerRegistryIndex)) {
       await this.#register(c);
     }
 

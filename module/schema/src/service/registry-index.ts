@@ -123,7 +123,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
   /**
    * Find base schema class for a given class
    */
-  getBaseSchema(cls: Class): Class {
+  getBaseSchemaClass(cls: Class): Class {
     if (!this.#baseSchema.has(cls)) {
       let conf = this.getClassConfig(cls);
       let parent = cls;
@@ -146,7 +146,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
   resolveInstanceType<T>(cls: Class<T>, o: T): Class {
     cls = this.getClassConfig(cls.Ⲑid).class; // Resolve by id to handle any stale references
 
-    const base = this.getBaseSchema(cls);
+    const base = this.getBaseSchemaClass(cls);
     const clsSchema = this.getClassConfig(cls);
     const baseSchema = this.getClassConfig(base);
 
@@ -179,7 +179,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
   registerSubTypes(cls: Class, name?: string): void {
     // Mark as subtype
     const config = (this.getClassConfig(cls) ?? this.getClassConfig(cls));
-    let base: Class | undefined = this.getBaseSchema(cls);
+    let base: Class | undefined = this.getBaseSchemaClass(cls);
 
     if (!this.#subTypes.has(base)) {
       this.#subTypes.set(base, new Map());
@@ -194,7 +194,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
       while (base && base.Ⲑid) {
         this.#subTypes.get(base)!.set(config.subTypeName!, cls);
         const parent = getParentClass(base);
-        base = parent ? this.getBaseSchema(parent) : undefined;
+        base = parent ? this.getBaseSchemaClass(parent) : undefined;
       }
     }
   }

@@ -24,10 +24,10 @@ export class ModelStorageUtil {
     }
 
     const checkType = (cls: Class, enforceBase = true): boolean => {
-      if (enforceBase && ModelRegistryIndex.getBaseModel(cls) !== cls) {
+      if (enforceBase && ModelRegistryIndex.getBaseModelClass(cls) !== cls) {
         return false;
       }
-      const { autoCreate } = ModelRegistryIndex.getClassConfig(cls) ?? {};
+      const { autoCreate } = ModelRegistryIndex.getModelOptions(cls) ?? {};
       return autoCreate ?? false;
     };
 

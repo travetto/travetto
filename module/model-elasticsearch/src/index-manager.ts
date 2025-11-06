@@ -98,7 +98,7 @@ export class IndexManager implements ModelStorageSupport {
    * Build an index if missing
    */
   async createIndexIfMissing(cls: Class): Promise<void> {
-    cls = ModelRegistryIndex.getBaseModel(cls);
+    cls = ModelRegistryIndex.getBaseModelClass(cls);
     const ident = this.getIdentity(cls);
     try {
       await this.#client.search(ident);

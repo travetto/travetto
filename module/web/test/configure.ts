@@ -31,7 +31,7 @@ export class ConfigureTest {
 
   @Test()
   async verifyConfiguration() {
-    const config = ControllerRegistryIndex.getController(TestController);
+    const config = ControllerRegistryIndex.getControllerConfig(TestController);
     assert.ok(config);
 
     assert(config.class === TestController);

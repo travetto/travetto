@@ -96,7 +96,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async #store<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'delete'): Promise<void> {
     const key = this.#resolveKey(cls, item.id);
-    const config = ModelRegistryIndex.getClassConfig(cls);
+    const config = ModelRegistryIndex.getModelOptions(cls);
     const existing = await this.get(cls, item.id).catch(() => undefined);
 
     // Store with indices
@@ -174,7 +174,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onGracefulShutdown(() => this.client.destroy());
     for (const el of RegistryV2.getClasses(ModelRegistryIndex)) {
-      for (const idx of ModelRegistryIndex.getClassConfig(el).indices ?? []) {
+      for (const idx of ModelRegistryIndex.getModelOptions(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
             console.error('Unique indices are not supported in redis for', { cls: el.Ⲑid, idx: idx.name });
