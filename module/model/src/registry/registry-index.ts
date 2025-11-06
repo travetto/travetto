@@ -10,6 +10,8 @@ import { NotFoundError } from '../error/not-found';
 
 type ClassType = ModelOptions<ModelType>;
 
+type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & { type: K[number] };
+
 /**
  * Model registry index for managing model configurations across classes
  */
@@ -27,12 +29,12 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     return RegistryV2.has(this, clsOrId);
   }
 
-  static getStore<T extends ModelType>(cls: Class<T>): string {
-    return RegistryV2.instance(this).getStore(cls);
+  static getStoreName<T extends ModelType>(cls: Class<T>): string {
+    return RegistryV2.instance(this).getStoreName(cls);
   }
 
   static getBaseModelClass<T extends ModelType>(cls: Class<T>): Class<T> {
-    return RegistryV2.instance(this).getBaseModel(cls);
+    return RegistryV2.instance(this).getBaseModelClass(cls);
   }
 
   static getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): (IndexConfig<T> & { type: K[number] })[] {
@@ -44,12 +46,12 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   }
 
   static getClassesByBaseType<T extends ModelType>(cls: Class<T>): Class<T>[] {
-    const baseType = RegistryV2.instance(this).getBaseModel(cls);
+    const baseType = RegistryV2.instance(this).getBaseModelClass(cls);
     return RegistryV2.instance(this).getClassesByBaseType(baseType);
   }
 
-  static getExpiry<T extends ModelType>(cls: Class<T>): keyof T {
-    return RegistryV2.instance(this).getExpiry(cls);
+  static getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
+    return RegistryV2.instance(this).getExpiryFieldName(cls);
   }
 
   /**
@@ -73,7 +75,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
 
   #finalize(cls: Class): ModelOptions<ModelType> {
     const parent = getParentClass(cls);
-    const parentConfig = parent ? this.get(parent) : undefined;
+    const parentConfig = parent ? this.getModelOptions(parent) : undefined;
     this.adapter(cls).finalize(parentConfig);
 
     // Finalize
@@ -81,12 +83,12 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     const view = schema.fields;
     delete view.id.required; // Allow ids to be optional
 
-    if (schema.subTypeField in view && this.getBaseModel(cls) !== cls) {
-      this.get(cls).subType = !!schema.subTypeName; // Copy from schema
+    if (schema.subTypeField in view && this.getBaseModelClass(cls) !== cls) {
+      this.getModelOptions(cls).subType = !!schema.subTypeName; // Copy from schema
       delete view[schema.subTypeField].required; // Allow type to be optional
     }
 
-    return this.get(cls);
+    return this.getModelOptions(cls);
   }
 
   #clear(): void {
@@ -114,7 +116,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   getInitialNameMapping(): Map<string, Class[]> {
     if (this.#initialModelNameMapping.size === 0) {
       for (const cls of RegistryV2.getClasses(ModelRegistryIndex)) {
-        const store = this.get(cls).store ?? cls.name;
+        const store = this.getModelOptions(cls).store ?? cls.name;
         if (!this.#initialModelNameMapping.has(store)) {
           this.#initialModelNameMapping.set(store, []);
         }
@@ -124,7 +126,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     return this.#initialModelNameMapping;
   }
 
-  get(cls: ClassOrId): ModelOptions<ModelType> {
+  getModelOptions(cls: ClassOrId): ModelOptions<ModelType> {
     return RegistryV2.get(ModelRegistryIndex, cls).get();
   }
 
@@ -135,14 +137,14 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   /**
    * Find base class for a given model
    */
-  getBaseModel<T extends ModelType>(cls: Class<T>): Class<T> {
+  getBaseModelClass<T extends ModelType>(cls: Class<T>): Class<T> {
     if (!this.#baseModels.has(cls)) {
-      let conf = this.get(cls);
+      let conf = this.getModelOptions(cls);
       let parent = cls;
 
       while (conf && !conf.baseType) {
         parent = getParentClass(parent)!;
-        conf = this.get(parent);
+        conf = this.getModelOptions(parent);
       }
 
       this.#baseModels.set(cls, conf ? parent : cls);
@@ -157,12 +159,12 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
     if (!this.#baseModelGrouped.size) {
       const out = new Map<Class, Class[]>();
       for (const cls of RegistryV2.getClasses(ModelRegistryIndex)) {
-        const conf = this.get(cls);
+        const conf = this.getModelOptions(cls);
         if (conf.baseType) {
           continue;
         }
 
-        const parent = this.getBaseModel(conf.class);
+        const parent = this.getBaseModelClass(conf.class);
 
         if (!out.has(parent)) {
           out.set(parent, []);
@@ -185,12 +187,12 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   /**
    * Get the apparent store for a type, handling polymorphism when appropriate
    */
-  getStore(cls: Class): string {
+  getStoreName(cls: Class): string {
     if (!this.#stores.has(cls)) {
-      const config = this.get(cls);
-      const base = this.getBaseModel(cls);
+      const config = this.getModelOptions(cls);
+      const base = this.getBaseModelClass(cls);
       if (base !== cls) {
-        return this.getStore(base);
+        return this.getStoreName(base);
       }
 
       const name = config.store ?? cls.name.toLowerCase();
@@ -218,8 +220,8 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   /**
    * Get Index
    */
-  getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexConfig<T> & { type: K[number] } {
-    const cfg = this.get(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
+  getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
+    const cfg = this.getModelOptions(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
     if (!cfg) {
       throw new NotFoundError(`${cls.name} Index`, `${name}`);
     }
@@ -232,16 +234,16 @@ export class ModelRegistryIndex implements RegistryIndex<ModelOptions<ModelType>
   /**
    * Get Indices
    */
-  getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): (IndexConfig<T> & { type: K[number] })[] {
-    return (this.get(cls).indices ?? []).filter((x): x is IndexConfig<T> => !supportedTypes || supportedTypes.includes(x.type));
+  getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): (IndexResult<T, K>)[] {
+    return (this.getModelOptions(cls).indices ?? []).filter((x): x is IndexConfig<T> => !supportedTypes || supportedTypes.includes(x.type));
   }
 
   /**
    * Get expiry field
    * @param cls
    */
-  getExpiry<T extends ModelType>(cls: Class<T>): keyof T {
-    const expiry = this.get(cls).expiresAt;
+  getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
+    const expiry = this.getModelOptions(cls).expiresAt;
     if (!expiry) {
       throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`);
     }

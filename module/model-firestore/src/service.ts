@@ -28,7 +28,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   constructor(config: FirestoreModelConfig) { this.config = config; }
 
   #resolveTable(cls: Class): string {
-    let table = ModelRegistryIndex.getStore(cls);
+    let table = ModelRegistryIndex.getStoreName(cls);
     if (this.config.namespace) {
       table = `${this.config.namespace}_${table}`;
     }

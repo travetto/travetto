@@ -62,7 +62,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   constructor(config: DynamoDBModelConfig) { this.config = config; }
 
   #resolveTable(cls: Class): string {
-    let table = ModelRegistryIndex.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
+    let table = ModelRegistryIndex.getStoreName(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
     if (this.config.namespace) {
       table = `${this.config.namespace}_${table}`;
     }

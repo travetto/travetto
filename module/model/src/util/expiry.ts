@@ -19,7 +19,7 @@ export class ModelExpiryUtil {
    * Get expiry info for a given item
    */
   static getExpiryState<T extends ModelType>(cls: Class<T>, item: T): { expiresAt?: Date, expired?: boolean } {
-    const expKey = ModelRegistryIndex.getExpiry(cls);
+    const expKey = ModelRegistryIndex.getExpiryFieldName(cls);
     const expiresAt: Date = castTo(item[expKey]);
 
     return {

@@ -39,7 +39,7 @@ export class FileExpirySuite extends ModelExpirySuite {
   async ensureCulled() {
     const service = await this.service;
     const config = await DependencyRegistry.getInstance(this.configClass);
-    const store = ModelRegistryIndex.getStore(ExpiryUser);
+    const store = ModelRegistryIndex.getStoreName(ExpiryUser);
     const folder = `${config.folder}/${config.namespace}/${store}`;
 
     const countFiles = () => fs.stat(folder)

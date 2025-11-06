@@ -64,7 +64,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   #resolveKey(cls: Class | string, id?: string): string {
-    let key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStore(cls);
+    let key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStoreName(cls);
     if (id) {
       key = `${key}:${id}`;
     }

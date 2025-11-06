@@ -66,7 +66,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async #resolveName<T extends ModelType>(cls: Class<T> | string, suffix?: Suffix, id?: string): Promise<string> {
-    const name = typeof cls === 'string' ? cls : ModelRegistryIndex.getStore(cls);
+    const name = typeof cls === 'string' ? cls : ModelRegistryIndex.getStoreName(cls);
     let resolved = path.resolve(this.config.folder, this.config.namespace, name);
     if (id) {
       resolved = path.resolve(resolved, id.replace(/^[/]/, '').substring(0, 3));

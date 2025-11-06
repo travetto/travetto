@@ -45,7 +45,7 @@ export class ModelOptions<T extends ModelType = ModelType> {
    */
   extra?: object;
   /**
-   * Does the model support expiry
+   * Expiry field
    */
   expiresAt?: string;
   /**

@@ -158,7 +158,7 @@ export class MongoModelService implements
    * Get mongo collection
    */
   async getStore<T extends ModelType>(cls: Class<T>): Promise<Collection<T>> {
-    return this.#db.collection(ModelRegistryIndex.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
+    return this.#db.collection(ModelRegistryIndex.getStoreName(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
   }
 
   // Crud

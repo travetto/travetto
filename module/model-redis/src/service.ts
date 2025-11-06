@@ -28,7 +28,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   constructor(config: RedisModelConfig) { this.config = config; }
 
   #resolveKey(cls: Class | string, id?: string, extra?: string): string {
-    let key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStore(cls);
+    let key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStoreName(cls);
     if (id) {
       key = `${key}:${id}`;
     }

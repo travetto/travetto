@@ -57,7 +57,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   get client(): Map<string, StoreType> { return this.#store; }
 
   #getStore<T extends ModelType>(cls: Class<T> | string): StoreType {
-    const key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStore(cls);
+    const key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStoreName(cls);
     if (!this.#store.has(key)) {
       this.#store.set(key, new Map());
     }

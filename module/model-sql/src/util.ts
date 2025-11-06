@@ -295,7 +295,7 @@ export class SQLModelUtil {
   static buildTable(list: VisitStack[]): string {
     const top = list.at(-1)!;
     if (!top[TableSymbol]) {
-      top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistryIndex.getStore(el.type) : el.name).join('_');
+      top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistryIndex.getStoreName(el.type) : el.name).join('_');
     }
     return top[TableSymbol]!;
   }

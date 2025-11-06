@@ -26,14 +26,14 @@ export class ModelCandidateUtil {
     const all = names.has('*');
     return RegistryV2.getClasses(ModelRegistryIndex)
       .map(x => ModelRegistryIndex.getBaseModelClass(x))
-      .filter(x => !models || all || names.has(ModelRegistryIndex.getStore(x)));
+      .filter(x => !models || all || names.has(ModelRegistryIndex.getStoreName(x)));
   }
 
   /**
    * Get model names
    */
   static async getModelNames(): Promise<string[]> {
-    return (await this.#getModels()).map(x => ModelRegistryIndex.getStore(x)).toSorted();
+    return (await this.#getModels()).map(x => ModelRegistryIndex.getStoreName(x)).toSorted();
   }
 
   /**
