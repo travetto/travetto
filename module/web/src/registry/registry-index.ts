@@ -18,7 +18,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   }
 
   static getEndpointConfigById(id: string): EndpointConfig | undefined {
-    return RegistryV2.instance(ControllerRegistryIndex).getEndpointConfigById(id);
+    return RegistryV2.instance(ControllerRegistryIndex).getEndpoint(id);
   }
 
   /**
@@ -44,7 +44,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
 
   async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
-    const map = this.getControllerConfig(inst.constructor).contextParams;
+    const map = this.getController(inst.constructor).contextParams;
     for (const [field, type] of Object.entries(map)) {
       Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
@@ -57,16 +57,16 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
    * @param type The context type to bind to field
    */
   registerControllerContextParam<T>(target: Class, field: string, type: Class<T>): void {
-    const controllerConfig = this.getControllerConfig(target);
+    const controllerConfig = this.getController(target);
     controllerConfig.contextParams![field] = type;
     DependencyRegistry.registerPostConstructHandler(target, 'ContextParam', inst => this.#bindContextParams(inst));
   }
 
-  getControllerConfig(cls: Class): ControllerConfig {
+  getController(cls: Class): ControllerConfig {
     return RegistryV2.get(ControllerRegistryIndex, cls).get();
   }
 
-  getEndpointConfigById(id: string): EndpointConfig | undefined {
+  getEndpoint(id: string): EndpointConfig | undefined {
     return this.#endpointsById.get(id.replace(':', '#'));
   }
 
@@ -77,7 +77,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   process(events: ChangeEvent<Class>[]): void {
     for (const evt of events) {
       if (evt.type !== 'removing') {
-        for (const ep of this.getControllerConfig(evt.curr).endpoints) {
+        for (const ep of this.getController(evt.curr).endpoints) {
           this.#endpointsById.set(ep.id, ep);
         }
       } else {

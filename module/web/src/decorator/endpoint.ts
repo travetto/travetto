@@ -11,7 +11,7 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
   return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    ControllerRegistryIndex.getForRegister(target).registerMethod(
+    ControllerRegistryIndex.getForRegister(target).registerEndpoint(
       prop,
       { endpoint: descriptor.value },
       config
@@ -86,7 +86,7 @@ export function Options(path = '/'): EndpointFunctionDecorator { return HttpEndp
  */
 export function ResponseType(responseType: EndpointIOType): EndpointFunctionDecorator {
   return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    ControllerRegistryIndex.getForRegister(target).registerMethod(property, { endpoint: descriptor.value }, { responseType });
+    ControllerRegistryIndex.getForRegister(target).registerEndpoint(property, { endpoint: descriptor.value }, { responseType });
     return descriptor;
   };
 }
@@ -97,7 +97,7 @@ export function ResponseType(responseType: EndpointIOType): EndpointFunctionDeco
  */
 export function RequestType(requestType: EndpointIOType): EndpointFunctionDecorator {
   return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    ControllerRegistryIndex.getForRegister(target).registerMethod(property, { endpoint: descriptor.value }, { requestType });
+    ControllerRegistryIndex.getForRegister(target).registerEndpoint(property, { endpoint: descriptor.value }, { requestType });
     return descriptor;
   };
 }

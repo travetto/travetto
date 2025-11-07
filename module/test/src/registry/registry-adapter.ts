@@ -73,7 +73,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
     return this.#config;
   }
 
-  registerMethod(method: string | symbol, ...data: Partial<TestConfig>[]): TestConfig {
+  registerTest(method: string | symbol, ...data: Partial<TestConfig>[]): TestConfig {
     const suite = this.register();
     if (!this.#tests.has(method)) {
       const lines = describeFunction(this.#cls)?.methods?.[method]?.lines;

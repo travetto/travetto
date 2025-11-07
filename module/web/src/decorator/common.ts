@@ -8,7 +8,7 @@ import { WebInterceptor } from '../types/interceptor.ts';
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
     if (property) {
-      return ControllerRegistryIndex.getForRegister(target).registerMethod(property, {
+      return ControllerRegistryIndex.getForRegister(target).registerEndpoint(property, {
         endpoint: descriptor!.value,
       }, config);
     } else {

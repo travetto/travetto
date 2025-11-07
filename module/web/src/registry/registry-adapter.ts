@@ -89,7 +89,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     return this.#config;
   }
 
-  registerMethod(method: string | symbol, ...data: Partial<EndpointConfig>[]): EndpointConfig {
+  registerEndpoint(method: string | symbol, ...data: Partial<EndpointConfig>[]): EndpointConfig {
     this.register();
 
     if (!this.#endpoints.has(method)) {
@@ -129,7 +129,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     return this.#config;
   }
 
-  getMethod(method: string | symbol): EndpointConfig {
+  getEndpointConfig(method: string | symbol): EndpointConfig {
     const endpoint = this.#endpoints.get(method);
     if (!endpoint) {
       throw new AppError(`Endpoint not registered: ${String(method)} on ${this.#cls.name}`);
@@ -151,6 +151,6 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     cfg: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig>
   ): EndpointConfig {
-    return this.registerMethod(prop, { interceptorConfigs: [[cls, castTo(cfg)]], ...extra });
+    return this.registerEndpoint(prop, { interceptorConfigs: [[cls, castTo(cfg)]], ...extra });
   }
 }

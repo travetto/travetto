@@ -14,7 +14,7 @@ type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx:
 export function Param(location: EndpointParamConfig['location'], extra: string | Partial<EndpointParamConfig>): ParamDecorator {
   return (target: ClassInstance, propertyKey: string | symbol, idx: number): void => {
     const handler = target.constructor.prototype[propertyKey];
-    ControllerRegistryIndex.getForRegister(target.constructor).registerMethod(propertyKey, {
+    ControllerRegistryIndex.getForRegister(target.constructor).registerEndpoint(propertyKey, {
       endpoint: handler,
       params: [{
         index: idx,
