@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { Env } from '@travetto/runtime';
 import { CliCommand, CliCommandShape, CliValidationResultError } from '@travetto/cli';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { Ignore } from '@travetto/schema';
 
@@ -24,7 +24,7 @@ export class CliWebRpcCommand implements CliCommandShape {
   }
 
   get #service(): Promise<WebRpcClientGeneratorService> {
-    return RegistryV2.init().then(() => DependencyRegistry.getInstance(WebRpcClientGeneratorService));
+    return RegistryV2.init().then(() => DependencyRegistryIndex.getInstance(WebRpcClientGeneratorService));
   }
 
   async main(type: WebRpcClient['type'] | 'config', output?: string): Promise<void> {

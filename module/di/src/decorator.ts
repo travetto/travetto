@@ -1,7 +1,8 @@
-import { asConstructable, asFull, TypedFunction, type Class } from '@travetto/runtime';
+import { asFull, TypedFunction, type Class } from '@travetto/runtime';
 
-import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types.ts';
-import { DependencyRegistry, ResolutionType } from './registry.ts';
+import { InjectableConfig, Dependency } from './types.ts';
+import { DependencyRegistryIndex } from './registry/registry-index.ts';
+import { ResolutionType } from './registry/types.ts';
 
 function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]): T {
   let out: Partial<T> = {};
@@ -32,7 +33,7 @@ export function Injectable(first?: Partial<InjectableConfig> | symbol, ...args: 
       ...collapseConfig<Partial<InjectableConfig>>(first, ...args),
       class: target
     };
-    DependencyRegistry.registerClass(target, config);
+    DependencyRegistryIndex.getForRegister(target).register(config);
     return target;
   };
 }
@@ -41,7 +42,7 @@ export type InjectConfig = { qualifier?: symbol, optional?: boolean, resolution?
 
 export function InjectArgs(configs?: InjectConfig[][]) {
   return <T extends Class>(target: T): void => {
-    DependencyRegistry.registerConstructor(target, configs?.map(x => collapseConfig(...x)));
+    DependencyRegistryIndex.getForRegister(target).registerConstructor(configs?.map(x => collapseConfig(...x)));
   };
 }
 
@@ -51,13 +52,10 @@ export function InjectArgs(configs?: InjectConfig[][]) {
  * @augments `@travetto/di:Inject`
  */
 export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | undefined)[]) {
-  return (target: unknown, propertyKey?: string, idx?: number | PropertyDescriptor): void => {
+  return (target: unknown, propertyKey?: string | symbol, idx?: number | PropertyDescriptor): void => {
     if (typeof idx !== 'number') { // Only register if on property
       const config = collapseConfig<Dependency>(first, ...args);
-
-      DependencyRegistry.registerProperty(
-        asConstructable(target).constructor, propertyKey!, config
-      );
+      DependencyRegistryIndex.getForRegister(target).registerProperty(propertyKey!, config);
     }
   };
 }
@@ -67,14 +65,21 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
  *
  * @augments `@travetto/di:InjectableFactory`
  */
-export function InjectableFactory(first?: Partial<InjectableFactoryConfig> | symbol, ...args: (Partial<InjectableFactoryConfig> | undefined)[]) {
+export function InjectableFactory(first?: Partial<InjectableConfig> | symbol, ...args: (Partial<InjectableConfig> | undefined)[]) {
   return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<TypedFunction>): void => {
-    const config: InjectableFactoryConfig = collapseConfig(first, ...args);
-    DependencyRegistry.registerFactory({
+    const config: InjectableConfig = collapseConfig(first, ...args);
+
+    // Create mock cls for DI purposes
+    const id = `${target.Ⲑid}#${property.toString()}`;
+    const fnClass = class { static Ⲑid = id; };
+
+    DependencyRegistryIndex.getForRegister(fnClass).register({
       ...config,
-      dependencies: config.dependencies?.map(x => Array.isArray(x) ? collapseConfig(...x) : collapseConfig(x)),
-      fn: descriptor.value!,
-      id: `${target.Ⲑid}#${property.toString()}`
+      dependencies: {
+        fields: {},
+        cons: config.dependencies?.cons?.map(x => Array.isArray(x) ? collapseConfig(...x) : collapseConfig(x)) ?? [],
+      },
+      factory: descriptor.value!,
     });
   };
 }

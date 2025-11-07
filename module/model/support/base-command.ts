@@ -2,7 +2,7 @@ import { Env } from '@travetto/runtime';
 import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
 import { RegistryV2 } from '@travetto/registry';
 
-import type { ModelStorageSupport } from '../src/service/storage.ts';
+import type { ModelStorageSupport } from '../src/types/storage.ts';
 
 import { ModelCandidateUtil } from './bin/candidate.ts';
 

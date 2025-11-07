@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct } from '@travetto/runtime';
 
 import { ClassTarget, Dependency, InjectableConfig } from '../types';
@@ -12,7 +12,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getInjectableConfig(clsOrId: ClassOrId): InjectableConfig {
+  static getConfig(clsOrId: ClassOrId): InjectableConfig {
     return RegistryV2.get(this, clsOrId).get();
   }
 
@@ -20,12 +20,22 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     return RegistryV2.has(this, clsOrId);
   }
 
+  static getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: ResolutionType): Promise<T> {
+    return RegistryV2.instance(DependencyRegistryIndex).getInstance(target, qual, resolution);
+  }
+
+  static getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
+    return RegistryV2.instance(DependencyRegistryIndex).getCandidateTypes<T>(target);
+  }
+
+  static getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
+    return RegistryV2.instance(DependencyRegistryIndex).getCandidateInstances<T>(target, predicate);
+  }
+
   #defaultSymbols = new Set<symbol>();
 
   #instances = new Map<DependencyTargetId, Map<symbol, unknown>>();
   #instancePromises = new Map<DependencyTargetId, Map<symbol, Promise<unknown>>>();
-
-  #factories = new Map<DependencyTargetId, Map<Class, InjectableConfig>>();
 
   #targetToClass = new Map<DependencyTargetId, Map<symbol, string>>();
   #classToTarget = new Map<DependencyClassId, Map<symbol, DependencyTargetId>>();
@@ -49,7 +59,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
     const qualifiers = this.#targetToClass.get(target.Ⲑid)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
-    return castTo(uniqueQualifiers.map(id => this.getClassConfig(id)));
+    return castTo(uniqueQualifiers.map(id => this.getConfig(id)));
   }
 
   /**
@@ -114,7 +124,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       }
     }
 
-    const config: InjectableConfig<T> = castTo(this.getClassConfig(cls!));
+    const config: InjectableConfig<T> = castTo(this.getConfig(cls!));
     return {
       qualifier,
       config,
@@ -183,7 +193,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
 
     // If factory with field properties on the sub class
     if (managed.factory) {
-      const resolved = this.getClassConfig(inst);
+      const resolved = this.getConfig(inst);
 
       if (resolved) {
         await this.resolveFieldDependencies(resolved, inst);
@@ -254,7 +264,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
    */
   async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
     // Compute fields to be auto-wired
-    return await this.resolveFieldDependencies(this.getClassConfig(cls), o);
+    return await this.resolveFieldDependencies(this.getConfig(cls), o);
   }
 
   /**

@@ -6,7 +6,8 @@ import type debug from 'debug';
 
 import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
-import { DependencyRegistry, Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { DependencyRegistryIndex, Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { RegistryV2 } from '@travetto/registry';
 
 class Item {
   follow: number;
@@ -72,8 +73,8 @@ class ForeignTest {
 
   @Test()
   async testSetter() {
-    await DependencyRegistry.init();
-    const inst = await DependencyRegistry.getInstance(Child);
+    await RegistryV2.init();
+    const inst = await DependencyRegistryIndex.getInstance(Child);
     assert(inst.db);
     assert(inst.stream);
     assert(inst.item);

@@ -1,4 +1,4 @@
-import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
+import { Injectable, Inject, DependencyRegistryIndex } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { toConcrete } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
@@ -66,7 +66,7 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
 
   async postConstruct(): Promise<void> {
     // Load all the parser types
-    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<BodyContentParser>());
+    const instances = await DependencyRegistryIndex.getCandidateInstances(toConcrete<BodyContentParser>());
     for (const instance of instances) {
       this.parsers[instance.type] = instance;
     }

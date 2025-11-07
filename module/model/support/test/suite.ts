@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { SuiteRegistryIndex, TestFixtures } from '@travetto/test';
 
@@ -19,7 +19,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
           await RegistryV2.init();
 
           if (!this[Loaded]) {
-            const config = await DependencyRegistry.getInstance(this.configClass);
+            const config = await DependencyRegistryIndex.getInstance(this.configClass);
             if ('namespace' in config) {
               config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
             }
@@ -31,7 +31,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       ],
       beforeEach: [
         async function (this: T) {
-          const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
+          const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
             await service.createStorage();
             if (service.createModel) {
@@ -44,7 +44,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       ],
       afterEach: [
         async function (this: T) {
-          const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
+          const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
             const models = RegistryV2.getClasses(ModelRegistryIndex).filter(m => m === ModelRegistryIndex.getBaseModelClass(m));
 
@@ -64,7 +64,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       ],
       afterAll: [
         async function (this: T) {
-          const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
+          const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
             if (service.deleteModel) {
               for (const m of RegistryV2.getClasses(ModelRegistryIndex)) {

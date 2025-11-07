@@ -1,5 +1,5 @@
 import { Class, toConcrete } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { ControllerRegistryIndex } from '@travetto/web';
 import { RegistryV2 } from '@travetto/registry';
 
@@ -39,7 +39,7 @@ export abstract class BaseWebRouter implements WebRouter {
    */
   async postConstruct(): Promise<void> {
 
-    this.#interceptors = await DependencyRegistry.getCandidateInstances(toConcrete<WebInterceptor>());
+    this.#interceptors = await DependencyRegistryIndex.getCandidateInstances(toConcrete<WebInterceptor>());
     this.#interceptors = EndpointUtil.orderInterceptors(this.#interceptors);
     const names = this.#interceptors.map(x => x.constructor.name);
     console.debug('Sorting interceptors', { count: names.length, names });

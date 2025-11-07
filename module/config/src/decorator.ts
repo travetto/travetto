@@ -1,6 +1,7 @@
 import { Class, ClassInstance } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { OverrideConfig, OverrideConfigSymbol } from './source/override.ts';
 import { ConfigurationService, ConfigBaseType } from './service.ts';
@@ -14,14 +15,14 @@ export function Config(ns: string) {
   return <T extends Class>(target: T): T => {
     const og: Function = target.prototype.postConstruct;
     // Declare as part of global config
-    (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(ConfigBaseType);
+    RegistryV2.getForRegister(DependencyRegistryIndex, target).register({ interfaces: [ConfigBaseType] });
     const env = SchemaRegistryIndex.getForRegister(target)
       .registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns, fields: {} });
     env.ns = ns;
 
     target.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
-      const cfg = await DependencyRegistry.getInstance(ConfigurationService);
+      const cfg = await DependencyRegistryIndex.getInstance(ConfigurationService);
       await cfg.bindTo(target, this, ns);
       await og?.call(this);
     };

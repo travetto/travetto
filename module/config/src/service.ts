@@ -1,7 +1,7 @@
 import util from 'node:util';
 
 import { AppError, toConcrete, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
-import { DependencyRegistry, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
@@ -50,13 +50,13 @@ export class ConfigurationService {
    *  - If of the same priority, then alpha sort on the source
    */
   async postConstruct(): Promise<void> {
-    const providers = await DependencyRegistry.getCandidateTypes(toConcrete<ConfigSource>());
+    const providers = await DependencyRegistryIndex.getCandidateTypes(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (el) => await DependencyRegistry.getInstance(el.class, el.qualifier))
+      providers.map(async (el) => await DependencyRegistryIndex.getInstance(el.class, el.qualifier))
     );
 
-    const parser = await DependencyRegistry.getInstance(ParserManager);
+    const parser = await DependencyRegistryIndex.getInstance(ParserManager);
 
     const possible = await Promise.all([
       new FileConfigSource(parser),
@@ -93,13 +93,13 @@ export class ConfigurationService {
    *   - Will not show fields marked as secret
    */
   async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
-    const configTargets = await DependencyRegistry.getCandidateTypes(ConfigBaseType);
+    const configTargets = await DependencyRegistryIndex.getCandidateTypes(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
-        .filter(el => el.qualifier === DependencyRegistry.get(el.class).qualifier) // Is primary?
+        .filter(el => el.qualifier === DependencyRegistryIndex.getConfig(el.class).qualifier) // Is primary?
         .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
         .map(async el => {
-          const inst = await DependencyRegistry.getInstance<ClassInstance>(el.class, el.qualifier);
+          const inst = await DependencyRegistryIndex.getInstance<ClassInstance>(el.class, el.qualifier);
           return [el, inst] as const;
         })
     );

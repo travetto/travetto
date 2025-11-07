@@ -1,5 +1,5 @@
 import { Runtime, toConcrete, Util } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
 import { RegistryV2 } from '@travetto/registry';
@@ -26,7 +26,7 @@ export class WebHttpCommand implements CliCommandShape {
 
   async main(): Promise<void> {
     await RegistryV2.init();
-    const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
+    const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
 
     const handle = await Util.acquireWithRetry(
       () => instance.serve(),

@@ -37,7 +37,7 @@ export interface CliValidationError {
   /**
    * Source of validation
    */
-  source?: 'flag' | 'arg' | 'custom';
+  source?: string;
 };
 
 /**

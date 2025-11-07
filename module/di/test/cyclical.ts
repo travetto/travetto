@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 import { RegistryV2 } from '@travetto/registry';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 
 @Suite('cycle')
 class CycleTest {
@@ -17,7 +17,7 @@ class CycleTest {
       await RegistryV2.init();
 
       const { ABC } = await import('./cycle/a.ts');
-      const result = await DependencyRegistry.getInstance(ABC);
+      const result = await DependencyRegistryIndex.getInstance(ABC);
       console.log('Loaded dependency', { instance: result.constructor.name });
     } catch {
       throw new Error('Failed to load dependency');

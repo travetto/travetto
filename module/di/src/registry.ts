@@ -4,15 +4,15 @@ import {
 } from '@travetto/runtime';
 import { RootRegistry, ChangeEvent, Registry } from '@travetto/registry';
 
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, PostConstructHandler } from './types.ts';
+import { Dependency, InjectableConfig, ClassTarget, PostConstructHandler } from './types.ts';
 import { InjectionError } from './error.ts';
 
 class AutoCreate { }
 type TargetId = string;
 type ClassId = string;
-export type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: string };
+type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: string };
 
-export type ResolutionType = 'strict' | 'loose' | 'any';
+type ResolutionType = 'strict' | 'loose' | 'any';
 
 const PrimaryCandidateSymbol = Symbol();
 

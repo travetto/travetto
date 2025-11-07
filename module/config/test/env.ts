@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
 
@@ -19,14 +19,14 @@ export class EnvConfigTest {
   @Test()
   async verifyBasic() {
     await this.init();
-    const conf = await DependencyRegistry.getInstance(TestConfig);
+    const conf = await DependencyRegistryIndex.getInstance(TestConfig);
     assert(conf.name === 'Oscar');
   }
 
   @Test()
   async verifyNotDefined() {
     await this.init();
-    const conf = await DependencyRegistry.getInstance(TestConfig);
+    const conf = await DependencyRegistryIndex.getInstance(TestConfig);
 
     // Default value from
     assert.deepStrictEqual(conf.anonHosts, ['a', 'b']);

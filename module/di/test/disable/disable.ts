@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
+import { RegistryV2 } from '@travetto/registry';
 
 import { MyCustomClass, MyCustomClass2, MyCustomClass3, MyCustomClass4 } from './types.ts';
 
@@ -15,10 +16,10 @@ class DisableSuite {
 
   @Test()
   async ensureDisableClass() {
-    await DependencyRegistry.init();
-    await assert.rejects(() => DependencyRegistry.getInstance(MyCustomClass));
-    assert(await DependencyRegistry.getInstance(MyCustomClass2));
-    await assert.rejects(() => DependencyRegistry.getInstance(MyCustomClass3));
-    assert(await DependencyRegistry.getInstance(MyCustomClass4));
+    await RegistryV2.init();
+    await assert.rejects(() => DependencyRegistryIndex.getInstance(MyCustomClass));
+    assert(await DependencyRegistryIndex.getInstance(MyCustomClass2));
+    await assert.rejects(() => DependencyRegistryIndex.getInstance(MyCustomClass3));
+    assert(await DependencyRegistryIndex.getInstance(MyCustomClass4));
   }
 }

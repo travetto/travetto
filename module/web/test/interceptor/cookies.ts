@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse, KeyGrip } from '@travetto/web';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { AsyncContext } from '@travetto/context';
 
@@ -18,8 +18,8 @@ class CookiesInterceptorSuite {
     update: (cookies: CookieJar) => void,
     signingKeys?: string[]
   ): Promise<string[]> {
-    const interceptor = await DependencyRegistry.getInstance(CookieInterceptor);
-    const context = await DependencyRegistry.getInstance(AsyncContext);
+    const interceptor = await DependencyRegistryIndex.getInstance(CookieInterceptor);
+    const context = await DependencyRegistryIndex.getInstance(AsyncContext);
 
     interceptor.config.keys = signingKeys;
     interceptor.config.secure = true;
@@ -33,7 +33,7 @@ class CookiesInterceptorSuite {
       }),
       config: interceptor.config,
       next: async () => {
-        const items = await DependencyRegistry.getInstance(WebAsyncContext);
+        const items = await DependencyRegistryIndex.getInstance(WebAsyncContext);
         await update?.(items.getValue(CookieJar));
         return new WebResponse({});
       }

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { EtagInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { TimeUtil } from '@travetto/runtime';
@@ -15,7 +15,7 @@ class EtagInterceptorSuite {
 
   @Test()
   async post() {
-    const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
     interceptor.config.minimumSize = 1;
 
@@ -47,7 +47,7 @@ class EtagInterceptorSuite {
 
   @Test()
   async get() {
-    const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
     interceptor.config.minimumSize = 1;
 
@@ -90,7 +90,7 @@ class EtagInterceptorSuite {
 
   @Test()
   async getCacheControl() {
-    const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
 
     const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
@@ -112,7 +112,7 @@ class EtagInterceptorSuite {
 
   @Test()
   async testExpires() {
-    const interceptor = await DependencyRegistry.getInstance(EtagInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
     interceptor.config.minimumSize = 1;
 

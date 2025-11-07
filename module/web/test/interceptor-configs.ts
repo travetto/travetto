@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Class, toConcrete } from '@travetto/runtime';
-import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { RegistryV2 } from '@travetto/registry';
@@ -98,7 +98,7 @@ class TestInterceptorConfigSuite {
   @BeforeAll()
   async init() {
     await RegistryV2.init();
-    await DependencyRegistry.getInstance(toConcrete<StandardWebRouter>());
+    await DependencyRegistryIndex.getInstance(toConcrete<StandardWebRouter>());
   }
 
   @Test()

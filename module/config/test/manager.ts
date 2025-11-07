@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Test, Suite, BeforeEach } from '@travetto/test';
 import { ValidationResultError } from '@travetto/schema';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { DependencyRegistryIndex, InjectableFactory } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
 import { Config, ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
@@ -69,7 +69,7 @@ export class ManagerTest {
   async before() {
     Env.TRV_RESOURCES.add('@#test/fixtures');
     await RegistryV2.init();
-    this.config = await DependencyRegistry.getInstance(ConfigurationService);
+    this.config = await DependencyRegistryIndex.getInstance(ConfigurationService);
   }
 
   @Test()
@@ -94,7 +94,7 @@ export class ManagerTest {
     assert(result.user.age === 52);
     assert(result.user.height === undefined);
 
-    await assert.rejects(() => DependencyRegistry.getInstance(Nested), ValidationResultError);
+    await assert.rejects(() => DependencyRegistryIndex.getInstance(Nested), ValidationResultError);
   }
 
   @Test()

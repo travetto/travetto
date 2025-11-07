@@ -1,4 +1,4 @@
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { Runtime } from '@travetto/runtime';
 
 import { Controller } from '../decorator/controller.ts';
@@ -14,7 +14,7 @@ export class GlobalHandler {
 
   @Get('')
   @ConditionalRegister(async () => {
-    const config = await DependencyRegistry.getInstance(WebConfig);
+    const config = await DependencyRegistryIndex.getInstance(WebConfig);
     return config.defaultMessage;
   })
   message(): { module: string, version: string, env?: string } {

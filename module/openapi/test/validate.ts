@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { Suite, Test } from '@travetto/test';
 import { OpenApiService } from '@travetto/openapi';
@@ -13,7 +13,7 @@ export class OpenApiSuite {
   @Test()
   async verify() {
     await RegistryV2.init();
-    const svc = await DependencyRegistry.getInstance(OpenApiService);
+    const svc = await DependencyRegistryIndex.getInstance(OpenApiService);
 
     const spec = await svc.getSpec();
 

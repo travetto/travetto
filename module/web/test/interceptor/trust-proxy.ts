@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { TrustProxyInterceptor, WebRequest, WebResponse } from '@travetto/web';
 
@@ -15,7 +15,7 @@ class TrustProxyInterceptorSuite {
 
   @Test()
   async simpleTest() {
-    const interceptor = await DependencyRegistry.getInstance(TrustProxyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(TrustProxyInterceptor);
     interceptor.config.applies = true;
 
     const request = new WebRequest({
@@ -44,7 +44,7 @@ class TrustProxyInterceptorSuite {
 
   @Test()
   async overrideFail() {
-    const interceptor = await DependencyRegistry.getInstance(TrustProxyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(TrustProxyInterceptor);
     interceptor.config.applies = true;
     const request = new WebRequest({
       context: {
@@ -74,7 +74,7 @@ class TrustProxyInterceptorSuite {
 
   @Test()
   async overrideSuccess() {
-    const interceptor = await DependencyRegistry.getInstance(TrustProxyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(TrustProxyInterceptor);
     interceptor.config.applies = true;
     const request = new WebRequest({
       context: {
@@ -108,7 +108,7 @@ class TrustProxyInterceptorSuite {
 
   @Test()
   async wildcard() {
-    const interceptor = await DependencyRegistry.getInstance(TrustProxyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(TrustProxyInterceptor);
     interceptor.config.applies = true;
     const request = new WebRequest({
       context: {

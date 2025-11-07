@@ -1,7 +1,7 @@
 import { RegistryV2 } from '@travetto/registry';
 import { castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
-import { DependencyRegistry, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
 
 import { WebDispatcher } from '../../../src/types/dispatch.ts';
@@ -47,7 +47,7 @@ export abstract class BaseWebSuite {
   async initServer(): Promise<void> {
     await RegistryV2.init();
     this.#cleanup = await this.serve?.();
-    this.#dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
+    this.#dispatcher = await DependencyRegistryIndex.getInstance(this.dispatcherType);
   }
 
   @AfterAll()

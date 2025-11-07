@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { RegistryV2 } from '@travetto/registry';
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { Env } from '@travetto/runtime';
 
 import { EditorService } from './bin/editor.ts';
@@ -20,7 +20,7 @@ export class EmailTestCommand implements CliCommandShape {
   async main(file: string, to: string): Promise<void> {
     file = path.resolve(file);
     await RegistryV2.init();
-    const editor = await DependencyRegistry.getInstance(EditorService);
+    const editor = await DependencyRegistryIndex.getInstance(EditorService);
     await editor.sendFile(file, to);
   }
 }

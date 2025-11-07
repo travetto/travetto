@@ -1,4 +1,4 @@
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { Class } from '@travetto/runtime';
 import { RegistryV2 } from '@travetto/registry';
 import { SuiteRegistryIndex } from '@travetto/test';
@@ -25,7 +25,7 @@ export function WithSuiteContext() {
           if (!this[Init]) {
             this[Init] = true;
             await RegistryV2.init();
-            const ctx = await DependencyRegistry.getInstance(AsyncContext);
+            const ctx = await DependencyRegistryIndex.getInstance(AsyncContext);
             for (const t of SuiteRegistryIndex.getConfig(target).tests) {
               const fn = wrapped(ctx, this[t.methodName]);
               Object.defineProperty(fn, 'name', { value: t.methodName });

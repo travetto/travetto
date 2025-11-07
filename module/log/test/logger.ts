@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
 import { castTo, ConsoleListener, ConsoleManager } from '@travetto/runtime';
-import { DependencyRegistry, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { JsonLogFormatter, LogDecorator, LogEvent, LogFormatUtil, Logger, LogService } from '@travetto/log';
 
@@ -41,7 +41,7 @@ class LoggerTest {
   @BeforeEach()
   async reset() {
     this.mgr = ConsoleManager.get();
-    (await DependencyRegistry.getInstance(CustomLogger)).reset();
+    (await DependencyRegistryIndex.getInstance(CustomLogger)).reset();
   }
 
   resetConsole(): void {
@@ -50,14 +50,14 @@ class LoggerTest {
 
   @Test('Should Log')
   async shouldLog() {
-    const svc = await DependencyRegistry.getInstance(LogService);
+    const svc = await DependencyRegistryIndex.getInstance(LogService);
     ConsoleManager.set(svc);
 
     console.log('Hello', { args: [1, 2, 3] });
 
     this.resetConsole();
 
-    const logger = await DependencyRegistry.getInstance(CustomLogger);
+    const logger = await DependencyRegistryIndex.getInstance(CustomLogger);
     assert(logger.values.length === 1);
     assert(logger.values[0].message === 'Hello');
     const context = LogFormatUtil.getContext(logger.values[0]);
@@ -73,13 +73,13 @@ class LoggerTest {
 
   @Test('Decorator')
   async shouldDecorate() {
-    const svc = await DependencyRegistry.getInstance(LogService);
+    const svc = await DependencyRegistryIndex.getInstance(LogService);
 
     ConsoleManager.set(svc);
     console.log('Hello', { otherSecret: true });
     this.resetConsole();
 
-    const logger = await DependencyRegistry.getInstance(CustomLogger);
+    const logger = await DependencyRegistryIndex.getInstance(CustomLogger);
     assert(logger.values.length === 1);
     assert(logger.values[0].message === 'Hello');
     const context = LogFormatUtil.getContext(logger.values[0]);
@@ -89,13 +89,13 @@ class LoggerTest {
 
   @Test('Decorator Override')
   async shouldDecorateOverride() {
-    const svc = await DependencyRegistry.getInstance(LogService);
+    const svc = await DependencyRegistryIndex.getInstance(LogService);
 
     ConsoleManager.set(svc);
     console.log('Hello', { secret: true });
     this.resetConsole();
 
-    const logger = await DependencyRegistry.getInstance(CustomLogger);
+    const logger = await DependencyRegistryIndex.getInstance(CustomLogger);
     assert(logger.values.length === 1);
     assert(logger.values[0].message === 'Hello');
     const context = LogFormatUtil.getContext(logger.values[0]);
@@ -104,8 +104,8 @@ class LoggerTest {
 
   @Test('Verify context handling')
   async verifyContext() {
-    const svc = await DependencyRegistry.getInstance(LogService);
-    const logger = await DependencyRegistry.getInstance(CustomLogger);
+    const svc = await DependencyRegistryIndex.getInstance(LogService);
+    const logger = await DependencyRegistryIndex.getInstance(CustomLogger);
 
     ConsoleManager.set(svc);
     console.log('Hello', 'Roger', { secret: true });

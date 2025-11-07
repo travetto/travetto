@@ -1,6 +1,6 @@
 import { asConstructable, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
 import { BindUtil, ParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RetargettingProxy } from '@travetto/registry';
 
 import { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
@@ -209,7 +209,7 @@ export class EndpointUtil {
       return [];
     }
 
-    config.instance = await DependencyRegistry.getInstance(config.class);
+    config.instance = await DependencyRegistryIndex.getInstance(config.class);
 
     if (Runtime.dynamic) {
       config.instance = RetargettingProxy.unwrap(config.instance);

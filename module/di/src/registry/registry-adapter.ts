@@ -1,25 +1,8 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
 
-import { InjectableConfig, InjectableFactoryConfig } from '../types';
+import { Dependency, InjectableConfig, PostConstructHandler } from '../types';
 import { AutoCreate } from './types';
-
-function combineFactories(base: InjectableFactoryConfig, ...override: Partial<InjectableFactoryConfig>[]): InjectableFactoryConfig {
-  for (const o of override) {
-    base.enabled = o.enabled ?? base.enabled ?? true;
-    base.qualifier = o.qualifier ?? base.qualifier;
-    if (o.dependencies) {
-      base.dependencies = o.dependencies;
-    }
-    if (o.factory) {
-      base.factory = o.factory;
-    }
-    if (o.target) {
-      base.target = o.target;
-    }
-  }
-  return base;
-}
 
 function combineClasses(base: InjectableConfig, ...override: Partial<InjectableConfig>[]): InjectableConfig {
   for (const o of override) {
@@ -34,12 +17,13 @@ function combineClasses(base: InjectableConfig, ...override: Partial<InjectableC
     if (o.target) {
       base.target = o.target;
     }
+    if (o.factory) {
+      base.factory = o.factory;
+    }
     if (o.dependencies) {
       base.dependencies = {
-        ...o.dependencies,
-        fields: {
-          ...o.dependencies.fields
-        }
+        fields: { ...base.dependencies.fields, ...o.dependencies.fields },
+        cons: o.dependencies.cons ?? base.dependencies.cons
       };
     }
     if (o.autoCreate) {
@@ -78,6 +62,31 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   get(): InjectableConfig<unknown> {
     return this.#config;
   }
+
+  /**
+   * Register a constructor with dependencies
+   */
+  registerConstructor(dependencies?: Dependency[]): void {
+    const conf = this.register();
+    conf.dependencies!.cons = dependencies;
+  }
+
+  /**
+   * Register a post construct handler
+   */
+  registerPostConstructHandler(name: string | symbol, handler: PostConstructHandler<unknown>): void {
+    const conf = this.register();
+    conf.postConstruct[name] = handler;
+  }
+
+  /**
+   * Register a property as a dependency
+   */
+  registerProperty(field: string | symbol, dependency: Dependency): void {
+    const conf = this.register();
+    conf.dependencies.fields[field] = dependency;
+  }
+
 
   finalize(parent?: InjectableConfig<unknown> | undefined): void {
 

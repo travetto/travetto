@@ -5,7 +5,7 @@ import assert from 'node:assert';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RegistryV2 } from '@travetto/registry';
 import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from '@travetto/web';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 
 const toBuffer = (src: Buffer | Readable) => Buffer.isBuffer(src) ? src : buffer(src);
 
@@ -19,7 +19,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async basicJSON() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
     const request = new WebRequest({
@@ -44,7 +44,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async basicText() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
     const request = new WebRequest({
@@ -69,7 +69,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async basicBinary() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
     const stream = Readable.from(Buffer.alloc(1000));
@@ -98,7 +98,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async basicTextEncoding() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
@@ -128,7 +128,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async basicTextEncodingSkipped() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
@@ -157,7 +157,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async basicTextEncodingWrong() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
@@ -186,7 +186,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async basicTextEncodingInvalid() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
     const request = new WebRequest({
@@ -212,7 +212,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async lengthEnforced() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true, limit: '10kb' as const };
 
     await assert.rejects(
@@ -256,7 +256,7 @@ class BodyInterceptorSuite {
 
   @Test()
   async lengthMismatched() {
-    const interceptor = await DependencyRegistry.getInstance(BodyInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true, limit: '50kb' as const };
 
     await assert.rejects(

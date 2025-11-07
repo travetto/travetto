@@ -1,6 +1,6 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { Class, ClassInstance, RetainPrimitiveFields } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 
 import { ControllerRegistryAdapter } from './registry-adapter';
 import { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
@@ -43,7 +43,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   #endpointsById = new Map<string, EndpointConfig>();
 
   async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
-    const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
+    const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
     const map = this.getController(inst.constructor).contextParams;
     for (const [field, type] of Object.entries(map)) {
       Object.defineProperty(inst, field, { get: ctx.getSource(type) });
@@ -59,7 +59,10 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   registerControllerContextParam<T>(target: Class, field: string, type: Class<T>): void {
     const controllerConfig = this.getController(target);
     controllerConfig.contextParams![field] = type;
-    DependencyRegistry.registerPostConstructHandler(target, 'ContextParam', inst => this.#bindContextParams(inst));
+    RegistryV2.getForRegister(DependencyRegistryIndex, target).registerPostConstructHandler(
+      'ContextParam',
+      inst => this.#bindContextParams(inst)
+    );
   }
 
   getController(cls: Class): ControllerConfig {

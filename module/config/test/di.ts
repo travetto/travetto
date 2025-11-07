@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { DependencyRegistryIndex, InjectableFactory } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 
 import { CustomEmptySymbol, DbConfig, Empty } from './di-config.ts';
@@ -28,7 +28,7 @@ export class DiConfigSuite {
   @Test('factory with autowire after')
   async simpleConfig() {
     await RegistryV2.init();
-    const inst = await DependencyRegistry.getInstance(DbConfig, CustomEmptySymbol);
+    const inst = await DependencyRegistryIndex.getInstance(DbConfig, CustomEmptySymbol);
 
     assert(inst);
 

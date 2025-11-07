@@ -3,7 +3,7 @@ import assert from 'node:assert';
 
 import { Controller, Get, WebHeaders, WebResponse, Post, Cookie, CookieJar } from '@travetto/web';
 import { Suite, Test } from '@travetto/test';
-import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
+import { DependencyRegistryIndex, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
@@ -235,7 +235,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     assert(lastStatus === 200);
     assert(typeof body === 'string');
 
-    const codec = await DependencyRegistry.getInstance(JWTPrincipalCodec, CommonPrincipalCodecSymbol);
+    const codec = await DependencyRegistryIndex.getInstance(JWTPrincipalCodec, CommonPrincipalCodecSymbol);
     await assert.doesNotReject(() => codec.verify(body));
   }
 

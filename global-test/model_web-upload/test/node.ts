@@ -1,6 +1,6 @@
 import { Suite } from '@travetto/test';
 import { NodeWebServer } from '@travetto/web-node';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 
 import { FetchWebDispatcher } from '@travetto/web-http-server/support/test/dispatcher.ts';
 
@@ -10,7 +10,9 @@ import { ModelBlobWebUploadServerSuite } from './suite.ts';
 export class NodeWebUploadTest extends ModelBlobWebUploadServerSuite {
   dispatcherType = FetchWebDispatcher;
 
-  serve() {
-    return DependencyRegistry.getInstance(NodeWebServer).then(v => v.serve()).then(v => v.kill);
+  async serve() {
+    const server = await DependencyRegistryIndex.getInstance(NodeWebServer);
+    const handle = await server.serve();
+    return () => { handle.stop(); };
   }
 }

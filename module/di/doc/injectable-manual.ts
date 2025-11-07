@@ -1,11 +1,11 @@
-import { Injectable, DependencyRegistry } from '@travetto/di';
+import { Injectable, DependencyRegistryIndex } from '@travetto/di';
 
 @Injectable()
 class Complex { }
 
 class ManualLookup {
   async invoke() {
-    const complex = await DependencyRegistry.getInstance(Complex);
+    const complex = await DependencyRegistryIndex.getInstance(Complex);
     return complex;
   }
 }

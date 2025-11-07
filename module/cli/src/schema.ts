@@ -166,7 +166,7 @@ export class CliCommandSchemaUtil {
       },
     ];
 
-    const SOURCES = ['flag', 'arg', 'custom'] as const;
+    const SOURCES = ['flag', 'arg', 'custom'];
 
     const results = validators.map((x, i) => x().catch(err => {
       if (!(err instanceof CliValidationResultError) && !(err instanceof ValidationResultError)) {

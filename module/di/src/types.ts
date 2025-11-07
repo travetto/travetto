@@ -65,7 +65,7 @@ export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
    */
   dependencies: {
     cons?: Dependency[];
-    fields: Record<string, Dependency>;
+    fields: Record<string | symbol, Dependency>;
   };
   /**
    * List of interface types
@@ -75,18 +75,9 @@ export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
    * Post construct handlers
    */
   postConstruct: Record<string | symbol, PostConstructHandler<unknown>>;
-}
 
-/**
- * Factory configuration
- */
-export interface InjectableFactoryConfig<T = unknown> extends CoreTarget<T> {
   /**
    * Factory function for the injectable
    */
-  factory: (...args: unknown[]) => T;
-  /**
-   * List of all dependencies as function arguments
-   */
-  dependencies?: Dependency[];
+  factory?: (...args: unknown[]) => T;
 }

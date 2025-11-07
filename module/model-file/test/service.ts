@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { Suite, Test } from '@travetto/test';
 import { TimeUtil } from '@travetto/runtime';
 import { ModelRegistryIndex } from '@travetto/model';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { FileModelConfig, FileModelService } from '@travetto/model-file';
 
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
@@ -38,7 +38,7 @@ export class FileExpirySuite extends ModelExpirySuite {
   @Test()
   async ensureCulled() {
     const service = await this.service;
-    const config = await DependencyRegistry.getInstance(this.configClass);
+    const config = await DependencyRegistryIndex.getInstance(this.configClass);
     const store = ModelRegistryIndex.getStoreName(ExpiryUser);
     const folder = `${config.folder}/${config.namespace}/${store}`;
 
