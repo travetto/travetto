@@ -1,4 +1,4 @@
-import { castTo, Runtime } from '@travetto/runtime';
+import { Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { TestConsumerRegistry } from '../../src/consumer/registry.ts';
@@ -35,8 +35,10 @@ export async function selectConsumer(inst: { format?: string }) {
 
   const cls = inst.constructor;
 
-  SchemaRegistryIndex.getForRegister(castTo(cls)).getClass().fields.format.enum = {
-    message: `{path} is only allowed to be "${types.join('" or "')}"`,
-    values: types
-  };
+  SchemaRegistryIndex.getForRegister(cls).registerField('format', {
+    enum: {
+      message: `{path} is only allowed to be "${types.join('" or "')}"`,
+      values: types
+    }
+  });
 }
