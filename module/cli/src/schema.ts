@@ -53,14 +53,12 @@ export class CliCommandSchemaUtil {
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
     const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
 
-    const schemaIndex = RegistryV2.instance(SchemaRegistryIndex);
-
     // Ensure finalized
     const parent = getParentClass(cls);
     if (parent?.Ⲑid) {
-      schemaIndex.process([{ type: 'added', curr: parent }]);
+      RegistryV2.process([{ type: 'added', curr: parent }]);
     }
-    schemaIndex.process([{ type: 'added', curr: cls }]);
+    RegistryV2.process([{ type: 'added', curr: cls }]);
 
     const schema = await SchemaRegistryIndex.getSchemaConfig(cls);
     const flags = Object.values(schema.schema).map(fieldToInput);

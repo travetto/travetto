@@ -1,4 +1,4 @@
-import { castTo, Class, ClassInstance } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 import { RegistryV2 } from '@travetto/registry';
 import { SuiteRegistryIndex } from '@travetto/test';
 
@@ -13,7 +13,7 @@ export function InjectableSuite() {
       beforeEach: [
         async function (this: unknown) {
           await RegistryV2.init();
-          await RegistryV2.instance(DependencyRegistryIndex).injectFields(castTo<ClassInstance>(this), target);
+          await DependencyRegistryIndex.injectFields(this, target);
         },
       ]
     });

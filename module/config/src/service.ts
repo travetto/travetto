@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { AppError, toConcrete, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
+import { AppError, toConcrete, castTo, Class, Env, Runtime, RuntimeResources } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -93,22 +93,13 @@ export class ConfigurationService {
    *   - Will not show fields marked as secret
    */
   async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
-    const configTargets = await DependencyRegistryIndex.getCandidateTypes(ConfigBaseType);
-    const configs = await Promise.all(
-      configTargets
-        .filter(el => el.qualifier === DependencyRegistryIndex.getConfig(el.class).qualifier) // Is primary?
-        .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
-        .map(async el => {
-          const inst = await DependencyRegistryIndex.getInstance<ClassInstance>(el.class, el.qualifier);
-          return [el, inst] as const;
-        })
-    );
+    const instances = await DependencyRegistryIndex.getPrimaryCandidateInstances(ConfigBaseType);
     const out: Record<string, ConfigData> = {};
-    for (const [el, inst] of configs) {
+    for (const [cls, inst] of instances) {
       const data = BindUtil.bindSchemaToObject<ConfigData>(
-        inst.constructor, {}, inst, { filterInput: f => 'secret' in f && !f.secret, filterValue: v => v !== undefined }
+        castTo(inst.constructor), {}, inst, { filterInput: f => 'secret' in f && !f.secret, filterValue: v => v !== undefined }
       );
-      out[el.class.name] = DataUtil.filterByKeys(data, this.#secrets);
+      out[cls.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
     return { sources: this.#specs, active: out };
   }

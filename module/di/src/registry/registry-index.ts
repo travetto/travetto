@@ -12,14 +12,6 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getConfig(clsOrId: ClassOrId): InjectableConfig {
-    return RegistryV2.get(this, clsOrId).get();
-  }
-
-  static has(clsOrId: ClassOrId): boolean {
-    return RegistryV2.has(this, clsOrId);
-  }
-
   static getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: ResolutionType): Promise<T> {
     return RegistryV2.instance(DependencyRegistryIndex).getInstance(target, qual, resolution);
   }
@@ -30,6 +22,23 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
 
   static getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
     return RegistryV2.instance(DependencyRegistryIndex).getCandidateInstances<T>(target, predicate);
+  }
+
+  static injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
+    return RegistryV2.instance(DependencyRegistryIndex).injectFields(o, cls);
+  }
+
+  static async getPrimaryCandidateInstances<T>(candidateType: Class<T>): Promise<[Class, T][]> {
+    const targets = await DependencyRegistryIndex.getCandidateTypes(candidateType);
+    return await Promise.all(
+      targets
+        .filter(el => el.qualifier === RegistryV2.get(DependencyRegistryIndex, el.class).get().qualifier) // Is primary?
+        .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
+        .map(async el => {
+          const instance = await DependencyRegistryIndex.getInstance<T>(el.class, el.qualifier);
+          return [el.class, instance];
+        })
+    );
   }
 
   #defaultSymbols = new Set<symbol>();

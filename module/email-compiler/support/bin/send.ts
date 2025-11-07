@@ -27,7 +27,7 @@ export class EditorSendService {
           factory: () => new NodemailerTransport(senderConfig),
           target: MailTransportTarget,
         });
-        RegistryV2.instance(DependencyRegistryIndex).process([{ type: 'added', curr: cls }]);
+        RegistryV2.process([{ type: 'added', curr: cls }]);
 
         this.ethereal = !!senderConfig.host?.includes('ethereal.email');
       } catch {
