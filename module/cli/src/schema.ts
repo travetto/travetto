@@ -101,7 +101,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const fullSchema = SchemaRegistryIndex.getClassConfig(cls);
+    const fullSchema = SchemaRegistryIndex.getConfig(cls);
     const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getByClass(cls)!;
     const cfg: CliCommandSchema = {
       ...meta,

@@ -1,35 +1,85 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
 
-import { InjectableConfig } from '../types';
+import { InjectableConfig, InjectableFactoryConfig } from '../types';
+import { AutoCreate } from './types';
+
+function combineFactories(base: InjectableFactoryConfig, ...override: Partial<InjectableFactoryConfig>[]): InjectableFactoryConfig {
+  for (const o of override) {
+    base.enabled = o.enabled ?? base.enabled ?? true;
+    base.qualifier = o.qualifier ?? base.qualifier;
+    if (o.dependencies) {
+      base.dependencies = o.dependencies;
+    }
+    if (o.factory) {
+      base.factory = o.factory;
+    }
+    if (o.target) {
+      base.target = o.target;
+    }
+  }
+  return base;
+}
+
+function combineClasses(base: InjectableConfig, ...override: Partial<InjectableConfig>[]): InjectableConfig {
+  for (const o of override) {
+    base.enabled = o.enabled ?? base.enabled;
+    base.qualifier = o.qualifier ?? base.qualifier;
+    if (o.interfaces) {
+      (base.interfaces ??= []).push(...o.interfaces);
+    }
+    if (o.primary !== undefined) {
+      base.primary = o.primary;
+    }
+    if (o.target) {
+      base.target = o.target;
+    }
+    if (o.dependencies) {
+      base.dependencies = {
+        ...o.dependencies,
+        fields: {
+          ...o.dependencies.fields
+        }
+      };
+    }
+    if (o.autoCreate) {
+      (base.interfaces ??= []).push(AutoCreate);
+    }
+  }
+  return base;
+}
 
 export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConfig> {
-  indexCls: RegistryIndexClass<InjectableConfig<unknown>, {}, {}>;
+  indexCls: RegistryIndexClass<InjectableConfig>;
 
   #cls: Class;
+  #config: InjectableConfig;
 
   constructor(cls: Class) {
     this.#cls = cls;
   }
-  register(...data: Partial<InjectableConfig<unknown>>[]): InjectableConfig<unknown> {
-    throw new Error('Method not implemented.');
+
+  register(...data: Partial<InjectableConfig<unknown>>[]): InjectableConfig {
+    this.#config ??= {
+      qualifier: Symbol.for(this.#cls.Ⲑid),
+      class: this.#cls,
+      enabled: true,
+      target: this.#cls,
+      interfaces: [],
+      dependencies: {
+        fields: {},
+        cons: []
+      },
+      postConstruct: {}
+    };
+    return combineClasses(this.#config, ...data);
   }
-  registerField(field: string | symbol, ...data: Partial<{}>[]): {} {
-    throw new Error('Method not implemented.');
+
+  get(): InjectableConfig<unknown> {
+    return this.#config;
   }
-  registerMethod(method: string | symbol, ...data: Partial<{}>[]): {} {
-    throw new Error('Method not implemented.');
-  }
+
   finalize(parent?: InjectableConfig<unknown> | undefined): void {
-    throw new Error('Method not implemented.');
-  }
-  getClass(): InjectableConfig<unknown> {
-    throw new Error('Method not implemented.');
-  }
-  getField(field: string | symbol): {} {
-    throw new Error('Method not implemented.');
-  }
-  getMethod(method: string | symbol): {} {
-    throw new Error('Method not implemented.');
+
   }
 }

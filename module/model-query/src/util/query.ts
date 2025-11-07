@@ -58,7 +58,7 @@ export class ModelQueryUtil {
 
     const conf = ModelRegistryIndex.getConfig(cls);
     if (conf.subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.getClassConfig(cls);
+      const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
       clauses.push(castTo({ [subTypeField]: subTypeName }));
     }
     if (checkExpiry && conf.expiresAt) {

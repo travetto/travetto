@@ -222,7 +222,7 @@ export class ElasticsearchQueryUtil {
       });
     }
     if (subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.getClassConfig(cls);
+      const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
       clauses.push({
         term: { [subTypeField]: { value: subTypeName! } }
       });

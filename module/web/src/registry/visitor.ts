@@ -11,7 +11,7 @@ import { ControllerRegistryIndex } from './registry-index.ts';
 export class ControllerVisitUtil {
 
   static #onSchemaEvent(visitor: ControllerVisitor, type?: Class): unknown | Promise<unknown> {
-    return type && SchemaRegistryIndex.has(type) ? visitor.onSchema?.(SchemaRegistryIndex.getClassConfig(type)) : undefined;
+    return type && SchemaRegistryIndex.has(type) ? visitor.onSchema?.(SchemaRegistryIndex.getConfig(type)) : undefined;
   }
 
   static async visitController(visitor: ControllerVisitor, cls: Class, options: ControllerVisitorOptions = {}): Promise<void> {

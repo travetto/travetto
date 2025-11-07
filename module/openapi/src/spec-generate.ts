@@ -92,7 +92,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const out: Record<string, unknown> = {};
     // Handle nested types
     if (SchemaRegistryIndex.has(field.type)) {
-      const id = this.#nameResolver.getName(SchemaRegistryIndex.getClassConfig(field.type));
+      const id = this.#nameResolver.getName(SchemaRegistryIndex.getConfig(field.type));
       // Exposing
       this.#schemas[id] = this.#allSchemas[id];
       out.$ref = `${DEFINITION}/${id}`;
@@ -195,7 +195,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const typeId = this.#nameResolver.getName(type);
 
     if (!this.#allSchemas[typeId]) {
-      const config = SchemaRegistryIndex.getClassConfig(cls);
+      const config = SchemaRegistryIndex.getConfig(cls);
       if (config) {
         this.#allSchemas[typeId] = {
           title: config.title || config.description,
@@ -209,7 +209,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
         for (const fieldName of Object.keys(def.fields)) {
           if (SchemaRegistryIndex.has(def.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistryIndex.getClassConfig(def.fields[fieldName].type));
+            this.onSchema(SchemaRegistryIndex.getConfig(def.fields[fieldName].type));
           }
           properties[fieldName] = this.#processSchemaField(def.fields[fieldName], required);
         }
@@ -221,7 +221,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
             extra.oneOf = map
               .filter(x => !describeFunction(x)?.abstract)
               .map(c => {
-                this.onSchema(SchemaRegistryIndex.getClassConfig(c));
+                this.onSchema(SchemaRegistryIndex.getConfig(c));
                 return this.#getType(c);
               });
           }
@@ -252,7 +252,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: ''
       };
     } else {
-      const cls = SchemaRegistryIndex.getClassConfig(body.type);
+      const cls = SchemaRegistryIndex.getConfig(body.type);
       const typeId = cls ? this.#nameResolver.getName(cls) : body.type.name;
       const typeRef = cls ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {

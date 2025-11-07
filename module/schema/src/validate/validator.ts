@@ -217,7 +217,7 @@ export class SchemaValidator {
    * Validate the class level validations
    */
   static async #validateClassLevel<T>(cls: Class<T>, o: T, view?: string): Promise<ValidationError[]> {
-    const schema = SchemaRegistryIndex.getClassConfig(cls);
+    const schema = SchemaRegistryIndex.getConfig(cls);
     if (!schema) {
       return [];
     }

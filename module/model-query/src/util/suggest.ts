@@ -32,7 +32,7 @@ export class ModelQuerySuggestUtil {
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
     if (config.subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.getClassConfig(cls);
+      const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
       clauses.push({ [subTypeField]: subTypeName });
     }
 
@@ -89,7 +89,7 @@ export class ModelQuerySuggestUtil {
       ...(query ?? {}),
       select: castTo({
         [field]: true, ...(config.subType ? {
-          [SchemaRegistryIndex.getClassConfig(cls).subTypeField]: true
+          [SchemaRegistryIndex.getConfig(cls).subTypeField]: true
         } : {})
       })
     });

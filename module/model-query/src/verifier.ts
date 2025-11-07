@@ -52,7 +52,7 @@ export class QueryVerifier {
    * Handle generic clauses
    */
   static processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler): void {
-    const view = SchemaRegistryIndex.getClassConfig(cls).fields;
+    const view = SchemaRegistryIndex.getConfig(cls).fields;
 
     if (val === undefined || val === null) {
       state.log('Value cannot be undefined or null');

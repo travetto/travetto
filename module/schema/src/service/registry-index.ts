@@ -19,7 +19,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getClassConfig(clsOrId: ClassOrId): ClassConfig {
+  static getConfig(clsOrId: ClassOrId): ClassConfig {
     return RegistryV2.get(this, clsOrId).get();
   }
 
