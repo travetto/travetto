@@ -42,7 +42,12 @@ export type InjectConfig = { qualifier?: symbol, optional?: boolean, resolution?
 
 export function InjectArgs(configs?: InjectConfig[][]) {
   return <T extends Class>(target: T): void => {
-    DependencyRegistryIndex.getForRegister(target).registerConstructor(configs?.map(x => collapseConfig(...x)));
+    DependencyRegistryIndex.getForRegister(target).register({
+      dependencies: {
+        fields: {},
+        cons: configs?.map(x => collapseConfig(...x))
+      }
+    });
   };
 }
 
@@ -55,7 +60,11 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
   return (target: unknown, propertyKey?: string | symbol, idx?: number | PropertyDescriptor): void => {
     if (typeof idx !== 'number') { // Only register if on property
       const config = collapseConfig<Dependency>(first, ...args);
-      DependencyRegistryIndex.getForRegister(target).registerProperty(propertyKey!, config);
+      DependencyRegistryIndex.getForRegister(target).register({
+        dependencies: {
+          fields: { [propertyKey!]: config }
+        }
+      });
     }
   };
 }

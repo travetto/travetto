@@ -2,7 +2,7 @@ import { Class } from '@travetto/runtime';
 
 export type ClassTarget<T = unknown> = Class<T> | Function;
 
-export type PostConstructHandler<T> = (value: T) => (void | Promise<void>);
+export type PostConstructHandler<T = unknown> = (value: T) => (void | Promise<void>);
 
 /**
  * State of a Dependency
@@ -74,7 +74,7 @@ export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
   /**
    * Post construct handlers
    */
-  postConstruct: Record<string | symbol, PostConstructHandler<unknown>>;
+  postConstruct: Record<string | symbol, PostConstructHandler>;
 
   /**
    * Factory function for the injectable

@@ -59,10 +59,11 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   registerControllerContextParam<T>(target: Class, field: string, type: Class<T>): void {
     const controllerConfig = this.getController(target);
     controllerConfig.contextParams![field] = type;
-    RegistryV2.getForRegister(DependencyRegistryIndex, target).registerPostConstructHandler(
-      'ContextParam',
-      inst => this.#bindContextParams(inst)
-    );
+    RegistryV2.getForRegister(DependencyRegistryIndex, target).register({
+      postConstruct: {
+        ContextParam: inst => this.#bindContextParams(inst)
+      }
+    });
   }
 
   getController(cls: Class): ControllerConfig {
