@@ -44,6 +44,7 @@ class $Registry {
     }
     this.#adapters.delete(cls);
     this.#idToCls.delete(cls.Ⲑid);
+    this.#finalized.delete(cls);
   }
 
   #adapter<C extends {}, T extends RegistryIndexClass<C>>(
