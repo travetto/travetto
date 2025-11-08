@@ -65,7 +65,31 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     return this.#config;
   }
 
-  finalize(parent?: InjectableConfig<unknown> | undefined): void {
+  finalize(parentConfig?: InjectableConfig<unknown> | undefined): void {
 
+    if (this.#config.enabled !== undefined && !(typeof this.#config.enabled === 'boolean' ? this.#config.enabled : this.#config.enabled())) {
+      return;
+    }
+
+    if (parentConfig) {
+      this.#config.dependencies = {
+        cons: this.#config.dependencies.cons ?? parentConfig.dependencies.cons,
+        fields: {
+          ...parentConfig.dependencies.fields,
+          ...this.#config.dependencies.fields
+        }
+      };
+
+      // collect interfaces
+      this.#config.interfaces = [
+        ...parentConfig.interfaces,
+        ...this.#config.interfaces
+      ];
+
+      this.#config.postConstruct = {
+        ...parentConfig.postConstruct,
+        ...this.#config.postConstruct
+      };
+    }
   }
 }

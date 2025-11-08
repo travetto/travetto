@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 import { AppError, castTo, Class, ClassInstance, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
-import { RegistryItem, RegistryIndex, RegistryIndexClass, ClassOrId, RegistrationMethods } from './types';
+import { RegistryIndex, RegistryIndexClass, ClassOrId, RegistrationMethods, RegistryAdapter } from './types';
 import { ChangeEvent } from '../types';
 import { MethodSource } from '../source/method-source';
 
@@ -13,13 +13,18 @@ class $Registry {
   trace = false;
   #uid = Util.uuid();
 
-  #items: Map<Class, RegistryItem> = new Map();
+  // Core data
+  #adapters: Map<Class, Map<RegistryIndexClass, RegistryAdapter>> = new Map();
+  #finalized = new Map<Class, boolean>();
+
+  // Lookups
   #idToCls: Map<string, Class> = new Map();
-  #itemsByIndex = new Map<RegistryIndexClass, Map<Class, RegistryItem>>();
-  #classSource = new ClassSource();
-  #methodSource?: MethodSource;
+  #adaptersByIndex = new Map<RegistryIndexClass, Map<Class, RegistryAdapter>>();
   #indexes = new Map<RegistryIndexClass, RegistryIndex<{}>>();
 
+  // Eventing
+  #classSource = new ClassSource();
+  #methodSource?: MethodSource;
   #emitter = new EventEmitter<{ event: [ChangeEvent<Class>] }>();
 
   #matchesEvent(event: ChangeEvent<Class>, matches: RegistryIndexClass): boolean {
@@ -32,63 +37,46 @@ class $Registry {
       ('prev' in event && this.has(matches, event.prev[0]));
   }
 
-  #item(cls: Class): RegistryItem {
-    let item = this.#items.get(cls);
-    if (!item) {
-      item = new RegistryItem(cls);
-      this.#items.set(cls, item);
-      this.#idToCls.set(cls.Ⲑid, cls);
+  #removeItem(cls: Class): void {
+    for (const adapter of this.#adapters.get(cls)?.values() ?? []) {
+      // Remove from itemsByIndex map
+      this.#adaptersByIndex.get(adapter.indexCls)?.delete(cls);
     }
-    return item;
+    this.#adapters.delete(cls);
+    this.#idToCls.delete(cls.Ⲑid);
   }
 
   #adapter<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
-    cls: Class,
+    clsOrId: ClassOrId,
   ): ReturnType<InstanceType<T>['adapter']> {
-    if (!this.#indexes.has(indexCls)) {
-      this.#indexes.set(indexCls, new indexCls());
+    const cls = this.#toCls(clsOrId);
+    if (!this.#adapters.has(cls)) {
+      this.#adapters.set(cls, new Map());
+    }
+    if (!this.#adaptersByIndex.has(indexCls)) {
+      this.#adaptersByIndex.set(indexCls, new Map());
+    }
+    if (!this.#adapters.get(cls)!.has(indexCls)) {
+      const adapter = this.instance(indexCls).adapter(cls);
+      this.#adapters.get(cls)!.set(indexCls, adapter);
+      this.#idToCls.set(cls.Ⲑid, cls);
+      this.#adaptersByIndex.get(indexCls)!.set(cls, adapter);
     }
 
-    const index: RegistryIndex<C> = castTo(this.#indexes.get(indexCls));
-
-    const item = this.#item(cls);
-    if (!this.#itemsByIndex.has(indexCls)) {
-      this.#itemsByIndex.set(indexCls, new Map());
-    }
-    this.#itemsByIndex.get(indexCls)!.set(cls, item);
-    return castTo(this.#item(cls).adapter(index, cls));
-  }
-
-  #readonlyAdapter<C extends {}, T extends RegistryIndexClass<C>>(
-    indexCls: T,
-    cls: Class,
-  ): Extract<ReturnType<InstanceType<T>['adapter']>, 'get' | `get${string}`> {
-    if (!this.has(indexCls, cls)) {
-      throw new AppError(`Class ${cls} is not registered in index ${indexCls}`);
-    }
-    const index: RegistryIndex<C> = castTo(this.#indexes.get(indexCls));
-    return castTo(this.#item(cls).readonlyAdapter(index, cls));
-  }
-
-  #removeItem(cls: Class): void {
-    const item = this.#items.get(cls);
-    if (item) {
-      for (const adapter of item.adapters.values()) {
-        // Remove from itemsByIndex map
-        this.#itemsByIndex.get(adapter.indexCls)?.delete(item.cls);
-      }
-      this.#items.delete(item.cls);
-      this.#idToCls.delete(item.cls.Ⲑid);
-    }
+    return castTo(this.#adapters.get(cls)!.get(indexCls)!);
   }
 
   #finalizeItems(classes: Class[]): void {
     for (const cls of classes) {
-      const item = this.#item(cls);
-      if (!item.finalized) {
-        item.finalize();
+      if (this.#finalized.get(cls)) {
+        continue;
       }
+      for (const adapter of this.#adapters.get(cls)?.values() ?? []) {
+        const inst = this.instance(adapter.indexCls);
+        adapter.finalize(inst.getParentConfig?.(cls));
+      }
+      this.#finalized.set(cls, true);
     }
   }
 
@@ -164,9 +152,13 @@ class $Registry {
 
   getForRegister<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
-    clsOrId: ClassOrId
+    clsOrId: ClassOrId,
   ): ReturnType<InstanceType<T>['adapter']> {
     const cls = this.#toCls(clsOrId);
+
+    if (this.#finalized.get(cls)) {
+      throw new AppError(`Class ${cls} is already finalized`);
+    }
     return this.#adapter(indexCls, cls);
   }
 
@@ -174,19 +166,25 @@ class $Registry {
     indexCls: T,
     clsOrId: ClassOrId
   ): Omit<ReturnType<InstanceType<T>['adapter']>, RegistrationMethods> {
-    const cls = this.#toCls(clsOrId);
-    return this.#readonlyAdapter(indexCls, cls);
+    if (!this.has(indexCls, clsOrId)) {
+      const cls = this.#toCls(clsOrId);
+      throw new AppError(`Class ${cls} is not registered in index ${indexCls}`);
+    }
+    return this.#adapter(indexCls, clsOrId);
   }
 
   getClasses<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T
   ): Class[] {
-    return Array.from(this.#itemsByIndex.get(indexCls)?.keys() ?? []);
+    return Array.from(this.#adaptersByIndex.get(indexCls)?.keys() ?? []);
   }
 
   instance<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T
   ): InstanceType<T> {
+    if (!this.#indexes.has(indexCls)) {
+      this.#indexes.set(indexCls, new indexCls());
+    }
     return castTo(this.#indexes.get(indexCls));
   }
 
@@ -198,7 +196,7 @@ class $Registry {
     clsOrId: ClassOrId
   ): boolean {
     const cls = this.#toCls(clsOrId);
-    return this.#itemsByIndex.get(indexCls)?.has(cls) ?? false;
+    return this.#adaptersByIndex.get(indexCls)?.has(cls) ?? false;
   }
 
   /**
