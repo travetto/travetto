@@ -108,20 +108,26 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
     return RegistryV2.get(SchemaRegistryIndex, cls).get();
   }
 
+  getParentClass(cls: Class): Class | undefined {
+    return getParentClass(cls);
+  }
+
   /**
    * Find base schema class for a given class
    */
   getBaseSchemaClass(cls: Class): Class {
     if (!this.#baseSchema.has(cls)) {
-      let conf = this.getClassConfig(cls);
-      let parent = cls;
+      let conf: ClassConfig | undefined = this.getClassConfig(cls);
+      let parent: Class | undefined = cls;
 
-      while (conf && !conf.baseType) {
-        parent = getParentClass(parent)!;
-        conf = this.getClassConfig(parent);
+      while (parent && conf && !conf.baseType) {
+        parent = this.getParentClass(parent);
+        if (parent) {
+          conf = this.getClassConfig(parent);
+        }
       }
 
-      this.#baseSchema.set(cls, conf ? parent : cls);
+      this.#baseSchema.set(cls, (conf && parent) ? parent : cls);
     }
     return this.#baseSchema.get(cls)!;
   }

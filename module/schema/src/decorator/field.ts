@@ -8,7 +8,7 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 
 function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
   return (t: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
-    if (idx !== undefined && typeof idx === 'number') {
+    if (typeof idx === 'number') {
       SchemaRegistryIndex.getForRegister(t).registerParameter(t.constructor, idx, obj);
     } else {
       SchemaRegistryIndex.getForRegister(t).registerField(k, obj);
@@ -24,18 +24,23 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
  */
 export function Field(type: Pick<FieldConfig, 'type' | 'array'>, ...config: Partial<FieldConfig>[]) {
   return (f: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
-    if (idx !== undefined && typeof idx === 'number') {
-      SchemaRegistryIndex.getForRegister(f).registerParameter(k, idx, {
-        type: type.type,
-        array: type.array ?? false,
-        ...config,
-      });
+    if (typeof idx === 'number') {
+      SchemaRegistryIndex.getForRegister(f).registerParameter(k,
+        idx,
+        {
+          type: type.type,
+          array: type.array ?? false,
+        },
+        ...config);
     } else {
-      SchemaRegistryIndex.getForRegister(f).registerField(k, {
-        type: type.type,
-        array: type.array ?? false,
+      SchemaRegistryIndex.getForRegister(f).registerField(
+        k,
+        {
+          type: type.type,
+          array: type.array ?? false,
+        },
         ...config,
-      });
+      );
     }
   };
 }

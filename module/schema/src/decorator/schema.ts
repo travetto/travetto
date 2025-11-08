@@ -1,5 +1,4 @@
 import { Any, castTo, Class, ClassInstance, DeepPartial } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
 
 import { BindUtil } from '../bind-util.ts';
 import { ClassConfig, ViewFieldsConfig } from '../service/types.ts';

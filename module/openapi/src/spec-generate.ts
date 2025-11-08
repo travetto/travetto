@@ -49,23 +49,23 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Convert schema to a set of dotted parameters
    */
   #schemaToDotParams(location: 'query' | 'header', input: InputConfig, prefix: string = '', rootField: InputConfig = input): ParameterObject[] {
-    const viewConf = SchemaRegistryIndex.has(input.type) ?
+    const schemaConf = SchemaRegistryIndex.has(input.type) ?
       SchemaRegistryIndex.getSchemaConfig(input.type, input.view) :
       undefined;
 
-    const schemaConf = viewConf && viewConf.schema;
     if (!schemaConf) {
       throw new AppError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
 
     const params: ParameterObject[] = [];
     for (const sub of Object.values(schemaConf)) {
+      const name = sub.name.toString();
       if (SchemaRegistryIndex.has(sub.type)) {
         const suffix = (sub.array) ? '[]' : '';
-        params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${sub.name}${suffix}` : `${sub.name}${suffix}.`, rootField));
+        params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${name}${suffix}` : `${name}${suffix}.`, rootField));
       } else {
         params.push({
-          name: `${prefix}${sub.name}`,
+          name: `${prefix}${name}`,
           description: sub.description,
           schema: sub.array ? {
             type: 'array',

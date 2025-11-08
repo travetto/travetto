@@ -65,9 +65,9 @@ export function toConcrete<T extends unknown>(): Class<T> {
 /**
  * Find parent class for a given class object
  */
-export function getParentClass(cls: Class): Class | null {
+export function getParentClass(cls: Class): Class | undefined {
   const parent: Class = Object.getPrototypeOf(cls);
-  return parent.name && parent !== Object ? parent : null;
+  return parent.name && parent !== Object ? parent : undefined;
 }
 
 /**

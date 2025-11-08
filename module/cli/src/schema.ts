@@ -55,13 +55,14 @@ export class CliCommandSchemaUtil {
 
     // Ensure finalized
     const parent = getParentClass(cls);
-    if (parent?.Ⲑid) {
-      RegistryV2.process([{ type: 'added', curr: parent }]);
-    }
-    RegistryV2.process([{ type: 'added', curr: cls }]);
+
+    RegistryV2.process([
+      ...(parent?.Ⲑid ? [{ type: 'added', curr: parent } as const] : []),
+      { type: 'added', curr: cls }
+    ]);
 
     const schema = await SchemaRegistryIndex.getSchemaConfig(cls);
-    const flags = Object.values(schema.schema).map(fieldToInput);
+    const flags = Object.values(schema).map(fieldToInput);
 
     // Add help command
     flags.push({ name: 'help', flagNames: ['h'], description: 'display help for command', type: 'boolean' });
