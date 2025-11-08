@@ -1,5 +1,5 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, classConstruct, describeFunction } from '@travetto/runtime';
 
 import { ClassTarget, Dependency, InjectableConfig } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
@@ -49,13 +49,139 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   #targetToClass = new Map<DependencyTargetId, Map<symbol, string>>();
   #classToTarget = new Map<DependencyClassId, Map<symbol, DependencyTargetId>>();
 
+  #addClass(cls: Class): void {
+    const classId = cls.Ⲑid;
+
+    const adapter = RegistryV2.get(DependencyRegistryIndex, cls);
+    if (!adapter.enabled()) {
+      return;
+    }
+
+    const config = adapter.get();
+    const parentClass = this.getParentClass(cls);
+
+    if (config.factory) {
+      if (!this.#targetToClass.has(classId)) {
+        this.#targetToClass.set(classId, new Map());
+      }
+      // Make explicitly discoverable as self
+      this.#targetToClass.get(classId)?.set(config.qualifier, classId);
+    }
+
+    if (describeFunction(cls)?.abstract) { // Skip out early, only needed to inherit
+      return;
+    }
+
+    if (!this.#classToTarget.has(classId)) {
+      this.#classToTarget.set(classId, new Map());
+    }
+
+    const targetClassId = config.target.Ⲑid;
+
+    if (!this.#targetToClass.has(targetClassId)) {
+      this.#targetToClass.set(targetClassId, new Map());
+    }
+
+    if (config.qualifier === Symbol.for(classId)) {
+      this.#defaultSymbols.add(config.qualifier);
+    }
+
+    this.#targetToClass.get(targetClassId)!.set(config.qualifier, classId);
+    this.#classToTarget.get(classId)!.set(config.qualifier, targetClassId);
+
+    // If aliased
+    for (const el of config.interfaces) {
+      const elClassId = el.Ⲑid;
+      if (!this.#targetToClass.has(elClassId)) {
+        this.#targetToClass.set(elClassId, new Map());
+      }
+      this.#targetToClass.get(elClassId)!.set(config.qualifier, classId);
+      this.#classToTarget.get(classId)!.set(Symbol.for(elClassId), elClassId);
+
+      if (config.primary && (classId === targetClassId || config.factory)) {
+        this.#targetToClass.get(elClassId)!.set(PrimaryCandidateSymbol, classId);
+      }
+    }
+
+    const parentConfig = RegistryV2.get(DependencyRegistryIndex, parentClass).get();
+
+
+    // If targeting self (default @Injectable behavior)
+    if ((classId === targetClassId || config.factory) && (parentConfig || describeFunction(parentClass)?.abstract)) {
+      const parentId = parentClass.Ⲑid;
+
+      if (!this.#targetToClass.has(parentId)) {
+        this.#targetToClass.set(parentId, new Map());
+      }
+
+      if (config.primary) {
+        this.#targetToClass.get(parentId)!.set(PrimaryCandidateSymbol, classId);
+      }
+
+      this.#targetToClass.get(parentId)!.set(config.qualifier, classId);
+      this.#classToTarget.get(classId)!.set(config.qualifier, parentId);
+    }
+
+    if (config.primary) {
+      if (!this.#targetToClass.has(classId)) {
+        this.#targetToClass.set(classId, new Map());
+      }
+      this.#targetToClass.get(classId)!.set(PrimaryCandidateSymbol, classId);
+
+      if (config.factory) {
+        this.#targetToClass.get(targetClassId)!.set(PrimaryCandidateSymbol, classId);
+      }
+
+      // Register primary if only one interface provided and no parent config
+      if (config.interfaces.length === 1 && !parentConfig) {
+        const [primaryInterface] = config.interfaces;
+        const primaryClassId = primaryInterface.Ⲑid;
+        if (!this.#targetToClass.has(primaryClassId)) {
+          this.#targetToClass.set(primaryClassId, new Map());
+        }
+        this.#targetToClass.get(primaryClassId)!.set(PrimaryCandidateSymbol, classId);
+      }
+    }
+  }
+
+  #removeClass(cls: Class): void {
+    const classId = cls.Ⲑid;
+
+    if (!this.#classToTarget.has(classId)) {
+      return;
+    }
+
+    if (this.#instances.has(classId)) {
+      for (const qualifier of this.#classToTarget.get(classId)!.keys()) {
+        this.destroyInstance(cls, qualifier);
+      }
+    }
+  }
+
+  getParentClass(cls: Class): Class {
+    const config = RegistryV2.get(DependencyRegistryIndex, cls).get();
+    let parentClass: Function = config.factory ? config.target : Object.getPrototypeOf(cls);
+
+    if (config.factory) {
+      while (describeFunction(Object.getPrototypeOf(parentClass))?.abstract) {
+        parentClass = Object.getPrototypeOf(parentClass);
+      }
+    }
+    return castTo(parentClass);
+  }
+
   getConfig(clsOrId: ClassOrId): InjectableConfig {
     return RegistryV2.get(DependencyRegistryIndex, clsOrId).get();
   }
 
-
   process(events: ChangeEvent<Class>[]): void {
-
+    for (const ev of events) {
+      if (ev.type === 'added') {
+        this.#addClass(ev.curr);
+      } else if (ev.type === 'removing') {
+        this.#removeClass(ev.prev);
+      }
+    }
   }
 
   adapter(cls: Class): DependencyRegistryAdapter {
@@ -223,10 +349,14 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   }
 
   /**
-   * Create the instance
+   * Get or create the instance
    */
-  async createInstance<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
-    const classId = this.resolveTarget(target, qualifier).id;
+  async getInstance<T>(target: ClassTarget<T>, requestedQualifier?: symbol, resolution?: ResolutionType): Promise<T> {
+    if (!target) {
+      throw new AppError('Unable to get instance when target is undefined');
+    }
+
+    const { id: classId, qualifier } = this.resolveTarget(target, requestedQualifier, resolution);
 
     if (!this.#instances.has(classId)) {
       this.#instances.set(classId, new Map());
@@ -274,21 +404,5 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
     // Compute fields to be auto-wired
     return await this.resolveFieldDependencies(this.getConfig(cls), o);
-  }
-
-  /**
-   * Get an instance by type and qualifier
-   */
-  async getInstance<T>(target: ClassTarget<T>, requestedQualifier?: symbol, resolution?: ResolutionType): Promise<T> {
-    if (!target) {
-      throw new AppError('Unable to get instance when target is undefined');
-    }
-
-    // TODO: Move resolution type into create instance, not sure how that affects the caching
-    const { id: classId, qualifier } = this.resolveTarget(target, requestedQualifier, resolution);
-    if (!this.#instances.has(classId) || !this.#instances.get(classId)!.has(qualifier)) {
-      await this.createInstance(target, qualifier); // Wait for proxy
-    }
-    return castTo(this.#instances.get(classId)!.get(qualifier));
   }
 }

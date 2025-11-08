@@ -74,7 +74,12 @@ class $Registry {
       }
       for (const adapter of this.#adapters.get(cls)?.values() ?? []) {
         const inst = this.instance(adapter.indexCls);
-        adapter.finalize(inst.getParentConfig?.(cls));
+        const parentClass = inst.getParentClass?.(cls);
+        let parentConfig;
+        if (parentClass && this.#adapters.has(parentClass) && this.#adapters.get(parentClass)!.has(adapter.indexCls)) {
+          parentConfig = this.#adapter(adapter.indexCls, parentClass).get();
+        }
+        adapter.finalize(parentConfig);
       }
       this.#finalized.set(cls, true);
     }

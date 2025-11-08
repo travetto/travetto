@@ -12,7 +12,7 @@ export type RegistrationMethods = `register${string}` | `finalize${string}`;
 export interface RegistryIndex<C extends {} = {}> {
   process(events: ChangeEvent<Class>[]): void;
   adapter(cls: Class): RegistryAdapter<C>;
-  getParentConfig?(cls: Class): C | undefined;
+  getParentClass?(cls: Class): Class | undefined;
 }
 
 /**
