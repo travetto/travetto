@@ -54,13 +54,6 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
     this.#baseSchema.delete(cls);
   }
 
-  #finalize(cls: Class): ClassConfig {
-    const parent = getParentClass(cls);
-    const parentConfig = parent ? this.getClassConfig(parent) : undefined;
-    this.adapter(cls).finalize(parentConfig);
-    return this.getClassConfig(cls);
-  }
-
   #recomputeSubTypes(): void {
     this.#subTypes.clear();
     const all = RegistryV2.getClasses(SchemaRegistryIndex);
@@ -102,11 +95,6 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
         this.#onRemoving(event);
       } else if (event.type === 'added') {
         this.#onAdded(event);
-      }
-    }
-    for (const event of events) {
-      if (event.type === 'added' || event.type === 'changed') {
-        this.#finalize(event.curr);
       }
     }
     this.#recomputeSubTypes();

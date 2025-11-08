@@ -60,6 +60,7 @@ class $Registry {
     }
     if (!this.#adapters.get(cls)!.has(indexCls)) {
       const adapter = this.instance(indexCls).adapter(cls);
+      adapter.indexCls = indexCls;
       this.#adapters.get(cls)!.set(indexCls, adapter);
       this.#idToCls.set(cls.Ⲑid, cls);
       this.#adaptersByIndex.get(indexCls)!.set(cls, adapter);
