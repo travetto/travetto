@@ -23,7 +23,8 @@ export class DeclarationUtil {
    */
   static isPublic(node: ts.Declaration): boolean {
     // eslint-disable-next-line no-bitwise
-    return !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier);
+    return !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier) &&
+      (!('name' in node && node.name) || !ts.isPrivateIdentifier(node.name as ts.Node));
   }
 
   /**

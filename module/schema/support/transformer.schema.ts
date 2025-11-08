@@ -64,7 +64,7 @@ export class SchemaTransformer {
    */
   @OnMethod()
   static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (!state[InSchemaSymbol]) {
+    if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
       return node;
     }
 
@@ -86,9 +86,16 @@ export class SchemaTransformer {
    */
   @OnProperty()
   static processSchemaField(state: TransformerState & AutoState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
+    if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
+      return node;
+    }
+
     const ignore = state.findDecorator(this, node, 'Ignore');
-    return state[InSchemaSymbol] && !ignore && DeclarationUtil.isPublic(node) ?
-      SchemaTransformUtil.computeField(state, node) : node;
+    if (ignore) {
+      return node;
+    }
+
+    return SchemaTransformUtil.computeField(state, node);
   }
 
   /**
