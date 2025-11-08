@@ -14,11 +14,11 @@ class $Registry {
   #uid = Util.uuid();
 
   // Core data
-  #adapters: Map<Class, Map<RegistryIndexClass, RegistryAdapter>> = new Map();
+  #adapters = new Map<Class, Map<RegistryIndexClass, RegistryAdapter>>();
   #finalized = new Map<Class, boolean>();
 
   // Lookups
-  #idToCls: Map<string, Class> = new Map();
+  #idToCls = new Map<string, Class>();
   #adaptersByIndex = new Map<RegistryIndexClass, Map<Class, RegistryAdapter>>();
   #indexes = new Map<RegistryIndexClass, RegistryIndex<{}>>();
 

@@ -12,8 +12,8 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: ResolutionType): Promise<T> {
-    return RegistryV2.instance(DependencyRegistryIndex).getInstance(target, qual, resolution);
+  static getInstance<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Promise<T> {
+    return RegistryV2.instance(DependencyRegistryIndex).getInstance(target, qualifier, resolution);
   }
 
   static getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
@@ -279,12 +279,13 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   /**
    * Get an instance by type and qualifier
    */
-  async getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: ResolutionType): Promise<T> {
+  async getInstance<T>(target: ClassTarget<T>, requestedQualifier?: symbol, resolution?: ResolutionType): Promise<T> {
     if (!target) {
       throw new AppError('Unable to get instance when target is undefined');
     }
 
-    const { id: classId, qualifier } = this.resolveTarget(target, qual, resolution);
+    // TODO: Move resolution type into create instance, not sure how that affects the caching
+    const { id: classId, qualifier } = this.resolveTarget(target, requestedQualifier, resolution);
     if (!this.#instances.has(classId) || !this.#instances.get(classId)!.has(qualifier)) {
       await this.createInstance(target, qualifier); // Wait for proxy
     }
