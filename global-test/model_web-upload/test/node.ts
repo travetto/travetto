@@ -10,9 +10,7 @@ import { ModelBlobWebUploadServerSuite } from './suite.ts';
 export class NodeWebUploadTest extends ModelBlobWebUploadServerSuite {
   dispatcherType = FetchWebDispatcher;
 
-  async serve() {
-    const server = await DependencyRegistryIndex.getInstance(NodeWebServer);
-    const handle = await server.serve();
-    return () => { handle.stop(); };
+  serve() {
+    return DependencyRegistryIndex.getInstance(NodeWebServer).then(server => server.serve()).then(handle => () => handle.stop());
   }
 }
