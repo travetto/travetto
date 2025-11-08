@@ -221,11 +221,11 @@ export class SchemaValidator {
       return [];
     }
 
-    const schema = SchemaRegistryIndex.getConfig(cls);
-
+    const classConfig = SchemaRegistryIndex.getConfig(cls);
     const errors: ValidationError[] = [];
+
     // Handle class level validators
-    for (const fn of schema.validators) {
+    for (const fn of classConfig.validators) {
       try {
         const res = await fn(o, view);
         if (res) {

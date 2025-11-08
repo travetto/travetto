@@ -56,7 +56,7 @@ function combineClasses<T extends ClassConfig>(base: T, configs: Partial<T>[], i
     Object.assign(base, {
       ...config,
       ...config.views ? { views: { ...base.views, ...config.views } } : {},
-      ...config.validators ? { validators: { ...base.validators, ...config.validators } } : {},
+      ...config.validators ? { validators: [...base.validators, ...config.validators] } : {},
       ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
       ...!inherited ? {
         baseType: config.baseType ?? base.baseType,
