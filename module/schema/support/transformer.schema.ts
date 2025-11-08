@@ -68,9 +68,23 @@ export class SchemaTransformer {
       return node;
     }
 
+    const modifiers = (node.modifiers ?? []).slice(0);
+
+    const comments = DocUtil.describeDocs(node);
+
+    if (!state.findDecorator(this, node, 'Method', SchemaTransformUtil.METHOD_IMPORT)) {
+      modifiers.unshift(state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'Method'));
+    }
+
+    if (comments.description) {
+      modifiers.push(state.createDecorator(SchemaTransformUtil.COMMON_IMPORT, 'Describe', state.fromLiteral({
+        title: comments.description
+      })));
+    }
+
     return state.factory.updateMethodDeclaration(
       node,
-      node.modifiers,
+      modifiers,
       node.asteriskToken,
       node.name,
       node.questionToken,

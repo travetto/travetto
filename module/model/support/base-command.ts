@@ -1,6 +1,7 @@
 import { Env } from '@travetto/runtime';
 import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
 import { RegistryV2 } from '@travetto/registry';
+import { Schema } from '@travetto/schema';
 
 import type { ModelStorageSupport } from '../src/types/storage.ts';
 
@@ -9,6 +10,7 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 /**
  * CLI Entry point for exporting model schemas
  */
+@Schema()
 export abstract class BaseModelCommand implements CliCommandShape {
 
   /** Application Environment */

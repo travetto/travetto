@@ -7,6 +7,7 @@ import {
 export class SchemaTransformUtil {
 
   static SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema.ts';
+  static METHOD_IMPORT = '@travetto/schema/src/decorator/method.ts';
   static FIELD_IMPORT = '@travetto/schema/src/decorator/field.ts';
   static COMMON_IMPORT = '@travetto/schema/src/decorator/common.ts';
   static TYPES_IMPORT = '@travetto/schema/src/types.ts';
