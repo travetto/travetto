@@ -8,7 +8,7 @@ import { OnCall, TransformerState } from '@travetto/transformer';
 export class DynamicImportTransformer {
 
   @OnCall()
-  static onLogCall(state: TransformerState, node: ts.CallExpression): typeof node | ts.Identifier {
+  static onCall(state: TransformerState, node: ts.CallExpression): typeof node | ts.Identifier {
     if (
       ts.isCallExpression(node) &&
       node.expression.kind === ts.SyntaxKind.ImportKeyword &&

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter } from '@travetto/transformer';
+import { TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter, OnMethod } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
 
@@ -46,11 +46,6 @@ export class SchemaTransformer {
       })));
     }
 
-    const members = state.factory.createNodeArray(
-      node.members.map(x => ts.isMethodDeclaration(x) ?
-        this.processSchemaMethod(state, x) : x)
-    );
-
     delete state[InSchemaSymbol];
     delete state[AccessorsSymbol];
 
@@ -60,13 +55,14 @@ export class SchemaTransformer {
       node.name,
       node.typeParameters,
       node.heritageClauses,
-      members
+      node.members
     );
   }
 
   /**
    * Handle explicitly registered methods
    */
+  @OnMethod()
   static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (!state[InSchemaSymbol]) {
       return node;

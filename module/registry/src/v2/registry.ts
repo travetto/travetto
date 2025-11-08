@@ -143,7 +143,7 @@ class $Registry {
    */
   verifyInitialized(): void {
     if (!this.#resolved) {
-      throw new Error(`${this.constructor.name} has not been initialized, you probably need to call RegistryV2.init()`);
+      throw new AppError('Registry not initialized, call init() first');
     }
   }
 
@@ -164,7 +164,7 @@ class $Registry {
     const cls = this.#toCls(clsOrId);
 
     if (this.#finalized.get(cls)) {
-      throw new AppError(`Class ${cls} is already finalized`);
+      throw new AppError(`Class ${cls.Ⲑid} is already finalized`);
     }
     return this.#adapter(indexCls, cls);
   }
@@ -175,7 +175,7 @@ class $Registry {
   ): Omit<ReturnType<InstanceType<T>['adapter']>, RegistrationMethods> {
     if (!this.has(indexCls, clsOrId)) {
       const cls = this.#toCls(clsOrId);
-      throw new AppError(`Class ${cls} is not registered in index ${indexCls}`);
+      throw new AppError(`Class ${cls.Ⲑid} is not registered in index ${indexCls.Ⲑid}`);
     }
     return this.#adapter(indexCls, clsOrId);
   }
