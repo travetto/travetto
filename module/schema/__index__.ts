@@ -1,5 +1,6 @@
 import type { } from './src/global.d.ts';
 export * from './src/decorator/field.ts';
+export * from './src/decorator/input.ts';
 export * from './src/decorator/schema.ts';
 export * from './src/decorator/method.ts';
 export * from './src/decorator/common.ts';

@@ -26,3 +26,12 @@ export function Describe(config: Partial<DescribableConfig>) {
     }
   };
 }
+
+/**
+ * Mark a field/method as ignored
+ *
+ * @augments `@travetto/schema:Ignore`
+ */
+export function Ignore(): PropertyDecorator {
+  return () => { };
+}

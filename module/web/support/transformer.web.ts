@@ -1,8 +1,7 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, DecoratorMeta, LiteralUtil, AnyType,
-  OnProperty
+  TransformerState, OnMethod, DocUtil, DecoratorUtil, DecoratorMeta, LiteralUtil, AnyType
 } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util.ts';
@@ -64,7 +63,7 @@ export class WebTransformer {
       }
     }
 
-    node = SchemaTransformUtil.computeField(state, node, config);
+    node = SchemaTransformUtil.computeInput(state, node, config);
 
     const modifiers = (node.modifiers ?? []).filter(x => x !== pDec);
     const conf = state.extendObjectLiteral({ name, sourceText: node.name.getText() }, pDecArg);
@@ -101,15 +100,6 @@ export class WebTransformer {
     const modifiers = (node.modifiers ?? []).slice(0);
     const newDecls: ts.ModifierLike[] = [];
 
-    const comments = DocUtil.describeDocs(node);
-
-    // Handle description/title/summary w/e
-    if (comments.description) {
-      newDecls.push(state.createDecorator(COMMON_DEC_IMPORT, 'Describe', state.fromLiteral({
-        title: comments.description
-      })));
-    }
-
     let nParams = node.parameters;
 
     // Handle parameters
@@ -138,6 +128,7 @@ export class WebTransformer {
       inner = state.getApparentTypeOfField(targetType.original!, 'body');
     }
 
+    const comments = DocUtil.describeDocs(node);
     const returnType = SchemaTransformUtil.ensureType(state, inner ?? nodeType, node);
     if (returnType.type) {
       newDecls.push(state.createDecorator(ENDPOINT_DEC_IMPORT, 'ResponseType', state.fromLiteral({
@@ -161,52 +152,5 @@ export class WebTransformer {
     } else {
       return node;
     }
-  }
-
-  /**
-   * Handle @Controller
-   */
-  @OnClass('Controller')
-  static handleController(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    // Read title/description/summary from jsdoc on class
-    const comments = DocUtil.describeDocs(node);
-
-    if (!comments.description) {
-      return node;
-    } else {
-      return state.factory.updateClassDeclaration(
-        node,
-        [
-          ...(node.modifiers ?? []),
-          state.createDecorator(COMMON_DEC_IMPORT, 'Describe', state.fromLiteral({
-            title: comments.description
-          }))
-        ],
-        node.name,
-        node.typeParameters,
-        node.heritageClauses,
-        node.members
-      );
-    }
-  }
-
-  /**
-   * Handle ContextParam annotation
-   */
-  @OnProperty('ContextParam')
-  static registerContextParam(state: TransformerState, node: ts.PropertyDeclaration): typeof node {
-    const decl = state.findDecorator(this, node, 'ContextParam', PARAM_DEC_IMPORT);
-
-    // Doing decls
-    return state.factory.updatePropertyDeclaration(
-      node,
-      DecoratorUtil.spliceDecorators(node, decl, [
-        state.createDecorator(PARAM_DEC_IMPORT, 'ContextParam', state.fromLiteral({ target: state.getConcreteType(node) }))
-      ], 0),
-      node.name,
-      node.questionToken,
-      node.type,
-      node.initializer
-    );
   }
 }

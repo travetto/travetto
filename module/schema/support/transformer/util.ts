@@ -9,6 +9,7 @@ export class SchemaTransformUtil {
   static SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema.ts';
   static METHOD_IMPORT = '@travetto/schema/src/decorator/method.ts';
   static FIELD_IMPORT = '@travetto/schema/src/decorator/field.ts';
+  static INPUT_IMPORT = '@travetto/schema/src/decorator/input.ts';
   static COMMON_IMPORT = '@travetto/schema/src/decorator/common.ts';
   static TYPES_IMPORT = '@travetto/schema/src/types.ts';
 
@@ -41,18 +42,15 @@ export class SchemaTransformUtil {
         if (!existing) {
           const cls = state.factory.createClassDeclaration(
             [
-              state.createDecorator(this.SCHEMA_IMPORT, 'Schema'),
-              state.createDecorator(this.COMMON_IMPORT, 'Describe',
-                state.fromLiteral({
-                  title: type.name,
-                  description: type.comment
-                })
-              )
+              state.createDecorator(this.SCHEMA_IMPORT, 'Schema', state.fromLiteral({
+                title: type.name,
+                description: type.comment
+              })),
             ],
             id, [], [],
             Object.entries(type.fieldTypes)
               .map(([k, v]) =>
-                this.computeField(state, state.factory.createPropertyDeclaration(
+                this.computeInput(state, state.factory.createPropertyDeclaration(
                   [], /\W/.test(k) ? state.factory.createComputedPropertyName(state.fromLiteral(k)) : k,
                   v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
                   v.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
@@ -84,12 +82,11 @@ export class SchemaTransformUtil {
   }
 
   /**
-   * Compute property information from declaration
+   * Compute decorator params from property/parameter/getter/setter
    */
-  static computeField<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
+  static computeInputDecoratorParams<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
     state: TransformerState, node: T, config: { type?: AnyType, root?: ts.Node, name?: string } = { root: node }
-  ): T {
-
+  ): ts.Expression[] {
     const typeExpr = config.type ?? state.resolveType(ts.isSetAccessor(node) ? node.parameters[0] : node);
     const attrs: ts.PropertyAssignment[] = [];
 
@@ -149,10 +146,15 @@ export class SchemaTransformUtil {
     }
 
     if (ts.isParameter(node)) {
-      const comments = DocUtil.describeDocs(node.parent);
-      const commentConfig: Partial<ParamDocumentation> = (comments.params ?? []).find(x => x.name === node.name.getText()) || {};
-      if (commentConfig.description) {
-        attrs.push(state.factory.createPropertyAssignment('description', state.fromLiteral(commentConfig.description)));
+      const parentComments = DocUtil.describeDocs(node.parent);
+      const paramComments: Partial<ParamDocumentation> = (parentComments.params ?? []).find(x => x.name === node.name.getText()) || {};
+      if (paramComments.description) {
+        attrs.push(state.factory.createPropertyAssignment('description', state.fromLiteral(paramComments.description)));
+      }
+    } else {
+      const comments = DocUtil.describeDocs(node);
+      if (comments.description) {
+        attrs.push(state.factory.createPropertyAssignment('description', state.fromLiteral(comments.description)));
       }
     }
 
@@ -164,7 +166,10 @@ export class SchemaTransformUtil {
 
     const params: ts.Expression[] = [];
 
-    const existing = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
+    const existing =
+      state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT) ??
+      state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
+
     if (!existing) {
       const resolved = this.toConcreteType(state, typeExpr, node, config.root);
       params.push(LiteralUtil.fromLiteral(state.factory, {
@@ -185,20 +190,30 @@ export class SchemaTransformUtil {
       }
     }
 
-    const newModifiers = [
-      ...(node.modifiers ?? []).filter(x => x !== existing),
-      state.createDecorator(this.FIELD_IMPORT, 'Field', ...params)
-    ];
+    return params;
+  }
+
+  /**
+   * Compute property information from declaration
+   */
+  static computeInput<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
+    state: TransformerState, node: T, config: { type?: AnyType, root?: ts.Node, name?: string } = { root: node }
+  ): T {
+
+    const existingField = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
+    const existingInput = state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
+    const existing = existingField ?? existingInput;
+
+    const decParams = this.computeInputDecoratorParams(state, node, config);
+
+    const dec = existingField ?
+      state.createDecorator(this.INPUT_IMPORT, 'Input', ...decParams) :
+      state.createDecorator(this.FIELD_IMPORT, 'Field', ...decParams);
+
+    const newModifiers = [...(node.modifiers ?? []).filter(x => x !== existing), dec];
 
     let result: unknown;
     if (ts.isPropertyDeclaration(node)) {
-      const comments = DocUtil.describeDocs(node);
-      if (comments.description) {
-        newModifiers.push(state.createDecorator(this.COMMON_IMPORT, 'Describe', state.fromLiteral({
-          description: comments.description
-        })));
-      }
-
       result = state.factory.updatePropertyDeclaration(node,
         newModifiers, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isParameter(node)) {

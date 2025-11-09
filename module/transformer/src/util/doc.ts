@@ -92,4 +92,12 @@ export class DocUtil {
   static readAugments(type: ts.Type | ts.Symbol): string[] {
     return this.readDocTag(type, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
   }
+
+  /**
+   * Read example information
+   * @param type
+   */
+  static readExample(type: ts.Type | ts.Symbol): string[] {
+    return this.readDocTag(type, 'example').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
+  }
 }

@@ -10,6 +10,7 @@ export type DecoratorMeta = {
   file?: string;
   targets?: string[];
   name?: string;
+  options?: string[];
 };
 
 export type State = {

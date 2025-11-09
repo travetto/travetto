@@ -1,14 +1,16 @@
 import ts from 'typescript';
 
-import { TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter, OnMethod } from '@travetto/transformer';
+import { TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter, OnMethod, DecoratorUtil } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
 
 const InSchemaSymbol = Symbol();
 const AccessorsSymbol = Symbol();
+const AutoEnrollMethods = Symbol();
 
 interface AutoState {
   [InSchemaSymbol]?: boolean;
+  [AutoEnrollMethods]?: Set<string>;
   [AccessorsSymbol]?: Set<string>;
 }
 
@@ -17,6 +19,14 @@ interface AutoState {
  */
 export class SchemaTransformer {
 
+  static isInvisible(state: AutoState & TransformerState, node: ts.Declaration): boolean {
+    if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
+      return false;
+    }
+    const ignore = state.findDecorator(this, node, 'Ignore');
+    return !!ignore;
+  }
+
   /**
    * Track schema on start
    */
@@ -24,6 +34,17 @@ export class SchemaTransformer {
   static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     state[InSchemaSymbol] = true;
     state[AccessorsSymbol] = new Set();
+    state[AutoEnrollMethods] = new Set();
+
+    // Determine auto enrol methods
+    for (const item of state.getDecoratorList(node)) {
+      if (item.targets?.includes('@travetto/schema:Schema')) {
+        for (const opt of item.options ?? []) {
+          state[AutoEnrollMethods].add(opt);
+        }
+      }
+    }
+
     return node;
   }
 
@@ -32,36 +53,29 @@ export class SchemaTransformer {
    */
   @AfterClass('Schema')
   static finalizeSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    const modifiers = (node.modifiers ?? []).slice(0);
-
     const comments = DocUtil.describeDocs(node);
 
-    if (!state.findDecorator(this, node, 'Schema', SchemaTransformUtil.SCHEMA_IMPORT)) {
-      modifiers.unshift(state.createDecorator(SchemaTransformUtil.SCHEMA_IMPORT, 'Schema'));
-    }
+    const existing = state.findDecorator(this, node, 'Schema', SchemaTransformUtil.SCHEMA_IMPORT);
+    const cons = node.members.find(x => ts.isConstructorDeclaration(x));
+
+    const params = DecoratorUtil.getArguments(existing) ?? [];
 
     if (comments.description) {
-      modifiers.push(state.createDecorator(SchemaTransformUtil.COMMON_IMPORT, 'Describe', state.fromLiteral({
-        title: comments.description
-      })));
+      params.unshift(state.fromLiteral({ title: comments.description }));
     }
 
-    let members = node.members.slice(0);
-
-    if (members.some(x => ts.isConstructorDeclaration(x))) {
-      modifiers.push(state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'ClassMethod', state.fromLiteral({})));
-      members = members.map(x => {
-        if (ts.isConstructorDeclaration(x)) {
-          return ts.factory.updateConstructorDeclaration(
-            x,
-            x.modifiers,
-            x.parameters.map(y => SchemaTransformUtil.computeField(state, y)),
-            x.body
-          );
+    if (cons) {
+      params.push(state.fromLiteral({
+        methods: {
+          constructor: {
+            parameters: cons.parameters.map(p => SchemaTransformUtil.computeInputDecoratorParams(state, p))
+          }
         }
-        return x;
-      });
+      }));
     }
+
+    const newSchemaDec = state.createDecorator(SchemaTransformUtil.SCHEMA_IMPORT, 'Schema', ...params);
+    const modifiers = [...node.modifiers?.filter(x => x !== existing) ?? [], newSchemaDec];
 
     delete state[InSchemaSymbol];
     delete state[AccessorsSymbol];
@@ -72,7 +86,7 @@ export class SchemaTransformer {
       node.name,
       node.typeParameters,
       node.heritageClauses,
-      members
+      node.members
     );
   }
 
@@ -81,23 +95,24 @@ export class SchemaTransformer {
    */
   @OnMethod()
   static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
+    if (this.isInvisible(state, node)) {
+      return node;
+    }
+    const existing = state.findDecorator(this, node, 'Method', SchemaTransformUtil.METHOD_IMPORT);
+
+    if (!existing && !state[AutoEnrollMethods]?.has('*') && !state[AutoEnrollMethods]?.has(node.name.getText())) {
       return node;
     }
 
-    const modifiers = (node.modifiers ?? []).slice(0);
-
     const comments = DocUtil.describeDocs(node);
-
-    if (!state.findDecorator(this, node, 'Method', SchemaTransformUtil.METHOD_IMPORT)) {
-      modifiers.unshift(state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'Method'));
-    }
+    const params = DecoratorUtil.getArguments(existing) ?? [];
 
     if (comments.description) {
-      modifiers.push(state.createDecorator(SchemaTransformUtil.COMMON_IMPORT, 'Describe', state.fromLiteral({
-        title: comments.description
-      })));
+      params.unshift(state.fromLiteral({ title: comments.description }));
     }
+
+    const newSchemaDec = state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'Method', ...params);
+    const modifiers = [...node.modifiers?.filter(x => x !== existing) ?? [], newSchemaDec];
 
     return state.factory.updateMethodDeclaration(
       node,
@@ -106,7 +121,7 @@ export class SchemaTransformer {
       node.name,
       node.questionToken,
       node.typeParameters,
-      node.parameters.map(y => SchemaTransformUtil.computeField(state, y)),
+      node.parameters.map(y => SchemaTransformUtil.computeInput(state, y)),
       node.type,
       node.body
     );
@@ -117,16 +132,10 @@ export class SchemaTransformer {
    */
   @OnProperty()
   static processSchemaField(state: TransformerState & AutoState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
-    if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
+    if (this.isInvisible(state, node)) {
       return node;
     }
-
-    const ignore = state.findDecorator(this, node, 'Ignore');
-    if (ignore) {
-      return node;
-    }
-
-    return SchemaTransformUtil.computeField(state, node);
+    return SchemaTransformUtil.computeInput(state, node);
   }
 
   /**
@@ -134,12 +143,15 @@ export class SchemaTransformer {
    */
   @OnGetter()
   static processSchemaGetter(state: TransformerState & AutoState, node: ts.GetAccessorDeclaration): ts.GetAccessorDeclaration {
-    const ignore = state.findDecorator(this, node, 'Ignore');
-    if (state[InSchemaSymbol] && !ignore && DeclarationUtil.isPublic(node) && !state[AccessorsSymbol]?.has(node.name.getText())) {
-      state[AccessorsSymbol]?.add(node.name.getText());
-      return SchemaTransformUtil.computeField(state, node);
+    if (this.isInvisible(state, node)) {
+      return node;
     }
-    return node;
+    if (state[AccessorsSymbol]?.has(node.name.getText())) {
+      return node;
+    } else {
+      state[AccessorsSymbol]?.add(node.name.getText());
+      return SchemaTransformUtil.computeInput(state, node);
+    }
   }
 
   /**
@@ -147,11 +159,14 @@ export class SchemaTransformer {
    */
   @OnSetter()
   static processSchemaSetter(state: TransformerState & AutoState, node: ts.SetAccessorDeclaration): ts.SetAccessorDeclaration {
-    const ignore = state.findDecorator(this, node, 'Ignore');
-    if (state[InSchemaSymbol] && !ignore && DeclarationUtil.isPublic(node) && !state[AccessorsSymbol]?.has(node.name.getText())) {
-      state[AccessorsSymbol]?.add(node.name.getText());
-      return SchemaTransformUtil.computeField(state, node);
+    if (this.isInvisible(state, node)) {
+      return node;
     }
-    return node;
+    if (state[AccessorsSymbol]?.has(node.name.getText())) {
+      return node;
+    } else {
+      state[AccessorsSymbol]?.add(node.name.getText());
+      return SchemaTransformUtil.computeInput(state, node);
+    }
   }
 }
