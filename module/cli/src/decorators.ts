@@ -80,6 +80,7 @@ const FIELD_CONFIG: {
  * Decorator to register a CLI command
  * @augments `@travetto/schema:Schema`
  * @augments `@travetto/cli:CliCommand`
+ * @example main
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {

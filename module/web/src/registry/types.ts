@@ -204,7 +204,7 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
   /**
    * Context parameters to bind at create
    */
-  contextParams: Record<string | symbol, Class>;
+  contextParams: Record<string | symbol, boolean>;
 }
 
 /**

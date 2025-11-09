@@ -1,6 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
 import { type Class, asFull, castTo, asConstructable, ClassInstance, RetainPrimitiveFields } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
 import { WebChainedFilter, WebFilter } from '../types/filter.ts';
@@ -8,6 +9,7 @@ import { WebInterceptor } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
 
 import { WebAsyncContext } from '../context.ts';
+
 
 /**
  * Controller registry
@@ -23,7 +25,8 @@ class $ControllerRegistry extends Registry<ControllerConfig, EndpointConfig> {
   async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
     const map = this.get(inst.constructor).contextParams;
-    for (const [field, type] of Object.entries(map)) {
+    for (const [field] of Object.keys(map)) {
+      const { type } = SchemaRegistryIndex.getSchemaConfig(inst)[field];
       Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
   }
@@ -145,9 +148,9 @@ class $ControllerRegistry extends Registry<ControllerConfig, EndpointConfig> {
    * @param field Field on controller to bind context param to
    * @param type The context type to bind to field
    */
-  registerControllerContextParam<T>(target: Class, field: string, type: Class<T>): void {
+  registerControllerContextParam<T>(target: Class, field: string): void {
     const controllerConfig = this.getOrCreatePending(target);
-    controllerConfig.contextParams![field] = type;
+    controllerConfig.contextParams![field] = true;
     DependencyRegistry.registerPostConstructHandler(target, 'ContextParam', inst => this.#bindContextParams(inst));
   }
 

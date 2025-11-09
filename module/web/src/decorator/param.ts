@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/runtime';
+import { ClassInstance } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointParamConfig } from '../registry/types.ts';
@@ -10,6 +10,7 @@ type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx:
  * @param location The location of the parameter
  * @param extra Any extra configuration for the param
  * @augments `@travetto/web:Param`
+ * @augments `@travetto/schema:Input`
  */
 export function Param(location: EndpointParamConfig['location'], extra: string | Partial<EndpointParamConfig>): ParamDecorator {
   return (target: ClassInstance, propertyKey: string | symbol, idx: number): void => {
@@ -30,35 +31,40 @@ export function Param(location: EndpointParamConfig['location'], extra: string |
  * Define a Path param
  * @param param The param configuration or name
  * @augments `@travetto/web:Param`
+ * @augments `@travetto/schema:Input`
  */
 export function PathParam(param: string | Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('path', param); }
 /**
  * Define a Query param
  * @param param The param configuration or name
  * @augments `@travetto/web:Param`
+ * @augments `@travetto/schema:Input`
  */
 export function QueryParam(param: string | Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('query', param); }
 /**
  * Define a Header param
  * @param param The param configuration or name
  * @augments `@travetto/web:Param`
+ * @augments `@travetto/schema:Input`
  */
 export function HeaderParam(param: string | Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('header', param); }
 /**
  * Define a body param as an input
  * @param param The param configuration
  * @augments `@travetto/web:Param`
+ * @augments `@travetto/schema:Input`
  */
 export function Body(param: Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('body', param); }
 
 /**
  * A contextual field as provided by the WebAsyncContext
  * @augments `@travetto/web:ContextParam`
+ * @augments `@travetto/schema:Field`
  */
-export function ContextParam(config?: { target: Class }) {
+export function ContextParam() {
   return (inst: unknown, field: string | symbol): void => {
     ControllerRegistryIndex.getForRegister(inst).register({
-      contextParams: { [field]: config!.target }
+      contextParams: { [field]: true }
     });
   };
 }

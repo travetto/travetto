@@ -21,7 +21,7 @@ export class SchemaTransformer {
 
   static isInvisible(state: AutoState & TransformerState, node: ts.Declaration): boolean {
     if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
-      return false;
+      return true;
     }
     const ignore = state.findDecorator(this, node, 'Ignore');
     return !!ignore;

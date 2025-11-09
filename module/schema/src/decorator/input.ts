@@ -6,12 +6,12 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
-function inp<V>(obj: Partial<InputConfig>): PropType<V> {
+function inp<V>(...obj: Partial<InputConfig>[]): PropType<V> {
   return (t: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (typeof idx === 'number') {
-      SchemaRegistryIndex.getForRegister(t).registerParameter(t.constructor, idx, obj);
+      SchemaRegistryIndex.getForRegister(t).registerParameter(t.constructor, idx, ...obj);
     } else {
-      SchemaRegistryIndex.getForRegister(t).registerField(k, obj);
+      SchemaRegistryIndex.getForRegister(t).registerField(k, ...obj);
     }
   };
 }
@@ -22,27 +22,8 @@ function inp<V>(obj: Partial<InputConfig>): PropType<V> {
  * @param config The input configuration
  * @augments `@travetto/schema:Input`
  */
-export function Input(type: Pick<InputConfig, 'type' | 'array'>, ...config: Partial<InputConfig>[]) {
-  return (f: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
-    if (typeof idx === 'number') {
-      SchemaRegistryIndex.getForRegister(f).registerParameter(k,
-        idx,
-        {
-          type: type.type,
-          array: type.array ?? false,
-        },
-        ...config);
-    } else {
-      SchemaRegistryIndex.getForRegister(f).registerField(
-        k,
-        {
-          type: type.type,
-          array: type.array ?? false,
-        },
-        ...config,
-      );
-    }
-  };
+export function Input(type: Pick<InputConfig, 'type' | 'array'>, ...config: Partial<InputConfig>[]): PropType<unknown> {
+  return inp({ type: type.type, array: type.array ?? false }, ...config);
 }
 
 /**
