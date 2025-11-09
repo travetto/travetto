@@ -120,10 +120,10 @@ export class SchemaTransformUtil {
       }
     }
 
-    const rawName = node.name.getText();
-    attrs.push(['name', config?.name ?? rawName]);
+    const rawName = node.getSourceFile()?.text ? node.name.getText() : undefined;
+    attrs.push(['name', config?.name ?? rawName!]);
 
-    if (rawName !== config?.name) {
+    if (rawName !== config?.name && rawName) {
       attrs.push(['sourceText', rawName]);
     }
 

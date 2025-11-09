@@ -8,26 +8,17 @@ function combineClasses(base: InjectableConfig, ...override: Partial<InjectableC
   for (const o of override) {
     base.enabled = o.enabled ?? base.enabled;
     base.qualifier = o.qualifier ?? base.qualifier;
-    if (o.interfaces) {
-      (base.interfaces ??= []).push(...o.interfaces);
-    }
-    if (o.postConstruct) {
-      base.postConstruct = { ...base.postConstruct, ...o.postConstruct };
-    }
-    if (o.primary !== undefined) {
-      base.primary = o.primary;
-    }
-    if (o.target) {
-      base.target = o.target;
-    }
-    if (o.factory) {
-      base.factory = o.factory;
-    }
+    base.target = o.target ?? base.target;
+    base.factory = o.factory ?? base.factory;
+    base.postConstruct = { ...base.postConstruct, ...o.postConstruct };
+    base.primary = o.primary ?? base.primary;
     base.dependencies = {
       fields: { ...base.dependencies.fields, ...o.dependencies?.fields },
       cons: o.dependencies?.cons ?? base.dependencies.cons
     };
-
+    if (o.interfaces) {
+      (base.interfaces ??= []).push(...o.interfaces);
+    }
     if (o.autoCreate) {
       (base.interfaces ??= []).push(AutoCreate);
     }
@@ -91,5 +82,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
         ...this.#config.postConstruct
       };
     }
+
+    // TODO: Need to backfill target from schema for dependencies
   }
 }

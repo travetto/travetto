@@ -7,7 +7,16 @@ export type PostConstructHandler<T = unknown> = (value: T) => (void | Promise<vo
 /**
  * State of a Dependency
  */
-interface Core<T = unknown> {
+export interface Dependency<T = unknown> {
+  /**
+   * Whether or not the dependency is optional
+   */
+  optional?: boolean;
+  /**
+   * Whether or not resolution of dependency should be flexible,
+   * or should be strict.  Default is strict.
+   */
+  resolution?: 'loose' | 'strict';
   /**
    * Actual reference to a Class
    */
@@ -15,47 +24,17 @@ interface Core<T = unknown> {
   /**
    * Qualifier symbol
    */
-  qualifier: symbol;
-}
-
-/**
- * State of a Dependency Target
- */
-interface CoreTarget<T = unknown> extends Core<T> {
+  qualifier?: symbol;
   /**
-   * Is this injectable enabled
+   * Index of the parameter (for constructor dependencies)
    */
-  enabled?: boolean | (() => boolean);
-  /**
-   * Is this the primary instance
-   */
-  primary?: boolean;
-  /**
-   * Should the target be auto-created
-   */
-  autoCreate?: boolean;
-}
-
-/**
- * State of a Dependency
- */
-export interface Dependency<T = unknown> extends Core<T> {
-  /**
-   * Whether or not the dependency is optional
-   */
-  optional?: boolean;
-
-  /**
-   * Whether or not resolution of dependency should be flexible,
-   * or should be strict.  Default is strict.
-   */
-  resolution?: 'loose' | 'strict';
+  index?: number;
 }
 
 /**
  * Injectable configuration
  */
-export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
+export interface InjectableConfig<T = unknown> {
   /**
    * Reference for the class
    */
@@ -80,4 +59,25 @@ export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
    * Factory function for the injectable
    */
   factory?: (...args: unknown[]) => T;
+
+  /**
+   * Is this injectable enabled
+   */
+  enabled?: boolean | (() => boolean);
+  /**
+   * Is this the primary instance
+   */
+  primary?: boolean;
+  /**
+   * Should the target be auto-created
+   */
+  autoCreate?: boolean;
+  /**
+   * Actual reference to a Class
+   */
+  target?: ClassTarget<T>;
+  /**
+   * Qualifier symbol
+   */
+  qualifier: symbol;
 }

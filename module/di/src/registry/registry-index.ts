@@ -100,7 +100,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       this.#classToTarget.set(classId, new Map());
     }
 
-    const targetClassId = config.target.Ⲑid;
+    const targetClassId = (config.target ?? config.class).Ⲑid;
 
     if (!this.#targetToClass.has(targetClassId)) {
       this.#targetToClass.set(targetClassId, new Map());
@@ -297,7 +297,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     return {
       qualifier,
       config,
-      id: (config.factory ? config.target : config.class).Ⲑid
+      id: (config.target ?? config.class).Ⲑid
     };
   }
 
@@ -379,6 +379,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       await op(inst);
     }
 
+    // Proxy if necessary
     return Runtime.dynamic ? this.#proxyInstance(target, qualifier, inst) : inst;
   }
 
