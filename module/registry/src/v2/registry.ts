@@ -117,6 +117,11 @@ class $Registry {
         console.debug('Initializing', { uid: this.#uid });
       }
 
+      // Initialize indexes
+      for (const idx of this.#indexes.values()) {
+        await idx.init?.();
+      }
+
       const added = await this.#classSource.init();
       this.#finalizeItems(added);
 

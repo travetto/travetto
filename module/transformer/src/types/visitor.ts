@@ -23,8 +23,9 @@ export type State = {
 export type TransformPhase = 'before' | 'after';
 
 export type TransformerType =
-  'class' | 'method' | 'property' | 'getter' | 'setter' | 'parameter' |
-  'static-method' | 'call' | 'function' | 'file' | 'type' | 'interface';
+  'class' | 'method' | 'property' | 'getter' | 'setter' | 'parameter'
+  | 'static-method' | 'call' | 'function' | 'file' | 'type' | 'interface'
+  | 'constructor';
 
 export const ModuleNameSymbol = Symbol.for('@travetto/transformer:id');
 

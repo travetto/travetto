@@ -1,6 +1,7 @@
 import type { } from './src/global.d.ts';
 export * from './src/decorator/field.ts';
 export * from './src/decorator/schema.ts';
+export * from './src/decorator/method.ts';
 export * from './src/decorator/common.ts';
 export * from './src/service/changes.ts';
 export * from './src/service/registry.ts';

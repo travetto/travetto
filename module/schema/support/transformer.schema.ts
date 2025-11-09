@@ -46,6 +46,23 @@ export class SchemaTransformer {
       })));
     }
 
+    let members = node.members.slice(0);
+
+    if (members.some(x => ts.isConstructorDeclaration(x))) {
+      modifiers.push(state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'ClassMethod', state.fromLiteral({})));
+      members = members.map(x => {
+        if (ts.isConstructorDeclaration(x)) {
+          return ts.factory.updateConstructorDeclaration(
+            x,
+            x.modifiers,
+            x.parameters.map(y => SchemaTransformUtil.computeField(state, y)),
+            x.body
+          );
+        }
+        return x;
+      });
+    }
+
     delete state[InSchemaSymbol];
     delete state[AccessorsSymbol];
 
@@ -55,7 +72,7 @@ export class SchemaTransformer {
       node.name,
       node.typeParameters,
       node.heritageClauses,
-      node.members
+      members
     );
   }
 
