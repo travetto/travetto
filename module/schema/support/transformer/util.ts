@@ -289,4 +289,26 @@ export class SchemaTransformUtil {
       return state.findMethodByName(cls, methodName);
     }
   }
+
+  /**
+   * Compute return type decorator params
+   */
+  static computeReturnTypeDecoratorParams(state: TransformerState, node: ts.MethodDeclaration): ts.Expression[] {
+    // If we have a valid response type, declare it
+    const returnType = state.resolveReturnType(node);
+    let targetType = returnType;
+
+    if (returnType.key === 'literal' && returnType.typeArguments?.length && returnType.name === 'Promise') {
+      targetType = returnType.typeArguments[0];
+    }
+
+    // TODO: Standardize this using jsdoc
+    let innerReturnType: AnyType | undefined;
+    if (targetType.key === 'managed' && targetType.importName.startsWith('@travetto/')) {
+      innerReturnType = state.getApparentTypeOfField(targetType.original!, 'body');
+    }
+
+    const finalReturnType = SchemaTransformUtil.ensureType(state, innerReturnType ?? returnType, node);
+    return finalReturnType ? [state.fromLiteral({ returnType: { type: finalReturnType } })] : [];
+  }
 }

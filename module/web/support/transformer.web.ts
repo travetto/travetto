@@ -7,7 +7,6 @@ import {
 import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util.ts';
 
 const PARAM_DEC_IMPORT = '@travetto/web/src/decorator/param.ts';
-const COMMON_DEC_IMPORT = '@travetto/web/src/decorator/common.ts';
 const ENDPOINT_DEC_IMPORT = '@travetto/web/src/decorator/endpoint.ts';
 
 /**

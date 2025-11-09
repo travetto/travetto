@@ -1,6 +1,9 @@
 import ts from 'typescript';
 
-import { TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter, OnMethod, DecoratorUtil } from '@travetto/transformer';
+import {
+  TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil,
+  OnGetter, OnSetter, OnMethod, DecoratorUtil
+} from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
 
@@ -110,6 +113,8 @@ export class SchemaTransformer {
     if (comments.description) {
       params.unshift(state.fromLiteral({ title: comments.description }));
     }
+
+    params.push(...SchemaTransformUtil.computeReturnTypeDecoratorParams(state, node));
 
     const newSchemaDec = state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'Method', ...params);
     const modifiers = [...node.modifiers?.filter(x => x !== existing) ?? [], newSchemaDec];

@@ -5,6 +5,12 @@ import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
+export type ReturnTypeConfig = {
+  title?: string;
+  innerType?: { array?: boolean, type: Class };
+  type: { array?: boolean, type: Class };
+};
+
 /**
  * Basic describable configuration
  */
@@ -39,6 +45,10 @@ export interface MethodConfig extends DescribableConfig {
    * Validators to run for th method
    */
   validators: MethodValidatorFn<unknown[]>[];
+  /**
+   * The return type configuration
+   */
+  returnType?: ReturnTypeConfig;
 }
 
 /**
