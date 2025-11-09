@@ -1,7 +1,8 @@
 import { ClassInstance } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
-import { EndpointParamConfig } from '../registry/types.ts';
+import { EndpointParamConfig, EndpointParamLocation } from '../registry/types.ts';
 
 type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx: number) => void;
 
@@ -12,17 +13,18 @@ type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx:
  * @augments `@travetto/web:Param`
  * @augments `@travetto/schema:Input`
  */
-export function Param(location: EndpointParamConfig['location'], extra: string | Partial<EndpointParamConfig>): ParamDecorator {
+export function Param(location: EndpointParamLocation, extra: string | Partial<EndpointParamConfig>): ParamDecorator {
   return (target: ClassInstance, propertyKey: string | symbol, idx: number): void => {
-    const handler = target.constructor.prototype[propertyKey];
+    const name = typeof extra === 'string' ? extra : extra.name;
+    const config = typeof extra === 'string' ? {} : extra;
+
+    // Set name as needed
+    if (name) {
+      SchemaRegistryIndex.getForRegister(target).registerParameter(propertyKey, idx, { name });
+    }
+
     ControllerRegistryIndex.getForRegister(target.constructor).registerEndpoint(propertyKey, {
-      endpoint: handler,
-      params: [{
-        index: idx,
-        location,
-        name: typeof extra === 'string' ? extra : extra.name,
-        ...(typeof extra !== 'string' ? extra : {})
-      }]
+      params: [{ index: idx, location, ...config }]
     });
   };
 }
@@ -63,8 +65,6 @@ export function Body(param: Partial<EndpointParamConfig> = {}): ParamDecorator {
  */
 export function ContextParam() {
   return (inst: unknown, field: string | symbol): void => {
-    ControllerRegistryIndex.getForRegister(inst).register({
-      contextParams: { [field]: true }
-    });
+    ControllerRegistryIndex.getForRegister(inst).register({ contextParams: { [field]: true } });
   };
 }

@@ -128,7 +128,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
 
   registerMethod(method: string | symbol, ...data: Partial<MethodConfig>[]): MethodConfig {
     const config = this.register({});
-    const cfg = config.methods[method] ??= { parameters: [], validators: [] };
+    const cfg = config.methods[method] ??= { parameters: [], validators: [], handle: this.#cls.prototype[method] };
     combineMethods(cfg, data);
     return cfg;
   }

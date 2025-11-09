@@ -1,4 +1,4 @@
-import { Any, Class, Primitive } from '@travetto/runtime';
+import { Any, Class, Primitive, TypedFunction } from '@travetto/runtime';
 
 import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
@@ -49,6 +49,10 @@ export interface MethodConfig extends DescribableConfig {
    * The return type configuration
    */
   returnType?: ReturnTypeConfig;
+  /**
+   * The method handle
+   */
+  handle: TypedFunction<Any, unknown>;
 }
 
 /**
@@ -180,7 +184,7 @@ export interface ParameterConfig extends InputConfig {
   /**
    * Parameter name
    */
-  name?: string | symbol;
+  name?: string;
   /**
    * The position of the field if ordered
    */
@@ -189,6 +193,10 @@ export interface ParameterConfig extends InputConfig {
    * Method the parameter belongs to
    */
   method: string | symbol;
+  /**
+   * Source text for the parameter
+   */
+  sourceText?: string;
 }
 
 /**

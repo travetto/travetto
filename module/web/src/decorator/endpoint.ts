@@ -1,4 +1,4 @@
-import { EndpointConfig, EndpointFunctionDescriptor, EndpointIOType } from '../registry/types.ts';
+import { EndpointConfig, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 
@@ -11,11 +11,7 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
   return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    ControllerRegistryIndex.getForRegister(target).registerEndpoint(
-      prop,
-      { endpoint: descriptor.value },
-      config
-    );
+    ControllerRegistryIndex.getForRegister(target).registerEndpoint(prop, { name: prop }, config);
     return descriptor;
   };
 }
@@ -86,25 +82,3 @@ export function Head(path = '/'): EndpointFunctionDecorator { return HttpEndpoin
  * @augments `@travetto/schema:Method`
  */
 export function Options(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('OPTIONS', path); }
-
-/**
- * Defines the response type of the endpoint
- * @param responseType The desired response mime type
- */
-export function ResponseType(responseType: EndpointIOType): EndpointFunctionDecorator {
-  return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    ControllerRegistryIndex.getForRegister(target).registerEndpoint(property, { endpoint: descriptor.value }, { responseType });
-    return descriptor;
-  };
-}
-
-/**
- * Defines the supported request body type
- * @param requestType The type of the request body
- */
-export function RequestType(requestType: EndpointIOType): EndpointFunctionDecorator {
-  return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    ControllerRegistryIndex.getForRegister(target).registerEndpoint(property, { endpoint: descriptor.value }, { requestType });
-    return descriptor;
-  };
-}

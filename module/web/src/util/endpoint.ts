@@ -81,25 +81,26 @@ export class EndpointUtil {
     ]);
   }
 
+
   /**
    * Extract parameter from request
    */
-  static extractParameter(request: WebRequest, param: EndpointParamConfig, field: ParameterConfig, value?: unknown): unknown {
+  static extractParameter(request: WebRequest, param: EndpointParamConfig, input: ParameterConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
       return param.extract(request, param);
     }
 
-    const name = param.name!;
+    const name = param.name ?? input.name!;
     switch (param.location) {
       case 'path': return request.context.pathParams?.[name];
-      case 'header': return field.array ? request.headers.getList(name) : request.headers.get(name);
+      case 'header': return input.array ? request.headers.getList(name) : request.headers.get(name);
       case 'body': return request.body;
       case 'query': {
         const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
         const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
-        return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
+        return param.prefix ? q[param.prefix] : (input.type.Ⲑid ? q : q[name]);
       }
     }
   }

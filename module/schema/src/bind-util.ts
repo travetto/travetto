@@ -310,7 +310,7 @@ export class BindUtil {
    * @param params
    * @returns
    */
-  static coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = true): unknown[] {
+  static coerceMethodParams<T>(cls: Class<T>, method: string | symbol, params: unknown[], applyDefaults = true): unknown[] {
     const paramConfigs = SchemaRegistryIndex.getMethodConfig(cls, method).parameters;
     return this.coerceParameters(paramConfigs, params, applyDefaults);
   }

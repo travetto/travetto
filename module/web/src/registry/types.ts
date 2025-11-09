@@ -19,6 +19,8 @@ export type EndpointDecorator = (
   (<U>(target: U, prop: string | symbol, descriptor?: EndpointFunctionDescriptor) => void)
 );
 
+export type EndpointParamLocation = 'path' | 'query' | 'body' | 'header';
+
 /**
  * Endpoint type
  */
@@ -27,24 +29,6 @@ export type EndpointIOType = {
   array?: boolean;
   description?: string;
 };
-
-/**
- * Describable elements
- */
-export interface DescribableConfig {
-  /**
-   * The title
-   */
-  title?: string;
-  /**
-   * Description
-   */
-  description?: string;
-  /**
-   * Is the resource documented
-   */
-  documented?: boolean;
-}
 
 /**
  * Core configuration for endpoints and controllers
@@ -82,6 +66,10 @@ interface CoreConfig {
    * Partial response context
    */
   responseContext?: Partial<WebResponseContext>;
+  /**
+   * Is the resource documented
+   */
+  documented?: boolean;
 }
 
 /**
@@ -97,13 +85,9 @@ export interface EndpointParamConfig {
    */
   index: number;
   /**
-   * Raw text of parameter at source
-   */
-  sourceText?: string;
-  /**
    * Location of the parameter
    */
-  location: 'path' | 'query' | 'body' | 'header';
+  location: EndpointParamLocation;
   /**
    * Resolves the value by executing with req/res as input
    */
@@ -122,15 +106,15 @@ export interface EndpointParamConfig {
 /**
  * Endpoint configuration
  */
-export interface EndpointConfig extends CoreConfig, DescribableConfig {
+export interface EndpointConfig extends CoreConfig {
   /**
    * Unique identifier
    */
   id: string;
   /**
-   * The name of the method
+   * Name of the endpoint (method name)
    */
-  name: string;
+  name: string | symbol;
   /**
    * Instance the endpoint is for
    */
@@ -164,14 +148,6 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    */
   params: EndpointParamConfig[];
   /**
-   * The response type
-   */
-  responseType?: EndpointIOType;
-  /**
-   * The request type
-   */
-  requestType?: EndpointIOType;
-  /**
    * Full path including controller
    */
   fullPath: string;
@@ -188,7 +164,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
 /**
  * Controller configuration
  */
-export interface ControllerConfig extends CoreConfig, DescribableConfig {
+export interface ControllerConfig extends CoreConfig {
   /**
    * The base path of the controller
    */

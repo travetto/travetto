@@ -1,6 +1,7 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { Class, ClassInstance, RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerRegistryAdapter } from './registry-adapter';
 import { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
@@ -18,7 +19,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   }
 
   static getEndpointConfigById(id: string): EndpointConfig | undefined {
-    return RegistryV2.instance(ControllerRegistryIndex).getEndpoint(id);
+    return RegistryV2.instance(ControllerRegistryIndex).getEndpointById(id);
   }
 
   /**
@@ -45,7 +46,8 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
     const map = this.getController(inst.constructor).contextParams;
-    for (const [field, type] of Object.entries(map)) {
+    for (const field of Object.keys(map)) {
+      const { type } = SchemaRegistryIndex.getSchemaConfig(inst)[field];
       Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
   }
@@ -56,9 +58,9 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
    * @param field Field on controller to bind context param to
    * @param type The context type to bind to field
    */
-  registerControllerContextParam<T>(target: Class, field: string, type: Class<T>): void {
+  registerControllerContextParam<T>(target: Class, field: string): void {
     const controllerConfig = this.getController(target);
-    controllerConfig.contextParams![field] = type;
+    controllerConfig.contextParams[field] = true;
     RegistryV2.getForRegister(DependencyRegistryIndex, target).register({
       postConstruct: {
         ContextParam: (inst: ClassInstance) => this.#bindContextParams(inst)
@@ -70,7 +72,11 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
     return RegistryV2.get(ControllerRegistryIndex, cls).get();
   }
 
-  getEndpoint(id: string): EndpointConfig | undefined {
+  getEndpoint(cls: Class, method: string | symbol): EndpointConfig {
+    return this.getController(cls).endpoints.find(e => e.name === method)!;
+  }
+
+  getEndpointById(id: string): EndpointConfig | undefined {
     return this.#endpointsById.get(id.replace(':', '#'));
   }
 
@@ -82,7 +88,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
     for (const evt of events) {
       if (evt.type !== 'removing') {
         for (const ep of this.getController(evt.curr).endpoints) {
-          this.#endpointsById.set(ep.id, ep);
+          this.#endpointsById.set(`${evt.curr.name}#${ep.name.toString()}`, ep);
         }
       } else {
         // Match by name
