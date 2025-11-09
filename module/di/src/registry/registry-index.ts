@@ -1,5 +1,5 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2, RetargettingProxy } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, describeFunction, Runtime } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime } from '@travetto/runtime';
 
 import { ClassTarget, Dependency, InjectableConfig } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
@@ -170,11 +170,9 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
 
   #changedClass(cls: Class, _prev: Class): void {
     // Reload instances
-    if (Runtime.dynamic && !describeFunction(cls)?.abstract && this.#proxies.has(cls.Ⲑid)) {
-      for (const qualifier of this.#proxies.get(cls.Ⲑid)!.keys()) {
-        // Timing matters due to create instance being asynchronous
-        process.nextTick(() => this.getInstance(cls, qualifier));
-      }
+    for (const qualifier of this.#proxies.get(cls.Ⲑid)?.keys() ?? []) {
+      // Timing matters due to create instance being asynchronous
+      process.nextTick(() => this.getInstance(cls, qualifier));
     }
   }
 
@@ -194,7 +192,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
 
   getParentClass(cls: Class): Class {
     const config = RegistryV2.get(DependencyRegistryIndex, cls).get();
-    let parentClass: Function = config.factory ? config.target : Object.getPrototypeOf(cls);
+    let parentClass = config.factory ? config.target : (getParentClass(cls) ?? Object);
 
     if (config.factory) {
       while (describeFunction(Object.getPrototypeOf(parentClass))?.abstract) {
@@ -381,12 +379,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       await op(inst);
     }
 
-    // Proxy if necessary
-    if (Runtime.dynamic) {
-      return this.#proxyInstance(target, qualifier, inst);
-    } else {
-      return inst;
-    }
+    return Runtime.dynamic ? this.#proxyInstance(target, qualifier, inst) : inst;
   }
 
   /**
@@ -436,6 +429,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     this.#instances.get(classId)!.delete(qualifier);
     this.#instancePromises.get(classId)!.delete(qualifier);
     this.#classToTarget.get(classId)!.delete(qualifier);
+    // May not exist
     this.#proxies.get(classId)?.get(qualifier)?.setTarget(null);
     console.debug('On uninstall', { id: classId, qualifier: qualifier.toString(), classId });
   }
