@@ -67,6 +67,24 @@ export class SchemaTransformer {
       params.unshift(state.fromLiteral({ title: comments.description }));
     }
 
+    // Extract all interfaces
+    const interfaces: ts.Node[] = [];
+    for (const clause of node.heritageClauses ?? []) {
+      if (clause.token === ts.SyntaxKind.ImplementsKeyword) {
+        for (const typeExpression of clause.types) {
+          const resolvedType = state.resolveType(typeExpression);
+          if (resolvedType.key === 'managed') {
+            const resolved = state.getOrImport(resolvedType);
+            interfaces.push(resolved);
+          }
+        }
+      }
+    }
+
+    if (interfaces.length > 0) {
+      params.push(state.fromLiteral({ interfaces }));
+    }
+
     if (cons) {
       params.push(state.fromLiteral({
         methods: {

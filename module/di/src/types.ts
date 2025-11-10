@@ -9,10 +9,6 @@ export type PostConstructHandler<T = unknown> = (value: T) => (void | Promise<vo
  */
 export interface Dependency<T = unknown> {
   /**
-   * Whether or not the dependency is optional
-   */
-  optional?: boolean;
-  /**
    * Whether or not resolution of dependency should be flexible,
    * or should be strict.  Default is strict.
    */
@@ -20,7 +16,7 @@ export interface Dependency<T = unknown> {
   /**
    * Actual reference to a Class
    */
-  target: ClassTarget<T>;
+  target?: ClassTarget<T>;
   /**
    * Qualifier symbol
    */
@@ -47,19 +43,13 @@ export interface InjectableConfig<T = unknown> {
     fields: Record<string | symbol, Dependency>;
   };
   /**
-   * List of interface types
-   */
-  interfaces: Class[];
-  /**
    * Post construct handlers
    */
   postConstruct: Record<string | symbol, PostConstructHandler>;
-
   /**
    * Factory function for the injectable
    */
   factory?: (...args: unknown[]) => T;
-
   /**
    * Is this injectable enabled
    */

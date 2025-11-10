@@ -51,22 +51,37 @@ function combineMethods<T extends MethodConfig>(base: T, configs: Partial<T>[]):
   return base;
 }
 
-function combineClasses<T extends ClassConfig>(base: T, configs: Partial<T>[], inherited: boolean = false): T {
+function combineClassWithParent<T extends ClassConfig>(base: T, parent: T): T {
+  Object.assign(base, {
+    ...base,
+    ...base.views ? { views: { ...parent.views, ...base.views } } : {},
+    ...base.validators ? { validators: [...parent.validators, ...base.validators] } : {},
+    ...base.metadata ? { metadata: { ...parent.metadata, ...base.metadata } } : {},
+    interfaces: [...parent.interfaces, ...base.interfaces],
+    methods: { ...parent.methods, ...base.methods },
+    fields: { ...parent.fields, ...base.fields },
+    title: base.title || parent.title,
+    description: base.description || parent.description,
+    examples: [...(parent.examples ?? []), ...(base.examples ?? [])],
+    subTypeField: base.subTypeField ?? parent.subTypeField,
+  });
+  return base;
+}
+
+function combineClasses<T extends ClassConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     Object.assign(base, {
       ...config,
       ...config.views ? { views: { ...base.views, ...config.views } } : {},
       ...config.validators ? { validators: [...base.validators, ...config.validators] } : {},
       ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
-      ...!inherited ? {
-        baseType: config.baseType ?? base.baseType,
-        subTypeName: config.subTypeName ?? base.subTypeName,
-      } : {},
+      interfaces: [...base.interfaces, ...(config.interfaces ?? [])],
       methods: { ...base.methods, ...config.methods },
       fields: { ...base.fields, ...config.fields },
       title: config.title || base.title,
       description: config.description || base.description,
       examples: [...(base.examples ?? []), ...(config.examples ?? [])],
+      baseType: config.baseType ?? base.baseType,
       subTypeField: config.subTypeField ?? base.subTypeField,
     });
   }
@@ -92,6 +107,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
       class: this.#cls,
       views: {},
       validators: [],
+      interfaces: [],
       fields: {},
       subTypeField: 'type'
     };
@@ -160,7 +176,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
     const config = this.#config;
 
     if (parent) {
-      combineClasses(config, [parent], true);
+      combineClassWithParent(config, parent);
     }
 
     if (config.subTypeName && config.subTypeField in config.fields) {

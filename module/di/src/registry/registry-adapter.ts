@@ -2,7 +2,6 @@ import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
 
 import { InjectableConfig } from '../types';
-import { AutoCreate } from './types';
 
 function combineClasses(base: InjectableConfig, ...override: Partial<InjectableConfig>[]): InjectableConfig {
   for (const o of override) {
@@ -16,13 +15,23 @@ function combineClasses(base: InjectableConfig, ...override: Partial<InjectableC
       fields: { ...base.dependencies.fields, ...o.dependencies?.fields },
       cons: o.dependencies?.cons ?? base.dependencies.cons
     };
-    if (o.interfaces) {
-      (base.interfaces ??= []).push(...o.interfaces);
-    }
-    if (o.autoCreate) {
-      (base.interfaces ??= []).push(AutoCreate);
-    }
   }
+  return base;
+}
+
+function combineClassWithParent(base: InjectableConfig, parent: InjectableConfig): InjectableConfig {
+  base.dependencies = {
+    cons: base.dependencies.cons ?? parent.dependencies.cons,
+    fields: {
+      ...parent.dependencies.fields,
+      ...base.dependencies.fields
+    }
+  };
+
+  base.postConstruct = {
+    ...parent.postConstruct,
+    ...base.postConstruct
+  };
   return base;
 }
 
@@ -42,7 +51,6 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
       class: this.#cls,
       enabled: true,
       target: this.#cls,
-      interfaces: [],
       dependencies: {
         fields: {},
         cons: []
@@ -63,24 +71,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
 
   finalize(parentConfig?: InjectableConfig<unknown> | undefined): void {
     if (parentConfig) {
-      this.#config.dependencies = {
-        cons: this.#config.dependencies.cons ?? parentConfig.dependencies.cons,
-        fields: {
-          ...parentConfig.dependencies.fields,
-          ...this.#config.dependencies.fields
-        }
-      };
-
-      // collect interfaces
-      this.#config.interfaces = [
-        ...parentConfig.interfaces,
-        ...this.#config.interfaces
-      ];
-
-      this.#config.postConstruct = {
-        ...parentConfig.postConstruct,
-        ...this.#config.postConstruct
-      };
+      combineClassWithParent(this.#config, parentConfig);
     }
 
     // TODO: Need to backfill target from schema for dependencies

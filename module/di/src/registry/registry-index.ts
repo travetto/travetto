@@ -1,5 +1,6 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2, RetargettingProxy } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime } from '@travetto/runtime';
+import { FieldConfig, ParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ClassTarget, Dependency, InjectableConfig } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
@@ -114,7 +115,8 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     this.#classToTarget.get(classId)!.set(config.qualifier, targetClassId);
 
     // If aliased
-    for (const el of config.interfaces) {
+    const { interfaces } = SchemaRegistryIndex.getConfig(cls);
+    for (const el of interfaces) {
       const elClassId = el.Ⲑid;
       if (!this.#targetToClass.has(elClassId)) {
         this.#targetToClass.set(elClassId, new Map());
@@ -157,8 +159,8 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       }
 
       // Register primary if only one interface provided and no parent config
-      if (config.interfaces.length === 1 && !parentConfig) {
-        const [primaryInterface] = config.interfaces;
+      if (interfaces.length === 1 && !parentConfig) {
+        const [primaryInterface] = interfaces;
         const primaryClassId = primaryInterface.Ⲑid;
         if (!this.#targetToClass.has(primaryClassId)) {
           this.#targetToClass.set(primaryClassId, new Map());
@@ -304,20 +306,21 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   /**
    * Retrieve all dependencies
    */
-  async fetchDependencies<T>(managed: InjectableConfig<T>, deps?: Dependency[], keys?: string[]): Promise<unknown[]> {
+  async fetchDependencies<T>(managed: InjectableConfig<T>, deps: Dependency[], inputs: (FieldConfig | ParameterConfig)[]): Promise<unknown[]> {
     if (!deps || !deps.length) {
       return [];
     }
 
     const promises = deps.map(async (x, i) => {
       try {
-        return await this.getInstance(x.target, x.qualifier, x.resolution);
+        const target = x.target ?? inputs[i].type;
+        return await this.getInstance(target, x.qualifier, x.resolution);
       } catch (err) {
-        if (x.optional && err instanceof InjectionError && err.category === 'notfound') {
+        if (inputs[i].required?.active === false && err instanceof InjectionError && err.category === 'notfound') {
           return undefined;
         } else {
           if (err && err instanceof Error) {
-            err.message = `${err.message} via=${managed.class.Ⲑid}[${keys?.[i] ?? 'constructor'}]`;
+            err.message = `${err.message} via=${managed.class.Ⲑid}[${inputs[i].name?.toString() ?? 'constructor'}]`;
           }
           throw err;
         }
@@ -334,9 +337,15 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     const keys = Object.keys(config.dependencies.fields ?? {})
       .filter(k => instance[castKey<T>(k)] === undefined); // Filter out already set ones
 
+    const schema = SchemaRegistryIndex.getSchemaConfig(config.class);
+
     // And auto-wire
     if (keys.length) {
-      const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]), keys);
+      const deps = await this.fetchDependencies(
+        config,
+        keys.map(x => config.dependencies.fields[x]),
+        keys.map(x => schema[x])
+      );
       for (let i = 0; i < keys.length; i++) {
         instance[castKey<T>(keys[i])] = castTo(deps[i]);
       }
@@ -350,7 +359,11 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     const managed = this.resolveTarget(target, qualifier).config;
 
     // Only fetch constructor values
-    const consValues = await this.fetchDependencies(managed, managed.dependencies.cons);
+    const consValues = await this.fetchDependencies(
+      managed,
+      managed.dependencies.cons ?? [],
+      SchemaRegistryIndex.getMethodConfig(managed.class, 'constructor').parameters
+    );
 
     // Create instance
     const inst = managed.factory ?

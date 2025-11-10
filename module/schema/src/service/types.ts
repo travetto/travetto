@@ -109,6 +109,10 @@ export interface ClassConfig extends DescribableConfig {
    * Method configs
    */
   methods: Record<string | symbol, MethodConfig>;
+  /**
+   * Interfaces that the class implements
+   */
+  interfaces: Class[];
 }
 
 export interface InputConfig extends DescribableConfig {
