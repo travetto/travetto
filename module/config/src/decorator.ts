@@ -15,10 +15,12 @@ export function Config(ns: string) {
   return <T extends Class>(target: T): T => {
     const og: Function = target.prototype.postConstruct;
     // Declare as part of global config
-    RegistryV2.getForRegister(DependencyRegistryIndex, target).register({ interfaces: [ConfigBaseType] });
-    const env = SchemaRegistryIndex.getForRegister(target)
-      .registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns, fields: {} });
-    env.ns = ns;
+    RegistryV2.getForRegister(SchemaRegistryIndex, target).register({
+      interfaces: [ConfigBaseType],
+      metadata: {
+        [OverrideConfigSymbol]: { ns, fields: {} }
+      }
+    });
 
     target.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
