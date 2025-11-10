@@ -19,7 +19,6 @@ export * from './src/decorator/controller.ts';
 export * from './src/decorator/param.ts';
 export * from './src/decorator/endpoint.ts';
 
-export * from './src/registry/controller.ts';
 export * from './src/registry/registry-index.ts';
 export * from './src/registry/registry-adapter.ts';
 export * from './src/registry/visitor.ts';

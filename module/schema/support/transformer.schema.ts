@@ -61,10 +61,10 @@ export class SchemaTransformer {
     const existing = state.findDecorator(this, node, 'Schema', SchemaTransformUtil.SCHEMA_IMPORT);
     const cons = node.members.find(x => ts.isConstructorDeclaration(x));
 
-    const params = DecoratorUtil.getArguments(existing) ?? [];
+    const attrs: Record<string, string | boolean | ts.Expression | number | object | unknown[]> = {};
 
     if (comments.description) {
-      params.unshift(state.fromLiteral({ title: comments.description }));
+      attrs.title = comments.description;
     }
 
     // Extract all interfaces
@@ -82,17 +82,20 @@ export class SchemaTransformer {
     }
 
     if (interfaces.length > 0) {
-      params.push(state.fromLiteral({ interfaces }));
+      attrs.interfaces = interfaces;
     }
 
     if (cons) {
-      params.push(state.fromLiteral({
-        methods: {
-          constructor: {
-            parameters: cons.parameters.map(p => SchemaTransformUtil.computeInputDecoratorParams(state, p))
-          }
+      attrs.methods = {
+        constructor: {
+          parameters: cons.parameters.map(p => SchemaTransformUtil.computeInputDecoratorParams(state, p))
         }
-      }));
+      };
+    }
+
+    let params = DecoratorUtil.getArguments(existing) ?? [];
+    if (Object.keys(attrs).length) {
+      params = [...params, state.fromLiteral(attrs)];
     }
 
     delete state[InSchemaSymbol];

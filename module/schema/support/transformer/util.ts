@@ -92,39 +92,40 @@ export class SchemaTransformUtil {
     config?: ComputeConfig
   ): ts.Expression[] {
     const typeExpr = config?.type ?? state.resolveType(ts.isSetAccessor(node) ? node.parameters[0] : node);
-    const attrs: [string, string | boolean | object | ts.Expression][] = [];
+    const attrs: Record<string, string | boolean | object | ts.Expression> = {};
 
     if (!ts.isGetAccessorDeclaration(node) && !ts.isSetAccessorDeclaration(node)) {
       // eslint-disable-next-line no-bitwise
       if ((ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Readonly) > 0) {
-        attrs.push(['access', 'readonly']);
+        attrs.access = 'readonly';
       } else if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
-        attrs.push(['required', { active: true }]);
+        attrs.required = { active: true };
       }
       if (node.initializer && (
         ts.isLiteralExpression(node.initializer) ||
         (ts.isArrayLiteralExpression(node.initializer) && node.initializer.elements.length === 0)
       )) {
-        attrs.push(['default', node.initializer]);
+        attrs.default = node.initializer;
       }
     } else {
       const acc = DeclarationUtil.getAccessorPair(node);
-      attrs.push(['accessor', true]);
+      attrs.accessor = true;
       if (!acc.setter) {
-        attrs.push(['access', 'readonly']);
+        attrs.access = 'readonly';
       }
       if (!acc.getter) {
-        attrs.push(['access', 'writeonly']);
+        attrs.access = 'writeonly';
       } else if (!typeExpr.undefinable) {
-        attrs.push(['required', { active: true }]);
+        attrs.required = { active: true };
       }
     }
 
     const rawName = node.getSourceFile()?.text ? node.name.getText() ?? undefined : undefined;
-    attrs.push(['name', config?.name ?? rawName!]);
+    const providedName = config?.name ?? rawName!;
+    attrs.name = providedName;
 
-    if (rawName !== config?.name && rawName) {
-      attrs.push(['sourceText', rawName]);
+    if (rawName !== providedName && rawName) {
+      attrs.sourceText = rawName;
     }
 
     const primaryExpr = typeExpr.key === 'literal' && typeExpr.typeArguments?.[0] ? typeExpr.typeArguments[0] : typeExpr;
@@ -136,37 +137,37 @@ export class SchemaTransformUtil {
         .filter(x => x !== undefined && x !== null);
 
       if (values.length === primaryExpr.subTypes.length) {
-        attrs.push(['enum', {
+        attrs.enum = {
           values,
           message: `{path} is only allowed to be "${values.join('" or "')}"`
-        }]);
+        };
       }
     } else if (primaryExpr.key === 'template' && primaryExpr.template) {
       const re = LiteralUtil.templateLiteralToRegex(primaryExpr.template);
-      attrs.push(['match', {
+      attrs.match = {
         re: new RegExp(re),
         template: primaryExpr.template,
         message: `{path} must match "${re}"`
-      }]);
+      };
     }
 
     if (ts.isParameter(node)) {
       const parentComments = DocUtil.describeDocs(node.parent);
       const paramComments: Partial<ParamDocumentation> = (parentComments.params ?? []).find(x => x.name === node.name.getText()) || {};
       if (paramComments.description) {
-        attrs.push(['description', paramComments.description]);
+        attrs.description = paramComments.description;
       }
     } else {
       const comments = DocUtil.describeDocs(node);
       if (comments.description) {
-        attrs.push(['description', comments.description]);
+        attrs.description = comments.description;
       }
     }
 
     const tags = ts.getJSDocTags(node);
     const aliases = tags.filter(x => x.tagName.getText() === 'alias');
     if (aliases.length) {
-      attrs.push(['aliases', aliases.map(x => x.comment).filter(x => !!x)]);
+      attrs.aliases = aliases.map(x => x.comment).filter(x => !!x);
     }
 
     const params: ts.Expression[] = [];
@@ -176,13 +177,8 @@ export class SchemaTransformUtil {
       state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
 
 
-    if (attrs.length) {
-      params.push(
-        state.factory.createObjectLiteralExpression(
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          attrs.map(([k, v]) => state.factory.createPropertyAssignment(k, state.fromLiteral(v as string)))
-        )
-      );
+    if (Object.keys(attrs).length) {
+      params.push(state.fromLiteral(attrs));
     }
 
     if (!existing) {
