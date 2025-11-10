@@ -1,5 +1,5 @@
 import { Class, toConcrete } from '@travetto/runtime';
-import { DependencyRegistryIndex } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { ControllerRegistryIndex } from '@travetto/web';
 import { RegistryV2 } from '@travetto/registry';
 
@@ -14,6 +14,7 @@ import { EndpointUtil } from '../util/endpoint.ts';
 /**
  * Supports the base pattern for the most common web router implementations
  */
+@Injectable()
 export abstract class BaseWebRouter implements WebRouter {
 
   #cleanup = new Map<string, Function>();

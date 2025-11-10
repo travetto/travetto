@@ -95,15 +95,14 @@ export class SchemaTransformer {
       }));
     }
 
-    const newSchemaDec = state.createDecorator(SchemaTransformUtil.SCHEMA_IMPORT, 'Schema', ...params);
-    const modifiers = [...node.modifiers?.filter(x => x !== existing) ?? [], newSchemaDec];
-
     delete state[InSchemaSymbol];
     delete state[AccessorsSymbol];
 
     return state.factory.updateClassDeclaration(
       node,
-      modifiers,
+      DecoratorUtil.spliceDecorators(node, existing, [
+        state.createDecorator(SchemaTransformUtil.SCHEMA_IMPORT, 'Schema', ...params)
+      ]),
       node.name,
       node.typeParameters,
       node.heritageClauses,
@@ -134,12 +133,11 @@ export class SchemaTransformer {
 
     params.push(...SchemaTransformUtil.computeReturnTypeDecoratorParams(state, node));
 
-    const newSchemaDec = state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'Method', ...params);
-    const modifiers = [...node.modifiers?.filter(x => x !== existing) ?? [], newSchemaDec];
-
     return state.factory.updateMethodDeclaration(
       node,
-      modifiers,
+      DecoratorUtil.spliceDecorators(node, existing, [
+        state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'Method', ...params)
+      ]),
       node.asteriskToken,
       node.name,
       node.questionToken,
