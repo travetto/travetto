@@ -16,12 +16,16 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
     return RegistryV2.getForRegister(CliCommandRegistryIndex, clsOrId);
   }
 
-  static getConfig(clsOrId: ClassOrId): CliCommandConfig {
-    return RegistryV2.get(CliCommandRegistryIndex, clsOrId).get();
+  static getConfigByCommandName(cmd: string): CliCommandConfig | undefined {
+    return RegistryV2.instance(CliCommandRegistryIndex).getConfigByCommandName(cmd);
   }
 
-  static getCommandMapping(): Map<string, string> {
-    return RegistryV2.instance(CliCommandRegistryIndex).getCommandMapping();
+  static getCommandList(): string[] {
+    return RegistryV2.instance(CliCommandRegistryIndex).getCommandList();
+  }
+
+  static hasCommand(name: string): boolean {
+    return RegistryV2.instance(CliCommandRegistryIndex).hasCommand(name);
   }
 
   static async getInstance(name: string): Promise<CliCommandShape> {
@@ -30,14 +34,10 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
 
   #fileMapping: Map<string, string>;
 
-  process(events: ChangeEvent<Class>[]): void {
-    // Do nothing for now?
-  }
-
   /**
    * Get list of all commands available
    */
-  getCommandMapping(): Map<string, string> {
+  get #commandMapping(): Map<string, string> {
     if (!this.#fileMapping) {
       const all = new Map<string, string>();
       for (const e of RuntimeIndex.find({
@@ -52,19 +52,25 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
     return this.#fileMapping;
   }
 
-  /**
-   * Get the name of a command from a given instance
-   */
-  getName(cmd: CliCommandShape, withModule = false): string | undefined {
-    return RegistryV2.get(CliCommandRegistryIndex, cmd).getName(withModule);
+
+  process(events: ChangeEvent<Class>[]): void {
+    // Do nothing for now?
+  }
+
+  getConfigByCommandName(cmd: string): CliCommandConfig | undefined {
+    if (!this.hasCommand(cmd)) {
+      return;
+    }
+    const found = this.#commandMapping.get(cmd)!;
+    return RegistryV2.get(CliCommandRegistryIndex, found).get();
   }
 
   /**
    * Import command into an instance
    */
   async getInstance(name: string): Promise<CliCommandShape> {
-    const found = this.getCommandMapping().get(name);
-    if (found) {
+    if (this.hasCommand(name)) {
+      const found = this.#commandMapping.get(name)!;
       const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
       for (const v of values) {
         const cfg = RegistryV2.getOptional(CliCommandRegistryIndex, v);
@@ -79,5 +85,13 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
       }
     }
     throw new CliUnknownCommandError(name);
+  }
+
+  getCommandList(): string[] {
+    return [...this.#commandMapping.keys()].toSorted((a, b) => a.localeCompare(b));
+  }
+
+  hasCommand(name: string): boolean {
+    return this.#commandMapping.has(name);
   }
 }

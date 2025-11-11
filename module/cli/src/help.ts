@@ -97,18 +97,15 @@ export class HelpUtil {
    */
   static async renderAllHelp(title?: string): Promise<string> {
     const rows: string[] = [];
-    const keys = [...CliCommandRegistryIndex.getCommandMapping().keys()].toSorted((a, b) => a.localeCompare(b));
+    const keys = CliCommandRegistryIndex.getCommandList();
     const maxWidth = keys.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b).length), 0);
 
     for (const cmd of keys) {
       try {
-        const inst = await CliCommandRegistryIndex.getInstance(cmd);
-        if (inst) {
-          const cfg = await CliCommandRegistryIndex.getConfig(inst);
-          if (!cfg.hidden) {
-            const schema = await CliCommandSchemaUtil.getSchema(cfg.cls);
-            rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
-          }
+        const cfg = await CliCommandRegistryIndex.getConfigByCommandName(cmd);
+        if (cfg && !cfg.hidden) {
+          const schema = await CliCommandSchemaUtil.getSchema(cfg.cls);
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
         }
       } catch (err) {
         if (err instanceof Error) {

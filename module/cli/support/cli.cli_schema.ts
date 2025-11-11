@@ -19,7 +19,7 @@ export class CliSchemaCommand implements CliCommandShape {
 
   async validate(names: string[]): Promise<CliValidationError | undefined> {
     for (const name of names ?? []) {
-      if (name && !CliCommandRegistryIndex.getCommandMapping().has(name)) {
+      if (name && !CliCommandRegistryIndex.hasCommand(name)) {
         return {
           source: 'arg',
           message: `name: ${name} is not a valid cli command`
@@ -34,7 +34,7 @@ export class CliSchemaCommand implements CliCommandShape {
 
   async main(names?: string[]): Promise<void> {
     if (!names?.length) {
-      names = [...CliCommandRegistryIndex.getCommandMapping().keys()];
+      names = CliCommandRegistryIndex.getCommandList();
     }
     const resolved = await Promise.all(names.map(x => this.#getSchema(x)));
     await CliUtil.writeAndEnsureComplete(resolved);
