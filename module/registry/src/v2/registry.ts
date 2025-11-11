@@ -50,7 +50,7 @@ class $Registry {
   #adapter<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     clsOrId: ClassOrId,
-  ): ReturnType<InstanceType<T>['adapter']> {
+  ): InstanceType<T['adapterCls']> {
     const cls = this.#toCls(clsOrId);
     if (!this.#adapters.has(cls)) {
       this.#adapters.set(cls, new Map());
@@ -59,7 +59,7 @@ class $Registry {
       this.#adaptersByIndex.set(indexCls, new Map());
     }
     if (!this.#adapters.get(cls)!.has(indexCls)) {
-      const adapter = this.instance(indexCls).adapter(cls);
+      const adapter = new indexCls.adapterCls(cls);
       adapter.indexCls = indexCls;
       this.#adapters.get(cls)!.set(indexCls, adapter);
       this.#idToCls.set(cls.Ⲑid, cls);
@@ -165,7 +165,7 @@ class $Registry {
   getForRegister<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     clsOrId: ClassOrId,
-  ): ReturnType<InstanceType<T>['adapter']> {
+  ): InstanceType<T['adapterCls']> {
     const cls = this.#toCls(clsOrId);
 
     if (this.#finalized.get(cls)) {
@@ -177,10 +177,20 @@ class $Registry {
   get<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     clsOrId: ClassOrId
-  ): Omit<ReturnType<InstanceType<T>['adapter']>, RegistrationMethods> {
+  ): Omit<InstanceType<T['adapterCls']>, RegistrationMethods> {
     if (!this.has(indexCls, clsOrId)) {
       const cls = this.#toCls(clsOrId);
       throw new AppError(`Class ${cls.Ⲑid} is not registered in index ${indexCls.Ⲑid}`);
+    }
+    return this.#adapter(indexCls, clsOrId);
+  }
+
+  getOptional<C extends {}, T extends RegistryIndexClass<C>>(
+    indexCls: T,
+    clsOrId: ClassOrId
+  ): Omit<InstanceType<T['adapterCls']>, RegistrationMethods> | undefined {
+    if (!this.has(indexCls, clsOrId)) {
+      return undefined;
     }
     return this.#adapter(indexCls, clsOrId);
   }

@@ -14,6 +14,7 @@ const classToSubTypeName = (cls: Class): string => cls.name
  * Schema registry index for managing schema configurations across classes
  */
 export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
+  static adapterCls = SchemaRegistryAdapter;
 
   static getForRegister(clsOrId: ClassOrId): SchemaRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
@@ -98,10 +99,6 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
       }
     }
     this.#recomputeSubTypes();
-  }
-
-  adapter(cls: Class): SchemaRegistryAdapter {
-    return new SchemaRegistryAdapter(cls);
   }
 
   getClassConfig(cls: ClassOrId): ClassConfig {

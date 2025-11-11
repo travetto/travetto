@@ -9,6 +9,8 @@ import { InjectionError } from '../error';
 
 
 export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> {
+  static adapterCls = DependencyRegistryAdapter;
+
   static getForRegister(clsOrId: ClassOrId): DependencyRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
@@ -218,10 +220,6 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
         this.#changedClass(ev.curr, ev.prev);
       }
     }
-  }
-
-  adapter(cls: Class): DependencyRegistryAdapter {
-    return new DependencyRegistryAdapter(cls);
   }
 
   /**

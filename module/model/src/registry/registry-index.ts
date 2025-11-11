@@ -15,6 +15,8 @@ type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & 
  */
 export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
 
+  static adapterCls = ModelRegistryAdapter;
+
   static getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
@@ -71,22 +73,13 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
    */
   #initialModelNameMapping = new Map<string, Class[]>();
 
-  #finalize(cls: Class): ModelConfig {
-    const parent = getParentClass(cls);
-    const parentConfig = parent ? this.getModelOptions(parent) : undefined;
-    this.adapter(cls).finalize(parentConfig);
-
-    // Finalize
-    const schema = SchemaRegistryIndex.getForRegister(cls).get();
-    const view = schema.fields;
-    delete view.id.required; // Allow ids to be optional
-
-    if (schema.subTypeField in view && this.getBaseModelClass(cls) !== cls) {
-      this.getModelOptions(cls).subType = !!schema.subTypeName; // Copy from schema
-      delete view[schema.subTypeField].required; // Allow type to be optional
+  #finalize(cls: Class): void {
+    const config = SchemaRegistryIndex.getForRegister(cls).get();
+    const schema = config.fields;
+    if (config.subTypeField in schema && this.getBaseModelClass(cls) !== cls) {
+      this.getModelOptions(cls).subType = !!config.subTypeName; // Copy from config
+      delete schema[config.subTypeField].required; // Allow type to be optional
     }
-
-    return this.getModelOptions(cls);
   }
 
   #clear(): void {
@@ -105,10 +98,6 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
       }
     }
     this.#clear();
-  }
-
-  adapter(cls: Class): ModelRegistryAdapter {
-    return new ModelRegistryAdapter(cls);
   }
 
   getInitialNameMapping(): Map<string, Class[]> {

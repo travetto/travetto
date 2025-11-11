@@ -12,6 +12,8 @@ type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
  */
 export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
 
+  static adapterCls = SuiteRegistryAdapter;
+
   static getForRegister(clsOrId: ClassOrId): SuiteRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
@@ -30,10 +32,6 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
 
   static getConfig(cls: Class): SuiteConfig {
     return RegistryV2.get(SuiteRegistryIndex, cls).get();
-  }
-
-  adapter(cls: Class): SuiteRegistryAdapter {
-    return new SuiteRegistryAdapter(cls);
   }
 
   process(_events: ChangeEvent<Class>[]): void {

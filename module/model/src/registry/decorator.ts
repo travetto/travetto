@@ -17,6 +17,7 @@ export function Model(conf: Partial<ModelConfig<ModelType>> | string = {}) {
     }
     ModelRegistryIndex.getForRegister(target).register(conf);
     SchemaRegistryIndex.getForRegister(target).register({ baseType: conf.baseType });
+    SchemaRegistryIndex.getForRegister(target).registerField('id', { required: { active: false } });
     return target;
   };
 }

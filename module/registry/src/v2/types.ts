@@ -4,6 +4,7 @@ import { ChangeEvent } from '../types';
 export type ClassOrId = Class | string | ClassInstance;
 
 export type RegistryIndexClass<C extends {} = {}> = {
+  adapterCls: new (cls: Class) => RegistryAdapter<C>;
   new(): RegistryIndex<C>;
 };
 
@@ -12,7 +13,6 @@ export type RegistrationMethods = `register${string}` | `finalize${string}`;
 export interface RegistryIndex<C extends {} = {}> {
   init?(): Promise<void> | void;
   process(events: ChangeEvent<Class>[]): void;
-  adapter(cls: Class): RegistryAdapter<C>;
   getParentClass?(cls: Class): Class | undefined;
 }
 

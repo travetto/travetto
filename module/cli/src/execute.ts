@@ -1,7 +1,7 @@
 import { ConsoleManager, Runtime, ShutdownManager } from '@travetto/runtime';
 
 import { HelpUtil } from './help.ts';
-import { CliCommandRegistry } from './registry.ts';
+import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 import { CliCommandSchemaUtil } from './schema.ts';
 import { CliUnknownCommandError, CliValidationResultError } from './error.ts';
 import { CliParseUtil } from './parse.ts';
@@ -33,7 +33,7 @@ export class ExecutionManager {
 
   /** Bind command  */
   static async #bindCommand(cmd: string, args: string[]): Promise<{ command: CliCommandShape, boundArgs: unknown[] }> {
-    const command = await CliCommandRegistry.getInstance(cmd, true);
+    const command = await CliCommandRegistryIndex.getInstance(cmd);
     const schema = await CliCommandSchemaUtil.getSchema(command);
     const fullArgs = await CliParseUtil.expandArgs(schema, args);
     const state = command._parsed = await CliParseUtil.parse(schema, fullArgs);

@@ -4,13 +4,13 @@ import { castKey, castTo, Primitive } from '@travetto/runtime';
 
 import { cliTpl } from './color.ts';
 import { CliCommandShape } from './types.ts';
-import { CliCommandRegistry } from './registry.ts';
+import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 import { CliCommandSchemaUtil } from './schema.ts';
 import { CliValidationResultError } from './error.ts';
 import { isBoolFlag } from './parse.ts';
+import { RegistryV2 } from 'module/registry/__index__.ts';
 
-const validationSourceMap = {
-  custom: '',
+const validationSourceMap: Record<string, string> = {
   arg: 'Argument',
   flag: 'Flag'
 };
@@ -25,8 +25,8 @@ export class HelpUtil {
    * @param command
    */
   static async renderCommandHelp(cmd: CliCommandShape | string): Promise<string> {
-    const command = typeof cmd === 'string' ? await CliCommandRegistry.getInstance(cmd, true) : cmd;
-    const commandName = CliCommandRegistry.getName(command);
+    const command = typeof cmd === 'string' ? await CliCommandRegistryIndex.getInstance(cmd) : cmd;
+    const commandName = RegistryV2.get(CliCommandRegistryIndex, command).getName();
 
     await command.preHelp?.();
 
@@ -97,14 +97,14 @@ export class HelpUtil {
    */
   static async renderAllHelp(title?: string): Promise<string> {
     const rows: string[] = [];
-    const keys = [...CliCommandRegistry.getCommandMapping().keys()].toSorted((a, b) => a.localeCompare(b));
+    const keys = [...CliCommandRegistryIndex.getCommandMapping().keys()].toSorted((a, b) => a.localeCompare(b));
     const maxWidth = keys.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b).length), 0);
 
     for (const cmd of keys) {
       try {
-        const inst = await CliCommandRegistry.getInstance(cmd);
+        const inst = await CliCommandRegistryIndex.getInstance(cmd);
         if (inst) {
-          const cfg = await CliCommandRegistry.getConfig(inst);
+          const cfg = await CliCommandRegistryIndex.getConfig(inst);
           if (!cfg.hidden) {
             const schema = await CliCommandSchemaUtil.getSchema(cfg.cls);
             rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
@@ -133,9 +133,12 @@ export class HelpUtil {
   static renderValidationError(err: CliValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
-      ...err.details.errors.map(e => e.source && e.source !== 'custom' ?
-        cliTpl` * ${{ identifier: validationSourceMap[e.source] }} ${{ subtitle: e.message }}` :
-        cliTpl` * ${{ failure: e.message }}`),
+      ...err.details.errors.map(e => {
+        if (e.source && e.source in validationSourceMap) {
+          return cliTpl` * ${{ identifier: validationSourceMap[e.source] }} ${{ subtitle: e.message }}`;
+        }
+        return cliTpl` * ${{ failure: e.message }}`;
+      }),
       '',
     ].join('\n');
   }

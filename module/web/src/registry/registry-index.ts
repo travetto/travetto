@@ -10,6 +10,8 @@ import type { WebInterceptor } from '../types/interceptor.ts';
 
 export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> {
 
+  static adapterCls = ControllerRegistryAdapter;
+
   static getForRegister(clsOrId: ClassOrId): ControllerRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
@@ -78,10 +80,6 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
 
   getEndpointById(id: string): EndpointConfig | undefined {
     return this.#endpointsById.get(id.replace(':', '#'));
-  }
-
-  adapter(cls: Class): ControllerRegistryAdapter {
-    return new ControllerRegistryAdapter(cls);
   }
 
   process(events: ChangeEvent<Class>[]): void {

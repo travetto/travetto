@@ -1,8 +1,8 @@
 import { Env } from '@travetto/runtime';
 
-import { CliCommand } from '../src/decorators.ts';
+import { CliCommand } from '../src/registry/decorator.ts';
 import { CliCommandSchema, CliCommandShape, CliValidationError } from '../src/types.ts';
-import { CliCommandRegistry } from '../src/registry.ts';
+import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
 import { CliCommandSchemaUtil } from '../src/schema.ts';
 import { CliUtil } from '../src/util.ts';
 
@@ -13,13 +13,13 @@ import { CliUtil } from '../src/util.ts';
 export class CliSchemaCommand implements CliCommandShape {
 
   async #getSchema(name: string): Promise<CliCommandSchema> {
-    const inst = await CliCommandRegistry.getInstance(name);
+    const inst = await CliCommandRegistryIndex.getInstance(name);
     return CliCommandSchemaUtil.getSchema(inst!);
   }
 
   async validate(names: string[]): Promise<CliValidationError | undefined> {
     for (const name of names ?? []) {
-      if (name && !CliCommandRegistry.getCommandMapping().has(name)) {
+      if (name && !CliCommandRegistryIndex.getCommandMapping().has(name)) {
         return {
           source: 'arg',
           message: `name: ${name} is not a valid cli command`
@@ -34,7 +34,7 @@ export class CliSchemaCommand implements CliCommandShape {
 
   async main(names?: string[]): Promise<void> {
     if (!names?.length) {
-      names = [...CliCommandRegistry.getCommandMapping().keys()];
+      names = [...CliCommandRegistryIndex.getCommandMapping().keys()];
     }
     const resolved = await Promise.all(names.map(x => this.#getSchema(x)));
     await CliUtil.writeAndEnsureComplete(resolved);

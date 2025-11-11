@@ -1,11 +1,11 @@
 import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
 import { FieldConfig, SchemaRegistryIndex, ValidationError } from '@travetto/schema';
 
-import { CliCommandShape } from './types.ts';
-import { CliCommandRegistry } from './registry.ts';
-import { CliModuleUtil } from './module.ts';
-import { CliParseUtil } from './parse.ts';
-import { CliUtil } from './util.ts';
+import { CliCommandShape } from '../types.ts';
+import { CliCommandRegistryIndex } from './registry-index.ts';
+import { CliModuleUtil } from '../module.ts';
+import { CliParseUtil } from '../parse.ts';
+import { CliUtil } from '../util.ts';
 
 type Cmd = CliCommandShape & { env?: string };
 
@@ -90,7 +90,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
 
     const VALID_FIELDS = FIELD_CONFIG.filter(f => !!cfg.with?.[f.name]);
 
-    const { commandModule } = CliCommandRegistry.registerClass(target, {
+    const { commandModule } = CliCommandRegistryIndex.getForRegister(target).register({
       hidden: cfg.hidden,
       runTarget: cfg.runTarget,
       preMain: async (cmd: Cmd) => {
