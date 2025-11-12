@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { AppError, castTo, Class, ClassInstance, Util } from '@travetto/runtime';
+import { AppError, castTo, Class, ClassInstance, getParentClass, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
 import { RegistryIndex, RegistryIndexClass, ClassOrId, RegistrationMethods, RegistryAdapter } from './types';
@@ -76,7 +76,7 @@ class $Registry {
       }
       for (const adapter of this.#adapters.get(cls)?.values() ?? []) {
         const inst = this.instance(adapter.indexCls);
-        const parentClass = inst.getParentClass?.(cls);
+        const parentClass = (inst.getParentClass ?? getParentClass)(cls);
         let parentConfig;
         if (parentClass && this.#adapters.has(parentClass) && this.#adapters.get(parentClass)!.has(adapter.indexCls)) {
           parentConfig = this.#adapter(adapter.indexCls, parentClass).get();

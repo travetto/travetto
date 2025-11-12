@@ -1,7 +1,7 @@
-import { AppError, Class, classConstruct, describeFunction } from '@travetto/runtime';
+import { Class, classConstruct, describeFunction } from '@travetto/runtime';
+import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
-import { RegistryAdapter, RegistryIndexClass } from 'module/registry/__index__.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
@@ -16,7 +16,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     this.#cls = cls;
   }
 
-  finalize(parent?: CliCommandConfig | undefined): void {
+  finalize(): void {
     // Do nothing
   }
 

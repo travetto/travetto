@@ -4,7 +4,7 @@ import path from 'node:path';
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
 import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { Terminal } from '@travetto/terminal';
-import { Ignore, Required, Schema } from '@travetto/schema';
+import { Ignore, Method, Required, Schema } from '@travetto/schema';
 import { PackageUtil } from '@travetto/manifest';
 
 import { PackOperation } from './bin/operation.ts';
@@ -125,6 +125,7 @@ export abstract class BasePackCommand implements CliCommandShape {
       .flat();
   }
 
+  @Method()
   async main(args: string[] = []): Promise<void> {
     // Resolve all files to absolute paths
     this.output = this.output ? path.resolve(this.output) : undefined!;

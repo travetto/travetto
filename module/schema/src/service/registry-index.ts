@@ -105,10 +105,6 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
     return RegistryV2.get(SchemaRegistryIndex, cls).get();
   }
 
-  getParentClass(cls: Class): Class | undefined {
-    return getParentClass(cls);
-  }
-
   /**
    * Find base schema class for a given class
    */
@@ -118,7 +114,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
       let parent: Class | undefined = cls;
 
       while (parent && conf && !conf.baseType) {
-        parent = this.getParentClass(parent);
+        parent = getParentClass(parent);
         if (parent) {
           conf = this.getClassConfig(parent);
         }
