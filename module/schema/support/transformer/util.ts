@@ -209,29 +209,30 @@ export class SchemaTransformUtil {
   ): T {
     const existingField = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
     const existingInput = state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
-    const existing = existingField ?? existingInput;
-
     const decParams = this.computeInputDecoratorParams(state, node, config);
 
-    const dec = existingField ?
-      state.createDecorator(this.INPUT_IMPORT, 'Input', ...decParams) :
-      state.createDecorator(this.FIELD_IMPORT, 'Field', ...decParams);
-
-    const newModifiers = [...(node.modifiers ?? []).filter(x => x !== existing), dec];
+    let modifiers: ts.ModifierLike[];
+    if (existingField) {
+      const dec = state.createDecorator(this.FIELD_IMPORT, 'Field', ...decParams);
+      modifiers = DecoratorUtil.spliceDecorators(node, existingField, [dec]);
+    } else {
+      const dec = state.createDecorator(this.INPUT_IMPORT, 'Input', ...decParams);
+      modifiers = DecoratorUtil.spliceDecorators(node, existingInput, [dec]);
+    }
 
     let result: unknown;
     if (ts.isPropertyDeclaration(node)) {
       result = state.factory.updatePropertyDeclaration(node,
-        newModifiers, node.name, node.questionToken, node.type, node.initializer);
+        modifiers, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isParameter(node)) {
       result = state.factory.updateParameterDeclaration(node,
-        newModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
+        modifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isGetAccessorDeclaration(node)) {
       result = state.factory.updateGetAccessorDeclaration(node,
-        newModifiers, node.name, node.parameters, node.type, node.body);
+        modifiers, node.name, node.parameters, node.type, node.body);
     } else {
       result = state.factory.updateSetAccessorDeclaration(node,
-        newModifiers, node.name, node.parameters, node.body);
+        modifiers, node.name, node.parameters, node.body);
     }
     return transformCast(result);
   }

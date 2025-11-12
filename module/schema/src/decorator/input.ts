@@ -9,7 +9,7 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 function inp<V>(...obj: Partial<InputConfig>[]): PropType<V> {
   return (t: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (typeof idx === 'number') {
-      SchemaRegistryIndex.getForRegister(t).registerParameter(t.constructor, idx, ...obj);
+      SchemaRegistryIndex.getForRegister(t).registerParameter(k, idx, ...obj);
     } else {
       SchemaRegistryIndex.getForRegister(t).registerField(k, ...obj);
     }
