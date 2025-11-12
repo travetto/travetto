@@ -32,7 +32,16 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
     return RegistryV2.instance(CliCommandRegistryIndex).getInstance(name);
   }
 
+  static getName(cmd: CliCommandShape): string | undefined {
+    return RegistryV2.get(CliCommandRegistryIndex, cmd).getName();
+  }
+
+  static getSchemaByCommandName(cmd: string): CliCommandConfig | undefined {
+    return RegistryV2.instance(CliCommandRegistryIndex).getConfigByCommandName(cmd);
+  }
+
   #fileMapping: Map<string, string>;
+  #instanceMapping: Map<string, CliCommandShape> = new Map();
 
   /**
    * Get list of all commands available
@@ -69,6 +78,9 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
    * Import command into an instance
    */
   async getInstance(name: string): Promise<CliCommandShape> {
+    if (this.#instanceMapping.has(name)) {
+      return this.#instanceMapping.get(name)!;
+    }
     if (this.hasCommand(name)) {
       const found = this.#commandMapping.get(name)!;
       const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
@@ -88,6 +100,7 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
         if (result.isActive !== undefined && !result.isActive()) {
           continue;
         }
+        this.#instanceMapping.set(name, result);
         return result;
       }
     }

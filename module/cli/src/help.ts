@@ -1,7 +1,6 @@
 import util from 'node:util';
 
-import { castKey, castTo, Primitive } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
+import { castKey, castTo, Primitive, TypedObject } from '@travetto/runtime';
 
 import { cliTpl } from './color.ts';
 import { CliCommandShape } from './types.ts';
@@ -26,7 +25,7 @@ export class HelpUtil {
    */
   static async renderCommandHelp(cmd: CliCommandShape | string): Promise<string> {
     const command = typeof cmd === 'string' ? await CliCommandRegistryIndex.getInstance(cmd) : cmd;
-    const commandName = RegistryV2.get(CliCommandRegistryIndex, command).getName();
+    const commandName = CliCommandRegistryIndex.getName(command);
 
     await command.preHelp?.();
 
@@ -100,9 +99,15 @@ export class HelpUtil {
     const keys = CliCommandRegistryIndex.getCommandList();
     const maxWidth = keys.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b).length), 0);
 
+    // All
+    const resolved = TypedObject.fromEntries(
+      await Promise.all(CliCommandRegistryIndex.getCommandList().map(async x => [x, await CliCommandSchemaUtil.getSchema(x)]))
+    );
+
+
     for (const cmd of keys) {
       try {
-        const cfg = await CliCommandRegistryIndex.getConfigByCommandName(cmd);
+        const cfg = resolved[cmd];
         if (cfg && !cfg.hidden) {
           const schema = await CliCommandSchemaUtil.getSchema(cfg.cls);
           rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);

@@ -129,6 +129,7 @@ class $Registry {
     if (typeof clsOrId === 'string') {
       const cls = this.#idToCls.get(clsOrId);
       if (!cls) {
+        console.trace('Unknown class id', clsOrId);
         throw new AppError(`Unknown class id ${clsOrId}`);
       }
       return cls;

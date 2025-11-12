@@ -1,7 +1,7 @@
 import { Env } from '@travetto/runtime';
 
 import { CliCommand } from '../src/registry/decorator.ts';
-import { CliCommandSchema, CliCommandShape, CliValidationError } from '../src/types.ts';
+import { CliCommandShape, CliValidationError } from '../src/types.ts';
 import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
 import { CliCommandSchemaUtil } from '../src/schema.ts';
 import { CliUtil } from '../src/util.ts';
@@ -11,11 +11,6 @@ import { CliUtil } from '../src/util.ts';
  */
 @CliCommand({ hidden: true })
 export class CliSchemaCommand implements CliCommandShape {
-
-  async #getSchema(name: string): Promise<CliCommandSchema> {
-    const inst = await CliCommandRegistryIndex.getInstance(name);
-    return CliCommandSchemaUtil.getSchema(inst);
-  }
 
   async validate(names: string[]): Promise<CliValidationError | undefined> {
     for (const name of names ?? []) {
@@ -36,7 +31,7 @@ export class CliSchemaCommand implements CliCommandShape {
     if (!names?.length) {
       names = CliCommandRegistryIndex.getCommandList();
     }
-    const resolved = await Promise.all(names.map(x => this.#getSchema(x)));
+    const resolved = await Promise.all(names.map(x => CliCommandSchemaUtil.getSchema(x)));
     await CliUtil.writeAndEnsureComplete(resolved);
   }
 }

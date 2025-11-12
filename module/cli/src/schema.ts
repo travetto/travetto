@@ -50,7 +50,11 @@ export class CliCommandSchemaUtil {
   /**
    * Get schema for a given command
    */
-  static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
+  static async getSchema(src: Class | CliCommandShape | string): Promise<CliCommandSchema> {
+    if (typeof src === 'string') {
+      src = await CliCommandRegistryIndex.getInstance(src);
+    }
+
     const cls = getClass(src);
 
     // Ensure finalized
