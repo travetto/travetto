@@ -1,8 +1,8 @@
-import { castKey, castTo, Class, getParentClass } from '@travetto/runtime';
+import { castKey, castTo, Class, getClass, getParentClass } from '@travetto/runtime';
 import { BindUtil, InputConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { RegistryV2 } from '@travetto/registry';
 
-import { CliCommandRegistry } from './registry.ts';
+import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 import { ParsedState, CliCommandInput, CliCommandSchema, CliCommandShape } from './types.ts';
 import { CliValidationResultError } from './error.ts';
 
@@ -51,15 +51,12 @@ export class CliCommandSchemaUtil {
    * Get schema for a given command
    */
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
-    const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
+    const cls = getClass(src);
 
     // Ensure finalized
     const parent = getParentClass(cls);
 
-    RegistryV2.process([
-      ...(parent?.Ⲑid ? [{ type: 'added', curr: parent } as const] : []),
-      { type: 'added', curr: cls }
-    ]);
+    RegistryV2.manuallyInit(parent?.Ⲑid ? [cls, parent] : [cls]);
 
     const schema = await SchemaRegistryIndex.getSchemaConfig(cls);
     const flags = Object.values(schema).map(fieldToInput);
@@ -101,7 +98,7 @@ export class CliCommandSchemaUtil {
     }
 
     const fullSchema = SchemaRegistryIndex.getConfig(cls);
-    const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getByClass(cls)!;
+    const { cls: _cls, preMain: _preMain, ...meta } = RegistryV2.get(CliCommandRegistryIndex, cls).get();
     const cfg: CliCommandSchema = {
       ...meta,
       args: method,
@@ -142,7 +139,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const cls = CliCommandRegistry.getClass(cmd);
+    const cls = getClass(cmd);
     BindUtil.bindSchemaToObject(cls, cmd, template);
     return BindUtil.coerceMethodParams(cls, 'main', bound);
   }
@@ -151,7 +148,7 @@ export class CliCommandSchemaUtil {
    * Validate command shape with the given arguments
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
-    const cls = CliCommandRegistry.getClass(cmd);
+    const cls = getClass(cmd);
     const paramNames = SchemaRegistryIndex.getMethodConfig(cls, 'main').parameters.map(x => x.name!);
 
     const validators = [

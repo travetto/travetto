@@ -117,14 +117,8 @@ class $Registry {
         console.debug('Initializing', { uid: this.#uid });
       }
 
-      // Initialize indexes
-      for (const idx of this.#indexes.values()) {
-        await idx.init?.();
-      }
-
       const added = await this.#classSource.init();
-      this.#finalizeItems(added);
-
+      this.process(added.map(cls => ({ type: 'added', curr: cls })));
       this.#classSource.on(e => this.process([e]));
     } finally {
       this.#resolved = true;
@@ -141,6 +135,10 @@ class $Registry {
     } else {
       return 'Ⲑid' in clsOrId ? clsOrId : clsOrId.constructor;
     }
+  }
+
+  manuallyInit(classes: Class[]): void {
+    this.process(classes.map(cls => ({ type: 'added', curr: cls })));
   }
 
   /**

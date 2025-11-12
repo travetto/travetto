@@ -71,6 +71,11 @@ export function getParentClass(cls: Class): Class | undefined {
 }
 
 /**
+ * Get the class from an instance or class
+ */
+export const getClass = (x: ClassInstance | Class): Class => 'Ⲑid' in x ? x : x.constructor;
+
+/**
  * Range of bytes, inclusive
  */
 export type ByteRange = { start: number, end?: number };

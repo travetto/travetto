@@ -14,7 +14,7 @@ export class CliSchemaCommand implements CliCommandShape {
 
   async #getSchema(name: string): Promise<CliCommandSchema> {
     const inst = await CliCommandRegistryIndex.getInstance(name);
-    return CliCommandSchemaUtil.getSchema(inst!);
+    return CliCommandSchemaUtil.getSchema(inst);
   }
 
   async validate(names: string[]): Promise<CliValidationError | undefined> {

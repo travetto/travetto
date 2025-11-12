@@ -1,5 +1,5 @@
 import { Class, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { ChangeEvent, ClassOrId, RegistryAdapter, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ClassOrId, RegistryAdapter, RegistryIndex, RegistryV2 } from '@travetto/registry';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
 import { CliUnknownCommandError } from '../error.ts';
@@ -53,7 +53,7 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
   }
 
 
-  process(events: ChangeEvent<Class>[]): void {
+  process(): void {
     // Do nothing for now?
   }
 
@@ -72,6 +72,13 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
     if (this.hasCommand(name)) {
       const found = this.#commandMapping.get(name)!;
       const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
+      const uninitialized = values.filter(v => typeof v === 'object' && !!v && 'Ⲑid' in v && !RegistryV2.has(CliCommandRegistryIndex, v));
+
+      // Initialize any uninitialized commands
+      if (uninitialized.length) {
+        RegistryV2.manuallyInit(uninitialized);
+      }
+
       for (const v of values) {
         const cfg = RegistryV2.getOptional(CliCommandRegistryIndex, v);
         if (!cfg) {

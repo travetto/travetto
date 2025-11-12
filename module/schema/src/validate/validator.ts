@@ -44,7 +44,7 @@ export class SchemaValidator {
     const fields = TypedObject.keys<SchemaConfig>(schema);
     for (const field of fields) {
       if (schema[field].access !== 'readonly') { // Do not validate readonly fields
-        errors = errors.concat(this.#validateFieldSchema(schema[field], o[castKey<T>(field)], relative));
+        errors = errors.concat(this.#validateInputSchema(schema[field], o[castKey<T>(field)], relative));
       }
     }
 
@@ -57,7 +57,7 @@ export class SchemaValidator {
    * @param val The raw value, could be an array or not
    * @param relative The relative path of object traversal
    */
-  static #validateFieldSchema(input: InputConfig, val: unknown, relative: string = ''): ValidationError[] {
+  static #validateInputSchema(input: InputConfig, val: unknown, relative: string = ''): ValidationError[] {
     const key = 'name' in input ? input.name : ('index' in input ? input.index : 'unknown');
     const path = `${relative}${relative ? '.' : ''}${key}`;
     const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
@@ -319,7 +319,7 @@ export class SchemaValidator {
     for (const param of config.parameters) {
       const i = param.index;
       errors.push(...[
-        ... this.#validateFieldSchema(param, params[i]),
+        ... this.#validateInputSchema(param, params[i]),
         ... await this.#validateClassLevel(param.type, params[i])
       ].map(x => {
         if (param.name && typeof param.name === 'string') {
