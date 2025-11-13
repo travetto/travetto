@@ -1,11 +1,12 @@
 import type { } from './src/trv.d.ts';
 export * from './src/types.ts';
-export * from './src/registry/decorator.ts';
 export * from './src/execute.ts';
 export * from './src/error.ts';
 export * from './src/schema.ts';
+export * from './src/registry/decorator.ts';
 export * from './src/registry/registry-index.ts';
 export * from './src/registry/registry-adapter.ts';
+export * from './src/registry/util.ts';
 export * from './src/help.ts';
 export * from './src/color.ts';
 export * from './src/module.ts';
