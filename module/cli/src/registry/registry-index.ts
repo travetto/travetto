@@ -1,4 +1,4 @@
-import { Class, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Class, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ClassOrId, RegistryAdapter, RegistryIndex, RegistryV2 } from '@travetto/registry';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
@@ -8,6 +8,8 @@ import { CliCommandRegistryAdapter } from './registry-adapter.ts';
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 
+type CliCommandLoadResult = { command: string, config: CliCommandConfig, instance: CliCommandShape };
+
 export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> {
 
   static adapterCls = CliCommandRegistryAdapter;
@@ -16,28 +18,16 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
     return RegistryV2.getForRegister(CliCommandRegistryIndex, clsOrId);
   }
 
-  static getConfigByCommandName(cmd: string): CliCommandConfig | undefined {
-    return RegistryV2.instance(CliCommandRegistryIndex).getConfigByCommandName(cmd);
-  }
-
-  static getCommandList(): string[] {
-    return RegistryV2.instance(CliCommandRegistryIndex).getCommandList();
-  }
-
   static hasCommand(name: string): boolean {
     return RegistryV2.instance(CliCommandRegistryIndex).hasCommand(name);
   }
 
-  static async getInstance(name: string): Promise<CliCommandShape> {
-    return RegistryV2.instance(CliCommandRegistryIndex).getInstance(name);
+  static get(clsOrId: ClassOrId): CliCommandConfig {
+    return RegistryV2.get(CliCommandRegistryIndex, clsOrId).get();
   }
 
-  static getName(cmd: CliCommandShape): string | undefined {
-    return RegistryV2.get(CliCommandRegistryIndex, cmd).getName();
-  }
-
-  static getSchemaByCommandName(cmd: string): CliCommandConfig | undefined {
-    return RegistryV2.instance(CliCommandRegistryIndex).getConfigByCommandName(cmd);
+  static load(names?: string[]): Promise<CliCommandLoadResult[]> {
+    return RegistryV2.instance(CliCommandRegistryIndex).load(names);
   }
 
   #fileMapping: Map<string, string>;
@@ -66,28 +56,28 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
     // Do nothing for now?
   }
 
-  getConfigByCommandName(cmd: string): CliCommandConfig | undefined {
-    if (!this.hasCommand(cmd)) {
-      return;
-    }
-    const found = this.#commandMapping.get(cmd)!;
-    return RegistryV2.get(CliCommandRegistryIndex, found).get();
-  }
-
   /**
    * Import command into an instance
    */
-  async getInstance(name: string): Promise<CliCommandShape> {
-    if (this.#instanceMapping.has(name)) {
-      return this.#instanceMapping.get(name)!;
-    }
-    if (this.hasCommand(name)) {
+  async #getInstance(name: string): Promise<CliCommandShape> {
+    if (!this.#instanceMapping.has(name) && this.hasCommand(name)) {
       const found = this.#commandMapping.get(name)!;
       const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
-      const uninitialized = values.filter(v => typeof v === 'object' && !!v && 'Ⲑid' in v && !RegistryV2.has(CliCommandRegistryIndex, v));
+      const uninitialized = values
+        .filter((v): v is Class => typeof v === 'object' && !!v)
+        .reduce<Class[]>((acc, v) => {
+          const parent = getParentClass(v);
+          if (parent && !acc.includes(parent)) {
+            acc.push(parent);
+          }
+          acc.push(v);
+          return acc;
+        }, [])
+        .filter(v => RegistryV2.has(CliCommandRegistryIndex, v) && !RegistryV2.finalized(v));
 
       // Initialize any uninitialized commands
       if (uninitialized.length) {
+        // Ensure finalized
         RegistryV2.manuallyInit(uninitialized);
       }
 
@@ -107,11 +97,19 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
     throw new CliUnknownCommandError(name);
   }
 
-  getCommandList(): string[] {
-    return [...this.#commandMapping.keys()].toSorted((a, b) => a.localeCompare(b));
-  }
-
   hasCommand(name: string): boolean {
     return this.#commandMapping.has(name);
+  }
+
+  async load(names?: string[]): Promise<CliCommandLoadResult[]> {
+    const keys = names ?? [...this.#commandMapping.keys()];
+
+    const list = await Promise.all(keys.map(async x => {
+      const instance = await this.#getInstance(x);
+      const config = RegistryV2.get(CliCommandRegistryIndex, instance).get();
+      return { command: x, instance, config };
+    }));
+
+    return list.sort((a, b) => a.command.localeCompare(b.command));
   }
 }

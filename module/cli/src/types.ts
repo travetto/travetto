@@ -6,18 +6,6 @@ type ParsedArg = { type: 'arg', input: string, array?: boolean, index: number };
 type ParsedUnknown = { type: 'unknown', input: string };
 type ParsedInput = ParsedUnknown | ParsedFlag | ParsedArg;
 
-/**
- * Command configuration
- */
-export type CliCommandConfig = {
-  name: string;
-  commandModule: string;
-  runTarget?: boolean;
-  cls: Class<CliCommandShape>;
-  hidden?: boolean;
-  preMain?: (cmd: CliCommandShape) => void | Promise<void>;
-};
-
 export type ParsedState = {
   inputs: string[];
   all: ParsedInput[];
@@ -129,7 +117,8 @@ export type CliCommandInput<K extends string = string> = {
 /**
  * CLI Command schema shape
  */
-export interface CliCommandSchema<K extends string = string> {
+export interface CliCommandConfig<K extends string = string> {
+  cls: Class<CliCommandShape>;
   name: string;
   title: string;
   commandModule: string;
@@ -137,4 +126,6 @@ export interface CliCommandSchema<K extends string = string> {
   description?: string;
   args: CliCommandInput[];
   flags: CliCommandInput<K>[];
+  hidden?: boolean;
+  preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 }

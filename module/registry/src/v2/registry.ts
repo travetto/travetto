@@ -221,6 +221,14 @@ class $Registry {
   }
 
   /**
+   * Check if class is finalized
+   */
+  finalized(clsOrId: ClassOrId): boolean {
+    const cls = this.#toCls(clsOrId);
+    return this.#finalized.get(cls) ?? false;
+  }
+
+  /**
    * Listen for changes
    */
   onClassChange(handler: (event: ChangeEvent<Class>) => void, matches?: RegistryIndexClass): void {

@@ -1,9 +1,9 @@
-import type { CliCommandInput, CliCommandSchema } from '@travetto/cli';
+import type { CliCommandInput, CliCommandConfig } from '@travetto/cli';
 
 /**
  * Run choice
  */
-export type RunChoice = Omit<CliCommandSchema, 'args'> & {
+export type RunChoice = Omit<CliCommandConfig, 'args'> & {
   inputs: string[];
   prettyName?: string;
   resolved?: boolean;

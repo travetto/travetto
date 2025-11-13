@@ -1,11 +1,10 @@
 import util from 'node:util';
 
-import { castKey, castTo, Primitive, TypedObject } from '@travetto/runtime';
+import { castKey, castTo, Primitive } from '@travetto/runtime';
 
 import { cliTpl } from './color.ts';
 import { CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
-import { CliCommandSchemaUtil } from './schema.ts';
 import { CliValidationResultError } from './error.ts';
 import { isBoolFlag } from './parse.ts';
 
@@ -23,14 +22,12 @@ export class HelpUtil {
    * Render command-specific help
    * @param command
    */
-  static async renderCommandHelp(cmd: CliCommandShape | string): Promise<string> {
-    const command = typeof cmd === 'string' ? await CliCommandRegistryIndex.getInstance(cmd) : cmd;
-    const commandName = CliCommandRegistryIndex.getName(command);
+  static async renderCommandHelp(command: CliCommandShape): Promise<string> {
+    const { flags, args, name: commandName } = await CliCommandRegistryIndex.get(command);
 
     await command.preHelp?.();
 
     // Ensure finalized
-    const { flags, args } = await CliCommandSchemaUtil.getSchema(command);
 
     const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`];
     for (const field of args) {
@@ -96,21 +93,15 @@ export class HelpUtil {
    */
   static async renderAllHelp(title?: string): Promise<string> {
     const rows: string[] = [];
-    const keys = CliCommandRegistryIndex.getCommandList();
-    const maxWidth = keys.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b).length), 0);
 
     // All
-    const resolved = TypedObject.fromEntries(
-      await Promise.all(CliCommandRegistryIndex.getCommandList().map(async x => [x, await CliCommandSchemaUtil.getSchema(x)]))
-    );
+    const resolved = await CliCommandRegistryIndex.load();
+    const maxWidth = resolved.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b.command).length), 0);
 
-
-    for (const cmd of keys) {
+    for (const { command: cmd, config: cfg } of resolved) {
       try {
-        const cfg = resolved[cmd];
         if (cfg && !cfg.hidden) {
-          const schema = await CliCommandSchemaUtil.getSchema(cfg.cls);
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: cfg.title }}`);
         }
       } catch (err) {
         if (err instanceof Error) {
