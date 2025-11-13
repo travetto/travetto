@@ -3,7 +3,7 @@ import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
-import { CliCommandRegistryUtil } from './schema.ts';
+import { CliCommandRegistryUtil } from './util.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
