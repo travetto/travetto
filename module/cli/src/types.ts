@@ -121,7 +121,6 @@ export interface CliCommandConfig<K extends string = string> {
   cls: Class<CliCommandShape>;
   name: string;
   title: string;
-  commandModule: string;
   runTarget?: boolean;
   description?: string;
   args: CliCommandInput[];

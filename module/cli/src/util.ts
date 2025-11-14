@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-import { Env, ExecUtil, Runtime } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Runtime } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -61,8 +61,10 @@ export class CliUtil {
     const req = {
       type: `@travetto/cli:${action}`,
       data: {
-        name: cmd._cfg!.name, env,
-        commandModule: cmd._cfg!.commandModule,
+        name: cmd._cfg!.name,
+        env,
+        // TODO: Is this needed?
+        commandModule: describeFunction(cmd.constructor).module,
         module: Runtime.main.name,
         args: process.argv.slice(3),
       }

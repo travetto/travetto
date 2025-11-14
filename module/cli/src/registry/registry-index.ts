@@ -60,39 +60,48 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
    * Import command into an instance
    */
   async #getInstance(name: string): Promise<CliCommandShape> {
-    if (!this.#instanceMapping.has(name) && this.hasCommand(name)) {
-      const found = this.#commandMapping.get(name)!;
-      const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
-      const uninitialized = values
-        .filter((v): v is Class => typeof v === 'object' && !!v)
-        .reduce<Class[]>((acc, v) => {
-          const parent = getParentClass(v);
-          if (parent && !acc.includes(parent)) {
-            acc.push(parent);
-          }
-          acc.push(v);
-          return acc;
-        }, [])
-        .filter(v => RegistryV2.has(CliCommandRegistryIndex, v) && !RegistryV2.finalized(v));
+    if (!this.hasCommand(name)) {
+      throw new CliUnknownCommandError(name);
+    }
 
-      // Initialize any uninitialized commands
-      if (uninitialized.length) {
-        // Ensure finalized
-        RegistryV2.manuallyInit(uninitialized);
-      }
+    if (this.#instanceMapping.has(name)) {
+      return this.#instanceMapping.get(name)!;
+    }
 
-      for (const v of values) {
-        const cfg = RegistryV2.getOptional(CliCommandRegistryIndex, v);
-        if (!cfg) {
-          continue;
+    const found = this.#commandMapping.get(name)!;
+    const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
+    const filtered = values
+      .filter((v): v is Class => typeof v === 'function')
+      .reduce<Class[]>((acc, v) => {
+        const parent = getParentClass(v);
+        if (parent && !acc.includes(parent)) {
+          acc.push(parent);
         }
-        const result = cfg.getInstance();
-        if (result.isActive !== undefined && !result.isActive()) {
-          continue;
-        }
-        this.#instanceMapping.set(name, result);
-        return result;
+        acc.push(v);
+        return acc;
+      }, []);
+
+    const uninitialized = filtered
+      .filter(v => !RegistryV2.finalized(v));
+
+
+    // Initialize any uninitialized commands
+    if (uninitialized.length) {
+      // Ensure finalized
+      RegistryV2.manuallyInit(uninitialized);
+    }
+
+    for (const v of values) {
+      const cfg = RegistryV2.getOptional(CliCommandRegistryIndex, v);
+      if (!cfg) {
+        continue;
       }
+      const result = cfg.getInstance();
+      if (result.isActive !== undefined && !result.isActive()) {
+        continue;
+      }
+      this.#instanceMapping.set(name, result);
+      return result;
     }
     throw new CliUnknownCommandError(name);
   }

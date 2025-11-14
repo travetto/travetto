@@ -3,7 +3,8 @@ import type { CliCommandInput, CliCommandConfig } from '@travetto/cli';
 /**
  * Run choice
  */
-export type RunChoice = Omit<CliCommandConfig, 'args'> & {
+export type RunChoice = Omit<CliCommandConfig, 'args' | 'cls' | 'preMain'> & {
+  module: string;
   inputs: string[];
   prettyName?: string;
   resolved?: boolean;

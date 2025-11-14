@@ -90,7 +90,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
 
     const VALID_FIELDS = FIELD_CONFIG.filter(f => !!cfg.with?.[f.name]);
 
-    const { commandModule } = CliCommandRegistryIndex.getForRegister(target).register({
+    CliCommandRegistryIndex.getForRegister(target).register({
       hidden: cfg.hidden,
       runTarget: cfg.runTarget,
       preMain: async (cmd: Cmd) => {
@@ -99,6 +99,8 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
         }
       }
     });
+
+    const commandModule = describeFunction(target).module;
 
     const adapter = SchemaRegistryIndex.getForRegister(target);
 

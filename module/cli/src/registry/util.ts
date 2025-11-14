@@ -7,52 +7,60 @@ const SHORT_FLAG = /^-[a-z]/i;
 
 const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
 
-function baseType(x: InputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
-  switch (x.type) {
-    case Date: return { type: 'date' };
-    case Boolean: return { type: 'boolean' };
-    case Number: return { type: 'number' };
-    case RegExp: return { type: 'regex' };
-    case String: {
-      switch (true) {
-        case x.specifiers?.includes('module'): return { type: 'module' };
-        case x.specifiers?.includes('file'): return {
-          type: 'file',
-          fileExtensions: x.specifiers?.map(s => s.split('ext:')[1]).filter(s => !!s)
-        };
-      }
-    }
-  }
-  return { type: 'string' };
-}
-
-const fieldToInput = (x: InputConfig): CliCommandInput => ({
-  ...baseType(x),
-  ...(('name' in x && typeof x.name === 'string') ? { name: x.name } : { name: '' }),
-  description: x.description,
-  array: x.array,
-  required: x.required?.active,
-  choices: x.enum?.values,
-  default: Array.isArray(x.default) ? x.default.slice(0) : x.default,
-  flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
-  envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))
-});
-
 /**
  * Utilities for building command registry entries
  */
 export class CliCommandRegistryUtil {
 
   /**
-   * Build command schema from schema classconfig
+   * Get the base type for a CLI command input
+   */
+  static baseType(x: InputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
+    switch (x.type) {
+      case Date: return { type: 'date' };
+      case Boolean: return { type: 'boolean' };
+      case Number: return { type: 'number' };
+      case RegExp: return { type: 'regex' };
+      case String: {
+        switch (true) {
+          case x.specifiers?.includes('module'): return { type: 'module' };
+          case x.specifiers?.includes('file'): return {
+            type: 'file',
+            fileExtensions: x.specifiers?.map(s => s.split('ext:')[1]).filter(s => !!s)
+          };
+        }
+      }
+    }
+    return { type: 'string' };
+  }
+
+  /**
+   * Process input configuration for CLI commands
+   */
+  static processInput(x: InputConfig): CliCommandInput {
+    return {
+      ...CliCommandRegistryUtil.baseType(x),
+      ...(('name' in x && typeof x.name === 'string') ? { name: x.name } : { name: '' }),
+      description: x.description,
+      array: x.array,
+      required: x.required?.active,
+      choices: x.enum?.values,
+      default: Array.isArray(x.default) ? x.default.slice(0) : x.default,
+      flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
+      envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))
+    };
+  }
+
+  /**
+   * Build command schema
    */
   static buildSchema(cfg: ClassConfig): Pick<CliCommandConfig, 'args' | 'flags'> {
-    const flags = Object.values(cfg.fields).map(fieldToInput);
+    const flags = Object.values(cfg.fields).map(CliCommandRegistryUtil.processInput);
 
     // Add help command
     flags.push({ name: 'help', flagNames: ['h'], description: 'display help for command', type: 'boolean' });
 
-    const method = cfg.methods.main.parameters.map(fieldToInput);
+    const method = cfg.methods.main.parameters.map(CliCommandRegistryUtil.processInput);
 
     const used = new Set(flags
       .flatMap(f => f.flagNames ?? [])

@@ -33,7 +33,8 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
   finalize(parentConfig?: CliCommandConfig): void {
     const schemaConfig = SchemaRegistryIndex.getConfig(this.#cls);
     const desc = this.#config.description || schemaConfig.description || parentConfig?.description || '';
-    combineClasses(this.#config, CliCommandRegistryUtil.buildSchema(schemaConfig), { description: desc });
+    const schema = CliCommandRegistryUtil.buildSchema(schemaConfig);
+    combineClasses(this.#config, parentConfig ?? {}, schema, { description: desc });
   }
 
   get(): CliCommandConfig {
@@ -53,7 +54,6 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       preMain: undefined,
       title: '',
       name: getName(meta.import),
-      commandModule: meta.module,
     };
     combineClasses(this.#config, ...cfg);
     return this.#config;
