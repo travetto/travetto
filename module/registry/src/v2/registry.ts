@@ -38,14 +38,16 @@ class $Registry {
       ('prev' in event && this.has(matches, event.prev[0]));
   }
 
-  #removeItem(cls: Class): void {
-    for (const adapter of this.#adapters.get(cls)?.values() ?? []) {
-      // Remove from itemsByIndex map
-      this.#adaptersByIndex.get(adapter.indexCls)?.delete(cls);
+  #removeItems(classes: Class[]): void {
+    for (const cls of classes) {
+      for (const adapter of this.#adapters.get(cls)?.values() ?? []) {
+        // Remove from itemsByIndex map
+        this.#adaptersByIndex.get(adapter.indexCls)?.delete(cls);
+      }
+      this.#adapters.delete(cls);
+      this.#idToCls.delete(cls.Ⲑid);
+      this.#finalized.delete(cls);
     }
-    this.#adapters.delete(cls);
-    this.#idToCls.delete(cls.Ⲑid);
-    this.#finalized.delete(cls);
   }
 
   #adapter<C extends {}, T extends RegistryIndexClass<C>>(
@@ -94,22 +96,20 @@ class $Registry {
   }
 
   process(events: ChangeEvent<Class>[]): void {
-    for (const e of events) {
-      if (e.type === 'added' || e.type === 'changed') {
-        this.#finalizeItems([e.curr]);
-      }
-      for (const index of this.#indexes.values()) { // Visit every index
-        if (this.#matchesEvent(e, castTo(index.constructor))) {
-          index.process([e]);
-        }
-      }
+    this.#finalizeItems(events.filter(ev => 'curr' in ev).map(ev => ev.curr));
 
-      this.#emitter.emit('event', e);
-
-      if (e.type === 'removing' || e.type === 'changed') {
-        this.#removeItem(e.prev);
+    for (const indexCls of this.#indexOrder) { // Visit every index, in order
+      const matched = events.filter(e => this.#matchesEvent(e, indexCls));
+      if (matched.length) {
+        this.instance(indexCls).process(matched);
       }
     }
+
+    for (const e of events) {
+      this.#emitter.emit('event', e);
+    }
+
+    this.#removeItems(events.filter(ev => 'prev' in ev).map(ev => ev.prev));
   }
 
   /**
@@ -144,10 +144,6 @@ class $Registry {
     }
   }
 
-  manuallyInit(classes: Class[]): void {
-    this.process(classes.map(cls => ({ type: 'added', curr: cls })));
-  }
-
   /**
    * Verify initialized state
    */
@@ -171,8 +167,8 @@ class $Registry {
    * Initialize, with a built-in latch to prevent concurrent initializations
    */
   async init(): Promise<unknown> {
-    if (this.trace) {
-      console.debug('Trying to initialize', { uid: this.#uid, initialized: !!this.#initialized });
+    if (this.trace && this.#initialized) {
+      console.trace('Trying to re-initialize', { uid: this.#uid, initialized: !!this.#initialized });
     }
     return this.#initialized ??= this.#init();
   }
