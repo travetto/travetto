@@ -1,4 +1,4 @@
-import { Class, Runtime, describeFunction } from '@travetto/runtime';
+import { AppError, Class, Runtime, describeFunction } from '@travetto/runtime';
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite.ts';
@@ -78,12 +78,18 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
       }
     } else { // Else lookup directly
       if (methodNames.length) {
-        const cls = this.getValidClasses().find(x => x.Ⲑid === clsId)!;
+        const cls = this.getValidClasses().find(x => x.Ⲑid === clsId);
+        if (!cls) {
+          throw new AppError('Unable to find suite for class ID', { details: { classId: clsId } });
+        }
         const suite = this.get(cls);
         const tests = suite.tests.filter(x => methodNames.includes(x.methodName))!;
         return [{ suite, tests }];
       } else if (clsId) {
         const cls = this.getValidClasses().find(x => x.Ⲑid === clsId)!;
+        if (!cls) {
+          throw new AppError('Unable to find suite for class ID', { details: { classId: clsId } });
+        }
         const suite = this.get(cls);
         return suite ? [{ suite, tests: suite.tests }] : [];
       } else {

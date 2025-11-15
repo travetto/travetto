@@ -123,7 +123,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
         }
       }
 
-      this.#baseSchema.set(cls, (conf && parent) ? parent : cls);
+      this.#baseSchema.set(cls, conf ? conf.class : cls);
     }
     return this.#baseSchema.get(cls)!;
   }
@@ -168,7 +168,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
    */
   registerSubTypes(cls: Class, name?: string): void {
     // Mark as subtype
-    const config = (this.getClassConfig(cls) ?? this.getClassConfig(cls));
+    const config = this.getClassConfig(cls);
     let base: Class | undefined = this.getBaseSchemaClass(cls);
 
     if (!this.#subTypes.has(base)) {
