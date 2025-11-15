@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { RegistryV2 } from '@travetto/registry';
-import { MaxLength, MethodValidator, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
+import { MaxLength, Method, MethodValidator, Schema, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 const nameValidator = (name: string): ValidationError | undefined => {
   if (name === 'bob') {
@@ -24,10 +24,12 @@ const EvenValidator = MethodValidator((name: string): ValidationError | undefine
   }
 });
 
+@Schema()
 class TestClass {
 
   @MethodValidator(nameValidator)
   @EvenValidator
+  @Method()
   value(@MaxLength(10) name: string) {
     return name;
   }
