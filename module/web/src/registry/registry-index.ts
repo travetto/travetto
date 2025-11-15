@@ -49,7 +49,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
     const map = this.getController(inst.constructor).contextParams;
     for (const field of Object.keys(map)) {
-      const { type } = SchemaRegistryIndex.getSchemaConfig(inst)[field];
+      const { type } = SchemaRegistryIndex.getFieldMap(inst)[field];
       Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
   }

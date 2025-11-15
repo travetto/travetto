@@ -186,10 +186,10 @@ export class SchemaFaker {
    * @param view The view to define specifically
    */
   static generate<T>(cls: Class<T>, view?: string): T {
-    const cfg = SchemaRegistryIndex.getSchemaConfig(cls, view);
+    const fields = SchemaRegistryIndex.getFieldMap(cls, view);
     const out: Record<string, unknown> = {};
 
-    for (const [f, fieldConfig] of Object.entries(cfg.fields)) {
+    for (const [f, fieldConfig] of Object.entries(fields)) {
       if (f === 'type' || f === 'id') { // Do not set primary fields
         continue;
       }

@@ -128,3 +128,5 @@ export interface CliCommandConfig<K extends string = string> {
   hidden?: boolean;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 }
+
+export type CliCommandConfigSchema = Pick<CliCommandConfig, 'args' | 'flags'>;

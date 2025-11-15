@@ -22,15 +22,6 @@ export type EndpointDecorator = (
 export type EndpointParamLocation = 'path' | 'query' | 'body' | 'header';
 
 /**
- * Endpoint type
- */
-export type EndpointIOType = {
-  type: Class;
-  array?: boolean;
-  description?: string;
-};
-
-/**
  * Core configuration for endpoints and controllers
  */
 interface CoreConfig {

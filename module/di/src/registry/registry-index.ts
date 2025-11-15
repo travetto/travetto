@@ -335,14 +335,14 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     const keys = Object.keys(config.dependencies.fields ?? {})
       .filter(k => instance[castKey<T>(k)] === undefined); // Filter out already set ones
 
-    const schema = SchemaRegistryIndex.getSchemaConfig(config.class);
+    const fields = SchemaRegistryIndex.getFieldMap(config.class);
 
     // And auto-wire
     if (keys.length) {
       const deps = await this.fetchDependencies(
         config,
         keys.map(x => config.dependencies.fields[x]),
-        keys.map(x => schema[x])
+        keys.map(x => fields[x])
       );
       for (let i = 0; i < keys.length; i++) {
         instance[castKey<T>(keys[i])] = castTo(deps[i]);

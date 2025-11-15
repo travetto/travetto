@@ -5,10 +5,10 @@ import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
-export type ReturnTypeConfig = {
+export type SchemaMethodReturnType = {
   title?: string;
-  innerType?: { array?: boolean, type: Class };
-  type: { array?: boolean, type: Class };
+  array?: boolean;
+  type: Class;
 };
 
 /**
@@ -48,7 +48,7 @@ export interface SchemaMethodConfig extends SchemaCoreConfig {
   /**
    * The return type configuration
    */
-  returnType?: ReturnTypeConfig;
+  returnType?: SchemaMethodReturnType;
   /**
    * The method handle
    */
@@ -64,14 +64,6 @@ export interface SchemaFieldMap {
    */
   [key: string | symbol]: SchemaFieldConfig;
 }
-
-/**
- * View configuration
- */
-export type ViewConfig = {
-  fields: SchemaFieldMap;
-  names: (string | symbol)[];
-};
 
 /**
  * Class configuration

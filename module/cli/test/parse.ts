@@ -2,8 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Env } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { CliCommand, CliCommandSchemaUtil, CliParseUtil } from '@travetto/cli';
+import { CliCommand, CliCommandRegistryUtil, CliParseUtil } from '@travetto/cli';
 
 /**
  * My command
@@ -14,7 +15,9 @@ class WithModule {
 }
 
 const expand = async (args: string[]): Promise<string[]> => CliParseUtil.expandArgs(
-  await CliCommandSchemaUtil.getSchema(WithModule),
+  CliCommandRegistryUtil.buildSchema(
+    SchemaRegistryIndex.getConfig(WithModule)
+  ),
   CliParseUtil.getArgs(args).args
 );
 

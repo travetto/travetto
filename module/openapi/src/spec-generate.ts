@@ -4,9 +4,9 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
-import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaMethodReturnType } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config.ts';
 
@@ -49,16 +49,16 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Convert schema to a set of dotted parameters
    */
   #schemaToDotParams(location: 'query' | 'header', input: SchemaInputConfig, prefix: string = '', rootField: SchemaInputConfig = input): ParameterObject[] {
-    const schemaConf = SchemaRegistryIndex.has(input.type) ?
-      SchemaRegistryIndex.getSchemaConfig(input.type, input.view) :
+    const fields = SchemaRegistryIndex.has(input.type) ?
+      SchemaRegistryIndex.getFieldMap(input.type, input.view) :
       undefined;
 
-    if (!schemaConf) {
+    if (!fields) {
       throw new AppError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
 
     const params: ParameterObject[] = [];
-    for (const sub of Object.values(schemaConf)) {
+    for (const sub of Object.values(fields)) {
       const name = sub.name.toString();
       if (SchemaRegistryIndex.has(sub.type)) {
         const suffix = (sub.array) ? '[]' : '';
@@ -241,7 +241,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Standard payload structure
    */
-  #getEndpointBody(body?: EndpointIOType, mime?: string | null): RequestBodyObject {
+  #getEndpointBody(body?: SchemaMethodReturnType, mime?: string | null): RequestBodyObject {
     if (!body) {
       return { content: {}, description: '' };
     } else if (body.type === Readable || body.type === Buffer) {
@@ -306,17 +306,19 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const tagName = ctrl.externalName;
 
+    const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+
     const op: OperationObject = {
       tags: [tagName],
       responses: {},
-      summary: ep.title,
-      description: ep.description || ep.title,
-      operationId: `${ep.class.name}_${ep.name}`,
+      summary: schema.title,
+      description: schema.description || schema.title,
+      operationId: `${ep.class.name}_${ep.name.toString()}`,
       parameters: []
     };
 
     const contentTypeMime = ep.finalizedResponseHeaders.get('content-type');
-    const pConf = this.#getEndpointBody(ep.responseType, contentTypeMime);
+    const pConf = this.#getEndpointBody(schema.returnType, contentTypeMime);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 
@@ -344,9 +346,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     if (this.#config.skipEndpoints) {
       return;
     }
+    const classSchema = SchemaRegistryIndex.getConfig(controller.class);
     this.#tags.push({
       name: controller.externalName,
-      description: controller.description || controller.title
+      description: classSchema.description || classSchema.title
     });
   }
 

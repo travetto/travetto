@@ -80,14 +80,14 @@ export class MongoUtil {
 
   /**/
   static extractSimple<T>(base: Class<T> | undefined, o: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
-    const schema = base ? SchemaRegistryIndex.getSchemaConfig(base) : undefined;
+    const fields = base ? SchemaRegistryIndex.getFieldMap(base) : undefined;
     const out: Record<string, unknown> = {};
     const sub = o;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;
       const v: Record<string, unknown> = castTo(sub[key]);
-      const subField = schema?.[key];
+      const subField = fields?.[key];
 
       const isPlain = v && DataUtil.isPlainObject(v);
       const firstKey = isPlain ? Object.keys(v)[0] : '';

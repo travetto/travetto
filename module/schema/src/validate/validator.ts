@@ -13,9 +13,9 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  * @param base The starting type or config
  * @param o The value to use for the polymorphic check
  */
-function resolveSchema<T>(base: Class<T>, o: T): SchemaFieldMap {
+function resolveFieldMap<T>(base: Class<T>, o: T): SchemaFieldMap {
   const target = SchemaRegistryIndex.resolveInstanceType(base, o);
-  return SchemaRegistryIndex.getSchemaConfig(target);
+  return SchemaRegistryIndex.getFieldMap(target);
 }
 
 function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
@@ -34,17 +34,16 @@ export class SchemaValidator {
 
   /**
    * Validate the schema for a given object
-   * @param schema The config to validate against
+   * @param fields The config to validate against
    * @param o The object to validate
    * @param relative The relative path as the validation recurses
    */
-  static #validateSchema<T>(schema: SchemaFieldMap, o: T, relative: string): ValidationError[] {
+  static #validateFields<T>(fields: SchemaFieldMap, o: T, relative: string): ValidationError[] {
     let errors: ValidationError[] = [];
 
-    const fields = TypedObject.keys<SchemaFieldMap>(schema);
-    for (const field of fields) {
-      if (schema[field].access !== 'readonly') { // Do not validate readonly fields
-        errors = errors.concat(this.#validateInputSchema(schema[field], o[castKey<T>(field)], relative));
+    for (const [field, fieldConfig] of TypedObject.entries(fields)) {
+      if (fieldConfig.access !== 'readonly') { // Do not validate readonly fields
+        errors = errors.concat(this.#validateInputSchema(fieldConfig, o[castKey<T>(field)], relative));
       }
     }
 
@@ -82,7 +81,7 @@ export class SchemaValidator {
       let errors: ValidationError[] = [];
       if (complex) {
         for (let i = 0; i < val.length; i++) {
-          const subErrors = this.#validateSchema(resolveSchema(type, val[i]), val[i], `${path}[${i}]`);
+          const subErrors = this.#validateFields(resolveFieldMap(type, val[i]), val[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
@@ -93,7 +92,7 @@ export class SchemaValidator {
       }
       return errors;
     } else if (complex) {
-      return this.#validateSchema(resolveSchema(type, val), val, path);
+      return this.#validateFields(resolveFieldMap(type, val), val, path);
     } else {
       const fieldErrors = this.#validateInput(input, val);
       return this.#prepareErrors(path, fieldErrors);
@@ -258,11 +257,11 @@ export class SchemaValidator {
     }
     cls = SchemaRegistryIndex.resolveInstanceType(cls, o);
 
-    const config = SchemaRegistryIndex.getSchemaConfig(cls, view);
+    const fields = SchemaRegistryIndex.getFieldMap(cls, view);
 
     // Validate using standard behaviors
     const errors = [
-      ...this.#validateSchema(config, o, ''),
+      ...this.#validateFields(fields, o, ''),
       ... await this.#validateClassLevel(cls, o, view)
     ];
     if (errors.length) {

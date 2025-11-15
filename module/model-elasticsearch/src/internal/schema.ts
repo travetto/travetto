@@ -75,11 +75,11 @@ export class ElasticsearchSchemaUtil {
    * Build a mapping for a given class
    */
   static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    const schema = SchemaRegistryIndex.getSchemaConfig(cls);
+    const fields = SchemaRegistryIndex.getFieldMap(cls);
 
     const props: Record<string, estypes.MappingProperty> = {};
 
-    for (const [field, conf] of Object.entries(schema)) {
+    for (const [field, conf] of Object.entries(fields)) {
       if (conf.type === PointImpl) {
         props[field] = { type: 'geo_point' };
       } else if (conf.type === Number) {

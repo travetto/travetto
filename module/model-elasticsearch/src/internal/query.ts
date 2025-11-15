@@ -65,11 +65,11 @@ export class ElasticsearchQueryUtil {
    */
   static extractWhereTermQuery<T>(cls: Class<T>, o: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
     const items = [];
-    const schema = SchemaRegistryIndex.getSchemaConfig(cls);
+    const fields = SchemaRegistryIndex.getFieldMap(cls);
 
     for (const key of TypedObject.keys(o)) {
       const top = o[key];
-      const declaredSchema = schema[key];
+      const declaredSchema = fields[key];
       const declaredType = declaredSchema.type;
       const sPath = declaredType === String ?
         ((key === 'id' && !path) ? '_id' : `${path}${key}`) :

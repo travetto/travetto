@@ -317,6 +317,6 @@ export class SchemaTransformUtil {
     }
 
     const finalReturnType = SchemaTransformUtil.ensureType(state, innerReturnType ?? returnType, node);
-    return finalReturnType ? [state.fromLiteral({ returnType: { type: finalReturnType } })] : [];
+    return finalReturnType ? [state.fromLiteral({ returnType: finalReturnType })] : [];
   }
 }

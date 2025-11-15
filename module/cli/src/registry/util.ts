@@ -1,6 +1,6 @@
 import { SchemaClassConfig, SchemaInputConfig } from '@travetto/schema';
 
-import { CliCommandConfig, CliCommandInput } from '../types.ts';
+import { CliCommandConfigSchema, CliCommandInput } from '../types.ts';
 
 const LONG_FLAG = /^--[a-z][^= ]+/i;
 const SHORT_FLAG = /^-[a-z]/i;
@@ -54,7 +54,7 @@ export class CliCommandRegistryUtil {
   /**
    * Build command schema
    */
-  static buildSchema(cfg: SchemaClassConfig): Pick<CliCommandConfig, 'args' | 'flags'> {
+  static buildSchema(cfg: SchemaClassConfig): CliCommandConfigSchema {
     const flags = Object.values(cfg.fields).map(CliCommandRegistryUtil.processInput);
 
     // Add help command

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { Runtime } from '@travetto/runtime';
-import { CliCommandInput, CliCommandConfig, ParsedState } from './types.ts';
+import { CliCommandInput, CliCommandConfig, ParsedState, CliCommandConfigSchema } from './types.ts';
 
 type ParsedInput = ParsedState['all'][number];
 
@@ -80,7 +80,7 @@ export class CliParseUtil {
   /**
    * Get a user-specified module if present
    */
-  static getSpecifiedModule(schema: CliCommandConfig, args: string[]): string | undefined {
+  static getSpecifiedModule(schema: CliCommandConfigSchema, args: string[]): string | undefined {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
     const input = schema.flags.find(x => x.type === 'module');
     const ENV_KEY = input?.flagNames?.filter(x => x.startsWith(ENV_PRE)).map(x => x.replace(ENV_PRE, ''))[0] ?? '';
@@ -144,7 +144,7 @@ export class CliParseUtil {
   /**
    * Expand flag arguments into full argument list
    */
-  static async expandArgs(schema: CliCommandConfig, args: string[]): Promise<string[]> {
+  static async expandArgs(schema: CliCommandConfigSchema, args: string[]): Promise<string[]> {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
     const mod = this.getSpecifiedModule(schema, args);
     return (await Promise.all(args.map((x, i) =>

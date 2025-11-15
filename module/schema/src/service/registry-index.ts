@@ -24,7 +24,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
     return RegistryV2.get(this, clsOrId).get();
   }
 
-  static getSchemaConfig(clsOrId: ClassOrId, view?: string): SchemaFieldMap {
+  static getFieldMap(clsOrId: ClassOrId, view?: string): SchemaFieldMap {
     return RegistryV2.get(this, clsOrId).getSchema(view);
   }
 
