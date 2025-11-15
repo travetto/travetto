@@ -32,9 +32,10 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
 
   finalize(parentConfig?: CliCommandConfig): void {
     const schemaConfig = SchemaRegistryIndex.getConfig(this.#cls);
-    const desc = this.#config.description || schemaConfig.description || parentConfig?.description || '';
+    const title = this.#config.title || schemaConfig.title || parentConfig?.title || '';
+    const description = this.#config.description || schemaConfig.description || parentConfig?.description || '';
     const schema = CliCommandRegistryUtil.buildSchema(schemaConfig);
-    combineClasses(this.#config, parentConfig ?? {}, schema, { description: desc });
+    combineClasses(this.#config, parentConfig ?? {}, schema, { title, description });
   }
 
   get(): CliCommandConfig {

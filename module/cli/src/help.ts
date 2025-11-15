@@ -23,13 +23,13 @@ export class HelpUtil {
    * @param command
    */
   static async renderCommandHelp(command: CliCommandShape): Promise<string> {
-    const { flags, args, name: commandName } = await CliCommandRegistryIndex.get(command);
+    const { flags, args, name: commandName, title } = await CliCommandRegistryIndex.get(command);
 
     await command.preHelp?.();
 
     // Ensure finalized
 
-    const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`];
+    const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
     for (const field of args) {
       const type = field.type === 'string' && field.choices && field.choices.length <= 7 ? field.choices?.join('|') : field.type;
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
@@ -77,6 +77,7 @@ export class HelpUtil {
     }
 
     return [
+      ...(title ? [cliTpl`${{ title: commandName }}: ${{ subtitle: title }}`, ''] : []),
       usage.join(' '),
       '',
       cliTpl`${{ title: 'Options:' }}`,
