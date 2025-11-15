@@ -1,5 +1,5 @@
 import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
-import { AppError, castKey, castTo, Class } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, describeFunction } from '@travetto/runtime';
 
 import { SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig, SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig } from './types';
 
@@ -109,7 +109,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       validators: [],
       interfaces: [],
       fields: {},
-      subTypeField: 'type'
+      subTypeField: 'type',
+      baseType: describeFunction(this.#cls).abstract || undefined,
     };
     combineClasses(cfg, data);
     return cfg;
