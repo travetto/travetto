@@ -1,6 +1,6 @@
 import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
 
-import { SchemaInputConfig, SchemaConfig } from '../service/types.ts';
+import { SchemaInputConfig, SchemaFieldMap } from '../service/types.ts';
 import { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 import { Messages } from './messages.ts';
 import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
@@ -13,7 +13,7 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  * @param base The starting type or config
  * @param o The value to use for the polymorphic check
  */
-function resolveSchema<T>(base: Class<T>, o: T): SchemaConfig {
+function resolveSchema<T>(base: Class<T>, o: T): SchemaFieldMap {
   const target = SchemaRegistryIndex.resolveInstanceType(base, o);
   return SchemaRegistryIndex.getSchemaConfig(target);
 }
@@ -38,10 +38,10 @@ export class SchemaValidator {
    * @param o The object to validate
    * @param relative The relative path as the validation recurses
    */
-  static #validateSchema<T>(schema: SchemaConfig, o: T, relative: string): ValidationError[] {
+  static #validateSchema<T>(schema: SchemaFieldMap, o: T, relative: string): ValidationError[] {
     let errors: ValidationError[] = [];
 
-    const fields = TypedObject.keys<SchemaConfig>(schema);
+    const fields = TypedObject.keys<SchemaFieldMap>(schema);
     for (const field of fields) {
       if (schema[field].access !== 'readonly') { // Do not validate readonly fields
         errors = errors.concat(this.#validateInputSchema(schema[field], o[castKey<T>(field)], relative));

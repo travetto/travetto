@@ -1,7 +1,7 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
-import { SchemaFieldConfig, SchemaClassConfig, SchemaConfig, SchemaMethodConfig } from './types.ts';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfig } from './types.ts';
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
@@ -24,7 +24,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
     return RegistryV2.get(this, clsOrId).get();
   }
 
-  static getSchemaConfig(clsOrId: ClassOrId, view?: string): SchemaConfig {
+  static getSchemaConfig(clsOrId: ClassOrId, view?: string): SchemaFieldMap {
     return RegistryV2.get(this, clsOrId).getSchema(view);
   }
 

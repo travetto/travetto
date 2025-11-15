@@ -2,7 +2,7 @@ import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@tr
 import { RegistryV2 } from '@travetto/registry';
 
 import { DataUtil } from './data.ts';
-import { SchemaInputConfig, SchemaParameterConfig, SchemaConfig } from './service/types.ts';
+import { SchemaInputConfig, SchemaParameterConfig, SchemaFieldMap } from './service/types.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
 
 type BindConfig = {
@@ -182,7 +182,7 @@ export class BindUtil {
           obj[k] = data[k];
         }
       } else {
-        let schema: SchemaConfig = conf.fields;
+        let schema: SchemaFieldMap = conf.fields;
         if (view) {
           schema = adapter.getSchema(view);
           if (!schema) {

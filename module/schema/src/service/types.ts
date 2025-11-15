@@ -58,7 +58,7 @@ export interface SchemaMethodConfig extends SchemaCoreConfig {
 /**
  * Schema configuration
  */
-export interface SchemaConfig {
+export interface SchemaFieldMap {
   /**
    * List of all fields
    */
@@ -69,7 +69,7 @@ export interface SchemaConfig {
  * View configuration
  */
 export type ViewConfig = {
-  fields: SchemaConfig;
+  fields: SchemaFieldMap;
   names: (string | symbol)[];
 };
 
@@ -88,7 +88,7 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
   /**
    * Field configurations
    */
-  fields: SchemaConfig;
+  fields: SchemaFieldMap;
   /**
    * Global validators
    */

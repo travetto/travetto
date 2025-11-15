@@ -1,7 +1,7 @@
 import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { AppError, castKey, castTo, Class } from '@travetto/runtime';
 
-import { SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig, SchemaParameterConfig, SchemaInputConfig, SchemaConfig, SchemaCoreConfig } from './types';
+import { SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig, SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig } from './types';
 
 function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {
   const md = base.metadata ??= {};
@@ -92,7 +92,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   #cls: Class;
   #config: SchemaClassConfig;
-  #views: Map<string, SchemaConfig> = new Map();
+  #views: Map<string, SchemaFieldMap> = new Map();
   #accessorDescriptors: Map<string, PropertyDescriptor> = new Map();
 
   indexCls: RegistryIndexClass<SchemaClassConfig>;
@@ -199,7 +199,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
         ('with' in fields ? fields.with : []);
 
       this.#views.set(view,
-        fieldList.reduce<SchemaConfig>((acc, v) => {
+        fieldList.reduce<SchemaFieldMap>((acc, v) => {
           acc[v] = config.fields[v];
           return acc;
         }, {})
@@ -223,7 +223,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return this.#config.methods[method];
   }
 
-  getSchema(view?: string): SchemaConfig {
+  getSchema(view?: string): SchemaFieldMap {
     if (!view) {
       return this.#config.fields;
     }
