@@ -12,6 +12,8 @@ type CliCommandLoadResult = { command: string, config: CliCommandConfig, instanc
 
 export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> {
 
+  static { RegistryV2.registerIndex(CliCommandRegistryIndex); }
+
   static adapterCls = CliCommandRegistryAdapter;
 
   static getForRegister(clsOrId: ClassOrId): RegistryAdapter<CliCommandConfig> {

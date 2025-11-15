@@ -21,6 +21,7 @@ class $Registry {
   #idToCls = new Map<string, Class>();
   #adaptersByIndex = new Map<RegistryIndexClass, Map<Class, RegistryAdapter>>();
   #indexes = new Map<RegistryIndexClass, RegistryIndex<{}>>();
+  #indexOrder: RegistryIndexClass[] = [];
 
   // Eventing
   #classSource = new ClassSource();
@@ -70,19 +71,24 @@ class $Registry {
   }
 
   #finalizeItems(classes: Class[]): void {
-    for (const cls of classes) {
-      if (this.#finalized.get(cls)) {
-        continue;
-      }
-      for (const adapter of this.#adapters.get(cls)?.values() ?? []) {
-        const inst = this.instance(adapter.indexCls);
-        const parentClass = (inst.getParentClass ?? getParentClass)(cls);
-        let parentConfig;
-        if (parentClass && this.#adapters.has(parentClass) && this.#adapters.get(parentClass)!.has(adapter.indexCls)) {
-          parentConfig = this.#adapter(adapter.indexCls, parentClass).get();
+    const pending = classes.filter(c => !this.#finalized.get(c));
+
+    for (const idx of this.#indexOrder) {
+      for (const cls of pending) {
+        if (this.has(idx, cls)) {
+          const inst = this.instance(idx);
+          const parentClass = (inst.getParentClass ?? getParentClass)(cls);
+          let parentConfig;
+          const adapter = this.#adapter(idx, cls);
+          if (parentClass && this.#adapters.has(parentClass) && this.#adapters.get(parentClass)!.has(adapter.indexCls)) {
+            parentConfig = this.#adapter(adapter.indexCls, parentClass).get();
+          }
+          adapter.finalize(parentConfig);
         }
-        adapter.finalize(parentConfig);
       }
+    }
+
+    for (const cls of pending) {
       this.#finalized.set(cls, true);
     }
   }
@@ -152,6 +158,16 @@ class $Registry {
   }
 
   /**
+   * Register a new index
+   */
+  registerIndex<C extends {}, T extends RegistryIndexClass<C>>(indexCls: T): void {
+    if (!this.#indexes.has(indexCls)) {
+      this.#indexes.set(indexCls, new indexCls());
+      this.#indexOrder.push(indexCls);
+    }
+  }
+
+  /**
    * Initialize, with a built-in latch to prevent concurrent initializations
    */
   async init(): Promise<unknown> {
@@ -200,12 +216,7 @@ class $Registry {
     return Array.from(this.#adaptersByIndex.get(indexCls)?.keys() ?? []);
   }
 
-  instance<C extends {}, T extends RegistryIndexClass<C>>(
-    indexCls: T
-  ): InstanceType<T> {
-    if (!this.#indexes.has(indexCls)) {
-      this.#indexes.set(indexCls, new indexCls());
-    }
+  instance<C extends {}, T extends RegistryIndexClass<C>>(indexCls: T): InstanceType<T> {
     return castTo(this.#indexes.get(indexCls));
   }
 

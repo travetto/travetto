@@ -12,6 +12,8 @@ type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
  */
 export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
 
+  static { RegistryV2.registerIndex(SuiteRegistryIndex); }
+
   static adapterCls = SuiteRegistryAdapter;
 
   static getForRegister(clsOrId: ClassOrId): SuiteRegistryAdapter {

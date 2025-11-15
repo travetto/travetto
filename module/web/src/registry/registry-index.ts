@@ -10,6 +10,8 @@ import type { WebInterceptor } from '../types/interceptor.ts';
 
 export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> {
 
+  static { RegistryV2.registerIndex(ControllerRegistryIndex); }
+
   static adapterCls = ControllerRegistryAdapter;
 
   static getForRegister(clsOrId: ClassOrId): ControllerRegistryAdapter {

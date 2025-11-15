@@ -15,6 +15,8 @@ type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & 
  */
 export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
 
+  static { RegistryV2.registerIndex(ModelRegistryIndex); }
+
   static adapterCls = ModelRegistryAdapter;
 
   static getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {

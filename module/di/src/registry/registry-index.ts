@@ -9,6 +9,9 @@ import { InjectionError } from '../error';
 
 
 export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> {
+
+  static { RegistryV2.registerIndex(DependencyRegistryIndex); }
+
   static adapterCls = DependencyRegistryAdapter;
 
   static getForRegister(clsOrId: ClassOrId): DependencyRegistryAdapter {
