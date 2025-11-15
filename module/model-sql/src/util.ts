@@ -1,16 +1,16 @@
 import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistryIndex, ModelType, OptionalId } from '@travetto/model';
-import { ClassConfig, FieldConfig, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaClassConfig, SchemaFieldConfig, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types.ts';
 import { TableSymbol, VisitStack } from './types.ts';
 
 type FieldCacheEntry = {
-  local: FieldConfig[];
-  localMap: Record<string | symbol, FieldConfig>;
-  foreign: FieldConfig[];
-  foreignMap: Record<string | symbol, FieldConfig>;
+  local: SchemaFieldConfig[];
+  localMap: Record<string | symbol, SchemaFieldConfig>;
+  foreign: SchemaFieldConfig[];
+  foreignMap: Record<string | symbol, SchemaFieldConfig>;
 };
 
 /**
@@ -61,7 +61,7 @@ export class SQLModelUtil {
     }
 
     if (!conf) { // If a simple type, it is it's own field
-      const field: FieldConfig = castTo({ ...top });
+      const field: SchemaFieldConfig = castTo({ ...top });
       return {
         local: [field], localMap: { [field.name]: field },
         foreign: [], foreignMap: {}
@@ -76,7 +76,7 @@ export class SQLModelUtil {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of ModelRegistryIndex.getClassesByBaseType(conf.class)) {
         const typeConf = SchemaRegistryIndex.getConfig(type);
-        for (const [fieldName, field] of Object.entries<FieldConfig>(typeConf.fields)) {
+        for (const [fieldName, field] of Object.entries<SchemaFieldConfig>(typeConf.fields)) {
           if (!fieldMap.has(fieldName)) {
             fieldMap.add(fieldName);
             fields.push({ ...field, required: { active: false } });
@@ -103,7 +103,7 @@ export class SQLModelUtil {
   /**
    * Process a schema structure, synchronously
    */
-  static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }): void {
+  static visitSchemaSync(config: SchemaClassConfig | SchemaFieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }): void {
     const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
@@ -131,7 +131,7 @@ export class SQLModelUtil {
   /**
    * Visit a Schema structure
    */
-  static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }): Promise<void> {
+  static async visitSchema(config: SchemaClassConfig | SchemaFieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }): Promise<void> {
     const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
@@ -208,7 +208,7 @@ export class SQLModelUtil {
   /**
    * Get list of selected fields
    */
-  static select<T>(cls: Class<T>, select?: SelectClause<T>): FieldConfig[] {
+  static select<T>(cls: Class<T>, select?: SelectClause<T>): SchemaFieldConfig[] {
     if (!select || Object.keys(select).length === 0) {
       return [{ type: cls, name: '*', owner: cls, array: false }];
     }
@@ -237,7 +237,7 @@ export class SQLModelUtil {
    */
   static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
     return sort.map((cl: Record<string, unknown>) => {
-      let schema: ClassConfig = SchemaRegistryIndex.getConfig(cls);
+      let schema: SchemaClassConfig = SchemaRegistryIndex.getConfig(cls);
       const stack = this.classToStack(cls);
       let found: OrderBy | undefined;
       while (!found) {
@@ -260,7 +260,7 @@ export class SQLModelUtil {
   /**
    * Find all dependent fields via child tables
    */
-  static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: FieldConfig): Record<string, T> {
+  static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: SchemaFieldConfig): Record<string, T> {
     if (field) {
       const isSimple = SchemaRegistryIndex.has(field.type);
       for (const el of v) {

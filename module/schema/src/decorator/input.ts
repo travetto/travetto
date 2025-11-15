@@ -1,12 +1,12 @@
 import { Any, ClassInstance } from '@travetto/runtime';
 
 import { CommonRegExp } from '../validate/regexp.ts';
-import { InputConfig } from '../service/types.ts';
+import { SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
-function inp<V>(...obj: Partial<InputConfig>[]): PropType<V> {
+function inp<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
   return (t: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (typeof idx === 'number') {
       SchemaRegistryIndex.getForRegister(t).registerParameter(k, idx, ...obj);
@@ -22,7 +22,7 @@ function inp<V>(...obj: Partial<InputConfig>[]): PropType<V> {
  * @param config The input configuration
  * @augments `@travetto/schema:Input`
  */
-export function Input(type: Pick<InputConfig, 'type' | 'array'>, ...config: Partial<InputConfig>[]): PropType<unknown> {
+export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...config: Partial<SchemaInputConfig>[]): PropType<unknown> {
   return inp({ type: type.type, array: type.array ?? false }, ...config);
 }
 

@@ -1,4 +1,4 @@
-import { ClassConfig } from './service/types.ts';
+import { SchemaClassConfig } from './service/types.ts';
 
 const ID_RE = /(\d{1,100})Δ$/;
 
@@ -14,7 +14,7 @@ export class SchemaNameResolver {
     this.#digits = digits;
   }
 
-  getName(schema: ClassConfig): string {
+  getName(schema: SchemaClassConfig): string {
     const cls = schema.class;
     const id = cls.Ⲑid;
     if (ID_RE.test(cls.name)) {

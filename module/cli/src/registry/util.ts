@@ -1,4 +1,4 @@
-import { ClassConfig, InputConfig } from '@travetto/schema';
+import { SchemaClassConfig, SchemaInputConfig } from '@travetto/schema';
 
 import { CliCommandConfig, CliCommandInput } from '../types.ts';
 
@@ -15,7 +15,7 @@ export class CliCommandRegistryUtil {
   /**
    * Get the base type for a CLI command input
    */
-  static baseType(x: InputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
+  static baseType(x: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
     switch (x.type) {
       case Date: return { type: 'date' };
       case Boolean: return { type: 'boolean' };
@@ -37,7 +37,7 @@ export class CliCommandRegistryUtil {
   /**
    * Process input configuration for CLI commands
    */
-  static processInput(x: InputConfig): CliCommandInput {
+  static processInput(x: SchemaInputConfig): CliCommandInput {
     return {
       ...CliCommandRegistryUtil.baseType(x),
       ...(('name' in x && typeof x.name === 'string') ? { name: x.name } : { name: '' }),
@@ -54,7 +54,7 @@ export class CliCommandRegistryUtil {
   /**
    * Build command schema
    */
-  static buildSchema(cfg: ClassConfig): Pick<CliCommandConfig, 'args' | 'flags'> {
+  static buildSchema(cfg: SchemaClassConfig): Pick<CliCommandConfig, 'args' | 'flags'> {
     const flags = Object.values(cfg.fields).map(CliCommandRegistryUtil.processInput);
 
     // Add help command

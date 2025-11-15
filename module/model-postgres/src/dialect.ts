@@ -1,4 +1,4 @@
-import { FieldConfig } from '@travetto/schema';
+import { SchemaFieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { ModelType } from '@travetto/model';
@@ -43,7 +43,7 @@ export class PostgreSQLDialect extends SQLDialect {
     return `encode(digest('${value}', 'sha1'), 'hex')`;
   }
 
-  ident(field: FieldConfig | string): string {
+  ident(field: SchemaFieldConfig | string): string {
     return `"${typeof field === 'string' ? field : field.name}"`;
   }
 
@@ -51,7 +51,7 @@ export class PostgreSQLDialect extends SQLDialect {
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]): string {
-    const field: FieldConfig = castTo(stack.at(-1));
+    const field: SchemaFieldConfig = castTo(stack.at(-1));
     const type = this.getColumnType(field);
     const ident = this.ident(field.name);
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident}  TYPE ${type} USING (${ident}::${type});`;

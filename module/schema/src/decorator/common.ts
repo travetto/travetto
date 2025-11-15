@@ -1,6 +1,6 @@
 import { Class, ClassInstance } from '@travetto/runtime';
 
-import { DescribableConfig } from '../service/types.ts';
+import { SchemaCoreConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 function isClassInstance(o: Class | ClassInstance, property?: string | symbol): o is ClassInstance {
@@ -12,7 +12,7 @@ function isClassInstance(o: Class | ClassInstance, property?: string | symbol): 
  * @param config The describe configuration
  * @augments `@travetto/schema:Describe`
  */
-export function Describe(config: Partial<DescribableConfig>) {
+export function Describe(config: Partial<SchemaCoreConfig>) {
   return (target: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
     const adapter = SchemaRegistryIndex.getForRegister(target);
     if (isClassInstance(target, property)) {

@@ -2,13 +2,13 @@ import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@tr
 import { RegistryV2 } from '@travetto/registry';
 
 import { DataUtil } from './data.ts';
-import { InputConfig, ParameterConfig, SchemaConfig } from './service/types.ts';
+import { SchemaInputConfig, SchemaParameterConfig, SchemaConfig } from './service/types.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
 
 type BindConfig = {
   view?: string;
-  filterInput?: (input: InputConfig) => boolean;
-  filterValue?: (value: unknown, input: InputConfig) => boolean;
+  filterInput?: (input: SchemaInputConfig) => boolean;
+  filterValue?: (value: unknown, input: SchemaInputConfig) => boolean;
 };
 
 function isInstance<T>(o: unknown): o is T {
@@ -25,7 +25,7 @@ export class BindUtil {
    * @param conf The field config to coerce to
    * @param val The provided value
    */
-  static #coerceType<T>(conf: InputConfig, val: unknown): T | null | undefined {
+  static #coerceType<T>(conf: SchemaInputConfig, val: unknown): T | null | undefined {
     if (conf.type?.bindSchema) {
       val = conf.type.bindSchema(val);
     } else {
@@ -262,7 +262,7 @@ export class BindUtil {
    * @param applyDefaults
    * @returns
    */
-  static coerceInput(cfg: InputConfig, val: unknown, applyDefaults = false): unknown {
+  static coerceInput(cfg: SchemaInputConfig, val: unknown, applyDefaults = false): unknown {
     if ((val === undefined || val === null) && applyDefaults) {
       val = Array.isArray(cfg.default) ? cfg.default.slice(0) : cfg.default;
     }
@@ -294,7 +294,7 @@ export class BindUtil {
    * @param params
    * @returns
    */
-  static coerceParameters(fields: ParameterConfig[], params: unknown[], applyDefaults = true): unknown[] {
+  static coerceParameters(fields: SchemaParameterConfig[], params: unknown[], applyDefaults = true): unknown[] {
     params = [...params];
     // Coerce types
     for (const el of fields) {

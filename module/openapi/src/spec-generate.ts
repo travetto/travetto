@@ -6,17 +6,17 @@ import type {
 
 import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
-import { FieldConfig, ClassConfig, SchemaNameResolver, InputConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config.ts';
 
 const DEFINITION = '#/components/schemas';
 
-function isInputConfig(val: object): val is InputConfig {
+function isInputConfig(val: object): val is SchemaInputConfig {
   return !!val && 'owner' in val && 'type' in val;
 }
 
-function isFieldConfig(val: object): val is FieldConfig {
+function isFieldConfig(val: object): val is SchemaFieldConfig {
   return isInputConfig(val) && 'name' in val;
 }
 
@@ -48,7 +48,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Convert schema to a set of dotted parameters
    */
-  #schemaToDotParams(location: 'query' | 'header', input: InputConfig, prefix: string = '', rootField: InputConfig = input): ParameterObject[] {
+  #schemaToDotParams(location: 'query' | 'header', input: SchemaInputConfig, prefix: string = '', rootField: SchemaInputConfig = input): ParameterObject[] {
     const schemaConf = SchemaRegistryIndex.has(input.type) ?
       SchemaRegistryIndex.getSchemaConfig(input.type, input.view) :
       undefined;
@@ -82,7 +82,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Get the type for a given class
    */
-  #getType(inputOrClass: InputConfig | Class): Record<string, unknown> {
+  #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
     let field: { type: Class<unknown>, precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
       field = { type: inputOrClass };
@@ -138,7 +138,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process schema field
    */
-  #processSchemaField(input: InputConfig, required: string[]): SchemaObject {
+  #processSchemaField(input: SchemaInputConfig, required: string[]): SchemaObject {
     let prop: SchemaObject = this.#getType(input);
 
     if (input.examples) {
@@ -186,7 +186,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process schema class
    */
-  onSchema(type?: ClassConfig): void {
+  onSchema(type?: SchemaClassConfig): void {
     if (type === undefined) {
       return;
     }
@@ -269,7 +269,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: EndpointParamConfig, input: InputConfig): (
+  #processEndpointParam(ep: EndpointConfig, param: EndpointParamConfig, input: SchemaInputConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined

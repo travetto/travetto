@@ -1,11 +1,11 @@
 import { Any, ClassInstance } from '@travetto/runtime';
 
-import { FieldConfig } from '../service/types.ts';
+import { SchemaFieldConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
-function field<V>(...obj: Partial<FieldConfig>[]): PropType<V> {
+function field<V>(...obj: Partial<SchemaFieldConfig>[]): PropType<V> {
   return (t: ClassInstance, k: string | symbol): void => {
     SchemaRegistryIndex.getForRegister(t).registerField(k, ...obj);
   };
@@ -17,7 +17,7 @@ function field<V>(...obj: Partial<FieldConfig>[]): PropType<V> {
  * @param config The field configuration
  * @augments `@travetto/schema:Input`
  */
-export function Field(type: Pick<FieldConfig, 'type' | 'array'>, ...config: Partial<FieldConfig>[]): PropType<unknown> {
+export function Field(type: Pick<SchemaFieldConfig, 'type' | 'array'>, ...config: Partial<SchemaFieldConfig>[]): PropType<unknown> {
   return field(type, ...config);
 }
 

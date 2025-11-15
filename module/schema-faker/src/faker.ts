@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 import { Class, TimeUtil } from '@travetto/runtime';
-import { BindUtil, FieldConfig, CommonRegExp, SchemaRegistryIndex } from '@travetto/schema';
+import { BindUtil, SchemaFieldConfig, CommonRegExp, SchemaRegistryIndex } from '@travetto/schema';
 
 
 /**
@@ -63,7 +63,7 @@ export class SchemaFaker {
    * Get an array of values
    * @param cfg Field configuration
    */
-  static #array(cfg: FieldConfig): unknown[] {
+  static #array(cfg: SchemaFieldConfig): unknown[] {
     const min = cfg.minlength ? cfg.minlength.n : 0;
     const max = cfg.maxlength ? cfg.maxlength.n : 10;
     const size = faker.number.int({ min, max });
@@ -78,7 +78,7 @@ export class SchemaFaker {
    * Get a new number value
    * @param cfg Number config
    */
-  static #number(cfg: FieldConfig): number {
+  static #number(cfg: SchemaFieldConfig): number {
     let min = cfg.min && typeof cfg.min.n === 'number' ? cfg.min.n : undefined;
     let max = cfg.max && typeof cfg.max.n === 'number' ? cfg.max.n : undefined;
     let precision = cfg.precision;
@@ -111,7 +111,7 @@ export class SchemaFaker {
    * Get a date value
    * @param cfg Field config
    */
-  static #date(cfg: FieldConfig): Date {
+  static #date(cfg: SchemaFieldConfig): Date {
     const name = cfg.name.toString().toLowerCase();
     const min = cfg.min && typeof cfg.min.n !== 'number' ? cfg.min.n : undefined;
     const max = cfg.max && typeof cfg.max.n !== 'number' ? cfg.max.n : undefined;
@@ -132,7 +132,7 @@ export class SchemaFaker {
    * Get a string value
    * @param cfg Field config
    */
-  static #string(cfg: FieldConfig): string {
+  static #string(cfg: SchemaFieldConfig): string {
     const name = cfg.name.toString().toLowerCase();
 
     if (cfg.match) {
@@ -157,7 +157,7 @@ export class SchemaFaker {
    * Get a value for a field config
    * @param cfg Field config
    */
-  static #value(cfg: FieldConfig, subArray = false): unknown {
+  static #value(cfg: SchemaFieldConfig, subArray = false): unknown {
     if (!subArray && cfg.array) {
       return this.#array(cfg);
     } else if (cfg.enum) {

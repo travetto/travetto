@@ -1,4 +1,4 @@
-import { FieldConfig } from '@travetto/schema';
+import { SchemaFieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
@@ -64,7 +64,7 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Build identifier
    */
-  ident(field: FieldConfig | string): string {
+  ident(field: SchemaFieldConfig | string): string {
     return `\`${typeof field === 'string' ? field : field.name}\``;
   }
 
@@ -79,7 +79,7 @@ export class MySQLDialect extends SQLDialect {
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]): string {
-    const field: FieldConfig = castTo(stack.at(-1));
+    const field: SchemaFieldConfig = castTo(stack.at(-1));
     return `ALTER TABLE ${this.parentTable(stack)} MODIFY COLUMN ${this.getColumnDefinition(field)};`;
   }
 

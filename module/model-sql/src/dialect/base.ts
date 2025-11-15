@@ -1,5 +1,5 @@
 /* eslint-disable @stylistic/indent */
-import { DataUtil, FieldConfig, Schema, SchemaRegistryIndex, type Point } from '@travetto/schema';
+import { DataUtil, SchemaFieldConfig, Schema, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainQueryPrimitiveFields, ModelQueryUtil } from '@travetto/model-query';
 import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
@@ -21,7 +21,7 @@ class Total {
   total: number;
 }
 
-function makeField(name: string, type: Class, required: boolean, extra: Partial<FieldConfig>): FieldConfig {
+function makeField(name: string, type: Class, required: boolean, extra: Partial<SchemaFieldConfig>): SchemaFieldConfig {
   return {
     name,
     owner: null!,
@@ -161,7 +161,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Identify a name or field (escape it)
    */
-  abstract ident(name: string | symbol | FieldConfig): string;
+  abstract ident(name: string | symbol | SchemaFieldConfig): string;
 
   quote(text: string): string {
     return `'${text.replace(/[']/g, "''")}'`;
@@ -180,7 +180,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Convert value to SQL valid representation
    */
-  resolveValue(conf: FieldConfig, value: unknown): string {
+  resolveValue(conf: SchemaFieldConfig, value: unknown): string {
     if (value === undefined || value === null) {
       return 'NULL';
     } else if (conf.type === String) {
@@ -211,7 +211,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Get column type from field config
    */
-  getColumnType(conf: FieldConfig): string {
+  getColumnType(conf: SchemaFieldConfig): string {
     let type: string = '';
 
     if (conf.type === Number) {
@@ -258,7 +258,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * FieldConfig to Column definition
    */
-  getColumnDefinition(conf: FieldConfig): string | undefined {
+  getColumnDefinition(conf: SchemaFieldConfig): string | undefined {
     const type = this.getColumnType(conf);
     if (!type) {
       return;
@@ -295,7 +295,7 @@ export abstract class SQLDialect implements DialectState {
    * Add a sql column
    */
   getAddColumnSQL(stack: VisitStack[]): string {
-    const field: FieldConfig = castTo(stack.at(-1));
+    const field: SchemaFieldConfig = castTo(stack.at(-1));
     return `ALTER TABLE ${this.parentTable(stack)} ADD COLUMN ${this.getColumnDefinition(field)};`;
   }
 
@@ -342,7 +342,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Alias a field for usage
    */
-  alias(field: string | symbol | FieldConfig, alias: string = this.rootAlias): string {
+  alias(field: string | symbol | SchemaFieldConfig, alias: string = this.rootAlias): string {
     return `${alias}.${this.ident(field)}`;
   }
 
@@ -637,7 +637,7 @@ ${this.getLimitSQL(cls, query)}`;
     const array = parent && config.array;
     const fields = SchemaRegistryIndex.has(config.type) ?
       [...SQLModelUtil.getFieldsByLocation(stack).local] :
-      (array ? [castTo<FieldConfig>(config)] : []);
+      (array ? [castTo<SchemaFieldConfig>(config)] : []);
 
     if (!parent) {
       let idField = fields.find(x => x.name === this.idField.name);
@@ -861,7 +861,7 @@ ${this.getWhereSQL(type, where)};`;
   /**
   * Get elements by ids
   */
-  getSelectRowsByIdsSQL(stack: VisitStack[], ids: string[], select: FieldConfig[] = []): string {
+  getSelectRowsByIdsSQL(stack: VisitStack[], ids: string[], select: SchemaFieldConfig[] = []): string {
     const config = stack.at(-1)!;
     const orderBy = !config.array ?
       '' :
@@ -890,7 +890,7 @@ ${this.getWhereSQL(cls, where!)}`;
     const stack: Record<string, unknown>[] = [];
     const selectStack: (SelectClause<T> | undefined)[] = [];
 
-    const buildSet = (children: unknown[], field?: FieldConfig): Record<string, unknown> =>
+    const buildSet = (children: unknown[], field?: SchemaFieldConfig): Record<string, unknown> =>
       SQLModelUtil.collectDependents(this, stack.at(-1)!, children, field);
 
     await SQLModelUtil.visitSchema(SchemaRegistryIndex.getConfig(cls), {
@@ -908,7 +908,7 @@ ${this.getWhereSQL(cls, where!)}`;
         const subSelectTop: SelectClause<T> | undefined = castTo(selectTop?.[fieldKey]);
 
         // See if a selection exists at all
-        const sel: FieldConfig[] = subSelectTop ? fields
+        const sel: SchemaFieldConfig[] = subSelectTop ? fields
           .filter(f => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(f.name)] === 1)
           : [];
 

@@ -1,6 +1,6 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2, RetargettingProxy } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime } from '@travetto/runtime';
-import { FieldConfig, ParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ClassTarget, Dependency, InjectableConfig } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
@@ -304,7 +304,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   /**
    * Retrieve all dependencies
    */
-  async fetchDependencies<T>(managed: InjectableConfig<T>, deps: Dependency[], inputs: (FieldConfig | ParameterConfig)[]): Promise<unknown[]> {
+  async fetchDependencies<T>(managed: InjectableConfig<T>, deps: Dependency[], inputs: (SchemaFieldConfig | SchemaParameterConfig)[]): Promise<unknown[]> {
     if (!deps || !deps.length) {
       return [];
     }

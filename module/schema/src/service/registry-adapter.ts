@@ -1,9 +1,9 @@
 import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { AppError, castKey, castTo, Class } from '@travetto/runtime';
 
-import { ClassConfig, MethodConfig, FieldConfig, ParameterConfig, InputConfig, SchemaConfig, DescribableConfig } from './types';
+import { SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig, SchemaParameterConfig, SchemaInputConfig, SchemaConfig, SchemaCoreConfig } from './types';
 
-function assignMetadata<T>(key: symbol, base: DescribableConfig, data: Partial<T>[]): T {
+function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {
   const md = base.metadata ??= {};
   const out = md[key] ??= {};
   for (const d of data) {
@@ -12,7 +12,7 @@ function assignMetadata<T>(key: symbol, base: DescribableConfig, data: Partial<T
   return castTo(out);
 }
 
-function combineInputs<T extends InputConfig>(base: T, configs: Partial<T>[]): T {
+function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     Object.assign(base, {
       ...config,
@@ -33,7 +33,7 @@ function combineInputs<T extends InputConfig>(base: T, configs: Partial<T>[]): T
   return base;
 }
 
-function combineMethods<T extends MethodConfig>(base: T, configs: Partial<T>[]): T {
+function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     Object.assign(base, {
       ...config,
@@ -51,7 +51,7 @@ function combineMethods<T extends MethodConfig>(base: T, configs: Partial<T>[]):
   return base;
 }
 
-function combineClassWithParent<T extends ClassConfig>(base: T, parent: T): T {
+function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T): T {
   Object.assign(base, {
     ...base,
     ...base.views ? { views: { ...parent.views, ...base.views } } : {},
@@ -68,7 +68,7 @@ function combineClassWithParent<T extends ClassConfig>(base: T, parent: T): T {
   return base;
 }
 
-function combineClasses<T extends ClassConfig>(base: T, configs: Partial<T>[]): T {
+function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     Object.assign(base, {
       ...config,
@@ -88,20 +88,20 @@ function combineClasses<T extends ClassConfig>(base: T, configs: Partial<T>[]): 
   return base;
 }
 
-export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
+export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig> {
 
   #cls: Class;
-  #config: ClassConfig;
+  #config: SchemaClassConfig;
   #views: Map<string, SchemaConfig> = new Map();
   #accessorDescriptors: Map<string, PropertyDescriptor> = new Map();
 
-  indexCls: RegistryIndexClass<ClassConfig>;
+  indexCls: RegistryIndexClass<SchemaClassConfig>;
 
   constructor(cls: Class) {
     this.#cls = cls;
   }
 
-  register(...data: Partial<ClassConfig>[]): ClassConfig {
+  register(...data: Partial<SchemaClassConfig>[]): SchemaClassConfig {
     const cfg = this.#config ??= {
       methods: {},
       class: this.#cls,
@@ -125,7 +125,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
     return md ? castTo<T>(md[key]) : undefined;
   }
 
-  registerField(field: string | symbol, ...data: Partial<FieldConfig>[]): FieldConfig {
+  registerField(field: string | symbol, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
     const config = this.register({});
     const cfg = config.fields[field] ??= { array: false, name: field, type: null!, owner: this.#cls };
     combineInputs(cfg, data);
@@ -142,7 +142,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
     return md ? castTo<T>(md[key]) : undefined;
   }
 
-  registerMethod(method: string | symbol, ...data: Partial<MethodConfig>[]): MethodConfig {
+  registerMethod(method: string | symbol, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const config = this.register({});
     const cfg = config.methods[method] ??= { parameters: [], validators: [], handle: this.#cls.prototype[method] };
     combineMethods(cfg, data);
@@ -165,14 +165,14 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
    * @param idx The param index
    * @param data The config to register
    */
-  registerParameter(method: string | symbol, idx: number, ...data: Partial<ParameterConfig>[]): ParameterConfig {
+  registerParameter(method: string | symbol, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
     const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
     combineInputs(cfg, data);
     return cfg;
   }
 
-  finalize(parent?: ClassConfig): void {
+  finalize(parent?: SchemaClassConfig): void {
     const config = this.#config;
 
     if (parent) {
@@ -211,15 +211,15 @@ export class SchemaRegistryAdapter implements RegistryAdapter<ClassConfig> {
     }
   }
 
-  get(): ClassConfig {
+  get(): SchemaClassConfig {
     return this.#config;
   }
 
-  getField(field: string | symbol): FieldConfig {
+  getField(field: string | symbol): SchemaFieldConfig {
     return this.#config.fields[field];
   }
 
-  getMethod(method: string | symbol): MethodConfig {
+  getMethod(method: string | symbol): SchemaMethodConfig {
     return this.#config.methods[method];
   }
 

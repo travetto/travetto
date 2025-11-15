@@ -1,5 +1,5 @@
 import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
-import { FieldConfig, SchemaRegistryIndex, ValidationError } from '@travetto/schema';
+import { SchemaFieldConfig, SchemaRegistryIndex, ValidationError } from '@travetto/schema';
 
 import { CliCommandShape } from '../types.ts';
 import { CliCommandRegistryIndex } from './registry-index.ts';
@@ -27,7 +27,7 @@ type CliCommandConfigOptions = {
 
 const FIELD_CONFIG: {
   name: keyof Exclude<CliCommandConfigOptions['with'], undefined>;
-  field: Partial<FieldConfig>;
+  field: Partial<SchemaFieldConfig>;
   run: (cmd: Cmd) => (Promise<unknown> | unknown);
 }[] =
   [

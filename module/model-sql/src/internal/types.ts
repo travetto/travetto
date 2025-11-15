@@ -1,4 +1,4 @@
-import type { FieldConfig, ClassConfig } from '@travetto/schema';
+import type { SchemaFieldConfig, SchemaClassConfig } from '@travetto/schema';
 
 import { VisitStack } from '../types.ts';
 
@@ -22,10 +22,10 @@ export interface DeleteWrapper {
  * Dialect state
  */
 export interface DialectState {
-  pathField: FieldConfig;
-  parentPathField: FieldConfig;
-  idField: FieldConfig;
-  idxField: FieldConfig;
+  pathField: SchemaFieldConfig;
+  parentPathField: SchemaFieldConfig;
+  idField: SchemaFieldConfig;
+  idxField: SchemaFieldConfig;
 }
 
 export type VisitState = { path: VisitStack[] };
@@ -35,7 +35,7 @@ export type VisitState = { path: VisitStack[] };
  */
 export interface VisitNode<R> {
   path: VisitStack[];
-  fields: FieldConfig[];
+  fields: SchemaFieldConfig[];
   descend: () => R;
 }
 
@@ -58,7 +58,7 @@ export interface VisitInstanceNode<R> extends VisitNode<R> {
  * Visit handler
  */
 export interface VisitHandler<R, U extends VisitNode<R> = VisitNode<R>> {
-  onRoot(config: U & { config: ClassConfig }): R;
-  onSub(config: U & { config: FieldConfig }): R;
-  onSimple(config: Omit<U, 'descend'> & { config: FieldConfig }): R;
+  onRoot(config: U & { config: SchemaClassConfig }): R;
+  onSub(config: U & { config: SchemaFieldConfig }): R;
+  onSimple(config: Omit<U, 'descend'> & { config: SchemaFieldConfig }): R;
 }

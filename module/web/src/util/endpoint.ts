@@ -1,5 +1,5 @@
 import { asConstructable, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
-import { BindUtil, ParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { RetargettingProxy } from '@travetto/registry';
 
@@ -85,7 +85,7 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(request: WebRequest, param: EndpointParamConfig, input: ParameterConfig, value?: unknown): unknown {
+  static extractParameter(request: WebRequest, param: EndpointParamConfig, input: SchemaParameterConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {

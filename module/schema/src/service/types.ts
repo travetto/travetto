@@ -12,9 +12,9 @@ export type ReturnTypeConfig = {
 };
 
 /**
- * Basic describable configuration
+ * Basic schema configuration
  */
-export interface DescribableConfig {
+export interface SchemaCoreConfig {
   /**
    * Title
    */
@@ -36,11 +36,11 @@ export interface DescribableConfig {
 /**
  * Basic structure for a method configuration
  */
-export interface MethodConfig extends DescribableConfig {
+export interface SchemaMethodConfig extends SchemaCoreConfig {
   /**
    * The parameters of the method
    */
-  parameters: ParameterConfig[];
+  parameters: SchemaParameterConfig[];
   /**
    * Validators to run for th method
    */
@@ -62,7 +62,7 @@ export interface SchemaConfig {
   /**
    * List of all fields
    */
-  [key: string | symbol]: FieldConfig;
+  [key: string | symbol]: SchemaFieldConfig;
 }
 
 /**
@@ -76,7 +76,7 @@ export type ViewConfig = {
 /**
  * Class configuration
  */
-export interface ClassConfig extends DescribableConfig {
+export interface SchemaClassConfig extends SchemaCoreConfig {
   /**
    * Target class
    */
@@ -108,14 +108,14 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * Method configs
    */
-  methods: Record<string | symbol, MethodConfig>;
+  methods: Record<string | symbol, SchemaMethodConfig>;
   /**
    * Interfaces that the class implements
    */
   interfaces: Class[];
 }
 
-export interface InputConfig extends DescribableConfig {
+export interface SchemaInputConfig extends SchemaCoreConfig {
   /**
    * Key name for validation when dealing with complex types
    */
@@ -184,7 +184,7 @@ export interface InputConfig extends DescribableConfig {
 /**
  * Parameter configuration for methods
  */
-export interface ParameterConfig extends InputConfig {
+export interface SchemaParameterConfig extends SchemaInputConfig {
   /**
    * Parameter name
    */
@@ -206,7 +206,7 @@ export interface ParameterConfig extends InputConfig {
 /**
  * Field configuration
  */
-export interface FieldConfig extends InputConfig {
+export interface SchemaFieldConfig extends SchemaInputConfig {
   /**
    * Field name
    */

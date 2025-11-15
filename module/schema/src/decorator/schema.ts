@@ -1,7 +1,7 @@
 import { castTo, Class, DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util.ts';
-import { ClassConfig, ViewFieldsConfig } from '../service/types.ts';
+import { SchemaClassConfig, ViewFieldsConfig } from '../service/types.ts';
 import { ValidatorFn } from '../validate/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
@@ -10,7 +10,7 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  *
  * @augments `@travetto/schema:Schema`
  */
-export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeField' | 'baseType'>>) { // Auto is used during compilation
+export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'subTypeName' | 'subTypeField' | 'baseType'>>) { // Auto is used during compilation
   return <T, U extends Class<T>>(target: U): U => {
     target.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });

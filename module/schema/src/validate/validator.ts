@@ -1,6 +1,6 @@
 import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
 
-import { InputConfig, SchemaConfig } from '../service/types.ts';
+import { SchemaInputConfig, SchemaConfig } from '../service/types.ts';
 import { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 import { Messages } from './messages.ts';
 import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
@@ -57,7 +57,7 @@ export class SchemaValidator {
    * @param val The raw value, could be an array or not
    * @param relative The relative path of object traversal
    */
-  static #validateInputSchema(input: InputConfig, val: unknown, relative: string = ''): ValidationError[] {
+  static #validateInputSchema(input: SchemaInputConfig, val: unknown, relative: string = ''): ValidationError[] {
     const key = 'name' in input ? input.name : ('index' in input ? input.index : 'unknown');
     const path = `${relative}${relative ? '.' : ''}${key}`;
     const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
@@ -106,7 +106,7 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static #validateRange(input: InputConfig, key: 'min' | 'max', value: string | number | Date): boolean {
+  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | number | Date): boolean {
     const f = input[key]!;
     const valueNum = (typeof value === 'string') ?
       (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
@@ -122,8 +122,8 @@ export class SchemaValidator {
    * @param input The config of the field to validate
    * @param value The actual value
    */
-  static #validateInput(input: InputConfig, value: unknown): ValidationResult[] {
-    const criteria: ([string, InputConfig[ValidationKindCore]] | [string])[] = [];
+  static #validateInput(input: SchemaInputConfig, value: unknown): ValidationResult[] {
+    const criteria: ([string, SchemaInputConfig[ValidationKindCore]] | [string])[] = [];
 
     if (
       (input.type === String && (typeof value !== 'string')) ||

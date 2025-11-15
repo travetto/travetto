@@ -1,7 +1,7 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
-import { FieldConfig, ClassConfig, SchemaConfig, MethodConfig } from './types.ts';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaConfig, SchemaMethodConfig } from './types.ts';
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
@@ -13,14 +13,14 @@ const classToSubTypeName = (cls: Class): string => cls.name
 /**
  * Schema registry index for managing schema configurations across classes
  */
-export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
+export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
   static adapterCls = SchemaRegistryAdapter;
 
   static getForRegister(clsOrId: ClassOrId): SchemaRegistryAdapter {
     return RegistryV2.getForRegister(this, clsOrId);
   }
 
-  static getConfig(clsOrId: ClassOrId): ClassConfig {
+  static getConfig(clsOrId: ClassOrId): SchemaClassConfig {
     return RegistryV2.get(this, clsOrId).get();
   }
 
@@ -28,7 +28,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
     return RegistryV2.get(this, clsOrId).getSchema(view);
   }
 
-  static getMethodConfig(clsOrId: ClassOrId, method: string | symbol): MethodConfig {
+  static getMethodConfig(clsOrId: ClassOrId, method: string | symbol): SchemaMethodConfig {
     return RegistryV2.get(this, clsOrId).getMethod(method);
   }
 
@@ -44,7 +44,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
     return RegistryV2.instance(this).resolveInstanceType(cls, o);
   }
 
-  static visitFields<T>(cls: Class<T>, onField: (field: FieldConfig, path: FieldConfig[]) => void): void {
+  static visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void): void {
     return RegistryV2.instance(this).visitFields(cls, onField);
   }
 
@@ -101,7 +101,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
     this.#recomputeSubTypes();
   }
 
-  getClassConfig(cls: ClassOrId): ClassConfig {
+  getClassConfig(cls: ClassOrId): SchemaClassConfig {
     return RegistryV2.get(SchemaRegistryIndex, cls).get();
   }
 
@@ -110,7 +110,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
    */
   getBaseSchemaClass(cls: Class): Class {
     if (!this.#baseSchema.has(cls)) {
-      let conf: ClassConfig | undefined = this.getClassConfig(cls);
+      let conf: SchemaClassConfig | undefined = this.getClassConfig(cls);
       let parent: Class | undefined = cls;
 
       while (parent && conf && !conf.baseType) {
@@ -192,7 +192,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
    * @param curr The new class
    * @param path The path within the object hierarchy
    */
-  trackSchemaDependencies(cls: Class, curr: Class = cls, path: FieldConfig[] = []): void {
+  trackSchemaDependencies(cls: Class, curr: Class = cls, path: SchemaFieldConfig[] = []): void {
     const config = this.getClassConfig(curr);
 
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.getClassConfig(cls));
@@ -208,7 +208,7 @@ export class SchemaRegistryIndex implements RegistryIndex<ClassConfig> {
   /**
    * Visit fields recursively
    */
-  visitFields<T>(cls: Class<T>, onField: (field: FieldConfig, path: FieldConfig[]) => void, _path: FieldConfig[] = [], root = cls): void {
+  visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void, _path: SchemaFieldConfig[] = [], root = cls): void {
     const fields = SchemaRegistryIndex.has(cls) ?
       Object.values(this.getClassConfig(cls).fields) :
       [];

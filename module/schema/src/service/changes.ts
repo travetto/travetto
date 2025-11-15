@@ -3,27 +3,27 @@ import { EventEmitter } from 'node:events';
 import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 
-import { FieldConfig, ClassConfig } from './types.ts';
+import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 
 const id = (c: Class | string): string => typeof c === 'string' ? c : c.Ⲑid;
 
 interface FieldMapping {
-  path: FieldConfig[];
-  config: ClassConfig;
+  path: SchemaFieldConfig[];
+  config: SchemaClassConfig;
 }
 
 export interface FieldChangeEvent {
   cls: Class;
-  changes: ChangeEvent<FieldConfig>[];
+  changes: ChangeEvent<SchemaFieldConfig>[];
 }
 
 interface SubSchemaChange {
-  path: FieldConfig[];
-  fields: ChangeEvent<FieldConfig>[];
+  path: SchemaFieldConfig[];
+  fields: ChangeEvent<SchemaFieldConfig>[];
 }
 
 export interface SchemaChange {
-  config: ClassConfig;
+  config: SchemaClassConfig;
   subs: SubSchemaChange[];
 }
 
@@ -70,7 +70,7 @@ class $SchemaChangeListener {
    * @param path The path within the object hierarchy to arrive at the class
    * @param config The configuration or the class
    */
-  trackSchemaDependency(src: Class, parent: Class, path: FieldConfig[], config: ClassConfig): void {
+  trackSchemaDependency(src: Class, parent: Class, path: SchemaFieldConfig[], config: SchemaClassConfig): void {
     const idValue = id(src);
     if (!this.#mapping.has(idValue)) {
       this.#mapping.set(idValue, new Map());
@@ -108,14 +108,14 @@ class $SchemaChangeListener {
    * @param prev The previous class config
    * @param curr The current class config
    */
-  emitFieldChanges(ev: ChangeEvent<ClassConfig>): void {
+  emitFieldChanges(ev: ChangeEvent<SchemaClassConfig>): void {
     const prev = 'prev' in ev ? ev.prev : undefined;
     const curr = 'curr' in ev ? ev.curr : undefined;
 
     const prevFields = new Set(Object.keys(prev?.fields ?? {}));
     const currFields = new Set(Object.keys(curr?.fields ?? {}));
 
-    const changes: ChangeEvent<FieldConfig>[] = [];
+    const changes: ChangeEvent<SchemaFieldConfig>[] = [];
 
     for (const c of currFields) {
       if (!prevFields.has(c) && curr) {
