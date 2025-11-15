@@ -76,7 +76,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
   #initialModelNameMapping = new Map<string, Class[]>();
 
   #finalize(cls: Class): void {
-    const config = SchemaRegistryIndex.getForRegister(cls).get();
+    const config = RegistryV2.get(SchemaRegistryIndex, cls).get();
     const schema = config.fields;
     if (config.subTypeField in schema && this.getBaseModelClass(cls) !== cls) {
       this.getModelOptions(cls).subType = !!config.subTypeName; // Copy from config
@@ -131,12 +131,14 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
       let conf = this.getModelOptions(cls);
       let parent = cls;
 
-      while (conf && !conf.baseType) {
+      while (parent && conf && !conf.baseType) {
         parent = getParentClass(parent)!;
-        conf = this.getModelOptions(parent);
+        if (parent) {
+          conf = this.getModelOptions(parent);
+        }
       }
 
-      this.#baseModels.set(cls, conf ? parent : cls);
+      this.#baseModels.set(cls, conf ? conf.class : cls);
     }
     return this.#baseModels.get(cls)!;
   }
