@@ -35,7 +35,7 @@ export async function selectConsumer(inst: { format?: string }) {
 
   const cls = inst.constructor;
 
-  SchemaRegistryIndex.getForRegister(cls).registerField('format', {
+  SchemaRegistryIndex.getForRegister(cls, true).registerField('format', {
     enum: {
       message: `{path} is only allowed to be "${types.join('" or "')}"`,
       values: types

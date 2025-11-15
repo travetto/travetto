@@ -71,7 +71,7 @@ class $Registry {
   }
 
   #finalizeItems(classes: Class[]): void {
-    const pending = classes.filter(c => !this.#finalized.get(c));
+    const pending = classes.filter(c => !this.#finalized.has(c));
 
     for (const idx of this.#indexOrder) {
       for (const cls of pending) {
@@ -180,10 +180,11 @@ class $Registry {
   getForRegister<C extends {}, T extends RegistryIndexClass<C>>(
     indexCls: T,
     clsOrId: ClassOrId,
+    allowFinalized = false
   ): InstanceType<T['adapterCls']> {
     const cls = this.#toCls(clsOrId);
 
-    if (this.#finalized.get(cls)) {
+    if (this.#finalized.get(cls) && !allowFinalized) {
       throw new AppError(`Class ${cls.Ⲑid} is already finalized`);
     }
     return this.#adapter(indexCls, cls);

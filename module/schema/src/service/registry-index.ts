@@ -19,8 +19,8 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
 
   static adapterCls = SchemaRegistryAdapter;
 
-  static getForRegister(clsOrId: ClassOrId): SchemaRegistryAdapter {
-    return RegistryV2.getForRegister(this, clsOrId);
+  static getForRegister(clsOrId: ClassOrId, allowFinalized = false): SchemaRegistryAdapter {
+    return RegistryV2.getForRegister(this, clsOrId, allowFinalized);
   }
 
   static getConfig(clsOrId: ClassOrId): SchemaClassConfig {
