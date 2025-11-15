@@ -23,7 +23,7 @@ export class HelpUtil {
    * @param command
    */
   static async renderCommandHelp(command: CliCommandShape): Promise<string> {
-    const { flags, args, name: commandName, title } = await CliCommandRegistryIndex.get(command);
+    const { flags, args, name: commandName, title } = CliCommandRegistryIndex.get(command);
 
     await command.preHelp?.();
 

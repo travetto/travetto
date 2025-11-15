@@ -11,14 +11,18 @@ import { CliUtil } from '../src/util.ts';
 @CliCommand({ hidden: true })
 export class CliSchemaCommand implements CliCommandShape {
 
-  async validate(names: string[]): Promise<CliValidationError | undefined> {
-    for (const name of names ?? []) {
-      if (name && !CliCommandRegistryIndex.hasCommand(name)) {
-        return {
-          source: 'arg',
-          message: `name: ${name} is not a valid cli command`
-        };
-      }
+  async validate(names?: string[]): Promise<CliValidationError | undefined> {
+    if (!names || names.length === 0) {
+      return;
+    }
+    const resolved = await CliCommandRegistryIndex.load(names);
+    const invalid = names.find(x => !resolved.find(r => r.command === x));
+
+    if (invalid) {
+      return {
+        source: 'arg',
+        message: `name: ${invalid} is not a valid cli command`
+      };
     }
   }
 

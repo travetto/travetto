@@ -18,10 +18,6 @@ export class CliCommandRegistryIndex implements RegistryIndex<CliCommandConfig> 
     return RegistryV2.getForRegister(CliCommandRegistryIndex, clsOrId);
   }
 
-  static hasCommand(name: string): boolean {
-    return RegistryV2.instance(CliCommandRegistryIndex).hasCommand(name);
-  }
-
   static get(clsOrId: ClassOrId): CliCommandConfig {
     return RegistryV2.get(CliCommandRegistryIndex, clsOrId).get();
   }
