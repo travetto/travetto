@@ -86,7 +86,10 @@ export function InjectableFactory(first?: Partial<InjectableConfig> | symbol, ..
         fields: {},
         cons: config.dependencies?.cons?.map(x => Array.isArray(x) ? collapseConfig(...x) : collapseConfig(x)) ?? [],
       },
-      factory: descriptor.value!,
+      factory: {
+        property,
+        handle: descriptor.value!
+      },
     });
   };
 }

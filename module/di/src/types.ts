@@ -47,9 +47,12 @@ export interface InjectableConfig<T = unknown> {
    */
   postConstruct: Record<string | symbol, PostConstructHandler>;
   /**
-   * Factory function for the injectable
+   * Factory
    */
-  factory?: (...args: unknown[]) => T;
+  factory?: {
+    property: string | symbol;
+    handle: (...args: unknown[]) => T | Promise<T>;
+  };
   /**
    * Is this injectable enabled
    */
