@@ -30,6 +30,11 @@ export class SchemaTransformer {
     if (manuallyOpted) {
       return false;
     }
+    if (ts.isMethodDeclaration(node)) {
+      if (!node.body || !state[AutoEnrollMethods]?.has(node.name.getText())) {
+        return true;
+      }
+    }
     if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
       return true;
     }

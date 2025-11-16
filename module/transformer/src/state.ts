@@ -165,7 +165,7 @@ export class TransformerState implements State {
   getDecoratorMeta(dec: ts.Decorator): DecoratorMeta | undefined {
     const ident = DecoratorUtil.getDecoratorIdent(dec);
     const type = this.#resolver.getType(ident);
-    const decl = DeclarationUtil.getPrimaryDeclarationNode(type);
+    const decl = DeclarationUtil.getOptionalPrimaryDeclarationNode(type);
     const src = decl?.getSourceFile().fileName;
     const mod = src ? this.#resolver.getFileImportName(src, true) : undefined;
     const file = this.#manifestIndex.getFromImport(mod ?? '')?.outputFile;

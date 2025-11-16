@@ -45,15 +45,19 @@ export class DeclarationUtil {
   /**
    * Find primary declaration out of a list of declarations
    */
-  static getPrimaryDeclaration(decls: ts.Declaration[]): ts.Declaration {
-    return decls?.[0];
+  static getPrimaryDeclarationNode(node: ts.Type | ts.Symbol): ts.Declaration {
+    const decls = this.getDeclarations(node);
+    if (!decls.length) {
+      throw new Error('No declarations found for type');
+    }
+    return decls[0];
   }
 
   /**
    * Find primary declaration out of a list of declarations
    */
-  static getPrimaryDeclarationNode(node: ts.Type | ts.Symbol): ts.Declaration {
-    return this.getPrimaryDeclaration(this.getDeclarations(node));
+  static getOptionalPrimaryDeclarationNode(node: ts.Type | ts.Symbol): ts.Declaration | undefined {
+    return this.getDeclarations(node)[0];
   }
 
   /**

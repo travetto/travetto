@@ -59,7 +59,7 @@ export class SimpleResolver implements TransformResolver {
    * Resolve an import name (e.g. @module/path/file) for a type
    */
   getTypeImportName(type: ts.Type, removeExt?: boolean): string | undefined {
-    const ogSource = DeclarationUtil.getPrimaryDeclarationNode(type)?.getSourceFile()?.fileName;
+    const ogSource = DeclarationUtil.getOptionalPrimaryDeclarationNode(type)?.getSourceFile()?.fileName;
     return ogSource ? this.getFileImportName(ogSource, removeExt) : undefined;
   }
 
@@ -92,9 +92,6 @@ export class SimpleResolver implements TransformResolver {
   getReturnType(node: ts.MethodDeclaration): ts.Type {
     const type = this.getType(node);
     const [sig] = type.getCallSignatures();
-    if (!sig) {
-      return type;
-    }
     return this.#tsChecker.getReturnTypeOfSignature(sig);
   }
 
@@ -109,7 +106,7 @@ export class SimpleResolver implements TransformResolver {
    * Get list of properties
    */
   getPropertiesOfType(type: ts.Type): ts.Symbol[] {
-    return this.#tsChecker.getPropertiesOfType(type);
+    return this.#tsChecker.getPropertiesOfType(type).filter(x => x.getName() !== '__proto__' && x.getName() !== 'prototype');
   }
 
   /**
@@ -134,7 +131,9 @@ export class SimpleResolver implements TransformResolver {
       // Recurse
       if (result) {
         result.original = resType;
-        result.comment = DocUtil.describeDocs(type).description;
+        try {
+          result.comment = DocUtil.describeDocs(type).description;
+        } catch { }
 
         if ('tsTypeArguments' in result) {
           result.typeArguments = result.tsTypeArguments!.map((elType) => resolve(elType, type.aliasSymbol, depth + 1));
