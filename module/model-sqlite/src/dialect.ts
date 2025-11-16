@@ -50,7 +50,7 @@ export class SqliteDialect extends SQLDialect {
    * Build identifier
    */
   ident(field: SchemaFieldConfig | string): string {
-    return `\`${typeof field === 'string' ? field : field.name}\``;
+    return `\`${typeof field === 'string' ? field : field.name.toString()}\``;
   }
 
   /**
@@ -59,7 +59,7 @@ export class SqliteDialect extends SQLDialect {
   getModifyColumnSQL(stack: VisitStack[]): string {
     const field: SchemaFieldConfig = castTo(stack.at(-1));
     const type = this.getColumnType(field);
-    const ident = this.ident(field.name);
+    const ident = this.ident(field.name.toString());
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident} TYPE ${type} USING (${ident}::${type});`;
   }
 

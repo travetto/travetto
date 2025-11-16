@@ -3,6 +3,7 @@ import { castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
+import { Schema } from '@travetto/schema';
 
 import { WebDispatcher } from '../../../src/types/dispatch.ts';
 import { WebRequest, WebRequestContext } from '../../../src/types/request.ts';
@@ -35,6 +36,7 @@ export class WebTestConfig implements ConfigSource {
 /**
  * Base Web Suite
  */
+@Schema()
 export abstract class BaseWebSuite {
 
   #cleanup?: () => void;

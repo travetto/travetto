@@ -14,7 +14,7 @@ class Preferences {
   language?: string;
 }
 
-@Model()
+@Model('users')
 class User {
   id: string;
   email: string;

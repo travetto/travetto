@@ -156,7 +156,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
       while (parent && conf && !conf.baseType) {
         parent = getParentClass(parent);
         if (parent) {
-          conf = this.getClassConfig(parent);
+          conf = RegistryV2.getOptional(SchemaRegistryIndex, parent)?.get();
         }
       }
 
