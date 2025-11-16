@@ -56,27 +56,52 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
    * by requested store name.  This is the state at the
    * start of the application.
    */
-  #initialModelNameMapping = new Map<string, Class[]>();
+  #modelNameMapping = new Map<string, Set<Class>>();
 
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if ('prev' in event) {
-        this.#stores.delete(event.prev);
+  #addClass(cls: Class): void {
+    let config = this.getModelOptions(cls);
+    const base = SchemaRegistryIndex.getBaseSchemaClass(cls);
+    if (base !== cls) {
+      config = this.getModelOptions(base);
+    }
+    const name = config.store ?? cls.name.toLowerCase();
+    let classes = this.#modelNameMapping.get(name);
+    if (!classes) {
+      this.#modelNameMapping.set(name, classes = new Set());
+    }
+    classes.add(cls);
+
+    // Don't allow two models with same class name, or same store name
+    if (classes.size > 1) {
+      if (config.store) {
+        throw new AppError('Duplicate models with same store name', {
+          details: { classes: [...classes].toSorted().map(x => x.Ⲑid) }
+        });
+      } else {
+        throw new AppError('Duplicate models with same class name, but no store name provided', {
+          details: { classes: [...classes].toSorted().map(x => x.Ⲑid) }
+        });
       }
     }
   }
 
-  getInitialNameMapping(): Map<string, Class[]> {
-    if (this.#initialModelNameMapping.size === 0) {
-      for (const cls of RegistryV2.getClasses(ModelRegistryIndex)) {
-        const store = this.getModelOptions(cls).store ?? cls.name;
-        if (!this.#initialModelNameMapping.has(store)) {
-          this.#initialModelNameMapping.set(store, []);
-        }
-        this.#initialModelNameMapping.get(store)!.push(cls);
+  #removeClass(cls: Class): void {
+    const name = this.#stores.get(cls);
+    if (name) {
+      this.#stores.delete(cls);
+      this.#modelNameMapping.get(name)?.delete(cls);
+    }
+  }
+
+  process(events: ChangeEvent<Class>[]): void {
+    for (const event of events) {
+      if ('prev' in event) {
+        this.#removeClass(event.prev);
+      }
+      if ('curr' in event) {
+        this.#addClass(event.curr);
       }
     }
-    return this.#initialModelNameMapping;
   }
 
   getModelOptions(cls: ClassOrId): ModelConfig<ModelType> {
@@ -91,33 +116,11 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
    * Get the apparent store for a type, handling polymorphism when appropriate
    */
   getStoreName(cls: Class): string {
-    if (!this.#stores.has(cls)) {
-      const config = this.getModelOptions(cls);
-      const base = SchemaRegistryIndex.getBaseSchemaClass(cls);
-      if (base !== cls) {
-        return this.getStoreName(base);
-      }
-
-      const name = config.store ?? cls.name.toLowerCase();
-
-      const candidates = this.getInitialNameMapping().get(name) || [];
-
-      // Don't allow two models with same class name, or same store name
-      if (candidates.length > 1) {
-        if (config.store) {
-          throw new AppError('Duplicate models with same store name', {
-            details: { classes: candidates.map(x => x.Ⲑid) }
-          });
-        } else {
-          throw new AppError('Duplicate models with same class name, but no store name provided', {
-            details: { classes: candidates.map(x => x.Ⲑid) }
-          });
-        }
-      }
-
-      this.#stores.set(cls, name);
+    const result = this.#stores.get(cls);
+    if (!result) {
+      throw new AppError(`Store name not found for class: ${cls.name}`);
     }
-    return this.#stores.get(cls)!;
+    return result;
   }
 
   /**
