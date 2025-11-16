@@ -47,6 +47,11 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
       description: config.description || base.description,
       examples: [...(base.examples ?? []), ...(config.examples ?? [])],
     });
+    if (config.parameters) {
+      for (const param of config.parameters) {
+        Object.assign(base.parameters[param.index], param);
+      }
+    }
   }
   return base;
 }

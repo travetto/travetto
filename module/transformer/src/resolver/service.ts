@@ -92,6 +92,9 @@ export class SimpleResolver implements TransformResolver {
   getReturnType(node: ts.MethodDeclaration): ts.Type {
     const type = this.getType(node);
     const [sig] = type.getCallSignatures();
+    if (!sig) {
+      return type;
+    }
     return this.#tsChecker.getReturnTypeOfSignature(sig);
   }
 
@@ -117,7 +120,7 @@ export class SimpleResolver implements TransformResolver {
     const resolve = (resType: ts.Type, alias?: ts.Symbol, depth = 0): AnyType => {
 
       if (depth > 20) { // Max depth is 20
-        throw new Error('Object structure too nested');
+        throw new Error(`Object structure too nested: ${'getText' in node ? node.getText() : ''}`);
       }
 
       const { category, type } = TypeCategorize(this, resType);

@@ -10,7 +10,6 @@ export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
  * @param description The Suite description
  * @augments `@travetto/test:Suite`
  * @augments `@travetto/schema:Schema`
- * @example `*`
  */
 export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;

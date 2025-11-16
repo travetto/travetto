@@ -262,7 +262,7 @@ export const TypeBuilder: {
 
       for (const member of props) {
         const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
-        if (DeclarationUtil.isPublic(dec)) { // If public
+        if (dec && DeclarationUtil.isPublic(dec)) { // If public
           const memberType = resolver.getType(dec);
           if (
             !member.getName().includes('@') && // if not a symbol

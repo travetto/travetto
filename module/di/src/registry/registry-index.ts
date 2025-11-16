@@ -1,5 +1,5 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2, RetargettingProxy } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ClassTarget, Dependency, InjectableConfig } from '../types';
@@ -181,7 +181,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     // Reload instances
     for (const qualifier of this.#proxies.get(cls.Ⲑid)?.keys() ?? []) {
       // Timing matters due to create instance being asynchronous
-      process.nextTick(() => this.getInstance(cls, qualifier));
+      Util.queueMacroTask().then(() => { this.getInstance(cls, qualifier); });
     }
   }
 

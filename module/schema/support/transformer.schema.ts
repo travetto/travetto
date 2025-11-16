@@ -23,6 +23,13 @@ interface AutoState {
 export class SchemaTransformer {
 
   static isInvisible(state: AutoState & TransformerState, node: ts.Declaration): boolean {
+    const manuallyOpted = !!(
+      state.findDecorator(this, node, 'Input') ??
+      state.findDecorator(this, node, 'Method')
+    );
+    if (manuallyOpted) {
+      return false;
+    }
     if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
       return true;
     }
@@ -118,25 +125,19 @@ export class SchemaTransformer {
    */
   @OnMethod()
   static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (this.isInvisible(state, node)) {
-      return node;
-    }
-    const matchesMethod = state.findDecorator(this, node, 'Method');
-
-    if (!matchesMethod && !state[AutoEnrollMethods]?.has('*') && !state[AutoEnrollMethods]?.has(node.name.getText())) {
+    if (this.isInvisible(state, node) && !state[AutoEnrollMethods]?.has(node.name.getText())) {
       return node;
     }
 
+    const existing = state.findDecorator(this, node, 'Method', SchemaTransformUtil.METHOD_IMPORT);
     const comments = DocUtil.describeDocs(node);
-    const params = DecoratorUtil.getArguments(matchesMethod) ?? [];
+    const params = DecoratorUtil.getArguments(existing) ?? [];
 
     if (comments.description) {
       params.unshift(state.fromLiteral({ title: comments.description }));
     }
 
     params.push(...SchemaTransformUtil.computeReturnTypeDecoratorParams(state, node));
-
-    const existing = state.findDecorator(this, node, 'Method', SchemaTransformUtil.METHOD_IMPORT);
 
     return state.factory.updateMethodDeclaration(
       node,
