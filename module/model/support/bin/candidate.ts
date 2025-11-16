@@ -26,7 +26,7 @@ export class ModelCandidateUtil {
     const names = new Set(models ?? []);
     const all = names.has('*');
     return RegistryV2.getClasses(ModelRegistryIndex)
-      .map(x => SchemaRegistryIndex.getBaseSchemaClass(x))
+      .map(x => SchemaRegistryIndex.getBaseClass(x))
       .filter(x => !models || all || names.has(ModelRegistryIndex.getStoreName(x)));
   }
 

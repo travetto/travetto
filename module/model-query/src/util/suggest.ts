@@ -27,15 +27,16 @@ export class ModelQuerySuggestUtil {
    * Build suggest query on top of query language
    */
   static getSuggestQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>): Query<T> {
-    const config = ModelRegistryIndex.getConfig(cls);
     const limit = query?.limit ?? 10;
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
-    if (config.subType) {
+    const { subType } = SchemaRegistryIndex.getConfig(cls);
+    if (subType) {
       const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
       clauses.push({ [subTypeField]: subTypeName });
     }
 
+    const config = ModelRegistryIndex.getConfig(cls);
     if (config.expiresAt) {
       clauses.push({ [config.expiresAt]: { $gt: new Date() } });
     }
@@ -84,14 +85,10 @@ export class ModelQuerySuggestUtil {
    * Build suggestion query
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
-    const config = ModelRegistryIndex.getConfig(cls);
+    const { subTypeField, subType } = SchemaRegistryIndex.getConfig(cls);
     return this.getSuggestQuery<T>(cls, castTo(field), prefix, {
       ...(query ?? {}),
-      select: castTo({
-        [field]: true, ...(config.subType ? {
-          [SchemaRegistryIndex.getConfig(cls).subTypeField]: true
-        } : {})
-      })
+      select: castTo({ [field]: true, ...(subType ? { [subTypeField]: true } : {}) })
     });
   }
 }

@@ -55,8 +55,8 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
     return RegistryV2.instance(this).getClassesByBaseType(cls);
   }
 
-  static getBaseSchemaClass(cls: Class): Class {
-    return RegistryV2.instance(this).getBaseSchemaClass(cls);
+  static getBaseClass(cls: Class): Class {
+    return RegistryV2.instance(this).getBaseClass(cls);
   }
 
   #baseSchema = new Map<Class, Class>();
@@ -123,7 +123,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
   /**
    * Find base schema class for a given class
    */
-  getBaseSchemaClass(cls: Class): Class {
+  getBaseClass(cls: Class): Class {
     if (!this.#baseSchema.has(cls)) {
       let conf: SchemaClassConfig | undefined = this.getClassConfig(cls);
       let parent: Class | undefined = cls;
@@ -148,7 +148,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
   resolveInstanceType<T>(cls: Class<T>, o: T): Class {
     cls = this.getClassConfig(cls.Ⲑid).class; // Resolve by id to handle any stale references
 
-    const base = this.getBaseSchemaClass(cls);
+    const base = this.getBaseClass(cls);
     const clsSchema = this.getClassConfig(cls);
     const baseSchema = this.getClassConfig(base);
 
@@ -181,7 +181,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
   registerSubTypes(cls: Class, name?: string): void {
     // Mark as subtype
     const config = this.getClassConfig(cls);
-    let base: Class | undefined = this.getBaseSchemaClass(cls);
+    let base: Class | undefined = this.getBaseClass(cls);
 
     if (!this.#subTypes.has(base)) {
       this.#subTypes.set(base, new Map());
@@ -203,7 +203,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
       while (base && base.Ⲑid) {
         this.#subTypes.get(base)!.set(config.subTypeName!, cls);
         const parent = getParentClass(base);
-        base = parent ? this.getBaseSchemaClass(parent) : undefined;
+        base = parent ? this.getBaseClass(parent) : undefined;
       }
     }
   }

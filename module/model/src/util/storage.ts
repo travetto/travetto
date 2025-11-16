@@ -1,5 +1,5 @@
 import { Class, hasFunction, Runtime } from '@travetto/runtime';
-import { SchemaChangeListener } from '@travetto/schema';
+import { SchemaChangeListener, SchemaRegistryIndex } from '@travetto/schema';
 import { RegistryV2 } from '@travetto/registry';
 
 import { ModelStorageSupport } from '../types/storage.ts';
@@ -24,7 +24,7 @@ export class ModelStorageUtil {
     }
 
     const checkType = (cls: Class, enforceBase = true): boolean => {
-      if (enforceBase && ModelRegistryIndex.getBaseModelClass(cls) !== cls) {
+      if (enforceBase && SchemaRegistryIndex.getBaseClass(cls) !== cls) {
         return false;
       }
       const { autoCreate } = ModelRegistryIndex.getConfig(cls) ?? {};

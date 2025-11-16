@@ -56,11 +56,13 @@ export class ModelQueryUtil {
   static getWhereClause<T extends ModelType>(cls: Class<T>, q: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
     const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
 
-    const conf = ModelRegistryIndex.getConfig(cls);
-    if (conf.subType) {
+    const { subType } = SchemaRegistryIndex.getConfig(cls);
+    if (subType) {
       const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
       clauses.push(castTo({ [subTypeField]: subTypeName }));
     }
+
+    const conf = ModelRegistryIndex.getConfig(cls);
     if (checkExpiry && conf.expiresAt) {
       clauses.push(castTo({
         $or: [

@@ -1,4 +1,4 @@
-import { castTo, Class, Util, asConstructable, AppError, hasFunction } from '@travetto/runtime';
+import { castTo, Class, Util, AppError, hasFunction } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 import { RegistryV2 } from '@travetto/registry';
 
@@ -48,7 +48,7 @@ export class ModelCrudUtil {
       resolvedInput = input;
     }
 
-    const result = ModelRegistryIndex.getBaseModelClass(cls).from(resolvedInput);
+    const result = SchemaRegistryIndex.getBaseClass(cls).from(resolvedInput);
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
       if (onTypeMismatch === 'notfound') {
@@ -76,7 +76,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = ModelRegistryIndex.getConfig(asConstructable(item).constructor);
+    const config = SchemaRegistryIndex.getConfig(item);
     if (config.subType) { // Sub-typing, assign type
       RegistryV2.get(SchemaRegistryIndex, cls).ensureInstanceTypeField(item);
     }
@@ -106,7 +106,7 @@ export class ModelCrudUtil {
    * Ensure subtype is not supported
    */
   static ensureNotSubType(cls: Class): void {
-    if (ModelRegistryIndex.getConfig(cls).subType) {
+    if (SchemaRegistryIndex.getConfig(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
   }

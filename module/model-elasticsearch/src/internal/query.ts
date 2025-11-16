@@ -209,7 +209,7 @@ export class ElasticsearchQueryUtil {
     if (search && Object.keys(search).length) {
       clauses.push(search);
     }
-    const { expiresAt, subType } = ModelRegistryIndex.getConfig(cls);
+    const { expiresAt } = ModelRegistryIndex.getConfig(cls);
     if (checkExpiry && expiresAt) {
       clauses.push({
         bool: {
@@ -221,6 +221,7 @@ export class ElasticsearchQueryUtil {
         },
       });
     }
+    const { subType } = SchemaRegistryIndex.getConfig(cls);
     if (subType) {
       const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
       clauses.push({
