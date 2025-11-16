@@ -52,25 +52,11 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
    */
   #stores = new Map<Class, string>();
   /**
-   * All base model classes (inherited from)
-   */
-  #baseModels = new Map<Class, Class>();
-  /**
-   * Indexed base model classes to all subclasses
-   */
-  #baseModelGrouped = new Map<Class, Class[]>();
-  /**
    * Default mapping of classes by class name or
    * by requested store name.  This is the state at the
    * start of the application.
    */
   #initialModelNameMapping = new Map<string, Class[]>();
-
-  #clear(): void {
-    // Force system to recompute on uninstall
-    this.#baseModels.clear();
-    this.#baseModelGrouped.clear();
-  }
 
   process(events: ChangeEvent<Class>[]): void {
     for (const event of events) {
@@ -78,7 +64,6 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
         this.#stores.delete(event.prev);
       }
     }
-    this.#clear();
   }
 
   getInitialNameMapping(): Map<string, Class[]> {
