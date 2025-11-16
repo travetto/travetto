@@ -25,6 +25,10 @@ export interface SuiteCore {
    * Tags for a suite or a test
    */
   tags?: string[];
+  /**
+   * Description
+   */
+  description?: string;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { AppError, asFull, Class, describeFunction, Runtime } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
@@ -23,7 +24,13 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
     }
     if (cfg.tests) {
       for (const [key, test] of Object.entries(cfg.tests ?? {})) {
-        baseConfig.tests[key] = { ...test };
+        baseConfig.tests[key] = {
+          ...test,
+          sourceImport: Runtime.getImport(baseConfig.class),
+          class: baseConfig.class,
+          classId: baseConfig.classId,
+          import: baseConfig.import,
+        };
       }
     }
   }
@@ -86,7 +93,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
         lineBodyStart: lines?.[2],
-        methodName: method.toString()
+        methodName: method.toString(),
       });
       this.#config.tests[method] = config;
     }
@@ -103,6 +110,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
 
     for (const test of Object.values(this.#config.tests)) {
       test.tags = [...test.tags ?? [], ...this.#config.tags ?? []];
+      test.description ||= SchemaRegistryIndex.getMethodConfig(this.#cls, test.methodName).description;
     }
   }
 

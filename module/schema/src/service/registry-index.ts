@@ -63,17 +63,39 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
   #baseSchemasGrouped = new Map<Class, Class[]>();
   #subTypes = new Map<Class, Map<string, Class>>();
 
-  #removeClassData(cls: Class): void {
-    this.#baseSchema.delete(cls);
-    this.#baseSchemasGrouped.clear();
-  }
+  /**
+   * Register sub types for a class
+   */
+  #registerSubTypes(cls: Class, name?: string): void {
+    // Mark as subtype
+    const config = this.getClassConfig(cls);
+    let base: Class | undefined = this.getBaseClass(cls);
 
-  #recomputeSubTypes(): void {
-    this.#subTypes.clear();
-    this.#baseSchemasGrouped.clear();
-    const all = RegistryV2.getClasses(SchemaRegistryIndex);
-    for (const el of all) {
-      this.registerSubTypes(el);
+    if (!this.#subTypes.has(base)) {
+      this.#subTypes.set(base, new Map());
+    }
+
+    if (!this.#baseSchemasGrouped.has(base)) {
+      this.#baseSchemasGrouped.set(base, []);
+    }
+
+    const baseList = this.#baseSchemasGrouped.get(base)!;
+
+    if (base !== cls || config.baseType) {
+      baseList.push(cls);
+      config.subTypeField = (this.getClassConfig(base) ?? this.getClassConfig(base)).subTypeField;
+      config.subTypeName = name ?? config.subTypeName ?? classToSubTypeName(cls);
+      this.#subTypes.get(base)!.set(config.subTypeName!, cls);
+    }
+    if (base !== cls) {
+      while (base && base.Ⲑid) {
+        if (!this.#subTypes.has(base)) {
+          this.#subTypes.set(base, new Map());
+        }
+        this.#subTypes.get(base)!.set(config.subTypeName!, cls);
+        const parent = getParentClass(base);
+        base = parent ? this.getBaseClass(parent) : undefined;
+      }
     }
   }
 
@@ -109,11 +131,14 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
       } else if (event.type === 'added') {
         this.#onAdded(event);
       }
-      if ('prev' in event) {
-        this.#removeClassData(event.prev);
-      }
     }
-    this.#recomputeSubTypes();
+
+    // Rebuild indices after every "process" batch
+    this.#subTypes.clear();
+    this.#baseSchemasGrouped.clear();
+    for (const el of RegistryV2.getClasses(SchemaRegistryIndex)) {
+      this.#registerSubTypes(el);
+    }
   }
 
   getClassConfig(cls: ClassOrId): SchemaClassConfig {
@@ -171,41 +196,6 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
   getSubTypesForClass(cls: Class): Class[] | undefined {
     const res = this.#subTypes.get(cls)?.values();
     return res ? [...res] : undefined;
-  }
-
-  /**
-   * Register sub types for a class
-   * @param cls The class to register against
-   * @param name The subtype name
-   */
-  registerSubTypes(cls: Class, name?: string): void {
-    // Mark as subtype
-    const config = this.getClassConfig(cls);
-    let base: Class | undefined = this.getBaseClass(cls);
-
-    if (!this.#subTypes.has(base)) {
-      this.#subTypes.set(base, new Map());
-    }
-
-    if (!this.#baseSchemasGrouped.has(base)) {
-      this.#baseSchemasGrouped.set(base, []);
-    }
-
-    const baseList = this.#baseSchemasGrouped.get(base)!;
-
-    if (base !== cls || config.baseType) {
-      baseList.push(cls);
-      config.subTypeField = (this.getClassConfig(base) ?? this.getClassConfig(base)).subTypeField;
-      config.subTypeName = name ?? config.subTypeName ?? classToSubTypeName(cls);
-      this.#subTypes.get(base)!.set(config.subTypeName!, cls);
-    }
-    if (base !== cls) {
-      while (base && base.Ⲑid) {
-        this.#subTypes.get(base)!.set(config.subTypeName!, cls);
-        const parent = getParentClass(base);
-        base = parent ? this.getBaseClass(parent) : undefined;
-      }
-    }
   }
 
   /**

@@ -2,6 +2,7 @@ import { Class } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { SuiteRegistryIndex, TestFixtures } from '@travetto/test';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
@@ -9,6 +10,9 @@ import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
 const Loaded = Symbol();
 
+/**
+ * @augments `@travetto/schema:Schema`
+ */
 export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {
   const fixtures = new TestFixtures(['@travetto/model']);
   return (target: Class<T>): void => {
@@ -36,7 +40,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
             await service.createStorage();
             if (service.createModel) {
               await Promise.all(RegistryV2.getClasses(ModelRegistryIndex)
-                .filter(x => x === ModelRegistryIndex.getBaseModelClass(x))
+                .filter(x => x === SchemaRegistryIndex.getBaseClass(x))
                 .map(m => service.createModel!(m)));
             }
           }
@@ -46,7 +50,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
         async function (this: T) {
           const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
-            const models = RegistryV2.getClasses(ModelRegistryIndex).filter(m => m === ModelRegistryIndex.getBaseModelClass(m));
+            const models = RegistryV2.getClasses(ModelRegistryIndex).filter(m => m === SchemaRegistryIndex.getBaseClass(m));
 
             if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
               await service.truncateBlob();
@@ -68,7 +72,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
           if (ModelStorageUtil.isSupported(service)) {
             if (service.deleteModel) {
               for (const m of RegistryV2.getClasses(ModelRegistryIndex)) {
-                if (m === ModelRegistryIndex.getBaseModelClass(m)) {
+                if (m === SchemaRegistryIndex.getBaseClass(m)) {
                   await service.deleteModel(m);
                 }
               }
