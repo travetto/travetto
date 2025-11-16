@@ -31,7 +31,11 @@ export class TestDigestCommand {
     const all = suites
       .map(c => SuiteRegistryIndex.getConfig(c))
       .filter(c => !describeFunction(c.class).abstract)
-      .flatMap(c => Object.values(c.tests).toSorted((a, b) => a.lineStart - b.lineStart));
+      .flatMap(c => Object.values(c.tests))
+      .toSorted((a, b) => {
+        const classComp = a.classId.localeCompare(b.classId);
+        return classComp !== 0 ? classComp : a.methodName.localeCompare(b.methodName);
+      });
 
     if (this.output === 'json') {
       console.log(JSON.stringify(all));
