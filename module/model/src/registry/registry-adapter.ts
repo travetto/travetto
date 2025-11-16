@@ -1,5 +1,6 @@
 import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
-import { Class, describeFunction } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelConfig } from './types';
 
@@ -28,7 +29,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       class: this.#cls,
       indices: [],
       autoCreate: true,
-      baseType: describeFunction(this.#cls).abstract,
+      store: this.#cls.name.toLowerCase(),
       postLoad: [],
       prePersist: []
     };
@@ -39,6 +40,13 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   finalize(parent?: ModelConfig): void {
     const config = this.#config;
     if (parent) {
+      const parentSchema = SchemaRegistryIndex.getConfig(this.#cls); // Ensure schema is finalized first
+      const schema = SchemaRegistryIndex.getConfig(this.#cls);
+
+      if ((parentSchema.baseType || schema.subType) && parent.store) {
+        config.store = parent.store;
+      }
+
       config.postLoad = [...parent.postLoad ?? [], ...config.postLoad ?? []];
       config.prePersist = [...parent.prePersist ?? [], ...config.prePersist ?? []];
     }

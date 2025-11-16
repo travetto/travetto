@@ -1,6 +1,7 @@
 import { toConcrete, Class } from '@travetto/runtime';
 import { InjectableConfig, DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelStorageSupport } from '../../src/types/storage.ts';
 import type { ModelType } from '../../src/types/model.ts';
@@ -25,7 +26,7 @@ export class ModelCandidateUtil {
     const names = new Set(models ?? []);
     const all = names.has('*');
     return RegistryV2.getClasses(ModelRegistryIndex)
-      .map(x => ModelRegistryIndex.getBaseModelClass(x))
+      .map(x => SchemaRegistryIndex.getBaseSchemaClass(x))
       .filter(x => !models || all || names.has(ModelRegistryIndex.getStoreName(x)));
   }
 

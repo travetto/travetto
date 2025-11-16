@@ -27,7 +27,7 @@ export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Store name
    */
-  store?: string;
+  store: string;
   /**
    * Indices
    */

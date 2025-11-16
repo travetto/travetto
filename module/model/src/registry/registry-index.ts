@@ -1,6 +1,5 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
 import { ModelType } from '../types/model';
@@ -48,49 +47,31 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
   }
 
   /**
-   * All stores names
-   */
-  #stores = new Map<Class, string>();
-  /**
    * Default mapping of classes by class name or
    * by requested store name.  This is the state at the
    * start of the application.
    */
-  #modelNameMapping = new Map<string, Set<Class>>();
+  #modelNameMapping = new Map<string, Set<string>>();
 
   #addClass(cls: Class): void {
-    let config = this.getModelOptions(cls);
-    const base = SchemaRegistryIndex.getBaseSchemaClass(cls);
-    if (base !== cls) {
-      config = this.getModelOptions(base);
-    }
-    const name = config.store ?? cls.name.toLowerCase();
-    let classes = this.#modelNameMapping.get(name);
+    const store = this.getModelOptions(cls).store;
+    let classes = this.#modelNameMapping.get(store);
     if (!classes) {
-      this.#modelNameMapping.set(name, classes = new Set());
+      this.#modelNameMapping.set(store, classes = new Set());
     }
-    classes.add(cls);
+    classes.add(cls.Ⲑid);
 
     // Don't allow two models with same class name, or same store name
     if (classes.size > 1) {
-      if (config.store) {
-        throw new AppError('Duplicate models with same store name', {
-          details: { classes: [...classes].toSorted().map(x => x.Ⲑid) }
-        });
-      } else {
-        throw new AppError('Duplicate models with same class name, but no store name provided', {
-          details: { classes: [...classes].toSorted().map(x => x.Ⲑid) }
-        });
-      }
+      throw new AppError('Duplicate models with same store name', {
+        details: { classes: [...classes].toSorted() }
+      });
     }
   }
 
   #removeClass(cls: Class): void {
-    const name = this.#stores.get(cls);
-    if (name) {
-      this.#stores.delete(cls);
-      this.#modelNameMapping.get(name)?.delete(cls);
-    }
+    const { store } = RegistryV2.get(ModelRegistryIndex, cls).get();
+    this.#modelNameMapping.get(store)?.delete(cls.Ⲑid);
   }
 
   process(events: ChangeEvent<Class>[]): void {
@@ -116,11 +97,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
    * Get the apparent store for a type, handling polymorphism when appropriate
    */
   getStoreName(cls: Class): string {
-    const result = this.#stores.get(cls);
-    if (!result) {
-      throw new AppError(`Store name not found for class: ${cls.name}`);
-    }
-    return result;
+    return RegistryV2.get(ModelRegistryIndex, cls).get().store;
   }
 
   /**
