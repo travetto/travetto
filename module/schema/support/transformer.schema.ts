@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import {
   TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil,
-  OnGetter, OnSetter, OnMethod, DecoratorUtil
+  OnGetter, OnSetter, OnMethod, DecoratorUtil, OnStaticMethod
 } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
@@ -129,6 +129,7 @@ export class SchemaTransformer {
    * Handle explicitly registered methods
    */
   @OnMethod()
+  @OnStaticMethod()
   static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (this.isInvisible(state, node) && !state[AutoEnrollMethods]?.has(node.name.getText())) {
       return node;
