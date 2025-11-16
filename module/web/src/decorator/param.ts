@@ -10,7 +10,6 @@ type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx:
  * Define a parameter
  * @param location The location of the parameter
  * @param extra Any extra configuration for the param
- * @augments `@travetto/web:Param`
  * @augments `@travetto/schema:Input`
  */
 export function Param(location: EndpointParamLocation, extra: string | Partial<EndpointParamConfig>): ParamDecorator {
@@ -32,35 +31,30 @@ export function Param(location: EndpointParamLocation, extra: string | Partial<E
 /**
  * Define a Path param
  * @param param The param configuration or name
- * @augments `@travetto/web:Param`
  * @augments `@travetto/schema:Input`
  */
 export function PathParam(param: string | Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('path', param); }
 /**
  * Define a Query param
  * @param param The param configuration or name
- * @augments `@travetto/web:Param`
  * @augments `@travetto/schema:Input`
  */
 export function QueryParam(param: string | Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('query', param); }
 /**
  * Define a Header param
  * @param param The param configuration or name
- * @augments `@travetto/web:Param`
  * @augments `@travetto/schema:Input`
  */
 export function HeaderParam(param: string | Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('header', param); }
 /**
  * Define a body param as an input
  * @param param The param configuration
- * @augments `@travetto/web:Param`
  * @augments `@travetto/schema:Input`
  */
 export function Body(param: Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('body', param); }
 
 /**
  * A contextual field as provided by the WebAsyncContext
- * @augments `@travetto/web:ContextParam`
  * @augments `@travetto/schema:Field`
  */
 export function ContextParam() {

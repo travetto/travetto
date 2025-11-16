@@ -9,7 +9,6 @@ import { ConfigurationService, ConfigBaseType } from './service.ts';
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
  * @augments `@travetto/schema:Schema`
- * @augments `@travetto/di:Injectable`
  */
 export function Config(ns: string) {
   return <T extends Class>(target: T): T => {
@@ -21,6 +20,8 @@ export function Config(ns: string) {
         [OverrideConfigSymbol]: { ns, fields: {} }
       }
     });
+
+    RegistryV2.getForRegister(DependencyRegistryIndex, target).register();
 
     target.prototype.postConstruct = async function (): Promise<void> {
       // Apply config

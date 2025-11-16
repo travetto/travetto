@@ -33,49 +33,42 @@ function HttpEndpoint(method: HttpMethod, path: string): EndpointFunctionDecorat
 /**
  * Registers GET requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
 export function Get(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('GET', path); }
 /**
  * Registers POST requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
 export function Post(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('POST', path); }
 /**
  * Registers PUT requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
 export function Put(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('PUT', path); }
 /**
  * Registers PATCH requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
 export function Patch(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('PATCH', path); }
 /**
  * Registers DELETE requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
 export function Delete(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('DELETE', path); }
 /**
  * Registers HEAD requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
 export function Head(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('HEAD', path); }
 /**
  * Registers OPTIONS requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
 export function Options(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('OPTIONS', path); }

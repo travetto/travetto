@@ -13,7 +13,6 @@ export function AssertCheck(): MethodDecorator {
 /**
  * The `@Test` decorator register a test to be run as part of the enclosing suite.
  * @param description The test description
- * @augments `@travetto/test:Test`
  * @augments `@travetto/schema:Method`
  * @augments `@travetto/test:AssertCheck`
  * @augments `@travetto/runtime:DebugBreak`

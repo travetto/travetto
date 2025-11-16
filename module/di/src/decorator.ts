@@ -25,7 +25,6 @@ function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Par
 /**
  * Indicate that a class is able to be injected
  *
- * @augments `@travetto/di:Injectable`
  * @augments `@travetto/schema:Schema`
  */
 export function Injectable(first?: Partial<InjectableConfig> | symbol, ...args: (Partial<InjectableConfig> | undefined)[]) {
@@ -54,8 +53,6 @@ export function InjectArgs(configs?: InjectConfig[][]) {
 
 /**
  * Indicate that a field is able to be injected
- *
- * @augments `@travetto/di:Inject`
  */
 export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | undefined)[]) {
   return (target: unknown, propertyKey?: string | symbol, idx?: number | PropertyDescriptor): void => {
@@ -72,9 +69,8 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
 
 /**
  * Identifies a static method that is able to produce a dependency
- *
- * @augments `@travetto/di:InjectableFactory`
- * @augments `@travetto/schema:Method`
+
+* @augments `@travetto/schema:Method`
  */
 export function InjectableFactory(first?: Partial<InjectableConfig> | symbol, ...args: (Partial<InjectableConfig> | undefined)[]) {
   return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<TypedFunction>): void => {
