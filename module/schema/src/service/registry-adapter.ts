@@ -225,7 +225,11 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getMethod(method: string | symbol): SchemaMethodConfig {
-    return this.#config.methods[method];
+    const res = this.#config.methods[method];
+    if (!res) {
+      throw new AppError(`Unknown method ${String(method)} on class ${this.#cls.Ⲑid}`);
+    }
+    return res;
   }
 
   getSchema(view?: string): SchemaFieldMap {
@@ -233,7 +237,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       return this.#config.fields;
     }
     if (!this.#views.has(view)) {
-      throw new AppError(`Unknown view ${view} for class ${this.#cls.name}`);
+      throw new AppError(`Unknown view ${view} for class ${this.#cls.Ⲑid}`);
     }
     return this.#views.get(view)!;
   }

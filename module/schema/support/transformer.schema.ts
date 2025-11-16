@@ -121,20 +121,22 @@ export class SchemaTransformer {
     if (this.isInvisible(state, node)) {
       return node;
     }
-    const existing = state.findDecorator(this, node, 'Method', SchemaTransformUtil.METHOD_IMPORT);
+    const matchesMethod = state.findDecorator(this, node, 'Method');
 
-    if (!existing && !state[AutoEnrollMethods]?.has('*') && !state[AutoEnrollMethods]?.has(node.name.getText())) {
+    if (!matchesMethod && !state[AutoEnrollMethods]?.has('*') && !state[AutoEnrollMethods]?.has(node.name.getText())) {
       return node;
     }
 
     const comments = DocUtil.describeDocs(node);
-    const params = DecoratorUtil.getArguments(existing) ?? [];
+    const params = DecoratorUtil.getArguments(matchesMethod) ?? [];
 
     if (comments.description) {
       params.unshift(state.fromLiteral({ title: comments.description }));
     }
 
     params.push(...SchemaTransformUtil.computeReturnTypeDecoratorParams(state, node));
+
+    const existing = state.findDecorator(this, node, 'Method', SchemaTransformUtil.METHOD_IMPORT);
 
     return state.factory.updateMethodDeclaration(
       node,

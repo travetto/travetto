@@ -7,6 +7,7 @@ import type {
 import { EndpointConfig, ControllerConfig, EndpointParamConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaMethodReturnType } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 import { ApiSpecConfig } from './config.ts';
 
@@ -242,7 +243,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Standard payload structure
    */
   #getEndpointBody(body?: SchemaMethodReturnType, mime?: string | null): RequestBodyObject {
-    if (!body) {
+    if (!body || body.type === undefined) {
       return { content: {}, description: '' };
     } else if (body.type === Readable || body.type === Buffer) {
       return {
@@ -252,9 +253,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: ''
       };
     } else {
-      const cls = SchemaRegistryIndex.getConfig(body.type);
-      const typeId = cls ? this.#nameResolver.getName(cls) : body.type.name;
-      const typeRef = cls ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
+      const schemaConfig = RegistryV2.getOptional(SchemaRegistryIndex, body.type)?.get();
+      const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.name;
+      const typeRef = schemaConfig ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {
         content: {
           [mime ?? 'application/json']: {
@@ -323,6 +324,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     op.responses![code] = pConf;
 
     const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+
     for (const param of methodSchema.parameters) {
       const result = this.#processEndpointParam(ep, ep.params[param.index], param);
       if (result) {

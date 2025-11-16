@@ -134,7 +134,9 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       }
     }
 
-    const parentConfig = parentClass ? RegistryV2.getForRegister(DependencyRegistryIndex, parentClass).get() : undefined;
+    const parentConfig = parentClass && RegistryV2.has(DependencyRegistryIndex, parentClass) ?
+      RegistryV2.get(DependencyRegistryIndex, parentClass).get() :
+      undefined;
 
 
     // If targeting self (default @Injectable behavior)

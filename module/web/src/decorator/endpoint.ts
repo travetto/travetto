@@ -40,7 +40,6 @@ export function Get(path = '/'): EndpointFunctionDecorator { return HttpEndpoint
 /**
  * Registers POST requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpRequestBody`
  * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
@@ -48,7 +47,6 @@ export function Post(path = '/'): EndpointFunctionDecorator { return HttpEndpoin
 /**
  * Registers PUT requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpRequestBody`
  * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */
@@ -56,7 +54,6 @@ export function Put(path = '/'): EndpointFunctionDecorator { return HttpEndpoint
 /**
  * Registers PATCH requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpRequestBody`
  * @augments `@travetto/web:Endpoint`
  * @augments `@travetto/schema:Method`
  */

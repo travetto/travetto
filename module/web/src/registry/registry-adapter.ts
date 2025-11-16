@@ -1,7 +1,7 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { AppError, asFull, castTo, Class, RetainPrimitiveFields } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerConfig, EndpointConfig, EndpointParamConfig, EndpointParamLocation } from './types';
 import type { WebInterceptor } from '../types/interceptor.ts';
@@ -71,11 +71,10 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     this.#cls = cls;
   }
 
-  computeParameterLocation(ep: EndpointConfig, param: EndpointParamConfig): EndpointParamLocation {
+  computeParameterLocation(ep: EndpointConfig, schema: SchemaParameterConfig, param: EndpointParamConfig): EndpointParamLocation {
     if (param.location) {
       return param.location;
     }
-    const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name).parameters[param.index];
 
     const name = param?.name ?? schema?.name;
 
@@ -138,9 +137,13 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
       ep.finalizedResponseHeaders = new WebHeaders({ ...this.#config.responseHeaders, ...ep.responseHeaders });
       ep.responseContext = { ...this.#config.responseContext, ...ep.responseContext };
 
-      for (const param of ep.params) {
-        param.location = this.computeParameterLocation(ep, param);
-      }
+      const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name).parameters;
+      ep.params = schema.map(s => ({
+        name: s.name,
+        ...ep.params[s.index!],
+        index: s.index!,
+        location: this.computeParameterLocation(ep, s, ep.params[s.index!] ?? {})
+      }));
     }
   }
 

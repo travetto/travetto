@@ -86,7 +86,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
 
   process(events: ChangeEvent<Class>[]): void {
     for (const evt of events) {
-      if (evt.type !== 'removing') {
+      if ('curr' in evt) {
         for (const ep of this.getController(evt.curr).endpoints) {
           this.#endpointsById.set(`${evt.curr.name}#${ep.name.toString()}`, ep);
         }

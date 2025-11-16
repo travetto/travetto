@@ -32,10 +32,11 @@ export class ControllerVisitUtil {
         continue;
       }
 
-      const { parameters: params } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.name);
+      const { parameters: params, returnType } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.name);
       await visitor.onEndpointStart?.(endpoint, controller, params);
-      await this.#onSchemaEvent(visitor, endpoint.responseType?.type);
-      await this.#onSchemaEvent(visitor, endpoint.requestType?.type);
+      if (returnType) {
+        await this.#onSchemaEvent(visitor, returnType.type);
+      }
       for (const param of params) {
         await this.#onSchemaEvent(visitor, param.type);
       }
