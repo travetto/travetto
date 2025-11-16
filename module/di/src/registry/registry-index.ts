@@ -316,7 +316,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
 
     const promises = deps.map(async (x, i) => {
       try {
-        const target = x.target ?? inputs[i].type;
+        const target = x.target ?? inputs[i].foreignType ?? inputs[i].type;
         return await this.getInstance(target, x.qualifier, x.resolution);
       } catch (err) {
         if (inputs[i].required?.active === false && err instanceof InjectionError && err.category === 'notfound') {

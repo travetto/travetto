@@ -6,7 +6,7 @@ import type {
 
 import { EndpointConfig, ControllerConfig, EndpointParamConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
-import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaMethodReturnType } from '@travetto/schema';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType } from '@travetto/schema';
 import { RegistryV2 } from '@travetto/registry';
 
 import { ApiSpecConfig } from './config.ts';
@@ -242,7 +242,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Standard payload structure
    */
-  #getEndpointBody(body?: SchemaMethodReturnType, mime?: string | null): RequestBodyObject {
+  #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
     if (!body || body.type === undefined) {
       return { content: {}, description: '' };
     } else if (body.type === Readable || body.type === Buffer) {

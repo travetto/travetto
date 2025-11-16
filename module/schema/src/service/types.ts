@@ -5,10 +5,29 @@ import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
-export type SchemaMethodReturnType = {
-  title?: string;
+/**
+ * Represents a typed item in the schema
+ */
+export type SchemaBasicType = {
+  /**
+   * Description of the type
+   */
+  description?: string;
+  /**
+   * Is the type an array
+   */
   array?: boolean;
-  type: Class;
+  /**
+   * The class tied to the type
+   */
+  type: Class & {
+    bindSchema?(input: unknown): undefined | unknown;
+    validateSchema?(input: unknown): string | undefined;
+  };
+  /**
+   * The foreign type for the field, if applicable
+   */
+  foreignType?: Class;
 };
 
 /**
@@ -48,7 +67,7 @@ export interface SchemaMethodConfig extends SchemaCoreConfig {
   /**
    * The return type configuration
    */
-  returnType?: SchemaMethodReturnType;
+  returnType?: SchemaBasicType;
   /**
    * The method handle
    */
@@ -111,7 +130,10 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
   interfaces: Class[];
 }
 
-export interface SchemaInputConfig extends SchemaCoreConfig {
+/**
+ * Shared base type for all input-related fields
+ */
+export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
   /**
    * Key name for validation when dealing with complex types
    */
@@ -124,17 +146,6 @@ export interface SchemaInputConfig extends SchemaCoreConfig {
    * List of aliases
    */
   aliases?: string[];
-  /**
-   * Specific type for the field, with optional binding/validation support
-   */
-  type: Class & {
-    bindSchema?(input: unknown): undefined | unknown;
-    validateSchema?(input: unknown): string | undefined;
-  };
-  /**
-   * Is the field an array
-   */
-  array?: boolean;
   /**
    * Does the field have a specialization
    */
