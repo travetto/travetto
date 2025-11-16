@@ -36,7 +36,10 @@ export function registerFunction(
     import: `${pkg}/${pth}`,
     module: pkg,
     modulePath,
-    ...tag, methods, abstract, class: abstract !== undefined
+    ...tag,
+    methods,
+    abstract,
+    class: methods !== undefined
   };
   pending.add(fn);
   Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [MetadataSymbol]: { value: metadata } });

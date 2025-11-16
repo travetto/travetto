@@ -1,7 +1,8 @@
 import { AssertionError } from 'node:assert';
 
-import { Env, TimeUtil, Runtime, castTo } from '@travetto/runtime';
+import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
 import { RegistryV2 } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { TestConfig, TestResult, TestRun } from '../model/test.ts';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
@@ -114,9 +115,11 @@ export class TestExecutor {
 
     const startTime = Date.now();
 
+    const description = SchemaRegistryIndex.getMethodConfig(test.class, test.methodName)?.description;
+
     const result: TestResult = {
       methodName: test.methodName,
-      description: test.description,
+      description,
       classId: test.classId,
       lineStart: test.lineStart,
       lineEnd: test.lineEnd,
@@ -176,6 +179,9 @@ export class TestExecutor {
    * Execute an entire suite
    */
   async executeSuite(suite: SuiteConfig, tests: TestConfig[]): Promise<void> {
+
+    suite.instance = classConstruct(suite.class);
+
     if (!tests.length || await this.#shouldSkip(suite, suite.instance)) {
       return;
     }

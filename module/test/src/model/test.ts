@@ -109,6 +109,10 @@ export interface TestResult extends TestCore {
    * Logging output
    */
   output: TestLog[];
+  /**
+   * Description of the test
+   */
+  description?: string;
 }
 
 /**

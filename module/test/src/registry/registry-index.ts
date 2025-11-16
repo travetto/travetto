@@ -5,6 +5,9 @@ import { SuiteConfig } from '../model/suite.ts';
 import { TestConfig, TestRun } from '../model/test.ts';
 import { SuiteRegistryAdapter } from './registry-adapter.ts';
 
+const sortedTests = (cfg: SuiteConfig): TestConfig[] =>
+  Object.values(cfg.tests).toSorted((a, b) => a.lineStart - b.lineStart);
+
 type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
 
 /**
@@ -71,10 +74,11 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
       const suite = suites.find(x => line >= x.lineStart && line <= x.lineEnd);
 
       if (suite) {
-        const test = suite.tests.find(x => line >= x.lineStart && line <= x.lineEnd);
-        return test ? [{ suite, tests: [test] }] : [{ suite, tests: suite.tests }];
+        const tests = sortedTests(suite);
+        const test = tests.find(x => line >= x.lineStart && line <= x.lineEnd);
+        return test ? [{ suite, tests: [test] }] : [{ suite, tests }];
       } else {
-        return suites.map(x => ({ suite: x, tests: x.tests }));
+        return suites.map(x => ({ suite: x, tests: sortedTests(x) }));
       }
     } else { // Else lookup directly
       if (methodNames.length) {
@@ -83,7 +87,7 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
           throw new AppError('Unable to find suite for class ID', { details: { classId: clsId } });
         }
         const suite = this.get(cls);
-        const tests = suite.tests.filter(x => methodNames.includes(x.methodName))!;
+        const tests = sortedTests(suite).filter(x => methodNames.includes(x.methodName));
         return [{ suite, tests }];
       } else if (clsId) {
         const cls = this.getValidClasses().find(x => x.Ⲑid === clsId)!;
@@ -91,12 +95,12 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
           throw new AppError('Unable to find suite for class ID', { details: { classId: clsId } });
         }
         const suite = this.get(cls);
-        return suite ? [{ suite, tests: suite.tests }] : [];
+        return suite ? [{ suite, tests: sortedTests(suite) }] : [];
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
           .filter(x => !describeFunction(x.class).abstract);  // Do not run abstract suites
-        return suites.map(x => ({ suite: x, tests: x.tests }));
+        return suites.map(x => ({ suite: x, tests: sortedTests(x) }));
       }
     }
   }
@@ -107,7 +111,7 @@ export class SuiteRegistryIndex implements RegistryIndex<SuiteConfig> {
   getTestConfig(cls: Class, method: Function): TestConfig | undefined {
     if (this.has(cls)) {
       const conf = this.get(cls);
-      return conf.tests.find(x => x.methodName === method.name);
+      return Object.values(conf.tests).find(x => x.methodName === method.name);
     }
   }
 }

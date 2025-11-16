@@ -31,7 +31,7 @@ export class TestDigestCommand {
     const all = suites
       .map(c => SuiteRegistryIndex.getConfig(c))
       .filter(c => !describeFunction(c.class).abstract)
-      .flatMap(c => c.tests);
+      .flatMap(c => Object.values(c.tests).toSorted((a, b) => a.lineStart - b.lineStart));
 
     if (this.output === 'json') {
       console.log(JSON.stringify(all));

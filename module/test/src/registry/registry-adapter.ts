@@ -1,5 +1,5 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
-import { AppError, asFull, Class, classConstruct, describeFunction, Runtime } from '@travetto/runtime';
+import { AppError, asFull, Class, describeFunction, Runtime } from '@travetto/runtime';
 
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
@@ -22,7 +22,9 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
       baseConfig.tags = [...(baseConfig.tags ?? []), ...cfg.tags];
     }
     if (cfg.tests) {
-      baseConfig.tests = [...(baseConfig.tests ?? []), ...cfg.tests];
+      for (const [key, test] of Object.entries(cfg.tests ?? {})) {
+        baseConfig.tests[key] = { ...test };
+      }
     }
   }
   return baseConfig;
@@ -46,7 +48,6 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
   indexCls: RegistryIndexClass<SuiteConfig>;
   #cls: Class;
   #config: SuiteConfig;
-  #tests: Map<string | symbol, TestConfig> = new Map();
 
   constructor(cls: Class) {
     this.#cls = cls;
@@ -62,7 +63,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
-        tests: [],
+        tests: {},
         beforeAll: [],
         beforeEach: [],
         afterAll: [],
@@ -75,9 +76,10 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
 
   registerTest(method: string | symbol, ...data: Partial<TestConfig>[]): TestConfig {
     const suite = this.register();
-    if (!this.#tests.has(method)) {
+
+    if (!(method in this.#config.tests)) {
       const lines = describeFunction(this.#cls)?.methods?.[method]?.lines;
-      const testConfig = asFull<TestConfig>({
+      const config = asFull<TestConfig>({
         class: this.#cls,
         tags: [],
         import: Runtime.getImport(this.#cls),
@@ -86,12 +88,12 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         lineBodyStart: lines?.[2],
         methodName: method.toString()
       });
-      this.#tests.set(method, testConfig);
-      this.#config.tests!.push(testConfig);
-
+      this.#config.tests[method] = config;
     }
-    combineMethods(suite, this.#tests.get(method)!, ...data);
-    return this.#tests.get(method)!;
+
+    const result = this.#config.tests[method];
+    combineMethods(suite, result, ...data);
+    return result;
   }
 
   finalize(parent?: SuiteConfig): void {
@@ -99,12 +101,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
       combineClasses(this.#config, parent);
     }
 
-    this.#config.instance = classConstruct(this.#cls);
-    this.#config.description ||= this.#config.classId;
-
-    for (const test of this.#config.tests!) {
-      test.sourceImport = this.#config.import;
-      test.class = this.#cls;
+    for (const test of Object.values(this.#config.tests)) {
       test.tags = [...test.tags ?? [], ...this.#config.tags ?? []];
     }
   }
@@ -114,7 +111,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
   }
 
   getMethod(method: string | symbol): TestConfig {
-    const test = this.#tests.get(method);
+    const test = this.#config.tests[method];
     if (!test) {
       throw new AppError(`Test not registered: ${String(method)} on ${this.#cls.name}`);
     }

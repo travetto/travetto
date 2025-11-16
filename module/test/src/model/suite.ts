@@ -18,11 +18,11 @@ export interface SuiteConfig extends SuiteCore {
   /**
    * Actual class instance
    */
-  instance: unknown;
+  instance?: unknown;
   /**
-   * List of tests to run
+   * Tests to run
    */
-  tests: TestConfig[];
+  tests: Record<string | symbol, TestConfig>;
   /**
    * Before all handlers
    */
