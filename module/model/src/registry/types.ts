@@ -29,14 +29,6 @@ export class ModelConfig<T extends ModelType = ModelType> {
    */
   store?: string;
   /**
-   * If a sub type
-   */
-  subType?: boolean;
-  /**
-   * Is a base type?
-   */
-  baseType?: boolean;
-  /**
    * Indices
    */
   indices?: IndexConfig<T>[];

@@ -1,5 +1,5 @@
 import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
-import { AppError, castTo, Class, getParentClass } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
@@ -35,21 +35,12 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
     return RegistryV2.instance(this).getStoreName(cls);
   }
 
-  static getBaseModelClass<T extends ModelType>(cls: Class<T>): Class<T> {
-    return RegistryV2.instance(this).getBaseModelClass(cls);
-  }
-
   static getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
     return RegistryV2.instance(this).getIndices(cls, supportedTypes);
   }
 
   static getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
     return RegistryV2.instance(this).getIndex(cls, name, supportedTypes);
-  }
-
-  static getClassesByBaseType<T extends ModelType>(cls: Class<T>): Class<T>[] {
-    const baseType = RegistryV2.instance(this).getBaseModelClass(cls);
-    return RegistryV2.instance(this).getClassesByBaseType(baseType);
   }
 
   static getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
@@ -75,15 +66,6 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
    */
   #initialModelNameMapping = new Map<string, Class[]>();
 
-  #finalize(cls: Class): void {
-    const config = RegistryV2.get(SchemaRegistryIndex, cls).get();
-    const schema = config.fields;
-    if (config.subTypeField in schema && this.getBaseModelClass(cls) !== cls) {
-      this.getModelOptions(cls).subType = !!config.subTypeName; // Copy from config
-      delete schema[config.subTypeField].required; // Allow type to be optional
-    }
-  }
-
   #clear(): void {
     // Force system to recompute on uninstall
     this.#baseModels.clear();
@@ -94,9 +76,6 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
     for (const event of events) {
       if ('prev' in event) {
         this.#stores.delete(event.prev);
-      }
-      if ('curr' in event) {
-        this.#finalize(event.curr);
       }
     }
     this.#clear();
@@ -124,64 +103,12 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
   }
 
   /**
-   * Find base class for a given model
-   */
-  getBaseModelClass<T extends ModelType>(cls: Class<T>): Class<T> {
-    if (!this.#baseModels.has(cls)) {
-      let conf = this.getModelOptions(cls);
-      let parent = cls;
-
-      while (parent && conf && !conf.baseType) {
-        parent = getParentClass(parent)!;
-        if (parent) {
-          conf = this.getModelOptions(parent);
-        }
-      }
-
-      this.#baseModels.set(cls, conf ? conf.class : cls);
-    }
-    return this.#baseModels.get(cls)!;
-  }
-
-  /**
-   * Find all classes by their base types
-   */
-  getAllClassesByBaseType(): Map<Class, Class[]> {
-    if (!this.#baseModelGrouped.size) {
-      const out = new Map<Class, Class[]>();
-      for (const cls of RegistryV2.getClasses(ModelRegistryIndex)) {
-        const conf = this.getModelOptions(cls);
-        if (conf.baseType) {
-          continue;
-        }
-
-        const parent = this.getBaseModelClass(conf.class);
-
-        if (!out.has(parent)) {
-          out.set(parent, []);
-        }
-
-        out.get(parent)!.push(conf.class);
-      }
-      this.#baseModelGrouped = out;
-    }
-    return this.#baseModelGrouped;
-  }
-
-  /**
-   * Get all classes for a given base type
-   */
-  getClassesByBaseType(base: Class): Class[] {
-    return this.getAllClassesByBaseType().get(base) ?? [];
-  }
-
-  /**
    * Get the apparent store for a type, handling polymorphism when appropriate
    */
   getStoreName(cls: Class): string {
     if (!this.#stores.has(cls)) {
       const config = this.getModelOptions(cls);
-      const base = this.getBaseModelClass(cls);
+      const base = SchemaRegistryIndex.getBaseSchemaClass(cls);
       if (base !== cls) {
         return this.getStoreName(base);
       }

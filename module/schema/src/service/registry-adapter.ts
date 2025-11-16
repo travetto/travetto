@@ -182,11 +182,15 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
     if (config.subTypeName && config.subTypeField in config.fields) {
       const field = config.fields[config.subTypeField];
+      config.subType = !!config.subTypeName; // Copy from config
       config.fields[config.subTypeField] = {
         ...field,
         enum: {
           values: [config.subTypeName],
           message: `${config.subTypeField} can only be '${config.subTypeName}'`,
+        },
+        required: {
+          active: false
         }
       };
     }

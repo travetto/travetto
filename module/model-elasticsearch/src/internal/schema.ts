@@ -1,7 +1,6 @@
 import { estypes } from '@elastic/elasticsearch';
 
 import { Class, toConcrete } from '@travetto/runtime';
-import { ModelRegistryIndex } from '@travetto/model';
 import { Point, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types.ts';
@@ -55,7 +54,7 @@ export class ElasticsearchSchemaUtil {
    * Build one or more mappings depending on the polymorphic state
    */
   static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    return ModelRegistryIndex.getConfig(cls).baseType ?
+    return SchemaRegistryIndex.getConfig(cls).baseType ?
       this.generateAllMapping(cls, config) :
       this.generateSingleMapping(cls, config);
   }
@@ -64,7 +63,7 @@ export class ElasticsearchSchemaUtil {
    * Generate all mappings
    */
   static generateAllMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    const allTypes = ModelRegistryIndex.getClassesByBaseType(cls);
+    const allTypes = SchemaRegistryIndex.getClassesByBaseType(cls);
     return allTypes.reduce<estypes.MappingTypeMapping>((acc, schemaCls) => {
       DataUtil.deepAssign(acc, this.generateSingleMapping(schemaCls, config));
       return acc;

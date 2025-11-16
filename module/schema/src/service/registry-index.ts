@@ -51,15 +51,26 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
     return RegistryV2.instance(this).visitFields(cls, onField);
   }
 
+  static getClassesByBaseType(cls: Class): Class[] {
+    return RegistryV2.instance(this).getClassesByBaseType(cls);
+  }
+
+  static getBaseSchemaClass(cls: Class): Class {
+    return RegistryV2.instance(this).getBaseSchemaClass(cls);
+  }
+
   #baseSchema = new Map<Class, Class>();
+  #baseSchemasGrouped = new Map<Class, Class[]>();
   #subTypes = new Map<Class, Map<string, Class>>();
 
   #removeClassData(cls: Class): void {
     this.#baseSchema.delete(cls);
+    this.#baseSchemasGrouped.clear();
   }
 
   #recomputeSubTypes(): void {
     this.#subTypes.clear();
+    this.#baseSchemasGrouped.clear();
     const all = RegistryV2.getClasses(SchemaRegistryIndex);
     for (const el of all) {
       this.registerSubTypes(el);
@@ -74,12 +85,10 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
         prev: this.getClassConfig(event.prev)
       });
     });
-    this.#removeClassData(event.prev);
   }
 
   #onRemoving(event: ChangeEvent<Class> & { type: 'removing' }): void {
     SchemaChangeListener.clearSchemaDependency(event.prev);
-    this.#removeClassData(event.prev);
   }
 
   #onAdded(event: ChangeEvent<Class> & { type: 'added' }): void {
@@ -99,6 +108,9 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
         this.#onRemoving(event);
       } else if (event.type === 'added') {
         this.#onAdded(event);
+      }
+      if ('prev' in event) {
+        this.#removeClassData(event.prev);
       }
     }
     this.#recomputeSubTypes();
@@ -175,7 +187,14 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
       this.#subTypes.set(base, new Map());
     }
 
+    if (!this.#baseSchemasGrouped.has(base)) {
+      this.#baseSchemasGrouped.set(base, []);
+    }
+
+    const baseList = this.#baseSchemasGrouped.get(base)!;
+
     if (base !== cls || config.baseType) {
+      baseList.push(cls);
       config.subTypeField = (this.getClassConfig(base) ?? this.getClassConfig(base)).subTypeField;
       config.subTypeName = name ?? config.subTypeName ?? classToSubTypeName(cls);
       this.#subTypes.get(base)!.set(config.subTypeName!, cls);
@@ -222,5 +241,12 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
         onField(field, _path);
       }
     }
+  }
+
+  /**
+   * Find all classes by their base types
+   */
+  getClassesByBaseType(cls: Class): Class[] {
+    return this.#baseSchemasGrouped.get(cls) ?? [];
   }
 }
