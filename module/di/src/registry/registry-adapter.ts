@@ -1,75 +1,106 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
-import { Class } from '@travetto/runtime';
+import { castKey, Class } from '@travetto/runtime';
 
-import { InjectableConfig } from '../types';
+import { InjectableClassConfig, InjectionClassConfig, InjectableFactoryConfig } from '../types';
 
-function combineClasses(base: InjectableConfig, ...override: Partial<InjectableConfig>[]): InjectableConfig {
+function combineInjectableClasses(cls: Class, base: InjectableClassConfig | undefined, ...override: Partial<InjectableClassConfig>[]): InjectableClassConfig {
+  const full: InjectableClassConfig = base ?? {
+    postConstruct: {},
+    fields: {},
+    constructorParameters: [],
+    qualifier: Symbol.for(cls.Ⲑid),
+    class: cls,
+    enabled: true,
+    target: cls,
+  };
+
   for (const o of override) {
-    base.enabled = o.enabled ?? base.enabled;
-    base.qualifier = o.qualifier ?? base.qualifier;
-    base.target = o.target ?? base.target;
-    base.factory = o.factory ?? base.factory;
-    base.postConstruct = { ...base.postConstruct, ...o.postConstruct };
-    base.primary = o.primary ?? base.primary;
-    base.dependencies = {
-      fields: { ...base.dependencies.fields, ...o.dependencies?.fields },
-      cons: o.dependencies?.cons ?? base.dependencies.cons
+    full.enabled = o.enabled ?? full.enabled;
+    full.qualifier = o.qualifier ?? full.qualifier;
+    full.target = o.target ?? full.target;
+    full.postConstruct = { ...full.postConstruct, ...o.postConstruct };
+    full.primary = o.primary ?? full.primary;
+    full.fields = { ...full.fields, ...o?.fields };
+    full.constructorParameters = o.constructorParameters ?? full.constructorParameters;
+  }
+  return full;
+}
+
+function combineInjectableFactories(
+  cls: Class, method: string | symbol,
+  base: InjectableFactoryConfig | undefined,
+  ...override: Partial<InjectableFactoryConfig>[]
+): InjectableFactoryConfig {
+
+  const full: InjectableFactoryConfig = base ?? {
+    class: cls,
+    method,
+    enabled: true,
+    qualifier: Symbol.for(`${cls.Ⲑid}+factory+${method.toString()}`),
+    target: cls,
+    postConstruct: {},
+    parameters: [],
+    handle: cls[castKey(method)]
+  };
+
+  for (const o of override) {
+    full.enabled = o.enabled ?? full.enabled;
+    full.qualifier = o.qualifier ?? full.qualifier;
+    full.target = o.target ?? full.target;
+    full.postConstruct = { ...full.postConstruct, ...o.postConstruct };
+    full.primary = o.primary ?? full.primary;
+    full.parameters = o.parameters ?? full.parameters;
+  }
+  return full;
+}
+
+function combineClassWithParent(base: InjectionClassConfig, parent: InjectionClassConfig): InjectionClassConfig {
+  if (base.injectable && parent.injectable) {
+    base.injectable.fields = {
+      ...parent.injectable.fields,
+      ...base.injectable.fields
+    };
+    base.injectable.constructorParameters = base.injectable.constructorParameters ?? parent.injectable.constructorParameters;
+    base.injectable.postConstruct = {
+      ...parent.injectable.postConstruct,
+      ...base.injectable.postConstruct
     };
   }
   return base;
 }
 
-function combineClassWithParent(base: InjectableConfig, parent: InjectableConfig): InjectableConfig {
-  base.dependencies = {
-    cons: base.dependencies.cons ?? parent.dependencies.cons,
-    fields: {
-      ...parent.dependencies.fields,
-      ...base.dependencies.fields
-    }
-  };
-
-  base.postConstruct = {
-    ...parent.postConstruct,
-    ...base.postConstruct
-  };
-  return base;
-}
-
-export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConfig> {
-  indexCls: RegistryIndexClass<InjectableConfig>;
+export class DependencyRegistryAdapter implements RegistryAdapter<InjectionClassConfig> {
+  indexCls: RegistryIndexClass<InjectionClassConfig>;
 
   #cls: Class;
-  #config: InjectableConfig;
+  #config: InjectionClassConfig;
 
   constructor(cls: Class) {
     this.#cls = cls;
   }
 
-  register(...data: Partial<InjectableConfig<unknown>>[]): InjectableConfig {
-    this.#config ??= {
-      qualifier: Symbol.for(this.#cls.Ⲑid),
+  register(): InjectionClassConfig {
+    return this.#config ??= {
       class: this.#cls,
-      enabled: true,
-      target: this.#cls,
-      dependencies: {
-        fields: {},
-        cons: []
-      },
-      postConstruct: {}
+      factories: {},
     };
-    return combineClasses(this.#config, ...data);
   }
 
-  get(): InjectableConfig<unknown> {
+  registerInjectable(...data: Partial<InjectableClassConfig<unknown>>[]): InjectableClassConfig {
+    this.register();
+    return this.#config.injectable ??= combineInjectableClasses(this.#cls, this.#config.injectable, ...data);
+  }
+
+  registerFactory(method: string | symbol, ...data: Partial<InjectableFactoryConfig<unknown>>[]): InjectableFactoryConfig {
+    this.register();
+    return combineInjectableFactories(this.#cls, method, this.#config.factories[method], ...data);
+  }
+
+  get(): InjectionClassConfig<unknown> {
     return this.#config;
   }
 
-  enabled(): boolean {
-    return this.#config.enabled === undefined ||
-      (typeof this.#config.enabled === 'boolean' ? this.#config.enabled : this.#config.enabled());
-  }
-
-  finalize(parentConfig?: InjectableConfig<unknown> | undefined): void {
+  finalize(parentConfig?: InjectionClassConfig<unknown> | undefined): void {
     if (parentConfig) {
       combineClassWithParent(this.#config, parentConfig);
     }

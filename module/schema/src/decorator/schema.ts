@@ -15,10 +15,6 @@ export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'subTypeName' | 'su
     target.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
     };
-    const cons = cfg?.methods?.[castTo<''>('constructor')];
-    if (cons?.parameters) {
-      cons.parameters = cons.parameters.map(p => Array.isArray(p) ? castTo({ ...p }) : p);
-    }
     SchemaRegistryIndex.getForRegister(target).register({ ...cfg });
     return target;
   };

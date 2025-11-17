@@ -1,5 +1,5 @@
 import { toConcrete, Class } from '@travetto/runtime';
-import { InjectableConfig, DependencyRegistryIndex } from '@travetto/di';
+import { InjectionClassConfig, DependencyRegistryIndex } from '@travetto/di';
 import { RegistryV2 } from '@travetto/registry';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -40,7 +40,7 @@ export class ModelCandidateUtil {
   /**
    * Get all providers that are viable candidates
    */
-  static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectableConfig[]> {
+  static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectionClassConfig[]> {
     const types = DependencyRegistryIndex.getCandidateTypes(toConcrete<ModelStorageSupport>());
     return types.filter(x => !op || x.class.prototype?.[op]);
   }
@@ -59,7 +59,7 @@ export class ModelCandidateUtil {
    */
   static async getProvider(provider: string): Promise<ModelStorageSupport> {
     const config = (await this.getProviders()).find(x => x.class.name === `${provider}ModelService`)!;
-    return DependencyRegistryIndex.getInstance<ModelStorageSupport>(config.class, config.qualifier);
+    return DependencyRegistryIndex.getInstance<ModelStorageSupport>(config.class, config.injectable?.qualifier);
   }
 
   /**
