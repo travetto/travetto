@@ -70,7 +70,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
    */
   #classToTarget = new Map<DependencyClassId, Map<symbol, DependencyTargetId>>();
 
-  #registerClassAndTarget(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
+  #registerClassToTargetToClass(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
     relateViaSymbol(this.#classToTarget, clsId, qualifier, targetId);
     relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
   }
@@ -113,7 +113,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
 
     if (config.factory) {
       const schema = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(config.factory.property);
-      target = schema.returnType?.foreignType ?? schema.returnType?.type;
+      target = schema.returnType?.type;
     }
     return target ? target.Ⲑid : classId;
   }
@@ -140,10 +140,10 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     const parentClass = this.getParentClass(cls);
     const parentConfig = parentClass ? RegistryV2.getOptional(DependencyRegistryIndex, parentClass) : undefined;
     const hasParentBase = (parentConfig || describeFunction(parentClass)?.abstract);
-    const parentId = parentClass?.Ⲑid;
+    const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
 
     // Register class to target
-    this.#registerClassAndTarget(classId, config.qualifier, targetClassId);
+    this.#registerClassToTargetToClass(classId, config.qualifier, targetClassId);
 
     // Make factory able to be targeted as self
     if (config.factory) {
@@ -153,18 +153,18 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     // Track interface aliases as targets
     const { interfaces } = SchemaRegistryIndex.getConfig(cls);
     for (const { Ⲑid: interfaceId } of interfaces) {
-      this.#registerClassAndTarget(classId, config.qualifier, interfaceId);
+      this.#registerClassToTargetToClass(classId, config.qualifier, interfaceId);
     }
 
     // If targeting self (default @Injectable behavior)
-    if (isSelfTarget && hasParentBase && parentId) {
-      this.#registerClassAndTarget(classId, config.qualifier, parentId);
+    if (isSelfTarget && baseParentId) {
+      this.#registerClassToTargetToClass(classId, config.qualifier, baseParentId);
     }
 
     // Registry primary candidates
     if (config.primary) {
-      if (hasParentBase && parentId) {
-        this.#registerTargetToClass(parentId, PrimaryCandidateSymbol, classId);
+      if (baseParentId) {
+        this.#registerTargetToClass(baseParentId, PrimaryCandidateSymbol, classId);
       }
 
       // Register primary for self
@@ -179,10 +179,8 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
         const [primaryInterface] = interfaces;
         const primaryClassId = primaryInterface.Ⲑid;
         this.#registerTargetToClass(primaryClassId, PrimaryCandidateSymbol, classId);
-      }
-
-      // Register primary for all interfaces if self targeting
-      if (isSelfTarget) {
+      } else if (isSelfTarget) {
+        // Register primary for all interfaces if self targeting
         for (const { Ⲑid: interfaceId } of interfaces) {
           this.#registerTargetToClass(interfaceId, PrimaryCandidateSymbol, classId);
         }
@@ -330,7 +328,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
 
     const promises = deps.map(async (x, i) => {
       try {
-        const target = x.target ?? inputs[i].foreignType ?? inputs[i].type;
+        const target = x.target ?? inputs[i].type;
         return await this.getInstance(target, x.qualifier, x.resolution);
       } catch (err) {
         if (inputs[i].required?.active === false && err instanceof InjectionError && err.category === 'notfound') {

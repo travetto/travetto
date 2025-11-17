@@ -25,9 +25,9 @@ export type SchemaBasicType = {
     validateSchema?(input: unknown): string | undefined;
   };
   /**
-   * The foreign type for the field, if applicable
+   * Is the field a foreign type
    */
-  foreignType?: Class;
+  isForeign?: boolean;
 };
 
 /**

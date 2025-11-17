@@ -183,10 +183,12 @@ export class SchemaTransformUtil {
 
     if (!existing) {
       const resolved = this.toConcreteType(state, typeExpr, node, config?.root ?? node);
+      const type = typeExpr.key === 'foreign' ? state.getConcreteType(node) :
+        ts.isArrayLiteralExpression(resolved) ? resolved.elements[0] : resolved;
+
       params.unshift(LiteralUtil.fromLiteral(state.factory, {
         array: ts.isArrayLiteralExpression(resolved),
-        type: ts.isArrayLiteralExpression(resolved) ? resolved.elements[0] : resolved,
-        ...(typeExpr.key === 'foreign' ? { foreignType: state.getConcreteType(node) } : {})
+        type
       }));
     } else {
       const args = DecoratorUtil.getArguments(existing) ?? [];
@@ -262,8 +264,7 @@ export class SchemaTransformUtil {
     const { out, type } = this.unwrapType(anyType);
     switch (type?.key) {
       case 'foreign': {
-        out.foreignType = state.getForeignTarget(type);
-        out.type = state.factory.createIdentifier('Object');
+        out.type = state.getForeignTarget(type);
         break;
       }
       case 'managed': out.type = state.typeToIdentifier(type); break;
