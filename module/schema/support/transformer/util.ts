@@ -200,7 +200,6 @@ export class SchemaTransformUtil {
       }
     }
 
-
     return params;
   }
 
