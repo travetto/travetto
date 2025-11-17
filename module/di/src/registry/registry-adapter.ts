@@ -1,14 +1,15 @@
 import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
 import { castKey, Class } from '@travetto/runtime';
 
-import { InjectableClassConfig, InjectionClassConfig, InjectableFactoryConfig } from '../types';
+import { InjectableClassConfig, InjectionClassConfig, InjectableFactoryConfig, InjectableConfig, getDefaultQualifier } from '../types';
 
 function combineInjectableClasses(cls: Class, base: InjectableClassConfig | undefined, ...override: Partial<InjectableClassConfig>[]): InjectableClassConfig {
   const full: InjectableClassConfig = base ?? {
+    type: 'class',
     postConstruct: {},
     fields: {},
     constructorParameters: [],
-    qualifier: Symbol.for(cls.Ⲑid),
+    qualifier: getDefaultQualifier(cls),
     class: cls,
     enabled: true,
     target: cls,
@@ -33,10 +34,11 @@ function combineInjectableFactories(
 ): InjectableFactoryConfig {
 
   const full: InjectableFactoryConfig = base ?? {
+    type: 'factory',
     class: cls,
     method,
     enabled: true,
-    qualifier: Symbol.for(`${cls.Ⲑid}+factory+${method.toString()}`),
+    qualifier: getDefaultQualifier(cls, method),
     target: cls,
     postConstruct: {},
     parameters: [],
@@ -104,7 +106,16 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectionClass
     if (parentConfig) {
       combineClassWithParent(this.#config, parentConfig);
     }
+  }
 
-    // TODO: Need to backfill target from schema for dependencies
+  getInjectables(): InjectableConfig[] {
+    const res: InjectableConfig[] = [];
+    if (this.#config.injectable) {
+      res.push(this.#config.injectable);
+    }
+    for (const factory of Object.values(this.#config.factories)) {
+      res.push(factory);
+    }
+    return res;
   }
 }

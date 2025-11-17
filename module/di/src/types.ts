@@ -32,7 +32,11 @@ export interface Dependency<T = unknown> {
 /**
  * Injectable configuration
  */
-export interface InjectableCommonConfig<T = unknown> {
+export interface InjectableCommonConfig<Z extends string, T = unknown> {
+  /**
+   * Type of injectable
+   */
+  type: Z;
   /**
    * Reference for the class
    */
@@ -66,7 +70,7 @@ export interface InjectableCommonConfig<T = unknown> {
 /**
  * Injectable class configuration, for classes that are able to be injected
  */
-export interface InjectableClassConfig<T = unknown> extends InjectableCommonConfig<T> {
+export interface InjectableClassConfig<T = unknown> extends InjectableCommonConfig<'class', T> {
   /**
    * Fields that are dependencies
    */
@@ -77,11 +81,10 @@ export interface InjectableClassConfig<T = unknown> extends InjectableCommonConf
   constructorParameters?: Dependency[];
 }
 
-
 /**
  * Injectable method configuration, for static methods that produce dependencies
  */
-export interface InjectableFactoryConfig<T = unknown> extends InjectableCommonConfig<T> {
+export interface InjectableFactoryConfig<T = unknown> extends InjectableCommonConfig<'factory', T> {
   /**
    * Method that is injectable on class
    */
@@ -95,6 +98,11 @@ export interface InjectableFactoryConfig<T = unknown> extends InjectableCommonCo
    */
   handle: (...args: unknown[]) => T | Promise<T>;
 }
+
+/**
+ * Union type for injectable configuration
+ */
+export type InjectableConfig = InjectableFactoryConfig | InjectableClassConfig;
 
 /**
  * Full injectable configuration for a class
@@ -112,4 +120,8 @@ export interface InjectionClassConfig<T = unknown> {
    * Factories that are injectable
    */
   factories: Record<string | symbol, InjectableFactoryConfig<T>>;
+}
+
+export function getDefaultQualifier(cls: Class, factory?: string | symbol): symbol {
+  return factory ? Symbol.for(`${cls.Ⲑid}+factory+${factory?.toString()}`) : Symbol.for(cls.Ⲑid);
 }
