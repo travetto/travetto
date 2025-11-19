@@ -2,9 +2,9 @@ import { EventEmitter } from 'node:events';
 import { AppError, castTo, Class, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
-import { RegistryIndex, RegistryIndexClass, RegistryAdapter } from './types';
 import { ChangeEvent } from '../types';
 import { MethodSource } from '../source/method-source';
+import { RegistryIndex, RegistryIndexClass } from './store';
 
 class $Registry {
 
@@ -25,7 +25,7 @@ class $Registry {
   #removeItems(classes: Class[]): void {
     for (const cls of classes) {
       for (const idx of this.#indexOrder) {
-        this.instance(idx).remove(cls);
+        this.instance(idx).store.remove(cls);
       }
     }
   }
@@ -34,7 +34,7 @@ class $Registry {
     for (const idx of this.#indexOrder) {
       const inst = this.instance(idx);
       for (const cls of classes) {
-        inst.finalize(cls);
+        inst.store.finalize(cls);
       }
     }
   }
@@ -44,7 +44,7 @@ class $Registry {
 
     for (const indexCls of this.#indexOrder) { // Visit every index, in order
       const inst = this.instance(indexCls);
-      const matched = events.filter(e => inst.has('curr' in e ? e.curr : e.prev!));
+      const matched = events.filter(e => inst.store.has('curr' in e ? e.curr : e.prev!));
       if (matched.length) {
         inst.process(matched);
       }
@@ -105,7 +105,7 @@ class $Registry {
     return this.#initialized ??= this.#init();
   }
 
-  instance<A extends RegistryAdapter, T extends RegistryIndexClass<A>>(indexCls: T): InstanceType<T> {
+  instance<T extends RegistryIndexClass>(indexCls: T): InstanceType<T> {
     return castTo(this.#indexes.get(indexCls));
   }
 
@@ -118,7 +118,7 @@ class $Registry {
     } else {
       const inst = this.instance(matches);
       this.#emitter.on('event', (event) => {
-        if (inst.has('curr' in event ? event.curr : event.prev!)) {
+        if (inst.store.has('curr' in event ? event.curr : event.prev!)) {
           handler(event);
         }
       });
@@ -139,7 +139,7 @@ class $Registry {
     } else {
       const inst = this.instance(matches);
       src.on((event) => {
-        if (inst.has('curr' in event ? event.curr?.[0] : event.prev!?.[0])) {
+        if (inst.store.has('curr' in event ? event.curr?.[0] : event.prev!?.[0])) {
           handler(event);
         }
       });

@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { Class, ClassInstance, RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
@@ -8,22 +8,28 @@ import { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
 import { WebAsyncContext } from '../context';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
-export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> {
+export class ControllerRegistryIndex {
 
   static { RegistryV2.registerIndex(ControllerRegistryIndex); }
 
-  static adapterCls = ControllerRegistryAdapter;
+  static get instance(): ControllerRegistryIndex {
+    return RegistryV2.instance(this);
+  }
+
+  static getClasses(): Class[] {
+    return this.instance.store.getClasses();
+  }
 
   static getForRegister(clsOrId: ClassOrId): ControllerRegistryAdapter {
-    return RegistryV2.getForRegister(this, clsOrId);
+    return this.instance.store.getForRegister(clsOrId);
   }
 
   static getConfig(clsOrId: ClassOrId): ControllerConfig {
-    return RegistryV2.get(this, clsOrId).get();
+    return this.instance.store.get(clsOrId).get();
   }
 
   static getEndpointConfigById(id: string): EndpointConfig | undefined {
-    return RegistryV2.instance(ControllerRegistryIndex).getEndpointById(id);
+    return this.instance.getEndpointById(id);
   }
 
   /**
@@ -47,6 +53,8 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
 
   #endpointsById = new Map<string, EndpointConfig>();
 
+  store = new RegistryIndexStore(ControllerRegistryAdapter);
+
   async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
     const map = this.getController(inst.constructor).contextParams;
@@ -65,7 +73,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   registerControllerContextParam<T>(target: Class, field: string): void {
     const controllerConfig = this.getController(target);
     controllerConfig.contextParams[field] = true;
-    RegistryV2.getForRegister(DependencyRegistryIndex, target).register({
+    DependencyRegistryIndex.getForRegister(target).register({
       postConstruct: {
         ContextParam: (inst: ClassInstance) => this.#bindContextParams(inst)
       }
@@ -73,7 +81,7 @@ export class ControllerRegistryIndex implements RegistryIndex<ControllerConfig> 
   }
 
   getController(cls: Class): ControllerConfig {
-    return RegistryV2.get(ControllerRegistryIndex, cls).get();
+    return this.store.get(cls).get();
   }
 
   getEndpoint(cls: Class, method: string | symbol): EndpointConfig {

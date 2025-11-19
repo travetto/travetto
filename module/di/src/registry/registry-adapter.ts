@@ -1,4 +1,4 @@
-import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
+import { RegistryAdapter } from '@travetto/registry';
 import { castKey, Class } from '@travetto/runtime';
 
 import { InjectableClassConfig, InjectionClassConfig, InjectableFactoryConfig, InjectableConfig, getDefaultQualifier } from '../types';
@@ -72,8 +72,6 @@ function combineClassWithParent(base: InjectionClassConfig, parent: InjectionCla
 }
 
 export class DependencyRegistryAdapter implements RegistryAdapter<InjectionClassConfig> {
-  indexCls: RegistryIndexClass<InjectionClassConfig>;
-
   #cls: Class;
   #config: InjectionClassConfig;
 

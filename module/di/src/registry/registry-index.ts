@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2, RetargettingProxy } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2, RetargettingProxy } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -8,30 +8,32 @@ import { DependencyTargetId, hasPostConstruct, hasPreDestroy } from './types';
 import { InjectionError } from '../error';
 import { DependencyRegistryResolver } from './registry-resolver';
 
-export class DependencyRegistryIndex implements RegistryIndex<InjectionClassConfig> {
+export class DependencyRegistryIndex {
 
   static { RegistryV2.registerIndex(DependencyRegistryIndex); }
 
-  static adapterCls = DependencyRegistryAdapter;
+  static get instance(): DependencyRegistryIndex {
+    return RegistryV2.instance(this);
+  }
 
   static getForRegister(clsOrId: ClassOrId): DependencyRegistryAdapter {
-    return RegistryV2.getForRegister(this, clsOrId);
+    return this.instance.store.getForRegister(clsOrId);
   }
 
   static getInstance<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Promise<T> {
-    return RegistryV2.instance(DependencyRegistryIndex).getInstance(target, qualifier, resolution);
+    return this.instance.getInstance(target, qualifier, resolution);
   }
 
   static getCandidateTypes<T>(target: Class<T>): InjectionClassConfig<T>[] {
-    return RegistryV2.instance(DependencyRegistryIndex).getCandidateTypes<T>(target);
+    return this.instance.getCandidateTypes<T>(target);
   }
 
   static getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectionClassConfig<T>) => boolean): Promise<T[]> {
-    return RegistryV2.instance(DependencyRegistryIndex).getCandidateInstances<T>(target, predicate);
+    return this.instance.getCandidateInstances<T>(target, predicate);
   }
 
   static injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
-    return RegistryV2.instance(DependencyRegistryIndex).injectFields(o, cls);
+    return this.instance.injectFields(o, cls);
   }
 
   static async getPrimaryCandidateInstances<T>(candidateType: Class<T>): Promise<[Class, T][]> {
@@ -77,7 +79,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectionClassConf
   }
 
   #addClass(cls: Class): void {
-    const adapter = RegistryV2.get(DependencyRegistryIndex, cls);
+    const adapter = this.store.get(cls);
     if (
       !adapter.enabled() ||
       describeFunction(cls)?.abstract  // Skip out early, only needed to inherit
@@ -112,8 +114,10 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectionClassConf
     }
   }
 
+  store = new RegistryIndexStore(DependencyRegistryAdapter);
+
   getParentClass(cls: Class): Class {
-    const config = RegistryV2.get(DependencyRegistryIndex, cls).get();
+    const config = this.getConfig(cls);
     if (config.factory) {
       let parentClass = config.target;
       while (describeFunction(Object.getPrototypeOf(parentClass))?.abstract) {
@@ -126,7 +130,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectionClassConf
   }
 
   getConfig(clsOrId: ClassOrId): InjectionClassConfig {
-    return RegistryV2.get(DependencyRegistryIndex, clsOrId).get();
+    return this.store.get(clsOrId).get();
   }
 
   process(events: ChangeEvent<Class>[]): void {

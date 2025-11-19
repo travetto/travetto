@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
@@ -16,36 +16,40 @@ export class ModelRegistryIndex {
 
   static { RegistryV2.registerIndex(ModelRegistryIndex); }
 
+  static get instance(): ModelRegistryIndex {
+    return RegistryV2.instance(this);
+  }
+
   static getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
-    return RegistryV2.instance(this).getForRegister(clsOrId);
+    return this.instance.store.getForRegister(clsOrId);
   }
 
   static getConfig(clsOrId: ClassOrId): ModelConfig {
-    return RegistryV2.instance(this).getModelOptions(clsOrId);
+    return this.instance.getModelOptions(clsOrId);
   }
 
   static has(clsOrId: ClassOrId): boolean {
-    return RegistryV2.instance(this).has(clsOrId);
+    return this.instance.store.has(clsOrId);
   }
 
   static getStoreName<T extends ModelType>(cls: Class<T>): string {
-    return RegistryV2.instance(this).getStoreName(cls);
+    return this.instance.getStoreName(cls);
   }
 
   static getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
-    return RegistryV2.instance(this).getIndices(cls, supportedTypes);
+    return this.instance.getIndices(cls, supportedTypes);
   }
 
   static getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
-    return RegistryV2.instance(this).getIndex(cls, name, supportedTypes);
+    return this.instance.getIndex(cls, name, supportedTypes);
   }
 
   static getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
-    return RegistryV2.instance(this).getExpiryFieldName(cls);
+    return this.instance.getExpiryFieldName(cls);
   }
 
   static getClasses(): Class[] {
-    return RegistryV2.instance(this).getClasses();
+    return this.instance.store.getClasses();
   }
 
   /**
@@ -55,7 +59,7 @@ export class ModelRegistryIndex {
    */
   #modelNameMapping = new Map<string, Set<string>>();
 
-  #store = new RegistryIndexStore(ModelRegistryAdapter);
+  store = new RegistryIndexStore(ModelRegistryAdapter);
 
   #addClass(cls: Class): void {
     const store = this.getModelOptions(cls).store;
@@ -74,7 +78,7 @@ export class ModelRegistryIndex {
   }
 
   #removeClass(cls: Class): void {
-    const { store } = this.#store.get(cls).get();
+    const { store } = this.store.get(cls).get();
     this.#modelNameMapping.get(store)?.delete(cls.Ⲑid);
   }
 
@@ -89,39 +93,15 @@ export class ModelRegistryIndex {
     }
   }
 
-  getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
-    return this.#store.getForRegister(clsOrId);
-  }
-
-  get(clsOrId: ClassOrId): Omit<ModelRegistryAdapter, RegistrationMethods> {
-    return this.#store.get(clsOrId);
-  }
-
   getModelOptions(cls: ClassOrId): ModelConfig<ModelType> {
-    return this.#store.get(cls).get();
-  }
-
-  getClasses(): Class[] {
-    return this.#store.getClasses();
-  }
-
-  has(cls: ClassOrId): boolean {
-    return this.#store.has(cls);
-  }
-
-  remove(cls: Class): void {
-    this.#store.remove(cls);
-  }
-
-  finalize(cls: Class): void {
-    this.#store.finalize(cls);
+    return this.store.get(cls).get();
   }
 
   /**
    * Get the apparent store for a type, handling polymorphism when appropriate
    */
   getStoreName(cls: Class): string {
-    return this.#store.get(cls).get().store;
+    return this.store.get(cls).get().store;
   }
 
   /**

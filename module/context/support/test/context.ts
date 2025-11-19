@@ -26,7 +26,7 @@ export function WithSuiteContext() {
             this[Init] = true;
             await RegistryV2.init();
             const ctx = await DependencyRegistryIndex.getInstance(AsyncContext);
-            for (const t of SuiteRegistryIndex.getConfig(target).tests) {
+            for (const [k, t] of Object.entries(SuiteRegistryIndex.getConfig(target).tests)) {
               const fn = wrapped(ctx, this[t.methodName]);
               Object.defineProperty(fn, 'name', { value: t.methodName });
               this[t.methodName] = fn;

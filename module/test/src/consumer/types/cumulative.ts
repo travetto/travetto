@@ -1,6 +1,5 @@
 import { existsSync } from 'node:fs';
 
-import { RegistryV2 } from '@travetto/registry';
 import { type Class, RuntimeIndex } from '@travetto/runtime';
 
 import type { TestConsumerShape } from '../types.ts';
@@ -31,7 +30,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     // Was only loading to verify existence (TODO: double-check)
     if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
       (this.#state[test.classId] ??= {})[test.methodName] = test.status;
-      const SuiteCls = RegistryV2.getClasses(SuiteRegistryIndex).find(x => x.Ⲑid === test.classId);
+      const SuiteCls = SuiteRegistryIndex.getClasses().find(x => x.Ⲑid === test.classId);
       return SuiteCls ? this.computeTotal(SuiteCls) : this.removeClass(test.classId);
     } else {
       return this.removeClass(test.classId);
@@ -53,7 +52,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    */
   computeTotal(cls: Class): SuiteResult {
     const suite = SuiteRegistryIndex.getConfig(cls);
-    const total = suite.tests.reduce((acc, x) => {
+    const total = Object.values(suite.tests).reduce((acc, x) => {
       const status = this.#state[x.classId][x.methodName] ?? 'unknown';
       acc[status] += 1;
       return acc;

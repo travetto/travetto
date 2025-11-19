@@ -1,4 +1,4 @@
-import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
+import { RegistryAdapter } from '@travetto/registry';
 import { AppError, asFull, castTo, Class, RetainPrimitiveFields } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
 import { SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
@@ -61,8 +61,6 @@ function combineEndpointConfigs(ctrl: ControllerConfig, base: EndpointConfig, ..
  * Adapter for controller registry
  */
 export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConfig> {
-  indexCls: RegistryIndexClass<ControllerConfig>;
-
   #config: ControllerConfig;
   #endpoints: Map<string | symbol, EndpointConfig> = new Map();
   #cls: Class;

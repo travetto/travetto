@@ -1,6 +1,20 @@
 import { AppError, castTo, Class, ClassInstance } from '@travetto/runtime';
 
 import { ClassOrId, RegistrationMethods, RegistryAdapter } from './types';
+import { ChangeEvent } from '../types';
+
+
+export type RegistryIndexClass = {
+  new(): RegistryIndex;
+};
+
+/**
+ * Registry index definition
+ */
+export type RegistryIndex = {
+  store: RegistryIndexStore;
+  process(events: ChangeEvent<Class>[]): void;
+};
 
 /**
  * Base registry index implementation

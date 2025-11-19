@@ -1,5 +1,5 @@
 import { Class, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { ClassOrId, RegistrationMethods, RegistryAdapter, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ClassOrId, RegistryAdapter, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
 import { CliUnknownCommandError } from '../error.ts';
@@ -14,21 +14,26 @@ export class CliCommandRegistryIndex {
 
   static { RegistryV2.registerIndex(this); }
 
+  static get instance(): CliCommandRegistryIndex {
+    return RegistryV2.instance(this);
+  }
+
   static getForRegister(clsOrId: ClassOrId): RegistryAdapter<CliCommandConfig> {
-    return RegistryV2.instance(this).getForRegister(clsOrId);
+    return this.instance.store.getForRegister(clsOrId);
   }
 
   static get(clsOrId: ClassOrId): CliCommandConfig {
-    return RegistryV2.instance(this).get(clsOrId).get();
+    return this.instance.store.get(clsOrId).get();
   }
 
   static load(names?: string[]): Promise<CliCommandLoadResult[]> {
-    return RegistryV2.instance(this).load(names);
+    return this.instance.load(names);
   }
 
   #fileMapping: Map<string, string>;
   #instanceMapping: Map<string, CliCommandShape> = new Map();
-  #store = new RegistryIndexStore(CliCommandRegistryAdapter);
+
+  store = new RegistryIndexStore(CliCommandRegistryAdapter);
 
   /**
    * Get list of all commands available
@@ -51,26 +56,6 @@ export class CliCommandRegistryIndex {
 
   process(): void {
     // Do nothing for now?
-  }
-
-  remove(cls: Class): void {
-    this.#store.remove(cls);
-  }
-
-  finalize(cls: Class): void {
-    this.#store.finalize(cls);
-  }
-
-  has(cls: Class): boolean {
-    return this.#store.has(cls);
-  }
-
-  get(clsOrId: ClassOrId): Omit<CliCommandRegistryAdapter, RegistrationMethods> {
-    return this.#store.get(clsOrId);
-  }
-
-  getForRegister(clsOrId: ClassOrId): CliCommandRegistryAdapter {
-    return this.#store.getForRegister(clsOrId);
   }
 
   /**
@@ -99,7 +84,7 @@ export class CliCommandRegistryIndex {
       }, []);
 
     const uninitialized = filtered
-      .filter(v => !this.#store.finalized(v));
+      .filter(v => !this.store.finalized(v));
 
 
     // Initialize any uninitialized commands
@@ -109,7 +94,7 @@ export class CliCommandRegistryIndex {
     }
 
     for (const v of values) {
-      const cfg = this.#store.get(v);
+      const cfg = this.store.get(v);
       if (!cfg) {
         continue;
       }
@@ -132,7 +117,7 @@ export class CliCommandRegistryIndex {
 
     const list = await Promise.all(keys.map(async x => {
       const instance = await this.#getInstance(x);
-      const config = this.#store.get(instance).get();
+      const config = this.store.get(instance).get();
       return { command: x, instance, config };
     }));
 

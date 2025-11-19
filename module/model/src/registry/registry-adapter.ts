@@ -1,4 +1,4 @@
-import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
+import type { RegistryAdapter } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -18,7 +18,6 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
 export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   #cls: Class;
   #config: ModelConfig;
-  indexCls: RegistryIndexClass<ModelConfig>;
 
   constructor(cls: Class) {
     this.#cls = cls;
