@@ -46,7 +46,7 @@ export abstract class BaseWebRouter implements WebRouter {
     console.debug('Sorting interceptors', { count: names.length, names });
 
     // Register all active
-    for (const c of RegistryV2.getClasses(ControllerRegistryIndex)) {
+    for (const c of ControllerRegistryIndex.getClasses()) {
       await this.#register(c);
     }
 

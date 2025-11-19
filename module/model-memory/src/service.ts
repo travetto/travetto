@@ -9,7 +9,6 @@ import {
   ModelRegistryIndex, NotFoundError, ExistsError, OptionalId, ModelBlobSupport,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, ModelBlobUtil,
 } from '@travetto/model';
-import { RegistryV2 } from '@travetto/registry';
 
 const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
@@ -150,7 +149,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     await ModelStorageUtil.registerModelChangeListener(this);
     ModelExpiryUtil.registerCull(this);
 
-    for (const el of RegistryV2.getClasses(ModelRegistryIndex)) {
+    for (const el of ModelRegistryIndex.getClasses()) {
       for (const idx of ModelRegistryIndex.getConfig(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {

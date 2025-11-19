@@ -1,6 +1,5 @@
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { castTo, Class } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
 
 import { DependencyClassId, DependencyTargetId, PrimaryCandidateSymbol, Resolved } from './types';
 import { ClassTarget, getDefaultQualifier, InjectableConfig, InjectionClassConfig, ResolutionType } from '../types';
@@ -33,7 +32,7 @@ export class DependencyRegistryResolver {
     let target = config.target;
 
     if (config.factory) {
-      const schema = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(config.factory.property);
+      const schema = SchemaRegistryIndex.get(cls).getMethod(config.factory.property);
       target = schema.returnType?.type;
     }
     return target ? target.Ⲑid : classId;

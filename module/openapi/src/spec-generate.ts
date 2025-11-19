@@ -7,7 +7,6 @@ import type {
 import { EndpointConfig, ControllerConfig, EndpointParamConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { ApiSpecConfig } from './config.ts';
 
@@ -253,7 +252,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: ''
       };
     } else {
-      const schemaConfig = RegistryV2.getOptional(SchemaRegistryIndex, body.type)?.get();
+      const schemaConfig = SchemaRegistryIndex.getOptionalConfig(body.type);
       const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.name;
       const typeRef = schemaConfig ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {

@@ -10,43 +10,34 @@ import { DependencyRegistryResolver } from './registry-resolver';
 
 export class DependencyRegistryIndex {
 
-  static { RegistryV2.registerIndex(DependencyRegistryIndex); }
-
-  static get instance(): DependencyRegistryIndex {
-    return RegistryV2.instance(this);
-  }
+  static #instance = RegistryV2.registerIndex(DependencyRegistryIndex);
 
   static getForRegister(clsOrId: ClassOrId): DependencyRegistryAdapter {
-    return this.instance.store.getForRegister(clsOrId);
+    return this.#instance.store.getForRegister(clsOrId);
   }
 
   static getInstance<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Promise<T> {
-    return this.instance.getInstance(target, qualifier, resolution);
+    return this.#instance.getInstance(target, qualifier, resolution);
   }
 
   static getCandidateTypes<T>(target: Class<T>): InjectionClassConfig<T>[] {
-    return this.instance.getCandidateTypes<T>(target);
+    return this.#instance.getCandidateTypes<T>(target);
   }
 
   static getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectionClassConfig<T>) => boolean): Promise<T[]> {
-    return this.instance.getCandidateInstances<T>(target, predicate);
+    return this.#instance.getCandidateInstances<T>(target, predicate);
   }
 
   static injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
-    return this.instance.injectFields(o, cls);
+    return this.#instance.injectFields(o, cls);
+  }
+
+  static getOptional(clsOrId: ClassOrId): InjectionClassConfig | undefined {
+    return this.#instance.store.getOptional(clsOrId)?.get();
   }
 
   static async getPrimaryCandidateInstances<T>(candidateType: Class<T>): Promise<[Class, T][]> {
-    const targets = await DependencyRegistryIndex.getCandidateTypes(candidateType);
-    return await Promise.all(
-      targets
-        .filter(el => el.qualifier === RegistryV2.get(DependencyRegistryIndex, el.class).get().qualifier) // Is primary?
-        .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
-        .map(async el => {
-          const instance = await DependencyRegistryIndex.getInstance<T>(el.class, el.qualifier);
-          return [el.class, instance];
-        })
-    );
+    return this.#instance.getPrimaryCandidateInstances<T>(candidateType);
   }
 
   #instances = new Map<DependencyTargetId, Map<symbol, unknown>>();
@@ -89,7 +80,7 @@ export class DependencyRegistryIndex {
 
     for (const item of adapter.getInjectables()) {
       const parentClass = this.getParentClass(cls);
-      const parentConfig = parentClass ? RegistryV2.getOptional(DependencyRegistryIndex, parentClass) : undefined;
+      const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
       const hasParentBase = (parentConfig || describeFunction(parentClass)?.abstract);
       const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
       this.#resolver.registerClass(item, baseParentId, parentConfig?.get());
@@ -161,6 +152,18 @@ export class DependencyRegistryIndex {
   }
 
 
+  async getPrimaryCandidateInstances<T>(candidateType: Class<T>): Promise<[Class, T][]> {
+    const targets = await this.getCandidateTypes(candidateType);
+    return await Promise.all(
+      targets
+        .filter(el => el.qualifier === this.store.get(el.class).get().qualifier) // Is primary?
+        .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
+        .map(async el => {
+          const instance = await this.getInstance<T>(el.class, el.qualifier);
+          return [el.class, instance];
+        })
+    );
+  }
 
   /**
    * Retrieve all dependencies

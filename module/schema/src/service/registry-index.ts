@@ -15,57 +15,61 @@ const classToSubTypeName = (cls: Class): string => cls.name
  */
 export class SchemaRegistryIndex {
 
-  static { RegistryV2.registerIndex(SchemaRegistryIndex); }
-
-  static instance(): SchemaRegistryIndex {
-    return RegistryV2.instance(this);
-  }
+  static #instance = RegistryV2.registerIndex(SchemaRegistryIndex);
 
   static getForRegister(clsOrId: ClassOrId, allowFinalized = false): SchemaRegistryAdapter {
-    return this.instance().getForRegister(clsOrId, allowFinalized);
+    return this.#instance.getForRegister(clsOrId, allowFinalized);
   }
 
   static getConfig(clsOrId: ClassOrId): SchemaClassConfig {
-    return this.instance().get(clsOrId).get();
+    return this.#instance.get(clsOrId).get();
   }
 
   static getFieldMap(clsOrId: ClassOrId, view?: string): SchemaFieldMap {
-    return this.instance().get(clsOrId).getSchema(view);
+    return this.#instance.get(clsOrId).getSchema(view);
   }
 
   static getMethodConfig(clsOrId: ClassOrId, method: string | symbol): SchemaMethodConfig {
-    return this.instance().get(clsOrId).getMethod(method);
+    return this.#instance.get(clsOrId).getMethod(method);
   }
 
   static has(clsOrId: ClassOrId): boolean {
-    return this.instance().has(clsOrId);
+    return this.#instance.store.has(clsOrId);
   }
 
   static getSubTypesForClass(cls: Class): Class[] | undefined {
-    return this.instance().getSubTypesForClass(cls);
+    return this.#instance.getSubTypesForClass(cls);
   }
 
   static resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    return this.instance().resolveInstanceType(cls, o);
+    return this.#instance.resolveInstanceType(cls, o);
   }
 
   static visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void): void {
-    return this.instance().visitFields(cls, onField);
+    return this.#instance.visitFields(cls, onField);
   }
 
   static getClassesByBaseType(cls: Class): Class[] {
-    return this.instance().getClassesByBaseType(cls);
+    return this.#instance.getClassesByBaseType(cls);
   }
 
   static getBaseClass(cls: Class): Class {
-    return this.instance().getBaseClass(cls);
+    return this.#instance.getBaseClass(cls);
   }
 
   static get(clsOrId: ClassOrId): Omit<SchemaRegistryAdapter, RegistrationMethods> {
-    return this.instance().#store.get(clsOrId);
+    return this.#instance.store.get(clsOrId);
   }
 
-  #store = new RegistryIndexStore(SchemaRegistryAdapter);
+  static getOptionalConfig(clsOrId: ClassOrId): SchemaClassConfig | undefined {
+    return this.#instance.store.getOptional(clsOrId)?.get();
+  }
+
+  static getClasses(): Class[] {
+    return this.#instance.store.getClasses();
+  }
+
+  store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
   #baseSchemasGrouped = new Map<Class, Class[]>();
   #subTypes = new Map<Class, Map<string, Class>>();
@@ -143,33 +147,21 @@ export class SchemaRegistryIndex {
     // Rebuild indices after every "process" batch
     this.#subTypes.clear();
     this.#baseSchemasGrouped.clear();
-    for (const el of this.#store.getClasses()) {
+    for (const el of this.store.getClasses()) {
       this.#registerSubTypes(el);
     }
   }
 
-  has(clsOrId: ClassOrId): boolean {
-    return this.#store.has(clsOrId);
-  }
-
-  remove(clsOrId: ClassOrId): void {
-    this.#store.remove(clsOrId);
-  }
-
-  finalize(clsOrId: ClassOrId): void {
-    this.#store.finalize(clsOrId);
-  }
-
   getClassConfig(cls: ClassOrId): SchemaClassConfig {
-    return this.#store.get(cls).get();
+    return this.store.get(cls).get();
   }
 
   get(cls: ClassOrId): Omit<SchemaRegistryAdapter, RegistrationMethods> {
-    return this.#store.get(cls);
+    return this.store.get(cls);
   }
 
   getForRegister(cls: ClassOrId, allowFinalized = false): SchemaRegistryAdapter {
-    return this.#store.getForRegister(cls, allowFinalized);
+    return this.store.getForRegister(cls, allowFinalized);
   }
 
   /**
@@ -183,7 +175,7 @@ export class SchemaRegistryIndex {
       while (parent && conf && !conf.baseType) {
         parent = getParentClass(parent);
         if (parent) {
-          conf = this.#store.getOptional(parent)?.get();
+          conf = this.store.getOptional(parent)?.get();
         }
       }
 

@@ -10,26 +10,22 @@ import type { WebInterceptor } from '../types/interceptor.ts';
 
 export class ControllerRegistryIndex {
 
-  static { RegistryV2.registerIndex(ControllerRegistryIndex); }
-
-  static get instance(): ControllerRegistryIndex {
-    return RegistryV2.instance(this);
-  }
+  static #instance = RegistryV2.registerIndex(this);
 
   static getClasses(): Class[] {
-    return this.instance.store.getClasses();
+    return this.#instance.store.getClasses();
   }
 
   static getForRegister(clsOrId: ClassOrId): ControllerRegistryAdapter {
-    return this.instance.store.getForRegister(clsOrId);
+    return this.#instance.store.getForRegister(clsOrId);
   }
 
   static getConfig(clsOrId: ClassOrId): ControllerConfig {
-    return this.instance.store.get(clsOrId).get();
+    return this.#instance.store.get(clsOrId).get();
   }
 
   static getEndpointConfigById(id: string): EndpointConfig | undefined {
-    return this.instance.getEndpointById(id);
+    return this.#instance.getEndpointById(id);
   }
 
   /**
@@ -73,7 +69,7 @@ export class ControllerRegistryIndex {
   registerControllerContextParam<T>(target: Class, field: string): void {
     const controllerConfig = this.getController(target);
     controllerConfig.contextParams[field] = true;
-    DependencyRegistryIndex.getForRegister(target).register({
+    DependencyRegistryIndex.getForRegister(target).registerInjectable({
       postConstruct: {
         ContextParam: (inst: ClassInstance) => this.#bindContextParams(inst)
       }

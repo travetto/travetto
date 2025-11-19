@@ -7,7 +7,6 @@ import {
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { RegistryV2 } from '@travetto/registry';
 
 import { RedisModelConfig } from './config.ts';
 
@@ -173,7 +172,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     await this.client.connect();
     await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onGracefulShutdown(() => this.client.destroy());
-    for (const el of RegistryV2.getClasses(ModelRegistryIndex)) {
+    for (const el of ModelRegistryIndex.getClasses()) {
       for (const idx of ModelRegistryIndex.getConfig(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {

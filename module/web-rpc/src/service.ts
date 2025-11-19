@@ -26,7 +26,7 @@ export class WebRpcClientGeneratorService {
   }
 
   async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {
-    return RegistryV2.getClasses(ControllerRegistryIndex)
+    return ControllerRegistryIndex.getClasses()
       .filter(x => {
         const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(x));
         return entry && entry.role === 'std';

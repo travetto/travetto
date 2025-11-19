@@ -14,42 +14,38 @@ type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & 
  */
 export class ModelRegistryIndex {
 
-  static { RegistryV2.registerIndex(ModelRegistryIndex); }
-
-  static get instance(): ModelRegistryIndex {
-    return RegistryV2.instance(this);
-  }
+  static #instance = RegistryV2.registerIndex(this);
 
   static getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
-    return this.instance.store.getForRegister(clsOrId);
+    return this.#instance.store.getForRegister(clsOrId);
   }
 
   static getConfig(clsOrId: ClassOrId): ModelConfig {
-    return this.instance.getModelOptions(clsOrId);
+    return this.#instance.getModelOptions(clsOrId);
   }
 
   static has(clsOrId: ClassOrId): boolean {
-    return this.instance.store.has(clsOrId);
+    return this.#instance.store.has(clsOrId);
   }
 
   static getStoreName<T extends ModelType>(cls: Class<T>): string {
-    return this.instance.getStoreName(cls);
+    return this.#instance.getStoreName(cls);
   }
 
   static getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
-    return this.instance.getIndices(cls, supportedTypes);
+    return this.#instance.getIndices(cls, supportedTypes);
   }
 
   static getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
-    return this.instance.getIndex(cls, name, supportedTypes);
+    return this.#instance.getIndex(cls, name, supportedTypes);
   }
 
   static getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
-    return this.instance.getExpiryFieldName(cls);
+    return this.#instance.getExpiryFieldName(cls);
   }
 
   static getClasses(): Class[] {
-    return this.instance.store.getClasses();
+    return this.#instance.store.getClasses();
   }
 
   /**

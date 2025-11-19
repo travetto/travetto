@@ -15,34 +15,30 @@ type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
  */
 export class SuiteRegistryIndex {
 
-  static { RegistryV2.registerIndex(this); }
-
-  static get instance(): SuiteRegistryIndex {
-    return RegistryV2.instance(this);
-  }
+  static #instance = RegistryV2.registerIndex(this);
 
   static getForRegister(clsOrId: ClassOrId): SuiteRegistryAdapter {
-    return this.instance.store.getForRegister(clsOrId);
+    return this.#instance.store.getForRegister(clsOrId);
   }
 
   static has(cls: Class): boolean {
-    return this.instance.store.has(cls);
+    return this.#instance.store.has(cls);
   }
 
   static getTestConfig(cls: Class, method: Function): TestConfig | undefined {
-    return this.instance.getTestConfig(cls, method);
+    return this.#instance.getTestConfig(cls, method);
   }
 
   static getSuiteTests(run: TestRun): SuiteTests[] {
-    return this.instance.getSuiteTests(run);
+    return this.#instance.getSuiteTests(run);
   }
 
   static getConfig(cls: Class): SuiteConfig {
-    return this.instance.store.get(cls).get();
+    return this.#instance.store.get(cls).get();
   }
 
   static getClasses(): Class[] {
-    return this.instance.store.getClasses();
+    return this.#instance.store.getClasses();
   }
 
   store = new RegistryIndexStore(SuiteRegistryAdapter);

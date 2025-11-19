@@ -88,11 +88,12 @@ class $Registry {
   /**
    * Register a new index
    */
-  registerIndex<T extends RegistryIndexClass>(indexCls: T): void {
+  registerIndex<T extends RegistryIndexClass>(indexCls: T): InstanceType<T> {
     if (!this.#indexes.has(indexCls)) {
       this.#indexes.set(indexCls, new indexCls());
       this.#indexOrder.push(indexCls);
     }
+    return castTo(this.#indexes.get(indexCls));
   }
 
   /**

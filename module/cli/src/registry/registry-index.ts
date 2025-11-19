@@ -12,22 +12,18 @@ type CliCommandLoadResult = { command: string, config: CliCommandConfig, instanc
 
 export class CliCommandRegistryIndex {
 
-  static { RegistryV2.registerIndex(this); }
-
-  static get instance(): CliCommandRegistryIndex {
-    return RegistryV2.instance(this);
-  }
+  static #instance = RegistryV2.registerIndex(this);
 
   static getForRegister(clsOrId: ClassOrId): RegistryAdapter<CliCommandConfig> {
-    return this.instance.store.getForRegister(clsOrId);
+    return this.#instance.store.getForRegister(clsOrId);
   }
 
   static get(clsOrId: ClassOrId): CliCommandConfig {
-    return this.instance.store.get(clsOrId).get();
+    return this.#instance.store.get(clsOrId).get();
   }
 
   static load(names?: string[]): Promise<CliCommandLoadResult[]> {
-    return this.instance.load(names);
+    return this.#instance.load(names);
   }
 
   #fileMapping: Map<string, string>;
