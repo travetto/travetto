@@ -2,19 +2,13 @@ import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2, RetargettingProxy } 
 import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { ClassTarget, Dependency, InjectableConfig } from '../types';
+import { ClassTarget, Dependency, InjectionClassConfig, ResolutionType } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
-import { DependencyClassId, DependencyTargetId, hasPostConstruct, hasPreDestroy, PrimaryCandidateSymbol, ResolutionType, Resolved } from './types';
+import { DependencyTargetId, hasPostConstruct, hasPreDestroy } from './types';
 import { InjectionError } from '../error';
+import { DependencyRegistryResolver } from './registry-resolver';
 
-function relateViaSymbol(map: Map<string, Map<symbol, string>>, src: string, qual: symbol, dest: string): void {
-  if (!map.has(src)) {
-    map.set(src, new Map());
-  }
-  map.get(src)!.set(qual, dest);
-}
-
-export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> {
+export class DependencyRegistryIndex implements RegistryIndex<InjectionClassConfig> {
 
   static { RegistryV2.registerIndex(DependencyRegistryIndex); }
 
@@ -28,11 +22,11 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     return RegistryV2.instance(DependencyRegistryIndex).getInstance(target, qualifier, resolution);
   }
 
-  static getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
+  static getCandidateTypes<T>(target: Class<T>): InjectionClassConfig<T>[] {
     return RegistryV2.instance(DependencyRegistryIndex).getCandidateTypes<T>(target);
   }
 
-  static getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
+  static getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectionClassConfig<T>) => boolean): Promise<T[]> {
     return RegistryV2.instance(DependencyRegistryIndex).getCandidateInstances<T>(target, predicate);
   }
 
@@ -57,31 +51,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   #instancePromises = new Map<DependencyTargetId, Map<symbol, Promise<unknown>>>();
   #proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
 
-  /**
-   * Default symbols
-   */
-  #defaultSymbols = new Set<symbol>();
-  /**
-   * Maps from the target id to the class id, by symbol
-   */
-  #targetToClass = new Map<DependencyTargetId, Map<symbol, string>>();
-  /**
-   * Maps from the class id to the target id, by symbol
-   */
-  #classToTarget = new Map<DependencyClassId, Map<symbol, DependencyTargetId>>();
-
-  #registerClassToTargetToClass(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
-    relateViaSymbol(this.#classToTarget, clsId, qualifier, targetId);
-    relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
-  }
-
-  #registerTargetToClass(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
-    relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
-  }
-
-  #registerClassToTarget(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
-    relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
-  }
+  #resolver = new DependencyRegistryResolver();
 
   #proxyInstance<T>(target: ClassTarget<unknown>, qualifier: symbol, instance: T): T {
     const classId = target.Ⲑid;
@@ -106,18 +76,6 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     return proxy.get();
   }
 
-  #getTargetClassId(cls: Class): DependencyTargetId {
-    const classId = cls.Ⲑid;
-    const config = RegistryV2.get(DependencyRegistryIndex, cls).get();
-    let target = config.target;
-
-    if (config.factory) {
-      const schema = RegistryV2.get(SchemaRegistryIndex, cls).getMethod(config.factory.property);
-      target = schema.returnType?.type;
-    }
-    return target ? target.Ⲑid : classId;
-  }
-
   #addClass(cls: Class): void {
     const adapter = RegistryV2.get(DependencyRegistryIndex, cls);
     if (
@@ -127,64 +85,12 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       return;
     }
 
-    const config = adapter.get();
-
-    // Record qualifier if its the default for the class
-    if (config.qualifier === Symbol.for(cls.Ⲑid)) {
-      this.#defaultSymbols.add(config.qualifier);
-    }
-
-    const classId = cls.Ⲑid;
-    const targetClassId = this.#getTargetClassId(cls);
-    const isSelfTarget = (classId === targetClassId || !!config.factory);
-    const parentClass = this.getParentClass(cls);
-    const parentConfig = parentClass ? RegistryV2.getOptional(DependencyRegistryIndex, parentClass) : undefined;
-    const hasParentBase = (parentConfig || describeFunction(parentClass)?.abstract);
-    const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
-
-    // Register class to target
-    this.#registerClassToTargetToClass(classId, config.qualifier, targetClassId);
-
-    // Make factory able to be targeted as self
-    if (config.factory) {
-      this.#registerClassToTarget(classId, config.qualifier, classId);
-    }
-
-    // Track interface aliases as targets
-    const { interfaces } = SchemaRegistryIndex.getConfig(cls);
-    for (const { Ⲑid: interfaceId } of interfaces) {
-      this.#registerClassToTargetToClass(classId, config.qualifier, interfaceId);
-    }
-
-    // If targeting self (default @Injectable behavior)
-    if (isSelfTarget && baseParentId) {
-      this.#registerClassToTargetToClass(classId, config.qualifier, baseParentId);
-    }
-
-    // Registry primary candidates
-    if (config.primary) {
-      if (baseParentId) {
-        this.#registerTargetToClass(baseParentId, PrimaryCandidateSymbol, classId);
-      }
-
-      // Register primary for self
-      this.#registerTargetToClass(classId, PrimaryCandidateSymbol, classId);
-
-      if (config.factory) {
-        this.#registerTargetToClass(targetClassId, PrimaryCandidateSymbol, classId);
-      }
-
-      // Register primary if only one interface provided and no parent config
-      if (interfaces.length === 1 && !parentConfig) {
-        const [primaryInterface] = interfaces;
-        const primaryClassId = primaryInterface.Ⲑid;
-        this.#registerTargetToClass(primaryClassId, PrimaryCandidateSymbol, classId);
-      } else if (isSelfTarget) {
-        // Register primary for all interfaces if self targeting
-        for (const { Ⲑid: interfaceId } of interfaces) {
-          this.#registerTargetToClass(interfaceId, PrimaryCandidateSymbol, classId);
-        }
-      }
+    for (const item of adapter.getInjectables()) {
+      const parentClass = this.getParentClass(cls);
+      const parentConfig = parentClass ? RegistryV2.getOptional(DependencyRegistryIndex, parentClass) : undefined;
+      const hasParentBase = (parentConfig || describeFunction(parentClass)?.abstract);
+      const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
+      this.#resolver.registerClass(item, baseParentId, parentConfig?.get());
     }
   }
 
@@ -199,12 +105,8 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   #removeClass(cls: Class): void {
     const classId = cls.Ⲑid;
 
-    if (!this.#classToTarget.has(classId)) {
-      return;
-    }
-
     if (this.#instances.has(classId)) {
-      for (const qualifier of this.#classToTarget.get(classId)!.keys()) {
+      for (const qualifier of this.#resolver.getQualifiers(cls)) {
         this.destroyInstance(cls, qualifier);
       }
     }
@@ -223,7 +125,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
     }
   }
 
-  getConfig(clsOrId: ClassOrId): InjectableConfig {
+  getConfig(clsOrId: ClassOrId): InjectionClassConfig {
     return RegistryV2.get(DependencyRegistryIndex, clsOrId).get();
   }
 
@@ -242,86 +144,24 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   /**
    * Get all available candidate types for the target
    */
-  getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
-    const qualifiers = this.#targetToClass.get(target.Ⲑid)!;
-    const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
-    return castTo(uniqueQualifiers.map(id => this.getConfig(id)));
+  getCandidateTypes<T>(target: Class<T>): InjectionClassConfig<T>[] {
+    return castTo(this.#resolver.getQualifiers(target).map(id => this.getConfig(id)));
   }
 
   /**
    * Get candidate instances by target type, with an optional filter
    */
-  getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
+  getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectionClassConfig<T>) => boolean): Promise<T[]> {
     const inputs = this.getCandidateTypes<T>(target).filter(x => !predicate || predicate(x));
     return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
   }
 
-  /**
-   * Resolve the target given a qualifier
-   * @param target
-   * @param qualifier
-   */
-  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
-    const qualifiers = this.#targetToClass.get(target.Ⲑid) ?? new Map<symbol, string>();
 
-    let cls: string | undefined;
-
-    if (qualifier && qualifiers.has(qualifier)) {
-      cls = qualifiers.get(qualifier);
-    } else {
-      const resolved = [...qualifiers.keys()];
-      if (!qualifier) {
-        // If primary found
-        if (qualifiers.has(PrimaryCandidateSymbol)) {
-          qualifier = PrimaryCandidateSymbol;
-        } else {
-          // If there is only one default symbol
-          const filtered = resolved.filter(x => !!x).filter(x => this.#defaultSymbols.has(x));
-          if (filtered.length === 1) {
-            qualifier = filtered[0];
-          } else if (filtered.length > 1) {
-            // If dealing with sub types, prioritize exact matches
-            const exact = this
-              .getCandidateTypes(castTo<Class>(target))
-              .filter(x => x.class === target);
-            if (exact.length === 1) {
-              qualifier = exact[0].qualifier;
-            } else {
-              if (resolution === 'any') {
-                qualifier = filtered[0];
-              } else {
-                throw new InjectionError('Dependency has multiple candidates', target, filtered);
-              }
-            }
-          }
-        }
-      }
-
-      if (!qualifier) {
-        throw new InjectionError('Dependency not found', target);
-      } else if (!qualifiers.has(qualifier)) {
-        if (!this.#defaultSymbols.has(qualifier) && resolution === 'loose') {
-          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: target.Ⲑid });
-          return this.resolveTarget(target);
-        }
-        throw new InjectionError('Dependency not found', target, [qualifier]);
-      } else {
-        cls = qualifiers.get(qualifier!)!;
-      }
-    }
-
-    const config: InjectableConfig<T> = castTo(this.getConfig(cls!));
-    return {
-      qualifier,
-      config,
-      id: (config.target ?? config.class).Ⲑid
-    };
-  }
 
   /**
    * Retrieve all dependencies
    */
-  async fetchDependencies<T>(managed: InjectableConfig<T>, deps: Dependency[], inputs: (SchemaFieldConfig | SchemaParameterConfig)[]): Promise<unknown[]> {
+  async fetchDependencies<T>(managed: InjectionClassConfig<T>, deps: Dependency[], inputs: (SchemaFieldConfig | SchemaParameterConfig)[]): Promise<unknown[]> {
     if (!deps || !deps.length) {
       return [];
     }
@@ -348,7 +188,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
   /**
    * Resolve all field dependencies
    */
-  async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T): Promise<void> {
+  async resolveFieldDependencies<T>(config: InjectionClassConfig<T>, instance: T): Promise<void> {
     const keys = Object.keys(config.dependencies.fields ?? {})
       .filter(k => instance[castKey<T>(k)] === undefined); // Filter out already set ones
 
@@ -371,7 +211,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
    * Actually construct an instance while resolving the dependencies
    */
   async construct<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
-    const managed = this.resolveTarget(target, qualifier).config;
+    const managed = this.#resolver.resolveTarget(target, qualifier).config;
 
     // Only fetch constructor values
     const consValues = await this.fetchDependencies(
@@ -419,7 +259,7 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       throw new AppError('Unable to get instance when target is undefined');
     }
 
-    const { id: classId, qualifier } = this.resolveTarget(target, requestedQualifier, resolution);
+    const { id: classId, qualifier } = this.#resolver.resolveTarget(target, requestedQualifier, resolution);
 
     if (!this.#instances.has(classId)) {
       this.#instances.set(classId, new Map());
@@ -454,10 +294,10 @@ export class DependencyRegistryIndex implements RegistryIndex<InjectableConfig> 
       activeInstance.preDestroy();
     }
 
-    this.#defaultSymbols.delete(qualifier);
+    this.#resolver.removeClass(cls, qualifier);
     this.#instances.get(classId)!.delete(qualifier);
     this.#instancePromises.get(classId)!.delete(qualifier);
-    this.#classToTarget.get(classId)!.delete(qualifier);
+
     // May not exist
     this.#proxies.get(classId)?.get(qualifier)?.setTarget(null);
     console.debug('On uninstall', { id: classId, qualifier: qualifier.toString(), classId });
