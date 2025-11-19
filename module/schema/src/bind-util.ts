@@ -1,5 +1,4 @@
 import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
 
 import { DataUtil } from './data.ts';
 import { SchemaInputConfig, SchemaParameterConfig, SchemaFieldMap } from './service/types.ts';
@@ -150,7 +149,7 @@ export class BindUtil {
       return castTo(data);
     } else {
       const tgt = classConstruct<T & { type?: string }>(cls);
-      RegistryV2.get(SchemaRegistryIndex, cls).ensureInstanceTypeField(tgt);
+      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(tgt);
 
       for (const k of TypedObject.keys(tgt)) { // Do not retain undefined fields
         if (tgt[k] === undefined) {
@@ -173,7 +172,7 @@ export class BindUtil {
     delete cfg.view;
 
     if (!!data && isInstance<T>(data)) {
-      const adapter = RegistryV2.get(SchemaRegistryIndex, cons);
+      const adapter = SchemaRegistryIndex.get(cons);
       const conf = adapter.get();
 
       // If no configuration

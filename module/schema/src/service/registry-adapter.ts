@@ -1,4 +1,4 @@
-import type { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
+import type { RegistryAdapter } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, describeFunction } from '@travetto/runtime';
 
 import { SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig, SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig } from './types';
@@ -104,8 +104,6 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   #config: SchemaClassConfig;
   #views: Map<string, SchemaFieldMap> = new Map();
   #accessorDescriptors: Map<string, PropertyDescriptor> = new Map();
-
-  indexCls: RegistryIndexClass<SchemaClassConfig>;
 
   constructor(cls: Class) {
     this.#cls = cls;

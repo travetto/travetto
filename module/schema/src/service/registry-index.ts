@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfig } from './types.ts';
@@ -13,52 +13,59 @@ const classToSubTypeName = (cls: Class): string => cls.name
 /**
  * Schema registry index for managing schema configurations across classes
  */
-export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
+export class SchemaRegistryIndex {
 
   static { RegistryV2.registerIndex(SchemaRegistryIndex); }
 
-  static adapterCls = SchemaRegistryAdapter;
+  static instance(): SchemaRegistryIndex {
+    return RegistryV2.instance(this);
+  }
 
   static getForRegister(clsOrId: ClassOrId, allowFinalized = false): SchemaRegistryAdapter {
-    return RegistryV2.getForRegister(this, clsOrId, allowFinalized);
+    return this.instance().getForRegister(clsOrId, allowFinalized);
   }
 
   static getConfig(clsOrId: ClassOrId): SchemaClassConfig {
-    return RegistryV2.get(this, clsOrId).get();
+    return this.instance().get(clsOrId).get();
   }
 
   static getFieldMap(clsOrId: ClassOrId, view?: string): SchemaFieldMap {
-    return RegistryV2.get(this, clsOrId).getSchema(view);
+    return this.instance().get(clsOrId).getSchema(view);
   }
 
   static getMethodConfig(clsOrId: ClassOrId, method: string | symbol): SchemaMethodConfig {
-    return RegistryV2.get(this, clsOrId).getMethod(method);
+    return this.instance().get(clsOrId).getMethod(method);
   }
 
   static has(clsOrId: ClassOrId): boolean {
-    return RegistryV2.has(this, clsOrId);
+    return this.instance().has(clsOrId);
   }
 
   static getSubTypesForClass(cls: Class): Class[] | undefined {
-    return RegistryV2.instance(this).getSubTypesForClass(cls);
+    return this.instance().getSubTypesForClass(cls);
   }
 
   static resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    return RegistryV2.instance(this).resolveInstanceType(cls, o);
+    return this.instance().resolveInstanceType(cls, o);
   }
 
   static visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void): void {
-    return RegistryV2.instance(this).visitFields(cls, onField);
+    return this.instance().visitFields(cls, onField);
   }
 
   static getClassesByBaseType(cls: Class): Class[] {
-    return RegistryV2.instance(this).getClassesByBaseType(cls);
+    return this.instance().getClassesByBaseType(cls);
   }
 
   static getBaseClass(cls: Class): Class {
-    return RegistryV2.instance(this).getBaseClass(cls);
+    return this.instance().getBaseClass(cls);
   }
 
+  static get(clsOrId: ClassOrId): Omit<SchemaRegistryAdapter, RegistrationMethods> {
+    return this.instance().#store.get(clsOrId);
+  }
+
+  #store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
   #baseSchemasGrouped = new Map<Class, Class[]>();
   #subTypes = new Map<Class, Map<string, Class>>();
@@ -136,13 +143,33 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
     // Rebuild indices after every "process" batch
     this.#subTypes.clear();
     this.#baseSchemasGrouped.clear();
-    for (const el of RegistryV2.getClasses(SchemaRegistryIndex)) {
+    for (const el of this.#store.getClasses()) {
       this.#registerSubTypes(el);
     }
   }
 
+  has(clsOrId: ClassOrId): boolean {
+    return this.#store.has(clsOrId);
+  }
+
+  remove(clsOrId: ClassOrId): void {
+    this.#store.remove(clsOrId);
+  }
+
+  finalize(clsOrId: ClassOrId): void {
+    this.#store.finalize(clsOrId);
+  }
+
   getClassConfig(cls: ClassOrId): SchemaClassConfig {
-    return RegistryV2.get(SchemaRegistryIndex, cls).get();
+    return this.#store.get(cls).get();
+  }
+
+  get(cls: ClassOrId): Omit<SchemaRegistryAdapter, RegistrationMethods> {
+    return this.#store.get(cls);
+  }
+
+  getForRegister(cls: ClassOrId, allowFinalized = false): SchemaRegistryAdapter {
+    return this.#store.getForRegister(cls, allowFinalized);
   }
 
   /**
@@ -156,7 +183,7 @@ export class SchemaRegistryIndex implements RegistryIndex<SchemaClassConfig> {
       while (parent && conf && !conf.baseType) {
         parent = getParentClass(parent);
         if (parent) {
-          conf = RegistryV2.getOptional(SchemaRegistryIndex, parent)?.get();
+          conf = this.#store.getOptional(parent)?.get();
         }
       }
 

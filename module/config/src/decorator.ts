@@ -1,7 +1,6 @@
 import { Class, ClassInstance } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
 
 import { OverrideConfig, OverrideConfigSymbol } from './source/override.ts';
 import { ConfigurationService, ConfigBaseType } from './service.ts';
@@ -14,14 +13,14 @@ export function Config(ns: string) {
   return <T extends Class>(target: T): T => {
     const og: Function = target.prototype.postConstruct;
     // Declare as part of global config
-    RegistryV2.getForRegister(SchemaRegistryIndex, target).register({
+    SchemaRegistryIndex.getForRegister(target).register({
       interfaces: [ConfigBaseType],
       metadata: {
         [OverrideConfigSymbol]: { ns, fields: {} }
       }
     });
 
-    RegistryV2.getForRegister(DependencyRegistryIndex, target).register();
+    SchemaRegistryIndex.getForRegister(target).register();
 
     target.prototype.postConstruct = async function (): Promise<void> {
       // Apply config

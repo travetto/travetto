@@ -3,23 +3,23 @@ import { ChangeEvent } from '../types';
 
 export type ClassOrId = Class | string | ClassInstance;
 
-export type RegistryIndexClass<C extends {} = {}> = {
-  adapterCls: new (cls: Class) => RegistryAdapter<C>;
+export type RegistryIndexClass<C extends RegistryAdapter<{}> = RegistryAdapter<{}>> = {
   new(): RegistryIndex<C>;
 };
 
-export type RegistrationMethods = `register${string}` | `finalize${string}`;
-
-export interface RegistryIndex<C extends {} = {}> {
+export type RegistryIndex<A extends RegistryAdapter<{}> = RegistryAdapter<{}>> = {
   process(events: ChangeEvent<Class>[]): void;
-  getParentClass?(cls: Class): Class | undefined;
-}
+  has(clsOrId: ClassOrId): boolean;
+  finalize(clsOrId: ClassOrId): void;
+  remove(clsOrId: ClassOrId): void;
+};
+
+export type RegistrationMethods = `register${string}` | `finalize${string}`;
 
 /**
  * Interface for registry adapters to implement
  */
 export interface RegistryAdapter<C extends {} = {}> {
-  indexCls: RegistryIndexClass<C>;
   register(...data: Partial<C>[]): C;
   finalize(parent?: C): void;
   get(): C;

@@ -1,4 +1,4 @@
-import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
+import { RegistryAdapter } from '@travetto/registry';
 import { AppError, asFull, Class, describeFunction, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -52,7 +52,6 @@ function combineMethods(suite: SuiteConfig, baseConfig: TestConfig, ...subConfig
 }
 
 export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
-  indexCls: RegistryIndexClass<SuiteConfig>;
   #cls: Class;
   #config: SuiteConfig;
 

@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistryIndex, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
@@ -12,22 +12,20 @@ type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & 
 /**
  * Model registry index for managing model configurations across classes
  */
-export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
+export class ModelRegistryIndex {
 
   static { RegistryV2.registerIndex(ModelRegistryIndex); }
 
-  static adapterCls = ModelRegistryAdapter;
-
   static getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
-    return RegistryV2.getForRegister(this, clsOrId);
+    return RegistryV2.instance(this).getForRegister(clsOrId);
   }
 
   static getConfig(clsOrId: ClassOrId): ModelConfig {
-    return RegistryV2.get(this, clsOrId).get();
+    return RegistryV2.instance(this).getModelOptions(clsOrId);
   }
 
   static has(clsOrId: ClassOrId): boolean {
-    return RegistryV2.has(this, clsOrId);
+    return RegistryV2.instance(this).has(clsOrId);
   }
 
   static getStoreName<T extends ModelType>(cls: Class<T>): string {
@@ -46,12 +44,18 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
     return RegistryV2.instance(this).getExpiryFieldName(cls);
   }
 
+  static getClasses(): Class[] {
+    return RegistryV2.instance(this).getClasses();
+  }
+
   /**
    * Default mapping of classes by class name or
    * by requested store name.  This is the state at the
    * start of the application.
    */
   #modelNameMapping = new Map<string, Set<string>>();
+
+  #store = new RegistryIndexStore(ModelRegistryAdapter);
 
   #addClass(cls: Class): void {
     const store = this.getModelOptions(cls).store;
@@ -70,7 +74,7 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
   }
 
   #removeClass(cls: Class): void {
-    const { store } = RegistryV2.get(ModelRegistryIndex, cls).get();
+    const { store } = this.#store.get(cls).get();
     this.#modelNameMapping.get(store)?.delete(cls.Ⲑid);
   }
 
@@ -85,19 +89,39 @@ export class ModelRegistryIndex implements RegistryIndex<ModelConfig> {
     }
   }
 
+  getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
+    return this.#store.getForRegister(clsOrId);
+  }
+
+  get(clsOrId: ClassOrId): Omit<ModelRegistryAdapter, RegistrationMethods> {
+    return this.#store.get(clsOrId);
+  }
+
   getModelOptions(cls: ClassOrId): ModelConfig<ModelType> {
-    return RegistryV2.get(ModelRegistryIndex, cls).get();
+    return this.#store.get(cls).get();
+  }
+
+  getClasses(): Class[] {
+    return this.#store.getClasses();
   }
 
   has(cls: ClassOrId): boolean {
-    return ModelRegistryIndex.has(cls);
+    return this.#store.has(cls);
+  }
+
+  remove(cls: Class): void {
+    this.#store.remove(cls);
+  }
+
+  finalize(cls: Class): void {
+    this.#store.finalize(cls);
   }
 
   /**
    * Get the apparent store for a type, handling polymorphism when appropriate
    */
   getStoreName(cls: Class): string {
-    return RegistryV2.get(ModelRegistryIndex, cls).get().store;
+    return this.#store.get(cls).get().store;
   }
 
   /**

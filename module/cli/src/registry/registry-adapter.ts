@@ -1,5 +1,5 @@
 import { Class, classConstruct, describeFunction } from '@travetto/runtime';
-import { RegistryAdapter, RegistryIndexClass } from '@travetto/registry';
+import { RegistryAdapter } from '@travetto/registry';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
@@ -21,8 +21,6 @@ const combineClasses = (target: CliCommandConfig, ...sources: Partial<CliCommand
 };
 
 export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConfig> {
-
-  indexCls: RegistryIndexClass<CliCommandConfig>;
   #cls: Class;
   #config: CliCommandConfig;
 
