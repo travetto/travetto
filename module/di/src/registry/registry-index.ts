@@ -44,7 +44,9 @@ export class DependencyRegistryIndex {
   #instancePromises = new Map<DependencyTargetId, Map<symbol, Promise<unknown>>>();
   #proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
 
-  #resolver = new DependencyRegistryResolver();
+  #resolver = new DependencyRegistryResolver(
+    (s) => castTo(this.getConfig(s))
+  );
 
   #proxyInstance<T>(target: ClassTarget<unknown>, qualifier: symbol, instance: T): T {
     const classId = target.Ⲑid;

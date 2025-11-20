@@ -20,22 +20,26 @@ export class DependencyRegistryResolver {
   /**
    * Maps from the target id to the class id, by symbol
    */
-  #targetToClass = new Map<DependencyTargetId, Map<symbol, string>>();
+  #targetToClass = new Map<DependencyTargetId, Map<symbol, DependencyClassId>>();
   /**
    * Maps from the class id to the target id, by symbol
    */
   #classToTarget = new Map<DependencyClassId, Map<symbol, DependencyTargetId>>();
 
-
   #getTargetClassId(cls: Class, config: InjectableConfig): DependencyTargetId {
     const classId = cls.Ⲑid;
     let target = config.target;
-
-    if (config.factory) {
-      const schema = SchemaRegistryIndex.get(cls).getMethod(config.factory.property);
+    if (config.type === 'factory') {
+      const schema = SchemaRegistryIndex.get(cls).getMethod(config.method);
       target = schema.returnType?.type;
     }
     return target ? target.Ⲑid : classId;
+  }
+
+  #resolveConfig: <T>(cls: DependencyClassId) => InjectableConfig<T>;
+
+  constructor(configResolver: <T>(clsId: DependencyClassId) => InjectableConfig<T>) {
+    this.#resolveConfig = configResolver;
   }
 
   registerClassToTargetToClass(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
@@ -51,8 +55,7 @@ export class DependencyRegistryResolver {
     relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
   }
 
-
-  registerClass(config: InjectableConfig, baseParentId?: string, parentConfig?: InjectableConfig): void {
+  registerClass(config: InjectableConfig, baseParentId?: string, parentConfig?: InjectionClassConfig): void {
     const classId = config.class.Ⲑid;
 
     // Record qualifier if its the default for the class
@@ -61,18 +64,18 @@ export class DependencyRegistryResolver {
     }
 
     const targetClassId = this.#getTargetClassId(config.class, config);
-    const isSelfTarget = (classId === targetClassId || !!config.factory);
+    const isSelfTarget = (classId === targetClassId || config.type === 'factory');
 
     // Register class to target
     this.registerClassToTargetToClass(classId, config.qualifier, targetClassId);
 
     // Make factory able to be targeted as self
-    if (config.factory) {
+    if (config.type === 'factory') {
       this.registerClassToTarget(classId, config.qualifier, classId);
     }
 
     // Track interface aliases as targets
-    const { interfaces } = SchemaRegistryIndex.getConfig(cls);
+    const { interfaces } = SchemaRegistryIndex.getConfig(config.class);
     for (const { Ⲑid: interfaceId } of interfaces) {
       this.registerClassToTargetToClass(classId, config.qualifier, interfaceId);
     }
@@ -91,7 +94,7 @@ export class DependencyRegistryResolver {
       // Register primary for self
       this.registerTargetToClass(classId, PrimaryCandidateSymbol, classId);
 
-      if (config.factory) {
+      if (config.type === 'factory') {
         this.registerTargetToClass(targetClassId, PrimaryCandidateSymbol, classId);
       }
 
@@ -110,11 +113,11 @@ export class DependencyRegistryResolver {
   }
 
   /**
-     * Resolve the target given a qualifier
-     * @param target
-     * @param qualifier
-     */
-  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
+   * Resolve the target given a qualifier
+   * @param target
+   * @param qualifier
+   */
+  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType,): Resolved<T> {
     const qualifiers = this.#targetToClass.get(target.Ⲑid) ?? new Map<symbol, string>();
 
     let cls: string | undefined;
@@ -135,7 +138,8 @@ export class DependencyRegistryResolver {
           } else if (filtered.length > 1) {
             // If dealing with sub types, prioritize exact matches
             const exact = this
-              .getCandidateTypes(castTo<Class>(target))
+              .getTargetedTypes(castTo<Class>(target))
+              .map(this.#resolveConfig)
               .filter(x => x.class === target);
             if (exact.length === 1) {
               qualifier = exact[0].qualifier;
@@ -163,10 +167,10 @@ export class DependencyRegistryResolver {
       }
     }
 
-    const config: InjectionClassConfig<T> = castTo(this.getConfig(cls!));
+    const config = this.#resolveConfig<T>(cls!);
     return {
-      qualifier,
       config,
+      qualifier,
       id: (config.target ?? config.class).Ⲑid
     };
   }
@@ -180,5 +184,10 @@ export class DependencyRegistryResolver {
   getQualifiers(cls: Class): symbol[] {
     const classId = cls.Ⲑid;
     return [...new Set([...(this.#classToTarget.get(classId)?.keys() ?? [])])];
+  }
+
+  getTargetedTypes(cls: Class): DependencyTargetId[] {
+    const classId = cls.Ⲑid;
+    return [...new Set([...(this.#classToTarget.get(classId)?.values() ?? [])])];
   }
 }

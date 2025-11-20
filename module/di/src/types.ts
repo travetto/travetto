@@ -102,7 +102,7 @@ export interface InjectableFactoryConfig<T = unknown> extends InjectableCommonCo
 /**
  * Union type for injectable configuration
  */
-export type InjectableConfig = InjectableFactoryConfig | InjectableClassConfig;
+export type InjectableConfig<T = unknown> = InjectableFactoryConfig<T> | InjectableClassConfig<T>;
 
 /**
  * Full injectable configuration for a class
