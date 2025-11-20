@@ -4,7 +4,7 @@ import { AppError, castTo, Class, Util } from '@travetto/runtime';
 import { ClassSource } from '../source/class-source';
 import { ChangeEvent } from '../types';
 import { MethodSource } from '../source/method-source';
-import { RegistryIndex, RegistryIndexClass } from './store';
+import { RegistryIndex, RegistryIndexClass } from './types';
 
 class $Registry {
 

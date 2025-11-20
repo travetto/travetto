@@ -108,6 +108,12 @@ function getEndpoint(path: string, method: HttpMethod) {
     .endpoints.find(x => x.path === path && x.httpMethod === method)!;
 }
 
+function getEndpointResponse(path: string, method: HttpMethod) {
+  const ep = getEndpoint(path, method);
+  const resp = SchemaRegistryIndex.getMethodConfig(SchemaAPI, ep.name);
+  return resp?.returnType;
+}
+
 @Suite()
 export abstract class SchemaWebServerSuite extends BaseWebSuite {
 
@@ -226,50 +232,50 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
 
   @Test()
   async verifyVoid() {
-    const ep = getEndpoint('/void', 'GET');
-    assert(ep.responseType === undefined);
+    const responseType = getEndpointResponse('/void', 'GET');
+    assert(responseType === undefined);
   }
 
   @Test()
   async verifyVoidAll() {
-    const ep = getEndpoint('/voidAll', 'GET');
-    assert(ep.responseType === undefined);
+    const responseType = getEndpointResponse('/voidAll', 'GET');
+    assert(responseType === undefined);
   }
 
   @Test()
   async verifyList() {
-    const ep = getEndpoint('/users', 'GET');
-    assert(ep.responseType?.type === User);
+    const responseType = getEndpointResponse('/users', 'GET');
+    assert(responseType?.type === User);
   }
 
   @Test()
   async verifyShapeAll() {
-    const ep = getEndpoint('/allShapes', 'GET');
-    console.log(`${ep.responseType}`);
+    const responseType = getEndpointResponse('/allShapes', 'GET');
+    console.log(`${responseType}`);
   }
 
   @Test()
   async verifyShapeClass() {
-    const ep = getEndpoint('/classShape/:shape', 'GET');
-    assert(ep.responseType);
-    assert(SchemaRegistryIndex.has(ep.responseType!.type));
+    const responseType = getEndpointResponse('/classShape/:shape', 'GET');
+    assert(responseType);
+    assert(SchemaRegistryIndex.has(responseType!.type));
   }
 
   @Test()
   async verifyRenderable() {
-    const ep = getEndpoint('/renderable/:age', 'GET');
-    assert(ep.responseType?.type === undefined);
+    const responseType = getEndpointResponse('/renderable/:age', 'GET');
+    assert(responseType?.type === undefined);
   }
 
   @Test()
   async verifyCustomSerializeable() {
-    const ep = getEndpoint('/customSerialize', 'GET');
-    assert(ep.responseType?.type === User);
+    const responseType = getEndpointResponse('/customSerialize', 'GET');
+    assert(responseType?.type === User);
   }
 
   @Test()
   async verifyCustomSerializeable2() {
-    const ep = getEndpoint('/customSerialize2', 'GET');
-    assert(ep.responseType?.type === User);
+    const responseType = getEndpointResponse('/customSerialize2', 'GET');
+    assert(responseType?.type === User);
   }
 }
