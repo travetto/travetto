@@ -1,5 +1,6 @@
 import { RegistryAdapter } from '@travetto/registry';
 import { castKey, Class } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableClassConfig, InjectionClassConfig, InjectableFactoryConfig, InjectableConfig, getDefaultQualifier } from '../types';
 
@@ -42,7 +43,8 @@ function combineInjectableFactories(
     target: cls,
     postConstruct: {},
     parameters: [],
-    handle: cls[castKey(method)]
+    handle: cls[castKey(method)],
+    returnType: undefined!, // Will be resolved during finalization
   };
 
   for (const o of override) {
@@ -103,6 +105,10 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectionClass
   finalize(parentConfig?: InjectionClassConfig<unknown> | undefined): void {
     if (parentConfig) {
       combineClassWithParent(this.#config, parentConfig);
+    }
+    for (const [k, v] of Object.entries(this.#config.factories)) {
+      const schema = SchemaRegistryIndex.get(this.#cls).getMethod(k);
+      v.returnType = schema.returnType!.type;
     }
   }
 

@@ -97,6 +97,10 @@ export interface InjectableFactoryConfig<T = unknown> extends InjectableCommonCo
    * Method handle
    */
   handle: (...args: unknown[]) => T | Promise<T>;
+  /**
+   * Return type of the factory method
+   */
+  returnType: Class;
 }
 
 /**

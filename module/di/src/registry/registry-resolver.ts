@@ -26,14 +26,8 @@ export class DependencyRegistryResolver {
    */
   #classToTarget = new Map<DependencyClassId, Map<symbol, DependencyTargetId>>();
 
-  #getTargetClassId(cls: Class, config: InjectableConfig): DependencyTargetId {
-    const classId = cls.Ⲑid;
-    let target = config.target;
-    if (config.type === 'factory') {
-      const schema = SchemaRegistryIndex.get(cls).getMethod(config.method);
-      target = schema.returnType?.type;
-    }
-    return target ? target.Ⲑid : classId;
+  #getSourceClass(config: InjectableConfig): Class {
+    return config.type === 'factory' ? config.returnType : config.class!;
   }
 
   #resolveConfig: <T>(cls: DependencyClassId) => InjectableConfig<T>;
@@ -42,71 +36,104 @@ export class DependencyRegistryResolver {
     this.#resolveConfig = configResolver;
   }
 
-  registerClassToTargetToClass(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
+  #registerTargetToClass(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
+    relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
+  }
+
+  #registerClassToTarget(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId, inverse = false): void {
     relateViaSymbol(this.#classToTarget, clsId, qualifier, targetId);
-    relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
+    if (inverse) {
+      relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
+    }
   }
 
-  registerTargetToClass(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
-    relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
+  #resolveQualifier<T>(target: ClassTarget<T>, resolution?: ResolutionType): symbol | undefined {
+    const qualifiers = this.#targetToClass.get(target.Ⲑid) ?? new Map<symbol, string>();
+
+    const resolved = [...qualifiers.keys()];
+    // If primary found
+    if (qualifiers.has(PrimaryCandidateSymbol)) {
+      return PrimaryCandidateSymbol;
+    } else {
+      // If there is only one default symbol
+      const filtered = resolved.filter(x => !!x).filter(x => this.#defaultSymbols.has(x));
+      if (filtered.length === 1) {
+        return filtered[0];
+      } else if (filtered.length > 1) {
+        // If dealing with sub types, prioritize exact matches
+        const exact = this
+          .getTargetedTypes(castTo<Class>(target))
+          .map(this.#resolveConfig)
+          .filter(x => x.class === target);
+        if (exact.length === 1) {
+          return exact[0].qualifier;
+        } else {
+          if (resolution === 'any') {
+            return filtered[0];
+          } else {
+            throw new InjectionError('Dependency has multiple candidates', target, filtered);
+          }
+        }
+      }
+    }
   }
 
-  registerClassToTarget(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
-    relateViaSymbol(this.#targetToClass, targetId, qualifier, clsId);
-  }
-
+  /**
+   * Register a class with the dependency resolver
+   */
   registerClass(config: InjectableConfig, baseParentId?: string, parentConfig?: InjectionClassConfig): void {
-    const classId = config.class.Ⲑid;
+    const cls = this.#getSourceClass(config);
+    const target = config.target ?? cls;
+
+    const targetClassId = target.Ⲑid;
+    const classId = cls.Ⲑid;
+    const isSelfTarget = classId === targetClassId;
 
     // Record qualifier if its the default for the class
     if (config.qualifier === getDefaultQualifier(config.class)) {
       this.#defaultSymbols.add(config.qualifier);
     }
 
-    const targetClassId = this.#getTargetClassId(config.class, config);
-    const isSelfTarget = (classId === targetClassId || config.type === 'factory');
-
     // Register class to target
-    this.registerClassToTargetToClass(classId, config.qualifier, targetClassId);
+    this.#registerClassToTarget(classId, config.qualifier, targetClassId, true);
 
-    // Make factory able to be targeted as self
     if (config.type === 'factory') {
-      this.registerClassToTarget(classId, config.qualifier, classId);
+      this.#registerTargetToClass(classId, config.qualifier, classId);
     }
 
     // Track interface aliases as targets
     const { interfaces } = SchemaRegistryIndex.getConfig(config.class);
     for (const { Ⲑid: interfaceId } of interfaces) {
-      this.registerClassToTargetToClass(classId, config.qualifier, interfaceId);
+      this.#registerClassToTarget(classId, config.qualifier, interfaceId, true);
     }
 
     // If targeting self (default @Injectable behavior)
     if (isSelfTarget && baseParentId) {
-      this.registerClassToTargetToClass(classId, config.qualifier, baseParentId);
+      this.#registerClassToTarget(classId, config.qualifier, baseParentId, true);
     }
 
     // Registry primary candidates
     if (config.primary) {
       if (baseParentId) {
-        this.registerTargetToClass(baseParentId, PrimaryCandidateSymbol, classId);
+        this.#registerTargetToClass(baseParentId, PrimaryCandidateSymbol, classId);
       }
 
       // Register primary for self
-      this.registerTargetToClass(classId, PrimaryCandidateSymbol, classId);
+      this.#registerTargetToClass(classId, PrimaryCandidateSymbol, classId);
 
       if (config.type === 'factory') {
-        this.registerTargetToClass(targetClassId, PrimaryCandidateSymbol, classId);
+        this.#registerTargetToClass(targetClassId, PrimaryCandidateSymbol, classId);
       }
 
       // Register primary if only one interface provided and no parent config
       if (interfaces.length === 1 && !parentConfig) {
         const [primaryInterface] = interfaces;
         const primaryClassId = primaryInterface.Ⲑid;
-        this.registerTargetToClass(primaryClassId, PrimaryCandidateSymbol, classId);
+        this.#registerTargetToClass(primaryClassId, PrimaryCandidateSymbol, classId);
       } else if (isSelfTarget) {
         // Register primary for all interfaces if self targeting
         for (const { Ⲑid: interfaceId } of interfaces) {
-          this.registerTargetToClass(interfaceId, PrimaryCandidateSymbol, classId);
+          this.#registerTargetToClass(interfaceId, PrimaryCandidateSymbol, classId);
         }
       }
     }
@@ -117,7 +144,7 @@ export class DependencyRegistryResolver {
    * @param target
    * @param qualifier
    */
-  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType,): Resolved<T> {
+  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
     const qualifiers = this.#targetToClass.get(target.Ⲑid) ?? new Map<symbol, string>();
 
     let cls: string | undefined;
@@ -125,34 +152,7 @@ export class DependencyRegistryResolver {
     if (qualifier && qualifiers.has(qualifier)) {
       cls = qualifiers.get(qualifier);
     } else {
-      const resolved = [...qualifiers.keys()];
-      if (!qualifier) {
-        // If primary found
-        if (qualifiers.has(PrimaryCandidateSymbol)) {
-          qualifier = PrimaryCandidateSymbol;
-        } else {
-          // If there is only one default symbol
-          const filtered = resolved.filter(x => !!x).filter(x => this.#defaultSymbols.has(x));
-          if (filtered.length === 1) {
-            qualifier = filtered[0];
-          } else if (filtered.length > 1) {
-            // If dealing with sub types, prioritize exact matches
-            const exact = this
-              .getTargetedTypes(castTo<Class>(target))
-              .map(this.#resolveConfig)
-              .filter(x => x.class === target);
-            if (exact.length === 1) {
-              qualifier = exact[0].qualifier;
-            } else {
-              if (resolution === 'any') {
-                qualifier = filtered[0];
-              } else {
-                throw new InjectionError('Dependency has multiple candidates', target, filtered);
-              }
-            }
-          }
-        }
-      }
+      qualifier ??= this.#resolveQualifier(target, resolution);
 
       if (!qualifier) {
         throw new InjectionError('Dependency not found', target);
