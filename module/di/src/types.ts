@@ -1,7 +1,5 @@
 import { Class } from '@travetto/runtime';
 
-export type ClassTarget<T = unknown> = Class<T> | Function;
-
 export type ResolutionType = 'strict' | 'loose' | 'any';
 
 /**
@@ -28,6 +26,10 @@ export interface Dependency<T = unknown> {
  */
 export interface InjectableCandidate<T = unknown> {
   /**
+   * Reference for the class
+   */
+  class: Class<T>;
+  /**
    * Method that is injectable on class
    */
   method: string | symbol;
@@ -39,10 +41,6 @@ export interface InjectableCandidate<T = unknown> {
    * Return type of the factory method
    */
   candidateType: Class;
-  /**
-   * Reference for the class
-   */
-  class: Class<T>;
   /**
    * Is this injectable enabled
    */
@@ -58,7 +56,7 @@ export interface InjectableCandidate<T = unknown> {
   /**
    * Actual reference to a Class
    */
-  target?: ClassTarget<T>;
+  target?: Class;
   /**
    * Qualifier symbol
    */
@@ -76,7 +74,7 @@ export interface InjectableConfig<T = unknown> {
   /**
    * Candidates that are injectable
    */
-  candidates: Record<string | symbol, InjectableCandidate<T>>;
+  candidates: Record<string | symbol, InjectableCandidate>;
 }
 
 export function getDefaultQualifier(cls: Class): symbol {

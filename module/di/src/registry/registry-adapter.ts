@@ -1,33 +1,28 @@
 import { RegistryAdapter } from '@travetto/registry';
-import { castKey, castTo, Class, classConstruct } from '@travetto/runtime';
+import { castKey, castTo, Class, classConstruct, safeAssign } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableConfig, getDefaultQualifier, InjectableCandidate } from '../types';
 
-function combineInjectableCandidates(
-  cls: Class,
-  method: string | symbol,
-  base: InjectableCandidate | undefined,
-  ...override: Partial<InjectableCandidate>[]
-): InjectableCandidate {
-
-  const full: InjectableCandidate = base ?? {
-    class: cls,
-    method,
-    enabled: true,
-    target: cls,
-    factory: (...params: unknown[]) => castTo<Function>(cls[castKey(method)])(...params),
-    candidateType: undefined!, // Will be resolved during finalization
-  };
-
+function combineInjectableCandidates<T extends InjectableCandidate>(base: T, ...override: Partial<T>[]): typeof base {
   for (const o of override) {
-    full.enabled = o.enabled ?? full.enabled;
-    full.qualifier = o.qualifier ?? full.qualifier;
-    full.target = o.target ?? full.target;
-    full.primary = o.primary ?? full.primary;
-    full.factory = o.factory ?? full.factory;
+    safeAssign(base, o);
   }
-  return full;
+  return base;
+}
+
+function combineClasses<T extends InjectableConfig>(base: T, ...override: Partial<T>[]): typeof base {
+  for (const o of override) {
+    base = {
+      ...base,
+      ...o,
+      candidates: {
+        ...base.candidates,
+        ...o.candidates,
+      }
+    };
+  }
+  return base;
 }
 
 export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConfig> {
@@ -38,31 +33,27 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     this.#cls = cls;
   }
 
-  register(): InjectableConfig {
-    return this.#config ??= {
-      class: this.#cls,
-      candidates: {},
-    };
+  registerConstructor(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
+    return this.registerFactory('constructor', ...data, {
+      factory: (...params: unknown[]) => classConstruct(this.#cls, params)
+    });
   }
 
-  registerConstructor(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
-    this.register();
-    const key = castKey('constructor');
-    this.#config.candidates[key] = combineInjectableCandidates(
-      this.#cls, key,
-      this.#config.candidates[key],
-      ...data,
-      {
-        factory: (...params: unknown[]) => classConstruct(this.#cls, params)
-      }
-    );
-    return this.#config.candidates[key];
+  register(...data: Partial<InjectableConfig<unknown>>[]): InjectableConfig<unknown> {
+    this.#config ??= { class: this.#cls, candidates: {} };
+    return combineClasses(this.#config, ...data);
   }
 
   registerFactory(method: string | symbol, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
-    this.register();
-    this.#config.candidates[method] = combineInjectableCandidates(this.#cls, method, this.#config.candidates[method], ...data);
-    return this.#config.candidates[method];
+    const { candidates } = this.#config ??= { class: this.#cls, candidates: {} };
+    candidates[method] ??= {
+      class: this.#cls,
+      method,
+      enabled: true,
+      factory: (...params: unknown[]) => castTo<Function>(this.#cls[castKey(method)])(...params),
+      candidateType: undefined!,
+    };
+    return combineInjectableCandidates(candidates[method], ...data);
   }
 
   get(): InjectableConfig<unknown> {
@@ -71,10 +62,10 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
 
   finalize(): void {
     for (const [k, v] of Object.entries(this.#config.candidates)) {
-      const schema = SchemaRegistryIndex.get(this.#cls).getMethod(k);
       if (k !== 'constructor') {
-        v.candidateType = schema.returnType!.type;
-        v.qualifier ??= getDefaultQualifier(v.class);
+        const candidateType = SchemaRegistryIndex.get(v.class).getMethod(k).returnType?.type!;
+        v.candidateType = candidateType;
+        v.qualifier ??= getDefaultQualifier(candidateType);
       }
     }
   }

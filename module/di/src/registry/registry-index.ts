@@ -2,10 +2,7 @@ import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2, RetargettingPro
 import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import {
-  ClassTarget, Dependency, InjectableCandidate, InjectableClassMetadata,
-  InjectableConfig, ResolutionType, PrimaryCandidateSymbol
-} from '../types';
+import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType, PrimaryCandidateSymbol } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
 import { InjectionError } from '../error';
 import { DependencyRegistryResolver } from './registry-resolver';
@@ -70,7 +67,7 @@ export class DependencyRegistryIndex {
   #proxies = new Map<ClassId, Map<symbol | undefined, RetargettingProxy<unknown>>>();
   #resolver = new DependencyRegistryResolver();
 
-  #proxyInstance<T>(target: ClassTarget<unknown>, qualifier: symbol, instance: T): T {
+  #proxyInstance<T>(target: Class<unknown>, qualifier: symbol, instance: T): T {
     const classId = target.Ⲑid;
     let proxy: RetargettingProxy<unknown>;
 
@@ -229,18 +226,19 @@ export class DependencyRegistryIndex {
    */
   async construct<T>(candidateType: Class<T>, qualifier: symbol): Promise<T> {
     const { candidate } = this.#resolver.resolveCandidate(candidateType, qualifier);
+    const targetType = candidate.candidateType;
     const params = await this.fetchDependencyParameters(candidate);
     const inst = await candidate.factory(params);
 
     // And auto-wire fields
-    await this.injectFields(candidate.candidateType, inst, candidate.class);
+    await this.injectFields(targetType, inst, candidate.class);
 
     // Run post construct, if it wasn't passed in, otherwise it was already created
     if (hasPostConstruct(inst) && !params.includes(inst)) {
       await inst.postConstruct();
     }
 
-    const metadata = SchemaRegistryIndex.get(candidate.candidateType).getMetadata<InjectableClassMetadata>(MetadataSymbol);
+    const metadata = SchemaRegistryIndex.get(targetType).getMetadata<InjectableClassMetadata>(MetadataSymbol);
 
     // Run post constructors
     for (const op of Object.values(metadata?.postConstruct ?? {})) {
@@ -248,7 +246,7 @@ export class DependencyRegistryIndex {
     }
 
     // Proxy if necessary
-    return Runtime.dynamic ? this.#proxyInstance(candidateType, qualifier, inst) : inst;
+    return Runtime.dynamic ? this.#proxyInstance(targetType, qualifier, inst) : inst;
   }
 
   /**

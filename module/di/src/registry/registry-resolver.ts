@@ -1,7 +1,7 @@
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { castTo, Class } from '@travetto/runtime';
 
-import { ClassTarget, getDefaultQualifier, InjectableCandidate, PrimaryCandidateSymbol, ResolutionType } from '../types';
+import { getDefaultQualifier, InjectableCandidate, PrimaryCandidateSymbol, ResolutionType } from '../types';
 import { InjectionError } from '../error';
 
 type Resolved<T> = { candidate: InjectableCandidate<T>, qualifier: symbol, targetId: string };
@@ -30,7 +30,7 @@ export class DependencyRegistryResolver {
    */
   #byContainerType = new Map<ClassId, Map<symbol, InjectableCandidate>>();
 
-  #resolveQualifier<T>(type: ClassTarget<T>, resolution?: ResolutionType): symbol | undefined {
+  #resolveQualifier<T>(type: Class<T>, resolution?: ResolutionType): symbol | undefined {
     const qualifiers = this.#byCandidateType.get(type.Ⲑid) ?? new Map<symbol, InjectableCandidate>();
 
     const resolved = [...qualifiers.keys()];
@@ -132,7 +132,7 @@ export class DependencyRegistryResolver {
    * @param candidateType
    * @param qualifier
    */
-  resolveCandidate<T>(candidateType: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
+  resolveCandidate<T>(candidateType: Class<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
     const qualifiers = this.#byCandidateType.get(candidateType.Ⲑid) ?? new Map<symbol, InjectableCandidate>();
 
     let config: InjectableCandidate;
@@ -170,12 +170,12 @@ export class DependencyRegistryResolver {
     this.#byContainerType.get(classId)!.delete(qualifier);
   }
 
-  getCandidateEntries(candidateType: ClassTarget): [symbol, InjectableCandidate][] {
+  getCandidateEntries(candidateType: Class): [symbol, InjectableCandidate][] {
     const candidateTypeId = candidateType.Ⲑid;
     return [...new Set([...(this.#byCandidateType.get(candidateTypeId)?.entries() ?? [])])];
   }
 
-  getContainerEntries(containerType: ClassTarget): [symbol, InjectableCandidate][] {
+  getContainerEntries(containerType: Class): [symbol, InjectableCandidate][] {
     const containerTypeId = containerType.Ⲑid;
     return [...new Set([...(this.#byContainerType.get(containerTypeId)?.entries() ?? [])])];
   }

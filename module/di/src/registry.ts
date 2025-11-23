@@ -4,7 +4,7 @@ import {
 } from '@travetto/runtime';
 import { RootRegistry, ChangeEvent, Registry } from '@travetto/registry';
 
-import { Dependency, InjectableConfig, ClassTarget, PostConstructHandler } from './types.ts';
+import { Dependency, InjectableConfig, Class, PostConstructHandler } from './types.ts';
 import { InjectionError } from './error.ts';
 
 class AutoCreate { }
@@ -44,7 +44,7 @@ class $DependencyRegistry extends Registry<InjectableConfig> {
    * @param target
    * @param qualifier
    */
-  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
+  resolveTarget<T>(target: Class<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
     const qualifiers = this.targetToClass.get(target.Ⲑid) ?? new Map<symbol, string>();
 
     let cls: string | undefined;
@@ -146,7 +146,7 @@ class $DependencyRegistry extends Registry<InjectableConfig> {
   /**
    * Actually construct an instance while resolving the dependencies
    */
-  async construct<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
+  async construct<T>(target: Class<T>, qualifier: symbol): Promise<T> {
     const managed = this.resolveTarget(target, qualifier).config;
 
     // Only fetch constructor values
@@ -185,7 +185,7 @@ class $DependencyRegistry extends Registry<InjectableConfig> {
   /**
    * Create the instance
    */
-  async createInstance<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
+  async createInstance<T>(target: Class<T>, qualifier: symbol): Promise<T> {
     const classId = this.resolveTarget(target, qualifier).id;
 
     if (!this.instances.has(classId)) {
@@ -276,7 +276,7 @@ class $DependencyRegistry extends Registry<InjectableConfig> {
   /**
    * Get an instance by type and qualifier
    */
-  async getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: ResolutionType): Promise<T> {
+  async getInstance<T>(target: Class<T>, qual?: symbol, resolution?: ResolutionType): Promise<T> {
     this.verifyInitialized();
 
     if (!target) {
