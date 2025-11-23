@@ -1,8 +1,8 @@
 import { castTo, type Class } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableCandidateConfig, ResolutionType, DiSchemaSymbol } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
-import { SchemaRegistryIndex } from 'module/schema/__index__.ts';
 
 const collapseConfig = <T extends { qualifier?: symbol }>(first?: T | symbol, args: Partial<T>[] = []): Partial<T>[] => {
   const configs: Partial<T>[] = [];
@@ -28,7 +28,7 @@ export function Injectable(first?: Partial<InjectableCandidateConfig> | symbol, 
 export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
 
 /**
- * Indicate that a field is able to be injected
+ * Indicate that a field or parameter is able to be injected
  */
 export function Inject(first?: InjectConfig | symbol) {
   return (target: unknown, propertyKey?: string | symbol, idx?: number | PropertyDescriptor): void => {
