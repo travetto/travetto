@@ -328,9 +328,7 @@ class Validation {
       }]
     };
 
-    try {
-      await SchemaValidator.validate(AllAs, item);
-    } catch (err) {
+    await assert.rejects(() => SchemaValidator.validate(AllAs, item), err => {
       assert(err instanceof ValidationResultError);
       assert(err.details.errors[0].path === 'all[0].b');
       assert(err.details.errors[0].message === 'all[0].b is required');
@@ -338,7 +336,7 @@ class Validation {
       assert(err.details.errors[1].message === 'all[1].b is required');
       assert(err.details.errors[2].path === 'all[1].c');
       assert(err.details.errors[2].message === 'all[1].c is required');
-    }
+    });
   }
 
   @Test()
