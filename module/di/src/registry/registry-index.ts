@@ -193,8 +193,7 @@ export class DependencyRegistryIndex {
   async fetchDependencyParameters<T>(managed: InjectableConfig<T>): Promise<unknown[]> {
     const inputs = SchemaRegistryIndex.getMethodConfig(managed.class, managed.type === 'factory' ? managed.method : 'constructor').parameters;
 
-    const deps = managed.type === 'factory' ? managed.parameters ?? [] : managed.constructorParameters ?? [];
-    const promises = deps
+    const promises = (managed.parameters ?? [])
       .toSorted((c, d) => c.index - d.index).map((v) => [v, inputs.find(x => x.index === v.index)!, v.index] as const)
       .map(async ([x, input]) => this.#resolveDependencyValue(managed.class, x, input));
 
@@ -257,7 +256,7 @@ export class DependencyRegistryIndex {
     }
 
     // Run post construct, if it wasn't passed in, otherwise it was already created
-    if (hasPostConstruct(inst) && !consValues.includes(inst)) {
+    if (hasPostConstruct(inst) && !params.includes(inst)) {
       await inst.postConstruct();
     }
 

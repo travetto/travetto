@@ -49,3 +49,23 @@
 * Qualifier
   * Class - Decorator value
   * Factory - Decorator value
+
+
+## Construction
+### Classes
+* Pretty straightforward
+* Register by self, parent, and interfaces
+* On construct
+    * Resolve constructor params
+    * Invoke constructor
+    * Resolve fields that aren't defined
+    * Call post construct
+
+### Factories
+* Register by Return type
+  * Parent, and interfaces
+* On construct
+   * Resolve method parameters
+   * Invoke method
+   * Inject fields as needed, into returned item
+   * Call post construct
