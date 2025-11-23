@@ -199,7 +199,8 @@ export class DependencyRegistryIndex {
    * Retrieve list dependencies
    */
   async fetchDependencyParameters<T>(candidate: InjectableCandidate<T>): Promise<unknown[]> {
-    const inputs = SchemaRegistryIndex.getMethodConfig(candidate.class, candidate.method).parameters;
+    const inputs = SchemaRegistryIndex.has(candidate.class) ?
+      SchemaRegistryIndex.getMethodConfig(candidate.class, candidate.method).parameters : [];
 
     const promises = inputs
       .map(input => this.#resolveDependencyValue(readMetadata(input) ?? {}, input, candidate.class));
@@ -211,7 +212,7 @@ export class DependencyRegistryIndex {
    * Retrieve mapped dependencies
    */
   async injectFields<T>(candidateType: Class, instance: T, srcClass: Class): Promise<T> {
-    const inputs = SchemaRegistryIndex.getFieldMap(candidateType);
+    const inputs = SchemaRegistryIndex.has(candidateType) ? SchemaRegistryIndex.getFieldMap(candidateType) : {};
 
     const promises = TypedObject.entries(inputs)
       .filter(([k, input]) => instance[castKey(k)] === undefined && readMetadata(input) !== undefined)
@@ -242,7 +243,8 @@ export class DependencyRegistryIndex {
       await inst.postConstruct();
     }
 
-    const metadata = SchemaRegistryIndex.get(targetType).getMetadata<InjectableClassMetadata>(MetadataSymbol);
+    const metadata = SchemaRegistryIndex.has(targetType) ?
+      SchemaRegistryIndex.get(targetType).getMetadata<InjectableClassMetadata>(MetadataSymbol) : undefined;
 
     // Run post constructors
     for (const op of Object.values(metadata?.postConstruct ?? {})) {

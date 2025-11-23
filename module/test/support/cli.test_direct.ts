@@ -9,6 +9,12 @@ export class TestDirectCommand {
 
   format: string = 'tap';
 
+  /**
+   * Format options
+   * @alias o
+   */
+  formatOptions?: string[];
+
   async preValidate(): Promise<void> {
     await selectConsumer(this);
   }
@@ -21,8 +27,12 @@ export class TestDirectCommand {
   }
 
   main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
+
+    const options = Object.fromEntries((this.formatOptions ?? [])?.map(f => [...f.split(':'), true]));
+
     return runTests({
       consumer: this.format,
+      consumerOptions: options,
       target: {
         import: importOrFile,
         classId: clsId,
