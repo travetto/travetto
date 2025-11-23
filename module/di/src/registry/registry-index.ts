@@ -1,8 +1,8 @@
 import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2, RetargettingProxy } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { ClassTarget, Dependency, InjectionClassConfig, ResolutionType } from '../types';
+import { ClassTarget, Dependency, InjectableClassConfig, InjectableConfig, InjectionClassConfig, ResolutionType } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
 import { DependencyTargetId, hasPostConstruct, hasPreDestroy } from './types';
 import { InjectionError } from '../error';
@@ -85,7 +85,7 @@ export class DependencyRegistryIndex {
       const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
       const hasParentBase = (parentConfig || describeFunction(parentClass)?.abstract);
       const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
-      this.#resolver.registerClass(item, baseParentId, parentConfig?.get());
+      this.#resolver.registerClass(item, baseParentId);
     }
   }
 
@@ -167,52 +167,60 @@ export class DependencyRegistryIndex {
     );
   }
 
-  /**
-   * Retrieve all dependencies
-   */
-  async fetchDependencies<T>(managed: InjectionClassConfig<T>, deps: Dependency[], inputs: (SchemaFieldConfig | SchemaParameterConfig)[]): Promise<unknown[]> {
-    if (!deps || !deps.length) {
-      return [];
-    }
-
-    const promises = deps.map(async (x, i) => {
-      try {
-        const target = x.target ?? inputs[i].type;
-        return await this.getInstance(target, x.qualifier, x.resolution);
-      } catch (err) {
-        if (inputs[i].required?.active === false && err instanceof InjectionError && err.category === 'notfound') {
-          return undefined;
-        } else {
-          if (err && err instanceof Error) {
-            err.message = `${err.message} via=${managed.class.Ⲑid}[${inputs[i].name?.toString() ?? 'constructor'}]`;
-          }
-          throw err;
+  async #resolveDependencyValue(cls: Class, x: Dependency, input: SchemaFieldConfig | SchemaParameterConfig): Promise<unknown> {
+    try {
+      const target = x.target ?? input.type;
+      return await this.getInstance(target, x.qualifier, x.resolution);
+    } catch (err) {
+      if (input.required?.active === false && err instanceof InjectionError && err.category === 'notfound') {
+        return undefined;
+      } else {
+        if (err && err instanceof Error) {
+          err.message = `${err.message} via=${cls.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
         }
+        throw err;
       }
-    });
+    }
+  }
+
+  /**
+   * Retrieve list dependencies
+   */
+  async fetchDependencyParameters<T>(managed: InjectableConfig<T>): Promise<unknown[]> {
+    const inputs = SchemaRegistryIndex.getMethodConfig(managed.class, managed.type === 'factory' ? managed.method : 'constructor').parameters;
+
+    const deps = managed.type === 'factory' ? managed.parameters ?? [] : managed.constructorParameters ?? [];
+    const promises = deps
+      .toSorted((c, d) => c.index - d.index).map((v) => [v, inputs.find(x => x.index === v.index)!, v.index] as const)
+      .map(async ([x, input]) => this.#resolveDependencyValue(managed.class, x, input));
 
     return await Promise.all(promises);
   }
 
   /**
+   * Retrieve mapped dependencies
+   */
+  async fetchDependencyFields<T>(managed: InjectableClassConfig<T>, instance: Partial<T>): Promise<Partial<T>> {
+    const inputs = SchemaRegistryIndex.getFieldMap(managed.class);
+
+    const deps = managed.fields ?? {};
+
+    const promises = TypedObject.keys(deps)
+      .filter(k => instance[castKey(k)] === undefined)
+      .map(k => [deps[k], inputs[k], k] as const)
+      .map(async ([x, input, key]) => [key, await this.#resolveDependencyValue(managed.class, x, input)]);
+
+    const pairs = await Promise.all(promises);
+    return Object.fromEntries(pairs);
+  }
+
+  /**
    * Resolve all field dependencies
    */
-  async resolveFieldDependencies<T>(config: InjectionClassConfig<T>, instance: T): Promise<void> {
-    const keys = Object.keys(config.dependencies.fields ?? {})
-      .filter(k => instance[castKey<T>(k)] === undefined); // Filter out already set ones
-
-    const fields = SchemaRegistryIndex.getFieldMap(config.class);
-
-    // And auto-wire
-    if (keys.length) {
-      const deps = await this.fetchDependencies(
-        config,
-        keys.map(x => config.dependencies.fields[x]),
-        keys.map(x => fields[x])
-      );
-      for (let i = 0; i < keys.length; i++) {
-        instance[castKey<T>(keys[i])] = castTo(deps[i]);
-      }
+  async resolveFieldDependencies<T>(config: InjectableClassConfig<T>, instance: T): Promise<void> {
+    const deps = await this.fetchDependencyFields(config, instance);
+    for (const [k, v] of TypedObject.entries(deps)) {
+      instance[k] = castTo(v);
     }
   }
 
@@ -222,17 +230,15 @@ export class DependencyRegistryIndex {
   async construct<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
     const managed = this.#resolver.resolveTarget(target, qualifier).config;
 
-    // Only fetch constructor values
-    const consValues = await this.fetchDependencies(
-      managed,
-      managed.dependencies.cons ?? [],
-      SchemaRegistryIndex.getMethodConfig(managed.class, 'constructor').parameters
-    );
+    let inst: T;
 
-    // Create instance
-    const inst = managed.factory ?
-      managed.factory.handle(...consValues) :
-      classConstruct(managed.class, consValues);
+    const params = await this.fetchDependencyParameters(managed);
+
+    if (managed.type === 'factory') {
+      inst = castTo(managed.handle(...params));
+    } else {
+      inst = classConstruct(managed.class, params);
+    }
 
     // And auto-wire fields
     await this.resolveFieldDependencies(managed, inst);

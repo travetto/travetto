@@ -2,7 +2,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { castTo, Class } from '@travetto/runtime';
 
 import { DependencyClassId, DependencyTargetId, PrimaryCandidateSymbol, Resolved } from './types';
-import { ClassTarget, getDefaultQualifier, InjectableConfig, InjectionClassConfig, ResolutionType } from '../types';
+import { ClassTarget, getDefaultQualifier, InjectableConfig, ResolutionType } from '../types';
 import { InjectionError } from '../error';
 
 function relateViaSymbol(map: Map<string, Map<symbol, string>>, src: string, qual: symbol, dest: string): void {
@@ -26,14 +26,14 @@ export class DependencyRegistryResolver {
    */
   #classToTarget = new Map<DependencyClassId, Map<symbol, DependencyTargetId>>();
 
-  #getSourceClass(config: InjectableConfig): Class {
-    return config.type === 'factory' ? config.returnType : config.class!;
-  }
-
   #resolveConfig: <T>(cls: DependencyClassId) => InjectableConfig<T>;
 
   constructor(configResolver: <T>(clsId: DependencyClassId) => InjectableConfig<T>) {
     this.#resolveConfig = configResolver;
+  }
+
+  #getSourceClass(config: InjectableConfig): Class {
+    return config.type === 'factory' ? config.returnType : config.class;
   }
 
   #registerTargetToClass(clsId: DependencyClassId, qualifier: symbol, targetId: DependencyTargetId): void {
@@ -81,7 +81,7 @@ export class DependencyRegistryResolver {
   /**
    * Register a class with the dependency resolver
    */
-  registerClass(config: InjectableConfig, baseParentId?: string, parentConfig?: InjectionClassConfig): void {
+  registerClass(config: InjectableConfig, baseParentId?: string): void {
     const cls = this.#getSourceClass(config);
     const target = config.target ?? cls;
 
@@ -126,7 +126,7 @@ export class DependencyRegistryResolver {
       }
 
       // Register primary if only one interface provided and no parent config
-      if (interfaces.length === 1 && !parentConfig) {
+      if (interfaces.length === 1 && !this.#classToTarget.has(baseParentId!)) {
         const [primaryInterface] = interfaces;
         const primaryClassId = primaryInterface.Ⲑid;
         this.#registerTargetToClass(primaryClassId, PrimaryCandidateSymbol, classId);
