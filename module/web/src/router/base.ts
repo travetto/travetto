@@ -40,7 +40,7 @@ export abstract class BaseWebRouter implements WebRouter {
    */
   async postConstruct(): Promise<void> {
 
-    this.#interceptors = await DependencyRegistryIndex.getCandidateInstances(toConcrete<WebInterceptor>());
+    this.#interceptors = await DependencyRegistryIndex.getInstances(toConcrete<WebInterceptor>());
     this.#interceptors = EndpointUtil.orderInterceptors(this.#interceptors);
     const names = this.#interceptors.map(x => x.constructor.name);
     console.debug('Sorting interceptors', { count: names.length, names });

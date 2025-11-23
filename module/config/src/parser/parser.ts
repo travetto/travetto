@@ -13,7 +13,7 @@ export class ParserManager {
   #parsers: Record<string, ConfigParser>;
 
   async postConstruct(): Promise<void> {
-    const parsers = await DependencyRegistryIndex.getCandidateInstances(toConcrete<ConfigParser>());
+    const parsers = await DependencyRegistryIndex.getInstances(toConcrete<ConfigParser>());
 
     // Register parsers
     this.#parsers = Object.fromEntries(parsers.flatMap(p => p.ext.map(e => [e, p])));

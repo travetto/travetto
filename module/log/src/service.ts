@@ -21,12 +21,12 @@ export class LogService implements ConsoleListener {
   #decorators: LogDecorator[] = [];
 
   async postConstruct(): Promise<void> {
-    this.#listeners = await DependencyRegistryIndex.getCandidateInstances(toConcrete<Logger>(), c => c.class !== CommonLogger);
+    this.#listeners = await DependencyRegistryIndex.getInstances(toConcrete<Logger>(), c => c.class !== CommonLogger);
     if (!this.#listeners.length) {
       this.#listeners = [await DependencyRegistryIndex.getInstance(CommonLogger)];
     }
 
-    this.#decorators = await DependencyRegistryIndex.getCandidateInstances(toConcrete<LogDecorator>());
+    this.#decorators = await DependencyRegistryIndex.getInstances(toConcrete<LogDecorator>());
 
     ConsoleManager.set(this);
   }

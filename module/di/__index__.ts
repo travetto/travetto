@@ -3,5 +3,4 @@ export * from './src/error.ts';
 export * from './src/registry.ts';
 export * from './src/registry/registry-index.ts';
 export * from './src/registry/registry-adapter.ts';
-export * from './src/registry/types.ts';
 export * from './src/types.ts';

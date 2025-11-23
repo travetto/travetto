@@ -1,9 +1,11 @@
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { castTo, Class } from '@travetto/runtime';
 
-import { DependencyClassId, PrimaryCandidateSymbol, Resolved } from './types';
-import { ClassTarget, getDefaultQualifier, InjectableCandidateConfig, ResolutionType } from '../types';
+import { ClassTarget, getDefaultQualifier, InjectableCandidateConfig, PrimaryCandidateSymbol, ResolutionType } from '../types';
 import { InjectionError } from '../error';
+
+type Resolved<T> = { candidate: InjectableCandidateConfig<T>, qualifier: symbol, targetId: string };
+type ClassId = string;
 
 function setInMap<T>(map: Map<string, Map<typeof key, T>>, src: string, key: symbol | string, dest: T): void {
   if (!map.has(src)) {
@@ -21,12 +23,12 @@ export class DependencyRegistryResolver {
   /**
    * Maps from the requested type id to the candidates
    */
-  #byCandidateType = new Map<DependencyClassId, Map<symbol, InjectableCandidateConfig>>();
+  #byCandidateType = new Map<ClassId, Map<symbol, InjectableCandidateConfig>>();
 
   /**
    * Maps from inbound class id (file) to the candidates
    */
-  #byContainerType = new Map<DependencyClassId, Map<symbol, InjectableCandidateConfig>>();
+  #byContainerType = new Map<ClassId, Map<symbol, InjectableCandidateConfig>>();
 
   #resolveQualifier<T>(type: ClassTarget<T>, resolution?: ResolutionType): symbol | undefined {
     const qualifiers = this.#byCandidateType.get(type.Ⲑid) ?? new Map<symbol, InjectableCandidateConfig>();
@@ -118,27 +120,27 @@ export class DependencyRegistryResolver {
 
   /**
    * Resolve the target given a qualifier
-   * @param target
+   * @param candidateType
    * @param qualifier
    */
-  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
-    const qualifiers = this.#byCandidateType.get(target.Ⲑid) ?? new Map<symbol, InjectableCandidateConfig>();
+  resolveTarget<T>(candidateType: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
+    const qualifiers = this.#byCandidateType.get(candidateType.Ⲑid) ?? new Map<symbol, InjectableCandidateConfig>();
 
     let config: InjectableCandidateConfig;
 
     if (qualifier && qualifiers.has(qualifier)) {
       config = qualifiers.get(qualifier)!;
     } else {
-      qualifier ??= this.#resolveQualifier(target, resolution);
+      qualifier ??= this.#resolveQualifier(candidateType, resolution);
 
       if (!qualifier) {
-        throw new InjectionError('Dependency not found', target);
+        throw new InjectionError('Dependency not found', candidateType);
       } else if (!qualifiers.has(qualifier)) {
         if (!this.#defaultSymbols.has(qualifier) && resolution === 'loose') {
-          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: target.Ⲑid });
-          return this.resolveTarget(target);
+          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: candidateType.Ⲑid });
+          return this.resolveTarget(candidateType);
         }
-        throw new InjectionError('Dependency not found', target, [qualifier]);
+        throw new InjectionError('Dependency not found', candidateType, [qualifier]);
       } else {
         config = qualifiers.get(qualifier!)!;
       }
@@ -147,7 +149,7 @@ export class DependencyRegistryResolver {
     return {
       candidate: castTo(config),
       qualifier,
-      id: (config.target ?? config.candidateType).Ⲑid
+      targetId: (config.target ?? config.candidateType).Ⲑid
     };
   }
 
@@ -161,5 +163,10 @@ export class DependencyRegistryResolver {
   getCandidateEntries(candidateType: ClassTarget): [symbol, InjectableCandidateConfig][] {
     const candidateTypeId = candidateType.Ⲑid;
     return [...new Set([...(this.#byCandidateType.get(candidateTypeId)?.entries() ?? [])])];
+  }
+
+  getContainerEntries(containerType: ClassTarget): [symbol, InjectableCandidateConfig][] {
+    const containerTypeId = containerType.Ⲑid;
+    return [...new Set([...(this.#byContainerType.get(containerTypeId)?.entries() ?? [])])];
   }
 }

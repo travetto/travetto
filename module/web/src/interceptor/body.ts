@@ -66,7 +66,7 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
 
   async postConstruct(): Promise<void> {
     // Load all the parser types
-    const instances = await DependencyRegistryIndex.getCandidateInstances(toConcrete<BodyContentParser>());
+    const instances = await DependencyRegistryIndex.getInstances(toConcrete<BodyContentParser>());
     for (const instance of instances) {
       this.parsers[instance.type] = instance;
     }
