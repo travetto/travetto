@@ -232,7 +232,7 @@ export class DependencyRegistryIndex {
     const { candidate } = this.#resolver.resolveCandidate(candidateType, qualifier);
     const targetType = candidate.candidateType;
     const params = await this.fetchDependencyParameters(candidate);
-    const inst = await candidate.factory(params);
+    const inst = await candidate.factory(...params);
 
     // And auto-wire fields
     await this.injectFields(targetType, inst, candidate.class);

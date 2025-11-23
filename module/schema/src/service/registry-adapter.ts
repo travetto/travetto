@@ -215,6 +215,19 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       );
     }
 
+    // Ensure constructors are established and typed to the class
+    const cfg = config.methods['CONSTRUCTOR'] ??= {
+      parameters: [],
+      validators: [],
+      handle: undefined!,
+      returnType: { type: this.#cls },
+    };
+
+    cfg.returnType = {
+      ...cfg.returnType,
+      type: this.#cls
+    };
+
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
     }
@@ -237,9 +250,6 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getMethodReturnType(method: string | symbol): Class {
-    if (method === 'CONSTRUCTOR') {
-      return this.#cls;
-    }
     return this.getMethod(method).returnType!.type;
   }
 

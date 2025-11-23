@@ -84,6 +84,7 @@ export class DependencyRegistryResolver {
     setInMap(this.#byContainerType, config.class.Ⲑid, config.method, config);
 
     setInMap(this.#byCandidateType, targetClassId, qualifier, config);
+    setInMap(this.#byCandidateType, candidateClassId, qualifier, config);
 
     // Track interface aliases as targets
     const { interfaces } = SchemaRegistryIndex.getConfig(candidateType);
