@@ -41,11 +41,8 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
     safeAssign(base, {
       ...config,
       ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
-      parameters: [...base.parameters, ...(config.parameters ?? [])],
-      validators: [
-        ...base.validators,
-        ...(config.validators ?? [])
-      ],
+      parameters: config.parameters ?? base.parameters,
+      validators: [...base.validators, ...(config.validators ?? [])],
       title: config.title || base.title,
       description: config.description || base.description,
       examples: [...(base.examples ?? []), ...(config.examples ?? [])],
@@ -78,13 +75,6 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
 
 function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
-    if (config?.methods?.CONSTRUCTOR) {
-      Object.assign(config.methods.CONSTRUCTOR, {
-        parameters: config.methods.CONSTRUCTOR.parameters?.map((p, i) => ({ ...p, index: i })),
-        returnType: { type: base.class }
-      });
-    }
-
     Object.assign(base, {
       ...config,
       ...config.views ? { views: { ...base.views, ...config.views } } : {},
@@ -224,6 +214,11 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
         }, {})
       );
     }
+
+    // Fill in constructor if missing
+    const meth = config.methods.CONSTRUCTOR ??= { validators: [], parameters: [], handle: castTo(this.#cls) };
+    meth.returnType ??= { type: this.#cls };
+    meth.parameters = meth!.parameters.map((p, i) => ({ ...p, index: i }));
 
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
