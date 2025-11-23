@@ -9,7 +9,7 @@ function combineInjectableClasses(cls: Class, base: InjectableClassConfig | unde
     type: 'class',
     postConstruct: {},
     fields: {},
-    constructorParameters: [],
+    parameters: [],
     qualifier: getDefaultQualifier(cls),
     class: cls,
     enabled: true,
@@ -23,7 +23,7 @@ function combineInjectableClasses(cls: Class, base: InjectableClassConfig | unde
     full.postConstruct = { ...full.postConstruct, ...o.postConstruct };
     full.primary = o.primary ?? full.primary;
     full.fields = { ...full.fields, ...o?.fields };
-    full.constructorParameters = o.constructorParameters ?? full.constructorParameters;
+    full.parameters = o.parameters ?? full.parameters;
   }
   return full;
 }
@@ -64,7 +64,7 @@ function combineClassWithParent(base: InjectionClassConfig, parent: InjectionCla
       ...parent.injectable.fields,
       ...base.injectable.fields
     };
-    base.injectable.constructorParameters = base.injectable.constructorParameters ?? parent.injectable.constructorParameters;
+    base.injectable.parameters = base.injectable.parameters ?? parent.injectable.parameters;
     base.injectable.postConstruct = {
       ...parent.injectable.postConstruct,
       ...base.injectable.postConstruct

@@ -89,6 +89,10 @@ export class ModelRegistryIndex {
     }
   }
 
+  finalize(cls: Class): void {
+    this.store.finalize(cls);
+  }
+
   getModelOptions(cls: ClassOrId): ModelConfig<ModelType> {
     return this.store.get(cls).get();
   }

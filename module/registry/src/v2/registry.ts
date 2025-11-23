@@ -34,7 +34,7 @@ class $Registry {
     for (const idx of this.#indexOrder) {
       const inst = this.instance(idx);
       for (const cls of classes) {
-        inst.store.finalize(cls);
+        inst.finalize(cls);
       }
     }
   }

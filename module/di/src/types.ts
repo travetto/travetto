@@ -6,6 +6,8 @@ export type PostConstructHandler<T = unknown> = (value: T) => (void | Promise<vo
 
 export type ResolutionType = 'strict' | 'loose' | 'any';
 
+export type DependencyMap = Record<string | symbol, Dependency>;
+
 /**
  * State of a Dependency
  */
@@ -23,10 +25,16 @@ export interface Dependency<T = unknown> {
    * Qualifier symbol
    */
   qualifier?: symbol;
+}
+
+/**
+ * A parameter dependency
+ */
+export interface ParameterDependency<T = unknown> extends Dependency<T> {
   /**
    * Index of the parameter (for constructor dependencies)
    */
-  index?: number;
+  index: number;
 }
 
 /**
@@ -65,6 +73,10 @@ export interface InjectableCommonConfig<Z extends string, T = unknown> {
    * Qualifier symbol
    */
   qualifier: symbol;
+  /**
+   * Parameters for the factory method
+   */
+  parameters: ParameterDependency[];
 }
 
 /**
@@ -74,11 +86,7 @@ export interface InjectableClassConfig<T = unknown> extends InjectableCommonConf
   /**
    * Fields that are dependencies
    */
-  fields?: Record<string | symbol, Dependency>;
-  /**
-   * Constructor parameters that are dependencies
-   */
-  constructorParameters?: Dependency[];
+  fields?: DependencyMap;
 }
 
 /**
@@ -89,10 +97,6 @@ export interface InjectableFactoryConfig<T = unknown> extends InjectableCommonCo
    * Method that is injectable on class
    */
   method: string | symbol;
-  /**
-   * Parameters for the factory method
-   */
-  parameters: Dependency[];
   /**
    * Method handle
    */

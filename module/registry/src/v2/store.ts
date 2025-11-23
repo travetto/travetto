@@ -1,4 +1,4 @@
-import { AppError, castTo, Class, ClassInstance } from '@travetto/runtime';
+import { AppError, castTo, Class, ClassInstance, getParentClass } from '@travetto/runtime';
 
 import { ClassOrId, RegistrationMethods, RegistryAdapter } from './types';
 
@@ -38,8 +38,13 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return this.#adapters.has(cls);
   }
 
-  finalize(clsOrId: ClassOrId): void {
+  finalize(clsOrId: ClassOrId, parentConfig?: ReturnType<A['get']>): void {
     const cls = this.#toCls(clsOrId);
+    if (!parentConfig) {
+      const parentClass = getParentClass(cls);
+      parentConfig = castTo(parentClass && this.has(parentClass) ? this.get(parentClass).get() : undefined);
+    }
+    this.adapter(cls).finalize(parentConfig);
     this.#finalized.set(cls, true);
   }
 

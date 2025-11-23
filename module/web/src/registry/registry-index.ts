@@ -103,4 +103,8 @@ export class ControllerRegistryIndex {
       }
     }
   }
+
+  finalize(cls: Class): void {
+    this.store.finalize(cls);
+  }
 }

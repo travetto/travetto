@@ -19,14 +19,17 @@ export type RegistryIndexClass = {
   new(): RegistryIndex;
 };
 
+export type RegistrySimpleStore = {
+  has(clsOrId: ClassOrId): boolean;
+  finalize(clsOrId: ClassOrId): void;
+  remove(clsOrId: ClassOrId): void;
+};
+
 /**
  * Registry index definition
  */
 export type RegistryIndex = {
-  store: {
-    has(clsOrId: ClassOrId): boolean;
-    finalize(clsOrId: ClassOrId): void;
-    remove(clsOrId: ClassOrId): void;
-  };
+  store: RegistrySimpleStore;
   process(events: ChangeEvent<Class>[]): void;
+  finalize(cls: Class): void;
 };

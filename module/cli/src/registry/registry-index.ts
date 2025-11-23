@@ -54,6 +54,10 @@ export class CliCommandRegistryIndex {
     // Do nothing for now?
   }
 
+  finalize(cls: Class): void {
+    this.store.finalize(cls);
+  }
+
   /**
    * Import command into an instance
    */

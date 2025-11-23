@@ -138,6 +138,10 @@ export class DependencyRegistryIndex {
     }
   }
 
+  finalize(cls: Class): void {
+    this.store.finalize(cls);
+  }
+
   /**
    * Get all available candidate types for the target
    */

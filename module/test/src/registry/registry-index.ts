@@ -47,6 +47,10 @@ export class SuiteRegistryIndex {
     // No-op for now
   }
 
+  finalize(cls: Class): void {
+    this.store.finalize(cls);
+  }
+
   /**
    * Find all valid tests (ignoring abstract)
    */
