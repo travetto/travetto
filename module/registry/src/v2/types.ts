@@ -22,6 +22,7 @@ export type RegistryIndexClass = {
 export type RegistrySimpleStore = {
   has(clsOrId: ClassOrId): boolean;
   finalize(clsOrId: ClassOrId): void;
+  finalized(clsOrId: ClassOrId): boolean;
   remove(clsOrId: ClassOrId): void;
 };
 

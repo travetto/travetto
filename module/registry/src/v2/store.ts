@@ -34,7 +34,8 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return Array.from(this.#adapters.keys());
   }
 
-  has(cls: Class): boolean {
+  has(clsOrId: ClassOrId): boolean {
+    const cls = this.#toCls(clsOrId);
     return this.#adapters.has(cls);
   }
 
@@ -78,11 +79,11 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
   }
 
   get(clsOrId: ClassOrId): Omit<A, RegistrationMethods> {
-    if (!this.has(clsOrId)) {
-      const cls = this.#toCls(clsOrId);
-      throw new AppError(`Class ${cls.Ⲑid} is not registered in index ${this.constructor.Ⲑid}`);
+    const cls = this.#toCls(clsOrId);
+    if (!this.has(cls)) {
+      throw new AppError(`Class ${cls.Ⲑid} is not registered for ${this.#adapterCls.Ⲑid}`);
     }
-    return this.adapter(clsOrId);
+    return this.adapter(cls);
   }
 
   getOptional(clsOrId: ClassOrId): Omit<A, RegistrationMethods> | undefined {
