@@ -2,13 +2,9 @@ import { Class } from '@travetto/runtime';
 
 export type ClassTarget<T = unknown> = Class<T> | Function;
 
-export type PostConstructHandler<T = unknown> = (value: T) => (void | Promise<void>);
-
 export const DiSchemaSymbol = Symbol();
 
 export type ResolutionType = 'strict' | 'loose' | 'any';
-
-export type DependencyMap = Record<string | symbol, Dependency>;
 
 /**
  * State of a Dependency

@@ -120,8 +120,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       subTypeField: 'type',
       baseType: !!describeFunction(this.#cls).abstract,
     };
-    combineClasses(cfg, data);
-    return cfg;
+    return combineClasses(cfg, data);
   }
 
   registerMetadata<T>(key: symbol, ...data: Partial<T>[]): T {
@@ -131,14 +130,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   getMetadata<T>(key: symbol): T | undefined {
     const md = this.#config?.metadata;
-    return md ? castTo<T>(md[key]) : undefined;
+    return castTo<T>(md?.[key]);
   }
 
   registerField(field: string | symbol, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
     const config = this.register({});
     const cfg = config.fields[field] ??= { array: false, name: field, type: null!, owner: this.#cls };
-    combineInputs(cfg, data);
-    return cfg;
+    return combineInputs(cfg, data);
   }
 
   registerFieldMetadata<T>(field: string | symbol, key: symbol, ...data: Partial<T>[]): T {
@@ -148,14 +146,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   getFieldMetadata<T>(field: string | symbol, key: symbol): T | undefined {
     const md = this.#config?.fields[field]?.metadata;
-    return md ? castTo<T>(md[key]) : undefined;
+    return castTo<T>(md?.[key]);
   }
 
   registerMethod(method: string | symbol, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const config = this.register({});
     const cfg = config.methods[method] ??= { parameters: [], validators: [], handle: this.#cls.prototype[method] };
-    combineMethods(cfg, data);
-    return cfg;
+    return combineMethods(cfg, data);
   }
 
   registerMethodMetadata<T>(method: string | symbol, key: symbol, ...data: Partial<T>[]): T {
@@ -165,20 +162,24 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   getMethodMetadata<T>(method: string | symbol, key: symbol): T | undefined {
     const md = this.#config?.methods[method]?.metadata;
-    return md ? castTo<T>(md[key]) : undefined;
+    return castTo<T>(md?.[key]);
   }
 
-  /**
-   * Register a partial config for a pending method param
-   * @param method The method name
-   * @param idx The param index
-   * @param data The config to register
-   */
   registerParameter(method: string | symbol, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
     const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
-    combineInputs(cfg, data);
-    return cfg;
+    return combineInputs(cfg, data);
+  }
+
+  registerParameterMetadata<T>(method: string | symbol, idx: number, key: symbol, ...data: Partial<T>[]): T {
+    const params = this.registerMethod(method, {}).parameters;
+    const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
+    return assignMetadata(key, cfg, data);
+  }
+
+  getParameterMetadata<T>(method: string | symbol, idx: number, key: symbol): T | undefined {
+    const md = this.#config?.methods[method]?.parameters[idx]?.metadata;
+    return castTo<T>(md?.[key]);
   }
 
   finalize(parent?: SchemaClassConfig): void {
