@@ -39,8 +39,8 @@ export class DependencyRegistryResolver {
     if (qualifiers.has(PrimaryCandidateSymbol)) {
       return PrimaryCandidateSymbol;
     } else {
-      // If there is only one default symbol
       const filtered = resolved.filter(x => !!x).filter(x => this.#defaultSymbols.has(x));
+      // If there is only one default symbol
       if (filtered.length === 1) {
         return filtered[0];
       } else if (filtered.length > 1) {
