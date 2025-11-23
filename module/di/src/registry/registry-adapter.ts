@@ -81,6 +81,6 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
 
   getCandidateConfigs(): InjectableCandidate[] {
     return Object.values(this.#config.candidates)
-      .filter(item => item.enabled === false || (typeof item.enabled === 'function') && !item.enabled());
+      .filter(item => item.enabled === undefined || item.enabled === true || (typeof item.enabled === 'function' && !item.enabled()));
   }
 }
