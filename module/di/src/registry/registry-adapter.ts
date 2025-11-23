@@ -33,19 +33,19 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     this.#cls = cls;
   }
 
+  register(...data: Partial<InjectableConfig<unknown>>[]): InjectableConfig<unknown> {
+    this.#config ??= { class: this.#cls, candidates: {} };
+    return combineClasses(this.#config, ...data);
+  }
+
   registerConstructor(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
     return this.registerFactory('constructor', ...data, {
       factory: (...params: unknown[]) => classConstruct(this.#cls, params)
     });
   }
 
-  register(...data: Partial<InjectableConfig<unknown>>[]): InjectableConfig<unknown> {
-    this.#config ??= { class: this.#cls, candidates: {} };
-    return combineClasses(this.#config, ...data);
-  }
-
   registerFactory(method: string | symbol, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
-    const { candidates } = this.#config ??= { class: this.#cls, candidates: {} };
+    const { candidates } = this.register();
     candidates[method] ??= {
       class: this.#cls,
       method,

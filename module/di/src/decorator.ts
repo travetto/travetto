@@ -30,12 +30,12 @@ export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
  * Indicate that a field or parameter is able to be injected
  */
 export function Inject(first?: InjectConfig | symbol) {
-  return (target: unknown, propertyKey?: string | symbol, idx?: number | PropertyDescriptor): void => {
+  return (target: unknown, propertyKey: string | symbol, idx?: number | PropertyDescriptor): void => {
     const config = typeof first === 'symbol' ? { qualifier: first } : first ?? {};
     if (typeof idx !== 'number') {
-      DependencyRegistryIndex.registerFieldMetadata(target, propertyKey!, config);
+      DependencyRegistryIndex.registerFieldMetadata(target, propertyKey, config);
     } else {
-      DependencyRegistryIndex.registerParameterMetadata(target, propertyKey!, idx, config);
+      DependencyRegistryIndex.registerParameterMetadata(target, propertyKey, idx, config);
     }
   };
 }
