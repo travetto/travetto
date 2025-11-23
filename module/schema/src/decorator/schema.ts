@@ -15,7 +15,7 @@ export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'subTypeName' | 'su
     target.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
     };
-    SchemaRegistryIndex.getForRegister(target).register({ ...cfg });
+    SchemaRegistryIndex.getForRegister(target).registerClass(cfg);
     return target;
   };
 }

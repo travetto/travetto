@@ -56,6 +56,19 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
   return base;
 }
 
+function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, parent?: Partial<T>): SchemaMethodConfig {
+  const parentCons = parent?.methods?.['CONSTRUCTOR'];
+  const baseCons = base.methods?.['CONSTRUCTOR'];
+  return {
+    parameters: [],
+    validators: [],
+    handle: undefined!,
+    ...parentCons,
+    ...baseCons,
+    returnType: { type: base.class! }
+  };
+}
+
 function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T): T {
   safeAssign(base, {
     ...base,
@@ -144,6 +157,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return castTo<T>(md?.[key]);
   }
 
+  registerClass(cfg?: Partial<SchemaClassConfig>): void {
+    this.register({ ...cfg });
+    if (cfg && cfg.methods?.['CONSTRUCTOR']) {
+      this.registerMethod('CONSTRUCTOR', cfg.methods['CONSTRUCTOR']!);
+    }
+  }
+
   registerMethod(method: string | symbol, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const config = this.register({});
     const cfg = config.methods[method] ??= { parameters: [], validators: [], handle: this.#cls.prototype[method] };
@@ -215,19 +235,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       );
     }
 
-    // Ensure constructors are established and typed to the class
-    config.methods['CONSTRUCTOR'] = {
-      ...{
-        parameters: [],
-        validators: [],
-        handle: undefined!,
-      },
-      ...config.methods['CONSTRUCTOR'],
-      returnType: {
-        ...config.methods['CONSTRUCTOR']?.returnType,
-        type: this.#cls
-      }
-    };
+    config.methods['CONSTRUCTOR'] = getConstructorConfig(config, parent);
 
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
