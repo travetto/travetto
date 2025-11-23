@@ -153,9 +153,7 @@ export class SchemaRegistryIndex {
   }
 
   finalize(cls: Class): void {
-    const parent = getParentClass(cls);
-    const config = parent && parent !== cls && this.store.has(parent) ? this.getClassConfig(parent) : undefined;
-    this.store.finalize(cls, config);
+    this.store.finalize(cls);
   }
 
   getClassConfig(cls: ClassOrId): SchemaClassConfig {
