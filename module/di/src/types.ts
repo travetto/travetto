@@ -16,7 +16,7 @@ export interface Dependency<T = unknown> {
   /**
    * Actual reference to a Class
    */
-  target?: ClassTarget<T>;
+  target?: Class<T>;
   /**
    * Qualifier symbol
    */
@@ -26,7 +26,7 @@ export interface Dependency<T = unknown> {
 /**
  * Injectable candidate
  */
-export interface InjectableCandidateConfig<T = unknown> {
+export interface InjectableCandidate<T = unknown> {
   /**
    * Method that is injectable on class
    */
@@ -76,7 +76,7 @@ export interface InjectableConfig<T = unknown> {
   /**
    * Candidates that are injectable
    */
-  candidates: Record<string | symbol, InjectableCandidateConfig<T>>;
+  candidates: Record<string | symbol, InjectableCandidate<T>>;
 }
 
 export function getDefaultQualifier(cls: Class): symbol {

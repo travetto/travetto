@@ -1,6 +1,6 @@
 import { castTo, type Class } from '@travetto/runtime';
 
-import { InjectableCandidateConfig, ResolutionType } from './types.ts';
+import { InjectableCandidate, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
 
 const collapseConfig = <T extends { qualifier?: symbol }>(first?: T | symbol, args: Partial<T>[] = []): Partial<T>[] => {
@@ -17,7 +17,7 @@ const collapseConfig = <T extends { qualifier?: symbol }>(first?: T | symbol, ar
  * Indicate that a class is able to be injected
  * @augments `@travetto/schema:Schema`
  */
-export function Injectable(first?: Partial<InjectableCandidateConfig> | symbol, ...args: Partial<InjectableCandidateConfig>[]) {
+export function Injectable(first?: Partial<InjectableCandidate> | symbol, ...args: Partial<InjectableCandidate>[]) {
   return <T extends Class>(target: T): T => {
     DependencyRegistryIndex.getForRegister(target).registerConstructor(...collapseConfig(first, args));
     return target;
@@ -44,9 +44,9 @@ export function Inject(first?: InjectConfig | symbol) {
  * Identifies a static method that is able to produce a dependency
  * @augments `@travetto/schema:Method`
  */
-export function InjectableFactory(first?: Partial<InjectableCandidateConfig> | symbol, ...args: Partial<InjectableCandidateConfig>[]) {
+export function InjectableFactory(first?: Partial<InjectableCandidate> | symbol, ...args: Partial<InjectableCandidate>[]) {
   return <T extends Class>(target: T, property: string | symbol): void => {
-    const config: Partial<InjectableCandidateConfig>[] = collapseConfig(first, args);
+    const config: Partial<InjectableCandidate>[] = collapseConfig(first, args);
     DependencyRegistryIndex.getForRegister(target).registerFactory(property, ...config, ...args,);
   };
 }

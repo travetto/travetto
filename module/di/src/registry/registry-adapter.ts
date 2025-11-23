@@ -2,16 +2,16 @@ import { RegistryAdapter } from '@travetto/registry';
 import { castKey, castTo, Class, classConstruct } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { InjectableConfig, getDefaultQualifier, InjectableCandidateConfig } from '../types';
+import { InjectableConfig, getDefaultQualifier, InjectableCandidate } from '../types';
 
 function combineInjectableCandidates(
   cls: Class,
   method: string | symbol,
-  base: InjectableCandidateConfig | undefined,
-  ...override: Partial<InjectableCandidateConfig>[]
-): InjectableCandidateConfig {
+  base: InjectableCandidate | undefined,
+  ...override: Partial<InjectableCandidate>[]
+): InjectableCandidate {
 
-  const full: InjectableCandidateConfig = base ?? {
+  const full: InjectableCandidate = base ?? {
     class: cls,
     method,
     enabled: true,
@@ -45,10 +45,10 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     };
   }
 
-  registerConstructor(...data: Partial<InjectableCandidateConfig<unknown>>[]): InjectableCandidateConfig {
+  registerConstructor(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
     this.register();
     const key = castKey('constructor');
-    return this.#config.candidates[key] ??= combineInjectableCandidates(
+    this.#config.candidates[key] = combineInjectableCandidates(
       this.#cls, key,
       this.#config.candidates[key],
       ...data,
@@ -56,11 +56,13 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
         factory: (...params: unknown[]) => classConstruct(this.#cls, params)
       }
     );
+    return this.#config.candidates[key];
   }
 
-  registerFactory(method: string | symbol, ...data: Partial<InjectableCandidateConfig<unknown>>[]): InjectableCandidateConfig {
+  registerFactory(method: string | symbol, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
     this.register();
-    return combineInjectableCandidates(this.#cls, method, this.#config.candidates[method], ...data);
+    this.#config.candidates[method] = combineInjectableCandidates(this.#cls, method, this.#config.candidates[method], ...data);
+    return this.#config.candidates[method];
   }
 
   get(): InjectableConfig<unknown> {
@@ -70,12 +72,14 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   finalize(): void {
     for (const [k, v] of Object.entries(this.#config.candidates)) {
       const schema = SchemaRegistryIndex.get(this.#cls).getMethod(k);
-      v.candidateType = schema.returnType!.type;
-      v.qualifier ??= getDefaultQualifier(v.class);
+      if (k !== 'constructor') {
+        v.candidateType = schema.returnType!.type;
+        v.qualifier ??= getDefaultQualifier(v.class);
+      }
     }
   }
 
-  getCandidateConfigs(): InjectableCandidateConfig[] {
+  getCandidateConfigs(): InjectableCandidate[] {
     return Object.values(this.#config.candidates)
       .filter(item => item.enabled === false || (typeof item.enabled === 'function') && !item.enabled());
   }

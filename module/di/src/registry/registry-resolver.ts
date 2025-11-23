@@ -1,10 +1,10 @@
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { castTo, Class } from '@travetto/runtime';
 
-import { ClassTarget, getDefaultQualifier, InjectableCandidateConfig, PrimaryCandidateSymbol, ResolutionType } from '../types';
+import { ClassTarget, getDefaultQualifier, InjectableCandidate, PrimaryCandidateSymbol, ResolutionType } from '../types';
 import { InjectionError } from '../error';
 
-type Resolved<T> = { candidate: InjectableCandidateConfig<T>, qualifier: symbol, targetId: string };
+type Resolved<T> = { candidate: InjectableCandidate<T>, qualifier: symbol, targetId: string };
 type ClassId = string;
 
 function setInMap<T>(map: Map<string, Map<typeof key, T>>, src: string, key: symbol | string, dest: T): void {
@@ -23,17 +23,18 @@ export class DependencyRegistryResolver {
   /**
    * Maps from the requested type id to the candidates
    */
-  #byCandidateType = new Map<ClassId, Map<symbol, InjectableCandidateConfig>>();
+  #byCandidateType = new Map<ClassId, Map<symbol, InjectableCandidate>>();
 
   /**
    * Maps from inbound class id (file) to the candidates
    */
-  #byContainerType = new Map<ClassId, Map<symbol, InjectableCandidateConfig>>();
+  #byContainerType = new Map<ClassId, Map<symbol, InjectableCandidate>>();
 
   #resolveQualifier<T>(type: ClassTarget<T>, resolution?: ResolutionType): symbol | undefined {
-    const qualifiers = this.#byCandidateType.get(type.Ⲑid) ?? new Map<symbol, InjectableCandidateConfig>();
+    const qualifiers = this.#byCandidateType.get(type.Ⲑid) ?? new Map<symbol, InjectableCandidate>();
 
     const resolved = [...qualifiers.keys()];
+
     // If primary found
     if (qualifiers.has(PrimaryCandidateSymbol)) {
       return PrimaryCandidateSymbol;
@@ -64,7 +65,7 @@ export class DependencyRegistryResolver {
   /**
    * Register a class with the dependency resolver
    */
-  registerClass(config: InjectableCandidateConfig, baseParentId?: string): void {
+  registerClass(config: InjectableCandidate, baseParentId?: string): void {
     const candidateType = config.candidateType;
     const candidateClassId = candidateType.Ⲑid;
     const target = config.target ?? candidateType;
@@ -73,6 +74,14 @@ export class DependencyRegistryResolver {
     const isSelfTarget = candidateClassId === targetClassId;
 
     const qualifier = config.qualifier ?? getDefaultQualifier(candidateType);
+
+    console.error('DependencyRegistryResolver.registerClass status', {
+      candidateClassId,
+      targetClassId,
+      qualifier: qualifier.toString(),
+      isSelfTarget,
+      baseParentId
+    });
 
     // Record qualifier if its the default for the class
     if (config.qualifier === getDefaultQualifier(candidateType)) {
@@ -124,9 +133,9 @@ export class DependencyRegistryResolver {
    * @param qualifier
    */
   resolveCandidate<T>(candidateType: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
-    const qualifiers = this.#byCandidateType.get(candidateType.Ⲑid) ?? new Map<symbol, InjectableCandidateConfig>();
+    const qualifiers = this.#byCandidateType.get(candidateType.Ⲑid) ?? new Map<symbol, InjectableCandidate>();
 
-    let config: InjectableCandidateConfig;
+    let config: InjectableCandidate;
 
     if (qualifier && qualifiers.has(qualifier)) {
       config = qualifiers.get(qualifier)!;
@@ -140,6 +149,7 @@ export class DependencyRegistryResolver {
           console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: candidateType.Ⲑid });
           return this.resolveCandidate(candidateType);
         }
+        console.error('Qualifier lookup failed', { qualifier, target: candidateType.Ⲑid, available: [...qualifiers.keys()] });
         throw new InjectionError('Dependency not found', candidateType, [qualifier]);
       } else {
         config = qualifiers.get(qualifier!)!;
@@ -160,12 +170,12 @@ export class DependencyRegistryResolver {
     this.#byContainerType.get(classId)!.delete(qualifier);
   }
 
-  getCandidateEntries(candidateType: ClassTarget): [symbol, InjectableCandidateConfig][] {
+  getCandidateEntries(candidateType: ClassTarget): [symbol, InjectableCandidate][] {
     const candidateTypeId = candidateType.Ⲑid;
     return [...new Set([...(this.#byCandidateType.get(candidateTypeId)?.entries() ?? [])])];
   }
 
-  getContainerEntries(containerType: ClassTarget): [symbol, InjectableCandidateConfig][] {
+  getContainerEntries(containerType: ClassTarget): [symbol, InjectableCandidate][] {
     const containerTypeId = containerType.Ⲑid;
     return [...new Set([...(this.#byContainerType.get(containerTypeId)?.entries() ?? [])])];
   }
