@@ -1,5 +1,5 @@
 import { RegistryAdapter } from '@travetto/registry';
-import { Class, getAllEntries, safeAssign } from '@travetto/runtime';
+import { Class, describeFunction, getAllEntries, safeAssign } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableConfig, getDefaultQualifier, InjectableCandidate } from '../types';
@@ -66,6 +66,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   getCandidateConfigs(): InjectableCandidate[] {
     return getAllEntries(this.#config.candidates)
       .map(([_, item]) => item)
-      .filter(item => item.enabled !== false && (typeof item.enabled !== 'function' || item.enabled()));
+      .filter(item => item.enabled !== false && (typeof item.enabled !== 'function' || item.enabled()))
+      .filter(item => item.method !== 'CONSTRUCTOR' || !describeFunction(item.candidateType)?.abstract);
   }
 }

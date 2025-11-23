@@ -98,11 +98,6 @@ export class DependencyRegistryIndex {
     const adapter = this.store.get(cls);
 
     for (const config of adapter.getCandidateConfigs()) {
-      // Skip out early, only needed to inherit
-      if (describeFunction(config.candidateType)?.abstract) {
-        continue;
-      }
-
       const parentClass = getParentClass(config.candidateType);
       const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
       const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));

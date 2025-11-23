@@ -72,7 +72,6 @@ export class DependencyRegistryResolver {
 
     const targetClassId = target.Ⲑid;
     const isSelfTarget = candidateClassId === targetClassId;
-
     const qualifier = config.qualifier ?? getDefaultQualifier(candidateType);
 
     // Record qualifier if its the default for the class

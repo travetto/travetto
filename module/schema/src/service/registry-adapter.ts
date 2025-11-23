@@ -216,16 +216,15 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     }
 
     // Ensure constructors are established and typed to the class
-    const cfg = config.methods['CONSTRUCTOR'] ??= {
-      parameters: [],
-      validators: [],
-      handle: undefined!,
-      returnType: { type: this.#cls },
-    };
     config.methods['CONSTRUCTOR'] = {
-      ...cfg,
+      ...{
+        parameters: [],
+        validators: [],
+        handle: undefined!,
+      },
+      ...config.methods['CONSTRUCTOR'],
       returnType: {
-        ...cfg.returnType,
+        ...config.methods['CONSTRUCTOR']?.returnType,
         type: this.#cls
       }
     };
