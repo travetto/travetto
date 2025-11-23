@@ -2,8 +2,6 @@ import { Class } from '@travetto/runtime';
 
 export type ClassTarget<T = unknown> = Class<T> | Function;
 
-export const DiSchemaSymbol = Symbol();
-
 export type ResolutionType = 'strict' | 'loose' | 'any';
 
 /**
@@ -64,7 +62,7 @@ export interface InjectableCandidateConfig<T = unknown> {
   /**
    * Qualifier symbol
    */
-  qualifier: symbol;
+  qualifier?: symbol;
 }
 
 /**
@@ -81,6 +79,10 @@ export interface InjectableConfig<T = unknown> {
   candidates: Record<string | symbol, InjectableCandidateConfig<T>>;
 }
 
-export function getDefaultQualifier(cls: Class, factory?: string | symbol): symbol {
-  return factory ? Symbol.for(`${cls.Ⲑid}+factory+${factory?.toString()}`) : Symbol.for(cls.Ⲑid);
+export function getDefaultQualifier(cls: Class): symbol {
+  return Symbol.for(cls.Ⲑid);
 }
+
+export type InjectableClassMetadata = {
+  postConstruct: Record<string | symbol, (<T>(inst: T) => Promise<void>)>
+};

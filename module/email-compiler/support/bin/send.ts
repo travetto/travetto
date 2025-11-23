@@ -16,7 +16,7 @@ export class EditorSendService {
   async service(): Promise<MailService> {
     const MailTransportTarget = toConcrete<MailTransport>();
 
-    const transports = DependencyRegistryIndex.getCandidateTypes(MailTransportTarget);
+    const transports = DependencyRegistryIndex.getCandidates(MailTransportTarget);
 
     if (!transports.length) {
       try {

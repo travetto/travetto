@@ -26,7 +26,7 @@ export class AuthService {
   async postConstruct(): Promise<void> {
     // Find all authenticators
     const AuthenticatorTarget = toConcrete<Authenticator>();
-    for (const source of DependencyRegistryIndex.getCandidateTypes(AuthenticatorTarget)) {
+    for (const source of DependencyRegistryIndex.getCandidates(AuthenticatorTarget)) {
       const dep = DependencyRegistryIndex.getInstance(AuthenticatorTarget, source.qualifier);
       this.#authenticators.set(source.qualifier, dep);
     }

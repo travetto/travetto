@@ -1,12 +1,18 @@
 import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2, RetargettingProxy } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, describeFunction, getParentClass, Runtime, TypedObject, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, describeFunction, getParentClass, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { ClassTarget, Dependency, InjectableClassConfig, InjectableConfig, InjectionClassConfig, ResolutionType } from '../types';
+import { ClassTarget, Dependency, InjectableCandidateConfig, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
-import { DependencyTargetId, hasPostConstruct, hasPreDestroy } from './types';
+import { DependencyTargetId, hasPostConstruct, hasPreDestroy, PrimaryCandidateSymbol } from './types';
 import { InjectionError } from '../error';
 import { DependencyRegistryResolver } from './registry-resolver';
+
+const MetadataSymbol = Symbol();
+
+function readDependency(item: { metadata?: Record<symbol, unknown> }): Dependency | undefined {
+  return item.metadata?.[MetadataSymbol] as Dependency | undefined;
+}
 
 export class DependencyRegistryIndex {
 
@@ -20,19 +26,19 @@ export class DependencyRegistryIndex {
     return this.#instance.getInstance(target, qualifier, resolution);
   }
 
-  static getCandidateTypes<T>(target: Class<T>): InjectionClassConfig<T>[] {
-    return this.#instance.getCandidateTypes<T>(target);
+  static getCandidates<T>(target: Class<T>): InjectableCandidateConfig<T>[] {
+    return this.#instance.getCandidates<T>(target);
   }
 
-  static getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectionClassConfig<T>) => boolean): Promise<T[]> {
+  static getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectableCandidateConfig<T>) => boolean): Promise<T[]> {
     return this.#instance.getCandidateInstances<T>(target, predicate);
   }
 
-  static injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
-    return this.#instance.injectFields(o, cls);
+  static injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<T> {
+    return this.#instance.injectFields(cls, o);
   }
 
-  static getOptional(clsOrId: ClassOrId): InjectionClassConfig | undefined {
+  static getOptional(clsOrId: ClassOrId): InjectableConfig | undefined {
     return this.#instance.store.getOptional(clsOrId)?.get();
   }
 
@@ -40,13 +46,22 @@ export class DependencyRegistryIndex {
     return this.#instance.getPrimaryCandidateInstances<T>(candidateType);
   }
 
+  static registerClassMetadata(clsOrId: ClassOrId, metadata: InjectableClassMetadata): void {
+    SchemaRegistryIndex.getForRegister(clsOrId).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
+  }
+
+  static registerParameterMetadata(clsOrId: ClassOrId, method: string | symbol, index: number, metadata: Dependency): void {
+    SchemaRegistryIndex.getForRegister(clsOrId).registerParameterMetadata(method, index, MetadataSymbol, metadata);
+  }
+
+  static registerFieldMetadata(clsOrId: ClassOrId, field: string | symbol, metadata: Dependency): void {
+    SchemaRegistryIndex.getForRegister(clsOrId).registerFieldMetadata(field, MetadataSymbol, metadata);
+  }
+
   #instances = new Map<DependencyTargetId, Map<symbol, unknown>>();
   #instancePromises = new Map<DependencyTargetId, Map<symbol, Promise<unknown>>>();
   #proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
-
-  #resolver = new DependencyRegistryResolver(
-    (s) => castTo(this.getConfig(s))
-  );
+  #resolver = new DependencyRegistryResolver();
 
   #proxyInstance<T>(target: ClassTarget<unknown>, qualifier: symbol, instance: T): T {
     const classId = target.Ⲑid;
@@ -73,17 +88,18 @@ export class DependencyRegistryIndex {
 
   #addClass(cls: Class): void {
     const adapter = this.store.get(cls);
-    if (
-      !adapter.enabled() ||
-      describeFunction(cls)?.abstract  // Skip out early, only needed to inherit
-    ) {
-      return;
-    }
 
     for (const item of adapter.getInjectables()) {
-      const parentClass = this.getParentClass(cls);
+      if (
+        (item.enabled === false || (typeof item.enabled === 'function') && !item.enabled()) ||
+        describeFunction(item.candidateType)?.abstract  // Skip out early, only needed to inherit
+      ) {
+        return;
+      }
+
+      const parentClass = getParentClass(item.candidateType);
       const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
-      const hasParentBase = (parentConfig || describeFunction(parentClass)?.abstract);
+      const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
       const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
       this.#resolver.registerClass(item, baseParentId);
     }
@@ -101,7 +117,7 @@ export class DependencyRegistryIndex {
     const classId = cls.Ⲑid;
 
     if (this.#instances.has(classId)) {
-      for (const qualifier of this.#resolver.getQualifiers(cls)) {
+      for (const [qualifier] of this.#resolver.getCandidateEntries(cls)) {
         this.destroyInstance(cls, qualifier);
       }
     }
@@ -109,20 +125,7 @@ export class DependencyRegistryIndex {
 
   store = new RegistryIndexStore(DependencyRegistryAdapter);
 
-  getParentClass(cls: Class): Class {
-    const config = this.getConfig(cls);
-    if (config.factory) {
-      let parentClass = config.target;
-      while (describeFunction(Object.getPrototypeOf(parentClass))?.abstract) {
-        parentClass = Object.getPrototypeOf(parentClass);
-      }
-      return castTo(parentClass);
-    } else {
-      return getParentClass(cls) ?? Object;
-    }
-  }
-
-  getConfig(clsOrId: ClassOrId): InjectionClassConfig {
+  getConfig(clsOrId: ClassOrId): InjectableConfig {
     return this.store.get(clsOrId).get();
   }
 
@@ -143,26 +146,25 @@ export class DependencyRegistryIndex {
   }
 
   /**
-   * Get all available candidate types for the target
+   * Get all available candidates for a given type
    */
-  getCandidateTypes<T>(target: Class<T>): InjectionClassConfig<T>[] {
-    return castTo(this.#resolver.getQualifiers(target).map(id => this.getConfig(id)));
+  getCandidates<T>(candidateType: Class<T>): InjectableCandidateConfig<T>[] {
+    return this.#resolver.getCandidateEntries(candidateType).map(([_, x]) => castTo<InjectableCandidateConfig<T>>(x));
   }
 
   /**
    * Get candidate instances by target type, with an optional filter
    */
-  getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectionClassConfig<T>) => boolean): Promise<T[]> {
-    const inputs = this.getCandidateTypes<T>(target).filter(x => !predicate || predicate(x));
+  getCandidateInstances<T>(candidateType: Class<T>, predicate?: (cfg: InjectableCandidateConfig<T>) => boolean): Promise<T[]> {
+    const inputs = this.getCandidates<T>(candidateType).filter(x => !predicate || predicate(x));
     return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
   }
 
-
   async getPrimaryCandidateInstances<T>(candidateType: Class<T>): Promise<[Class, T][]> {
-    const targets = await this.getCandidateTypes(candidateType);
+    const targets = await this.getCandidates(candidateType);
     return await Promise.all(
       targets
-        .filter(el => el.qualifier === this.store.get(el.class).get().qualifier) // Is primary?
+        .filter(el => el.qualifier === PrimaryCandidateSymbol) // Is primary?
         .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
         .map(async el => {
           const instance = await this.getInstance<T>(el.class, el.qualifier);
@@ -171,7 +173,7 @@ export class DependencyRegistryIndex {
     );
   }
 
-  async #resolveDependencyValue(cls: Class, x: Dependency, input: SchemaFieldConfig | SchemaParameterConfig): Promise<unknown> {
+  async #resolveDependencyValue(x: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, src: Class): Promise<unknown> {
     try {
       const target = x.target ?? input.type;
       return await this.getInstance(target, x.qualifier, x.resolution);
@@ -180,7 +182,7 @@ export class DependencyRegistryIndex {
         return undefined;
       } else {
         if (err && err instanceof Error) {
-          err.message = `${err.message} via=${cls.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
+          err.message = `${err.message} via=${src.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
         }
         throw err;
       }
@@ -190,12 +192,11 @@ export class DependencyRegistryIndex {
   /**
    * Retrieve list dependencies
    */
-  async fetchDependencyParameters<T>(managed: InjectableConfig<T>): Promise<unknown[]> {
-    const inputs = SchemaRegistryIndex.getMethodConfig(managed.class, managed.type === 'factory' ? managed.method : 'constructor').parameters;
+  async fetchDependencyParameters<T>(candidate: InjectableCandidateConfig<T>): Promise<unknown[]> {
+    const inputs = SchemaRegistryIndex.getMethodConfig(candidate.class, candidate.method).parameters;
 
-    const promises = (managed.parameters ?? [])
-      .toSorted((c, d) => c.index - d.index).map((v) => [v, inputs.find(x => x.index === v.index)!, v.index] as const)
-      .map(async ([x, input]) => this.#resolveDependencyValue(managed.class, x, input));
+    const promises = inputs
+      .map(input => this.#resolveDependencyValue(readDependency(input) ?? {}, input, candidate.class));
 
     return await Promise.all(promises);
   }
@@ -203,65 +204,44 @@ export class DependencyRegistryIndex {
   /**
    * Retrieve mapped dependencies
    */
-  async fetchDependencyFields<T>(managed: InjectableClassConfig<T>, instance: Partial<T>): Promise<Partial<T>> {
-    const inputs = SchemaRegistryIndex.getFieldMap(managed.class);
+  async injectFields<T>(candidate: InjectableCandidateConfig<T> | Class, instance: T): Promise<T> {
+    let candidateType = 'candidateType' in candidate ? candidate.candidateType : candidate;
+    let srcClass = 'candidateType' in candidate ? candidate.class : candidate;
 
-    const deps = managed.fields ?? {};
+    const inputs = SchemaRegistryIndex.getFieldMap(candidateType);
 
-    const promises = TypedObject.keys(deps)
-      .filter(k => instance[castKey(k)] === undefined)
-      .map(k => [deps[k], inputs[k], k] as const)
-      .map(async ([x, input, key]) => [key, await this.#resolveDependencyValue(managed.class, x, input)]);
+    const promises = TypedObject.entries(inputs)
+      .filter(([k, input]) => instance[castKey(k)] === undefined && readDependency(input) !== undefined)
+      .map(async ([k, input]) => [k, await this.#resolveDependencyValue(readDependency(input) ?? {}, input, srcClass)] as const);
 
     const pairs = await Promise.all(promises);
-    return Object.fromEntries(pairs);
-  }
 
-  /**
-   * Resolve all field dependencies
-   */
-  async resolveFieldDependencies<T>(config: InjectableClassConfig<T>, instance: T): Promise<void> {
-    const deps = await this.fetchDependencyFields(config, instance);
-    for (const [k, v] of TypedObject.entries(deps)) {
-      instance[k] = castTo(v);
+    for (const [k, v] of pairs) {
+      instance[castKey(k)] = castTo(v);
     }
+    return instance;
   }
 
   /**
    * Actually construct an instance while resolving the dependencies
    */
   async construct<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
-    const managed = this.#resolver.resolveTarget(target, qualifier).config;
-
-    let inst: T;
-
-    const params = await this.fetchDependencyParameters(managed);
-
-    if (managed.type === 'factory') {
-      inst = castTo(managed.handle(...params));
-    } else {
-      inst = classConstruct(managed.class, params);
-    }
+    const { candidate } = this.#resolver.resolveTarget(target, qualifier);
+    const params = await this.fetchDependencyParameters(candidate);
+    const inst = await candidate.factory(params);
 
     // And auto-wire fields
-    await this.resolveFieldDependencies(managed, inst);
-
-    // If factory with field properties on the sub class
-    if (managed.factory) {
-      const resolved = this.getConfig(inst);
-
-      if (resolved) {
-        await this.resolveFieldDependencies(resolved, inst);
-      }
-    }
+    await this.injectFields(candidate, inst);
 
     // Run post construct, if it wasn't passed in, otherwise it was already created
     if (hasPostConstruct(inst) && !params.includes(inst)) {
       await inst.postConstruct();
     }
 
+    const metadata = SchemaRegistryIndex.get(candidate.candidateType).getMetadata<InjectableClassMetadata>(MetadataSymbol);
+
     // Run post constructors
-    for (const op of Object.values(managed.postConstruct)) {
+    for (const op of Object.values(metadata?.postConstruct ?? {})) {
       await op(inst);
     }
 
@@ -319,13 +299,5 @@ export class DependencyRegistryIndex {
     // May not exist
     this.#proxies.get(classId)?.get(qualifier)?.setTarget(null);
     console.debug('On uninstall', { id: classId, qualifier: qualifier.toString(), classId });
-  }
-
-  /**
-   * Inject fields into instance
-   */
-  async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
-    // Compute fields to be auto-wired
-    return await this.resolveFieldDependencies(this.getConfig(cls), o);
   }
 }

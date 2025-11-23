@@ -69,7 +69,7 @@ export class ControllerRegistryIndex {
   registerControllerContextParam<T>(target: Class, field: string): void {
     const controllerConfig = this.getController(target);
     controllerConfig.contextParams[field] = true;
-    DependencyRegistryIndex.getForRegister(target).registerInjectable({
+    DependencyRegistryIndex.registerClassMetadata(target, {
       postConstruct: {
         ContextParam: (inst: ClassInstance) => this.#bindContextParams(inst)
       }

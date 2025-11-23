@@ -15,7 +15,6 @@ function combineInjectableCandidates(
     class: cls,
     method,
     enabled: true,
-    qualifier: getDefaultQualifier(cls, method),
     target: cls,
     factory: (...params: unknown[]) => castTo<Function>(cls[castKey(method)])(...params),
     candidateType: undefined!, // Will be resolved during finalization
@@ -72,6 +71,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     for (const [k, v] of Object.entries(this.#config.candidates)) {
       const schema = SchemaRegistryIndex.get(this.#cls).getMethod(k);
       v.candidateType = schema.returnType!.type;
+      v.qualifier ??= getDefaultQualifier(v.class);
     }
   }
 

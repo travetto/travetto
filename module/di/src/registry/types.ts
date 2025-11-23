@@ -8,4 +8,4 @@ export const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>
 export const PrimaryCandidateSymbol = Symbol();
 export class AutoCreate { }
 
-export type Resolved<T> = { config: InjectableCandidateConfig<T>, qualifier: symbol, id: string };
+export type Resolved<T> = { candidate: InjectableCandidateConfig<T>, qualifier: symbol, id: string };

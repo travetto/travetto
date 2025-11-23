@@ -148,10 +148,10 @@ class DiTest2 {
 
   @Test('abstract inheritance')
   async absTract() {
-    const types = DependencyRegistryIndex.getCandidateTypes(BasePattern);
+    const types = DependencyRegistryIndex.getCandidates(BasePattern);
     assert(types.length > 0);
 
-    const spec = DependencyRegistryIndex.getCandidateTypes(SpecificPattern);
+    const spec = DependencyRegistryIndex.getCandidates(SpecificPattern);
     assert(spec.length === 1);
 
     assert(types[0] === spec[0]);
@@ -164,10 +164,10 @@ class DiTest2 {
   @Test('interface injection')
   async intInjection() {
     const BaseTypeTarget = toConcrete<BaseType>();
-    const types = DependencyRegistryIndex.getCandidateTypes(BaseTypeTarget);
+    const types = DependencyRegistryIndex.getCandidates(BaseTypeTarget);
     assert(types.length > 0);
 
-    const spec = DependencyRegistryIndex.getCandidateTypes(InterfaceType);
+    const spec = DependencyRegistryIndex.getCandidates(InterfaceType);
     assert(spec.length > 0);
 
     assert(types[0] === spec[0]);
@@ -181,16 +181,16 @@ class DiTest2 {
 
   @Test('overridden via subclass')
   async subclassVerification() {
-    const types = DependencyRegistryIndex.getCandidateTypes(UsableMainClass);
+    const types = DependencyRegistryIndex.getCandidates(UsableMainClass);
     assert(types.length === 2);
 
-    const spec = DependencyRegistryIndex.getCandidateTypes(UsableSubClass);
+    const spec = DependencyRegistryIndex.getCandidates(UsableSubClass);
     assert(spec.length === 1);
 
     const specInst = await DependencyRegistryIndex.getInstance(UsableSubClass);
     assert(specInst.constructor === UsableSubClass);
 
-    const specSpec = DependencyRegistryIndex.getCandidateTypes(UsableSubSubClass);
+    const specSpec = DependencyRegistryIndex.getCandidates(UsableSubSubClass);
     assert(specSpec.length === 2);
 
     await assert.rejects(() => DependencyRegistryIndex.getInstance(UsableSubSubClass), /Multiple candidate/i);
@@ -198,7 +198,7 @@ class DiTest2 {
 
   @Test('loose resolution')
   async looseResolution() {
-    const types = DependencyRegistryIndex.getCandidateTypes(LooseResolutionClass);
+    const types = DependencyRegistryIndex.getCandidates(LooseResolutionClass);
     assert(types.length === 2);
 
     const inst = await DependencyRegistryIndex.getInstance(LooseResolutionClass);

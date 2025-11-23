@@ -1,7 +1,6 @@
 import { castTo, type Class } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { InjectableCandidateConfig, ResolutionType, DiSchemaSymbol } from './types.ts';
+import { InjectableCandidateConfig, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
 
 const collapseConfig = <T extends { qualifier?: symbol }>(first?: T | symbol, args: Partial<T>[] = []): Partial<T>[] => {
@@ -34,9 +33,9 @@ export function Inject(first?: InjectConfig | symbol) {
   return (target: unknown, propertyKey?: string | symbol, idx?: number | PropertyDescriptor): void => {
     const config = typeof first === 'symbol' ? { qualifier: first } : first ?? {};
     if (typeof idx !== 'number') {
-      SchemaRegistryIndex.getForRegister(target).registerFieldMetadata(propertyKey!, DiSchemaSymbol, config);
+      DependencyRegistryIndex.registerFieldMetadata(target, propertyKey!, config);
     } else {
-      SchemaRegistryIndex.getForRegister(target).registerParameterMetadata(propertyKey!, idx, DiSchemaSymbol, config);
+      DependencyRegistryIndex.registerParameterMetadata(target, propertyKey!, idx, config);
     }
   };
 }

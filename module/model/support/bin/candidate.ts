@@ -40,7 +40,7 @@ export class ModelCandidateUtil {
    * Get all providers that are viable candidates
    */
   static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectionClassConfig[]> {
-    const types = DependencyRegistryIndex.getCandidateTypes(toConcrete<ModelStorageSupport>());
+    const types = DependencyRegistryIndex.getCandidates(toConcrete<ModelStorageSupport>());
     return types.filter(x => !op || x.class.prototype?.[op]);
   }
 

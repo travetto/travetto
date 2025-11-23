@@ -28,14 +28,6 @@ export class DependencyRegistryResolver {
    */
   #byContainerType = new Map<DependencyClassId, Map<symbol, InjectableCandidateConfig>>();
 
-  #registerByCandidateType(typeId: DependencyClassId, qualifier: symbol, candidate: InjectableCandidateConfig): void {
-    setInMap(this.#byCandidateType, typeId, qualifier, candidate);
-  }
-
-  #registerByContainerType(clsId: DependencyClassId, method: symbol | string, candidate: InjectableCandidateConfig): void {
-    setInMap(this.#byContainerType, clsId, method, candidate);
-  }
-
   #resolveQualifier<T>(type: ClassTarget<T>, resolution?: ResolutionType): symbol | undefined {
     const qualifiers = this.#byCandidateType.get(type.Ⲑid) ?? new Map<symbol, InjectableCandidateConfig>();
 
@@ -50,7 +42,9 @@ export class DependencyRegistryResolver {
         return filtered[0];
       } else if (filtered.length > 1) {
         // If dealing with sub types, prioritize exact matches
-        const exact = this.getTargetedTypes(type).filter(x => x.candidateType === type);
+        const exact = this.getCandidateEntries(type)
+          .map(([_, x]) => x)
+          .filter(x => x.candidateType === type);
 
         if (exact.length === 1) {
           return exact[0].qualifier;
@@ -76,45 +70,47 @@ export class DependencyRegistryResolver {
     const targetClassId = target.Ⲑid;
     const isSelfTarget = candidateClassId === targetClassId;
 
+    const qualifier = config.qualifier ?? getDefaultQualifier(candidateType);
+
     // Record qualifier if its the default for the class
     if (config.qualifier === getDefaultQualifier(candidateType)) {
       this.#defaultSymbols.add(config.qualifier);
     }
 
     // Register inbound config by method and class
-    this.#registerByContainerType(config.class.Ⲑid, config.method, config);
+    setInMap(this.#byContainerType, config.class.Ⲑid, config.method, config);
 
-    this.#registerByCandidateType(candidateClassId, config.qualifier, config);
+    setInMap(this.#byCandidateType, candidateClassId, qualifier, config);
 
     // Track interface aliases as targets
     const { interfaces } = SchemaRegistryIndex.getConfig(config.class);
     for (const { Ⲑid: interfaceId } of interfaces) {
-      this.#registerByContainerType(interfaceId, config.qualifier, config);
+      setInMap(this.#byCandidateType, interfaceId, qualifier, config);
     }
 
     // If targeting self (default @Injectable behavior)
     if (isSelfTarget && baseParentId) {
-      this.#registerByContainerType(baseParentId, config.qualifier, config);
+      setInMap(this.#byCandidateType, baseParentId, qualifier, config);
     }
 
     // Registry primary candidates
     if (config.primary) {
       if (baseParentId) {
-        this.#registerByCandidateType(baseParentId, PrimaryCandidateSymbol, config);
+        setInMap(this.#byCandidateType, baseParentId, PrimaryCandidateSymbol, config);
       }
 
       // Register primary for self
-      this.#registerByCandidateType(candidateClassId, PrimaryCandidateSymbol, config);
+      setInMap(this.#byCandidateType, candidateClassId, PrimaryCandidateSymbol, config);
 
       // Register primary if only one interface provided and no parent config
       if (interfaces.length === 1 && (!baseParentId || !this.#byContainerType.has(baseParentId))) {
         const [primaryInterface] = interfaces;
         const primaryClassId = primaryInterface.Ⲑid;
-        this.#registerByCandidateType(primaryClassId, PrimaryCandidateSymbol, config);
+        setInMap(this.#byCandidateType, primaryClassId, PrimaryCandidateSymbol, config);
       } else if (isSelfTarget) {
         // Register primary for all interfaces if self targeting
         for (const { Ⲑid: interfaceId } of interfaces) {
-          this.#registerByCandidateType(interfaceId, PrimaryCandidateSymbol, config);
+          setInMap(this.#byCandidateType, interfaceId, PrimaryCandidateSymbol, config);
         }
       }
     }
@@ -149,7 +145,7 @@ export class DependencyRegistryResolver {
     }
 
     return {
-      config: castTo(config),
+      candidate: castTo(config),
       qualifier,
       id: (config.target ?? config.candidateType).Ⲑid
     };
@@ -162,13 +158,8 @@ export class DependencyRegistryResolver {
     this.#byContainerType.get(classId)!.delete(qualifier);
   }
 
-  getQualifiers(candidateType: ClassTarget): symbol[] {
+  getCandidateEntries(candidateType: ClassTarget): [symbol, InjectableCandidateConfig][] {
     const candidateTypeId = candidateType.Ⲑid;
-    return [...new Set([...(this.#byCandidateType.get(candidateTypeId)?.keys() ?? [])])];
-  }
-
-  getTargetedTypes(candidateType: ClassTarget): InjectableCandidateConfig[] {
-    const candidateTypeId = candidateType.Ⲑid;
-    return [...new Set([...(this.#byCandidateType.get(candidateTypeId)?.values() ?? [])])];
+    return [...new Set([...(this.#byCandidateType.get(candidateTypeId)?.entries() ?? [])])];
   }
 }
