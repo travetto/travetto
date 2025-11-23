@@ -215,11 +215,6 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       );
     }
 
-    // Fill in constructor if missing
-    const meth = config.methods.CONSTRUCTOR ??= { validators: [], parameters: [], handle: castTo(this.#cls) };
-    meth.returnType ??= { type: this.#cls };
-    meth.parameters = meth!.parameters.map((p, i) => ({ ...p, index: i }));
-
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
     }
@@ -242,6 +237,9 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getMethodReturnType(method: string | symbol): Class {
+    if (method === 'CONSTRUCTOR') {
+      return this.#cls;
+    }
     return this.getMethod(method).returnType!.type;
   }
 

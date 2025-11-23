@@ -38,7 +38,7 @@ export interface InjectableCandidate<T = unknown> {
    */
   factory: (...args: unknown[]) => T | Promise<T>;
   /**
-   * Return type of the factory method
+   * The type of the candidate 
    */
   candidateType: Class;
   /**

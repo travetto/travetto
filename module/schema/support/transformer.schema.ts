@@ -100,7 +100,7 @@ export class SchemaTransformer {
     if (cons) {
       attrs.methods = {
         CONSTRUCTOR: {
-          parameters: cons.parameters.map(p => SchemaTransformUtil.computeInputDecoratorParams(state, p))
+          parameters: cons.parameters.map((p, i) => SchemaTransformUtil.computeInputDecoratorParams(state, p, { index: i })),
         }
       };
     }
@@ -154,7 +154,7 @@ export class SchemaTransformer {
       node.name,
       node.questionToken,
       node.typeParameters,
-      node.parameters.map(y => SchemaTransformUtil.computeInput(state, y)),
+      node.parameters.map((y, i) => SchemaTransformUtil.computeInput(state, y, { index: i })),
       node.type,
       node.body
     );

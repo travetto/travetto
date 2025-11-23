@@ -21,6 +21,7 @@ export function Injectable(first?: Partial<InjectableCandidate> | symbol, ...arg
   return <T extends Class>(target: T): void => {
     DependencyRegistryIndex.getForRegister(target).registerFactory('CONSTRUCTOR', ...collapseConfig(first, args), {
       factory: (...params: unknown[]) => classConstruct(target, params),
+      candidateType: target,
     });
   };
 }

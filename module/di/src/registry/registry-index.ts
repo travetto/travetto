@@ -34,6 +34,10 @@ export class DependencyRegistryIndex {
     return this.#instance.getCandidates<T>(candidateType);
   }
 
+  static getCandidateTypes<T>(candidateType: Class<T>): Class<T>[] {
+    return this.#instance.getCandidates(candidateType).map(c => c.candidateType);
+  }
+
   static getInstances<T>(candidateType: Class<T>, predicate?: (cfg: InjectableCandidate<T>) => boolean): Promise<T[]> {
     return this.#instance.getInstances<T>(candidateType, predicate);
   }

@@ -92,7 +92,7 @@ export class SchemaTransformUtil {
     config?: ComputeConfig
   ): ts.Expression[] {
     const typeExpr = config?.type ?? state.resolveType(ts.isSetAccessor(node) ? node.parameters[0] : node);
-    const attrs: Record<string, string | boolean | object | ts.Expression> = {};
+    const attrs: Record<string, string | boolean | object | number | ts.Expression> = {};
 
     if (!ts.isGetAccessorDeclaration(node) && !ts.isSetAccessorDeclaration(node)) {
       // eslint-disable-next-line no-bitwise
@@ -176,6 +176,9 @@ export class SchemaTransformUtil {
       state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT) ??
       state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
 
+    if (config?.index !== undefined) {
+      attrs.index = config.index;
+    }
 
     if (Object.keys(attrs).length) {
       params.push(state.fromLiteral(attrs));
