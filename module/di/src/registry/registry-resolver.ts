@@ -123,7 +123,7 @@ export class DependencyRegistryResolver {
    * @param candidateType
    * @param qualifier
    */
-  resolveTarget<T>(candidateType: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
+  resolveCandidate<T>(candidateType: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
     const qualifiers = this.#byCandidateType.get(candidateType.Ⲑid) ?? new Map<symbol, InjectableCandidateConfig>();
 
     let config: InjectableCandidateConfig;
@@ -138,7 +138,7 @@ export class DependencyRegistryResolver {
       } else if (!qualifiers.has(qualifier)) {
         if (!this.#defaultSymbols.has(qualifier) && resolution === 'loose') {
           console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: candidateType.Ⲑid });
-          return this.resolveTarget(candidateType);
+          return this.resolveCandidate(candidateType);
         }
         throw new InjectionError('Dependency not found', candidateType, [qualifier]);
       } else {

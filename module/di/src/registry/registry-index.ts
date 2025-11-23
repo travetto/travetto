@@ -178,10 +178,10 @@ export class DependencyRegistryIndex {
     );
   }
 
-  async #resolveDependencyValue(x: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, src: Class): Promise<unknown> {
+  async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, src: Class): Promise<unknown> {
     try {
-      const target = x.target ?? input.type;
-      return await this.getInstance(target, x.qualifier, x.resolution);
+      const target = dependency.target ?? input.type;
+      return await this.getInstance(target, dependency.qualifier, dependency.resolution);
     } catch (err) {
       if (input.required?.active === false && err instanceof InjectionError && err.category === 'notfound') {
         return undefined;
@@ -227,8 +227,8 @@ export class DependencyRegistryIndex {
   /**
    * Actually construct an instance while resolving the dependencies
    */
-  async construct<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
-    const { candidate } = this.#resolver.resolveTarget(target, qualifier);
+  async construct<T>(candidateType: ClassTarget<T>, qualifier: symbol): Promise<T> {
+    const { candidate } = this.#resolver.resolveCandidate(candidateType, qualifier);
     const params = await this.fetchDependencyParameters(candidate);
     const inst = await candidate.factory(params);
 
@@ -248,7 +248,7 @@ export class DependencyRegistryIndex {
     }
 
     // Proxy if necessary
-    return Runtime.dynamic ? this.#proxyInstance(target, qualifier, inst) : inst;
+    return Runtime.dynamic ? this.#proxyInstance(candidateType, qualifier, inst) : inst;
   }
 
   /**
@@ -259,7 +259,7 @@ export class DependencyRegistryIndex {
       throw new AppError('Unable to get instance when target is undefined');
     }
 
-    const { targetId, qualifier } = this.#resolver.resolveTarget(candidateType, requestedQualifier, resolution);
+    const { targetId, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier, resolution);
 
     if (!this.#instances.has(targetId)) {
       this.#instances.set(targetId, new Map());
@@ -286,20 +286,20 @@ export class DependencyRegistryIndex {
   /**
    * Destroy an instance
    */
-  destroyInstance(candidateType: Class, qualifier: symbol): void {
-    const candidateTypeId = candidateType.Ⲑid;
+  destroyInstance(candidateType: Class, requestedQualifier: symbol): void {
+    const { targetId, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier);
 
-    const activeInstance = this.#instances.get(candidateTypeId)!.get(qualifier);
+    const activeInstance = this.#instances.get(targetId)!.get(qualifier);
     if (hasPreDestroy(activeInstance)) {
       activeInstance.preDestroy();
     }
 
     this.#resolver.removeClass(candidateType, qualifier);
-    this.#instances.get(candidateTypeId)!.delete(qualifier);
-    this.#instancePromises.get(candidateTypeId)!.delete(qualifier);
+    this.#instances.get(targetId)!.delete(qualifier);
+    this.#instancePromises.get(targetId)!.delete(qualifier);
 
     // May not exist
-    this.#proxies.get(candidateTypeId)?.get(qualifier)?.setTarget(null);
-    console.debug('On uninstall', { id: candidateTypeId, qualifier: qualifier.toString(), classId: candidateTypeId });
+    this.#proxies.get(targetId)?.get(qualifier)?.setTarget(null);
+    console.debug('On uninstall', { id: targetId, qualifier: qualifier.toString(), classId: targetId });
   }
 }
