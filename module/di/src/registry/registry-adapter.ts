@@ -1,5 +1,5 @@
 import { RegistryAdapter } from '@travetto/registry';
-import { castKey, castTo, Class, classConstruct, safeAssign } from '@travetto/runtime';
+import { Class, getAllEntries, safeAssign } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableConfig, getDefaultQualifier, InjectableCandidate } from '../types';
@@ -38,19 +38,13 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     return combineClasses(this.#config, ...data);
   }
 
-  registerConstructor(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
-    return this.registerFactory('CONSTRUCTOR', ...data, {
-      factory: (...params: unknown[]) => classConstruct(this.#cls, params)
-    });
-  }
-
   registerFactory(method: string | symbol, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
     const { candidates } = this.register();
     candidates[method] ??= {
       class: this.#cls,
       method,
       enabled: true,
-      factory: (...params: unknown[]) => castTo<Function>(this.#cls[castKey(method)])(...params),
+      factory: undefined!,
       candidateType: undefined!,
     };
     return combineInjectableCandidates(candidates[method], ...data);
@@ -61,24 +55,17 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   }
 
   finalize(): void {
-    const keys = [
-      ...Object.keys(this.#config.candidates),
-      ...Object.getOwnPropertySymbols(this.#config.candidates)
-    ];
-    for (const k of keys) {
+    for (const [k] of getAllEntries(this.#config.candidates)) {
       const v = this.#config.candidates[k];
-      const candidateType = k !== 'CONSTRUCTOR' ? SchemaRegistryIndex.get(v.class).getMethod(k).returnType?.type! : this.#cls;
+      const candidateType = SchemaRegistryIndex.get(v.class).getMethodReturnType(k);
       v.candidateType = candidateType;
       v.qualifier ??= getDefaultQualifier(candidateType);
     }
   }
 
   getCandidateConfigs(): InjectableCandidate[] {
-    return [
-      ...Object.keys(this.#config.candidates),
-      ...Object.getOwnPropertySymbols(this.#config.candidates)
-    ]
-      .map(k => this.#config.candidates[k])
+    return getAllEntries(this.#config.candidates)
+      .map(([_, item]) => item)
       .filter(item => item.enabled !== false && (typeof item.enabled !== 'function' || item.enabled()));
   }
 }

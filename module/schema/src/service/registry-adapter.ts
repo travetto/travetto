@@ -1,7 +1,10 @@
 import type { RegistryAdapter } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, describeFunction, safeAssign } from '@travetto/runtime';
 
-import { SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig, SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig } from './types';
+import {
+  SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig,
+  SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig
+} from './types';
 
 function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {
   const md = base.metadata ??= {};
@@ -75,9 +78,11 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
 
 function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
-    const cons = config.methods?.['CONSTRUCTOR'];
-    if (cons?.parameters) {
-      cons.parameters = cons.parameters.map((p, i) => ({ ...Array.isArray(p) ? castTo({ ...p }) : p, index: i }));
+    if (config?.methods?.CONSTRUCTOR) {
+      Object.assign(config.methods.CONSTRUCTOR, {
+        parameters: config.methods.CONSTRUCTOR.parameters?.map((p, i) => ({ ...p, index: i })),
+        returnType: { type: base.class }
+      });
     }
 
     Object.assign(base, {
@@ -239,6 +244,10 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       throw new AppError(`Unknown method ${String(method)} on class ${this.#cls.Ⲑid}`);
     }
     return res;
+  }
+
+  getMethodReturnType(method: string | symbol): Class {
+    return this.getMethod(method).returnType!.type;
   }
 
   getSchema(view?: string): SchemaFieldMap {
