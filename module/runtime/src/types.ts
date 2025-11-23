@@ -39,6 +39,9 @@ export const TypedObject: {
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
 } & ObjectConstructor = Object;
 
+export const safeAssign = <T extends {}, U extends {}>(target: T, ...sources: U[]): T & U =>
+  Object.assign(target, ...sources);
+
 export function castTo<T>(input: unknown): T {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return input as T;

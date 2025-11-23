@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, describeFunction } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, describeFunction, safeAssign } from '@travetto/runtime';
 
 import { SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig, SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig } from './types';
 
@@ -7,14 +7,14 @@ function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>
   const md = base.metadata ??= {};
   const out = md[key] ??= {};
   for (const d of data) {
-    Object.assign(out, d);
+    safeAssign(out, d);
   }
   return castTo(out);
 }
 
 function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
-    Object.assign(base, {
+    safeAssign(base, {
       ...config,
       ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
       ...config.aliases ? { aliases: [...base.aliases ?? [], ...config.aliases ?? []] } : {},
@@ -35,7 +35,7 @@ function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>
 
 function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
-    Object.assign(base, {
+    safeAssign(base, {
       ...config,
       ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
       parameters: [...base.parameters, ...(config.parameters ?? [])],
@@ -49,7 +49,7 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
     });
     if (config.parameters) {
       for (const param of config.parameters) {
-        Object.assign(base.parameters[param.index], param);
+        safeAssign(base.parameters[param.index], param);
       }
     }
   }

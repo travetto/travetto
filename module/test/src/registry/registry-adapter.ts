@@ -1,5 +1,5 @@
 import { RegistryAdapter } from '@travetto/registry';
-import { AppError, asFull, Class, describeFunction, Runtime } from '@travetto/runtime';
+import { AppError, asFull, Class, describeFunction, Runtime, safeAssign } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { SuiteConfig } from '../model/suite';
@@ -41,7 +41,7 @@ function combineMethods(suite: SuiteConfig, baseConfig: TestConfig, ...subConfig
   baseConfig.classId = suite.classId;
   baseConfig.import = suite.import;
   for (const cfg of subConfig) {
-    Object.assign(baseConfig, cfg, {
+    safeAssign(baseConfig, cfg, {
       tags: [
         ...baseConfig.tags ?? [],
         ...cfg.tags ?? []
