@@ -13,14 +13,14 @@ function combineInjectableCandidates<T extends InjectableCandidate>(base: T, ...
 
 function combineClasses<T extends InjectableConfig>(base: T, ...override: Partial<T>[]): typeof base {
   for (const o of override) {
-    base = {
+    Object.assign(base, {
       ...base,
       ...o,
       candidates: {
         ...base.candidates,
         ...o.candidates,
       }
-    };
+    });
   }
   return base;
 }
@@ -39,7 +39,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   }
 
   registerConstructor(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
-    return this.registerFactory('constructor', ...data, {
+    return this.registerFactory('CONSTRUCTOR', ...data, {
       factory: (...params: unknown[]) => classConstruct(this.#cls, params)
     });
   }
@@ -61,17 +61,29 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   }
 
   finalize(): void {
-    for (const [k, v] of Object.entries(this.#config.candidates)) {
-      if (k !== 'constructor') {
+    const keys = [
+      ...Object.keys(this.#config.candidates),
+      ...Object.getOwnPropertySymbols(this.#config.candidates)
+    ];
+    for (const k of keys) {
+      const v = this.#config.candidates[k];
+
+      if (k !== 'CONSTRUCTOR') {
         const candidateType = SchemaRegistryIndex.get(v.class).getMethod(k).returnType?.type!;
         v.candidateType = candidateType;
         v.qualifier ??= getDefaultQualifier(candidateType);
+      } else {
+        v.candidateType = this.#cls;
       }
     }
   }
 
   getCandidateConfigs(): InjectableCandidate[] {
-    return Object.values(this.#config.candidates)
-      .filter(item => item.enabled === undefined || item.enabled === true || (typeof item.enabled === 'function' && !item.enabled()));
+    return [
+      ...Object.keys(this.#config.candidates),
+      ...Object.getOwnPropertySymbols(this.#config.candidates)
+    ]
+      .map(k => this.#config.candidates[k])
+      .filter(item => item.enabled !== false && (typeof item.enabled !== 'function' || item.enabled()));
   }
 }

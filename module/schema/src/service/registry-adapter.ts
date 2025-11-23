@@ -75,7 +75,7 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
 
 function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
-    const cons = config.methods?.[castTo<''>('constructor')];
+    const cons = config.methods?.['CONSTRUCTOR'];
     if (cons?.parameters) {
       cons.parameters = cons.parameters.map((p, i) => ({ ...Array.isArray(p) ? castTo({ ...p }) : p, index: i }));
     }

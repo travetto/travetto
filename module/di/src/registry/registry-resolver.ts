@@ -75,14 +75,6 @@ export class DependencyRegistryResolver {
 
     const qualifier = config.qualifier ?? getDefaultQualifier(candidateType);
 
-    console.error('DependencyRegistryResolver.registerClass status', {
-      candidateClassId,
-      targetClassId,
-      qualifier: qualifier.toString(),
-      isSelfTarget,
-      baseParentId
-    });
-
     // Record qualifier if its the default for the class
     if (config.qualifier === getDefaultQualifier(candidateType)) {
       this.#defaultSymbols.add(config.qualifier);
@@ -91,10 +83,10 @@ export class DependencyRegistryResolver {
     // Register inbound config by method and class
     setInMap(this.#byContainerType, config.class.Ⲑid, config.method, config);
 
-    setInMap(this.#byCandidateType, candidateClassId, qualifier, config);
+    setInMap(this.#byCandidateType, targetClassId, qualifier, config);
 
     // Track interface aliases as targets
-    const { interfaces } = SchemaRegistryIndex.getConfig(config.class);
+    const { interfaces } = SchemaRegistryIndex.getConfig(candidateType);
     for (const { Ⲑid: interfaceId } of interfaces) {
       setInMap(this.#byCandidateType, interfaceId, qualifier, config);
     }
@@ -111,7 +103,7 @@ export class DependencyRegistryResolver {
       }
 
       // Register primary for self
-      setInMap(this.#byCandidateType, candidateClassId, PrimaryCandidateSymbol, config);
+      setInMap(this.#byCandidateType, targetClassId, PrimaryCandidateSymbol, config);
 
       // Register primary if only one interface provided and no parent config
       if (interfaces.length === 1 && (!baseParentId || !this.#byContainerType.has(baseParentId))) {
