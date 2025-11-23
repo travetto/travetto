@@ -2,7 +2,7 @@
 import { d, c } from '@travetto/doc';
 
 import { Registry } from './src/registry.ts';
-import { RegistryV2 } from './src/v2/registry.ts';
+import { RegistryV2 } from './src/service/registry.ts';
 import { DynamicFileLoader } from './src/internal/file-loader.ts';
 
 export const text = <>
