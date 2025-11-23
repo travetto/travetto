@@ -167,11 +167,11 @@ export class DependencyRegistryResolver {
 
   getCandidateEntries(candidateType: Class): [symbol, InjectableCandidate][] {
     const candidateTypeId = candidateType.Ⲑid;
-    return [...new Set([...(this.#byCandidateType.get(candidateTypeId)?.entries() ?? [])])];
+    return [...this.#byCandidateType.get(candidateTypeId)?.entries() ?? []];
   }
 
   getContainerEntries(containerType: Class): [symbol, InjectableCandidate][] {
     const containerTypeId = containerType.Ⲑid;
-    return [...new Set([...(this.#byContainerType.get(containerTypeId)?.entries() ?? [])])];
+    return [...this.#byContainerType.get(containerTypeId)?.entries() ?? []];
   }
 }

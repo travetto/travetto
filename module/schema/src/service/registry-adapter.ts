@@ -222,10 +222,12 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       handle: undefined!,
       returnType: { type: this.#cls },
     };
-
-    cfg.returnType = {
-      ...cfg.returnType,
-      type: this.#cls
+    config.methods['CONSTRUCTOR'] = {
+      ...cfg,
+      returnType: {
+        ...cfg.returnType,
+        type: this.#cls
+      }
     };
 
     for (const method of Object.values(config.methods)) {
