@@ -57,7 +57,7 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
 }
 
 function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T): T {
-  Object.assign(base, {
+  safeAssign(base, {
     ...base,
     ...base.views ? { views: { ...parent.views, ...base.views } } : {},
     ...base.validators ? { validators: [...parent.validators, ...base.validators] } : {},
