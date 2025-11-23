@@ -1,7 +1,6 @@
 export * from './src/v2/registry.ts';
 export * from './src/v2/types.ts';
 export * from './src/v2/store.ts';
-export * from './src/service/root.ts';
 export * from './src/proxy.ts';
 export * from './src/registry.ts';
 export * from './src/source/class-source.ts';
