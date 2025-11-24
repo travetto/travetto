@@ -30,10 +30,9 @@ export class ModelQuerySuggestUtil {
     const limit = query?.limit ?? 10;
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
-    const { subType } = SchemaRegistryIndex.getConfig(cls);
-    if (subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
-      clauses.push({ [subTypeField]: subTypeName });
+    const polymorphicConfig = SchemaRegistryIndex.getPolymorphicConfig(cls);
+    if (polymorphicConfig) {
+      clauses.push({ [polymorphicConfig.subTypeField]: polymorphicConfig.subTypeName });
     }
 
     const config = ModelRegistryIndex.getConfig(cls);
@@ -85,10 +84,10 @@ export class ModelQuerySuggestUtil {
    * Build suggestion query
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
-    const { subTypeField, subType } = SchemaRegistryIndex.getConfig(cls);
+    const polymorphicConfig = SchemaRegistryIndex.getPolymorphicConfig(cls);
     return this.getSuggestQuery<T>(cls, castTo(field), prefix, {
       ...(query ?? {}),
-      select: castTo({ [field]: true, ...(subType ? { [subTypeField]: true } : {}) })
+      select: castTo({ [field]: true, ...(polymorphicConfig ? { [polymorphicConfig.subTypeField]: true } : {}) })
     });
   }
 }

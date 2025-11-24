@@ -206,14 +206,15 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       combineClassWithParent(config, parent);
     }
 
-    if (config.subTypeName && config.subTypeField in config.fields) {
-      const field = config.fields[config.subTypeField];
-      config.subType = !!config.subTypeName; // Copy from config
-      config.fields[config.subTypeField] = {
+    const polymorphicConfig = this.getPolymorphicConfig();
+    if (polymorphicConfig) {
+      const { subTypeField, subTypeName } = polymorphicConfig;
+      const field = config.fields[subTypeField];
+      config.fields[subTypeField] = {
         ...field,
         enum: {
-          values: [config.subTypeName],
-          message: `${config.subTypeField} can only be '${config.subTypeName}'`,
+          values: [subTypeName],
+          message: `${subTypeField} can only be '${subTypeName}'`,
         },
         required: {
           active: false
@@ -298,5 +299,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       o[typeField] = castTo(config.subTypeName); // Assign if missing
     }
     return o;
+  }
+
+  getPolymorphicConfig(): { subTypeName: string, subTypeField: string } | undefined {
+    const { subTypeField, subTypeName } = this.#config;
+    if (subTypeName && subTypeField && subTypeField in this.#config.fields) {
+      return { subTypeName, subTypeField };
+    }
+    return undefined;
   }
 }

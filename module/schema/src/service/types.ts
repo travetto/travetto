@@ -113,10 +113,6 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
    */
   baseType?: boolean;
   /**
-   * Is the class a sub type
-   */
-  subType?: boolean;
-  /**
    * Sub type name
    */
   subTypeName?: string;

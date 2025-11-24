@@ -221,9 +221,9 @@ export class ElasticsearchQueryUtil {
         },
       });
     }
-    const { subType, subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
-    if (subType) {
-      clauses.push({ term: { [subTypeField]: { value: subTypeName! } } });
+    const polymorphicConfig = SchemaRegistryIndex.getPolymorphicConfig(cls);
+    if (polymorphicConfig) {
+      clauses.push({ term: { [polymorphicConfig.subTypeField]: { value: polymorphicConfig.subTypeName! } } });
     }
     return clauses.length === 0 ? {} :
       clauses.length === 1 ? clauses[0] :

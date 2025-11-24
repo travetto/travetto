@@ -29,6 +29,10 @@ export class SchemaRegistryIndex {
     return this.#instance.store.get(clsOrId).get();
   }
 
+  static getPolymorphicConfig<T>(cls: Class<T>): { subTypeName: string, subTypeField: string } | undefined {
+    return this.#instance.store.get(cls).getPolymorphicConfig();
+  }
+
   static getConfigByInstance(instance: ClassInstance): SchemaClassConfig {
     return this.#instance.store.getByInstance(instance).get();
   }

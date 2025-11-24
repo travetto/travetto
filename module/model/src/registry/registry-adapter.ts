@@ -40,9 +40,8 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
     const config = this.#config;
     if (parent) {
       const parentSchema = parent ? SchemaRegistryIndex.getConfig(parent.class) : undefined; // Ensure schema is finalized first
-      const schema = SchemaRegistryIndex.getConfig(this.#cls);
 
-      if ((parentSchema?.baseType || schema.subType) && parent.store) {
+      if (parentSchema?.baseType && parent.store) {
         config.store = parent.store;
       }
 

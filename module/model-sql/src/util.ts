@@ -70,10 +70,10 @@ export class SQLModelUtil {
 
     const hasModel = ModelRegistryIndex.has(conf.class)!;
     const fields = Object.values(conf.fields).map(field => ({ ...field }));
-    const schema = SchemaRegistryIndex.getConfig(conf.class);
 
     // Polymorphic
-    if (hasModel && (schema.baseType ?? schema.subType)) {
+    const subTypeConfig = SchemaRegistryIndex.getPolymorphicConfig(conf.class);
+    if (hasModel && subTypeConfig) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of SchemaRegistryIndex.getClassesByBaseType(conf.class)) {
         const typeConf = SchemaRegistryIndex.getConfig(type);

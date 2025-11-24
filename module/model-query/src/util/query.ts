@@ -56,9 +56,9 @@ export class ModelQueryUtil {
   static getWhereClause<T extends ModelType>(cls: Class<T>, q: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
     const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
 
-    const { subType } = SchemaRegistryIndex.getConfig(cls);
-    if (subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
+    const polymorphicConfig = SchemaRegistryIndex.getPolymorphicConfig(cls);
+    if (polymorphicConfig) {
+      const { subTypeField, subTypeName } = polymorphicConfig;
       clauses.push(castTo({ [subTypeField]: subTypeName }));
     }
 
