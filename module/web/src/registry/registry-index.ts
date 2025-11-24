@@ -44,11 +44,11 @@ export class ControllerRegistryIndex {
     cfg: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
-    return (instanceOrClass: unknown, property?: symbol | string): void => {
-      if (isClassInstance(property, instanceOrClass)) {
-        ControllerRegistryIndex.getForRegister(instanceOrClass.constructor).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
+    return (instanceOrCls: unknown, property?: symbol | string): void => {
+      if (isClassInstance(property, instanceOrCls)) {
+        ControllerRegistryIndex.getForRegister(instanceOrCls.constructor).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
       } else {
-        ControllerRegistryIndex.getForRegister(instanceOrClass).registerInterceptorConfig(cls, cfg, extra);
+        ControllerRegistryIndex.getForRegister(instanceOrCls).registerInterceptorConfig(cls, cfg, extra);
       }
     };
   }
@@ -70,8 +70,8 @@ export class ControllerRegistryIndex {
    * Register a controller to bind context params on post construct
    * @param target Controller class
    */
-  bindContextParamsOnPostConstruct(target: ClassOrId): void {
-    DependencyRegistryIndex.registerClassMetadata(target, {
+  bindContextParamsOnPostConstruct(clsOrId: ClassOrId): void {
+    DependencyRegistryIndex.registerClassMetadata(clsOrId, {
       postConstruct: {
         ContextParam: (inst: ClassInstance) => this.#bindContextParams(inst)
       }

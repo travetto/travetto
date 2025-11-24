@@ -8,12 +8,12 @@ import { DependencyRegistryIndex } from '../../src/registry/registry-index.ts';
  * Registers a suite as injectable
  */
 export function InjectableSuite() {
-  return (target: Class) => {
-    SuiteRegistryIndex.getForRegister(target).register({
+  return (cls: Class) => {
+    SuiteRegistryIndex.getForRegister(cls).register({
       beforeEach: [
         async function (this: unknown) {
           await RegistryV2.init();
-          await DependencyRegistryIndex.injectFields(this, target);
+          await DependencyRegistryIndex.injectFields(this, cls);
         },
       ]
     });

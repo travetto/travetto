@@ -13,15 +13,15 @@ function isClassInstance(o: Class | ClassInstance, property?: string | symbol): 
  * @augments `@travetto/schema:Describe`
  */
 export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
-  return (instanceOrClass: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
-    if (isClassInstance(instanceOrClass, property)) {
+  return (instanceOrCls: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
+    if (isClassInstance(instanceOrCls, property)) {
       if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
-        SchemaRegistryIndex.getForRegister(instanceOrClass.constructor).registerParameter(property!, descOrIdx, { ...config });
+        SchemaRegistryIndex.getForRegister(instanceOrCls.constructor).registerParameter(property!, descOrIdx, { ...config });
       } else {
-        SchemaRegistryIndex.getForRegister(instanceOrClass.constructor).registerField(property!, config);
+        SchemaRegistryIndex.getForRegister(instanceOrCls.constructor).registerField(property!, config);
       }
     } else {
-      SchemaRegistryIndex.getForRegister(instanceOrClass).register(config);
+      SchemaRegistryIndex.getForRegister(instanceOrCls).register(config);
     }
   };
 }

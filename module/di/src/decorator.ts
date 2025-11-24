@@ -1,4 +1,4 @@
-import { Any, castTo, classConstruct, ClassInstance, type Class } from '@travetto/runtime';
+import { Any, castTo, ClassInstance, type Class } from '@travetto/runtime';
 
 import { InjectableCandidate, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
@@ -18,8 +18,8 @@ const collapseConfig = <T extends { qualifier?: symbol }>(first?: T | symbol, ar
  * @augments `@travetto/schema:Schema`
  */
 export function Injectable(first?: Partial<InjectableCandidate> | symbol, ...args: Partial<InjectableCandidate>[]) {
-  return <T extends Class>(target: T): void => {
-    DependencyRegistryIndex.getForRegister(target).registerClass(...collapseConfig(first, args));
+  return <T extends Class>(cls: T): void => {
+    DependencyRegistryIndex.getForRegister(cls).registerClass(...collapseConfig(first, args));
   };
 }
 
@@ -44,10 +44,10 @@ export function Inject(first?: InjectConfig | symbol) {
  * @augments `@travetto/schema:Method`
  */
 export function InjectableFactory(first?: Partial<InjectableCandidate> | symbol, ...args: Partial<InjectableCandidate>[]) {
-  return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<(...args: Any[]) => Any>): void => {
+  return <T extends Class>(cls: T, property: string | symbol, descriptor: TypedPropertyDescriptor<(...args: Any[]) => Any>): void => {
     const config = collapseConfig(first, args);
-    DependencyRegistryIndex.getForRegister(target).registerFactory(property, ...config, ...args, {
-      factory: (...params: unknown[]) => descriptor.value!.apply(target, params),
+    DependencyRegistryIndex.getForRegister(cls).registerFactory(property, ...config, ...args, {
+      factory: (...params: unknown[]) => descriptor.value!.apply(cls, params),
     });
   };
 }
