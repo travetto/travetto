@@ -1,4 +1,4 @@
-import { Env } from '@travetto/runtime';
+import { Class, Env } from '@travetto/runtime';
 import { Config, EnvVar } from '@travetto/config';
 import { DependencyRegistryIndex, Inject, Injectable } from '@travetto/di';
 import { Required } from '@travetto/schema';
@@ -33,8 +33,10 @@ export class CommonLogger implements Logger {
   appender: LogAppender;
 
   async postConstruct(): Promise<void> {
-    this.formatter ??= await DependencyRegistryIndex.getInstance(this.config.format === 'line' ? LineLogFormatter : JsonLogFormatter);
-    this.appender ??= await DependencyRegistryIndex.getInstance(this.config.output !== 'console' ? FileLogAppender : ConsoleLogAppender);
+    const formatterCls: Class = this.config.format === 'line' ? LineLogFormatter : JsonLogFormatter;
+    const appenderCls: Class = this.config.output !== 'console' ? FileLogAppender : ConsoleLogAppender;
+    this.formatter ??= await DependencyRegistryIndex.getInstance(formatterCls);
+    this.appender ??= await DependencyRegistryIndex.getInstance(appenderCls);
   }
 
   log(ev: LogEvent): void {
