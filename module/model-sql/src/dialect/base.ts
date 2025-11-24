@@ -263,7 +263,7 @@ export abstract class SQLDialect implements DialectState {
     if (!type) {
       return;
     }
-    return `${this.ident(conf)} ${type} ${(conf.required && conf.required.active) ? 'NOT NULL' : 'DEFAULT NULL'}`;
+    return `${this.ident(conf)} ${type} ${(conf.required?.active !== false) ? 'NOT NULL' : 'DEFAULT NULL'}`;
   }
 
   /**

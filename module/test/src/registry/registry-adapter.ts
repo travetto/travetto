@@ -8,19 +8,19 @@ import { TestConfig } from '../model/test';
 function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConfig>[]): SuiteConfig {
   for (const cfg of subConfig) {
     if (cfg.beforeAll) {
-      baseConfig.beforeAll = [...baseConfig.beforeAll, ...cfg.beforeAll ?? []];
+      baseConfig.beforeAll = [...baseConfig.beforeAll, ...cfg.beforeAll];
     }
     if (cfg.beforeEach) {
-      baseConfig.beforeEach = [...baseConfig.beforeEach, ...cfg.beforeEach ?? []];
+      baseConfig.beforeEach = [...baseConfig.beforeEach, ...cfg.beforeEach];
     }
     if (cfg.afterAll) {
-      baseConfig.afterAll = [...baseConfig.afterAll, ...cfg.afterAll ?? []];
+      baseConfig.afterAll = [...baseConfig.afterAll, ...cfg.afterAll];
     }
     if (cfg.afterEach) {
-      baseConfig.afterEach = [...baseConfig.afterEach, ...cfg.afterEach ?? []];
+      baseConfig.afterEach = [...baseConfig.afterEach, ...cfg.afterEach];
     }
     if (cfg.tags) {
-      baseConfig.tags = [...baseConfig.tags ?? [], ...cfg.tags ?? []];
+      baseConfig.tags = [...baseConfig.tags ?? [], ...cfg.tags];
     }
     if (cfg.tests) {
       for (const [key, test] of Object.entries(cfg.tests ?? {})) {

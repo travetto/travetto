@@ -1,6 +1,7 @@
 import { Env } from '@travetto/runtime';
 import { Config, EnvVar } from '@travetto/config';
 import { DependencyRegistryIndex, Inject, Injectable } from '@travetto/di';
+import { Required } from '@travetto/schema';
 
 import { ConsoleLogAppender } from './appender/console.ts';
 import { FileLogAppender } from './appender/file.ts';
@@ -23,10 +24,12 @@ export class CommonLogger implements Logger {
   @Inject()
   config: CommonLoggerConfig;
 
-  @Inject(LogCommonSymbol, { optional: true })
+  @Inject(LogCommonSymbol)
+  @Required(false)
   formatter: LogFormatter;
 
-  @Inject(LogCommonSymbol, { optional: true })
+  @Inject(LogCommonSymbol)
+  @Required(false)
   appender: LogAppender;
 
   async postConstruct(): Promise<void> {

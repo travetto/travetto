@@ -193,7 +193,7 @@ export class SchemaFaker {
       if (f === 'type' || f === 'id') { // Do not set primary fields
         continue;
       }
-      if (!fieldConfig.required && (Math.random() < .5)) {
+      if (fieldConfig.required?.active === false && (Math.random() < .5)) {
         continue;
       }
       out[f] = this.#value(fieldConfig);

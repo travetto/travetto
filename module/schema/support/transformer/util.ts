@@ -98,8 +98,8 @@ export class SchemaTransformUtil {
       // eslint-disable-next-line no-bitwise
       if ((ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Readonly) > 0) {
         attrs.access = 'readonly';
-      } else if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
-        attrs.required = { active: true };
+      } else if (!!node.questionToken || !!typeExpr.undefinable || !!node.initializer) {
+        attrs.required = { active: false };
       }
       if (node.initializer && (
         ts.isLiteralExpression(node.initializer) ||
@@ -115,8 +115,8 @@ export class SchemaTransformUtil {
       }
       if (!acc.getter) {
         attrs.access = 'writeonly';
-      } else if (!typeExpr.undefinable) {
-        attrs.required = { active: true };
+      } else if (!!typeExpr.undefinable) {
+        attrs.required = { active: false };
       }
     }
 

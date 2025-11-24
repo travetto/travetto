@@ -71,7 +71,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
             type: 'array',
             ...this.#getType(sub)
           } : this.#getType(sub),
-          required: !!(rootField?.required?.active && sub.required?.active),
+          required: (rootField?.required?.active !== false && sub.required?.active !== false),
           in: location
         });
       }
@@ -164,7 +164,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       prop.enum = input.enum.values;
     }
     if (isFieldConfig(input)) {
-      if (input.required && input.required.active) {
+      if (input.required?.active !== false) {
         required.push(input.name.toString());
       }
       if (input.access === 'readonly') {

@@ -43,7 +43,7 @@ export class CliCommandRegistryUtil {
       ...(('name' in x && typeof x.name === 'string') ? { name: x.name } : { name: '' }),
       description: x.description,
       array: x.array,
-      required: x.required?.active,
+      required: x.required?.active !== false,
       choices: x.enum?.values,
       default: Array.isArray(x.default) ? x.default.slice(0) : x.default,
       flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),

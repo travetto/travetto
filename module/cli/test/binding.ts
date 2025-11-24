@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { CliCommand, CliCommandSchemaUtil, CliFlag, CliParseUtil, ParsedState } from '@travetto/cli';
+import { CliCommand, CliCommandRegistryIndex, CliCommandSchemaUtil, CliFlag, CliParseUtil, ParsedState } from '@travetto/cli';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 /**
  * My command
@@ -29,7 +30,7 @@ class Entity {
   main(file: string, force: boolean, args?: string[]) { }
 }
 
-const get = async (...args: string[]) => CliParseUtil.parse(await CliCommandSchemaUtil.getSchema(Entity), args);
+const get = async (...args: string[]) => CliParseUtil.parse(CliCommandRegistryIndex.get(Entity), args);
 const unused = (state: ParsedState) => state.unknown;
 const checkArgs = async (args: string[], expected: unknown[], raw?: unknown[]) => {
   const entity = new Entity();
@@ -83,9 +84,10 @@ export class SchemaBindingSuite {
 
   @Test()
   async testSchema() {
-    const schema = await CliCommandSchemaUtil.getSchema(Entity);
+    const cliSchema = CliCommandRegistryIndex.get(Entity);
+    const schema = SchemaRegistryIndex.getConfig(Entity);
     assert(schema.title === 'My command');
-    const color = schema.flags.find(x => x.name === 'color')!;
+    const color = cliSchema.flags.find(x => x.name === 'color')!;
     assert(color.description === 'My color');
     assert(color.required !== true);
     assert(color.type === 'string');
@@ -94,7 +96,7 @@ export class SchemaBindingSuite {
     assert(color.flagNames?.includes('--color'));
     assert.deepStrictEqual(color.choices?.toSorted(), ['blue', 'green']);
 
-    const age = schema.flags.find(x => x.name === 'age')!;
+    const age = cliSchema.flags.find(x => x.name === 'age')!;
     assert(age.description === 'My age');
     assert(age.required !== true);
     assert(age.type === 'number');
