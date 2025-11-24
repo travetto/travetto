@@ -3,23 +3,16 @@ import { Any, castTo, ClassInstance, type Class } from '@travetto/runtime';
 import { InjectableCandidate, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
 
-const collapseConfig = <T extends { qualifier?: symbol }>(first?: T | symbol, args: Partial<T>[] = []): Partial<T>[] => {
-  const configs: Partial<T>[] = [];
-  if (typeof first === 'symbol') {
-    configs.push(castTo({ qualifier: first }));
-  } else if (first) {
-    configs.push(first);
-  }
-  return [...configs, ...args];
-};
+const fromArg = <T extends { qualifier?: symbol }>(arg?: T | symbol): T =>
+  typeof arg === 'symbol' ? castTo({ qualifier: arg }) : arg ?? castTo<T>({});
 
 /**
  * Indicate that a class is able to be injected
  * @augments `@travetto/schema:Schema`
  */
-export function Injectable(first?: Partial<InjectableCandidate> | symbol, ...args: Partial<InjectableCandidate>[]) {
+export function Injectable(config?: Partial<InjectableCandidate> | symbol) {
   return <T extends Class>(cls: T): void => {
-    DependencyRegistryIndex.getForRegister(cls).registerClass(...collapseConfig(first, args));
+    DependencyRegistryIndex.getForRegister(cls).registerClass(fromArg(config));
   };
 }
 
@@ -28,13 +21,13 @@ export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
 /**
  * Indicate that a field or parameter is able to be injected
  */
-export function Inject(first?: InjectConfig | symbol) {
+export function Inject(config?: InjectConfig | symbol) {
   return (instance: ClassInstance, property: string | symbol, idx?: number | PropertyDescriptor): void => {
-    const config = typeof first === 'symbol' ? { qualifier: first } : first ?? {};
+    const cfg = fromArg(config);
     if (typeof idx !== 'number') {
-      DependencyRegistryIndex.registerFieldMetadata(instance.constructor, property, config);
+      DependencyRegistryIndex.registerFieldMetadata(instance.constructor, property, cfg);
     } else {
-      DependencyRegistryIndex.registerParameterMetadata(instance.constructor, property, idx, config);
+      DependencyRegistryIndex.registerParameterMetadata(instance.constructor, property, idx, cfg);
     }
   };
 }
@@ -43,10 +36,9 @@ export function Inject(first?: InjectConfig | symbol) {
  * Identifies a static method that is able to produce a dependency
  * @augments `@travetto/schema:Method`
  */
-export function InjectableFactory(first?: Partial<InjectableCandidate> | symbol, ...args: Partial<InjectableCandidate>[]) {
+export function InjectableFactory(config?: Partial<InjectableCandidate> | symbol) {
   return <T extends Class>(cls: T, property: string | symbol, descriptor: TypedPropertyDescriptor<(...args: Any[]) => Any>): void => {
-    const config = collapseConfig(first, args);
-    DependencyRegistryIndex.getForRegister(cls).registerFactory(property, ...config, ...args, {
+    DependencyRegistryIndex.getForRegister(cls).registerFactory(property, fromArg(config), {
       factory: (...params: unknown[]) => descriptor.value!.apply(cls, params),
     });
   };
