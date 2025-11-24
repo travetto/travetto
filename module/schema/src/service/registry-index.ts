@@ -85,7 +85,7 @@ export class SchemaRegistryIndex {
   /**
    * Register sub types for a class
    */
-  #registerSubTypes(cls: Class, name?: string): void {
+  #registerSubTypes(cls: Class): void {
     // Mark as subtype
     const config = this.getClassConfig(cls);
     let base: Class | undefined = this.getBaseClass(cls);
@@ -102,8 +102,8 @@ export class SchemaRegistryIndex {
 
     if (base !== cls || config.baseType) {
       baseList.push(cls);
-      config.subTypeField = (this.getClassConfig(base) ?? this.getClassConfig(base)).subTypeField;
-      config.subTypeName = name ?? config.subTypeName ?? classToSubTypeName(cls);
+      config.subTypeField = this.getClassConfig(base).subTypeField;
+      config.subTypeName = config.subTypeName ?? classToSubTypeName(cls);
       this.#subTypes.get(base)!.set(config.subTypeName!, cls);
     }
     if (base !== cls) {
