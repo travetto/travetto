@@ -6,8 +6,10 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
 function field<V>(...obj: Partial<SchemaFieldConfig>[]): PropType<V> {
-  return (t: ClassInstance, k: string | symbol): void => {
-    SchemaRegistryIndex.getForRegister(t).registerField(k, ...obj);
+  return (instance: ClassInstance, property: string | symbol): void => {
+    SchemaRegistryIndex
+      .getForRegister(instance.constructor)
+      .registerField(property, ...obj);
   };
 }
 

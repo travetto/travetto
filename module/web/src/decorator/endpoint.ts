@@ -1,8 +1,9 @@
 import { EndpointConfig, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
+import { ClassInstance } from '@travetto/runtime';
 
-type EndpointFunctionDecorator = <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
+type EndpointFunctionDecorator = <T>(instance: T, property: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
 
 type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
 
@@ -10,8 +11,8 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  * Generic Endpoint Decorator
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
-  return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    ControllerRegistryIndex.getForRegister(target).registerEndpoint(prop, { name: prop }, config);
+  return function (instance: ClassInstance, property: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
+    ControllerRegistryIndex.getForRegister(instance.constructor).registerEndpoint(property, { name: property }, config);
     return descriptor;
   };
 }

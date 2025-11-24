@@ -18,7 +18,7 @@ const FileMapContract = toConcrete<FileMap>();
  */
 export function Upload(
   param: string | Partial<EndpointParameterConfig> & UploadConfig = {},
-): (inst: ClassInstance, prop: string | symbol, idx: number) => void {
+): (instance: ClassInstance, property: string | symbol, idx: number) => void {
 
   if (typeof param === 'string') {
     param = { name: param };
@@ -26,10 +26,10 @@ export function Upload(
 
   const finalConf = { ...param };
 
-  return (inst: ClassInstance, prop: string | symbol, idx: number): void => {
+  return (instance: ClassInstance, property: string | symbol, idx: number): void => {
     // Register field
-    ControllerRegistryIndex.getForRegister(inst).registerEndpointInterceptorConfig(
-      prop,
+    ControllerRegistryIndex.getForRegister(instance.constructor).registerEndpointInterceptorConfig(
+      property,
       WebUploadInterceptor,
       {
         applies: true,
@@ -37,7 +37,7 @@ export function Upload(
         types: finalConf.types,
         cleanupFiles: finalConf.cleanupFiles,
         uploads: {
-          [finalConf.name ?? prop]: {
+          [finalConf.name ?? property]: {
             maxSize: finalConf.maxSize,
             types: finalConf.types,
             cleanupFiles: finalConf.cleanupFiles
@@ -49,7 +49,7 @@ export function Upload(
     return Param('body', {
       ...finalConf,
       extract: (request, config) => {
-        const input = SchemaRegistryIndex.getMethodConfig(inst, prop).parameters[idx];
+        const input = SchemaRegistryIndex.getMethodConfig(instance.constructor, property).parameters[idx];
 
         if (!input) {
           throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
@@ -63,6 +63,6 @@ export function Upload(
         const map = WebUploadUtil.getRequestUploads(request);
         return isMap ? map : map[config.name!];
       }
-    })(inst, prop, idx);
+    })(instance, property, idx);
   };
 }

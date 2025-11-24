@@ -8,6 +8,8 @@ import { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
 import { WebAsyncContext } from '../context';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
+const isClassInstance = (property: unknown, target: unknown): target is ClassInstance => !!property;
+
 export class ControllerRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(this);
@@ -42,11 +44,11 @@ export class ControllerRegistryIndex {
     cfg: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
-    return (target: unknown, prop?: symbol | string): void => {
-      if (prop) {
-        ControllerRegistryIndex.getForRegister(target).registerEndpointInterceptorConfig(prop, cls, cfg, extra);
+    return (instanceOrClass: unknown, property?: symbol | string): void => {
+      if (isClassInstance(property, instanceOrClass)) {
+        ControllerRegistryIndex.getForRegister(instanceOrClass.constructor).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
       } else {
-        ControllerRegistryIndex.getForRegister(target).registerInterceptorConfig(cls, cfg, extra);
+        ControllerRegistryIndex.getForRegister(instanceOrClass).registerInterceptorConfig(cls, cfg, extra);
       }
     };
   }
@@ -59,7 +61,7 @@ export class ControllerRegistryIndex {
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
     const map = this.getController(inst.constructor).contextParams;
     for (const field of Object.keys(map)) {
-      const { type } = SchemaRegistryIndex.getFieldMap(inst)[field];
+      const { type } = SchemaRegistryIndex.getFieldMap(inst.constructor)[field];
       Object.defineProperty(inst, field, { get: ctx.getSource(type) });
     }
   }

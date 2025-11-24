@@ -1,7 +1,7 @@
-import { Class, ClassInstance } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '../types';
 
-export type ClassOrId = Class | string | ClassInstance;
+export type ClassOrId = Class | string;
 
 
 export type RegistrationMethods = `register${string}` | `finalize${string}`;

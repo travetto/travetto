@@ -7,11 +7,12 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
 function inp<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
-  return (t: ClassInstance, k: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
+  return (instance: ClassInstance, property: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
+    const adapter = SchemaRegistryIndex.getForRegister(instance.constructor);
     if (typeof idx === 'number') {
-      SchemaRegistryIndex.getForRegister(t).registerParameter(k, idx, ...obj);
+      adapter.registerParameter(property, idx, ...obj);
     } else {
-      SchemaRegistryIndex.getForRegister(t).registerField(k, ...obj);
+      adapter.registerField(property, ...obj);
     }
   };
 }

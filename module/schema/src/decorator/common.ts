@@ -12,17 +12,16 @@ function isClassInstance(o: Class | ClassInstance, property?: string | symbol): 
  * @param config The describe configuration
  * @augments `@travetto/schema:Describe`
  */
-export function Describe(config: Partial<SchemaCoreConfig>) {
-  return (target: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
-    const adapter = SchemaRegistryIndex.getForRegister(target);
-    if (isClassInstance(target, property)) {
+export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
+  return (instanceOrClass: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
+    if (isClassInstance(instanceOrClass, property)) {
       if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
-        adapter.registerParameter(property!, descOrIdx, { ...config });
+        SchemaRegistryIndex.getForRegister(instanceOrClass.constructor).registerParameter(property!, descOrIdx, { ...config });
       } else {
-        adapter.registerField(property!, config);
+        SchemaRegistryIndex.getForRegister(instanceOrClass.constructor).registerField(property!, config);
       }
     } else {
-      adapter.register(target, config);
+      SchemaRegistryIndex.getForRegister(instanceOrClass).register(config);
     }
   };
 }

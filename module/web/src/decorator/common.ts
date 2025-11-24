@@ -1,16 +1,20 @@
-import { Class, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { Class, ClassInstance, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
+function isClass(property: unknown, target: unknown): target is Class<unknown> {
+  return !!property;
+}
+
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
-  return function <T>(target: T | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
-    if (property) {
-      return ControllerRegistryIndex.getForRegister(target).registerEndpoint(property, config);
+  return function <T>(instOrClass: ClassInstance | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
+    if (isClass(property, instOrClass)) {
+      return ControllerRegistryIndex.getForRegister(instOrClass).registerEndpoint(property!, config);
     } else {
-      return ControllerRegistryIndex.getForRegister(target).register(config);
+      return ControllerRegistryIndex.getForRegister(instOrClass.constructor).register(config);
     }
   };
 }

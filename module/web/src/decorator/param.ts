@@ -4,7 +4,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointParameterConfig, EndpointParamLocation } from '../registry/types.ts';
 
-type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx: number) => void;
+type ParamDecorator = (instance: ClassInstance, property: string | symbol, idx: number) => void;
 
 /**
  * Define a parameter
@@ -13,16 +13,16 @@ type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx:
  * @augments `@travetto/schema:Input`
  */
 export function Param(location: EndpointParamLocation, extra: string | Partial<EndpointParameterConfig>): ParamDecorator {
-  return (target: ClassInstance, propertyKey: string | symbol, idx: number): void => {
+  return (instance: ClassInstance, property: string | symbol, idx: number): void => {
     const name = typeof extra === 'string' ? extra : extra.name;
     const config = typeof extra === 'string' ? {} : extra;
 
     // Set name as needed
     if (name) {
-      SchemaRegistryIndex.getForRegister(target).registerParameter(propertyKey, idx, { name });
+      SchemaRegistryIndex.getForRegister(instance.constructor).registerParameter(property, idx, { name });
     }
 
-    ControllerRegistryIndex.getForRegister(target.constructor).registerEndpointParameter(propertyKey, idx, {
+    ControllerRegistryIndex.getForRegister(instance.constructor).registerEndpointParameter(property, idx, {
       index: idx, location, ...config
     });
   };
@@ -58,9 +58,9 @@ export function Body(param: Partial<EndpointParameterConfig> = {}): ParamDecorat
  * @augments `@travetto/schema:Field`
  */
 export function ContextParam() {
-  return (inst: unknown, field: string | symbol): void => {
-    ControllerRegistryIndex.getForRegister(inst).register({ contextParams: { [field]: true } });
-    ControllerRegistryIndex.bindContextParamsOnPostConstruct(inst);
+  return (instance: ClassInstance, property: string | symbol): void => {
+    ControllerRegistryIndex.getForRegister(instance.constructor).register({ contextParams: { [property]: true } });
+    ControllerRegistryIndex.bindContextParamsOnPostConstruct(instance.constructor);
 
   };
 }

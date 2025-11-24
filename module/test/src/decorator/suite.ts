@@ -32,8 +32,8 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
  * Registers function to run before any tests are run
  */
 export function BeforeAll() {
-  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(inst).register({ beforeAll: [descriptor.value] });
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(instance.constructor).register({ beforeAll: [descriptor.value] });
     return descriptor;
   };
 }
@@ -42,8 +42,8 @@ export function BeforeAll() {
  * Registers function to run before each test is run
  */
 export function BeforeEach() {
-  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(inst).register({ beforeEach: [descriptor.value] });
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(instance.constructor).register({ beforeEach: [descriptor.value] });
     return descriptor;
   };
 }
@@ -52,8 +52,8 @@ export function BeforeEach() {
  * Registers function to run after all tests are run
  */
 export function AfterAll() {
-  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(inst).register({ afterAll: [descriptor.value] });
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(instance.constructor).register({ afterAll: [descriptor.value] });
     return descriptor;
   };
 }
@@ -62,8 +62,8 @@ export function AfterAll() {
  * Registers function to run after each test is run
  */
 export function AfterEach() {
-  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(inst).register({ afterEach: [descriptor.value] });
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(instance.constructor).register({ afterEach: [descriptor.value] });
     return descriptor;
   };
 }

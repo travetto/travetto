@@ -13,7 +13,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
   #adapterCls: new (cls: Class) => A;
   #finalized = new Map<Class, boolean>();
 
-  #toCls(clsOrId: Class | string | ClassInstance): Class {
+  #toCls(clsOrId: ClassOrId): Class {
     if (typeof clsOrId === 'string') {
       const cls = this.#idToCls.get(clsOrId);
       if (!cls) {
@@ -22,7 +22,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
       }
       return cls;
     } else {
-      return 'Ⲑid' in clsOrId ? clsOrId : clsOrId.constructor;
+      return clsOrId;
     }
   }
 
