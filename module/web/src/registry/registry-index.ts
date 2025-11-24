@@ -28,8 +28,8 @@ export class ControllerRegistryIndex {
     return this.#instance.getEndpointById(id);
   }
 
-  static registerControllerContextParam(target: ClassOrId, field: string | symbol): void {
-    this.#instance.registerControllerContextParam(target, field);
+  static bindContextParamsOnPostConstruct(target: ClassOrId): void {
+    this.#instance.bindContextParamsOnPostConstruct(target);
   }
 
   /**
@@ -65,13 +65,10 @@ export class ControllerRegistryIndex {
   }
 
   /**
-   * Register a controller context param
+   * Register a controller to bind context params on post construct
    * @param target Controller class
-   * @param field Field on controller to bind context param to
    */
-  registerControllerContextParam(target: ClassOrId, field: string | symbol): void {
-    const controllerConfig = this.getController(target);
-    controllerConfig.contextParams[field] = true;
+  bindContextParamsOnPostConstruct(target: ClassOrId): void {
     DependencyRegistryIndex.registerClassMetadata(target, {
       postConstruct: {
         ContextParam: (inst: ClassInstance) => this.#bindContextParams(inst)

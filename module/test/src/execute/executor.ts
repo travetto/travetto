@@ -250,6 +250,7 @@ export class TestExecutor {
       if (!(err instanceof Error)) {
         throw err;
       }
+      console.error(err);
       this.#onSuiteFailure(AssertUtil.gernerateImportFailure(run.import, err));
       return;
     }
