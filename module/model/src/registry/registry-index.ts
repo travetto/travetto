@@ -21,7 +21,7 @@ export class ModelRegistryIndex {
   }
 
   static getConfig(clsOrId: ClassOrId): ModelConfig {
-    return this.#instance.getModelOptions(clsOrId);
+    return this.#instance.getConfig(clsOrId);
   }
 
   static has(clsOrId: ClassOrId): boolean {
@@ -58,7 +58,7 @@ export class ModelRegistryIndex {
   store = new RegistryIndexStore(ModelRegistryAdapter);
 
   #addClass(cls: Class): void {
-    const store = this.getModelOptions(cls).store;
+    const store = this.getConfig(cls).store;
     let classes = this.#modelNameMapping.get(store);
     if (!classes) {
       this.#modelNameMapping.set(store, classes = new Set());
@@ -93,7 +93,7 @@ export class ModelRegistryIndex {
     this.store.finalize(cls);
   }
 
-  getModelOptions(cls: ClassOrId): ModelConfig<ModelType> {
+  getConfig(cls: ClassOrId): ModelConfig<ModelType> {
     return this.store.get(cls).get();
   }
 
@@ -108,7 +108,7 @@ export class ModelRegistryIndex {
    * Get Index
    */
   getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
-    const cfg = this.getModelOptions(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
+    const cfg = this.getConfig(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
     if (!cfg) {
       throw new NotFoundError(`${cls.name} Index`, `${name}`);
     }
@@ -122,7 +122,7 @@ export class ModelRegistryIndex {
    * Get Indices
    */
   getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
-    return (this.getModelOptions(cls).indices ?? []).filter((x): x is IndexConfig<T> => !supportedTypes || supportedTypes.includes(x.type));
+    return (this.getConfig(cls).indices ?? []).filter((x): x is IndexConfig<T> => !supportedTypes || supportedTypes.includes(x.type));
   }
 
   /**
@@ -130,7 +130,7 @@ export class ModelRegistryIndex {
    * @param cls
    */
   getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
-    const expiry = this.getModelOptions(cls).expiresAt;
+    const expiry = this.getConfig(cls).expiresAt;
     if (!expiry) {
       throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`);
     }
