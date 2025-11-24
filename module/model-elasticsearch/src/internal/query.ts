@@ -221,12 +221,9 @@ export class ElasticsearchQueryUtil {
         },
       });
     }
-    const { subType } = SchemaRegistryIndex.getConfig(cls);
+    const { subType, subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
     if (subType) {
-      const { subTypeField, subTypeName } = SchemaRegistryIndex.getConfig(cls);
-      clauses.push({
-        term: { [subTypeField]: { value: subTypeName! } }
-      });
+      clauses.push({ term: { [subTypeField]: { value: subTypeName! } } });
     }
     return clauses.length === 0 ? {} :
       clauses.length === 1 ? clauses[0] :

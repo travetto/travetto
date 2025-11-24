@@ -254,9 +254,6 @@ export class TestExecutor {
       return;
     }
 
-    // Initialize registry (after loading the above)
-    await RegistryV2.init();
-
     // Convert inbound arguments to specific tests to run
     const suites = SuiteRegistryIndex.getSuiteTests(run);
     if (!suites.length) {
