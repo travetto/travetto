@@ -3,8 +3,8 @@ import { Class, ClassInstance } from '@travetto/runtime';
 import { SchemaCoreConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
-function isClassInstance(o: Class | ClassInstance, property?: string | symbol): o is ClassInstance {
-  return !!property;
+function isClassInstance(o: Class | ClassInstance, property?: string | symbol): o is Class {
+  return !property;
 }
 
 /**
@@ -15,13 +15,14 @@ function isClassInstance(o: Class | ClassInstance, property?: string | symbol): 
 export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
   return (instanceOrCls: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
     if (isClassInstance(instanceOrCls, property)) {
-      if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
-        SchemaRegistryIndex.getForRegister(instanceOrCls.constructor).registerParameter(property!, descOrIdx, { ...config });
-      } else {
-        SchemaRegistryIndex.getForRegister(instanceOrCls.constructor).registerField(property!, config);
-      }
-    } else {
       SchemaRegistryIndex.getForRegister(instanceOrCls).register(config);
+    } else {
+      const adapter = SchemaRegistryIndex.getForRegisterByInstance(instanceOrCls);
+      if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
+        adapter.registerParameter(property!, descOrIdx, { ...config });
+      } else {
+        adapter.registerField(property!, config);
+      }
     }
   };
 }

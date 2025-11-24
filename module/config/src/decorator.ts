@@ -10,20 +10,20 @@ import { ConfigurationService, ConfigBaseType } from './service.ts';
  * @augments `@travetto/schema:Schema`
  */
 export function Config(ns: string) {
-  return <T extends Class>(target: T): T => {
+  return <T extends Class>(cls: T): T => {
     // Declare as part of global config
-    SchemaRegistryIndex.getForRegister(target).register({ interfaces: [ConfigBaseType] });
-    SchemaRegistryIndex.getForRegister(target).registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns, fields: {} });
-    DependencyRegistryIndex.getForRegister(target).registerClass();
+    SchemaRegistryIndex.getForRegister(cls).register({ interfaces: [ConfigBaseType] });
+    SchemaRegistryIndex.getForRegister(cls).registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns, fields: {} });
+    DependencyRegistryIndex.getForRegister(cls).registerClass();
 
-    const og: Function = target.prototype.postConstruct;
-    target.prototype.postConstruct = async function (): Promise<void> {
+    const og: Function = cls.prototype.postConstruct;
+    cls.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
       const cfg = await DependencyRegistryIndex.getInstance(ConfigurationService);
-      await cfg.bindTo(target, this, ns);
+      await cfg.bindTo(cls, this, ns);
       await og?.call(this);
     };
-    return target;
+    return cls;
   };
 }
 

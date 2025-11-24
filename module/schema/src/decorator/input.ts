@@ -6,7 +6,7 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
-function inp<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
+function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
   return (instance: ClassInstance, property: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     const adapter = SchemaRegistryIndex.getForRegister(instance.constructor);
     if (typeof idx === 'number') {
@@ -24,7 +24,7 @@ function inp<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
  * @augments `@travetto/schema:Input`
  */
 export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...config: Partial<SchemaInputConfig>[]): PropType<unknown> {
-  return inp({ type: type.type, array: type.array ?? false }, ...config);
+  return input({ type: type.type, array: type.array ?? false }, ...config);
 }
 
 /**
@@ -32,7 +32,7 @@ export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...config
  * @param aliases List of all aliases for a field
  * @augments `@travetto/schema:Input`
  */
-export function Alias(...aliases: string[]): PropType<unknown> { return inp({ aliases }); }
+export function Alias(...aliases: string[]): PropType<unknown> { return input({ aliases }); }
 
 /**
  * Mark an input as required
@@ -40,7 +40,7 @@ export function Alias(...aliases: string[]): PropType<unknown> { return inp({ al
  * @param message The error message when a the constraint fails.
  * @augments `@travetto/schema:Input`
  */
-export function Required(active = true, message?: string): PropType<unknown> { return inp({ required: { active, message } }); }
+export function Required(active = true, message?: string): PropType<unknown> { return input({ required: { active, message } }); }
 
 /**
  * Define an input as a set of enumerated values
@@ -50,20 +50,20 @@ export function Required(active = true, message?: string): PropType<unknown> { r
  */
 export function Enum(values: string[], message?: string): PropType<string | number> {
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
-  return inp({ enum: { values, message } });
+  return input({ enum: { values, message } });
 }
 
 /**
  * Mark the input as indicating it's storing textual data
  * @augments `@travetto/schema:Input`
  */
-export function Text(): PropType<string | string[]> { return inp({ specifiers: ['text'] }); }
+export function Text(): PropType<string | string[]> { return input({ specifiers: ['text'] }); }
 
 /**
  * Mark the input to indicate it's for long form text
  * @augments `@travetto/schema:Input`
  */
-export function LongText(): PropType<string | string[]> { return inp({ specifiers: ['text', 'long'] }); }
+export function LongText(): PropType<string | string[]> { return input({ specifiers: ['text', 'long'] }); }
 
 /**
  * Require the input to match a specific RegExp
@@ -71,7 +71,7 @@ export function LongText(): PropType<string | string[]> { return inp({ specifier
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
  */
-export function Match(re: RegExp, message?: string): PropType<string | string[]> { return inp({ match: { re, message } }); }
+export function Match(re: RegExp, message?: string): PropType<string | string[]> { return input({ match: { re, message } }); }
 
 /**
  * The minimum length for the string or array
@@ -80,7 +80,7 @@ export function Match(re: RegExp, message?: string): PropType<string | string[]>
  * @augments `@travetto/schema:Input`
  */
 export function MinLength(n: number, message?: string): PropType<string | unknown[]> {
-  return inp({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) });
+  return input({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) });
 }
 
 /**
@@ -89,7 +89,7 @@ export function MinLength(n: number, message?: string): PropType<string | unknow
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
  */
-export function MaxLength(n: number, message?: string): PropType<string | unknown[]> { return inp({ maxlength: { n, message } }); }
+export function MaxLength(n: number, message?: string): PropType<string | unknown[]> { return input({ maxlength: { n, message } }); }
 
 /**
  * The minimum value
@@ -98,7 +98,7 @@ export function MaxLength(n: number, message?: string): PropType<string | unknow
  * @augments `@travetto/schema:Input`
  */
 export function Min<T extends number | Date>(n: T, message?: string): PropType<Date | number> {
-  return inp({ min: { n, message } });
+  return input({ min: { n, message } });
 }
 
 /**
@@ -108,7 +108,7 @@ export function Min<T extends number | Date>(n: T, message?: string): PropType<D
  * @augments `@travetto/schema:Input`
  */
 export function Max<T extends number | Date>(n: T, message?: string): PropType<Date | number> {
-  return inp({ max: { n, message } });
+  return input({ max: { n, message } });
 }
 
 /**
@@ -138,7 +138,7 @@ export function Url(message?: string): PropType<string | string[]> { return Matc
  * @param decimals The number of decimal digits to support
  * @augments `@travetto/schema:Input`
  */
-export function Precision(digits: number, decimals?: number): PropType<number> { return inp({ precision: [digits, decimals] }); }
+export function Precision(digits: number, decimals?: number): PropType<number> { return input({ precision: [digits, decimals] }); }
 
 /**
  * Mark a number as an integer
@@ -169,14 +169,14 @@ export function Currency(): PropType<number> { return Precision(13, 2); }
  * @param specifiers The specifiers for an input
  * @augments `@travetto/schema:Input`
  */
-export function Specifier(...specifiers: string[]): PropType<unknown> { return inp({ specifiers }); }
+export function Specifier(...specifiers: string[]): PropType<unknown> { return input({ specifiers }); }
 
 /**
  * Sets the subtype field via a property decorator
  * @augments `@travetto/schema:Input`
  */
 export function SubTypeField(): ((t: ClassInstance, k: string) => void) {
-  return (t: ClassInstance, k: string): void => {
-    SchemaRegistryIndex.getForRegister(t).register({ subTypeField: k });
+  return (instance: ClassInstance, property: string): void => {
+    SchemaRegistryIndex.getForRegister(instance.constructor).register({ subTypeField: property });
   };
 }

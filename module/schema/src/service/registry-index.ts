@@ -1,5 +1,5 @@
 import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, classConstruct, ClassInstance, getParentClass, Util } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfig } from './types.ts';
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
@@ -18,19 +18,23 @@ export class SchemaRegistryIndex {
   static #instance = RegistryV2.registerIndex(SchemaRegistryIndex);
 
   static getForRegister(clsOrId: ClassOrId, allowFinalized = false): SchemaRegistryAdapter {
-    return this.#instance.getForRegister(clsOrId, allowFinalized);
+    return this.#instance.store.getForRegister(clsOrId, allowFinalized);
+  }
+
+  static getForRegisterByInstance(instance: ClassInstance, allowFinalized = false): SchemaRegistryAdapter {
+    return this.#instance.store.getForRegisterByInstance(instance, allowFinalized);
   }
 
   static getConfig(clsOrId: ClassOrId): SchemaClassConfig {
-    return this.#instance.get(clsOrId).get();
+    return this.#instance.store.get(clsOrId).get();
   }
 
   static getFieldMap(clsOrId: ClassOrId, view?: string): SchemaFieldMap {
-    return this.#instance.get(clsOrId).getSchema(view);
+    return this.#instance.store.get(clsOrId).getSchema(view);
   }
 
   static getMethodConfig(clsOrId: ClassOrId, method: string | symbol): SchemaMethodConfig {
-    return this.#instance.get(clsOrId).getMethod(method);
+    return this.#instance.store.get(clsOrId).getMethod(method);
   }
 
   static has(clsOrId: ClassOrId): boolean {
@@ -158,14 +162,6 @@ export class SchemaRegistryIndex {
 
   getClassConfig(cls: ClassOrId): SchemaClassConfig {
     return this.store.get(cls).get();
-  }
-
-  get(cls: ClassOrId): Omit<SchemaRegistryAdapter, RegistrationMethods> {
-    return this.store.get(cls);
-  }
-
-  getForRegister(cls: ClassOrId, allowFinalized = false): SchemaRegistryAdapter {
-    return this.store.getForRegister(cls, allowFinalized);
   }
 
   /**

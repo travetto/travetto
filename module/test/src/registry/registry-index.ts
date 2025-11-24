@@ -1,4 +1,4 @@
-import { AppError, Class, Runtime, describeFunction } from '@travetto/runtime';
+import { AppError, Class, ClassInstance, Runtime, describeFunction } from '@travetto/runtime';
 import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite.ts';
@@ -19,6 +19,10 @@ export class SuiteRegistryIndex {
 
   static getForRegister(clsOrId: ClassOrId): SuiteRegistryAdapter {
     return this.#instance.store.getForRegister(clsOrId);
+  }
+
+  static getForRegisterByInstance(instance: ClassInstance, allowFinalized = false): SuiteRegistryAdapter {
+    return this.#instance.store.getForRegisterByInstance(instance, allowFinalized);
   }
 
   static has(cls: Class): boolean {

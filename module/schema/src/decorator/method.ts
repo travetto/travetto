@@ -11,7 +11,7 @@ import { MethodValidatorFn } from '../validate/types';
  */
 export function Method(...config: Partial<SchemaMethodConfig>[]) {
   return (instance: ClassInstance, property: string | symbol): void => {
-    SchemaRegistryIndex.getForRegister(instance.constructor).registerMethod(property, ...config);
+    SchemaRegistryIndex.getForRegisterByInstance(instance).registerMethod(property, ...config);
   };
 }
 
@@ -21,7 +21,7 @@ export function Method(...config: Partial<SchemaMethodConfig>[]) {
  * @param fn The validator function
  */
 export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
-  return (instance: ClassInstance, property: string, _prop: TypedPropertyDescriptor<T>): void => {
-    SchemaRegistryIndex.getForRegister(instance.constructor).registerMethod(property, { validators: [castTo(fn)] });
+  return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<T>): void => {
+    SchemaRegistryIndex.getForRegisterByInstance(instance).registerMethod(property, { validators: [castTo(fn)] });
   };
 }

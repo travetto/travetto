@@ -1,4 +1,4 @@
-import { ClassInstance } from '@travetto/runtime';
+import { asConstructable, ClassInstance } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
@@ -19,10 +19,10 @@ export function Param(location: EndpointParamLocation, extra: string | Partial<E
 
     // Set name as needed
     if (name) {
-      SchemaRegistryIndex.getForRegister(instance.constructor).registerParameter(property, idx, { name });
+      SchemaRegistryIndex.getForRegisterByInstance(instance).registerParameter(property, idx, { name });
     }
 
-    ControllerRegistryIndex.getForRegister(instance.constructor).registerEndpointParameter(property, idx, {
+    ControllerRegistryIndex.getForRegisterByInstance(instance).registerEndpointParameter(property, idx, {
       index: idx, location, ...config
     });
   };
@@ -59,8 +59,7 @@ export function Body(param: Partial<EndpointParameterConfig> = {}): ParamDecorat
  */
 export function ContextParam() {
   return (instance: ClassInstance, property: string | symbol): void => {
-    ControllerRegistryIndex.getForRegister(instance.constructor).register({ contextParams: { [property]: true } });
-    ControllerRegistryIndex.bindContextParamsOnPostConstruct(instance.constructor);
-
+    ControllerRegistryIndex.getForRegisterByInstance(instance).register({ contextParams: { [property]: true } });
+    ControllerRegistryIndex.bindContextParamsOnPostConstruct(asConstructable(instance).constructor);
   };
 }

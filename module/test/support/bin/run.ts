@@ -23,19 +23,17 @@ export async function runTests(opts: RunState): Promise<void> {
   }
 }
 
-export async function selectConsumer(inst: { format?: string }) {
+export async function selectConsumer(instance: { format?: string }) {
   await TestConsumerRegistry.manualInit();
 
   let types = TestConsumerRegistry.getTypes();
 
-  if (inst.format?.includes('/')) {
-    await Runtime.importFrom(inst.format);
+  if (instance.format?.includes('/')) {
+    await Runtime.importFrom(instance.format);
     types = TestConsumerRegistry.getTypes();
   }
 
-  const cls = inst.constructor;
-
-  SchemaRegistryIndex.getForRegister(cls, true).registerField('format', {
+  SchemaRegistryIndex.getForRegisterByInstance(instance, true).registerField('format', {
     enum: {
       message: `{path} is only allowed to be "${types.join('" or "')}"`,
       values: types

@@ -1,7 +1,8 @@
+import { ClassInstance } from '@travetto/runtime';
+
 import { EndpointConfig, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
-import { ClassInstance } from '@travetto/runtime';
 
 type EndpointFunctionDecorator = <T>(instance: T, property: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
 
@@ -12,7 +13,7 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
   return function (instance: ClassInstance, property: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    ControllerRegistryIndex.getForRegister(instance.constructor).registerEndpoint(property, { name: property }, config);
+    ControllerRegistryIndex.getForRegisterByInstance(instance).registerEndpoint(property, { name: property }, config);
     return descriptor;
   };
 }

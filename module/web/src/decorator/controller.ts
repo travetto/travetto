@@ -8,8 +8,8 @@ import { ControllerRegistryIndex } from '../registry/registry-index.ts';
  * @augments `@travetto/schema:Schema`
  */
 export function Controller(path: string) {
-  return function <T>(target: Class<T>): void {
-    ControllerRegistryIndex.getForRegister(target).register({ basePath: path, class: target, });
-    DependencyRegistryIndex.getForRegister(target).registerClass();
+  return function <T>(cls: Class<T>): void {
+    ControllerRegistryIndex.getForRegister(cls).register({ basePath: path, class: cls, });
+    DependencyRegistryIndex.getForRegister(cls).registerClass();
   };
 }

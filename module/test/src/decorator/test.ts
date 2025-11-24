@@ -21,8 +21,8 @@ export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description?: string | Partial<TestConfig>, ...rest: Partial<TestConfig>[]): MethodDecorator {
-  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(inst.constructor).registerTest(prop, descriptor.value,
+  return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
+    SuiteRegistryIndex.getForRegisterByInstance(instance).registerTest(prop, descriptor.value,
       ...(typeof description !== 'string' && description) ? [description] : [],
       ...rest,
       ...(typeof description === 'string') ? [{ description }] : []
@@ -36,8 +36,8 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
  * @param state The parameters to use for checking if the response is valid
  */
 export function ShouldThrow(state: ThrowableError): MethodDecorator {
-  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(inst.constructor).registerTest(prop, descriptor.value, { shouldThrow: state });
+  return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
+    SuiteRegistryIndex.getForRegisterByInstance(instance).registerTest(prop, descriptor.value, { shouldThrow: state });
     return descriptor;
   };
 }
@@ -47,8 +47,8 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
  * @param ms Max time to wait
  */
 export function Timeout(ms: number): MethodDecorator {
-  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(inst.constructor).registerTest(prop, descriptor.value, { timeout: ms });
+  return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
+    SuiteRegistryIndex.getForRegisterByInstance(instance).registerTest(prop, descriptor.value, { timeout: ms });
     return descriptor;
   };
 }

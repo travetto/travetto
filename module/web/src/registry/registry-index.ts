@@ -22,6 +22,10 @@ export class ControllerRegistryIndex {
     return this.#instance.store.getForRegister(clsOrId);
   }
 
+  static getForRegisterByInstance(instance: ClassInstance, allowFinalized = false): ControllerRegistryAdapter {
+    return this.#instance.store.getForRegisterByInstance(instance, allowFinalized);
+  }
+
   static getConfig(clsOrId: ClassOrId): ControllerConfig {
     return this.#instance.store.get(clsOrId).get();
   }
@@ -30,8 +34,8 @@ export class ControllerRegistryIndex {
     return this.#instance.getEndpointById(id);
   }
 
-  static bindContextParamsOnPostConstruct(target: ClassOrId): void {
-    this.#instance.bindContextParamsOnPostConstruct(target);
+  static bindContextParamsOnPostConstruct(cls: Class): void {
+    this.#instance.bindContextParamsOnPostConstruct(cls);
   }
 
   /**

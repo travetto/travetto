@@ -6,15 +6,15 @@ import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
 function isClass(property: unknown, target: unknown): target is Class<unknown> {
-  return !!property;
+  return !property;
 }
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
-  return function <T>(instOrClass: ClassInstance | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
-    if (isClass(property, instOrClass)) {
-      return ControllerRegistryIndex.getForRegister(instOrClass).registerEndpoint(property!, config);
+  return function <T>(instanceOrCls: ClassInstance | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
+    if (isClass(property, instanceOrCls)) {
+      return ControllerRegistryIndex.getForRegister(instanceOrCls).registerEndpoint(property!, config);
     } else {
-      return ControllerRegistryIndex.getForRegister(instOrClass.constructor).register(config);
+      return ControllerRegistryIndex.getForRegisterByInstance(instanceOrCls).register(config);
     }
   };
 }

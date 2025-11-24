@@ -11,12 +11,12 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  * @augments `@travetto/schema:Schema`
  */
 export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'subTypeName' | 'subTypeField' | 'baseType' | 'methods'>>) {
-  return <T, U extends Class<T>>(target: U): U => {
-    target.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
+  return <T, U extends Class<T>>(cls: U): U => {
+    cls.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
     };
-    SchemaRegistryIndex.getForRegister(target).registerClass(cfg);
-    return target;
+    SchemaRegistryIndex.getForRegister(cls).registerClass(cfg);
+    return cls;
   };
 }
 
@@ -26,8 +26,8 @@ export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'subTypeName' | 'su
  * @param fn The validator function
  */
 export const Validator = <T>(fn: ValidatorFn<T, string>) =>
-  (target: Class<T>, _k?: string): void => {
-    SchemaRegistryIndex.getForRegister(target).register({ validators: [castTo(fn)] });
+  (cls: Class<T>): void => {
+    SchemaRegistryIndex.getForRegister(cls).register({ validators: [castTo(fn)] });
   };
 
 /**
@@ -36,8 +36,8 @@ export const Validator = <T>(fn: ValidatorFn<T, string>) =>
  * @param fields The specific fields to add as part of a view
  */
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
-  return (target: Class<Partial<T>>): void => {
-    SchemaRegistryIndex.getForRegister(target).register({ views: { [name]: fields } });
+  return (cls: Class<Partial<T>>): void => {
+    SchemaRegistryIndex.getForRegister(cls).register({ views: { [name]: fields } });
   };
 }
 
@@ -47,7 +47,7 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
  * @returns
  */
 export function SubType<T>(name: string) {
-  return (target: Class<Partial<T>>): void => {
-    SchemaRegistryIndex.getForRegister(target).register({ subTypeName: name });
+  return (cls: Class<Partial<T>>): void => {
+    SchemaRegistryIndex.getForRegister(cls).register({ subTypeName: name });
   };
 }

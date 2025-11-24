@@ -1,4 +1,4 @@
-import { AppError, asConstructable, castTo, Class } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelType } from '../types/model.ts';
@@ -11,15 +11,15 @@ import { ModelRegistryIndex } from './registry-index.ts';
  * @augments `@travetto/schema:Schema`
  */
 export function Model(conf: Partial<ModelConfig<ModelType>> | string = {}) {
-  return function <T extends ModelType, U extends Class<T>>(target: U): U {
+  return function <T extends ModelType, U extends Class<T>>(cls: U): U {
     if (typeof conf === 'string') {
       conf = { store: conf };
     }
-    ModelRegistryIndex.getForRegister(target).register(conf);
-    if (SchemaRegistryIndex.getForRegister(target).get().fields.id) {
-      SchemaRegistryIndex.getForRegister(target).registerField('id', { required: { active: false } });
+    ModelRegistryIndex.getForRegister(cls).register(conf);
+    if (SchemaRegistryIndex.getForRegister(cls).get().fields.id) {
+      SchemaRegistryIndex.getForRegister(cls).registerField('id', { required: { active: false } });
     }
-    return target;
+    return cls;
   };
 }
 
@@ -41,7 +41,7 @@ export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(instance: T, property: K): void => {
-    ModelRegistryIndex.getForRegister(asConstructable(instance).constructor).register({ expiresAt: property });
+    ModelRegistryIndex.getForRegisterByInstance(instance).register({ expiresAt: property });
   };
 }
 
@@ -64,7 +64,7 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
  */
 export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
-    ModelRegistryIndex.getForRegister(asConstructable(instance).constructor).register({
+    ModelRegistryIndex.getForRegisterByInstance(instance).register({
       prePersist: [{
         scope,
         handler: (inst): void => {
@@ -81,7 +81,7 @@ export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PreP
  */
 export function Transient<T>() {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
-    ModelRegistryIndex.getForRegister(asConstructable(instance).constructor).register({
+    ModelRegistryIndex.getForRegisterByInstance(instance).register({
       prePersist: [{
         scope: 'all',
         handler: (inst): void => {

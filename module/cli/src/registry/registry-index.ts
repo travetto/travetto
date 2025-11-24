@@ -117,7 +117,7 @@ export class CliCommandRegistryIndex {
 
     const list = await Promise.all(keys.map(async x => {
       const instance = await this.#getInstance(x);
-      const config = this.store.get(x).get();
+      const config = this.store.getByInstance(instance).get();
       return { command: x, instance, config };
     }));
 

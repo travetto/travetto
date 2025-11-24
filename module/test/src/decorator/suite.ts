@@ -14,15 +14,15 @@ export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassDecorator {
-  const dec = (target: Class): typeof target => {
-    const isAbstract = describeFunction(target).abstract;
-    SuiteRegistryIndex.getForRegister(target).register(
+  const dec = (cls: Class): typeof cls => {
+    const isAbstract = describeFunction(cls).abstract;
+    SuiteRegistryIndex.getForRegister(cls).register(
       ...(typeof description !== 'string' && description ? [description] : []),
       ...rest,
       ...isAbstract ? [{ skip: true }] : [],
       ...(typeof description === 'string' ? [{ description }] : []),
     );
-    return target;
+    return cls;
   };
 
   return castTo(dec);
@@ -33,7 +33,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
  */
 export function BeforeAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(instance.constructor).register({ beforeAll: [descriptor.value] });
+    SuiteRegistryIndex.getForRegisterByInstance(instance).register({ beforeAll: [descriptor.value] });
     return descriptor;
   };
 }
@@ -43,7 +43,7 @@ export function BeforeAll() {
  */
 export function BeforeEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(instance.constructor).register({ beforeEach: [descriptor.value] });
+    SuiteRegistryIndex.getForRegisterByInstance(instance).register({ beforeEach: [descriptor.value] });
     return descriptor;
   };
 }
@@ -53,7 +53,7 @@ export function BeforeEach() {
  */
 export function AfterAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(instance.constructor).register({ afterAll: [descriptor.value] });
+    SuiteRegistryIndex.getForRegisterByInstance(instance).register({ afterAll: [descriptor.value] });
     return descriptor;
   };
 }
@@ -63,7 +63,7 @@ export function AfterAll() {
  */
 export function AfterEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(instance.constructor).register({ afterEach: [descriptor.value] });
+    SuiteRegistryIndex.getForRegisterByInstance(instance).register({ afterEach: [descriptor.value] });
     return descriptor;
   };
 }

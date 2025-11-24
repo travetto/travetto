@@ -1,4 +1,4 @@
-import { AppError, castTo, Class, ClassInstance, getParentClass } from '@travetto/runtime';
+import { AppError, asConstructable, castTo, Class, ClassInstance, getParentClass } from '@travetto/runtime';
 
 import { ClassOrId, RegistrationMethods, RegistryAdapter } from './types';
 
@@ -66,10 +66,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     this.#finalized.delete(cls);
   }
 
-  getForRegister(
-    clsOrId: ClassOrId,
-    allowFinalized = false
-  ): A {
+  getForRegister(clsOrId: ClassOrId, allowFinalized = false): A {
     const cls = this.#toCls(clsOrId);
 
     if (this.#finalized.get(cls) && !allowFinalized) {
@@ -78,12 +75,20 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return this.adapter(cls);
   }
 
+  getForRegisterByInstance(instance: ClassInstance, allowFinalized = false): A {
+    return this.getForRegister(asConstructable(instance).constructor, allowFinalized);
+  }
+
   get(clsOrId: ClassOrId): Omit<A, RegistrationMethods> {
     const cls = this.#toCls(clsOrId);
     if (!this.has(cls)) {
       throw new AppError(`Class ${cls.Ⲑid} is not registered for ${this.#adapterCls.Ⲑid}`);
     }
     return this.adapter(cls);
+  }
+
+  getByInstance(instance: ClassInstance): Omit<A, RegistrationMethods> {
+    return this.get(asConstructable(instance).constructor);
   }
 
   getOptional(clsOrId: ClassOrId): Omit<A, RegistrationMethods> | undefined {
