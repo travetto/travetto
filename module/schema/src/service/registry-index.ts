@@ -98,9 +98,8 @@ export class SchemaRegistryIndex {
       this.#baseSchemasGrouped.set(base, []);
     }
 
-    const baseList = this.#baseSchemasGrouped.get(base)!;
-
     if (base !== cls || config.baseType) {
+      const baseList = this.#baseSchemasGrouped.get(base)!;
       baseList.push(cls);
       config.subTypeField = this.getClassConfig(base).subTypeField;
       config.subTypeName = config.subTypeName ?? classToSubTypeName(cls);
