@@ -1,5 +1,5 @@
 import { RegistryAdapter } from '@travetto/registry';
-import { AppError, asFull, castTo, Class, RetainPrimitiveFields } from '@travetto/runtime';
+import { AppError, asFull, castTo, Class, RetainPrimitiveFields, safeAssign } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
 import { SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -130,7 +130,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   registerEndpointParameter(method: string | symbol, index: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {
     const ep = this.registerEndpoint(method);
     ep.parameters[index] ??= { index, location: 'query' };
-    Object.assign(ep.parameters[index], ...config);
+    safeAssign(ep.parameters[index], ...config);
     return ep.parameters[index];
   }
 
