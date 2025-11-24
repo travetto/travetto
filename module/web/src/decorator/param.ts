@@ -59,6 +59,6 @@ export function Body(param: Partial<EndpointParamConfig> = {}): ParamDecorator {
  */
 export function ContextParam() {
   return (inst: unknown, field: string | symbol): void => {
-    ControllerRegistryIndex.getForRegister(inst).register({ contextParams: { [field]: true } });
+    ControllerRegistryIndex.registerControllerContextParam(inst, field);
   };
 }

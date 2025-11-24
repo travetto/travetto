@@ -28,6 +28,10 @@ export class ControllerRegistryIndex {
     return this.#instance.getEndpointById(id);
   }
 
+  static registerControllerContextParam(target: ClassOrId, field: string | symbol): void {
+    this.#instance.registerControllerContextParam(target, field);
+  }
+
   /**
    * Register a controller/endpoint with specific config for an interceptor
    * @param cls The interceptor to register data for
@@ -64,9 +68,8 @@ export class ControllerRegistryIndex {
    * Register a controller context param
    * @param target Controller class
    * @param field Field on controller to bind context param to
-   * @param type The context type to bind to field
    */
-  registerControllerContextParam<T>(target: Class, field: string): void {
+  registerControllerContextParam(target: ClassOrId, field: string | symbol): void {
     const controllerConfig = this.getController(target);
     controllerConfig.contextParams[field] = true;
     DependencyRegistryIndex.registerClassMetadata(target, {
@@ -76,11 +79,11 @@ export class ControllerRegistryIndex {
     });
   }
 
-  getController(cls: Class): ControllerConfig {
+  getController(cls: ClassOrId): ControllerConfig {
     return this.store.get(cls).get();
   }
 
-  getEndpoint(cls: Class, method: string | symbol): EndpointConfig {
+  getEndpoint(cls: ClassOrId, method: string | symbol): EndpointConfig {
     return this.getController(cls).endpoints.find(e => e.name === method)!;
   }
 
