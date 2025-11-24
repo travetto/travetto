@@ -9,7 +9,6 @@ import { ControllerRegistryIndex } from '../registry/registry-index.ts';
  */
 export function Controller(path: string) {
   return function <T>(cls: Class<T>): void {
-    console.error('Registering controller:', cls);
     ControllerRegistryIndex.getForRegister(cls).register({ basePath: path, class: cls, });
     DependencyRegistryIndex.getForRegister(cls).registerClass();
   };
