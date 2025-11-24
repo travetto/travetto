@@ -1,5 +1,5 @@
 import { RegistryAdapter } from '@travetto/registry';
-import { Class, describeFunction, getAllEntries, safeAssign } from '@travetto/runtime';
+import { Class, classConstruct, describeFunction, getAllEntries, safeAssign } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableConfig, getDefaultQualifier, InjectableCandidate } from '../types';
@@ -48,6 +48,13 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
       candidateType: undefined!,
     };
     return combineInjectableCandidates(candidates[method], ...data);
+  }
+
+  registerClass(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
+    return this.registerFactory('CONSTRUCTOR', ...data, {
+      factory: (...args: unknown[]) => classConstruct(this.#cls, args),
+      candidateType: this.#cls,
+    });
   }
 
   get(): InjectableConfig<unknown> {

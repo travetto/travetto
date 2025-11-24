@@ -143,8 +143,9 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerField(field: string | symbol, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
     const config = this.register({});
-    const cfg = config.fields[field] ??= { array: false, name: field, type: null!, owner: this.#cls };
-    return combineInputs(cfg, data);
+    const cfg = config.fields[field] ??= { name: field, owner: this.#cls, type: null! };
+    const combined = combineInputs(cfg, data);
+    return combined;
   }
 
   registerFieldMetadata<T>(field: string | symbol, key: symbol, ...data: Partial<T>[]): T {
@@ -157,10 +158,10 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return castTo<T>(md?.[key]);
   }
 
-  registerClass(cfg?: Partial<SchemaClassConfig>): void {
+  registerClass({ methods, ...cfg }: Partial<SchemaClassConfig> = {}): void {
     this.register({ ...cfg });
-    if (cfg && cfg.methods?.['CONSTRUCTOR']) {
-      this.registerMethod('CONSTRUCTOR', cfg.methods['CONSTRUCTOR']!);
+    if (methods?.['CONSTRUCTOR']) {
+      this.registerMethod('CONSTRUCTOR', methods['CONSTRUCTOR']);
     }
   }
 

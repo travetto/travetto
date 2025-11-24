@@ -37,7 +37,7 @@ export class ElasticsearchModelConfig {
   /**
    * Base schema config for elasticsearch
    */
-  @Field(Object)
+  @Field({ type: Object })
   schemaConfig: EsSchemaConfig = {
     caseSensitive: false
   };
@@ -45,7 +45,7 @@ export class ElasticsearchModelConfig {
   /**
    * Base index create settings
    */
-  @Field(Object)
+  @Field({ type: Object })
   indexCreate = {
     ['number_of_replicas']: 0,
     ['number_of_shards']: 1

@@ -19,10 +19,7 @@ const collapseConfig = <T extends { qualifier?: symbol }>(first?: T | symbol, ar
  */
 export function Injectable(first?: Partial<InjectableCandidate> | symbol, ...args: Partial<InjectableCandidate>[]) {
   return <T extends Class>(target: T): void => {
-    DependencyRegistryIndex.getForRegister(target).registerFactory('CONSTRUCTOR', ...collapseConfig(first, args), {
-      factory: (...params: unknown[]) => classConstruct(target, params),
-      candidateType: target,
-    });
+    DependencyRegistryIndex.getForRegister(target).registerClass(...collapseConfig(first, args));
   };
 }
 

@@ -2,7 +2,7 @@ import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
 import { ModelRegistryIndex, ModelType, ModelStorageSupport } from '@travetto/model';
-import { SchemaChange } from '@travetto/schema';
+import { SchemaChange, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -98,7 +98,7 @@ export class IndexManager implements ModelStorageSupport {
    * Build an index if missing
    */
   async createIndexIfMissing(cls: Class): Promise<void> {
-    cls = ModelRegistryIndex.getBaseModelClass(cls);
+    cls = SchemaRegistryIndex.getBaseClass(cls);
     const ident = this.getIdentity(cls);
     try {
       await this.#client.search(ident);

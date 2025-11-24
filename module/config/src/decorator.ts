@@ -11,17 +11,12 @@ import { ConfigurationService, ConfigBaseType } from './service.ts';
  */
 export function Config(ns: string) {
   return <T extends Class>(target: T): T => {
-    const og: Function = target.prototype.postConstruct;
     // Declare as part of global config
-    SchemaRegistryIndex.getForRegister(target).register({
-      interfaces: [ConfigBaseType],
-      metadata: {
-        [OverrideConfigSymbol]: { ns, fields: {} }
-      }
-    });
+    SchemaRegistryIndex.getForRegister(target).register({ interfaces: [ConfigBaseType] });
+    SchemaRegistryIndex.getForRegister(target).registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns, fields: {} });
+    DependencyRegistryIndex.getForRegister(target).registerClass();
 
-    SchemaRegistryIndex.getForRegister(target).register();
-
+    const og: Function = target.prototype.postConstruct;
     target.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
       const cfg = await DependencyRegistryIndex.getInstance(ConfigurationService);

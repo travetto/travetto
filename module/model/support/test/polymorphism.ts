@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
-import { SubTypeField, Text, TypeMismatchError } from '@travetto/schema';
+import { Schema, SubTypeField, Text, TypeMismatchError } from '@travetto/schema';
 import {
   ModelIndexedSupport, Index, ModelCrudSupport, Model,
   NotFoundError, SubTypeNotSupportedError, PersistValue
@@ -14,7 +14,8 @@ import { ExistsError } from '../../src/error/exists.ts';
 
 import { BaseModelSuite } from './base.ts';
 
-@Model({ baseType: true })
+@Schema({ baseType: true })
+@Model()
 export class Worker {
   id: string;
   @SubTypeField()
@@ -42,7 +43,8 @@ export class Engineer extends Worker {
   major: string;
 }
 
-@Model({ baseType: true })
+@Schema({ baseType: true })
+@Model()
 @Index({
   name: 'worker-name',
   type: 'sorted',

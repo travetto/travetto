@@ -210,7 +210,7 @@ export class DependencyRegistryIndex {
     const inputs = SchemaRegistryIndex.has(candidateType) ? SchemaRegistryIndex.getFieldMap(candidateType) : {};
 
     const promises = TypedObject.entries(inputs)
-      .filter(([k, input]) => instance[castKey(k)] === undefined && readMetadata(input) !== undefined)
+      .filter(([k, input]) => readMetadata(input) !== undefined && (input.access !== 'readonly' && instance[castKey(k)] === undefined))
       .map(async ([k, input]) => [k, await this.#resolveDependencyValue(readMetadata(input) ?? {}, input, srcClass)] as const);
 
     const pairs = await Promise.all(promises);

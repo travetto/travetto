@@ -41,7 +41,7 @@ export class MongoModelConfig {
   /**
    * Mongo client options
    */
-  @Field(Object)
+  @Field({ type: Object })
   options: mongo.MongoClientOptions = {};
 
   /**
