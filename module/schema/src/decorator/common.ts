@@ -3,7 +3,7 @@ import { Class, ClassInstance } from '@travetto/runtime';
 import { SchemaCoreConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
-function isClassInstance(o: Class | ClassInstance, property?: string | symbol): o is Class {
+function isClass(o: Class | ClassInstance, property?: string | symbol): o is Class {
   return !property;
 }
 
@@ -14,7 +14,7 @@ function isClassInstance(o: Class | ClassInstance, property?: string | symbol): 
  */
 export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
   return (instanceOrCls: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
-    if (isClassInstance(instanceOrCls, property)) {
+    if (isClass(instanceOrCls, property)) {
       SchemaRegistryIndex.getForRegister(instanceOrCls).register(config);
     } else {
       const adapter = SchemaRegistryIndex.getForRegisterByInstance(instanceOrCls);

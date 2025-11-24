@@ -22,12 +22,12 @@ export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
  * Indicate that a field or parameter is able to be injected
  */
 export function Inject(config?: InjectConfig | symbol) {
-  return (instance: ClassInstance, property: string | symbol, idx?: number | PropertyDescriptor): void => {
+  return (instance: ClassInstance, property?: string | symbol, idx?: number | PropertyDescriptor): void => {
     const cfg = fromArg(config);
     if (typeof idx !== 'number') {
-      DependencyRegistryIndex.registerFieldMetadata(instance.constructor, property, cfg);
+      DependencyRegistryIndex.registerFieldMetadata(instance.constructor, property!, cfg);
     } else {
-      DependencyRegistryIndex.registerParameterMetadata(instance.constructor, property, idx, cfg);
+      DependencyRegistryIndex.registerParameterMetadata(instance.constructor, property!, idx, cfg);
     }
   };
 }

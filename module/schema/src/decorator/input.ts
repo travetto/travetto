@@ -8,7 +8,7 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 
 function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
   return (instance: ClassInstance, property: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
-    const adapter = SchemaRegistryIndex.getForRegister(instance.constructor);
+    const adapter = SchemaRegistryIndex.getForRegisterByInstance(instance);
     if (typeof idx === 'number') {
       adapter.registerParameter(property, idx, ...obj);
     } else {
@@ -177,6 +177,6 @@ export function Specifier(...specifiers: string[]): PropType<unknown> { return i
  */
 export function SubTypeField(): ((t: ClassInstance, k: string) => void) {
   return (instance: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegister(instance.constructor).register({ subTypeField: property });
+    SchemaRegistryIndex.getForRegisterByInstance(instance).register({ subTypeField: property });
   };
 }

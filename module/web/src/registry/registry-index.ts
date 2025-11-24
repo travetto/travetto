@@ -8,7 +8,7 @@ import { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
 import { WebAsyncContext } from '../context';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
-const isClassInstance = (property: unknown, target: unknown): target is ClassInstance => !!property;
+const isClass = (property: unknown, target: unknown): target is Class => !property;
 
 export class ControllerRegistryIndex {
 
@@ -49,10 +49,10 @@ export class ControllerRegistryIndex {
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
     return (instanceOrCls: unknown, property?: symbol | string): void => {
-      if (isClassInstance(property, instanceOrCls)) {
-        ControllerRegistryIndex.getForRegister(instanceOrCls.constructor).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
+      if (isClass(property, instanceOrCls)) {
+        ControllerRegistryIndex.getForRegister(instanceOrCls).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
       } else {
-        ControllerRegistryIndex.getForRegister(instanceOrCls).registerInterceptorConfig(cls, cfg, extra);
+        ControllerRegistryIndex.getForRegisterByInstance(instanceOrCls).registerInterceptorConfig(cls, cfg, extra);
       }
     };
   }
