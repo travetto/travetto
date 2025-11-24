@@ -75,7 +75,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = SchemaRegistryIndex.getConfig(item);
+    const config = SchemaRegistryIndex.getConfigByInstance(item);
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
     }

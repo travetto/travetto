@@ -1,5 +1,6 @@
 import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { AppError, castTo, Class, ClassInstance } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
 import { ModelType } from '../types/model';
@@ -62,7 +63,14 @@ export class ModelRegistryIndex {
   store = new RegistryIndexStore(ModelRegistryAdapter);
 
   #addClass(cls: Class): void {
-    const store = this.getConfig(cls).store;
+    const config = this.getConfig(cls);
+
+    // Don't index on subclasses
+    if (cls !== SchemaRegistryIndex.getBaseClass(cls)) {
+      return;
+    }
+
+    const { store } = config;
     let classes = this.#modelNameMapping.get(store);
     if (!classes) {
       this.#modelNameMapping.set(store, classes = new Set());

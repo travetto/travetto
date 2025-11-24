@@ -29,6 +29,10 @@ export class SchemaRegistryIndex {
     return this.#instance.store.get(clsOrId).get();
   }
 
+  static getConfigByInstance(instance: ClassInstance): SchemaClassConfig {
+    return this.#instance.store.getByInstance(instance).get();
+  }
+
   static getFieldMap(clsOrId: ClassOrId, view?: string): SchemaFieldMap {
     return this.#instance.store.get(clsOrId).getSchema(view);
   }
