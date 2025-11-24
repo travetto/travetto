@@ -50,9 +50,9 @@ export class ControllerRegistryIndex {
   ): EndpointDecorator {
     return (instanceOrCls: unknown, property?: symbol | string): void => {
       if (isClass(property, instanceOrCls)) {
-        ControllerRegistryIndex.getForRegister(instanceOrCls).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
+        ControllerRegistryIndex.getForRegister(instanceOrCls).registerInterceptorConfig(cls, cfg, extra);
       } else {
-        ControllerRegistryIndex.getForRegisterByInstance(instanceOrCls).registerInterceptorConfig(cls, cfg, extra);
+        ControllerRegistryIndex.getForRegisterByInstance(instanceOrCls).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
       }
     };
   }

@@ -5,16 +5,16 @@ import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDe
 import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
-function isClass(property: unknown, target: unknown): target is Class<unknown> {
+function isClass(target: unknown, property: unknown,): target is Class<unknown> {
   return !property;
 }
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(instanceOrCls: ClassInstance | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
-    if (isClass(property, instanceOrCls)) {
-      return ControllerRegistryIndex.getForRegister(instanceOrCls).registerEndpoint(property!, config);
+    if (isClass(instanceOrCls, property)) {
+      ControllerRegistryIndex.getForRegister(instanceOrCls).register(config);
     } else {
-      return ControllerRegistryIndex.getForRegisterByInstance(instanceOrCls).register(config);
+      ControllerRegistryIndex.getForRegisterByInstance(instanceOrCls).registerEndpoint(property!, config);
     }
   };
 }

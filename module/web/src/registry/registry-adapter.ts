@@ -166,18 +166,18 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
 
   registerInterceptorConfig<T extends WebInterceptor>(
     cls: Class<T>,
-    cfg: Partial<RetainPrimitiveFields<T['config']>>,
+    config: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): ControllerConfig {
-    return this.register({ interceptorConfigs: [[cls, castTo(cfg)]], ...extra });
+    return this.register({ interceptorConfigs: [[cls, castTo(config)]], ...extra });
   }
 
   registerEndpointInterceptorConfig<T extends WebInterceptor>(
-    prop: string | symbol,
+    property: string | symbol,
     cls: Class<T>,
-    cfg: Partial<RetainPrimitiveFields<T['config']>>,
+    config: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig>
   ): EndpointConfig {
-    return this.registerEndpoint(prop, { interceptorConfigs: [[cls, castTo(cfg)]], ...extra });
+    return this.registerEndpoint(property, { interceptorConfigs: [[cls, castTo(config)]], ...extra });
   }
 }

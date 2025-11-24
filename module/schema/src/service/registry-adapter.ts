@@ -126,7 +126,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       interfaces: [],
       fields: {},
       subTypeField: 'type',
-      baseType: !!describeFunction(this.#cls).abstract,
+      baseType: !!describeFunction(this.#cls)?.abstract,
     };
     return combineClasses(cfg, data);
   }

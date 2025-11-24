@@ -11,12 +11,11 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  * @augments `@travetto/schema:Schema`
  */
 export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'subTypeName' | 'subTypeField' | 'baseType' | 'methods'>>) {
-  return <T, U extends Class<T>>(cls: U): U => {
+  return <T, U extends Class<T>>(cls: U): void => {
     cls.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
     };
     SchemaRegistryIndex.getForRegister(cls).registerClass(cfg);
-    return cls;
   };
 }
 
