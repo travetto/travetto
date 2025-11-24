@@ -2,7 +2,8 @@ import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
 import { RegistryV2 } from '@travetto/registry';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam, Undocumented } from '@travetto/web';
+import { IsPrivate } from '@travetto/schema';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { OpenapiVisitor } from '@travetto/openapi';
 
@@ -66,14 +67,14 @@ class TestCont {
     return new Readable({});
   }
 
-  @Undocumented()
+  @IsPrivate()
   @Delete('/random')
   async ignore(): Promise<void> {
 
   }
 }
 
-@Undocumented()
+@IsPrivate()
 @Controller('/test2')
 class IgnoredCont {
   @Get('/user')

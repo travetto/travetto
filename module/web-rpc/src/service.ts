@@ -6,6 +6,7 @@ import { ControllerRegistryIndex } from '@travetto/web';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
 import { RegistryV2 } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { clientFactory } from '../support/client/rpc.ts';
 import { WebRpcClient, WebRpcConfig } from './config.ts';
@@ -31,7 +32,7 @@ export class WebRpcClientGeneratorService {
         const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(x));
         return entry && entry.role === 'std';
       })
-      .filter(x => ControllerRegistryIndex.getConfig(x).documented !== false)
+      .filter(x => SchemaRegistryIndex.getConfig(x).private !== true)
       .map(x => {
         const imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(x));
         const base = Runtime.workspaceRelative(RuntimeIndex.manifest.build.typesFolder);

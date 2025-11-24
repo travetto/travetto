@@ -1,14 +1,15 @@
 import { stringify } from 'yaml';
 
-import { ConfigureInterceptor, Controller, CorsInterceptor, Get, SetHeaders, Undocumented } from '@travetto/web';
+import { ConfigureInterceptor, Controller, CorsInterceptor, Get, SetHeaders } from '@travetto/web';
 import { Inject } from '@travetto/di';
+import { IsPrivate } from '@travetto/schema';
 
 import { OpenApiService } from './service.ts';
 
 /**
  * Basic controller for surfacing the api spec
  */
-@Undocumented()
+@IsPrivate()
 @Controller('/')
 @ConfigureInterceptor(CorsInterceptor, { origins: ['*'] })
 export class OpenApiController {

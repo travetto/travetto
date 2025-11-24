@@ -18,16 +18,18 @@ export class ControllerVisitUtil {
       options = Object.assign(visitor.getOptions(), options);
     }
 
-    options.skipUndocumented ??= true;
+    options.skipPrivate ??= true;
 
     const controller = ControllerRegistryIndex.getConfig(cls);
-    if (controller.documented === false && options.skipUndocumented) {
+    const schema = SchemaRegistryIndex.getConfig(cls);
+    if (schema.private === true && options.skipPrivate) {
       return;
     }
 
     await visitor.onControllerStart?.(controller);
     for (const endpoint of controller.endpoints) {
-      if (endpoint.documented === false && options.skipUndocumented) {
+      const endpointSchema = SchemaRegistryIndex.getMethodConfig(cls, endpoint.name);
+      if (endpointSchema.private === true && options.skipPrivate) {
         continue;
       }
 

@@ -28,6 +28,12 @@ export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
 }
 
 /**
+ * Mark a field/method as private
+ * @augments `@travetto/schema:Describe`
+ */
+export const IsPrivate = Describe.bind(null, { private: true });
+
+/**
  * Mark a field/method as ignored
  *
  * @augments `@travetto/schema:Ignore`

@@ -1,7 +1,8 @@
 import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
+import { IsPrivate } from '@travetto/schema';
 import {
-  HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistryIndex,
+  HeaderParam, Controller, ExcludeInterceptors, ControllerRegistryIndex,
   WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
   RespondInterceptor, DecompressInterceptor, Get
 } from '@travetto/web';
@@ -13,7 +14,7 @@ import {
   val instanceof RespondInterceptor ||
   val.category === 'global'
 ))
-@Undocumented()
+@IsPrivate()
 export class WebRpcController {
 
   @Inject()

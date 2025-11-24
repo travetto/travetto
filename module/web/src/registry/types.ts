@@ -57,10 +57,6 @@ interface CoreConfig {
    * Partial response context
    */
   responseContext?: Partial<WebResponseContext>;
-  /**
-   * Is the resource documented
-   */
-  documented?: boolean;
 }
 
 /**
@@ -177,7 +173,7 @@ export interface ControllerConfig extends CoreConfig {
 /**
  * Controller visitor options
  */
-export type ControllerVisitorOptions = { skipUndocumented?: boolean };
+export type ControllerVisitorOptions = { skipPrivate?: boolean };
 
 /**
  * Controller visitor pattern

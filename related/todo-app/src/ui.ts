@@ -1,10 +1,11 @@
 import { Readable } from 'node:stream';
 
-import { Controller, Get, Produces, WebRequest, Undocumented, ContextParam } from '@travetto/web';
+import { Controller, Get, Produces, WebRequest, ContextParam } from '@travetto/web';
 import { RuntimeResources } from '@travetto/runtime';
+import { IsPrivate } from '@travetto/schema';
 
 @Controller('/ui')
-@Undocumented()
+@IsPrivate()
 export class UIController {
 
   @ContextParam()

@@ -10,7 +10,6 @@ function combineCommon<T extends ControllerConfig | EndpointConfig>(base: T, ove
   base.filters = [...(base.filters ?? []), ...(override.filters ?? [])];
   base.interceptorConfigs = [...(base.interceptorConfigs ?? []), ...(override.interceptorConfigs ?? [])];
   base.interceptorExclude = base.interceptorExclude ?? override.interceptorExclude;
-  base.documented = override.documented ?? base.documented;
   base.responseHeaders = { ...override.responseHeaders, ...base.responseHeaders };
   base.responseContext = { ...override.responseContext, ...base.responseContext };
   return base;

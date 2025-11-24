@@ -47,6 +47,10 @@ export interface SchemaCoreConfig {
    */
   examples?: string[];
   /**
+   * Is the field/method/private
+   */
+  private?: boolean;
+  /**
    * Metadata that is related to the schema structure
    */
   metadata?: Record<symbol, unknown>;

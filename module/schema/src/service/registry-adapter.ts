@@ -15,11 +15,20 @@ function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>
   return castTo(out);
 }
 
+function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): T {
+  return safeAssign(base, {
+    ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
+    ...config.private ? { private: config.private ?? base.private } : {},
+    ...config.title ? { title: config.title || base.title } : {},
+    ...config.description ? { description: config.description || base.description } : {},
+    ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
+  });
+}
+
 function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     safeAssign(base, {
       ...config,
-      ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
       ...config.aliases ? { aliases: [...base.aliases ?? [], ...config.aliases ?? []] } : {},
       ...config.specifiers ? { specifiers: [...base.specifiers ?? [], ...config.specifiers ?? []] } : {},
       ...config.enum ? {
@@ -28,10 +37,8 @@ function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>
           values: [...base.enum?.values ?? [], ...config.enum?.values ?? []].toSorted()
         }
       } : {},
-      title: config.title || base.title,
-      description: config.description || base.description,
-      examples: [...(base.examples ?? []), ...(config.examples ?? [])],
     });
+    combineCore(base, config);
   }
   return base;
 }
@@ -40,13 +47,10 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
   for (const config of configs) {
     safeAssign(base, {
       ...config,
-      ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
       parameters: config.parameters ?? base.parameters,
       validators: [...base.validators, ...(config.validators ?? [])],
-      title: config.title || base.title,
-      description: config.description || base.description,
-      examples: [...(base.examples ?? []), ...(config.examples ?? [])],
     });
+    combineCore(base, config);
     if (config.parameters) {
       for (const param of config.parameters) {
         safeAssign(base.parameters[param.index], param);
@@ -92,16 +96,13 @@ function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T
       ...config,
       ...config.views ? { views: { ...base.views, ...config.views } } : {},
       ...config.validators ? { validators: [...base.validators, ...config.validators] } : {},
-      ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
       interfaces: [...base.interfaces, ...(config.interfaces ?? [])],
       methods: { ...base.methods, ...config.methods },
       fields: { ...base.fields, ...config.fields },
-      title: config.title || base.title,
-      description: config.description || base.description,
-      examples: [...(base.examples ?? []), ...(config.examples ?? [])],
       baseType: config.baseType ?? base.baseType,
       subTypeField: config.subTypeField ?? base.subTypeField,
     });
+    combineCore(base, config);
   }
   return base;
 }
