@@ -8,7 +8,7 @@ import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebRequest } from '../types/request.ts';
 import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig } from '../registry/types.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { WebCommonUtil } from './common.ts';
 
@@ -85,7 +85,7 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(request: WebRequest, param: EndpointParamConfig, input: SchemaParameterConfig, value?: unknown): unknown {
+  static extractParameter(request: WebRequest, param: EndpointParameterConfig, input: SchemaParameterConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
@@ -118,15 +118,15 @@ export class EndpointUtil {
 
     try {
       const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(request, c, parameters[i], vals?.[i]));
+      const extracted = endpoint.parameters.map((c, i) => this.extractParameter(request, c, parameters[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
-      await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
+      await SchemaValidator.validateMethod(cls, method, params, endpoint.parameters.map(x => x.prefix));
       return params;
     } catch (err) {
       if (err instanceof ValidationResultError) {
         for (const el of err.details?.errors ?? []) {
           if (el.kind === 'required') {
-            const config = endpoint.params.find(x => x.name === el.path);
+            const config = endpoint.parameters.find(x => x.name === el.path);
             if (config) {
               el.message = `Missing ${config.location.replace(/s$/, '')}: ${config.name}`;
             }
@@ -185,7 +185,7 @@ export class EndpointUtil {
     const endpointFilters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...(endpoint.filters ?? []).map(fn => fn.bind(endpoint.instance)),
-      ...(endpoint.params.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
+      ...(endpoint.parameters.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
     ]
       .map(fn => ({ filter: fn }));
 

@@ -4,7 +4,7 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParamConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType } from '@travetto/schema';
 
@@ -269,7 +269,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: EndpointParamConfig, input: SchemaInputConfig): (
+  #processEndpointParam(ep: EndpointConfig, param: EndpointParameterConfig, input: SchemaInputConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined
@@ -325,7 +325,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
 
     for (const param of methodSchema.parameters) {
-      const result = this.#processEndpointParam(ep, ep.params[param.index], param);
+      const result = this.#processEndpointParam(ep, ep.parameters[param.index], param);
       if (result) {
         if ('parameters' in result) {
           (op.parameters ??= []).push(...result.parameters);

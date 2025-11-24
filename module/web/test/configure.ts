@@ -47,9 +47,9 @@ export class ConfigureTest {
     assert(ep.endpoint === TestController.prototype.getUser);
     assert(ep.title === 'Get user by name');
 
-    assert(ep.params.length === 1);
+    assert(ep.parameters.length === 1);
 
-    assert(ep.params[0].name === 'name');
+    assert(ep.parameters[0].name === 'name');
     assert(params[0].description === 'User name as a number');
   }
 }

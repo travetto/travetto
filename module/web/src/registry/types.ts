@@ -64,9 +64,9 @@ interface CoreConfig {
 }
 
 /**
- * Endpoint param configuration
+ * Endpoint parameter configuration
  */
-export interface EndpointParamConfig {
+export interface EndpointParameterConfig {
   /**
    * Name of the parameter
    */
@@ -87,7 +87,7 @@ export interface EndpointParamConfig {
    * Extract the value from request
    * @param context The http context with the endpoint param config
    */
-  extract?: (ctx: WebRequest, config: EndpointParamConfig) => unknown;
+  extract?: (ctx: WebRequest, config: EndpointParameterConfig) => unknown;
   /**
    * Input prefix for parameter
    */
@@ -137,7 +137,7 @@ export interface EndpointConfig extends CoreConfig {
   /**
    * List of params for the endpoint
    */
-  params: EndpointParamConfig[];
+  parameters: EndpointParameterConfig[];
   /**
    * Full path including controller
    */

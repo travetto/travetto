@@ -1,5 +1,5 @@
 import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistryIndex, EndpointParamConfig, Param } from '@travetto/web';
+import { ControllerRegistryIndex, EndpointParameterConfig, Param } from '@travetto/web';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor.ts';
@@ -17,7 +17,7 @@ const FileMapContract = toConcrete<FileMap>();
  * @augments `@travetto/schema:Input`
  */
 export function Upload(
-  param: string | Partial<EndpointParamConfig> & UploadConfig = {},
+  param: string | Partial<EndpointParameterConfig> & UploadConfig = {},
 ): (inst: ClassInstance, prop: string | symbol, idx: number) => void {
 
   if (typeof param === 'string') {
