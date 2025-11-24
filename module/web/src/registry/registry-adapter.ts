@@ -43,11 +43,7 @@ function combineEndpointConfigs(ctrl: ControllerConfig, base: EndpointConfig, ..
         path: override.path || base.path,
         params: (override.params ?? base.params).map(x => ({ ...x })),
         responseFinalizer: override.responseFinalizer ?? base.responseFinalizer,
-      },
-      'endpoint' in override && override.endpoint ? {
-        id: `${ctrl.class.name}#${override.endpoint.name}`,
-        name: override.endpoint.name,
-      } : {}
+      }
     );
   }
   // Ensure we have full path
@@ -112,7 +108,9 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
         allowsBody: false,
         class: this.#cls,
         filters: [],
+        endpoint: this.#cls.prototype[method],
         name: method.toString(),
+        id: `${this.#cls.name}#${method.toString()}`,
         params: [],
         interceptorConfigs: [],
         responseHeaders: {},

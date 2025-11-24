@@ -1,27 +1,19 @@
 import { Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
-import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
+import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
     if (property) {
-      return ControllerRegistryIndex.getForRegister(target).registerEndpoint(property, {
-        endpoint: descriptor!.value,
-      }, config);
+      return ControllerRegistryIndex.getForRegister(target).registerEndpoint(property, config);
     } else {
       return ControllerRegistryIndex.getForRegister(target).register(config);
     }
   };
 }
-
-/**
- * Decorator used to add description metadata to a class or method
- * @param desc The describe config
- */
-export function Describe(desc: DescribableConfig): EndpointDecorator { return register(desc); }
 
 /**
  * Marks a class/endpoint as being undocumented

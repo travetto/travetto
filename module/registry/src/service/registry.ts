@@ -41,6 +41,11 @@ class $Registry {
     }
   }
 
+  finalizeForIndex(indexCls: RegistryIndexClass) {
+    const inst = this.instance(indexCls);
+    this.#finalizeItems(inst.store.getClasses());
+  }
+
   process(events: ChangeEvent<Class>[]): void {
     this.#finalizeItems(events.filter(ev => 'curr' in ev).map(ev => ev.curr));
 

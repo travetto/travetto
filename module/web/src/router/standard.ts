@@ -11,7 +11,6 @@ import type { WebFilterContext } from '../types/filter.ts';
 import { WebConfig } from '../config.ts';
 
 import { BaseWebRouter } from './base.ts';
-import { Ignore } from '@travetto/schema';
 
 const DEFAULT_HTTP_METHOD = 'POST';
 

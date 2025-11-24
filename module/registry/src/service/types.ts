@@ -24,6 +24,7 @@ export type RegistrySimpleStore = {
   finalize(clsOrId: ClassOrId): void;
   finalized(clsOrId: ClassOrId): boolean;
   remove(clsOrId: ClassOrId): void;
+  getClasses(): Class[];
 };
 
 /**

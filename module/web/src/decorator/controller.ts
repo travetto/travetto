@@ -10,6 +10,6 @@ import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 export function Controller(path: string) {
   return function <T>(target: Class<T>): void {
     ControllerRegistryIndex.getForRegister(target).register({ basePath: path, class: target, });
-    DependencyRegistryIndex.getForRegister(target).register();
+    DependencyRegistryIndex.getForRegister(target).registerClass();
   };
 }

@@ -28,7 +28,7 @@ export function Upload(
 
   return (inst: ClassInstance, prop: string | symbol, idx: number): void => {
     // Register field
-    ControllerRegistryIndex.getForRegister(inst.constructor).registerEndpointInterceptorConfig(
+    ControllerRegistryIndex.getForRegister(inst).registerEndpointInterceptorConfig(
       prop,
       WebUploadInterceptor,
       {
@@ -49,7 +49,7 @@ export function Upload(
     return Param('body', {
       ...finalConf,
       extract: (request, config) => {
-        const input = SchemaRegistryIndex.getMethodConfig(inst.constructor, prop).parameters[idx];
+        const input = SchemaRegistryIndex.getMethodConfig(inst, prop).parameters[idx];
 
         if (!input) {
           throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
