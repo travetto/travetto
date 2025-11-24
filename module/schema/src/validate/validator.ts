@@ -62,7 +62,7 @@ export class SchemaValidator {
     const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
 
     if (!hasValue) {
-      if (input.required && input.required.active) {
+      if (input.required?.active !== false) {
         return this.#prepareErrors(path, [{ kind: 'required', ...input.required }]);
       } else {
         return [];
