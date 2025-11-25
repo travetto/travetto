@@ -33,7 +33,6 @@ export interface CliValidationError {
  * @concrete
  */
 export interface CliCommandShape<T extends unknown[] = unknown[]> {
-
   /**
    * Parsed state
    */

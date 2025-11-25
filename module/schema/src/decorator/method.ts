@@ -11,11 +11,9 @@ import { MethodValidatorFn } from '../validate/types';
  */
 export function Method(...config: Partial<SchemaMethodConfig>[]) {
   return (instanceOrCls: ClassInstance, property: string | symbol): void => {
-    const adapter = ('Ⲑid' in instanceOrCls) ?
-      SchemaRegistryIndex.getForRegister(instanceOrCls) :
-      SchemaRegistryIndex.getForRegisterByInstance(instanceOrCls);
-
-    adapter.registerMethod(property, ...config);
+    const targetCls = ('Ⲑid' in instanceOrCls) ? instanceOrCls : instanceOrCls.constructor;
+    console.log('Decorating method', String(property), 'on', targetCls.Ⲑid);
+    SchemaRegistryIndex.getForRegister(targetCls).registerMethod(property, ...config);
   };
 }
 

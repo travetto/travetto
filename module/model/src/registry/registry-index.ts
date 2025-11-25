@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { AppError, castTo, Class, ClassInstance } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -17,20 +17,16 @@ export class ModelRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(this);
 
-  static getForRegister(clsOrId: ClassOrId): ModelRegistryAdapter {
-    return this.#instance.store.getForRegister(clsOrId);
+  static getForRegister(instanceOrClass: Class | ClassInstance): ModelRegistryAdapter {
+    return this.#instance.store.getForRegister(instanceOrClass);
   }
 
-  static getForRegisterByInstance(instance: ClassInstance): ModelRegistryAdapter {
-    return this.#instance.store.getForRegisterByInstance(instance);
+  static getConfig(cls: Class): ModelConfig {
+    return this.#instance.getConfig(cls);
   }
 
-  static getConfig(clsOrId: ClassOrId): ModelConfig {
-    return this.#instance.getConfig(clsOrId);
-  }
-
-  static has(clsOrId: ClassOrId): boolean {
-    return this.#instance.store.has(clsOrId);
+  static has(cls: Class): boolean {
+    return this.#instance.store.has(cls);
   }
 
   static getStoreName<T extends ModelType>(cls: Class<T>): string {
@@ -105,7 +101,7 @@ export class ModelRegistryIndex {
     this.store.finalize(cls);
   }
 
-  getConfig(cls: ClassOrId): ModelConfig<ModelType> {
+  getConfig(cls: Class): ModelConfig<ModelType> {
     return this.store.get(cls).get();
   }
 

@@ -1,6 +1,6 @@
-import { AppError, asConstructable, castTo, Class, ClassInstance, getParentClass } from '@travetto/runtime';
+import { AppError, castTo, Class, ClassInstance, getParentClass } from '@travetto/runtime';
 
-import { ClassOrId, RegistrationMethods, RegistryAdapter } from './types';
+import { RegistrationMethods, RegistryAdapter } from './types';
 
 /**
  * Base registry index implementation
@@ -13,19 +13,6 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
   #adapterCls: new (cls: Class) => A;
   #finalized = new Map<Class, boolean>();
 
-  #toCls(clsOrId: ClassOrId): Class {
-    if (typeof clsOrId === 'string') {
-      const cls = this.#idToCls.get(clsOrId);
-      if (!cls) {
-        console.trace('Unknown class id', clsOrId);
-        throw new AppError(`Unknown class id ${clsOrId}`);
-      }
-      return cls;
-    } else {
-      return clsOrId;
-    }
-  }
-
   constructor(adapterCls: new (cls: Class) => A) {
     this.#adapterCls = adapterCls;
   }
@@ -34,13 +21,11 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return Array.from(this.#adapters.keys());
   }
 
-  has(clsOrId: ClassOrId): boolean {
-    const cls = this.#toCls(clsOrId);
+  has(cls: Class): boolean {
     return this.#adapters.has(cls);
   }
 
-  finalize(clsOrId: ClassOrId, parentConfig?: ReturnType<A['get']>): void {
-    const cls = this.#toCls(clsOrId);
+  finalize(cls: Class, parentConfig?: ReturnType<A['get']>): void {
     if (!parentConfig) {
       const parentClass = getParentClass(cls);
       parentConfig = castTo(parentClass && this.has(parentClass) ? this.get(parentClass).get() : undefined);
@@ -49,8 +34,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     this.#finalized.set(cls, true);
   }
 
-  adapter(clsOrId: ClassOrId): A {
-    const cls = this.#toCls(clsOrId);
+  adapter(cls: Class): A {
     if (!this.#adapters.has(cls)!) {
       const adapter = new this.#adapterCls(cls);
       this.#adapters.set(cls, adapter);
@@ -60,46 +44,33 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return castTo(this.#adapters.get(cls));
   }
 
-  remove(clsOrId: ClassOrId): void {
-    const cls = this.#toCls(clsOrId);
+  remove(cls: Class): void {
     this.#adapters.delete(cls);
     this.#finalized.delete(cls);
   }
 
-  getForRegister(clsOrId: ClassOrId, allowFinalized = false): A {
-    const cls = this.#toCls(clsOrId);
-
+  getForRegister(cls: Class, allowFinalized = false): A {
     if (this.#finalized.get(cls) && !allowFinalized) {
       throw new AppError(`Class ${cls.Ⲑid} is already finalized`);
     }
     return this.adapter(cls);
   }
 
-  getForRegisterByInstance(instance: ClassInstance, allowFinalized = false): A {
-    return this.getForRegister(asConstructable(instance).constructor, allowFinalized);
-  }
-
-  get(clsOrId: ClassOrId): Omit<A, RegistrationMethods> {
-    const cls = this.#toCls(clsOrId);
+  get(cls: Class): Omit<A, RegistrationMethods> {
     if (!this.has(cls)) {
       throw new AppError(`Class ${cls.Ⲑid} is not registered for ${this.#adapterCls.Ⲑid}`);
     }
     return this.adapter(cls);
   }
 
-  getByInstance(instance: ClassInstance): Omit<A, RegistrationMethods> {
-    return this.get(asConstructable(instance).constructor);
-  }
-
-  getOptional(clsOrId: ClassOrId): Omit<A, RegistrationMethods> | undefined {
-    if (!this.has(clsOrId)) {
+  getOptional(cls: Class): Omit<A, RegistrationMethods> | undefined {
+    if (!this.has(cls)) {
       return undefined;
     }
-    return this.adapter(clsOrId);
+    return this.adapter(cls);
   }
 
-  finalized(clsOrId: ClassOrId): boolean {
-    const cls = this.#toCls(clsOrId);
+  finalized(cls: Class): boolean {
     return this.#finalized.has(cls);
   }
 }

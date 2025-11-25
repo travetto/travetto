@@ -106,7 +106,7 @@ export class ModelCrudUtil {
    */
   static ensureNotSubType(cls: Class): void {
     const config = SchemaRegistryIndex.getConfig(cls);
-    if (config.classType === 'subtype') {
+    if (config.classType === 'discriminated-base') {
       throw new SubTypeNotSupportedError(cls);
     }
   }

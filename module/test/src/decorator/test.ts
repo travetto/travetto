@@ -22,7 +22,7 @@ export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description?: string | Partial<TestConfig>, ...rest: Partial<TestConfig>[]): MethodDecorator {
   return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegisterByInstance(instance).registerTest(prop, descriptor.value,
+    SuiteRegistryIndex.getForRegister(instance).registerTest(prop, descriptor.value,
       ...(typeof description !== 'string' && description) ? [description] : [],
       ...rest,
       ...(typeof description === 'string') ? [{ description }] : []
@@ -37,7 +37,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
  */
 export function ShouldThrow(state: ThrowableError): MethodDecorator {
   return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegisterByInstance(instance).registerTest(prop, descriptor.value, { shouldThrow: state });
+    SuiteRegistryIndex.getForRegister(instance).registerTest(prop, descriptor.value, { shouldThrow: state });
     return descriptor;
   };
 }
@@ -48,7 +48,7 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
  */
 export function Timeout(ms: number): MethodDecorator {
   return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegisterByInstance(instance).registerTest(prop, descriptor.value, { timeout: ms });
+    SuiteRegistryIndex.getForRegister(instance).registerTest(prop, descriptor.value, { timeout: ms });
     return descriptor;
   };
 }

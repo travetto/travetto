@@ -41,7 +41,7 @@ export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(instance: T, property: K): void => {
-    ModelRegistryIndex.getForRegisterByInstance(instance).register({ expiresAt: property });
+    ModelRegistryIndex.getForRegister(instance).register({ expiresAt: property });
   };
 }
 
@@ -64,7 +64,7 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
  */
 export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
-    ModelRegistryIndex.getForRegisterByInstance(instance).register({
+    ModelRegistryIndex.getForRegister(instance).register({
       prePersist: [{
         scope,
         handler: (inst): void => {
@@ -81,7 +81,7 @@ export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PreP
  */
 export function Transient<T>() {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
-    ModelRegistryIndex.getForRegisterByInstance(instance).register({
+    ModelRegistryIndex.getForRegister(instance).register({
       prePersist: [{
         scope: 'all',
         handler: (inst): void => {

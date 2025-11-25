@@ -163,15 +163,17 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return castTo<T>(md?.[key]);
   }
 
-  registerClass({ methods, ...cfg }: Partial<SchemaClassConfig> = {}): void {
+  registerClass({ methods, ...cfg }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
     this.register({ ...cfg });
     if (methods?.['CONSTRUCTOR']) {
       this.registerMethod('CONSTRUCTOR', methods['CONSTRUCTOR']);
     }
+    return this.#config;
   }
 
   registerMethod(method: string | symbol, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
-    const config = this.register({});
+    const config = this.register();
+    console.trace('Registering method', String(method), 'on', config);
     const cfg = config.methods[method] ??= { parameters: [], validators: [], handle: this.#cls.prototype[method] };
     return combineMethods(cfg, data);
   }

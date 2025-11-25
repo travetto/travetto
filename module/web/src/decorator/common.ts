@@ -14,7 +14,7 @@ function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointD
     if (isClass(instanceOrCls, property)) {
       ControllerRegistryIndex.getForRegister(instanceOrCls).register(config);
     } else {
-      ControllerRegistryIndex.getForRegisterByInstance(instanceOrCls).registerEndpoint(property!, config);
+      ControllerRegistryIndex.getForRegister(instanceOrCls).registerEndpoint(property!, config);
     }
   };
 }

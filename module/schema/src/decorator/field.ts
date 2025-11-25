@@ -7,7 +7,7 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 
 function field<V>(...obj: Partial<SchemaFieldConfig>[]): PropType<V> {
   return (instance: ClassInstance, property: string | symbol): void => {
-    SchemaRegistryIndex.getForRegisterByInstance(instance).registerField(property, ...obj);
+    SchemaRegistryIndex.getForRegister(instance.constructor).registerField(property, ...obj);
   };
 }
 

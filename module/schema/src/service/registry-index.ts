@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistrationMethods, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, RegistrationMethods, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, ClassInstance, getParentClass, Util } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfig } from './types.ts';
@@ -12,36 +12,28 @@ export class SchemaRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(SchemaRegistryIndex);
 
-  static getForRegister(clsOrId: ClassOrId, allowFinalized = false): SchemaRegistryAdapter {
-    return this.#instance.store.getForRegister(clsOrId, allowFinalized);
+  static getForRegister(instanceOrClass: Class | ClassInstance, allowFinalized = false): SchemaRegistryAdapter {
+    return this.#instance.store.getForRegister(instanceOrClass, allowFinalized);
   }
 
-  static getForRegisterByInstance(instance: ClassInstance, allowFinalized = false): SchemaRegistryAdapter {
-    return this.#instance.store.getForRegisterByInstance(instance, allowFinalized);
-  }
-
-  static getConfig(clsOrId: ClassOrId): SchemaClassConfig {
-    return this.#instance.store.get(clsOrId).get();
+  static getConfig(cls: Class): SchemaClassConfig {
+    return this.#instance.store.get(cls).get();
   }
 
   static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField'>> | undefined {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
-  static getConfigByInstance(instance: ClassInstance): SchemaClassConfig {
-    return this.#instance.store.getByInstance(instance).get();
+  static getFieldMap(cls: Class, view?: string): SchemaFieldMap {
+    return this.#instance.store.get(cls).getSchema(view);
   }
 
-  static getFieldMap(clsOrId: ClassOrId, view?: string): SchemaFieldMap {
-    return this.#instance.store.get(clsOrId).getSchema(view);
+  static getMethodConfig(cls: Class, method: string | symbol): SchemaMethodConfig {
+    return this.#instance.store.get(cls).getMethod(method);
   }
 
-  static getMethodConfig(clsOrId: ClassOrId, method: string | symbol): SchemaMethodConfig {
-    return this.#instance.store.get(clsOrId).getMethod(method);
-  }
-
-  static has(clsOrId: ClassOrId): boolean {
-    return this.#instance.store.has(clsOrId);
+  static has(cls: Class): boolean {
+    return this.#instance.store.has(cls);
   }
 
   static getDiscriminatedTypesForClass(cls: Class): Class[] | undefined {
@@ -64,12 +56,12 @@ export class SchemaRegistryIndex {
     return this.#instance.getBaseClass(cls);
   }
 
-  static get(clsOrId: ClassOrId): Omit<SchemaRegistryAdapter, RegistrationMethods> {
-    return this.#instance.store.get(clsOrId);
+  static get(cls: Class): Omit<SchemaRegistryAdapter, RegistrationMethods> {
+    return this.#instance.store.get(cls);
   }
 
-  static getOptionalConfig(clsOrId: ClassOrId): SchemaClassConfig | undefined {
-    return this.#instance.store.getOptional(clsOrId)?.get();
+  static getOptionalConfig(cls: Class): SchemaClassConfig | undefined {
+    return this.#instance.store.getOptional(cls)?.get();
   }
 
   static getClasses(): Class[] {
@@ -160,7 +152,7 @@ export class SchemaRegistryIndex {
     this.store.finalize(cls);
   }
 
-  getClassConfig(cls: ClassOrId): SchemaClassConfig {
+  getClassConfig(cls: Class): SchemaClassConfig {
     return this.store.get(cls).get();
   }
 
@@ -188,10 +180,9 @@ export class SchemaRegistryIndex {
    * @param o Actual instance
    */
   resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    cls = this.getClassConfig(cls.Ⲑid).class; // Resolve by id to handle any stale references
-
+    const adapter = this.store.get(cls); // Resolve by id to handle any stale references
     const base = this.getBaseClass(cls);
-    const discriminatedConfig = this.store.get(cls).getDiscriminatedConfig();
+    const discriminatedConfig = adapter.getDiscriminatedConfig();
 
     if (discriminatedConfig) { // We have a sub type
       const type = castTo<string>(o[castKey<T>(discriminatedConfig.discriminatedField)]) ?? discriminatedConfig.discriminatedType;

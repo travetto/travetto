@@ -28,7 +28,7 @@ export function Upload(
 
   return (instance: ClassInstance, property: string | symbol, idx: number): void => {
     // Register field
-    ControllerRegistryIndex.getForRegisterByInstance(instance).registerEndpointInterceptorConfig(
+    ControllerRegistryIndex.getForRegister(instance).registerEndpointInterceptorConfig(
       property,
       WebUploadInterceptor,
       {

@@ -17,7 +17,7 @@ export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
     if (isClass(instanceOrCls, property)) {
       SchemaRegistryIndex.getForRegister(instanceOrCls).register(config);
     } else {
-      const adapter = SchemaRegistryIndex.getForRegisterByInstance(instanceOrCls);
+      const adapter = SchemaRegistryIndex.getForRegister(instanceOrCls);
       if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
         adapter.registerParameter(property!, descOrIdx, { ...config });
       } else {

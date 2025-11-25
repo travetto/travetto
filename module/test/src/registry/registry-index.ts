@@ -17,12 +17,8 @@ export class SuiteRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(this);
 
-  static getForRegister(clsOrId: ClassOrId): SuiteRegistryAdapter {
-    return this.#instance.store.getForRegister(clsOrId);
-  }
-
-  static getForRegisterByInstance(instance: ClassInstance, allowFinalized = false): SuiteRegistryAdapter {
-    return this.#instance.store.getForRegisterByInstance(instance, allowFinalized);
+  static getForRegister(instanceOrClass: Class | ClassInstance): SuiteRegistryAdapter {
+    return this.#instance.store.getForRegister(instanceOrClass);
   }
 
   static has(cls: Class): boolean {

@@ -33,7 +33,7 @@ export async function selectConsumer(instance: { format?: string }) {
     types = TestConsumerRegistry.getTypes();
   }
 
-  SchemaRegistryIndex.getForRegisterByInstance(instance, true).registerField('format', {
+  SchemaRegistryIndex.getForRegister(instance, true).registerField('format', {
     enum: {
       message: `{path} is only allowed to be "${types.join('" or "')}"`,
       values: types

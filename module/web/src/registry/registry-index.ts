@@ -1,4 +1,4 @@
-import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { Class, ClassInstance, RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
@@ -18,16 +18,12 @@ export class ControllerRegistryIndex {
     return this.#instance.store.getClasses();
   }
 
-  static getForRegister(clsOrId: ClassOrId): ControllerRegistryAdapter {
-    return this.#instance.store.getForRegister(clsOrId);
+  static getForRegister(instanceOrClass: Class | ClassInstance): ControllerRegistryAdapter {
+    return this.#instance.store.getForRegister(instanceOrClass);
   }
 
-  static getForRegisterByInstance(instance: ClassInstance, allowFinalized = false): ControllerRegistryAdapter {
-    return this.#instance.store.getForRegisterByInstance(instance, allowFinalized);
-  }
-
-  static getConfig(clsOrId: ClassOrId): ControllerConfig {
-    return this.#instance.store.get(clsOrId).get();
+  static getConfig(cls: Class): ControllerConfig {
+    return this.#instance.store.get(cls).get();
   }
 
   static getEndpointConfigById(id: string): EndpointConfig | undefined {
@@ -48,11 +44,11 @@ export class ControllerRegistryIndex {
     cfg: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
-    return (instanceOrCls: unknown, property?: symbol | string): void => {
+    return (instanceOrCls: Class | ClassInstance, property?: symbol | string): void => {
       if (isClass(property, instanceOrCls)) {
         ControllerRegistryIndex.getForRegister(instanceOrCls).registerInterceptorConfig(cls, cfg, extra);
       } else {
-        ControllerRegistryIndex.getForRegisterByInstance(instanceOrCls).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
+        ControllerRegistryIndex.getForRegister(instanceOrCls).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
       }
     };
   }
@@ -74,19 +70,19 @@ export class ControllerRegistryIndex {
    * Register a controller to bind context params on post construct
    * @param target Controller class
    */
-  bindContextParamsOnPostConstruct(clsOrId: ClassOrId): void {
-    DependencyRegistryIndex.registerClassMetadata(clsOrId, {
+  bindContextParamsOnPostConstruct(cls: Class): void {
+    DependencyRegistryIndex.registerClassMetadata(cls, {
       postConstruct: {
         ContextParam: (inst: ClassInstance) => this.#bindContextParams(inst)
       }
     });
   }
 
-  getController(cls: ClassOrId): ControllerConfig {
+  getController(cls: Class): ControllerConfig {
     return this.store.get(cls).get();
   }
 
-  getEndpoint(cls: ClassOrId, method: string | symbol): EndpointConfig {
+  getEndpoint(cls: Class, method: string | symbol): EndpointConfig {
     return this.getController(cls).endpoints.find(e => e.name === method)!;
   }
 

@@ -32,7 +32,7 @@ export function Config(ns: string) {
  */
 export function EnvVar(name: string, ...others: string[]) {
   return (instance: ClassInstance, property: string): void => {
-    const env = SchemaRegistryIndex.getForRegisterByInstance(instance)
+    const env = SchemaRegistryIndex.getForRegister(instance.constructor)
       .registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns: '', fields: {} });
     env.fields[property] = (): string | undefined =>
       process.env[[name, ...others].find(x => !!process.env[x])!];

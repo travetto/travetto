@@ -1,4 +1,4 @@
-import { Class, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asConstructable, Class, ClassInstance, getClass, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ClassOrId, RegistryAdapter, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
@@ -14,12 +14,12 @@ export class CliCommandRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(this);
 
-  static getForRegister(clsOrId: ClassOrId): RegistryAdapter<CliCommandConfig> {
-    return this.#instance.store.getForRegister(clsOrId);
+  static getForRegister(instanceOrClass: Class | ClassInstance): RegistryAdapter<CliCommandConfig> {
+    return this.#instance.store.getForRegister(instanceOrClass);
   }
 
-  static get(clsOrId: ClassOrId): CliCommandConfig {
-    return this.#instance.store.get(clsOrId).get();
+  static get(cls: Class): CliCommandConfig {
+    return this.#instance.store.get(cls).get();
   }
 
   static load(names?: string[]): Promise<CliCommandLoadResult[]> {
@@ -117,7 +117,7 @@ export class CliCommandRegistryIndex {
 
     const list = await Promise.all(keys.map(async x => {
       const instance = await this.#getInstance(x);
-      const config = this.store.getByInstance(instance).get();
+      const config = this.store.get(getClass(instance)).get();
       return { command: x, instance, config };
     }));
 

@@ -1,5 +1,5 @@
 import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2, RetargettingProxy } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, ClassInstance, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType, PrimaryCandidateSymbol } from '../types';
@@ -22,8 +22,8 @@ export class DependencyRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(DependencyRegistryIndex);
 
-  static getForRegister(clsOrId: ClassOrId): DependencyRegistryAdapter {
-    return this.#instance.store.getForRegister(clsOrId);
+  static getForRegister(instanceOrClass: Class | ClassInstance): DependencyRegistryAdapter {
+    return this.#instance.store.getForRegister(instanceOrClass);
   }
 
   static getInstance<T>(candidateType: Class<T>, qualifier?: symbol, resolution?: ResolutionType): Promise<T> {
@@ -46,24 +46,24 @@ export class DependencyRegistryIndex {
     return this.#instance.injectFields(cls, o, cls);
   }
 
-  static getOptional(clsOrId: ClassOrId): InjectableConfig | undefined {
-    return this.#instance.store.getOptional(clsOrId)?.get();
+  static getOptional(cls: Class): InjectableConfig | undefined {
+    return this.#instance.store.getOptional(cls)?.get();
   }
 
   static async getPrimaryCandidateInstances<T>(candidateType: Class<T>): Promise<[Class, T][]> {
     return this.#instance.getPrimaryCandidateInstances<T>(candidateType);
   }
 
-  static registerClassMetadata(clsOrId: ClassOrId, metadata: InjectableClassMetadata): void {
-    SchemaRegistryIndex.getForRegister(clsOrId).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
+  static registerClassMetadata(instanceOrClass: Class | ClassInstance, metadata: InjectableClassMetadata): void {
+    SchemaRegistryIndex.getForRegister(instanceOrClass).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
   }
 
-  static registerParameterMetadata(clsOrId: ClassOrId, method: string | symbol, index: number, metadata: Dependency): void {
-    SchemaRegistryIndex.getForRegister(clsOrId).registerParameterMetadata(method, index, MetadataSymbol, metadata);
+  static registerParameterMetadata(instanceOrClass: Class | ClassInstance, method: string | symbol, index: number, metadata: Dependency): void {
+    SchemaRegistryIndex.getForRegister(instanceOrClass).registerParameterMetadata(method, index, MetadataSymbol, metadata);
   }
 
-  static registerFieldMetadata(clsOrId: ClassOrId, field: string | symbol, metadata: Dependency): void {
-    SchemaRegistryIndex.getForRegister(clsOrId).registerFieldMetadata(field, MetadataSymbol, metadata);
+  static registerFieldMetadata(instanceOrClass: Class | ClassInstance, field: string | symbol, metadata: Dependency): void {
+    SchemaRegistryIndex.getForRegister(instanceOrClass).registerFieldMetadata(field, MetadataSymbol, metadata);
   }
 
   #instances = new Map<ClassId, Map<symbol, unknown>>();
@@ -126,8 +126,8 @@ export class DependencyRegistryIndex {
 
   store = new RegistryIndexStore(DependencyRegistryAdapter);
 
-  getConfig(clsOrId: ClassOrId): InjectableConfig {
-    return this.store.get(clsOrId).get();
+  getConfig(cls: Class): InjectableConfig {
+    return this.store.get(cls).get();
   }
 
   process(events: ChangeEvent<Class>[]): void {

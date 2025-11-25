@@ -13,7 +13,7 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
   return function (instance: ClassInstance, property: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    ControllerRegistryIndex.getForRegisterByInstance(instance).registerEndpoint(property, { name: property }, config);
+    ControllerRegistryIndex.getForRegister(instance).registerEndpoint(property, { name: property }, config);
     return descriptor;
   };
 }
