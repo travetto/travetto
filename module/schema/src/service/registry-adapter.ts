@@ -210,20 +210,18 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       combineClassWithParent(config, parent);
     }
 
-    const polymorphicConfig = this.getDiscriminatedConfig();
-    if (polymorphicConfig) {
-      const { discriminatedField, discriminatedType } = polymorphicConfig;
-      const field = config.fields[discriminatedField];
-      config.fields[discriminatedField] = {
-        ...field,
-        enum: {
-          values: [discriminatedType],
-          message: `${discriminatedField} can only be '${discriminatedType}'`,
-        },
+    if (config.discriminatedField) {
+      Object.assign(config.fields[config.discriminatedField], {
         required: {
           active: false
-        }
-      };
+        },
+        ...config.discriminatedType ? {
+          enum: {
+            values: [config.discriminatedType],
+            message: `${config.discriminatedField} can only be '${config.discriminatedType}'`,
+          },
+        } : {}
+      });
     }
 
     // Compute views on install

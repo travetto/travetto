@@ -54,7 +54,7 @@ export class SQLModelUtil {
    */
   static getFieldsByLocation(stack: VisitStack[]): FieldCacheEntry {
     const top = stack.at(-1)!;
-    const conf = SchemaRegistryIndex.getConfig(top.type);
+    const conf = SchemaRegistryIndex.has(top.type) ? SchemaRegistryIndex.getConfig(top.type) : undefined;
 
     if (conf && this.#schemaFieldsCache.has(conf.class)) {
       return this.#schemaFieldsCache.get(conf.class)!;
