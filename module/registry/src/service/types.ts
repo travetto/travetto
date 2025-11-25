@@ -1,9 +1,6 @@
 import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '../types';
 
-export type ClassOrId = Class | string;
-
-
 export type RegistrationMethods = `register${string}` | `finalize${string}`;
 
 /**
@@ -20,10 +17,10 @@ export type RegistryIndexClass = {
 };
 
 export type RegistrySimpleStore = {
-  has(clsOrId: ClassOrId): boolean;
-  finalize(clsOrId: ClassOrId): void;
-  finalized(clsOrId: ClassOrId): boolean;
-  remove(clsOrId: ClassOrId): void;
+  has(cls: Class): boolean;
+  finalize(cls: Class): void;
+  finalized(cls: Class): boolean;
+  remove(cls: Class): void;
   getClasses(): Class[];
 };
 

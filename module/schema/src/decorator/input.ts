@@ -1,4 +1,4 @@
-import { Any, Class, ClassInstance } from '@travetto/runtime';
+import { Any, Class, ClassInstance, getClass } from '@travetto/runtime';
 
 import { CommonRegExp } from '../validate/regexp.ts';
 import { SchemaInputConfig } from '../service/types.ts';
@@ -8,7 +8,7 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 
 function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
   return (instanceOrCls: ClassInstance | Class, property: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
-    const adapter = SchemaRegistryIndex.getForRegister(instanceOrCls);
+    const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
     if (typeof idx === 'number') {
       adapter.registerParameter(property, idx, ...obj);
     } else {
@@ -177,7 +177,7 @@ export function Specifier(...specifiers: string[]): PropType<unknown> { return i
  */
 export function DiscriminatorField(): ((t: ClassInstance, k: string) => void) {
   return (instance: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegister(instance).register({
+    SchemaRegistryIndex.getForRegister(getClass(instance)).register({
       classType: 'discriminated-base',
       discriminatedField: property
     });

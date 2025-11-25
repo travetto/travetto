@@ -1,5 +1,5 @@
-import { ChangeEvent, ClassOrId, RegistryIndexStore, RegistryV2, RetargettingProxy } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, ClassInstance, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
+import { ChangeEvent, RegistryIndexStore, RegistryV2, RetargettingProxy } from '@travetto/registry';
+import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType, PrimaryCandidateSymbol } from '../types';
@@ -22,8 +22,8 @@ export class DependencyRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(DependencyRegistryIndex);
 
-  static getForRegister(instanceOrClass: Class | ClassInstance): DependencyRegistryAdapter {
-    return this.#instance.store.getForRegister(instanceOrClass);
+  static getForRegister(cls: Class): DependencyRegistryAdapter {
+    return this.#instance.store.getForRegister(cls);
   }
 
   static getInstance<T>(candidateType: Class<T>, qualifier?: symbol, resolution?: ResolutionType): Promise<T> {
@@ -54,16 +54,16 @@ export class DependencyRegistryIndex {
     return this.#instance.getPrimaryCandidateInstances<T>(candidateType);
   }
 
-  static registerClassMetadata(instanceOrClass: Class | ClassInstance, metadata: InjectableClassMetadata): void {
-    SchemaRegistryIndex.getForRegister(instanceOrClass).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
+  static registerClassMetadata(cls: Class, metadata: InjectableClassMetadata): void {
+    SchemaRegistryIndex.getForRegister(cls).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
   }
 
-  static registerParameterMetadata(instanceOrClass: Class | ClassInstance, method: string | symbol, index: number, metadata: Dependency): void {
-    SchemaRegistryIndex.getForRegister(instanceOrClass).registerParameterMetadata(method, index, MetadataSymbol, metadata);
+  static registerParameterMetadata(cls: Class, method: string | symbol, index: number, metadata: Dependency): void {
+    SchemaRegistryIndex.getForRegister(cls).registerParameterMetadata(method, index, MetadataSymbol, metadata);
   }
 
-  static registerFieldMetadata(instanceOrClass: Class | ClassInstance, field: string | symbol, metadata: Dependency): void {
-    SchemaRegistryIndex.getForRegister(instanceOrClass).registerFieldMetadata(field, MetadataSymbol, metadata);
+  static registerFieldMetadata(cls: Class, field: string | symbol, metadata: Dependency): void {
+    SchemaRegistryIndex.getForRegister(cls).registerFieldMetadata(field, MetadataSymbol, metadata);
   }
 
   #instances = new Map<ClassId, Map<symbol, unknown>>();

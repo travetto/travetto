@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { castKey, castTo, Primitive } from '@travetto/runtime';
+import { asConstructable, castKey, castTo, getClass, Primitive } from '@travetto/runtime';
 
 import { cliTpl } from './color.ts';
 import { CliCommandShape } from './types.ts';
@@ -23,7 +23,7 @@ export class HelpUtil {
    * @param command
    */
   static async renderCommandHelp(command: CliCommandShape): Promise<string> {
-    const { flags, args, name: commandName, title } = CliCommandRegistryIndex.get(command);
+    const { flags, args, name: commandName, title } = CliCommandRegistryIndex.get(getClass(command));
 
     await command.preHelp?.();
 

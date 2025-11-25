@@ -1,5 +1,5 @@
 import { ChangeEvent, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
-import { Class, ClassInstance, RetainPrimitiveFields } from '@travetto/runtime';
+import { Class, ClassInstance, getClass, RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -18,8 +18,8 @@ export class ControllerRegistryIndex {
     return this.#instance.store.getClasses();
   }
 
-  static getForRegister(instanceOrClass: Class | ClassInstance): ControllerRegistryAdapter {
-    return this.#instance.store.getForRegister(instanceOrClass);
+  static getForRegister(cls: Class): ControllerRegistryAdapter {
+    return this.#instance.store.getForRegister(cls);
   }
 
   static getConfig(cls: Class): ControllerConfig {
@@ -45,10 +45,11 @@ export class ControllerRegistryIndex {
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
     return (instanceOrCls: Class | ClassInstance, property?: symbol | string): void => {
+      const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
       if (isClass(property, instanceOrCls)) {
-        ControllerRegistryIndex.getForRegister(instanceOrCls).registerInterceptorConfig(cls, cfg, extra);
+        adapter.registerInterceptorConfig(cls, cfg, extra);
       } else {
-        ControllerRegistryIndex.getForRegister(instanceOrCls).registerEndpointInterceptorConfig(property!, cls, cfg, extra);
+        adapter.registerEndpointInterceptorConfig(property!, cls, cfg, extra);
       }
     };
   }
@@ -57,12 +58,13 @@ export class ControllerRegistryIndex {
 
   store = new RegistryIndexStore(ControllerRegistryAdapter);
 
-  async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
+  async #bindContextParams<T>(instance: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
-    const map = this.getController(inst.constructor).contextParams;
+    const cls = getClass(instance);
+    const map = this.getController(cls).contextParams;
     for (const field of Object.keys(map)) {
-      const { type } = SchemaRegistryIndex.getFieldMap(inst.constructor)[field];
-      Object.defineProperty(inst, field, { get: ctx.getSource(type) });
+      const { type } = SchemaRegistryIndex.getFieldMap(cls)[field];
+      Object.defineProperty(instance, field, { get: ctx.getSource(type) });
     }
   }
 

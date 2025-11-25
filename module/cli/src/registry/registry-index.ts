@@ -1,5 +1,5 @@
-import { asConstructable, Class, ClassInstance, getClass, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { ClassOrId, RegistryAdapter, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { Class, getClass, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { RegistryAdapter, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
 import { CliUnknownCommandError } from '../error.ts';
@@ -14,8 +14,8 @@ export class CliCommandRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(this);
 
-  static getForRegister(instanceOrClass: Class | ClassInstance): RegistryAdapter<CliCommandConfig> {
-    return this.#instance.store.getForRegister(instanceOrClass);
+  static getForRegister(cls: Class): RegistryAdapter<CliCommandConfig> {
+    return this.#instance.store.getForRegister(cls);
   }
 
   static get(cls: Class): CliCommandConfig {

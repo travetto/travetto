@@ -1,4 +1,4 @@
-import { Class, ClassInstance, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { Class, ClassInstance, getClass, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
@@ -11,10 +11,11 @@ function isClass(target: unknown, property: unknown,): target is Class<unknown> 
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(instanceOrCls: ClassInstance | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
+    const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
     if (isClass(instanceOrCls, property)) {
-      ControllerRegistryIndex.getForRegister(instanceOrCls).register(config);
+      adapter.register(config);
     } else {
-      ControllerRegistryIndex.getForRegister(instanceOrCls).registerEndpoint(property!, config);
+      adapter.registerEndpoint(property!, config);
     }
   };
 }

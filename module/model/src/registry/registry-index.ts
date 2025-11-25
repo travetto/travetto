@@ -1,5 +1,5 @@
 import { ChangeEvent, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
-import { AppError, castTo, Class, ClassInstance } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
@@ -17,8 +17,8 @@ export class ModelRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(this);
 
-  static getForRegister(instanceOrClass: Class | ClassInstance): ModelRegistryAdapter {
-    return this.#instance.store.getForRegister(instanceOrClass);
+  static getForRegister(cls: Class): ModelRegistryAdapter {
+    return this.#instance.store.getForRegister(cls);
   }
 
   static getConfig(cls: Class): ModelConfig {

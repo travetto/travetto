@@ -1,5 +1,5 @@
 import { ChangeEvent, RegistrationMethods, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, ClassInstance, getParentClass, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfig } from './types.ts';
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
@@ -12,8 +12,8 @@ export class SchemaRegistryIndex {
 
   static #instance = RegistryV2.registerIndex(SchemaRegistryIndex);
 
-  static getForRegister(instanceOrClass: Class | ClassInstance, allowFinalized = false): SchemaRegistryAdapter {
-    return this.#instance.store.getForRegister(instanceOrClass, allowFinalized);
+  static getForRegister(cls: Class, allowFinalized = false): SchemaRegistryAdapter {
+    return this.#instance.store.getForRegister(cls, allowFinalized);
   }
 
   static getConfig(cls: Class): SchemaClassConfig {

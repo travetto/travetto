@@ -1,4 +1,4 @@
-import { AppError, castTo, Class, ClassInstance, getParentClass } from '@travetto/runtime';
+import { AppError, castTo, Class, getParentClass } from '@travetto/runtime';
 
 import { RegistrationMethods, RegistryAdapter } from './types';
 

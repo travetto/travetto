@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/runtime';
+import { Class, ClassInstance, getClass } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -32,7 +32,7 @@ export function Config(ns: string) {
  */
 export function EnvVar(name: string, ...others: string[]) {
   return (instance: ClassInstance, property: string): void => {
-    const env = SchemaRegistryIndex.getForRegister(instance.constructor)
+    const env = SchemaRegistryIndex.getForRegister(getClass(instance))
       .registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns: '', fields: {} });
     env.fields[property] = (): string | undefined =>
       process.env[[name, ...others].find(x => !!process.env[x])!];

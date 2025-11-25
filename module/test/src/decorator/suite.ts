@@ -1,4 +1,4 @@
-import { castTo, Class, ClassInstance, describeFunction } from '@travetto/runtime';
+import { castTo, Class, ClassInstance, describeFunction, getClass } from '@travetto/runtime';
 
 import { SuiteConfig } from '../model/suite.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
@@ -33,7 +33,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
  */
 export function BeforeAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(instance).register({ beforeAll: [descriptor.value] });
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ beforeAll: [descriptor.value] });
     return descriptor;
   };
 }
@@ -43,7 +43,7 @@ export function BeforeAll() {
  */
 export function BeforeEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(instance).register({ beforeEach: [descriptor.value] });
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ beforeEach: [descriptor.value] });
     return descriptor;
   };
 }
@@ -53,7 +53,7 @@ export function BeforeEach() {
  */
 export function AfterAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(instance).register({ afterAll: [descriptor.value] });
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ afterAll: [descriptor.value] });
     return descriptor;
   };
 }
@@ -63,7 +63,7 @@ export function AfterAll() {
  */
 export function AfterEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(instance).register({ afterEach: [descriptor.value] });
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ afterEach: [descriptor.value] });
     return descriptor;
   };
 }

@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/runtime';
+import { Class, ClassInstance, getClass } from '@travetto/runtime';
 
 import { SchemaCoreConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
@@ -14,10 +14,10 @@ function isClass(o: Class | ClassInstance, property?: string | symbol): o is Cla
  */
 export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
   return (instanceOrCls: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
+    const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
     if (isClass(instanceOrCls, property)) {
-      SchemaRegistryIndex.getForRegister(instanceOrCls).register(config);
+      adapter.register(config);
     } else {
-      const adapter = SchemaRegistryIndex.getForRegister(instanceOrCls);
       if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
         adapter.registerParameter(property!, descOrIdx, { ...config });
       } else {
