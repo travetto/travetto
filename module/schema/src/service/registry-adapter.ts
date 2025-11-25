@@ -91,7 +91,7 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
   if (base.classType === undefined) {
     switch (parent.classType) {
       case 'discriminated':
-      case 'subtype': base.classType = 'discriminated'; break;
+      case 'discriminated-base': base.classType = 'discriminated'; break;
       default: base.classType = 'standard'; break;
     }
   }

@@ -5,11 +5,6 @@ import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfi
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
-const classToSubTypeName = (cls: Class): string => cls.name
-  .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
-  .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
-  .toLowerCase();
-
 /**
  * Schema registry index for managing schema configurations across classes
  */
@@ -49,8 +44,8 @@ export class SchemaRegistryIndex {
     return this.#instance.store.has(clsOrId);
   }
 
-  static getSubTypesForClass(cls: Class): Class[] | undefined {
-    return this.#instance.getSubTypesForClass(cls);
+  static getDiscriminatedTypesForClass(cls: Class): Class[] | undefined {
+    return this.#instance.getDiscriminatedTypesForClass(cls);
   }
 
   static resolveInstanceType<T>(cls: Class<T>, o: T): Class {
@@ -84,7 +79,7 @@ export class SchemaRegistryIndex {
   store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
   #baseSchemasGrouped = new Map<Class, Class[]>();
-  #subTypes = new Map<Class, Map<string, Class>>();
+  #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
 
   /**
    * Register sub types for a class
@@ -94,27 +89,25 @@ export class SchemaRegistryIndex {
     const config = this.getClassConfig(cls);
     let base: Class | undefined = this.getBaseClass(cls);
 
-    if (!this.#subTypes.has(base)) {
-      this.#subTypes.set(base, new Map());
+    if (!this.#byDiscriminatedTypes.has(base)) {
+      this.#byDiscriminatedTypes.set(base, new Map());
     }
 
     if (!this.#baseSchemasGrouped.has(base)) {
       this.#baseSchemasGrouped.set(base, []);
     }
 
-    if (base !== cls || config.baseType) {
+    if (config.classType === 'discriminated-base') {
       const baseList = this.#baseSchemasGrouped.get(base)!;
       baseList.push(cls);
-      config.subTypeField = this.getClassConfig(base).subTypeField;
-      config.subTypeName = config.subTypeName ?? classToSubTypeName(cls);
-      this.#subTypes.get(base)!.set(config.subTypeName!, cls);
+      this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType!, cls);
     }
     if (base !== cls) {
       while (base && base.Ⲑid) {
-        if (!this.#subTypes.has(base)) {
-          this.#subTypes.set(base, new Map());
+        if (!this.#byDiscriminatedTypes.has(base)) {
+          this.#byDiscriminatedTypes.set(base, new Map());
         }
-        this.#subTypes.get(base)!.set(config.subTypeName!, cls);
+        this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType!, cls);
         const parent = getParentClass(base);
         base = parent ? this.getBaseClass(parent) : undefined;
       }
@@ -156,7 +149,7 @@ export class SchemaRegistryIndex {
     }
 
     // Rebuild indices after every "process" batch
-    this.#subTypes.clear();
+    this.#byDiscriminatedTypes.clear();
     this.#baseSchemasGrouped.clear();
     for (const el of this.store.getClasses()) {
       this.#registerSubTypes(el);
@@ -176,17 +169,15 @@ export class SchemaRegistryIndex {
    */
   getBaseClass(cls: Class): Class {
     if (!this.#baseSchema.has(cls)) {
-      let conf: SchemaClassConfig | undefined = this.getClassConfig(cls);
+      let conf = this.getClassConfig(cls);
       let parent: Class | undefined = cls;
-
-      while (parent && conf && conf.classType === 'subtype') {
+      while (parent && conf.classType === 'discriminated') {
         parent = getParentClass(parent);
         if (parent) {
-          conf = this.store.getOptional(parent)?.get();
+          conf = this.store.getOptional(parent)?.get() ?? conf;
         }
       }
-
-      this.#baseSchema.set(cls, conf ? conf.class : cls);
+      this.#baseSchema.set(cls, conf.class);
     }
     return this.#baseSchema.get(cls)!;
   }
@@ -204,11 +195,11 @@ export class SchemaRegistryIndex {
 
     if (discriminatedConfig) { // We have a sub type
       const type = castTo<string>(o[castKey<T>(discriminatedConfig.discriminatedField)]) ?? discriminatedConfig.discriminatedType;
-      const subType = this.#subTypes.get(base)!.get(type)!;
-      if (subType && !(classConstruct(subType) instanceof cls)) {
-        throw new AppError(`Resolved class ${subType.name} is not assignable to ${cls.name}`);
+      const discriminatedCls = this.#byDiscriminatedTypes.get(base)!.get(type)!;
+      if (discriminatedCls && !(classConstruct(discriminatedCls) instanceof cls)) {
+        throw new AppError(`Resolved class ${discriminatedCls.name} is not assignable to ${cls.name}`);
       }
-      return subType;
+      return discriminatedCls;
     } else {
       return cls;
     }
@@ -218,8 +209,8 @@ export class SchemaRegistryIndex {
    * Return all subtypes by discriminator for a given class
    * @param cls The base class to resolve from
    */
-  getSubTypesForClass(cls: Class): Class[] | undefined {
-    const res = this.#subTypes.get(cls)?.values();
+  getDiscriminatedTypesForClass(cls: Class): Class[] | undefined {
+    const res = this.#byDiscriminatedTypes.get(cls)?.values();
     return res ? [...res] : undefined;
   }
 

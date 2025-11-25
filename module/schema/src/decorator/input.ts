@@ -178,7 +178,7 @@ export function Specifier(...specifiers: string[]): PropType<unknown> { return i
 export function DiscriminatorField(): ((t: ClassInstance, k: string) => void) {
   return (instance: ClassInstance, property: string): void => {
     SchemaRegistryIndex.getForRegisterByInstance(instance).register({
-      classType: 'discriminated',
+      classType: 'discriminated-base',
       discriminatedField: property
     });
   };

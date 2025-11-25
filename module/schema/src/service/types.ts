@@ -111,7 +111,7 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
   /**
    * Type of class
    */
-  classType?: 'discriminated' | 'subtype' | 'standard';
+  classType?: 'discriminated-base' | 'discriminated' | 'standard';
   /**
    * Do we have a discriminator field
    */

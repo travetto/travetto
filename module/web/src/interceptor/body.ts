@@ -96,8 +96,8 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
       return next();
     }
 
-    const [baseType,] = contentType.value.split('/');
-    const parserType = config.parsingTypes[contentType.value] ?? config.parsingTypes[baseType];
+    const [baseMimeType,] = contentType.value.split('/');
+    const parserType = config.parsingTypes[contentType.value] ?? config.parsingTypes[baseMimeType];
     if (!parserType) {
       return next();
     }

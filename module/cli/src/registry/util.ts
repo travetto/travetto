@@ -15,7 +15,7 @@ export class CliCommandRegistryUtil {
   /**
    * Get the base type for a CLI command input
    */
-  static baseType(x: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
+  static baseInputType(x: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
     switch (x.type) {
       case Date: return { type: 'date' };
       case Boolean: return { type: 'boolean' };
@@ -39,7 +39,7 @@ export class CliCommandRegistryUtil {
    */
   static processInput(x: SchemaInputConfig): CliCommandInput {
     return {
-      ...CliCommandRegistryUtil.baseType(x),
+      ...CliCommandRegistryUtil.baseInputType(x),
       ...(('name' in x && typeof x.name === 'string') ? { name: x.name } : { name: '' }),
       description: x.description,
       array: x.array,

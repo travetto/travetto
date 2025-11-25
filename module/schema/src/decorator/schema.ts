@@ -10,12 +10,17 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  */
 type ValidStringField<T> = { [K in Extract<keyof T, string>]: T[K] extends string ? K : never }[Extract<keyof T, string>];
 
+const classToDiscriminatedType = (cls: Class): string => cls.name
+  .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
+  .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
+  .toLowerCase();
+
 /**
  * Register a class as a Schema
  *
  * @augments `@travetto/schema:Schema`
  */
-export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'classType' | 'methods'>>) {
+export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'validators' | 'methods'>>) {
   return <T, U extends Class<T>>(cls: U): void => {
     cls.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
@@ -49,9 +54,12 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
  * Register a class as a discriminated class, by a specific type
  * @param type
  */
-export function SubType<T>(type: string) {
+export function SubType<T>(type?: string) {
   return (cls: Class<Partial<T>>): void => {
-    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedType: type, classType: 'subtype' });
+    SchemaRegistryIndex.getForRegister(cls).register({
+      discriminatedType: type ?? classToDiscriminatedType(cls),
+      classType: 'discriminated'
+    });
   };
 }
 
@@ -61,6 +69,6 @@ export function SubType<T>(type: string) {
  */
 export function Discriminated<T>(field: ValidStringField<T>) {
   return (cls: Class<Partial<T>>): void => {
-    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedField: field, classType: 'discriminated' });
+    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedField: field, classType: 'discriminated-base' });
   };
 }
