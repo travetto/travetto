@@ -54,7 +54,7 @@ export class ElasticsearchSchemaUtil {
    * Build one or more mappings depending on the polymorphic state
    */
   static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    return SchemaRegistryIndex.getConfig(cls).classType === 'discriminated' ?
+    return SchemaRegistryIndex.getConfig(cls).classType === 'discriminated-base' ?
       this.generateAllMapping(cls, config) :
       this.generateSingleMapping(cls, config);
   }
@@ -63,7 +63,7 @@ export class ElasticsearchSchemaUtil {
    * Generate all mappings
    */
   static generateAllMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    const allTypes = SchemaRegistryIndex.getClassesByBaseType(cls);
+    const allTypes = SchemaRegistryIndex.getDiscriminatedClasses(cls);
     return allTypes.reduce<estypes.MappingTypeMapping>((acc, schemaCls) => {
       DataUtil.deepAssign(acc, this.generateSingleMapping(schemaCls, config));
       return acc;

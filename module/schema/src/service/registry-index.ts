@@ -48,8 +48,8 @@ export class SchemaRegistryIndex {
     return this.#instance.visitFields(cls, onField);
   }
 
-  static getClassesByBaseType(cls: Class): Class[] {
-    return this.#instance.getClassesByBaseType(cls);
+  static getDiscriminatedClasses(cls: Class): Class[] {
+    return this.#instance.getDiscriminatedClasses(cls);
   }
 
   static getBaseClass(cls: Class): Class {
@@ -70,7 +70,6 @@ export class SchemaRegistryIndex {
 
   store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
-  #baseSchemasGrouped = new Map<Class, Class[]>();
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
 
   /**
@@ -84,11 +83,6 @@ export class SchemaRegistryIndex {
     }
 
     let base: Class | undefined = this.getBaseClass(cls);
-
-    if (!this.#baseSchemasGrouped.has(base)) {
-      this.#baseSchemasGrouped.set(base, []);
-    }
-    this.#baseSchemasGrouped.get(base)!.push(cls);
 
     while (base && base.Ⲑid) {
       if (!this.#byDiscriminatedTypes.has(base)) {
@@ -136,7 +130,6 @@ export class SchemaRegistryIndex {
 
     // Rebuild indices after every "process" batch
     this.#byDiscriminatedTypes.clear();
-    this.#baseSchemasGrouped.clear();
     for (const el of this.store.getClasses()) {
       this.#registerDiscriminatedTypes(el);
     }
@@ -245,7 +238,7 @@ export class SchemaRegistryIndex {
   /**
    * Find all classes by their base types
    */
-  getClassesByBaseType(cls: Class): Class[] {
-    return this.#baseSchemasGrouped.get(cls) ?? [];
+  getDiscriminatedClasses(cls: Class): Class[] {
+    return [...this.#byDiscriminatedTypes.get(cls)?.values() ?? []];
   }
 }
