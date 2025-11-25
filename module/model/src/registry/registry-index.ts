@@ -59,14 +59,14 @@ export class ModelRegistryIndex {
   store = new RegistryIndexStore(ModelRegistryAdapter);
 
   #addClass(cls: Class): void {
-    const config = this.getConfig(cls);
+    const schema = SchemaRegistryIndex.getConfig(cls);
 
-    // Don't index on subclasses
-    if (cls !== SchemaRegistryIndex.getBaseClass(cls)) {
+    // Don't index on discriminated schemas
+    if (schema.classType === 'discriminated') {
       return;
     }
 
-    const { store } = config;
+    const { store } = this.getConfig(cls);
     let classes = this.#modelNameMapping.get(store);
     if (!classes) {
       this.#modelNameMapping.set(store, classes = new Set());
