@@ -75,7 +75,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = SchemaRegistryIndex.getPolymorphicConfig(cls);
+    const config = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     if (config) { // Sub-typing, assign type
       SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
     }
@@ -106,8 +106,7 @@ export class ModelCrudUtil {
    */
   static ensureNotSubType(cls: Class): void {
     const config = SchemaRegistryIndex.getConfig(cls);
-    const parent = SchemaRegistryIndex.getBaseClass(cls);
-    if (parent !== cls && config.subTypeField) {
+    if (config.classType === 'subtype') {
       throw new SubTypeNotSupportedError(cls);
     }
   }

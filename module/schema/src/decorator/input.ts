@@ -172,11 +172,14 @@ export function Currency(): PropType<number> { return Precision(13, 2); }
 export function Specifier(...specifiers: string[]): PropType<unknown> { return input({ specifiers }); }
 
 /**
- * Sets the subtype field via a property decorator
+ * Sets the discriminator field via a property decorator
  * @augments `@travetto/schema:Input`
  */
-export function SubTypeField(): ((t: ClassInstance, k: string) => void) {
+export function DiscriminatorField(): ((t: ClassInstance, k: string) => void) {
   return (instance: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegisterByInstance(instance).register({ subTypeField: property });
+    SchemaRegistryIndex.getForRegisterByInstance(instance).register({
+      classType: 'discriminated',
+      discriminatedField: property
+    });
   };
 }

@@ -72,8 +72,7 @@ export class SQLModelUtil {
     const fields = Object.values(conf.fields).map(field => ({ ...field }));
 
     // Polymorphic
-    const subTypeConfig = SchemaRegistryIndex.getPolymorphicConfig(conf.class);
-    if (hasModel && subTypeConfig) {
+    if (hasModel && conf.classType === 'discriminated') {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of SchemaRegistryIndex.getClassesByBaseType(conf.class)) {
         const typeConf = SchemaRegistryIndex.getConfig(type);

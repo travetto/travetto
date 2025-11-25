@@ -109,17 +109,17 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
    */
   validators: ValidatorFn<Any, unknown>[];
   /**
-   * Is the class a base type
+   * Type of class
    */
-  baseType?: boolean;
+  classType?: 'discriminated' | 'subtype' | 'standard';
   /**
-   * Sub type name
+   * Do we have a discriminator field
    */
-  subTypeName?: string;
+  discriminatedField?: string;
   /**
-   * The field the subtype is determined by
+   * Discriminated type name
    */
-  subTypeField: string;
+  discriminatedType?: string;
   /**
    * Method configs
    */

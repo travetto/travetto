@@ -54,7 +54,7 @@ export class ElasticsearchSchemaUtil {
    * Build one or more mappings depending on the polymorphic state
    */
   static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    return SchemaRegistryIndex.getConfig(cls).baseType ?
+    return SchemaRegistryIndex.getConfig(cls).classType === 'discriminated' ?
       this.generateAllMapping(cls, config) :
       this.generateSingleMapping(cls, config);
   }

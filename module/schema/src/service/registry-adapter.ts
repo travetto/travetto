@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, describeFunction, safeAssign } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, safeAssign } from '@travetto/runtime';
 
 import {
   SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig,
@@ -85,8 +85,16 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     title: base.title || parent.title,
     description: base.description || parent.description,
     examples: [...(parent.examples ?? []), ...(base.examples ?? [])],
-    subTypeField: base.subTypeField ?? parent.subTypeField,
+    discriminatedField: base.discriminatedField ?? parent.discriminatedField,
   });
+  // Combine with parent
+  if (base.classType === undefined) {
+    switch (parent.classType) {
+      case 'discriminated':
+      case 'subtype': base.classType = 'discriminated'; break;
+      default: base.classType = 'standard'; break;
+    }
+  }
   return base;
 }
 
@@ -99,8 +107,6 @@ function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T
       interfaces: [...base.interfaces, ...(config.interfaces ?? [])],
       methods: { ...base.methods, ...config.methods },
       fields: { ...base.fields, ...config.fields },
-      baseType: config.baseType ?? base.baseType,
-      subTypeField: config.subTypeField ?? base.subTypeField,
     });
     combineCore(base, config);
   }
@@ -126,8 +132,6 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       validators: [],
       interfaces: [],
       fields: {},
-      subTypeField: 'type',
-      baseType: !!describeFunction(this.#cls)?.abstract,
     };
     return combineClasses(cfg, data);
   }
@@ -206,15 +210,15 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       combineClassWithParent(config, parent);
     }
 
-    const polymorphicConfig = this.getPolymorphicConfig();
+    const polymorphicConfig = this.getDiscriminatedConfig();
     if (polymorphicConfig) {
-      const { subTypeField, subTypeName } = polymorphicConfig;
-      const field = config.fields[subTypeField];
-      config.fields[subTypeField] = {
+      const { discriminatedField, discriminatedType } = polymorphicConfig;
+      const field = config.fields[discriminatedField];
+      config.fields[discriminatedField] = {
         ...field,
         enum: {
-          values: [subTypeName],
-          message: `${subTypeField} can only be '${subTypeName}'`,
+          values: [discriminatedType],
+          message: `${discriminatedField} can only be '${discriminatedType}'`,
         },
         required: {
           active: false
@@ -293,18 +297,18 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
    * Ensure type is set properly
    */
   ensureInstanceTypeField<T>(o: T): T {
-    const config = this.#config;
-    const typeField = castKey<T>(config.subTypeField);
-    if (config.subTypeName && !!config.fields[typeField] && !o[typeField]) {  // Do we have a type field defined
-      o[typeField] = castTo(config.subTypeName); // Assign if missing
+    const config = this.getDiscriminatedConfig();
+    if (config) {
+      const typeField = castKey<T>(config.discriminatedField);
+      o[typeField] ??= castTo(config.discriminatedType); // Assign if missing
     }
     return o;
   }
 
-  getPolymorphicConfig(): { subTypeName: string, subTypeField: string } | undefined {
-    const { subTypeField, subTypeName } = this.#config;
-    if (subTypeName && subTypeField && subTypeField in this.#config.fields) {
-      return { subTypeName, subTypeField };
+  getDiscriminatedConfig(): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField'>> | undefined {
+    const { classType, discriminatedField, discriminatedType } = this.#config;
+    if (classType === 'discriminated' && discriminatedType && discriminatedField && discriminatedField in this.#config.fields) {
+      return { discriminatedType, discriminatedField };
     }
     return undefined;
   }

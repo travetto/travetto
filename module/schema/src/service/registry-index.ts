@@ -29,8 +29,8 @@ export class SchemaRegistryIndex {
     return this.#instance.store.get(clsOrId).get();
   }
 
-  static getPolymorphicConfig<T>(cls: Class<T>): { subTypeName: string, subTypeField: string } | undefined {
-    return this.#instance.store.get(cls).getPolymorphicConfig();
+  static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField'>> | undefined {
+    return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
   static getConfigByInstance(instance: ClassInstance): SchemaClassConfig {
@@ -179,7 +179,7 @@ export class SchemaRegistryIndex {
       let conf: SchemaClassConfig | undefined = this.getClassConfig(cls);
       let parent: Class | undefined = cls;
 
-      while (parent && conf && !conf.baseType) {
+      while (parent && conf && conf.classType === 'subtype') {
         parent = getParentClass(parent);
         if (parent) {
           conf = this.store.getOptional(parent)?.get();
@@ -200,11 +200,10 @@ export class SchemaRegistryIndex {
     cls = this.getClassConfig(cls.Ⲑid).class; // Resolve by id to handle any stale references
 
     const base = this.getBaseClass(cls);
-    const clsSchema = this.getClassConfig(cls);
-    const baseSchema = this.getClassConfig(base);
+    const discriminatedConfig = this.store.get(cls).getDiscriminatedConfig();
 
-    if (clsSchema.subTypeName || baseSchema.baseType) { // We have a sub type
-      const type = castTo<string>(o[castKey<T>(baseSchema.subTypeField)]) ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
+    if (discriminatedConfig) { // We have a sub type
+      const type = castTo<string>(o[castKey<T>(discriminatedConfig.discriminatedField)]) ?? discriminatedConfig.discriminatedType;
       const subType = this.#subTypes.get(base)!.get(type)!;
       if (subType && !(classConstruct(subType) instanceof cls)) {
         throw new AppError(`Resolved class ${subType.name} is not assignable to ${cls.name}`);
