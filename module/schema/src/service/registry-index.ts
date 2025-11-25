@@ -179,8 +179,9 @@ export class SchemaRegistryIndex {
    * @param cls Class for instance
    * @param o Actual instance
    */
-  resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    const adapter = this.store.get(cls); // Resolve by id to handle any stale references
+  resolveInstanceType<T>(requestedCls: Class<T>, o: T): Class {
+    const cls = this.store.getClassById(requestedCls); // Resolve by id to handle any stale references
+    const adapter = this.store.get(cls);
     const base = this.getBaseClass(cls);
     const discriminatedConfig = adapter.getDiscriminatedConfig();
 
