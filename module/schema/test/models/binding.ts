@@ -1,4 +1,4 @@
-import { Schema, View, Field, Float, Integer, Alias, Url, Required } from '@travetto/schema';
+import { Schema, View, Field, Float, Integer, Alias, Url, Required, Discriminated } from '@travetto/schema';
 
 import { Address } from './address.ts';
 
@@ -59,6 +59,7 @@ export class Response {
 }
 
 @Schema()
+@Discriminated('type')
 export abstract class BasePoly {
   type?: string;
 }

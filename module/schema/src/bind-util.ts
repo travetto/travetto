@@ -144,19 +144,21 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = SchemaRegistryIndex.resolveInstanceType<T>(cons, asFull<T>(data));
-    if (data instanceof cls) {
+    if (data instanceof cons) {
       return castTo(data);
     } else {
-      const tgt = classConstruct<T & { type?: string }>(cls);
-      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(tgt);
+      const cls = SchemaRegistryIndex.resolveInstanceType<T>(cons, asFull<T>(data));
+      const instance = classConstruct<T & { type?: string }>(cls);
 
-      for (const k of TypedObject.keys(tgt)) { // Do not retain undefined fields
-        if (tgt[k] === undefined) {
-          delete tgt[k];
+      for (const k of TypedObject.keys(instance)) { // Do not retain undefined fields
+        if (instance[k] === undefined) {
+          delete instance[k];
         }
       }
-      return this.bindSchemaToObject(cls, tgt, data, cfg);
+
+      const out = this.bindSchemaToObject(cls, instance, data, cfg);
+      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(out);
+      return out;
     }
   }
 
