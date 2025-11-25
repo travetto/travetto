@@ -61,6 +61,10 @@ export interface SchemaCoreConfig {
  */
 export interface SchemaMethodConfig extends SchemaCoreConfig {
   /**
+   * Is the method static
+   */
+  isStatic?: boolean;
+  /**
    * The parameters of the method
    */
   parameters: SchemaParameterConfig[];
@@ -72,10 +76,6 @@ export interface SchemaMethodConfig extends SchemaCoreConfig {
    * The return type configuration
    */
   returnType?: SchemaBasicType;
-  /**
-   * The method handle
-   */
-  handle: TypedFunction<Any, unknown>;
 }
 
 /**
