@@ -62,8 +62,8 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
    * Get instance of the command
    */
   getInstance(): CliCommandShape {
-    const inst: CliCommandShape = classConstruct(this.#cls);
-    inst._cfg = this.#config;
-    return inst;
+    const instance: CliCommandShape = classConstruct(this.#cls);
+    instance._cfg = this.#config;
+    return instance;
   }
 }

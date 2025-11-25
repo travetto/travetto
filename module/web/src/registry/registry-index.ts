@@ -75,7 +75,7 @@ export class ControllerRegistryIndex {
   bindContextParamsOnPostConstruct(cls: Class): void {
     DependencyRegistryIndex.registerClassMetadata(cls, {
       postConstruct: {
-        ContextParam: (inst: ClassInstance) => this.#bindContextParams(inst)
+        ContextParam: (instance: ClassInstance) => this.#bindContextParams(instance)
       }
     });
   }

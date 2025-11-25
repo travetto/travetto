@@ -137,7 +137,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
  * Decorator to register a CLI command flag
  */
 export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fileExtensions?: string[], envVars?: string[] }) {
-  return function (target: ClassInstance, prop: string | symbol): void {
+  return function (target: ClassInstance, property: string | symbol): void {
     const aliases: string[] = [];
     if (cfg.name) {
       aliases.push(cfg.name.startsWith('-') ? cfg.name : `--${cfg.name}`);
@@ -148,12 +148,10 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fil
     if (cfg.envVars) {
       aliases.push(...cfg.envVars.map(CliParseUtil.toEnvField));
     }
-    if (typeof prop === 'string') {
-      SchemaRegistryIndex.getForRegister(target.constructor).registerField(prop, {
-        aliases,
-        description: cfg.desc,
-        specifiers: cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : undefined
-      });
-    }
+    SchemaRegistryIndex.getForRegister(target.constructor).registerField(property, {
+      aliases,
+      description: cfg.desc,
+      specifiers: cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : undefined
+    });
   };
 }

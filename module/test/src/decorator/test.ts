@@ -7,7 +7,7 @@ import { SuiteRegistryIndex } from '../registry/registry-index.ts';
  * The `@AssertCheck` indicates that a function's assert calls should be transformed
  */
 export function AssertCheck(): MethodDecorator {
-  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => descriptor;
+  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => descriptor;
 }
 
 /**
@@ -21,8 +21,8 @@ export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description?: string | Partial<TestConfig>, ...rest: Partial<TestConfig>[]): MethodDecorator {
-  return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(prop, descriptor.value,
+  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => {
+    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value,
       ...(typeof description !== 'string' && description) ? [description] : [],
       ...rest,
       ...(typeof description === 'string') ? [{ description }] : []
@@ -36,8 +36,8 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
  * @param state The parameters to use for checking if the response is valid
  */
 export function ShouldThrow(state: ThrowableError): MethodDecorator {
-  return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(prop, descriptor.value, { shouldThrow: state });
+  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => {
+    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value, { shouldThrow: state });
     return descriptor;
   };
 }
@@ -47,8 +47,8 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
  * @param ms Max time to wait
  */
 export function Timeout(ms: number): MethodDecorator {
-  return (instance: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(prop, descriptor.value, { timeout: ms });
+  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => {
+    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value, { timeout: ms });
     return descriptor;
   };
 }
