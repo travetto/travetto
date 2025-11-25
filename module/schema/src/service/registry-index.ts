@@ -74,35 +74,29 @@ export class SchemaRegistryIndex {
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
 
   /**
-   * Register sub types for a class
+   * Register discriminated types for a class
    */
-  #registerSubTypes(cls: Class): void {
+  #registerDiscriminatedTypes(cls: Class): void {
     // Mark as subtype
     const config = this.getClassConfig(cls);
-    let base: Class | undefined = this.getBaseClass(cls);
-
-    if (!this.#byDiscriminatedTypes.has(base)) {
-      this.#byDiscriminatedTypes.set(base, new Map());
+    if (config.classType !== 'discriminated') {
+      return;
     }
+
+    let base: Class | undefined = this.getBaseClass(cls);
 
     if (!this.#baseSchemasGrouped.has(base)) {
       this.#baseSchemasGrouped.set(base, []);
     }
+    this.#baseSchemasGrouped.get(base)!.push(cls);
 
-    if (config.classType === 'discriminated-base') {
-      const baseList = this.#baseSchemasGrouped.get(base)!;
-      baseList.push(cls);
-      this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType!, cls);
-    }
-    if (base !== cls) {
-      while (base && base.Ⲑid) {
-        if (!this.#byDiscriminatedTypes.has(base)) {
-          this.#byDiscriminatedTypes.set(base, new Map());
-        }
-        this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType!, cls);
-        const parent = getParentClass(base);
-        base = parent ? this.getBaseClass(parent) : undefined;
+    while (base && base.Ⲑid) {
+      if (!this.#byDiscriminatedTypes.has(base)) {
+        this.#byDiscriminatedTypes.set(base, new Map());
       }
+      this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType!, cls);
+      const parent = getParentClass(base);
+      base = parent ? this.getBaseClass(parent) : undefined;
     }
   }
 
@@ -144,7 +138,7 @@ export class SchemaRegistryIndex {
     this.#byDiscriminatedTypes.clear();
     this.#baseSchemasGrouped.clear();
     for (const el of this.store.getClasses()) {
-      this.#registerSubTypes(el);
+      this.#registerDiscriminatedTypes(el);
     }
   }
 
@@ -174,6 +168,17 @@ export class SchemaRegistryIndex {
     return this.#baseSchema.get(cls)!;
   }
 
+  #resolveDiscriminatedType(cls: Class, type: string): Class {
+    const map = this.#byDiscriminatedTypes.get(cls);
+    if (!map) {
+      throw new AppError(`Unable to resolve discriminated type map for class ${cls.name}`);
+    }
+    if (!map.has(type)) {
+      throw new AppError(`Unable to resolve discriminated type '${type}' for class ${cls.name}`);
+    }
+    return map.get(type)!;
+  }
+
   /**
    * Find the resolved type for a given instance
    * @param cls Class for instance
@@ -182,18 +187,14 @@ export class SchemaRegistryIndex {
   resolveInstanceType<T>(requestedCls: Class<T>, o: T): Class {
     const cls = this.store.getClassById(requestedCls); // Resolve by id to handle any stale references
     const adapter = this.store.get(cls);
-    const base = this.getBaseClass(cls);
-    const discriminatedConfig = adapter.getDiscriminatedConfig();
-
-    if (discriminatedConfig) { // We have a sub type
-      const type = castTo<string>(o[castKey<T>(discriminatedConfig.discriminatedField)]) ?? discriminatedConfig.discriminatedType;
-      const discriminatedCls = this.#byDiscriminatedTypes.get(base)!.get(type)!;
-      if (discriminatedCls && !(classConstruct(discriminatedCls) instanceof cls)) {
-        throw new AppError(`Resolved class ${discriminatedCls.name} is not assignable to ${cls.name}`);
-      }
-      return discriminatedCls;
-    } else {
+    const { classType, discriminatedField, discriminatedType } = adapter.get();
+    if (classType !== 'discriminated' && classType !== 'discriminated-base') {
       return cls;
+    } else {
+      return this.#resolveDiscriminatedType(
+        this.getBaseClass(cls),
+        castTo<string>(o[castKey<T>(discriminatedField!)]) ?? discriminatedType
+      );
     }
   }
 
