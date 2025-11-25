@@ -2,9 +2,10 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { RegistryV2 } from '@travetto/registry';
-import { Schema } from '@travetto/schema';
+import { Discriminated, DiscriminatorField, Schema } from '@travetto/schema';
 
-@Schema({ subTypeField: 'flavor' })
+@Schema()
+@Discriminated('flavor')
 abstract class CustomBase {
   flavor: string;
   beans: number;

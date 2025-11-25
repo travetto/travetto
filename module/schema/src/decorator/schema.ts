@@ -10,11 +10,6 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  */
 type ValidStringField<T> = { [K in Extract<keyof T, string>]: T[K] extends string ? K : never }[Extract<keyof T, string>];
 
-const classToDiscriminatedType = (cls: Class): string => cls.name
-  .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
-  .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
-  .toLowerCase();
-
 /**
  * Register a class as a Schema
  *
@@ -56,10 +51,7 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
  */
 export function SubType<T>(type?: string) {
   return (cls: Class<Partial<T>>): void => {
-    SchemaRegistryIndex.getForRegister(cls).register({
-      discriminatedType: type ?? classToDiscriminatedType(cls),
-      classType: 'discriminated'
-    });
+    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedType: type, classType: 'discriminated' });
   };
 }
 

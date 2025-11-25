@@ -1,5 +1,5 @@
 import { ChangeEvent, RegistrationMethods, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, getParentClass, Util } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfig } from './types.ts';
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
@@ -78,19 +78,16 @@ export class SchemaRegistryIndex {
   #registerDiscriminatedTypes(cls: Class): void {
     // Mark as subtype
     const config = this.getClassConfig(cls);
-    if (config.classType !== 'discriminated') {
+    if (config.classType === 'standard' || !config.discriminatedType) {
       return;
     }
 
-    let base: Class | undefined = this.getBaseClass(cls);
-
-    while (base && base.Ⲑid) {
+    if (config.discriminatedType) {
+      let base = this.getBaseClass(cls);
       if (!this.#byDiscriminatedTypes.has(base)) {
         this.#byDiscriminatedTypes.set(base, new Map());
       }
-      this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType!, cls);
-      const parent = getParentClass(base);
-      base = parent ? this.getBaseClass(parent) : undefined;
+      this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType, cls);
     }
   }
 
@@ -161,17 +158,6 @@ export class SchemaRegistryIndex {
     return this.#baseSchema.get(cls)!;
   }
 
-  #resolveDiscriminatedType(cls: Class, type: string): Class {
-    const map = this.#byDiscriminatedTypes.get(cls);
-    if (!map) {
-      throw new AppError(`Unable to resolve discriminated type map for class ${cls.name}`);
-    }
-    if (!map.has(type)) {
-      throw new AppError(`Unable to resolve discriminated type '${type}' for class ${cls.name}`);
-    }
-    return map.get(type)!;
-  }
-
   /**
    * Find the resolved type for a given instance
    * @param cls Class for instance
@@ -184,10 +170,15 @@ export class SchemaRegistryIndex {
     if (classType !== 'discriminated' && classType !== 'discriminated-base') {
       return cls;
     } else {
-      return this.#resolveDiscriminatedType(
-        this.getBaseClass(cls),
-        castTo<string>(o[castKey<T>(discriminatedField!)]) ?? discriminatedType
-      );
+      const map = this.#byDiscriminatedTypes.get(cls);
+      const type = castTo<string>(o[castKey<T>(discriminatedField!)]) ?? discriminatedType;
+      if (!map) {
+        throw new AppError(`Unable to resolve discriminated type map for class ${cls.name}`);
+      }
+      if (!map.has(type)) {
+        throw new AppError(`Unable to resolve discriminated type '${type}' for class ${cls.name}`);
+      }
+      return map.get(type)!;
     }
   }
 

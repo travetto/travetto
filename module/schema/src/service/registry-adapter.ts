@@ -1,10 +1,16 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, safeAssign } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, describeFunction, safeAssign } from '@travetto/runtime';
 
 import {
   SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig,
   SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig
 } from './types';
+
+const classToDiscriminatedType = (cls: Class): string => cls.name
+  .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
+  .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
+  .toLowerCase();
+
 
 function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {
   const md = base.metadata ??= {};
@@ -74,7 +80,6 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
 
 function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T): T {
   safeAssign(base, {
-    ...base,
     ...base.views ? { views: { ...parent.views, ...base.views } } : {},
     ...base.validators ? { validators: [...parent.validators, ...base.validators] } : {},
     ...base.metadata ? { metadata: { ...parent.metadata, ...base.metadata } } : {},
@@ -210,18 +215,22 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       combineClassWithParent(config, parent);
     }
 
-    if (config.discriminatedField) {
-      Object.assign(config.fields[config.discriminatedField], {
-        required: {
-          active: false
-        },
-        ...config.discriminatedType ? {
-          enum: {
-            values: [config.discriminatedType],
-            message: `${config.discriminatedField} can only be '${config.discriminatedType}'`,
+    if (config.discriminatedField && !describeFunction(this.#cls).abstract) {
+      config.discriminatedType ??= classToDiscriminatedType(this.#cls);
+      config.fields[config.discriminatedField] = Object.assign(
+        {},
+        config.fields[config.discriminatedField], // Make a full copy
+        {
+          required: {
+            active: false
           },
-        } : {}
-      });
+          ...config.discriminatedType ? {
+            enum: {
+              values: [config.discriminatedType],
+              message: `${config.discriminatedField} can only be '${config.discriminatedType}'`,
+            },
+          } : {}
+        });
     }
 
     // Compute views on install

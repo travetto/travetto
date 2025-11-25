@@ -1,7 +1,8 @@
 import { TimeUnit } from '@travetto/runtime';
 import {
   Schema, Float, MinLength, Match, Max, Min,
-  CommonRegExp, View, Url, Required, Validator
+  CommonRegExp, View, Url, Required, Validator,
+  Discriminated
 } from '@travetto/schema';
 
 @Schema()
@@ -37,7 +38,8 @@ export class DateTestSchema {
   date: Date;
 }
 
-@Schema({ d: true })
+@Schema()
+@Discriminated('type')
 export class Aaaaz {
   type?: string;
   a: boolean;
