@@ -10,8 +10,12 @@ import { MethodValidatorFn } from '../validate/types';
  * @augments `@travetto/schema:Method`
  */
 export function Method(...config: Partial<SchemaMethodConfig>[]) {
-  return (instance: ClassInstance, property: string | symbol): void => {
-    SchemaRegistryIndex.getForRegisterByInstance(instance).registerMethod(property, ...config);
+  return (instanceOrCls: ClassInstance, property: string | symbol): void => {
+    const adapter = ('Ⲑid' in instanceOrCls) ?
+      SchemaRegistryIndex.getForRegister(instanceOrCls) :
+      SchemaRegistryIndex.getForRegisterByInstance(instanceOrCls);
+
+    adapter.registerMethod(property, ...config);
   };
 }
 
@@ -21,7 +25,5 @@ export function Method(...config: Partial<SchemaMethodConfig>[]) {
  * @param fn The validator function
  */
 export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
-  return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<T>): void => {
-    SchemaRegistryIndex.getForRegisterByInstance(instance).registerMethod(property, { validators: [castTo(fn)] });
-  };
+  return Method({ validators: [castTo(fn)] });
 }
