@@ -111,7 +111,7 @@ function getEndpoint(path: string, method: HttpMethod) {
 function getEndpointResponse(path: string, method: HttpMethod) {
   const ep = getEndpoint(path, method);
   const resp = SchemaRegistryIndex.getMethodConfig(SchemaAPI, ep.name);
-  return resp?.returnType;
+  return resp?.returnType?.type;
 }
 
 @Suite()
@@ -245,7 +245,7 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyList() {
     const responseType = getEndpointResponse('/users', 'GET');
-    assert(responseType?.type === User);
+    assert(responseType === User);
   }
 
   @Test()
@@ -258,24 +258,24 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyShapeClass() {
     const responseType = getEndpointResponse('/classShape/:shape', 'GET');
     assert(responseType);
-    assert(SchemaRegistryIndex.has(responseType!.type));
+    assert(SchemaRegistryIndex.has(responseType));
   }
 
   @Test()
   async verifyRenderable() {
     const responseType = getEndpointResponse('/renderable/:age', 'GET');
-    assert(responseType?.type === undefined);
+    assert(responseType === undefined);
   }
 
   @Test()
   async verifyCustomSerializeable() {
     const responseType = getEndpointResponse('/customSerialize', 'GET');
-    assert(responseType?.type === User);
+    assert(responseType === User);
   }
 
   @Test()
   async verifyCustomSerializeable2() {
     const responseType = getEndpointResponse('/customSerialize2', 'GET');
-    assert(responseType?.type === User);
+    assert(responseType === User);
   }
 }

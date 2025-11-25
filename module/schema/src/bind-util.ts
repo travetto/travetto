@@ -267,7 +267,7 @@ export class BindUtil {
     if ((val === undefined || val === null) && applyDefaults) {
       val = Array.isArray(cfg.default) ? cfg.default.slice(0) : cfg.default;
     }
-    if (!cfg.required && (val === undefined || val === null)) {
+    if (cfg.required?.active === false && (val === undefined || val === null)) {
       return val;
     }
     const complex = SchemaRegistryIndex.has(cfg.type);
