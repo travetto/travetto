@@ -70,6 +70,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       owner: this.#cls,
       description: 'display help for command',
       required: { active: false },
+      access: 'readonly',
       aliases: ['-h', '--help']
     };
   }

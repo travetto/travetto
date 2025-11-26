@@ -183,7 +183,7 @@ export class CliParseUtil {
           out.push({ type: 'unknown', input });
         } else {
           const next = inputs[i + 1];
-          const base = { type: 'flag', fieldName: field?.name.toString() ?? input, input, array: field?.array } as const;
+          const base = { type: 'flag', fieldName: field.name.toString(), input, array: field.array } as const;
           if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
             if (isBoolFlag(field)) {
               out.push({ ...base, value: !input.startsWith('--no-') });
