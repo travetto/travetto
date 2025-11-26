@@ -23,6 +23,7 @@ function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointD
 /**
  * Set response headers on success
  * @param headers The response headers to set
+ * @kind decorator
  */
 export function SetHeaders(headers: EndpointConfig['responseHeaders']): EndpointDecorator {
   return register({ responseHeaders: headers });
@@ -30,6 +31,7 @@ export function SetHeaders(headers: EndpointConfig['responseHeaders']): Endpoint
 
 /**
  * Specifies content type for response
+ * @kind decorator
  */
 export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'Content-Type': mime }); }
 
@@ -38,6 +40,7 @@ type CacheControlInput = { cacheableAge?: number | TimeSpan, isPrivate?: boolean
 /**
  * Set the max-age of a response based on the config
  * @param value The value for the duration
+ * @kind decorator
  */
 export function CacheControl(input: TimeSpan | number | CacheControlInput, extra?: Omit<CacheControlInput, 'cacheableAge'>): EndpointDecorator {
   if (typeof input === 'string' || typeof input === 'number') {
@@ -55,6 +58,7 @@ export function CacheControl(input: TimeSpan | number | CacheControlInput, extra
 /**
  * Define an endpoint to support specific input types
  * @param types The list of mime types to allow/deny
+ * @kind decorator
  */
 export function Accepts(types: [string, ...string[]]): EndpointDecorator {
   return ControllerRegistryIndex.createInterceptorConfigDecorator(
@@ -66,6 +70,7 @@ export function Accepts(types: [string, ...string[]]): EndpointDecorator {
 
 /**
  * Allows for configuring interceptor-level support at an endpoint or controller level
+ * @kind decorator
  */
 export const ConfigureInterceptor = <T extends WebInterceptor>(
   cls: Class<T>,
@@ -76,6 +81,7 @@ export const ConfigureInterceptor = <T extends WebInterceptor>(
 
 /**
  * Specifies if endpoint should be conditional
+ * @kind decorator
  */
 export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator {
   return register({ conditional: handler });
@@ -83,6 +89,7 @@ export function ConditionalRegister(handler: () => (boolean | Promise<boolean>))
 
 /**
  * Registers an interceptor exclusion filter
+ * @kind decorator
  */
 export function ExcludeInterceptors(interceptorExclude: (val: WebInterceptor) => boolean): EndpointDecorator {
   return register({ interceptorExclude });

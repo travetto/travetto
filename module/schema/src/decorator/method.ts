@@ -8,6 +8,7 @@ import { MethodValidatorFn } from '../validate/types';
  * Registering a method
  * @param config The method configuration
  * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function Method(...config: Partial<SchemaMethodConfig>[]) {
   return (instanceOrCls: ClassInstance, property: string | symbol): void => {
@@ -20,6 +21,7 @@ export function Method(...config: Partial<SchemaMethodConfig>[]) {
  *
  * @param fn The validator function
  * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>): MethodDecorator {
   return Method({ validators: [castTo(fn)] });

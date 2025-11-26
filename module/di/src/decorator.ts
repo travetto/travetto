@@ -10,6 +10,7 @@ const fromArg = <T extends { qualifier?: symbol }>(arg?: T | symbol): T =>
 /**
  * Indicate that a class is able to be injected
  * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function Injectable(config?: Partial<InjectableCandidate> | symbol) {
   return <T extends Class>(cls: T): void => {
@@ -23,6 +24,7 @@ export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
  * Indicate that a field or parameter is able to be injected
  * @augments `@travetto/di:Inject`
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Inject(config?: InjectConfig | symbol) {
   return (instanceOrCls: Class | ClassInstance, property?: string | symbol, idx?: number | PropertyDescriptor): void => {
@@ -40,6 +42,7 @@ export function Inject(config?: InjectConfig | symbol) {
 /**
  * Identifies a static method that is able to produce a dependency
  * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function InjectableFactory(config?: Partial<InjectableCandidate> | symbol) {
   return <T extends Class>(cls: T, property: string | symbol, descriptor: TypedPropertyDescriptor<(...args: Any[]) => Any>): void => {

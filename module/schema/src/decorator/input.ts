@@ -23,6 +23,7 @@ function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
  * @param type The type for the input
  * @param config The input configuration
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...config: Partial<SchemaInputConfig>[]): PropType<unknown> {
   return input({ type: type.type, array: type.array ?? false }, ...config);
@@ -32,6 +33,7 @@ export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...config
  * Alias for the input
  * @param aliases List of all aliases for a field
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Alias(...aliases: string[]): PropType<unknown> { return input({ aliases }); }
 
@@ -40,6 +42,7 @@ export function Alias(...aliases: string[]): PropType<unknown> { return input({ 
  * @param active This determines if this field is required or not.
  * @param message The error message when a the constraint fails.
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Required(active = true, message?: string): PropType<unknown> { return input({ required: { active, message } }); }
 
@@ -48,6 +51,7 @@ export function Required(active = true, message?: string): PropType<unknown> { r
  * @param values The list of values allowed for the enumeration
  * @param message The error message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Enum(values: string[], message?: string): PropType<string | number> {
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
@@ -57,12 +61,14 @@ export function Enum(values: string[], message?: string): PropType<string | numb
 /**
  * Mark the input as indicating it's storing textual data
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Text(): PropType<string | string[]> { return input({ specifiers: ['text'] }); }
 
 /**
  * Mark the input to indicate it's for long form text
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function LongText(): PropType<string | string[]> { return input({ specifiers: ['text', 'long'] }); }
 
@@ -71,6 +77,7 @@ export function LongText(): PropType<string | string[]> { return input({ specifi
  * @param re The regular expression to match against
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Match(re: RegExp, message?: string): PropType<string | string[]> { return input({ match: { re, message } }); }
 
@@ -79,6 +86,7 @@ export function Match(re: RegExp, message?: string): PropType<string | string[]>
  * @param n The minimum length
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function MinLength(n: number, message?: string): PropType<string | unknown[]> {
   return input({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) });
@@ -89,6 +97,7 @@ export function MinLength(n: number, message?: string): PropType<string | unknow
  * @param n The maximum length
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function MaxLength(n: number, message?: string): PropType<string | unknown[]> { return input({ maxlength: { n, message } }); }
 
@@ -97,6 +106,7 @@ export function MaxLength(n: number, message?: string): PropType<string | unknow
  * @param n The minimum value
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Min<T extends number | Date>(n: T, message?: string): PropType<Date | number> {
   return input({ min: { n, message } });
@@ -107,6 +117,7 @@ export function Min<T extends number | Date>(n: T, message?: string): PropType<D
  * @param n The maximum value
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Max<T extends number | Date>(n: T, message?: string): PropType<Date | number> {
   return input({ max: { n, message } });
@@ -116,6 +127,7 @@ export function Max<T extends number | Date>(n: T, message?: string): PropType<D
  * Mark an input as an email
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Email(message?: string): PropType<string | string[]> { return Match(CommonRegExp.email, message); }
 
@@ -123,6 +135,7 @@ export function Email(message?: string): PropType<string | string[]> { return Ma
  * Mark an input as an telephone number
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Telephone(message?: string): PropType<string | string[]> { return Match(CommonRegExp.telephone, message); }
 
@@ -130,6 +143,7 @@ export function Telephone(message?: string): PropType<string | string[]> { retur
  * Mark an input as a url
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Url(message?: string): PropType<string | string[]> { return Match(CommonRegExp.url, message); }
 
@@ -138,30 +152,35 @@ export function Url(message?: string): PropType<string | string[]> { return Matc
  * @param digits The number of digits a number should have
  * @param decimals The number of decimal digits to support
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Precision(digits: number, decimals?: number): PropType<number> { return input({ precision: [digits, decimals] }); }
 
 /**
  * Mark a number as an integer
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Integer(): PropType<number> { return Precision(0); }
 
 /**
  * Mark a number as a float
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Float(): PropType<number> { return Precision(10, 7); }
 
 /**
  * Mark a number as a long value
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Long(): PropType<number> { return Precision(19, 0); }
 
 /**
  * Mark a number as a currency
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Currency(): PropType<number> { return Precision(13, 2); }
 
@@ -169,12 +188,14 @@ export function Currency(): PropType<number> { return Precision(13, 2); }
  * Specifier for the input
  * @param specifiers The specifiers for an input
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Specifier(...specifiers: string[]): PropType<unknown> { return input({ specifiers }); }
 
 /**
  * Sets the discriminator field via a property decorator
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function DiscriminatorField(): ((t: ClassInstance, k: string) => void) {
   return (instance: ClassInstance, property: string): void => {

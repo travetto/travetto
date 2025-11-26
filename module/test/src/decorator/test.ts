@@ -6,6 +6,7 @@ import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 /**
  * The `@AssertCheck` indicates that a function's assert calls should be transformed
  * @augments `@travetto/test:AssertCheck`
+ * @kind decorator
  */
 export function AssertCheck(): MethodDecorator {
   return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => descriptor;
@@ -17,6 +18,7 @@ export function AssertCheck(): MethodDecorator {
  * @augments `@travetto/schema:Method`
  * @augments `@travetto/test:AssertCheck`
  * @augments `@travetto/runtime:DebugBreak`
+ * @kind decorator
  */
 export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
@@ -35,6 +37,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
 /**
  * Marks a method as should throw to indicate a lack of throwing is a problem
  * @param state The parameters to use for checking if the response is valid
+ * @kind decorator
  */
 export function ShouldThrow(state: ThrowableError): MethodDecorator {
   return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => {
@@ -46,6 +49,7 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
 /**
  * Sets the full timeout window for a given test
  * @param ms Max time to wait
+ * @kind decorator
  */
 export function Timeout(ms: number): MethodDecorator {
   return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => {

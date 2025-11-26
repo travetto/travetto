@@ -14,6 +14,7 @@ type ValidStringField<T> = { [K in Extract<keyof T, string>]: T[K] extends strin
  * Register a class as a Schema
  *
  * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'validators' | 'methods'>>) {
   return <T, U extends Class<T>>(cls: U): void => {
@@ -28,6 +29,7 @@ export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'validators' | 'met
  * Add a custom validator, can be at the class level
  *
  * @param fn The validator function
+ * @kind decorator
  */
 export const Validator = <T>(fn: ValidatorFn<T, string>) =>
   (cls: Class<T>): void => {
@@ -38,6 +40,7 @@ export const Validator = <T>(fn: ValidatorFn<T, string>) =>
  * Register a specific view for a class
  * @param name The name of the view
  * @param fields The specific fields to add as part of a view
+ * @kind decorator
  */
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
   return (cls: Class<Partial<T>>): void => {
@@ -47,7 +50,8 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
 
 /**
  * Register a class as a discriminated class, by a specific type
- * @param type
+ * @param type The type to use for discrimination
+ * @kind decorator
  */
 export function SubType<T>(type?: string) {
   return (cls: Class<Partial<T>>): void => {
@@ -57,7 +61,8 @@ export function SubType<T>(type?: string) {
 
 /**
  * Register a class as a discriminated class
- * @param type
+ * @param field The field to use for discrimination
+ * @kind decorator
  */
 export function Discriminated<T>(field: ValidStringField<T>) {
   return (cls: Class<Partial<T>>): void => {

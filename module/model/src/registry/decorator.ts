@@ -9,6 +9,7 @@ import { ModelRegistryIndex } from './registry-index.ts';
  * Model decorator, extends `@Schema`
  *
  * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function Model(conf: Partial<ModelConfig<ModelType>> | string = {}) {
   return function <T extends ModelType, U extends Class<T>>(cls: U): U {
@@ -25,6 +26,7 @@ export function Model(conf: Partial<ModelConfig<ModelType>> | string = {}) {
 
 /**
  * Defines an index on a model
+ * @kind decorator
  */
 export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
   if (indices.some(x => x.fields.some(f => f === 'id'))) {
@@ -38,6 +40,7 @@ export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
 /**
  * Model field decorator for denoting expiry date/time
  * @augments `@travetto/schema:Field`
+ * @kind decorator
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(instance: T, property: K): void => {
@@ -47,6 +50,8 @@ export function ExpiresAt() {
 
 /**
  * Model class decorator for pre-persist behavior
+ * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 'all') {
   return function (cls: Class<T>): void {
@@ -61,6 +66,8 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
 
 /**
  * Model field decorator for pre-persist value setting
+ * @augments `@travetto/schema:Field`
+ * @kind decorator
  */
 export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
@@ -78,6 +85,8 @@ export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PreP
 
 /**
  * Prevent a field from being persisted
+ * @augments `@travetto/schema:Field`
+ * @kind decorator
  */
 export function Transient<T>() {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
@@ -95,6 +104,8 @@ export function Transient<T>() {
 
 /**
  * Model class decorator for post-load behavior
+ * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function PostLoad<T>(handler: DataHandler<T>) {
   return function (cls: Class<T>): void {

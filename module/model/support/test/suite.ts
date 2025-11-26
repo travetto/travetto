@@ -12,6 +12,7 @@ const Loaded = Symbol();
 
 /**
  * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {
   const fixtures = new TestFixtures(['@travetto/model']);

@@ -9,6 +9,7 @@ export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
  * Register a class to be defined as a test suite, and a candidate for testing
  * @param description The Suite description
  * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
@@ -30,6 +31,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
 
 /**
  * Registers function to run before any tests are run
+ * @kind decorator
  */
 export function BeforeAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
@@ -40,6 +42,7 @@ export function BeforeAll() {
 
 /**
  * Registers function to run before each test is run
+ * @kind decorator
  */
 export function BeforeEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
@@ -50,6 +53,7 @@ export function BeforeEach() {
 
 /**
  * Registers function to run after all tests are run
+ * @kind decorator
  */
 export function AfterAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
@@ -60,6 +64,7 @@ export function AfterAll() {
 
 /**
  * Registers function to run after each test is run
+ * @kind decorator
  */
 export function AfterEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {

@@ -6,6 +6,7 @@ import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 /**
  * Decorator to register a new web controller
  * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function Controller(path: string) {
   return function <T>(cls: Class<T>): void {

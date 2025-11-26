@@ -8,6 +8,7 @@ import { AuthLogoutInterceptor } from './interceptors/logout.ts';
  * Authenticate an endpoint with a list of available identity sources
  * @param source The symbol to target the specific authenticator
  * @param sources Additional providers to support
+ * @kind decorator
  */
 export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
   return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthLoginInterceptor, {
@@ -23,6 +24,7 @@ export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
 /**
  * Ensure the controller/endpoint is authenticated, give a set of permissions
  * @param permissions Set of required/disallowed permissions
+ * @kind decorator
  */
 export function Authenticated(permissions: string[] = []): EndpointDecorator {
   return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
@@ -38,6 +40,7 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
 
 /**
  * Require the controller/endpoint to be unauthenticated
+ * @kind decorator
  */
 export function Unauthenticated(): EndpointDecorator {
   return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
@@ -48,6 +51,7 @@ export function Unauthenticated(): EndpointDecorator {
 
 /**
  * Logs a user out of the auth state
+ * @kind decorator
  */
 export function Logout(): EndpointDecorator {
   return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthLogoutInterceptor, { applies: true }, {

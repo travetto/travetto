@@ -15,6 +15,7 @@ const FileMapContract = toConcrete<FileMap>();
  * Allows for supporting uploads
  *
  * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Upload(
   param: string | Partial<EndpointParameterConfig> & UploadConfig = {},

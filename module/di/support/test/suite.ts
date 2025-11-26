@@ -6,6 +6,7 @@ import { DependencyRegistryIndex } from '../../src/registry/registry-index.ts';
 
 /**
  * Registers a suite as injectable
+ * @kind decorator
  */
 export function InjectableSuite() {
   return (cls: Class) => {
