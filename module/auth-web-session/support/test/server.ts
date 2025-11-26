@@ -15,6 +15,7 @@ import { Suite, Test } from '@travetto/test';
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
+// QUESTION: Explicitly not loading source, maybe we should for the module itself
 // Ensure auth-session is loaded
 import '../../src/interceptor.ts';
 
