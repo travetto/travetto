@@ -2,9 +2,11 @@ import { EventEmitter } from 'node:events';
 
 import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
+import { IsPrivate } from '@travetto/schema';
 
 /** Test child worker target */
-@CliCommand({ hidden: true })
+@CliCommand()
+@IsPrivate()
 export class TestChildWorkerCommand {
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;

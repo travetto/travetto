@@ -1,11 +1,12 @@
 import { Runtime } from '@travetto/runtime';
 import { CliCommandShape, CliCommand, CliValidationError, ParsedState } from '@travetto/cli';
-import { Ignore } from '@travetto/schema';
+import { Ignore, IsPrivate } from '@travetto/schema';
 
 /**
  * Allows for running of main entry points
  */
-@CliCommand({ hidden: true })
+@CliCommand()
+@IsPrivate()
 export class MainCommand implements CliCommandShape {
 
   @Ignore()

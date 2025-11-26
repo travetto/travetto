@@ -1,4 +1,5 @@
 import { describeFunction, Env } from '@travetto/runtime';
+import { IsPrivate } from '@travetto/schema';
 
 import { CliCommand } from '../src/registry/decorator.ts';
 import { CliCommandShape, CliValidationError } from '../src/types.ts';
@@ -8,7 +9,8 @@ import { CliUtil } from '../src/util.ts';
 /**
  * Generates the schema for all CLI operations
  */
-@CliCommand({ hidden: true })
+@CliCommand()
+@IsPrivate()
 export class CliSchemaCommand implements CliCommandShape {
 
   async validate(names?: string[]): Promise<CliValidationError | undefined> {

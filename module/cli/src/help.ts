@@ -34,7 +34,7 @@ export class HelpUtil {
 
     const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
     for (const field of args) {
-      const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type;
+      const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type.name.toLowerCase();
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required ? `<${arg}>` : `[${arg}]` }}`);
     }
@@ -56,7 +56,7 @@ export class HelpUtil {
       }
       const param = [cliTpl`${{ param: aliases.join(', ') }}`];
       if (!isBoolFlag(field)) {
-        const type = field.type === String && field.enum && field.enum.values.length <= 3 ? field.enum.values?.join('|') : field.type;
+        const type = field.type === String && field.enum && field.enum.values.length <= 3 ? field.enum.values?.join('|') : field.type.name.toLowerCase();
         param.push(cliTpl`${{ type: `<${type}>` }}`);
       }
       params.push(param.join(' '));

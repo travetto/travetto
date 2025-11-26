@@ -1,10 +1,12 @@
 import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
+import { IsPrivate } from '@travetto/schema';
 
 import { runTests, selectConsumer } from './bin/run.ts';
 
 /**  Direct test invocation */
-@CliCommand({ hidden: true })
+@CliCommand()
+@IsPrivate()
 export class TestDirectCommand {
 
   format: string = 'tap';

@@ -1,11 +1,13 @@
 import { CliCommand } from '@travetto/cli';
 import { Env, Runtime, describeFunction } from '@travetto/runtime';
 import { RegistryV2 } from '@travetto/registry';
+import { IsPrivate } from '@travetto/schema';
 
 import { SuiteRegistryIndex } from '../src/registry/registry-index.ts';
 import { RunnerUtil } from '../src/execute/util.ts';
 
-@CliCommand({ hidden: true })
+@CliCommand()
+@IsPrivate()
 export class TestDigestCommand {
 
   output: 'json' | 'text' = 'text';
