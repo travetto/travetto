@@ -1,4 +1,4 @@
-import { Any, castTo, ClassInstance, type Class } from '@travetto/runtime';
+import { Any, castTo, ClassInstance, getClass, type Class } from '@travetto/runtime';
 
 import { InjectableCandidate, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
@@ -22,12 +22,12 @@ export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
  * Indicate that a field or parameter is able to be injected
  */
 export function Inject(config?: InjectConfig | symbol) {
-  return (instance: ClassInstance, property?: string | symbol, idx?: number | PropertyDescriptor): void => {
+  return (instanceOrCls: Class | ClassInstance, property?: string | symbol, idx?: number | PropertyDescriptor): void => {
     const cfg = fromArg(config);
     if (typeof idx !== 'number') {
-      DependencyRegistryIndex.registerFieldMetadata(instance.constructor, property!, cfg);
+      DependencyRegistryIndex.registerFieldMetadata(getClass(instanceOrCls), property!, cfg);
     } else {
-      DependencyRegistryIndex.registerParameterMetadata(instance.constructor, property!, idx, cfg);
+      DependencyRegistryIndex.registerParameterMetadata(getClass(instanceOrCls), property!, idx, cfg);
     }
   };
 }
