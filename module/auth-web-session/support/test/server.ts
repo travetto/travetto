@@ -15,6 +15,9 @@ import { Suite, Test } from '@travetto/test';
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
+// Ensure auth-session is loaded
+import '../../src/interceptor.ts';
+
 type Aged = { age: number, payload?: Record<string, unknown> };
 
 @Injectable()
