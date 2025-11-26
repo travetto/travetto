@@ -1,4 +1,4 @@
-import { Any, castTo, ClassInstance } from '@travetto/runtime';
+import { Any, castTo, ClassInstance, getClass } from '@travetto/runtime';
 
 import { SchemaMethodConfig } from '../service/types';
 import { SchemaRegistryIndex } from '../service/registry-index';
@@ -11,10 +11,7 @@ import { MethodValidatorFn } from '../validate/types';
  */
 export function Method(...config: Partial<SchemaMethodConfig>[]) {
   return (instanceOrCls: ClassInstance, property: string | symbol): void => {
-    const targetCls = ('Ⲑid' in instanceOrCls) ? instanceOrCls : instanceOrCls.constructor;
-    SchemaRegistryIndex.getForRegister(targetCls).registerMethod(property, ...config, {
-      isStatic: targetCls === instanceOrCls,
-    });
+    SchemaRegistryIndex.getForRegister(getClass(instanceOrCls)).registerMethod(property, ...config);
   };
 }
 

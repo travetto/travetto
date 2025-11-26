@@ -402,9 +402,15 @@ export class TransformerState implements State {
    * Produce a foreign target type
    */
   getForeignTarget(ret: ForeignType): ts.Expression {
-    return this.fromLiteral({
-      Ⲑid: `${ret.source.split('node_modules/')[1]}+${ret.name}`
-    });
+    return this.factory.createClassExpression([], undefined, undefined, undefined, [
+      this.factory.createPropertyDeclaration(
+        [this.factory.createModifier(ts.SyntaxKind.StaticKeyword)],
+        'Ⲑid',
+        undefined,
+        undefined,
+        this.fromLiteral(`${ret.source.split('node_modules/')[1]}+${ret.name}`)
+      )
+    ]);
   }
 
   /**

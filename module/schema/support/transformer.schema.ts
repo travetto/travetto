@@ -148,7 +148,9 @@ export class SchemaTransformer {
     if (comments.description) {
       params.unshift(state.fromLiteral({ title: comments.description }));
     }
-
+    if (node.modifiers?.some(x => x.kind === ts.SyntaxKind.StaticKeyword)) {
+      params.push(state.fromLiteral({ isStatic: true }));
+    }
     params.push(...SchemaTransformUtil.computeReturnTypeDecoratorParams(state, node));
 
     return state.factory.updateMethodDeclaration(

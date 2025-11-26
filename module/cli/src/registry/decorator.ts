@@ -135,6 +135,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
 
 /**
  * Decorator to register a CLI command flag
+ * @augments `@travetto/schema:Input`
  */
 export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fileExtensions?: string[], envVars?: string[] }) {
   return function (target: ClassInstance, property: string | symbol): void {
