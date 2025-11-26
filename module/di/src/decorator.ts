@@ -1,4 +1,5 @@
 import { Any, castTo, ClassInstance, getClass, type Class } from '@travetto/runtime';
+import { CONSTRUCTOR_PROPERTY } from '@travetto/schema';
 
 import { InjectableCandidate, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
@@ -27,7 +28,7 @@ export function Inject(config?: InjectConfig | symbol) {
   return (instanceOrCls: Class | ClassInstance, property?: string | symbol, idx?: number | PropertyDescriptor): void => {
     const cfg = fromArg(config);
     const cls = getClass(instanceOrCls);
-    const propertyKey = property ?? 'CONSTRUCTOR';
+    const propertyKey = property ?? CONSTRUCTOR_PROPERTY;
     if (typeof idx !== 'number') {
       DependencyRegistryIndex.registerFieldMetadata(cls, propertyKey, cfg);
     } else {

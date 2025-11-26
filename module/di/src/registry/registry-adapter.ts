@@ -1,6 +1,6 @@
 import { RegistryAdapter } from '@travetto/registry';
 import { Class, classConstruct, describeFunction, getAllEntries, safeAssign } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { CONSTRUCTOR_PROPERTY, SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableConfig, getDefaultQualifier, InjectableCandidate } from '../types';
 
@@ -51,7 +51,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   }
 
   registerClass(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
-    return this.registerFactory('CONSTRUCTOR', ...data, {
+    return this.registerFactory(CONSTRUCTOR_PROPERTY, ...data, {
       factory: (...args: unknown[]) => classConstruct(this.#cls, args),
       candidateType: this.#cls,
     });
@@ -74,6 +74,6 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     const entries = getAllEntries(this.#config.candidates).map(([_, item]) => item);
     return entries
       .filter(item => (item.enabled ?? true) === true || (typeof item.enabled === 'function' && item.enabled()))
-      .filter(item => item.method !== 'CONSTRUCTOR' || !describeFunction(item.candidateType)?.abstract);
+      .filter(item => item.method !== CONSTRUCTOR_PROPERTY || !describeFunction(item.candidateType)?.abstract);
   }
 }

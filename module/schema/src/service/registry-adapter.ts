@@ -3,7 +3,8 @@ import { AppError, castKey, castTo, Class, describeFunction, safeAssign } from '
 
 import {
   SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig,
-  SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig
+  SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig,
+  CONSTRUCTOR_PROPERTY
 } from './types';
 
 const classToDiscriminatedType = (cls: Class): string => cls.name
@@ -67,8 +68,8 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
 }
 
 function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, parent?: Partial<T>): SchemaMethodConfig {
-  const parentCons = parent?.methods?.['CONSTRUCTOR'];
-  const baseCons = base.methods?.['CONSTRUCTOR'];
+  const parentCons = parent?.methods?.[CONSTRUCTOR_PROPERTY];
+  const baseCons = base.methods?.[CONSTRUCTOR_PROPERTY];
   return {
     parameters: [],
     validators: [],
@@ -169,11 +170,11 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerClass({ methods, ...cfg }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
     this.register({ ...cfg });
-    if (methods?.['CONSTRUCTOR']) {
-      const { parameters, ...rest } = methods['CONSTRUCTOR'];
-      this.registerMethod('CONSTRUCTOR', rest);
+    if (methods?.[CONSTRUCTOR_PROPERTY]) {
+      const { parameters, ...rest } = methods[CONSTRUCTOR_PROPERTY];
+      this.registerMethod(CONSTRUCTOR_PROPERTY, rest);
       for (const param of parameters ?? []) {
-        this.registerParameter('CONSTRUCTOR', param.index!, param);
+        this.registerParameter(CONSTRUCTOR_PROPERTY, param.index!, param);
       }
     }
     return this.#config;
@@ -252,7 +253,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       );
     }
 
-    config.methods['CONSTRUCTOR'] = getConstructorConfig(config, parent);
+    config.methods[CONSTRUCTOR_PROPERTY] = getConstructorConfig(config, parent);
 
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));

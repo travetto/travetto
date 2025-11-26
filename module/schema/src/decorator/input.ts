@@ -1,7 +1,7 @@
 import { Any, Class, ClassInstance, getClass } from '@travetto/runtime';
 
 import { CommonRegExp } from '../validate/regexp.ts';
-import { SchemaInputConfig } from '../service/types.ts';
+import { CONSTRUCTOR_PROPERTY, SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
@@ -9,7 +9,7 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
   return (instanceOrCls: ClassInstance | Class, property: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
-    const propertyKey = property ?? 'CONSTRUCTOR';
+    const propertyKey = property ?? CONSTRUCTOR_PROPERTY;
     if (typeof idx === 'number') {
       adapter.registerParameter(propertyKey, idx, ...obj);
     } else {

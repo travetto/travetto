@@ -7,6 +7,7 @@ import {
 
 import { SchemaTransformUtil } from './transformer/util.ts';
 
+const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 const InSchemaSymbol = Symbol();
 const AccessorsSymbol = Symbol();
 const AutoEnrollMethods = Symbol();
@@ -103,7 +104,7 @@ export class SchemaTransformer {
 
     if (cons) {
       attrs.methods = {
-        CONSTRUCTOR: {
+        [CONSTRUCTOR_PROPERTY]: {
           parameters: cons.parameters.map((p, i) => SchemaTransformUtil.computeInputDecoratorParams(state, p, { index: i })).map(x =>
             state.extendObjectLiteral({}, ...x)
           ),

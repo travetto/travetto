@@ -1,9 +1,11 @@
-import { Any, Class, Primitive, TypedFunction } from '@travetto/runtime';
+import { Any, Class, Primitive } from '@travetto/runtime';
 
 import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
+
+export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 
 /**
  * Represents a typed item in the schema
