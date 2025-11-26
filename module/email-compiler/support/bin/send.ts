@@ -24,8 +24,14 @@ export class EditorSendService {
         const senderConfig = await EditorConfig.get('sender');
         const cls = class { };
         DependencyRegistryIndex.getForRegister(cls).register({
-          factory: () => new NodemailerTransport(senderConfig),
-          target: MailTransportTarget,
+          candidates: {
+            factory: {
+              candidateType: MailTransportTarget,
+              factory: () => new NodemailerTransport(senderConfig),
+              class: cls,
+              method: 'factory',
+            }
+          }
         });
         RegistryV2.process([{ type: 'added', curr: cls }]);
 

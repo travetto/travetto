@@ -53,7 +53,7 @@ export class ConfigurationService {
     const providers = await DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (el) => await DependencyRegistryIndex.getInstance(el.class, el.qualifier))
+      providers.map(async (el) => await DependencyRegistryIndex.getInstance(el.candidateType, el.qualifier))
     );
 
     const parser = await DependencyRegistryIndex.getInstance(ParserManager);
