@@ -24,7 +24,8 @@ class Entity {
    */
   color?: 'green' | 'blue';
 
-  @CliFlag({ short: 'g', desc: 'My age' })
+  /** My age */
+  @CliFlag({ short: 'g' })
   age?: number;
 
   main(file: string, force: boolean, args?: string[]) { }

@@ -35,7 +35,7 @@ const FIELD_CONFIG: {
       run: cmd => Env.TRV_ENV.set(cmd.env || Runtime.env),
       field: {
         type: String,
-        aliases: ['e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
+        aliases: ['-e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
         description: 'Application environment',
         required: { active: false },
       },
@@ -45,7 +45,7 @@ const FIELD_CONFIG: {
       run: (): void => { },
       field: {
         type: String,
-        aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
+        aliases: ['-m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
         description: 'Module to run for',
         specifiers: ['module'],
         required: { active: Runtime.monoRoot },
@@ -56,7 +56,7 @@ const FIELD_CONFIG: {
       run: cmd => CliUtil.debugIfIpc(cmd).then((v) => v && process.exit(0)),
       field: {
         type: Boolean,
-        aliases: ['di'],
+        aliases: ['-di'],
         description: 'Should debug invocation trigger via ipc',
         default: true,
         required: { active: false },
@@ -67,7 +67,7 @@ const FIELD_CONFIG: {
       run: cmd => CliUtil.runWithRestart(cmd)?.then((v) => v && process.exit(0)),
       field: {
         type: Boolean,
-        aliases: ['cr'],
+        aliases: ['-cr'],
         description: 'Should the invocation automatically restart on exit',
         default: false,
         required: { active: false },
@@ -135,24 +135,15 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
  * Decorator to register a CLI command flag
  * @augments `@travetto/schema:Input`
  */
-export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fileExtensions?: string[], envVars?: string[] }) {
+export function CliFlag(cfg: { full?: string, short?: string, fileExtensions?: string[], envVars?: string[] } = {}) {
   return function (instance: ClassInstance, property: string | symbol): void {
-    const adapter = SchemaRegistryIndex.getForRegister(getClass(instance));
-    const aliases: string[] = [];
-    if (cfg.name) {
-      aliases.push(cfg.name.startsWith('-') ? cfg.name : `--${cfg.name}`);
-    }
-    if (cfg.short) {
-      aliases.push(cfg.short.startsWith('-') ? cfg.short : `-${cfg.short}`);
-    }
-    if (cfg.envVars) {
-      aliases.push(...cfg.envVars.map(CliParseUtil.toEnvField));
-    }
+    const aliases = [
+      ...(cfg.full ? [cfg.full.startsWith('-') ? cfg.full : `--${cfg.full}`] : []),
+      ...(cfg.short ? [cfg.short.startsWith('-') ? cfg.short : `-${cfg.short}`] : []),
+      ...(cfg.envVars ? cfg.envVars.map(CliParseUtil.toEnvField) : [])
+    ];
+    const specifiers = cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : [];
 
-    adapter.registerField(property, {
-      aliases,
-      description: cfg.desc,
-      specifiers: cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : undefined
-    });
+    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, { aliases, specifiers });
   };
 }

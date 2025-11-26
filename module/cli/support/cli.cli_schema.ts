@@ -35,8 +35,19 @@ export class CliSchemaCommand implements CliCommandShape {
   async main(names?: string[]): Promise<void> {
     const resolved = await CliCommandRegistryIndex.load(names);
     const output = resolved
-      .map(x => x.config)
-      .map(({ cls, preMain: _preMain, ...x }) => ({ ...x, module: describeFunction(cls).module }));
+      .map(x => {
+        const { schema, config } = x;
+        return {
+          name: config.name,
+          module: describeFunction(config.cls).module,
+          description: schema.title || schema.description,
+          // TODO: Create output schema for all fields
+          fields: Object.entries(schema.fields).map(([k, v]) => ({
+            // name: k,
+            ...v
+          }))
+        };
+      })
     await CliUtil.writeAndEnsureComplete(output);
   }
 }
