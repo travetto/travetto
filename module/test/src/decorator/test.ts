@@ -5,6 +5,7 @@ import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * The `@AssertCheck` indicates that a function's assert calls should be transformed
+ * @augments `@travetto/test:AssertCheck`
  */
 export function AssertCheck(): MethodDecorator {
   return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => descriptor;

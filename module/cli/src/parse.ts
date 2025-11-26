@@ -167,25 +167,33 @@ export class CliParseUtil {
       const input = inputs[i];
 
       if (input === RAW_SEP) { // Raw separator
-        out.push(...inputs.slice(i + 1).map((x, idx) => ({ type: 'arg', input: x, index: argIdx + idx }) as const));
+        out.push(...inputs.slice(i + 1).map((x, idx) => ({ type: 'unknown', input: x, index: argIdx + idx }) as const));
         break;
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
         const [k, ...v] = input.split('=');
         const field = flagMap.get(k);
-        out.push({ type: 'flag', fieldName: field!.name.toString() ?? k, input: k, value: v.join('=') });
+        if (field) {
+          out.push({ type: 'flag', fieldName: field.name.toString(), input: k, value: v.join('=') });
+        } else {
+          out.push({ type: 'unknown', input });
+        }
       } else if (VALID_FLAG.test(input)) { // Flag
         const field = flagMap.get(input);
-        const next = inputs[i + 1];
-        const base = { type: 'flag', fieldName: field!.name.toString(), input, array: field?.array } as const;
-        if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
-          if (isBoolFlag(field)) {
-            out.push({ ...base, value: !input.startsWith('--no-') });
-          } else {
-            out.push(base);
-          }
+        if (!field) {
+          out.push({ type: 'unknown', input });
         } else {
-          out.push({ ...base, value: next });
-          i += 1;
+          const next = inputs[i + 1];
+          const base = { type: 'flag', fieldName: field?.name.toString() ?? input, input, array: field?.array } as const;
+          if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
+            if (isBoolFlag(field)) {
+              out.push({ ...base, value: !input.startsWith('--no-') });
+            } else {
+              out.push(base);
+            }
+          } else {
+            out.push({ ...base, value: next });
+            i += 1;
+          }
         }
       } else {
         const field = schema.methods.main?.parameters[argIdx];

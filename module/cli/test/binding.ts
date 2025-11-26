@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
+import { AssertCheck, BeforeAll, Suite, Test } from '@travetto/test';
 import { CliCommand, CliCommandSchemaUtil, CliFlag, CliParseUtil, ParsedState } from '@travetto/cli';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { RegistryV2 } from '@travetto/registry';
@@ -34,18 +34,21 @@ class Entity {
 
 const get = async (...args: string[]) => CliParseUtil.parse(SchemaRegistryIndex.getConfig(Entity), args);
 const unused = (state: ParsedState) => state.unknown;
-const checkArgs = async (args: string[], expected: unknown[], raw?: unknown[]) => {
-  const entity = new Entity();
-  const parsed = await get(...args);
-  const found = await CliCommandSchemaUtil.bindInput(entity, parsed);
-  assert.deepStrictEqual(found, expected);
-  if (raw) {
-    assert.deepStrictEqual(unused(parsed), raw);
-  }
-};
 
 @Suite()
 export class SchemaBindingSuite {
+
+  @AssertCheck()
+  async checkArgs(args: string[], expected: unknown[], raw?: unknown[]) {
+    const entity = new Entity();
+    const parsed = await get(...args);
+    const found = await CliCommandSchemaUtil.bindInput(entity, parsed);
+    assert.deepStrictEqual(found, expected);
+    if (raw) {
+      assert.deepStrictEqual(unused(parsed), raw);
+    }
+  };
+
 
   @BeforeAll()
   async init() {
@@ -113,17 +116,16 @@ export class SchemaBindingSuite {
 
   @Test()
   async testBindArgs() {
-    await checkArgs(['-g', '20', 'george'], ['george', undefined, undefined]);
-    await checkArgs(['-g', '20', '--age', 'george'], [undefined, undefined, undefined]);
-    await checkArgs(['-g', '20', 'george', '1'], ['george', true, undefined]);
-    await checkArgs(['-g', '20', 'george', 'red'], ['george', false, undefined]);
-    await checkArgs(['-g', '20', 'george', 'true', 'orange'], ['george', true, ['orange']]);
-    await checkArgs(['-g', '20', 'george', 'true', '--', '--age', '20', 'orange'],
+    await this.checkArgs(['-g', '20', 'george'], ['george', undefined, undefined]);
+    await this.checkArgs(['-g', '20', '--age', 'george'], [undefined, undefined, undefined]);
+    await this.checkArgs(['-g', '20', 'george', '1'], ['george', true, undefined]);
+    await this.checkArgs(['-g', '20', 'george', 'red'], ['george', false, undefined]);
+    await this.checkArgs(['-g', '20', 'george', 'true', 'orange'], ['george', true, ['orange']]);
+    await this.checkArgs(['-g', '20', 'george', 'true', '--', '--age', '20', 'orange'],
       ['george', true, undefined],
       ['--age', '20', 'orange']
     );
-
-    await checkArgs(['-g', '20', 'george', 'true', '-z', '--gravy', '--', '--age', '20', 'orange'],
+    await this.checkArgs(['-g', '20', 'george', 'true', '-z', '--gravy', '--', '--age', '20', 'orange'],
       ['george', true, undefined],
       ['-z', '--gravy', '--age', '20', 'orange']
     );

@@ -11,7 +11,7 @@ export class CliCommandSchemaUtil {
   /**
    * Bind parsed inputs to command
    */
-  static async bindInput<T extends CliCommandShape>(cmd: T, state: ParsedState): Promise<unknown[]> {
+  static bindInput<T extends CliCommandShape>(cmd: T, state: ParsedState): unknown[] {
     const template: Partial<T> = {};
     const bound: unknown[] = [];
 
