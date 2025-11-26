@@ -1,5 +1,5 @@
 import { Class, getClass, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { RegistryAdapter, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { RegistryAdapter, RegistryIndex, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
@@ -11,7 +11,7 @@ const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ??
 
 type CliCommandLoadResult = { command: string, config: CliCommandConfig, instance: CliCommandShape, schema: SchemaClassConfig };
 
-export class CliCommandRegistryIndex {
+export class CliCommandRegistryIndex implements RegistryIndex {
 
   static #instance = RegistryV2.registerIndex(this);
 

@@ -1,4 +1,4 @@
-import { ChangeEvent, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, RegistryIndex, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -13,7 +13,7 @@ type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & 
 /**
  * Model registry index for managing model configurations across classes
  */
-export class ModelRegistryIndex {
+export class ModelRegistryIndex implements RegistryIndex {
 
   static #instance = RegistryV2.registerIndex(this);
 

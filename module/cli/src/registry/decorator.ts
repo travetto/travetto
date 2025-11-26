@@ -83,7 +83,11 @@ const FIELD_CONFIG: {
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    if (!target.Ⲑid || describeFunction(target)?.abstract) {
+    const adapter = SchemaRegistryIndex.getForRegister(target);
+    const description = describeFunction(target) ?? {};
+
+
+    if (!target.Ⲑid || description.abstract) {
       return;
     }
 
@@ -98,9 +102,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       }
     });
 
-    const commandModule = describeFunction(target).module;
-
-    const adapter = SchemaRegistryIndex.getForRegister(target);
+    const commandModule = description.module;
 
     for (const { name, field: { type, ...field } } of VALID_FIELDS) {
       adapter.registerField(name, field, { type });

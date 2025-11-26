@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import { CliCommand, CliCommandRegistryIndex, CliCommandSchemaUtil, CliFlag, CliParseUtil, ParsedState } from '@travetto/cli';
 import { SchemaRegistryIndex } from '@travetto/schema';
+import { RegistryV2 } from '@travetto/registry';
 
 /**
  * My command
@@ -45,6 +46,12 @@ const checkArgs = async (args: string[], expected: unknown[], raw?: unknown[]) =
 
 @Suite()
 export class SchemaBindingSuite {
+
+  @BeforeAll()
+  async init() {
+    await RegistryV2.init();
+  }
+
   @Test()
   async testFlags() {
     const entity = new Entity();
@@ -85,24 +92,23 @@ export class SchemaBindingSuite {
 
   @Test()
   async testSchema() {
-    const cliSchema = CliCommandRegistryIndex.get(Entity);
     const schema = SchemaRegistryIndex.getConfig(Entity);
     assert(schema.title === 'My command');
-    const color = cliSchema.flags.find(x => x.name === 'color')!;
+    const color = schema.fields.color;
     assert(color.description === 'My color');
-    assert(color.required !== true);
-    assert(color.type === 'string');
-    assert(color.envVars?.includes('COLOREO'));
-    assert(color.flagNames?.includes('-l'));
-    assert(color.flagNames?.includes('--color'));
-    assert.deepStrictEqual(color.choices?.toSorted(), ['blue', 'green']);
+    assert(color.required?.active === false);
+    assert(color.type === String);
+    assert(color.aliases?.includes('env.COLOREO'));
+    assert(color.aliases?.includes('-l'));
+    assert(color.aliases?.includes('--color'));
+    assert.deepStrictEqual(color.enum?.values?.toSorted(), ['blue', 'green']);
 
-    const age = cliSchema.flags.find(x => x.name === 'age')!;
+    const age = schema.fields.age;
     assert(age.description === 'My age');
-    assert(age.required !== true);
-    assert(age.type === 'number');
-    assert(age.flagNames?.includes('-g'));
-    assert(age.flagNames?.includes('--age'));
+    assert(age.required?.active === false);
+    assert(age.type === Number);
+    assert(age.aliases?.includes('-g'));
+    assert(age.aliases?.includes('--age'));
   }
 
   @Test()

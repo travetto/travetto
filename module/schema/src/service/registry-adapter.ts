@@ -39,8 +39,8 @@ function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>
       ...config.specifiers ? { specifiers: [...base.specifiers ?? [], ...config.specifiers ?? []] } : {},
       ...config.enum ? {
         enum: {
-          message: base.enum?.message ?? config.enum?.message,
-          values: [...base.enum?.values ?? [], ...config.enum?.values ?? []].toSorted()
+          message: config.enum?.message ?? base.enum?.message,
+          values: (config.enum?.values ?? base.enum?.values ?? []).toSorted()
         }
       } : {},
     });
