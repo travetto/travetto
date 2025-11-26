@@ -9,10 +9,11 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
   return (instanceOrCls: ClassInstance | Class, property: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
     const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
+    const propertyKey = property ?? 'CONSTRUCTOR';
     if (typeof idx === 'number') {
-      adapter.registerParameter(property, idx, ...obj);
+      adapter.registerParameter(propertyKey, idx, ...obj);
     } else {
-      adapter.registerField(property, ...obj);
+      adapter.registerField(propertyKey, ...obj);
     }
   };
 }

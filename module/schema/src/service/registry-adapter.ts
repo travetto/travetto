@@ -170,7 +170,11 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   registerClass({ methods, ...cfg }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
     this.register({ ...cfg });
     if (methods?.['CONSTRUCTOR']) {
-      this.registerMethod('CONSTRUCTOR', methods['CONSTRUCTOR']);
+      const { parameters, ...rest } = methods['CONSTRUCTOR'];
+      this.registerMethod('CONSTRUCTOR', rest);
+      for (const param of parameters ?? []) {
+        this.registerParameter('CONSTRUCTOR', param.index!, param);
+      }
     }
     return this.#config;
   }
@@ -198,8 +202,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   registerParameterMetadata<T>(method: string | symbol, idx: number, key: symbol, ...data: Partial<T>[]): T {
-    const params = this.registerMethod(method, {}).parameters;
-    const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
+    const cfg = this.registerParameter(method, idx);
     return assignMetadata(key, cfg, data);
   }
 

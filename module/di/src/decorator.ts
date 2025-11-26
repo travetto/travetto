@@ -4,7 +4,7 @@ import { InjectableCandidate, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
 
 const fromArg = <T extends { qualifier?: symbol }>(arg?: T | symbol): T =>
-  typeof arg === 'symbol' ? castTo({ qualifier: arg }) : arg ?? castTo<T>({});
+  typeof arg === 'symbol' ? castTo({ qualifier: arg }) : (arg ?? castTo<T>({}));
 
 /**
  * Indicate that a class is able to be injected
@@ -20,14 +20,18 @@ export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
 
 /**
  * Indicate that a field or parameter is able to be injected
+ * @augments `@travetto/di:Inject`
+ * @augments `@travetto/schema:Input`
  */
 export function Inject(config?: InjectConfig | symbol) {
   return (instanceOrCls: Class | ClassInstance, property?: string | symbol, idx?: number | PropertyDescriptor): void => {
     const cfg = fromArg(config);
+    const cls = getClass(instanceOrCls);
+    const propertyKey = property ?? 'CONSTRUCTOR';
     if (typeof idx !== 'number') {
-      DependencyRegistryIndex.registerFieldMetadata(getClass(instanceOrCls), property!, cfg);
+      DependencyRegistryIndex.registerFieldMetadata(cls, propertyKey, cfg);
     } else {
-      DependencyRegistryIndex.registerParameterMetadata(getClass(instanceOrCls), property!, idx, cfg);
+      DependencyRegistryIndex.registerParameterMetadata(cls, propertyKey, idx, cfg);
     }
   };
 }

@@ -19,6 +19,7 @@ export function Method(...config: Partial<SchemaMethodConfig>[]) {
  * Add a custom validator for a given method
  *
  * @param fn The validator function
+ * @augments `@travetto/schema:Method`
  */
 export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
   return Method({ validators: [castTo(fn)] });
