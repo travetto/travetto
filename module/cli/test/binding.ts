@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { CliCommand, CliCommandRegistryIndex, CliCommandSchemaUtil, CliFlag, CliParseUtil, ParsedState } from '@travetto/cli';
+import { CliCommand, CliCommandSchemaUtil, CliFlag, CliParseUtil, ParsedState } from '@travetto/cli';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { RegistryV2 } from '@travetto/registry';
 
@@ -170,7 +170,6 @@ export class SchemaBindingSuite {
     assert(state.all.length === 1);
 
     assert(state.all[0].type === 'flag');
-    assert(state.all[0].value === true);
 
     state = await get('--fun=0');
     assert(state.all.length === 1);

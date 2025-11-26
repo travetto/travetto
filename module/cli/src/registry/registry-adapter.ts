@@ -25,18 +25,6 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     // Add help command
     const schema = SchemaRegistryIndex.getConfig(this.#cls);
 
-    console.error('Finalizing CLI command schema for', this.#cls.name);
-
-    // Add help to every command
-    (schema.fields ??= {}).help = {
-      type: Boolean,
-      name: 'help',
-      owner: this.#cls,
-      description: 'display help for command',
-      required: { active: false },
-      aliases: ['-h', '--help']
-    };
-
     const used = new Set(Object.values(schema.fields)
       .flatMap(f => f.aliases ?? [])
       .filter(x => SHORT_FLAG.test(x) || x.replaceAll('-', '').length < 3)
@@ -48,7 +36,6 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       const withoutEnv = (field.aliases ?? []).filter(x => !x.startsWith(ENV_PREFIX));
 
       let short = withoutEnv.find(x => SHORT_FLAG.test(x) || x.replaceAll('-', '').length < 3)?.replace(/^-+/, '');
-
       const long = withoutEnv.find(x => LONG_FLAG.test(x) || x.replaceAll('-', '').length > 2)?.replace(/^-+/, '') ||
         fieldName.replace(/([a-z])([A-Z])/g, (_, l, r: string) => `${l}-${r.toLowerCase()}`);
 
@@ -71,7 +58,20 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       if (isBoolFlag(field)) {
         aliases.push(`--no-${long}`);
       }
+      // Remove noise when done
+      field.aliases = field.aliases
+        .filter(x => x.startsWith('-') || x.startsWith(ENV_PREFIX));
     }
+
+    // Add help to every command
+    (schema.fields ??= {}).help = {
+      type: Boolean,
+      name: 'help',
+      owner: this.#cls,
+      description: 'display help for command',
+      required: { active: false },
+      aliases: ['-h', '--help']
+    };
   }
 
   get(): CliCommandConfig {

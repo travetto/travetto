@@ -44,11 +44,10 @@ export class HelpUtil {
 
     for (const field of Object.values(schema.fields)) {
       const key = castKey<CliCommandShape>(field.name);
-      const flagVal: Primitive = castTo(command[key]);
 
-      let aliases = field.aliases ?? [];
+      let aliases = (field.aliases ?? []).filter(x => x.startsWith('-'));
       if (isBoolFlag(field)) {
-        if (flagVal === true) {
+        if (field.default === true) {
           aliases = (field.aliases ?? []).filter(x => !/^[-][^-]/.test(x));
         } else {
           aliases = (field.aliases ?? []).filter(x => !x.startsWith('--no-'));
@@ -62,8 +61,8 @@ export class HelpUtil {
       params.push(param.join(' '));
       const desc = [cliTpl`${{ title: field.description }}`];
 
-      if (key !== 'help' && flagVal !== null && flagVal !== undefined && flagVal !== '') {
-        desc.push(cliTpl`(default: ${{ input: JSON.stringify(flagVal) }})`);
+      if (key !== 'help' && field.default !== null && field.default !== undefined && field.default !== '') {
+        desc.push(cliTpl`(default: ${{ input: JSON.stringify(field.default) }})`);
       }
       descriptions.push(desc.join(' '));
     }
@@ -120,9 +119,8 @@ export class HelpUtil {
 
     const lines = [cliTpl`${{ title: 'Commands:' }}`, ...rows, ''];
 
-    if (title === undefined || title) {
-      lines.unshift(title ? cliTpl`${{ title }}` : cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`, '');
-    }
+    lines.unshift(title ? cliTpl`${{ title }}` : cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`, '');
+
     return lines.map(x => x.trimEnd()).join('\n');
   }
 

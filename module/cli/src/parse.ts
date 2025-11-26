@@ -172,13 +172,17 @@ export class CliParseUtil {
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
         const [k, ...v] = input.split('=');
         const field = flagMap.get(k);
-        out.push({ type: 'flag', fieldName: field?.name.toString() ?? k, input: k, value: v.join('=') });
+        out.push({ type: 'flag', fieldName: field!.name.toString() ?? k, input: k, value: v.join('=') });
       } else if (VALID_FLAG.test(input)) { // Flag
         const field = flagMap.get(input);
         const next = inputs[i + 1];
-        const base = { type: 'flag', fieldName: field?.name.toString() ?? input, input, array: field?.array } as const;
+        const base = { type: 'flag', fieldName: field!.name.toString(), input, array: field?.array } as const;
         if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
-          out.push(base);
+          if (isBoolFlag(field)) {
+            out.push({ ...base, value: !input.startsWith('--no-') });
+          } else {
+            out.push(base);
+          }
         } else {
           out.push({ ...base, value: next });
           i += 1;
