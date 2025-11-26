@@ -23,6 +23,11 @@ interface AutoState {
 export class SchemaTransformer {
 
   static isInvisible(state: AutoState & TransformerState, node: ts.Declaration): boolean {
+    const ignore = state.findDecorator(this, node, 'Ignore');
+    if (ignore) {
+      return true;
+    }
+
     const manuallyOpted = !!(
       state.findDecorator(this, node, 'Input') ??
       state.findDecorator(this, node, 'Method')
@@ -38,8 +43,7 @@ export class SchemaTransformer {
     if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
       return true;
     }
-    const ignore = state.findDecorator(this, node, 'Ignore');
-    return !!ignore;
+    return false;
   }
 
   /**

@@ -33,7 +33,7 @@ export const IsPrivate = () => Describe({ private: true });
 
 /**
  * Mark a field/method as ignored
- * @augments `@travetto/schema:Input`
+ * @augments `@travetto/schema:Ignore`
  */
 export function Ignore(): PropertyDecorator {
   return () => { };
