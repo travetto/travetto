@@ -3,25 +3,23 @@ import { Class, ClassInstance, getClass } from '@travetto/runtime';
 import { SchemaCoreConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
-function isClass(o: Class | ClassInstance, property?: string | symbol): o is Class {
-  return !property;
-}
-
 /**
  * Describe a model or a field
  * @param config The describe configuration
- * @augments `@travetto/schema:Describe`
+ * @augments `@travetto/schema:Input`
  */
 export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
   return (instanceOrCls: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
     const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
-    if (isClass(instanceOrCls, property)) {
+    if (!property) {
       adapter.register(config);
     } else {
       if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
-        adapter.registerParameter(property!, descOrIdx, { ...config });
+        adapter.registerParameter(property, descOrIdx, config);
+      } else if (typeof descOrIdx === 'object' && typeof descOrIdx.value === 'function') {
+        adapter.registerMethod(property, config);
       } else {
-        adapter.registerField(property!, config);
+        adapter.registerField(property, config);
       }
     }
   };
@@ -29,14 +27,13 @@ export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
 
 /**
  * Mark a field/method as private
- * @augments `@travetto/schema:Describe`
+ * @augments `@travetto/schema:Input`
  */
-export const IsPrivate = Describe.bind(null, { private: true });
+export const IsPrivate = () => Describe({ private: true });
 
 /**
  * Mark a field/method as ignored
- *
- * @augments `@travetto/schema:Ignore`
+ * @augments `@travetto/schema:Input`
  */
 export function Ignore(): PropertyDecorator {
   return () => { };

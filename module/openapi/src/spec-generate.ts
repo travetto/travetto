@@ -288,7 +288,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
           in: param.location,
           name: param.name || param.location,
           description: input.description,
-          required: !!input.required?.active || false,
+          required: input.required?.active !== false,
           schema: input.array ? { type: 'array', items: this.#getType(input) } : this.#getType(input)
         };
         return { parameters: [epParam] };

@@ -2,8 +2,8 @@ import { Class, ClassInstance, getClass } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { OverrideConfig, OverrideConfigSymbol } from './source/override.ts';
 import { ConfigurationService, ConfigBaseType } from './service.ts';
+import { ConfigOverrideUtil } from './util.ts';
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
@@ -13,7 +13,9 @@ export function Config(ns: string) {
   return <T extends Class>(cls: T): T => {
     // Declare as part of global config
     SchemaRegistryIndex.getForRegister(cls).register({ interfaces: [ConfigBaseType] });
-    SchemaRegistryIndex.getForRegister(cls).registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns, fields: {} });
+
+    ConfigOverrideUtil.setOverrideConfig(cls, ns);
+
     DependencyRegistryIndex.getForRegister(cls).registerClass();
 
     const og: Function = cls.prototype.postConstruct;
@@ -32,9 +34,6 @@ export function Config(ns: string) {
  */
 export function EnvVar(name: string, ...others: string[]) {
   return (instance: ClassInstance, property: string): void => {
-    const env = SchemaRegistryIndex.getForRegister(getClass(instance))
-      .registerMetadata<OverrideConfig>(OverrideConfigSymbol, { ns: '', fields: {} });
-    env.fields[property] = (): string | undefined =>
-      process.env[[name, ...others].find(x => !!process.env[x])!];
+    ConfigOverrideUtil.setOverrideConfigField(getClass(instance), property, [name, ...others]);
   };
 }
