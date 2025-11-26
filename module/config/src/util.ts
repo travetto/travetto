@@ -1,4 +1,4 @@
-import { asFull, Class } from '@travetto/runtime';
+import { Any, asFull, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 export const OverrideConfigSymbol = Symbol.for('@travetto/config:overrides');
@@ -15,7 +15,7 @@ export type OverrideConfig = {
  * Utility for managing override configuration via SchemaRegistryIndex
  */
 export class ConfigOverrideUtil {
-  static getOverrideConfig(cls: Class<any>): OverrideConfig | undefined {
+  static getOverrideConfig(cls: Class<Any>): OverrideConfig | undefined {
     return SchemaRegistryIndex.get(cls).getMetadata<OverrideConfig>(OverrideConfigSymbol);
   }
 
@@ -30,16 +30,15 @@ export class ConfigOverrideUtil {
     return out;
   }
 
-  static setOverrideConfigField(cls: Class<any>, field: string, names: string[]): void {
+  static setOverrideConfigField(cls: Class<Any>, field: string, names: string[]): void {
     const env = SchemaRegistryIndex.getForRegister(cls)
       .registerMetadata<OverrideConfig>(OverrideConfigSymbol, {});
 
-    (env.fields ??= {})[field] = (): string | undefined => {
-      return process.env[names.find(x => !!process.env[x])!];
-    }
+    (env.fields ??= {})[field] = (): string | undefined =>
+      process.env[names.find(x => !!process.env[x])!];
   }
 
-  static setOverrideConfig(cls: Class<any>, namespace: string): void {
+  static setOverrideConfig(cls: Class<Any>, namespace: string): void {
     SchemaRegistryIndex.getForRegister(cls).registerMetadata<OverrideConfig>(OverrideConfigSymbol, { namespace });
   }
 }

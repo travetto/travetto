@@ -9,6 +9,7 @@ import { runTests, selectConsumer } from './bin/run.ts';
 @IsPrivate()
 export class TestDirectCommand {
 
+  @IsPrivate()
   format: string = 'tap';
 
   /**

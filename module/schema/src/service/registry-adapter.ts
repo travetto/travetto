@@ -221,20 +221,18 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
     if (config.discriminatedField && !describeFunction(this.#cls).abstract) {
       config.discriminatedType ??= classToDiscriminatedType(this.#cls);
-      config.fields[config.discriminatedField] = Object.assign(
-        {},
-        config.fields[config.discriminatedField], // Make a full copy
-        {
-          required: {
-            active: false
+      config.fields[config.discriminatedField] = {
+        ...config.fields[config.discriminatedField], // Make a full copy
+        required: {
+          active: false
+        },
+        ...config.discriminatedType ? {
+          enum: {
+            values: [config.discriminatedType],
+            message: `${config.discriminatedField} can only be '${config.discriminatedType}'`,
           },
-          ...config.discriminatedType ? {
-            enum: {
-              values: [config.discriminatedType],
-              message: `${config.discriminatedField} can only be '${config.discriminatedType}'`,
-            },
-          } : {}
-        });
+        } : {}
+      };
     }
 
     // Compute views on install

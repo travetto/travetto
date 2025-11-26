@@ -10,7 +10,7 @@ function isClass(target: unknown, property: unknown,): target is Class<unknown> 
 }
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
-  return function <T>(instanceOrCls: ClassInstance | Class<T>, property?: string | symbol, descriptor?: EndpointFunctionDescriptor) {
+  return function <T>(instanceOrCls: ClassInstance | Class<T>, property?: string | symbol, _?: EndpointFunctionDescriptor) {
     const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
     if (isClass(instanceOrCls, property)) {
       adapter.register(config);
@@ -71,7 +71,7 @@ export const ConfigureInterceptor = <T extends WebInterceptor>(
   cls: Class<T>,
   cfg: Partial<RetainPrimitiveFields<T['config']>>,
   extra?: Partial<EndpointConfig & ControllerConfig>
-) =>
+): EndpointDecorator =>
   ControllerRegistryIndex.createInterceptorConfigDecorator(cls, cfg, extra);
 
 /**

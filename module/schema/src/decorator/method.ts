@@ -21,6 +21,6 @@ export function Method(...config: Partial<SchemaMethodConfig>[]) {
  * @param fn The validator function
  * @augments `@travetto/schema:Method`
  */
-export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
+export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>): MethodDecorator {
   return Method({ validators: [castTo(fn)] });
 }

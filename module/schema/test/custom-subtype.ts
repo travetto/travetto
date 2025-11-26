@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { RegistryV2 } from '@travetto/registry';
-import { Discriminated, DiscriminatorField, Schema } from '@travetto/schema';
+import { Discriminated, Schema } from '@travetto/schema';
 
 @Schema()
 @Discriminated('flavor')

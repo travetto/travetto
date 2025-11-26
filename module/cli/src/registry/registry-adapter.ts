@@ -21,7 +21,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     this.#cls = cls;
   }
 
-  finalize(parent?: CliCommandConfig | undefined): void {
+  finalize(): void {
     // Add help command
     const schema = SchemaRegistryIndex.getConfig(this.#cls);
 
@@ -32,7 +32,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     );
 
     for (const field of Object.values(schema.fields)) {
-      const fieldName = field.name.toString()
+      const fieldName = field.name.toString();
       const withoutEnv = (field.aliases ?? []).filter(x => !x.startsWith(ENV_PREFIX));
 
       let short = withoutEnv.find(x => SHORT_FLAG.test(x) || x.replaceAll('-', '').length < 3)?.replace(/^-+/, '');

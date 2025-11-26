@@ -38,7 +38,7 @@ export interface InjectableCandidate<T = unknown> {
    */
   factory: (...args: unknown[]) => T | Promise<T>;
   /**
-   * The type of the candidate 
+   * The type of the candidate
    */
   candidateType: Class;
   /**
@@ -85,5 +85,5 @@ export function getDefaultQualifier(cls: Class): symbol {
 export const PrimaryCandidateSymbol = Symbol();
 
 export type InjectableClassMetadata = {
-  postConstruct: Record<string | symbol, (<T>(inst: T) => Promise<void>)>
+  postConstruct: Record<string | symbol, (<T>(inst: T) => Promise<void>)>;
 };

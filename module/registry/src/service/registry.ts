@@ -41,7 +41,7 @@ class $Registry {
     }
   }
 
-  finalizeForIndex(indexCls: RegistryIndexClass) {
+  finalizeForIndex(indexCls: RegistryIndexClass): void {
     const inst = this.instance(indexCls);
     this.#finalizeItems(inst.store.getClasses());
   }

@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { castKey, castTo, getClass, Primitive } from '@travetto/runtime';
+import { castKey, getClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
@@ -103,7 +103,7 @@ export class HelpUtil {
     const resolved = await CliCommandRegistryIndex.load();
     const maxWidth = resolved.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b.command).length), 0);
 
-    for (const { command: cmd, config: cfg, schema } of resolved) {
+    for (const { command: cmd, schema } of resolved) {
       try {
         if (schema && !schema.private) {
           rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title || schema.description || '' }}`);

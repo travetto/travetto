@@ -82,7 +82,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
       return;
     }
 
-    let base = this.getBaseClass(cls);
+    const base = this.getBaseClass(cls);
     if (!this.#byDiscriminatedTypes.has(base)) {
       this.#byDiscriminatedTypes.set(base, new Map());
     }

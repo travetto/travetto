@@ -15,7 +15,7 @@ const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDe
 
 
 function readMetadata(item: { metadata?: Record<symbol, unknown> }): Dependency | undefined {
-  return item.metadata?.[MetadataSymbol] as Dependency | undefined;
+  return castTo<Dependency | undefined>(item.metadata?.[MetadataSymbol]);
 }
 
 export class DependencyRegistryIndex implements RegistryIndex {
