@@ -7,6 +7,7 @@ import { Util } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
+import '../src/controller.ts'; // Ensure we load the controller
 
 interface User {
   id: string;
