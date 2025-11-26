@@ -98,34 +98,11 @@ export type CliCommandShapeFields = {
 };
 
 /**
- * CLI Command argument/flag shape
- */
-export type CliCommandInput<K extends string = string> = {
-  name: string;
-  description?: string;
-  type: 'string' | 'file' | 'number' | 'boolean' | 'date' | 'regex' | 'module';
-  fileExtensions?: string[];
-  choices?: unknown[];
-  required?: boolean;
-  array?: boolean;
-  default?: unknown;
-  flagNames?: K[];
-  envVars?: string[];
-};
-
-/**
  * CLI Command schema shape
  */
-export interface CliCommandConfig<K extends string = string> {
+export interface CliCommandConfig {
   cls: Class<CliCommandShape>;
   name: string;
-  title: string;
   runTarget?: boolean;
-  description?: string;
-  args: CliCommandInput[];
-  flags: CliCommandInput<K>[];
-  hidden?: boolean;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 }
-
-export type CliCommandConfigSchema = Pick<CliCommandConfig, 'args' | 'flags'>;

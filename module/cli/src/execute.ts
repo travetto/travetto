@@ -33,10 +33,10 @@ export class ExecutionManager {
 
   /** Bind command  */
   static async #bindCommand(cmd: string, args: string[]): Promise<{ command: CliCommandShape, boundArgs: unknown[] }> {
-    const [{ config, instance: command }] = await CliCommandRegistryIndex.load([cmd]);
-    const fullArgs = await CliParseUtil.expandArgs(config, args);
+    const [{ instance: command, schema }] = await CliCommandRegistryIndex.load([cmd]);
+    const fullArgs = await CliParseUtil.expandArgs(schema, args);
 
-    const state = command._parsed = await CliParseUtil.parse(config, fullArgs);
+    const state = command._parsed = await CliParseUtil.parse(schema, fullArgs);
 
     await command.preBind?.();
     const boundArgs = await CliCommandSchemaUtil.bindInput(command, state);

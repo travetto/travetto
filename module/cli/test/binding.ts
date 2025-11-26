@@ -30,7 +30,7 @@ class Entity {
   main(file: string, force: boolean, args?: string[]) { }
 }
 
-const get = async (...args: string[]) => CliParseUtil.parse(CliCommandRegistryIndex.get(Entity), args);
+const get = async (...args: string[]) => CliParseUtil.parse(SchemaRegistryIndex.getConfig(Entity), args);
 const unused = (state: ParsedState) => state.unknown;
 const checkArgs = async (args: string[], expected: unknown[], raw?: unknown[]) => {
   const entity = new Entity();

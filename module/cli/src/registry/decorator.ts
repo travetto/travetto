@@ -1,4 +1,4 @@
-import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
+import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction, getClass } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaRegistryIndex, ValidationError } from '@travetto/schema';
 
 import { CliCommandShape } from '../types.ts';
@@ -10,7 +10,6 @@ import { CliUtil } from '../util.ts';
 type Cmd = CliCommandShape & { env?: string };
 
 type CliCommandConfigOptions = {
-  hidden?: boolean;
   runTarget?: boolean;
   runtimeModule?: 'current' | 'command';
   with?: {
@@ -91,7 +90,6 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     const VALID_FIELDS = FIELD_CONFIG.filter(f => !!cfg.with?.[f.name]);
 
     CliCommandRegistryIndex.getForRegister(target).register({
-      hidden: cfg.hidden,
       runTarget: cfg.runTarget,
       preMain: async (cmd: Cmd) => {
         for (const field of VALID_FIELDS) {
@@ -138,7 +136,8 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
  * @augments `@travetto/schema:Input`
  */
 export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fileExtensions?: string[], envVars?: string[] }) {
-  return function (target: ClassInstance, property: string | symbol): void {
+  return function (instance: ClassInstance, property: string | symbol): void {
+    const adapter = SchemaRegistryIndex.getForRegister(getClass(instance));
     const aliases: string[] = [];
     if (cfg.name) {
       aliases.push(cfg.name.startsWith('-') ? cfg.name : `--${cfg.name}`);
@@ -149,7 +148,8 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fil
     if (cfg.envVars) {
       aliases.push(...cfg.envVars.map(CliParseUtil.toEnvField));
     }
-    SchemaRegistryIndex.getForRegister(target.constructor).registerField(property, {
+
+    adapter.registerField(property, {
       aliases,
       description: cfg.desc,
       specifiers: cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : undefined

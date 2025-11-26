@@ -1,5 +1,6 @@
 import { Class, getClass, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { RegistryAdapter, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
 import { CliUnknownCommandError } from '../error.ts';
@@ -8,7 +9,7 @@ import { CliCommandRegistryAdapter } from './registry-adapter.ts';
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 
-type CliCommandLoadResult = { command: string, config: CliCommandConfig, instance: CliCommandShape };
+type CliCommandLoadResult = { command: string, config: CliCommandConfig, instance: CliCommandShape, schema: SchemaClassConfig };
 
 export class CliCommandRegistryIndex {
 
@@ -118,7 +119,8 @@ export class CliCommandRegistryIndex {
     const list = await Promise.all(keys.map(async x => {
       const instance = await this.#getInstance(x);
       const config = this.store.get(getClass(instance)).get();
-      return { command: x, instance, config };
+      const schema = SchemaRegistryIndex.getConfig(getClass(instance));
+      return { command: x, instance, config, schema };
     }));
 
     return list.sort((a, b) => a.command.localeCompare(b.command));

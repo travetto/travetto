@@ -34,7 +34,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
       const parentClass = getParentClass(cls);
       parentConfig = castTo(parentClass && this.has(parentClass) ? this.get(parentClass).get() : undefined);
     }
-    this.adapter(cls).finalize(parentConfig);
+    this.adapter(cls).finalize?.(parentConfig);
     this.#finalized.set(cls, true);
   }
 

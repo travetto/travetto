@@ -8,7 +8,7 @@ export type RegistrationMethods = `register${string}` | `finalize${string}`;
  */
 export interface RegistryAdapter<C extends {} = {}> {
   register(...data: Partial<C>[]): C;
-  finalize(parent?: C): void;
+  finalize?(parent?: C): void;
   get(): C;
 }
 

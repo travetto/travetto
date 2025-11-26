@@ -1,6 +1,7 @@
 import util from 'node:util';
 
-import { asConstructable, castKey, castTo, getClass, Primitive } from '@travetto/runtime';
+import { castKey, castTo, getClass, Primitive } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
 import { CliCommandShape } from './types.ts';
@@ -23,7 +24,9 @@ export class HelpUtil {
    * @param command
    */
   static async renderCommandHelp(command: CliCommandShape): Promise<string> {
-    const { flags, args, name: commandName, title } = CliCommandRegistryIndex.get(getClass(command));
+    const schema = SchemaRegistryIndex.getConfig(getClass(command));
+    const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
+    const args = schema.methods.main?.parameters ?? [];
 
     await command.preHelp?.();
 
@@ -31,7 +34,7 @@ export class HelpUtil {
 
     const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
     for (const field of args) {
-      const type = field.type === 'string' && field.choices && field.choices.length <= 7 ? field.choices?.join('|') : field.type;
+      const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type;
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required ? `<${arg}>` : `[${arg}]` }}`);
     }
@@ -39,25 +42,25 @@ export class HelpUtil {
     const params: string[] = [];
     const descriptions: string[] = [];
 
-    for (const flag of flags) {
-      const key = castKey<CliCommandShape>(flag.name);
+    for (const field of Object.values(schema.fields)) {
+      const key = castKey<CliCommandShape>(field.name);
       const flagVal: Primitive = castTo(command[key]);
 
-      let aliases = flag.flagNames ?? [];
-      if (isBoolFlag(flag)) {
+      let aliases = field.aliases ?? [];
+      if (isBoolFlag(field)) {
         if (flagVal === true) {
-          aliases = (flag.flagNames ?? []).filter(x => !/^[-][^-]/.test(x));
+          aliases = (field.aliases ?? []).filter(x => !/^[-][^-]/.test(x));
         } else {
-          aliases = (flag.flagNames ?? []).filter(x => !x.startsWith('--no-'));
+          aliases = (field.aliases ?? []).filter(x => !x.startsWith('--no-'));
         }
       }
       const param = [cliTpl`${{ param: aliases.join(', ') }}`];
-      if (!isBoolFlag(flag)) {
-        const type = flag.type === 'string' && flag.choices && flag.choices.length <= 3 ? flag.choices?.join('|') : flag.type;
+      if (!isBoolFlag(field)) {
+        const type = field.type === String && field.enum && field.enum.values.length <= 3 ? field.enum.values?.join('|') : field.type;
         param.push(cliTpl`${{ type: `<${type}>` }}`);
       }
       params.push(param.join(' '));
-      const desc = [cliTpl`${{ title: flag.description }}`];
+      const desc = [cliTpl`${{ title: field.description }}`];
 
       if (key !== 'help' && flagVal !== null && flagVal !== undefined && flagVal !== '') {
         desc.push(cliTpl`(default: ${{ input: JSON.stringify(flagVal) }})`);
@@ -75,6 +78,8 @@ export class HelpUtil {
     if (helpText.length && helpText.at(-1) !== '') {
       helpText.push('');
     }
+
+    const title = schema.title ?? schema.description;
 
     return [
       ...(title ? [cliTpl`${{ title: commandName }}: ${{ subtitle: title }}`, ''] : []),
@@ -99,10 +104,10 @@ export class HelpUtil {
     const resolved = await CliCommandRegistryIndex.load();
     const maxWidth = resolved.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b.command).length), 0);
 
-    for (const { command: cmd, config: cfg } of resolved) {
+    for (const { command: cmd, config: cfg, schema } of resolved) {
       try {
-        if (cfg && !cfg.hidden) {
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: cfg.title }}`);
+        if (schema && !schema.private) {
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title || schema.description || '' }}`);
         }
       } catch (err) {
         if (err instanceof Error) {

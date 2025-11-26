@@ -2,7 +2,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { Runtime } from '@travetto/runtime';
-import { CliCommandInput, CliCommandConfig, ParsedState, CliCommandConfigSchema } from './types.ts';
+import { SchemaClassConfig, SchemaFieldConfig, SchemaInputConfig } from '@travetto/schema';
+
+import { ParsedState } from './types.ts';
 
 type ParsedInput = ParsedState['all'][number];
 
@@ -14,24 +16,7 @@ const CONFIG_PRE = '+=';
 const ENV_PRE = 'env.';
 const SPACE = new Set([32, 7, 13, 10]);
 
-export const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
-
-const getInput = (cfg: { field?: CliCommandInput, rawText?: string, input: string, index?: number, value?: string }): ParsedInput => {
-  const { field, input, rawText = input, value, index } = cfg;
-  if (!field) {
-    return { type: 'unknown', input: rawText };
-  } else if (!field.flagNames?.length) {
-    return { type: 'arg', input: field ? input : rawText ?? input, array: field.array, index: index! };
-  } else {
-    return {
-      type: 'flag',
-      fieldName: field.name,
-      array: field.array,
-      input: field ? input : rawText ?? input,
-      value: value ?? (isBoolFlag(field) ? !input.startsWith('--no-') : undefined)
-    };
-  }
-};
+export const isBoolFlag = (x?: SchemaInputConfig): boolean => x?.type === Boolean && !x.array;
 
 /**
  * Parsing support for the cli
@@ -80,11 +65,11 @@ export class CliParseUtil {
   /**
    * Get a user-specified module if present
    */
-  static getSpecifiedModule(schema: CliCommandConfigSchema, args: string[]): string | undefined {
+  static getSpecifiedModule(schema: SchemaClassConfig, args: string[]): string | undefined {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
-    const input = schema.flags.find(x => x.type === 'module');
-    const ENV_KEY = input?.flagNames?.filter(x => x.startsWith(ENV_PRE)).map(x => x.replace(ENV_PRE, ''))[0] ?? '';
-    const flags = new Set(input?.flagNames ?? []);
+    const input = Object.values(schema.fields).find(x => x.specifiers?.includes('module'));
+    const ENV_KEY = input?.aliases?.filter(x => x.startsWith(ENV_PRE)).map(x => x.replace(ENV_PRE, ''))[0] ?? '';
+    const flags = new Set(input?.aliases ?? []);
     const check = (k?: string, v?: string): string | undefined => flags.has(k!) ? v : undefined;
     return args.reduce(
       (m, x, i, arr) =>
@@ -144,7 +129,7 @@ export class CliParseUtil {
   /**
    * Expand flag arguments into full argument list
    */
-  static async expandArgs(schema: CliCommandConfigSchema, args: string[]): Promise<string[]> {
+  static async expandArgs(schema: SchemaClassConfig, args: string[]): Promise<string[]> {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
     const mod = this.getSpecifiedModule(schema, args);
     return (await Promise.all(args.map((x, i) =>
@@ -154,22 +139,23 @@ export class CliParseUtil {
   /**
    * Parse inputs to command
    */
-  static async parse(schema: CliCommandConfig, inputs: string[]): Promise<ParsedState> {
-    const flagMap = new Map<string, CliCommandInput>(
-      schema.flags.flatMap(f => (f.flagNames ?? []).map(name => [name, f]))
+  static async parse(schema: SchemaClassConfig, inputs: string[]): Promise<ParsedState> {
+    const flagMap = new Map<string, SchemaFieldConfig>(
+      Object.values(schema.fields).flatMap(f => (f.aliases ?? []).map(name => [name, f]))
     );
 
     const out: ParsedInput[] = [];
 
     // Load env vars to front
-    for (const field of schema.flags) {
-      for (const envName of field.envVars ?? []) {
-        if (envName in process.env) {
-          const value: string = process.env[envName]!;
+    for (const field of Object.values(schema.fields)) {
+      for (const envName of (field.aliases ?? []).filter(x => x.startsWith(ENV_PRE))) {
+        const simple = envName.replace(ENV_PRE, '');
+        if (simple in process.env) {
+          const value: string = process.env[simple]!;
           if (field.array) {
-            out.push(...value.split(/\s*,\s*/g).map(v => getInput({ field, input: `${ENV_PRE}${envName}`, value: v })));
+            out.push(...value.split(/\s*,\s*/g).map(v => ({ type: 'flag', fieldName: field.name.toString(), input: envName, value: v }) as const));
           } else {
-            out.push(getInput({ field, input: `${ENV_PRE}${envName}`, value }));
+            out.push({ type: 'flag', fieldName: field.name.toString(), input: envName, value });
           }
         }
       }
@@ -181,24 +167,25 @@ export class CliParseUtil {
       const input = inputs[i];
 
       if (input === RAW_SEP) { // Raw separator
-        out.push(...inputs.slice(i + 1).map(x => getInput({ input: x })));
+        out.push(...inputs.slice(i + 1).map((x, idx) => ({ type: 'arg', input: x, index: argIdx + idx }) as const));
         break;
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
         const [k, ...v] = input.split('=');
         const field = flagMap.get(k);
-        out.push(getInput({ field, rawText: input, input: k, value: v.join('=') }));
+        out.push({ type: 'flag', fieldName: field?.name.toString() ?? k, input: k, value: v.join('=') });
       } else if (VALID_FLAG.test(input)) { // Flag
         const field = flagMap.get(input);
         const next = inputs[i + 1];
+        const base = { type: 'flag', fieldName: field?.name.toString() ?? input, input, array: field?.array } as const;
         if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
-          out.push(getInput({ field, input }));
+          out.push(base);
         } else {
-          out.push(getInput({ field, input, value: next }));
+          out.push({ ...base, value: next });
           i += 1;
         }
       } else {
-        const field = schema.args[argIdx];
-        out.push(getInput({ field, input, index: argIdx }));
+        const field = schema.methods.main?.parameters[argIdx];
+        out.push({ type: 'arg', array: field?.array ?? false, input, index: argIdx });
         // Move argIdx along if not in a var arg situation
         if (!field?.array) {
           argIdx += 1;
