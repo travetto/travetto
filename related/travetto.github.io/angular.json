@@ -9,7 +9,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss",
+          "style": "css",
           "displayBlock": true
         }
       },
@@ -22,13 +22,13 @@
             },
             "index": "src/index.html",
             "tsConfig": "src/tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
+            "inlineStyleLanguage": "css",
             "polyfills": [],
             "assets": [
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.css"
             ],
             "scripts": [],
             "browser": "src/main.ts"

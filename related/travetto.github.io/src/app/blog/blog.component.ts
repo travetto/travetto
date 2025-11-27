@@ -41,7 +41,7 @@ interface Post {
   }
 </div>
 `,
-  styleUrls: ['./blog.component.scss']
+  styleUrls: ['./blog.component.css']
 })
 export class BlogComponent implements OnInit {
 

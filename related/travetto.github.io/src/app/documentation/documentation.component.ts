@@ -6,7 +6,7 @@ import { PAGES } from './pages';
 
 @Component({
   selector: 'app-documentation',
-  styleUrls: ['./documentation.component.scss'],
+  styleUrls: ['./documentation.component.css'],
   templateUrl: './documentation.component.html',
   encapsulation: ViewEncapsulation.Emulated,
   imports: [RouterLinkActive, RouterLink, NgClass, RouterOutlet]

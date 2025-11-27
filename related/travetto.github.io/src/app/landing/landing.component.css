@@ -44,11 +44,13 @@ aside {
   font-size: 16pt;
   text-align: center;
   background: rgba(0, 0, 0, 0.1);
+
   p {
     width: 100%;
     color: #333;
     margin: 0;
     padding: 0 !important;
+
     a {
       color: #666;
       font-weight: normal;
@@ -83,7 +85,7 @@ section {
     box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
   }
 
-  div + img {
+  div+img {
     margin-left: 15px;
   }
 
@@ -94,7 +96,7 @@ section {
   &:nth-child(even) {
     flex-direction: row-reverse;
 
-    div + img {
+    div+img {
       margin-left: 0px;
       margin-right: 15px;
     }

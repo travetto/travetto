@@ -1,27 +1,30 @@
-@use "sass:color";
-@use "reset.scss";
+@import "reset.css";
 
-@mixin group($r, $g, $b) {
-  background: #333
-    linear-gradient(315deg, rgba($r, $g, $b, 0.7) 20px, rgba($r, $g, $b, 1) 30px, rgba($r, $g, $b, 1) 100%);
+@property --icon-size {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
 }
 
-@mixin materialIcon($size: 20px, $lineHeight: 35px, $padding: 0.5em) {
+
+a[class$="-link"]::after,
+tbody tr td:not(:first-of-type, :empty)::after,
+figcaption::before {
   font-family: "Material Icons";
   font-weight: normal;
   font-style: normal;
-  font-size: $size;
+  font-size: var(--icon-size, 20px);
   /* Preferred icon size */
   display: inline-block;
-  line-height: $lineHeight;
+  line-height: var(--icon-line-height, 35px);
   text-transform: none;
   letter-spacing: normal;
   vertical-align: bottom;
   word-wrap: normal;
   white-space: nowrap;
   direction: ltr;
-  padding-left: $padding;
-  padding-right: $padding;
+  padding-left: var(--icon-padding, 0.5em);
+  padding-right: var(--icon-padding, 0.5em);
 
   /* Support for all WebKit browsers. */
   -webkit-font-smoothing: antialiased;
@@ -33,43 +36,6 @@
 
   /* Support for IE. */
   font-feature-settings: "liga";
-}
-
-@mixin cornered($left: true, $right: true, $radius: 15px, $invert: false) {
-  position: relative;
-  @if $left {
-    &:before {
-      position: absolute;
-      z-index: 100;
-      top: -1px;
-      content: "";
-      border-top: $radius solid white;
-      @if $invert {
-        right: -1px;
-        border-left: $radius solid transparent;
-      } @else {
-        left: -1px;
-        border-right: $radius solid transparent;
-      }
-    }
-  }
-
-  @if $right {
-    &:after {
-      position: absolute;
-      z-index: 100;
-      bottom: -1px;
-      content: "";
-      border-bottom: $radius solid white;
-      @if $invert {
-        left: -1px;
-        border-right: $radius solid transparent;
-      } @else {
-        right: -1px;
-        border-left: $radius solid transparent;
-      }
-    }
-  }
 }
 
 /* You can add global styles to this file, and also import other style files */
@@ -128,6 +94,7 @@ li {
   table {
     border-collapse: collapse;
     border-spacing: 0;
+
     tr {
       th {
         color: #333;
@@ -137,31 +104,39 @@ li {
         padding-left: 0.5rem;
         padding-right: 0.5rem;
       }
+
       td,
       th {
         vertical-align: middle;
       }
+
       th:not(:first-of-type),
       td:not(:first-of-type) {
         text-align: center;
         min-width: 6rem;
       }
+
       td:not(:first-of-type) {
         border: 1px solid #eee;
       }
+
       td:first-of-type {
         border-bottom: 1px solid #eee;
       }
     }
+
     tbody tr {
       td:not(:first-of-type, :empty) {
         color: transparent;
+
         &::after {
           padding: 0.5rem;
           color: green;
           font-weight: bold;
           content: "circle";
-          @include materialIcon($size: 1.2em, $lineHeight: 1em, $padding: 0px);
+          --icon-size: 1.2em;
+          --icon-line-height: 1em;
+          --icon-padding: 0px;
         }
       }
     }
@@ -184,6 +159,7 @@ li {
   h1 {
     line-height: 2em;
     border-bottom: 1px solid #ccc;
+
     small {
       display: inline-block;
       font-size: 1rem;
@@ -244,9 +220,10 @@ li {
         content: "view_module";
         color: rgba(0, 128, 0, 0.7);
       }
+
       color: rgba(0, 128, 0, 1);
       text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.3);
-      // background: rgba(0, 128, 0, .2);
+      /* background: rgba(0, 128, 0, .2); */
     }
 
     &.source-link {
@@ -254,9 +231,10 @@ li {
         content: "text_snippet";
         color: rgba(255, 0, 0, 0.7);
       }
+
       color: rgba(255, 0, 0, 1);
       text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.3);
-      // background: rgba(255, 0, 0, .2);
+      /* background: rgba(255, 0, 0, .2); */
     }
 
     &.external-link {
@@ -264,20 +242,45 @@ li {
         content: "exit_to_app";
         color: rgba(50, 100, 180, 0.5);
       }
+
       color: rgba(50, 100, 180, 1);
       text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.3);
-      // background: rgba(0, 0, 255, .2);
+      /* background: rgba(0, 0, 255, .2); */
     }
 
     &::after {
-      @include materialIcon($size: 1.2em, $lineHeight: 1em, $padding: 0px);
+      --icon-size: 1.2em;
+      --icon-line-height: 1em;
+      --icon-padding: 0px;
       vertical-align: middle;
       color: white;
     }
   }
 
   figure {
-    @include cornered($radius: 20px, $invert: true);
+    position: relative;
+
+    &:before {
+      position: absolute;
+      z-index: 100;
+      top: -1px;
+      content: "";
+      border-top: 20px solid white;
+      right: -1px;
+      border-left: 20px solid transparent;
+    }
+
+    &:after {
+      position: absolute;
+      z-index: 100;
+      bottom: -1px;
+      content: "";
+      border-bottom: 20px solid white;
+      left: -1px;
+      border-right: 20px solid transparent;
+    }
+
+
     padding: 0px;
     margin: 0px;
     margin-top: 1rem;
@@ -289,6 +292,7 @@ li {
       font-style: normal;
       margin: 0px;
       padding: 0px;
+
       a {
         margin-right: 0.5em;
         color: white;
@@ -316,42 +320,44 @@ li {
         font-size: 0.8em;
         line-height: 1.2em;
         margin: 0.4em 0;
+
         &:hover {
           border-bottom: 1px solid #fff;
         }
       }
 
-      &::before {
-        @include materialIcon;
-      }
+      &::before {}
 
       &.install::before {
         content: "playlist_add";
       }
+
       &.terminal::before {
         content: "call_to_action";
       }
+
       &.code::before {
         content: "code";
       }
+
       &.config::before {
         content: "settings";
       }
 
       &.install {
-        background-color: color.scale(color.adjust(rgb(218, 165, 32), $lightness: -5%), $saturation: 0%);
+        background-color: hsl(43, 75%, 44%);
       }
 
       &.terminal {
-        background-color: color.scale(rgba(102, 102, 102, 1), $saturation: 0%);
+        background-color: rgb(102, 102, 102);
       }
 
       &.code {
-        background-color: color.scale(color.adjust(rgba(0, 255, 0, 1), $lightness: -20%), $saturation: 0%);
+        background-color: hsl(120, 100%, 30%);
       }
 
       &.config {
-        background-color: color.scale(color.adjust(rgba(0, 0, 255, 1), $lightness: -20%), $saturation: -40%);
+        background-color: hsl(240, 60%, 30%);
       }
     }
 
@@ -382,7 +388,7 @@ li {
       padding: 1.5em;
       background: #ccc;
       color: #333;
-      // box-shadow: 1px 1px .3em -.1em black;
+      /* box-shadow: 1px 1px .3em -.1em black; */
 
       margin: 0;
 
@@ -395,7 +401,8 @@ li {
         background-size: 100vw 500vh;
         background-position: fixed, fixed, fixed, fixed, fixed;
         background-repeat: repeat;
-        background-image: repeating-linear-gradient(315deg, #5885852e 92%, #073aff00 100%),
+        background-image:
+          repeating-linear-gradient(315deg, #5885852e 92%, #073aff00 100%),
           repeating-radial-gradient(75% 75% at 238% 218%, #75cbcb05 30%, #073aff14 39%),
           radial-gradient(99% 99% at 109% 2%, #151212d9 0%, #073aff00 100%),
           radial-gradient(99% 99% at 21% 78%, #141117ff 0%, #073aff00 100%),
@@ -408,6 +415,7 @@ li {
         }
 
         .token {
+
           &.class-name,
           &.type {
             color: hsl(195, 53%, 79%);
@@ -423,7 +431,7 @@ li {
           &.cdata {
             color: lightgreen;
 
-            & > * {
+            &>* {
               color: hsl(30, 50%, 50%) !important;
             }
           }
@@ -499,7 +507,7 @@ li {
       }
 
       &.path {
-        background-color: color.adjust(pink, $lightness: -30%);
+        background-color: hsl(350, 100%, 58%);
         color: white;
       }
 
@@ -555,8 +563,8 @@ li {
     margin-bottom: 0;
   }
 
-  ul + h3,
-  ol + h3 {
+  ul+h3,
+  ol+h3 {
     margin-top: 1em;
   }
 
@@ -573,8 +581,8 @@ li {
       width: 100%;
       display: block;
 
-      &.active > a {
-        border-color: color.adjust(green, $lightness: 10%);
+      &.active>a {
+        border-color: hsl(120, 100%, 35%);
       }
 
       a {
@@ -598,7 +606,7 @@ li {
           font-size: 0.8em;
 
           &.active a {
-            border-color: color.adjust(red, $lightness: 10%);
+            border-color: hsl(0, 100%, 60%);
           }
         }
       }
@@ -619,7 +627,7 @@ li {
       }
     }
 
-    .wrapper > * {
+    .wrapper>* {
       display: block !important;
     }
 
