@@ -147,7 +147,7 @@ class $Registry {
     } else {
       const inst = this.instance(matches);
       src.on((event) => {
-        if (inst.store.has('curr' in event ? event.curr?.[0] : event.prev!?.[0])) {
+        if (inst.store.has('curr' in event ? event.curr[0] : event.prev[0])) {
           handler(event);
         }
       });

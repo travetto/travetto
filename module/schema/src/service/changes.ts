@@ -5,8 +5,6 @@ import { ChangeEvent } from '@travetto/registry';
 
 import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 
-const id = (c: Class | string): string => typeof c === 'string' ? c : c.Ⲑid;
-
 interface FieldMapping {
   path: SchemaFieldConfig[];
   config: SchemaClassConfig;
@@ -60,7 +58,7 @@ class $SchemaChangeListener {
    * Clear dependency mappings for a given class
    */
   clearSchemaDependency(cls: Class): void {
-    this.#mapping.delete(id(cls));
+    this.#mapping.delete(cls.Ⲑid);
   }
 
   /**
@@ -71,11 +69,11 @@ class $SchemaChangeListener {
    * @param config The configuration or the class
    */
   trackSchemaDependency(src: Class, parent: Class, path: SchemaFieldConfig[], config: SchemaClassConfig): void {
-    const idValue = id(src);
+    const idValue = src.Ⲑid;
     if (!this.#mapping.has(idValue)) {
       this.#mapping.set(idValue, new Map());
     }
-    this.#mapping.get(idValue)!.set(id(parent), { path, config });
+    this.#mapping.get(idValue)!.set(parent.Ⲑid, { path, config });
   }
 
   /**
@@ -85,7 +83,7 @@ class $SchemaChangeListener {
    */
   emitSchemaChanges({ cls, changes }: FieldChangeEvent): void {
     const updates = new Map<string, SchemaChange>();
-    const clsId = id(cls);
+    const clsId = cls.Ⲑid;
 
     if (this.#mapping.has(clsId)) {
       const deps = this.#mapping.get(clsId)!;
