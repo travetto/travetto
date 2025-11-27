@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { DependencyRegistry, Injectable, InjectableFactory, Inject } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable, InjectableFactory, Inject } from '@travetto/di';
 
 export const text = <>
   <c.StdHeader />
@@ -74,7 +74,7 @@ export const text = <>
 
   <c.Section title='Manual Invocation'>
 
-    Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the {DependencyRegistry}. The registry allows for requesting a dependency by class reference:
+    Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the {DependencyRegistryIndex}. The registry allows for requesting a dependency by class reference:
 
     <c.Code title='Example of Manual Lookup' src='doc/injectable-manual.ts' />
 

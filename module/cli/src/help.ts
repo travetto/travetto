@@ -7,7 +7,6 @@ import { cliTpl } from './color.ts';
 import { CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 import { CliValidationResultError } from './error.ts';
-import { isBoolFlag } from './parse.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
 
 const validationSourceMap: Record<string, string> = {

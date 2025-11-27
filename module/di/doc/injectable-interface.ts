@@ -24,6 +24,6 @@ class SpecificService {
 class ManualInvocationOfInterface {
   @InjectableFactory()
   static getCustomService(): Promise<ServiceContract> {
-    return DependencyRegistryIndex.getInstance<ServiceContract>(toConcrete<ServiceContract>());
+    return DependencyRegistryIndex.getInstance(toConcrete<ServiceContract>());
   }
 }
