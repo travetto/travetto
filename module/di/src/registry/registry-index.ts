@@ -99,7 +99,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
       const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
       const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
       this.#resolver.registerClass(config, baseParentId);
-      if (config.autoInjectable) {
+      if (config.autoInject) {
         // Don't wait
         this.getInstance(config.candidateType, config.qualifier);
       }

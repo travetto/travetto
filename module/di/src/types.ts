@@ -52,7 +52,7 @@ export interface InjectableCandidate<T = unknown> {
   /**
    * Should the target be constructed on startup
    */
-  autoInjectable?: boolean;
+  autoInject?: boolean;
   /**
    * Actual reference to a Class
    */

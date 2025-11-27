@@ -11,7 +11,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { clientFactory } from '../support/client/rpc.ts';
 import { WebRpcClient, WebRpcConfig } from './config.ts';
 
-@Injectable({ autoInjectable: !Runtime.production })
+@Injectable({ autoInject: !Runtime.production })
 export class WebRpcClientGeneratorService {
 
   @Inject()
