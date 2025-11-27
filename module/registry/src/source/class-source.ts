@@ -153,22 +153,20 @@ export class ClassSource implements ChangeSource<Class> {
       })();
     }
 
-    if (Env.TRV_ROLE.val === 'test') {
-      // We do not auto load in test mode
-    } else {
-      // Ensure everything is loaded
-      for (const entry of RuntimeIndex.find({
-        module: (m) => {
-          const role = Env.TRV_ROLE.val;
-          return m.roles.includes('std') && (
+    // Ensure everything is loaded
+    for (const entry of RuntimeIndex.find({
+      module: (m) => {
+        const role = Env.TRV_ROLE.val;
+        return role !== 'test' && // Skip all modules when in test
+          m.roles.includes('std') &&
+          (
             !Runtime.production || m.prod ||
             (role === 'doc' && m.roles.includes(role))
           );
-        },
-        folder: f => f === 'src' || f === '$index'
-      })) {
-        await Runtime.importFrom(entry.import);
-      }
+      },
+      folder: f => f === 'src' || f === '$index'
+    })) {
+      await Runtime.importFrom(entry.import);
     }
 
     // Flush all load events
