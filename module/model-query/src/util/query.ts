@@ -58,7 +58,12 @@ export class ModelQueryUtil {
 
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     if (polymorphicConfig) {
-      clauses.push(castTo({ [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedType }));
+      clauses.push(castTo(polymorphicConfig.discriminatedBase ? {
+        [polymorphicConfig.discriminatedField]: { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) }
+      } : {
+        [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedType
+      }
+      ));
     }
 
     const conf = ModelRegistryIndex.getConfig(cls);

@@ -32,7 +32,11 @@ export class ModelQuerySuggestUtil {
 
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     if (polymorphicConfig) {
-      clauses.push({ [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedType });
+      clauses.push(polymorphicConfig.discriminatedBase ? {
+        [polymorphicConfig.discriminatedField]: { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) }
+      } : {
+        [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedType
+      });
     }
 
     const config = ModelRegistryIndex.getConfig(cls);

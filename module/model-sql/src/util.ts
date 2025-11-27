@@ -72,7 +72,7 @@ export class SQLModelUtil {
     const fields = Object.values(conf.fields).map(field => ({ ...field }));
 
     // Polymorphic
-    if (hasModel && conf.classType === 'discriminated-base') {
+    if (hasModel && conf.discriminatedBase) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of SchemaRegistryIndex.getDiscriminatedClasses(conf.class)) {
         const typeConf = SchemaRegistryIndex.getConfig(type);

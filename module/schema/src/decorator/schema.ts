@@ -55,7 +55,7 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
  */
 export function SubType<T>(type?: string) {
   return (cls: Class<Partial<T>>): void => {
-    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedType: type, classType: 'discriminated' });
+    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedType: type });
   };
 }
 
@@ -66,6 +66,6 @@ export function SubType<T>(type?: string) {
  */
 export function Discriminated<T>(field: ValidStringField<T>) {
   return (cls: Class<Partial<T>>): void => {
-    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedField: field, classType: 'discriminated-base' });
+    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedField: field, discriminatedBase: true });
   };
 }

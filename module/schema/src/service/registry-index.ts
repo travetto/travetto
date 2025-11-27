@@ -20,7 +20,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls).get();
   }
 
-  static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField'>> | undefined {
+  static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
@@ -36,8 +36,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.has(cls);
   }
 
-  static getDiscriminatedTypesForClass(cls: Class): Class[] | undefined {
-    return this.#instance.getDiscriminatedTypesForClass(cls);
+  static getDiscriminatedTypes(cls: Class): string[] | undefined {
+    return this.#instance.getDiscriminatedTypes(cls);
   }
 
   static resolveInstanceType<T>(cls: Class<T>, o: T): Class {
@@ -78,10 +78,9 @@ export class SchemaRegistryIndex implements RegistryIndex {
   #registerDiscriminatedTypes(cls: Class): void {
     // Mark as subtype
     const config = this.getClassConfig(cls);
-    if (config.classType === 'standard' || !config.discriminatedType) {
+    if (!config.discriminatedType) {
       return;
     }
-
     const base = this.getBaseClass(cls);
     if (!this.#byDiscriminatedTypes.has(base)) {
       this.#byDiscriminatedTypes.set(base, new Map());
@@ -145,7 +144,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
     if (!this.#baseSchema.has(cls)) {
       let conf = this.getClassConfig(cls);
       let parent: Class | undefined = cls;
-      while (parent && conf.classType === 'discriminated') {
+      while (parent && conf.discriminatedType && !conf.discriminatedBase) {
         parent = getParentClass(parent);
         if (parent) {
           conf = this.store.getOptional(parent)?.get() ?? conf;
@@ -164,8 +163,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
   resolveInstanceType<T>(requestedCls: Class<T>, o: T): Class {
     const cls = this.store.getClassById(requestedCls); // Resolve by id to handle any stale references
     const adapter = this.store.get(cls);
-    const { classType, discriminatedField, discriminatedType } = adapter.get();
-    if (classType !== 'discriminated' && classType !== 'discriminated-base') {
+    const { discriminatedField, discriminatedType } = adapter.get();
+    if (!discriminatedField) {
       return cls;
     } else {
       const base = this.getBaseClass(cls);
@@ -189,15 +188,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
       }
       return requested;
     }
-  }
-
-  /**
-   * Return all subtypes by discriminator for a given class
-   * @param cls The base class to resolve from
-   */
-  getDiscriminatedTypesForClass(cls: Class): Class[] | undefined {
-    const res = this.#byDiscriminatedTypes.get(cls)?.values();
-    return res ? [...res] : undefined;
   }
 
   /**
@@ -236,9 +226,21 @@ export class SchemaRegistryIndex implements RegistryIndex {
   }
 
   /**
-   * Find all classes by their base types
+   * Return all subtypes by discriminator for a given class
+   * @param cls The base class to resolve from
    */
   getDiscriminatedClasses(cls: Class): Class[] {
     return [...this.#byDiscriminatedTypes.get(cls)?.values() ?? []];
+  }
+
+  /**
+   * Get all discriminated types for a given class
+   */
+  getDiscriminatedTypes(cls: Class): string[] | undefined {
+    const map = this.#byDiscriminatedTypes.get(cls);
+    if (map) {
+      return [...map.keys()];
+    }
+    return undefined;
   }
 }

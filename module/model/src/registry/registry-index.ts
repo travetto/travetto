@@ -62,7 +62,7 @@ export class ModelRegistryIndex implements RegistryIndex {
     const schema = SchemaRegistryIndex.getConfig(cls);
 
     // Don't index on discriminated schemas
-    if (schema.classType === 'discriminated') {
+    if (schema.discriminatedType && !schema.discriminatedBase) {
       return;
     }
 

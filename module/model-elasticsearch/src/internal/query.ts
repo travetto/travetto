@@ -205,7 +205,7 @@ export class ElasticsearchQueryUtil {
    * @param search
    */
   static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): estypes.QueryDslQueryContainer {
-    const clauses = [];
+    const clauses: estypes.QueryDslQueryContainer[] = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
     }
@@ -223,7 +223,11 @@ export class ElasticsearchQueryUtil {
     }
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     if (polymorphicConfig) {
-      clauses.push({ term: { [polymorphicConfig.discriminatedField]: { value: polymorphicConfig.discriminatedType } } });
+      if (polymorphicConfig.discriminatedBase) {
+        clauses.push({ terms: { [polymorphicConfig.discriminatedField]: SchemaRegistryIndex.getDiscriminatedTypes(cls)! } });
+      } else {
+        clauses.push({ term: { [polymorphicConfig.discriminatedField]: { value: polymorphicConfig.discriminatedType } } });
+      }
     }
     return clauses.length === 0 ? {} :
       clauses.length === 1 ? clauses[0] :

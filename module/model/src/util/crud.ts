@@ -75,10 +75,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = SchemaRegistryIndex.getDiscriminatedConfig(cls);
-    if (config) { // Sub-typing, assign type
-      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
-    }
+    SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
 
     item = await this.prePersist(cls, item, scope);
 
@@ -106,7 +103,7 @@ export class ModelCrudUtil {
    */
   static ensureNotSubType(cls: Class): void {
     const config = SchemaRegistryIndex.getConfig(cls);
-    if (config.classType === 'discriminated') {
+    if (config.discriminatedType && !config.discriminatedBase) {
       throw new SubTypeNotSupportedError(cls);
     }
   }

@@ -12,7 +12,6 @@ const classToDiscriminatedType = (cls: Class): string => cls.name
   .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
   .toLowerCase();
 
-
 function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {
   const md = base.metadata ??= {};
   const out = md[key] ??= {};
@@ -90,14 +89,6 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     examples: [...(parent.examples ?? []), ...(base.examples ?? [])],
     discriminatedField: base.discriminatedField ?? parent.discriminatedField,
   });
-  // Combine with parent
-  if (base.classType === undefined) {
-    switch (parent.classType) {
-      case 'discriminated':
-      case 'discriminated-base': base.classType = 'discriminated'; break;
-      default: base.classType = 'standard'; break;
-    }
-  }
   return base;
 }
 
@@ -217,19 +208,20 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       combineClassWithParent(config, parent);
     }
 
-    if (config.discriminatedField && !describeFunction(this.#cls).abstract) {
-      config.discriminatedType ??= classToDiscriminatedType(this.#cls);
+    if (config.discriminatedField && !config.discriminatedType && !describeFunction(this.#cls).abstract) {
+      config.discriminatedType = classToDiscriminatedType(this.#cls);
+    }
+
+    if (config.discriminatedField && config.discriminatedType) {
       config.fields[config.discriminatedField] = {
         ...config.fields[config.discriminatedField], // Make a full copy
         required: {
           active: false
         },
-        ...config.discriminatedType ? {
-          enum: {
-            values: [config.discriminatedType],
-            message: `${config.discriminatedField} can only be '${config.discriminatedType}'`,
-          },
-        } : {}
+        enum: {
+          values: [config.discriminatedType],
+          message: `${config.discriminatedField} can only be '${config.discriminatedType}'`,
+        },
       };
     }
 
@@ -312,10 +304,10 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return o;
   }
 
-  getDiscriminatedConfig(): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField'>> | undefined {
-    const { classType, discriminatedField, discriminatedType } = this.#config;
-    if (classType === 'discriminated' && discriminatedType && discriminatedField && discriminatedField in this.#config.fields) {
-      return { discriminatedType, discriminatedField };
+  getDiscriminatedConfig(): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
+    const { discriminatedField, discriminatedType, discriminatedBase } = this.#config;
+    if (discriminatedType && discriminatedField) {
+      return { discriminatedType, discriminatedField, discriminatedBase: !!discriminatedBase };
     }
     return undefined;
   }

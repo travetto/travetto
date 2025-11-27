@@ -107,9 +107,9 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
    */
   validators: ValidatorFn<Any, unknown>[];
   /**
-   * Type of class
+   * Is this a base class for discrimination
    */
-  classType?: 'discriminated-base' | 'discriminated' | 'standard';
+  discriminatedBase?: boolean;
   /**
    * Do we have a discriminator field
    */
