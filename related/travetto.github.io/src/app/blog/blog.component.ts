@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, resource } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
 interface Post {
@@ -23,7 +23,7 @@ interface Post {
   imports: [DatePipe],
   template: `
 <div class="documentation">
-  @for (post of posts; track $index) {
+  @for (post of posts.value(); track $index) {
     <article>
       <h2>
         {{post.title}}
@@ -43,18 +43,18 @@ interface Post {
 `,
   styleUrls: ['./blog.component.css']
 })
-export class BlogComponent implements OnInit {
+export class BlogComponent {
 
-  blogId = '8362979454426216505';
-  posts: Post[] = [];
+  posts = resource({
+    params: () => ({
+      key: 'AIzaSyBfg2W_JaAJU4qQWSKs-Vx_zVbFh4joYos',
+      blogId: '8362979454426216505'
+    }),
+    loader: ({ params }) =>
+      fetch(`https://www.googleapis.com/blogger/v3/blogs/${params.blogId}/posts/?key=${params.key}`)
+        .then(res => res.json())
+        .then<Post[]>(data => data.items.slice(0, 3))
 
-  ngOnInit(): void {
-    const key = 'AIzaSyBfg2W_JaAJU4qQWSKs-Vx_zVbFh4joYos';
-
-    fetch(
-      `https://www.googleapis.com/blogger/v3/blogs/${this.blogId}/posts/?key=${key}`,
-    )
-      .then(res => res.json())
-      .then(data => this.posts = data.items.slice(0, 3));
-  }
+  }).asReadonly();
 }
+
