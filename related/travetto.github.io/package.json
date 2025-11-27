@@ -25,7 +25,7 @@
     "deploy": "./deploy.sh"
   },
   "dependencies": {
-    "@angular/common": "^19.2.9",
+    "@angular/common": "^19.2.16",
     "@angular/compiler": "^19.2.9",
     "@angular/core": "^19.2.9",
     "@angular/platform-browser": "^19.2.9",
