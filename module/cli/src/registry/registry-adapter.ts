@@ -3,7 +3,7 @@ import { RegistryAdapter } from '@travetto/registry';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
-import { CliParseUtil, ENV_PREFIX, isBoolFlag } from '../parse.ts';
+import { CliParseUtil, ENV_PREFIX } from '../parse.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 

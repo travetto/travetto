@@ -16,7 +16,10 @@ export type RegistryIndexClass = {
   new(): RegistryIndex;
 };
 
-export type RegistrySimpleStore = {
+/**
+ * Simple store interface for registry indexes
+ */
+export interface RegistrySimpleStore {
   has(cls: Class): boolean;
   finalize(cls: Class): void;
   finalized(cls: Class): boolean;
@@ -26,9 +29,10 @@ export type RegistrySimpleStore = {
 
 /**
  * Registry index definition
+ * @concrete
  */
-export type RegistryIndex = {
+export interface RegistryIndex {
   store: RegistrySimpleStore;
   process(events: ChangeEvent<Class>[]): void;
   finalize(cls: Class): void;
-};
+}
