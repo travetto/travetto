@@ -8,11 +8,15 @@ import { CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 import { CliValidationResultError } from './error.ts';
 import { isBoolFlag } from './parse.ts';
+import { CliSchemaExportUtil } from './schema-export.ts';
 
 const validationSourceMap: Record<string, string> = {
   arg: 'Argument',
   flag: 'Flag'
 };
+
+const ifDefined = <T>(v: T | null | '' | undefined): T | undefined =>
+  (v === null || v === '' || v === undefined) ? undefined : v;
 
 /**
  * Utilities for showing help
@@ -36,7 +40,7 @@ export class HelpUtil {
     for (const field of args) {
       const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type.name.toLowerCase();
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
-      usage.push(cliTpl`${{ input: field.required ? `<${arg}>` : `[${arg}]` }}`);
+      usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
     }
 
     const params: string[] = [];
@@ -55,14 +59,21 @@ export class HelpUtil {
       }
       const param = [cliTpl`${{ param: aliases.join(', ') }}`];
       if (!isBoolFlag(field)) {
-        const type = field.type === String && field.enum && field.enum.values.length <= 3 ? field.enum.values?.join('|') : field.type.name.toLowerCase();
+        let type: string;
+        if (field.type === String && field.enum && field.enum.values.length <= 3) {
+          type = field.enum.values?.join('|');
+        } else {
+          ({ type } = CliSchemaExportUtil.baseInputType(field));
+        }
         param.push(cliTpl`${{ type: `<${type}>` }}`);
       }
       params.push(param.join(' '));
       const desc = [cliTpl`${{ title: field.description }}`];
 
-      if (key !== 'help' && field.default !== null && field.default !== undefined && field.default !== '') {
-        desc.push(cliTpl`(default: ${{ input: JSON.stringify(field.default) }})`);
+      const def = ifDefined(field.default) ?? ifDefined(command[key]);
+
+      if (key !== 'help' && def !== undefined) {
+        desc.push(cliTpl`(default: ${{ input: JSON.stringify(def) }})`);
       }
       descriptions.push(desc.join(' '));
     }
@@ -78,10 +89,7 @@ export class HelpUtil {
       helpText.push('');
     }
 
-    const title = schema.title ?? schema.description;
-
     return [
-      ...(title ? [cliTpl`${{ title: commandName }}: ${{ subtitle: title }}`, ''] : []),
       usage.join(' '),
       '',
       cliTpl`${{ title: 'Options:' }}`,

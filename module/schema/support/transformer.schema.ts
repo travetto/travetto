@@ -149,7 +149,7 @@ export class SchemaTransformer {
     if (comments.description) {
       params.unshift(state.fromLiteral({ title: comments.description }));
     }
-    if (node.modifiers?.some(x => x.kind === ts.SyntaxKind.StaticKeyword)) {
+    if (DeclarationUtil.isStatic(node)) {
       params.push(state.fromLiteral({ isStatic: true }));
     }
     params.push(...SchemaTransformUtil.computeReturnTypeDecoratorParams(state, node));
@@ -185,7 +185,7 @@ export class SchemaTransformer {
    */
   @OnGetter()
   static processSchemaGetter(state: TransformerState & AutoState, node: ts.GetAccessorDeclaration): ts.GetAccessorDeclaration {
-    if (this.isInvisible(state, node)) {
+    if (this.isInvisible(state, node) || DeclarationUtil.isStatic(node)) {
       return node;
     }
     if (state[AccessorsSymbol]?.has(node.name.getText())) {
@@ -201,7 +201,7 @@ export class SchemaTransformer {
    */
   @OnSetter()
   static processSchemaSetter(state: TransformerState & AutoState, node: ts.SetAccessorDeclaration): ts.SetAccessorDeclaration {
-    if (this.isInvisible(state, node)) {
+    if (this.isInvisible(state, node) || DeclarationUtil.isStatic(node)) {
       return node;
     }
     if (state[AccessorsSymbol]?.has(node.name.getText())) {

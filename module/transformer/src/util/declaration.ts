@@ -95,4 +95,11 @@ export class DeclarationUtil {
     }
     return acc;
   }
+
+  static isStatic(node: ts.Declaration): boolean {
+    if ('modifiers' in node && Array.isArray(node.modifiers)) {
+      return node.modifiers?.some(x => x.kind === ts.SyntaxKind.StaticKeyword) ?? false;
+    }
+    return false;
+  }
 }
