@@ -16,7 +16,7 @@ import { BaseModelSuite } from './base.ts';
 
 @Schema()
 @Model()
-export class Worker {
+export abstract class Worker {
   id: string;
   @DiscriminatorField()
   _type: string;
@@ -56,7 +56,6 @@ export class IndexedWorker {
   name: string;
   age?: number;
 }
-
 @Model()
 export class IndexedDoctor extends IndexedWorker {
   specialty: string;

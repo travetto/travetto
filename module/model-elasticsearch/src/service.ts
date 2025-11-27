@@ -16,7 +16,6 @@ import {
   ModelQueryFacet,
 } from '@travetto/model-query';
 
-
 import { ElasticsearchModelConfig } from './config.ts';
 import { EsBulkError } from './internal/types.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';

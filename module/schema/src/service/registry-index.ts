@@ -169,17 +169,11 @@ export class SchemaRegistryIndex implements RegistryIndex {
     } else {
       const base = this.getBaseClass(cls);
       const map = this.#byDiscriminatedTypes.get(base);
-      if (!discriminatedField) {
-        throw new AppError(`Unable to resolve discriminated type for class ${base.name} without a discriminated field`);
-      }
       const type = castTo<string>(o[castKey<T>(discriminatedField)]) ?? discriminatedType;
       if (!type) {
         throw new AppError(`Unable to resolve discriminated type for class ${base.name} without a type`);
       }
-      if (!map) {
-        throw new AppError(`Unable to resolve discriminated type map for class ${base.name}`);
-      }
-      if (!map.has(type)) {
+      if (!map?.has(type)) {
         throw new AppError(`Unable to resolve discriminated type '${type}' for class ${base.name}`);
       }
       const requested = map.get(type)!;

@@ -31,12 +31,16 @@ export class ModelQuerySuggestUtil {
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
+    const select: Query<T>['select'] = {
+      ...query?.select
+    };
     if (polymorphicConfig) {
       clauses.push(polymorphicConfig.discriminatedBase ? {
         [polymorphicConfig.discriminatedField]: { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) }
       } : {
         [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedType
       });
+      Object.assign(select, { [polymorphicConfig.discriminatedField]: true });
     }
 
     const config = ModelRegistryIndex.getConfig(cls);
@@ -51,7 +55,7 @@ export class ModelQuerySuggestUtil {
     return {
       where: clauses.length ? (clauses.length > 1 ? { $and: clauses } : clauses[0]) : {},
       limit,
-      select: query?.select
+      select
     };
   }
 
@@ -88,10 +92,6 @@ export class ModelQuerySuggestUtil {
    * Build suggestion query
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
-    const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
-    return this.getSuggestQuery<T>(cls, castTo(field), prefix, {
-      ...(query ?? {}),
-      select: castTo({ [field]: true, ...(polymorphicConfig ? { [polymorphicConfig.discriminatedField]: true } : {}) })
-    });
+    return this.getSuggestQuery<T>(cls, castTo(field), prefix, query);
   }
 }
