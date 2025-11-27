@@ -191,7 +191,7 @@ export class SchemaBindingSuite {
     state = await get('--no-fun');
     assert(state.all.length === 1);
 
-    assert(state.all[0].type === 'unknown');
+    assert(state.all[0].type === 'flag');
   }
 
   @Test()
