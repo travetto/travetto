@@ -62,7 +62,7 @@ This module also has a tight integration with the <a target="_blank" class="exte
 At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
 <ul> <li>The file must be located in the <code class="item path">support/</code> folder, and have a name that matches <code class="item path">cli.*.ts</code></li>
 <li>The file must be a class that has a main method</li>
-<li>The class must use the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> decorator</li>
+<li>The class must use the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85">@CliCommand</a> decorator</li>
 </ul>
 
   <figure class="code">
@@ -104,7 +104,7 @@ The pattern is that underscores(_) translate to colons (:), and the <code class=
 
 <h2 id="binding-flags">Binding Flags</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> is a wrapper for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">@Schema</a>, and so every class that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> decorator is now a full <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">@Schema</a> class. The fields of the class represent the flags that are available to the command.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85">@CliCommand</a> is a wrapper for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19">@Schema</a>, and so every class that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85">@CliCommand</a> decorator is now a full <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19">@Schema</a> class. The fields of the class represent the flags that are available to the command.
 
   <figure class="code">
     <figcaption class="code">Basic Command with Flag
@@ -148,11 +148,11 @@ As you can see the command now has the support of a basic boolean flag to determ
 HELLO</code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> supports the following data types for flags:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85">@CliCommand</a> supports the following data types for flags:
 <ul> <li>Boolean values</li>
-<li>Number values. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L164">@Integer</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L170">@Float</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L158">@Precision</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99">@Min</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109">@Max</a> decorators help provide additional validation.</li>
-<li>String values. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99">@MinLength</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109">@MaxLength</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L91">@Match</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L70">@Enum</a> provide additional constraints</li>
-<li>Date values. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99">@Min</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109">@Max</a> decorators help provide additional validation.</li>
+<li>Number values. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L164">@Integer</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L171">@Float</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L157">@Precision</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L91">@Min</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L102">@Max</a> decorators help provide additional validation.</li>
+<li>String values. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L91">@MinLength</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L102">@MaxLength</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L82">@Match</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L56">@Enum</a> provide additional constraints</li>
+<li>Date values. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L91">@Min</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L102">@Max</a> decorators help provide additional validation.</li>
 <li>String lists. Same as String, but allowing multiple values.</li>
 <li>Numeric lists. Same as Number, but allowing multiple values.</li>
 </ul>
@@ -293,7 +293,7 @@ Options:
 
 <h2 id="customization">Customization</h2>
 
-By default, all fields are treated as flags and all parameters of <code class="item method">main()</code> are treated as arguments within the validation process.  Like the standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">@Schema</a> behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
+By default, all fields are treated as flags and all parameters of <code class="item method">main()</code> are treated as arguments within the validation process.  Like the standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19">@Schema</a> behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
 
   <figure class="code">
     <figcaption class="code">Custom Command with Metadata
@@ -462,7 +462,7 @@ Ultimately, after resolution, the content of these files will be injected inline
 
 <h2 id="vscode-integration">VSCode Integration</h2>
 
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative support for creating Web Applications">Web API</a> does expose a cli target <code class="item input">web:http</code> that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a>. This is achieved by setting the <code class="item input">runTarget</code> field on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative support for creating Web Applications">Web API</a> does expose a cli target <code class="item input">web:http</code> that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a>. This is achieved by setting the <code class="item input">runTarget</code> field on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85">@CliCommand</a> decorator.  This means the target will be visible within the editor tooling.
 
   <figure class="code">
     <figcaption class="code">Simple Run Target
@@ -487,11 +487,10 @@ By default, cli commands do not expose themselves to the VSCode extension, as th
 
   <figure class="code">
     <figcaption class="code">Anatomy of a Command
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L47">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L35">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliCommandShape<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
-
   <span class="token comment">/**
    * Parsed state
    */</span>
@@ -545,10 +544,10 @@ If the goal is to run a more complex application, which may include depending on
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Runtime<span class="token punctuation">,</span> toConcrete<span class="token punctuation">,</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistryIndex <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand<span class="token punctuation">,</span> CliCommandShape <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NetUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RootRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Registry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> WebHttpServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types.ts'</span><span class="token punctuation">;</span>
 
@@ -571,8 +570,8 @@ If the goal is to run a more complex application, which may include depending on
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">await</span> RootRegistry<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">const</span> instance <span class="token operator">=</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token generic-function"><span class="token function">toConcrete</span><span class="token generic class-name"><span class="token operator">&lt;</span>WebHttpServer<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> Registry<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> instance <span class="token operator">=</span> <span class="token keyword">await</span> DependencyRegistryIndex<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token generic-function"><span class="token function">toConcrete</span><span class="token generic class-name"><span class="token operator">&lt;</span>WebHttpServer<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">const</span> handle <span class="token operator">=</span> <span class="token keyword">await</span> Util<span class="token punctuation">.</span><span class="token function">acquireWithRetry</span><span class="token punctuation">(</span>
       <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> instance<span class="token punctuation">.</span><span class="token function">serve</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
@@ -590,11 +589,11 @@ The <code class="item input">module</code> field is slightly more complex, but i
 
 <h3 id="custom-validation">Custom Validation</h3>
 
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L32">CliValidationError</a> errors that are returned will be shared with the user, and fail to invoke the <code class="item method">main</code> method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L20">CliValidationError</a> errors that are returned will be shared with the user, and fail to invoke the <code class="item method">main</code> method.
 
   <figure class="code">
     <figcaption class="code">CliValidationError
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L32">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L20">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliValidationError</span> <span class="token punctuation">{{'{'}}</span>
@@ -641,14 +640,14 @@ Options:
 
 Available Services
 --------------------
- * dynamodb@2.6.1
- * elasticsearch@8.17.0
+ * dynamodb@3.0.0
+ * elasticsearch@9.1.0
  * firestore@latest
  * mongodb@8.0
- * mysql@9.3
- * postgresql@17.5
+ * mysql@9.4
+ * postgresql@17.6
  * redis@8.0
- * s3@4.2.0</code></pre>
+ * s3@4.8.0</code></pre>
   </figure>
 
 A sample of all services available to the entire framework:
@@ -661,14 +660,14 @@ A sample of all services available to the entire framework:
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           <span class="token number">2.6</span>.1    Running 93af422e793a
-elasticsearch     <span class="token number">8.17</span>.0    Running ed76ee063d13
+dynamodb           <span class="token number">3.0</span>.0    Running 93af422e793a
+elasticsearch      <span class="token number">9.1</span>.0    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              <span class="token number">8.0</span>    Running 5513eba6734e
-mysql                <span class="token number">9.3</span>    Running 307bc66d442a
-postgresql          <span class="token number">17.5</span>    Running e78291e71040
+mysql                <span class="token number">9.4</span>    Running 307bc66d442a
+postgresql          <span class="token number">17.6</span>    Running e78291e71040
 redis                <span class="token number">8.0</span>    Running 77ba279b4e30
-s3                 <span class="token number">4.2</span>.0    Running fdacfc55b9e3</code></pre>
+s3                 <span class="token number">4.8</span>.0    Running fdacfc55b9e3</code></pre>
   </figure>
 
 <h3 id="defining-new-services">Defining new Services</h3>

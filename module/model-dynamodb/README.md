@@ -36,13 +36,12 @@ export class Init {
 }
 ```
 
-where the [DynamoDBModelConfig](https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts#L7) is defined by:
+where the [DynamoDBModelConfig](https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts#L6) is defined by:
 
 **Code: Structure of DynamoDBModelConfig**
 ```typescript
 @Config('model.dynamodb')
 export class DynamoDBModelConfig {
-  @Field(Object)
   client: dynamodb.DynamoDBClientConfig = {
     endpoint: undefined
   };

@@ -20,20 +20,21 @@ Registration, within the framework flows throw two main use cases:
 
 ### Initial Flows
 The primary flow occurs on initialization of the application. At that point, the module will:
-   1. Initialize [RootRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10) and will automatically register/load all relevant files
+   1. Initialize [Registry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9) and will automatically register/load all relevant files
    1. As files are imported, decorators within the files will record various metadata relevant to the respective registries
-   1. When all files are processed, the [RootRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10) is finished, and it will signal to anything waiting on registered data that its free to use it.
+   1. When all files are processed, the [Registry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9) is finished, and it will signal to anything waiting on registered data that its free to use it.
 
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
 **Code: Sample Registry**
 ```typescript
 import { Class } from '@travetto/runtime';
-import { MetadataRegistry } from '@travetto/registry';
+import { ChangeEvent, RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 interface Group {
   class: Class;
   name: string;
+  children: Child[];
 }
 
 interface Child {
@@ -41,41 +42,72 @@ interface Child {
   method: Function;
 }
 
-function isComplete(o: Partial<Group>): o is Group {
-  return !!o;
-}
+/**
+ * The adapter to handle mapping/modeling a specific class
+ */
+class SampleRegistryAdapter implements RegistryAdapter<Group> {
 
-export class SampleRegistry extends MetadataRegistry<Group, Child> {
-  /**
-   * Finalize class after all metadata is collected
-   */
-  onInstallFinalize<T>(cls: Class<T>): Group {
-    const pending: Partial<Group> = this.getOrCreatePending(cls);
-    if (isComplete(pending)) {
-      return pending;
-    } else {
-      throw new Error('Invalid Group');
-    }
+  #class: Class;
+  #config: Group;
+
+  constructor(cls: Class) {
+    this.#class = cls;
   }
 
-  /**
-   * Create scaffolding on first encounter of a class
-   */
-  createPending(cls: Class): Partial<Group> {
-    return {
-      class: cls,
-      name: cls.name
-    };
+  register(...data: Partial<Partial<Group>>[]): Group {
+    for (const d of data) {
+      Object.assign(this.#config, {
+        ...d,
+        children: [
+          ...(this.#config?.children ?? []),
+          ...(d.children ?? [])
+        ]
+      });
+    }
+    return this.#config;
+  }
+
+  registerChild(method: Function, name: string): void {
+    this.register({ children: [{ method, name }] });
+  }
+
+  finalize?(parent?: Partial<Group> | undefined): void {
+    // Nothing to do
+  }
+
+  get(): Group {
+    return this.#config;
+  }
+}
+
+/**
+ * Basic Index that handles cross-class activity
+ */
+export class SampleRegistryIndex implements RegistryIndex {
+  static #instance = Registry.registerIndex(SampleRegistryIndex);
+
+  static getForRegister(cls: Class, allowFinalized = false): SampleRegistryAdapter {
+    return this.#instance.store.getForRegister(cls, allowFinalized);
+  }
+
+  store = new RegistryIndexStore(SampleRegistryAdapter);
+
+  process(events: ChangeEvent<Class>[]): void {
+    // Nothing to do
+  }
+
+  finalize(cls: Class): void {
+    this.store.finalize(cls);
   }
 }
 ```
 
-The registry is a [MetadataRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/metadata.ts#L14) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
+The registry index is a [RegistryIndex](https://github.com/travetto/travetto/tree/main/module/registry/src/service/types.ts#L34) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
 
 ### Live Flow
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. 
 
-As the [DynamicFileLoader](https://github.com/travetto/travetto/tree/main/module/registry/src/internal/file-loader.ts#L17) notifies that a file has been changed, the [RootRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10) will pick it up, and process it accordingly.
+As the [DynamicFileLoader](https://github.com/travetto/travetto/tree/main/module/registry/src/internal/file-loader.ts#L17) notifies that a file has been changed, the [Registry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9) will pick it up, and process it accordingly.
 
 ## Supporting Metadata
 As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s readme, the framework produces hashes of methods, classes, and functions, to allow for detecting changes to individual parts of the codebase. During the live flow, various registries will inspect this information to determine if action should be taken.
@@ -116,7 +148,7 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
           const nextHash = describeFunction(next.get(k)!)?.hash;
           if (prevHash !== nextHash) {
             changes += 1;
-            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
+            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
           }
         }
       }

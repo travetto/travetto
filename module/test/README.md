@@ -21,7 +21,7 @@ This module provides unit testing functionality that integrates with the framewo
 **Note**: All tests should be under the `**/*` folders.  The pattern for tests is defined as as a standard glob using [Node](https://nodejs.org)'s built in globbing support.
 
 ## Definition
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L20) decorator.  All tests intrinsically support `async`/`await`. 
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L23) decorator.  All tests intrinsically support `async`/`await`. 
 
 A simple example would be:
 
@@ -79,9 +79,11 @@ would translate to:
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+const Δmethod = tslib_1.__importStar(require("@travetto/schema/src/decorator/method.js"));
 const Δdebug = tslib_1.__importStar(require("@travetto/runtime/src/debug.js"));
 const Δcheck = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
 const Δfunction = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
+const Δschema = tslib_1.__importStar(require("@travetto/schema/src/decorator/schema.js"));
 var mod_1 = ["@travetto/test", "doc/assert-example.ts"];
 const node_assert_1 = tslib_1.__importDefault(require("node:assert"));
 const test_1 = require("@travetto/test");
@@ -94,10 +96,12 @@ let SimpleTest = class SimpleTest {
     }
 };
 tslib_1.__decorate([
-    (0, test_1.Test)()
+    (0, test_1.Test)(),
+    Δmethod.Method({ returnType: {} })
 ], SimpleTest.prototype, "test", null);
 SimpleTest = tslib_1.__decorate([
-    (0, test_1.Suite)()
+    (0, test_1.Suite)(),
+    Δschema.Schema()
 ], SimpleTest);
 ```
 

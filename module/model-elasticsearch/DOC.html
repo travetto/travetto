@@ -46,11 +46,11 @@ Out of the box, by installing the module, everything should be wired up by defau
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L11">ElasticsearchModelConfig</a> is defined by:
+where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10">ElasticsearchModelConfig</a> is defined by:
 
   <figure class="code">
     <figcaption class="code">Structure of ElasticsearchModelConfig
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L9">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.elasticsearch'</span><span class="token punctuation">)</span>
@@ -83,7 +83,6 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   <span class="token comment">/**
    * Base schema config for elasticsearch
    */</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Field</span></span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   schemaConfig<span class="token operator">:</span> EsSchemaConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     caseSensitive<span class="token operator">:</span> <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
@@ -91,7 +90,6 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   <span class="token comment">/**
    * Base index create settings
    */</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Field</span></span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   indexCreate <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">[</span><span class="token string">'number_of_replicas'</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token string">'number_of_shards'</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token number">1</span>

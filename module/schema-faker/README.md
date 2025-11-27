@@ -28,7 +28,7 @@ By default all types are mapped as-is:
       *  telephone
       *  postalCode
 
-   *  Sub-schemas as registered via [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) decorators
+   *  Sub-schemas as registered via [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) decorators
 
 In addition to the general types, the code relies upon name matching to provide additional refinement:
 
@@ -45,7 +45,7 @@ static #namesToType = {
       [/l(ast)?name/, faker.person.lastName],
       [/^ip(add(ress)?)?$/, faker.internet.ip],
       [/^ip(add(ress)?)?(v?)6$/, faker.internet.ipv6],
-      [/^username$/, faker.internet.userName],
+      [/^username$/, faker.internet.username],
       [/^domain(name)?$/, faker.internet.domainName],
       [/^file(path|name)?$/, faker.system.filePath],
       [/^street(1)?$/, faker.location.streetAddress],

@@ -42,7 +42,7 @@ export class Init {
 }
 ```
 
-where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L11) is defined by:
+where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10) is defined by:
 
 **Code: Structure of ElasticsearchModelConfig**
 ```typescript
@@ -76,7 +76,6 @@ export class ElasticsearchModelConfig {
   /**
    * Base schema config for elasticsearch
    */
-  @Field(Object)
   schemaConfig: EsSchemaConfig = {
     caseSensitive: false
   };
@@ -84,7 +83,6 @@ export class ElasticsearchModelConfig {
   /**
    * Base index create settings
    */
-  @Field(Object)
   indexCreate = {
     ['number_of_replicas']: 0,
     ['number_of_shards']: 1

@@ -278,7 +278,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L17) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L19) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript

@@ -26,7 +26,7 @@ There are three primary cli commands for packing your code:
 ```bash
 $ trv pack --help
 
-Usage: pack [options]
+Usage: pack [options] [args...:string]
 
 Options:
   -b, --build-dir <string>             Workspace for building (default: "/tmp/<temp-folder>")
@@ -92,7 +92,7 @@ This command is nearly identical to the standard `pack` operation, except for th
 ```bash
 $ trv pack:zip --help
 
-Usage: pack:zip [options]
+Usage: pack:zip [options] [args...:string]
 
 Options:
   -b, --build-dir <string>             Workspace for building (default: "/tmp/<temp-folder>")
@@ -121,7 +121,7 @@ This command starts off identical to the standard `pack` operation, but it conta
 ```bash
 $ trv pack:docker --help
 
-Usage: pack:docker [options]
+Usage: pack:docker [options] [args...:string]
 
 Options:
   -b, --build-dir <string>               Workspace for building (default: "/tmp/<temp-folder>")
@@ -140,7 +140,7 @@ Options:
   -wr, --include-workspace-resources     Include workspace resources (default: false)
   -np, --npm-package <string>            External NPM Packages (default: [])
   -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile.ts")
-  -di, --docker-image <string>           Docker Image to extend (default: "node:24-alpine")
+  -di, --docker-image <string>           Docker Image to extend (default: "node:25-alpine")
   -dn, --docker-name <string>            Docker Image Name (default: "travetto_pack")
   -ru, --runtime-user <string>           Docker Runtime user
   -rp, --runtime-package <string>        Docker Runtime Packages (default: [])
@@ -244,21 +244,21 @@ cd $TRV_OUT
 npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT
 
-# Pulling Docker Base Image node:24-alpine 
+# Pulling Docker Base Image node:25-alpine 
 
-echo "Pulling Docker Base Image node:24-alpine"
+echo "Pulling Docker Base Image node:25-alpine"
 
-docker pull node:24-alpine
+docker pull node:25-alpine
 
-# Detected Image OS node:24-alpine as alpine 
+# Detected Image OS node:25-alpine as alpine 
 
-echo "Detected Image OS node:24-alpine as alpine"
+echo "Detected Image OS node:25-alpine as alpine"
 
 # Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile.ts 
 
 echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile.ts"
 
-echo "FROM node:24-alpine" > $DIST/Dockerfile
+echo "FROM node:25-alpine" > $DIST/Dockerfile
 echo "RUN addgroup -g 2000 app && adduser -D -G app -u 2000 app" >> $DIST/Dockerfile
 echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile

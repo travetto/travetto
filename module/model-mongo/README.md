@@ -43,7 +43,7 @@ export class Init {
 }
 ```
 
-where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mongo/src/config.ts#L11) is defined by:
+where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mongo/src/config.ts#L10) is defined by:
 
 **Code: Structure of MongoModelConfig**
 ```typescript
@@ -81,7 +81,6 @@ export class MongoModelConfig {
   /**
    * Mongo client options
    */
-  @Field(Object)
   options: mongo.MongoClientOptions = {};
 
   /**

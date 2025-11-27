@@ -83,7 +83,7 @@ The [@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/dec
       *  `reinstate` the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
 
 ### EvictCache
-Additionally, there is support for planned eviction via the [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L38) decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same `keySpace` and `key` to compute the expected key.
+Additionally, there is support for planned eviction via the [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L44) decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same `keySpace` and `key` to compute the expected key.
 
 **Code: Using decorators to cache/evict user access**
 ```typescript

@@ -94,7 +94,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h3 id="evictcache">EvictCache</h3>
 
-Additionally, there is support for planned eviction via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L38">&#64;EvictCache</a> decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same <code class="item input">keySpace</code> and <code class="item input">key</code> to compute the expected key.
+Additionally, there is support for planned eviction via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L44">&#64;EvictCache</a> decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same <code class="item input">keySpace</code> and <code class="item input">key</code> to compute the expected key.
 
   <figure class="code">
     <figcaption class="code">Using decorators to cache/evict user access

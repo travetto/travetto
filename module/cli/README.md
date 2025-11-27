@@ -60,7 +60,7 @@ This module also has a tight integration with the [VSCode plugin](https://market
 At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
    *  The file must be located in the `support/` folder, and have a name that matches `cli.*.ts`
    *  The file must be a class that has a main method
-   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator
+   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85) decorator
 
 **Code: Basic Command**
 ```typescript
@@ -95,7 +95,7 @@ Examples of mappings:
 The pattern is that underscores(_) translate to colons (:), and the `cli.` prefix, and `.ts` suffix are dropped.
 
 ## Binding Flags
-[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) class. The fields of the class represent the flags that are available to the command.
+[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) class. The fields of the class represent the flags that are available to the command.
 
 **Code: Basic Command with Flag**
 ```typescript
@@ -132,11 +132,11 @@ $ trv basic:flag --loud
 HELLO
 ```
 
-The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) supports the following data types for flags:
+The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85) supports the following data types for flags:
    *  Boolean values
-   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L164), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L170), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L158), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109) decorators help provide additional validation.
-   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L91) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L70) provide additional constraints
-   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109) decorators help provide additional validation.
+   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L164), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L171), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L157), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L91) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L102) decorators help provide additional validation.
+   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L91), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L102), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L82) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L56) provide additional constraints
+   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L91) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L102) decorators help provide additional validation.
    *  String lists. Same as String, but allowing multiple values.
    *  Numeric lists. Same as Number, but allowing multiple values.
 
@@ -252,7 +252,7 @@ $ trv basic:arglist -r 10 5 3 9 8 1
 ```
 
 ## Customization
-By default, all fields are treated as flags and all parameters of `main()` are treated as arguments within the validation process.  Like the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
+By default, all fields are treated as flags and all parameters of `main()` are treated as arguments within the validation process.  Like the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
 
 **Code: Custom Command with Metadata**
 ```typescript
@@ -391,7 +391,7 @@ npx trv call:db --host localhost --port 3306 --username app --password <custom>
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -414,7 +414,6 @@ export class RunCommand {
 **Code: Anatomy of a Command**
 ```typescript
 export interface CliCommandShape<T extends unknown[] = unknown[]> {
-
   /**
    * Parsed state
    */
@@ -464,10 +463,10 @@ If the goal is to run a more complex application, which may include depending on
 **Code: Simple Run Target**
 ```typescript
 import { Runtime, toConcrete, Util } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import type { WebHttpServer } from '../src/types.ts';
 
@@ -490,8 +489,8 @@ export class WebHttpCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
-    await RootRegistry.init();
-    const instance = await DependencyRegistry.getInstance(toConcrete<WebHttpServer>());
+    await Registry.init();
+    const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
 
     const handle = await Util.acquireWithRetry(
       () => instance.serve(),
@@ -509,7 +508,7 @@ As noted in the example above, `fields` is specified in this execution, with sup
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 ### Custom Validation
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L32) errors that are returned will be shared with the user, and fail to invoke the `main` method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L20) errors that are returned will be shared with the user, and fail to invoke the `main` method.
 
 **Code: CliValidationError**
 ```typescript
@@ -551,14 +550,14 @@ Options:
 
 Available Services
 --------------------
- * dynamodb@2.6.1
- * elasticsearch@8.17.0
+ * dynamodb@3.0.0
+ * elasticsearch@9.1.0
  * firestore@latest
  * mongodb@8.0
- * mysql@9.3
- * postgresql@17.5
+ * mysql@9.4
+ * postgresql@17.6
  * redis@8.0
- * s3@4.2.0
+ * s3@4.8.0
 ```
 
 A sample of all services available to the entire framework:
@@ -569,14 +568,14 @@ $ trv service status
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           2.6.1    Running 93af422e793a
-elasticsearch     8.17.0    Running ed76ee063d13
+dynamodb           3.0.0    Running 93af422e793a
+elasticsearch      9.1.0    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              8.0    Running 5513eba6734e
-mysql                9.3    Running 307bc66d442a
-postgresql          17.5    Running e78291e71040
+mysql                9.4    Running 307bc66d442a
+postgresql          17.6    Running e78291e71040
 redis                8.0    Running 77ba279b4e30
-s3                 4.2.0    Running fdacfc55b9e3
+s3                 4.8.0    Running fdacfc55b9e3
 ```
 
 ### Defining new Services

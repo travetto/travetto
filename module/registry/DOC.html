@@ -22,9 +22,9 @@ Registration, within the framework flows throw two main use cases:
 <h3 id="initial-flows">Initial Flows</h3>
 
 The primary flow occurs on initialization of the application. At that point, the module will:
-<ol> <li>Initialize <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10">RootRegistry</a> and will automatically register/load all relevant files</li>
+<ol> <li>Initialize <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9">Registry</a> and will automatically register/load all relevant files</li>
 <li>As files are imported, decorators within the files will record various metadata relevant to the respective registries</li>
-<li>When all files are processed, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10">RootRegistry</a> is finished, and it will signal to anything waiting on registered data that its free to use it.</li>
+<li>When all files are processed, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9">Registry</a> is finished, and it will signal to anything waiting on registered data that its free to use it.</li>
 </ol>
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
@@ -34,11 +34,12 @@ This flow ensures all files are loaded and processed before application starts. 
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Class <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MetadataRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ChangeEvent<span class="token punctuation">,</span> RegistryAdapter<span class="token punctuation">,</span> RegistryIndex<span class="token punctuation">,</span> RegistryIndexStore<span class="token punctuation">,</span> Registry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">interface</span> <span class="token class-name">Group</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">class</span><span class="token operator">:</span> Class<span class="token punctuation">;</span>
   name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  children<span class="token operator">:</span> Child<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
 <span class="token keyword">interface</span> <span class="token class-name">Child</span> <span class="token punctuation">{{'{'}}</span>
@@ -46,41 +47,72 @@ This flow ensures all files are loaded and processed before application starts. 
   method<span class="token operator">:</span> <span class="token builtin">Function</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-<span class="token keyword">function</span> <span class="token function">isComplete</span><span class="token punctuation">(</span>o<span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Group<span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> o <span class="token keyword">is</span> Group <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">return</span> <span class="token operator">!</span><span class="token operator">!</span>o<span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span>
+<span class="token comment">/**
+ * The adapter to handle mapping/modeling a specific class
+ */</span>
+<span class="token keyword">class</span> <span class="token class-name">SampleRegistryAdapter</span> <span class="token keyword">implements</span> <span class="token class-name">RegistryAdapter<span class="token operator">&lt;</span>Group<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
 
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleRegistry</span> <span class="token keyword">extends</span> <span class="token class-name">MetadataRegistry<span class="token operator">&lt;</span>Group<span class="token punctuation">,</span> Child<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">/**
-   * Finalize class after all metadata is collected
-   */</span>
-  <span class="token generic-function"><span class="token function">onInstallFinalize</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> Group <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> pending<span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Group<span class="token operator">></span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getOrCreatePending</span><span class="token punctuation">(</span>cls<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isComplete</span><span class="token punctuation">(</span>pending<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">return</span> pending<span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'Invalid Group'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span>
+  #<span class="token keyword">class</span><span class="token operator">:</span> Class<span class="token punctuation">;</span>
+  #config<span class="token operator">:</span> Group<span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>#<span class="token keyword">class</span> <span class="token operator">=</span> cls<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token comment">/**
-   * Create scaffolding on first encounter of a class
-   */</span>
-  <span class="token function">createPending</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token punctuation">)</span><span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Group<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">class</span><span class="token operator">:</span> cls<span class="token punctuation">,</span>
-      name<span class="token operator">:</span> cls<span class="token punctuation">.</span>name
-    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token function">register</span><span class="token punctuation">(</span><span class="token operator">...</span>data<span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Partial<span class="token operator">&lt;</span>Group<span class="token operator">>></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> Group <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> d <span class="token keyword">of</span> data<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      Object<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#config<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token operator">...</span>d<span class="token punctuation">,</span>
+        children<span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token operator">...</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#config<span class="token operator">?.</span>children <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token operator">...</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span>children <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        <span class="token punctuation">]</span>
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#config<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token function">registerChild</span><span class="token punctuation">(</span>method<span class="token operator">:</span> <span class="token builtin">Function</span><span class="token punctuation">,</span> name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> children<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span> method<span class="token punctuation">,</span> name <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  finalize<span class="token operator">?</span><span class="token punctuation">(</span>parent<span class="token operator">?</span><span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Group<span class="token operator">></span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Nothing to do</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Group <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#config<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token comment">/**
+ * Basic Index that handles cross-class activity
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleRegistryIndex</span> <span class="token keyword">implements</span> <span class="token class-name">RegistryIndex</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">static</span> #instance <span class="token operator">=</span> Registry<span class="token punctuation">.</span><span class="token function">registerIndex</span><span class="token punctuation">(</span>SampleRegistryIndex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">static</span> <span class="token function">getForRegister</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token punctuation">,</span> allowFinalized <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> SampleRegistryAdapter <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#instance<span class="token punctuation">.</span>store<span class="token punctuation">.</span><span class="token function">getForRegister</span><span class="token punctuation">(</span>cls<span class="token punctuation">,</span> allowFinalized<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  store <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RegistryIndexStore</span><span class="token punctuation">(</span>SampleRegistryAdapter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">process</span><span class="token punctuation">(</span>events<span class="token operator">:</span> ChangeEvent<span class="token operator">&lt;</span>Class<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Nothing to do</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token function">finalize</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>store<span class="token punctuation">.</span><span class="token function">finalize</span><span class="token punctuation">(</span>cls<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The registry is a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/service/metadata.ts#L14">MetadataRegistry</a> that similar to the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>'s Schema registry and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a>'s Dependency registry.
+The registry index is a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/service/types.ts#L34">RegistryIndex</a> that similar to the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>'s Schema registry and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a>'s Dependency registry.
 
 <h3 id="live-flow">Live Flow</h3>
 
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. <br><br>
-As the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/internal/file-loader.ts#L17">DynamicFileLoader</a> notifies that a file has been changed, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10">RootRegistry</a> will pick it up, and process it accordingly.
+As the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/internal/file-loader.ts#L17">DynamicFileLoader</a> notifies that a file has been changed, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9">Registry</a> will pick it up, and process it accordingly.
 
 <h2 id="supporting-metadata">Supporting Metadata</h2>
 
@@ -88,7 +120,7 @@ As mentioned in <a class="module-link" href="https://github.com/travetto/travett
 
   <figure class="code">
     <figcaption class="code">Sample Class Diffing
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/registry/src/source/class-source.ts#L55">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/registry/src/source/class-source.ts#L61">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token function">#handleFileChanges</span><span class="token punctuation">(</span>importFile<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> classes<span class="token operator">:</span> Class<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{{'{'}}</span>
@@ -124,7 +156,7 @@ As mentioned in <a class="module-link" href="https://github.com/travetto/travett
         <span class="token keyword">const</span> nextHash <span class="token operator">=</span> <span class="token function">describeFunction</span><span class="token punctuation">(</span>next<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token operator">!</span><span class="token punctuation">)</span><span class="token operator">?.</span>hash<span class="token punctuation">;</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span>prevHash <span class="token operator">!==</span> nextHash<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
           changes <span class="token operator">+=</span> <span class="token number">1</span><span class="token punctuation">;</span>
-          <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> type<span class="token operator">:</span> <span class="token string">'changed'</span><span class="token punctuation">,</span> curr<span class="token operator">:</span> next<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token operator">!</span><span class="token punctuation">,</span> prev<span class="token operator">:</span> prev<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> type<span class="token operator">:</span> <span class="token string">'changed'</span><span class="token punctuation">,</span> curr<span class="token operator">:</span> next<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token operator">!</span><span class="token punctuation">,</span> prev<span class="token operator">:</span> prev<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span><span class="token operator">!</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>

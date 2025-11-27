@@ -41,17 +41,15 @@ Out of the box, by installing the module, everything should be wired up by defau
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-redis/src/config.ts#L7">RedisModelConfig</a> is defined by:
+where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-redis/src/config.ts#L6">RedisModelConfig</a> is defined by:
 
   <figure class="code">
     <figcaption class="code">Structure of RedisModelConfig
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-redis/src/config.ts#L6">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-redis/src/config.ts#L5">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.redis'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RedisModelConfig</span> <span class="token punctuation">{{'{'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Field</span></span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   client<span class="token operator">:</span> redis<span class="token punctuation">.</span>RedisClientOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   namespace<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
