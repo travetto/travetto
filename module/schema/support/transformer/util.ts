@@ -101,8 +101,10 @@ export class SchemaTransformUtil {
       } else if (!!node.questionToken || !!typeExpr.undefinable || !!node.initializer) {
         attrs.required = { active: false };
       }
-      if (node.initializer && (
+      if (node.initializer !== undefined && (
         ts.isLiteralExpression(node.initializer) ||
+        node.initializer.kind === ts.SyntaxKind.TrueKeyword ||
+        node.initializer.kind === ts.SyntaxKind.FalseKeyword ||
         (ts.isArrayLiteralExpression(node.initializer) && node.initializer.elements.length === 0)
       )) {
         attrs.default = node.initializer;

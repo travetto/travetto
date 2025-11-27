@@ -64,21 +64,23 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       const long = stripDashes(longAliases?.[0]) ?? rawAliases.find(x => x.length >= 3) ?? toFlagName(fieldName);
       const aliases: string[] = field.aliases = [...envAliases];
 
-      if (short === undefined) {
-        if (!(isBoolFlag(field) && field.default === true)) {
+      const isDefaultedTrueBool = (isBoolFlag(field) && field.default === true);
+
+      if (!isDefaultedTrueBool) {
+        if (short === undefined) {
           short = fieldName.charAt(0);
           if (!used.has(short)) {
             aliases.push(`-${short}`);
             used.add(short);
           }
+        } else {
+          aliases.push(`-${short}`);
         }
-      } else {
-        aliases.push(`-${short}`);
       }
 
       aliases.push(`--${long}`);
 
-      if (isBoolFlag(field)) {
+      if (isDefaultedTrueBool) {
         aliases.push(`--no-${long}`);
       }
     }

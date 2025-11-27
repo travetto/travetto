@@ -49,14 +49,7 @@ export class HelpUtil {
     for (const field of Object.values(schema.fields)) {
       const key = castKey<CliCommandShape>(field.name);
 
-      let aliases = (field.aliases ?? []).filter(x => x.startsWith('-'));
-      if (isBoolFlag(field)) {
-        if (field.default === true) {
-          aliases = (field.aliases ?? []).filter(x => !/^[-][^-]/.test(x));
-        } else {
-          aliases = (field.aliases ?? []).filter(x => !x.startsWith('--no-'));
-        }
-      }
+      const aliases = (field.aliases ?? []).filter(x => x.startsWith('-'));
       const param = [cliTpl`${{ param: aliases.join(', ') }}`];
       if (!isBoolFlag(field)) {
         let type: string;

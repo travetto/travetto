@@ -24,7 +24,7 @@ export const isBoolFlag = (x?: SchemaInputConfig): boolean => x?.type === Boolea
 export class CliParseUtil {
 
   static toEnvField(k: string): string {
-    return `${ENV_PRE}${k}`;
+    return k.startsWith(ENV_PRE) ? k : `${ENV_PRE}${k}`;
   }
 
   static readToken(text: string, start = 0): { next: number, value?: string } {
