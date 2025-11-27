@@ -25,23 +25,23 @@
     "deploy": "./deploy.sh"
   },
   "dependencies": {
-    "@angular/common": "^19.2.9",
-    "@angular/compiler": "^19.2.9",
-    "@angular/core": "^19.2.9",
-    "@angular/platform-browser": "^19.2.9",
-    "@angular/platform-browser-dynamic": "^19.2.9",
-    "@angular/router": "^19.2.9",
+    "@angular/common": "^20.3.14",
+    "@angular/compiler": "^20.3.14",
+    "@angular/core": "^20.3.14",
+    "@angular/platform-browser": "^20.3.14",
+    "@angular/platform-browser-dynamic": "^20.3.14",
+    "@angular/router": "^20.3.14",
     "rxjs": "^7.8.2",
     "zone.js": "^0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "^19.2.10",
-    "@angular/cli": "^19.2.10",
-    "@angular/compiler-cli": "^19.2.9",
+    "@angular/build": "^20.3.12",
+    "@angular/cli": "^20.3.12",
+    "@angular/compiler-cli": "^20.3.14",
     "@types/node": "^22.13.4",
     "source-map-explorer": "^2.5.3",
     "ts-node": "~10.9.1",
-    "typescript": "~5.5.4"
+    "typescript": "~5.9.3"
   },
   "private": true,
   "publishConfig": {
