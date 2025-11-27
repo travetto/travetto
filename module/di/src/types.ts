@@ -50,9 +50,9 @@ export interface InjectableCandidate<T = unknown> {
    */
   primary?: boolean;
   /**
-   * Should the target be auto-created
+   * Should the target be constructed on startup
    */
-  autoCreate?: boolean;
+  autoInjectable?: boolean;
   /**
    * Actual reference to a Class
    */

@@ -2,7 +2,7 @@ import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry, RetargettingP
 import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType, PrimaryCandidateSymbol } from '../types';
+import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
 import { InjectionError } from '../error';
 import { DependencyRegistryResolver } from './registry-resolver';
@@ -99,6 +99,10 @@ export class DependencyRegistryIndex implements RegistryIndex {
       const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
       const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
       this.#resolver.registerClass(config, baseParentId);
+      if (config.autoInjectable) {
+        // Don't wait
+        this.getInstance(config.candidateType, config.qualifier);
+      }
     }
   }
 

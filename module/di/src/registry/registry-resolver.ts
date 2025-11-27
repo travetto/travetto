@@ -143,7 +143,6 @@ export class DependencyRegistryResolver {
           console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: candidateType.Ⲑid });
           return this.resolveCandidate(candidateType);
         }
-        console.error('Qualifier lookup failed', { qualifier, target: candidateType.Ⲑid, available: [...qualifiers.keys()] });
         throw new InjectionError('Dependency not found', candidateType, [qualifier]);
       } else {
         config = qualifiers.get(qualifier!)!;

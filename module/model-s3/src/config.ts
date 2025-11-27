@@ -2,7 +2,7 @@ import { fromIni } from '@aws-sdk/credential-provider-ini';
 import type s3 from '@aws-sdk/client-s3';
 
 import { Config, EnvVar } from '@travetto/config';
-import { Field, Required } from '@travetto/schema';
+import { Required } from '@travetto/schema';
 import { Runtime } from '@travetto/runtime';
 
 /**
