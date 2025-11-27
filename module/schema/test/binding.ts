@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { AppError } from '@travetto/runtime';
 import { BindUtil, SchemaValidator } from '@travetto/schema';
 
@@ -13,7 +13,7 @@ class DataBinding {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test('Validate bind')

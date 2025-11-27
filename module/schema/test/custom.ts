@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Schema, SchemaValidator, ValidationResultError, Validator } from '@travetto/schema';
 
 @Schema()
@@ -47,7 +47,7 @@ export class CustomTest {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test()

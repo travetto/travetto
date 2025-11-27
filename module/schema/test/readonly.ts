@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { ReadonlyUser } from './models/readonly.ts';
 
@@ -10,7 +10,7 @@ class ReadonlySuite {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test('Validate bind')

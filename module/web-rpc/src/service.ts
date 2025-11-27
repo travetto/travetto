@@ -5,7 +5,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { ControllerRegistryIndex } from '@travetto/web';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { clientFactory } from '../support/client/rpc.ts';
@@ -23,7 +23,7 @@ export class WebRpcClientGeneratorService {
     if (!this.config.clients.length || !Runtime.dynamic) {
       return;
     }
-    RegistryV2.onClassChange(() => this.render(), ControllerRegistryIndex);
+    Registry.onClassChange(() => this.render(), ControllerRegistryIndex);
   }
 
   async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {

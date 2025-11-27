@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Controller, ControllerRegistryIndex, EndpointUtil, Get, Post } from '@travetto/web';
 
@@ -63,7 +63,7 @@ export class RouterUtilTest {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test()

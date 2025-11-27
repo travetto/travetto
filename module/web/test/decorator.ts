@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
 import { CacheControl, Controller, ControllerRegistryIndex, Patch, SetHeaders } from '@travetto/web';
 
@@ -23,7 +23,7 @@ export class ConfigureTest {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   getEndpoint(cls: Class, idx: number) {

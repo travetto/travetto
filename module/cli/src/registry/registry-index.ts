@@ -1,5 +1,5 @@
 import { Class, getClass, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { RegistryAdapter, RegistryIndex, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
@@ -13,7 +13,7 @@ type CliCommandLoadResult = { command: string, config: CliCommandConfig, instanc
 
 export class CliCommandRegistryIndex implements RegistryIndex {
 
-  static #instance = RegistryV2.registerIndex(this);
+  static #instance = Registry.registerIndex(this);
 
   static getForRegister(cls: Class): RegistryAdapter<CliCommandConfig> {
     return this.#instance.store.getForRegister(cls);
@@ -91,7 +91,7 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     // Initialize any uninitialized commands
     if (uninitialized.length) {
       // Ensure processed
-      RegistryV2.process(uninitialized.map(v => ({ type: 'added', curr: v })));
+      Registry.process(uninitialized.map(v => ({ type: 'added', curr: v })));
     }
 
     for (const v of values) {

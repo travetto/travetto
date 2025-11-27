@@ -1,6 +1,6 @@
 import { Class, hasFunction, Runtime } from '@travetto/runtime';
 import { SchemaChangeListener, SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { ModelStorageSupport } from '../types/storage.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -33,7 +33,7 @@ export class ModelStorageUtil {
 
     // If listening for model add/removes/updates
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
-      RegistryV2.onClassChange(ev => {
+      Registry.onClassChange(ev => {
         switch (ev.type) {
           case 'added': checkType(ev.curr) ? storage.createModel?.(ev.curr) : undefined; break;
           case 'changed': checkType(ev.curr, false) ? storage.changeModel?.(ev.curr) : undefined; break;

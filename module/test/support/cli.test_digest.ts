@@ -1,6 +1,6 @@
 import { CliCommand } from '@travetto/cli';
 import { Env, Runtime, describeFunction } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { IsPrivate } from '@travetto/schema';
 
 import { SuiteRegistryIndex } from '../src/registry/registry-index.ts';
@@ -27,7 +27,7 @@ export class TestDigestCommand {
       }
     }
 
-    await RegistryV2.init();
+    await Registry.init();
 
     const suites = SuiteRegistryIndex.getClasses();
     const all = suites

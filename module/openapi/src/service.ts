@@ -5,7 +5,7 @@ import { BinaryUtil } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistryIndex, ControllerVisitUtil, WebConfig } from '@travetto/web';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config.ts';
 import { OpenapiVisitor } from './spec-generate.ts';
@@ -44,8 +44,8 @@ export class OpenApiService {
    * Initialize after schemas are readied
    */
   async postConstruct(): Promise<void> {
-    RegistryV2.onClassChange(() => this.resetSpec(), ControllerRegistryIndex);
-    RegistryV2.onClassChange(() => this.resetSpec(), SchemaRegistryIndex);
+    Registry.onClassChange(() => this.resetSpec(), ControllerRegistryIndex);
+    Registry.onClassChange(() => this.resetSpec(), SchemaRegistryIndex);
 
     if (!this.apiHostConfig.servers && this.webConfig.baseUrl) {
       this.apiHostConfig.servers = [{ url: this.webConfig.baseUrl }];

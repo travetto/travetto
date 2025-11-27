@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Schema, View } from '@travetto/schema';
 
 @Schema()
@@ -25,7 +25,7 @@ export class ViewsTest {
 
   @BeforeAll()
   ready() {
-    return RegistryV2.init();
+    return Registry.init();
   }
 
   @Test()

@@ -1,7 +1,7 @@
 import { AssertionError } from 'node:assert';
 
 import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { TestConfig, TestResult, TestRun } from '../model/test.ts';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
@@ -256,7 +256,7 @@ export class TestExecutor {
     }
 
     // Initialize registry (after loading the above)
-    await RegistryV2.finalizeForIndex(SuiteRegistryIndex);
+    await Registry.finalizeForIndex(SuiteRegistryIndex);
 
     // Convert inbound arguments to specific tests to run
     const suites = SuiteRegistryIndex.getSuiteTests(run);

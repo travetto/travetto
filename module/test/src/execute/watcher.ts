@@ -1,4 +1,4 @@
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
 
@@ -23,7 +23,7 @@ export class TestWatcher {
   static async watch(format: string, runAllOnStart = true): Promise<void> {
     console.debug('Listening for changes');
 
-    await RegistryV2.init();
+    await Registry.init();
 
     const events: TestRun[] = [];
 
@@ -38,7 +38,7 @@ export class TestWatcher {
     )
       .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
 
-    RegistryV2.onMethodChange((event) => {
+    Registry.onMethodChange((event) => {
       const [cls, method] = ('prev' in event && event.prev ? event.prev : null) ??
         ('curr' in event && event.curr ? event.curr : []);
 
@@ -73,7 +73,7 @@ export class TestWatcher {
     }, SuiteRegistryIndex);
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    RegistryV2.onNonClassChanges(imp => itr.add({ import: imp }));
+    Registry.onNonClassChanges(imp => itr.add({ import: imp }));
 
     process.on('message', ev => {
       if (typeof ev === 'object' && ev && 'type' in ev && ev.type === 'run-test') {

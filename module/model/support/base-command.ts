@@ -1,6 +1,6 @@
 import { Env } from '@travetto/runtime';
 import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
 
 import type { ModelStorageSupport } from '../src/types/storage.ts';
@@ -23,7 +23,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   }
 
   async help(): Promise<string[]> {
-    await RegistryV2.init();
+    await Registry.init();
 
     const candidates = await ModelCandidateUtil.export(this.getOp());
     return [
@@ -38,7 +38,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   }
 
   async validate(provider: string, models: string[]): Promise<CliValidationError | undefined> {
-    await RegistryV2.init();
+    await Registry.init();
 
     const candidates = await ModelCandidateUtil.export(this.getOp());
     if (provider && !candidates.providers.includes(provider)) {

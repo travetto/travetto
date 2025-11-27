@@ -1,7 +1,7 @@
 import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { WebHttpServer, WebHttpConfig } from '@travetto/web-http-server';
 
 import './config-override.ts';
@@ -16,7 +16,7 @@ export class SampleApp {
 
   async main() {
     console.log('CUSTOM STARTUP');
-    await RegistryV2.init();
+    await Registry.init();
     const ssl = await DependencyRegistryIndex.getInstance(WebHttpConfig);
     ssl.tls = true;
 

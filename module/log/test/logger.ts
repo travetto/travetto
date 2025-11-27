@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
 import { castTo, ConsoleListener, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { JsonLogFormatter, LogDecorator, LogEvent, LogFormatUtil, Logger, LogService } from '@travetto/log';
 
 @Injectable()
@@ -35,7 +35,7 @@ class LoggerTest {
 
   @BeforeAll()
   init() {
-    return RegistryV2.init();
+    return Registry.init();
   }
 
   @BeforeEach()

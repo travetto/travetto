@@ -5,7 +5,7 @@ import { buffer } from 'node:stream/consumers';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
 import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
 
@@ -14,7 +14,7 @@ class DecompressInterceptorSuite {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   async decompress({ data, encoding, requestHeaders = {}, responseHeaders = {} }: {

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeEach } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { asFull, toConcrete } from '@travetto/runtime';
 
 import { Injectable, InjectableFactory, DependencyRegistryIndex } from '@travetto/di';
@@ -79,7 +79,7 @@ class ComplexDiTest {
 
   @BeforeEach()
   init() {
-    return RegistryV2.init();
+    return Registry.init();
   }
 
   @Test()

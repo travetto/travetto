@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { MaxLength, Method, MethodValidator, Schema, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 const nameValidator = (name: string): ValidationError | undefined => {
@@ -40,7 +40,7 @@ class SchemaValidatorMethodSuite {
 
   @Test('should validate method with correct schema')
   async testValidMethod() {
-    await RegistryV2.init();
+    await Registry.init();
 
     await assert.doesNotReject(() =>
       SchemaValidator.validateMethod(TestClass, 'value', ['greg'])

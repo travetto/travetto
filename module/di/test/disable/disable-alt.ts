@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { InjectionError, DependencyRegistryIndex } from '@travetto/di';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { MyCustomClass3, MyCustomClass4 } from './types.ts';
 
@@ -16,7 +16,7 @@ class AltDisableSuite {
 
   @Test()
   async allowDisableOverride() {
-    await RegistryV2.init();
+    await Registry.init();
     await assert.rejects(() => DependencyRegistryIndex.getInstance(MyCustomClass4), InjectionError);
     assert(await DependencyRegistryIndex.getInstance(MyCustomClass3));
   }

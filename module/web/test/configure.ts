@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Controller, ControllerRegistryIndex, Get, PathParam } from '@travetto/web';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -26,7 +26,7 @@ export class ConfigureTest {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test()

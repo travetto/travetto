@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { ChangeEvent, RegistryAdapter, RegistryIndex, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 interface Group {
   class: Class;
@@ -54,7 +54,7 @@ class SampleRegistryAdapter implements RegistryAdapter<Group> {
  * Basic Index that handles cross-class activity
  */
 export class SampleRegistryIndex implements RegistryIndex {
-  static #instance = RegistryV2.registerIndex(SampleRegistryIndex);
+  static #instance = Registry.registerIndex(SampleRegistryIndex);
 
   static getForRegister(cls: Class, allowFinalized = false): SampleRegistryAdapter {
     return this.#instance.store.getForRegister(cls, allowFinalized);

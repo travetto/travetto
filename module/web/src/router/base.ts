@@ -1,7 +1,7 @@
 import { Class, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { ControllerRegistryIndex } from '@travetto/web';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { ControllerConfig, EndpointConfig } from '../registry/types.ts';
 import type { WebRouter } from '../types/dispatch.ts';
@@ -51,7 +51,7 @@ export abstract class BaseWebRouter implements WebRouter {
     }
 
     // Listen for updates
-    RegistryV2.onClassChange(async e => {
+    Registry.onClassChange(async e => {
       const targetCls = ('curr' in e ? e.curr : null) ?? ('prev' in e ? e.prev : null);
       console.debug('Registry event', { type: e.type, target: targetCls?.Ⲑid });
 

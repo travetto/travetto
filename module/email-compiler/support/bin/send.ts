@@ -1,7 +1,7 @@
 import { MailService, EmailOptions, MailTransport } from '@travetto/email';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { toConcrete } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { EditorConfig } from './config.ts';
 
@@ -33,7 +33,7 @@ export class EditorSendService {
             }
           }
         });
-        RegistryV2.process([{ type: 'added', curr: cls }]);
+        Registry.process([{ type: 'added', curr: cls }]);
 
         this.ethereal = !!senderConfig.host?.includes('ethereal.email');
       } catch {

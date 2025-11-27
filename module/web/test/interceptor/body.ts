@@ -3,7 +3,7 @@ import { buffer } from 'node:stream/consumers';
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
 
@@ -14,7 +14,7 @@ class BodyInterceptorSuite {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test()

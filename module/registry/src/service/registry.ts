@@ -155,4 +155,4 @@ class $Registry {
   }
 }
 
-export const RegistryV2 = new $Registry();
+export const Registry = new $Registry();

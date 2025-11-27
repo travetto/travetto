@@ -1,4 +1,4 @@
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { Class, ClassInstance, getClass, RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
@@ -12,7 +12,7 @@ const isClass = (property: unknown, target: unknown): target is Class => !proper
 
 export class ControllerRegistryIndex implements RegistryIndex {
 
-  static #instance = RegistryV2.registerIndex(this);
+  static #instance = Registry.registerIndex(this);
 
   static getClasses(): Class[] {
     return this.#instance.store.getClasses();

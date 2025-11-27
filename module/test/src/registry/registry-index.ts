@@ -1,5 +1,5 @@
 import { AppError, Class, Runtime, describeFunction } from '@travetto/runtime';
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, RegistryV2 } from '@travetto/registry';
+import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite.ts';
 import { TestConfig, TestRun } from '../model/test.ts';
@@ -15,7 +15,7 @@ type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
  */
 export class SuiteRegistryIndex implements RegistryIndex {
 
-  static #instance = RegistryV2.registerIndex(this);
+  static #instance = Registry.registerIndex(this);
 
   static getForRegister(cls: Class): SuiteRegistryAdapter {
     return this.#instance.store.getForRegister(cls);

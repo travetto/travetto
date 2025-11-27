@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 import {
@@ -91,7 +91,7 @@ export class EndpointParameterTest {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test()

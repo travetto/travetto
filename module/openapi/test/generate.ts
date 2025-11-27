@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { IsPrivate } from '@travetto/schema';
 import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
 import { BeforeAll, Suite, Test } from '@travetto/test';
@@ -87,7 +87,7 @@ class IgnoredCont {
 export class GenerateSuite {
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test()

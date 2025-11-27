@@ -1,4 +1,4 @@
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, RegistryV2, RetargettingProxy } from '@travetto/registry';
+import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -20,7 +20,7 @@ function readMetadata(item: { metadata?: Record<symbol, unknown> }): Dependency 
 
 export class DependencyRegistryIndex implements RegistryIndex {
 
-  static #instance = RegistryV2.registerIndex(DependencyRegistryIndex);
+  static #instance = Registry.registerIndex(DependencyRegistryIndex);
 
   static getForRegister(cls: Class): DependencyRegistryAdapter {
     return this.#instance.store.getForRegister(cls);

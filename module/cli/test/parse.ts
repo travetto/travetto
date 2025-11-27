@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Env } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 import { CliCommand, CliParseUtil } from '@travetto/cli';
 
@@ -25,7 +25,7 @@ export class ParseSuite {
 
   @BeforeAll()
   async setup() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test()

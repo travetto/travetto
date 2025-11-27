@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { DBConfig } from '@travetto/config/doc/dbconfig.ts';
@@ -8,7 +8,7 @@ import { DBConfig } from '@travetto/config/doc/dbconfig.ts';
 util.inspect.defaultOptions.depth = 5;
 
 export async function main(): Promise<void> {
-  await RegistryV2.init();
+  await Registry.init();
   process.env.DATABASE_PORT = '2000';
   const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
   await config.bindTo(DBConfig, new DBConfig(), 'database');

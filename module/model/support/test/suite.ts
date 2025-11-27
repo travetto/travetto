@@ -1,6 +1,6 @@
 import { Class } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { SuiteRegistryIndex, TestFixtures } from '@travetto/test';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -21,7 +21,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
     SuiteRegistryIndex.getForRegister(target).register({
       beforeAll: [
         async function (this: T & { [Loaded]?: boolean }) {
-          await RegistryV2.init();
+          await Registry.init();
 
           if (!this[Loaded]) {
             const config = await DependencyRegistryIndex.getInstance(this.configClass);

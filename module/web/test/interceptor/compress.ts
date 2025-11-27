@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import { buffer } from 'node:stream/consumers';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { CompressInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
@@ -14,7 +14,7 @@ class CompressInterceptorSuite {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   async compress({ size, stream, requestHeaders, responseHeaders }: {

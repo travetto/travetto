@@ -1,6 +1,6 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Class } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { SuiteRegistryIndex } from '@travetto/test';
 
 import { AsyncContext } from '../../src/service.ts';
@@ -24,7 +24,7 @@ export function WithSuiteContext() {
         async function (this: { [Init]?: boolean } & Record<string, Function>) {
           if (!this[Init]) {
             this[Init] = true;
-            await RegistryV2.init();
+            await Registry.init();
             const ctx = await DependencyRegistryIndex.getInstance(AsyncContext);
             for (const [k, t] of Object.entries(SuiteRegistryIndex.getConfig(target).tests)) {
               const fn = wrapped(ctx, this[t.methodName]);

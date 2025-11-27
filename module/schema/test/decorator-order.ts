@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Alias, Field, LongText, Required, Schema, SchemaRegistryIndex, Specifier, Text } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 @Schema()
 class MyClass {
@@ -25,21 +25,21 @@ class MyClass {
 export class DecoratorOrderSuite {
   @Test()
   async testAlias() {
-    await RegistryV2.init();
+    await Registry.init();
     const fields = SchemaRegistryIndex.getFieldMap(MyClass);
     assert.deepStrictEqual(fields.field.aliases, ['bob', 'bob1', 'bob2']);
   }
 
   @Test()
   async testSpecifiers() {
-    await RegistryV2.init();
+    await Registry.init();
     const fields = SchemaRegistryIndex.getFieldMap(MyClass);
     assert.deepStrictEqual(fields.text.specifiers?.toSorted(), ['text', 'long', 'weird'].toSorted());
   }
 
   @Test()
   async testSpecifiersRaw() {
-    await RegistryV2.init();
+    await Registry.init();
     const fields = SchemaRegistryIndex.getFieldMap(MyClass);
     assert.deepStrictEqual(fields.text2.specifiers?.toSorted(), ['text', 'weirder'].toSorted());
     assert(fields.text2.name === 'text2');

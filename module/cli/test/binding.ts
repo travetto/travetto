@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { AssertCheck, BeforeAll, Suite, Test } from '@travetto/test';
 import { CliCommand, CliCommandSchemaUtil, CliFlag, CliParseUtil, ParsedState } from '@travetto/cli';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 /**
  * My command
@@ -52,7 +52,7 @@ export class SchemaBindingSuite {
 
   @BeforeAll()
   async init() {
-    await RegistryV2.init();
+    await Registry.init();
   }
 
   @Test()

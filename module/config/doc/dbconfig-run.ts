@@ -2,14 +2,14 @@ import util from 'node:util';
 
 import { ConfigurationService } from '@travetto/config';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { DBConfig } from '@travetto/config/doc/dbconfig.ts';
 import { hasToJSON } from '@travetto/runtime';
 
 util.inspect.defaultOptions.depth = 5;
 
 export async function main(): Promise<void> {
-  await RegistryV2.init();
+  await Registry.init();
   const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
 
   try {

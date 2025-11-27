@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { RegistryV2 } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { SuiteRegistryIndex } from '@travetto/test';
 
 import { DependencyRegistryIndex } from '../../src/registry/registry-index.ts';
@@ -13,7 +13,7 @@ export function InjectableSuite() {
     SuiteRegistryIndex.getForRegister(cls).register({
       beforeEach: [
         async function (this: unknown) {
-          await RegistryV2.init();
+          await Registry.init();
           await DependencyRegistryIndex.injectFields(this, cls);
         },
       ]
