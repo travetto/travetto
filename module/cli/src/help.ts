@@ -48,22 +48,27 @@ export class HelpUtil {
 
     for (const field of Object.values(schema.fields)) {
       const key = castKey<CliCommandShape>(field.name);
+      const def = ifDefined(command[key]) ?? ifDefined(field.default);
+      const aliases = (field.aliases ?? [])
+        .filter(x => x.startsWith('-'))
+        .filter(x =>
+          (field.type !== Boolean) || ((def !== true || field.name === 'help') ? !x.startsWith('--no-') : x.startsWith('--'))
+        );
+      let type: string | undefined;
 
-      const aliases = (field.aliases ?? []).filter(x => x.startsWith('-'));
-      const param = [cliTpl`${{ param: aliases.join(', ') }}`];
-      if (!isBoolFlag(field)) {
-        let type: string;
-        if (field.type === String && field.enum && field.enum.values.length <= 3) {
-          type = field.enum.values?.join('|');
-        } else {
-          ({ type } = CliSchemaExportUtil.baseInputType(field));
-        }
-        param.push(cliTpl`${{ type: `<${type}>` }}`);
+      if (field.type === String && field.enum && field.enum.values.length <= 3) {
+        type = field.enum.values?.join('|');
+      } else if (field.type !== Boolean) {
+        ({ type } = CliSchemaExportUtil.baseInputType(field));
       }
+
+      const param = [
+        cliTpl`${{ param: aliases.join(', ') }}`,
+        ...(type ? [cliTpl`${{ type: `<${type}>` }}`] : []),
+      ];
+
       params.push(param.join(' '));
       const desc = [cliTpl`${{ title: field.description }}`];
-
-      const def = ifDefined(command[key]) ?? ifDefined(field.default);
 
       if (key !== 'help' && def !== undefined) {
         desc.push(cliTpl`(default: ${{ input: JSON.stringify(def) }})`);
