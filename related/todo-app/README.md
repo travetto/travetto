@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/related/todo-app/DOC.tsx and execute "npx trv doc" to rebuild -->
 # Getting Started: A Todo App
 
-The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/module/todo-app).  Additionally, you can use the [App Scaffold](https://github.com/travetto/travetto/tree/main/module/scaffold#readme "App Scaffold for the Travetto framework").
+The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/related/todo-app).  Additionally, you can use the [App Scaffold](https://github.com/travetto/travetto/tree/main/module/scaffold#readme "App Scaffold for the Travetto framework").
 
 ## Overview
 
