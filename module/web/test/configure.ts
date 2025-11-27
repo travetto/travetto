@@ -37,7 +37,7 @@ export class ConfigureTest {
     assert(config.class === TestController);
     assert(config.basePath === '/test');
     const schema = SchemaRegistryIndex.getConfig(TestController);
-    assert(/.*Fun.*/.test(schema.title ?? ''));
+    assert(/.*Fun.*/.test(schema.description ?? ''));
 
     assert(config.endpoints.length === 1);
 
@@ -48,7 +48,7 @@ export class ConfigureTest {
     assert(ep.endpoint === TestController.prototype.getUser);
 
     const endpointSchema = SchemaRegistryIndex.getMethodConfig(TestController, ep.name);
-    assert(endpointSchema.title === 'Get user by name');
+    assert(endpointSchema.description === 'Get user by name');
 
     assert(ep.parameters.length === 1);
 

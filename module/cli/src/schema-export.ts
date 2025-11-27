@@ -24,7 +24,6 @@ export type CliCommandInput<K extends string = string> = {
  */
 export interface CliCommandSchema<K extends string = string> {
   name: string;
-  title: string;
   module: string;
   commandModule: string;
   runTarget?: boolean;
@@ -81,12 +80,11 @@ export class CliSchemaExportUtil {
     return {
       name: config.name,
       module: describeFunction(config.cls).module,
-      description: schema.title || schema.description,
+      description: schema.description,
       flags: processed.filter(v => v.flagNames && v.flagNames.length > 0),
       args: processed.filter(v => !v.flagNames || v.flagNames.length === 0),
       runTarget: config.runTarget ?? false,
       commandModule: describeFunction(cls).module,
-      title: schema.title || schema.description || ''
     };
   }
 }

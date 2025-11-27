@@ -37,10 +37,6 @@ export type SchemaBasicType = {
  */
 export interface SchemaCoreConfig {
   /**
-   * Title
-   */
-  title?: string;
-  /**
    * Description
    */
   description?: string;

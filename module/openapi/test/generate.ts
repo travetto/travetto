@@ -117,7 +117,7 @@ export class GenerateSuite {
           schema: { $ref: '#/components/schemas/TestUser' }
         }
       },
-      description: ''
+      description: undefined
     });
   }
 
@@ -140,7 +140,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { $ref: '#/components/schemas/TestUser' } }
         }
       },
-      description: ''
+      description: undefined
     });
   }
 
@@ -157,7 +157,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { type: 'string' } }
         }
       },
-      description: ''
+      description: undefined
     });
 
     const param = config.paths['/test/names'].put.parameters?.[0];
@@ -180,7 +180,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { type: 'string' } }
         }
       },
-      description: ''
+      description: undefined
     });
 
     assert(config.paths['/test/who'].patch.parameters?.length === 0);
@@ -194,11 +194,11 @@ export class GenerateSuite {
           }
         }
       },
-      description: '__type'
+      description: undefined
     });
     assert.deepStrictEqual(config.components.schemas['who__12130'], {
-      description: '__type',
-      example: undefined,
+      description: undefined,
+      examples: undefined,
       properties: {
         color: {
           description: undefined,
@@ -213,7 +213,6 @@ export class GenerateSuite {
         'name',
         'color'
       ],
-      title: '__type'
     });
   }
 
@@ -224,7 +223,6 @@ export class GenerateSuite {
     assert(config.paths['/test/{id}'].delete.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/{id}'].delete.responses['201'], {
       content: {},
-      description: ''
     });
 
     assert(config.paths['/test/{id}'].delete.parameters?.length === 1);
@@ -245,7 +243,6 @@ export class GenerateSuite {
     assert(config.paths['/test/all/{id}'].delete.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].delete.responses['201'], {
       content: {},
-      description: ''
     });
 
     assert(config.paths['/test/all/{id}'].delete.parameters?.length === 4);
@@ -287,7 +284,6 @@ export class GenerateSuite {
     assert(config.paths['/test/all/{id}'].head.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].head.responses['201'], {
       content: {},
-      description: ''
     });
 
     assert(config.paths['/test/all/{id}'].head.parameters?.length === 4);
@@ -331,7 +327,6 @@ export class GenerateSuite {
       content: {
         'application/octet-stream': { schema: { type: 'string', format: 'binary' } }
       },
-      description: ''
     });
 
     const param = config.paths['/test/download'].get.parameters?.[0];
@@ -380,7 +375,7 @@ export class GenerateSuite {
           }
         }
       },
-      description: 'UserSearch'
+      description: undefined
     });
 
   }

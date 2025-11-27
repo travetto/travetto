@@ -45,7 +45,6 @@ export class SchemaTransformUtil {
           const cls = state.factory.createClassDeclaration(
             [
               state.createDecorator(this.SCHEMA_IMPORT, 'Schema', state.fromLiteral({
-                title: type.name,
                 description: type.comment
               })),
             ],

@@ -198,9 +198,8 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       const config = SchemaRegistryIndex.getConfig(cls);
       if (config) {
         this.#allSchemas[typeId] = {
-          title: config.title || config.description,
-          description: config.description || config.title,
-          example: config.examples
+          description: config.description,
+          examples: config.examples
         };
 
         const properties: Record<string, SchemaObject> = {};
@@ -233,7 +232,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
           ...extra
         });
       } else {
-        this.#allSchemas[typeId] = { title: typeId };
+        this.#allSchemas[typeId] = { description: typeId };
       }
     }
   }
@@ -243,13 +242,12 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    */
   #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
     if (!body || body.type === undefined) {
-      return { content: {}, description: '' };
+      return { content: {} };
     } else if (body.type === Readable || body.type === Buffer) {
       return {
         content: {
           [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } }
         },
-        description: ''
       };
     } else {
       const schemaConfig = SchemaRegistryIndex.getOptionalConfig(body.type);
@@ -261,7 +259,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
             schema: !body!.array ? typeRef : { type: 'array', items: typeRef }
           }
         },
-        description: this.#allSchemas[typeId!]?.description ?? ''
+        description: this.#allSchemas[typeId!]?.description
       };
     }
   }
@@ -311,8 +309,8 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const op: OperationObject = {
       tags: [tagName],
       responses: {},
-      summary: schema.title,
-      description: schema.description || schema.title,
+      summary: schema.description,
+      description: schema.description,
       operationId: `${ep.class.name}_${ep.name.toString()}`,
       parameters: []
     };
@@ -350,7 +348,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const classSchema = SchemaRegistryIndex.getConfig(controller.class);
     this.#tags.push({
       name: controller.externalName,
-      description: classSchema.description || classSchema.title
+      description: classSchema.description
     });
   }
 

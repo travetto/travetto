@@ -26,7 +26,6 @@ function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): T
   return safeAssign(base, {
     ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
     ...config.private ? { private: config.private ?? base.private } : {},
-    ...config.title ? { title: config.title || base.title } : {},
     ...config.description ? { description: config.description || base.description } : {},
     ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
   });
@@ -87,7 +86,6 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     interfaces: [...parent.interfaces, ...base.interfaces],
     methods: { ...parent.methods, ...base.methods },
     fields: { ...parent.fields, ...base.fields },
-    title: base.title || parent.title,
     description: base.description || parent.description,
     examples: [...(parent.examples ?? []), ...(base.examples ?? [])],
     discriminatedField: base.discriminatedField ?? parent.discriminatedField,

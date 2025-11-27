@@ -111,7 +111,7 @@ export class HelpUtil {
     for (const { command: cmd, schema } of resolved) {
       try {
         if (schema && !schema.private) {
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title || schema.description || '' }}`);
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.description || '' }}`);
         }
       } catch (err) {
         if (err instanceof Error) {

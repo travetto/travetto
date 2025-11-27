@@ -96,7 +96,7 @@ export class SchemaBindingSuite {
   @Test()
   async testSchema() {
     const schema = SchemaRegistryIndex.getConfig(Entity);
-    assert(schema.title === 'My command');
+    assert(schema.description === 'My command');
     const color = schema.fields.color;
     assert(color.description === 'My color');
     assert(color.required?.active === false);

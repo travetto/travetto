@@ -81,7 +81,7 @@ export class SchemaTransformer {
     const attrs: Record<string, string | boolean | ts.Expression | number | object | unknown[]> = {};
 
     if (comments.description) {
-      attrs.title = comments.description;
+      attrs.description = comments.description;
     }
 
     // Extract all interfaces
@@ -147,7 +147,7 @@ export class SchemaTransformer {
     const params = DecoratorUtil.getArguments(existing) ?? [];
 
     if (comments.description) {
-      params.unshift(state.fromLiteral({ title: comments.description }));
+      params.unshift(state.fromLiteral({ description: comments.description }));
     }
     if (DeclarationUtil.isStatic(node)) {
       params.push(state.fromLiteral({ isStatic: true }));

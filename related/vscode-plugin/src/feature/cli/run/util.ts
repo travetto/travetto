@@ -20,10 +20,10 @@ export class CliRunUtil {
 
   /**
    * Build choice details for quick pick
-   * @param app
+   * @param choice
    */
-  static #buildChoiceDetail(app: RunChoice): string {
-    const detail = [app.title];
+  static #buildChoiceDetail(choice: RunChoice): string {
+    const detail = [choice.description];
     const out = detail.filter(x => !!x).join(' ').trim();
     return out ? `${'\u00A0'.repeat(4)}${out}` : out;
   }
@@ -87,7 +87,7 @@ export class CliRunUtil {
     }
 
     if (selected.length < all.length) {
-      throw new Error(`Missing arguments for ${choice.title}`);
+      throw new Error(`Missing arguments for ${choice.description}`);
     }
 
     return selected;
