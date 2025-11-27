@@ -361,7 +361,7 @@ npx trv web:http
       AcceptConfig: { applies: false, types: [] },
       ApiHostConfig: {
         servers: [ { url: 'http://localhost:12555' } ],
-        openapi: '3.0.0'
+        openapi: '3.2.0'
       },
       ApiInfoConfig: {
         description: '',
