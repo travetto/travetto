@@ -50,10 +50,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.#instance.store.getOptional(cls)?.get();
   }
 
-  static async getPrimaryCandidateInstances<T>(candidateType: Class<T>): Promise<[Class, T][]> {
-    return this.#instance.getPrimaryCandidateInstances<T>(candidateType);
-  }
-
   static registerClassMetadata(cls: Class, metadata: InjectableClassMetadata): void {
     SchemaRegistryIndex.getForRegister(cls).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
   }
@@ -124,6 +120,23 @@ export class DependencyRegistryIndex implements RegistryIndex {
     }
   }
 
+
+  async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, src: Class): Promise<unknown> {
+    try {
+      const target = dependency.target ?? input.type;
+      return await this.getInstance(target, dependency.qualifier, dependency.resolution);
+    } catch (err) {
+      if (input.required?.active === false && err instanceof InjectionError && err.category === 'notfound') {
+        return undefined;
+      } else {
+        if (err && err instanceof Error) {
+          err.message = `${err.message} via=${src.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
+        }
+        throw err;
+      }
+    }
+  }
+
   store = new RegistryIndexStore(DependencyRegistryAdapter);
 
   getConfig(cls: Class): InjectableConfig {
@@ -159,35 +172,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
   getInstances<T>(candidateType: Class<T>, predicate?: (cfg: InjectableCandidate<T>) => boolean): Promise<T[]> {
     const inputs = this.getCandidates<T>(candidateType).filter(x => !predicate || predicate(x));
     return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
-  }
-
-  async getPrimaryCandidateInstances<T>(candidateType: Class<T>): Promise<[Class, T][]> {
-    const targets = await this.getCandidates(candidateType);
-    return await Promise.all(
-      targets
-        .filter(el => el.qualifier === PrimaryCandidateSymbol) // Is primary?
-        .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
-        .map(async el => {
-          const instance = await this.getInstance<T>(el.class, el.qualifier);
-          return [el.class, instance];
-        })
-    );
-  }
-
-  async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, src: Class): Promise<unknown> {
-    try {
-      const target = dependency.target ?? input.type;
-      return await this.getInstance(target, dependency.qualifier, dependency.resolution);
-    } catch (err) {
-      if (input.required?.active === false && err instanceof InjectionError && err.category === 'notfound') {
-        return undefined;
-      } else {
-        if (err && err instanceof Error) {
-          err.message = `${err.message} via=${src.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
-        }
-        throw err;
-      }
-    }
   }
 
   /**

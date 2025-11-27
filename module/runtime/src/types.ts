@@ -83,7 +83,7 @@ export function getParentClass(cls: Class): Class | undefined {
 /**
  * Get the class from an instance or class
  */
-export const getClass = (x: ClassInstance | Class): Class => 'Ⲑid' in x ? castTo(x) : asConstructable(x).constructor;
+export const getClass = <T = unknown>(x: ClassInstance | Class): Class<T> => 'Ⲑid' in x ? castTo(x) : asConstructable<T>(x).constructor;
 
 /**
  * Range of bytes, inclusive

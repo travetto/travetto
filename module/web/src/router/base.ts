@@ -30,7 +30,6 @@ export abstract class BaseWebRouter implements WebRouter {
       ep.filter = EndpointUtil.createEndpointHandler(this.#interceptors, ep, config);
     }
 
-    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
     const fn = await this.register(endpoints, config);
     this.#cleanup.set(c.Ⲑid, fn);
   };

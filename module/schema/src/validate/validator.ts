@@ -63,7 +63,7 @@ export class SchemaValidator {
 
     if (!hasValue) {
       if (input.required?.active !== false) {
-        return this.#prepareErrors(path, [{ kind: 'required', ...input.required }]);
+        return this.#prepareErrors(path, [{ kind: 'required', active: true, ...input.required }]);
       } else {
         return [];
       }
