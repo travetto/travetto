@@ -1,31 +1,15 @@
 import { Class, classConstruct, describeFunction } from '@travetto/runtime';
 import { RegistryAdapter } from '@travetto/registry';
-import { SchemaInputConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandConfig, CliCommandShape } from '../types.ts';
+import { CliParseUtil, ENV_PREFIX, isBoolFlag } from '../parse.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
-const ENV_PREFIX = 'env.';
-type AliasesParseResult = Record<'long' | 'short' | 'raw' | 'env', string[]>;
 
-const isBoolFlag = (x?: SchemaInputConfig): boolean => x?.type === Boolean && !x.array;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 const stripDashes = (x?: string): string | undefined => x?.replace(/^-+/, '');
 const toFlagName = (x: string): string => x.replace(/([a-z])([A-Z])/g, (_, l: string, r: string) => `${l}-${r.toLowerCase()}`);
-const parseAliases = (aliases: string[]): AliasesParseResult =>
-  aliases.reduce<AliasesParseResult>((acc, curr) => {
-    if (curr.startsWith('--')) {
-      acc.long.push(curr);
-    } else if (curr.startsWith('-')) {
-      acc.short.push(curr);
-    } else if (!curr.startsWith(ENV_PREFIX)) {
-      acc.raw.push(curr);
-    } else {
-      acc.env.push(curr);
-    }
-    return acc;
-  }, { long: [], short: [], raw: [], env: [] });
-
 
 export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConfig> {
   #cls: Class;
@@ -46,6 +30,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       owner: this.#cls,
       description: 'display help for command',
       required: { active: false },
+      default: false,
       access: 'readonly',
       aliases: ['-h', '--help']
     };
@@ -58,15 +43,14 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
 
     for (const field of Object.values(schema.fields)) {
       const fieldName = field.name.toString();
-      const { long: longAliases, short: shortAliases, raw: rawAliases, env: envAliases } = parseAliases(field.aliases ?? []);
+      const { long: longAliases, short: shortAliases, raw: rawAliases, env: envAliases } = CliParseUtil.parseAliases(field.aliases ?? []);
 
       let short = stripDashes(shortAliases?.[0]) ?? rawAliases.find(x => x.length <= 2);
       const long = stripDashes(longAliases?.[0]) ?? rawAliases.find(x => x.length >= 3) ?? toFlagName(fieldName);
       const aliases: string[] = field.aliases = [...envAliases];
 
-      const isDefaultedTrueBool = (isBoolFlag(field) && field.default === true);
 
-      if (!isDefaultedTrueBool) {
+      if (field.type !== Boolean || field.default === false) {
         if (short === undefined) {
           short = fieldName.charAt(0);
           if (!used.has(short)) {
@@ -76,12 +60,9 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
         } else {
           aliases.push(`-${short}`);
         }
-      }
-
-      aliases.push(`--${long}`);
-
-      if (isDefaultedTrueBool) {
-        aliases.push(`--no-${long}`);
+        aliases.push(`--${long}`);
+      } else {
+        aliases.push(`--${long}`, `--no-${long}`);
       }
     }
   }

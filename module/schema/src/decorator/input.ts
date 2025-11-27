@@ -26,7 +26,7 @@ function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
  * @kind decorator
  */
 export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...config: Partial<SchemaInputConfig>[]): PropType<unknown> {
-  return input({ type: type.type, array: type.array ?? false }, ...config);
+  return input(type, ...config);
 }
 
 /**

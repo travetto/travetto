@@ -63,7 +63,7 @@ export class HelpUtil {
       params.push(param.join(' '));
       const desc = [cliTpl`${{ title: field.description }}`];
 
-      const def = ifDefined(field.default) ?? ifDefined(command[key]);
+      const def = ifDefined(command[key]) ?? ifDefined(field.default);
 
       if (key !== 'help' && def !== undefined) {
         desc.push(cliTpl`(default: ${{ input: JSON.stringify(def) }})`);

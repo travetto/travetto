@@ -8,7 +8,7 @@ import { ConfigOverrideUtil } from './util.ts';
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
  * @augments `@travetto/schema:Schema`
- * @decorator
+ * @kind decorator
  */
 export function Config(ns: string) {
   return <T extends Class>(cls: T): T => {
@@ -32,7 +32,7 @@ export function Config(ns: string) {
 
 /**
  * Allows for binding specific fields to environment variables as a top-level override
- * @decorator
+ * @kind decorator
  */
 export function EnvVar(name: string, ...others: string[]) {
   return (instance: ClassInstance, property: string): void => {

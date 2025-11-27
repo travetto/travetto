@@ -13,10 +13,12 @@ const VALID_FLAG = /^-{1,2}[a-z]/i;
 const HELP_FLAG = /^-h|--help$/;
 const LONG_FLAG_WITH_EQ = /^--[a-z][^= ]+=\S+/i;
 const CONFIG_PRE = '+=';
-const ENV_PRE = 'env.';
 const SPACE = new Set([32, 7, 13, 10]);
 
+export const ENV_PREFIX = 'env.';
 export const isBoolFlag = (x?: SchemaInputConfig): boolean => x?.type === Boolean && !x.array;
+
+export type AliasesParseResult = Record<'long' | 'short' | 'raw' | 'env', string[]>;
 
 /**
  * Parsing support for the cli
@@ -24,7 +26,7 @@ export const isBoolFlag = (x?: SchemaInputConfig): boolean => x?.type === Boolea
 export class CliParseUtil {
 
   static toEnvField(k: string): string {
-    return k.startsWith(ENV_PRE) ? k : `${ENV_PRE}${k}`;
+    return k.startsWith(ENV_PREFIX) ? k : `${ENV_PREFIX}${k}`;
   }
 
   static readToken(text: string, start = 0): { next: number, value?: string } {
@@ -68,7 +70,7 @@ export class CliParseUtil {
   static getSpecifiedModule(schema: SchemaClassConfig, args: string[]): string | undefined {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
     const input = Object.values(schema.fields).find(x => x.specifiers?.includes('module'));
-    const ENV_KEY = input?.aliases?.filter(x => x.startsWith(ENV_PRE)).map(x => x.replace(ENV_PRE, ''))[0] ?? '';
+    const ENV_KEY = input?.aliases?.filter(x => x.startsWith(ENV_PREFIX)).map(x => x.replace(ENV_PREFIX, ''))[0] ?? '';
     const flags = new Set(input?.aliases ?? []);
     const check = (k?: string, v?: string): string | undefined => flags.has(k!) ? v : undefined;
     return args.reduce(
@@ -148,8 +150,8 @@ export class CliParseUtil {
 
     // Load env vars to front
     for (const field of Object.values(schema.fields)) {
-      for (const envName of (field.aliases ?? []).filter(x => x.startsWith(ENV_PRE))) {
-        const simple = envName.replace(ENV_PRE, '');
+      for (const envName of (field.aliases ?? []).filter(x => x.startsWith(ENV_PREFIX))) {
+        const simple = envName.replace(ENV_PREFIX, '');
         if (simple in process.env) {
           const value: string = process.env[simple]!;
           if (field.array) {
@@ -212,5 +214,25 @@ export class CliParseUtil {
       unknown: out.filter(x => x.type === 'unknown').map(x => x.input),
       flags: out.filter(x => x.type === 'flag')
     };
+  }
+
+  /**
+   * Parse aliases into categories for registration
+   */
+  static parseAliases(aliases: string[]): AliasesParseResult {
+    return aliases.reduce<AliasesParseResult>((acc, curr) => {
+      if (VALID_FLAG.test(curr)) {
+        if (curr.startsWith('--')) {
+          acc.long.push(curr);
+        } else {
+          acc.short.push(curr);
+        }
+      } else if (curr.startsWith(ENV_PREFIX)) {
+        acc.env.push(curr);
+      } else {
+        acc.raw.push(curr);
+      }
+      return acc;
+    }, { long: [], short: [], raw: [], env: [] });
   }
 }

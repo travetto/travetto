@@ -13,7 +13,7 @@ import { OpenApiClientHelp } from './bin/help.ts';
 export class OpenApiClientCommand implements CliCommandShape {
   /** Show Extended Help */
   @CliFlag({ short: '-x' })
-  extendedHelp?: boolean;
+  extendedHelp: boolean = false;
   /** Additional Properties */
   @CliFlag({ short: '-a', full: '--additional-properties' })
   props: string[] = [];
@@ -25,7 +25,7 @@ export class OpenApiClientCommand implements CliCommandShape {
   dockerImage = 'openapitools/openapi-generator-cli:latest';
 
   async help(): Promise<string[]> {
-    return OpenApiClientHelp.help(this.dockerImage, this.extendedHelp ?? false);
+    return OpenApiClientHelp.help(this.dockerImage, this.extendedHelp);
   }
 
   async main(format: string): Promise<void> {
