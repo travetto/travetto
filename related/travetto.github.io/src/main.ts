@@ -1,4 +1,4 @@
-import { importProvidersFrom } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { withInMemoryScrolling, provideRouter, Routes } from '@angular/router';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 
@@ -39,6 +39,7 @@ const routes: Routes = [
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideZonelessChangeDetection(),
     importProvidersFrom(BrowserModule),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'disabled' }))
   ]

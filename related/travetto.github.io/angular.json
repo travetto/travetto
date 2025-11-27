@@ -23,9 +23,7 @@
             "index": "src/index.html",
             "tsConfig": "src/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": [],
             "assets": [
               "src/assets"
             ],
