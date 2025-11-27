@@ -214,7 +214,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         }
 
         const extra: Record<string, unknown> = {};
-        if (config.classType === 'discriminated') {
+        if (config.classType === 'discriminated-base') {
           const map = SchemaRegistryIndex.getDiscriminatedTypesForClass(cls);
           if (map) {
             extra.oneOf = map
