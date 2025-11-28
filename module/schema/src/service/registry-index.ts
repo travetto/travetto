@@ -36,6 +36,10 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.has(cls);
   }
 
+  static getClassById(classId: string): Class {
+    return this.#instance.store.getClassById(classId);
+  }
+
   static getDiscriminatedTypes(cls: Class): string[] | undefined {
     return this.#instance.getDiscriminatedTypes(cls);
   }
@@ -161,7 +165,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
    * @param o Actual instance
    */
   resolveInstanceType<T>(requestedCls: Class<T>, o: T): Class {
-    const cls = this.store.getClassById(requestedCls); // Resolve by id to handle any stale references
+    const cls = this.store.getClassById(requestedCls.Ⲑid); // Resolve by id to handle any stale references
     const adapter = this.store.get(cls);
     const { discriminatedField, discriminatedType } = adapter.get();
     if (!discriminatedField) {

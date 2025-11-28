@@ -25,8 +25,8 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return this.#adapters.has(cls);
   }
 
-  getClassById(cls: Class): Class {
-    return this.#idToCls.get(cls.Ⲑid)!;
+  getClassById(id: string): Class {
+    return this.#idToCls.get(id)!;
   }
 
   finalize(cls: Class, parentConfig?: ReturnType<A['get']>): void {

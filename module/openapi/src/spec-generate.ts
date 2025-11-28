@@ -12,13 +12,8 @@ import { ApiSpecConfig } from './config.ts';
 
 const DEFINITION = '#/components/schemas';
 
-function isInputConfig(val: object): val is SchemaInputConfig {
-  return !!val && 'owner' in val && 'type' in val;
-}
-
-function isFieldConfig(val: object): val is SchemaFieldConfig {
-  return isInputConfig(val) && 'name' in val;
-}
+const isInputConfig = (val: object): val is SchemaInputConfig => !!val && 'owner' in val && 'type' in val;
+const isFieldConfig = (val: object): val is SchemaFieldConfig => isInputConfig(val) && 'name' in val;
 
 type GeneratedSpec = {
   tags: TagObject[];
@@ -49,14 +44,11 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Convert schema to a set of dotted parameters
    */
   #schemaToDotParams(location: 'query' | 'header', input: SchemaInputConfig, prefix: string = '', rootField: SchemaInputConfig = input): ParameterObject[] {
-    const fields = SchemaRegistryIndex.has(input.type) ?
-      SchemaRegistryIndex.getFieldMap(input.type, input.view) :
-      undefined;
-
-    if (!fields) {
+    if (!SchemaRegistryIndex.has(input.type)) {
       throw new AppError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
 
+    const fields = SchemaRegistryIndex.getFieldMap(input.type, input.view);
     const params: ParameterObject[] = [];
     for (const sub of Object.values(fields)) {
       const name = sub.name.toString();
