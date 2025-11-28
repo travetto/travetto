@@ -47,13 +47,6 @@ export class SqliteDialect extends SQLDialect {
   }
 
   /**
-   * Build identifier
-   */
-  ident(field: SchemaFieldConfig | string): string {
-    return `\`${typeof field === 'string' ? field : field.name.toString()}\``;
-  }
-
-  /**
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]): string {

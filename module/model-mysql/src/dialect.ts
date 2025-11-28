@@ -62,13 +62,6 @@ export class MySQLDialect extends SQLDialect {
   }
 
   /**
-   * Build identifier
-   */
-  ident(field: SchemaFieldConfig | string): string {
-    return `\`${typeof field === 'string' ? field : field.name}\``;
-  }
-
-  /**
    * Create table, adding in specific engine options
    */
   override getCreateTableSQL(stack: VisitStack[]): string {

@@ -99,6 +99,8 @@ export abstract class SQLDialect implements DialectState {
     DECIMAL: (d, p) => `DECIMAL(${d},${p})`
   };
 
+  ID_AFFIX = '`';
+
   /**
    * Generate an id field
    */
@@ -161,7 +163,14 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Identify a name or field (escape it)
    */
-  abstract ident(name: string | symbol | SchemaFieldConfig): string;
+  ident(field: SchemaFieldConfig | string | symbol): string {
+    if (field === '*') {
+      return field;
+    } else {
+      const name = (typeof field === 'symbol' || typeof field === 'string') ? field : field.name;
+      return `${this.ID_AFFIX}${name.toString()}${this.ID_AFFIX}`;
+    }
+  }
 
   quote(text: string): string {
     return `'${text.replace(/[']/g, "''")}'`;

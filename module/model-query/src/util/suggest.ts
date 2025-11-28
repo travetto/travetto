@@ -29,18 +29,20 @@ export class ModelQuerySuggestUtil {
   static getSuggestQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>): Query<T> {
     const limit = query?.limit ?? 10;
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
-
-    const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     const select: Query<T>['select'] = {
       ...query?.select
     };
+
+    const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     if (polymorphicConfig) {
-      clauses.push(polymorphicConfig.discriminatedBase ? {
-        [polymorphicConfig.discriminatedField]: { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) }
-      } : {
-        [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedType
+      clauses.push({
+        [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedBase ?
+          { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) } :
+          polymorphicConfig.discriminatedType
       });
-      Object.assign(select, { [polymorphicConfig.discriminatedField]: true });
+      if (query?.select) {
+        Object.assign(select, { [polymorphicConfig.discriminatedField]: true });
+      }
     }
 
     const config = ModelRegistryIndex.getConfig(cls);
