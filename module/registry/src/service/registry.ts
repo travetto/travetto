@@ -57,11 +57,13 @@ class $Registry {
       }
     }
 
+    Util.queueMacroTask().then(() => {
+      this.#removeItems(events.filter(ev => 'prev' in ev).map(ev => ev.prev!));
+    });
+
     for (const e of events) {
       this.#emitter.emit('event', e);
     }
-
-    this.#removeItems(events.filter(ev => 'prev' in ev).map(ev => ev.prev));
   }
 
   /**

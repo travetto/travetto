@@ -51,14 +51,14 @@ export abstract class BaseWebRouter implements WebRouter {
 
     // Listen for updates
     Registry.onClassChange(async e => {
-      const targetCls = ('curr' in e ? e.curr : null) ?? ('prev' in e ? e.prev : null);
-      console.debug('Registry event', { type: e.type, target: targetCls?.Ⲑid });
+      const targetCls = 'curr' in e ? e.curr : e.prev;
+      console.debug('Registry event', { type: e.type, target: targetCls.Ⲑid });
 
-      if ('prev' in e && e.prev) {
+      if ('prev' in e) {
         this.#cleanup.get(e.prev.Ⲑid)?.();
         this.#cleanup.delete(e.prev.Ⲑid);
       }
-      if ('curr' in e && e.curr) {
+      if ('curr' in e) {
         await this.#register(e.curr);
       }
     }, ControllerRegistryIndex);
