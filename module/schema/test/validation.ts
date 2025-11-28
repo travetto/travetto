@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { asFull, castTo } from '@travetto/runtime';
-import { SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
+import { SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,
@@ -21,7 +21,7 @@ class Validation {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test('Url and message')
@@ -201,10 +201,10 @@ class Validation {
 
   @Test()
   async verifyMultipleNested() {
-    const schema = SchemaRegistry.getViewSchema(Ccccz);
-    assert(schema.fields.includes('c'));
-    assert(schema.fields.includes('b'));
-    assert(schema.fields.includes('a'));
+    const fields = SchemaRegistryIndex.getFieldMap(Ccccz);
+    assert('c' in fields);
+    assert('b' in fields);
+    assert('a' in fields);
   }
 
   @Test()
@@ -328,9 +328,7 @@ class Validation {
       }]
     };
 
-    try {
-      await SchemaValidator.validate(AllAs, item);
-    } catch (err) {
+    await assert.rejects(() => SchemaValidator.validate(AllAs, item), err => {
       assert(err instanceof ValidationResultError);
       assert(err.details.errors[0].path === 'all[0].b');
       assert(err.details.errors[0].message === 'all[0].b is required');
@@ -338,7 +336,7 @@ class Validation {
       assert(err.details.errors[1].message === 'all[1].b is required');
       assert(err.details.errors[2].path === 'all[1].c');
       assert(err.details.errors[2].message === 'all[1].c is required');
-    }
+    });
   }
 
   @Test()

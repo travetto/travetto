@@ -1,9 +1,10 @@
 import type { } from './src/global.d.ts';
 export * from './src/decorator/field.ts';
+export * from './src/decorator/input.ts';
 export * from './src/decorator/schema.ts';
+export * from './src/decorator/method.ts';
 export * from './src/decorator/common.ts';
 export * from './src/service/changes.ts';
-export * from './src/service/registry.ts';
 export * from './src/service/types.ts';
 export * from './src/validate/messages.ts';
 export * from './src/validate/regexp.ts';
@@ -14,3 +15,4 @@ export * from './src/bind-util.ts';
 export * from './src/data.ts';
 export * from './src/name.ts';
 export * from './src/types.ts';
+export * from './src/service/registry-index.ts';

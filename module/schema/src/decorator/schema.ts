@@ -1,22 +1,27 @@
-import { Any, castTo, Class, ClassInstance, DeepPartial } from '@travetto/runtime';
+import { castTo, Class, DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util.ts';
-import { SchemaRegistry } from '../service/registry.ts';
-import { ClassConfig, ViewFieldsConfig } from '../service/types.ts';
-import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
+import { SchemaClassConfig, ViewFieldsConfig } from '../service/types.ts';
+import { ValidatorFn } from '../validate/types.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
+
+/**
+ * Provides all the valid string type fields from a given type T
+ */
+type ValidStringField<T> = { [K in Extract<keyof T, string>]: T[K] extends string ? K : never }[Extract<keyof T, string>];
 
 /**
  * Register a class as a Schema
  *
  * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
-export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeField' | 'baseType'>>) { // Auto is used during compilation
-  return <T, U extends Class<T>>(target: U): U => {
-    target.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
+export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'validators' | 'methods'>>) {
+  return <T, U extends Class<T>>(cls: U): void => {
+    cls.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
     };
-    SchemaRegistry.register(target, cfg);
-    return target;
+    SchemaRegistryIndex.getForRegister(cls).registerClass(cfg);
   };
 }
 
@@ -24,41 +29,43 @@ export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeF
  * Add a custom validator, can be at the class level
  *
  * @param fn The validator function
+ * @kind decorator
  */
 export const Validator = <T>(fn: ValidatorFn<T, string>) =>
-  (target: Class<T>, _k?: string): void => {
-    SchemaRegistry.getOrCreatePending(target).validators!.push(castTo(fn));
+  (cls: Class<T>): void => {
+    SchemaRegistryIndex.getForRegister(cls).register({ validators: [castTo(fn)] });
   };
-
-/**
- * Add a custom validator for a given method
- *
- * @param fn The validator function
- */
-export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
-  return (target: ClassInstance, k: string, _prop: TypedPropertyDescriptor<T>): void => {
-    SchemaRegistry.registerPendingMethod(target.constructor, k).validators!.push(castTo(fn));
-  };
-}
 
 /**
  * Register a specific view for a class
  * @param name The name of the view
  * @param fields The specific fields to add as part of a view
+ * @kind decorator
  */
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
-  return (target: Class<Partial<T>>): void => {
-    SchemaRegistry.registerPendingView(target, name, fields);
+  return (cls: Class<Partial<T>>): void => {
+    SchemaRegistryIndex.getForRegister(cls).register({ views: { [name]: fields } });
   };
 }
 
 /**
- * Register a class as a subtype, with a specific discriminator
- * @param name
- * @returns
+ * Register a class as a discriminated class, by a specific type
+ * @param type The type to use for discrimination
+ * @kind decorator
  */
-export function SubType<T>(name: string) {
-  return (target: Class<Partial<T>>): void => {
-    SchemaRegistry.register(target, { subTypeName: name });
+export function SubType<T>(type?: string) {
+  return (cls: Class<Partial<T>>): void => {
+    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedType: type });
+  };
+}
+
+/**
+ * Register a class as a discriminated class
+ * @param field The field to use for discrimination
+ * @kind decorator
+ */
+export function Discriminated<T>(field: ValidStringField<T>) {
+  return (cls: Class<Partial<T>>): void => {
+    SchemaRegistryIndex.getForRegister(cls).register({ discriminatedField: field, discriminatedBase: true });
   };
 }

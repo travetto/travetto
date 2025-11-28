@@ -1,4 +1,4 @@
-import { DependencyRegistry, Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { DependencyRegistryIndex, Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { toConcrete } from '@travetto/runtime';
 
 /**
@@ -24,6 +24,6 @@ class SpecificService {
 class ManualInvocationOfInterface {
   @InjectableFactory()
   static getCustomService(): Promise<ServiceContract> {
-    return DependencyRegistry.getInstance<ServiceContract>(toConcrete<ServiceContract>());
+    return DependencyRegistryIndex.getInstance(toConcrete<ServiceContract>());
   }
 }

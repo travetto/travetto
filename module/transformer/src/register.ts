@@ -116,6 +116,15 @@ export function OnMethod(...target: string[]) {
 }
 
 /**
+ * Listens for a `ts.ConstructorDeclaration`, on descent
+ */
+export function OnConstructor(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.ConstructorDeclaration, dm?: DecoratorMeta) => R>
+  ): void => storeHandler(inst, d.value!, 'before', 'constructor', target);
+}
+
+/**
  * Listens for a static `ts.MethodDeclaration`, on descent
  */
 export function OnStaticMethod(...target: string[]) {
@@ -212,6 +221,15 @@ export function AfterMethod(...target: string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.MethodDeclaration, dm?: DecoratorMeta) => R>
   ): void => storeHandler(inst, d.value!, 'after', 'method', target);
+}
+
+/**
+ * Listens for a `ts.ConstructorDeclaration`, on ascent
+ */
+export function AfterConstructor(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.ConstructorDeclaration, dm?: DecoratorMeta) => R>
+  ): void => storeHandler(inst, d.value!, 'after', 'constructor', target);
 }
 
 /**

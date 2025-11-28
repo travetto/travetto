@@ -11,19 +11,21 @@ import { OpenApiClientHelp } from './bin/help.ts';
  */
 @CliCommand()
 export class OpenApiClientCommand implements CliCommandShape {
-  @CliFlag({ desc: 'Show Extended Help', short: '-x' })
-  extendedHelp?: boolean;
-  @CliFlag({ desc: 'Additional Properties', short: '-a', name: '--additional-properties' })
+  /** Show Extended Help */
+  @CliFlag({ short: '-x' })
+  extendedHelp: boolean = false;
+  /** Additional Properties */
+  @CliFlag({ short: '-a', full: '--additional-properties' })
   props: string[] = [];
-  @CliFlag({ desc: 'Input file' })
+  /** Input file */
   input = './openapi.yml';
-  @CliFlag({ desc: 'Output folder' })
+  /** Output folder */
   output = './api-client';
-  @CliFlag({ desc: 'Docker Image to user' })
+  /** Docker Image to user */
   dockerImage = 'openapitools/openapi-generator-cli:latest';
 
   async help(): Promise<string[]> {
-    return OpenApiClientHelp.help(this.dockerImage, this.extendedHelp ?? false);
+    return OpenApiClientHelp.help(this.dockerImage, this.extendedHelp);
   }
 
   async main(format: string): Promise<void> {

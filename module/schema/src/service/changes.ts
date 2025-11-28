@@ -3,27 +3,25 @@ import { EventEmitter } from 'node:events';
 import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 
-import { FieldConfig, ClassConfig } from './types.ts';
-
-const id = (c: Class | string): string => typeof c === 'string' ? c : c.Ⲑid;
+import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 
 interface FieldMapping {
-  path: FieldConfig[];
-  config: ClassConfig;
+  path: SchemaFieldConfig[];
+  config: SchemaClassConfig;
 }
 
 export interface FieldChangeEvent {
   cls: Class;
-  changes: ChangeEvent<FieldConfig>[];
+  changes: ChangeEvent<SchemaFieldConfig>[];
 }
 
 interface SubSchemaChange {
-  path: FieldConfig[];
-  fields: ChangeEvent<FieldConfig>[];
+  path: SchemaFieldConfig[];
+  fields: ChangeEvent<SchemaFieldConfig>[];
 }
 
 export interface SchemaChange {
-  config: ClassConfig;
+  config: SchemaClassConfig;
   subs: SubSchemaChange[];
 }
 
@@ -33,7 +31,7 @@ export interface SchemaChangeEvent {
 }
 
 /**
- * Schema change listener.  Handles all changes that occur via the SchemaRegistry
+ * Schema change listener.  Handles all changes that occur via the SchemaRegistryIndex
  */
 class $SchemaChangeListener {
 
@@ -60,7 +58,7 @@ class $SchemaChangeListener {
    * Clear dependency mappings for a given class
    */
   clearSchemaDependency(cls: Class): void {
-    this.#mapping.delete(id(cls));
+    this.#mapping.delete(cls.Ⲑid);
   }
 
   /**
@@ -70,12 +68,12 @@ class $SchemaChangeListener {
    * @param path The path within the object hierarchy to arrive at the class
    * @param config The configuration or the class
    */
-  trackSchemaDependency(src: Class, parent: Class, path: FieldConfig[], config: ClassConfig): void {
-    const idValue = id(src);
+  trackSchemaDependency(src: Class, parent: Class, path: SchemaFieldConfig[], config: SchemaClassConfig): void {
+    const idValue = src.Ⲑid;
     if (!this.#mapping.has(idValue)) {
       this.#mapping.set(idValue, new Map());
     }
-    this.#mapping.get(idValue)!.set(id(parent), { path, config });
+    this.#mapping.get(idValue)!.set(parent.Ⲑid, { path, config });
   }
 
   /**
@@ -85,7 +83,7 @@ class $SchemaChangeListener {
    */
   emitSchemaChanges({ cls, changes }: FieldChangeEvent): void {
     const updates = new Map<string, SchemaChange>();
-    const clsId = id(cls);
+    const clsId = cls.Ⲑid;
 
     if (this.#mapping.has(clsId)) {
       const deps = this.#mapping.get(clsId)!;
@@ -108,25 +106,24 @@ class $SchemaChangeListener {
    * @param prev The previous class config
    * @param curr The current class config
    */
-  emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>): void {
+  emitFieldChanges(ev: ChangeEvent<SchemaClassConfig>): void {
+    const prev = 'prev' in ev ? ev.prev : undefined;
+    const curr = 'curr' in ev ? ev.curr : undefined;
 
-    const prevView = prev?.totalView || { fields: [], schema: {} };
-    const currView = curr!.totalView;
+    const prevFields = new Set(Object.keys(prev?.fields ?? {}));
+    const currFields = new Set(Object.keys(curr?.fields ?? {}));
 
-    const prevFields = new Set(prevView.fields);
-    const currFields = new Set(currView.fields);
-
-    const changes: ChangeEvent<FieldConfig>[] = [];
+    const changes: ChangeEvent<SchemaFieldConfig>[] = [];
 
     for (const c of currFields) {
-      if (!prevFields.has(c)) {
-        changes.push({ curr: currView.schema[c], type: 'added' });
+      if (!prevFields.has(c) && curr) {
+        changes.push({ curr: curr.fields[c], type: 'added' });
       }
     }
 
     for (const c of prevFields) {
-      if (!currFields.has(c)) {
-        changes.push({ prev: prevView.schema[c], type: 'removing' });
+      if (!currFields.has(c) && prev) {
+        changes.push({ prev: prev.fields[c], type: 'removing' });
       }
     }
 
@@ -134,14 +131,14 @@ class $SchemaChangeListener {
     const compareTypes = (a: Class, b: Class): boolean => a.Ⲑid ? a.Ⲑid === b.Ⲑid : a === b;
 
     for (const c of currFields) {
-      if (prevFields.has(c)) {
-        const prevSchema = prevView.schema[c];
-        const currSchema = currView.schema[c];
+      if (prevFields.has(c) && prev && curr) {
+        const prevSchema = prev.fields[c];
+        const currSchema = curr.fields[c];
         if (
           JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
           !compareTypes(prevSchema.type, currSchema.type)
         ) {
-          changes.push({ prev: prevView.schema[c], curr: currView.schema[c], type: 'changed' });
+          changes.push({ prev: prev.fields[c], curr: curr.fields[c], type: 'changed' });
         }
       }
     }

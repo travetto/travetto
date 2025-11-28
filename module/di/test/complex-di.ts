@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeEach } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { asFull, toConcrete } from '@travetto/runtime';
 
-import { Injectable, InjectableFactory, DependencyRegistry } from '@travetto/di';
+import { Injectable, InjectableFactory, DependencyRegistryIndex } from '@travetto/di';
 
 abstract class Common { }
 @Injectable()
@@ -79,41 +79,41 @@ class ComplexDiTest {
 
   @BeforeEach()
   init() {
-    return RootRegistry.init();
+    return Registry.init();
   }
 
   @Test()
   async commonWithDuplicates() {
-    await assert.rejects(() => DependencyRegistry.getInstance(Common), /multiple/i);
+    await assert.rejects(() => DependencyRegistryIndex.getInstance(Common), /multiple/i);
   }
 
   @Test()
   async commonWithSingle() {
-    assert(await DependencyRegistry.getInstance(CommonWithSingle) instanceof SubCommonSingle);
+    assert(await DependencyRegistryIndex.getInstance(CommonWithSingle) instanceof SubCommonSingle);
   }
 
   @Test()
   async commonWithPrimary() {
-    assert(await DependencyRegistry.getInstance(CommonWithPrimary) instanceof SubCommonWithPrimaryA);
+    assert(await DependencyRegistryIndex.getInstance(CommonWithPrimary) instanceof SubCommonWithPrimaryA);
   }
 
   @Test()
   async commonWithCustom() {
-    assert(await DependencyRegistry.getInstance(CommonWithCustom) instanceof SubCommonWithCustomB);
+    assert(await DependencyRegistryIndex.getInstance(CommonWithCustom) instanceof SubCommonWithCustomB);
   }
 
   @Test()
   async commonWithCustomFactory() {
-    assert(await DependencyRegistry.getInstance(CommonWithFactory) instanceof CommonWithFactory);
+    assert(await DependencyRegistryIndex.getInstance(CommonWithFactory) instanceof CommonWithFactory);
   }
 
   @Test()
   async primaryWithFactory() {
-    assert(!(await DependencyRegistry.getInstance(PrimaryWithFactory) instanceof SubPrimaryWithFactoryA));
+    assert(!(await DependencyRegistryIndex.getInstance(PrimaryWithFactory) instanceof SubPrimaryWithFactoryA));
   }
 
   @Test()
   async primaryTargetFactory() {
-    assert(!!(await DependencyRegistry.getInstance(toConcrete<PrimaryTargetInterface>())));
+    assert(!!(await DependencyRegistryIndex.getInstance(toConcrete<PrimaryTargetInterface>())));
   }
 }

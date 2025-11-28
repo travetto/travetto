@@ -4,10 +4,14 @@ import {
   DecoratorUtil, DocUtil, ParamDocumentation, TransformerState, transformCast,
 } from '@travetto/transformer';
 
+export type ComputeConfig = { type?: AnyType, root?: ts.Node, name?: string, index?: number };
+
 export class SchemaTransformUtil {
 
   static SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema.ts';
+  static METHOD_IMPORT = '@travetto/schema/src/decorator/method.ts';
   static FIELD_IMPORT = '@travetto/schema/src/decorator/field.ts';
+  static INPUT_IMPORT = '@travetto/schema/src/decorator/input.ts';
   static COMMON_IMPORT = '@travetto/schema/src/decorator/common.ts';
   static TYPES_IMPORT = '@travetto/schema/src/types.ts';
 
@@ -40,18 +44,14 @@ export class SchemaTransformUtil {
         if (!existing) {
           const cls = state.factory.createClassDeclaration(
             [
-              state.createDecorator(this.SCHEMA_IMPORT, 'Schema'),
-              state.createDecorator(this.COMMON_IMPORT, 'Describe',
-                state.fromLiteral({
-                  title: type.name,
-                  description: type.comment
-                })
-              )
+              state.createDecorator(this.SCHEMA_IMPORT, 'Schema', state.fromLiteral({
+                description: type.comment
+              })),
             ],
             id, [], [],
             Object.entries(type.fieldTypes)
               .map(([k, v]) =>
-                this.computeField(state, state.factory.createPropertyDeclaration(
+                this.computeInput(state, state.factory.createPropertyDeclaration(
                   [], /\W/.test(k) ? state.factory.createComputedPropertyName(state.fromLiteral(k)) : k,
                   v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
                   v.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
@@ -83,45 +83,50 @@ export class SchemaTransformUtil {
   }
 
   /**
-   * Compute property information from declaration
+   * Compute decorator params from property/parameter/getter/setter
    */
-  static computeField<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
-    state: TransformerState, node: T, config: { type?: AnyType, root?: ts.Node, name?: string } = { root: node }
-  ): T {
-
-    const typeExpr = config.type ?? state.resolveType(ts.isSetAccessor(node) ? node.parameters[0] : node);
-    const attrs: ts.PropertyAssignment[] = [];
+  static computeInputDecoratorParams<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
+    state: TransformerState,
+    node: T,
+    config?: ComputeConfig
+  ): ts.Expression[] {
+    const typeExpr = config?.type ?? state.resolveType(ts.isSetAccessor(node) ? node.parameters[0] : node);
+    const attrs: Record<string, string | boolean | object | number | ts.Expression> = {};
 
     if (!ts.isGetAccessorDeclaration(node) && !ts.isSetAccessorDeclaration(node)) {
       // eslint-disable-next-line no-bitwise
       if ((ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Readonly) > 0) {
-        attrs.push(state.factory.createPropertyAssignment('access', state.fromLiteral('readonly')));
-      } else if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
-        attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
+        attrs.access = 'readonly';
+      } else if (!!node.questionToken || !!typeExpr.undefinable || !!node.initializer) {
+        attrs.required = { active: false };
       }
-      if (node.initializer && (
+      if (node.initializer !== undefined && (
         ts.isLiteralExpression(node.initializer) ||
+        node.initializer.kind === ts.SyntaxKind.TrueKeyword ||
+        node.initializer.kind === ts.SyntaxKind.FalseKeyword ||
         (ts.isArrayLiteralExpression(node.initializer) && node.initializer.elements.length === 0)
       )) {
-        attrs.push(state.factory.createPropertyAssignment('default', node.initializer));
+        attrs.default = node.initializer;
       }
     } else {
       const acc = DeclarationUtil.getAccessorPair(node);
-      attrs.push(state.factory.createPropertyAssignment('accessor', state.fromLiteral(true)));
+      attrs.accessor = true;
       if (!acc.setter) {
-        attrs.push(state.factory.createPropertyAssignment('access', state.fromLiteral('readonly')));
+        attrs.access = 'readonly';
       }
       if (!acc.getter) {
-        attrs.push(state.factory.createPropertyAssignment('access', state.fromLiteral('writeonly')));
-      } else if (!typeExpr.undefinable) {
-        attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
+        attrs.access = 'writeonly';
+      } else if (!!typeExpr.undefinable) {
+        attrs.required = { active: false };
       }
     }
 
-    if (ts.isParameter(node) || config.name !== undefined) {
-      attrs.push(state.factory.createPropertyAssignment('name', state.factory.createStringLiteral(
-        config.name !== undefined ? config.name : node.name.getText())
-      ));
+    const rawName = node.getSourceFile()?.text ? node.name.getText() ?? undefined : undefined;
+    const providedName = config?.name ?? rawName!;
+    attrs.name = providedName;
+
+    if (rawName !== providedName && rawName) {
+      attrs.sourceText = rawName;
     }
 
     const primaryExpr = typeExpr.key === 'literal' && typeExpr.typeArguments?.[0] ? typeExpr.typeArguments[0] : typeExpr;
@@ -133,79 +138,107 @@ export class SchemaTransformUtil {
         .filter(x => x !== undefined && x !== null);
 
       if (values.length === primaryExpr.subTypes.length) {
-        attrs.push(state.factory.createPropertyAssignment('enum', state.fromLiteral({
+        attrs.enum = {
           values,
           message: `{path} is only allowed to be "${values.join('" or "')}"`
-        })));
+        };
       }
     } else if (primaryExpr.key === 'template' && primaryExpr.template) {
       const re = LiteralUtil.templateLiteralToRegex(primaryExpr.template);
-      attrs.push(state.factory.createPropertyAssignment('match', state.fromLiteral({
+      attrs.match = {
         re: new RegExp(re),
         template: primaryExpr.template,
         message: `{path} must match "${re}"`
-      })));
+      };
     }
 
     if (ts.isParameter(node)) {
-      const comments = DocUtil.describeDocs(node.parent);
-      const commentConfig: Partial<ParamDocumentation> = (comments.params ?? []).find(x => x.name === node.name.getText()) || {};
-      if (commentConfig.description) {
-        attrs.push(state.factory.createPropertyAssignment('description', state.fromLiteral(commentConfig.description)));
+      const parentComments = DocUtil.describeDocs(node.parent);
+      const paramComments: Partial<ParamDocumentation> = (parentComments.params ?? []).find(x => x.name === node.name.getText()) || {};
+      if (paramComments.description) {
+        attrs.description = paramComments.description;
+      }
+    } else {
+      const comments = DocUtil.describeDocs(node);
+      if (comments.description) {
+        attrs.description = comments.description;
       }
     }
 
     const tags = ts.getJSDocTags(node);
     const aliases = tags.filter(x => x.tagName.getText() === 'alias');
     if (aliases.length) {
-      attrs.push(state.factory.createPropertyAssignment('aliases', state.fromLiteral(aliases.map(x => x.comment).filter(x => !!x))));
+      attrs.aliases = aliases.map(x => x.comment).filter(x => !!x);
     }
 
     const params: ts.Expression[] = [];
 
-    const existing = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
+    const existing =
+      state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT) ??
+      state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
+
+    if (config?.index !== undefined) {
+      attrs.index = config.index;
+    }
+
+    if (Object.keys(attrs).length) {
+      params.push(state.fromLiteral(attrs));
+    }
+
     if (!existing) {
-      const resolved = this.toConcreteType(state, typeExpr, node, config.root);
-      params.push(resolved);
-      if (attrs.length) {
-        params.push(state.factory.createObjectLiteralExpression(attrs));
-      }
+      const resolved = this.toConcreteType(state, typeExpr, node, config?.root ?? node);
+      const type = typeExpr.key === 'foreign' ? state.getConcreteType(node) :
+        ts.isArrayLiteralExpression(resolved) ? resolved.elements[0] : resolved;
+
+      params.unshift(LiteralUtil.fromLiteral(state.factory, {
+        array: ts.isArrayLiteralExpression(resolved),
+        type
+      }));
     } else {
       const args = DecoratorUtil.getArguments(existing) ?? [];
       if (args.length > 0) {
-        params.push(args[0]);
+        params.unshift(args[0]);
       }
-      params.push(state.factory.createObjectLiteralExpression(attrs));
       if (args.length > 1) {
         params.push(...args.slice(1));
       }
     }
 
-    const newModifiers = [
-      ...(node.modifiers ?? []).filter(x => x !== existing),
-      state.createDecorator(this.FIELD_IMPORT, 'Field', ...params)
-    ];
+    return params;
+  }
+
+  /**
+   * Compute property information from declaration
+   */
+  static computeInput<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
+    state: TransformerState, node: T, config?: ComputeConfig
+  ): T {
+    const existingField = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
+    const existingInput = state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
+    const decParams = this.computeInputDecoratorParams(state, node, config);
+
+    let modifiers: ts.ModifierLike[];
+    if (existingField) {
+      const dec = state.createDecorator(this.FIELD_IMPORT, 'Field', ...decParams);
+      modifiers = DecoratorUtil.spliceDecorators(node, existingField, [dec]);
+    } else {
+      const dec = state.createDecorator(this.INPUT_IMPORT, 'Input', ...decParams);
+      modifiers = DecoratorUtil.spliceDecorators(node, existingInput, [dec]);
+    }
 
     let result: unknown;
     if (ts.isPropertyDeclaration(node)) {
-      const comments = DocUtil.describeDocs(node);
-      if (comments.description) {
-        newModifiers.push(state.createDecorator(this.COMMON_IMPORT, 'Describe', state.fromLiteral({
-          description: comments.description
-        })));
-      }
-
       result = state.factory.updatePropertyDeclaration(node,
-        newModifiers, node.name, node.questionToken, node.type, node.initializer);
+        modifiers, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isParameter(node)) {
       result = state.factory.updateParameterDeclaration(node,
-        newModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
+        modifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isGetAccessorDeclaration(node)) {
       result = state.factory.updateGetAccessorDeclaration(node,
-        newModifiers, node.name, node.parameters, node.type, node.body);
+        modifiers, node.name, node.parameters, node.type, node.body);
     } else {
       result = state.factory.updateSetAccessorDeclaration(node,
-        newModifiers, node.name, node.parameters, node.body);
+        modifiers, node.name, node.parameters, node.body);
     }
     return transformCast(result);
   }
@@ -233,6 +266,10 @@ export class SchemaTransformUtil {
   static ensureType(state: TransformerState, anyType: AnyType, target: ts.Node): Record<string, unknown> {
     const { out, type } = this.unwrapType(anyType);
     switch (type?.key) {
+      case 'foreign': {
+        out.type = state.getForeignTarget(type);
+        break;
+      }
       case 'managed': out.type = state.typeToIdentifier(type); break;
       case 'shape': out.type = this.toConcreteType(state, type, target); break;
       case 'template': out.type = state.factory.createIdentifier(type.ctor.name); break;
@@ -269,5 +306,27 @@ export class SchemaTransformUtil {
     if (cls) {
       return state.findMethodByName(cls, methodName);
     }
+  }
+
+  /**
+   * Compute return type decorator params
+   */
+  static computeReturnTypeDecoratorParams(state: TransformerState, node: ts.MethodDeclaration): ts.Expression[] {
+    // If we have a valid response type, declare it
+    const returnType = state.resolveReturnType(node);
+    let targetType = returnType;
+
+    if (returnType.key === 'literal' && returnType.typeArguments?.length && returnType.name === 'Promise') {
+      targetType = returnType.typeArguments[0];
+    }
+
+    // TODO: Standardize this using jsdoc
+    let innerReturnType: AnyType | undefined;
+    if (targetType.key === 'managed' && targetType.importName.startsWith('@travetto/')) {
+      innerReturnType = state.getApparentTypeOfField(targetType.original!, 'body');
+    }
+
+    const finalReturnType = SchemaTransformUtil.ensureType(state, innerReturnType ?? returnType, node);
+    return finalReturnType ? [state.fromLiteral({ returnType: finalReturnType })] : [];
   }
 }

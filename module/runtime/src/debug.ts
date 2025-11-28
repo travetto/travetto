@@ -6,7 +6,7 @@ import { ClassInstance } from './types.ts';
  * @augments `@travetto/runtime:DebugBreak`
  */
 export function DebugBreak(): MethodDecorator {
-  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => descriptor;
+  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => descriptor;
 
 }
 

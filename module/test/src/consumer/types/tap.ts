@@ -91,7 +91,7 @@ export class TapEmitter implements TestConsumerShape {
         let subCount = 0;
         for (const asrt of test.assertions) {
           const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
-          const pth = `./${path.relative(process.cwd(), RuntimeIndex.getFromImport(asrt.import)!.sourceFile)}`;
+          const pth = asrt.import ? `./${path.relative(process.cwd(), RuntimeIndex.getFromImport(asrt.import)!.sourceFile)}` : '<unknown>';
           let subMessage = [
             this.#enhancer.assertNumber(++subCount),
             '-',

@@ -1,13 +1,22 @@
 import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
+import { IsPrivate } from '@travetto/schema';
 
 import { runTests, selectConsumer } from './bin/run.ts';
 
 /**  Direct test invocation */
-@CliCommand({ hidden: true })
+@CliCommand()
+@IsPrivate()
 export class TestDirectCommand {
 
+  @IsPrivate()
   format: string = 'tap';
+
+  /**
+   * Format options
+   * @alias o
+   */
+  formatOptions?: string[];
 
   async preValidate(): Promise<void> {
     await selectConsumer(this);
@@ -21,8 +30,12 @@ export class TestDirectCommand {
   }
 
   main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
+
+    const options = Object.fromEntries((this.formatOptions ?? [])?.map(f => [...f.split(':'), true]));
+
     return runTests({
       consumer: this.format,
+      consumerOptions: options,
       target: {
         import: importOrFile,
         classId: clsId,

@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
-import { RootRegistry } from '@travetto/registry';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam, Undocumented } from '@travetto/web';
+import { Registry } from '@travetto/registry';
+import { IsPrivate } from '@travetto/schema';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { OpenapiVisitor } from '@travetto/openapi';
 
@@ -66,14 +67,14 @@ class TestCont {
     return new Readable({});
   }
 
-  @Undocumented()
+  @IsPrivate()
   @Delete('/random')
   async ignore(): Promise<void> {
 
   }
 }
 
-@Undocumented()
+@IsPrivate()
 @Controller('/test2')
 class IgnoredCont {
   @Get('/user')
@@ -86,7 +87,7 @@ class IgnoredCont {
 export class GenerateSuite {
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test()
@@ -116,7 +117,7 @@ export class GenerateSuite {
           schema: { $ref: '#/components/schemas/TestUser' }
         }
       },
-      description: ''
+      description: undefined
     });
   }
 
@@ -139,7 +140,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { $ref: '#/components/schemas/TestUser' } }
         }
       },
-      description: ''
+      description: undefined
     });
   }
 
@@ -156,7 +157,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { type: 'string' } }
         }
       },
-      description: ''
+      description: undefined
     });
 
     const param = config.paths['/test/names'].put.parameters?.[0];
@@ -179,7 +180,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { type: 'string' } }
         }
       },
-      description: ''
+      description: undefined
     });
 
     assert(config.paths['/test/who'].patch.parameters?.length === 0);
@@ -193,11 +194,11 @@ export class GenerateSuite {
           }
         }
       },
-      description: '__type'
+      description: undefined
     });
     assert.deepStrictEqual(config.components.schemas['who__12130'], {
-      description: '__type',
-      example: undefined,
+      description: undefined,
+      examples: undefined,
       properties: {
         color: {
           description: undefined,
@@ -212,7 +213,6 @@ export class GenerateSuite {
         'name',
         'color'
       ],
-      title: '__type'
     });
   }
 
@@ -223,7 +223,6 @@ export class GenerateSuite {
     assert(config.paths['/test/{id}'].delete.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/{id}'].delete.responses['201'], {
       content: {},
-      description: ''
     });
 
     assert(config.paths['/test/{id}'].delete.parameters?.length === 1);
@@ -244,7 +243,6 @@ export class GenerateSuite {
     assert(config.paths['/test/all/{id}'].delete.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].delete.responses['201'], {
       content: {},
-      description: ''
     });
 
     assert(config.paths['/test/all/{id}'].delete.parameters?.length === 4);
@@ -286,7 +284,6 @@ export class GenerateSuite {
     assert(config.paths['/test/all/{id}'].head.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].head.responses['201'], {
       content: {},
-      description: ''
     });
 
     assert(config.paths['/test/all/{id}'].head.parameters?.length === 4);
@@ -330,7 +327,6 @@ export class GenerateSuite {
       content: {
         'application/octet-stream': { schema: { type: 'string', format: 'binary' } }
       },
-      description: ''
     });
 
     const param = config.paths['/test/download'].get.parameters?.[0];
@@ -379,7 +375,7 @@ export class GenerateSuite {
           }
         }
       },
-      description: 'UserSearch'
+      description: undefined
     });
 
   }

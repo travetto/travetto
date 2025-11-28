@@ -6,7 +6,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport,
+  ModelRegistryIndex, NotFoundError, ExistsError, OptionalId, ModelBlobSupport,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, ModelBlobUtil,
 } from '@travetto/model';
 
@@ -56,7 +56,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   get client(): Map<string, StoreType> { return this.#store; }
 
   #getStore<T extends ModelType>(cls: Class<T> | string): StoreType {
-    const key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
+    const key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStoreName(cls);
     if (!this.#store.has(key)) {
       this.#store.set(key, new Map());
     }
@@ -76,7 +76,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   async #removeIndices<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     try {
       const item = await this.get(cls, id);
-      for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
+      for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
         const idxName = indexName(cls, idx);
         const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
         this.#indices[idx.type].get(idxName)?.get(key)?.delete(id);
@@ -89,7 +89,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async #writeIndices<T extends ModelType>(cls: Class<T>, item: T): Promise<void> {
-    for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
+    for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
       const idxName = indexName(cls, idx);
       const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
       let index = this.#indices[idx.type].get(idxName)?.get(key);
@@ -128,7 +128,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
-    const config = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, config, body);
     const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
     let id: string | undefined;
@@ -149,8 +149,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     await ModelStorageUtil.registerModelChangeListener(this);
     ModelExpiryUtil.registerCull(this);
 
-    for (const el of ModelRegistry.getClasses()) {
-      for (const idx of ModelRegistry.get(el).indices ?? []) {
+    for (const el of ModelRegistryIndex.getClasses()) {
+      for (const idx of ModelRegistryIndex.getConfig(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
             console.error('Unique indices are not supported for', { cls: el.Ⲑid, idx: idx.name });
@@ -167,7 +167,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (store.has(id)) {
       const res = await ModelCrudUtil.load(cls, store.get(id)!);
       if (res) {
-        if (ModelRegistry.get(cls).expiresAt) {
+        if (ModelRegistryIndex.getConfig(cls).expiresAt) {
           if (!ModelExpiryUtil.getExpiryState(cls, res).expired) {
             return res;
           }
@@ -302,7 +302,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async createModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    for (const idx of ModelRegistry.get(cls).indices ?? []) {
+    for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
       if (idx.type === 'sorted' || idx.type === 'unsorted') {
         this.#indices[idx.type].set(indexName(cls, idx), new Map());
       }
@@ -332,7 +332,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    const config = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
     const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
 

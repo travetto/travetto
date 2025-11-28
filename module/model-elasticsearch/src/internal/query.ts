@@ -2,8 +2,8 @@ import { estypes } from '@elastic/elasticsearch';
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { WhereClause, SelectClause, SortClause, Query, ModelQueryUtil } from '@travetto/model-query';
-import { IndexConfig, ModelType, ModelRegistry } from '@travetto/model';
-import { DataUtil, SchemaRegistry } from '@travetto/schema';
+import { IndexConfig, ModelType, ModelRegistryIndex } from '@travetto/model';
+import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types.ts';
 
@@ -65,11 +65,11 @@ export class ElasticsearchQueryUtil {
    */
   static extractWhereTermQuery<T>(cls: Class<T>, o: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
     const items = [];
-    const schema = SchemaRegistry.getViewSchema(cls).schema;
+    const fields = SchemaRegistryIndex.getFieldMap(cls);
 
     for (const key of TypedObject.keys(o)) {
       const top = o[key];
-      const declaredSchema = schema[key];
+      const declaredSchema = fields[key];
       const declaredType = declaredSchema.type;
       const sPath = declaredType === String ?
         ((key === 'id' && !path) ? '_id' : `${path}${key}`) :
@@ -205,11 +205,11 @@ export class ElasticsearchQueryUtil {
    * @param search
    */
   static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): estypes.QueryDslQueryContainer {
-    const clauses = [];
+    const clauses: estypes.QueryDslQueryContainer[] = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
     }
-    const { expiresAt, subType } = ModelRegistry.get(cls);
+    const { expiresAt } = ModelRegistryIndex.getConfig(cls);
     if (checkExpiry && expiresAt) {
       clauses.push({
         bool: {
@@ -221,11 +221,13 @@ export class ElasticsearchQueryUtil {
         },
       });
     }
-    if (subType) {
-      const { subTypeField, subTypeName } = SchemaRegistry.get(cls);
-      clauses.push({
-        term: { [subTypeField]: { value: subTypeName } }
-      });
+    const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
+    if (polymorphicConfig) {
+      if (polymorphicConfig.discriminatedBase) {
+        clauses.push({ terms: { [polymorphicConfig.discriminatedField]: SchemaRegistryIndex.getDiscriminatedTypes(cls)! } });
+      } else {
+        clauses.push({ term: { [polymorphicConfig.discriminatedField]: { value: polymorphicConfig.discriminatedType } } });
+      }
     }
     return clauses.length === 0 ? {} :
       clauses.length === 1 ? clauses[0] :

@@ -3,8 +3,8 @@ import path from 'node:path';
 
 import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { Env } from '@travetto/runtime';
-import { RootRegistry } from '@travetto/registry';
-import { DependencyRegistry } from '@travetto/di';
+import { Registry } from '@travetto/registry';
+import { DependencyRegistryIndex } from '@travetto/di';
 
 /**
  * CLI for outputting the open api spec to a local file
@@ -22,10 +22,10 @@ export class OpenApiSpecCommand implements CliCommandShape {
   async main(): Promise<void> {
     const { OpenApiService } = await import('../src/service.ts');
 
-    await RootRegistry.init();
+    await Registry.init();
 
-    const instance = await DependencyRegistry.getInstance(OpenApiService);
-    const result = instance.getSpec();
+    const instance = await DependencyRegistryIndex.getInstance(OpenApiService);
+    const result = await instance.getSpec();
 
     if (this.output === '-' || !this.output) {
       console.log!(JSON.stringify(result, null, 2));

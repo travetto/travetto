@@ -1,6 +1,6 @@
 import { Class, AppError, TimeUtil, castTo, hasFunction } from '@travetto/runtime';
-import { ModelType, ModelRegistry, NotFoundError } from '@travetto/model';
-import { SchemaRegistry } from '@travetto/schema';
+import { ModelType, NotFoundError, ModelRegistryIndex } from '@travetto/model';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WhereClause, WhereClauseRaw } from '../model/where-clause.ts';
 import { ModelQuerySupport } from '../types/query.ts';
@@ -56,11 +56,17 @@ export class ModelQueryUtil {
   static getWhereClause<T extends ModelType>(cls: Class<T>, q: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
     const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
 
-    const conf = ModelRegistry.get(cls);
-    if (conf.subType) {
-      const { subTypeField, subTypeName } = SchemaRegistry.get(cls);
-      clauses.push(castTo({ [subTypeField]: subTypeName }));
+    const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
+    if (polymorphicConfig) {
+      clauses.push(castTo(polymorphicConfig.discriminatedBase ? {
+        [polymorphicConfig.discriminatedField]: { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) }
+      } : {
+        [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedType
+      }
+      ));
     }
+
+    const conf = ModelRegistryIndex.getConfig(cls);
     if (checkExpiry && conf.expiresAt) {
       clauses.push(castTo({
         $or: [

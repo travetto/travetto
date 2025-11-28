@@ -110,7 +110,7 @@ export class DocFileUtil {
     let found = false;
     if (start > 0) {
       for (let i = start - 1; i > start - 3; i--) {
-        if (lines[i].includes('@augments')) {
+        if (lines[i].includes('@kind decorator')) {
           found = true;
           break;
         }

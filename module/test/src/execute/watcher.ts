@@ -1,14 +1,14 @@
-import { RootRegistry, MethodSource } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../registry/suite.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistry } from '../consumer/registry.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { TestRun } from '../model/test.ts';
 import { RunnerUtil } from './util.ts';
 import { TestReadyEvent, TestRemovedEvent } from '../worker/types.ts';
+import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * Test Watcher.
@@ -23,9 +23,7 @@ export class TestWatcher {
   static async watch(format: string, runAllOnStart = true): Promise<void> {
     console.debug('Listening for changes');
 
-    await SuiteRegistry.init();
-    SuiteRegistry.listen(RootRegistry);
-    await RootRegistry.init();
+    await Registry.init();
 
     const events: TestRun[] = [];
 
@@ -40,18 +38,22 @@ export class TestWatcher {
     )
       .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
 
-    new MethodSource(RootRegistry).on(e => {
-      const [cls, method] = (e.prev ?? e.curr ?? []);
+    Registry.onMethodChange((event) => {
+      const [cls, method] = ('prev' in event && event.prev ? event.prev : null) ??
+        ('curr' in event && event.curr ? event.curr : []);
+
       if (!cls || describeFunction(cls).abstract) {
         return;
       }
+
       const classId = cls.Ⲑid;
       if (!method) {
         consumer.removeClass(classId);
         return;
       }
-      const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
-      if (e.type !== 'removing') {
+
+      const conf = SuiteRegistryIndex.getTestConfig(cls, method)!;
+      if (event.type !== 'removing') {
         if (conf) {
           const run: TestRun = {
             import: conf.import, classId: conf.classId, methodNames: [conf.methodName], metadata: { partial: true }
@@ -68,10 +70,10 @@ export class TestWatcher {
           import: Runtime.getImport(cls)
         } satisfies TestRemovedEvent);
       }
-    });
+    }, SuiteRegistryIndex);
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    RootRegistry.onNonClassChanges(imp => itr.add({ import: imp }));
+    Registry.onNonClassChanges(imp => itr.add({ import: imp }));
 
     process.on('message', ev => {
       if (typeof ev === 'object' && ev && 'type' in ev && ev.type === 'run-test') {

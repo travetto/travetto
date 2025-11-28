@@ -1,5 +1,5 @@
 import type { Any, Class, TypedFunction } from '@travetto/runtime';
-import type { FieldConfig, ClassConfig } from '@travetto/schema';
+import type { SchemaClassConfig, SchemaParameterConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
@@ -16,35 +16,10 @@ export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunctio
  */
 export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
-  (<U>(target: U, prop: string, descriptor?: EndpointFunctionDescriptor) => void)
+  (<U>(target: U, prop: string | symbol, descriptor?: EndpointFunctionDescriptor) => void)
 );
 
-/**
- * Endpoint type
- */
-export type EndpointIOType = {
-  type: Class;
-  array?: boolean;
-  description?: string;
-};
-
-/**
- * Describable elements
- */
-export interface DescribableConfig {
-  /**
-   * The title
-   */
-  title?: string;
-  /**
-   * Description
-   */
-  description?: string;
-  /**
-   * Is the resource documented
-   */
-  documented?: boolean;
-}
+export type EndpointParamLocation = 'path' | 'query' | 'body' | 'header';
 
 /**
  * Core configuration for endpoints and controllers
@@ -85,21 +60,21 @@ interface CoreConfig {
 }
 
 /**
- * Endpoint param configuration
+ * Endpoint parameter configuration
  */
-export interface EndpointParamConfig {
+export interface EndpointParameterConfig {
   /**
    * Name of the parameter
    */
   name?: string;
   /**
-   * Raw text of parameter at source
+   * Index of parameter
    */
-  sourceText?: string;
+  index: number;
   /**
    * Location of the parameter
    */
-  location: 'path' | 'query' | 'body' | 'header';
+  location: EndpointParamLocation;
   /**
    * Resolves the value by executing with req/res as input
    */
@@ -108,7 +83,7 @@ export interface EndpointParamConfig {
    * Extract the value from request
    * @param context The http context with the endpoint param config
    */
-  extract?: (ctx: WebRequest, config: EndpointParamConfig) => unknown;
+  extract?: (ctx: WebRequest, config: EndpointParameterConfig) => unknown;
   /**
    * Input prefix for parameter
    */
@@ -118,15 +93,15 @@ export interface EndpointParamConfig {
 /**
  * Endpoint configuration
  */
-export interface EndpointConfig extends CoreConfig, DescribableConfig {
+export interface EndpointConfig extends CoreConfig {
   /**
    * Unique identifier
    */
   id: string;
   /**
-   * The name of the method
+   * Name of the endpoint (method name)
    */
-  name: string;
+  name: string | symbol;
   /**
    * Instance the endpoint is for
    */
@@ -158,15 +133,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * List of params for the endpoint
    */
-  params: EndpointParamConfig[];
-  /**
-   * The response type
-   */
-  responseType?: EndpointIOType;
-  /**
-   * The request type
-   */
-  requestType?: EndpointIOType;
+  parameters: EndpointParameterConfig[];
   /**
    * Full path including controller
    */
@@ -184,7 +151,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
 /**
  * Controller configuration
  */
-export interface ControllerConfig extends CoreConfig, DescribableConfig {
+export interface ControllerConfig extends CoreConfig {
   /**
    * The base path of the controller
    */
@@ -200,13 +167,13 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
   /**
    * Context parameters to bind at create
    */
-  contextParams: Record<string, Class>;
+  contextParams: Record<string | symbol, boolean>;
 }
 
 /**
  * Controller visitor options
  */
-export type ControllerVisitorOptions = { skipUndocumented?: boolean };
+export type ControllerVisitorOptions = { skipPrivate?: boolean };
 
 /**
  * Controller visitor pattern
@@ -218,10 +185,10 @@ export interface ControllerVisitor<T = unknown> {
   onControllerStart?(controller: ControllerConfig): Promise<unknown> | unknown;
   onControllerEnd?(controller: ControllerConfig): Promise<unknown> | unknown;
 
-  onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: FieldConfig[]): Promise<unknown> | unknown;
-  onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: FieldConfig[]): Promise<unknown> | unknown;
+  onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: SchemaParameterConfig[]): Promise<unknown> | unknown;
+  onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: SchemaParameterConfig[]): Promise<unknown> | unknown;
 
-  onSchema?(schema: ClassConfig): Promise<unknown> | unknown;
+  onSchema?(schema: SchemaClassConfig): Promise<unknown> | unknown;
 
   onControllerAdd?(cls: Class): Promise<unknown> | unknown;
   onControllerRemove?(cls: Class): Promise<unknown> | unknown;

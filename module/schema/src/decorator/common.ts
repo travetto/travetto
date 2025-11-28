@@ -1,27 +1,43 @@
-import { Class, ClassInstance } from '@travetto/runtime';
+import { Class, ClassInstance, getClass } from '@travetto/runtime';
 
-import { DescribableConfig } from '../service/types.ts';
-import { SchemaRegistry } from '../service/registry.ts';
-
-function isClassInstance(o: Class | ClassInstance, property?: string): o is ClassInstance {
-  return !!property;
-}
+import { SchemaCoreConfig } from '../service/types.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 /**
  * Describe a model or a field
  * @param config The describe configuration
- * @augments `@travetto/schema:Describe`
+ * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
-export function Describe(config: Partial<DescribableConfig>) {
-  return (target: Class | ClassInstance, property?: string, descOrIdx?: PropertyDescriptor | number): void => {
-    if (isClassInstance(target, property)) {
-      if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
-        SchemaRegistry.registerPendingParamFacet(target.constructor, property!, descOrIdx, config);
-      } else {
-        SchemaRegistry.registerPendingFieldFacet(target.constructor, property!, config);
-      }
+export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
+  return (instanceOrCls: Class | ClassInstance, property?: string | symbol, descOrIdx?: PropertyDescriptor | number): void => {
+    const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
+    if (!property) {
+      adapter.register(config);
     } else {
-      SchemaRegistry.register(target, config);
+      if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
+        adapter.registerParameter(property, descOrIdx, config);
+      } else if (typeof descOrIdx === 'object' && typeof descOrIdx.value === 'function') {
+        adapter.registerMethod(property, config);
+      } else {
+        adapter.registerField(property, config);
+      }
     }
   };
+}
+
+/**
+ * Mark a field/method as private
+ * @augments `@travetto/schema:Input`
+ * @kind decorator
+ */
+export const IsPrivate = (): (instanceOrCls: Class | ClassInstance, property?: string | symbol) => void => Describe({ private: true });
+
+/**
+ * Mark a field/method as ignored
+ * @augments `@travetto/schema:Ignore`
+ * @kind decorator
+ */
+export function Ignore(): PropertyDecorator {
+  return () => { };
 }

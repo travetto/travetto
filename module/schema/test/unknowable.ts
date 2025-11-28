@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
-import { SchemaRegistry, UnknownType } from '@travetto/schema';
+import { Registry } from '@travetto/registry';
+import { SchemaRegistryIndex, UnknownType } from '@travetto/schema';
 
 import { Unknowable } from './models/unknown.ts';
 
@@ -11,8 +11,8 @@ export class UnknownTest {
 
   @Test()
   async basic() {
-    await RootRegistry.init();
-    const config = SchemaRegistry.getViewSchema(Unknowable).schema.value;
-    assert(config.type === UnknownType);
+    await Registry.init();
+    const fields = SchemaRegistryIndex.getFieldMap(Unknowable).value;
+    assert(fields.type === UnknownType);
   }
 }

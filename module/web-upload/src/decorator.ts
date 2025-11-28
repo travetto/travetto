@@ -1,6 +1,6 @@
-import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, EndpointParamConfig, Param } from '@travetto/web';
-import { SchemaRegistry } from '@travetto/schema';
+import { AppError, toConcrete, ClassInstance, getClass } from '@travetto/runtime';
+import { ControllerRegistryIndex, EndpointParameterConfig, Param } from '@travetto/web';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor.ts';
 import { WebUploadConfig } from './config.ts';
@@ -14,12 +14,12 @@ const FileMapContract = toConcrete<FileMap>();
 /**
  * Allows for supporting uploads
  *
- * @augments `@travetto/web-upload:Upload`
- * @augments `@travetto/web:Param`
+ * @augments `@travetto/schema:Input`
+ * @kind decorator
  */
 export function Upload(
-  param: string | Partial<EndpointParamConfig> & UploadConfig = {},
-): (inst: ClassInstance, prop: string, idx: number) => void {
+  param: string | Partial<EndpointParameterConfig> & UploadConfig = {},
+): (instance: ClassInstance, property: string | symbol, idx: number) => void {
 
   if (typeof param === 'string') {
     param = { name: param };
@@ -27,17 +27,18 @@ export function Upload(
 
   const finalConf = { ...param };
 
-  return (inst: ClassInstance, prop: string, idx: number): void => {
+  return (instance: ClassInstance, property: string | symbol, idx: number): void => {
     // Register field
-    ControllerRegistry.registerEndpointInterceptorConfig(
-      inst.constructor, inst[prop], WebUploadInterceptor,
+    ControllerRegistryIndex.getForRegister(getClass(instance)).registerEndpointInterceptorConfig(
+      property,
+      WebUploadInterceptor,
       {
         applies: true,
         maxSize: finalConf.maxSize,
         types: finalConf.types,
         cleanupFiles: finalConf.cleanupFiles,
         uploads: {
-          [finalConf.name ?? prop]: {
+          [finalConf.name ?? property]: {
             maxSize: finalConf.maxSize,
             types: finalConf.types,
             cleanupFiles: finalConf.cleanupFiles
@@ -49,20 +50,20 @@ export function Upload(
     return Param('body', {
       ...finalConf,
       extract: (request, config) => {
-        const field = SchemaRegistry.getMethodSchema(inst.constructor, prop)[idx];
+        const input = SchemaRegistryIndex.getMethodConfig(instance.constructor, property).parameters[idx];
 
-        if (!field) {
+        if (!input) {
           throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
-        if (!(field.type === Blob || field.type === File || field.type === FileMapContract)) {
-          throw new AppError(`Cannot use upload decorator with ${field.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
+        if (!(input.type === Blob || input.type === File || input.type === FileMapContract)) {
+          throw new AppError(`Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
-        const isMap = field.type === FileMapContract;
+        const isMap = input.type === FileMapContract;
         const map = WebUploadUtil.getRequestUploads(request);
         return isMap ? map : map[config.name!];
       }
-    })(inst, prop, idx);
+    })(instance, property, idx);
   };
 }

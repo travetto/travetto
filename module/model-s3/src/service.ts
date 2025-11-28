@@ -8,9 +8,8 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
-  ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
+  ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistryIndex, ExistsError, NotFoundError, OptionalId,
   ModelBlobSupport, ModelExpirySupport, ModelBlobUtil, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
-
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil, TimeSpan, TimeUtil } from '@travetto/runtime';
@@ -65,7 +64,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   #resolveKey(cls: Class | string, id?: string): string {
-    let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
+    let key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStoreName(cls);
     if (id) {
       key = `${key}:${id}`;
     }
@@ -85,7 +84,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
 
   #getExpiryConfig<T extends ModelType>(cls: Class<T>, item: T): { Expires?: Date } {
-    if (ModelRegistry.get(cls).expiresAt) {
+    if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item);
       if (expiresAt) {
         return { Expires: expiresAt };
@@ -197,8 +196,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async head<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {
     try {
       const result = await this.client.headObject(this.#q(cls, id));
-      const { expiresAt } = ModelRegistry.get(cls);
-      if (expiresAt && result.Expires && result.Expires.getTime() < Date.now()) {
+      const { expiresAt } = ModelRegistryIndex.getConfig(cls);
+      if (expiresAt && result.ExpiresString && Date.parse(result.ExpiresString) < Date.now()) {
         return false;
       }
       return true;
@@ -219,7 +218,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         const body = await toText(castTo(result.Body));
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
-          const { expiresAt } = ModelRegistry.get(cls);
+          const { expiresAt } = ModelRegistryIndex.getConfig(cls);
           if (expiresAt) {
             const expiry = ModelExpiryUtil.getExpiryState(cls, output);
             if (!expiry.expired) {

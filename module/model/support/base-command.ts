@@ -1,14 +1,16 @@
 import { Env } from '@travetto/runtime';
 import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
+import { Schema } from '@travetto/schema';
 
-import type { ModelStorageSupport } from '../src/service/storage.ts';
+import type { ModelStorageSupport } from '../src/types/storage.ts';
 
 import { ModelCandidateUtil } from './bin/candidate.ts';
 
 /**
  * CLI Entry point for exporting model schemas
  */
+@Schema()
 export abstract class BaseModelCommand implements CliCommandShape {
 
   /** Application Environment */
@@ -21,7 +23,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   }
 
   async help(): Promise<string[]> {
-    await RootRegistry.init();
+    await Registry.init();
 
     const candidates = await ModelCandidateUtil.export(this.getOp());
     return [
@@ -36,7 +38,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   }
 
   async validate(provider: string, models: string[]): Promise<CliValidationError | undefined> {
-    await RootRegistry.init();
+    await Registry.init();
 
     const candidates = await ModelCandidateUtil.export(this.getOp());
     if (provider && !candidates.providers.includes(provider)) {

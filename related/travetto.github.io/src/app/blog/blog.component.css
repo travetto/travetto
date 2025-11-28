@@ -10,7 +10,7 @@
     flex-direction: column;
     gap: 1rem;
 
-    article + article {
+    article+article {
       border-top: 1px solid #ddd;
       padding-top: 2em;
     }
@@ -34,6 +34,7 @@
         .date {
           grid-column: 2;
         }
+
         .byline {
           grid-column: 3;
         }
@@ -52,6 +53,7 @@
         div {
           color: #333;
         }
+
         .content h2:first-child,
         .content h3:first-child {
           margin-top: 0;
@@ -78,6 +80,7 @@
           filter: saturate(120%);
           margin-bottom: 0.25rem;
           font-weight: 400;
+
           span,
           b {
             font-weight: 400;
@@ -87,17 +90,20 @@
         code {
           font-size: 0.9em;
         }
+
         ul.notes {
           font-size: 1rem;
           height: 1.5em;
           overflow: hidden;
           display: block;
+
           &::before {
             text-align: right;
             text-decoration: underline;
             display: block;
             content: "Show notes";
           }
+
           &:hover {
             height: auto;
           }

@@ -1,5 +1,8 @@
 import { inspect, type InspectOptions } from 'node:util';
+
 import { DataUtil } from '@travetto/schema';
+import { safeAssign } from '@travetto/runtime';
+
 import { LogEvent } from '../types.ts';
 
 const INSPECT_OPTIONS = { colors: false, showHidden: false, depth: 5, breakLength: 200 };
@@ -10,7 +13,7 @@ export class LogFormatUtil {
     const out: Record<string, unknown> = {};
     for (const o of ev.args ?? []) {
       if (DataUtil.isPlainObject(o)) {
-        Object.assign(out, o);
+        safeAssign(out, o);
       }
     }
     return out && Object.keys(out).length > 0 ? out : undefined;

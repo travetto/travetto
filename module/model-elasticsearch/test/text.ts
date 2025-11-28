@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { LongText, Text, Schema } from '@travetto/schema';
 
@@ -20,7 +20,7 @@ export class TextTestSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test()

@@ -1,19 +1,21 @@
 import util from 'node:util';
 
-import { castKey, castTo, Primitive } from '@travetto/runtime';
+import { castKey, getClass } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
 import { CliCommandShape } from './types.ts';
-import { CliCommandRegistry } from './registry.ts';
-import { CliCommandSchemaUtil } from './schema.ts';
+import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 import { CliValidationResultError } from './error.ts';
-import { isBoolFlag } from './parse.ts';
+import { CliSchemaExportUtil } from './schema-export.ts';
 
-const validationSourceMap = {
-  custom: '',
+const validationSourceMap: Record<string, string> = {
   arg: 'Argument',
   flag: 'Flag'
 };
+
+const ifDefined = <T>(v: T | null | '' | undefined): T | undefined =>
+  (v === null || v === '' || v === undefined) ? undefined : v;
 
 /**
  * Utilities for showing help
@@ -24,47 +26,51 @@ export class HelpUtil {
    * Render command-specific help
    * @param command
    */
-  static async renderCommandHelp(cmd: CliCommandShape | string): Promise<string> {
-    const command = typeof cmd === 'string' ? await CliCommandRegistry.getInstance(cmd, true) : cmd;
-    const commandName = CliCommandRegistry.getName(command);
+  static async renderCommandHelp(command: CliCommandShape): Promise<string> {
+    const schema = SchemaRegistryIndex.getConfig(getClass(command));
+    const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
+    const args = schema.methods.main?.parameters ?? [];
 
     await command.preHelp?.();
 
     // Ensure finalized
-    const { flags, args } = await CliCommandSchemaUtil.getSchema(command);
 
-    const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`];
+    const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
     for (const field of args) {
-      const type = field.type === 'string' && field.choices && field.choices.length <= 7 ? field.choices?.join('|') : field.type;
+      const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type.name.toLowerCase();
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
-      usage.push(cliTpl`${{ input: field.required ? `<${arg}>` : `[${arg}]` }}`);
+      usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
     }
 
     const params: string[] = [];
     const descriptions: string[] = [];
 
-    for (const flag of flags) {
-      const key = castKey<CliCommandShape>(flag.name);
-      const flagVal: Primitive = castTo(command[key]);
+    for (const field of Object.values(schema.fields)) {
+      const key = castKey<CliCommandShape>(field.name);
+      const def = ifDefined(command[key]) ?? ifDefined(field.default);
+      const aliases = (field.aliases ?? [])
+        .filter(x => x.startsWith('-'))
+        .filter(x =>
+          (field.type !== Boolean) || ((def !== true || field.name === 'help') ? !x.startsWith('--no-') : x.startsWith('--'))
+        );
+      let type: string | undefined;
 
-      let aliases = flag.flagNames ?? [];
-      if (isBoolFlag(flag)) {
-        if (flagVal === true) {
-          aliases = (flag.flagNames ?? []).filter(x => !/^[-][^-]/.test(x));
-        } else {
-          aliases = (flag.flagNames ?? []).filter(x => !x.startsWith('--no-'));
-        }
+      if (field.type === String && field.enum && field.enum.values.length <= 3) {
+        type = field.enum.values?.join('|');
+      } else if (field.type !== Boolean) {
+        ({ type } = CliSchemaExportUtil.baseInputType(field));
       }
-      const param = [cliTpl`${{ param: aliases.join(', ') }}`];
-      if (!isBoolFlag(flag)) {
-        const type = flag.type === 'string' && flag.choices && flag.choices.length <= 3 ? flag.choices?.join('|') : flag.type;
-        param.push(cliTpl`${{ type: `<${type}>` }}`);
-      }
+
+      const param = [
+        cliTpl`${{ param: aliases.join(', ') }}`,
+        ...(type ? [cliTpl`${{ type: `<${type}>` }}`] : []),
+      ];
+
       params.push(param.join(' '));
-      const desc = [cliTpl`${{ title: flag.description }}`];
+      const desc = [cliTpl`${{ title: field.description }}`];
 
-      if (key !== 'help' && flagVal !== null && flagVal !== undefined && flagVal !== '') {
-        desc.push(cliTpl`(default: ${{ input: JSON.stringify(flagVal) }})`);
+      if (key !== 'help' && def !== undefined) {
+        desc.push(cliTpl`(default: ${{ input: JSON.stringify(def) }})`);
       }
       descriptions.push(desc.join(' '));
     }
@@ -97,18 +103,15 @@ export class HelpUtil {
    */
   static async renderAllHelp(title?: string): Promise<string> {
     const rows: string[] = [];
-    const keys = [...CliCommandRegistry.getCommandMapping().keys()].toSorted((a, b) => a.localeCompare(b));
-    const maxWidth = keys.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b).length), 0);
 
-    for (const cmd of keys) {
+    // All
+    const resolved = await CliCommandRegistryIndex.load();
+    const maxWidth = resolved.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b.command).length), 0);
+
+    for (const { command: cmd, schema } of resolved) {
       try {
-        const inst = await CliCommandRegistry.getInstance(cmd);
-        if (inst) {
-          const cfg = await CliCommandRegistry.getConfig(inst);
-          if (!cfg.hidden) {
-            const schema = await CliCommandSchemaUtil.getSchema(cfg.cls);
-            rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
-          }
+        if (schema && !schema.private) {
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.description || '' }}`);
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -121,9 +124,8 @@ export class HelpUtil {
 
     const lines = [cliTpl`${{ title: 'Commands:' }}`, ...rows, ''];
 
-    if (title === undefined || title) {
-      lines.unshift(title ? cliTpl`${{ title }}` : cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`, '');
-    }
+    lines.unshift(title ? cliTpl`${{ title }}` : cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`, '');
+
     return lines.map(x => x.trimEnd()).join('\n');
   }
 
@@ -133,9 +135,12 @@ export class HelpUtil {
   static renderValidationError(err: CliValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
-      ...err.details.errors.map(e => e.source && e.source !== 'custom' ?
-        cliTpl` * ${{ identifier: validationSourceMap[e.source] }} ${{ subtitle: e.message }}` :
-        cliTpl` * ${{ failure: e.message }}`),
+      ...err.details.errors.map(e => {
+        if (e.source && e.source in validationSourceMap) {
+          return cliTpl` * ${{ identifier: validationSourceMap[e.source] }} ${{ subtitle: e.message }}`;
+        }
+        return cliTpl` * ${{ failure: e.message }}`;
+      }),
       '',
     ].join('\n');
   }

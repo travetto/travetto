@@ -1,4 +1,4 @@
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Env, Runtime } from '@travetto/runtime';
 
@@ -20,7 +20,7 @@ export class EmailCompileCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
-    await RootRegistry.init();
+    await Registry.init();
 
     // Let the engine template
     const all = await EmailCompiler.compileAll();

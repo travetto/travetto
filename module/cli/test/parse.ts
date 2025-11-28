@@ -1,9 +1,11 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Env } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
+import { Registry } from '@travetto/registry';
 
-import { CliCommand, CliCommandSchemaUtil, CliParseUtil } from '@travetto/cli';
+import { CliCommand, CliParseUtil } from '@travetto/cli';
 
 /**
  * My command
@@ -14,12 +16,18 @@ class WithModule {
 }
 
 const expand = async (args: string[]): Promise<string[]> => CliParseUtil.expandArgs(
-  await CliCommandSchemaUtil.getSchema(WithModule),
+  SchemaRegistryIndex.getConfig(WithModule),
   CliParseUtil.getArgs(args).args
 );
 
 @Suite()
 export class ParseSuite {
+
+  @BeforeAll()
+  async setup() {
+    await Registry.init();
+  }
+
   @Test()
   async testArgs() {
     const expected = { cmd: 'bob', args: ['-h'], help: true };

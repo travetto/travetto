@@ -16,7 +16,7 @@ yarn add @travetto/log
 This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L43) in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. The logging infrastructure is built upon the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") system, and so new loggers can be created that rely upon dependency injected services and sources.
 
 ## Extending the Common Logger
-By default, the system ships with the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L12), and by default will leverage the [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L37) and the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7). The configuration [CommonLoggerConfig](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L12) provides two configuration variables that allows for switching out [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L37) for the [JsonLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/json.ts#L16), depending on the value of `CommonLoggerConfig.format`.  Additionally the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7) can be swapped out for the [FileLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/file.ts#L11) depending on the value of `CommonLoggerConfig.output`.
+By default, the system ships with the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L13), and by default will leverage the [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L37) and the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7). The configuration [CommonLoggerConfig](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L13) provides two configuration variables that allows for switching out [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L37) for the [JsonLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/json.ts#L16), depending on the value of `CommonLoggerConfig.format`.  Additionally the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7) can be swapped out for the [FileLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/file.ts#L11) depending on the value of `CommonLoggerConfig.output`.
 
 **Code: Standard Logging Config**
 ```typescript
@@ -29,7 +29,7 @@ export class CommonLoggerConfig {
 }
 ```
 
-In addition to these simple overrides, the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L12) can be extended by providing an implementation of either a [LogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L36) or [LogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L28), with the declared symbol of `LogCommonSymbol`.
+In addition to these simple overrides, the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L13) can be extended by providing an implementation of either a [LogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L36) or [LogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L28), with the declared symbol of `LogCommonSymbol`.
 
 **Code: Sample Common Formatter**
 ```typescript
@@ -127,13 +127,10 @@ import { LogDecorator, LogEvent } from '@travetto/log';
 @Injectable()
 export class CustomDecorator implements LogDecorator {
   decorate(ev: LogEvent): LogEvent {
-
-    // Add memory usage, and hostname
-    Object.assign(ev.context ??= {}, {
+    ev.args.push({
       memory: process.memoryUsage,
       hostname: os.hostname()
     });
-
     return ev;
   }
 }

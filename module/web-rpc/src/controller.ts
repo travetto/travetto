@@ -1,7 +1,8 @@
 import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
+import { IsPrivate } from '@travetto/schema';
 import {
-  HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry,
+  HeaderParam, Controller, ExcludeInterceptors, ControllerRegistryIndex,
   WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
   RespondInterceptor, DecompressInterceptor, Get
 } from '@travetto/web';
@@ -13,7 +14,7 @@ import {
   val instanceof RespondInterceptor ||
   val.category === 'global'
 ))
-@Undocumented()
+@IsPrivate()
 export class WebRpcController {
 
   @Inject()
@@ -32,7 +33,7 @@ export class WebRpcController {
    */
   @Post('/:target')
   async onRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
-    const endpoint = ControllerRegistry.getEndpointById(target);
+    const endpoint = ControllerRegistryIndex.getEndpointConfigById(target);
 
     if (!endpoint || !endpoint.filter) {
       throw new AppError('Unknown endpoint', { category: 'notfound' });
@@ -48,7 +49,7 @@ export class WebRpcController {
     } else if (Array.isArray(body)) { // Params passed via body
       params = body;
 
-      const bodyParamIdx = endpoint.params.findIndex((x) => x.location === 'body');
+      const bodyParamIdx = endpoint.parameters.findIndex((x) => x.location === 'body');
       if (bodyParamIdx >= 0) { // Re-assign body
         request.body = params[bodyParamIdx];
       }
@@ -58,7 +59,7 @@ export class WebRpcController {
       params = [];
     }
 
-    const final = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
+    const final = endpoint.parameters.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
     WebCommonUtil.setRequestParams(request, final);
 
     // Dispatch

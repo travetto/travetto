@@ -29,16 +29,16 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
    * On a class being emitted, check methods
    */
   onClassEvent(e: ChangeEvent<Class>): void {
-    const next = describeFunction(e.curr!)?.methods ?? {};
-    const prev = describeFunction(e.prev!)?.methods ?? {};
+    const next = (e.type !== 'removing' ? describeFunction(e.curr!)?.methods : null) ?? {};
+    const prev = (e.type !== 'added' ? describeFunction(e.prev!)?.methods : null) ?? {};
 
     /**
      * Go through each method, comparing hashes.  To see added/removed and changed
      */
     for (const k of Object.keys(next)) {
-      if (!prev[k] || !e.prev) {
+      if ((!prev[k] || !('prev' in e)) && e.type !== 'removing') {
         this.emit({ type: 'added', curr: [e.curr!, e.curr!.prototype[k]] });
-      } else if (next[k].hash !== prev[k].hash && e.curr) {
+      } else if (next[k].hash !== prev[k].hash && e.type === 'changed') {
         // FIXME: Why is e.prev undefined sometimes?
         this.emit({ type: 'changed', curr: [e.curr, e.curr.prototype[k]], prev: [e.prev, e.prev.prototype[k]] });
       } else {
@@ -47,7 +47,7 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
     }
 
     for (const k of Object.keys(prev)) {
-      if (!next[k] && e.prev) {
+      if (!next[k] && e.type !== 'added') {
         this.emit({ type: 'removing', prev: [e.prev, e.prev.prototype[k]] });
       }
     }

@@ -1,7 +1,9 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
+import { AssertCheck, BeforeAll, Suite, Test } from '@travetto/test';
 import { CliCommand, CliCommandSchemaUtil, CliFlag, CliParseUtil, ParsedState } from '@travetto/cli';
+import { SchemaRegistryIndex } from '@travetto/schema';
+import { Registry } from '@travetto/registry';
 
 /**
  * My command
@@ -23,26 +25,36 @@ class Entity {
    */
   color?: 'green' | 'blue';
 
-  @CliFlag({ short: 'g', desc: 'My age' })
+  /** My age */
+  @CliFlag({ short: 'g' })
   age?: number;
 
   main(file: string, force: boolean, args?: string[]) { }
 }
 
-const get = async (...args: string[]) => CliParseUtil.parse(await CliCommandSchemaUtil.getSchema(Entity), args);
+const get = async (...args: string[]) => CliParseUtil.parse(SchemaRegistryIndex.getConfig(Entity), args);
 const unused = (state: ParsedState) => state.unknown;
-const checkArgs = async (args: string[], expected: unknown[], raw?: unknown[]) => {
-  const entity = new Entity();
-  const parsed = await get(...args);
-  const found = await CliCommandSchemaUtil.bindInput(entity, parsed);
-  assert.deepStrictEqual(found, expected);
-  if (raw) {
-    assert.deepStrictEqual(unused(parsed), raw);
-  }
-};
 
 @Suite()
 export class SchemaBindingSuite {
+
+  @AssertCheck()
+  async checkArgs(args: string[], expected: unknown[], raw?: unknown[]) {
+    const entity = new Entity();
+    const parsed = await get(...args);
+    const found = await CliCommandSchemaUtil.bindInput(entity, parsed);
+    assert.deepStrictEqual(found, expected);
+    if (raw) {
+      assert.deepStrictEqual(unused(parsed), raw);
+    }
+  };
+
+
+  @BeforeAll()
+  async init() {
+    await Registry.init();
+  }
+
   @Test()
   async testFlags() {
     const entity = new Entity();
@@ -83,38 +95,37 @@ export class SchemaBindingSuite {
 
   @Test()
   async testSchema() {
-    const schema = await CliCommandSchemaUtil.getSchema(Entity);
-    assert(schema.title === 'My command');
-    const color = schema.flags.find(x => x.name === 'color')!;
+    const schema = SchemaRegistryIndex.getConfig(Entity);
+    assert(schema.description === 'My command');
+    const color = schema.fields.color;
     assert(color.description === 'My color');
-    assert(color.required !== true);
-    assert(color.type === 'string');
-    assert(color.envVars?.includes('COLOREO'));
-    assert(color.flagNames?.includes('-l'));
-    assert(color.flagNames?.includes('--color'));
-    assert.deepStrictEqual(color.choices?.toSorted(), ['blue', 'green']);
+    assert(color.required?.active === false);
+    assert(color.type === String);
+    assert(color.aliases?.includes('env.COLOREO'));
+    assert(color.aliases?.includes('-l'));
+    assert(color.aliases?.includes('--color'));
+    assert.deepStrictEqual(color.enum?.values?.toSorted(), ['blue', 'green']);
 
-    const age = schema.flags.find(x => x.name === 'age')!;
+    const age = schema.fields.age;
     assert(age.description === 'My age');
-    assert(age.required !== true);
-    assert(age.type === 'number');
-    assert(age.flagNames?.includes('-g'));
-    assert(age.flagNames?.includes('--age'));
+    assert(age.required?.active === false);
+    assert(age.type === Number);
+    assert(age.aliases?.includes('-g'));
+    assert(age.aliases?.includes('--age'));
   }
 
   @Test()
   async testBindArgs() {
-    await checkArgs(['-g', '20', 'george'], ['george', undefined, undefined]);
-    await checkArgs(['-g', '20', '--age', 'george'], [undefined, undefined, undefined]);
-    await checkArgs(['-g', '20', 'george', '1'], ['george', true, undefined]);
-    await checkArgs(['-g', '20', 'george', 'red'], ['george', false, undefined]);
-    await checkArgs(['-g', '20', 'george', 'true', 'orange'], ['george', true, ['orange']]);
-    await checkArgs(['-g', '20', 'george', 'true', '--', '--age', '20', 'orange'],
+    await this.checkArgs(['-g', '20', 'george'], ['george', undefined, undefined]);
+    await this.checkArgs(['-g', '20', '--age', 'george'], [undefined, undefined, undefined]);
+    await this.checkArgs(['-g', '20', 'george', '1'], ['george', true, undefined]);
+    await this.checkArgs(['-g', '20', 'george', 'red'], ['george', false, undefined]);
+    await this.checkArgs(['-g', '20', 'george', 'true', 'orange'], ['george', true, ['orange']]);
+    await this.checkArgs(['-g', '20', 'george', 'true', '--', '--age', '20', 'orange'],
       ['george', true, undefined],
       ['--age', '20', 'orange']
     );
-
-    await checkArgs(['-g', '20', 'george', 'true', '-z', '--gravy', '--', '--age', '20', 'orange'],
+    await this.checkArgs(['-g', '20', 'george', 'true', '-z', '--gravy', '--', '--age', '20', 'orange'],
       ['george', true, undefined],
       ['-z', '--gravy', '--age', '20', 'orange']
     );
@@ -161,7 +172,6 @@ export class SchemaBindingSuite {
     assert(state.all.length === 1);
 
     assert(state.all[0].type === 'flag');
-    assert(state.all[0].value === true);
 
     state = await get('--fun=0');
     assert(state.all.length === 1);
@@ -182,7 +192,6 @@ export class SchemaBindingSuite {
     assert(state.all.length === 1);
 
     assert(state.all[0].type === 'flag');
-    assert(state.all[0].value === false);
   }
 
   @Test()

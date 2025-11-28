@@ -33,7 +33,7 @@ export class CacheService {
 
   #modelService: ModelExpirySupport;
 
-  constructor(@Inject(CacheModelSymbol, { resolution: 'loose' }) modelService: ModelExpirySupport) {
+  constructor(@Inject({ qualifier: CacheModelSymbol, resolution: 'loose' }) modelService: ModelExpirySupport) {
     this.#modelService = modelService;
   }
 

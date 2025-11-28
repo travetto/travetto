@@ -1,7 +1,7 @@
 <div class="documentation">
   <div class="modules">
     @for (page of pages; track $index) {
-    <div [class]="page.path">
+    <div [class]="page.cls">
       @if (page.loadComponent) {
       <a [routerLink]="['/', 'docs', page.path]" [innerHtml]="page.title"></a>
       } @else {

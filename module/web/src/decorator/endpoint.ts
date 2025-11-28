@@ -1,10 +1,10 @@
-import { asConstructable } from '@travetto/runtime';
+import { ClassInstance, getClass } from '@travetto/runtime';
 
-import { ControllerRegistry } from '../registry/controller.ts';
-import { EndpointConfig, EndpointFunctionDescriptor, EndpointIOType } from '../registry/types.ts';
+import { EndpointConfig, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 
-type EndpointFunctionDecorator = <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
+type EndpointFunctionDecorator = <T>(instance: T, property: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
 
 type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
 
@@ -12,11 +12,9 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  * Generic Endpoint Decorator
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
-  return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    const result = ControllerRegistry.registerPendingEndpoint(
-      asConstructable(target).constructor, descriptor, config
-    );
-    return result;
+  return function (instance: ClassInstance, property: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
+    ControllerRegistryIndex.getForRegister(getClass(instance)).registerEndpoint(property, { name: property }, config);
+    return descriptor;
   };
 }
 
@@ -37,65 +35,49 @@ function HttpEndpoint(method: HttpMethod, path: string): EndpointFunctionDecorat
 /**
  * Registers GET requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
+ * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function Get(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('GET', path); }
 /**
  * Registers POST requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpRequestBody`
- * @augments `@travetto/web:Endpoint`
+ * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function Post(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('POST', path); }
 /**
  * Registers PUT requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpRequestBody`
- * @augments `@travetto/web:Endpoint`
+ * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function Put(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('PUT', path); }
 /**
  * Registers PATCH requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpRequestBody`
- * @augments `@travetto/web:Endpoint`
+ * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function Patch(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('PATCH', path); }
 /**
  * Registers DELETE requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
+ * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function Delete(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('DELETE', path); }
 /**
  * Registers HEAD requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
+ * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function Head(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('HEAD', path); }
 /**
  * Registers OPTIONS requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:Endpoint`
+ * @augments `@travetto/schema:Method`
+ * @kind decorator
  */
 export function Options(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('OPTIONS', path); }
-
-/**
- * Defines the response type of the endpoint
- * @param responseType The desired response mime type
- */
-export function ResponseType(responseType: EndpointIOType): EndpointFunctionDecorator {
-  return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, { responseType });
-  };
-}
-
-/**
- * Defines the supported request body type
- * @param requestType The type of the request body
- */
-export function RequestType(requestType: EndpointIOType): EndpointFunctionDecorator {
-  return function <T>(target: T, property: string | symbol, descriptor: EndpointFunctionDescriptor) {
-    return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, { requestType });
-  };
-}

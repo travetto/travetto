@@ -1,10 +1,13 @@
 import { CliCommand } from '@travetto/cli';
 import { Env, Runtime, describeFunction } from '@travetto/runtime';
+import { Registry } from '@travetto/registry';
+import { IsPrivate } from '@travetto/schema';
 
-import { SuiteRegistry } from '../src/registry/suite.ts';
+import { SuiteRegistryIndex } from '../src/registry/registry-index.ts';
 import { RunnerUtil } from '../src/execute/util.ts';
 
-@CliCommand({ hidden: true })
+@CliCommand()
+@IsPrivate()
 export class TestDigestCommand {
 
   output: 'json' | 'text' = 'text';
@@ -24,13 +27,17 @@ export class TestDigestCommand {
       }
     }
 
-    await SuiteRegistry.init();
+    await Registry.init();
 
-    const suites = SuiteRegistry.getClasses();
+    const suites = SuiteRegistryIndex.getClasses();
     const all = suites
-      .map(c => SuiteRegistry.get(c))
+      .map(c => SuiteRegistryIndex.getConfig(c))
       .filter(c => !describeFunction(c.class).abstract)
-      .flatMap(c => c.tests);
+      .flatMap(c => Object.values(c.tests))
+      .toSorted((a, b) => {
+        const classComp = a.classId.localeCompare(b.classId);
+        return classComp !== 0 ? classComp : a.methodName.localeCompare(b.methodName);
+      });
 
     if (this.output === 'json') {
       console.log(JSON.stringify(all));

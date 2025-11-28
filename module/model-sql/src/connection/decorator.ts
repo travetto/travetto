@@ -10,6 +10,7 @@ export interface ConnectionAware<C = unknown> {
 
 /**
  * Decorator to ensure a method runs with a valid connection
+ * @kind decorator
  */
 export function Connected() {
   return function <T extends { conn?: Connection }>(
@@ -24,6 +25,7 @@ export function Connected() {
 
 /**
  * Decorator to ensure a method runs with a valid connection
+ * @kind decorator
  */
 export function ConnectedIterator() {
   return function <T extends { conn?: Connection }>(
@@ -38,6 +40,7 @@ export function ConnectedIterator() {
 
 /**
  * Decorator to ensure a method runs with a valid transaction
+ * @kind decorator
  */
 export function Transactional(mode: TransactionType = 'required') {
   return function <T extends { conn?: Connection }>(

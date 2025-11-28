@@ -1,4 +1,4 @@
-import { FieldConfig, Point } from '@travetto/schema';
+import { SchemaFieldConfig, Point } from '@travetto/schema';
 import { Class, toConcrete } from '@travetto/runtime';
 
 const st = (t: string | string[], isArr: boolean = false): Set<string> =>
@@ -36,7 +36,7 @@ export class TypeUtil {
   /**
    * Get declared type of a given field, only for primitive types
    */
-  static getDeclaredType(f: FieldConfig | Class): keyof typeof TypeUtil.OPERATORS | undefined {
+  static getDeclaredType(f: SchemaFieldConfig | Class): keyof typeof TypeUtil.OPERATORS | undefined {
     const type = 'type' in f ? f.type : f;
     switch (type) {
       case String: return 'string';

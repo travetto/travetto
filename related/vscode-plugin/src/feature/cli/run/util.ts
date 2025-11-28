@@ -20,10 +20,10 @@ export class CliRunUtil {
 
   /**
    * Build choice details for quick pick
-   * @param app
+   * @param choice
    */
-  static #buildChoiceDetail(app: RunChoice): string {
-    const detail = [app.title];
+  static #buildChoiceDetail(choice: RunChoice): string {
+    const detail = [choice.description];
     const out = detail.filter(x => !!x).join(' ').trim();
     return out ? `${'\u00A0'.repeat(4)}${out}` : out;
   }
@@ -87,7 +87,7 @@ export class CliRunUtil {
     }
 
     if (selected.length < all.length) {
-      throw new Error(`Missing arguments for ${choice.title}`);
+      throw new Error(`Missing arguments for ${choice.description}`);
     }
 
     return selected;
@@ -137,18 +137,18 @@ export class CliRunUtil {
       const moduleFlag = choice.flags.find(x => x.type === 'module');
       if (moduleFlag?.required) {
         modules ??= await this.getModules();
-        for (const module of modules.filter(m => m.local && m.children.has(choice.commandModule))) {
+        for (const module of modules.filter(m => m.local && m.children.has(choice.module))) {
           output.push({
             ...choice,
             prettyName: `${choice.name} [${module.name}]`,
             inputFlags: ['--module', module.name]
           });
         }
-        if (modules.find(m => m.local && m.name === choice.commandModule)) {
+        if (modules.find(m => m.local && m.name === choice.module)) {
           output.push({
             ...choice,
-            prettyName: `${choice.name} [${choice.commandModule}]`,
-            inputFlags: ['--module', choice.commandModule]
+            prettyName: `${choice.name} [${choice.module}]`,
+            inputFlags: ['--module', choice.module]
           });
         }
       } else {

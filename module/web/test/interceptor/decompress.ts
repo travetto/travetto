@@ -4,8 +4,8 @@ import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
 import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
 import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
 
@@ -14,7 +14,7 @@ class DecompressInterceptorSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   async decompress({ data, encoding, requestHeaders = {}, responseHeaders = {} }: {
@@ -23,7 +23,7 @@ class DecompressInterceptorSuite {
     requestHeaders?: Record<string, string>;
     responseHeaders?: Record<string, string>;
   }): Promise<Buffer | Readable> {
-    const interceptor = await DependencyRegistry.getInstance(DecompressInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(DecompressInterceptor);
     interceptor.config.applies = true;
 
     if (typeof data === 'number') {

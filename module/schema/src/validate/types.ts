@@ -34,6 +34,10 @@ export interface ValidationError {
    * The type of the field
    */
   type?: string;
+  /**
+   * Source of the error
+   */
+  source?: string;
 }
 
 /**

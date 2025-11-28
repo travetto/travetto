@@ -55,7 +55,6 @@ export class S3ModelConfig {
   @EnvVar('AWS_PROFILE')
   profile?: string;
 
-  @Field(Object)
   @Required(false)
   config: s3.S3ClientConfig; // Additional s3 config
 

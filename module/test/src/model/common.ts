@@ -10,10 +10,6 @@ export interface SuiteCore {
    */
   classId: string;
   /**
-   * The tests' description
-   */
-  description: string;
-  /**
    * The import location for the suite
    */
   import: string;
@@ -29,6 +25,10 @@ export interface SuiteCore {
    * Tags for a suite or a test
    */
   tags?: string[];
+  /**
+   * Description
+   */
+  description?: string;
 }
 
 /**

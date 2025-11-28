@@ -1,9 +1,9 @@
 import { Class, hasFunction, Runtime } from '@travetto/runtime';
-import { SchemaChangeListener } from '@travetto/schema';
+import { SchemaChangeListener, SchemaRegistryIndex } from '@travetto/schema';
+import { Registry } from '@travetto/registry';
 
-import { ModelRegistry } from '../registry/model.ts';
 import { ModelStorageSupport } from '../types/storage.ts';
-import { ModelType } from '../types/model.ts';
+import { ModelRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * Model storage util
@@ -24,29 +24,29 @@ export class ModelStorageUtil {
     }
 
     const checkType = (cls: Class, enforceBase = true): boolean => {
-      if (enforceBase && ModelRegistry.getBaseModel(cls) !== cls) {
+      if (enforceBase && SchemaRegistryIndex.getBaseClass(cls) !== cls) {
         return false;
       }
-      const { autoCreate } = ModelRegistry.get(cls) ?? {};
-      return autoCreate;
+      const { autoCreate } = ModelRegistryIndex.getConfig(cls) ?? {};
+      return autoCreate ?? false;
     };
 
     // If listening for model add/removes/updates
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
-      ModelRegistry.on<ModelType>(ev => {
+      Registry.onClassChange(ev => {
         switch (ev.type) {
-          case 'added': checkType(ev.curr!) ? storage.createModel?.(ev.curr!) : undefined; break;
-          case 'changed': checkType(ev.curr!, false) ? storage.changeModel?.(ev.curr!) : undefined; break;
-          case 'removing': checkType(ev.prev!) ? storage.deleteModel?.(ev.prev!) : undefined; break;
+          case 'added': checkType(ev.curr) ? storage.createModel?.(ev.curr) : undefined; break;
+          case 'changed': checkType(ev.curr, false) ? storage.changeModel?.(ev.curr) : undefined; break;
+          case 'removing': checkType(ev.prev) ? storage.deleteModel?.(ev.prev) : undefined; break;
         }
-      });
+      }, ModelRegistryIndex);
     }
 
     // Initialize on startup (test manages)
     await storage.createStorage();
 
     if (storage.createModel) {
-      for (const cls of ModelRegistry.getClasses()) {
+      for (const cls of ModelRegistryIndex.getClasses()) {
         if (checkType(cls)) {
           await storage.createModel(cls);
         }

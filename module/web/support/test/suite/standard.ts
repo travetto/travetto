@@ -1,18 +1,17 @@
 import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
+import { Registry } from '@travetto/registry';
 
 import { BaseWebSuite } from './base.ts';
 import { TestController } from './controller.ts';
-import { ControllerRegistry } from '../../../src/registry/controller.ts';
 
 @Suite()
 export abstract class StandardWebServerSuite extends BaseWebSuite {
 
   @BeforeAll()
   async init() {
-    ControllerRegistry.register(TestController);
-    await ControllerRegistry.install(TestController, { type: 'added' });
+    Registry.process([{ type: 'added', curr: TestController }]);
   }
 
   @Test()

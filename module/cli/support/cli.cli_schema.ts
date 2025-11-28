@@ -1,30 +1,32 @@
 import { Env } from '@travetto/runtime';
+import { IsPrivate } from '@travetto/schema';
 
-import { CliCommand } from '../src/decorators.ts';
-import { CliCommandSchema, CliCommandShape, CliValidationError } from '../src/types.ts';
-import { CliCommandRegistry } from '../src/registry.ts';
-import { CliCommandSchemaUtil } from '../src/schema.ts';
+import { CliCommand } from '../src/registry/decorator.ts';
+import { CliCommandShape, CliValidationError } from '../src/types.ts';
+import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
 import { CliUtil } from '../src/util.ts';
+import { CliSchemaExportUtil } from '../src/schema-export.ts';
+
 
 /**
  * Generates the schema for all CLI operations
  */
-@CliCommand({ hidden: true })
+@CliCommand()
+@IsPrivate()
 export class CliSchemaCommand implements CliCommandShape {
 
-  async #getSchema(name: string): Promise<CliCommandSchema> {
-    const inst = await CliCommandRegistry.getInstance(name);
-    return CliCommandSchemaUtil.getSchema(inst!);
-  }
+  async validate(names?: string[]): Promise<CliValidationError | undefined> {
+    if (!names || names.length === 0) {
+      return;
+    }
+    const resolved = await CliCommandRegistryIndex.load(names);
+    const invalid = names.find(x => !resolved.find(r => r.command === x));
 
-  async validate(names: string[]): Promise<CliValidationError | undefined> {
-    for (const name of names ?? []) {
-      if (name && !CliCommandRegistry.getCommandMapping().has(name)) {
-        return {
-          source: 'arg',
-          message: `name: ${name} is not a valid cli command`
-        };
-      }
+    if (invalid) {
+      return {
+        source: 'arg',
+        message: `name: ${invalid} is not a valid cli command`
+      };
     }
   }
 
@@ -33,10 +35,11 @@ export class CliSchemaCommand implements CliCommandShape {
   }
 
   async main(names?: string[]): Promise<void> {
-    if (!names?.length) {
-      names = [...CliCommandRegistry.getCommandMapping().keys()];
-    }
-    const resolved = await Promise.all(names.map(x => this.#getSchema(x)));
-    await CliUtil.writeAndEnsureComplete(resolved);
+    const resolved = await CliCommandRegistryIndex.load(names);
+
+    const output = resolved
+      .map(x => CliSchemaExportUtil.exportSchema(x.config.cls));
+
+    await CliUtil.writeAndEnsureComplete(output);
   }
 }

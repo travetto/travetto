@@ -1,8 +1,7 @@
 import { estypes } from '@elastic/elasticsearch';
 
 import { Class, toConcrete } from '@travetto/runtime';
-import { ModelRegistry } from '@travetto/model';
-import { Point, DataUtil, SchemaRegistry } from '@travetto/schema';
+import { Point, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types.ts';
 
@@ -55,7 +54,7 @@ export class ElasticsearchSchemaUtil {
    * Build one or more mappings depending on the polymorphic state
    */
   static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    return ModelRegistry.get(cls).baseType ?
+    return SchemaRegistryIndex.getConfig(cls).discriminatedBase ?
       this.generateAllMapping(cls, config) :
       this.generateSingleMapping(cls, config);
   }
@@ -64,7 +63,7 @@ export class ElasticsearchSchemaUtil {
    * Generate all mappings
    */
   static generateAllMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    const allTypes = ModelRegistry.getClassesByBaseType(cls);
+    const allTypes = SchemaRegistryIndex.getDiscriminatedClasses(cls);
     return allTypes.reduce<estypes.MappingTypeMapping>((acc, schemaCls) => {
       DataUtil.deepAssign(acc, this.generateSingleMapping(schemaCls, config));
       return acc;
@@ -75,13 +74,11 @@ export class ElasticsearchSchemaUtil {
    * Build a mapping for a given class
    */
   static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    const schema = SchemaRegistry.getViewSchema(cls);
+    const fields = SchemaRegistryIndex.getFieldMap(cls);
 
     const props: Record<string, estypes.MappingProperty> = {};
 
-    for (const field of schema.fields) {
-      const conf = schema.schema[field];
-
+    for (const [field, conf] of Object.entries(fields)) {
       if (conf.type === PointImpl) {
         props[field] = { type: 'geo_point' };
       } else if (conf.type === Number) {
@@ -136,7 +133,7 @@ export class ElasticsearchSchemaUtil {
         props[field] = { type: 'keyword', ...text };
       } else if (conf.type === Object) {
         props[field] = { type: 'object', dynamic: true };
-      } else if (SchemaRegistry.has(conf.type)) {
+      } else if (SchemaRegistryIndex.has(conf.type)) {
         props[field] = {
           type: conf.array ? 'nested' : 'object',
           ...this.generateSingleMapping(conf.type, config)

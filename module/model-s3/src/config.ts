@@ -2,7 +2,7 @@ import { fromIni } from '@aws-sdk/credential-provider-ini';
 import type s3 from '@aws-sdk/client-s3';
 
 import { Config, EnvVar } from '@travetto/config';
-import { Field, Required } from '@travetto/schema';
+import { Required } from '@travetto/schema';
 import { Runtime } from '@travetto/runtime';
 
 /**
@@ -22,7 +22,6 @@ export class S3ModelConfig {
   @EnvVar('AWS_PROFILE')
   profile?: string;
 
-  @Field(Object)
   @Required(false)
   config: s3.S3ClientConfig; // Additional s3 config
 

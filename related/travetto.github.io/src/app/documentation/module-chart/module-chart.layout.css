@@ -1,0 +1,97 @@
+.full {
+  grid-column: 1/span 6;
+}
+
+.left-half {
+  grid-column: 1/span 3;
+}
+
+.right-half {
+  grid-column: 4/span 3;
+}
+
+.left-third {
+  grid-column: 1/span 2;
+}
+
+.mid-third {
+  grid-column: 3/span 2;
+}
+
+.right-third {
+  grid-column: 5/span 2;
+}
+
+.group {
+  background-color: var(--bg-color);
+
+  * {
+    color: white !important;
+  }
+}
+
+.group-core {
+  --bg-color: rgb(190, 102, 102);
+}
+
+.group-lib {
+  --bg-color: rgb(123, 156, 205);
+}
+
+.group-tools {
+  --bg-color: rgb(232, 161, 155);
+}
+
+.group-system {
+  --bg-color: rgb(138, 138, 138);
+}
+
+.group-system-2 {
+  --bg-color: rgb(108, 108, 108);
+}
+
+.group-common {
+  --bg-color: rgb(76, 175, 80);
+}
+
+.modules {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 5;
+
+  .app {
+    grid-row: 1;
+  }
+
+  .tools {
+    grid-row: 2;
+  }
+
+  .auth {
+    grid-row: 2;
+  }
+
+  .email {
+    grid-row: 2;
+  }
+
+  .model {
+    grid-row: 3;
+  }
+
+  .model-query {
+    grid-row: 3;
+  }
+
+  .web {
+    grid-row: 3;
+  }
+
+  .core {
+    grid-row: 4;
+  }
+
+  .foundation {
+    grid-row: 5;
+  }
+}

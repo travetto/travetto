@@ -1,16 +1,16 @@
 import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
-import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
-import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
+import { ModelRegistryIndex, ModelType, OptionalId } from '@travetto/model';
+import { SchemaClassConfig, SchemaFieldConfig, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types.ts';
 import { TableSymbol, VisitStack } from './types.ts';
 
 type FieldCacheEntry = {
-  local: FieldConfig[];
-  localMap: Record<string, FieldConfig>;
-  foreign: FieldConfig[];
-  foreignMap: Record<string, FieldConfig>;
+  local: SchemaFieldConfig[];
+  localMap: Record<string | symbol, SchemaFieldConfig>;
+  foreign: SchemaFieldConfig[];
+  foreignMap: Record<string | symbol, SchemaFieldConfig>;
 };
 
 /**
@@ -54,33 +54,32 @@ export class SQLModelUtil {
    */
   static getFieldsByLocation(stack: VisitStack[]): FieldCacheEntry {
     const top = stack.at(-1)!;
-    const cls = SchemaRegistry.get(top.type);
+    const conf = SchemaRegistryIndex.has(top.type) ? SchemaRegistryIndex.getConfig(top.type) : undefined;
 
-    if (cls && this.#schemaFieldsCache.has(cls.class)) {
-      return this.#schemaFieldsCache.get(cls.class)!;
+    if (conf && this.#schemaFieldsCache.has(conf.class)) {
+      return this.#schemaFieldsCache.get(conf.class)!;
     }
 
-    if (!cls) { // If a simple type, it is it's own field
-      const field: FieldConfig = castTo({ ...top });
+    if (!conf) { // If a simple type, it is it's own field
+      const field: SchemaFieldConfig = castTo({ ...top });
       return {
         local: [field], localMap: { [field.name]: field },
         foreign: [], foreignMap: {}
       };
     }
 
-    const model = ModelRegistry.get(cls.class)!;
-    const conf = cls.totalView;
-    const fields = conf.fields.map(x => ({ ...conf.schema[x] }));
+    const hasModel = ModelRegistryIndex.has(conf.class)!;
+    const fields = Object.values(conf.fields).map(field => ({ ...field }));
 
     // Polymorphic
-    if (model && (model.baseType ?? model.subType)) {
+    if (hasModel && conf.discriminatedBase) {
       const fieldMap = new Set(fields.map(f => f.name));
-      for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(cls.class))) {
-        const typeConf = SchemaRegistry.get(type).totalView;
-        for (const f of typeConf.fields) {
-          if (!fieldMap.has(f)) {
-            fieldMap.add(f);
-            fields.push({ ...typeConf.schema[f], required: { active: false } });
+      for (const type of SchemaRegistryIndex.getDiscriminatedClasses(conf.class)) {
+        const typeConf = SchemaRegistryIndex.getConfig(type);
+        for (const [fieldName, field] of Object.entries<SchemaFieldConfig>(typeConf.fields)) {
+          if (!fieldMap.has(fieldName)) {
+            fieldMap.add(fieldName);
+            fields.push({ ...field, required: { active: false } });
           }
         }
       }
@@ -89,14 +88,14 @@ export class SQLModelUtil {
     const ret: FieldCacheEntry = {
       localMap: {},
       foreignMap: {},
-      local: fields.filter(x => !SchemaRegistry.has(x.type) && !x.array),
-      foreign: fields.filter(x => SchemaRegistry.has(x.type) || x.array)
+      local: fields.filter(x => !SchemaRegistryIndex.has(x.type) && !x.array),
+      foreign: fields.filter(x => SchemaRegistryIndex.has(x.type) || x.array)
     };
 
     ret.local.reduce((acc, f) => (acc[f.name] = f) && acc, ret.localMap);
     ret.foreign.reduce((acc, f) => (acc[f.name] = f) && acc, ret.foreignMap);
 
-    this.#schemaFieldsCache.set(cls.class, ret);
+    this.#schemaFieldsCache.set(conf.class, ret);
 
     return ret;
   }
@@ -104,13 +103,13 @@ export class SQLModelUtil {
   /**
    * Process a schema structure, synchronously
    */
-  static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }): void {
+  static visitSchemaSync(config: SchemaClassConfig | SchemaFieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }): void {
     const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = (): void => {
       for (const field of foreign) {
-        if (SchemaRegistry.has(field.type)) {
+        if (SchemaRegistryIndex.has(field.type)) {
           this.visitSchemaSync(field, handler, { path });
         } else {
           handler.onSimple({
@@ -132,13 +131,13 @@ export class SQLModelUtil {
   /**
    * Visit a Schema structure
    */
-  static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }): Promise<void> {
+  static async visitSchema(config: SchemaClassConfig | SchemaFieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }): Promise<void> {
     const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = async (): Promise<void> => {
       for (const field of foreign) {
-        if (SchemaRegistry.has(field.type)) {
+        if (SchemaRegistryIndex.has(field.type)) {
           await this.visitSchema(field, handler, { path });
         } else {
           await handler.onSimple({
@@ -162,7 +161,7 @@ export class SQLModelUtil {
    */
   static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T | OptionalId<T>, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>): void {
     const pathObj: unknown[] = [instance];
-    this.visitSchemaSync(SchemaRegistry.get(cls), {
+    this.visitSchemaSync(SchemaRegistryIndex.getConfig(cls), {
       onRoot: (config) => {
         const { path } = config;
         path[0].name = instance.id!;
@@ -171,7 +170,7 @@ export class SQLModelUtil {
       },
       onSub: (config) => {
         const { config: field } = config;
-        const topObj: Record<string, unknown> = castTo(pathObj.at(-1));
+        const topObj: Record<string | symbol, unknown> = castTo(pathObj.at(-1));
         const top = config.path.at(-1)!;
 
         if (field.name in topObj) {
@@ -199,7 +198,7 @@ export class SQLModelUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
-        const topObj: Record<string, unknown> = castTo(pathObj.at(-1));
+        const topObj: Record<string | symbol, unknown> = castTo(pathObj.at(-1));
         const value = topObj[field.name];
         return handler.onSimple({ ...config, value });
       }
@@ -209,7 +208,7 @@ export class SQLModelUtil {
   /**
    * Get list of selected fields
    */
-  static select<T>(cls: Class<T>, select?: SelectClause<T>): FieldConfig[] {
+  static select<T>(cls: Class<T>, select?: SelectClause<T>): SchemaFieldConfig[] {
     if (!select || Object.keys(select).length === 0) {
       return [{ type: cls, name: '*', owner: cls, array: false }];
     }
@@ -222,7 +221,7 @@ export class SQLModelUtil {
       if (typeof k === 'string' && !DataUtil.isPlainObject(select[k]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
-            toGet = new Set(SchemaRegistry.get(cls).totalView.fields);
+            toGet = new Set(Object.keys(SchemaRegistryIndex.getConfig(cls).fields));
           }
           toGet.delete(k);
         } else {
@@ -238,19 +237,19 @@ export class SQLModelUtil {
    */
   static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
     return sort.map((cl: Record<string, unknown>) => {
-      let schema: ClassConfig = SchemaRegistry.get(cls);
+      let schema: SchemaClassConfig = SchemaRegistryIndex.getConfig(cls);
       const stack = this.classToStack(cls);
       let found: OrderBy | undefined;
       while (!found) {
         const key = Object.keys(cl)[0];
         const val = cl[key];
-        const field = { ...schema.totalView.schema[key] };
+        const field = { ...schema.fields[key] };
         if (DataUtil.isPrimitive(val)) {
           stack.push(field);
           found = { stack, asc: val === 1 };
         } else {
           stack.push(field);
-          schema = SchemaRegistry.get(field.type);
+          schema = SchemaRegistryIndex.getConfig(field.type);
           cl = castTo(val);
         }
       }
@@ -261,9 +260,9 @@ export class SQLModelUtil {
   /**
    * Find all dependent fields via child tables
    */
-  static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: FieldConfig): Record<string, T> {
+  static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: SchemaFieldConfig): Record<string, T> {
     if (field) {
-      const isSimple = SchemaRegistry.has(field.type);
+      const isSimple = SchemaRegistryIndex.has(field.type);
       for (const el of v) {
         const parentKey: string = castTo(el[castKey<T>(dct.parentPathField.name)]);
         const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
@@ -296,7 +295,7 @@ export class SQLModelUtil {
   static buildTable(list: VisitStack[]): string {
     const top = list.at(-1)!;
     if (!top[TableSymbol]) {
-      top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
+      top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistryIndex.getStoreName(el.type) : el.name).join('_');
     }
     return top[TableSymbol]!;
   }
@@ -305,7 +304,7 @@ export class SQLModelUtil {
    * Build property path for a table/field given the current stack
    */
   static buildPath(list: VisitStack[]): string {
-    return list.map((el) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
+    return list.map((el) => `${el.name.toString()}${el.index ? `[${el.index}]` : ''}`).join('.');
   }
 
   /**

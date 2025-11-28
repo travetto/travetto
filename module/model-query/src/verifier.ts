@@ -1,5 +1,5 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
-import { DataUtil, SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
+import { DataUtil, ValidationResultError, ValidationError, SchemaRegistryIndex } from '@travetto/schema';
 import { Class } from '@travetto/runtime';
 
 import { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
@@ -52,7 +52,7 @@ export class QueryVerifier {
    * Handle generic clauses
    */
   static processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler): void {
-    const view = SchemaRegistry.getViewSchema(cls);
+    const view = SchemaRegistryIndex.getConfig(cls).fields;
 
     if (val === undefined || val === null) {
       state.log('Value cannot be undefined or null');
@@ -75,23 +75,23 @@ export class QueryVerifier {
         continue;
       }
 
-      if (!(key in view.schema)) {
+      if (!(key in view)) {
         state.log(`Unknown member ${key} of ${cls.name}`);
         continue;
       }
 
       // Find field
-      const field = view.schema[key];
+      const field = view[key];
       const op = TypeUtil.getDeclaredType(field);
 
       // If a simple operation
       if (op) {
-        handler.onSimpleType(state.extend(key), op, value, field.array);
+        handler.onSimpleType(state.extend(key), op, value, field.array ?? false);
       } else {
         // Otherwise recurse
         const subCls = field.type;
         const subVal = value;
-        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.array)) {
+        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.array ?? false)) {
           continue;
         }
         this.processGenericClause(state.extend(key), subCls, subVal, handler);

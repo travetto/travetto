@@ -1,40 +1,41 @@
-import { Class, ClassInstance } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
-import { SchemaRegistry } from '@travetto/schema';
+import { Class, ClassInstance, getClass } from '@travetto/runtime';
+import { DependencyRegistryIndex } from '@travetto/di';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { OverrideConfig, OverrideConfigSymbol } from './source/override.ts';
 import { ConfigurationService, ConfigBaseType } from './service.ts';
+import { ConfigOverrideUtil } from './util.ts';
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
  * @augments `@travetto/schema:Schema`
- * @augments `@travetto/di:Injectable`
+ * @kind decorator
  */
 export function Config(ns: string) {
-  return <T extends Class>(target: T): T => {
-    const og: Function = target.prototype.postConstruct;
+  return <T extends Class>(cls: T): T => {
     // Declare as part of global config
-    (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(ConfigBaseType);
-    const env = SchemaRegistry.getOrCreatePendingMetadata<OverrideConfig>(target, OverrideConfigSymbol, { ns, fields: {} });
-    env.ns = ns;
+    SchemaRegistryIndex.getForRegister(cls).register({ interfaces: [ConfigBaseType] });
 
-    target.prototype.postConstruct = async function (): Promise<void> {
+    ConfigOverrideUtil.setOverrideConfig(cls, ns);
+
+    DependencyRegistryIndex.getForRegister(cls).registerClass();
+
+    const og: Function = cls.prototype.postConstruct;
+    cls.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
-      const cfg = await DependencyRegistry.getInstance(ConfigurationService);
-      await cfg.bindTo(target, this, ns);
+      const cfg = await DependencyRegistryIndex.getInstance(ConfigurationService);
+      await cfg.bindTo(cls, this, ns);
       await og?.call(this);
     };
-    return target;
+    return cls;
   };
 }
 
 /**
  * Allows for binding specific fields to environment variables as a top-level override
+ * @kind decorator
  */
 export function EnvVar(name: string, ...others: string[]) {
-  return (inst: ClassInstance, prop: string): void => {
-    const env = SchemaRegistry.getOrCreatePendingMetadata<OverrideConfig>(inst.constructor, OverrideConfigSymbol, { ns: '', fields: {} });
-    env.fields[prop] = (): string | undefined =>
-      process.env[[name, ...others].find(x => !!process.env[x])!];
+  return (instance: ClassInstance, property: string): void => {
+    ConfigOverrideUtil.setOverrideConfigField(getClass(instance), property, [name, ...others]);
   };
 }

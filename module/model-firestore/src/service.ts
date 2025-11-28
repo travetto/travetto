@@ -3,7 +3,7 @@ import { DocumentData, FieldValue, Firestore, PartialWithFieldValue, Query } fro
 import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
-  ModelCrudSupport, ModelRegistry, ModelStorageSupport,
+  ModelCrudSupport, ModelRegistryIndex, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError, OptionalId,
   ModelCrudUtil, ModelIndexedUtil,
 } from '@travetto/model';
@@ -28,7 +28,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   constructor(config: FirestoreModelConfig) { this.config = config; }
 
   #resolveTable(cls: Class): string {
-    let table = ModelRegistry.getStore(cls);
+    let table = ModelRegistryIndex.getStoreName(cls);
     if (this.config.namespace) {
       table = `${this.config.namespace}_${table}`;
     }
@@ -151,7 +151,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const cfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const cfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, cfg, body, { emptySortValue: null });
     let query = fields.reduce<Query>((q, { path, value }) =>
       q.where(path.join('.'), '==', value), this.#getCollection(cls));

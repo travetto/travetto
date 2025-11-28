@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Controller, ControllerRegistry, EndpointUtil, Get, Post } from '@travetto/web';
+import { Controller, ControllerRegistryIndex, EndpointUtil, Get, Post } from '@travetto/web';
 
 @Controller('/')
 class EndpointController {
@@ -63,12 +63,12 @@ export class RouterUtilTest {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test()
   async testOrder() {
-    const controller = ControllerRegistry.get(EndpointController);
+    const controller = ControllerRegistryIndex.getConfig(EndpointController);
     const endpoints = EndpointUtil.orderEndpoints(controller.endpoints);
 
     assert.deepStrictEqual(endpoints.map(x => x.path), [

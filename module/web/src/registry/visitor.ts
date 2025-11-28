@@ -1,8 +1,8 @@
 import { Class } from '@travetto/runtime';
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
-import { ControllerRegistry } from './controller.ts';
+import { ControllerRegistryIndex } from './registry-index.ts';
 
 /**
  * Supports visiting the controller structure
@@ -10,7 +10,7 @@ import { ControllerRegistry } from './controller.ts';
 export class ControllerVisitUtil {
 
   static #onSchemaEvent(visitor: ControllerVisitor, type?: Class): unknown | Promise<unknown> {
-    return type && SchemaRegistry.has(type) ? visitor.onSchema?.(SchemaRegistry.get(type)) : undefined;
+    return type && SchemaRegistryIndex.has(type) ? visitor.onSchema?.(SchemaRegistryIndex.getConfig(type)) : undefined;
   }
 
   static async visitController(visitor: ControllerVisitor, cls: Class, options: ControllerVisitorOptions = {}): Promise<void> {
@@ -18,23 +18,26 @@ export class ControllerVisitUtil {
       options = Object.assign(visitor.getOptions(), options);
     }
 
-    options.skipUndocumented ??= true;
+    options.skipPrivate ??= true;
 
-    const controller = ControllerRegistry.get(cls);
-    if (!controller || controller.documented === false && options.skipUndocumented) {
+    const controller = ControllerRegistryIndex.getConfig(cls);
+    const schema = SchemaRegistryIndex.getConfig(cls);
+    if (schema.private === true && options.skipPrivate) {
       return;
     }
 
     await visitor.onControllerStart?.(controller);
     for (const endpoint of controller.endpoints) {
-      if (endpoint.documented === false && options.skipUndocumented) {
+      const endpointSchema = SchemaRegistryIndex.getMethodConfig(cls, endpoint.name);
+      if (endpointSchema.private === true && options.skipPrivate) {
         continue;
       }
 
-      const params = SchemaRegistry.getMethodSchema(cls, endpoint.name);
+      const { parameters: params, returnType } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.name);
       await visitor.onEndpointStart?.(endpoint, controller, params);
-      await this.#onSchemaEvent(visitor, endpoint.responseType?.type);
-      await this.#onSchemaEvent(visitor, endpoint.requestType?.type);
+      if (returnType) {
+        await this.#onSchemaEvent(visitor, returnType.type);
+      }
       for (const param of params) {
         await this.#onSchemaEvent(visitor, param.type);
       }
@@ -44,7 +47,7 @@ export class ControllerVisitUtil {
   }
 
   static async visit<T = unknown>(visitor: ControllerVisitor<T>, options: ControllerVisitorOptions = {}): Promise<T> {
-    for (const cls of ControllerRegistry.getClasses()) {
+    for (const cls of ControllerRegistryIndex.getClasses()) {
       await this.visitController(visitor, cls, options);
     }
     return await visitor.onComplete?.() ?? undefined!;

@@ -1,8 +1,8 @@
 import { ShutdownManager, Class, TimeSpan, TimeUtil, Util, castTo, hasFunction } from '@travetto/runtime';
 
-import { ModelRegistry } from '../registry/model.ts';
 import { ModelExpirySupport } from '../types/expiry.ts';
 import { ModelType } from '../types/model.ts';
+import { ModelRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * Utils for model expiry
@@ -18,7 +18,7 @@ export class ModelExpiryUtil {
    * Get expiry info for a given item
    */
   static getExpiryState<T extends ModelType>(cls: Class<T>, item: T): { expiresAt?: Date, expired?: boolean } {
-    const expKey = ModelRegistry.getExpiry(cls);
+    const expKey = ModelRegistryIndex.getExpiryFieldName(cls);
     const expiresAt: Date = castTo(item[expKey]);
 
     return {
@@ -32,7 +32,7 @@ export class ModelExpiryUtil {
    * @param svc
    */
   static registerCull(svc: ModelExpirySupport & { readonly config?: { cullRate?: number | TimeSpan } }): void {
-    const cullable = ModelRegistry.getClasses().filter(cls => !!ModelRegistry.get(cls).expiresAt);
+    const cullable = ModelRegistryIndex.getClasses().filter(cls => !!ModelRegistryIndex.getConfig(cls).expiresAt);
     if (svc.deleteExpired && cullable.length) {
       const running = new AbortController();
       const cullInterval = TimeUtil.asMillis(svc.config?.cullRate ?? '10m');

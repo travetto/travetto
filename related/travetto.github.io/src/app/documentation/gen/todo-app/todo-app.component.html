@@ -12,7 +12,7 @@
 </ol></div></div>
 <div class="documentation">
 <h1>Getting Started: A Todo App </h1>
-The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" routerLink="/docs/todo-app">Todo App</a>.  Additionally, you can use the <a class="module-link" routerLink="/docs/scaffold" title="App Scaffold for the Travetto framework">App Scaffold</a>.
+The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/related/todo-app">Todo App</a>.  Additionally, you can use the <a class="module-link" routerLink="/docs/scaffold" title="App Scaffold for the Travetto framework">App Scaffold</a>.
 
 
 
@@ -80,7 +80,7 @@ Create the file <code class="item path">src/model.ts</code>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-as you can see, the model structure is simple.  Everything that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">&#64;Model</a> services needs to implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>.
+as you can see, the model structure is simple.  Everything that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">&#64;Model</a> services needs to implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>.
 
 <h2 id="building-the-service-layer">Building the Service Layer</h2>
 
@@ -390,7 +390,7 @@ First we must start the application:
       AcceptConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       ApiHostConfig: <span class="token punctuation">{{'{'}}</span>
         servers: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
-        openapi: <span class="token string">'3.0.0'</span>
+        openapi: <span class="token string">'3.1.0'</span>
       <span class="token punctuation">{{'}'}}</span>,
       ApiInfoConfig: <span class="token punctuation">{{'{'}}</span>
         description: <span class="token string">''</span>,

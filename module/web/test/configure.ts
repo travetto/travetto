@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
-import { SchemaRegistry } from '@travetto/schema';
-import { Controller, ControllerRegistry, Get, PathParam } from '@travetto/web';
+import { Registry } from '@travetto/registry';
+import { Controller, ControllerRegistryIndex, Get, PathParam } from '@travetto/web';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 /**
  * Test Controller For Fun
@@ -26,30 +26,33 @@ export class ConfigureTest {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test()
   async verifyConfiguration() {
-    const config = ControllerRegistry.get(TestController);
+    const config = ControllerRegistryIndex.getConfig(TestController);
     assert.ok(config);
 
     assert(config.class === TestController);
     assert(config.basePath === '/test');
-    assert(/.*Fun.*/.test(config.title ?? ''));
+    const schema = SchemaRegistryIndex.getConfig(TestController);
+    assert(/.*Fun.*/.test(schema.description ?? ''));
 
     assert(config.endpoints.length === 1);
 
     const ep = config.endpoints[0];
-    const params = SchemaRegistry.getMethodSchema(ep.class, ep.name);
+    const { parameters: params } = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
     assert(ep.httpMethod === 'GET');
     assert(ep.name === 'getUser');
     assert(ep.endpoint === TestController.prototype.getUser);
-    assert(ep.title === 'Get user by name');
 
-    assert(ep.params.length === 1);
+    const endpointSchema = SchemaRegistryIndex.getMethodConfig(TestController, ep.name);
+    assert(endpointSchema.description === 'Get user by name');
 
-    assert(ep.params[0].name === 'name');
+    assert(ep.parameters.length === 1);
+
+    assert(ep.parameters[0].name === 'name');
     assert(params[0].description === 'User name as a number');
   }
 }

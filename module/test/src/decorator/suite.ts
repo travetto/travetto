@@ -1,60 +1,74 @@
-import { castTo, Class, ClassInstance, describeFunction } from '@travetto/runtime';
+import { castTo, Class, ClassInstance, describeFunction, getClass } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../registry/suite.ts';
 import { SuiteConfig } from '../model/suite.ts';
+import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 
 /**
  * Register a class to be defined as a test suite, and a candidate for testing
  * @param description The Suite description
- * @augments `@travetto/test:Suite`
+ * @augments `@travetto/schema:Schema`
+ * @kind decorator
  */
 export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassDecorator {
-  const extra: Partial<SuiteConfig> = {};
-  const descriptionString = description && typeof description !== 'string' ?
-    Object.assign(extra, description).description :
-    description;
-
-  for (const r of rest) {
-    Object.assign(extra, r);
-  }
-
-  const dec = (target: Class): typeof target => {
-    const cfg = { description: descriptionString, ...extra };
-    if (describeFunction(target).abstract) {
-      cfg.skip = true;
-    }
-    SuiteRegistry.register(target, cfg);
-    return target;
+  const dec = (cls: Class): typeof cls => {
+    const isAbstract = describeFunction(cls).abstract;
+    SuiteRegistryIndex.getForRegister(cls).register(
+      ...(typeof description !== 'string' && description ? [description] : []),
+      ...rest,
+      ...isAbstract ? [{ skip: true }] : [],
+      ...(typeof description === 'string' ? [{ description }] : []),
+    );
+    return cls;
   };
 
   return castTo(dec);
 }
 
-function listener(phase: SuitePhase) {
-  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
+/**
+ * Registers function to run before any tests are run
+ * @kind decorator
+ */
+export function BeforeAll() {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ beforeAll: [descriptor.value] });
     return descriptor;
   };
 }
 
 /**
- * Registers function to run before any tests are run
- */
-export const BeforeAll = listener.bind(null, 'beforeAll');
-/**
  * Registers function to run before each test is run
+ * @kind decorator
  */
-export const BeforeEach = listener.bind(null, 'beforeEach');
+export function BeforeEach() {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ beforeEach: [descriptor.value] });
+    return descriptor;
+  };
+}
+
 /**
  * Registers function to run after all tests are run
+ * @kind decorator
  */
-export const AfterAll = listener.bind(null, 'afterAll');
+export function AfterAll() {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ afterAll: [descriptor.value] });
+    return descriptor;
+  };
+}
+
 /**
  * Registers function to run after each test is run
+ * @kind decorator
  */
-export const AfterEach = listener.bind(null, 'afterEach');
+export function AfterEach() {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ afterEach: [descriptor.value] });
+    return descriptor;
+  };
+}

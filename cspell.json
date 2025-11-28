@@ -27,6 +27,7 @@
         "fnames",
         "httponly",
         "ilike",
+        "injectables",
         "Inno",
         "iregex",
         "jpegoptim",

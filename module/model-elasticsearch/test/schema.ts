@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Model } from '@travetto/model';
 import { Currency, Integer, Precision, Float, Text, Schema } from '@travetto/schema';
@@ -54,7 +54,7 @@ class SchemaSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test('verifySchema')

@@ -26,22 +26,22 @@ export class DocUtil {
    * Read JS Docs from a `ts.Declaration`
    */
   static describeDocs(node: ts.Declaration | ts.Type): DeclDocumentation {
-    if (node && !('getSourceFile' in node)) {
-      node = DeclarationUtil.getPrimaryDeclarationNode(node);
-    }
+    let toDescribe = (node && !('getSourceFile' in node)) ?
+      DeclarationUtil.getOptionalPrimaryDeclarationNode(node) : node;
+
     const out: DeclDocumentation = {
       description: undefined,
       return: undefined,
       params: []
     };
 
-    if (node) {
-      const tags = ts.getJSDocTags(node);
-      while (!this.hasJSDoc(node) && CoreUtil.hasOriginal(node)) {
-        node = transformCast<ts.Declaration>(node.original);
+    if (toDescribe) {
+      const tags = ts.getJSDocTags(toDescribe);
+      while (!this.hasJSDoc(toDescribe) && CoreUtil.hasOriginal(toDescribe)) {
+        toDescribe = transformCast<ts.Declaration>(toDescribe.original);
       }
 
-      const docs = this.hasJSDoc(node) ? node.jsDoc : undefined;
+      const docs = this.hasJSDoc(toDescribe) ? toDescribe.jsDoc : undefined;
 
       if (docs) {
         const top = docs.at(-1)!;
@@ -91,5 +91,13 @@ export class DocUtil {
    */
   static readAugments(type: ts.Type | ts.Symbol): string[] {
     return this.readDocTag(type, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
+  }
+
+  /**
+   * Read example information
+   * @param type
+   */
+  static readExample(type: ts.Type | ts.Symbol): string[] {
+    return this.readDocTag(type, 'example').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
   }
 }

@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/related/todo-app/DOC.tsx and execute "npx trv doc" to rebuild -->
 # Getting Started: A Todo App
 
-The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/module/todo-app).  Additionally, you can use the [App Scaffold](https://github.com/travetto/travetto/tree/main/module/scaffold#readme "App Scaffold for the Travetto framework").
+The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/related/todo-app).  Additionally, you can use the [App Scaffold](https://github.com/travetto/travetto/tree/main/module/scaffold#readme "App Scaffold for the Travetto framework").
 
 ## Overview
 
@@ -70,7 +70,7 @@ export class TodoSearch {
 }
 ```
 
-as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10).
+as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10).
 
 ## Building the Service Layer
 Next we establish the functionality for the service layer. The operations we need are:
@@ -361,7 +361,7 @@ npx trv web:http
       AcceptConfig: { applies: false, types: [] },
       ApiHostConfig: {
         servers: [ { url: 'http://localhost:12555' } ],
-        openapi: '3.0.0'
+        openapi: '3.1.0'
       },
       ApiInfoConfig: {
         description: '',

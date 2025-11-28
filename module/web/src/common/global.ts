@@ -1,20 +1,21 @@
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { Runtime } from '@travetto/runtime';
+import { IsPrivate } from '@travetto/schema';
 
 import { Controller } from '../decorator/controller.ts';
-import { ConditionalRegister, ConfigureInterceptor, Undocumented } from '../decorator/common.ts';
+import { ConditionalRegister, ConfigureInterceptor } from '../decorator/common.ts';
 import { Get, Options } from '../decorator/endpoint.ts';
 import { WebConfig } from '../config.ts';
 import { LoggingInterceptor, } from '../interceptor/logging.ts';
 
-@Undocumented()
+@IsPrivate()
 @Controller('/')
 @ConfigureInterceptor(LoggingInterceptor, { applies: false })
 export class GlobalHandler {
 
   @Get('')
   @ConditionalRegister(async () => {
-    const config = await DependencyRegistry.getInstance(WebConfig);
+    const config = await DependencyRegistryIndex.getInstance(WebConfig);
     return config.defaultMessage;
   })
   message(): { module: string, version: string, env?: string } {

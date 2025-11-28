@@ -72,7 +72,7 @@ export const STD_RULES = {
   '@stylistic/quotes': [
     'error',
     'single',
-    { avoidEscape: true, allowTemplateLiterals: false }
+    { avoidEscape: true, allowTemplateLiterals: 'never' }
   ],
   '@stylistic/semi': [
     'error',

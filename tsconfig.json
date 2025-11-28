@@ -2,6 +2,7 @@
   "extends": "./module/compiler/tsconfig.trv.json",
   "compilerOptions": {
     "rootDir": ".",
+    "baseUrl": "./"
   },
   "watchOptions": {
     "excludeDirectories": [

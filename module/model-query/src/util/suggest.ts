@@ -1,6 +1,6 @@
-import { ModelRegistry, ModelType } from '@travetto/model';
+import { ModelRegistryIndex, ModelType } from '@travetto/model';
 import { castTo, Class, hasFunction } from '@travetto/runtime';
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { PageableModelQuery, Query } from '../model/query.ts';
 import { ValidStringFields, WhereClauseRaw } from '../model/where-clause.ts';
@@ -27,15 +27,25 @@ export class ModelQuerySuggestUtil {
    * Build suggest query on top of query language
    */
   static getSuggestQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>): Query<T> {
-    const config = ModelRegistry.get(cls);
     const limit = query?.limit ?? 10;
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
+    const select: Query<T>['select'] = {
+      ...query?.select
+    };
 
-    if (config.subType) {
-      const { subTypeField, subTypeName } = SchemaRegistry.get(cls);
-      clauses.push({ [subTypeField]: subTypeName });
+    const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
+    if (polymorphicConfig) {
+      clauses.push({
+        [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedBase ?
+          { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) } :
+          polymorphicConfig.discriminatedType
+      });
+      if (query?.select) {
+        Object.assign(select, { [polymorphicConfig.discriminatedField]: true });
+      }
     }
 
+    const config = ModelRegistryIndex.getConfig(cls);
     if (config.expiresAt) {
       clauses.push({ [config.expiresAt]: { $gt: new Date() } });
     }
@@ -47,7 +57,7 @@ export class ModelQuerySuggestUtil {
     return {
       where: clauses.length ? (clauses.length > 1 ? { $and: clauses } : clauses[0]) : {},
       limit,
-      select: query?.select
+      select
     };
   }
 
@@ -84,10 +94,6 @@ export class ModelQuerySuggestUtil {
    * Build suggestion query
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
-    const config = ModelRegistry.get(cls);
-    return this.getSuggestQuery<T>(cls, castTo(field), prefix, {
-      ...(query ?? {}),
-      select: castTo({ [field]: true, ...(config.subType ? { [SchemaRegistry.get(cls).subTypeField]: true } : {}) })
-    });
+    return this.getSuggestQuery<T>(cls, castTo(field), prefix, query);
   }
 }

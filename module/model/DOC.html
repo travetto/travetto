@@ -18,7 +18,7 @@
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>, which is used for data model validation.
 <h2 id="a-simple-model">A Simple Model</h2>
 
-A model can be simply defined by usage of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> decorator, which opts it into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> contracts, as well as making it available to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/model.ts#L14">ModelRegistry</a>.
+A model can be simply defined by usage of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> decorator, which opts it into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> contracts, as well as making it available to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L16">ModelRegistryIndex</a>.
 
   <figure class="code">
     <figcaption class="code">Basic Structure
@@ -271,7 +271,7 @@ Finally, there is support for <a target="_blank" class="source-link" href="https
 
 <h2 id="declaration">Declaration</h2>
 
-Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>
+Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>
 
   <figure class="code">
     <figcaption class="code">ModelType
@@ -386,7 +386,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/support/test/base.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistryIndex <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> castTo<span class="token punctuation">,</span> Class<span class="token punctuation">,</span> classConstruct <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelBulkUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../../src/util/bulk.ts'</span><span class="token punctuation">;</span>
@@ -437,7 +437,7 @@ To enforce that these contracts are honored, the module provides shared test sui
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">get</span> <span class="token function">service</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>serviceClass<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> DependencyRegistryIndex<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>serviceClass<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">toArray</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">U</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>src<span class="token operator">:</span> AsyncIterable<span class="token operator">&lt;</span><span class="token constant">U</span><span class="token operator">></span> <span class="token operator">|</span> AsyncGenerator<span class="token operator">&lt;</span><span class="token constant">U</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">U</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
@@ -452,7 +452,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 
 <h2 id="cli-model-export">CLI - model:export</h2>
 
-The module provides the ability to generate an export of the model structure from all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+The module provides the ability to generate an export of the model structure from all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
   <figure class="terminal">
     <figcaption class="terminal">Running model export
@@ -478,7 +478,7 @@ Models
 
 <h2 id="cli-model-install">CLI - model:install</h2>
 
-The module provides the ability to install all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
+The module provides the ability to install all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
 
   <figure class="terminal">
     <figcaption class="terminal">Running model install

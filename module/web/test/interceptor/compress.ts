@@ -4,9 +4,9 @@ import assert from 'node:assert';
 import { buffer } from 'node:stream/consumers';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { CompressInterceptor, WebRequest, WebResponse } from '@travetto/web';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
 
 @Suite()
@@ -14,7 +14,7 @@ class CompressInterceptorSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   async compress({ size, stream, requestHeaders, responseHeaders }: {
@@ -23,7 +23,7 @@ class CompressInterceptorSuite {
     responseHeaders?: Record<string, string>;
     stream?: boolean;
   }): Promise<WebResponse> {
-    const interceptor = await DependencyRegistry.getInstance(CompressInterceptor);
+    const interceptor = await DependencyRegistryIndex.getInstance(CompressInterceptor);
     interceptor.config.applies = true;
 
     let data: Readable | Buffer = Buffer.alloc(size);

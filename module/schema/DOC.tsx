@@ -3,13 +3,14 @@ import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 
 import {
-  Currency, Email, Enum, Field, Float, Ignore, Integer,
-  LongText, Match, Max, MaxLength, Min, MinLength, Readonly,
-  Required, Telephone, Url, Writeonly, Text, Secret, Specifier,
-  SubTypeField
-} from './src/decorator/field.ts';
+  Currency, Email, Enum, Float, Integer,
+  LongText, Match, Max, MaxLength, Min, MinLength,
+  Required, Telephone, Url, Text, Specifier,
+  DiscriminatorField
+} from './src/decorator/input.ts';
+import { Readonly, Writeonly, Secret, Field } from './src/decorator/field.ts';
 import { Schema } from './src/decorator/schema.ts';
-import { Describe } from './src/decorator/common.ts';
+import { Ignore, Describe } from './src/decorator/common.ts';
 import { DataUtil } from './src/data.ts';
 import { ValidationError } from './src/validate/types.ts';
 
@@ -68,7 +69,7 @@ export const text = <>
         <li>{Writeonly} defines a that field should not be exported in serialization, but that it can be bound to</li>
         <li>{Secret} marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.</li>
         <li>{Specifier} attributes additional specifiers to a field, allowing for more specification beyond just the field's type.</li>
-        <li>{SubTypeField} allows for promoting a given field as the owner of the sub type discriminator (defaults to {d.field('type')}).</li>
+        <li>{DiscriminatorField} allows for promoting a given field as the owner of the sub type discriminator.</li>
       </ul>
 
       Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. <br />

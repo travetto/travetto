@@ -6,11 +6,11 @@ import { Skip, SuiteCore } from './common.ts';
 /**
  * Suite configuration
  */
-export interface SuiteConfig<T = unknown> extends SuiteCore {
+export interface SuiteConfig extends SuiteCore {
   /**
    * Class suite is in
    */
-  class: Class<T>;
+  class: Class;
   /**
    * Should this be skipped
    */
@@ -18,11 +18,11 @@ export interface SuiteConfig<T = unknown> extends SuiteCore {
   /**
    * Actual class instance
    */
-  instance: T;
+  instance?: unknown;
   /**
-   * List of tests to run
+   * Tests to run
    */
-  tests: TestConfig[];
+  tests: Record<string | symbol, TestConfig>;
   /**
    * Before all handlers
    */

@@ -69,7 +69,7 @@ export class ApiHostConfig {
   /**
    * OpenAPI Version
    */
-  openapi = '3.0.0';
+  openapi = '3.1.0';
 }
 
 /**
@@ -142,7 +142,7 @@ $ trv openapi:client --help
 Usage: openapi:client [options] <format:string>
 
 Options:
-  -x, --extended-help                   Show Extended Help
+  -x, --extended-help                   Show Extended Help (default: false)
   -a, --additional-properties <string>  Additional Properties (default: [])
   -i, --input <string>                  Input file (default: "./openapi.yml")
   -o, --output <string>                 Output folder (default: "./api-client")

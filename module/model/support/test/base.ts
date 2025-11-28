@@ -1,4 +1,4 @@
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 
 import { ModelBulkUtil } from '../../src/util/bulk.ts';
@@ -49,7 +49,7 @@ export abstract class BaseModelSuite<T> {
   }
 
   get service(): Promise<T> {
-    return DependencyRegistry.getInstance(this.serviceClass);
+    return DependencyRegistryIndex.getInstance(this.serviceClass);
   }
 
   async toArray<U>(src: AsyncIterable<U> | AsyncGenerator<U>): Promise<U[]> {

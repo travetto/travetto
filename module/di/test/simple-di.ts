@@ -1,18 +1,15 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { toConcrete } from '@travetto/runtime';
-import { DependencyRegistry, InjectionError } from '@travetto/di';
+import { DependencyRegistryIndex, InjectionError } from '@travetto/di';
 
 import {
   ServiceInherit, ServiceInheritSymbol2, CustomServiceInheritSymbol,
   CustomDatabaseSymbol, Database, CustomEmptySymbol, BasePattern,
   SpecificPattern, InterfaceType, BaseType, CustomInterfaceSymbol, UsableMainClass, UsableSubClass,
-  UsableSubSubClass,
-  LooseResolutionClass,
-  LooseSymbol,
-  SetterInject
+  UsableSubSubClass, LooseResolutionClass, LooseSymbol, SetterInject
 } from './deps.ts';
 
 import { DbConfig } from './config.ts';
@@ -29,13 +26,13 @@ class DiTest {
   @Test('run')
   async run() {
     console.log('starting');
-    await RootRegistry.init();
-    let inst = await DependencyRegistry.getInstance(ServiceInherit);
+    await Registry.init();
+    let inst = await DependencyRegistryIndex.getInstance(ServiceInherit);
     inst.doWork();
     assert.ok(inst.db);
     assert(inst.age === 30);
 
-    inst = await DependencyRegistry.getInstance(ServiceInherit, ServiceInheritSymbol2);
+    inst = await DependencyRegistryIndex.getInstance(ServiceInherit, ServiceInheritSymbol2);
     inst.doWork();
     assert.ok(inst.db);
     assert(inst.age === 31);
@@ -60,7 +57,7 @@ class DiTest2 {
 
   @BeforeAll()
   async beforeAll() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test('run')
@@ -68,7 +65,7 @@ class DiTest2 {
     console.log('starting');
     assert(30 === 30);
 
-    const inst = await DependencyRegistry.getInstance(ServiceInherit);
+    const inst = await DependencyRegistryIndex.getInstance(ServiceInherit);
     assert.ok(inst.db);
 
     inst.doWork();
@@ -91,7 +88,7 @@ class DiTest2 {
   @Test('factory')
   async factory() {
     assert(true);
-    const inst = await DependencyRegistry.getInstance(ServiceInherit, CustomServiceInheritSymbol);
+    const inst = await DependencyRegistryIndex.getInstance(ServiceInherit, CustomServiceInheritSymbol);
 
     assert(inst);
 
@@ -109,7 +106,7 @@ class DiTest2 {
   async factory2() {
     assert(true);
 
-    const inst = await DependencyRegistry.getInstance(Database, CustomDatabaseSymbol);
+    const inst = await DependencyRegistryIndex.getInstance(Database, CustomDatabaseSymbol);
 
     assert(inst);
 
@@ -126,7 +123,7 @@ class DiTest2 {
   async factory3() {
     assert(true);
 
-    const inst = await DependencyRegistry.getInstance(Database);
+    const inst = await DependencyRegistryIndex.getInstance(Database);
 
     assert(inst);
 
@@ -139,7 +136,7 @@ class DiTest2 {
   async factory4() {
     assert(true);
 
-    const inst = await DependencyRegistry.getInstance(DbConfig, CustomEmptySymbol);
+    const inst = await DependencyRegistryIndex.getInstance(DbConfig, CustomEmptySymbol);
 
     assert(inst);
 
@@ -148,15 +145,15 @@ class DiTest2 {
 
   @Test('abstract inheritance')
   async absTract() {
-    const types = DependencyRegistry.getCandidateTypes(BasePattern);
+    const types = DependencyRegistryIndex.getCandidateTypes(BasePattern);
     assert(types.length > 0);
 
-    const spec = DependencyRegistry.getCandidateTypes(SpecificPattern);
+    const spec = DependencyRegistryIndex.getCandidateTypes(SpecificPattern);
     assert(spec.length === 1);
 
     assert(types[0] === spec[0]);
 
-    const specInst = await DependencyRegistry.getInstance(SpecificPattern);
+    const specInst = await DependencyRegistryIndex.getInstance(SpecificPattern);
 
     assert(specInst instanceof SpecificPattern);
   }
@@ -164,61 +161,61 @@ class DiTest2 {
   @Test('interface injection')
   async intInjection() {
     const BaseTypeTarget = toConcrete<BaseType>();
-    const types = DependencyRegistry.getCandidateTypes(BaseTypeTarget);
+    const types = DependencyRegistryIndex.getCandidateTypes(BaseTypeTarget);
     assert(types.length > 0);
 
-    const spec = DependencyRegistry.getCandidateTypes(InterfaceType);
+    const spec = DependencyRegistryIndex.getCandidateTypes(InterfaceType);
     assert(spec.length > 0);
 
     assert(types[0] === spec[0]);
 
-    const specInst = await DependencyRegistry.getInstance(BaseTypeTarget);
+    const specInst = await DependencyRegistryIndex.getInstance(BaseTypeTarget);
     assert(specInst instanceof InterfaceType);
 
-    const customInst = await DependencyRegistry.getInstance(BaseTypeTarget, CustomInterfaceSymbol);
+    const customInst = await DependencyRegistryIndex.getInstance(BaseTypeTarget, CustomInterfaceSymbol);
     assert(customInst instanceof InterfaceType);
   }
 
   @Test('overridden via subclass')
   async subclassVerification() {
-    const types = DependencyRegistry.getCandidateTypes(UsableMainClass);
+    const types = DependencyRegistryIndex.getCandidateTypes(UsableMainClass);
     assert(types.length === 2);
 
-    const spec = DependencyRegistry.getCandidateTypes(UsableSubClass);
+    const spec = DependencyRegistryIndex.getCandidateTypes(UsableSubClass);
     assert(spec.length === 1);
 
-    const specInst = await DependencyRegistry.getInstance(UsableSubClass);
+    const specInst = await DependencyRegistryIndex.getInstance(UsableSubClass);
     assert(specInst.constructor === UsableSubClass);
 
-    const specSpec = DependencyRegistry.getCandidateTypes(UsableSubSubClass);
+    const specSpec = DependencyRegistryIndex.getCandidateTypes(UsableSubSubClass);
     assert(specSpec.length === 2);
 
-    await assert.rejects(() => DependencyRegistry.getInstance(UsableSubSubClass), /Multiple candidate/i);
+    await assert.rejects(() => DependencyRegistryIndex.getInstance(UsableSubSubClass), /Multiple candidate/i);
   }
 
   @Test('loose resolution')
   async looseResolution() {
-    const types = DependencyRegistry.getCandidateTypes(LooseResolutionClass);
+    const types = DependencyRegistryIndex.getCandidateTypes(LooseResolutionClass);
     assert(types.length === 2);
 
-    const inst = await DependencyRegistry.getInstance(LooseResolutionClass);
+    const inst = await DependencyRegistryIndex.getInstance(LooseResolutionClass);
 
-    const spec = await DependencyRegistry.getInstance(LooseResolutionClass, LooseSymbol);
+    const spec = await DependencyRegistryIndex.getInstance(LooseResolutionClass, LooseSymbol);
 
     assert(spec.name !== inst.name);
 
-    await assert.rejects(() => DependencyRegistry.getInstance(LooseResolutionClass, Symbol.for('')), InjectionError);
+    await assert.rejects(() => DependencyRegistryIndex.getInstance(LooseResolutionClass, Symbol.for('')), InjectionError);
 
-    await assert.doesNotReject(() => DependencyRegistry.getInstance(LooseResolutionClass, Symbol.for(''), 'loose'), InjectionError);
+    await assert.doesNotReject(() => DependencyRegistryIndex.getInstance(LooseResolutionClass, Symbol.for(''), 'loose'), InjectionError);
 
-    const specLoose = await DependencyRegistry.getInstance(LooseResolutionClass, Symbol.for(''), 'loose');
+    const specLoose = await DependencyRegistryIndex.getInstance(LooseResolutionClass, Symbol.for(''), 'loose');
 
     assert(specLoose.name === inst.name);
   }
 
   @Test('Setter')
   async testSetter() {
-    const inst = await DependencyRegistry.getInstance(SetterInject);
+    const inst = await DependencyRegistryIndex.getInstance(SetterInject);
     assert(inst._prop instanceof LooseResolutionClass);
   }
 }

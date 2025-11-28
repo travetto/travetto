@@ -1,24 +1,15 @@
-import type { Class, Primitive } from '@travetto/runtime';
+import type { Class, RetainPrimitiveFields } from '@travetto/runtime';
 
 import { ModelType } from '../types/model.ts';
 
-type ValidFieldNames<T> = {
-  [K in keyof T]:
-  (T[K] extends (Primitive | undefined) ? K :
-    (T[K] extends (Function | undefined) ? never :
-      K))
-}[keyof T];
-
-type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
-
 export type SortClauseRaw<T> = {
   [P in keyof T]?:
-  T[P] extends object ? SortClauseRaw<RetainFields<T[P]>> : 1 | -1;
+  T[P] extends object ? SortClauseRaw<RetainPrimitiveFields<T[P]>> : 1 | -1;
 };
 
 type IndexClauseRaw<T> = {
   [P in keyof T]?:
-  T[P] extends object ? IndexClauseRaw<RetainFields<T[P]>> : 1 | -1 | true;
+  T[P] extends object ? IndexClauseRaw<RetainPrimitiveFields<T[P]>> : 1 | -1 | true;
 };
 
 export type DataHandler<T = unknown> = (inst: T) => (Promise<T | void> | T | void);
@@ -26,9 +17,9 @@ export type DataHandler<T = unknown> = (inst: T) => (Promise<T | void> | T | voi
 export type PrePersistScope = 'full' | 'partial' | 'all';
 
 /**
- * Model options
+ * Model config
  */
-export class ModelOptions<T extends ModelType = ModelType> {
+export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Class for model
    */
@@ -36,15 +27,7 @@ export class ModelOptions<T extends ModelType = ModelType> {
   /**
    * Store name
    */
-  store?: string;
-  /**
-   * If a sub type
-   */
-  subType?: boolean;
-  /**
-   * Is a base type?
-   */
-  baseType?: boolean;
+  store: string;
   /**
    * Indices
    */
@@ -54,13 +37,13 @@ export class ModelOptions<T extends ModelType = ModelType> {
    */
   extra?: object;
   /**
-   * Does the model support expiry
+   * Expiry field
    */
-  expiresAt: string;
+  expiresAt?: string;
   /**
    * Auto create in development mode
    */
-  autoCreate: boolean;
+  autoCreate?: boolean;
   /**
    * Pre-persist handlers
    */
@@ -87,11 +70,11 @@ export type IndexConfig<T extends ModelType> = {
   /**
    * Fields and sort order
    */
-  fields: IndexClauseRaw<RetainFields<T>>[];
+  fields: IndexClauseRaw<RetainPrimitiveFields<T>>[];
   /**
    * Type
    */
   type: IndexType;
 };
 
-export type IndexField<T extends ModelType> = IndexClauseRaw<RetainFields<T>>;
+export type IndexField<T extends ModelType> = IndexClauseRaw<RetainPrimitiveFields<T>>;

@@ -1,5 +1,5 @@
 import { Class, hasFunction } from '@travetto/runtime';
-import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
+import { ModelType, ModelCrudSupport, ModelRegistryIndex } from '@travetto/model';
 
 import { ModelQueryCrudSupport } from '../types/crud.ts';
 
@@ -13,7 +13,7 @@ export class ModelQueryCrudUtil {
    * Delete all expired
    */
   static async deleteExpired<T extends ModelType>(svc: ModelQueryCrudSupport & ModelCrudSupport, cls: Class<T>): Promise<number> {
-    const expiry = await ModelRegistry.getExpiry(cls);
+    const expiry = await ModelRegistryIndex.getExpiryFieldName(cls);
     const res = await svc.deleteByQuery<ModelType>(cls, {
       where: {
         [expiry]: {

@@ -1,10 +1,10 @@
-import { Schema, View, Field, Float, Integer, Alias, Url, Required } from '@travetto/schema';
+import { Schema, View, Field, Float, Integer, Alias, Url, Required, Discriminated } from '@travetto/schema';
 
 import { Address } from './address.ts';
 
 @Schema()
 export class SuperAddress extends Address {
-  @Field(String)
+  @Field({ type: String })
   unit: string;
 }
 
@@ -16,11 +16,11 @@ export class RegexSimple {
 @Schema()
 export class Count {
 
-  @Field(String)
+  @Field({ type: String })
   area: string;
 
   @Float()
-  @Field(Number)
+  @Field({ type: Number })
   value: number;
 }
 
@@ -37,7 +37,7 @@ export class Person {
 
   address: Address;
 
-  @Field([Count])
+  @Field({ type: Count, array: true })
   counts: Count[];
 }
 
@@ -59,6 +59,7 @@ export class Response {
 }
 
 @Schema()
+@Discriminated('type')
 export abstract class BasePoly {
   type?: string;
 }

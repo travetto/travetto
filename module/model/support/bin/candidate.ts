@@ -1,9 +1,10 @@
 import { toConcrete, Class } from '@travetto/runtime';
-import { InjectableConfig, DependencyRegistry } from '@travetto/di';
+import { InjectableCandidate, DependencyRegistryIndex } from '@travetto/di';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { ModelRegistry } from '../../src/registry/model.ts';
 import type { ModelStorageSupport } from '../../src/types/storage.ts';
 import type { ModelType } from '../../src/types/model.ts';
+import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
 /**
  * Utilities for finding candidates for model operations
@@ -23,23 +24,23 @@ export class ModelCandidateUtil {
   static async #getModels(models?: string[]): Promise<Class<ModelType>[]> {
     const names = new Set(models ?? []);
     const all = names.has('*');
-    return ModelRegistry.getClasses()
-      .map(x => ModelRegistry.getBaseModel(x))
-      .filter(x => !models || all || names.has(ModelRegistry.getStore(x)));
+    return ModelRegistryIndex.getClasses()
+      .map(x => SchemaRegistryIndex.getBaseClass(x))
+      .filter(x => !models || all || names.has(ModelRegistryIndex.getStoreName(x)));
   }
 
   /**
    * Get model names
    */
   static async getModelNames(): Promise<string[]> {
-    return (await this.#getModels()).map(x => ModelRegistry.getStore(x)).toSorted();
+    return (await this.#getModels()).map(x => ModelRegistryIndex.getStoreName(x)).toSorted();
   }
 
   /**
    * Get all providers that are viable candidates
    */
-  static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectableConfig[]> {
-    const types = DependencyRegistry.getCandidateTypes(toConcrete<ModelStorageSupport>());
+  static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectableCandidate[]> {
+    const types = DependencyRegistryIndex.getCandidates(toConcrete<ModelStorageSupport>());
     return types.filter(x => !op || x.class.prototype?.[op]);
   }
 
@@ -57,7 +58,7 @@ export class ModelCandidateUtil {
    */
   static async getProvider(provider: string): Promise<ModelStorageSupport> {
     const config = (await this.getProviders()).find(x => x.class.name === `${provider}ModelService`)!;
-    return DependencyRegistry.getInstance<ModelStorageSupport>(config.class, config.qualifier);
+    return DependencyRegistryIndex.getInstance<ModelStorageSupport>(config.candidateType, config.qualifier);
   }
 
   /**

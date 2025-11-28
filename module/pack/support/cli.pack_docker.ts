@@ -15,30 +15,41 @@ const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
  */
 @CliCommand({ with: { module: true } })
 export class PackDockerCommand extends BasePackCommand {
-  @CliFlag({ desc: 'Docker Factory source', short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
+  /**  Docker Factory source */
+  @CliFlag({ short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
   dockerFactory = '@travetto/pack/support/pack.dockerfile.ts';
-  @CliFlag({ desc: 'Docker Image to extend', short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
+  /**  Docker Image to extend */
+  @CliFlag({ short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
   dockerImage = `node:${NODE_MAJOR}-alpine`;
-  @CliFlag({ desc: 'Docker Image Name', short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
+  /**  Docker Image Name */
+  @CliFlag({ short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
   @Required(false)
   dockerName: string;
-  @CliFlag({ desc: 'Docker Runtime user', short: 'ru', name: 'runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
+  /**  Docker Runtime user */
+  @CliFlag({ short: 'ru', full: 'runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
   dockerRuntimeUserSrc?: string;
-  @CliFlag({ desc: 'Docker Runtime Packages', short: 'rp', name: 'runtime-package', envVars: ['PACK_DOCKER_RUNTIME_PACKAGES'] })
+  /**  Docker Runtime Packages */
+  @CliFlag({ short: 'rp', full: 'runtime-package', envVars: ['PACK_DOCKER_RUNTIME_PACKAGES'] })
   dockerRuntimePackages: string[] = [];
-  @CliFlag({ desc: 'Docker Image Port', short: 'dp', envVars: ['PACK_DOCKER_PORT'] })
+  /**  Docker Image Port */
+  @CliFlag({ short: 'dp', envVars: ['PACK_DOCKER_PORT'] })
   dockerPort: number[] = [];
 
   // Publish flags
-  @CliFlag({ desc: 'Docker Stage Only', short: 'ds', envVars: ['PACK_DOCKER_STAGE'] })
+  /**  Docker Stage Only */
+  @CliFlag({ short: 'ds', envVars: ['PACK_DOCKER_STAGE'] })
   dockerStageOnly: boolean = false;
-  @CliFlag({ desc: 'Docker Image Tag', short: 'dt', envVars: ['PACK_DOCKER_TAGS'] })
+  /**  Docker Image Tag */
+  @CliFlag({ short: 'dt', envVars: ['PACK_DOCKER_TAGS'] })
   dockerTag: string[] = ['latest'];
-  @CliFlag({ desc: 'Docker Push Tags', short: 'dx', envVars: ['PACK_DOCKER_PUSH'] })
+  /**  Docker Push Tags */
+  @CliFlag({ short: 'dx', envVars: ['PACK_DOCKER_PUSH'] })
   dockerPush = false;
-  @CliFlag({ desc: 'Docker Build Platform', short: 'db', envVars: ['PACK_DOCKER_BUILD_PLATFORM'] })
+  /**  Docker Build Platform */
+  @CliFlag({ short: 'db', envVars: ['PACK_DOCKER_BUILD_PLATFORM'] })
   dockerBuildPlatform?: string;
-  @CliFlag({ desc: 'Docker Registry', short: 'dr', envVars: ['PACK_DOCKER_REGISTRY'] })
+  /**  Docker Registry */
+  @CliFlag({ short: 'dr', envVars: ['PACK_DOCKER_REGISTRY'] })
   dockerRegistry?: string;
 
   @Ignore()

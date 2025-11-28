@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
 
 import { NameConfig, TestConfig } from './shared.ts';
@@ -18,18 +18,18 @@ export class EnvConfigTest {
       NAME_ACTIVE: 'false'
     });
     Env.TRV_RESOURCES.add('@#test/fixtures');
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test()
   async verifyBasicWithEnv() {
-    const conf = await DependencyRegistry.getInstance(TestConfig);
+    const conf = await DependencyRegistryIndex.getInstance(TestConfig);
     assert(conf.name === 'Roger');
   }
 
   @Test()
   async verifyDefined() {
-    const conf = await DependencyRegistry.getInstance(TestConfig);
+    const conf = await DependencyRegistryIndex.getInstance(TestConfig);
 
     // Default value from
     assert.deepStrictEqual(conf.anonHosts, ['a', 'b', 'c', 'd']);
@@ -37,7 +37,7 @@ export class EnvConfigTest {
 
   @Test()
   async environmentOverrideFalse() {
-    const conf = await DependencyRegistry.getInstance(NameConfig);
+    const conf = await DependencyRegistryIndex.getInstance(NameConfig);
     assert(conf.active === false);
     assert(conf.size === 23);
   }

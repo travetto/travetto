@@ -2,7 +2,6 @@ import type mongo from 'mongodb';
 
 import { TimeSpan, TimeUtil, RuntimeResources, Runtime } from '@travetto/runtime';
 import { Config } from '@travetto/config';
-import { Field } from '@travetto/schema';
 
 /**
  * Mongo model config
@@ -41,7 +40,6 @@ export class MongoModelConfig {
   /**
    * Mongo client options
    */
-  @Field(Object)
   options: mongo.MongoClientOptions = {};
 
   /**

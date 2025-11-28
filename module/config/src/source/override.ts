@@ -1,17 +1,6 @@
-import { SchemaRegistry } from '@travetto/schema';
-
 import { ConfigData } from '../parser/types.ts';
 import { ConfigSource, ConfigSpec } from './types.ts';
-
-export const OverrideConfigSymbol = Symbol.for('@travetto/config:overrides');
-
-/**
- * Configuration Override
- */
-export type OverrideConfig = {
-  ns: string;
-  fields: Record<string, () => (unknown | undefined)>;
-};
+import { ConfigOverrideUtil } from '../util.ts';
 
 /**
  * Overridable config source, provides ability to override field level values, currently used by
@@ -20,12 +9,11 @@ export type OverrideConfig = {
 export class OverrideConfigSource implements ConfigSource {
   #build(): ConfigData {
     const out: ConfigData = {};
-    for (const cls of SchemaRegistry.getClasses()) {
-      const { ns, fields = {} } = SchemaRegistry.getMetadata<OverrideConfig>(cls, OverrideConfigSymbol) ?? {};
+    for (const { namespace, fields } of ConfigOverrideUtil.getAllOverrideConfigs()) {
       for (const [key, value] of Object.entries(fields)) {
         const val = value();
         if (val !== undefined && val !== '') {
-          out[`${ns}.${key}`] = val;
+          out[`${namespace}.${key}`] = val;
         }
       }
     }

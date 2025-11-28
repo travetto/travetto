@@ -4,16 +4,20 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
-import { Class, describeFunction } from '@travetto/runtime';
-import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
+import { AppError, Class, describeFunction } from '@travetto/runtime';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config.ts';
 
 const DEFINITION = '#/components/schemas';
 
-function isFieldConfig(val: object): val is FieldConfig {
+function isInputConfig(val: object): val is SchemaInputConfig {
   return !!val && 'owner' in val && 'type' in val;
+}
+
+function isFieldConfig(val: object): val is SchemaFieldConfig {
+  return isInputConfig(val) && 'name' in val;
 }
 
 type GeneratedSpec = {
@@ -44,26 +48,30 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Convert schema to a set of dotted parameters
    */
-  #schemaToDotParams(location: 'query' | 'header', field: FieldConfig, prefix: string = '', rootField: FieldConfig = field): ParameterObject[] {
-    const viewConf = SchemaRegistry.has(field.type) && SchemaRegistry.getViewSchema(field.type, field.view);
-    const schemaConf = viewConf && viewConf.schema;
-    if (!schemaConf) {
-      throw new Error(`Unknown class, not registered as a schema: ${field.type.Ⲑid}`);
+  #schemaToDotParams(location: 'query' | 'header', input: SchemaInputConfig, prefix: string = '', rootField: SchemaInputConfig = input): ParameterObject[] {
+    const fields = SchemaRegistryIndex.has(input.type) ?
+      SchemaRegistryIndex.getFieldMap(input.type, input.view) :
+      undefined;
+
+    if (!fields) {
+      throw new AppError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
+
     const params: ParameterObject[] = [];
-    for (const sub of Object.values(schemaConf)) {
-      if (SchemaRegistry.has(sub.type) || SchemaRegistry.hasPending(sub.type)) {
+    for (const sub of Object.values(fields)) {
+      const name = sub.name.toString();
+      if (SchemaRegistryIndex.has(sub.type)) {
         const suffix = (sub.array) ? '[]' : '';
-        params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${sub.name}${suffix}` : `${sub.name}${suffix}.`, rootField));
+        params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${name}${suffix}` : `${name}${suffix}.`, rootField));
       } else {
         params.push({
-          name: `${prefix}${sub.name}`,
+          name: `${prefix}${name}`,
           description: sub.description,
           schema: sub.array ? {
             type: 'array',
             ...this.#getType(sub)
           } : this.#getType(sub),
-          required: !!(rootField?.required?.active && sub.required?.active),
+          required: (rootField?.required?.active !== false && sub.required?.active !== false),
           in: location
         });
       }
@@ -74,17 +82,17 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Get the type for a given class
    */
-  #getType(fieldOrClass: FieldConfig | Class): Record<string, unknown> {
+  #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
     let field: { type: Class<unknown>, precision?: [number, number | undefined] };
-    if (!isFieldConfig(fieldOrClass)) {
-      field = { type: fieldOrClass };
+    if (!isInputConfig(inputOrClass)) {
+      field = { type: inputOrClass };
     } else {
-      field = fieldOrClass;
+      field = inputOrClass;
     }
     const out: Record<string, unknown> = {};
     // Handle nested types
-    if (SchemaRegistry.has(field.type)) {
-      const id = this.#nameResolver.getName(SchemaRegistry.get(field.type));
+    if (SchemaRegistryIndex.has(field.type)) {
+      const id = this.#nameResolver.getName(SchemaRegistryIndex.getConfig(field.type));
       // Exposing
       this.#schemas[id] = this.#allSchemas[id];
       out.$ref = `${DEFINITION}/${id}`;
@@ -130,40 +138,42 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process schema field
    */
-  #processSchemaField(field: FieldConfig, required: string[]): SchemaObject {
-    let prop: SchemaObject = this.#getType(field);
+  #processSchemaField(input: SchemaInputConfig, required: string[]): SchemaObject {
+    let prop: SchemaObject = this.#getType(input);
 
-    if (field.examples) {
-      prop.example = field.examples;
+    if (input.examples) {
+      prop.example = input.examples;
     }
-    prop.description = field.description;
-    if (field.match) {
-      prop.pattern = field.match.re!.source;
+    prop.description = input.description;
+    if (input.match) {
+      prop.pattern = input.match.re!.source;
     }
-    if (field.maxlength) {
-      prop.maxLength = field.maxlength.n;
+    if (input.maxlength) {
+      prop.maxLength = input.maxlength.n;
     }
-    if (field.minlength) {
-      prop.minLength = field.minlength.n;
+    if (input.minlength) {
+      prop.minLength = input.minlength.n;
     }
-    if (field.min) {
-      prop.minimum = typeof field.min.n === 'number' ? field.min.n : field.min.n.getTime();
+    if (input.min) {
+      prop.minimum = typeof input.min.n === 'number' ? input.min.n : input.min.n.getTime();
     }
-    if (field.max) {
-      prop.maximum = typeof field.max.n === 'number' ? field.max.n : field.max.n.getTime();
+    if (input.max) {
+      prop.maximum = typeof input.max.n === 'number' ? input.max.n : input.max.n.getTime();
     }
-    if (field.enum) {
-      prop.enum = field.enum.values;
+    if (input.enum) {
+      prop.enum = input.enum.values;
     }
-    if (field.required && field.required.active) {
-      required.push(field.name);
+    if (isFieldConfig(input)) {
+      if (input.required?.active !== false) {
+        required.push(input.name.toString());
+      }
+      if (input.access === 'readonly') {
+        prop.readOnly = true;
+      } else if (input.access === 'writeonly') {
+        prop.writeOnly = true;
+      }
     }
-    if (field.access === 'readonly') {
-      prop.readOnly = true;
-    } else if (field.access === 'writeonly') {
-      prop.writeOnly = true;
-    }
-    if (field.array) {
+    if (input.array) {
       prop = {
         type: 'array',
         items: prop
@@ -176,7 +186,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process schema class
    */
-  onSchema(type?: ClassConfig): void {
+  onSchema(type?: SchemaClassConfig): void {
     if (type === undefined) {
       return;
     }
@@ -185,33 +195,32 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const typeId = this.#nameResolver.getName(type);
 
     if (!this.#allSchemas[typeId]) {
-      const config = SchemaRegistry.get(cls);
+      const config = SchemaRegistryIndex.getConfig(cls);
       if (config) {
         this.#allSchemas[typeId] = {
-          title: config.title || config.description,
-          description: config.description || config.title,
-          example: config.examples
+          description: config.description,
+          examples: config.examples
         };
 
         const properties: Record<string, SchemaObject> = {};
-        const def = config.totalView;
+        const def = config;
         const required: string[] = [];
 
-        for (const fieldName of def.fields) {
-          if (SchemaRegistry.has(def.schema[fieldName].type)) {
-            this.onSchema(SchemaRegistry.get(def.schema[fieldName].type));
+        for (const fieldName of Object.keys(def.fields)) {
+          if (SchemaRegistryIndex.has(def.fields[fieldName].type)) {
+            this.onSchema(SchemaRegistryIndex.getConfig(def.fields[fieldName].type));
           }
-          properties[fieldName] = this.#processSchemaField(def.schema[fieldName], required);
+          properties[fieldName] = this.#processSchemaField(def.fields[fieldName], required);
         }
 
         const extra: Record<string, unknown> = {};
-        if (describeFunction(cls)?.abstract) {
-          const map = SchemaRegistry.getSubTypesForClass(cls);
+        if (config.discriminatedBase) {
+          const map = SchemaRegistryIndex.getDiscriminatedClasses(cls);
           if (map) {
             extra.oneOf = map
               .filter(x => !describeFunction(x)?.abstract)
               .map(c => {
-                this.onSchema(SchemaRegistry.get(c));
+                this.onSchema(SchemaRegistryIndex.getConfig(c));
                 return this.#getType(c);
               });
           }
@@ -223,7 +232,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
           ...extra
         });
       } else {
-        this.#allSchemas[typeId] = { title: typeId };
+        this.#allSchemas[typeId] = { description: typeId };
       }
     }
   }
@@ -231,27 +240,26 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Standard payload structure
    */
-  #getEndpointBody(body?: EndpointIOType, mime?: string | null): RequestBodyObject {
-    if (!body) {
-      return { content: {}, description: '' };
+  #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
+    if (!body || body.type === undefined) {
+      return { content: {} };
     } else if (body.type === Readable || body.type === Buffer) {
       return {
         content: {
           [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } }
         },
-        description: ''
       };
     } else {
-      const cls = SchemaRegistry.get(body.type);
-      const typeId = cls ? this.#nameResolver.getName(cls) : body.type.name;
-      const typeRef = cls ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
+      const schemaConfig = SchemaRegistryIndex.getOptionalConfig(body.type);
+      const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.name;
+      const typeRef = schemaConfig ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {
         content: {
           [mime ?? 'application/json']: {
             schema: !body!.array ? typeRef : { type: 'array', items: typeRef }
           }
         },
-        description: this.#allSchemas[typeId!]?.description ?? ''
+        description: this.#allSchemas[typeId!]?.description
       };
     }
   }
@@ -259,27 +267,27 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: EndpointParamConfig, field: FieldConfig): (
+  #processEndpointParam(ep: EndpointConfig, param: EndpointParameterConfig, input: SchemaInputConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined
   ) {
-    const complex = field.type && SchemaRegistry.has(field.type);
+    const complex = input.type && SchemaRegistryIndex.has(input.type);
     if (param.location) {
       if (param.location === 'body') {
         const acceptsMime = ep.finalizedResponseHeaders.get('accepts');
         return {
-          requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, acceptsMime)
+          requestBody: input.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(input, acceptsMime)
         };
       } else if (complex && (param.location === 'query' || param.location === 'header')) {
-        return { parameters: this.#schemaToDotParams(param.location, field, param.prefix ? `${param.prefix}.` : '') };
+        return { parameters: this.#schemaToDotParams(param.location, input, param.prefix ? `${param.prefix}.` : '') };
       } else {
         const epParam: ParameterObject = {
           in: param.location,
           name: param.name || param.location,
-          description: field.description,
-          required: !!field.required?.active || false,
-          schema: field.array ? { type: 'array', items: this.#getType(field) } : this.#getType(field)
+          description: input.description,
+          required: input.required?.active !== false,
+          schema: input.array ? { type: 'array', items: this.#getType(input) } : this.#getType(input)
         };
         return { parameters: [epParam] };
       }
@@ -296,23 +304,26 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const tagName = ctrl.externalName;
 
+    const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+
     const op: OperationObject = {
       tags: [tagName],
       responses: {},
-      summary: ep.title,
-      description: ep.description || ep.title,
-      operationId: `${ep.class.name}_${ep.name}`,
+      summary: schema.description,
+      description: schema.description,
+      operationId: `${ep.class.name}_${ep.name.toString()}`,
       parameters: []
     };
 
     const contentTypeMime = ep.finalizedResponseHeaders.get('content-type');
-    const pConf = this.#getEndpointBody(ep.responseType, contentTypeMime);
+    const pConf = this.#getEndpointBody(schema.returnType, contentTypeMime);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 
-    const schema = SchemaRegistry.getMethodSchema(ep.class, ep.name);
-    for (const field of schema) {
-      const result = this.#processEndpointParam(ep, ep.params[field.index!], field);
+    const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+
+    for (const param of methodSchema.parameters) {
+      const result = this.#processEndpointParam(ep, ep.parameters[param.index], param);
       if (result) {
         if ('parameters' in result) {
           (op.parameters ??= []).push(...result.parameters);
@@ -334,9 +345,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     if (this.#config.skipEndpoints) {
       return;
     }
+    const classSchema = SchemaRegistryIndex.getConfig(controller.class);
     this.#tags.push({
       name: controller.externalName,
-      description: controller.description || controller.title
+      description: classSchema.description
     });
   }
 

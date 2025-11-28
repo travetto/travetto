@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Schema, SchemaRegistry, ValidationResultError, Validator } from '@travetto/schema';
-import { Controller, Post, Get, ControllerRegistry, WebResponse, PathParam, QueryParam, HttpMethod } from '@travetto/web';
+import { Schema, SchemaRegistryIndex, ValidationResultError, Validator } from '@travetto/schema';
+import { Controller, Post, Get, ControllerRegistryIndex, WebResponse, PathParam, QueryParam, HttpMethod } from '@travetto/web';
 
 import { BaseWebSuite } from './base.ts';
 
@@ -104,8 +104,14 @@ class SchemaAPI {
 }
 
 function getEndpoint(path: string, method: HttpMethod) {
-  return ControllerRegistry.get(SchemaAPI)
+  return ControllerRegistryIndex.getConfig(SchemaAPI)
     .endpoints.find(x => x.path === path && x.httpMethod === method)!;
+}
+
+function getEndpointResponse(path: string, method: HttpMethod) {
+  const ep = getEndpoint(path, method);
+  const resp = SchemaRegistryIndex.getMethodConfig(SchemaAPI, ep.name);
+  return resp?.returnType?.type;
 }
 
 @Suite()
@@ -226,50 +232,50 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
 
   @Test()
   async verifyVoid() {
-    const ep = getEndpoint('/void', 'GET');
-    assert(ep.responseType === undefined);
+    const responseType = getEndpointResponse('/void', 'GET');
+    assert(responseType === undefined);
   }
 
   @Test()
   async verifyVoidAll() {
-    const ep = getEndpoint('/voidAll', 'GET');
-    assert(ep.responseType === undefined);
+    const responseType = getEndpointResponse('/voidAll', 'GET');
+    assert(responseType === undefined);
   }
 
   @Test()
   async verifyList() {
-    const ep = getEndpoint('/users', 'GET');
-    assert(ep.responseType?.type === User);
+    const responseType = getEndpointResponse('/users', 'GET');
+    assert(responseType === User);
   }
 
   @Test()
   async verifyShapeAll() {
-    const ep = getEndpoint('/allShapes', 'GET');
-    console.log(`${ep.responseType}`);
+    const responseType = getEndpointResponse('/allShapes', 'GET');
+    console.log(`${responseType}`);
   }
 
   @Test()
   async verifyShapeClass() {
-    const ep = getEndpoint('/classShape/:shape', 'GET');
-    assert(ep.responseType);
-    assert(SchemaRegistry.has(ep.responseType!.type));
+    const responseType = getEndpointResponse('/classShape/:shape', 'GET');
+    assert(responseType);
+    assert(SchemaRegistryIndex.has(responseType));
   }
 
   @Test()
   async verifyRenderable() {
-    const ep = getEndpoint('/renderable/:age', 'GET');
-    assert(ep.responseType?.type === undefined);
+    const responseType = getEndpointResponse('/renderable/:age', 'GET');
+    assert(responseType === undefined);
   }
 
   @Test()
   async verifyCustomSerializeable() {
-    const ep = getEndpoint('/customSerialize', 'GET');
-    assert(ep.responseType?.type === User);
+    const responseType = getEndpointResponse('/customSerialize', 'GET');
+    assert(responseType === User);
   }
 
   @Test()
   async verifyCustomSerializeable2() {
-    const ep = getEndpoint('/customSerialize2', 'GET');
-    assert(ep.responseType?.type === User);
+    const responseType = getEndpointResponse('/customSerialize2', 'GET');
+    assert(responseType === User);
   }
 }

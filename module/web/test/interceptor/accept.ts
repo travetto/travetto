@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { AcceptConfig, AcceptInterceptor, WebRequest, WebResponse } from '@travetto/web';
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 function unwrapError(err: unknown): unknown {
   if (err instanceof WebResponse && err.body instanceof Error) {
@@ -16,7 +16,7 @@ class AcceptInterceptorSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
 

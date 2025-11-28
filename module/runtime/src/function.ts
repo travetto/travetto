@@ -6,7 +6,7 @@ export type FunctionMetadata = FunctionMetadataTag & {
   import: string;
   module: string;
   modulePath: string;
-  methods?: Record<string, FunctionMetadataTag>;
+  methods?: Record<string | symbol, FunctionMetadataTag>;
   class?: boolean;
   abstract?: boolean;
 };
@@ -36,7 +36,10 @@ export function registerFunction(
     import: `${pkg}/${pth}`,
     module: pkg,
     modulePath,
-    ...tag, methods, abstract, class: abstract !== undefined
+    ...tag,
+    methods,
+    abstract,
+    class: methods !== undefined
   };
   pending.add(fn);
   Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [MetadataSymbol]: { value: metadata } });

@@ -1,13 +1,13 @@
 import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
 
 import { DataUtil } from './data.ts';
-import { SchemaRegistry } from './service/registry.ts';
-import { FieldConfig } from './service/types.ts';
+import { SchemaInputConfig, SchemaParameterConfig, SchemaFieldMap } from './service/types.ts';
+import { SchemaRegistryIndex } from './service/registry-index.ts';
 
 type BindConfig = {
   view?: string;
-  filterField?: (field: FieldConfig) => boolean;
-  filterValue?: (value: unknown, field: FieldConfig) => boolean;
+  filterInput?: (input: SchemaInputConfig) => boolean;
+  filterValue?: (value: unknown, input: SchemaInputConfig) => boolean;
 };
 
 function isInstance<T>(o: unknown): o is T {
@@ -24,7 +24,7 @@ export class BindUtil {
    * @param conf The field config to coerce to
    * @param val The provided value
    */
-  static #coerceType<T>(conf: FieldConfig, val: unknown): T | null | undefined {
+  static #coerceType<T>(conf: SchemaInputConfig, val: unknown): T | null | undefined {
     if (conf.type?.bindSchema) {
       val = conf.type.bindSchema(val);
     } else {
@@ -144,19 +144,21 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = SchemaRegistry.resolveInstanceType<T>(cons, asFull<T>(data));
-    if (data instanceof cls) {
+    if (data instanceof cons) {
       return castTo(data);
     } else {
-      const tgt = classConstruct<T & { type?: string }>(cls);
-      SchemaRegistry.ensureInstanceTypeField(cls, tgt);
+      const cls = SchemaRegistryIndex.resolveInstanceType<T>(cons, asFull<T>(data));
+      const instance = classConstruct<T & { type?: string }>(cls);
 
-      for (const k of TypedObject.keys(tgt)) { // Do not retain undefined fields
-        if (tgt[k] === undefined) {
-          delete tgt[k];
+      for (const k of TypedObject.keys(instance)) { // Do not retain undefined fields
+        if (instance[k] === undefined) {
+          delete instance[k];
         }
       }
-      return this.bindSchemaToObject(cls, tgt, data, cfg);
+
+      const out = this.bindSchemaToObject(cls, instance, data, cfg);
+      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(out);
+      return out;
     }
   }
 
@@ -172,7 +174,8 @@ export class BindUtil {
     delete cfg.view;
 
     if (!!data && isInstance<T>(data)) {
-      const conf = SchemaRegistry.get(cons);
+      const adapter = SchemaRegistryIndex.get(cons);
+      const conf = adapter.get();
 
       // If no configuration
       if (!conf) {
@@ -180,19 +183,17 @@ export class BindUtil {
           obj[k] = data[k];
         }
       } else {
-        let viewConf = conf.totalView;
+        let schema: SchemaFieldMap = conf.fields;
         if (view) {
-          viewConf = conf.views[view];
-          if (!viewConf) {
+          schema = adapter.getSchema(view);
+          if (!schema) {
             throw new Error(`View not found: ${view.toString()}`);
           }
         }
 
-        for (const schemaFieldName of viewConf.fields) {
-          const field = viewConf.schema[schemaFieldName];
-
+        for (const [schemaFieldName, field] of Object.entries(schema)) {
           let inboundField: string | undefined = undefined;
-          if (field.access === 'readonly' || cfg.filterField?.(field) === false) {
+          if (field.access === 'readonly' || cfg.filterInput?.(field) === false) {
             continue; // Skip trying to write readonly fields
           }
           if (schemaFieldName in data) {
@@ -227,7 +228,7 @@ export class BindUtil {
               }
             }
 
-            if (SchemaRegistry.has(field.type)) {
+            if (SchemaRegistryIndex.has(field.type)) {
               if (field.array && Array.isArray(v)) {
                 v = v.map(el => this.bindSchema(field.type, el, cfg));
               } else {
@@ -244,7 +245,7 @@ export class BindUtil {
 
           if (field.accessor) {
             Object.defineProperty(obj, schemaFieldName, {
-              ...SchemaRegistry.getAccessorDescriptor(cons, schemaFieldName),
+              ...adapter.getAccessorDescriptor(schemaFieldName),
               enumerable: true
             });
           }
@@ -257,31 +258,32 @@ export class BindUtil {
 
   /**
    * Coerce field to type
-   * @param field
+   * @param cfg
    * @param val
    * @param applyDefaults
    * @returns
    */
-  static coerceField(field: FieldConfig, val: unknown, applyDefaults = false): unknown {
+  static coerceInput(cfg: SchemaInputConfig, val: unknown, applyDefaults = false): unknown {
     if ((val === undefined || val === null) && applyDefaults) {
-      val = Array.isArray(field.default) ? field.default.slice(0) : field.default;
+      val = Array.isArray(cfg.default) ? cfg.default.slice(0) : cfg.default;
     }
-    if (!field.required && (val === undefined || val === null)) {
+    if (cfg.required?.active === false && (val === undefined || val === null)) {
       return val;
     }
-    const complex = SchemaRegistry.has(field.type);
-    if (field.array) {
+    const complex = SchemaRegistryIndex.has(cfg.type);
+    const bindCfg: BindConfig | undefined = (complex && 'view' in cfg && typeof cfg.view === 'string') ? { view: cfg.view } : undefined;
+    if (cfg.array) {
       const valArr = !Array.isArray(val) ? [val] : val;
       if (complex) {
-        val = valArr.map(x => this.bindSchema(field.type, x, { view: field.view }));
+        val = valArr.map(x => this.bindSchema(cfg.type, x, bindCfg));
       } else {
-        val = valArr.map(x => DataUtil.coerceType(x, field.type, false));
+        val = valArr.map(x => DataUtil.coerceType(x, cfg.type, false));
       }
     } else {
       if (complex) {
-        val = this.bindSchema(field.type, val, { view: field.view });
+        val = this.bindSchema(cfg.type, val, bindCfg);
       } else {
-        val = DataUtil.coerceType(val, field.type, false);
+        val = DataUtil.coerceType(val, cfg.type, false);
       }
     }
     return val;
@@ -293,11 +295,11 @@ export class BindUtil {
    * @param params
    * @returns
    */
-  static coerceFields(fields: FieldConfig[], params: unknown[], applyDefaults = true): unknown[] {
+  static coerceParameters(fields: SchemaParameterConfig[], params: unknown[], applyDefaults = true): unknown[] {
     params = [...params];
     // Coerce types
     for (const el of fields) {
-      params[el.index!] = this.coerceField(el, params[el.index!], applyDefaults);
+      params[el.index!] = this.coerceInput(el, params[el.index!], applyDefaults);
     }
     return params;
   }
@@ -309,7 +311,8 @@ export class BindUtil {
    * @param params
    * @returns
    */
-  static coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = true): unknown[] {
-    return this.coerceFields(SchemaRegistry.getMethodSchema(cls, method), params, applyDefaults);
+  static coerceMethodParams<T>(cls: Class<T>, method: string | symbol, params: unknown[], applyDefaults = true): unknown[] {
+    const paramConfigs = SchemaRegistryIndex.getMethodConfig(cls, method).parameters;
+    return this.coerceParameters(paramConfigs, params, applyDefaults);
   }
 }

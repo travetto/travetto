@@ -1,8 +1,8 @@
 import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
-import { ModelRegistry, ModelType, ModelStorageSupport } from '@travetto/model';
-import { SchemaChange } from '@travetto/schema';
+import { ModelRegistryIndex, ModelType, ModelStorageSupport } from '@travetto/model';
+import { SchemaChange, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -24,7 +24,7 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   getStore(cls: Class): string {
-    return ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
+    return ModelRegistryIndex.getStoreName(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
   }
 
   /**
@@ -98,13 +98,12 @@ export class IndexManager implements ModelStorageSupport {
    * Build an index if missing
    */
   async createIndexIfMissing(cls: Class): Promise<void> {
-    cls = ModelRegistry.getBaseModel(cls);
-    const ident = this.getIdentity(cls);
+    const baseCls = SchemaRegistryIndex.getBaseClass(cls);
+    const ident = this.getIdentity(baseCls);
     try {
       await this.#client.search(ident);
-      console.debug('Index already exists, not creating', ident);
     } catch {
-      await this.createIndex(cls);
+      await this.createIndex(baseCls);
     }
   }
 
@@ -186,7 +185,7 @@ export class IndexManager implements ModelStorageSupport {
 
       await this.#client.indices.putMapping({
         index,
-        body: schema
+        ...schema,
       });
     }
   }

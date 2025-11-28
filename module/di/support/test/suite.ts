@@ -1,21 +1,22 @@
-import { castTo, Class, ClassInstance } from '@travetto/runtime';
-import { RootRegistry } from '@travetto/registry';
-import { SuiteRegistry } from '@travetto/test';
+import { Class } from '@travetto/runtime';
+import { Registry } from '@travetto/registry';
+import { SuiteRegistryIndex } from '@travetto/test';
 
-import { DependencyRegistry } from '../../src/registry.ts';
+import { DependencyRegistryIndex } from '../../src/registry/registry-index.ts';
 
 /**
  * Registers a suite as injectable
+ * @kind decorator
  */
 export function InjectableSuite() {
-  return (target: Class) => {
-    SuiteRegistry.registerPendingListener(
-      target,
-      async function (this: unknown) {
-        await RootRegistry.init();
-        await DependencyRegistry.injectFields(castTo<ClassInstance>(this), target);
-      },
-      'beforeEach'
-    );
+  return (cls: Class) => {
+    SuiteRegistryIndex.getForRegister(cls).register({
+      beforeEach: [
+        async function (this: unknown) {
+          await Registry.init();
+          await DependencyRegistryIndex.injectFields(this, cls);
+        },
+      ]
+    });
   };
 }

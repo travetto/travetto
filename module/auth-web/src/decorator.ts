@@ -1,4 +1,4 @@
-import { ControllerRegistry, EndpointDecorator } from '@travetto/web';
+import { ControllerRegistryIndex, EndpointDecorator } from '@travetto/web';
 
 import { AuthVerifyInterceptor } from './interceptors/verify.ts';
 import { AuthLoginInterceptor } from './interceptors/login.ts';
@@ -8,10 +8,10 @@ import { AuthLogoutInterceptor } from './interceptors/logout.ts';
  * Authenticate an endpoint with a list of available identity sources
  * @param source The symbol to target the specific authenticator
  * @param sources Additional providers to support
- * @augments `@travetto/auth:Authenticate`
+ * @kind decorator
  */
 export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthLoginInterceptor, {
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthLoginInterceptor, {
     providers: [source, ...sources],
     applies: true
   }, {
@@ -24,10 +24,10 @@ export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
 /**
  * Ensure the controller/endpoint is authenticated, give a set of permissions
  * @param permissions Set of required/disallowed permissions
- * @augments `@travetto/auth:Authenticated`
+ * @kind decorator
  */
 export function Authenticated(permissions: string[] = []): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'authenticated',
     permissions,
     applies: true,
@@ -40,10 +40,10 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
 
 /**
  * Require the controller/endpoint to be unauthenticated
- * @augments `@travetto/auth:Unauthenticated`
+ * @kind decorator
  */
 export function Unauthenticated(): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'unauthenticated',
     applies: true
   });
@@ -51,10 +51,10 @@ export function Unauthenticated(): EndpointDecorator {
 
 /**
  * Logs a user out of the auth state
- * @augments `@travetto/auth:Logout`
+ * @kind decorator
  */
 export function Logout(): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthLogoutInterceptor, { applies: true }, {
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthLogoutInterceptor, { applies: true }, {
     responseContext: {
       isPrivate: true
     }

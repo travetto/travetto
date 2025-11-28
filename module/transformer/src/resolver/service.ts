@@ -59,7 +59,7 @@ export class SimpleResolver implements TransformResolver {
    * Resolve an import name (e.g. @module/path/file) for a type
    */
   getTypeImportName(type: ts.Type, removeExt?: boolean): string | undefined {
-    const ogSource = DeclarationUtil.getPrimaryDeclarationNode(type)?.getSourceFile()?.fileName;
+    const ogSource = DeclarationUtil.getOptionalPrimaryDeclarationNode(type)?.getSourceFile()?.fileName;
     return ogSource ? this.getFileImportName(ogSource, removeExt) : undefined;
   }
 
@@ -106,7 +106,7 @@ export class SimpleResolver implements TransformResolver {
    * Get list of properties
    */
   getPropertiesOfType(type: ts.Type): ts.Symbol[] {
-    return this.#tsChecker.getPropertiesOfType(type);
+    return this.#tsChecker.getPropertiesOfType(type).filter(x => x.getName() !== '__proto__' && x.getName() !== 'prototype');
   }
 
   /**
@@ -117,7 +117,7 @@ export class SimpleResolver implements TransformResolver {
     const resolve = (resType: ts.Type, alias?: ts.Symbol, depth = 0): AnyType => {
 
       if (depth > 20) { // Max depth is 20
-        throw new Error('Object structure too nested');
+        throw new Error(`Object structure too nested: ${'getText' in node ? node.getText() : ''}`);
       }
 
       const { category, type } = TypeCategorize(this, resType);
@@ -131,7 +131,9 @@ export class SimpleResolver implements TransformResolver {
       // Recurse
       if (result) {
         result.original = resType;
-        result.comment = DocUtil.describeDocs(type).description;
+        try {
+          result.comment = DocUtil.describeDocs(type).description;
+        } catch { }
 
         if ('tsTypeArguments' in result) {
           result.typeArguments = result.tsTypeArguments!.map((elType) => resolve(elType, type.aliasSymbol, depth + 1));

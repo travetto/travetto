@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Precision, Max, Min, Schema } from '@travetto/schema';
 import { SchemaFaker } from '@travetto/schema-faker';
@@ -49,7 +49,7 @@ class DataGenerationSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test()

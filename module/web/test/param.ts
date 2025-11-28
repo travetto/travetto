@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
+import { Describe, Min, Required, SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 import {
-  ContextParam, Controller, ControllerRegistry, EndpointConfig, EndpointUtil,
+  ContextParam, Controller, ControllerRegistryIndex, EndpointConfig, EndpointUtil,
   Get, HeaderParam, HttpMethod, PathParam, Post, QueryParam, WebHeaders, WebRequest
 } from '@travetto/web';
 
@@ -82,7 +82,7 @@ class ParamController {
 @Suite()
 export class EndpointParameterTest {
   static getEndpoint(path: string, method: HttpMethod) {
-    return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
+    return ControllerRegistryIndex.getConfig(ParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
   }
 
   static async extract(ep: EndpointConfig, request: Partial<WebRequest>): Promise<unknown[]> {
@@ -91,7 +91,7 @@ export class EndpointParameterTest {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test()
@@ -179,7 +179,7 @@ export class EndpointParameterTest {
   @Test()
   async testAliasing() {
     const ep = EndpointParameterTest.getEndpoint('/alias', 'POST');
-    const params = SchemaRegistry.getMethodSchema(ep.class, ep.name);
+    const { parameters: params } = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
     assert(params[0].description === 'User name');
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, {
       context: {
@@ -195,14 +195,14 @@ export class EndpointParameterTest {
     }), ['blue']);
 
     const ep2 = EndpointParameterTest.getEndpoint('/alias2', 'POST');
-    const params2 = SchemaRegistry.getMethodSchema(ep2.class, ep2.name);
+    const { parameters: params2 } = SchemaRegistryIndex.getMethodConfig(ep2.class, ep2.name);
     assert(params2[0].description === 'User\'s name');
-    assert(ep2.params[0].name === 'nm');
+    assert(ep2.parameters[0].name === 'nm');
 
     const ep3 = EndpointParameterTest.getEndpoint('/alias3', 'POST');
-    const params3 = SchemaRegistry.getMethodSchema(ep3.class, ep3.name);
+    const { parameters: params3 } = SchemaRegistryIndex.getMethodConfig(ep3.class, ep3.name);
     assert(params3[0].description === 'User\'s name');
-    assert(ep3.params[0].name === 'nm');
+    assert(ep3.parameters[0].name === 'nm');
   }
 
   @Test()
@@ -362,8 +362,6 @@ export class EndpointParameterTest {
 
   @Test()
   async realWorldUserInterface() {
-    await RootRegistry.init();
-
     const ep = EndpointParameterTest.getEndpoint('/interface-prefix', 'GET');
     await assert.rejects(() => EndpointParameterTest.extract(ep, {
       context: {

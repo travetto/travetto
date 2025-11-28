@@ -4,7 +4,7 @@ import path from 'node:path';
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
 import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { Terminal } from '@travetto/terminal';
-import { Ignore, Required, Schema } from '@travetto/schema';
+import { Ignore, Method, Required, Schema } from '@travetto/schema';
 import { PackageUtil } from '@travetto/manifest';
 
 import { PackOperation } from './bin/operation.ts';
@@ -27,52 +27,63 @@ export abstract class BasePackCommand implements CliCommandShape {
   @Ignore()
   _parsed: ParsedState;
 
-  @CliFlag({ desc: 'Workspace for building', short: 'b' })
+  /** Workspace for building */
+  @CliFlag({ short: 'b' })
   buildDir: string = path.resolve(os.tmpdir(), Runtime.mainSourcePath.replace(/[\/\\: ]/g, '_'));
 
-  @CliFlag({ desc: 'Clean workspace' })
+  /** Clean workspace */
   clean = true;
 
-  @CliFlag({ desc: 'Output location', short: 'o' })
+  /** Output location */
+  @CliFlag({ short: 'o' })
   @Required(false)
   output: string;
 
-  @CliFlag({ desc: 'Create entry scripts', short: 'es' })
+  /** Create entry scripts */
+  @CliFlag({ short: 'es' })
   mainScripts: boolean = true;
 
-  @CliFlag({ desc: 'Main name for build artifact', short: 'f' })
+  /** Main name for build artifact */
+  @CliFlag({ short: 'f' })
   @Required(false)
   mainName: string;
 
-  @CliFlag({ desc: 'Entry point', short: 'e' })
+  /** Entry point */
+  @CliFlag({ short: 'e' })
   @Required(false)
   entryPoint: string = '@travetto/cli/support/entry.trv.ts';
 
-  @CliFlag({ desc: 'Minify output' })
+  /** Minify output */
   minify = true;
 
-  @CliFlag({ desc: 'Bundle source maps', short: 'sm' })
+  /** Bundle source maps */
+  @CliFlag({ short: 'sm' })
   sourcemap = false;
 
-  @CliFlag({ desc: 'Include source with source maps', short: 'is' })
+  /** Include source with source maps */
+  @CliFlag({ short: 'is' })
   includeSources = false;
 
-  @CliFlag({ desc: 'Eject commands to file', short: 'x' })
+  /** Eject commands to file */
+  @CliFlag({ short: 'x' })
   ejectFile?: string;
 
-  @CliFlag({ desc: 'Rollup configuration file', short: 'r' })
+  /** Rollup configuration file */
+  @CliFlag({ short: 'r' })
   rollupConfiguration = '@travetto/pack/support/rollup/build.ts';
 
-  @CliFlag({ desc: 'Env Flag File Name' })
+  /** Env Flag File Name */
   envFile = '.env';
 
-  @CliFlag({ desc: 'Manifest File Name' })
+  /** Manifest File Name */
   manifestFile = 'manifest.json';
 
-  @CliFlag({ desc: 'Include workspace resources', short: 'wr' })
+  /** Include workspace resources */
+  @CliFlag({ short: 'wr' })
   includeWorkspaceResources: boolean = false;
 
-  @CliFlag({ desc: 'External NPM Packages', short: 'np', name: 'npm-package', envVars: ['PACK_EXTERNAL_PACKAGES'] })
+  /** External NPM Packages */
+  @CliFlag({ short: 'np', full: 'npm-package', envVars: ['PACK_EXTERNAL_PACKAGES'] })
   externalDependencies: string[] = [];
 
   @Ignore()
@@ -125,6 +136,7 @@ export abstract class BasePackCommand implements CliCommandShape {
       .flat();
   }
 
+  @Method()
   async main(args: string[] = []): Promise<void> {
     // Resolve all files to absolute paths
     this.output = this.output ? path.resolve(this.output) : undefined!;

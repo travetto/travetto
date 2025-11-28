@@ -1,6 +1,7 @@
 import { MailService, EmailOptions, MailTransport } from '@travetto/email';
-import { DependencyRegistry, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { toConcrete } from '@travetto/runtime';
+import { Registry } from '@travetto/registry';
 
 import { EditorConfig } from './config.ts';
 
@@ -15,20 +16,24 @@ export class EditorSendService {
   async service(): Promise<MailService> {
     const MailTransportTarget = toConcrete<MailTransport>();
 
-    const transports = DependencyRegistry.getCandidateTypes(MailTransportTarget);
+    const transports = DependencyRegistryIndex.getCandidates(MailTransportTarget);
 
     if (!transports.length) {
       try {
         const { NodemailerTransport } = await import('@travetto/email-nodemailer');
         const senderConfig = await EditorConfig.get('sender');
         const cls = class { };
-        DependencyRegistry.registerFactory({
-          fn: () => new NodemailerTransport(senderConfig),
-          target: MailTransportTarget,
-          src: cls,
-          id: 'nodemailer',
+        DependencyRegistryIndex.getForRegister(cls).register({
+          candidates: {
+            factory: {
+              candidateType: MailTransportTarget,
+              factory: () => new NodemailerTransport(senderConfig),
+              class: cls,
+              method: 'factory',
+            }
+          }
         });
-        DependencyRegistry.install(cls, { curr: cls, type: 'added' });
+        Registry.process([{ type: 'added', curr: cls }]);
 
         this.ethereal = !!senderConfig.host?.includes('ethereal.email');
       } catch {
@@ -36,7 +41,7 @@ export class EditorSendService {
         throw new Error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
       }
     }
-    return await DependencyRegistry.getInstance(MailService);
+    return await DependencyRegistryIndex.getInstance(MailService);
   }
 
   /**

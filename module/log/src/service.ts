@@ -1,5 +1,5 @@
 import { ConsoleListener, ConsoleManager, ConsoleEvent, toConcrete } from '@travetto/runtime';
-import { DependencyRegistry, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 
 import { LogDecorator, LogEvent, Logger } from './types.ts';
 import { CommonLogger } from './common.ts';
@@ -7,7 +7,7 @@ import { CommonLogger } from './common.ts';
 /**
  * Logger service
  */
-@Injectable({ autoCreate: true })
+@Injectable({ autoInject: true })
 export class LogService implements ConsoleListener {
 
   /**
@@ -21,12 +21,12 @@ export class LogService implements ConsoleListener {
   #decorators: LogDecorator[] = [];
 
   async postConstruct(): Promise<void> {
-    this.#listeners = await DependencyRegistry.getCandidateInstances(toConcrete<Logger>(), c => c.class !== CommonLogger);
+    this.#listeners = await DependencyRegistryIndex.getInstances(toConcrete<Logger>(), c => c.class !== CommonLogger);
     if (!this.#listeners.length) {
-      this.#listeners = [await DependencyRegistry.getInstance(CommonLogger)];
+      this.#listeners = [await DependencyRegistryIndex.getInstance(CommonLogger)];
     }
 
-    this.#decorators = await DependencyRegistry.getCandidateInstances(toConcrete<LogDecorator>());
+    this.#decorators = await DependencyRegistryIndex.getInstances(toConcrete<LogDecorator>());
 
     ConsoleManager.set(this);
   }

@@ -1,6 +1,6 @@
 import { asConstructable, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
-import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
-import { DependencyRegistry } from '@travetto/di';
+import { BindUtil, SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { DependencyRegistryIndex } from '@travetto/di';
 import { RetargettingProxy } from '@travetto/registry';
 
 import { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
@@ -8,8 +8,8 @@ import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebRequest } from '../types/request.ts';
 import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
-import { ControllerRegistry } from '../registry/controller.ts';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig } from '../registry/types.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { WebCommonUtil } from './common.ts';
 
 
@@ -81,25 +81,26 @@ export class EndpointUtil {
     ]);
   }
 
+
   /**
    * Extract parameter from request
    */
-  static extractParameter(request: WebRequest, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(request: WebRequest, param: EndpointParameterConfig, input: SchemaParameterConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
       return param.extract(request, param);
     }
 
-    const name = param.name!;
+    const name = param.name ?? input.name!;
     switch (param.location) {
       case 'path': return request.context.pathParams?.[name];
-      case 'header': return field.array ? request.headers.getList(name) : request.headers.get(name);
+      case 'header': return input.array ? request.headers.getList(name) : request.headers.get(name);
       case 'body': return request.body;
       case 'query': {
         const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
         const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
-        return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
+        return param.prefix ? q[param.prefix] : (input.type.Ⲑid ? q : q[name]);
       }
     }
   }
@@ -116,16 +117,16 @@ export class EndpointUtil {
     const vals = WebCommonUtil.getRequestParams(request);
 
     try {
-      const fields = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(request, c, fields[i], vals?.[i]));
+      const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, method);
+      const extracted = endpoint.parameters.map((c, i) => this.extractParameter(request, c, parameters[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
-      await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
+      await SchemaValidator.validateMethod(cls, method, params, endpoint.parameters.map(x => x.prefix));
       return params;
     } catch (err) {
       if (err instanceof ValidationResultError) {
         for (const el of err.details?.errors ?? []) {
           if (el.kind === 'required') {
-            const config = endpoint.params.find(x => x.name === el.path);
+            const config = endpoint.parameters.find(x => x.name === el.path);
             if (config) {
               el.message = `Missing ${config.location.replace(/s$/, '')}: ${config.name}`;
             }
@@ -184,7 +185,7 @@ export class EndpointUtil {
     const endpointFilters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...(endpoint.filters ?? []).map(fn => fn.bind(endpoint.instance)),
-      ...(endpoint.params.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
+      ...(endpoint.parameters.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
     ]
       .map(fn => ({ filter: fn }));
 
@@ -202,14 +203,14 @@ export class EndpointUtil {
    * Get bound endpoints, honoring the conditional status
    */
   static async getBoundEndpoints(c: Class): Promise<EndpointConfig[]> {
-    const config = ControllerRegistry.get(c);
+    const config = ControllerRegistryIndex.getConfig(c);
 
     // Skip registering conditional controllers
     if (config.conditional && !await config.conditional()) {
       return [];
     }
 
-    config.instance = await DependencyRegistry.getInstance(config.class);
+    config.instance = await DependencyRegistryIndex.getInstance(config.class);
 
     if (Runtime.dynamic) {
       config.instance = RetargettingProxy.unwrap(config.instance);

@@ -37,14 +37,12 @@ export class Init {
 }
 ```
 
-where the [RedisModelConfig](https://github.com/travetto/travetto/tree/main/module/model-redis/src/config.ts#L7) is defined by:
+where the [RedisModelConfig](https://github.com/travetto/travetto/tree/main/module/model-redis/src/config.ts#L6) is defined by:
 
 **Code: Structure of RedisModelConfig**
 ```typescript
 @Config('model.redis')
 export class RedisModelConfig {
-
-  @Field(Object)
   client: redis.RedisClientOptions = {};
   namespace?: string;
   autoCreate?: boolean;

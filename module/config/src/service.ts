@@ -1,8 +1,8 @@
 import util from 'node:util';
 
-import { AppError, toConcrete, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
-import { DependencyRegistry, Injectable } from '@travetto/di';
-import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { AppError, toConcrete, castTo, Class, Env, Runtime, RuntimeResources, getClass } from '@travetto/runtime';
+import { DependencyRegistryIndex, getDefaultQualifier, Injectable } from '@travetto/di';
+import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
 import { ConfigData } from './parser/types.ts';
@@ -50,13 +50,13 @@ export class ConfigurationService {
    *  - If of the same priority, then alpha sort on the source
    */
   async postConstruct(): Promise<void> {
-    const providers = await DependencyRegistry.getCandidateTypes(toConcrete<ConfigSource>());
+    const providers = await DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (el) => await DependencyRegistry.getInstance(el.class, el.qualifier))
+      providers.map(async (el) => await DependencyRegistryIndex.getInstance(el.candidateType, el.qualifier))
     );
 
-    const parser = await DependencyRegistry.getInstance(ParserManager);
+    const parser = await DependencyRegistryIndex.getInstance(ParserManager);
 
     const possible = await Promise.all([
       new FileConfigSource(parser),
@@ -93,22 +93,22 @@ export class ConfigurationService {
    *   - Will not show fields marked as secret
    */
   async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
-    const configTargets = await DependencyRegistry.getCandidateTypes(ConfigBaseType);
+    const configTargets = await DependencyRegistryIndex.getCandidates(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
-        .filter(el => el.qualifier === DependencyRegistry.get(el.class).qualifier) // Is primary?
+        .filter(el => el.qualifier === getDefaultQualifier(el.class)) // Is self targeting?
         .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
         .map(async el => {
-          const inst = await DependencyRegistry.getInstance<ClassInstance>(el.class, el.qualifier);
+          const inst = await DependencyRegistryIndex.getInstance(el.class, el.qualifier);
           return [el, inst] as const;
         })
     );
     const out: Record<string, ConfigData> = {};
     for (const [el, inst] of configs) {
       const data = BindUtil.bindSchemaToObject<ConfigData>(
-        inst.constructor, {}, inst, { filterField: f => !f.secret, filterValue: v => v !== undefined }
+        getClass(inst), {}, inst, { filterInput: f => !('secret' in f) || !f.secret, filterValue: v => v !== undefined }
       );
-      out[el.class.name] = DataUtil.filterByKeys(data, this.#secrets);
+      out[el.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
     return { sources: this.#specs, active: out };
   }
@@ -118,7 +118,7 @@ export class ConfigurationService {
    */
   async bindTo<T>(cls: Class<T>, item: T, namespace: string, validate = true): Promise<T> {
     const classId = cls.Ⲑid;
-    if (!SchemaRegistry.has(cls)) {
+    if (!SchemaRegistryIndex.has(cls)) {
       throw new AppError(`${classId} is not a valid schema class, config is not supported`);
     }
     BindUtil.bindSchemaToObject(cls, item, this.#get(namespace));

@@ -24,11 +24,23 @@ export type DeepPartial<T> = {
     (T[P] extends Any[] ? (DeepPartial<T[P][number]> | null | undefined)[] : DeepPartial<T[P]>));
 };
 
+type ValidPrimitiveFields<T, Z = undefined> = {
+  [K in keyof T]:
+  (T[K] extends (Primitive | Z | undefined) ? K :
+    (T[K] extends (Function | undefined) ? never :
+      K))
+}[keyof T];
+
+export type RetainPrimitiveFields<T, Z = undefined> = Pick<T, ValidPrimitiveFields<T, Z>>;
+
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(o: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
 } & ObjectConstructor = Object;
+
+export const safeAssign = <T extends {}, U extends {}>(target: T, ...sources: U[]): T & U =>
+  Object.assign(target, ...sources);
 
 export function castTo<T>(input: unknown): T {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -52,6 +64,26 @@ export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 export function toConcrete<T extends unknown>(): Class<T> {
   return arguments[0];
 }
+
+export function getAllEntries<V>(obj: Record<string | symbol, V>): [string | symbol, V][] {
+  return [
+    ...Object.keys(obj),
+    ...Object.getOwnPropertySymbols(obj)
+  ].map(k => [k, obj[k]] as const);
+}
+
+/**
+ * Find parent class for a given class object
+ */
+export function getParentClass(cls: Class): Class | undefined {
+  const parent: Class = Object.getPrototypeOf(cls);
+  return parent.name && parent !== Object ? parent : undefined;
+}
+
+/**
+ * Get the class from an instance or class
+ */
+export const getClass = <T = unknown>(x: ClassInstance | Class): Class<T> => 'Ⲑid' in x ? castTo(x) : asConstructable<T>(x).constructor;
 
 /**
  * Range of bytes, inclusive

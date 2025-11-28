@@ -29,13 +29,13 @@ By default all types are mapped as-is:
 <li>telephone</li>
 <li>postalCode</li>
 </ul>
-<li>Sub-schemas as registered via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">&#64;Schema</a> decorators</li>
+<li>Sub-schemas as registered via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19">&#64;Schema</a> decorators</li>
 </ul>
 In addition to the general types, the code relies upon name matching to provide additional refinement:
 
   <figure class="code">
     <figcaption class="code">Supported Mappings
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema-faker/src/faker.ts#L21">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema-faker/src/faker.ts#L22">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">static</span> #namesToType <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
@@ -49,7 +49,7 @@ In addition to the general types, the code relies upon name matching to provide 
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">l(ast)?name</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> faker<span class="token punctuation">.</span>person<span class="token punctuation">.</span>lastName<span class="token punctuation">]</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^ip(add(ress)?)?$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> faker<span class="token punctuation">.</span>internet<span class="token punctuation">.</span>ip<span class="token punctuation">]</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^ip(add(ress)?)?(v?)6$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> faker<span class="token punctuation">.</span>internet<span class="token punctuation">.</span>ipv6<span class="token punctuation">]</span><span class="token punctuation">,</span>
-    <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^username$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> faker<span class="token punctuation">.</span>internet<span class="token punctuation">.</span>userName<span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^username$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> faker<span class="token punctuation">.</span>internet<span class="token punctuation">.</span>username<span class="token punctuation">]</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^domain(name)?$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> faker<span class="token punctuation">.</span>internet<span class="token punctuation">.</span>domainName<span class="token punctuation">]</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^file(path|name)?$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> faker<span class="token punctuation">.</span>system<span class="token punctuation">.</span>filePath<span class="token punctuation">]</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^street(1)?$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> faker<span class="token punctuation">.</span>location<span class="token punctuation">.</span>streetAddress<span class="token punctuation">]</span><span class="token punctuation">,</span>

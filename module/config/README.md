@@ -13,7 +13,7 @@ npm install @travetto/config
 yarn add @travetto/config
 ```
 
-The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [yaml](https://github.com/eemeli/yaml).  Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) functionality applies.
+The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [yaml](https://github.com/eemeli/yaml).  Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L21) functionality applies.
 
 ## Resolution
 The configuration information is comprised of:
@@ -24,8 +24,8 @@ Config loading follows a defined resolution path, below is the order in increasi
    1. `resources/application.<ext>` - Priority `100` - Load the default `application.<ext>` if available.
    1. `resources/{env}.<ext>` - Priority `200` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
    1. `resources/*.<ext>` - Priority `300` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
-   1. [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29) [ConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/types.ts#L11) - Priority `???` - These are custom config sources provided by the module, and are able to define their own priorities
-   1. [OverrideConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/override.ts#L20) - Priority `999` - This is for [EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34) overrides, and is at the top priority for all built-in config sources.
+   1. [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L15) [ConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/types.ts#L11) - Priority `???` - These are custom config sources provided by the module, and are able to define their own priorities
+   1. [OverrideConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/override.ts#L9) - Priority `999` - This is for [@EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L37) overrides, and is at the top priority for all built-in config sources.
 
 By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
 
@@ -176,7 +176,7 @@ At startup, the [ConfigurationService](https://github.com/travetto/travetto/tree
 The [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L24) service provides injectable access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 ### Environment Variables
-Additionally there are times in which you may want to also support configuration via environment variables.  [EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34) supports override configuration values when environment variables are present. 
+Additionally there are times in which you may want to also support configuration via environment variables.  [@EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L37) supports override configuration values when environment variables are present. 
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 

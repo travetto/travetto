@@ -23,7 +23,7 @@ This module provides an adapter between [Web API](https://github.com/travetto/tr
 ```bash
 $ trv pack:lambda -h
 
-Usage: pack:lambda [options]
+Usage: pack:lambda [options] [args...:string]
 
 Options:
   -b, --build-dir <string>             Workspace for building (default: "/tmp/<temp-folder>")

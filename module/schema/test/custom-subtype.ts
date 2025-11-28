@@ -1,10 +1,11 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
-import { Schema } from '@travetto/schema';
+import { Registry } from '@travetto/registry';
+import { Discriminated, Schema } from '@travetto/schema';
 
-@Schema({ subTypeField: 'flavor' })
+@Schema()
+@Discriminated('flavor')
 abstract class CustomBase {
   flavor: string;
   beans: number;
@@ -29,7 +30,7 @@ class ExtraChocolate extends Chocolate {
 class CustomSubtypeSuite {
   @Test()
   async simpleTest() {
-    await RootRegistry.init();
+    await Registry.init();
 
     assert(true);
 

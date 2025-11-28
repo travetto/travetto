@@ -9,7 +9,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss",
+          "style": "css",
           "displayBlock": true
         }
       },
@@ -22,15 +22,13 @@
             },
             "index": "src/index.html",
             "tsConfig": "src/tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
-            "polyfills": [
-              "zone.js"
-            ],
+            "inlineStyleLanguage": "css",
+            "polyfills": [],
             "assets": [
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.css"
             ],
             "scripts": [],
             "browser": "src/main.ts"
@@ -86,5 +84,31 @@
   },
   "cli": {
     "analytics": false
+  },
+  "schematics": {
+    "@schematics/angular:component": {
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
+    }
   }
 }

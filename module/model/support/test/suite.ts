@@ -1,90 +1,87 @@
 import { Class } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
-import { SuiteRegistry, TestFixtures } from '@travetto/test';
+import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
+import { SuiteRegistryIndex, TestFixtures } from '@travetto/test';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
-import { ModelRegistry } from '../../src/registry/model.ts';
+import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
 const Loaded = Symbol();
 
+/**
+ * @augments `@travetto/schema:Schema`
+ * @kind decorator
+ */
 export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {
   const fixtures = new TestFixtures(['@travetto/model']);
   return (target: Class<T>): void => {
     target.prototype.fixtures = fixtures;
+    SuiteRegistryIndex.getForRegister(target).register({
+      beforeAll: [
+        async function (this: T & { [Loaded]?: boolean }) {
+          await Registry.init();
 
-    SuiteRegistry.registerPendingListener(
-      target,
-      async function (this: T & { [Loaded]?: boolean }) {
-        await RootRegistry.init();
-
-        if (!this[Loaded]) {
-          const config = await DependencyRegistry.getInstance(this.configClass);
-          if ('namespace' in config) {
-            config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
-          }
-          // We manually create
-          config.autoCreate = false;
-          this[Loaded] = true;
-        }
-      },
-      'beforeAll'
-    );
-    SuiteRegistry.registerPendingListener(
-      target,
-      async function (this: T) {
-        const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
-        if (ModelStorageUtil.isSupported(service)) {
-          await service.createStorage();
-          if (service.createModel) {
-            await Promise.all(ModelRegistry.getClasses()
-              .filter(x => x === ModelRegistry.getBaseModel(x))
-              .map(m => service.createModel!(m)));
+          if (!this[Loaded]) {
+            const config = await DependencyRegistryIndex.getInstance(this.configClass);
+            if ('namespace' in config) {
+              config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
+            }
+            // We manually create
+            config.autoCreate = false;
+            this[Loaded] = true;
           }
         }
-      },
-      'beforeEach'
-    );
-    SuiteRegistry.registerPendingListener(
-      target,
-      async function (this: T) {
-        const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
-        if (ModelStorageUtil.isSupported(service)) {
-          const models = ModelRegistry.getClasses().filter(m => m === ModelRegistry.getBaseModel(m));
-
-          if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
-            await service.truncateBlob();
-          }
-
-          if (service.truncateModel) {
-            await Promise.all(models.map(x => service.truncateModel!(x)));
-          } else if (service.deleteModel) {
-            await Promise.all(models.map(x => service.deleteModel!(x)));
-          } else {
-            await service.deleteStorage(); // Purge it all
-          }
-        }
-      },
-      'afterEach'
-    );
-    SuiteRegistry.registerPendingListener(
-      target,
-      async function (this: T) {
-        const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
-        if (ModelStorageUtil.isSupported(service)) {
-          if (service.deleteModel) {
-            for (const m of ModelRegistry.getClasses()) {
-              if (m === ModelRegistry.getBaseModel(m)) {
-                await service.deleteModel(m);
-              }
+      ],
+      beforeEach: [
+        async function (this: T) {
+          const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
+          if (ModelStorageUtil.isSupported(service)) {
+            await service.createStorage();
+            if (service.createModel) {
+              await Promise.all(ModelRegistryIndex.getClasses()
+                .filter(x => x === SchemaRegistryIndex.getBaseClass(x))
+                .map(m => service.createModel!(m)));
             }
           }
-          await service.deleteStorage();
         }
-      },
-      'afterAll'
-    );
+      ],
+      afterEach: [
+        async function (this: T) {
+          const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
+          if (ModelStorageUtil.isSupported(service)) {
+            const models = ModelRegistryIndex.getClasses().filter(m => m === SchemaRegistryIndex.getBaseClass(m));
 
+            if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
+              await service.truncateBlob();
+            }
+
+            if (service.truncateModel) {
+              await Promise.all(models.map(x => service.truncateModel!(x)));
+            } else if (service.deleteModel) {
+              await Promise.all(models.map(x => service.deleteModel!(x)));
+            } else {
+              await service.deleteStorage(); // Purge it all
+            }
+          }
+        }
+      ],
+      afterAll: [
+        async function (this: T) {
+          const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
+          if (ModelStorageUtil.isSupported(service)) {
+            if (service.deleteModel) {
+              for (const m of ModelRegistryIndex.getClasses()) {
+                if (m === SchemaRegistryIndex.getBaseClass(m)) {
+                  await service.deleteModel(m);
+                }
+              }
+            }
+            await service.deleteStorage();
+          }
+        }
+      ]
+    });
   };
 }

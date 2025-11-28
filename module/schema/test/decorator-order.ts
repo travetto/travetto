@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Alias, Field, LongText, Required, Schema, SchemaRegistry, Specifier, Text } from '@travetto/schema';
+import { Alias, Field, LongText, Required, Schema, SchemaRegistryIndex, Specifier, Text } from '@travetto/schema';
+import { Registry } from '@travetto/registry';
 
 @Schema()
 class MyClass {
@@ -16,7 +17,7 @@ class MyClass {
 
   @Text()
   @Required()
-  @Field(String, { specifiers: ['weirder'], required: { active: false } })
+  @Field({ type: String }, { specifiers: ['weirder'], required: { active: false } })
   text2: string;
 }
 
@@ -24,24 +25,24 @@ class MyClass {
 export class DecoratorOrderSuite {
   @Test()
   async testAlias() {
-    await SchemaRegistry.init();
-    const schema = SchemaRegistry.getViewSchema(MyClass);
-    assert.deepStrictEqual(schema.schema.field.aliases, ['bob', 'bob1', 'bob2']);
+    await Registry.init();
+    const fields = SchemaRegistryIndex.getFieldMap(MyClass);
+    assert.deepStrictEqual(fields.field.aliases, ['bob', 'bob1', 'bob2']);
   }
 
   @Test()
   async testSpecifiers() {
-    await SchemaRegistry.init();
-    const schema = SchemaRegistry.getViewSchema(MyClass);
-    assert.deepStrictEqual(schema.schema.text.specifiers?.toSorted(), ['text', 'long', 'weird'].toSorted());
+    await Registry.init();
+    const fields = SchemaRegistryIndex.getFieldMap(MyClass);
+    assert.deepStrictEqual(fields.text.specifiers?.toSorted(), ['text', 'long', 'weird'].toSorted());
   }
 
   @Test()
   async testSpecifiersRaw() {
-    await SchemaRegistry.init();
-    const schema = SchemaRegistry.getViewSchema(MyClass);
-    assert.deepStrictEqual(schema.schema.text2.specifiers?.toSorted(), ['text', 'weirder'].toSorted());
-    assert(schema.schema.text2.name === 'text2');
-    assert(schema.schema.text2.required?.active === true);
+    await Registry.init();
+    const fields = SchemaRegistryIndex.getFieldMap(MyClass);
+    assert.deepStrictEqual(fields.text2.specifiers?.toSorted(), ['text', 'weirder'].toSorted());
+    assert(fields.text2.name === 'text2');
+    assert(fields.text2.required?.active === true);
   }
 }

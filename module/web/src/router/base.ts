@@ -1,9 +1,9 @@
 import { Class, toConcrete } from '@travetto/runtime';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
+import { ControllerRegistryIndex } from '@travetto/web';
+import { Registry } from '@travetto/registry';
 
 import { ControllerConfig, EndpointConfig } from '../registry/types.ts';
-import { ControllerRegistry } from '../registry/controller.ts';
-
 import type { WebRouter } from '../types/dispatch.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebResponse } from '../types/response.ts';
@@ -14,13 +14,14 @@ import { EndpointUtil } from '../util/endpoint.ts';
 /**
  * Supports the base pattern for the most common web router implementations
  */
+@Injectable()
 export abstract class BaseWebRouter implements WebRouter {
 
   #cleanup = new Map<string, Function>();
   #interceptors: WebInterceptor[];
 
   async #register(c: Class): Promise<void> {
-    const config = ControllerRegistry.get(c);
+    const config = ControllerRegistryIndex.getConfig(c);
 
     let endpoints = await EndpointUtil.getBoundEndpoints(c);
     endpoints = EndpointUtil.orderEndpoints(endpoints);
@@ -29,7 +30,6 @@ export abstract class BaseWebRouter implements WebRouter {
       ep.filter = EndpointUtil.createEndpointHandler(this.#interceptors, ep, config);
     }
 
-    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
     const fn = await this.register(endpoints, config);
     this.#cleanup.set(c.Ⲑid, fn);
   };
@@ -39,27 +39,29 @@ export abstract class BaseWebRouter implements WebRouter {
    */
   async postConstruct(): Promise<void> {
 
-    this.#interceptors = await DependencyRegistry.getCandidateInstances(toConcrete<WebInterceptor>());
+    this.#interceptors = await DependencyRegistryIndex.getInstances(toConcrete<WebInterceptor>());
     this.#interceptors = EndpointUtil.orderInterceptors(this.#interceptors);
     const names = this.#interceptors.map(x => x.constructor.name);
     console.debug('Sorting interceptors', { count: names.length, names });
 
     // Register all active
-    for (const c of ControllerRegistry.getClasses()) {
+    for (const c of ControllerRegistryIndex.getClasses()) {
       await this.#register(c);
     }
 
     // Listen for updates
-    ControllerRegistry.on(async e => {
-      console.debug('Registry event', { type: e.type, target: (e.curr ?? e.prev)?.Ⲑid });
-      if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
+    Registry.onClassChange(async e => {
+      const targetCls = ('curr' in e ? e.curr : null) ?? ('prev' in e ? e.prev : null);
+      console.debug('Registry event', { type: e.type, target: targetCls?.Ⲑid });
+
+      if ('prev' in e && e.prev) {
         this.#cleanup.get(e.prev.Ⲑid)?.();
         this.#cleanup.delete(e.prev.Ⲑid);
       }
-      if (e.curr) {
+      if ('curr' in e && e.curr) {
         await this.#register(e.curr);
       }
-    });
+    }, ControllerRegistryIndex);
   }
 
   abstract register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<() => void>;

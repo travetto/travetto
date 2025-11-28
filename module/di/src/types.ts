@@ -1,27 +1,46 @@
 import { Class } from '@travetto/runtime';
 
-export type ClassTarget<T = unknown> = Class<T> | Function;
-
-export type PostConstructHandler<T> = (value: T) => (void | Promise<void>);
+export type ResolutionType = 'strict' | 'loose' | 'any';
 
 /**
  * State of a Dependency
  */
-interface Core<T = unknown> {
+export interface Dependency<T = unknown> {
+  /**
+   * Whether or not resolution of dependency should be flexible,
+   * or should be strict.  Default is strict.
+   */
+  resolution?: ResolutionType;
   /**
    * Actual reference to a Class
    */
-  target: ClassTarget<T>;
+  target?: Class<T>;
   /**
    * Qualifier symbol
    */
-  qualifier: symbol;
+  qualifier?: symbol;
 }
 
 /**
- * State of a Dependency Target
+ * Injectable candidate
  */
-interface CoreTarget<T = unknown> extends Core<T> {
+export interface InjectableCandidate<T = unknown> {
+  /**
+   * Reference for the class
+   */
+  class: Class<T>;
+  /**
+   * Method that is injectable on class
+   */
+  method: string | symbol;
+  /**
+   * Method handle
+   */
+  factory: (...args: unknown[]) => T | Promise<T>;
+  /**
+   * The type of the candidate
+   */
+  candidateType: Class;
   /**
    * Is this injectable enabled
    */
@@ -31,66 +50,40 @@ interface CoreTarget<T = unknown> extends Core<T> {
    */
   primary?: boolean;
   /**
-   * Should the target be auto-created
+   * Should the target be constructed on startup
    */
-  autoCreate?: boolean;
+  autoInject?: boolean;
+  /**
+   * Actual reference to a Class
+   */
+  target?: Class;
+  /**
+   * Qualifier symbol
+   */
+  qualifier?: symbol;
 }
 
 /**
- * State of a Dependency
+ * Full injectable configuration for a class
  */
-export interface Dependency<T = unknown> extends Core<T> {
-  /**
-   * Whether or not the dependency is optional
-   */
-  optional?: boolean;
-
-  /**
-   * Whether or not resolution of dependency should be flexible,
-   * or should be strict.  Default is strict.
-   */
-  resolution?: 'loose' | 'strict';
-}
-
-/**
- * Injectable configuration
- */
-export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
+export interface InjectableConfig<T = unknown> {
   /**
    * Reference for the class
    */
   class: Class<T>;
   /**
-   * Factory function for the injectable
+   * Candidates that are injectable
    */
-  factory?: (...args: unknown[]) => T;
-  /**
-   * List of dependencies as fields or as constructor arguments
-   */
-  dependencies: {
-    cons?: Dependency[];
-    fields: Record<string, Dependency>;
-  };
-  /**
-   * List of interface types
-   */
-  interfaces: Class[];
-  /**
-   * Post construct handlers
-   */
-  postConstruct: Record<string | symbol, PostConstructHandler<unknown>>;
+  candidates: Record<string | symbol, InjectableCandidate>;
 }
 
-/**
- * Factory configuration
- */
-export interface InjectableFactoryConfig<T = unknown> extends CoreTarget<T> {
-  /**
-   * Src of the factory method
-   */
-  src: Class<T>;
-  /**
-   * List of all dependencies as function arguments
-   */
-  dependencies?: Dependency[];
+export function getDefaultQualifier(cls: Class): symbol {
+  return Symbol.for(cls.Ⲑid);
 }
+
+
+export const PrimaryCandidateSymbol = Symbol();
+
+export type InjectableClassMetadata = {
+  postConstruct: Record<string | symbol, (<T>(inst: T) => Promise<void>)>;
+};

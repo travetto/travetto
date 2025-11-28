@@ -2,19 +2,40 @@ import { Any, Class, Primitive } from '@travetto/runtime';
 
 import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
-export type ClassList = Class | [Class];
-
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
+export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
+
 /**
- * Basic describable configuration
+ * Represents a typed item in the schema
  */
-export interface DescribableConfig {
+export type SchemaBasicType = {
   /**
-   * Title
+   * Description of the type
    */
-  title?: string;
+  description?: string;
+  /**
+   * Is the type an array
+   */
+  array?: boolean;
+  /**
+   * The class tied to the type
+   */
+  type: Class & {
+    bindSchema?(input: unknown): undefined | unknown;
+    validateSchema?(input: unknown): string | undefined;
+  };
+  /**
+   * Is the field a foreign type
+   */
+  isForeign?: boolean;
+};
+
+/**
+ * Basic schema configuration
+ */
+export interface SchemaCoreConfig {
   /**
    * Description
    */
@@ -23,44 +44,52 @@ export interface DescribableConfig {
    * List of examples
    */
   examples?: string[];
+  /**
+   * Is the field/method/private
+   */
+  private?: boolean;
+  /**
+   * Metadata that is related to the schema structure
+   */
+  metadata?: Record<symbol, unknown>;
 }
 
 /**
  * Basic structure for a method configuration
  */
-export interface SchemaMethodConfig {
-  fields: FieldConfig[];
+export interface SchemaMethodConfig extends SchemaCoreConfig {
+  /**
+   * Is the method static
+   */
+  isStatic?: boolean;
+  /**
+   * The parameters of the method
+   */
+  parameters: SchemaParameterConfig[];
+  /**
+   * Validators to run for th method
+   */
   validators: MethodValidatorFn<unknown[]>[];
+  /**
+   * The return type configuration
+   */
+  returnType?: SchemaBasicType;
 }
 
 /**
  * Schema configuration
  */
-export interface SchemaConfig {
+export interface SchemaFieldMap {
   /**
    * List of all fields
    */
-  [key: string]: FieldConfig;
-}
-
-/**
- * Specific view configuration for a schema
- */
-export interface ViewConfig {
-  /**
-   * The schema config
-   */
-  schema: SchemaConfig;
-  /**
-   * The list of all fields in the view
-   */
-  fields: string[];
+  [key: string | symbol]: SchemaFieldConfig;
 }
 
 /**
  * Class configuration
  */
-export interface ClassConfig extends DescribableConfig {
+export interface SchemaClassConfig extends SchemaCoreConfig {
   /**
    * Target class
    */
@@ -68,72 +97,53 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * List of all views
    */
-  views: Record<string, ViewConfig>;
+  views: Record<string, ViewFieldsConfig<Any>>;
   /**
-   * Composite of all views
+   * Field configurations
    */
-  totalView: ViewConfig;
+  fields: SchemaFieldMap;
   /**
    * Global validators
    */
   validators: ValidatorFn<Any, unknown>[];
   /**
-   * Is the class a base type
+   * Is this a base class for discrimination
    */
-  baseType?: boolean;
+  discriminatedBase?: boolean;
   /**
-   * Sub type name
+   * Do we have a discriminator field
    */
-  subTypeName?: string;
+  discriminatedField?: string;
   /**
-   * The field the subtype is determined by
+   * Discriminated type name
    */
-  subTypeField: string;
+  discriminatedType?: string;
   /**
-   * Metadata that is related to the schema structure
+   * Method configs
    */
-  metadata?: Record<symbol, unknown>;
+  methods: Record<string | symbol, SchemaMethodConfig>;
   /**
-   * Method parameter configs
+   * Interfaces that the class implements
    */
-  methods: Record<string, SchemaMethodConfig>;
+  interfaces: Class[];
 }
 
 /**
- * Field configuration
+ * Shared base type for all input-related fields
  */
-export interface FieldConfig extends DescribableConfig {
+export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
+  /**
+   * Key name for validation when dealing with complex types
+   */
+  view?: string;
   /**
    * Owner class
    */
-  owner?: Class;
-  /**
-   * Field name
-   */
-  name: string;
+  owner: Class;
   /**
    * List of aliases
    */
   aliases?: string[];
-  /**
-   * Specific type for the field, with optional binding/validation support
-   */
-  type: Class & {
-    bindSchema?(input: unknown): undefined | unknown;
-    validateSchema?(input: unknown): string | undefined;
-  };
-  /**
-   * View name for validation when dealing with complex types
-   */
-  view?: string;
-  /**
-   * The position of the field if ordered
-   */
-  index?: number;
-  /**
-   * Is the field an array
-   */
-  array: boolean;
   /**
    * Does the field have a specialization
    */
@@ -174,6 +184,38 @@ export interface FieldConfig extends DescribableConfig {
    * Default value
    */
   default?: Primitive | [];
+}
+
+/**
+ * Parameter configuration for methods
+ */
+export interface SchemaParameterConfig extends SchemaInputConfig {
+  /**
+   * Parameter name
+   */
+  name?: string;
+  /**
+   * The position of the field if ordered
+   */
+  index: number;
+  /**
+   * Method the parameter belongs to
+   */
+  method: string | symbol;
+  /**
+   * Source text for the parameter
+   */
+  sourceText?: string;
+}
+
+/**
+ * Field configuration
+ */
+export interface SchemaFieldConfig extends SchemaInputConfig {
+  /**
+   * Field name
+   */
+  name: string | symbol;
   /**
    * Is the field readonly, or write only?, defaults to no restrictions
    */

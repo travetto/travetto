@@ -1,16 +1,16 @@
 import util from 'node:util';
 
 import { ConfigurationService } from '@travetto/config';
-import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
 import { DBConfig } from '@travetto/config/doc/dbconfig.ts';
 import { hasToJSON } from '@travetto/runtime';
 
 util.inspect.defaultOptions.depth = 5;
 
 export async function main(): Promise<void> {
-  await RootRegistry.init();
-  const config = await DependencyRegistry.getInstance(ConfigurationService);
+  await Registry.init();
+  const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
 
   try {
     await config.bindTo(DBConfig, new DBConfig(), 'database');

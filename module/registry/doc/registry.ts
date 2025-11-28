@@ -1,9 +1,10 @@
 import { Class } from '@travetto/runtime';
-import { MetadataRegistry } from '@travetto/registry';
+import { ChangeEvent, RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 interface Group {
   class: Class;
   name: string;
+  children: Child[];
 }
 
 interface Child {
@@ -11,30 +12,61 @@ interface Child {
   method: Function;
 }
 
-function isComplete(o: Partial<Group>): o is Group {
-  return !!o;
-}
+/**
+ * The adapter to handle mapping/modeling a specific class
+ */
+class SampleRegistryAdapter implements RegistryAdapter<Group> {
 
-export class SampleRegistry extends MetadataRegistry<Group, Child> {
-  /**
-   * Finalize class after all metadata is collected
-   */
-  onInstallFinalize<T>(cls: Class<T>): Group {
-    const pending: Partial<Group> = this.getOrCreatePending(cls);
-    if (isComplete(pending)) {
-      return pending;
-    } else {
-      throw new Error('Invalid Group');
-    }
+  #class: Class;
+  #config: Group;
+
+  constructor(cls: Class) {
+    this.#class = cls;
   }
 
-  /**
-   * Create scaffolding on first encounter of a class
-   */
-  createPending(cls: Class): Partial<Group> {
-    return {
-      class: cls,
-      name: cls.name
-    };
+  register(...data: Partial<Partial<Group>>[]): Group {
+    for (const d of data) {
+      Object.assign(this.#config, {
+        ...d,
+        children: [
+          ...(this.#config?.children ?? []),
+          ...(d.children ?? [])
+        ]
+      });
+    }
+    return this.#config;
+  }
+
+  registerChild(method: Function, name: string): void {
+    this.register({ children: [{ method, name }] });
+  }
+
+  finalize?(parent?: Partial<Group> | undefined): void {
+    // Nothing to do
+  }
+
+  get(): Group {
+    return this.#config;
+  }
+}
+
+/**
+ * Basic Index that handles cross-class activity
+ */
+export class SampleRegistryIndex implements RegistryIndex {
+  static #instance = Registry.registerIndex(SampleRegistryIndex);
+
+  static getForRegister(cls: Class, allowFinalized = false): SampleRegistryAdapter {
+    return this.#instance.store.getForRegister(cls, allowFinalized);
+  }
+
+  store = new RegistryIndexStore(SampleRegistryAdapter);
+
+  process(events: ChangeEvent<Class>[]): void {
+    // Nothing to do
+  }
+
+  finalize(cls: Class): void {
+    this.store.finalize(cls);
   }
 }

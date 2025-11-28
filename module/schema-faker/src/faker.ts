@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker';
 
 import { Class, TimeUtil } from '@travetto/runtime';
-import { BindUtil, SchemaRegistry, FieldConfig, CommonRegExp } from '@travetto/schema';
+import { BindUtil, SchemaFieldConfig, CommonRegExp, SchemaRegistryIndex } from '@travetto/schema';
+
 
 /**
  * Provide a faker utility for generating content
@@ -29,7 +30,7 @@ export class SchemaFaker {
       [/l(ast)?name/, faker.person.lastName],
       [/^ip(add(ress)?)?$/, faker.internet.ip],
       [/^ip(add(ress)?)?(v?)6$/, faker.internet.ipv6],
-      [/^username$/, faker.internet.userName],
+      [/^username$/, faker.internet.username],
       [/^domain(name)?$/, faker.internet.domainName],
       [/^file(path|name)?$/, faker.system.filePath],
       [/^street(1)?$/, faker.location.streetAddress],
@@ -62,7 +63,7 @@ export class SchemaFaker {
    * Get an array of values
    * @param cfg Field configuration
    */
-  static #array(cfg: FieldConfig): unknown[] {
+  static #array(cfg: SchemaFieldConfig): unknown[] {
     const min = cfg.minlength ? cfg.minlength.n : 0;
     const max = cfg.maxlength ? cfg.maxlength.n : 10;
     const size = faker.number.int({ min, max });
@@ -77,14 +78,12 @@ export class SchemaFaker {
    * Get a new number value
    * @param cfg Number config
    */
-  static #number(cfg: FieldConfig): number {
+  static #number(cfg: SchemaFieldConfig): number {
     let min = cfg.min && typeof cfg.min.n === 'number' ? cfg.min.n : undefined;
     let max = cfg.max && typeof cfg.max.n === 'number' ? cfg.max.n : undefined;
     let precision = cfg.precision;
 
-    const name = cfg.name.toUpperCase();
-
-    if (/(price|amt|amount)$/.test(name)) {
+    if (/(price|amt|amount)$/i.test(cfg.name.toString())) {
       precision = [13, 2];
     }
 
@@ -112,8 +111,8 @@ export class SchemaFaker {
    * Get a date value
    * @param cfg Field config
    */
-  static #date(cfg: FieldConfig): Date {
-    const name = cfg.name.toUpperCase();
+  static #date(cfg: SchemaFieldConfig): Date {
+    const name = cfg.name.toString().toLowerCase();
     const min = cfg.min && typeof cfg.min.n !== 'number' ? cfg.min.n : undefined;
     const max = cfg.max && typeof cfg.max.n !== 'number' ? cfg.max.n : undefined;
 
@@ -133,8 +132,8 @@ export class SchemaFaker {
    * Get a string value
    * @param cfg Field config
    */
-  static #string(cfg: FieldConfig): string {
-    const name = cfg.name.toLowerCase();
+  static #string(cfg: SchemaFieldConfig): string {
+    const name = cfg.name.toString().toLowerCase();
 
     if (cfg.match) {
       const mre = cfg.match && cfg.match.re;
@@ -158,7 +157,7 @@ export class SchemaFaker {
    * Get a value for a field config
    * @param cfg Field config
    */
-  static #value(cfg: FieldConfig, subArray = false): unknown {
+  static #value(cfg: SchemaFieldConfig, subArray = false): unknown {
     if (!subArray && cfg.array) {
       return this.#array(cfg);
     } else if (cfg.enum) {
@@ -175,7 +174,7 @@ export class SchemaFaker {
         return this.#date(cfg);
       } else if (typ === Boolean) {
         return faker.datatype.boolean();
-      } else if (SchemaRegistry.has(typ)) {
+      } else if (SchemaRegistryIndex.has(typ)) {
         return this.generate(typ);
       }
     }
@@ -187,15 +186,14 @@ export class SchemaFaker {
    * @param view The view to define specifically
    */
   static generate<T>(cls: Class<T>, view?: string): T {
-    const cfg = SchemaRegistry.getViewSchema(cls, view);
+    const fields = SchemaRegistryIndex.getFieldMap(cls, view);
     const out: Record<string, unknown> = {};
 
-    for (const f of cfg.fields) {
+    for (const [f, fieldConfig] of Object.entries(fields)) {
       if (f === 'type' || f === 'id') { // Do not set primary fields
         continue;
       }
-      const fieldConfig = cfg.schema[f];
-      if (!fieldConfig.required && (Math.random() < .5)) {
+      if (fieldConfig.required?.active === false && (Math.random() < .5)) {
         continue;
       }
       out[f] = this.#value(fieldConfig);

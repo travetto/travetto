@@ -2,14 +2,14 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { CorsConfig, CorsInterceptor, HTTP_METHODS, WebRequest, WebResponse } from '@travetto/web';
-import { RootRegistry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 
 @Suite()
 class CorsInterceptorSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await Registry.init();
   }
 
   @Test()
