@@ -35,7 +35,7 @@
     "passport": "^0.7.0"
   },
   "devDependencies": {
-    "@types/passport-facebook": "^3.0.3",
+    "@types/passport-facebook": "^3.0.4",
     "passport-facebook": "^3.0.0"
   },
   "travetto": {

@@ -27,7 +27,7 @@
     "directory": "module/model-elasticsearch"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^9.1.1",
+    "@elastic/elasticsearch": "^9.2.0",
     "@travetto/cli": "^6.0.1",
     "@travetto/config": "^6.0.1",
     "@travetto/model": "^6.0.1",

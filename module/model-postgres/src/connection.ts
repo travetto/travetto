@@ -40,7 +40,11 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
 
     await this.runWithActive(() =>
       this.runWithTransaction('required', () =>
-        this.execute(this.active!, 'CREATE EXTENSION IF NOT EXISTS pgcrypto;')
+        this.execute(this.active!, 'CREATE EXTENSION IF NOT EXISTS pgcrypto;').catch(err => {
+          if (!(err instanceof Error && err.message.includes('already exists'))) {
+            throw err;
+          }
+        })
       )
     );
 
