@@ -640,14 +640,14 @@ Options:
 
 Available Services
 --------------------
- * dynamodb&#64;3.0.0
- * elasticsearch&#64;9.1.0
+ * dynamodb&#64;3.1.0
+ * elasticsearch&#64;9.2.1
  * firestore&#64;latest
- * mongodb&#64;8.0
- * mysql&#64;9.4
- * postgresql&#64;17.6
- * redis&#64;8.0
- * s3&#64;4.8.0</code></pre>
+ * mongodb&#64;8.2
+ * mysql&#64;9.5
+ * postgresql&#64;18.1
+ * redis&#64;8.4
+ * s3&#64;4.10.0</code></pre>
   </figure>
 
 A sample of all services available to the entire framework:
@@ -660,14 +660,14 @@ A sample of all services available to the entire framework:
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           <span class="token number">3.0</span>.0    Running 93af422e793a
-elasticsearch      <span class="token number">9.1</span>.0    Running ed76ee063d13
+dynamodb           <span class="token number">3.1</span>.0    Running 93af422e793a
+elasticsearch      <span class="token number">9.2</span>.1    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
-mongodb              <span class="token number">8.0</span>    Running 5513eba6734e
-mysql                <span class="token number">9.4</span>    Running 307bc66d442a
-postgresql          <span class="token number">17.6</span>    Running e78291e71040
-redis                <span class="token number">8.0</span>    Running 77ba279b4e30
-s3                 <span class="token number">4.8</span>.0    Running fdacfc55b9e3</code></pre>
+mongodb              <span class="token number">8.2</span>    Running 5513eba6734e
+mysql                <span class="token number">9.5</span>    Running 307bc66d442a
+postgresql          <span class="token number">18.1</span>    Running e78291e71040
+redis                <span class="token number">8.4</span>    Running 77ba279b4e30
+s3                <span class="token number">4.10</span>.0    Running fdacfc55b9e3</code></pre>
   </figure>
 
 <h3 id="defining-new-services">Defining new Services</h3>
@@ -681,7 +681,7 @@ The services are defined as plain typescript files within the framework and can 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ServiceDescriptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cli'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> version <span class="token operator">=</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">MONGO_VERSION</span> <span class="token operator">||</span> <span class="token string">'8.0'</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> version <span class="token operator">=</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">MONGO_VERSION</span> <span class="token operator">||</span> <span class="token string">'8.2'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> service<span class="token operator">:</span> ServiceDescriptor <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token string">'mongodb'</span><span class="token punctuation">,</span>
