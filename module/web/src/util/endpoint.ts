@@ -154,9 +154,8 @@ export class EndpointUtil {
    */
   static async extractParameters(endpoint: EndpointConfig, request: WebRequest): Promise<unknown[]> {
     const cls = endpoint.class;
-    const method = endpoint.name;
     const vals = WebCommonUtil.getRequestParams(request);
-    const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, method);
+    const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.name);
     const combined = parameters.map((cfg) => {
       const idx = cfg.index!;
       endpoint.parameters[idx] ??= { index: idx, location: undefined! };
@@ -166,8 +165,8 @@ export class EndpointUtil {
 
     try {
       const extracted = combined.map(({ param, schema, value }) => this.extractParameter(request, param, schema, value));
-      const params = BindUtil.coerceMethodParams(cls, method, extracted);
-      await SchemaValidator.validateMethod(cls, method, params, endpoint.parameters.map(x => x.prefix));
+      const params = BindUtil.coerceMethodParams(cls, endpoint.name, extracted);
+      await SchemaValidator.validateMethod(cls, endpoint.name, params, endpoint.parameters.map(x => x.prefix));
       return params;
     } catch (err) {
       if (err instanceof ValidationResultError) {
