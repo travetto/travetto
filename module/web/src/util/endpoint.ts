@@ -97,19 +97,13 @@ export class EndpointUtil {
     switch (param.location) {
       case 'body': return request.body;
       case 'path': {
-        for (const name of possibilities) {
-          const res = request.context.pathParams?.[name];
-          if (res !== undefined) {
-            return res;
-          }
-        }
-        break;
+        const pathParams = request.context.pathParams ?? {};
+        return pathParams[input.name!] ?? pathParams[input.aliases?.find(x => x in pathParams) ?? ''];
       }
       case 'header': {
         for (const name of possibilities) {
-          const res = input.array ? request.headers.getList(name) : request.headers.get(name);
-          if (res !== undefined) {
-            return res;
+          if (request.headers.has(name)) {
+            return input.array ? request.headers.getList(name) : request.headers.get(name);
           }
         }
         break;
@@ -117,13 +111,12 @@ export class EndpointUtil {
       case 'query': {
         const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
         const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
-        for (const name of possibilities) {
-          const res = param.prefix ? q[param.prefix] : (input.type.Ⲑid ? q : q[name]);
-          if (res !== undefined) {
-            return res;
-          }
+        if (param.prefix) {
+          return q[param.prefix];
+        } else if (input.type.Ⲑid) {
+          return q;
         }
-        break;
+        return q[input.name!] ?? q[input.aliases?.find(x => x in q) ?? ''];
       }
     }
   }
