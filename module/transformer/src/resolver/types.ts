@@ -61,21 +61,40 @@ export interface ShapeType extends Type<'shape'> {
    * Does not include methods, used for shapes not concrete types
    */
   fieldTypes: Record<string, AnyType>;
-
   /**
    * Type Info
    */
   tsFieldTypes?: Record<string, ts.Type>;
-
   /**
    * Type arguments
    */
   typeArguments?: AnyType[];
-
   /**
    * Type Arguments
    */
   tsTypeArguments?: ts.Type[];
+}
+
+/**
+ * A type that is mapped
+ */
+export interface MappedType extends Type<'mapped'> {
+  /**
+   *  Location the type came from, for class references
+   */
+  importName: string;
+  /**
+   * Import type name as the base of the mapping
+   */
+  importClassName: string;
+  /**
+   * The type of mapping operation
+   */
+  operation: 'Omit' | 'Pick' | 'Partial' | 'Required';
+  /**
+   * The fields being provided for the mapping
+   */
+  fields: string[];
 }
 
 /**
@@ -168,7 +187,6 @@ export interface ForeignType extends Type<'foreign'> {
    * Identifier for type
    */
   name: string;
-
   /**
    * Primary source file
    */
@@ -181,7 +199,7 @@ export interface ForeignType extends Type<'foreign'> {
 export interface UnknownType extends Type<'unknown'> { }
 
 export type AnyType =
-  TupleType | ShapeType | CompositionType | LiteralType |
+  TupleType | ShapeType | CompositionType | LiteralType | MappedType |
   ManagedType | PointerType | UnknownType | ForeignType | TemplateType;
 
 /**

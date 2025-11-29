@@ -84,11 +84,37 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     ...base.metadata ? { metadata: { ...parent.metadata, ...base.metadata } } : {},
     interfaces: [...parent.interfaces, ...base.interfaces],
     methods: { ...parent.methods, ...base.methods },
-    fields: { ...parent.fields, ...base.fields },
     description: base.description || parent.description,
     examples: [...(parent.examples ?? []), ...(base.examples ?? [])],
     discriminatedField: base.discriminatedField ?? parent.discriminatedField,
   });
+  switch (base.mappedOperation) {
+    case 'Required':
+    case 'Partial': {
+      base.fields = Object.fromEntries(
+        Object.entries(base.fields).map(([k, v]) => [k, {
+          ...v,
+          required: {
+            active: base.mappedOperation === 'Required'
+          }
+        }])
+      );
+      break;
+    }
+    case 'Pick':
+    case 'Omit': {
+      const keys = new Set<string>(base.mappedFields ?? []);
+      base.fields = Object.fromEntries(
+        Object.entries(parent.fields).filter(([k]) =>
+          base.mappedOperation === 'Pick' ? keys.has(k) : !keys.has(k)
+        )
+      );
+      break;
+    }
+    default: {
+      base.fields = { ...parent.fields, ...base.fields };
+    }
+  }
   return base;
 }
 
