@@ -105,7 +105,9 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   } else if (type.isLiteral()) {
     return { category: 'shape', type };
   } else if (objectFlags & ts.ObjectFlags.Mapped) { // Mapped types
-    return { category: 'mapped', type };
+    if (type.getProperties().some(x => x.declarations || x.valueDeclaration)) {
+      return { category: 'mapped', type };
+    }
   }
   return { category: 'literal', type };
 }
