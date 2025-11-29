@@ -247,15 +247,13 @@ export class ImportManager {
    * Get the identifier and import if needed
    */
   getOrImport(factory: ts.NodeFactory, type: ManagedType | MappedType): ts.Identifier | ts.PropertyAccessExpression {
+    const targetName = type.key === 'managed' ? type.name! : type.mappedClassName!;
+    // In same file already
     if (type.importName === this.#importName) {
-      return factory.createIdentifier(type.name!);
+      return factory.createIdentifier(targetName);
     } else {
       const { ident } = this.#imports.get(type.importName) ?? this.importFile(type.importName);
-      if (type.key === 'mapped') {
-        return factory.createPropertyAccessExpression(ident, type.importClassName!);
-      } else {
-        return factory.createPropertyAccessExpression(ident, type.name!);
-      }
+      return factory.createPropertyAccessExpression(ident, targetName);
     }
   }
 }

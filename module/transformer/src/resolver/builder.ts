@@ -284,10 +284,10 @@ export const TypeBuilder: {
       }
 
       const importName = resolver.getTypeImportName(mainType) ?? '<unknown>';
-      const importClassName = resolver.getTypeAsString(mainType)!;
+      const mappedClassName = resolver.getTypeAsString(mainType)!;
       const name = resolver.getTypeAsString(type)!;
 
-      return { key: 'mapped', name, original: mainType, operation, importName, importClassName, fields };
+      return { key: 'mapped', name, original: mainType, operation, importName, mappedClassName, fields };
     }
   },
   shape: {

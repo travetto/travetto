@@ -50,7 +50,7 @@ export class SchemaTransformUtil {
             )], []
           );
           cls.getText = (): string => `
-class ${uniqueId} extends ${type.importClassName} { 
+class ${uniqueId} extends ${type.mappedClassName} { 
   fields: ${type.fields?.join(', ')} 
   operation: ${type.operation}
 }`;

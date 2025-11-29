@@ -84,9 +84,9 @@ export interface MappedType extends Type<'mapped'> {
    */
   importName: string;
   /**
-   * Import type name as the base of the mapping
+   * Mapped class name
    */
-  importClassName: string;
+  mappedClassName: string;
   /**
    * The type of mapping operation
    */
