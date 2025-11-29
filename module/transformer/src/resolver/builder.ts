@@ -266,8 +266,11 @@ export const TypeBuilder: {
           operation = ref.typeName.getText();
           if (second) {
             const resolved = resolver.getType(second);
-            fields = resolved.isStringLiteral() ? [resolved.value] :
-              resolved.isUnion() && resolved.types.every(t => t.isStringLiteral()) ? resolved.types.map(t => t.value) : [];
+            if (resolved.isStringLiteral()) {
+              fields = [resolved.value];
+            } else if (resolved.isUnion() && resolved.types.every(t => t.isStringLiteral())) {
+              fields = resolved.types.map(t => t.value);
+            }
           }
         }
       } else {
