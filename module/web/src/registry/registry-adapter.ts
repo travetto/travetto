@@ -1,9 +1,8 @@
 import { RegistryAdapter } from '@travetto/registry';
 import { AppError, asFull, castTo, Class, RetainPrimitiveFields, safeAssign } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
-import { SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types';
+import { ControllerConfig, EndpointConfig, EndpointParameterConfig } from './types';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
 function combineCommon<T extends ControllerConfig | EndpointConfig>(base: T, override: Partial<T>): T {
@@ -40,7 +39,7 @@ function combineEndpointConfigs(ctrl: ControllerConfig, base: EndpointConfig, ..
         httpMethod: override.httpMethod ?? base.httpMethod,
         allowsBody: override.allowsBody ?? base.allowsBody,
         path: override.path || base.path,
-        params: (override.parameters ?? base.parameters).map(x => ({ ...x })),
+        parameters: (override.parameters ?? base.parameters).map(x => ({ ...x })),
         responseFinalizer: override.responseFinalizer ?? base.responseFinalizer,
       }
     );
@@ -59,28 +58,10 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   #config: ControllerConfig;
   #endpoints: Map<string | symbol, EndpointConfig> = new Map();
   #cls: Class;
+  #finalizeHandlers: Function[] = [];
 
   constructor(cls: Class) {
     this.#cls = cls;
-  }
-
-  computeParameterLocation(ep: EndpointConfig, schema: SchemaParameterConfig, param: EndpointParameterConfig): EndpointParamLocation {
-    if (param.location) {
-      return param.location;
-    }
-
-    const name = param?.name ?? schema?.name;
-
-    if (!SchemaRegistryIndex.has(schema.type)) {
-      if (schema.type === String && name && ep.path.includes(`:${name.toString()}`)) {
-        return 'path';
-      } else if (schema.type === Blob || schema.type === File || schema.type === ArrayBuffer || schema.type === Uint8Array) {
-        return 'body';
-      }
-      return 'query';
-    } else {
-      return ep.allowsBody ? 'body' : 'query';
-    }
   }
 
   register(...data: Partial<ControllerConfig>[]): ControllerConfig {
@@ -140,15 +121,11 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
       ep.fullPath = `/${this.#config.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
       ep.finalizedResponseHeaders = new WebHeaders({ ...this.#config.responseHeaders, ...ep.responseHeaders });
       ep.responseContext = { ...this.#config.responseContext, ...ep.responseContext };
-
-      const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name).parameters;
-      ep.parameters = schema.map(s => ({
-        name: s.name,
-        ...ep.parameters[s.index!],
-        index: s.index!,
-        location: this.computeParameterLocation(ep, s, ep.parameters[s.index!] ?? {})
-      }));
     }
+    for (const item of this.#finalizeHandlers) {
+      item();
+    }
+    this.#finalizeHandlers = [];
   }
 
   get(): ControllerConfig {
@@ -178,5 +155,9 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     extra?: Partial<EndpointConfig>
   ): EndpointConfig {
     return this.registerEndpoint(property, { interceptorConfigs: [[cls, castTo(config)]], ...extra });
+  }
+
+  registerFinalizeHandler(fn: () => void): void {
+    this.#finalizeHandlers.push(fn);
   }
 }

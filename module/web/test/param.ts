@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Describe, Min, Required, SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
+import { Alias, Min, Required, SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 import {
   ContextParam, Controller, ControllerRegistryIndex, EndpointConfig, EndpointUtil,
   Get, HeaderParam, HttpMethod, PathParam, Post, QueryParam, WebHeaders, WebRequest
@@ -48,13 +48,13 @@ class ParamController {
   async jobOutputMin(@PathParam() jobId: string, @Min(10) @QueryParam() age: number) { }
 
   @Get('/job/output2')
-  async jobOutput2(@QueryParam({ name: 'optional' }) time?: Date) { }
+  async jobOutput2(@Alias('optional') time?: Date) { }
 
   /**
-   * @param name User name
+   * @param nm User name
    */
   @Post('/alias')
-  async alias(@Describe({ description: 'User name' }) @QueryParam({ name: 'name' }) nm: string = 'green') { }
+  async alias(@Alias('name') nm: string = 'green') { }
 
   /**
    * @param nm User's name
@@ -186,7 +186,7 @@ export class EndpointParameterTest {
         path: '/alias',
         httpQuery: { nm: 'blue' }
       }
-    }), ['green']);
+    }), ['blue']);
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, {
       context: {
         path: '/alias',
@@ -197,12 +197,12 @@ export class EndpointParameterTest {
     const ep2 = EndpointParameterTest.getEndpoint('/alias2', 'POST');
     const { parameters: params2 } = SchemaRegistryIndex.getMethodConfig(ep2.class, ep2.name);
     assert(params2[0].description === 'User\'s name');
-    assert(ep2.parameters[0].name === 'nm');
+    assert(params2[0].name === 'nm');
 
     const ep3 = EndpointParameterTest.getEndpoint('/alias3', 'POST');
     const { parameters: params3 } = SchemaRegistryIndex.getMethodConfig(ep3.class, ep3.name);
     assert(params3[0].description === 'User\'s name');
-    assert(ep3.parameters[0].name === 'nm');
+    assert(params3[0].name === 'nm');
   }
 
   @Test()

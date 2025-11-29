@@ -18,38 +18,39 @@ const FileMapContract = toConcrete<FileMap>();
  * @kind decorator
  */
 export function Upload(
-  param: string | Partial<EndpointParameterConfig> & UploadConfig = {},
+  param: Partial<EndpointParameterConfig> & UploadConfig = {},
 ): (instance: ClassInstance, property: string | symbol, idx: number) => void {
-
-  if (typeof param === 'string') {
-    param = { name: param };
-  }
 
   const finalConf = { ...param };
 
   return (instance: ClassInstance, property: string | symbol, idx: number): void => {
     // Register field
-    ControllerRegistryIndex.getForRegister(getClass(instance)).registerEndpointInterceptorConfig(
-      property,
-      WebUploadInterceptor,
-      {
-        applies: true,
-        maxSize: finalConf.maxSize,
-        types: finalConf.types,
-        cleanupFiles: finalConf.cleanupFiles,
-        uploads: {
-          [finalConf.name ?? property]: {
-            maxSize: finalConf.maxSize,
-            types: finalConf.types,
-            cleanupFiles: finalConf.cleanupFiles
+    const cls = ControllerRegistryIndex.getForRegister(getClass(instance));
+    const getName = (): string => SchemaRegistryIndex.getMethodConfig(instance.constructor, property).parameters[idx].name!.toString();
+
+    cls.registerFinalizeHandler(() => {
+      cls.registerEndpointInterceptorConfig(
+        property,
+        WebUploadInterceptor,
+        {
+          applies: true,
+          maxSize: finalConf.maxSize,
+          types: finalConf.types,
+          cleanupFiles: finalConf.cleanupFiles,
+          uploads: {
+            [getName()]: {
+              maxSize: finalConf.maxSize,
+              types: finalConf.types,
+              cleanupFiles: finalConf.cleanupFiles
+            }
           }
         }
-      }
-    );
+      );
+    });
 
     return Param('body', {
       ...finalConf,
-      extract: (request, config) => {
+      extract: (request) => {
         const input = SchemaRegistryIndex.getMethodConfig(instance.constructor, property).parameters[idx];
 
         if (!input) {
@@ -62,7 +63,7 @@ export function Upload(
 
         const isMap = input.type === FileMapContract;
         const map = WebUploadUtil.getRequestUploads(request);
-        return isMap ? map : map[config.name!];
+        return isMap ? map : map[getName()];
       }
     })(instance, property, idx);
   };

@@ -8,7 +8,7 @@ import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebRequest } from '../types/request.ts';
 import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import { EndpointConfig, ControllerConfig, EndpointParameterConfig } from '../registry/types.ts';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig, EndpointParamLocation } from '../registry/types.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { WebCommonUtil } from './common.ts';
 
@@ -92,16 +92,57 @@ export class EndpointUtil {
       return param.extract(request, param);
     }
 
-    const name = param.name ?? input.name!;
+    const possibilities = [input.name!, ...input.aliases ?? []];
+
     switch (param.location) {
-      case 'path': return request.context.pathParams?.[name];
-      case 'header': return input.array ? request.headers.getList(name) : request.headers.get(name);
       case 'body': return request.body;
+      case 'path': {
+        for (const name of possibilities) {
+          const res = request.context.pathParams?.[name];
+          if (res !== undefined) {
+            return res;
+          }
+        }
+        break;
+      }
+      case 'header': {
+        for (const name of possibilities) {
+          const res = input.array ? request.headers.getList(name) : request.headers.get(name);
+          if (res !== undefined) {
+            return res;
+          }
+        }
+        break;
+      }
       case 'query': {
         const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
         const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
-        return param.prefix ? q[param.prefix] : (input.type.Ⲑid ? q : q[name]);
+        for (const name of possibilities) {
+          const res = param.prefix ? q[param.prefix] : (input.type.Ⲑid ? q : q[name]);
+          if (res !== undefined) {
+            return res;
+          }
+        }
+        break;
       }
+    }
+  }
+
+  /**
+   * Compute the location of a parameter within an endpoint
+   */
+  static computeParameterLocation(ep: EndpointConfig, schema: SchemaParameterConfig): EndpointParamLocation {
+    const name = schema?.name;
+
+    if (!SchemaRegistryIndex.has(schema.type)) {
+      if ((schema.type === String || schema.type === Number) && name && ep.path.includes(`:${name.toString()}`)) {
+        return 'path';
+      } else if (schema.type === Blob || schema.type === File || schema.type === ArrayBuffer || schema.type === Uint8Array) {
+        return 'body';
+      }
+      return 'query';
+    } else {
+      return ep.allowsBody ? 'body' : 'query';
     }
   }
 
@@ -115,10 +156,16 @@ export class EndpointUtil {
     const cls = endpoint.class;
     const method = endpoint.name;
     const vals = WebCommonUtil.getRequestParams(request);
+    const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, method);
+    const combined = parameters.map((cfg) => {
+      const idx = cfg.index!;
+      endpoint.parameters[idx] ??= { index: idx, location: undefined! };
+      endpoint.parameters[idx].location ??= this.computeParameterLocation(endpoint, cfg);
+      return { schema: cfg, param: endpoint.parameters[cfg.index], value: vals?.[idx] };
+    });
 
     try {
-      const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, method);
-      const extracted = endpoint.parameters.map((c, i) => this.extractParameter(request, c, parameters[i], vals?.[i]));
+      const extracted = combined.map(({ param, schema, value }) => this.extractParameter(request, param, schema, value));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.parameters.map(x => x.prefix));
       return params;
@@ -126,9 +173,9 @@ export class EndpointUtil {
       if (err instanceof ValidationResultError) {
         for (const el of err.details?.errors ?? []) {
           if (el.kind === 'required') {
-            const config = endpoint.parameters.find(x => x.name === el.path);
+            const config = combined.find(x => x.schema.name === el.path);
             if (config) {
-              el.message = `Missing ${config.location.replace(/s$/, '')}: ${config.name}`;
+              el.message = `Missing ${config.param.location.replace(/s$/, '')}: ${config.schema.name}`;
             }
           }
         }

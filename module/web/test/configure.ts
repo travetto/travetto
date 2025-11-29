@@ -52,7 +52,7 @@ export class ConfigureTest {
 
     assert(ep.parameters.length === 1);
 
-    assert(ep.parameters[0].name === 'name');
+    assert(params[0].name === 'name');
     assert(params[0].description === 'User name as a number');
   }
 }

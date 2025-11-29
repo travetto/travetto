@@ -4,9 +4,9 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParameterConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig, ControllerVisitor, HTTP_METHODS, EndpointUtil } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
-import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType } from '@travetto/schema';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType, SchemaParameterConfig } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config.ts';
 
@@ -259,12 +259,14 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: EndpointParameterConfig, input: SchemaInputConfig): (
+  #processEndpointParam(ep: EndpointConfig, param: EndpointParameterConfig, input: SchemaParameterConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined
   ) {
     const complex = input.type && SchemaRegistryIndex.has(input.type);
+    param.location ??= EndpointUtil.computeParameterLocation(ep, input);
+
     if (param.location) {
       if (param.location === 'body') {
         const acceptsMime = ep.finalizedResponseHeaders.get('accepts');
@@ -276,7 +278,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       } else {
         const epParam: ParameterObject = {
           in: param.location,
-          name: param.name || param.location,
+          name: input.name ?? param.location,
           description: input.description,
           required: input.required?.active !== false,
           schema: input.array ? { type: 'array', items: this.#getType(input) } : this.#getType(input)
@@ -315,7 +317,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
 
     for (const param of methodSchema.parameters) {
-      const result = this.#processEndpointParam(ep, ep.parameters[param.index], param);
+      const result = this.#processEndpointParam(ep, ep.parameters[param.index] ?? {}, param);
       if (result) {
         if ('parameters' in result) {
           (op.parameters ??= []).push(...result.parameters);
