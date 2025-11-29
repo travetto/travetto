@@ -274,7 +274,7 @@ export const TypeBuilder: {
         fields = type.getApparentProperties().map(p => p.getName());
       }
 
-      if (!isMappedType(operation) || !fields || !mainType || !mainType.isClass()) {
+      if (!isMappedType(operation) || fields === undefined || !mainType || !mainType.isClass()) {
         return TypeBuilder.shape.build(resolver, type, alias);
       }
 
