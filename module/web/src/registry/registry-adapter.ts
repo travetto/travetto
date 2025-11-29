@@ -1,8 +1,9 @@
 import { RegistryAdapter } from '@travetto/registry';
 import { AppError, asFull, castTo, Class, RetainPrimitiveFields, safeAssign } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
+import { SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { ControllerConfig, EndpointConfig, EndpointParameterConfig } from './types';
+import { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
 function combineCommon<T extends ControllerConfig | EndpointConfig>(base: T, override: Partial<T>): T {
@@ -52,6 +53,23 @@ function combineEndpointConfigs(ctrl: ControllerConfig, base: EndpointConfig, ..
 }
 
 /**
+ * Compute the location of a parameter within an endpoint
+ */
+function computeParameterLocation(ep: EndpointConfig, schema: SchemaParameterConfig): EndpointParamLocation {
+  const name = schema?.name;
+  if (!SchemaRegistryIndex.has(schema.type)) {
+    if ((schema.type === String || schema.type === Number) && name && ep.path.includes(`:${name.toString()}`)) {
+      return 'path';
+    } else if (schema.type === Blob || schema.type === File || schema.type === ArrayBuffer || schema.type === Uint8Array) {
+      return 'body';
+    }
+    return 'query';
+  } else {
+    return ep.allowsBody ? 'body' : 'query';
+  }
+}
+
+/**
  * Adapter for controller registry
  */
 export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConfig> {
@@ -91,7 +109,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
         class: this.#cls,
         filters: [],
         endpoint: this.#cls.prototype[method],
-        name: method.toString(),
+        methodName: method.toString(),
         id: `${this.#cls.name}#${method.toString()}`,
         parameters: [],
         interceptorConfigs: [],
@@ -121,6 +139,10 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
       ep.fullPath = `/${this.#config.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
       ep.finalizedResponseHeaders = new WebHeaders({ ...this.#config.responseHeaders, ...ep.responseHeaders });
       ep.responseContext = { ...this.#config.responseContext, ...ep.responseContext };
+      for (const schema of SchemaRegistryIndex.getMethodConfig(this.#cls, ep.methodName).parameters) {
+        ep.parameters[schema.index!] ??= { index: schema.index!, location: undefined! };
+        ep.parameters[schema.index!].location ??= computeParameterLocation(ep, schema);
+      }
     }
     for (const item of this.#finalizeHandlers) {
       item();

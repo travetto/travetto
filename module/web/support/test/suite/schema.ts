@@ -110,7 +110,7 @@ function getEndpoint(path: string, method: HttpMethod) {
 
 function getEndpointResponse(path: string, method: HttpMethod) {
   const ep = getEndpoint(path, method);
-  const resp = SchemaRegistryIndex.getMethodConfig(SchemaAPI, ep.name);
+  const resp = SchemaRegistryIndex.getMethodConfig(SchemaAPI, ep.methodName);
   return resp?.returnType?.type;
 }
 

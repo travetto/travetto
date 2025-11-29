@@ -8,7 +8,7 @@ import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebRequest } from '../types/request.ts';
 import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import { EndpointConfig, ControllerConfig, EndpointParameterConfig, EndpointParamLocation } from '../registry/types.ts';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig } from '../registry/types.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { WebCommonUtil } from './common.ts';
 
@@ -135,26 +135,6 @@ export class EndpointUtil {
   }
 
   /**
-   * Compute the location of a parameter within an endpoint
-   * @param ep The endpoint
-   * @param schema The parameter schema
-   */
-  static computeParameterLocation(ep: EndpointConfig, schema: SchemaParameterConfig): EndpointParamLocation {
-    const name = schema?.name;
-
-    if (!SchemaRegistryIndex.has(schema.type)) {
-      if ((schema.type === String || schema.type === Number) && name && ep.path.includes(`:${name.toString()}`)) {
-        return 'path';
-      } else if (schema.type === Blob || schema.type === File || schema.type === ArrayBuffer || schema.type === Uint8Array) {
-        return 'body';
-      }
-      return 'query';
-    } else {
-      return ep.allowsBody ? 'body' : 'query';
-    }
-  }
-
-  /**
    * Extract all parameters for a given endpoint/request/response combo
    * @param endpoint The endpoint to extract for
    * @param req The request
@@ -163,13 +143,9 @@ export class EndpointUtil {
   static async extractParameters(endpoint: EndpointConfig, request: WebRequest): Promise<unknown[]> {
     const cls = endpoint.class;
     const vals = WebCommonUtil.getRequestParams(request);
-    const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.name);
-    const combined = parameters.map((cfg) => {
-      const idx = cfg.index!;
-      endpoint.parameters[idx] ??= { index: idx, location: undefined! };
-      endpoint.parameters[idx].location ??= this.computeParameterLocation(endpoint, cfg);
-      return { schema: cfg, param: endpoint.parameters[cfg.index], value: vals?.[idx] };
-    });
+    const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.methodName);
+    const combined = parameters.map((cfg) =>
+      ({ schema: cfg, param: endpoint.parameters[cfg.index], value: vals?.[cfg.index] }));
 
     try {
       const extracted = combined.map(({ param, schema, value }) =>
@@ -177,8 +153,8 @@ export class EndpointUtil {
           value :
           this.extractParameter(request, param, schema)
       );
-      const params = BindUtil.coerceMethodParams(cls, endpoint.name, extracted);
-      await SchemaValidator.validateMethod(cls, endpoint.name, params, endpoint.parameters.map(x => x.prefix));
+      const params = BindUtil.coerceMethodParams(cls, endpoint.methodName, extracted);
+      await SchemaValidator.validateMethod(cls, endpoint.methodName, params, endpoint.parameters.map(x => x.prefix));
       return params;
     } catch (err) {
       if (err instanceof ValidationResultError) {

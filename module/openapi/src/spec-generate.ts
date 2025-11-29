@@ -4,7 +4,7 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParameterConfig, ControllerVisitor, HTTP_METHODS, EndpointUtil } from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType, SchemaParameterConfig } from '@travetto/schema';
 
@@ -265,7 +265,6 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     undefined
   ) {
     const complex = input.type && SchemaRegistryIndex.has(input.type);
-    param.location ??= EndpointUtil.computeParameterLocation(ep, input);
 
     if (param.location) {
       if (param.location === 'body') {
@@ -298,14 +297,14 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const tagName = ctrl.externalName;
 
-    const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+    const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
 
     const op: OperationObject = {
       tags: [tagName],
       responses: {},
       summary: schema.description,
       description: schema.description,
-      operationId: `${ep.class.name}_${ep.name.toString()}`,
+      operationId: `${ep.class.name}_${ep.methodName.toString()}`,
       parameters: []
     };
 
@@ -314,7 +313,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 
-    const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+    const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
 
     for (const param of methodSchema.parameters) {
       const result = this.#processEndpointParam(ep, ep.parameters[param.index] ?? {}, param);

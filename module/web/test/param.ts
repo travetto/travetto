@@ -179,7 +179,7 @@ export class EndpointParameterTest {
   @Test()
   async testAliasing() {
     const ep = EndpointParameterTest.getEndpoint('/alias', 'POST');
-    const { parameters: params } = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+    const { parameters: params } = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
     assert(params[0].description === 'User name');
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, {
       context: {
@@ -195,12 +195,12 @@ export class EndpointParameterTest {
     }), ['blue']);
 
     const ep2 = EndpointParameterTest.getEndpoint('/alias2', 'POST');
-    const { parameters: params2 } = SchemaRegistryIndex.getMethodConfig(ep2.class, ep2.name);
+    const { parameters: params2 } = SchemaRegistryIndex.getMethodConfig(ep2.class, ep2.methodName);
     assert(params2[0].description === 'User\'s name');
     assert(params2[0].name === 'nm');
 
     const ep3 = EndpointParameterTest.getEndpoint('/alias3', 'POST');
-    const { parameters: params3 } = SchemaRegistryIndex.getMethodConfig(ep3.class, ep3.name);
+    const { parameters: params3 } = SchemaRegistryIndex.getMethodConfig(ep3.class, ep3.methodName);
     assert(params3[0].description === 'User\'s name');
     assert(params3[0].name === 'nm');
   }
