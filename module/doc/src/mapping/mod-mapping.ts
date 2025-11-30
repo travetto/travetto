@@ -203,7 +203,7 @@ export const MOD_MAPPING = {
     name: '@travetto/web-connect', folder: '@travetto/web-connect', displayName: 'Web Connect Support',
     description: 'Web integration for Connect-Like Resources'
   },
-  WebHttpServer: {
+  WebHttp: {
     name: '@travetto/web-http', folder: '@travetto/web-http', displayName: 'Web HTTP Server Support',
     description: 'Web HTTP Server Support'
   },
