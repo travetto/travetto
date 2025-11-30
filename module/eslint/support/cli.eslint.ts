@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 
 import { Env, ExecUtil, Runtime } from '@travetto/runtime';
-import { CliCommandShape, CliCommand, CliModuleUtil, CliScmUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 
 /**
  * Command line support for eslint
@@ -26,21 +26,7 @@ export class ESLintCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
-    let files: string[];
-    try {
-      if (this.since) {
-        files = (await CliScmUtil.findChangedFiles(this.since, 'HEAD'))
-          .filter(x => !x.endsWith('package.json') && !x.endsWith('package-lock.json'));
-      } else {
-        const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'workspace', undefined, 'HEAD');
-        files = mods.map(x => x.sourcePath);
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      }
-      files = [];
-    }
+    const paths = await CliModuleUtil.findChangedPaths({ changed: this.changed, since: this.since, logError: true });
 
     const result = await ExecUtil.getResult(spawn('npx', [
       'eslint',
@@ -48,7 +34,7 @@ export class ESLintCommand implements CliCommandShape {
       '--cache-location', Runtime.toolPath('.eslintcache'),
       ...(this.format ? ['--format', this.format] : []),
       ...(this.fix ? ['--fix'] : []),
-      ...files
+      ...paths
     ], {
       cwd: Runtime.workspace.path,
       stdio: 'inherit',

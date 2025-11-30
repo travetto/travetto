@@ -98,4 +98,24 @@ export class CliModuleUtil {
     const graph = this.getDependencyGraph(mods);
     return graph[modName].includes(depModName);
   }
+
+  /**
+   * Find changed paths, either files between two git commits, or all folders for changed modules
+   */
+  static async findChangedPaths(config: { since?: string, changed?: boolean, logError?: boolean } = {}): Promise<string[]> {
+    if (config.since) {
+      try {
+        const files = await CliScmUtil.findChangedFiles(config.since, 'HEAD');
+        return files.filter(x => !x.endsWith('package.json') && !x.endsWith('package-lock.json'));
+      } catch (err) {
+        if (config.logError && err instanceof Error) {
+          console.error(err.message);
+        }
+        return [];
+      }
+    } else {
+      const mods = await this.findModules(config.changed ? 'changed' : 'workspace', undefined, 'HEAD');
+      return mods.map(x => x.sourcePath);
+    }
+  }
 }
