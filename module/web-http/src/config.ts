@@ -51,11 +51,11 @@ export class WebHttpConfig {
     this.bindAddress ||= await NetUtil.getLocalAddress();
 
     if (!this.tls) {
-      // Clear out keys if ssl is not set
+      // Clear out keys if tls is not set
       this.tlsKeys = undefined;
     } else if (!this.tlsKeys) {
       if (Runtime.production) {
-        throw new AppError('Default ssl keys are only valid for development use, please specify a config value at web.ssl.keys');
+        throw new AppError('Default tls keys are only valid for development use, please specify a config value at web.tls.keys');
       }
       this.tlsKeys = await WebTlsUtil.generateKeyPair();
     } else {

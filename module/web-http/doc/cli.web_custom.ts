@@ -17,8 +17,8 @@ export class SampleApp {
   async main() {
     console.log('CUSTOM STARTUP');
     await Registry.init();
-    const ssl = await DependencyRegistryIndex.getInstance(WebHttpConfig);
-    ssl.tls = true;
+    const config = await DependencyRegistryIndex.getInstance(WebHttpConfig);
+    config.tls = true;
 
     // Configure server before running
     const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());

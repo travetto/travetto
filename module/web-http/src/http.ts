@@ -19,7 +19,7 @@ type WebHttpServerConfig = {
   httpVersion?: '1.1' | '2';
   port: number;
   bindAddress: string;
-  sslKeys?: WebSecureKeyPair;
+  tlsKeys?: WebSecureKeyPair;
   dispatcher: WebDispatcher;
   signal?: AbortSignal;
 };
@@ -48,14 +48,14 @@ export class WebHttpUtil {
 
     let target: HttpServer;
     if (config.httpVersion === '2') {
-      if (config.sslKeys) {
-        target = http2.createSecureServer(config.sslKeys, handler);
+      if (config.tlsKeys) {
+        target = http2.createSecureServer(config.tlsKeys, handler);
       } else {
         target = http2.createServer(handler);
       }
     } else {
-      if (config.sslKeys) {
-        target = https.createServer(config.sslKeys, handler);
+      if (config.tlsKeys) {
+        target = https.createServer(config.tlsKeys, handler);
       } else {
         target = http.createServer(handler);
       }

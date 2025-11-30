@@ -5,4 +5,4 @@ model.elasticsearch:
 
 web.session.secret: 'bob'
 
-web.ssl.active: false
+web.tls.active: false
