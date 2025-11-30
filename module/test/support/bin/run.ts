@@ -1,7 +1,7 @@
 import { getClass, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { TestConsumerRegistry } from '../../src/consumer/registry.ts';
+import { TestConsumerRegistryIndex } from '../../src/consumer/registry-index.ts';
 import type { RunState } from '../../src/execute/types.ts';
 
 /**
@@ -24,14 +24,11 @@ export async function runTests(opts: RunState): Promise<void> {
 }
 
 export async function selectConsumer(instance: { format?: string }) {
-  await TestConsumerRegistry.manualInit();
-
-  let types = TestConsumerRegistry.getTypes();
-
   if (instance.format?.includes('/')) {
     await Runtime.importFrom(instance.format);
-    types = TestConsumerRegistry.getTypes();
   }
+
+  const types = await TestConsumerRegistryIndex.getTypes();
 
   SchemaRegistryIndex.getForRegister(getClass(instance), true).registerField('format', {
     enum: {

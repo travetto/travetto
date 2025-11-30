@@ -4,7 +4,7 @@ import { Util } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import { TestConsumer } from '../decorator.ts';
 
 /**
  * Streams all test events a JSON payload, in an nd-json format

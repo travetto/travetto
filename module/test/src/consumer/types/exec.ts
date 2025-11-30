@@ -3,7 +3,7 @@ import { Util } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import { TestConsumer } from '../decorator.ts';
 
 /**
  * Triggers each event as an IPC command to a parent process

@@ -6,7 +6,7 @@ import { RuntimeIndex } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import { TestConsumer } from '../decorator.ts';
 
 /**
  * Xunit consumer, compatible with JUnit formatters

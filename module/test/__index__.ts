@@ -8,5 +8,6 @@ export * from './src/registry/registry-index.ts';
 export * from './src/registry/registry-adapter.ts';
 export * from './src/fixture.ts';
 export * from './src/consumer/types.ts';
+export * from './src/consumer/registry-index.ts';
 export * from './src/execute/error.ts';
 export { TestWatchEvent } from './src/worker/types.ts';

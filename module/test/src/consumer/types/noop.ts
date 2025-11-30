@@ -1,5 +1,5 @@
 import type { TestConsumerShape } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import { TestConsumer } from '../decorator.ts';
 
 /**
  * Does nothing consumer

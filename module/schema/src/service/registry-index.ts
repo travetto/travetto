@@ -133,10 +133,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
     }
   }
 
-  finalize(cls: Class): void {
-    this.store.finalize(cls);
-  }
-
   getClassConfig(cls: Class): SchemaClassConfig {
     return this.store.get(cls).get();
   }
