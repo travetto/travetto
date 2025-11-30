@@ -39,9 +39,17 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Node Web Http Server'>
-    <c.Code title="Implementation" src={NodeWebHttpServer}></c.Code>
+    <c.Code title="Implementation" src={NodeWebHttpServer} />
 
-    In the handler code, you can see that the main work is:
+    Current the {NodeWebHttpServer} is the only provided {WebServerContract} implementation.  It supports http/1.1, http/2, and tls, and is the same foundation as used by express, koa, and other popular frameworks.
+  </c.Section>
+
+  <c.Section title='Standard Utilities'>
+    The module also provides standard utilities for starting http servers programmatically:
+
+    <c.Code title='Web Http Utilities' src='src/http.ts' outline />
+
+    Specifically, looking at {d.method('buildHandler')}, we can see the structure for integrating the server behavior with the {d.mod('Web')} module dispatcher:
     <ul>
       <li>Converting the node primitive request to a  {WebRequest}</li>
       <li>Dispatching the request through the framework</li>

@@ -301,7 +301,60 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-In the handler code, you can see that the main work is:
+Current the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/node.ts#L13">NodeWebHttpServer</a> is the only provided <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19">WebHttpServer</a> implementation.  It supports http/1.1, http/2, and tls, and is the same foundation as used by express, koa, and other popular frameworks.
+
+<h2 id="standard-utilities">Standard Utilities</h2>
+
+The module also provides standard utilities for starting http servers programmatically:
+
+  <figure class="code">
+    <figcaption class="code">Web Http Utilities
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/http.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> net <span class="token keyword">from</span> <span class="token string">'node:net'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> http <span class="token keyword">from</span> <span class="token string">'node:http'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> http2 <span class="token keyword">from</span> <span class="token string">'node:http2'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> https <span class="token keyword">from</span> <span class="token string">'node:https'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> pipeline <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:stream/promises'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TLSSocket <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:tls'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebBodyUtil<span class="token punctuation">,</span> WebCommonUtil<span class="token punctuation">,</span> WebDispatcher<span class="token punctuation">,</span> WebRequest<span class="token punctuation">,</span> WebResponse <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BinaryUtil<span class="token punctuation">,</span> castTo<span class="token punctuation">,</span> ShutdownManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebSecureKeyPair<span class="token punctuation">,</span> WebServerHandle <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types.ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">HttpServer</span> <span class="token operator">=</span> http<span class="token punctuation">.</span>Server <span class="token operator">|</span> http2<span class="token punctuation">.</span>Http2Server<span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">HttpResponse</span> <span class="token operator">=</span> http<span class="token punctuation">.</span>ServerResponse <span class="token operator">|</span> http2<span class="token punctuation">.</span>Http2ServerResponse<span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">HttpRequest</span> <span class="token operator">=</span> http<span class="token punctuation">.</span>IncomingMessage <span class="token operator">|</span> http2<span class="token punctuation">.</span>Http2ServerRequest<span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">HttpSocket</span> <span class="token operator">=</span> net<span class="token punctuation">.</span>Socket <span class="token operator">|</span> http2<span class="token punctuation">.</span>Http2Stream<span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">WebHttpServerConfig</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  httpVersion<span class="token operator">?</span><span class="token operator">:</span> <span class="token string">'1.1'</span> <span class="token operator">|</span> <span class="token string">'2'</span><span class="token punctuation">;</span>
+  port<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  bindAddress<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  sslKeys<span class="token operator">?</span><span class="token operator">:</span> WebSecureKeyPair<span class="token punctuation">;</span>
+  dispatcher<span class="token operator">:</span> WebDispatcher<span class="token punctuation">;</span>
+  signal<span class="token operator">?</span><span class="token operator">:</span> AbortSignal<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebHttpUtil</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Build a simple request handler
+   * @param dispatcher
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">buildHandler</span><span class="token punctuation">(</span>dispatcher<span class="token operator">:</span> WebDispatcher<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token punctuation">(</span>req<span class="token operator">:</span> HttpRequest<span class="token punctuation">,</span> res<span class="token operator">:</span> HttpResponse<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Start an http server
+   */</span>
+  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">startHttpServer</span><span class="token punctuation">(</span>config<span class="token operator">:</span> WebHttpServerConfig<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>WebServerHandle<span class="token operator">&lt;</span>HttpServer<span class="token operator">>></span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Create a WebRequest given an incoming http request
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">toWebRequest</span><span class="token punctuation">(</span>req<span class="token operator">:</span> HttpRequest<span class="token punctuation">)</span><span class="token operator">:</span> WebRequest<span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Send WebResponse to outbound http response
+   */</span>
+  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">respondToServerResponse</span><span class="token punctuation">(</span>webRes<span class="token operator">:</span> WebResponse<span class="token punctuation">,</span> res<span class="token operator">:</span> HttpResponse<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+Specifically, looking at <code class="item method">buildHandler</code>, we can see the structure for integrating the server behavior with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative support for creating Web Applications">Web API</a> module dispatcher:
 <ul> <li>Converting the node primitive request to a  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a></li>
 <li>Dispatching the request through the framework</li>
 <li>Receiving the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3">WebResponse</a> and sending that back over the primitive response.</li>

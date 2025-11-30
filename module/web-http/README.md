@@ -285,7 +285,56 @@ export class NodeWebHttpServer implements WebHttpServer {
 }
 ```
 
-In the handler code, you can see that the main work is:
+Current the [NodeWebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/node.ts#L13) is the only provided [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) implementation.  It supports http/1.1, http/2, and tls, and is the same foundation as used by express, koa, and other popular frameworks.
+
+## Standard Utilities
+The module also provides standard utilities for starting http servers programmatically:
+
+**Code: Web Http Utilities**
+```typescript
+import net from 'node:net';
+import http from 'node:http';
+import http2 from 'node:http2';
+import https from 'node:https';
+import { pipeline } from 'node:stream/promises';
+import { TLSSocket } from 'node:tls';
+import { WebBodyUtil, WebCommonUtil, WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
+import { BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
+import { WebSecureKeyPair, WebServerHandle } from './types.ts';
+type HttpServer = http.Server | http2.Http2Server;
+type HttpResponse = http.ServerResponse | http2.Http2ServerResponse;
+type HttpRequest = http.IncomingMessage | http2.Http2ServerRequest;
+type HttpSocket = net.Socket | http2.Http2Stream;
+type WebHttpServerConfig = {
+  httpVersion?: '1.1' | '2';
+  port: number;
+  bindAddress: string;
+  sslKeys?: WebSecureKeyPair;
+  dispatcher: WebDispatcher;
+  signal?: AbortSignal;
+};
+export class WebHttpUtil {
+  /**
+   * Build a simple request handler
+   * @param dispatcher
+   */
+  static buildHandler(dispatcher: WebDispatcher): (req: HttpRequest, res: HttpResponse) => Promise<void>;
+  /**
+   * Start an http server
+   */
+  static async startHttpServer(config: WebHttpServerConfig): Promise<WebServerHandle<HttpServer>>;
+  /**
+   * Create a WebRequest given an incoming http request
+   */
+  static toWebRequest(req: HttpRequest): WebRequest;
+  /**
+   * Send WebResponse to outbound http response
+   */
+  static async respondToServerResponse(webRes: WebResponse, res: HttpResponse): Promise<void>;
+}
+```
+
+Specifically, looking at `buildHandler`, we can see the structure for integrating the server behavior with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module dispatcher:
    *  Converting the node primitive request to a  [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)
    *  Dispatching the request through the framework
    *  Receiving the [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) and sending that back over the primitive response.
