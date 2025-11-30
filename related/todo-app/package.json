@@ -21,21 +21,21 @@
     "start": "npx trv web:http"
   },
   "dependencies": {
-    "@travetto/auth-web": "^6.0.3",
-    "@travetto/auth-web-session": "^6.0.3",
-    "@travetto/cli": "^6.0.1",
-    "@travetto/email-inky": "^6.0.1",
-    "@travetto/log": "^6.0.1",
-    "@travetto/model-mongo": "^6.0.1",
-    "@travetto/openapi": "^6.0.3",
-    "@travetto/web-http": "^6.0.3",
-    "@travetto/web-rpc": "^6.0.3",
+    "@travetto/auth-web": "^7.0.0-rc.0",
+    "@travetto/auth-web-session": "^7.0.0-rc.0",
+    "@travetto/cli": "^7.0.0-rc.0",
+    "@travetto/email-inky": "^7.0.0-rc.0",
+    "@travetto/log": "^7.0.0-rc.0",
+    "@travetto/model-mongo": "^7.0.0-rc.0",
+    "@travetto/openapi": "^7.0.0-rc.0",
+    "@travetto/web-http": "^7.0.0-rc.0",
+    "@travetto/web-rpc": "^7.0.0-rc.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@travetto/compiler": "^6.0.3",
-    "@travetto/email-compiler": "^6.0.1",
-    "@travetto/pack": "^6.0.1"
+    "@travetto/compiler": "^7.0.0-rc.0",
+    "@travetto/email-compiler": "^7.0.0-rc.0",
+    "@travetto/pack": "^7.0.0-rc.0"
   },
   "travetto": {
     "displayName": "Todo Application"

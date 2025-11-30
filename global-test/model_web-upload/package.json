@@ -2,10 +2,10 @@
   "name": "@travetto-test/model_web-upload",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/model": "^6.0.1",
-    "@travetto/web-aws-lambda": "^6.0.3",
-    "@travetto/web-http": "^6.0.3",
-    "@travetto/web-upload": "^6.0.3"
+    "@travetto/model": "^7.0.0-rc.0",
+    "@travetto/web-aws-lambda": "^7.0.0-rc.0",
+    "@travetto/web-http": "^7.0.0-rc.0",
+    "@travetto/web-upload": "^7.0.0-rc.0"
   },
   "travetto": {},
   "private": true
