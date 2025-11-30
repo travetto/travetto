@@ -108,7 +108,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
         allowsBody: false,
         class: this.#cls,
         filters: [],
-        endpoint: this.#cls.prototype[method],
+        endpointFunction: this.#cls.prototype[method],
         methodName: method.toString(),
         id: `${this.#cls.name}#${method.toString()}`,
         parameters: [],

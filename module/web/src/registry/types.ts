@@ -121,7 +121,7 @@ export interface EndpointConfig extends CoreConfig {
   /**
    * The function the endpoint will call
    */
-  endpoint: EndpointFunction;
+  endpointFunction: EndpointFunction;
   /**
    * The compiled and finalized handler
    */

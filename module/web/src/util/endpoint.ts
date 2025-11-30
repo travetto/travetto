@@ -177,7 +177,7 @@ export class EndpointUtil {
   static async invokeEndpoint(endpoint: EndpointConfig, { request }: WebChainedContext): Promise<WebResponse> {
     try {
       const params = await this.extractParameters(endpoint, request);
-      const body = await endpoint.endpoint.apply(endpoint.instance, params);
+      const body = await endpoint.endpointFunction.apply(endpoint.instance, params);
       const headers = endpoint.finalizedResponseHeaders;
       let response: WebResponse;
       if (body instanceof WebResponse) {

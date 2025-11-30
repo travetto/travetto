@@ -21,15 +21,15 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
       config = cfg;
     }
   }
-  const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, _descriptor: MethodDescriptor<R>): void {
+  const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
-    const handler = _descriptor.value!.bind(castTo(target));
+    const handler = descriptor.value!.bind(castTo(target));
     // Allows for DI to run, as the service will not be bound until after the decorator is run
-    _descriptor.value = castTo(function (this: typeof target) {
+    descriptor.value = castTo(function (this: typeof target) {
       return this[field].cache(this, propertyKey, handler, [...arguments]);
     });
-    Object.defineProperty(_descriptor.value, 'name', { value: propertyKey, writable: false });
+    Object.defineProperty(descriptor.value, 'name', { value: propertyKey, writable: false });
   };
   return castTo(dec);
 }
@@ -42,14 +42,14 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
  * @kind decorator
  */
 export function EvictCache<F extends string, U extends Record<F, CacheService>>(field: F, config: CoreCacheConfig = {}) {
-  return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, _descriptor: MethodDescriptor<R>): void {
+  return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[EvictConfigSymbol] ??= {})[propertyKey] = config;
-    const handler = _descriptor.value!.bind(castTo(target));
+    const handler = descriptor.value!.bind(castTo(target));
     // Allows for DI to run, as the service will not be bound until after the decorator is run
-    _descriptor.value = castTo(function (this: typeof target) {
+    descriptor.value = castTo(function (this: typeof target) {
       return this[field].evict(this, propertyKey, handler, [...arguments]);
     });
-    Object.defineProperty(_descriptor.value, 'name', { value: propertyKey, writable: false });
+    Object.defineProperty(descriptor.value, 'name', { value: propertyKey, writable: false });
   };
 }
