@@ -6,10 +6,10 @@ import { Runtime } from '@travetto/runtime';
 import { buildEslintConfig } from './bin/eslint-config-file.ts';
 
 /**
- * Writes the lint configuration file
+ * Writes the eslint configuration file
  */
 @CliCommand({})
-export class LintConfigureCommand implements CliCommandShape {
+export class ESLintConfigureCommand implements CliCommandShape {
 
   async main(): Promise<void> {
     const content = await buildEslintConfig();

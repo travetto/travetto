@@ -207,7 +207,7 @@ export class Context {
     await this.#exec('npx', ['trvc', 'build']);
     if (this.#devDependencies.includes('@travetto/eslint')) {
       yield cliTpl`${{ type: 'ESLint Registration' }} `;
-      await this.#exec('npx', ['trv', 'lint:register']);
+      await this.#exec('npx', ['trv', 'eslint:register']);
     }
 
     yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDir }} `;

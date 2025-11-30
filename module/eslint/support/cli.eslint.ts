@@ -4,10 +4,10 @@ import { Env, ExecUtil, Runtime } from '@travetto/runtime';
 import { CliCommandShape, CliCommand, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 
 /**
- * Command line support for linting
+ * Command line support for eslint
  */
 @CliCommand()
-export class LintCommand implements CliCommandShape {
+export class ESLintCommand implements CliCommandShape {
 
   /** Only check changed modules */
   changed = false;

@@ -28,8 +28,8 @@ Commands:
   email:compile     CLI Entry point for running the email server
   email:editor      The email editor compilation service and output serving
   email:test        CLI Entry point for running the email server
-  lint              Command line support for linting
-  lint:register     Writes the lint configuration file
+  eslint            Command line support for eslint
+  eslint:register   Writes the eslint configuration file
   model:export      Exports model schemas
   model:install     Installing models
   openapi:client    CLI for generating the cli client

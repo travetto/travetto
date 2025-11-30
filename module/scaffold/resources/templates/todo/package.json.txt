@@ -28,7 +28,7 @@
     "build": "npx trvc build",    
     {{#module_web}}"start": "npx trv web:http",{{/module_web}}
     {{#module_test}}"test": "npx trv test",{{/module_test}}
-    {{#module_lint}}"lint": "npx trv lint",{{/module_lint}}
+    {{#module_eslint}}"lint": "npx trv eslint",{{/module_eslint}}
     "watch": "npx trvc watch"
   },
   "files": [

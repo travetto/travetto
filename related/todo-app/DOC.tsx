@@ -75,7 +75,7 @@ $ npm init -f
 $ npm i @travetto/{log,web-http,model-mongo,cli}
 $ npm i -D @travetto/{eslint,compiler,test}
 
-$ npx trv lint:register
+$ npx trv eslint:register
 `} />
     </c.Section>
     <c.Section title='Establishing The Model'>

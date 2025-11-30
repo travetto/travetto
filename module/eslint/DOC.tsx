@@ -12,7 +12,7 @@ export const text = <>
   <c.Section title='CLI - Register'>
     In a new project, the first thing that will need to be done, post installation, is to create the eslint configuration file.
 
-    <c.Execution title='Registering the Configuration' cmd='trv' args={['lint:register']} />
+    <c.Execution title='Registering the Configuration' cmd='trv' args={['eslint:register']} />
 
     This is the file the linter will use, and any other tooling (e.g. IDEs).
 
@@ -25,7 +25,7 @@ export const text = <>
 
     Once installed, using the linter is as simple as invoking it via the cli:
 
-    <c.Terminal title='Running the Linter' src='npx trv lint' />
+    <c.Terminal title='Running the Linter' src='npx trv eslint' />
 
     Or pointing your IDE to reference the registered configuration file.
   </c.Section>
