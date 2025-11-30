@@ -1,7 +1,7 @@
 import type { Writable } from 'node:stream';
 
 import type { SuitesSummary } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import { TestConsumer } from '../decorator.ts';
 
 /**
  * Returns the entire result set as a single JSON document

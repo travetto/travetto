@@ -3,7 +3,7 @@ import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
-import { TestConsumerRegistry } from '../consumer/registry.ts';
+import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { TestRun } from '../model/test.ts';
 import { RunnerUtil } from './util.ts';
@@ -34,7 +34,7 @@ export class TestWatcher {
 
     const itr = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(
-      await TestConsumerRegistry.getInstance({ consumer: format })
+      await TestConsumerRegistryIndex.getInstance({ consumer: format })
     )
       .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
 

@@ -159,10 +159,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
     }
   }
 
-  finalize(cls: Class): void {
-    this.store.finalize(cls);
-  }
-
   /**
    * Get all available candidates for a given type
    */

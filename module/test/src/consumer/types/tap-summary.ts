@@ -5,7 +5,7 @@ import type { TestEvent } from '../../model/event.ts';
 import type { TestResult } from '../../model/test.ts';
 
 import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import { TestConsumer } from '../decorator.ts';
 
 import { TapEmitter } from './tap.ts';
 import { CONSOLE_ENHANCER, TestResultsEnhancer } from '../enhancer.ts';

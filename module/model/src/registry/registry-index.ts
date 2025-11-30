@@ -97,10 +97,6 @@ export class ModelRegistryIndex implements RegistryIndex {
     }
   }
 
-  finalize(cls: Class): void {
-    this.store.finalize(cls);
-  }
-
   getConfig(cls: Class): ModelConfig<ModelType> {
     return this.store.get(cls).get();
   }

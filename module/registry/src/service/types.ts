@@ -34,5 +34,5 @@ export interface RegistrySimpleStore {
 export interface RegistryIndex {
   store: RegistrySimpleStore;
   process(events: ChangeEvent<Class>[]): void;
-  finalize(cls: Class): void;
+  finalize?(cls: Class): void;
 }

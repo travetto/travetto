@@ -107,8 +107,4 @@ export class ControllerRegistryIndex implements RegistryIndex {
       }
     }
   }
-
-  finalize(cls: Class): void {
-    this.store.finalize(cls);
-  }
 }

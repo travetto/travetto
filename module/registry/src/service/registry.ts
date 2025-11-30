@@ -35,7 +35,11 @@ class $Registry {
       const inst = this.instance(idx);
       for (const cls of classes) {
         if (inst.store.has(cls) && !inst.store.finalized(cls)) {
-          inst.finalize(cls);
+          if (inst.finalize) {
+            inst.finalize(cls);
+          } else {
+            inst.store.finalize(cls);
+          }
         }
       }
     }

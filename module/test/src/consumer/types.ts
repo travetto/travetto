@@ -1,3 +1,5 @@
+import { Class } from '@travetto/runtime';
+
 import { TestEvent } from '../model/event.ts';
 import { Counts, SuiteResult } from '../model/suite.ts';
 
@@ -22,6 +24,17 @@ export interface SuitesSummary extends Counts {
 export type TestRunState = {
   testCount?: number;
 };
+
+/**
+ * Configuration for a test consumer
+ */
+export interface TestConsumerConfig {
+  cls: Class<TestConsumerShape>;
+  /**
+   * Consumer type key
+   */
+  type: string;
+}
 
 /**
  * A test consumer shape

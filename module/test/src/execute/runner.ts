@@ -10,7 +10,7 @@ import { TestRun } from '../model/test.ts';
 import { TestExecutor } from './executor.ts';
 import { RunnerUtil } from './util.ts';
 import { RunState } from './types.ts';
-import { TestConsumerRegistry } from '../consumer/registry.ts';
+import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 
 /**
  * Test Runner
@@ -27,7 +27,7 @@ export class Runner {
    * Run all files
    */
   async runFiles(globs?: string[]): Promise<boolean> {
-    const target = await TestConsumerRegistry.getInstance(this.#state);
+    const target = await TestConsumerRegistryIndex.getInstance(this.#state);
     const consumer = new RunnableTestConsumer(target);
     const tests = await RunnerUtil.getTestDigest(globs, this.#state.tags);
     const testRuns = RunnerUtil.getTestRuns(tests)
@@ -60,7 +60,7 @@ export class Runner {
       RuntimeIndex.reinitForModule(entry.module);
     }
 
-    const target = await TestConsumerRegistry.getInstance(this.#state);
+    const target = await TestConsumerRegistryIndex.getInstance(this.#state);
 
     const consumer = new RunnableTestConsumer(target)
       .withTransformer(e => {
