@@ -4,7 +4,7 @@ import { AppError, Runtime, RuntimeResources } from '@travetto/runtime';
 import { NetUtil } from '@travetto/web';
 
 import { WebSecureKeyPair } from './types.ts';
-import { WebSslUtil } from './tls.ts';
+import { WebTlsUtil } from './tls.ts';
 
 /**
  * Web HTTP configuration
@@ -57,7 +57,7 @@ export class WebHttpConfig {
       if (Runtime.production) {
         throw new AppError('Default ssl keys are only valid for development use, please specify a config value at web.ssl.keys');
       }
-      this.tlsKeys = await WebSslUtil.generateKeyPair();
+      this.tlsKeys = await WebTlsUtil.generateKeyPair();
     } else {
       if (this.tlsKeys.key.length < 100) { // We have files or resources
         this.tlsKeys.key = (await RuntimeResources.read(this.tlsKeys.key, true)).toString('utf8');

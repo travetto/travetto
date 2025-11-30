@@ -53,8 +53,7 @@ Commands:
   <span class="token builtin class-name">test</span>              Launch <span class="token builtin class-name">test</span> framework and execute tests
   test:watch        Invoke the <span class="token builtin class-name">test</span> watcher
   web:http          Run a web server
-  web:rpc-client    Generate the web-rpc client
-  web:server        Run a web server</code></pre>
+  web:rpc-client    Generate the web-rpc client</code></pre>
   </figure>
 
 This listing is from the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> monorepo, and represents the majority of tools that can be invoked from the command line. <br><br>
@@ -540,7 +539,7 @@ If the goal is to run a more complex application, which may include depending on
 
   <figure class="code">
     <figcaption class="code">Simple Run Target
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http-server/support/cli.web_http.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http/support/cli.web_http.ts">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Runtime<span class="token punctuation">,</span> toConcrete<span class="token punctuation">,</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
@@ -579,7 +578,7 @@ If the goal is to run a more complex application, which may include depending on
       <span class="token keyword">this</span><span class="token punctuation">.</span>killConflict <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production <span class="token operator">?</span> <span class="token number">5</span> <span class="token operator">:</span> <span class="token number">1</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token keyword">await</span> handle<span class="token punctuation">.</span>complete<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> handle<span class="token punctuation">.</span>complete<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

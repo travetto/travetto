@@ -31,7 +31,7 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,web-node,model-mongo,cli}
+$ npm i @travetto/{log,web-http,model-mongo,cli}
 $ npm i -D @travetto/{eslint,compiler,test}
 
 $ npx trv lint:register
@@ -305,7 +305,7 @@ npx trv web:http
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/web-node:src/server.ts:23] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/web-http:src/node.ts:26] Initialized {
   manifest: {
     main: {
       name: '@travetto/todo-app',
@@ -450,7 +450,7 @@ npx trv web:http
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/server.ts:24] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-http:src/node.ts:27] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

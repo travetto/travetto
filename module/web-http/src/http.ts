@@ -136,6 +136,7 @@ export class WebHttpUtil {
       await pipeline(body, res);
     } else {
       if (body) {
+        // Weird type union that http2 uses
         'stream' in res ? res.write(body) : res.write(body);
       }
       res.end();

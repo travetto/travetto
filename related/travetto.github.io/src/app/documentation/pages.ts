@@ -110,10 +110,6 @@ export const PAGES = [
     loadComponent: (): Promise<Type<unknown>> => import('./gen/web/web.component').then(m => m.WebComponent),
     subs: [
       {
-        path: 'web-node', title: 'Node',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-node/web-node.component').then(m => m.WebNodeComponent)
-      },
-      {
         path: 'web-aws-lambda', title: 'AWS Lambda',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/web-aws-lambda/web-aws-lambda.component').then(m => m.WebAwsLambdaComponent)
       },
@@ -126,8 +122,8 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/web-rpc/web-rpc.component').then(m => m.WebRpcComponent)
       },
       {
-        path: 'web-http-server', title: 'Server',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-http-server/web-http-server.component').then(m => m.WebHttpServerComponent)
+        path: 'web-http', title: 'Server',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-http/web-http.component').then(m => m.WebHttpComponent)
       },
       {
         path: 'openapi', title: 'OpenAPI',

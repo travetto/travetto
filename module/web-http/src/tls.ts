@@ -6,10 +6,10 @@ import { WebSecureKeyPair } from './types.ts';
 /**
  * Utils for generating key pairs
  */
-export class WebSslUtil {
+export class WebTlsUtil {
 
   /**
-   * Generate SSL key pair on demand
+   * Generate TLS key pair on demand
    * @param subj The subject for the app
    */
   static async generateKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'WEB', CN: 'DEV' }): Promise<WebSecureKeyPair> {
@@ -19,7 +19,7 @@ export class WebSslUtil {
       forge = (await import('node-forge')).default;
     } catch {
       const install = PackageUtil.getInstallCommand(Runtime, 'node-forge');
-      throw new Error(`In order to generate SSL keys, you must install node-forge, "${install}"`);
+      throw new Error(`In order to generate TLS keys, you must install node-forge, "${install}"`);
     }
 
     const pki = forge.pki;
