@@ -4,7 +4,7 @@ import { Inject } from '@travetto/di';
 import { TodoService } from './service.ts';
 import { Todo, TodoSearch } from './model.ts';
 
-type TodoRequest = Omit<Todo, 'id' | 'created'>;
+type TodoRequest = Omit<Todo, 'id'>;
 
 @Controller('/todo')
 export class TodoController {

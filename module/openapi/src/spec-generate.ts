@@ -234,12 +234,13 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    */
   #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
     if (!body || body.type === undefined) {
-      return { content: {} };
+      return { content: {}, description: '' };
     } else if (body.type === Readable || body.type === Buffer) {
       return {
         content: {
-          [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } }
+          [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } },
         },
+        description: 'Raw binary data'
       };
     } else {
       const schemaConfig = SchemaRegistryIndex.getOptionalConfig(body.type);
@@ -251,7 +252,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
             schema: !body!.array ? typeRef : { type: 'array', items: typeRef }
           }
         },
-        description: this.#allSchemas[typeId!]?.description
+        description: this.#allSchemas[typeId!]?.description ?? ''
       };
     }
   }
