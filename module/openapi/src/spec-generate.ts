@@ -6,7 +6,7 @@ import type {
 
 import { EndpointConfig, ControllerConfig, EndpointParameterConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { AppError, Class, describeFunction } from '@travetto/runtime';
-import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType } from '@travetto/schema';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType, SchemaParameterConfig } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config.ts';
 
@@ -234,12 +234,13 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    */
   #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
     if (!body || body.type === undefined) {
-      return { content: {} };
+      return { content: {}, description: '' };
     } else if (body.type === Readable || body.type === Buffer) {
       return {
         content: {
-          [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } }
+          [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } },
         },
+        description: 'Raw binary data'
       };
     } else {
       const schemaConfig = SchemaRegistryIndex.getOptionalConfig(body.type);
@@ -251,7 +252,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
             schema: !body!.array ? typeRef : { type: 'array', items: typeRef }
           }
         },
-        description: this.#allSchemas[typeId!]?.description
+        description: this.#allSchemas[typeId!]?.description ?? ''
       };
     }
   }
@@ -259,12 +260,13 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: EndpointParameterConfig, input: SchemaInputConfig): (
+  #processEndpointParam(ep: EndpointConfig, param: EndpointParameterConfig, input: SchemaParameterConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined
   ) {
     const complex = input.type && SchemaRegistryIndex.has(input.type);
+
     if (param.location) {
       if (param.location === 'body') {
         const acceptsMime = ep.finalizedResponseHeaders.get('accepts');
@@ -276,7 +278,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       } else {
         const epParam: ParameterObject = {
           in: param.location,
-          name: param.name || param.location,
+          name: input.name ?? param.location,
           description: input.description,
           required: input.required?.active !== false,
           schema: input.array ? { type: 'array', items: this.#getType(input) } : this.#getType(input)
@@ -296,14 +298,14 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const tagName = ctrl.externalName;
 
-    const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+    const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
 
     const op: OperationObject = {
       tags: [tagName],
       responses: {},
       summary: schema.description,
       description: schema.description,
-      operationId: `${ep.class.name}_${ep.name.toString()}`,
+      operationId: `${ep.class.name}_${ep.methodName.toString()}`,
       parameters: []
     };
 
@@ -312,10 +314,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 
-    const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.name);
+    const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
 
     for (const param of methodSchema.parameters) {
-      const result = this.#processEndpointParam(ep, ep.parameters[param.index], param);
+      const result = this.#processEndpointParam(ep, ep.parameters[param.index] ?? {}, param);
       if (result) {
         if ('parameters' in result) {
           (op.parameters ??= []).push(...result.parameters);

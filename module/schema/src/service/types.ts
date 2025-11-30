@@ -126,6 +126,14 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
    * Interfaces that the class implements
    */
   interfaces: Class[];
+  /**
+   * Is this class derived from another via a mapped type
+   */
+  mappedOperation?: 'Omit' | 'Pick' | 'Partial' | 'Required';
+  /**
+   * Are there any restrictions in the mapped type
+   */
+  mappedFields?: string[];
 }
 
 /**

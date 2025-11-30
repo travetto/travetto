@@ -83,26 +83,55 @@ export class EndpointUtil {
 
 
   /**
-   * Extract parameter from request
+   * Extract parameter value from request
+   * @param request The request
+   * @param param The parameter config
+   * @param name The parameter name
+   * @param isArray Whether the parameter is an array
    */
-  static extractParameter(request: WebRequest, param: EndpointParameterConfig, input: SchemaParameterConfig, value?: unknown): unknown {
-    if (value !== undefined && value !== this.MissingParamSymbol) {
-      return value;
-    } else if (param.extract) {
-      return param.extract(request, param);
-    }
-
-    const name = param.name ?? input.name!;
+  static extractParameterValue(request: WebRequest, param: EndpointParameterConfig, name: string, isArray?: boolean): unknown {
     switch (param.location) {
-      case 'path': return request.context.pathParams?.[name];
-      case 'header': return input.array ? request.headers.getList(name) : request.headers.get(name);
       case 'body': return request.body;
+      case 'path': return request.context.pathParams?.[name];
+      case 'header': return isArray ? request.headers.getList(name) : request.headers.get(name);
       case 'query': {
         const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
         const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
-        return param.prefix ? q[param.prefix] : (input.type.Ⲑid ? q : q[name]);
+        return q[name];
       }
     }
+  }
+
+  /**
+   * Extract parameter from request
+   * @param request The request
+   * @param param The parameter config
+   * @param input The schema parameter config
+   */
+  static extractParameter(request: WebRequest, param: EndpointParameterConfig, input: SchemaParameterConfig): unknown {
+    if (param.extract) {
+      return param.extract(request, param);
+    } else if (param.location === 'query') {
+      // TODO: Revisit this logic?
+      const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
+      const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
+      if (param.prefix) { // Has a prefix provided
+        return q[param.prefix];
+      } else if (input.type.Ⲑid) { // Is a full type
+        return q;
+      }
+    }
+
+    let res = this.extractParameterValue(request, param, input.name!.toString(), input.array);
+    if (!res && input.aliases) {
+      for (const name of input.aliases) {
+        res = this.extractParameterValue(request, param, name, input.array);
+        if (res !== undefined) {
+          break;
+        }
+      }
+    }
+    return res;
   }
 
   /**
@@ -113,22 +142,27 @@ export class EndpointUtil {
    */
   static async extractParameters(endpoint: EndpointConfig, request: WebRequest): Promise<unknown[]> {
     const cls = endpoint.class;
-    const method = endpoint.name;
     const vals = WebCommonUtil.getRequestParams(request);
+    const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.methodName);
+    const combined = parameters.map((cfg) =>
+      ({ schema: cfg, param: endpoint.parameters[cfg.index], value: vals?.[cfg.index] }));
 
     try {
-      const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, method);
-      const extracted = endpoint.parameters.map((c, i) => this.extractParameter(request, c, parameters[i], vals?.[i]));
-      const params = BindUtil.coerceMethodParams(cls, method, extracted);
-      await SchemaValidator.validateMethod(cls, method, params, endpoint.parameters.map(x => x.prefix));
+      const extracted = combined.map(({ param, schema, value }) =>
+        (value !== undefined && value !== this.MissingParamSymbol) ?
+          value :
+          this.extractParameter(request, param, schema)
+      );
+      const params = BindUtil.coerceMethodParams(cls, endpoint.methodName, extracted);
+      await SchemaValidator.validateMethod(cls, endpoint.methodName, params, endpoint.parameters.map(x => x.prefix));
       return params;
     } catch (err) {
       if (err instanceof ValidationResultError) {
         for (const el of err.details?.errors ?? []) {
           if (el.kind === 'required') {
-            const config = endpoint.parameters.find(x => x.name === el.path);
+            const config = combined.find(x => x.schema.name === el.path);
             if (config) {
-              el.message = `Missing ${config.location.replace(/s$/, '')}: ${config.name}`;
+              el.message = `Missing ${config.param.location} value: ${config.schema.name}`;
             }
           }
         }

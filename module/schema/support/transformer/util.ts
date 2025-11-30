@@ -32,6 +32,32 @@ export class SchemaTransformUtil {
         }
         break;
       }
+      case 'mapped': {
+        const base = state.getOrImport(type);
+        const uniqueId = state.generateUniqueIdentifier(node, type, 'Δ');
+        const [id, existing] = state.registerIdentifier(uniqueId);
+        if (!existing) {
+          const cls = state.factory.createClassDeclaration(
+            [
+              state.createDecorator(this.SCHEMA_IMPORT, 'Schema', state.fromLiteral({
+                description: type.comment,
+                mappedOperation: type.operation,
+                mappedFields: type.fields,
+              })),
+            ],
+            id, [], [state.factory.createHeritageClause(
+              ts.SyntaxKind.ExtendsKeyword, [state.factory.createExpressionWithTypeArguments(base, [])]
+            )], []
+          );
+          cls.getText = (): string => `
+class ${uniqueId} extends ${type.mappedClassName} { 
+  fields: ${type.fields?.join(', ')} 
+  operation: ${type.operation}
+}`;
+          state.addStatements([cls], root || node);
+        }
+        return id;
+      }
       case 'unknown': {
         const imp = state.importFile(this.TYPES_IMPORT);
         return state.createAccess(imp.ident, 'UnknownType');
@@ -271,6 +297,7 @@ export class SchemaTransformUtil {
         break;
       }
       case 'managed': out.type = state.typeToIdentifier(type); break;
+      case 'mapped': out.type = this.toConcreteType(state, type, target); break;
       case 'shape': out.type = this.toConcreteType(state, type, target); break;
       case 'template': out.type = state.factory.createIdentifier(type.ctor.name); break;
       case 'literal': {

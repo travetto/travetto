@@ -9,11 +9,13 @@ import { DeclarationUtil } from '../util/declaration.ts';
 import { LiteralUtil } from '../util/literal.ts';
 import { transformCast, TemplateLiteralPart } from '../types/shared.ts';
 
-import { Type, AnyType, CompositionType, TransformResolver, TemplateType } from './types.ts';
+import { Type, AnyType, CompositionType, TransformResolver, TemplateType, MappedType } from './types.ts';
 import { CoerceUtil } from './coerce.ts';
 
 const UNDEFINED = Symbol();
 
+const MAPPED_TYPE_SET = new Set(['Omit', 'Pick', 'Required', 'Partial']);
+const isMappedType = (type: string | undefined): type is MappedType['operation'] => MAPPED_TYPE_SET.has(type!);
 /**
  * List of global types that can be parameterized
  */
@@ -39,7 +41,7 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
 
 type Category =
   'tuple' | 'shape' | 'literal' | 'template' | 'managed' |
-  'composition' | 'foreign' | 'concrete' | 'unknown';
+  'composition' | 'foreign' | 'concrete' | 'unknown' | 'mapped';
 
 /**
  * Type categorizer, input for builder
@@ -102,9 +104,9 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     return { category: 'tuple', type };
   } else if (type.isLiteral()) {
     return { category: 'shape', type };
-  } else if ((objectFlags & ts.ObjectFlags.Mapped)) { // Mapped types: Pick, Omit, Exclude, Retain
+  } else if (objectFlags & ts.ObjectFlags.Mapped) { // Mapped types
     if (type.getProperties().some(x => x.declarations || x.valueDeclaration)) {
-      return { category: 'shape', type };
+      return { category: 'mapped', type };
     }
   }
   return { category: 'literal', type };
@@ -247,6 +249,45 @@ export const TypeBuilder: {
         return { importName: first.importName, name: first.name, key: 'shape', fieldTypes: subTypes.reduce((acc, x) => ({ ...acc, ...x.fieldTypes }), {}) };
       }
       return type;
+    }
+  },
+  mapped: {
+    build: (resolver, type, alias) => {
+      let mainType: ts.Type | undefined;
+      let fields: string[] | undefined;
+      let operation: string | undefined;
+
+      const decls = DeclarationUtil.getDeclarations(type).filter(x => ts.isTypeAliasDeclaration(x));
+      if (decls.length > 0) {
+        const ref = decls[0].type;
+        if (ts.isTypeReferenceNode(ref) && ref.typeArguments && ref.typeArguments.length > 0) {
+          const [first, second] = ref.typeArguments;
+          mainType = resolver.getType(first);
+          operation = ref.typeName.getText();
+          if (second) {
+            const resolved = resolver.getType(second);
+            if (resolved.isStringLiteral()) {
+              fields = [resolved.value];
+            } else if (resolved.isUnion() && resolved.types.every(t => t.isStringLiteral())) {
+              fields = resolved.types.map(t => t.value);
+            }
+          }
+        }
+      } else {
+        mainType = type.aliasTypeArguments?.[0]!;
+        operation = type.aliasSymbol?.escapedName.toString();
+        fields = type.getApparentProperties().map(p => p.getName());
+      }
+
+      if (!isMappedType(operation) || fields === undefined || !mainType || !mainType.isClass()) {
+        return TypeBuilder.shape.build(resolver, type, alias);
+      }
+
+      const importName = resolver.getTypeImportName(mainType) ?? '<unknown>';
+      const mappedClassName = resolver.getTypeAsString(mainType)!;
+      const name = resolver.getTypeAsString(type)!;
+
+      return { key: 'mapped', name, original: mainType, operation, importName, mappedClassName, fields };
     }
   },
   shape: {

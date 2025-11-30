@@ -85,7 +85,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
   }
 
   getEndpoint(cls: Class, method: string | symbol): EndpointConfig {
-    return this.getController(cls).endpoints.find(e => e.name === method)!;
+    return this.getController(cls).endpoints.find(e => e.methodName === method)!;
   }
 
   getEndpointById(id: string): EndpointConfig | undefined {
@@ -96,7 +96,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
     for (const evt of events) {
       if ('curr' in evt) {
         for (const ep of this.getController(evt.curr).endpoints) {
-          this.#endpointsById.set(`${evt.curr.name}#${ep.name.toString()}`, ep);
+          this.#endpointsById.set(`${evt.curr.name}#${ep.methodName.toString()}`, ep);
         }
       } else {
         // Match by name

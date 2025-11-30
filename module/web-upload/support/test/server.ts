@@ -28,17 +28,17 @@ class TestUploadController {
   }
 
   @Post('/all-named')
-  async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
+  async uploads(@Upload() file1: Blob, @Upload() file2: Blob) {
     return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Post('/all-named-custom')
-  async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
+  async uploadVariousLimits(@Upload({ types: ['!image/png'] }) file1: Blob, @Upload() file2: Blob) {
     return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Post('/all-named-size')
-  async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
+  async uploadVariousSizeLimits(@Upload({ maxSize: 100 }) file1: File, @Upload({ maxSize: 8000 }) file2: File) {
     return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 }

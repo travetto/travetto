@@ -64,10 +64,6 @@ interface CoreConfig {
  */
 export interface EndpointParameterConfig {
   /**
-   * Name of the parameter
-   */
-  name?: string;
-  /**
    * Index of parameter
    */
   index: number;
@@ -101,7 +97,7 @@ export interface EndpointConfig extends CoreConfig {
   /**
    * Name of the endpoint (method name)
    */
-  name: string | symbol;
+  methodName: string | symbol;
   /**
    * Instance the endpoint is for
    */

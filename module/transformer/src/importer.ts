@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { ManifestModuleUtil, PackageUtil, path } from '@travetto/manifest';
 
-import { AnyType, TransformResolver, ManagedType } from './resolver/types.ts';
+import { AnyType, TransformResolver, ManagedType, MappedType } from './resolver/types.ts';
 import { ImportUtil } from './util/import.ts';
 import { CoreUtil } from './util/core.ts';
 import { Import } from './types/shared.ts';
@@ -246,12 +246,14 @@ export class ImportManager {
   /**
    * Get the identifier and import if needed
    */
-  getOrImport(factory: ts.NodeFactory, type: ManagedType): ts.Identifier | ts.PropertyAccessExpression {
+  getOrImport(factory: ts.NodeFactory, type: ManagedType | MappedType): ts.Identifier | ts.PropertyAccessExpression {
+    const targetName = type.key === 'managed' ? type.name! : type.mappedClassName!;
+    // In same file already
     if (type.importName === this.#importName) {
-      return factory.createIdentifier(type.name!);
+      return factory.createIdentifier(targetName);
     } else {
       const { ident } = this.#imports.get(type.importName) ?? this.importFile(type.importName);
-      return factory.createPropertyAccessExpression(ident, type.name!);
+      return factory.createPropertyAccessExpression(ident, targetName);
     }
   }
 }

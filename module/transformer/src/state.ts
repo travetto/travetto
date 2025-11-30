@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { path, ManifestIndex } from '@travetto/manifest';
 
-import { ManagedType, AnyType, ForeignType } from './resolver/types.ts';
+import { ManagedType, AnyType, ForeignType, MappedType } from './resolver/types.ts';
 import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor.ts';
 import { SimpleResolver } from './resolver/service.ts';
 import { ImportManager } from './importer.ts';
@@ -64,7 +64,7 @@ export class TransformerState implements State {
   /**
    * Get or import the node or external type
    */
-  getOrImport(type: ManagedType): ts.Identifier | ts.PropertyAccessExpression {
+  getOrImport(type: ManagedType | MappedType): ts.Identifier | ts.PropertyAccessExpression {
     return this.#imports.getOrImport(this.factory, type);
   }
 

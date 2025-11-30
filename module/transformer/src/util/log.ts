@@ -38,7 +38,7 @@ export class LogUtil {
       const ox = x;
       const out: Record<string, unknown> = {};
       for (const key of TypedObject.keys(ox)) {
-        if (Object.getPrototypeOf(ox[key]) === Function.prototype || exclude.has(key) || ox[key] === undefined) {
+        if (ox[key] === null || ox[key] === undefined || Object.getPrototypeOf(ox[key]) === Function.prototype || exclude.has(key)) {
           continue;
         }
         try {
