@@ -28,7 +28,7 @@
     "@travetto/log": "^7.0.0-rc.0",
     "@travetto/model-mongo": "^7.0.0-rc.0",
     "@travetto/openapi": "^7.0.0-rc.0",
-    "@travetto/web-http": "^7.0.0-rc.0",
+    "@travetto/web-http": "^7.0.0-rc.1",
     "@travetto/web-rpc": "^7.0.0-rc.0",
     "vue": "^3.5.13"
   },
