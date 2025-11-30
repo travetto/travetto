@@ -1,4 +1,5 @@
 import { Class } from '@travetto/runtime';
+
 import { TestEvent } from '../model/event.ts';
 import { Counts, SuiteResult } from '../model/suite.ts';
 

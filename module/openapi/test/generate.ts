@@ -117,7 +117,7 @@ export class GenerateSuite {
           schema: { $ref: '#/components/schemas/TestUser' }
         }
       },
-      description: undefined
+      description: ''
     });
   }
 
@@ -140,7 +140,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { $ref: '#/components/schemas/TestUser' } }
         }
       },
-      description: undefined
+      description: ''
     });
   }
 
@@ -157,7 +157,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { type: 'string' } }
         }
       },
-      description: undefined
+      description: ''
     });
 
     const param = config.paths['/test/names'].put.parameters?.[0];
@@ -180,7 +180,7 @@ export class GenerateSuite {
           schema: { type: 'array', items: { type: 'string' } }
         }
       },
-      description: undefined
+      description: ''
     });
 
     assert(config.paths['/test/who'].patch.parameters?.length === 0);
@@ -194,7 +194,7 @@ export class GenerateSuite {
           }
         }
       },
-      description: undefined
+      description: ''
     });
     assert.deepStrictEqual(config.components.schemas['who__12130'], {
       description: undefined,
@@ -223,6 +223,7 @@ export class GenerateSuite {
     assert(config.paths['/test/{id}'].delete.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/{id}'].delete.responses['201'], {
       content: {},
+      description: ''
     });
 
     assert(config.paths['/test/{id}'].delete.parameters?.length === 1);
@@ -243,6 +244,7 @@ export class GenerateSuite {
     assert(config.paths['/test/all/{id}'].delete.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].delete.responses['201'], {
       content: {},
+      description: ''
     });
 
     assert(config.paths['/test/all/{id}'].delete.parameters?.length === 4);
@@ -284,6 +286,7 @@ export class GenerateSuite {
     assert(config.paths['/test/all/{id}'].head.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].head.responses['201'], {
       content: {},
+      description: ''
     });
 
     assert(config.paths['/test/all/{id}'].head.parameters?.length === 4);
@@ -327,6 +330,7 @@ export class GenerateSuite {
       content: {
         'application/octet-stream': { schema: { type: 'string', format: 'binary' } }
       },
+      description: 'Raw binary data'
     });
 
     const param = config.paths['/test/download'].get.parameters?.[0];
@@ -375,7 +379,7 @@ export class GenerateSuite {
           }
         }
       },
-      description: undefined
+      description: ''
     });
 
   }
