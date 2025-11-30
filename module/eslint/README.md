@@ -22,7 +22,7 @@ In a new project, the first thing that will need to be done, post installation, 
 
 **Terminal: Registering the Configuration**
 ```bash
-$ trv lint:register
+$ trv eslint:register
 
 Wrote eslint config to <workspace-root>/eslint.config.cjs
 ```
@@ -50,7 +50,7 @@ Once installed, using the linter is as simple as invoking it via the cli:
 
 **Terminal: Running the Linter**
 ```bash
-npx trv lint
+npx trv eslint
 ```
 
 Or pointing your IDE to reference the registered configuration file.
