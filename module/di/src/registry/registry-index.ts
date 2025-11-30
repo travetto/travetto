@@ -9,10 +9,8 @@ import { DependencyRegistryResolver } from './registry-resolver';
 
 const MetadataSymbol = Symbol();
 
-type ClassId = string;
 const hasPostConstruct = hasFunction<{ postConstruct: () => Promise<unknown> }>('postConstruct');
 const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDestroy');
-
 
 function readMetadata(item: { metadata?: Record<symbol, unknown> }): Dependency | undefined {
   return castTo<Dependency | undefined>(item.metadata?.[MetadataSymbol]);
@@ -62,25 +60,25 @@ export class DependencyRegistryIndex implements RegistryIndex {
     SchemaRegistryIndex.getForRegister(cls).registerFieldMetadata(field, MetadataSymbol, metadata);
   }
 
-  #instances = new Map<ClassId, Map<symbol, unknown>>();
-  #instancePromises = new Map<ClassId, Map<symbol, Promise<unknown>>>();
-  #proxies = new Map<ClassId, Map<symbol | undefined, RetargettingProxy<unknown>>>();
+  #proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
+  #instances = new Map<Class, Map<symbol, unknown>>();
+  #instancePromises = new Map<Class, Map<symbol, Promise<unknown>>>();
   #resolver = new DependencyRegistryResolver();
 
   #proxyInstance<T>(target: Class<unknown>, qualifier: symbol, instance: T): T {
-    const classId = target.Ⲑid;
     let proxy: RetargettingProxy<unknown>;
+    const targetId = target.Ⲑid;
 
-    if (!this.#proxies.has(classId)) {
-      this.#proxies.set(classId, new Map());
+    if (!this.#proxies.has(targetId)) {
+      this.#proxies.set(targetId, new Map());
     }
 
-    if (!this.#proxies.get(classId)!.has(qualifier)) {
+    if (!this.#proxies.get(targetId)!.has(qualifier)) {
       proxy = new RetargettingProxy(instance);
-      this.#proxies.get(classId)!.set(qualifier, proxy);
+      this.#proxies.get(targetId)!.set(qualifier, proxy);
       console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
     } else {
-      proxy = this.#proxies.get(classId)!.get(qualifier)!;
+      proxy = this.#proxies.get(targetId)!.get(qualifier)!;
       proxy.setTarget(instance);
       console.debug('Updating target', {
         id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: target.name
@@ -90,36 +88,30 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return proxy.get();
   }
 
-  #addClass(cls: Class): void {
+  #addClass(cls: Class, forceCreate: boolean = false): void {
     const adapter = this.store.get(cls);
 
     for (const config of adapter.getCandidateConfigs()) {
       const parentClass = getParentClass(config.candidateType);
       const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
       const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
-      const baseParentId = hasParentBase ? parentClass?.Ⲑid : undefined;
-      this.#resolver.registerClass(config, baseParentId);
-      if (config.autoInject) {
+      const baseParent = hasParentBase ? parentClass : undefined;
+      this.#resolver.registerClass(config, baseParent);
+      if (config.autoInject || forceCreate) {
         // Don't wait
-        this.getInstance(config.candidateType, config.qualifier);
+        Util.queueMacroTask().then(() => {
+          this.getInstance(config.candidateType, config.qualifier);
+        });
       }
     }
   }
 
-  #changedClass(cls: Class, _prev: Class): void {
-    // Reload instances
-    for (const qualifier of this.#proxies.get(cls.Ⲑid)?.keys() ?? []) {
-      // Timing matters due to create instance being asynchronous
-      Util.queueMacroTask().then(() => { this.getInstance(cls, qualifier); });
-    }
-  }
-
   #removeClass(cls: Class): void {
-    const classId = cls.Ⲑid;
-
-    if (this.#instances.has(classId)) {
+    if (this.#instances.has(cls)) {
       for (const [qualifier, config] of this.#resolver.getContainerEntries(cls)) {
-        this.destroyInstance(config.candidateType, qualifier);
+        try {
+          this.destroyInstance(config.candidateType, qualifier);
+        } catch { }
       }
     }
   }
@@ -149,12 +141,11 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   process(events: ChangeEvent<Class>[]): void {
     for (const ev of events) {
-      if (ev.type === 'added') {
-        this.#addClass(ev.curr);
-      } else if (ev.type === 'removing') {
+      if ('prev' in ev) {
         this.#removeClass(ev.prev);
-      } else if (ev.type === 'changed') {
-        this.#changedClass(ev.curr, ev.prev);
+      }
+      if ('curr' in ev) {
+        this.#addClass(ev.curr, 'prev' in ev);
       }
     }
   }
@@ -242,26 +233,26 @@ export class DependencyRegistryIndex implements RegistryIndex {
       throw new AppError('Unable to get instance when target is undefined');
     }
 
-    const { targetId, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier, resolution);
+    const { target, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier, resolution);
 
-    if (!this.#instances.has(targetId)) {
-      this.#instances.set(targetId, new Map());
-      this.#instancePromises.set(targetId, new Map());
+    if (!this.#instances.has(target)) {
+      this.#instances.set(target, new Map());
+      this.#instancePromises.set(target, new Map());
     }
 
-    if (this.#instancePromises.get(targetId)!.has(qualifier)) {
-      return castTo(this.#instancePromises.get(targetId)!.get(qualifier));
+    if (this.#instancePromises.get(target)!.has(qualifier)) {
+      return castTo(this.#instancePromises.get(target)!.get(qualifier));
     }
 
     const instancePromise = this.construct(candidateType, qualifier);
-    this.#instancePromises.get(targetId)!.set(qualifier, instancePromise);
+    this.#instancePromises.get(target)!.set(qualifier, instancePromise);
     try {
       const instance = await instancePromise;
-      this.#instances.get(targetId)!.set(qualifier, instance);
+      this.#instances.get(target)!.set(qualifier, instance);
       return instance;
     } catch (err) {
       // Clear it out, don't save failed constructions
-      this.#instancePromises.get(targetId)!.delete(qualifier);
+      this.#instancePromises.get(target)!.delete(qualifier);
       throw err;
     }
   }
@@ -270,19 +261,19 @@ export class DependencyRegistryIndex implements RegistryIndex {
    * Destroy an instance
    */
   destroyInstance(candidateType: Class, requestedQualifier: symbol): void {
-    const { targetId, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier);
+    const { target, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier);
 
-    const activeInstance = this.#instances.get(targetId)!.get(qualifier);
+    const activeInstance = this.#instances.get(target)?.get(qualifier);
     if (hasPreDestroy(activeInstance)) {
       activeInstance.preDestroy();
     }
 
     this.#resolver.removeClass(candidateType, qualifier);
-    this.#instances.get(targetId)!.delete(qualifier);
-    this.#instancePromises.get(targetId)!.delete(qualifier);
+    this.#instances.get(target)?.delete(qualifier);
+    this.#instancePromises.get(target)?.delete(qualifier);
 
     // May not exist
-    this.#proxies.get(targetId)?.get(qualifier)?.setTarget(null);
-    console.debug('On uninstall', { id: targetId, qualifier: qualifier.toString(), classId: targetId });
+    this.#proxies.get(target.Ⲑid)?.get(qualifier)?.setTarget(null);
+    console.debug('On uninstall', { id: target, qualifier: qualifier.toString(), classId: target });
   }
 }

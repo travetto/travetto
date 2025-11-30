@@ -45,7 +45,7 @@ export class ConfigureTest {
     const { parameters: params } = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
     assert(ep.httpMethod === 'GET');
     assert(ep.methodName === 'getUser');
-    assert(ep.endpointFunction === TestController.prototype.getUser);
+    assert(ep.class === TestController);
 
     const endpointSchema = SchemaRegistryIndex.getMethodConfig(TestController, ep.methodName);
     assert(endpointSchema.description === 'Get user by name');
