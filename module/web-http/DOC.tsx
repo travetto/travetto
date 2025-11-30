@@ -2,9 +2,11 @@
 import { CliCommand } from '@travetto/cli';
 import { c, d } from '@travetto/doc';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
+import { WebRequest, WebResponse } from '@travetto/web';
 
 import type { WebHttpServer } from './src/types.ts';
 import { WebHttpConfig } from './src/config.ts';
+import { NodeWebHttpServer } from './src/node.ts';
 
 const WebServerContract = toConcrete<WebHttpServer>();
 
@@ -14,7 +16,7 @@ export const text = <>
 
   <c.Section title='Running a Server'>
 
-    By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server. Currently, {d.mod('WebNode')} is the only module that provides a compatible {WebServerContract}.
+    By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
 
     <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{
       cwd: './doc-exec'
@@ -34,6 +36,17 @@ export const text = <>
 
       <c.Execution title='Custom application' cmd='trv' args={['web:custom']} config={{ cwd: './doc-exec' }} />
     </c.SubSection>
+  </c.Section>
+
+  <c.Section title='Node Web Http Server'>
+    <c.Code title="Implementation" src={NodeWebHttpServer}></c.Code>
+
+    In the handler code, you can see that the main work is:
+    <ul>
+      <li>Converting the node primitive request to a  {WebRequest}</li>
+      <li>Dispatching the request through the framework</li>
+      <li>Receiving the {WebResponse} and sending that back over the primitive response.</li>
+    </ul>
   </c.Section>
 
   <c.Section title='TLS Support'>

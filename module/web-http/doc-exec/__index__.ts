@@ -1,9 +1,9 @@
 import { InjectableFactory } from '@travetto/di';
-import { WebHttpConfig, WebHttpServer, WebServerHandle } from '@travetto/web-http-server';
+import { WebHttpConfig, WebHttpServer, WebServerHandle } from '@travetto/web-http';
 import { ConfigurationService } from '@travetto/config';
 
 class Config {
-  @InjectableFactory()
+  @InjectableFactory({ primary: true })
   static target(config: WebHttpConfig, configService: ConfigurationService): WebHttpServer {
     return {
       async serve(): Promise<WebServerHandle> {

@@ -1,8 +1,8 @@
 {
-  "name": "@travetto-doc/web-http-server",
+  "name": "@travetto-doc/web-http",
   "dependencies": {
     "@travetto/cli": "^6.0.0",
-    "@travetto/web-http-server": "^6.0.0"
+    "@travetto/web-http": "^6.0.0"
   },
   "devDependencies": {
     "@travetto/compiler": "^6.0.0"
@@ -11,7 +11,7 @@
     "build": {
       "isolated": true,
       "includes": {
-        "@travetto/web-http-server": "main"
+        "@travetto/web-http": "main"
       }
     }
   }

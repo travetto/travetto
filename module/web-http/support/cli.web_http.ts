@@ -34,6 +34,6 @@ export class WebHttpCommand implements CliCommandShape {
       this.killConflict && !Runtime.production ? 5 : 1
     );
 
-    await handle.complete;
+    return handle.complete;
   }
 }

@@ -95,10 +95,6 @@ export class SampleRegistryIndex implements RegistryIndex {
   process(events: ChangeEvent<Class>[]): void {
     // Nothing to do
   }
-
-  finalize(cls: Class): void {
-    this.store.finalize(cls);
-  }
 }
 ```
 

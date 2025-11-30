@@ -27,8 +27,7 @@ export const FEATURES: Feature[] = [
     title: 'Web Framework',
     package: '@travetto/web',
     addons: [
-      { title: 'Web Node', package: '@travetto/web-node', required: true },
-      { title: 'Web Http Server', package: '@travetto/web-http-server', required: true },
+      { title: 'Web Http Server', package: '@travetto/web-http', required: true },
       { title: 'OpenAPI', package: '@travetto/openapi', required: true },
       {
         title: 'Web Authentication',

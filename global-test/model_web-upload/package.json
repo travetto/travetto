@@ -4,7 +4,7 @@
   "dependencies": {
     "@travetto/model": "^6.0.1",
     "@travetto/web-aws-lambda": "^6.0.3",
-    "@travetto/web-node": "^6.0.3",
+    "@travetto/web-http": "^6.0.3",
     "@travetto/web-upload": "^6.0.3"
   },
   "travetto": {},
