@@ -1,6 +1,6 @@
 {
   "name": "@travetto/openapi",
-  "version": "7.0.0-rc.0",
+  "version": "7.0.0-rc.1",
   "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
     "web",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@travetto/config": "^7.0.0-rc.0",
     "@travetto/schema": "^7.0.0-rc.0",
-    "@travetto/web": "^7.0.0-rc.0",
+    "@travetto/web": "^7.0.0-rc.1",
     "openapi3-ts": "^4.5.0",
     "yaml": "^2.8.1"
   },

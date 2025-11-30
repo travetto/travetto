@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "dependencies": {
     "@travetto/model": "^7.0.0-rc.0",
-    "@travetto/web-aws-lambda": "^7.0.0-rc.0",
-    "@travetto/web-http": "^7.0.0-rc.1",
-    "@travetto/web-upload": "^7.0.0-rc.0"
+    "@travetto/web-aws-lambda": "^7.0.0-rc.1",
+    "@travetto/web-http": "^7.0.0-rc.2",
+    "@travetto/web-upload": "^7.0.0-rc.1"
   },
   "travetto": {},
   "private": true

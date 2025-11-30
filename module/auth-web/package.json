@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-web",
-  "version": "7.0.0-rc.0",
+  "version": "7.0.0-rc.1",
   "description": "Web authentication integration support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@travetto/auth": "^7.0.0-rc.0",
     "@travetto/config": "^7.0.0-rc.0",
-    "@travetto/web": "^7.0.0-rc.0",
+    "@travetto/web": "^7.0.0-rc.1",
     "njwt": "^2.0.1"
   },
   "peerDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web",
-  "version": "7.0.0-rc.0",
+  "version": "7.0.0-rc.1",
   "description": "Declarative support for creating Web Applications",
   "keywords": [
     "web",
