@@ -47,9 +47,13 @@ export const text = <>
   <c.Section title='Standard Utilities'>
     The module also provides standard utilities for starting http servers programmatically:
 
-    <c.Code title='Web Http Utilities' src='src/http.ts' outline />
+    <c.Code title='Web Http Utilities' src='src/http.ts' outline startRe={/^export class /} />
 
-    Specifically, looking at {d.method('buildHandler')}, we can see the structure for integrating the server behavior with the {d.mod('Web')} module dispatcher:
+    Specifically, looking at {d.method('buildHandler')},
+
+    <c.Code title='Web Http Utilities' src='src/http.ts' startRe={/^\s+static buildHandler/} endRe={/^\s{2}[}]/} />
+
+    we can see the structure for integrating the server behavior with the {d.mod('Web')} module dispatcher:
     <ul>
       <li>Converting the node primitive request to a  {WebRequest}</li>
       <li>Dispatching the request through the framework</li>

@@ -292,27 +292,6 @@ The module also provides standard utilities for starting http servers programmat
 
 **Code: Web Http Utilities**
 ```typescript
-import net from 'node:net';
-import http from 'node:http';
-import http2 from 'node:http2';
-import https from 'node:https';
-import { pipeline } from 'node:stream/promises';
-import { TLSSocket } from 'node:tls';
-import { WebBodyUtil, WebCommonUtil, WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
-import { BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
-import { WebSecureKeyPair, WebServerHandle } from './types.ts';
-type HttpServer = http.Server | http2.Http2Server;
-type HttpResponse = http.ServerResponse | http2.Http2ServerResponse;
-type HttpRequest = http.IncomingMessage | http2.Http2ServerRequest;
-type HttpSocket = net.Socket | http2.Http2Stream;
-type WebHttpServerConfig = {
-  httpVersion?: '1.1' | '2';
-  port: number;
-  bindAddress: string;
-  sslKeys?: WebSecureKeyPair;
-  dispatcher: WebDispatcher;
-  signal?: AbortSignal;
-};
 export class WebHttpUtil {
   /**
    * Build a simple request handler
@@ -334,7 +313,20 @@ export class WebHttpUtil {
 }
 ```
 
-Specifically, looking at `buildHandler`, we can see the structure for integrating the server behavior with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module dispatcher:
+Specifically, looking at `buildHandler`,
+
+**Code: Web Http Utilities**
+```typescript
+static buildHandler(dispatcher: WebDispatcher): (req: HttpRequest, res: HttpResponse) => Promise<void> {
+    return async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+      const request = this.toWebRequest(req);
+      const response = await dispatcher.dispatch({ request });
+      this.respondToServerResponse(response, res);
+    };
+  }
+```
+
+we can see the structure for integrating the server behavior with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module dispatcher:
    *  Converting the node primitive request to a  [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)
    *  Dispatching the request through the framework
    *  Receiving the [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) and sending that back over the primitive response.
