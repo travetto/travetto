@@ -119,10 +119,6 @@ export interface EndpointConfig extends CoreConfig {
    */
   path: string;
   /**
-   * The function the endpoint will call
-   */
-  endpointFunction: EndpointFunction;
-  /**
    * The compiled and finalized handler
    */
   filter?: WebFilter;

@@ -1,4 +1,4 @@
-import { asConstructable, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
+import { asConstructable, castKey, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
 import { BindUtil, SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { RetargettingProxy } from '@travetto/registry';
@@ -8,7 +8,7 @@ import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebRequest } from '../types/request.ts';
 import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import { EndpointConfig, ControllerConfig, EndpointParameterConfig } from '../registry/types.ts';
+import { EndpointConfig, ControllerConfig, EndpointParameterConfig, EndpointFunction } from '../registry/types.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { WebCommonUtil } from './common.ts';
 
@@ -177,7 +177,7 @@ export class EndpointUtil {
   static async invokeEndpoint(endpoint: EndpointConfig, { request }: WebChainedContext): Promise<WebResponse> {
     try {
       const params = await this.extractParameters(endpoint, request);
-      const body = await endpoint.endpointFunction.apply(endpoint.instance, params);
+      const body = await castTo<EndpointFunction>(endpoint.instance![castKey(endpoint.methodName)]).apply(endpoint.instance, params);
       const headers = endpoint.finalizedResponseHeaders;
       let response: WebResponse;
       if (body instanceof WebResponse) {

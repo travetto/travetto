@@ -24,7 +24,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
   const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
-    const handler = descriptor.value!.bind(castTo(target));
+    const handler = descriptor.value!;
     // Allows for DI to run, as the service will not be bound until after the decorator is run
     descriptor.value = castTo(function (this: typeof target) {
       return this[field].cache(this, propertyKey, handler, [...arguments]);
@@ -45,7 +45,7 @@ export function EvictCache<F extends string, U extends Record<F, CacheService>>(
   return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[EvictConfigSymbol] ??= {})[propertyKey] = config;
-    const handler = descriptor.value!.bind(castTo(target));
+    const handler = descriptor.value!;
     // Allows for DI to run, as the service will not be bound until after the decorator is run
     descriptor.value = castTo(function (this: typeof target) {
       return this[field].evict(this, propertyKey, handler, [...arguments]);
