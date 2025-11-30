@@ -66,11 +66,9 @@ export class DependencyRegistryResolver {
    */
   registerClass(config: InjectableCandidate, baseParent?: Class): void {
     const candidateType = config.candidateType;
-    const candidateClassId = candidateType.Ⲑid;
     const target = config.target ?? candidateType;
 
-    const targetClassId = target.Ⲑid;
-    const isSelfTarget = candidateClassId === targetClassId;
+    const isSelfTarget = target === candidateType;
     const qualifier = config.qualifier ?? getDefaultQualifier(candidateType);
 
     // Record qualifier if its the default for the class
