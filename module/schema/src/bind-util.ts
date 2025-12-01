@@ -156,8 +156,8 @@ export class BindUtil {
         }
       }
 
-      const out = this.bindSchemaToObject(cls, instance, data, cfg);
-      SchemaRegistryIndex.get(cls).ensureInstanceTypeField(out);
+      const out = this.bindSchemaToObject(resolvedCls, instance, data, cfg);
+      SchemaRegistryIndex.get(resolvedCls).ensureInstanceTypeField(out);
       return out;
     }
   }
