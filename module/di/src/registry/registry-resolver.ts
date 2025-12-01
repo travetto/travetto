@@ -20,12 +20,12 @@ export class DependencyRegistryResolver {
   #defaultSymbols = new Set<symbol>();
 
   /**
-   * Maps from the requested type id to the candidates
+   * Maps from the requested type to the candidates
    */
   #byCandidateType = new Map<Class, Map<symbol, InjectableCandidate>>();
 
   /**
-   * Maps from inbound class id (file) to the candidates
+   * Maps from inbound class file) to the candidates
    */
   #byContainerType = new Map<Class, Map<symbol, InjectableCandidate>>();
 
