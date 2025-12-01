@@ -16,15 +16,14 @@ type ParamDecorator = (instance: ClassInstance, property: string | symbol, idx: 
 export function Param(location: EndpointParamLocation, aliasOrConfig: string | Partial<EndpointParameterConfig>): ParamDecorator {
   return (instance: ClassInstance, property: string | symbol, idx: number): void => {
     const config = typeof aliasOrConfig === 'string' ? {} : aliasOrConfig;
+    const cls = getClass(instance);
     if (typeof aliasOrConfig === 'string') {
-      SchemaRegistryIndex.getForRegister(getClass(instance)).registerParameter(property, idx, {
+      SchemaRegistryIndex.getForRegister(cls).registerParameter(property, idx, {
         aliases: [aliasOrConfig] // Register extra input string as an alias
       });
     }
 
-    ControllerRegistryIndex.getForRegister(getClass(instance)).registerEndpointParameter(property, idx, {
-      index: idx, location, ...config
-    });
+    ControllerRegistryIndex.getForRegister(cls).registerEndpointParameter(property, idx, { location, ...config });
   };
 }
 

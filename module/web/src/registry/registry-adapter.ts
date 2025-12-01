@@ -124,11 +124,11 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     return this.#endpoints.get(method)!;
   }
 
-  registerEndpointParameter(method: string | symbol, index: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {
+  registerEndpointParameter(method: string | symbol, idx: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {
     const ep = this.registerEndpoint(method);
-    ep.parameters[index] ??= { index, location: 'query' };
-    safeAssign(ep.parameters[index], ...config);
-    return ep.parameters[index];
+    ep.parameters[idx] ??= { index: idx, location: 'query' };
+    safeAssign(ep.parameters[idx], ...config);
+    return ep.parameters[idx];
   }
 
   finalize(): void {
