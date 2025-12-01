@@ -3,6 +3,8 @@ import { ChangeEvent } from '../types';
 
 export type RegistrationMethods = `register${string}` | `finalize${string}`;
 
+export const EXPIRED_CLASS = Symbol();
+
 /**
  * Interface for registry adapters to implement
  */

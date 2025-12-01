@@ -1,6 +1,6 @@
 import { AppError, castTo, Class, getParentClass } from '@travetto/runtime';
 
-import { RegistrationMethods, RegistryAdapter } from './types';
+import { EXPIRED_CLASS, RegistrationMethods, RegistryAdapter } from './types';
 
 /**
  * Base registry index implementation
@@ -17,12 +17,16 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     this.#adapterCls = adapterCls;
   }
 
+  #resolveClass(cls: Class): Class {
+    return (EXPIRED_CLASS in cls) ? this.getClassById(cls.Ⲑid) : cls;
+  }
+
   getClasses(): Class[] {
     return Array.from(this.#adapters.keys());
   }
 
   has(cls: Class): boolean {
-    return this.#adapters.has(cls);
+    return this.#adapters.has(this.#resolveClass(cls));
   }
 
   getClassById(id: string): Class {
@@ -39,6 +43,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
   }
 
   adapter(cls: Class): A {
+    cls = this.#resolveClass(cls);
     if (!this.#adapters.has(cls)!) {
       const adapter = new this.#adapterCls(cls);
       this.#adapters.set(cls, adapter);
@@ -61,6 +66,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
   }
 
   get(cls: Class): Omit<A, RegistrationMethods> {
+    cls = this.#resolveClass(cls);
     if (!this.has(cls)) {
       throw new AppError(`Class ${cls.Ⲑid} is not registered for ${this.#adapterCls.Ⲑid}`);
     }
@@ -75,6 +81,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
   }
 
   finalized(cls: Class): boolean {
+    cls = this.#resolveClass(cls);
     return this.#finalized.has(cls);
   }
 }

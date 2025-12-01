@@ -4,7 +4,7 @@ import { AppError, castTo, Class, Util } from '@travetto/runtime';
 import { ClassSource } from '../source/class-source';
 import { ChangeEvent } from '../types';
 import { MethodSource } from '../source/method-source';
-import { RegistryIndex, RegistryIndexClass } from './types';
+import { RegistryIndex, RegistryIndexClass, EXPIRED_CLASS } from './types';
 
 class $Registry {
 
@@ -27,6 +27,8 @@ class $Registry {
       for (const idx of this.#indexOrder) {
         this.instance(idx).store.remove(cls);
       }
+      // Tag expired classes
+      Object.assign(cls, { [EXPIRED_CLASS]: true });
     }
   }
 
