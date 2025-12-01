@@ -143,7 +143,7 @@ export class EndpointUtil {
   static async extractParameters(endpoint: EndpointConfig, request: WebRequest): Promise<unknown[]> {
     const cls = endpoint.class;
     const vals = WebCommonUtil.getRequestParams(request);
-    const { parameters } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.methodName);
+    const { parameters } = SchemaRegistryIndex.get(cls).getMethod(endpoint.methodName);
     const combined = parameters.map((cfg) =>
       ({ schema: cfg, param: endpoint.parameters[cfg.index], value: vals?.[cfg.index] }));
 

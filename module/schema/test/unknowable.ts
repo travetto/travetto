@@ -12,7 +12,7 @@ export class UnknownTest {
   @Test()
   async basic() {
     await Registry.init();
-    const fields = SchemaRegistryIndex.getFieldMap(Unknowable).value;
+    const fields = SchemaRegistryIndex.get(Unknowable).getSchema().value;
     assert(fields.type === UnknownType);
   }
 }

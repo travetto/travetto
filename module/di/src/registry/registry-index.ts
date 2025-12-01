@@ -170,7 +170,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
    */
   async fetchDependencyParameters<T>(candidate: InjectableCandidate<T>): Promise<unknown[]> {
     const inputs = SchemaRegistryIndex.has(candidate.class) ?
-      SchemaRegistryIndex.getMethodConfig(candidate.class, candidate.method).parameters : [];
+      SchemaRegistryIndex.get(candidate.class).getMethod(candidate.method).parameters : [];
 
     const promises = inputs
       .map(input => this.#resolveDependencyValue(readMetadata(input) ?? {}, input, candidate.class));
@@ -182,7 +182,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
    * Retrieve mapped dependencies
    */
   async injectFields<T>(candidateType: Class, instance: T, srcClass: Class): Promise<T> {
-    const inputs = SchemaRegistryIndex.has(candidateType) ? SchemaRegistryIndex.getFieldMap(candidateType) : {};
+    const inputs = SchemaRegistryIndex.getOptional(candidateType)?.getSchema() ?? {};
 
     const promises = TypedObject.entries(inputs)
       .filter(([k, input]) => readMetadata(input) !== undefined && (input.access !== 'readonly' && instance[castKey(k)] === undefined))

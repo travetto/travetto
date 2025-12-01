@@ -109,7 +109,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
 
     for (const test of Object.values(this.#config.tests)) {
       test.tags = [...test.tags ?? [], ...this.#config.tags ?? []];
-      test.description ||= SchemaRegistryIndex.getMethodConfig(this.#cls, test.methodName).description;
+      test.description ||= SchemaRegistryIndex.get(this.#cls).getMethod(test.methodName).description;
     }
   }
 

@@ -26,21 +26,21 @@ export class DecoratorOrderSuite {
   @Test()
   async testAlias() {
     await Registry.init();
-    const fields = SchemaRegistryIndex.getFieldMap(MyClass);
+    const fields = SchemaRegistryIndex.get(MyClass).getSchema();
     assert.deepStrictEqual(fields.field.aliases, ['bob', 'bob1', 'bob2']);
   }
 
   @Test()
   async testSpecifiers() {
     await Registry.init();
-    const fields = SchemaRegistryIndex.getFieldMap(MyClass);
+    const fields = SchemaRegistryIndex.get(MyClass).getSchema();
     assert.deepStrictEqual(fields.text.specifiers?.toSorted(), ['text', 'long', 'weird'].toSorted());
   }
 
   @Test()
   async testSpecifiersRaw() {
     await Registry.init();
-    const fields = SchemaRegistryIndex.getFieldMap(MyClass);
+    const fields = SchemaRegistryIndex.get(MyClass).getSchema();
     assert.deepStrictEqual(fields.text2.specifiers?.toSorted(), ['text', 'weirder'].toSorted());
     assert(fields.text2.name === 'text2');
     assert(fields.text2.required?.active === true);

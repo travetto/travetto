@@ -1,7 +1,7 @@
 import { ChangeEvent, RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
-import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfig } from './types.ts';
+import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
@@ -22,14 +22,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
 
   static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
-  }
-
-  static getFieldMap(cls: Class, view?: string): SchemaFieldMap {
-    return this.#instance.store.get(cls).getSchema(view);
-  }
-
-  static getMethodConfig(cls: Class, method: string | symbol): SchemaMethodConfig {
-    return this.#instance.store.get(cls).getMethod(method);
   }
 
   static has(cls: Class): boolean {
@@ -64,8 +56,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls);
   }
 
-  static getOptionalConfig(cls: Class): SchemaClassConfig | undefined {
-    return this.#instance.store.getOptional(cls)?.get();
+  static getOptional(cls: Class): Omit<SchemaRegistryAdapter, RegistrationMethods> | undefined {
+    return this.#instance.store.getOptional(cls);
   }
 
   static getClasses(): Class[] {

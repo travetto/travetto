@@ -201,7 +201,7 @@ class Validation {
 
   @Test()
   async verifyMultipleNested() {
-    const fields = SchemaRegistryIndex.getFieldMap(Ccccz);
+    const fields = SchemaRegistryIndex.get(Ccccz).getSchema();
     assert('c' in fields);
     assert('b' in fields);
     assert('a' in fields);

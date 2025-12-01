@@ -133,22 +133,22 @@ export class BindUtil {
 
   /**
    * Bind data to the schema for a class, with an optional view
-   * @param cons The schema class to bind against
+   * @param cls The schema class to bind against
    * @param data The provided data to bind
    * @param cfg The bind configuration
    */
-  static bindSchema<T>(cons: Class<T>, data?: undefined, cfg?: BindConfig): undefined;
-  static bindSchema<T>(cons: Class<T>, data?: null, cfg?: BindConfig): null;
-  static bindSchema<T>(cons: Class<T>, data?: object | T, cfg?: BindConfig): T;
-  static bindSchema<T>(cons: Class<T>, data?: object | T, cfg?: BindConfig): T | null | undefined {
+  static bindSchema<T>(cls: Class<T>, data?: undefined, cfg?: BindConfig): undefined;
+  static bindSchema<T>(cls: Class<T>, data?: null, cfg?: BindConfig): null;
+  static bindSchema<T>(cls: Class<T>, data?: object | T, cfg?: BindConfig): T;
+  static bindSchema<T>(cls: Class<T>, data?: object | T, cfg?: BindConfig): T | null | undefined {
     if (data === null || data === undefined) {
       return data;
     }
-    if (data instanceof cons) {
+    if (data instanceof cls) {
       return castTo(data);
     } else {
-      const cls = SchemaRegistryIndex.resolveInstanceType<T>(cons, asFull<T>(data));
-      const instance = classConstruct<T & { type?: string }>(cls);
+      const resolvedCls = SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data));
+      const instance = classConstruct<T & { type?: string }>(resolvedCls);
 
       for (const k of TypedObject.keys(instance)) { // Do not retain undefined fields
         if (instance[k] === undefined) {
@@ -164,17 +164,17 @@ export class BindUtil {
 
   /**
    * Bind the schema to the object
-   * @param cons The schema class
-   * @param obj The target object (instance of cons)
+   * @param cls The schema class
+   * @param obj The target object (instance of cls)
    * @param data The data to bind
    * @param cfg The bind configuration
    */
-  static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, cfg: BindConfig = {}): T {
+  static bindSchemaToObject<T>(cls: Class<T>, obj: T, data?: object, cfg: BindConfig = {}): T {
     const view = cfg.view; // Does not convey
     delete cfg.view;
 
     if (!!data && isInstance<T>(data)) {
-      const adapter = SchemaRegistryIndex.get(cons);
+      const adapter = SchemaRegistryIndex.get(cls);
       const conf = adapter.get();
 
       // If no configuration
@@ -312,7 +312,7 @@ export class BindUtil {
    * @returns
    */
   static coerceMethodParams<T>(cls: Class<T>, method: string | symbol, params: unknown[], applyDefaults = true): unknown[] {
-    const paramConfigs = SchemaRegistryIndex.getMethodConfig(cls, method).parameters;
+    const paramConfigs = SchemaRegistryIndex.get(cls).getMethod(method).parameters;
     return this.coerceParameters(paramConfigs, params, applyDefaults);
   }
 }

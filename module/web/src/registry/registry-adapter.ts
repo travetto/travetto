@@ -138,7 +138,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
       ep.fullPath = `/${this.#config.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
       ep.finalizedResponseHeaders = new WebHeaders({ ...this.#config.responseHeaders, ...ep.responseHeaders });
       ep.responseContext = { ...this.#config.responseContext, ...ep.responseContext };
-      for (const schema of SchemaRegistryIndex.getMethodConfig(this.#cls, ep.methodName).parameters) {
+      for (const schema of SchemaRegistryIndex.get(this.#cls).getMethod(ep.methodName).parameters) {
         ep.parameters[schema.index!] ??= { index: schema.index!, location: undefined! };
         ep.parameters[schema.index!].location ??= computeParameterLocation(ep, schema);
       }
