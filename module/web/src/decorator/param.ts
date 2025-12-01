@@ -1,5 +1,4 @@
 import { ClassInstance, getClass } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointParameterConfig, EndpointParamLocation } from '../registry/types.ts';
@@ -15,13 +14,7 @@ type ParamDecorator = (instance: ClassInstance, property: string | symbol, idx: 
  */
 export function Param(location: EndpointParamLocation, extra: string | Partial<EndpointParameterConfig>): ParamDecorator {
   return (instance: ClassInstance, property: string | symbol, idx: number): void => {
-    const name = typeof extra === 'string' ? extra : extra.name;
     const config = typeof extra === 'string' ? {} : extra;
-
-    // Set name as needed
-    if (name) {
-      SchemaRegistryIndex.getForRegister(getClass(instance)).registerParameter(property, idx, { name });
-    }
 
     ControllerRegistryIndex.getForRegister(getClass(instance)).registerEndpointParameter(property, idx, {
       index: idx, location, ...config
