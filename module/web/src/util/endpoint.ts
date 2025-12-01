@@ -122,11 +122,9 @@ export class EndpointUtil {
       }
     }
 
-    let res = this.extractParameterValue(request, param, input.name!.toString(), input.array);
-    if (res === undefined && input.aliases?.length) {
-      for (let i = 0; i < input.aliases.length && res === undefined; i++) {
-        res = this.extractParameterValue(request, param, input.aliases[i], input.array);
-      }
+    let res = this.extractParameterValue(request, param, input.name!.toString(), input.array) ?? undefined;
+    for (let i = 0; res === undefined && input.aliases && i < input.aliases.length; i += 1) {
+      res = this.extractParameterValue(request, param, input.aliases[i], input.array) ?? undefined;
     }
     return res;
   }
