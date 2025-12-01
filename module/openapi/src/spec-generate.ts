@@ -48,7 +48,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       throw new AppError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
 
-    const fields = SchemaRegistryIndex.get(input.type).getSchema(input.view);
+    const fields = SchemaRegistryIndex.get(input.type).getFields(input.view);
     const params: ParameterObject[] = [];
     for (const sub of Object.values(fields)) {
       const name = sub.name.toString();

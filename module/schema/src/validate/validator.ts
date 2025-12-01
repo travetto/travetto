@@ -15,7 +15,7 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  */
 function resolveFieldMap<T>(base: Class<T>, o: T): SchemaFieldMap {
   const target = SchemaRegistryIndex.resolveInstanceType(base, o);
-  return SchemaRegistryIndex.get(target).getSchema();
+  return SchemaRegistryIndex.get(target).getFields();
 }
 
 function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
@@ -257,7 +257,7 @@ export class SchemaValidator {
     }
     cls = SchemaRegistryIndex.resolveInstanceType(cls, o);
 
-    const fields = SchemaRegistryIndex.get(cls).getSchema(view);
+    const fields = SchemaRegistryIndex.get(cls).getFields(view);
 
     // Validate using standard behaviors
     const errors = [

@@ -182,7 +182,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
    * Retrieve mapped dependencies
    */
   async injectFields<T>(candidateType: Class, instance: T, srcClass: Class): Promise<T> {
-    const inputs = SchemaRegistryIndex.getOptional(candidateType)?.getSchema() ?? {};
+    const inputs = SchemaRegistryIndex.getOptional(candidateType)?.getFields() ?? {};
 
     const promises = TypedObject.entries(inputs)
       .filter(([k, input]) => readMetadata(input) !== undefined && (input.access !== 'readonly' && instance[castKey(k)] === undefined))

@@ -294,7 +294,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return this.getMethod(method).returnType!.type;
   }
 
-  getSchema(view?: string): SchemaFieldMap {
+  getFields(view?: string): SchemaFieldMap {
     if (!view) {
       return this.#config.fields;
     }

@@ -185,7 +185,7 @@ export class BindUtil {
       } else {
         let schema: SchemaFieldMap = conf.fields;
         if (view) {
-          schema = adapter.getSchema(view);
+          schema = adapter.getFields(view);
           if (!schema) {
             throw new Error(`View not found: ${view.toString()}`);
           }
