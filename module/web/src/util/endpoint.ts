@@ -230,8 +230,8 @@ export class EndpointUtil {
   /**
    * Get bound endpoints, honoring the conditional status
    */
-  static async getBoundEndpoints(c: Class): Promise<EndpointConfig[]> {
-    const config = ControllerRegistryIndex.getConfig(c);
+  static async getBoundEndpoints(cls: Class): Promise<EndpointConfig[]> {
+    const config = ControllerRegistryIndex.getConfig(cls);
 
     // Skip registering conditional controllers
     if (config.conditional && !await config.conditional()) {

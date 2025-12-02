@@ -36,8 +36,8 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     if (/\b@travetto[/]test\b/.test(Env.DEBUG.value ?? '')) {
       const file = Runtime.toolPath(`test-worker.${process.pid}.log`);
       const stdout = createWriteStream(file, { flags: 'a' });
-      const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
-      ConsoleManager.set({ log: (event) => c[event.level](process.pid, ...event.args) });
+      const cons = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
+      ConsoleManager.set({ log: (event) => cons[event.level](process.pid, ...event.args) });
     } else {
       ConsoleManager.set({ log: () => { } });
     }

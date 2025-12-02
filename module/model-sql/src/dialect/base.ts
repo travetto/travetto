@@ -767,7 +767,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const columns = SQLModelUtil.getFieldsByLocation(stack).local
       .filter(x => !SchemaRegistryIndex.has(x.type))
       .toSorted((a, b) => a.name.toString().localeCompare(b.name.toString()));
-    const columnNames = columns.map(c => c.name);
+    const columnNames = columns.map(column => column.name);
 
     const hasParent = stack.length > 1;
     const isArray = !!config.array;
@@ -798,7 +798,8 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return;
     }
 
-    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, castTo<Record<string | symbol, unknown>>(inst.value)[c.name])));
+    const matrix = instances.map(inst => columns.map(column =>
+      this.resolveValue(column, castTo<Record<string | symbol, unknown>>(inst.value)[column.name])));
 
     columnNames.push(this.pathField.name);
     if (hasParent) {

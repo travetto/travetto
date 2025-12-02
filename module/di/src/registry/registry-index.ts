@@ -33,7 +33,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
   }
 
   static getCandidateTypes<T>(candidateType: Class<T>): Class<T>[] {
-    return this.#instance.getCandidates(candidateType).map(c => c.candidateType);
+    return this.#instance.getCandidates(candidateType).map(candidate => candidate.candidateType);
   }
 
   static getInstances<T>(candidateType: Class<T>, predicate?: (config: InjectableCandidate<T>) => boolean): Promise<T[]> {

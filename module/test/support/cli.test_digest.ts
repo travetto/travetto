@@ -31,9 +31,9 @@ export class TestDigestCommand {
 
     const suites = SuiteRegistryIndex.getClasses();
     const all = suites
-      .map(c => SuiteRegistryIndex.getConfig(c))
-      .filter(c => !describeFunction(c.class).abstract)
-      .flatMap(c => Object.values(c.tests))
+      .map(cls => SuiteRegistryIndex.getConfig(cls))
+      .filter(config => !describeFunction(config.class).abstract)
+      .flatMap(config => Object.values(config.tests))
       .toSorted((a, b) => {
         const classComp = a.classId.localeCompare(b.classId);
         return classComp !== 0 ? classComp : a.methodName.localeCompare(b.methodName);

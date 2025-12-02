@@ -86,13 +86,13 @@ class $SchemaChangeListener {
     const clsId = cls.Ⲑid;
 
     if (this.#mapping.has(clsId)) {
-      const deps = this.#mapping.get(clsId)!;
-      for (const depClsId of deps.keys()) {
-        if (!updates.has(depClsId)) {
-          updates.set(depClsId, { config: deps.get(depClsId)!.config, subs: [] });
+      const dependencies = this.#mapping.get(clsId)!;
+      for (const dependencyClsId of dependencies.keys()) {
+        if (!updates.has(dependencyClsId)) {
+          updates.set(dependencyClsId, { config: dependencies.get(dependencyClsId)!.config, subs: [] });
         }
-        const c = deps.get(depClsId)!;
-        updates.get(depClsId)!.subs.push({ path: [...c.path], fields: changes });
+        const childDependency = dependencies.get(dependencyClsId)!;
+        updates.get(dependencyClsId)!.subs.push({ path: [...childDependency.path], fields: changes });
       }
     }
 
@@ -130,15 +130,15 @@ class $SchemaChangeListener {
     // Handle class references changing, but keeping same id
     const compareTypes = (a: Class, b: Class): boolean => a.Ⲑid ? a.Ⲑid === b.Ⲑid : a === b;
 
-    for (const c of currentFields) {
-      if (previousFields.has(c) && previous && current) {
-        const prevSchema = previous.fields[c];
-        const currSchema = current.fields[c];
+    for (const field of currentFields) {
+      if (previousFields.has(field) && previous && current) {
+        const prevSchema = previous.fields[field];
+        const currSchema = current.fields[field];
         if (
           JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
           !compareTypes(prevSchema.type, currSchema.type)
         ) {
-          changes.push({ previous: previous.fields[c], current: current.fields[c], type: 'changed' });
+          changes.push({ previous: previous.fields[field], current: current.fields[field], type: 'changed' });
         }
       }
     }

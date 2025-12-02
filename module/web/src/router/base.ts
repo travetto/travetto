@@ -20,10 +20,10 @@ export abstract class BaseWebRouter implements WebRouter {
   #cleanup = new Map<string, Function>();
   #interceptors: WebInterceptor[];
 
-  async #register(c: Class): Promise<void> {
-    const config = ControllerRegistryIndex.getConfig(c);
+  async #register(cls: Class): Promise<void> {
+    const config = ControllerRegistryIndex.getConfig(cls);
 
-    let endpoints = await EndpointUtil.getBoundEndpoints(c);
+    let endpoints = await EndpointUtil.getBoundEndpoints(cls);
     endpoints = EndpointUtil.orderEndpoints(endpoints);
 
     for (const endpoint of endpoints) {
@@ -31,7 +31,7 @@ export abstract class BaseWebRouter implements WebRouter {
     }
 
     const fn = await this.register(endpoints, config);
-    this.#cleanup.set(c.Ⲑid, fn);
+    this.#cleanup.set(cls.Ⲑid, fn);
   };
 
   /**
@@ -45,8 +45,8 @@ export abstract class BaseWebRouter implements WebRouter {
     console.debug('Sorting interceptors', { count: names.length, names });
 
     // Register all active
-    for (const c of ControllerRegistryIndex.getClasses()) {
-      await this.#register(c);
+    for (const cls of ControllerRegistryIndex.getClasses()) {
+      await this.#register(cls);
     }
 
     // Listen for updates

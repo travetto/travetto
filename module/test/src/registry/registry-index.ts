@@ -51,7 +51,7 @@ export class SuiteRegistryIndex implements RegistryIndex {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses(): Class[] {
-    return this.store.getClasses().filter(c => !describeFunction(c).abstract);
+    return this.store.getClasses().filter(cls => !describeFunction(cls).abstract);
   }
 
   getConfig(cls: Class): SuiteConfig {

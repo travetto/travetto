@@ -204,9 +204,9 @@ class TestRunnerFeature extends BaseFeature {
       this.onChangedActiveEditor(vscode.window.activeTextEditor) :
       this.#stopServer()
     );
-    vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
-    vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
-    vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);
+    vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
+    vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
+    vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
 
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({
       pattern: {

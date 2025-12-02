@@ -11,8 +11,8 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
 
   constructor(consumers: TestConsumerShape[]) {
     this.#consumers = consumers;
-    for (const c of consumers) {
-      c.onEvent = c.onEvent.bind(c);
+    for (const consumer of consumers) {
+      consumer.onEvent = consumer.onEvent.bind(consumer);
     }
   }
 
@@ -27,8 +27,8 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
   }
 
   async onStart(state: TestRunState): Promise<void> {
-    for (const c of this.#consumers) {
-      await c.onStart?.(state);
+    for (const consumer of this.#consumers) {
+      await consumer.onStart?.(state);
     }
   }
 
@@ -39,8 +39,8 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     if (this.#filter?.(event) === false) {
       return;
     }
-    for (const c of this.#consumers) {
-      c.onEvent(event);
+    for (const consumer of this.#consumers) {
+      consumer.onEvent(event);
     }
 
     this.onEventDone?.(event);
@@ -48,8 +48,8 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
 
   async summarize(summary?: SuitesSummary): Promise<void> {
     if (summary) {
-      for (const c of this.#consumers) {
-        await c.onSummary?.(summary);
+      for (const consumer of this.#consumers) {
+        await consumer.onSummary?.(summary);
       }
     }
   }

@@ -84,16 +84,16 @@ export class WebHeaderUtil {
   /**
    * Build cookie suffix
    */
-  static buildCookieSuffix(c: Cookie): string[] {
+  static buildCookieSuffix(cookie: Cookie): string[] {
     const parts = [];
-    if (c.path) { parts.push(`path=${c.path}`); }
-    if (c.expires) { parts.push(`expires=${c.expires.toUTCString()}`); }
-    if (c.domain) { parts.push(`domain=${c.domain}`); }
-    if (c.priority) { parts.push(`priority=${c.priority.toLowerCase()}`); }
-    if (c.sameSite) { parts.push(`samesite=${c.sameSite.toLowerCase()}`); }
-    if (c.secure) { parts.push('secure'); }
-    if (c.httponly) { parts.push('httponly'); }
-    if (c.partitioned) { parts.push('partitioned'); }
+    if (cookie.path) { parts.push(`path=${cookie.path}`); }
+    if (cookie.expires) { parts.push(`expires=${cookie.expires.toUTCString()}`); }
+    if (cookie.domain) { parts.push(`domain=${cookie.domain}`); }
+    if (cookie.priority) { parts.push(`priority=${cookie.priority.toLowerCase()}`); }
+    if (cookie.sameSite) { parts.push(`samesite=${cookie.sameSite.toLowerCase()}`); }
+    if (cookie.secure) { parts.push('secure'); }
+    if (cookie.httponly) { parts.push('httponly'); }
+    if (cookie.partitioned) { parts.push('partitioned'); }
     return parts;
   }
 

@@ -207,13 +207,13 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
         const extra: Record<string, unknown> = {};
         if (config.discriminatedBase) {
-          const map = SchemaRegistryIndex.getDiscriminatedClasses(cls);
-          if (map) {
-            extra.oneOf = map
-              .filter(x => !describeFunction(x)?.abstract)
-              .map(c => {
-                this.onSchema(SchemaRegistryIndex.getConfig(c));
-                return this.#getType(c);
+          const subClasses = SchemaRegistryIndex.getDiscriminatedClasses(cls);
+          if (subClasses) {
+            extra.oneOf = subClasses
+              .filter(subCls => !describeFunction(subCls)?.abstract)
+              .map(subCls => {
+                this.onSchema(SchemaRegistryIndex.getConfig(subCls));
+                return this.#getType(subCls);
               });
           }
         }

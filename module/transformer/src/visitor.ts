@@ -190,13 +190,13 @@ export class VisitorFactory<S extends State = State> {
     const target = this.#transformers.get(targetType);
 
     if (!target) {
-      return ts.visitEachChild(node, c => this.visit(state, context, c), context);
+      return ts.visitEachChild(node, child => this.visit(state, context, child), context);
     } else {
       // Before
       node = this.executePhaseAlways(state, target, 'before', node) ?? node;
       node = this.executePhase(state, target, 'before', node) ?? node;
 
-      node = ts.visitEachChild(node, c => this.visit(state, context, c), context);
+      node = ts.visitEachChild(node, child => this.visit(state, context, child), context);
       // After
       node = this.executePhaseAlways(state, target, 'after', node) ?? node;
       node = this.executePhase(state, target, 'after', node) ?? node;

@@ -74,7 +74,7 @@ export const Html: RenderProvider<RenderContext> = {
   div: std, span: stdInline, small: stdInline,
   a: async ({ recurse, props }) => `<a ${propsToStr(props)}>${await recurse()}</a>`,
 
-  InkyTemplate: c => c.recurse(),
+  InkyTemplate: ctx => ctx.recurse(),
   Title: async ({ recurse }) => `<title>${await recurse()}</title>`,
   Summary: async ({ recurse }) => `<span id="summary" style="${SUMMARY_STYLE}">${await recurse()}</span>`,
 

@@ -121,8 +121,8 @@ export class PackageModuleVisitor {
       }
       // Propagate to children
       for (const { item } of toProcess) {
-        for (const c of item.state.childSet) {
-          const child = mapping.get(c);
+        for (const childName of item.state.childSet) {
+          const child = mapping.get(childName);
           if (!child) { continue; }
           child.parent.delete(item.name);
           // Propagate roles from parent to child
@@ -132,7 +132,7 @@ export class PackageModuleVisitor {
             }
           }
           // Allow prod to trickle down as needed
-          child.item.prod ||= (item.prod && item.state.prodDeps.has(c));
+          child.item.prod ||= (item.prod && item.state.prodDeps.has(childName));
         }
       }
       // Remove from mapping
