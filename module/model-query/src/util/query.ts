@@ -53,8 +53,8 @@ export class ModelQueryUtil {
   /**
    * Get a where clause with type
    */
-  static getWhereClause<T extends ModelType>(cls: Class<T>, q: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
-    const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
+  static getWhereClause<T extends ModelType>(cls: Class<T>, where: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
+    const clauses: WhereClauseRaw<T>[] = (where ? [where] : []);
 
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     if (polymorphicConfig) {
@@ -77,11 +77,11 @@ export class ModelQueryUtil {
       }));
     }
     if (clauses.length > 1) {
-      q = { $and: clauses };
+      where = { $and: clauses };
     } else {
-      q = clauses[0];
+      where = clauses[0];
     }
-    return q!;
+    return where!;
   }
 
   static has$And = (value: unknown): value is ({ $and: WhereClause<unknown>[] }) =>

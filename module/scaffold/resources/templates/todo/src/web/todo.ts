@@ -57,13 +57,13 @@ export class TodoController {
    */
   @Get('/:id')
   async getOne(id: string): Promise<Todo> {
-    const q: ModelQuery<Todo> = { where: { id } };
+    const query: ModelQuery<Todo> = { where: { id } };
     // {{#modules.auth_web}}
-    if (typeof q.where !== 'string') {
-      q.where!.userId = this.authContext.principal?.id;
+    if (typeof query.where !== 'string') {
+      query.where!.userId = this.authContext.principal?.id;
     }
     // {{/modules.auth_web}}
-    return this.source.queryOne(Todo, q);
+    return this.source.queryOne(Todo, query);
   }
 
   /**
@@ -93,13 +93,13 @@ export class TodoController {
    */
   @Delete('/:id')
   async remove(id: string): Promise<void> {
-    const q: ModelQuery<Todo> = { where: { id } };
+    const query: ModelQuery<Todo> = { where: { id } };
     // {{#modules.auth_web}}
-    if (typeof q.where !== 'string') {
-      q.where!.userId = this.authContext.principal?.id;
+    if (typeof query.where !== 'string') {
+      query.where!.userId = this.authContext.principal?.id;
     }
     // {{/modules.auth_web}}
-    if (await this.source.deleteByQuery(Todo, q) !== 1) {
+    if (await this.source.deleteByQuery(Todo, query) !== 1) {
       throw new NotFoundError(Todo, id);
     }
   }

@@ -96,8 +96,8 @@ export class EndpointUtil {
       case 'header': return isArray ? request.headers.getList(name) : request.headers.get(name);
       case 'query': {
         const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
-        const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
-        return q[name];
+        const query = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
+        return query[name];
       }
     }
   }
@@ -114,11 +114,11 @@ export class EndpointUtil {
     } else if (param.location === 'query') {
       // TODO: Revisit this logic?
       const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
-      const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
+      const query = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
       if (param.prefix) { // Has a prefix provided
-        return q[param.prefix];
+        return query[param.prefix];
       } else if (input.type.Ⲑid) { // Is a full type
-        return q;
+        return query;
       }
     }
 

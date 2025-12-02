@@ -46,7 +46,7 @@ export class CliServiceCommand implements CliCommandShape {
     const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
     const maxVersion = Math.max(...all.map(x => `${x.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;
-    const q = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
+    const queue = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
 
     const jobs = all.map(async (descriptor, i) => {
       const identifier = descriptor.name.padEnd(maxName);
@@ -54,12 +54,12 @@ export class CliServiceCommand implements CliCommandShape {
       let msg: string;
       for await (const [valueType, value] of new ServiceRunner(descriptor).action(action)) {
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
-        q.add({ idx: i, text: msg = cliTpl`${{ identifier }} ${{ type }} ${details}` });
+        queue.add({ idx: i, text: msg = cliTpl`${{ identifier }} ${{ type }} ${details}` });
       }
-      q.add({ idx: i, done: true, text: msg! });
+      queue.add({ idx: i, done: true, text: msg! });
     });
 
-    Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => q.close());
+    Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => queue.close());
 
     const term = new Terminal();
     await term.writer.writeLines([
@@ -68,6 +68,6 @@ export class CliServiceCommand implements CliCommandShape {
       ''.padEnd(maxName + maxVersion + maxStatus + 3, '-'),
     ]).commit();
 
-    await term.streamList(q);
+    await term.streamList(queue);
   }
 }

@@ -107,19 +107,18 @@ export class QueryLanguageTokenizer {
    * Read string until quote
    */
   static readString(text: string, position: number): number {
-    const len = text.length;
-    const ch = text.charCodeAt(position);
-    const q = ch;
+    const length = text.length;
+    const char = text.charCodeAt(position);
     position += 1;
-    while (position < len) {
-      if (text.charCodeAt(position) === q) {
+    while (position < length) {
+      if (text.charCodeAt(position) === char) {
         break;
       } else if (text.charCodeAt(position) === BACKSLASH) {
         position += 1;
       }
       position += 1;
     }
-    if (position === len && text.charCodeAt(position) !== q) {
+    if (position === length && text.charCodeAt(position) !== char) {
       throw new Error('Unterminated string literal');
     }
     return position;

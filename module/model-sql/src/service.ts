@@ -294,16 +294,16 @@ export class SQLModelService implements
   @Connected()
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
-    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
-    const results = await this.query<T>(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, resolvedQuery);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query?.limit);
   }
 
   @Connected()
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
-    const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
-    const results = await this.query(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
+    const results = await this.query(cls, resolvedQuery);
 
     const modelTypeField: ValidStringFields<ModelType> = castTo(field);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, modelTypeField, prefix, results, x => x, query?.limit);
@@ -315,22 +315,22 @@ export class SQLModelService implements
     const col = this.#dialect.identifier(field);
     const ttl = this.#dialect.identifier('count');
     const key = this.#dialect.identifier('key');
-    const q = [
+    const sql = [
       `SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`,
       this.#dialect.getFromSQL(cls),
     ];
-    q.push(
+    sql.push(
       this.#dialect.getWhereSQL(cls, ModelQueryUtil.getWhereClause(cls, query?.where))
     );
-    q.push(
+    sql.push(
       `GROUP BY ${col}`,
       `ORDER BY ${ttl} DESC`
     );
 
-    const results = await this.#exec<{ key: string, count: number }>(q.join('\n'));
-    return results.records.map(x => {
-      x.count = DataUtil.coerceType(x.count, Number);
-      return x;
+    const results = await this.#exec<{ key: string, count: number }>(sql.join('\n'));
+    return results.records.map(result => {
+      result.count = DataUtil.coerceType(result.count, Number);
+      return result;
     });
   }
 }

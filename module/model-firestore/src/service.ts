@@ -124,7 +124,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
     const { fields } = ModelIndexedUtil.computeIndexParts(cls, idx, body);
     const query = fields.reduce<Query>(
-      (q, { path, value }) => q.where(path.join('.'), '==', value),
+      (result, { path, value }) => result.where(path.join('.'), '==', value),
       this.#getCollection(cls)
     );
 
@@ -153,8 +153,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, config, body, { emptySortValue: null });
-    let query = fields.reduce<Query>((q, { path, value }) =>
-      q.where(path.join('.'), '==', value), this.#getCollection(cls));
+    let query = fields.reduce<Query>((result, { path, value }) =>
+      result.where(path.join('.'), '==', value), this.#getCollection(cls));
 
     if (sorted) {
       query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');

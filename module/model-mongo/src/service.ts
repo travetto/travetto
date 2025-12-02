@@ -523,14 +523,14 @@ export class MongoModelService implements
       await QueryVerifier.verify(cls, query);
     }
 
-    let q: Record<string, unknown> = { [field]: { $exists: true } };
+    let queryObject: Record<string, unknown> = { [field]: { $exists: true } };
 
     if (query?.where) {
-      q = { $and: [q, MongoUtil.extractWhereFilter(cls, query.where)] };
+      queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(cls, query.where)] };
     }
 
     const aggregations: object[] = [
-      { $match: q },
+      { $match: queryObject },
       {
         $group: {
           _id: `$${field}`,
@@ -554,15 +554,15 @@ export class MongoModelService implements
   // Suggest
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
-    const q = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
-    const results = await this.query<T>(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, resolvedQuery);
     return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, (a) => a, query && query.limit);
   }
 
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
-    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
-    const results = await this.query<T>(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, resolvedQuery);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query && query.limit);
   }
 

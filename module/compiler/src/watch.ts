@@ -21,12 +21,12 @@ export class CompilerWatcher {
   #lastWorkspaceModified = Date.now();
   #watchCanaryFreq = 5;
   #root: string;
-  #q: AsyncQueue<CompilerWatchEvent>;
+  #queue: AsyncQueue<CompilerWatchEvent>;
 
   constructor(state: CompilerState, signal: AbortSignal) {
     this.#state = state;
     this.#root = state.manifest.workspace.path;
-    this.#q = new AsyncQueue(signal);
+    this.#queue = new AsyncQueue(signal);
     signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(x => x()));
   }
 
@@ -180,13 +180,13 @@ export class CompilerWatcher {
         }
 
         for (const item of items) {
-          this.#q.add(item);
+          this.#queue.add(item);
         }
       } catch (out) {
         if (out instanceof Error && out.message.includes('Events were dropped by the FSEvents client.')) {
           out = new CompilerReset('FSEvents failure, requires restart');
         }
-        return this.#q.throw(out instanceof Error ? out : new Error(`${out}`));
+        return this.#queue.throw(out instanceof Error ? out : new Error(`${out}`));
       }
     }, { ignore });
 
@@ -211,7 +211,7 @@ export class CompilerWatcher {
       const full = path.resolve(toolRootFolder, file);
       const stat = await fs.stat(full).catch(() => null);
       if (toolFolders.has(full) && !stat) {
-        this.#q.throw(new CompilerReset(`Tooling folder removal ${full}`));
+        this.#queue.throw(new CompilerReset(`Tooling folder removal ${full}`));
       }
     });
     this.#cleanup.tool = (): void => listener.close();
@@ -229,7 +229,7 @@ export class CompilerWatcher {
         log.error('Restarting canary due to extra long delay');
         this.#lastWorkspaceModified = Date.now(); // Reset
       } else if (delta > this.#watchCanaryFreq * 2) {
-        this.#q.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
+        this.#queue.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
       } else if (delta > this.#watchCanaryFreq) {
         log.error('Restarting parcel due to inactivity');
         await this.#listenWorkspace();
@@ -247,6 +247,6 @@ export class CompilerWatcher {
       this.#listenToolFolder();
       this.#listenCanary();
     }
-    return this.#q[Symbol.asyncIterator]();
+    return this.#queue[Symbol.asyncIterator]();
   }
 }

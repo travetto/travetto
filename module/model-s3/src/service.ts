@@ -72,12 +72,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return this.#basicKey(key);
   }
 
-  #q<U extends object>(cls: string | Class, id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
+  #query<U extends object>(cls: string | Class, id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
     const key = this.#resolveKey(cls, id);
     return { Key: key, Bucket: this.config.bucket, ...extra };
   }
 
-  #qBlob<U extends object>(id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
+  #queryBlob<U extends object>(id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
     const key = this.#basicKey(id);
     return { Key: key, Bucket: this.config.bucket, ...extra };
   }
@@ -116,7 +116,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
    * Write multipart file upload, in chunks
    */
   async #writeMultipart(id: string, input: Readable, meta: BlobMeta): Promise<void> {
-    const { UploadId } = await this.client.createMultipartUpload(this.#qBlob(id, this.#getMetaBase(meta)));
+    const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(meta)));
 
     const parts: CompletedPart[] = [];
     let buffers: Buffer[] = [];
@@ -124,7 +124,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     let i = 1;
     const flush = async (): Promise<void> => {
       if (!total) { return; }
-      const part = await this.client.uploadPart(this.#qBlob(id, {
+      const part = await this.client.uploadPart(this.#queryBlob(id, {
         Body: Buffer.concat(buffers),
         PartNumber: i,
         UploadId
@@ -145,12 +145,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       }
       await flush();
 
-      await this.client.completeMultipartUpload(this.#qBlob(id, {
+      await this.client.completeMultipartUpload(this.#queryBlob(id, {
         UploadId,
         MultipartUpload: { Parts: parts }
       }));
     } catch (error) {
-      await this.client.abortMultipartUpload(this.#qBlob(id, { UploadId }));
+      await this.client.abortMultipartUpload(this.#queryBlob(id, { UploadId }));
       throw error;
     }
   }
@@ -195,7 +195,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async head<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {
     try {
-      const result = await this.client.headObject(this.#q(cls, id));
+      const result = await this.client.headObject(this.#query(cls, id));
       const { expiresAt } = ModelRegistryIndex.getConfig(cls);
       if (expiresAt && result.ExpiresString && Date.parse(result.ExpiresString) < Date.now()) {
         return false;
@@ -213,7 +213,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     try {
-      const result = await this.client.getObject(this.#q(cls, id));
+      const result = await this.client.getObject(this.#query(cls, id));
       if (result.Body) {
         const body = await toText(castTo(result.Body));
         const output = await ModelCrudUtil.load(cls, body);
@@ -246,7 +246,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
     const content = Buffer.from(JSON.stringify(prepped), 'utf8');
-    await this.client.putObject(this.#q(cls, prepped.id, {
+    await this.client.putObject(this.#query(cls, prepped.id, {
       Body: content,
       ContentType: 'application/json',
       ContentLength: content.length,
@@ -289,7 +289,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
     }
-    await this.client.deleteObject(this.#q(cls, id));
+    await this.client.deleteObject(this.#query(cls, id));
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
@@ -321,7 +321,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
     if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
-      await this.client.putObject(this.#qBlob(location, {
+      await this.client.putObject(this.#queryBlob(location, {
         Body: await toBuffer(stream),
         ContentLength: blobMeta.size,
         ...this.#getMetaBase(blobMeta),
@@ -333,7 +333,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async #getObject(location: string, range?: Required<ByteRange>): Promise<Readable> {
     // Read from s3
-    const result = await this.client.getObject(this.#qBlob(location, range ? {
+    const result = await this.client.getObject(this.#queryBlob(location, range ? {
       Range: `bytes=${range.start}-${range.end}`
     } : {}));
 
@@ -359,7 +359,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {
-    const query = this.#qBlob(location);
+    const query = this.#queryBlob(location);
     try {
       return (await this.client.headObject(query));
     } catch (error) {
@@ -392,7 +392,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async deleteBlob(location: string): Promise<void> {
-    await this.client.deleteObject(this.#qBlob(location));
+    await this.client.deleteObject(this.#queryBlob(location));
   }
 
   async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
@@ -409,7 +409,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlobReadUrl(location: string, exp: TimeSpan = '1h'): Promise<string> {
     return await getSignedUrl(
       this.client,
-      new GetObjectCommand(this.#qBlob(location)),
+      new GetObjectCommand(this.#queryBlob(location)),
       { expiresIn: TimeUtil.asSeconds(exp) }
     );
   }
@@ -419,7 +419,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return await getSignedUrl(
       this.client,
       new PutObjectCommand({
-        ...this.#qBlob(location),
+        ...this.#queryBlob(location),
         ...base,
         ...(meta.size ? { ContentLength: meta.size } : {}),
         ...((meta.hash && meta.hash !== '-1') ? { ChecksumSHA256: meta.hash } : {}),

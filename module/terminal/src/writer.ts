@@ -73,13 +73,13 @@ export class TerminalWriter {
   }
 
   commit(restorePosition: boolean = this.#restoreOnCommit): Promise<void> {
-    const q = this.#buffer.filter(x => x !== undefined);
+    const queue = this.#buffer.filter(x => x !== undefined);
     this.#buffer = [];
-    if (q.length && restorePosition) {
-      q.unshift(Codes.POSITION_SAVE);
-      q.push(Codes.POSITION_RESTORE);
+    if (queue.length && restorePosition) {
+      queue.unshift(Codes.POSITION_SAVE);
+      queue.push(Codes.POSITION_RESTORE);
     }
-    if (q.length && !this.#term.output.write(q.join(''))) {
+    if (queue.length && !this.#term.output.write(queue.join(''))) {
       return new Promise<void>(resolve => this.#term.output.once('drain', resolve));
     } else {
       return Promise.resolve();

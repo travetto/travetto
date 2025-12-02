@@ -486,10 +486,10 @@ export class ElasticsearchModelService implements
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     await QueryVerifier.verify(cls, query);
 
-    const { sort: _, ...q } = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false);
+    const { sort: _, ...rest } = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false);
     const result = await this.client.deleteByQuery({
       ...this.manager.getIdentity(cls),
-      ...q,
+      ...rest,
       refresh: true,
     });
     return result.deleted ?? 0;
@@ -516,8 +516,8 @@ export class ElasticsearchModelService implements
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
 
-    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
-    const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
     const all = await Promise.all(result.hits.hits.map(x => this.postLoad(cls, x)));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (x, value) => value, query && query.limit);
@@ -526,11 +526,11 @@ export class ElasticsearchModelService implements
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
 
-    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
       select: castTo({ [field]: 1 }),
       ...query
     });
-    const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
     const all = await Promise.all(result.hits.hits.map(x => castTo<T>(({ [field]: field === 'id' ? x._id : x._source![field] }))));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, x => x, query && query.limit);
@@ -540,10 +540,10 @@ export class ElasticsearchModelService implements
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
-    const q = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
+    const resolvedSearch = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
 
     const search: estypes.SearchRequest = {
-      query: q.query ?? { ['match_all']: {} },
+      query: resolvedSearch.query ?? { ['match_all']: {} },
       aggs: { [field]: { terms: { field, size: 100 } } },
       size: 0
     };

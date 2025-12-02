@@ -117,8 +117,8 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$exists': {
-              const q = { exists: { field: subPath } };
-              items.push(value ? q : { bool: { ['must_not']: q } });
+              const clause = { exists: { field: subPath } };
+              items.push(value ? clause : { bool: { ['must_not']: clause } });
               break;
             }
             case '$lt':
