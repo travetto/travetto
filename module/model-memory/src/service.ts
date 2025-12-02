@@ -165,14 +165,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const store = this.#getStore(cls);
     if (store.has(id)) {
-      const res = await ModelCrudUtil.load(cls, store.get(id)!);
-      if (res) {
+      const result = await ModelCrudUtil.load(cls, store.get(id)!);
+      if (result) {
         if (ModelRegistryIndex.getConfig(cls).expiresAt) {
-          if (!ModelExpiryUtil.getExpiryState(cls, res).expired) {
-            return res;
+          if (!ModelExpiryUtil.getExpiryState(cls, result).expired) {
+            return result;
           }
         } else {
-          return res;
+          return result;
         }
       }
     }
@@ -281,8 +281,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     let deleted = 0;
     for (const key of [...store.keys()]) {
       try {
-        const res = await ModelCrudUtil.load(cls, store.get(key)!);
-        if (ModelExpiryUtil.getExpiryState(cls, res).expired) {
+        const result = await ModelCrudUtil.load(cls, store.get(key)!);
+        if (ModelExpiryUtil.getExpiryState(cls, result).expired) {
           store.delete(key);
           deleted += 1;
         }

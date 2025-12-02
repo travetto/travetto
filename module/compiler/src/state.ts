@@ -266,9 +266,9 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   readFile(sourceFile: string): string | undefined {
-    const res = this.#sourceContents.get(sourceFile) ?? this.#readFile(sourceFile);
-    this.#sourceContents.set(sourceFile, res);
-    return res;
+    const contents = this.#sourceContents.get(sourceFile) ?? this.#readFile(sourceFile);
+    this.#sourceContents.set(sourceFile, contents);
+    return contents;
   }
 
   getSourceFile(sourceFile: string, language: ts.ScriptTarget): ts.SourceFile {

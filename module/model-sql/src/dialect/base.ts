@@ -904,9 +904,9 @@ ${this.getWhereSQL(cls, where!)}`;
 
     await SQLModelUtil.visitSchema(SchemaRegistryIndex.getConfig(cls), {
       onRoot: async (config) => {
-        const res = buildSet(items); // Already filtered by initial select query
+        const fieldSet = buildSet(items); // Already filtered by initial select query
         selectStack.push(select);
-        stack.push(res);
+        stack.push(fieldSet);
         await config.descend();
       },
       onSub: async ({ config, descend, fields, path }) => {
@@ -936,9 +936,9 @@ ${this.getWhereSQL(cls, where!)}`;
             sel
           ));
 
-          const res = buildSet(children, config);
+          const fieldSet = buildSet(children, config);
           try {
-            stack.push(res);
+            stack.push(fieldSet);
             selectStack.push(subSelectTop);
             await descend();
           } finally {

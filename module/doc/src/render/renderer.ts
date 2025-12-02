@@ -20,10 +20,10 @@ const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
 export class DocRenderer {
 
   static async get(file: string, manifest: Pick<ManifestContext, 'workspace'>): Promise<DocRenderer> {
-    const res = await Runtime.importFrom<DocumentShape>(file);
+    const document = await Runtime.importFrom<DocumentShape>(file);
     const pkg = PackageUtil.readPackage(manifest.workspace.path);
     const repoBaseUrl = pkg.travetto?.doc?.baseUrl ?? manifest.workspace.path;
-    return new DocRenderer(res,
+    return new DocRenderer(document,
       new RenderContext(file, repoBaseUrl, path.resolve(pkg.travetto?.doc?.root ?? manifest.workspace.path))
     );
   }

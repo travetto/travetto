@@ -156,10 +156,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (idxCfg.type === 'unsorted') {
       id = (await this.client.sRandMember(fullKey))!;
     } else {
-      const res = await this.client.zRangeByScore(
+      const result = await this.client.zRangeByScore(
         fullKey, +sort!, +sort!
       );
-      id = res[0];
+      id = result[0];
     }
     if (id) {
       return id;
@@ -185,10 +185,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'exists'): Promise<void> {
-    const res = await this.client.exists(this.#resolveKey(cls, id));
-    if (res === 0 && error === 'notfound') {
+    const result = await this.client.exists(this.#resolveKey(cls, id));
+    if (result === 0 && error === 'notfound') {
       throw new NotFoundError(cls, id);
-    } else if (res === 1 && error === 'exists') {
+    } else if (result === 1 && error === 'exists') {
       throw new ExistsError(cls, id);
     }
   }

@@ -63,9 +63,9 @@ export class CliCommandSchemaUtil {
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),
       (): Promise<void> => SchemaValidator.validateMethod(cls, 'main', args, paramNames),
       async (): Promise<void> => {
-        const res = await cmd.validate?.(...args);
-        if (res) {
-          throw new CliValidationResultError(cmd, Array.isArray(res) ? res : [res]);
+        const result = await cmd.validate?.(...args);
+        if (result) {
+          throw new CliValidationResultError(cmd, Array.isArray(result) ? result : [result]);
         }
       },
     ];

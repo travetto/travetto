@@ -122,18 +122,17 @@ export class EndpointUtil {
       }
     }
 
-    let res = this.extractParameterValue(request, param, input.name!.toString(), input.array) ?? undefined;
-    for (let i = 0; res === undefined && input.aliases && i < input.aliases.length; i += 1) {
-      res = this.extractParameterValue(request, param, input.aliases[i], input.array) ?? undefined;
+    let result = this.extractParameterValue(request, param, input.name!.toString(), input.array) ?? undefined;
+    for (let i = 0; result === undefined && input.aliases && i < input.aliases.length; i += 1) {
+      result = this.extractParameterValue(request, param, input.aliases[i], input.array) ?? undefined;
     }
-    return res;
+    return result;
   }
 
   /**
    * Extract all parameters for a given endpoint/request/response combo
    * @param endpoint The endpoint to extract for
-   * @param req The request
-   * @param res The response
+   * @param request The request
    */
   static async extractParameters(endpoint: EndpointConfig, request: WebRequest): Promise<unknown[]> {
     const cls = endpoint.class;

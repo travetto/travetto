@@ -73,7 +73,7 @@ export class IpcChannel<V = unknown> {
    * Listen for a specific message type, once
    */
   once(eventType: string): Promise<V & { type: string }> {
-    return new Promise(res => this.#emitter.once(eventType, res));
+    return new Promise(resolve => this.#emitter.once(eventType, resolve));
   }
 
   /**

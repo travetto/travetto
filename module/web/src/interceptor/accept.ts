@@ -56,14 +56,14 @@ export class AcceptInterceptor implements WebInterceptor<AcceptConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<AcceptConfig>): Promise<WebResponse> {
-    let res: WebResponse | undefined;
+    let response: WebResponse | undefined;
     try {
       this.validate(request, config);
-      return res = await next();
+      return response = await next();
     } catch (err) {
-      throw res = await WebCommonUtil.catchResponse(err);
+      throw response = await WebCommonUtil.catchResponse(err);
     } finally {
-      res?.headers.setIfAbsent('Accept', config.types.join(','));
+      response?.headers.setIfAbsent('Accept', config.types.join(','));
     }
   }
 }

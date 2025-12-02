@@ -68,21 +68,21 @@ export class CliRunUtil {
 
     for (let i = 0; i < all.length; i++) {
       const param = all[i]!;
-      const res = await ParameterSelector.getParameter({
+      const result = await ParameterSelector.getParameter({
         param,
         total: all.length,
         step: i + 1,
         input: choice.inputs[i]
       });
 
-      if (res === undefined) {
+      if (result === undefined) {
         if (!param.required) {
           selected.push('');
         } else {
           return undefined;
         }
       } else {
-        selected.push(res);
+        selected.push(result);
       }
     }
 
@@ -170,8 +170,8 @@ export class CliRunUtil {
       .map(x => this.#buildQuickPickItem(x))
       .filter(x => !!x);
 
-    const res = await ParameterSelector.getObjectQuickPickList(title, items);
-    let choice: RunChoice | undefined = res?.target;
+    const result = await ParameterSelector.getObjectQuickPickList(title, items);
+    let choice: RunChoice | undefined = result?.target;
     if (choice && !choice.resolved) {
       const inputs = await this.#selectParameters(choice);
       if (inputs) {

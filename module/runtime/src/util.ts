@@ -127,8 +127,8 @@ export class Util {
     if (value === undefined) {
       return;
     }
-    const res = JSON.stringify(value);
-    return Buffer.from(res, 'utf8').toString('base64');
+    const text = JSON.stringify(value);
+    return Buffer.from(text, 'utf8').toString('base64');
   }
 
   /**

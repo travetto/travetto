@@ -5,7 +5,7 @@ import { WebFilterContext } from '@travetto/web';
 import { ConnectRequest, ConnectResponse } from './connect';
 
 
-type Middleware = (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => void;
+type Middleware = (request: IncomingMessage, response: ServerResponse, next: (err?: unknown) => void) => void;
 
 /**
  * Utilities for invoking express middleware with a WebFilterContext
@@ -18,8 +18,8 @@ export class WebConnectUtil {
    */
   static async invoke<T>(ctx: WebFilterContext,
     handler: (
-      req: IncomingMessage,
-      res: ServerResponse,
+      request: IncomingMessage,
+      response: ServerResponse,
       next: (err: Error | null | undefined, value: T | undefined | null) => void
     ) => Middleware
   ): Promise<T | undefined> {

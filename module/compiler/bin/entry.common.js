@@ -76,10 +76,10 @@ async function load(/** @type {(ops: import('../support/entry.main.ts').Operatio
 
     process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
     process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
-    const res = await ctx.loadMain();
+    const result = await ctx.loadMain();
     // @ts-ignore
     try { module.enableCompileCache(); } catch { }
-    return cb(res);
+    return cb(result);
   } catch (err) {
     await rm(ctx.destPath(COMP_MOD), { recursive: true, force: true });
     throw err;

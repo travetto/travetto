@@ -47,9 +47,9 @@ export class QueryLanguageTokenizer {
    */
   static #processToken(state: TokenizeState, mode?: TokenType): Token {
     const text = state.text.substring(state.start, state.pos);
-    const res = TOKEN_MAPPING[text.toLowerCase()];
+    const result = TOKEN_MAPPING[text.toLowerCase()];
     let value: unknown = text;
-    if (!res && state.mode === 'literal') {
+    if (!result && state.mode === 'literal') {
       if (/^["']/.test(text)) {
         value = text.substring(1, text.length - 1)
           .replace(/\\[.]/g, (a, b) => ESCAPE[a] || b);
@@ -67,7 +67,7 @@ export class QueryLanguageTokenizer {
         state.mode = 'identifier';
       }
     }
-    return res ?? { value, type: state.mode || mode };
+    return result ?? { value, type: state.mode || mode };
   }
 
   /**

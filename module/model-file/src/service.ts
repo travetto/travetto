@@ -219,8 +219,8 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     let deleted = 0;
     for await (const [_id, file] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
       try {
-        const res = await ModelCrudUtil.load(cls, await fs.readFile(file));
-        if (ModelExpiryUtil.getExpiryState(cls, res).expired) {
+        const item = await ModelCrudUtil.load(cls, await fs.readFile(file));
+        if (ModelExpiryUtil.getExpiryState(cls, item).expired) {
           await fs.rm(file, { force: true });
           deleted += 1;
         }

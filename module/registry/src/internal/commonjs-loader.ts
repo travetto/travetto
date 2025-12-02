@@ -7,9 +7,9 @@ import { RetargettingProxy } from '../proxy.ts';
 
 declare module 'module' {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  function _resolveFilename(req: string, parent: typeof Module): string;
+  function _resolveFilename(request: string, parent: typeof Module): string;
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  function _load(req: string, parent: typeof Module): unknown;
+  function _load(request: string, parent: typeof Module): unknown;
 }
 
 type ModuleLoader = typeof Module['_load'];

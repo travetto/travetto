@@ -124,8 +124,8 @@ export class CliParseUtil {
     const cmd = valid.length > 0 && !valid[0].startsWith('-') ? valid[0] : undefined;
     const helpIdx = valid.findIndex(x => HELP_FLAG.test(x));
     const args = out.slice(cmd ? 1 : 0);
-    const res = { cmd, args, help: helpIdx >= 0 };
-    return res;
+    const result = { cmd, args, help: helpIdx >= 0 };
+    return result;
   }
 
   /**

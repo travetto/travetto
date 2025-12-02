@@ -199,9 +199,9 @@ export class ManifestModuleUtil {
    */
   static async transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
     const updated = this.#getNewest(await fs.stat(full).catch(() => ({ mtimeMs: 0, ctimeMs: 0 })));
-    const res: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), updated];
+    const moduleFileTuple: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), updated];
     const role = this.getFileRole(moduleFile);
-    return role ? [...res, role] : res;
+    return role ? [...moduleFileTuple, role] : moduleFileTuple;
   }
 
   /**

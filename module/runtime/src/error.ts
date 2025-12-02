@@ -64,7 +64,7 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
    * Serializes an error to a basic object
    */
   toJSON(): AppErrorOptions<T> & { message: string } {
-    const res: AppErrorOptions<unknown> = {
+    const options: AppErrorOptions<unknown> = {
       category: this.category,
       ...(this.cause ? { cause: `${this.cause}` } : undefined),
       type: this.type,
@@ -73,6 +73,6 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
     };
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return { message: this.message, ...res as AppErrorOptions<T> };
+    return { message: this.message, ...options as AppErrorOptions<T> };
   }
 }

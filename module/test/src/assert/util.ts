@@ -78,9 +78,9 @@ export class AssertUtil {
 
     const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
 
-    const res = { import: RuntimeIndex.getFromSource(outFile)?.import!, line };
+    const result = { import: RuntimeIndex.getFromSource(outFile)?.import!, line };
 
-    return res;
+    return result;
   }
 
   /**

@@ -158,11 +158,11 @@ export class AssertCheck {
     } else if (typeof shouldThrow === 'function') {
       const target = shouldThrow.name ? `("${shouldThrow.name}")` : '';
       try {
-        const res = shouldThrow(err);
-        if (res === false) {
+        const result = shouldThrow(err);
+        if (result === false) {
           return new assert.AssertionError({ message: `Checking function ${target} indicated an invalid error`, actual: err });
-        } else if (typeof res === 'string') {
-          return new assert.AssertionError({ message: res, actual: err });
+        } else if (typeof result === 'string') {
+          return new assert.AssertionError({ message: result, actual: err });
         }
       } catch (checkErr) {
         if (checkErr instanceof assert.AssertionError) {

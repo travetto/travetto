@@ -11,14 +11,14 @@ export const getKids = (el: JSXElement): JSXElement[] => {
 
 export const visit = (el: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined | void, depth = 0): boolean | undefined => {
   if (depth > 0) {
-    const res = onVisit(el);
-    if (res === true) {
+    const result = onVisit(el);
+    if (result === true) {
       return true;
     }
   }
   for (const item of getKids(el)) {
-    const res = visit(item, onVisit, depth + 1);
-    if (res) {
+    const result = visit(item, onVisit, depth + 1);
+    if (result) {
       return;
     }
   }

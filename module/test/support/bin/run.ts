@@ -15,8 +15,8 @@ export async function runTests(opts: RunState): Promise<void> {
   RunnerUtil.registerCleanup('runner');
 
   try {
-    const res = await new Runner(opts).run();
-    process.exitCode = res ? 0 : 1;
+    const result = await new Runner(opts).run();
+    process.exitCode = result ? 0 : 1;
   } catch (err) {
     console.error('Test Worker Failed', { error: err });
     process.exitCode = 1;

@@ -153,9 +153,9 @@ export class ModelCrudUtil {
       item = { ...item };
       delete item.id;
     }
-    const res = await this.prePersist(cls, castTo(item), 'partial');
+    const result = await this.prePersist(cls, castTo(item), 'partial');
     await SchemaValidator.validatePartial(cls, item, view);
-    return res;
+    return result;
   }
 
   /**

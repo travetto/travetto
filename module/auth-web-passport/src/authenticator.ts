@@ -61,8 +61,8 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
       state: PassportUtil.enhanceState(ctx, requestOptions.state)
     };
 
-    const user = await WebConnectUtil.invoke<V>(ctx, (req, res, next) =>
-      passport.authenticate(this.#strategyName, options, next)(req, res)
+    const user = await WebConnectUtil.invoke<V>(ctx, (request, response, next) =>
+      passport.authenticate(this.#strategyName, options, next)(request, response)
     );
 
     if (user) {

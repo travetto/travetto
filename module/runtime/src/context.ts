@@ -132,16 +132,16 @@ class $Runtime {
     }
 
     imp = ManifestModuleUtil.withOutputExtension(imp);
-    const res = await import(imp);
-    if (res?.default?.default) {
+    const imported = await import(imp);
+    if (imported?.default?.default) {
       // Unpack default.default, typescript does this in a way that requires recreating the whole object
-      const def = res?.default?.default;
+      const def = imported?.default?.default;
       return Object.defineProperties(castTo({}), {
-        ...Object.getOwnPropertyDescriptors(res),
+        ...Object.getOwnPropertyDescriptors(imported),
         default: { get: () => def, configurable: false }
       });
     }
-    return res;
+    return imported;
   }
 }
 

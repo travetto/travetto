@@ -88,9 +88,9 @@ export class ModelIndexedUtil {
    * @param idx Index config
    */
   static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: DeepPartial<T>, cfg?: ComputeConfig): Record<string, unknown> {
-    const res: Record<string, unknown> = {};
+    const response: Record<string, unknown> = {};
     for (const { path, value } of this.computeIndexParts(cls, idx, item ?? {}, cfg).fields) {
-      let sub: Record<string, unknown> = res;
+      let sub: Record<string, unknown> = response;
       const all = path.slice(0);
       const last = all.pop()!;
       for (const k of all) {
@@ -98,7 +98,7 @@ export class ModelIndexedUtil {
       }
       sub[last] = value;
     }
-    return res;
+    return response;
   }
 
   /**

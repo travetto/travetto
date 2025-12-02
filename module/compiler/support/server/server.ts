@@ -47,7 +47,7 @@ export class CompilerServer {
       keepAlive: true,
       requestTimeout: 1000 * 60 * 60,
       keepAliveTimeout: 1000 * 60 * 60,
-    }, (req, res) => this.#onRequest(req, res));
+    }, (request, response) => this.#onRequest(request, response));
 
     setMaxListeners(1000, this.signal);
   }
@@ -98,21 +98,21 @@ export class CompilerServer {
     return output;
   }
 
-  #addListener(type: CompilerEventType | 'all', res: http.ServerResponse): void {
-    res.writeHead(200);
+  #addListener(type: CompilerEventType | 'all', response: http.ServerResponse): void {
+    response.writeHead(200);
     const id = `id_${Date.now()}_${Math.random()}`.replace('.', '1');
-    (this.#listeners[type] ??= {})[id] = res;
-    this.#listenersAll.add(res);
+    (this.#listeners[type] ??= {})[id] = response;
+    this.#listenersAll.add(response);
     if (type === 'state' || type === 'all') { // Send on initial connect
       this.#emitEvent({ type: 'state', payload: { state: this.info.state } }, id);
     } else {
-      res.write('\n'); // Send at least one byte on listen
+      response.write('\n'); // Send at least one byte on listen
     }
 
     // Do not wait on it
-    res.on('close', () => {
+    response.on('close', () => {
       delete this.#listeners[type]?.[id];
-      this.#listenersAll.delete(res);
+      this.#listenersAll.delete(response);
     });
   }
 
@@ -159,10 +159,10 @@ export class CompilerServer {
   /**
    * Request handler
    */
-  async #onRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
-    res.setHeader('Content-Type', 'application/json');
+  async #onRequest(request: http.IncomingMessage, response: http.ServerResponse): Promise<void> {
+    response.setHeader('Content-Type', 'application/json');
 
-    const [, action, subAction] = new URL(`${this.#url}${req.url}`).pathname.split('/');
+    const [, action, subAction] = new URL(`${this.#url}${request.url}`).pathname.split('/');
 
     let out: unknown;
     let close = false;
@@ -170,7 +170,7 @@ export class CompilerServer {
       case 'event': {
         switch (subAction) {
           case 'change': case 'log': case 'progress': case 'state': case 'all':
-            return this.#addListener(subAction, res);
+            return this.#addListener(subAction, response);
           default: return;
         }
       }
@@ -179,7 +179,7 @@ export class CompilerServer {
       case 'info':
       default: out = this.info ?? {}; break;
     }
-    res.end(JSON.stringify(out));
+    response.end(JSON.stringify(out));
     if (close) {
       await this.close();
     }

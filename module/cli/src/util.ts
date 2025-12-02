@@ -58,7 +58,7 @@ export class CliUtil {
     }
 
     const env: Record<string, string> = {};
-    const req = {
+    const request = {
       type: `@travetto/cli:${action}`,
       data: {
         name: cmd._cfg!.name,
@@ -69,10 +69,10 @@ export class CliUtil {
         args: process.argv.slice(3),
       }
     };
-    console.log('Triggering IPC request', req);
+    console.log('Triggering IPC request', request);
 
     Object.entries(process.env).forEach(([k, v]) => validEnv(k) && (env[k] = v!));
-    const sent = await fetch(Env.TRV_CLI_IPC.val!, { method: 'POST', body: JSON.stringify(req) });
+    const sent = await fetch(Env.TRV_CLI_IPC.val!, { method: 'POST', body: JSON.stringify(request) });
     return sent.ok;
   }
 

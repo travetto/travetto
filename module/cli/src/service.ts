@@ -46,8 +46,8 @@ export class ServiceRunner {
     while ((Date.now() - start) < timeoutMs) {
       try {
         const sock = net.createConnection(port, 'localhost');
-        await new Promise<void>((res, rej) =>
-          sock.on('connect', res).on('timeout', rej).on('error', rej)
+        await new Promise<void>((resolve, reject) =>
+          sock.on('connect', resolve).on('timeout', reject).on('error', reject)
         ).finally(() => sock.destroy());
 
         if (!this.svc.ready?.url || !full) {

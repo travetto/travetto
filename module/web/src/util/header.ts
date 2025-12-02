@@ -137,20 +137,20 @@ export class WebHeaderUtil {
   /**
    * Check freshness of the response using request and response headers.
    */
-  static isFresh(req: WebHeaders, res: WebHeaders): boolean {
-    const cacheControl = req.get('Cache-Control');
+  static isFresh(request: WebHeaders, response: WebHeaders): boolean {
+    const cacheControl = request.get('Cache-Control');
     if (cacheControl?.includes('no-cache')) {
       return false;
     }
 
-    const noneMatch = req.get('If-None-Match');
+    const noneMatch = request.get('If-None-Match');
     if (noneMatch) {
-      const etag = res.get('ETag');
+      const etag = response.get('ETag');
       const validTag = (v: string): boolean => v === etag || v === `W/${etag}` || `W/${v}` === etag;
       return noneMatch === '*' || (!!etag && noneMatch.split(SPLIT_COMMA).some(validTag));
     } else {
-      const modifiedSince = req.get('If-Modified-Since');
-      const lastModified = res.get('Last-Modified');
+      const modifiedSince = request.get('If-Modified-Since');
+      const lastModified = response.get('Last-Modified');
       if (!modifiedSince || !lastModified) {
         return false;
       }

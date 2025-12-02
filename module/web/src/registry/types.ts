@@ -72,7 +72,7 @@ export interface EndpointParameterConfig {
    */
   location: EndpointParamLocation;
   /**
-   * Resolves the value by executing with req/res as input
+   * Resolves the value by executing with request/response as input
    */
   resolve?: WebFilter;
   /**
@@ -133,7 +133,7 @@ export interface EndpointConfig extends CoreConfig {
   /**
    * Response finalizer
    */
-  responseFinalizer?: (res: WebResponse) => WebResponse;
+  responseFinalizer?: (response: WebResponse) => WebResponse;
   /**
    * Response headers finalized
    */

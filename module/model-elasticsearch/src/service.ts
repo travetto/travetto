@@ -412,8 +412,8 @@ export class ElasticsearchModelService implements
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
 
-    const req = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
-    const results = await this.execSearch(cls, req);
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
+    const results = await this.execSearch(cls, search);
     const shouldRemoveIds = query.select && 'id' in query.select && !query.select.id;
     return Promise.all(results.hits.hits.map(m => this.postLoad(cls, m).then(v => {
       if (shouldRemoveIds) {
@@ -431,8 +431,8 @@ export class ElasticsearchModelService implements
   async queryCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
 
-    const req = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
-    const result: number | { value: number } = (await this.execSearch(cls, req)).hits.total || { value: 0 };
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
+    const result: number | { value: number } = (await this.execSearch(cls, search)).hits.total || { value: 0 };
     return typeof result !== 'number' ? result.value : result;
   }
 

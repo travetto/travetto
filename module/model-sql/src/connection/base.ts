@@ -126,9 +126,9 @@ export abstract class Connection<C = unknown> {
         const txId = mode === 'isolated' ? `tx${Util.uuid()}` : undefined;
         try {
           await this.startTx(this.active!, txId);
-          const res = await op();
+          const result = await op();
           await this.commitTx(this.active!, txId);
-          return res;
+          return result;
         } catch (err) {
           try { await this.rollbackTx(this.active!, txId); } catch { }
           throw err;

@@ -242,19 +242,19 @@ export class SQLModelService implements
   @Connected()
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
-    const { records: res } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
+    const { records } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
     if (ModelRegistryIndex.has(cls)) {
-      await this.#dialect.fetchDependents(cls, res, query && query.select);
+      await this.#dialect.fetchDependents(cls, records, query && query.select);
     }
 
-    const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, res);
+    const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, records);
     return await Promise.all(cleaned.map(m => ModelCrudUtil.load(cls, m)));
   }
 
   @Connected()
   async queryOne<T extends ModelType>(cls: Class<T>, builder: ModelQuery<T>, failOnMany = true): Promise<T> {
-    const res = await this.query<T>(cls, { ...builder, limit: failOnMany ? 2 : 1 });
-    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, res, builder.where);
+    const results = await this.query<T>(cls, { ...builder, limit: failOnMany ? 2 : 1 });
+    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, results, builder.where);
   }
 
   @Connected()

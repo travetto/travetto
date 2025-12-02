@@ -18,7 +18,7 @@ export class RepoPublishCommand implements CliCommandShape {
       filter: mod => !!mod.workspace && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
       showStderr: false,
-      transformResult: (mod, res) => PackageManager.validatePublishedResult(Runtime, mod, res),
+      transformResult: (mod, result) => PackageManager.validatePublishedResult(Runtime, mod, result),
     });
 
     if (this.dryRun) {

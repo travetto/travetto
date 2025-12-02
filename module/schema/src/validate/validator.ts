@@ -226,12 +226,12 @@ export class SchemaValidator {
     // Handle class level validators
     for (const fn of classConfig.validators) {
       try {
-        const res = await fn(o, view);
-        if (res) {
-          if (Array.isArray(res)) {
-            errors.push(...res);
+        const error = await fn(o, view);
+        if (error) {
+          if (Array.isArray(error)) {
+            errors.push(...error);
           } else {
-            errors.push(res);
+            errors.push(error);
           }
         }
       } catch (err: unknown) {
@@ -330,12 +330,12 @@ export class SchemaValidator {
       }));
     }
     for (const validator of config.validators) {
-      const res = await validator(...params);
-      if (res) {
-        if (Array.isArray(res)) {
-          errors.push(...res);
+      const error = await validator(...params);
+      if (error) {
+        if (Array.isArray(error)) {
+          errors.push(...error);
         } else {
-          errors.push(res);
+          errors.push(error);
         }
       }
     }

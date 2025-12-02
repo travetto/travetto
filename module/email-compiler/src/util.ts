@@ -36,8 +36,8 @@ export class EmailCompileUtil {
    * Generate singular output path given a file
    */
   static buildOutputPath(file: string, suffix: string, prefix?: string): string {
-    const res = (SUPPORT_SRC.test(file) ? file.split(SUPPORT_SRC)[1] : file).replace(EXT, suffix);
-    return prefix ? path.join(prefix, res) : res;
+    const location = (SUPPORT_SRC.test(file) ? file.split(SUPPORT_SRC)[1] : file).replace(EXT, suffix);
+    return prefix ? path.join(prefix, location) : location;
   }
 
   /**
