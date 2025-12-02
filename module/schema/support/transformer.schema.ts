@@ -163,7 +163,7 @@ export class SchemaTransformer {
       node.name,
       node.questionToken,
       node.typeParameters,
-      node.parameters.map((y, i) => SchemaTransformUtil.computeInput(state, y, { index: i })),
+      node.parameters.map((parameter, i) => SchemaTransformUtil.computeInput(state, parameter, { index: i })),
       node.type,
       node.body
     );

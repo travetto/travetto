@@ -41,7 +41,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * #streamValues(operation: 'scan' | 'sScan' | 'zScan', search: RedisScan, count = 100): AsyncIterable<string[]> {
-    let prevCursor = '0';
+    let previousCursor = '0';
     let done = false;
 
     const flags = { COUNT: count, ...('match' in search ? { MATCH: search.match } : {}) };
@@ -50,13 +50,13 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     while (!done) {
       const [cursor, results] = await (
         operation === 'scan' ?
-          this.client.scan(prevCursor, flags).then(x => [x.cursor, x.keys] as const) :
+          this.client.scan(previousCursor, flags).then(x => [x.cursor, x.keys] as const) :
           operation === 'sScan' ?
-            this.client.sScan(key, prevCursor, flags).then(x => [x.cursor, x.members] as const) :
-            this.client.zScan(key, prevCursor, flags).then(x => [x.cursor, x.members.map(y => y.value)] as const)
+            this.client.sScan(key, previousCursor, flags).then(x => [x.cursor, x.members] as const) :
+            this.client.zScan(key, previousCursor, flags).then(x => [x.cursor, x.members.map(item => item.value)] as const)
       );
 
-      prevCursor = cursor;
+      previousCursor = cursor;
 
       yield results;
 
