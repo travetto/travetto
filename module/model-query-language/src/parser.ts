@@ -170,8 +170,8 @@ export class QueryLanguageParser {
         const parts = node.field!.split('.');
         const top: WhereClauseRaw<T> = {};
         let sub: Record<string, unknown> = top;
-        for (const p of parts) {
-          sub = sub[p] = {};
+        for (const part of parts) {
+          sub = sub[part] = {};
         }
         if (node.operation === '$regex' && typeof node.value === 'string') {
           sub[node.operation!] = new RegExp(`^${node.value}`);

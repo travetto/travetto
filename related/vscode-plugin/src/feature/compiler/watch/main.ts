@@ -54,8 +54,8 @@ export class CompilerWatchFeature extends BaseFeature {
       bar: await new Promise<ProgressBar>(resolve =>
         vscode.window.withProgress(
           { location: vscode.ProgressLocation.Notification, cancellable: false, title },
-          p => {
-            resolve(p);
+          progress => {
+            resolve(progress);
             return complete.promise;
           }
         )

@@ -23,9 +23,9 @@ const CLASS_MAPPING = {
 })
 export class ModuleChartComponent {
 
-  _pages = PAGES.map(p => ({
-    ...p,
-    cls: `${p.path} ${CLASS_MAPPING[p.path] ?? ''}`
+  _pages = PAGES.map(page => ({
+    ...page,
+    cls: `${page.path} ${CLASS_MAPPING[page.path] ?? ''}`
   }));
 
   get pages(): typeof PAGES {

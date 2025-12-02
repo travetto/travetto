@@ -24,10 +24,10 @@ export class EditorService {
     return Promise.resolve(this.engine.render(text, context)).then(MailUtil.purgeBrand);
   }
 
-  async #renderTemplate(rel: string, context: Record<string, unknown>): Promise<EmailCompiled> {
-    const p = await EmailCompiler.compile(rel);
+  async #renderTemplate(templateFile: string, context: Record<string, unknown>): Promise<EmailCompiled> {
+    const email = await EmailCompiler.compile(templateFile);
     return TypedObject.fromEntries(
-      await Promise.all(TypedObject.entries(p).map(([key, value]) =>
+      await Promise.all(TypedObject.entries(email).map(([key, value]) =>
         this.#interpolate(value, context).then((result) => [key, result])))
     );
   }

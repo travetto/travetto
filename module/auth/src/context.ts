@@ -30,8 +30,8 @@ export class AuthContext {
   /**
    * Set principal
    */
-  set principal(p: Principal | undefined) {
-    this.#principal.set(p);
+  set principal(value: Principal | undefined) {
+    this.#principal.set(value);
   }
 
   /**

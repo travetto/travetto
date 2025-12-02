@@ -29,11 +29,11 @@ export abstract class BaseModelCommand implements CliCommandShape {
     return [
       cliTpl`${{ title: 'Providers' }}`,
       '-'.repeat(20),
-      ...candidates.providers.map(p => cliTpl`  * ${{ type: p }}`),
+      ...candidates.providers.map(type => cliTpl`  * ${{ type }}`),
       '',
       cliTpl`${{ title: 'Models' }}`,
       '-'.repeat(20),
-      ...candidates.models.map(p => cliTpl`  * ${{ param: p }}`)
+      ...candidates.models.map(param => cliTpl`  * ${{ param }}`)
     ];
   }
 

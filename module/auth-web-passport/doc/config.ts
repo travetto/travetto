@@ -36,8 +36,8 @@ export class AppConfig {
   @InjectableFactory()
   static principalSource(): Authorizer {
     return new class implements Authorizer {
-      async authorize(p: Principal) {
-        return p;
+      async authorize(principal: Principal) {
+        return principal;
       }
     }();
   }

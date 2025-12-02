@@ -96,9 +96,9 @@ export class CoreUtil {
       first = factory.createIdentifier(first);
     }
     return items.reduce<ts.Expression>(
-      (acc, p) => typeof p === 'number' ?
-        factory.createElementAccessExpression(acc, p) :
-        factory.createPropertyAccessExpression(acc, p),
+      (acc, value) => typeof value === 'number' ?
+        factory.createElementAccessExpression(acc, value) :
+        factory.createPropertyAccessExpression(acc, value),
       factory.createPropertyAccessExpression(first, second)
     );
   }

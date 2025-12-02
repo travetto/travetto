@@ -11,7 +11,7 @@ type User = { username: string, password: string };
 class AuthConfig {
   @InjectableFactory()
   static getAuthorizer(): Authorizer { // Simply mirrors the identity back as the principal
-    return { authorize: p => p };
+    return { authorize: principal => principal };
   }
 
   @InjectableFactory(SessionModelSymbol)

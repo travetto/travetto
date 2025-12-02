@@ -105,7 +105,7 @@ export class SchemaTransformer {
     if (cons) {
       attrs.methods = {
         [CONSTRUCTOR_PROPERTY]: {
-          parameters: cons.parameters.map((p, i) => SchemaTransformUtil.computeInputDecoratorParams(state, p, { index: i })).map(x =>
+          parameters: cons.parameters.map((parameter, i) => SchemaTransformUtil.computeInputDecoratorParams(state, parameter, { index: i })).map(x =>
             state.extendObjectLiteral({}, ...x)
           ),
         }

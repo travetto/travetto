@@ -167,7 +167,7 @@ export class EmailCompileUtil {
       .replace(/<(meta|img|link|hr|br)[^>]{0,200}>/g, a => a.replace(/>/g, '/>')) // Fix self closing
       .replace(/&apos;/g, '&#39;') // Fix apostrophes, as outlook hates them
       .replace(/(background(?:-color)?:\s*)([#0-9a-f]{6,8})([^>.#,]+)>/ig,
-        (all, p, col, rest) => `${p}${col}${rest} bgcolor="${col}">`) // Inline bg-color
+        (all, property, color, rest) => `${property}${color}${rest} bgcolor="${color}">`) // Inline bg-color
       .replace(/<([^>]+vertical-align:\s*(top|bottom|middle)[^>]+)>/g,
         (a, tag, valign) => tag.indexOf('valign') ? `<${tag}>` : `<${tag} valign="${valign}">`) // Vertically align if it has the style
       .replace(/<(table[^>]+expand[^>]+width:\s*)(100%\s+!important)([^>]+)>/g,

@@ -16,7 +16,7 @@ export class ParserManager {
     const parsers = await DependencyRegistryIndex.getInstances(toConcrete<ConfigParser>());
 
     // Register parsers
-    this.#parsers = Object.fromEntries(parsers.flatMap(p => p.ext.map(ext => [ext, p])));
+    this.#parsers = Object.fromEntries(parsers.flatMap(parser => parser.ext.map(ext => [ext, parser])));
     this.#extMatch = parsers.length ? new RegExp(`(${Object.keys(this.#parsers).join('|').replaceAll('.', '[.]')})`) : /^$/;
   }
 

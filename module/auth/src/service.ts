@@ -82,23 +82,23 @@ export class AuthService {
   /**
    * Manage expiry state, renewing if allowed
    */
-  manageExpiry(p?: Principal): void {
-    if (!p) {
+  manageExpiry(principal?: Principal): void {
+    if (!principal) {
       return;
     }
 
     if (this.config.maxAgeMs) {
-      p.expiresAt ??= TimeUtil.fromNow(this.config.maxAgeMs);
+      principal.expiresAt ??= TimeUtil.fromNow(this.config.maxAgeMs);
     }
 
-    p.issuedAt ??= new Date();
+    principal.issuedAt ??= new Date();
 
-    if (p.expiresAt && this.config.maxAgeMs && this.config.rollingRenew) { // Session behavior
-      const end = p.expiresAt.getTime();
+    if (principal.expiresAt && this.config.maxAgeMs && this.config.rollingRenew) { // Session behavior
+      const end = principal.expiresAt.getTime();
       const midPoint = end - this.config.maxAgeMs / 2;
       if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
-        p.issuedAt = new Date();
-        p.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
+        principal.issuedAt = new Date();
+        principal.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
       }
     }
   }
@@ -106,10 +106,10 @@ export class AuthService {
   /**
    * Enforce expiry, invalidating the principal if expired
    */
-  enforceExpiry(p?: Principal): Principal | undefined {
-    if (p && p.expiresAt && p.expiresAt.getTime() < Date.now()) {
+  enforceExpiry(principal?: Principal): Principal | undefined {
+    if (principal && principal.expiresAt && principal.expiresAt.getTime() < Date.now()) {
       return undefined;
     }
-    return p;
+    return principal;
   }
 }

@@ -78,12 +78,12 @@ export class SessionService {
     // Ensure latest expiry information before persisting
     await this.authService.manageExpiry(this.authContext.principal);
 
-    const p = this.authContext.principal;
+    const principal = this.authContext.principal;
 
     // If not destroying, write to response, and store
-    if (p && session.action !== 'destroy') {
-      session.expiresAt = p.expiresAt;
-      session.issuedAt = p.issuedAt!;
+    if (principal && session.action !== 'destroy') {
+      session.expiresAt = principal.expiresAt;
+      session.issuedAt = principal.issuedAt!;
 
       // If expiration time has changed, send new session information
       if (session.action === 'create' || session.isChanged()) {

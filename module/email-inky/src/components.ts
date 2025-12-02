@@ -49,7 +49,7 @@ export type JSXElements = { [K in keyof C]: JSXElementByFn<K>; };
 
 export const EMPTY_ELEMENT = EMPTY;
 
-const invertedC = new Map<Function, string>(TypedObject.entries(c).map(p => [p[1], p[0]] as const));
+const invertedC = new Map<Function, string>(TypedObject.entries(c).map(([name, cls]) => [cls, name] as const));
 
 export function getComponentName(fn: Function | string): string {
   if (typeof fn === 'string') {

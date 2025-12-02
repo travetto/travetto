@@ -95,8 +95,8 @@ export abstract class SQLDialect implements DialectState {
    * Column types with inputs
    */
   PARAMETERIZED_COLUMN_TYPES: Record<'VARCHAR' | 'DECIMAL', (...values: number[]) => string> = {
-    VARCHAR: n => `VARCHAR(${n})`,
-    DECIMAL: (d, p) => `DECIMAL(${d},${p})`
+    VARCHAR: count => `VARCHAR(${count})`,
+    DECIMAL: (digits, precision) => `DECIMAL(${digits},${precision})`
   };
 
   ID_AFFIX = '`';

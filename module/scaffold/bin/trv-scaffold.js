@@ -5,7 +5,7 @@ async function getScaffoldCwd() {
   if (process.env.npm_lifecycle_script?.includes('trv-scaffold')) { // Is npx  run
     const { delimiter } = await import('node:path');
     const parts = process.env.PATH?.split(delimiter) ?? [];
-    const loc = parts.find(p => p.includes('npx') && p.includes('.bin'));
+    const loc = parts.find(part => part.includes('npx') && part.includes('.bin'));
     if (loc) {
       return loc.split('/node_modules')[0];
     }

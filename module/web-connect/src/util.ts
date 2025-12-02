@@ -26,11 +26,11 @@ export class WebConnectUtil {
     const connectReq = ConnectRequest.get(ctx.request);
     const connectRes = ConnectResponse.get();
 
-    const p = Promise.withResolvers<T | undefined>();
-    connectRes.on('end', () => p.resolve(null!));
+    const promise = Promise.withResolvers<T | undefined>();
+    connectRes.on('end', () => promise.resolve(null!));
 
-    handler(connectReq, connectRes, (error, value) => error ? p.reject(error) : p.resolve(value!));
-    const result = await p.promise;
+    handler(connectReq, connectRes, (error, value) => error ? promise.reject(error) : promise.resolve(value!));
+    const result = await promise.promise;
     connectRes.throwIfSent();
     return result;
   }

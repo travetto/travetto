@@ -128,11 +128,11 @@ export abstract class BasePackCommand implements CliCommandShape {
    */
   getBinaryDependencies(): string[] {
     return [...RuntimeIndex.getModuleList('all')]
-      .map(m => RuntimeIndex.getModule(m))
-      .filter(m => !!m)
-      .filter(m => m.prod)
-      .map(m => PackageUtil.readPackage(m?.sourcePath))
-      .map(p => p?.travetto?.build?.binaryDependencies ?? [])
+      .map(name => RuntimeIndex.getModule(name))
+      .filter(mod => !!mod)
+      .filter(mod => mod.prod)
+      .map(mod => PackageUtil.readPackage(mod?.sourcePath))
+      .map(pkg => pkg?.travetto?.build?.binaryDependencies ?? [])
       .flat();
   }
 

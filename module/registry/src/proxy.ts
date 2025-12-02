@@ -79,12 +79,12 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
       .concat(Object.getOwnPropertySymbols(this.target));
   }
 
-  deleteProperty(target: T, p: PropertyKey): boolean {
-    return delete this.target[castKey<T>(p)];
+  deleteProperty(target: T, property: PropertyKey): boolean {
+    return delete this.target[castKey<T>(property)];
   }
 
-  defineProperty(target: T, p: PropertyKey, attributes: PropertyDescriptor): boolean {
-    Object.defineProperty(this.target, p, attributes);
+  defineProperty(target: T, property: PropertyKey, attributes: PropertyDescriptor): boolean {
+    Object.defineProperty(this.target, property, attributes);
     return true;
   }
 }

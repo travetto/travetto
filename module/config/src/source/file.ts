@@ -24,7 +24,7 @@ export class FileConfigSource implements ConfigSource {
       ['application', 100],
       [Runtime.env!, 200],
       ...(Env.TRV_PROFILES.list ?? [])
-        .map((p, i) => [p, 300 + i * 10] as const)
+        .map((profile, i) => [profile, 300 + i * 10] as const)
     ] as const).filter(x => !!x[0]);
   }
 
