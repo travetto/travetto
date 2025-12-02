@@ -6,8 +6,8 @@ import type { TestEvent } from '../../model/event.ts';
  */
 export abstract class DelegatingConsumer implements TestConsumerShape {
   #consumers: TestConsumerShape[];
-  #transformer?: (ev: TestEvent) => typeof ev;
-  #filter?: (ev: TestEvent) => boolean;
+  #transformer?: (event: TestEvent) => typeof event;
+  #filter?: (event: TestEvent) => boolean;
 
   constructor(consumers: TestConsumerShape[]) {
     this.#consumers = consumers;
@@ -16,12 +16,12 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     }
   }
 
-  withTransformer(transformer: (ev: TestEvent) => typeof ev): this {
+  withTransformer(transformer: (event: TestEvent) => typeof event): this {
     this.#transformer = transformer;
     return this;
   }
 
-  withFilter(filter: (ev: TestEvent) => boolean): this {
+  withFilter(filter: (event: TestEvent) => boolean): this {
     this.#filter = filter;
     return this;
   }

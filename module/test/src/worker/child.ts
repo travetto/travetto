@@ -37,7 +37,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
       const file = Runtime.toolPath(`test-worker.${process.pid}.log`);
       const stdout = createWriteStream(file, { flags: 'a' });
       const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
-      ConsoleManager.set({ log: (ev) => c[ev.level](process.pid, ...ev.args) });
+      ConsoleManager.set({ log: (event) => c[event.level](process.pid, ...event.args) });
     } else {
       ConsoleManager.set({ log: () => { } });
     }
@@ -45,7 +45,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     RunnerUtil.registerCleanup('worker');
 
     // Listen for inbound requests
-    this.on('*', ev => this.onCommand(ev));
+    this.on('*', event => this.onCommand(event));
 
     // Let parent know the child is ready for handling commands
     this.send(Events.READY);

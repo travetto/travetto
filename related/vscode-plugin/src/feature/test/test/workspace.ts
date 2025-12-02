@@ -68,17 +68,17 @@ export class WorkspaceResultsManager {
 
   /**
    * On test event
-   * @param ev
+   * @param event
    */
-  onEvent(ev: TestWatchEvent): void {
-    const file = this.getLocation(ev);
+  onEvent(event: TestWatchEvent): void {
+    const file = this.getLocation(event);
     if (file) {
       const document = this.#filenameMap.get(file);
       if (document) {
-        this.#results.get(document)?.onEvent(ev);
+        this.#results.get(document)?.onEvent(event);
       }
     }
-    this.#diagnostics.onEvent(ev);
+    this.#diagnostics.onEvent(event);
   }
 
   /**

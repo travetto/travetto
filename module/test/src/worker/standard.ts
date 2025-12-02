@@ -41,9 +41,9 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
   await channel.send(Events.INIT); // Initialize
   await channel.once(Events.INIT_COMPLETE); // Wait for complete
 
-  channel.on('*', async ev => {
+  channel.on('*', async event => {
     try {
-      await consumer.onEvent(Util.deserializeFromJson(JSON.stringify(ev)));  // Connect the consumer with the event stream from the child
+      await consumer.onEvent(Util.deserializeFromJson(JSON.stringify(event)));  // Connect the consumer with the event stream from the child
     } catch {
       // Do nothing
     }
@@ -55,7 +55,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
   channel.send(Events.RUN, run);
 
   // Wait for complete
-  const result = await complete.then(ev => Util.deserializeFromJson<typeof ev>(JSON.stringify(ev)));
+  const result = await complete.then(event => Util.deserializeFromJson<typeof event>(JSON.stringify(event)));
 
   // Kill on complete
   await channel.destroy();

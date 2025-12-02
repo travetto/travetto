@@ -70,22 +70,22 @@ export class TapSummaryEmitter implements TestConsumerShape {
     );
   }
 
-  onEvent(ev: TestEvent): void {
-    if (ev.type === 'test' && ev.phase === 'after') {
-      const { test } = ev;
+  onEvent(event: TestEvent): void {
+    if (event.type === 'test' && event.phase === 'after') {
+      const { test } = event;
       this.#results.add(test);
       if (test.status === 'failed') {
-        this.#consumer.onEvent(ev);
+        this.#consumer.onEvent(event);
       }
       const tests = this.#timings.get('test')!;
-      tests.set(`${ev.test.classId}/${ev.test.methodName}`, {
-        key: `${ev.test.classId}/${ev.test.methodName}`,
+      tests.set(`${event.test.classId}/${event.test.methodName}`, {
+        key: `${event.test.classId}/${event.test.methodName}`,
         duration: test.duration,
         tests: 1
       });
-    } else if (ev.type === 'suite' && ev.phase === 'after') {
-      const [module] = ev.suite.classId.split(/:/);
-      const [file] = ev.suite.classId.split(/#/);
+    } else if (event.type === 'suite' && event.phase === 'after') {
+      const [module] = event.suite.classId.split(/:/);
+      const [file] = event.suite.classId.split(/#/);
 
       const modules = this.#timings.get('module')!;
       const files = this.#timings.get('file')!;
@@ -99,16 +99,16 @@ export class TapSummaryEmitter implements TestConsumerShape {
         files.set(file, { key: file, duration: 0, tests: 0 });
       }
 
-      suites.set(ev.suite.classId, {
-        key: ev.suite.classId,
-        duration: ev.suite.duration,
-        tests: ev.suite.tests.length
+      suites.set(event.suite.classId, {
+        key: event.suite.classId,
+        duration: event.suite.duration,
+        tests: event.suite.tests.length
       });
 
-      files.get(file)!.duration += ev.suite.duration;
-      files.get(file)!.tests += ev.suite.tests.length;
-      modules.get(module)!.duration += ev.suite.duration;
-      modules.get(module)!.tests += ev.suite.tests.length;
+      files.get(file)!.duration += event.suite.duration;
+      files.get(file)!.tests += event.suite.tests.length;
+      modules.get(module)!.duration += event.suite.duration;
+      modules.get(module)!.tests += event.suite.tests.length;
     }
   }
 

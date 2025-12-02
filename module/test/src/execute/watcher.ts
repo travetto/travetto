@@ -75,15 +75,15 @@ export class TestWatcher {
     // If a file is changed, but doesn't emit classes, re-run whole file
     Registry.onNonClassChanges(imp => itr.add({ import: imp }));
 
-    process.on('message', ev => {
-      if (typeof ev === 'object' && ev && 'type' in ev && ev.type === 'run-test') {
-        console.log('Received message', ev);
+    process.on('message', event => {
+      if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {
+        console.log('Received message', event);
         // Legacy
-        if ('file' in ev && typeof ev.file === 'string') {
-          ev = { import: RuntimeIndex.getFromSource(ev.file)?.import! };
+        if ('file' in event && typeof event.file === 'string') {
+          event = { import: RuntimeIndex.getFromSource(event.file)?.import! };
         }
-        console.debug('Manually triggered', ev);
-        itr.add(castTo(ev), true);
+        console.debug('Manually triggered', event);
+        itr.add(castTo(event), true);
       }
     });
 
