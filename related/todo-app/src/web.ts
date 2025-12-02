@@ -4,6 +4,10 @@ import { Inject } from '@travetto/di';
 import { TodoService } from './service.ts';
 import { Todo, TodoSearch } from './model.ts';
 
+
+/**
+ * Todo request
+ */
 type TodoRequest = Omit<Todo, 'id'>;
 
 @Controller('/todo')

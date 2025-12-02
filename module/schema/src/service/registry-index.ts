@@ -1,7 +1,7 @@
 import { ChangeEvent, RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
-import { SchemaFieldConfig, SchemaClassConfig, SchemaFieldMap, SchemaMethodConfig } from './types.ts';
+import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 import { SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
@@ -22,14 +22,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
 
   static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
-  }
-
-  static getFieldMap(cls: Class, view?: string): SchemaFieldMap {
-    return this.#instance.store.get(cls).getSchema(view);
-  }
-
-  static getMethodConfig(cls: Class, method: string | symbol): SchemaMethodConfig {
-    return this.#instance.store.get(cls).getMethod(method);
   }
 
   static has(cls: Class): boolean {
@@ -64,8 +56,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls);
   }
 
-  static getOptionalConfig(cls: Class): SchemaClassConfig | undefined {
-    return this.#instance.store.getOptional(cls)?.get();
+  static getOptional(cls: Class): Omit<SchemaRegistryAdapter, RegistrationMethods> | undefined {
+    return this.#instance.store.getOptional(cls);
   }
 
   static getClasses(): Class[] {
@@ -160,14 +152,12 @@ export class SchemaRegistryIndex implements RegistryIndex {
    * @param cls Class for instance
    * @param o Actual instance
    */
-  resolveInstanceType<T>(requestedCls: Class<T>, o: T): Class {
-    const cls = this.store.getClassById(requestedCls.Ⲑid); // Resolve by id to handle any stale references
-    const adapter = this.store.get(cls);
-    const { discriminatedField, discriminatedType } = adapter.get();
+  resolveInstanceType<T>(cls: Class<T>, o: T): Class {
+    const { discriminatedField, discriminatedType, class: targetClass } = this.store.get(cls).get();
     if (!discriminatedField) {
-      return cls;
+      return targetClass;
     } else {
-      const base = this.getBaseClass(cls);
+      const base = this.getBaseClass(targetClass);
       const map = this.#byDiscriminatedTypes.get(base);
       const type = castTo<string>(o[castKey<T>(discriminatedField)]) ?? discriminatedType;
       if (!type) {
@@ -177,8 +167,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
         throw new AppError(`Unable to resolve discriminated type '${type}' for class ${base.name}`);
       }
       const requested = map.get(type)!;
-      if (!(classConstruct(requested) instanceof requestedCls)) {
-        throw new AppError(`Resolved discriminated type '${type}' for class ${base.name} is not an instance of requested type ${requestedCls.name}`);
+      if (!(classConstruct(requested) instanceof targetClass)) {
+        throw new AppError(`Resolved discriminated type '${type}' for class ${base.name} is not an instance of requested type ${targetClass.name}`);
       }
       return requested;
     }

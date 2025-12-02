@@ -60,7 +60,7 @@ class EdgeCases {
 
   @Test()
   async testEmpty() {
-    const fields = SchemaRegistryIndex.getFieldMap(WithEmptyObject);
+    const fields = SchemaRegistryIndex.get(WithEmptyObject).getFields();
     assert(fields);
     assert('empty' in fields);
     assert(fields.empty.type === Object);
@@ -68,10 +68,10 @@ class EdgeCases {
 
   @Test()
   async testSingle() {
-    const fields = SchemaRegistryIndex.getFieldMap(SingleField);
+    const fields = SchemaRegistryIndex.get(SingleField).getFields();
     assert(fields);
     assert('single' in fields);
     assert(fields.single.type !== Object);
-    assert(SchemaRegistryIndex.getFieldMap(fields.single.type).field.type === Number);
+    assert(SchemaRegistryIndex.get(fields.single.type).getFields().field.type === Number);
   }
 }

@@ -42,12 +42,12 @@ export class ConfigureTest {
     assert(config.endpoints.length === 1);
 
     const ep = config.endpoints[0];
-    const { parameters: params } = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
+    const { parameters: params } = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
     assert(ep.httpMethod === 'GET');
     assert(ep.methodName === 'getUser');
-    assert(ep.endpointFunction === TestController.prototype.getUser);
+    assert(ep.class === TestController);
 
-    const endpointSchema = SchemaRegistryIndex.getMethodConfig(TestController, ep.methodName);
+    const endpointSchema = SchemaRegistryIndex.get(TestController).getMethod(ep.methodName);
     assert(endpointSchema.description === 'Get user by name');
 
     assert(ep.parameters.length === 1);

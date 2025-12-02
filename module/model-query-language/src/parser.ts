@@ -88,11 +88,11 @@ export class QueryLanguageParser {
     const second = nodes[nodes.length - 2];
     if (second && second.type === 'unary' && second.value === 'not') {
       const node = nodes.pop();
-      nodes.pop();
+      nodes.pop(); // This is second
       nodes.push({
         type: 'unary',
         op: 'not',
-        value: castTo(node)
+        value: castTo<AllNode>(node)
       });
     }
   }

@@ -48,7 +48,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       throw new AppError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
 
-    const fields = SchemaRegistryIndex.getFieldMap(input.type, input.view);
+    const fields = SchemaRegistryIndex.get(input.type).getFields(input.view);
     const params: ParameterObject[] = [];
     for (const sub of Object.values(fields)) {
       const name = sub.name.toString();
@@ -243,7 +243,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: 'Raw binary data'
       };
     } else {
-      const schemaConfig = SchemaRegistryIndex.getOptionalConfig(body.type);
+      const schemaConfig = SchemaRegistryIndex.getOptional(body.type)?.get();
       const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.name;
       const typeRef = schemaConfig ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {
@@ -298,7 +298,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const tagName = ctrl.externalName;
 
-    const schema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
+    const schema = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
 
     const op: OperationObject = {
       tags: [tagName],
@@ -314,7 +314,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 
-    const methodSchema = SchemaRegistryIndex.getMethodConfig(ep.class, ep.methodName);
+    const methodSchema = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
 
     for (const param of methodSchema.parameters) {
       const result = this.#processEndpointParam(ep, ep.parameters[param.index] ?? {}, param);

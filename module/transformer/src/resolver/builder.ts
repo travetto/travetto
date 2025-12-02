@@ -16,6 +16,14 @@ const UNDEFINED = Symbol();
 
 const MAPPED_TYPE_SET = new Set(['Omit', 'Pick', 'Required', 'Partial']);
 const isMappedType = (type: string | undefined): type is MappedType['operation'] => MAPPED_TYPE_SET.has(type!);
+const getMappedFields = (type: ts.Type): string[] | undefined => {
+  if (type.isStringLiteral()) {
+    return [type.value];
+  } else if (type.isUnion() && type.types.every(t => t.isStringLiteral())) {
+    return type.types.map(t => t.value);
+  }
+};
+
 /**
  * List of global types that can be parameterized
  */
@@ -117,7 +125,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
  */
 export const TypeBuilder: {
   [K in Category]: {
-    build(resolver: TransformResolver, type: ts.Type, alias?: ts.Symbol): AnyType | undefined;
+    build(resolver: TransformResolver, type: ts.Type, context: { alias?: ts.Symbol, node?: ts.Node }): AnyType | undefined;
     finalize?(type: Type<K>): AnyType;
   }
 } = {
@@ -252,48 +260,42 @@ export const TypeBuilder: {
     }
   },
   mapped: {
-    build: (resolver, type, alias) => {
+    build: (resolver, type, context) => {
       let mainType: ts.Type | undefined;
       let fields: string[] | undefined;
       let operation: string | undefined;
+      let name: string | undefined;
 
       const decls = DeclarationUtil.getDeclarations(type).filter(x => ts.isTypeAliasDeclaration(x));
-      if (decls.length > 0) {
-        const ref = decls[0].type;
-        if (ts.isTypeReferenceNode(ref) && ref.typeArguments && ref.typeArguments.length > 0) {
-          const [first, second] = ref.typeArguments;
-          mainType = resolver.getType(first);
-          operation = ref.typeName.getText();
-          if (second) {
-            const resolved = resolver.getType(second);
-            if (resolved.isStringLiteral()) {
-              fields = [resolved.value];
-            } else if (resolved.isUnion() && resolved.types.every(t => t.isStringLiteral())) {
-              fields = resolved.types.map(t => t.value);
-            }
-          }
-        }
-      } else {
-        mainType = type.aliasTypeArguments?.[0]!;
-        operation = type.aliasSymbol?.escapedName.toString();
-        fields = type.getApparentProperties().map(p => p.getName());
+      const ref = decls[0]?.type;
+
+      if (ref && ts.isTypeReferenceNode(ref) && ref.typeArguments && ref.typeArguments.length > 0) {
+        const [first, second] = ref.typeArguments;
+        mainType = resolver.getType(first);
+        operation = ref.typeName.getText();
+        name = resolver.getTypeAsString(type)!;
+        fields = !second ? [] : getMappedFields(resolver.getType(second));
+      } else if (type.aliasTypeArguments && type.aliasSymbol) {
+        mainType = type.aliasTypeArguments[0];
+        operation = type.aliasSymbol.escapedName.toString();
+        fields = (type.aliasTypeArguments.length > 1) ? getMappedFields(type.aliasTypeArguments[1]) : [];
+        name = `${resolver.getTypeAsString(mainType)!}_${operation}_${fields?.join('_')}`;
       }
 
       if (!isMappedType(operation) || fields === undefined || !mainType || !mainType.isClass()) {
-        return TypeBuilder.shape.build(resolver, type, alias);
+        return TypeBuilder.shape.build(resolver, type, context);
       }
 
       const importName = resolver.getTypeImportName(mainType) ?? '<unknown>';
       const mappedClassName = resolver.getTypeAsString(mainType)!;
-      const name = resolver.getTypeAsString(type)!;
 
       return { key: 'mapped', name, original: mainType, operation, importName, mappedClassName, fields };
     }
   },
   shape: {
-    build: (resolver, type, alias?) => {
+    build: (resolver, type, context) => {
       const tsFieldTypes: Record<string, ts.Type> = {};
-      const name = CoreUtil.getSymbol(alias ?? type)?.getName();
+      const name = CoreUtil.getSymbol(context?.alias ?? type)?.getName();
       const importName = resolver.getTypeImportName(type) ?? '<unknown>';
       const tsTypeArguments = resolver.getAllTypeArguments(type);
       const props = resolver.getPropertiesOfType(type);

@@ -83,7 +83,7 @@ class TestRunnerFeature extends BaseFeature {
     }
   }
 
-  #isTestDoc(doc: vscode.TextEditor | vscode.TextDocument | undefined): boolean {
+  #isTestDoc(doc: vscode.TextEditor | vscode.TextDocument | undefined): doc is Exclude<typeof doc, undefined> {
     const file = doc ? ('fileName' in doc ? doc.fileName : doc.document.fileName) : undefined;
     return Workspace.isCompilerWatching && !!this.#getTestModule(file);
   }

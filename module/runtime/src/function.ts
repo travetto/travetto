@@ -62,3 +62,12 @@ export function describeFunction(fn?: Function): FunctionMetadata | undefined {
   const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = fn;
   return _fn?.[MetadataSymbol];
 }
+
+const foreignTypeRegistry = new Map<string, Function>();
+export function foreignType(id: string): Function {
+  if (!foreignTypeRegistry.has(id)) {
+    const type = class { static Ⲑid = id; };
+    foreignTypeRegistry.set(id, type);
+  }
+  return foreignTypeRegistry.get(id)!;
+}

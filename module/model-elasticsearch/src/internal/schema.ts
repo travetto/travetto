@@ -74,7 +74,7 @@ export class ElasticsearchSchemaUtil {
    * Build a mapping for a given class
    */
   static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    const fields = SchemaRegistryIndex.getFieldMap(cls);
+    const fields = SchemaRegistryIndex.get(cls).getFields();
 
     const props: Record<string, estypes.MappingProperty> = {};
 

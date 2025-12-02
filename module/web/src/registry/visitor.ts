@@ -28,12 +28,12 @@ export class ControllerVisitUtil {
 
     await visitor.onControllerStart?.(controller);
     for (const endpoint of controller.endpoints) {
-      const endpointSchema = SchemaRegistryIndex.getMethodConfig(cls, endpoint.methodName);
+      const endpointSchema = SchemaRegistryIndex.get(cls).getMethod(endpoint.methodName);
       if (endpointSchema.private === true && options.skipPrivate) {
         continue;
       }
 
-      const { parameters: params, returnType } = SchemaRegistryIndex.getMethodConfig(cls, endpoint.methodName);
+      const { parameters: params, returnType } = endpointSchema;
       await visitor.onEndpointStart?.(endpoint, controller, params);
       if (returnType) {
         await this.#onSchemaEvent(visitor, returnType.type);

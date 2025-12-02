@@ -80,7 +80,7 @@ export class MongoUtil {
 
   /**/
   static extractSimple<T>(base: Class<T> | undefined, o: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
-    const fields = base ? SchemaRegistryIndex.getOptionalConfig(base)?.fields : undefined;
+    const fields = base ? SchemaRegistryIndex.getOptional(base)?.getFields() : undefined;
     const out: Record<string, unknown> = {};
     const sub = o;
     const keys = Object.keys(sub);

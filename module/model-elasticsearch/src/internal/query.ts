@@ -65,7 +65,7 @@ export class ElasticsearchQueryUtil {
    */
   static extractWhereTermQuery<T>(cls: Class<T>, o: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
     const items = [];
-    const fields = SchemaRegistryIndex.getFieldMap(cls);
+    const fields = SchemaRegistryIndex.get(cls).getFields();
 
     for (const key of TypedObject.keys(o)) {
       const top = o[key];

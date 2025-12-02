@@ -123,7 +123,7 @@ export class SimpleResolver implements TransformResolver {
       const { category, type } = TypeCategorize(this, resType);
       const { build, finalize } = TypeBuilder[category];
 
-      let result = build(this, type, alias);
+      let result = build(this, type, { alias, node: node && 'kind' in node ? node : undefined });
 
       // Convert via cache if needed
       result = visited.getOrSet(type, result);

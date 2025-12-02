@@ -27,6 +27,8 @@ function isRedefinableDeclaration(x: ts.Node): x is ts.InterfaceDeclaration | ts
   return ts.isFunctionDeclaration(x) || ts.isClassDeclaration(x) || ts.isInterfaceDeclaration(x);
 }
 
+const FOREIGN_TYPE_REGISTRY_FILE = '@travetto/runtime/src/function';
+
 /**
  * Transformer runtime state
  */
@@ -402,14 +404,12 @@ export class TransformerState implements State {
    * Produce a foreign target type
    */
   getForeignTarget(ret: ForeignType): ts.Expression {
-    return this.factory.createClassExpression([], undefined, undefined, undefined, [
-      this.factory.createPropertyDeclaration(
-        [this.factory.createModifier(ts.SyntaxKind.StaticKeyword)],
-        'Ⲑid',
-        undefined,
-        undefined,
-        this.fromLiteral(`${ret.source.split('node_modules/')[1]}+${ret.name}`)
-      )
+    const file = this.importFile(FOREIGN_TYPE_REGISTRY_FILE);
+    return this.factory.createCallExpression(this.createAccess(
+      file.ident,
+      this.factory.createIdentifier('foreignType'),
+    ), [], [
+      this.fromLiteral(`${ret.source.split('node_modules/')[1]}+${ret.name}`)
     ]);
   }
 

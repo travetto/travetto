@@ -279,10 +279,7 @@ export class MongoModelService implements
       return;
     }
     const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
-    const writeStream = this.#bucket.openUploadStream(location, {
-      contentType: blobMeta.contentType,
-      metadata: blobMeta,
-    });
+    const writeStream = this.#bucket.openUploadStream(location, { metadata: blobMeta });
     await pipeline(stream, writeStream);
 
     if (existing) {

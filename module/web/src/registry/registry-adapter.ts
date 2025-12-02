@@ -124,11 +124,11 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     return this.#endpoints.get(method)!;
   }
 
-  registerEndpointParameter(method: string | symbol, index: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {
+  registerEndpointParameter(method: string | symbol, idx: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {
     const ep = this.registerEndpoint(method);
-    ep.parameters[index] ??= { index, location: 'query' };
-    safeAssign(ep.parameters[index], ...config);
-    return ep.parameters[index];
+    ep.parameters[idx] ??= { index: idx, location: 'query' };
+    safeAssign(ep.parameters[idx], ...config);
+    return ep.parameters[idx];
   }
 
   finalize(): void {
@@ -138,7 +138,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
       ep.fullPath = `/${this.#config.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
       ep.finalizedResponseHeaders = new WebHeaders({ ...this.#config.responseHeaders, ...ep.responseHeaders });
       ep.responseContext = { ...this.#config.responseContext, ...ep.responseContext };
-      for (const schema of SchemaRegistryIndex.getMethodConfig(this.#cls, ep.methodName).parameters) {
+      for (const schema of SchemaRegistryIndex.get(this.#cls).getMethod(ep.methodName).parameters) {
         ep.parameters[schema.index!] ??= { index: schema.index!, location: undefined! };
         ep.parameters[schema.index!].location ??= computeParameterLocation(ep, schema);
       }
