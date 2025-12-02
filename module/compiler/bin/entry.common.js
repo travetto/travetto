@@ -60,7 +60,7 @@ async function getContext() {
 }
 
 /** @template T */
-async function load(/** @type {(operations: import('../support/entry.main.ts').Operations) => T} */ cb) {
+async function load(/** @type {(operations: import('../support/entry.main.ts').Operations) => T} */ callback) {
   const ctx = await getContext();
 
   try {
@@ -79,7 +79,7 @@ async function load(/** @type {(operations: import('../support/entry.main.ts').O
     const result = await ctx.loadMain();
     // @ts-ignore
     try { module.enableCompileCache(); } catch { }
-    return cb(result);
+    return callback(result);
   } catch (error) {
     await rm(ctx.destPath(COMP_MOD), { recursive: true, force: true });
     throw error;

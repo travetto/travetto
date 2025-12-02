@@ -137,13 +137,13 @@ export class ConnectResponse implements Pick<ServerResponse,
     return this;
   }
 
-  end(chunk?: unknown, encoding?: unknown, cb?: () => void): this {
+  end(chunk?: unknown, encoding?: unknown, callback?: () => void): this {
     this.flushHeaders();
     if (chunk) {
       this.write(chunk, encoding);
     }
     this.#finished = true;
-    cb?.();
+    callback?.();
     for (const item of this.#onEndHandlers) {
       item();
     }

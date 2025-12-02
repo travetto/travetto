@@ -40,7 +40,7 @@ class $SchemaChangeListener {
 
   /**
    * On schema change, emit the change event for the whole schema
-   * @param cb The function to call on schema change
+   * @param handler The function to call on schema change
    */
   onSchemaChange(handler: (event: SchemaChangeEvent) => void): void {
     this.#emitter.on('schema', handler);
@@ -48,7 +48,7 @@ class $SchemaChangeListener {
 
   /**
    * On schema field change, emit the change event for the whole schema
-   * @param cb The function to call on schema field change
+   * @param handler The function to call on schema field change
    */
   onFieldChange(handler: (event: FieldChangeEvent) => void): void {
     this.#emitter.on('field', handler);
