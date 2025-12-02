@@ -92,7 +92,7 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     case 'Required':
     case 'Partial': {
       base.fields = Object.fromEntries(
-        Object.entries(base.fields).map(([k, v]) => [k, {
+        Object.entries(parent.fields).map(([k, v]) => [k, {
           ...v,
           required: {
             active: base.mappedOperation === 'Required'

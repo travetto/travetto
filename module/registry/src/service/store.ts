@@ -1,6 +1,22 @@
-import { AppError, castTo, Class, getParentClass } from '@travetto/runtime';
+import { Any, AppError, castTo, Class, getParentClass, Runtime } from '@travetto/runtime';
 
 import { EXPIRED_CLASS, RegistrationMethods, RegistryAdapter } from './types';
+
+function ExchangeExpired<R = unknown>() {
+  return function (
+    target: Any,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<(this: RegistryIndexStore, cls: Class) => R>
+  ): void {
+    if (Runtime.dynamic) {
+      const original = descriptor.value!;
+      descriptor.value = function (this: RegistryIndexStore, cls: Class): R {
+        const resolved = EXPIRED_CLASS in cls ? this.getClassById(cls.Ⲑid) : cls;
+        return original.apply(this, [resolved]);
+      };
+    }
+  };
+}
 
 /**
  * Base registry index implementation
@@ -15,18 +31,11 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
 
   constructor(adapterCls: new (cls: Class) => A) {
     this.#adapterCls = adapterCls;
-  }
-
-  #resolveClass(cls: Class): Class {
-    return (EXPIRED_CLASS in cls) ? this.getClassById(cls.Ⲑid) : cls;
+    this.getClassById = this.getClassById.bind(this);
   }
 
   getClasses(): Class[] {
     return Array.from(this.#adapters.keys());
-  }
-
-  has(cls: Class): boolean {
-    return this.#adapters.has(this.#resolveClass(cls));
   }
 
   getClassById(id: string): Class {
@@ -42,8 +51,18 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     this.#finalized.set(cls, true);
   }
 
+  remove(cls: Class): void {
+    this.#adapters.delete(cls);
+    this.#finalized.delete(cls);
+  }
+
+  @ExchangeExpired()
+  has(cls: Class): boolean {
+    return this.#adapters.has(cls);
+  }
+
+  @ExchangeExpired()
   adapter(cls: Class): A {
-    cls = this.#resolveClass(cls);
     if (!this.#adapters.has(cls)!) {
       const adapter = new this.#adapterCls(cls);
       this.#adapters.set(cls, adapter);
@@ -53,11 +72,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return castTo(this.#adapters.get(cls));
   }
 
-  remove(cls: Class): void {
-    this.#adapters.delete(cls);
-    this.#finalized.delete(cls);
-  }
-
+  @ExchangeExpired()
   getForRegister(cls: Class, allowFinalized = false): A {
     if (this.#finalized.get(cls) && !allowFinalized) {
       throw new AppError(`Class ${cls.Ⲑid} is already finalized`);
@@ -65,14 +80,15 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return this.adapter(cls);
   }
 
+  @ExchangeExpired()
   get(cls: Class): Omit<A, RegistrationMethods> {
-    cls = this.#resolveClass(cls);
     if (!this.has(cls)) {
       throw new AppError(`Class ${cls.Ⲑid} is not registered for ${this.#adapterCls.Ⲑid}`);
     }
     return this.adapter(cls);
   }
 
+  @ExchangeExpired()
   getOptional(cls: Class): Omit<A, RegistrationMethods> | undefined {
     if (!this.has(cls)) {
       return undefined;
@@ -80,8 +96,8 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
     return this.adapter(cls);
   }
 
+  @ExchangeExpired()
   finalized(cls: Class): boolean {
-    cls = this.#resolveClass(cls);
     return this.#finalized.has(cls);
   }
 }

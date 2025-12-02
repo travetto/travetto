@@ -4,7 +4,11 @@ import { Inject } from '@travetto/di';
 import { TodoService } from './service.ts';
 import { Todo, TodoSearch } from './model.ts';
 
-type TodoRequest = Omit<Todo, 'id'>;
+
+/**
+ * Todo request
+ */
+type TodoRequest = Required<Todo>;
 
 @Controller('/todo')
 export class TodoController {
@@ -21,7 +25,10 @@ export class TodoController {
    */
   @Get('/')
   async getAll(search: TodoSearch): Promise<Todo[]> {
-    return this._svc.getAll(search);
+    return this._svc.getAll(search).then(x => x.map(y => {
+      y.id = y.id.toUpperCase();
+      return y;
+    }));
   }
 
   /**
