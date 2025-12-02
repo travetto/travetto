@@ -9,7 +9,7 @@ const BARE_IMPORT_RE = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
 
 async function writeIfStale(src = '', dest = '', transform = async (x = '') => x) {
-  const [srcStat, destStat] = await Promise.all([src, dest].map(x => stat(`${x}`).then(z => z.mtimeMs, () => 0)));
+  const [srcStat, destStat] = await Promise.all([src, dest].map(x => stat(`${x}`).then(stats => stats.mtimeMs, () => 0)));
 
   if (!destStat || destStat < srcStat) {
     const text = src ? await readFile(src, 'utf8') : '';
