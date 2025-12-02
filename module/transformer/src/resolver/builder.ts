@@ -304,14 +304,14 @@ export const TypeBuilder: {
       }
 
       for (const member of properties) {
-        const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
-        if (DeclarationUtil.isPublic(dec)) { // If public
-          const memberType = resolver.getType(dec);
+        const decorator = DeclarationUtil.getPrimaryDeclarationNode(member);
+        if (DeclarationUtil.isPublic(decorator)) { // If public
+          const memberType = resolver.getType(decorator);
           if (
             !member.getName().includes('@') && // if not a symbol
             !memberType.getCallSignatures().length // if not a function
           ) {
-            if ((ts.isPropertySignature(dec) || ts.isPropertyDeclaration(dec)) && !!dec.questionToken) {
+            if ((ts.isPropertySignature(decorator) || ts.isPropertyDeclaration(decorator)) && !!decorator.questionToken) {
               Object.defineProperty(memberType, UNDEFINED, { value: true });
             }
             tsFieldTypes[member.getName()] = memberType;
@@ -346,8 +346,8 @@ export const TypeBuilder: {
 
       // Convert name to $Concrete suffix if not provided
       if (!name) {
-        const [decl] = DeclarationUtil.getDeclarations(type).filter(x => ts.isInterfaceDeclaration(x) || ts.isTypeAliasDeclaration(x));
-        name = `${decl.name.text}$Concrete`;
+        const [declaration] = DeclarationUtil.getDeclarations(type).filter(x => ts.isInterfaceDeclaration(x) || ts.isTypeAliasDeclaration(x));
+        name = `${declaration.name.text}$Concrete`;
       }
 
       return { key: 'managed', name, importName };

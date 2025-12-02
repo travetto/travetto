@@ -312,9 +312,9 @@ export class SQLModelService implements
   @Connected()
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
-    const col = this.#dialect.ident(field);
-    const ttl = this.#dialect.ident('count');
-    const key = this.#dialect.ident('key');
+    const col = this.#dialect.identifier(field);
+    const ttl = this.#dialect.identifier('count');
+    const key = this.#dialect.identifier('key');
     const q = [
       `SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`,
       this.#dialect.getFromSQL(cls),

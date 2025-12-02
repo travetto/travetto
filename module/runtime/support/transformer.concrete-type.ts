@@ -18,7 +18,7 @@ export class ConcreteTransformer {
   static #createConcreteFunction(state: TransformerState, name: string | ts.Identifier): ts.FunctionDeclaration {
     const final = typeof name === 'string' ? name : name.getText();
 
-    const dec = state.factory.createFunctionDeclaration(
+    const declaration = state.factory.createFunctionDeclaration(
       // eslint-disable-next-line no-bitwise
       state.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export | ts.ModifierFlags.Const),
       undefined, `${final}$Concrete`, [], [], undefined,
@@ -26,13 +26,13 @@ export class ConcreteTransformer {
     );
 
     state.addStatements([
-      dec,
+      declaration,
       state.factory.createExpressionStatement(
         state.factory.createCallExpression(
           state.createAccess('Object', 'defineProperty'),
           undefined,
           [
-            dec.name!,
+            declaration.name!,
             state.fromLiteral('name'),
             state.fromLiteral({ value: final })
           ]
@@ -40,7 +40,7 @@ export class ConcreteTransformer {
       )
     ]);
 
-    return dec;
+    return declaration;
   }
 
   /**

@@ -35,7 +35,7 @@ const FOREIGN_TYPE_REGISTRY_FILE = '@travetto/runtime/src/function';
 export class TransformerState implements State {
   #resolver: SimpleResolver;
   #imports: ImportManager;
-  #modIdent: ts.Identifier;
+  #moduleIdentifier: ts.Identifier;
   #manifestIndex: ManifestIndex;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
@@ -147,8 +147,8 @@ export class TransformerState implements State {
   importDecorator(pth: string, name: string): ts.PropertyAccessExpression | undefined {
     if (!this.#decorators.has(`${pth}:${name}`)) {
       const ref = this.#imports.importFile(pth);
-      const ident = this.factory.createIdentifier(name);
-      this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.ident, ident));
+      const identifier = this.factory.createIdentifier(name);
+      this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.identifier, identifier));
     }
     return this.#decorators.get(name);
   }
@@ -164,22 +164,22 @@ export class TransformerState implements State {
   /**
    * Read a decorator's metadata
    */
-  getDecoratorMeta(dec: ts.Decorator): DecoratorMeta | undefined {
-    const ident = DecoratorUtil.getDecoratorIdent(dec);
-    const type = this.#resolver.getType(ident);
-    const decl = DeclarationUtil.getOptionalPrimaryDeclarationNode(type);
-    const src = decl?.getSourceFile().fileName;
+  getDecoratorMeta(decorator: ts.Decorator): DecoratorMeta | undefined {
+    const identifier = DecoratorUtil.getDecoratorIdentifier(decorator);
+    const type = this.#resolver.getType(identifier);
+    const declaration = DeclarationUtil.getOptionalPrimaryDeclarationNode(type);
+    const src = declaration?.getSourceFile().fileName;
     const mod = src ? this.#resolver.getFileImportName(src, true) : undefined;
     const file = this.#manifestIndex.getFromImport(mod ?? '')?.outputFile;
     const targets = DocUtil.readAugments(type);
     const example = DocUtil.readExample(type);
     const module = file ? mod : undefined;
-    const name = ident ?
-      ident.escapedText?.toString()! :
+    const name = identifier ?
+      identifier.escapedText?.toString()! :
       undefined;
 
-    if (ident && name) {
-      return { dec, ident, file, module, targets, name, options: example };
+    if (identifier && name) {
+      return { decorator, identifier, file, module, targets, name, options: example };
     }
   }
 
@@ -188,7 +188,7 @@ export class TransformerState implements State {
    */
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? [])
-      .map(dec => this.getDecoratorMeta(dec))
+      .map(decorator => this.getDecoratorMeta(decorator))
       .filter(x => !!x) : [];
   }
 
@@ -201,26 +201,26 @@ export class TransformerState implements State {
 
   /**
    * Register statement for inclusion in final output
-   * @param stmt
+   * @param added
    * @param before
    */
   addStatements(added: ts.Statement[], before?: ts.Node | number): void {
-    const stmts = this.source.statements.slice(0);
-    let idx = stmts.length + 1000;
+    const statements = this.source.statements.slice(0);
+    let idx = statements.length + 1000;
 
     if (before && typeof before !== 'number') {
-      let n = before;
-      if (hasOriginal(n)) {
-        n = n.original;
+      let node = before;
+      if (hasOriginal(node)) {
+        node = node.original;
       }
-      while (n && !ts.isSourceFile(n.parent) && n !== n.parent) {
-        n = n.parent;
+      while (node && !ts.isSourceFile(node.parent) && node !== node.parent) {
+        node = node.parent;
       }
-      if (!ts.isStatement(n)) {
+      if (!ts.isStatement(node)) {
         throw new Error('Unable to find statement at top level');
       }
-      if (n && ts.isSourceFile(n.parent) && stmts.indexOf(n) >= 0) {
-        idx = stmts.indexOf(n) - 1;
+      if (node && ts.isSourceFile(node.parent) && statements.indexOf(node) >= 0) {
+        idx = statements.indexOf(node) - 1;
       }
     } else if (before !== undefined) {
       idx = before;
@@ -284,17 +284,17 @@ export class TransformerState implements State {
    * Get filename identifier, regardless of module system
    */
   getModuleIdentifier(): ts.Expression {
-    if (this.#modIdent === undefined) {
-      this.#modIdent = this.factory.createUniqueName('mod');
+    if (this.#moduleIdentifier === undefined) {
+      this.#moduleIdentifier = this.factory.createUniqueName('mod');
       const entry = this.#resolver.getFileImport(this.source.fileName);
-      const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
+      const declaration = this.factory.createVariableDeclaration(this.#moduleIdentifier, undefined, undefined,
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
       );
       this.addStatements([
-        this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))
+        this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([declaration]))
       ], -1);
     }
-    return this.#modIdent;
+    return this.#moduleIdentifier;
   }
 
   /**
@@ -309,7 +309,7 @@ export class TransformerState implements State {
     mod = typeof mod === 'string' ? mod : mod[ModuleNameSymbol]!;
     const target = `${mod}:${name}`;
     const list = this.getDecoratorList(node);
-    return list.find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
+    return list.find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.decorator;
   }
 
   /**
@@ -406,7 +406,7 @@ export class TransformerState implements State {
   getForeignTarget(ret: ForeignType): ts.Expression {
     const file = this.importFile(FOREIGN_TYPE_REGISTRY_FILE);
     return this.factory.createCallExpression(this.createAccess(
-      file.ident,
+      file.identifier,
       this.factory.createIdentifier('foreignType'),
     ), [], [
       this.fromLiteral(`${ret.source.split('node_modules/')[1]}+${ret.name}`)

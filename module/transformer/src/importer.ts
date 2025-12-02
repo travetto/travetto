@@ -19,7 +19,7 @@ export class ImportManager {
   #newImports = new Map<string, Import>();
   #imports: Map<string, Import>;
   #idx: Record<string, number> = {};
-  #ids = new Map<string, ts.Identifier>();
+  #identifiers = new Map<string, ts.Identifier>();
   #importName: string;
   #resolver: TransformResolver;
 
@@ -107,19 +107,19 @@ export class ImportManager {
   }
 
   /**
-   * Produces a unique ID for a given file
+   * Produces a unique identifier for a given file
    */
-  getId(file: string, name?: string): ts.Identifier {
-    if (!this.#ids.has(file)) {
+  getIdentifier(file: string, name?: string): ts.Identifier {
+    if (!this.#identifiers.has(file)) {
       if (name) {
-        this.#ids.set(file, this.factory.createIdentifier(name));
+        this.#identifiers.set(file, this.factory.createIdentifier(name));
       } else {
         const key = path.basename(file, path.extname(file)).replace(/\W+/g, '_');
         const suffix = this.#idx[key] = (this.#idx[key] ?? -1) + 1;
-        this.#ids.set(file, this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`));
+        this.#identifiers.set(file, this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`));
       }
     }
-    return this.#ids.get(file)!;
+    return this.#identifiers.get(file)!;
   }
 
   /**
@@ -138,14 +138,14 @@ export class ImportManager {
     }
 
     if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {
-      const ident = this.getId(file, name);
-      const uniqueName = ident.text;
+      const identifier = this.getIdentifier(file, name);
+      const uniqueName = identifier.text;
 
       if (this.#imports.has(uniqueName)) { // Already imported, be cool
         return this.#imports.get(uniqueName)!;
       }
 
-      const newImport = { path: file, ident };
+      const newImport = { path: file, identifier };
       this.#imports.set(uniqueName, newImport);
       this.#newImports.set(file, newImport);
     }
@@ -179,10 +179,10 @@ export class ImportManager {
     }
 
     try {
-      const importStmts = [...this.#newImports.values()].map(({ path: resolved, ident }) => {
+      const importStmts = [...this.#newImports.values()].map(({ path: resolved, identifier }) => {
         const importStmt = this.factory.createImportDeclaration(
           undefined,
-          this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(ident)),
+          this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(identifier)),
           this.factory.createStringLiteral(resolved)
         );
         return importStmt;
@@ -205,30 +205,30 @@ export class ImportManager {
   finalizeImportExportExtension(ret: ts.SourceFile): ts.SourceFile {
     const toAdd: ts.Statement[] = [];
 
-    for (const stmt of ret.statements) {
-      if (ts.isExportDeclaration(stmt)) {
-        if (!stmt.isTypeOnly) {
+    for (const statement of ret.statements) {
+      if (ts.isExportDeclaration(statement)) {
+        if (!statement.isTypeOnly) {
           toAdd.push(this.factory.updateExportDeclaration(
-            stmt,
-            stmt.modifiers,
-            stmt.isTypeOnly,
-            stmt.exportClause,
-            this.normalizeModuleSpecifier(stmt.moduleSpecifier),
-            stmt.attributes
+            statement,
+            statement.modifiers,
+            statement.isTypeOnly,
+            statement.exportClause,
+            this.normalizeModuleSpecifier(statement.moduleSpecifier),
+            statement.attributes
           ));
         }
-      } else if (ts.isImportDeclaration(stmt)) {
-        if (!stmt.importClause?.isTypeOnly) {
+      } else if (ts.isImportDeclaration(statement)) {
+        if (!statement.importClause?.isTypeOnly) {
           toAdd.push(this.factory.updateImportDeclaration(
-            stmt,
-            stmt.modifiers,
-            this.#rewriteImportClause(stmt.moduleSpecifier, stmt.importClause)!,
-            this.normalizeModuleSpecifier(stmt.moduleSpecifier)!,
-            stmt.attributes
+            statement,
+            statement.modifiers,
+            this.#rewriteImportClause(statement.moduleSpecifier, statement.importClause)!,
+            this.normalizeModuleSpecifier(statement.moduleSpecifier)!,
+            statement.attributes
           ));
         }
       } else {
-        toAdd.push(stmt);
+        toAdd.push(statement);
       }
     }
     return CoreUtil.updateSource(this.factory, ret, toAdd);
@@ -252,8 +252,8 @@ export class ImportManager {
     if (type.importName === this.#importName) {
       return factory.createIdentifier(targetName);
     } else {
-      const { ident } = this.#imports.get(type.importName) ?? this.importFile(type.importName);
-      return factory.createPropertyAccessExpression(ident, targetName);
+      const { identifier } = this.#imports.get(type.importName) ?? this.importFile(type.importName);
+      return factory.createPropertyAccessExpression(identifier, targetName);
     }
   }
 }

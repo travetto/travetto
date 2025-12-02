@@ -158,9 +158,9 @@ export class VisitorFactory<S extends State = State> {
 
     // Checks for matches of decorators to registered items
     const targets = new Map<string, DecoratorMeta>();
-    for (const dec of state.getDecoratorList(node)) {
-      for (const sub of dec.targets ?? []) {
-        targets.set(sub, dec);
+    for (const decorator of state.getDecoratorList(node)) {
+      for (const sub of decorator.targets ?? []) {
+        targets.set(sub, decorator);
       }
     }
 
@@ -168,7 +168,7 @@ export class VisitorFactory<S extends State = State> {
       return;
     }
 
-    for (const [key, dec] of targets.entries()) {
+    for (const [key, decorator] of targets.entries()) {
       const values = set[phase]!.get(key);
       if (!values || !values.length) {
         continue;
@@ -176,7 +176,7 @@ export class VisitorFactory<S extends State = State> {
 
       // For all matching handlers, execute
       for (const item of values) {
-        node = item[phase]!<T>(state, node, dec) ?? node;
+        node = item[phase]!<T>(state, node, decorator) ?? node;
       }
     }
     return node;

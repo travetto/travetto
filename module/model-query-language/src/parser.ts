@@ -22,7 +22,7 @@ export class QueryLanguageParser {
   static handleClause(nodes: (AllNode | Token)[]): void {
     const value: Token | ArrayNode = castTo(nodes.pop());
     const operation: Token & { value: string } = castTo(nodes.pop());
-    const ident: Token & { value: string } = castTo(nodes.pop());
+    const identifier: Token & { value: string } = castTo(nodes.pop());
 
     // value isn't a literal or a list, bail
     if (value.type !== 'literal' && value.type !== 'list') {
@@ -43,7 +43,7 @@ export class QueryLanguageParser {
 
     nodes.push({
       type: 'clause',
-      field: ident.value,
+      field: identifier.value,
       operation: finalOp,
       value: value.value
     });

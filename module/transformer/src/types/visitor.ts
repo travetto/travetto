@@ -4,8 +4,8 @@ import ts from 'typescript';
  * Decorator metadata
  */
 export type DecoratorMeta = {
-  dec: ts.Decorator;
-  ident: ts.Identifier;
+  decorator: ts.Decorator;
+  identifier: ts.Identifier;
   module?: string;
   file?: string;
   targets?: string[];

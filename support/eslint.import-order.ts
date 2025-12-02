@@ -41,13 +41,13 @@ export const ImportOrder: TrvEslintPlugin = {
                 from = node.source.value;
               }
             } else if (node.type === 'VariableDeclaration' && node.kind === 'const') {
-              const [decl] = node.declarations;
+              const [declaration] = node.declarations;
               let call: Expression | undefined;
-              const initType = decl?.init?.type;
+              const initType = declaration?.init?.type;
               if (initType === 'CallExpression') {
-                call = decl.init;
+                call = declaration.init;
               } else if (initType === 'TSAsExpression') { // tslint support
-                call = decl.init.expression;
+                call = declaration.init.expression;
               }
               if (
                 call?.type === 'CallExpression' && call.callee.type === 'Identifier' &&

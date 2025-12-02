@@ -21,7 +21,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
       config = input;
     }
   }
-  const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
+  const decorator = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
     const handler = descriptor.value!;
@@ -31,7 +31,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
     });
     Object.defineProperty(descriptor.value, 'name', { value: propertyKey, writable: false });
   };
-  return castTo(dec);
+  return castTo(decorator);
 }
 
 /**

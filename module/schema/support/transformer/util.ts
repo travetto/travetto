@@ -60,7 +60,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
       }
       case 'unknown': {
         const imp = state.importFile(this.TYPES_IMPORT);
-        return state.createAccess(imp.ident, 'UnknownType');
+        return state.createAccess(imp.identifier, 'UnknownType');
       }
       case 'shape': {
         const uniqueId = state.generateUniqueIdentifier(node, type, 'Δ');
@@ -241,15 +241,15 @@ class ${uniqueId} extends ${type.mappedClassName} {
   ): T {
     const existingField = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
     const existingInput = state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
-    const decParams = this.computeInputDecoratorParams(state, node, config);
+    const params = this.computeInputDecoratorParams(state, node, config);
 
     let modifiers: ts.ModifierLike[];
     if (existingField) {
-      const dec = state.createDecorator(this.FIELD_IMPORT, 'Field', ...decParams);
-      modifiers = DecoratorUtil.spliceDecorators(node, existingField, [dec]);
+      const decorator = state.createDecorator(this.FIELD_IMPORT, 'Field', ...params);
+      modifiers = DecoratorUtil.spliceDecorators(node, existingField, [decorator]);
     } else {
-      const dec = state.createDecorator(this.INPUT_IMPORT, 'Input', ...decParams);
-      modifiers = DecoratorUtil.spliceDecorators(node, existingInput, [dec]);
+      const decorator = state.createDecorator(this.INPUT_IMPORT, 'Input', ...params);
+      modifiers = DecoratorUtil.spliceDecorators(node, existingInput, [decorator]);
     }
 
     let result: unknown;
@@ -324,8 +324,8 @@ class ${uniqueId} extends ${type.mappedClassName} {
     let cls;
     switch (type?.key) {
       case 'managed': {
-        const [dec] = DeclarationUtil.getDeclarations(type.original!);
-        cls = dec && ts.isClassDeclaration(dec) ? dec : undefined;
+        const [decorator] = DeclarationUtil.getDeclarations(type.original!);
+        cls = decorator && ts.isClassDeclaration(decorator) ? decorator : undefined;
         break;
       }
       case 'shape': cls = type.original; break;

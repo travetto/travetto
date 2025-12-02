@@ -74,22 +74,22 @@ export class IndexManager implements ModelStorageSupport {
    */
   async createIndex(cls: Class, alias = true): Promise<string> {
     const mapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
-    const ident = this.getIdentity(cls); // Already namespaced
-    const concreteIndex = `${ident.index}_${Date.now()}`;
+    const { index } = this.getIdentity(cls); // Already namespaced
+    const concreteIndex = `${index}_${Date.now()}`;
     try {
       await this.#client.indices.create({
         index: concreteIndex,
         mappings: mapping,
         settings: this.config.indexCreate,
-        ...(alias ? { aliases: { [ident.index]: {} } } : {})
+        ...(alias ? { aliases: { [index]: {} } } : {})
       });
-      console.debug('Index created', { index: ident.index, concrete: concreteIndex });
+      console.debug('Index created', { index, concrete: concreteIndex });
       console.debug('Index Config', {
         mappings: mapping,
         settings: this.config.indexCreate
       });
     } catch (error) {
-      console.warn('Index already created', { index: ident.index, error });
+      console.warn('Index already created', { index, error });
     }
     return concreteIndex;
   }
@@ -99,9 +99,9 @@ export class IndexManager implements ModelStorageSupport {
    */
   async createIndexIfMissing(cls: Class): Promise<void> {
     const baseCls = SchemaRegistryIndex.getBaseClass(cls);
-    const ident = this.getIdentity(baseCls);
+    const identity = this.getIdentity(baseCls);
     try {
-      await this.#client.search(ident);
+      await this.#client.search(identity);
     } catch {
       await this.createIndex(baseCls);
     }
@@ -114,8 +114,8 @@ export class IndexManager implements ModelStorageSupport {
 
   async exportModel(cls: Class<ModelType>): Promise<string> {
     const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
-    const ident = this.getIdentity(cls); // Already namespaced
-    return `curl -XPOST $ES_HOST/${ident.index} -d '${JSON.stringify({
+    const { index } = this.getIdentity(cls); // Already namespaced
+    return `curl -XPOST $ES_HOST/${index} -d '${JSON.stringify({
       mappings: schema,
       settings: this.config.indexCreate
     })}'`;

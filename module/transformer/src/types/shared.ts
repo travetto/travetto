@@ -22,8 +22,8 @@ export interface DeclDocumentation {
  */
 export type Import = {
   path: string;
-  ident: ts.Identifier;
-  stmt?: ts.ImportDeclaration;
+  identifier: ts.Identifier;
+  statement?: ts.ImportDeclaration;
 };
 
 /** Template Literal Types */

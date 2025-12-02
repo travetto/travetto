@@ -137,7 +137,7 @@ export class AssertTransformer {
    */
   static initState(state: TransformerState & AssertState): void {
     if (!state[AssertSymbol]) {
-      const asrt = state.importFile('@travetto/test/src/assert/check.ts').ident;
+      const asrt = state.importFile('@travetto/test/src/assert/check.ts').identifier;
       state[AssertSymbol] = {
         assert: asrt,
         assertCheck: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'check'),
@@ -298,9 +298,9 @@ export class AssertTransformer {
       }
       // If calling `assert.*`
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) { // Assert method call
-      const ident = exp.expression;
+      const identifier = exp.expression;
       const fn = exp.name.escapedText.toString();
-      if (ident.escapedText === ASSERT_CMD) {
+      if (identifier.escapedText === ASSERT_CMD) {
         // Look for reject/throw
         if (fn === 'fail') {
           node = this.doAssert(state, node, { fn: 'fail', args: node.arguments.slice() });

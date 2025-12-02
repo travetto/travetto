@@ -92,10 +92,10 @@ export class ConsoleLogTransformer {
     const level = name.escapedText!;
 
     if (VALID_LEVELS[level]) {
-      const ident = state.imported ??= state.importFile(CONSOLE_IMPORT).ident;
+      const identifier = state.imported ??= state.importFile(CONSOLE_IMPORT).identifier;
       return state.factory.updateCallExpression(
         node,
-        state.createAccess(ident, 'log'),
+        state.createAccess(identifier, 'log'),
         node.typeArguments,
         [
           LiteralUtil.fromLiteral(state.factory, {

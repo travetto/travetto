@@ -271,20 +271,20 @@ export class ElasticsearchModelService implements
     const body = operations.reduce<(T | BulkDoc | { doc: T })[]>((acc, operation) => {
 
       const core = (operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls });
-      const esIdent = this.manager.getIdentity(asConstructable<T>(core).constructor);
-      const ident: { _index: string, _type?: unknown } = { _index: esIdent.index };
+      const { index } = this.manager.getIdentity(asConstructable<T>(core).constructor);
+      const identity: { _index: string, _type?: unknown } = { _index: index };
 
       if (operation.delete) {
-        acc.push({ delete: { ...ident, _id: operation.delete.id } });
+        acc.push({ delete: { ...identity, _id: operation.delete.id } });
       } else if (operation.insert) {
         const id = this.preUpdate(operation.insert);
-        acc.push({ create: { ...ident, _id: id } }, castTo(operation.insert));
+        acc.push({ create: { ...identity, _id: id } }, castTo(operation.insert));
       } else if (operation.upsert) {
         const id = this.preUpdate(operation.upsert);
-        acc.push({ index: { ...ident, _id: id } }, castTo(operation.upsert));
+        acc.push({ index: { ...identity, _id: id } }, castTo(operation.upsert));
       } else if (operation.update) {
         const id = this.preUpdate(operation.update);
-        acc.push({ update: { ...ident, _id: id } }, { doc: operation.update });
+        acc.push({ update: { ...identity, _id: id } }, { doc: operation.update });
       }
       return acc;
     }, []);

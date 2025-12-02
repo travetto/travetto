@@ -37,18 +37,18 @@ export class ImportUtil {
 
     const imports = new Map<string, Import>();
 
-    for (const stmt of src.statements) {
-      if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-        const resolved = this.optionalResolve(stmt.moduleSpecifier.text, base);
+    for (const statement of src.statements) {
+      if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)) {
+        const resolved = this.optionalResolve(statement.moduleSpecifier.text, base);
 
-        if (stmt.importClause) {
-          if (stmt.importClause.namedBindings) {
-            const bindings = stmt.importClause.namedBindings;
+        if (statement.importClause) {
+          if (statement.importClause.namedBindings) {
+            const bindings = statement.importClause.namedBindings;
             if (ts.isNamespaceImport(bindings)) {
-              imports.set(bindings.name.text, { path: resolved, ident: bindings.name, stmt });
+              imports.set(bindings.name.text, { path: resolved, identifier: bindings.name, statement });
             } else if (ts.isNamedImports(bindings)) {
-              for (const n of bindings.elements) {
-                imports.set(n.name.text, { path: resolved, ident: n.name, stmt });
+              for (const element of bindings.elements) {
+                imports.set(element.name.text, { path: resolved, identifier: element.name, statement });
               }
             }
           }

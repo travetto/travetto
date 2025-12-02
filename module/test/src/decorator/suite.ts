@@ -15,7 +15,7 @@ export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassDecorator {
-  const dec = (cls: Class): typeof cls => {
+  const decorator = (cls: Class): typeof cls => {
     const isAbstract = describeFunction(cls).abstract;
     SuiteRegistryIndex.getForRegister(cls).register(
       ...(typeof description !== 'string' && description ? [description] : []),
@@ -26,7 +26,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
     return cls;
   };
 
-  return castTo(dec);
+  return castTo(decorator);
 }
 
 /**

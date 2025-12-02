@@ -25,12 +25,12 @@ export class DecoratorUtil {
   /**
    * Get identifier for a decorator
    */
-  static getDecoratorIdent(decorator: ts.Decorator): ts.Identifier {
-    const ident = this.#getIdentFromExpression(decorator.expression);
-    if (!ident) {
+  static getDecoratorIdentifier(decorator: ts.Decorator): ts.Identifier {
+    const identifier = this.#getIdentFromExpression(decorator.expression);
+    if (!identifier) {
       throw new Error('No Identifier');
     } else {
-      return ident;
+      return identifier;
     }
   }
 
