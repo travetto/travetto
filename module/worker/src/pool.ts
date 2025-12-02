@@ -26,7 +26,7 @@ type WorkPoolConfig<I, O> = Options & {
   shutdown?: AbortSignal;
 };
 
-const isWorkerFactory = <I, O>(o: WorkerInput<I, O>): o is (() => WorkerFactoryInput<I, O>) => o.length === 0;
+const isWorkerFactory = <I, O>(value: WorkerInput<I, O>): value is (() => WorkerFactoryInput<I, O>) => value.length === 0;
 
 /**
  * Work pool support

@@ -16,12 +16,12 @@ import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, Bina
 
 import { S3ModelConfig } from './config.ts';
 
-function isMetadataBearer(o: unknown): o is MetadataBearer {
-  return !!o && typeof o === 'object' && '$metadata' in o;
+function isMetadataBearer(value: unknown): value is MetadataBearer {
+  return !!value && typeof value === 'object' && '$metadata' in value;
 }
 
-function hasContentType<T>(o: T): o is T & { contenttype?: string } {
-  return o !== undefined && o !== null && Object.hasOwn(o, 'contenttype');
+function hasContentType<T>(value: T): value is T & { contenttype?: string } {
+  return value !== undefined && value !== null && Object.hasOwn(value, 'contenttype');
 }
 
 type MetaBase = Pick<CreateMultipartUploadRequest,
@@ -102,7 +102,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         Marker
       });
       if (objects.Contents?.length) {
-        yield objects.Contents.map(o => ({ Key: o.Key!, id: o.Key!.split(':').pop()! }));
+        yield objects.Contents.map(item => ({ Key: item.Key!, id: item.Key!.split(':').pop()! }));
       }
       if (objects.NextMarker) {
         Marker = objects.NextMarker;
@@ -121,16 +121,16 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const parts: CompletedPart[] = [];
     let buffers: Buffer[] = [];
     let total = 0;
-    let n = 1;
+    let i = 1;
     const flush = async (): Promise<void> => {
       if (!total) { return; }
       const part = await this.client.uploadPart(this.#qBlob(id, {
         Body: Buffer.concat(buffers),
-        PartNumber: n,
+        PartNumber: i,
         UploadId
       }));
-      parts.push({ PartNumber: n, ETag: part.ETag });
-      n += 1;
+      parts.push({ PartNumber: i, ETag: part.ETag });
+      i += 1;
       buffers = [];
       total = 0;
     };

@@ -30,22 +30,22 @@ export class SQLModelUtil {
   /**
    * Clean results from db, by dropping internal fields
    */
-  static cleanResults<T, U = T>(dct: DialectState, o: T[]): U[];
-  static cleanResults<T, U = T>(dct: DialectState, o: T): U;
-  static cleanResults<T, U = T>(dct: DialectState, o: T | T[]): U | U[] {
-    if (Array.isArray(o)) {
-      return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x));
-    } else if (!DataUtil.isSimpleValue(o)) {
-      for (const key of TypedObject.keys(o)) {
-        if (o[key] === null || o[key] === undefined || key === dct.parentPathField.name || key === dct.pathField.name || key === dct.idxField.name) {
-          delete o[key];
+  static cleanResults<T, U = T>(state: DialectState, item: T[]): U[];
+  static cleanResults<T, U = T>(state: DialectState, item: T): U;
+  static cleanResults<T, U = T>(state: DialectState, item: T | T[]): U | U[] {
+    if (Array.isArray(item)) {
+      return item.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(state, x));
+    } else if (!DataUtil.isSimpleValue(item)) {
+      for (const key of TypedObject.keys(item)) {
+        if (item[key] === null || item[key] === undefined || key === state.parentPathField.name || key === state.pathField.name || key === state.idxField.name) {
+          delete item[key];
         } else {
-          o[key] = this.cleanResults(dct, o[key]);
+          item[key] = this.cleanResults(state, item[key]);
         }
       }
-      return castTo({ ...o });
+      return castTo({ ...item });
     } else {
-      return castTo(o);
+      return castTo(item);
     }
   }
 
@@ -260,11 +260,11 @@ export class SQLModelUtil {
   /**
    * Find all dependent fields via child tables
    */
-  static collectDependents<T>(dct: DialectState, parent: unknown, items: T[], field?: SchemaFieldConfig): Record<string, T> {
+  static collectDependents<T>(state: DialectState, parent: unknown, items: T[], field?: SchemaFieldConfig): Record<string, T> {
     if (field) {
       const isSimple = SchemaRegistryIndex.has(field.type);
       for (const item of items) {
-        const parentKey: string = castTo(item[castKey<T>(dct.parentPathField.name)]);
+        const parentKey: string = castTo(item[castKey<T>(state.parentPathField.name)]);
         const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
         const fieldKey = castKey<(typeof root) | T>(field.name);
         if (field.array) {
@@ -281,7 +281,7 @@ export class SQLModelUtil {
 
     const mapping: Record<string, T> = {};
     for (const item of items) {
-      const key = item[castKey<T>(dct.pathField.name)];
+      const key = item[castKey<T>(state.pathField.name)];
       if (typeof key === 'string') {
         mapping[key] = item;
       }

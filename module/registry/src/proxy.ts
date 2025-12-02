@@ -7,8 +7,8 @@ const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });
 const GeneratorFunction = Object.getPrototypeOf(function* () { });
 const AsyncFunction = Object.getPrototypeOf(async function () { });
 
-function isFunction(o: unknown): o is Function {
-  const proto = o && Object.getPrototypeOf(o);
+function isFunction(value: unknown): value is Function {
+  const proto = value && Object.getPrototypeOf(value);
   return proto && (proto === Function.prototype || proto === AsyncFunction || proto === AsyncGeneratorFunction || proto === GeneratorFunction);
 }
 

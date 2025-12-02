@@ -404,13 +404,13 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Generate WHERE field clause
    */
-  getWhereFieldSQL(stack: VisitStack[], o: Record<string, unknown>): string {
+  getWhereFieldSQL(stack: VisitStack[], input: Record<string, unknown>): string {
     const items = [];
     const { foreignMap, localMap } = SQLModelUtil.getFieldsByLocation(stack);
     const SQL_OPS = this.SQL_OPS;
 
-    for (const key of Object.keys(o)) {
-      const top = o[key];
+    for (const key of Object.keys(input)) {
+      const top = input[key];
       const field = localMap[key] ?? foreignMap[key];
       if (!field) {
         throw new Error(`Unknown field: ${key}`);
@@ -534,17 +534,17 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Grouping of where clauses
    */
-  getWhereGroupingSQL<T>(cls: Class<T>, o: WhereClause<T>): string {
+  getWhereGroupingSQL<T>(cls: Class<T>, clause: WhereClause<T>): string {
     const SQL_OPS = this.SQL_OPS;
 
-    if (ModelQueryUtil.has$And(o)) {
-      return `(${o.$and.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$and} `)})`;
-    } else if (ModelQueryUtil.has$Or(o)) {
-      return `(${o.$or.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$or} `)})`;
-    } else if (ModelQueryUtil.has$Not(o)) {
-      return `${SQL_OPS.$not} (${this.getWhereGroupingSQL<T>(cls, o.$not)})`;
+    if (ModelQueryUtil.has$And(clause)) {
+      return `(${clause.$and.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$and} `)})`;
+    } else if (ModelQueryUtil.has$Or(clause)) {
+      return `(${clause.$or.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$or} `)})`;
+    } else if (ModelQueryUtil.has$Not(clause)) {
+      return `${SQL_OPS.$not} (${this.getWhereGroupingSQL<T>(cls, clause.$not)})`;
     } else {
-      return this.getWhereFieldSQL(SQLModelUtil.classToStack(cls), o);
+      return this.getWhereFieldSQL(SQLModelUtil.classToStack(cls), clause);
     }
   }
 

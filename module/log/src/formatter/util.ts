@@ -11,9 +11,9 @@ export class LogFormatUtil {
   /** Generate log context */
   static getContext(event: LogEvent): Record<string, unknown> | undefined {
     const out: Record<string, unknown> = {};
-    for (const o of event.args ?? []) {
-      if (DataUtil.isPlainObject(o)) {
-        safeAssign(out, o);
+    for (const arg of event.args ?? []) {
+      if (DataUtil.isPlainObject(arg)) {
+        safeAssign(out, arg);
       }
     }
     return out && Object.keys(out).length > 0 ? out : undefined;

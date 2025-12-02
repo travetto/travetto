@@ -34,7 +34,7 @@ type ValidPrimitiveFields<T, Z = undefined> = {
 export type RetainPrimitiveFields<T, Z = undefined> = Pick<T, ValidPrimitiveFields<T, Z>>;
 
 export const TypedObject: {
-  keys<T = unknown, K extends keyof T = keyof T & string>(o: T): K[];
+  keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
 } & ObjectConstructor = Object;
@@ -56,8 +56,8 @@ export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassIns
   return castTo(new cons(...args));
 }
 
-export const hasFunction = <T>(key: keyof T) => (o: unknown): o is T =>
-  typeof o === 'object' && o !== null && typeof o[castKey(key)] === 'function';
+export const hasFunction = <T>(key: keyof T) => (value: unknown): value is T =>
+  typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 

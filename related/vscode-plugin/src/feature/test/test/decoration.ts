@@ -64,8 +64,8 @@ const Style: {
   }
 };
 
-function isBatchError(o?: Error): o is Error & { details: { errors: (Error | string)[] } } {
-  return !!o && o instanceof Error && 'errors' in o;
+function isBatchError(value?: Error): value is Error & { details: { errors: (Error | string)[] } } {
+  return !!value && value instanceof Error && 'errors' in value;
 }
 
 /**
@@ -137,11 +137,11 @@ export class Decorations {
 
   /**
    * Create a line range
-   * @param n
+   * @param start
    * @param end
    */
-  static line(n: number, end: number = 0): vscode.DecorationOptions {
-    return { range: new vscode.Range(n - 1, 0, (end || n) - 1, 100000000000) };
+  static line(start: number, end: number = 0): vscode.DecorationOptions {
+    return { range: new vscode.Range(start - 1, 0, (end || start) - 1, 100000000000) };
   }
 
   /**

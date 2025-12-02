@@ -7,8 +7,8 @@ import { Token, Literal, GroupNode, OP_TRANSLATION, ArrayNode, AllNode } from '.
 /**
  * Determine if a token is boolean
  */
-function isBoolean(o: unknown): o is Token & { type: 'boolean' } {
-  return !!o && typeof o === 'object' && 'type' in o && o.type === 'boolean';
+function isBoolean(value: unknown): value is Token & { type: 'boolean' } {
+  return !!value && typeof value === 'object' && 'type' in value && value.type === 'boolean';
 }
 
 /**

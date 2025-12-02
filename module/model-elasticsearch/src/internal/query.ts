@@ -15,15 +15,15 @@ export class ElasticsearchQueryUtil {
   /**
    * Convert `a.b.c` to `a : { b : { c : ... }}`
    */
-  static extractSimple<T>(o: T, path: string = ''): Record<string, unknown> {
+  static extractSimple<T>(input: T, path: string = ''): Record<string, unknown> {
     const out: Record<string, unknown> = {};
-    const keys = TypedObject.keys(o);
+    const keys = TypedObject.keys(input);
     for (const key of keys) {
       const subPath = `${path}${key}`;
-      if (DataUtil.isPlainObject(o[key]) && !Object.keys(o[key])[0].startsWith('$')) {
-        Object.assign(out, this.extractSimple(o[key], `${subPath}.`));
+      if (DataUtil.isPlainObject(input[key]) && !Object.keys(input[key])[0].startsWith('$')) {
+        Object.assign(out, this.extractSimple(input[key], `${subPath}.`));
       } else {
-        out[subPath] = o[key];
+        out[subPath] = input[key];
       }
     }
     return out;
@@ -53,9 +53,9 @@ export class ElasticsearchQueryUtil {
    */
   static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): estypes.Sort {
     return sort.map<estypes.SortOptions>(x => {
-      const o = this.extractSimple(x);
-      const key = Object.keys(o)[0];
-      const value: boolean | -1 | 1 = castTo(o[key]);
+      const item = this.extractSimple(x);
+      const key = Object.keys(item)[0];
+      const value: boolean | -1 | 1 = castTo(item[key]);
       return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
     });
   }
@@ -63,12 +63,12 @@ export class ElasticsearchQueryUtil {
   /**
    * Extract specific term for a class, and a given field
    */
-  static extractWhereTermQuery<T>(cls: Class<T>, o: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
+  static extractWhereTermQuery<T>(cls: Class<T>, item: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
-    for (const property of TypedObject.keys(o)) {
-      const top = o[property];
+    for (const property of TypedObject.keys(item)) {
+      const top = item[property];
       const declaredSchema = fields[property];
       const declaredType = declaredSchema.type;
       const subPath = declaredType === String ?
@@ -187,15 +187,15 @@ export class ElasticsearchQueryUtil {
   /**
    * Build query from the where clause
    */
-  static extractWhereQuery<T>(cls: Class<T>, o: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
-    if (ModelQueryUtil.has$And(o)) {
-      return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
-    } else if (ModelQueryUtil.has$Or(o)) {
-      return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(cls, x, config)), ['minimum_should_match']: 1 } };
-    } else if (ModelQueryUtil.has$Not(o)) {
-      return { bool: { ['must_not']: this.extractWhereQuery<T>(cls, o.$not, config) } };
+  static extractWhereQuery<T>(cls: Class<T>, clause: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
+    if (ModelQueryUtil.has$And(clause)) {
+      return { bool: { must: clause.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
+    } else if (ModelQueryUtil.has$Or(clause)) {
+      return { bool: { should: clause.$or.map(x => this.extractWhereQuery<T>(cls, x, config)), ['minimum_should_match']: 1 } };
+    } else if (ModelQueryUtil.has$Not(clause)) {
+      return { bool: { ['must_not']: this.extractWhereQuery<T>(cls, clause.$not, config) } };
     } else {
-      return this.extractWhereTermQuery(cls, o, config);
+      return this.extractWhereTermQuery(cls, clause, config);
     }
   }
 

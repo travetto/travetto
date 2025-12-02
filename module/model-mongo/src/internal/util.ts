@@ -66,23 +66,23 @@ export class MongoUtil {
   /**
    * Build mongo where clause
    */
-  static extractWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, unknown> {
-    if (ModelQueryUtil.has$And(o)) {
-      return { $and: o.$and.map(x => this.extractWhereClause<T>(cls, x)) };
-    } else if (ModelQueryUtil.has$Or(o)) {
-      return { $or: o.$or.map(x => this.extractWhereClause<T>(cls, x)) };
-    } else if (ModelQueryUtil.has$Not(o)) {
-      return { $nor: [this.extractWhereClause<T>(cls, o.$not)] };
+  static extractWhereClause<T>(cls: Class<T>, clause: WhereClause<T>): Record<string, unknown> {
+    if (ModelQueryUtil.has$And(clause)) {
+      return { $and: clause.$and.map(x => this.extractWhereClause<T>(cls, x)) };
+    } else if (ModelQueryUtil.has$Or(clause)) {
+      return { $or: clause.$or.map(x => this.extractWhereClause<T>(cls, x)) };
+    } else if (ModelQueryUtil.has$Not(clause)) {
+      return { $nor: [this.extractWhereClause<T>(cls, clause.$not)] };
     } else {
-      return this.extractSimple(cls, o);
+      return this.extractSimple(cls, clause);
     }
   }
 
   /**/
-  static extractSimple<T>(base: Class<T> | undefined, o: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
+  static extractSimple<T>(base: Class<T> | undefined, item: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
     const fields = base ? SchemaRegistryIndex.getOptional(base)?.getFields() : undefined;
     const out: Record<string, unknown> = {};
-    const sub = o;
+    const sub = item;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;

@@ -25,9 +25,9 @@ export class BaseWebMessage<B = unknown, C = unknown> implements WebMessage<B, C
   readonly headers: WebHeaders;
   body?: B;
 
-  constructor(o: WebMessageInit<B, C> = {}) {
-    this.context = o.context ?? castTo<C>({});
-    this.headers = new WebHeaders(o.headers);
-    this.body = o.body;
+  constructor(input: WebMessageInit<B, C> = {}) {
+    this.context = input.context ?? castTo<C>({});
+    this.headers = new WebHeaders(input.headers);
+    this.body = input.body;
   }
 }

@@ -3,17 +3,17 @@ import ts from 'typescript';
 import { transformCast, TemplateLiteral } from '../types/shared.ts';
 
 const TypedObject: {
-  keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
+  keys<T = unknown, K extends keyof T = keyof T>(value: T): K[];
 } & ObjectConstructor = Object;
 
-function isNode(n: unknown): n is ts.Node {
-  return !!n && typeof n === 'object' && 'kind' in n;
+function isNode(value: unknown): value is ts.Node {
+  return !!value && typeof value === 'object' && 'kind' in value;
 }
 
 const KNOWN_FNS = new Set<unknown>([String, Number, Boolean, Date, RegExp]);
 
-function isKnownFn(n: unknown): n is Function {
-  return KNOWN_FNS.has(n);
+function isKnownFn(value: unknown): value is Function {
+  return KNOWN_FNS.has(value);
 }
 
 /**

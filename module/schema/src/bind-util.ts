@@ -10,8 +10,8 @@ type BindConfig = {
   filterValue?: (value: unknown, input: SchemaInputConfig) => boolean;
 };
 
-function isInstance<T>(o: unknown): o is T {
-  return !!o && !DataUtil.isPrimitive(o);
+function isInstance<T>(value: unknown): value is T {
+  return !!value && !DataUtil.isPrimitive(value);
 }
 
 /**

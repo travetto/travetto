@@ -226,10 +226,10 @@ export class DataUtil {
 
   /**
    * Clone top level properties to a new object
-   * @param o Object to clone
+   * @param value Object to clone
    */
-  static shallowClone<T>(a: T): T {
-    return castTo(Array.isArray(a) ? a.slice(0) : (this.isSimpleValue(a) ? a : { ...castTo<object>(a) }));
+  static shallowClone<T>(value: T): T {
+    return castTo(Array.isArray(value) ? value.slice(0) : (this.isSimpleValue(value) ? value : { ...castTo<object>(value) }));
   }
 
   /**

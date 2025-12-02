@@ -7,7 +7,7 @@ import { ManifestUtil } from './util.ts';
 import type { ManifestModule, ManifestRoot, ManifestModuleFile, IndexedModule, IndexedFile, FindConfig } from './types/manifest.ts';
 
 const TypedObject: {
-  keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
+  keys<T = unknown, K extends keyof T = keyof T>(item: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
 } & ObjectConstructor = Object;

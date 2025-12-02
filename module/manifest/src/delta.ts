@@ -15,7 +15,7 @@ const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 't
 const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
 const VALID_OUTPUT_TYPE = new Set<ManifestModuleFileType>([...VALID_SOURCE_TYPE, 'typings']);
 
-const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(o: T): K[] } & ObjectConstructor = Object;
+const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(item: T): K[] } & ObjectConstructor = Object;
 
 /**
  * Produce delta for the manifest

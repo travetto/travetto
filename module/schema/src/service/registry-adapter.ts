@@ -321,13 +321,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   /**
    * Ensure type is set properly
    */
-  ensureInstanceTypeField<T>(o: T): T {
+  ensureInstanceTypeField<T>(value: T): T {
     const config = this.getDiscriminatedConfig();
     if (config) {
       const typeField = castKey<T>(config.discriminatedField);
-      o[typeField] ??= castTo(config.discriminatedType); // Assign if missing
+      value[typeField] ??= castTo(config.discriminatedType); // Assign if missing
     }
-    return o;
+    return value;
   }
 
   getDiscriminatedConfig(): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {

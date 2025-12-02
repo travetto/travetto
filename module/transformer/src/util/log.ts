@@ -5,7 +5,7 @@ const exclude = new Set([
   'nextContainer', 'modifierFlagsCache', 'declaredProperties'
 ]);
 
-const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(o: T): K[] } & ObjectConstructor = Object;
+const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(value: T): K[] } & ObjectConstructor = Object;
 
 /**
  * Utilities for logging typescript nodes

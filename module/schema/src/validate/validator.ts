@@ -11,19 +11,19 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
  * @param base The starting type or config
- * @param o The value to use for the polymorphic check
+ * @param item The item to use for the polymorphic check
  */
-function resolveFieldMap<T>(base: Class<T>, o: T): SchemaFieldMap {
-  const target = SchemaRegistryIndex.resolveInstanceType(base, o);
+function resolveFieldMap<T>(base: Class<T>, item: T): SchemaFieldMap {
+  const target = SchemaRegistryIndex.resolveInstanceType(base, item);
   return SchemaRegistryIndex.get(target).getFields();
 }
 
-function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
-  return !DataUtil.isPlainObject(o) && o !== null && typeof o === 'object' && !!o.constructor;
+function isClassInstance<T>(value: unknown): value is ClassInstance<T> {
+  return !DataUtil.isPlainObject(value) && value !== null && typeof value === 'object' && !!value.constructor;
 }
 
-function isRangeValue(o: unknown): o is number | string | Date {
-  return typeof o === 'string' || typeof o === 'number' || o instanceof Date;
+function isRangeValue(value: unknown): value is number | string | Date {
+  return typeof value === 'string' || typeof value === 'number' || value instanceof Date;
 }
 
 /**
@@ -35,15 +35,15 @@ export class SchemaValidator {
   /**
    * Validate the schema for a given object
    * @param fields The config to validate against
-   * @param o The object to validate
+   * @param item The object to validate
    * @param relative The relative path as the validation recurses
    */
-  static #validateFields<T>(fields: SchemaFieldMap, o: T, relative: string): ValidationError[] {
+  static #validateFields<T>(fields: SchemaFieldMap, item: T, relative: string): ValidationError[] {
     let errors: ValidationError[] = [];
 
     for (const [field, fieldConfig] of TypedObject.entries(fields)) {
       if (fieldConfig.access !== 'readonly') { // Do not validate readonly fields
-        errors = errors.concat(this.#validateInputSchema(fieldConfig, o[castKey<T>(field)], relative));
+        errors = errors.concat(this.#validateInputSchema(fieldConfig, item[castKey<T>(field)], relative));
       }
     }
 
@@ -215,7 +215,7 @@ export class SchemaValidator {
   /**
    * Validate the class level validations
    */
-  static async #validateClassLevel<T>(cls: Class<T>, o: T, view?: string): Promise<ValidationError[]> {
+  static async #validateClassLevel<T>(cls: Class<T>, item: T, view?: string): Promise<ValidationError[]> {
     if (!SchemaRegistryIndex.has(cls)) {
       return [];
     }
@@ -226,7 +226,7 @@ export class SchemaValidator {
     // Handle class level validators
     for (const fn of classConfig.validators) {
       try {
-        const error = await fn(o, view);
+        const error = await fn(item, view);
         if (error) {
           if (Array.isArray(error)) {
             errors.push(...error);
@@ -248,27 +248,27 @@ export class SchemaValidator {
   /**
    * Validate an object against it's constructor's schema
    * @param cls The class to validate the objects against
-   * @param o The object to validate
+   * @param item The object to validate
    * @param view The optional view to limit the scope to
    */
-  static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
-    if (isClassInstance(o) && !(o instanceof cls || cls.Ⲑid === o.constructor.Ⲑid)) {
-      throw new TypeMismatchError(cls.name, o.constructor.name);
+  static async validate<T>(cls: Class<T>, item: T, view?: string): Promise<T> {
+    if (isClassInstance(item) && !(item instanceof cls || cls.Ⲑid === item.constructor.Ⲑid)) {
+      throw new TypeMismatchError(cls.name, item.constructor.name);
     }
-    cls = SchemaRegistryIndex.resolveInstanceType(cls, o);
+    cls = SchemaRegistryIndex.resolveInstanceType(cls, item);
 
     const fields = SchemaRegistryIndex.get(cls).getFields(view);
 
     // Validate using standard behaviors
     const errors = [
-      ...this.#validateFields(fields, o, ''),
-      ... await this.#validateClassLevel(cls, o, view)
+      ...this.#validateFields(fields, item, ''),
+      ... await this.#validateClassLevel(cls, item, view)
     ];
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
 
-    return o;
+    return item;
   }
 
   /**
@@ -279,19 +279,19 @@ export class SchemaValidator {
    */
   static async validateAll<T>(cls: Class<T>, items: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((items ?? [])
-      .map(o => this.validate(cls, o, view)));
+      .map(item => this.validate(cls, item, view)));
   }
 
   /**
    * Validate partial, ignoring required fields as they are partial
    *
    * @param cls The class to validate against
-   * @param o The value to validate
+   * @param item The value to validate
    * @param view The view to limit by
    */
-  static async validatePartial<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
+  static async validatePartial<T>(cls: Class<T>, item: T, view?: string): Promise<T> {
     try {
-      await this.validate(cls, o, view);
+      await this.validate(cls, item, view);
     } catch (error) {
       if (error instanceof ValidationResultError) { // Don't check required fields
         const errs = error.details.errors.filter(x => x.kind !== 'required');
@@ -301,7 +301,7 @@ export class SchemaValidator {
         }
       }
     }
-    return o;
+    return item;
   }
 
   /**

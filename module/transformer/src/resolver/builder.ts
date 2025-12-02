@@ -223,11 +223,11 @@ export const TypeBuilder: {
       let undefinable = false;
       let nullable = false;
       const remainder = uType.types.filter(ut => {
-        const u = (ut.getFlags() & (ts.TypeFlags.Undefined)) > 0;
-        const n = (ut.getFlags() & (ts.TypeFlags.Null)) > 0;
-        undefinable ||= u;
-        nullable ||= n;
-        return !(u || n);
+        const isUndefined = (ut.getFlags() & (ts.TypeFlags.Undefined)) > 0;
+        const isNull = (ut.getFlags() & (ts.TypeFlags.Null)) > 0;
+        undefinable ||= isUndefined;
+        nullable ||= isNull;
+        return !(isUndefined || isNull);
       });
       const name = CoreUtil.getSymbol(uType)?.getName();
       return { key: 'composition', name, undefinable, nullable, tsSubTypes: remainder, subTypes: [], operation: uType.isUnion() ? 'or' : 'and' };

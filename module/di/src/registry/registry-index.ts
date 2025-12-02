@@ -40,8 +40,8 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.#instance.getInstances<T>(candidateType, predicate);
   }
 
-  static injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<T> {
-    return this.#instance.injectFields(cls, o, cls);
+  static injectFields<T extends { constructor: Class<T> }>(item: T, cls = item.constructor): Promise<T> {
+    return this.#instance.injectFields(cls, item, cls);
   }
 
   static getOptional(cls: Class): InjectableConfig | undefined {

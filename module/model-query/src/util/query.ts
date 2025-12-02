@@ -84,10 +84,10 @@ export class ModelQueryUtil {
     return q!;
   }
 
-  static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>
-    !!o && typeof o === 'object' && '$and' in o;
-  static has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) =>
-    !!o && typeof o === 'object' && '$or' in o;
-  static has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) =>
-    !!o && typeof o === 'object' && '$not' in o;
+  static has$And = (value: unknown): value is ({ $and: WhereClause<unknown>[] }) =>
+    !!value && typeof value === 'object' && '$and' in value;
+  static has$Or = (value: unknown): value is ({ $or: WhereClause<unknown>[] }) =>
+    !!value && typeof value === 'object' && '$or' in value;
+  static has$Not = (value: unknown): value is ({ $not: WhereClause<unknown> }) =>
+    !!value && typeof value === 'object' && '$not' in value;
 }

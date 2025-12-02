@@ -9,12 +9,12 @@ export type WebHeadersInit = Headers | Record<string, undefined | null | HeaderV
  */
 export class WebHeaders extends Headers {
 
-  constructor(o?: WebHeadersInit) {
-    const passed = (o instanceof Headers);
-    super(passed ? o : undefined);
+  constructor(input?: WebHeadersInit) {
+    const passed = (input instanceof Headers);
+    super(passed ? input : undefined);
 
-    if (o && !passed) {
-      for (const [key, value] of (Array.isArray(o) ? o : Object.entries(o))) {
+    if (input && !passed) {
+      for (const [key, value] of (Array.isArray(input) ? input : Object.entries(input))) {
         if (value !== undefined && value !== null && !key.startsWith(':')) {
           this.append(key, castTo(value));
         }

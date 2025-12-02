@@ -90,8 +90,8 @@ export class Workspace {
   }
 
   /** See if an entity is an editor */
-  static isEditor(o: unknown): o is vscode.TextEditor {
-    return !!o && typeof o === 'object' && 'document' in o;
+  static isEditor(value: unknown): value is vscode.TextEditor {
+    return !!value && typeof value === 'object' && 'document' in value;
   }
 
   /** Get the editor for a doc */

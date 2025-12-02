@@ -6,9 +6,9 @@ import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';
 
-function isSimplePacket(o: unknown): o is OkPacket | ResultSetHeader {
-  return o !== null && o !== undefined && typeof o === 'object' && 'constructor' in o && (
-    o.constructor.name === 'OkPacket' || o.constructor.name === 'ResultSetHeader'
+function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
+  return value !== null && value !== undefined && typeof value === 'object' && 'constructor' in value && (
+    value.constructor.name === 'OkPacket' || value.constructor.name === 'ResultSetHeader'
   );
 }
 

@@ -63,24 +63,24 @@ export class ElasticsearchModelService implements
     }
   }
 
-  preUpdate(o: { id: string }): string;
-  preUpdate(o: {}): undefined;
-  preUpdate(o: { id?: string }): string | undefined {
-    if ('id' in o && typeof o.id === 'string') {
-      const id = o.id;
+  preUpdate(item: { id: string }): string;
+  preUpdate(item: {}): undefined;
+  preUpdate(item: { id?: string }): string | undefined {
+    if ('id' in item && typeof item.id === 'string') {
+      const id = item.id;
       if (!this.config.storeId) {
-        delete o.id;
+        delete item.id;
       }
       return id;
     }
     return;
   }
 
-  postUpdate<T extends ModelType>(o: T, id?: string): T {
+  postUpdate<T extends ModelType>(item: T, id?: string): T {
     if (!this.config.storeId) {
-      o.id = id!;
+      item.id = id!;
     }
-    return o;
+    return item;
   }
 
   /**
@@ -157,9 +157,9 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async create<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     try {
-      const clean = await ModelCrudUtil.preStore(cls, o, this);
+      const clean = await ModelCrudUtil.preStore(cls, item, this);
       const id = this.preUpdate(clean);
 
       await this.client.index({
@@ -176,12 +176,12 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async update<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
+  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    o = await ModelCrudUtil.preStore(cls, o, this);
+    item = await ModelCrudUtil.preStore(cls, item, this);
 
-    const id = this.preUpdate(o);
+    const id = this.preUpdate(item);
 
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, id);
@@ -192,16 +192,16 @@ export class ElasticsearchModelService implements
       id,
       op_type: 'index',
       refresh: true,
-      body: castTo<T & { id: never }>(o)
+      body: castTo<T & { id: never }>(item)
     });
 
-    return this.postUpdate(o, id);
+    return this.postUpdate(item, id);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, input: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const item = await ModelCrudUtil.preStore(cls, o, this);
+    const item = await ModelCrudUtil.preStore(cls, input, this);
     const id = this.preUpdate(item);
 
     await this.client.update({

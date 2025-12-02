@@ -36,8 +36,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.getDiscriminatedTypes(cls);
   }
 
-  static resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    return this.#instance.resolveInstanceType(cls, o);
+  static resolveInstanceType<T>(cls: Class<T>, item: T): Class {
+    return this.#instance.resolveInstanceType(cls, item);
   }
 
   static visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void): void {
@@ -150,16 +150,16 @@ export class SchemaRegistryIndex implements RegistryIndex {
   /**
    * Find the resolved type for a given instance
    * @param cls Class for instance
-   * @param o Actual instance
+   * @param item Actual instance
    */
-  resolveInstanceType<T>(cls: Class<T>, o: T): Class {
+  resolveInstanceType<T>(cls: Class<T>, item: T): Class {
     const { discriminatedField, discriminatedType, class: targetClass } = this.store.get(cls).get();
     if (!discriminatedField) {
       return targetClass;
     } else {
       const base = this.getBaseClass(targetClass);
       const map = this.#byDiscriminatedTypes.get(base);
-      const type = castTo<string>(o[castKey<T>(discriminatedField)]) ?? discriminatedType;
+      const type = castTo<string>(item[castKey<T>(discriminatedField)]) ?? discriminatedType;
       if (!type) {
         throw new AppError(`Unable to resolve discriminated type for class ${base.name} without a type`);
       }

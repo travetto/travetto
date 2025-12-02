@@ -15,7 +15,7 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(o: Record<string, unknown>): estypes.Script {
+  static generateUpdateScript(item: Record<string, unknown>): estypes.Script {
     const out: estypes.Script = {
       lang: 'painless',
       source: `
@@ -32,21 +32,21 @@ export class ElasticsearchSchemaUtil {
   }
  }
 `,
-      params: { body: o },
+      params: { body: item },
     };
     return out;
   }
 
   /**
    * Generate replace script
-   * @param o
+   * @param item
    * @returns
    */
-  static generateReplaceScript(o: Record<string, unknown>): estypes.Script {
+  static generateReplaceScript(item: Record<string, unknown>): estypes.Script {
     return {
       lang: 'painless',
       source: 'ctx._source.clear(); ctx._source.putAll(params.body)',
-      params: { body: o }
+      params: { body: item }
     };
   }
 

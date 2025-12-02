@@ -61,10 +61,10 @@ export class WebRpcClientGeneratorService {
     const factoryOutputFile = path.resolve(config.output, 'factory.ts');
     const factorySourceContents = [
       `import { ${clientFactory.name} } from './rpc';`,
-      ...classes.map((n) => `import type { ${n.name} } from '${n.import}';`),
+      ...classes.map((cls) => `import type { ${cls.name} } from '${cls.import}';`),
       '',
       `export const factory = ${clientFactory.name}<{`,
-      ...classes.map(x => `  ${x.name}: ${x.name};`),
+      ...classes.map(cls => `  ${cls.name}: ${cls.name};`),
       '}>();',
     ].join('\n');
 

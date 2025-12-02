@@ -15,12 +15,12 @@ import { CoreUtil } from './util/core.ts';
 import { LiteralUtil } from './util/literal.ts';
 import { SystemUtil } from './util/system.ts';
 
-function hasOriginal(n: ts.Node): n is ts.Node & { original: ts.Node } {
-  return !!n && !n.parent && 'original' in n && !!n.original;
+function hasOriginal(node: ts.Node): node is ts.Node & { original: ts.Node } {
+  return !!node && !node.parent && 'original' in node && !!node.original;
 }
 
-function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: string } } {
-  return !!n && 'name' in n && typeof n.name === 'object' && !!n.name && 'escapedText' in n.name && !!n.name.escapedText;
+function hasEscapedName(node: ts.Node): node is ts.Node & { name: { escapedText: string } } {
+  return !!node && 'name' in node && typeof node.name === 'object' && !!node.name && 'escapedText' in node.name && !!node.name.escapedText;
 }
 
 function isRedefinableDeclaration(x: ts.Node): x is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {

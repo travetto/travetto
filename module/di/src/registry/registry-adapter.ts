@@ -4,21 +4,21 @@ import { CONSTRUCTOR_PROPERTY, SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableConfig, getDefaultQualifier, InjectableCandidate } from '../types';
 
-function combineInjectableCandidates<T extends InjectableCandidate>(base: T, ...override: Partial<T>[]): typeof base {
-  for (const o of override) {
-    safeAssign(base, o);
+function combineInjectableCandidates<T extends InjectableCandidate>(base: T, ...overrides: Partial<T>[]): typeof base {
+  for (const override of overrides) {
+    safeAssign(base, override);
   }
   return base;
 }
 
-function combineClasses<T extends InjectableConfig>(base: T, ...override: Partial<T>[]): typeof base {
-  for (const o of override) {
+function combineClasses<T extends InjectableConfig>(base: T, ...overrides: Partial<T>[]): typeof base {
+  for (const override of overrides) {
     Object.assign(base, {
       ...base,
-      ...o,
+      ...override,
       candidates: {
         ...base.candidates,
-        ...o.candidates,
+        ...override.candidates,
       }
     });
   }
