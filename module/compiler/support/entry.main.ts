@@ -42,7 +42,7 @@ export const main = (ctx: ManifestContext) => {
     }
   };
 
-  const ops = {
+  const operations = {
     /** Stop the server */
     async stop(): Promise<void> {
       if (await client.stop()) {
@@ -53,7 +53,7 @@ export const main = (ctx: ManifestContext) => {
     },
 
     /** Restart the server */
-    async restart(): Promise<void> { await client.stop().then(() => ops.watch()); },
+    async restart(): Promise<void> { await client.stop().then(() => operations.watch()); },
 
     /** Get server info */
     info: (): Promise<CompilerServerInfo | undefined> => client.info(),
@@ -113,7 +113,7 @@ export const main = (ctx: ManifestContext) => {
       await CompilerSetup.exportManifest(ctx, output, prod); return;
     }
   };
-  return ops;
+  return operations;
 };
 
 export type Operations = ReturnType<typeof main>;

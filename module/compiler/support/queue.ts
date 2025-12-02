@@ -1,15 +1,7 @@
-type PromiseResolver<T> = { resolve: (v: T) => void, reject: (err?: unknown) => void };
-
-function resolvablePromise<T = void>(): Promise<T> & PromiseResolver<T> {
-  let ops: PromiseResolver<T>;
-  const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
-  return Object.assign(prom, ops!);
-}
-
 export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   #queue: X[] = [];
   #done = false;
-  #ready = resolvablePromise();
+  #ready = Promise.withResolvers<void>();
 
   constructor(signal?: AbortSignal) {
     signal?.addEventListener('abort', () => this.close());
@@ -23,7 +15,7 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   async next(): Promise<IteratorResult<X>> {
     while (!this.#done && !this.#queue.length) {
       await this.#ready;
-      this.#ready = resolvablePromise();
+      this.#ready = Promise.withResolvers<void>();
     }
     return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };
   }

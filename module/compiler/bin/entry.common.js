@@ -60,7 +60,7 @@ async function getContext() {
 }
 
 /** @template T */
-async function load(/** @type {(ops: import('../support/entry.main.ts').Operations) => T} */ cb) {
+async function load(/** @type {(operations: import('../support/entry.main.ts').Operations) => T} */ cb) {
   const ctx = await getContext();
 
   try {

@@ -52,7 +52,7 @@ export abstract class SQLDialect implements DialectState {
   DEFAULT_STRING_LEN = 1024;
 
   /**
-   * Mapping between query ops and SQL operations
+   * Mapping between query operators and SQL operations
    */
   SQL_OPS = {
     $and: 'AND',

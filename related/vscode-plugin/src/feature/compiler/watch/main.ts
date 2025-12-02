@@ -14,9 +14,9 @@ type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
 
 const resolvablePromise = <T = void>(): PromiseWithResolvers<T> => {
-  let ops: Pick<PromiseWithResolvers<T>, 'reject' | 'resolve'>;
-  const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
-  return { ...ops!, promise: prom };
+  let result: Pick<PromiseWithResolvers<T>, 'reject' | 'resolve'>;
+  const prom = new Promise<T>((resolve, reject) => result = { resolve, reject });
+  return { ...result!, promise: prom };
 };
 
 const SCOPE_MAX = 15;

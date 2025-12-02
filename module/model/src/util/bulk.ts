@@ -20,7 +20,7 @@ export class ModelBulkUtil {
   static isSupported = hasFunction<ModelBulkSupport>('processBulk');
 
   /**
-   * Prepares bulk ops for storage
+   * Prepares bulk operations for storage
    * @param cls
    * @param operations
    * @param provider

@@ -17,23 +17,23 @@ Available Commands:
 const toJson = (/** @type {number} */ depth) => v => process.stdout.write(`${JSON.stringify(v, undefined, depth)}\n`) ||
   new Promise(r => process.stdout.once('drain', r));
 
-require('./entry.common.js').load(ops => {
+require('./entry.common.js').load(operations => {
   const [operation, ...all] = process.argv.slice(2);
   const args = all.filter(x => !x.startsWith('-'));
 
   switch (operation) {
     case undefined:
     case 'help': return console.log(help);
-    case 'info': return ops.info().then(toJson(2));
-    case 'event': return ops.events(args[0], toJson(0));
-    case 'manifest': return ops.manifest(args[0], all.some(x => x === '--prod'));
-    case 'exec': return ops.exec(args[0], all.slice(1));
-    case 'build': return ops.build();
-    case 'clean': return ops.clean();
+    case 'info': return operations.info().then(toJson(2));
+    case 'event': return operations.events(args[0], toJson(0));
+    case 'manifest': return operations.manifest(args[0], all.some(x => x === '--prod'));
+    case 'exec': return operations.exec(args[0], all.slice(1));
+    case 'build': return operations.build();
+    case 'clean': return operations.clean();
     case 'start':
-    case 'watch': return ops.watch();
-    case 'stop': return ops.stop();
-    case 'restart': return ops.restart();
+    case 'watch': return operations.watch();
+    case 'stop': return operations.stop();
+    case 'restart': return operations.restart();
     default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
   }
 });
