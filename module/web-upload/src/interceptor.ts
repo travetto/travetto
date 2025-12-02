@@ -24,8 +24,8 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
   finalizeConfig({ config: base }: WebInterceptorContext<WebUploadConfig>, inputs: Partial<WebUploadConfig>[]): WebUploadConfig {
     base.uploads ??= {};
     // Override the uploads object with all the data from the inputs
-    for (const [k, cfg] of inputs.flatMap(el => Object.entries(el.uploads ?? {}))) {
-      Object.assign(base.uploads[k] ??= {}, cfg);
+    for (const [k, config] of inputs.flatMap(el => Object.entries(el.uploads ?? {}))) {
+      Object.assign(base.uploads[k] ??= {}, config);
     }
     return base;
   }

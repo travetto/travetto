@@ -91,11 +91,11 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     }
 
     for (const v of values) {
-      const cfg = this.store.get(v);
-      if (!cfg) {
+      const config = this.store.get(v);
+      if (!config) {
         continue;
       }
-      const result = cfg.getInstance();
+      const result = config.getInstance();
       if (result.isActive !== undefined && !result.isActive()) {
         continue;
       }

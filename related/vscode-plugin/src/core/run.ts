@@ -81,9 +81,9 @@ export class RunUtil {
   }
 
   /** Debug a given config */
-  static async debug(cfg: LaunchConfig): Promise<void> {
+  static async debug(config: LaunchConfig): Promise<void> {
     try {
-      await vscode.debug.startDebugging(Workspace.folder, this.buildDebugConfig(cfg));
+      await vscode.debug.startDebugging(Workspace.folder, this.buildDebugConfig(config));
     } catch (error) {
       vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
     }

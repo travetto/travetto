@@ -42,8 +42,8 @@ export class Logger implements LogConfig, LogShape {
   scope?: string;
   parent?: Logger;
 
-  constructor(cfg: LogConfig = {}) {
-    Object.assign(this, cfg);
+  constructor(config: LogConfig = {}) {
+    Object.assign(this, config);
   }
 
   valid(event: CompilerLogEvent): boolean {

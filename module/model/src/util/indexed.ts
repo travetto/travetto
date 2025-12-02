@@ -38,14 +38,14 @@ export class ModelIndexedUtil {
   static computeIndexParts<T extends ModelType>(
     cls: Class<T>, idx: IndexConfig<T> | string, item: DeepPartial<T>, opts: ComputeConfig = {}
   ): { fields: IndexFieldPart[], sorted: IndexSortPart | undefined } {
-    const cfg = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
-    const sortField = cfg.type === 'sorted' ? cfg.fields.at(-1) : undefined;
+    const config = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
+    const sortField = config.type === 'sorted' ? config.fields.at(-1) : undefined;
 
     const fields: IndexFieldPart[] = [];
     let sortDir: number = 0;
     let sorted: IndexSortPart | undefined;
 
-    for (const field of cfg.fields) {
+    for (const field of config.fields) {
       let f: Record<string, unknown> = field;
       let o: Record<string, unknown> = item;
       const parts = [];
@@ -55,7 +55,7 @@ export class ModelIndexedUtil {
         o = castTo(o[k]);
         parts.push(k);
         if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
-          if (cfg.type === 'sorted') {
+          if (config.type === 'sorted') {
             sortDir = f[k] === true ? 1 : f[k] === false ? 0 : f[k];
           }
           break; // At the bottom
@@ -69,7 +69,7 @@ export class ModelIndexedUtil {
       if (o === undefined || o === null) {
         const empty = field === sortField ? opts.emptySortValue : opts.emptyValue;
         if (empty === undefined || empty === Error) {
-          throw new IndexNotSupported(cls, cfg, `Missing field value for ${parts.join('.')}`);
+          throw new IndexNotSupported(cls, config, `Missing field value for ${parts.join('.')}`);
         }
         o = castTo(empty!);
       } else {
@@ -87,9 +87,9 @@ export class ModelIndexedUtil {
    * @param cls Type to get index for
    * @param idx Index config
    */
-  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: DeepPartial<T>, cfg?: ComputeConfig): Record<string, unknown> {
+  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: DeepPartial<T>, config?: ComputeConfig): Record<string, unknown> {
     const response: Record<string, unknown> = {};
-    for (const { path, value } of this.computeIndexParts(cls, idx, item ?? {}, cfg).fields) {
+    for (const { path, value } of this.computeIndexParts(cls, idx, item ?? {}, config).fields) {
       let sub: Record<string, unknown> = response;
       const all = path.slice(0);
       const last = all.pop()!;
@@ -115,8 +115,8 @@ export class ModelIndexedUtil {
   ): { type: string, key: string, sort?: number | Date } {
     const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(opts ?? {}), includeSortInFields: false });
     const key = fields.map(({ value }) => value).map(x => `${x}`).join(opts?.sep ?? DEFAULT_SEP);
-    const cfg = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
-    return !sorted ? { type: cfg.type, key } : { type: cfg.type, key, sort: sorted.value };
+    const config = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
+    return !sorted ? { type: config.type, key } : { type: config.type, key, sort: sorted.value };
   }
 
   /**

@@ -6,24 +6,24 @@ import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
 
 function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConfig>[]): SuiteConfig {
-  for (const cfg of subConfig) {
-    if (cfg.beforeAll) {
-      baseConfig.beforeAll = [...baseConfig.beforeAll, ...cfg.beforeAll];
+  for (const config of subConfig) {
+    if (config.beforeAll) {
+      baseConfig.beforeAll = [...baseConfig.beforeAll, ...config.beforeAll];
     }
-    if (cfg.beforeEach) {
-      baseConfig.beforeEach = [...baseConfig.beforeEach, ...cfg.beforeEach];
+    if (config.beforeEach) {
+      baseConfig.beforeEach = [...baseConfig.beforeEach, ...config.beforeEach];
     }
-    if (cfg.afterAll) {
-      baseConfig.afterAll = [...baseConfig.afterAll, ...cfg.afterAll];
+    if (config.afterAll) {
+      baseConfig.afterAll = [...baseConfig.afterAll, ...config.afterAll];
     }
-    if (cfg.afterEach) {
-      baseConfig.afterEach = [...baseConfig.afterEach, ...cfg.afterEach];
+    if (config.afterEach) {
+      baseConfig.afterEach = [...baseConfig.afterEach, ...config.afterEach];
     }
-    if (cfg.tags) {
-      baseConfig.tags = [...baseConfig.tags ?? [], ...cfg.tags];
+    if (config.tags) {
+      baseConfig.tags = [...baseConfig.tags ?? [], ...config.tags];
     }
-    if (cfg.tests) {
-      for (const [key, test] of Object.entries(cfg.tests ?? {})) {
+    if (config.tests) {
+      for (const [key, test] of Object.entries(config.tests ?? {})) {
         baseConfig.tests[key] = {
           ...test,
           sourceImport: Runtime.getImport(baseConfig.class),
@@ -40,11 +40,11 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
 function combineMethods(suite: SuiteConfig, baseConfig: TestConfig, ...subConfig: Partial<TestConfig>[]): TestConfig {
   baseConfig.classId = suite.classId;
   baseConfig.import = suite.import;
-  for (const cfg of subConfig) {
-    safeAssign(baseConfig, cfg, {
+  for (const config of subConfig) {
+    safeAssign(baseConfig, config, {
       tags: [
         ...baseConfig.tags ?? [],
-        ...cfg.tags ?? []
+        ...config.tags ?? []
       ]
     });
   }

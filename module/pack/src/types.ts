@@ -62,7 +62,7 @@ export type ShellCommandImpl = {
   script(lines: string[], chdir?: boolean): { ext: string, contents: string[] };
 };
 
-export type DockerPackFactory = (cfg: DockerPackConfig) => (string | Promise<string>);
+export type DockerPackFactory = (config: DockerPackConfig) => (string | Promise<string>);
 export type DockerPackFactoryModule = { factory: DockerPackFactory };
 
 export type CoreRollupConfig = {

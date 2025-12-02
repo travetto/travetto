@@ -24,7 +24,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   }
 
   register(...data: Partial<ModelConfig>[]): ModelConfig {
-    const cfg = this.#config ??= {
+    const config = this.#config ??= {
       class: this.#cls,
       indices: [],
       autoCreate: true,
@@ -32,8 +32,8 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       postLoad: [],
       prePersist: []
     };
-    combineClasses(cfg, data);
-    return cfg;
+    combineClasses(config, data);
+    return config;
   }
 
   finalize(parent?: ModelConfig): void {

@@ -135,12 +135,12 @@ export class BindUtil {
    * Bind data to the schema for a class, with an optional view
    * @param cls The schema class to bind against
    * @param data The provided data to bind
-   * @param cfg The bind configuration
+   * @param config The bind configuration
    */
-  static bindSchema<T>(cls: Class<T>, data?: undefined, cfg?: BindConfig): undefined;
-  static bindSchema<T>(cls: Class<T>, data?: null, cfg?: BindConfig): null;
-  static bindSchema<T>(cls: Class<T>, data?: object | T, cfg?: BindConfig): T;
-  static bindSchema<T>(cls: Class<T>, data?: object | T, cfg?: BindConfig): T | null | undefined {
+  static bindSchema<T>(cls: Class<T>, data?: undefined, config?: BindConfig): undefined;
+  static bindSchema<T>(cls: Class<T>, data?: null, config?: BindConfig): null;
+  static bindSchema<T>(cls: Class<T>, data?: object | T, config?: BindConfig): T;
+  static bindSchema<T>(cls: Class<T>, data?: object | T, config?: BindConfig): T | null | undefined {
     if (data === null || data === undefined) {
       return data;
     }
@@ -156,7 +156,7 @@ export class BindUtil {
         }
       }
 
-      const out = this.bindSchemaToObject(resolvedCls, instance, data, cfg);
+      const out = this.bindSchemaToObject(resolvedCls, instance, data, config);
       SchemaRegistryIndex.get(resolvedCls).ensureInstanceTypeField(out);
       return out;
     }
@@ -167,11 +167,11 @@ export class BindUtil {
    * @param cls The schema class
    * @param obj The target object (instance of cls)
    * @param data The data to bind
-   * @param cfg The bind configuration
+   * @param config The bind configuration
    */
-  static bindSchemaToObject<T>(cls: Class<T>, obj: T, data?: object, cfg: BindConfig = {}): T {
-    const view = cfg.view; // Does not convey
-    delete cfg.view;
+  static bindSchemaToObject<T>(cls: Class<T>, obj: T, data?: object, config: BindConfig = {}): T {
+    const view = config.view; // Does not convey
+    delete config.view;
 
     if (!!data && isInstance<T>(data)) {
       const adapter = SchemaRegistryIndex.get(cls);
@@ -193,7 +193,7 @@ export class BindUtil {
 
         for (const [schemaFieldName, field] of Object.entries(schema)) {
           let inboundField: string | undefined = undefined;
-          if (field.access === 'readonly' || cfg.filterInput?.(field) === false) {
+          if (field.access === 'readonly' || config.filterInput?.(field) === false) {
             continue; // Skip trying to write readonly fields
           }
           if (schemaFieldName in data) {
@@ -214,7 +214,7 @@ export class BindUtil {
           let v: unknown = data[castKey<T>(inboundField)];
 
           // Filtering values
-          if (cfg.filterValue && !cfg.filterValue(v, field)) {
+          if (config.filterValue && !config.filterValue(v, field)) {
             continue;
           }
 
@@ -230,9 +230,9 @@ export class BindUtil {
 
             if (SchemaRegistryIndex.has(field.type)) {
               if (field.array && Array.isArray(v)) {
-                v = v.map(el => this.bindSchema(field.type, el, cfg));
+                v = v.map(el => this.bindSchema(field.type, el, config));
               } else {
-                v = this.bindSchema(field.type, v, cfg);
+                v = this.bindSchema(field.type, v, config);
               }
             } else if (field.array && Array.isArray(v)) {
               v = v.map(el => this.#coerceType(field, el));
@@ -258,32 +258,32 @@ export class BindUtil {
 
   /**
    * Coerce field to type
-   * @param cfg
+   * @param config
    * @param value
    * @param applyDefaults
    * @returns
    */
-  static coerceInput(cfg: SchemaInputConfig, value: unknown, applyDefaults = false): unknown {
+  static coerceInput(config: SchemaInputConfig, value: unknown, applyDefaults = false): unknown {
     if ((value === undefined || value === null) && applyDefaults) {
-      value = Array.isArray(cfg.default) ? cfg.default.slice(0) : cfg.default;
+      value = Array.isArray(config.default) ? config.default.slice(0) : config.default;
     }
-    if (cfg.required?.active === false && (value === undefined || value === null)) {
+    if (config.required?.active === false && (value === undefined || value === null)) {
       return value;
     }
-    const complex = SchemaRegistryIndex.has(cfg.type);
-    const bindCfg: BindConfig | undefined = (complex && 'view' in cfg && typeof cfg.view === 'string') ? { view: cfg.view } : undefined;
-    if (cfg.array) {
+    const complex = SchemaRegistryIndex.has(config.type);
+    const bindCfg: BindConfig | undefined = (complex && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
+    if (config.array) {
       const valArr = !Array.isArray(value) ? [value] : value;
       if (complex) {
-        value = valArr.map(x => this.bindSchema(cfg.type, x, bindCfg));
+        value = valArr.map(x => this.bindSchema(config.type, x, bindCfg));
       } else {
-        value = valArr.map(x => DataUtil.coerceType(x, cfg.type, false));
+        value = valArr.map(x => DataUtil.coerceType(x, config.type, false));
       }
     } else {
       if (complex) {
-        value = this.bindSchema(cfg.type, value, bindCfg);
+        value = this.bindSchema(config.type, value, bindCfg);
       } else {
-        value = DataUtil.coerceType(value, cfg.type, false);
+        value = DataUtil.coerceType(value, config.type, false);
       }
     }
     return value;

@@ -11,17 +11,17 @@ import { PackUtil } from './util.ts';
 
 export class DockerPackOperation {
 
-  static getDockerTags(cfg: DockerPackConfig): string[] {
-    return (cfg.dockerTag ?? []).map(x => cfg.dockerRegistry ? `${cfg.dockerRegistry}/${cfg.dockerName}:${x}` : `${cfg.dockerName}:${x}`);
+  static getDockerTags(config: DockerPackConfig): string[] {
+    return (config.dockerTag ?? []).map(x => config.dockerRegistry ? `${config.dockerRegistry}/${config.dockerName}:${x}` : `${config.dockerName}:${x}`);
   }
 
   /**
    * Detect image os
    */
-  static async* detectDockerImageOs(cfg: DockerPackConfig): AsyncIterable<string[]> {
+  static async* detectDockerImageOs(config: DockerPackConfig): AsyncIterable<string[]> {
     // Read os before writing
-    cfg.dockerRuntime.os = await PackUtil.runCommand(
-      ['docker', 'run', '--rm', '--entrypoint', '/bin/sh', cfg.dockerImage, '-c', 'cat /etc/*release*']
+    config.dockerRuntime.os = await PackUtil.runCommand(
+      ['docker', 'run', '--rm', '--entrypoint', '/bin/sh', config.dockerImage, '-c', 'cat /etc/*release*']
     ).then(out => {
       const found = out.match(/\b(?:debian|alpine|centos)\b/i)?.[0].toLowerCase();
       switch (found) {
@@ -29,20 +29,20 @@ export class DockerPackOperation {
         default: return 'unknown';
       }
     });
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Detected Image OS' }} ${{ param: cfg.dockerImage }} as ${{ param: cfg.dockerRuntime.os }}`);
+    yield* PackOperation.title(config, cliTpl`${{ title: 'Detected Image OS' }} ${{ param: config.dockerImage }} as ${{ param: config.dockerRuntime.os }}`);
   }
 
   /**
    * Write Docker File
    */
-  static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const dockerFile = path.resolve(cfg.buildDir, 'Dockerfile');
-    const mod = await Runtime.importFrom<DockerPackFactoryModule>(cfg.dockerFactory);
-    const content = (await mod.factory(cfg)).trim();
+  static async* writeDockerFile(config: DockerPackConfig): AsyncIterable<string[]> {
+    const dockerFile = path.resolve(config.buildDir, 'Dockerfile');
+    const mod = await Runtime.importFrom<DockerPackFactoryModule>(config.dockerFactory);
+    const content = (await mod.factory(config)).trim();
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: cfg.dockerFactory }}`);
+    yield* PackOperation.title(config, cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: config.dockerFactory }}`);
 
-    if (cfg.ejectFile) {
+    if (config.ejectFile) {
       yield* ActiveShellCommand.createFile(dockerFile, content.split(/\n/));
     } else {
       await fs.writeFile(dockerFile, content, 'utf8');
@@ -52,12 +52,12 @@ export class DockerPackOperation {
   /**
    * Pull Docker Base Image
    */
-  static async* pullDockerBaseImage(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const command = ['docker', 'pull', cfg.dockerImage];
+  static async* pullDockerBaseImage(config: DockerPackConfig): AsyncIterable<string[]> {
+    const command = ['docker', 'pull', config.dockerImage];
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Pulling Docker Base Image' }} ${{ param: cfg.dockerImage }}`);
+    yield* PackOperation.title(config, cliTpl`${{ title: 'Pulling Docker Base Image' }} ${{ param: config.dockerImage }}`);
 
-    if (cfg.ejectFile) {
+    if (config.ejectFile) {
       yield command;
     } else {
       await PackUtil.runCommand(command);
@@ -67,22 +67,22 @@ export class DockerPackOperation {
   /**
    * Building Docker Container
    */
-  static async* buildDockerContainer(cfg: DockerPackConfig): AsyncIterable<string[]> {
+  static async* buildDockerContainer(config: DockerPackConfig): AsyncIterable<string[]> {
     const cmd = [
       'docker', 'build',
-      ...(cfg.dockerBuildPlatform ? ['--platform', cfg.dockerBuildPlatform] : []),
-      ...DockerPackOperation.getDockerTags(cfg).flatMap(x => ['-t', x]), '.'
+      ...(config.dockerBuildPlatform ? ['--platform', config.dockerBuildPlatform] : []),
+      ...DockerPackOperation.getDockerTags(config).flatMap(x => ['-t', x]), '.'
     ];
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Building Docker Container' }} ${{ param: cfg.dockerTag?.join(',') }}`);
+    yield* PackOperation.title(config, cliTpl`${{ title: 'Building Docker Container' }} ${{ param: config.dockerTag?.join(',') }}`);
 
-    if (cfg.ejectFile) {
-      yield ActiveShellCommand.chdir(cfg.buildDir);
+    if (config.ejectFile) {
+      yield ActiveShellCommand.chdir(config.buildDir);
       yield cmd;
       yield ActiveShellCommand.chdir(path.resolve());
     } else {
-      await PackUtil.runCommand(cmd, { cwd: cfg.buildDir, stdio: [0, 'pipe', 2] });
-      const [image]: [{ Size: number }] = JSON.parse(await PackUtil.runCommand(['docker', 'inspect', cfg.dockerImage]));
+      await PackUtil.runCommand(cmd, { cwd: config.buildDir, stdio: [0, 'pipe', 2] });
+      const [image]: [{ Size: number }] = JSON.parse(await PackUtil.runCommand(['docker', 'inspect', config.dockerImage]));
       yield [cliTpl`${{ title: 'Built Docker Container  ' }} ${{ identifier: 'sizeMb' }}=${{ param: Math.trunc(image.Size / 2 ** 20) }}`];
     }
   }
@@ -90,16 +90,16 @@ export class DockerPackOperation {
   /**
    * Push Docker Container
    */
-  static async* pushDockerContainer(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    if (!cfg.dockerPush) {
+  static async* pushDockerContainer(config: DockerPackConfig): AsyncIterable<string[]> {
+    if (!config.dockerPush) {
       return;
     }
-    const tags = DockerPackOperation.getDockerTags(cfg);
+    const tags = DockerPackOperation.getDockerTags(config);
     const cmd = ['docker', 'image', 'push'];
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Push Container to registry' }} ${{ param: cfg.dockerRegistry }}`);
+    yield* PackOperation.title(config, cliTpl`${{ title: 'Push Container to registry' }} ${{ param: config.dockerRegistry }}`);
 
-    if (cfg.ejectFile) {
+    if (config.ejectFile) {
       for (const tag of tags) {
         yield [...cmd, tag];
       }

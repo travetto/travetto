@@ -37,19 +37,19 @@ export class ControllerRegistryIndex implements RegistryIndex {
   /**
    * Register a controller/endpoint with specific config for an interceptor
    * @param cls The interceptor to register data for
-   * @param cfg The partial config override
+   * @param config The partial config override
    */
   static createInterceptorConfigDecorator<T extends WebInterceptor>(
     cls: Class<T>,
-    cfg: Partial<RetainPrimitiveFields<T['config']>>,
+    config: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
     return (instanceOrCls: Class | ClassInstance, property?: symbol | string): void => {
       const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
       if (isClass(property, instanceOrCls)) {
-        adapter.registerInterceptorConfig(cls, cfg, extra);
+        adapter.registerInterceptorConfig(cls, config, extra);
       } else {
-        adapter.registerEndpointInterceptorConfig(property!, cls, cfg, extra);
+        adapter.registerEndpointInterceptorConfig(property!, cls, config, extra);
       }
     };
   }

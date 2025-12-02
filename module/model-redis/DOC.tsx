@@ -14,5 +14,5 @@ export const text = <>
     {...ModelTypes(RedisModelService)}
   </ul>
 
-  <ModelCustomConfig cfg={RedisModelConfig} />
+  <ModelCustomConfig config={RedisModelConfig} />
 </>;

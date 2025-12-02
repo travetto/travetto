@@ -22,8 +22,8 @@ export function Config(ns: string) {
     const og: Function = cls.prototype.postConstruct;
     cls.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
-      const cfg = await DependencyRegistryIndex.getInstance(ConfigurationService);
-      await cfg.bindTo(cls, this, ns);
+      const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
+      await config.bindTo(cls, this, ns);
       await og?.call(this);
     };
     return cls;

@@ -125,11 +125,11 @@ ${context.cleanText(content.text)}
     return `# ${title}\n${desc ? `## ${desc}\n` : ''}${install}\n`;
   },
   Mod: async ({ props, context }) => {
-    const cfg = MOD_MAPPING[props.name];
-    return `[${cfg.displayName}](${context.link(cfg.folder, cfg)}#readme "${cfg.description}")`;
+    const config = MOD_MAPPING[props.name];
+    return `[${config.displayName}](${context.link(config.folder, config)}#readme "${config.description}")`;
   },
   Library: async ({ props }) => {
-    const cfg = LIB_MAPPING[props.name];
-    return `[${cfg.title}](${cfg.href})`;
+    const config = LIB_MAPPING[props.name];
+    return `[${config.title}](${config.href})`;
   }
 };

@@ -94,9 +94,9 @@ export class CompilerClient {
   fetchEvents<
     V extends CompilerEventType,
     T extends (CompilerEvent & { type: V })['payload']
-  >(type: V, cfg?: FetchEventsConfig<T>): AsyncIterable<T>;
-  fetchEvents(type: 'all', cfg?: FetchEventsConfig<CompilerEvent>): AsyncIterable<CompilerEvent>;
-  async * fetchEvents<T = unknown>(type: string, cfg: FetchEventsConfig<T> = {}): AsyncIterable<T> {
+  >(type: V, config?: FetchEventsConfig<T>): AsyncIterable<T>;
+  fetchEvents(type: 'all', config?: FetchEventsConfig<CompilerEvent>): AsyncIterable<CompilerEvent>;
+  async * fetchEvents<T = unknown>(type: string, config: FetchEventsConfig<T> = {}): AsyncIterable<T> {
     let info = await this.info();
     if (!info) {
       return;
@@ -104,7 +104,7 @@ export class CompilerClient {
 
     this.#log.debug(`Starting watch for events of type "${type}"`);
 
-    let signal = cfg.signal;
+    let signal = config.signal;
 
     // Ensure we capture end of process at least
     if (!signal) {
@@ -128,7 +128,7 @@ export class CompilerClient {
         for await (const line of rl.createInterface(response)) {
           if (line.trim().charAt(0) === '{') {
             const event: T = JSON.parse(line);
-            if (cfg.until?.(event)) {
+            if (config.until?.(event)) {
               await CommonUtil.queueMacroTask();
               ctrl.abort();
             }
@@ -150,7 +150,7 @@ export class CompilerClient {
         return;
       }
 
-      if (ctrl.signal.aborted || !info || (cfg.enforceIteration && info.iteration !== iteration)) { // If health check fails, or aborted
+      if (ctrl.signal.aborted || !info || (config.enforceIteration && info.iteration !== iteration)) { // If health check fails, or aborted
         this.#log.debug(`Stopping watch for events of type "${type}"`);
         return;
       } else {

@@ -16,5 +16,5 @@ export const text = <>
     {...ModelQueryTypes(ElasticsearchModelService)}
   </ul>
 
-  <ModelCustomConfig cfg={ElasticsearchModelConfig} />
+  <ModelCustomConfig config={ElasticsearchModelConfig} />
 </>;

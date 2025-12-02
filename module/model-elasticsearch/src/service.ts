@@ -382,7 +382,7 @@ export class ElasticsearchModelService implements
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    const cfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     let search = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,
@@ -390,7 +390,7 @@ export class ElasticsearchModelService implements
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
       ),
-      sort: ElasticsearchQueryUtil.getSort(cfg.fields)
+      sort: ElasticsearchQueryUtil.getSort(config.fields)
     });
 
     while (search.hits.hits.length > 0) {

@@ -37,15 +37,15 @@ export const ModelTypes = (fn: | Function): DocJSXElement[] => {
   return found.map(v => <li>{v}</li>);
 };
 
-export const ModelCustomConfig = ({ cfg }: { cfg: Function }): DocJSXElement => <>
+export const ModelCustomConfig = ({ config }: { config: Function }): DocJSXElement => <>
   Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source
   or config, you can override and register it with the {d.mod('Di')} module.
 
   <c.Code title='Wiring up a custom Model Source' src='doc/custom-service.ts' />
 
-  where the {cfg} is defined by:
+  where the {config} is defined by:
 
-  <c.Code title={`Structure of ${cfg.name}`} src={cfg} startRe={/@Config/} />
+  <c.Code title={`Structure of ${config.name}`} src={config} startRe={/@Config/} />
 
   Additionally, you can see that the class is registered with the {Config} annotation, and so these values can be overridden using the
   standard {d.mod('Config')}resolution paths.

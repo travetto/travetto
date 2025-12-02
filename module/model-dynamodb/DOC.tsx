@@ -15,5 +15,5 @@ export const text = <>
     {...ModelTypes(DynamoDBModelService)}
   </ul>
 
-  <ModelCustomConfig cfg={DynamoDBModelConfig} />
+  <ModelCustomConfig config={DynamoDBModelConfig} />
 </>;

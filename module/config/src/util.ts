@@ -22,9 +22,9 @@ export class ConfigOverrideUtil {
   static getAllOverrideConfigs(): Required<OverrideConfig>[] {
     const out: Required<OverrideConfig>[] = [];
     for (const cls of SchemaRegistryIndex.getClasses()) {
-      const cfg = this.getOverrideConfig(cls);
-      if (cfg && cfg.fields && cfg.namespace) {
-        out.push(asFull(cfg));
+      const config = this.getOverrideConfig(cls);
+      if (config && config.fields && config.namespace) {
+        out.push(asFull(config));
       }
     }
     return out;

@@ -112,14 +112,14 @@ export class ModelRegistryIndex implements RegistryIndex {
    * Get Index
    */
   getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
-    const cfg = this.getConfig(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
-    if (!cfg) {
+    const config = this.getConfig(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
+    if (!config) {
       throw new NotFoundError(`${cls.name} Index`, `${name}`);
     }
-    if (supportedTypes && !supportedTypes.includes(cfg.type)) {
-      throw new IndexNotSupported(cls, cfg, `${cfg.type} indices are not supported.`);
+    if (supportedTypes && !supportedTypes.includes(config.type)) {
+      throw new IndexNotSupported(cls, config, `${config.type} indices are not supported.`);
     }
-    return cfg;
+    return config;
   }
 
   /**

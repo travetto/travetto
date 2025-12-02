@@ -61,29 +61,29 @@ export class SchemaFaker {
 
   /**
    * Get an array of values
-   * @param cfg Field configuration
+   * @param config Field configuration
    */
-  static #array(cfg: SchemaFieldConfig): unknown[] {
-    const min = cfg.minlength ? cfg.minlength.n : 0;
-    const max = cfg.maxlength ? cfg.maxlength.n : 10;
+  static #array(config: SchemaFieldConfig): unknown[] {
+    const min = config.minlength ? config.minlength.n : 0;
+    const max = config.maxlength ? config.maxlength.n : 10;
     const size = faker.number.int({ min, max });
     const out: unknown[] = [];
     for (let i = 0; i < size; i++) {
-      out.push(this.#value(cfg, true));
+      out.push(this.#value(config, true));
     }
     return out;
   }
 
   /**
    * Get a new number value
-   * @param cfg Number config
+   * @param config Number config
    */
-  static #number(cfg: SchemaFieldConfig): number {
-    let min = cfg.min && typeof cfg.min.n === 'number' ? cfg.min.n : undefined;
-    let max = cfg.max && typeof cfg.max.n === 'number' ? cfg.max.n : undefined;
-    let precision = cfg.precision;
+  static #number(config: SchemaFieldConfig): number {
+    let min = config.min && typeof config.min.n === 'number' ? config.min.n : undefined;
+    let max = config.max && typeof config.max.n === 'number' ? config.max.n : undefined;
+    let precision = config.precision;
 
-    if (/(price|amt|amount)$/i.test(cfg.name.toString())) {
+    if (/(price|amt|amount)$/i.test(config.name.toString())) {
       precision = [13, 2];
     }
 
@@ -109,12 +109,12 @@ export class SchemaFaker {
 
   /**
    * Get a date value
-   * @param cfg Field config
+   * @param config Field config
    */
-  static #date(cfg: SchemaFieldConfig): Date {
-    const name = cfg.name.toString().toLowerCase();
-    const min = cfg.min && typeof cfg.min.n !== 'number' ? cfg.min.n : undefined;
-    const max = cfg.max && typeof cfg.max.n !== 'number' ? cfg.max.n : undefined;
+  static #date(config: SchemaFieldConfig): Date {
+    const name = config.name.toString().toLowerCase();
+    const min = config.min && typeof config.min.n !== 'number' ? config.min.n : undefined;
+    const max = config.max && typeof config.max.n !== 'number' ? config.max.n : undefined;
 
     if (min !== undefined || max !== undefined) {
       return faker.date.between({ from: min || TimeUtil.fromNow(-50, 'd'), to: max || new Date() });
@@ -130,13 +130,13 @@ export class SchemaFaker {
 
   /**
    * Get a string value
-   * @param cfg Field config
+   * @param config Field config
    */
-  static #string(cfg: SchemaFieldConfig): string {
-    const name = cfg.name.toString().toLowerCase();
+  static #string(config: SchemaFieldConfig): string {
+    const name = config.name.toString().toLowerCase();
 
-    if (cfg.match) {
-      const mre = cfg.match && cfg.match.re;
+    if (config.match) {
+      const mre = config.match && config.match.re;
       for (const [re, fn] of this.#stringToReType) {
         if (mre === re) {
           return fn();
@@ -155,23 +155,23 @@ export class SchemaFaker {
 
   /**
    * Get a value for a field config
-   * @param cfg Field config
+   * @param config Field config
    */
-  static #value(cfg: SchemaFieldConfig, subArray = false): unknown {
-    if (!subArray && cfg.array) {
-      return this.#array(cfg);
-    } else if (cfg.enum) {
-      return faker.helpers.arrayElement(cfg.enum.values);
+  static #value(config: SchemaFieldConfig, subArray = false): unknown {
+    if (!subArray && config.array) {
+      return this.#array(config);
+    } else if (config.enum) {
+      return faker.helpers.arrayElement(config.enum.values);
     } else {
 
-      const typ = cfg.type;
+      const typ = config.type;
 
       if (typ === Number) {
-        return this.#number(cfg);
+        return this.#number(config);
       } else if (typ === String) {
-        return this.#string(cfg);
+        return this.#string(config);
       } else if (typ === Date) {
-        return this.#date(cfg);
+        return this.#date(config);
       } else if (typ === Boolean) {
         return faker.datatype.boolean();
       } else if (SchemaRegistryIndex.has(typ)) {

@@ -134,12 +134,12 @@ yarn add ${el.props.pkg}
   },
 
   Mod: async ({ context, props }) => {
-    const cfg = MOD_MAPPING[props.name];
-    return `<a class="module-link" href="${context.link(cfg.folder, cfg)}" title="${cfg.description}">${cfg.displayName}</a>`;
+    const config = MOD_MAPPING[props.name];
+    return `<a class="module-link" href="${context.link(config.folder, config)}" title="${config.description}">${config.displayName}</a>`;
   },
   Library: async ({ context, props }) => {
-    const cfg = LIB_MAPPING[props.name];
-    return `<a target="_blank" class="external-link" href="${context.link(cfg.href, cfg)}">${cfg.title}</a>`;
+    const config = LIB_MAPPING[props.name];
+    return `<a target="_blank" class="external-link" href="${context.link(config.href, config)}">${config.title}</a>`;
   },
 
   Note: async ({ recurse }) => `\n\n<p class="note"><strong>Note</strong> ${await recurse()}</p>\n`,

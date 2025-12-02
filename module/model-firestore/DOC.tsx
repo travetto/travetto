@@ -14,5 +14,5 @@ export const text = <>
     {...ModelTypes(FirestoreModelService)}
   </ul>
 
-  <ModelCustomConfig cfg={FirestoreModelConfig} />
+  <ModelCustomConfig config={FirestoreModelConfig} />
 </>;

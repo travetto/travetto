@@ -50,10 +50,10 @@ export class EditorService {
   }
 
   async sendFile(file: string, to?: string): Promise<{ to: string, file: string, url?: string | false | undefined }> {
-    const cfg = await EditorConfig.get();
-    to ||= cfg.to;
-    const content = await this.#renderTemplate(file, cfg.context ?? {});
-    return { to, file, ...await this.sender.send({ from: cfg.from, to, ...content, }) };
+    const config = await EditorConfig.get();
+    to ||= config.to;
+    const content = await this.#renderTemplate(file, config.context ?? {});
+    return { to, file, ...await this.sender.send({ from: config.from, to, ...content, }) };
   }
 
   /**

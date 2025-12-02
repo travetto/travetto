@@ -145,7 +145,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   register(...data: Partial<SchemaClassConfig>[]): SchemaClassConfig {
-    const cfg = this.#config ??= {
+    const config = this.#config ??= {
       methods: {},
       class: this.#cls,
       views: {},
@@ -153,12 +153,12 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       interfaces: [],
       fields: {},
     };
-    return combineClasses(cfg, data);
+    return combineClasses(config, data);
   }
 
   registerMetadata<T>(key: symbol, ...data: Partial<T>[]): T {
-    const cfg = this.register({});
-    return assignMetadata(key, cfg, data);
+    const config = this.register({});
+    return assignMetadata(key, config, data);
   }
 
   getMetadata<T>(key: symbol): T | undefined {
@@ -167,15 +167,15 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   registerField(field: string | symbol, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
-    const config = this.register({});
-    const cfg = config.fields[field] ??= { name: field, owner: this.#cls, type: null! };
-    const combined = combineInputs(cfg, data);
+    const classConfig = this.register({});
+    const config = classConfig.fields[field] ??= { name: field, owner: this.#cls, type: null! };
+    const combined = combineInputs(config, data);
     return combined;
   }
 
   registerFieldMetadata<T>(field: string | symbol, key: symbol, ...data: Partial<T>[]): T {
-    const cfg = this.registerField(field);
-    return assignMetadata(key, cfg, data);
+    const config = this.registerField(field);
+    return assignMetadata(key, config, data);
   }
 
   getFieldMetadata<T>(field: string | symbol, key: symbol): T | undefined {
@@ -183,8 +183,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return castTo<T>(md?.[key]);
   }
 
-  registerClass({ methods, ...cfg }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
-    this.register({ ...cfg });
+  registerClass({ methods, ...config }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
+    this.register({ ...config });
     if (methods?.[CONSTRUCTOR_PROPERTY]) {
       const { parameters, ...rest } = methods[CONSTRUCTOR_PROPERTY];
       this.registerMethod(CONSTRUCTOR_PROPERTY, rest);
@@ -196,14 +196,14 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   registerMethod(method: string | symbol, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
-    const config = this.register();
-    const cfg = config.methods[method] ??= { parameters: [], validators: [] };
-    return combineMethods(cfg, data);
+    const classConfig = this.register();
+    const config = classConfig.methods[method] ??= { parameters: [], validators: [] };
+    return combineMethods(config, data);
   }
 
   registerMethodMetadata<T>(method: string | symbol, key: symbol, ...data: Partial<T>[]): T {
-    const cfg = this.registerMethod(method);
-    return assignMetadata(key, cfg, data);
+    const config = this.registerMethod(method);
+    return assignMetadata(key, config, data);
   }
 
   getMethodMetadata<T>(method: string | symbol, key: symbol): T | undefined {
@@ -213,13 +213,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerParameter(method: string | symbol, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
-    const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
-    return combineInputs(cfg, data);
+    const config = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
+    return combineInputs(config, data);
   }
 
   registerParameterMetadata<T>(method: string | symbol, idx: number, key: symbol, ...data: Partial<T>[]): T {
-    const cfg = this.registerParameter(method, idx);
-    return assignMetadata(key, cfg, data);
+    const config = this.registerParameter(method, idx);
+    return assignMetadata(key, config, data);
   }
 
   getParameterMetadata<T>(method: string | symbol, idx: number, key: symbol): T | undefined {

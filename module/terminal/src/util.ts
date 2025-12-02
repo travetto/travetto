@@ -11,17 +11,17 @@ export class TerminalUtil {
    */
   static progressBarUpdater(
     term: Terminal,
-    cfg?: {
+    config?: {
       withWaiting?: boolean;
       style?: { complete: TermStyleInput, incomplete?: TermStyleInput } | (() => ProgressStyle);
     }
   ): (event: ProgressEvent<string>) => string {
-    const styleBase = typeof cfg?.style !== 'function' ? {
-      complete: StyleUtil.getStyle(cfg?.style?.complete ?? { background: '#248613', text: '#ffffff' }),
-      incomplete: cfg?.style?.incomplete ? StyleUtil.getStyle(cfg.style.incomplete) : undefined,
+    const styleBase = typeof config?.style !== 'function' ? {
+      complete: StyleUtil.getStyle(config?.style?.complete ?? { background: '#248613', text: '#ffffff' }),
+      incomplete: config?.style?.incomplete ? StyleUtil.getStyle(config.style.incomplete) : undefined,
     } : undefined;
 
-    const style = typeof cfg?.style === 'function' ? cfg.style : (): ProgressStyle => styleBase!;
+    const style = typeof config?.style === 'function' ? config.style : (): ProgressStyle => styleBase!;
 
     let width: number;
     return event => {
@@ -32,12 +32,12 @@ export class TerminalUtil {
       }
       const state: Record<string, string> = { total: `${event.total}`, idx: `${event.idx}`.padStart(width ?? 0), pct: `${Math.trunc(pct * 100)}` };
       const line = ` ${text.replace(/[%](idx|total|pct)/g, (_, k) => state[k])} `;
-      const full = term.writer.padToWidth(line, cfg?.withWaiting ? 2 : 0);
+      const full = term.writer.padToWidth(line, config?.withWaiting ? 2 : 0);
       const mid = Math.trunc(pct * term.width);
       const [l, r] = [full.substring(0, mid), full.substring(mid)];
 
       const { complete, incomplete } = style();
-      return `${cfg?.withWaiting ? `${WAIT_TOKEN} ` : ''}${complete(l)}${incomplete?.(r) ?? r}`;
+      return `${config?.withWaiting ? `${WAIT_TOKEN} ` : ''}${complete(l)}${incomplete?.(r) ?? r}`;
     };
   }
 }

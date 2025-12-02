@@ -8,7 +8,7 @@ import { CliValidationError } from './src/types.ts';
 
 const CliValidationErrorContract = toConcrete<CliValidationError>();
 
-const cfg = { cwd: './doc-exec' };
+const config = { cwd: './doc-exec' };
 
 export const text = <>
   <c.StdHeader />
@@ -29,7 +29,7 @@ export const text = <>
   </ul>
 
   <c.Code title='Basic Command' src='doc/cli.basic.ts' />
-  <c.Execution title='Basic Command Help' cmd='trv' args={['basic', '-h']} config={cfg} />
+  <c.Execution title='Basic Command Help' cmd='trv' args={['basic', '-h']} config={config} />
 
   <c.Section title='Command Naming'>
     The file name {d.path('support/cli.<name>.ts')} has a direct mapping to the cli command name.   This hard mapping allows for the framework to be able to know which file to invoke without needing to load all command-related files. <br />
@@ -48,11 +48,11 @@ export const text = <>
     {CliCommand} is a wrapper for {Schema}, and so every class that uses the {CliCommand} decorator is now a full {Schema} class. The fields of the class represent the flags that are available to the command.
 
     <c.Code title='Basic Command with Flag' src='doc/cli.basic_flag.ts' />
-    <c.Execution title='Basic Command with Flag Help' cmd='trv' args={['basic:flag', '-h']} config={cfg} />
+    <c.Execution title='Basic Command with Flag Help' cmd='trv' args={['basic:flag', '-h']} config={config} />
 
     As you can see the command now has the support of a basic boolean flag to determine if the response should be loud or not.  The default value here is undefined/false, and so is an opt-in experience.
 
-    <c.Execution title='Basic Command with Loud Flag' cmd='trv' args={['basic:flag', '--loud']} config={cfg} />
+    <c.Execution title='Basic Command with Loud Flag' cmd='trv' args={['basic:flag', '--loud']} config={config} />
 
     The {CliCommand} supports the following data types for flags:
     <ul>
@@ -69,42 +69,42 @@ export const text = <>
     The {d.method('main()')} method is the entrypoint for the command, represents a series of parameters. Some will be required, some may be optional.  The arguments support all types supported by the flags, and decorators can be provided using the decorators inline on parameters.     Optional arguments in the method, will be optional at run time, and filled with the provided default values.
 
     <c.Code title='Basic Command with Arg' src='doc/cli.basic_arg.ts' />
-    <c.Execution title='Basic Command' cmd='trv' args={['basic:arg', '-h']} config={cfg} />
-    <c.Execution title='Basic Command with Invalid Loud Arg' cmd='trv' args={['basic:arg', '20']} config={cfg} />
-    <c.Execution title='Basic Command with Loud Arg > 7' cmd='trv' args={['basic:arg', '8']} config={cfg} />
-    <c.Execution title='Basic Command without Arg' cmd='trv' args={['basic:arg']} config={cfg} />
+    <c.Execution title='Basic Command' cmd='trv' args={['basic:arg', '-h']} config={config} />
+    <c.Execution title='Basic Command with Invalid Loud Arg' cmd='trv' args={['basic:arg', '20']} config={config} />
+    <c.Execution title='Basic Command with Loud Arg > 7' cmd='trv' args={['basic:arg', '8']} config={config} />
+    <c.Execution title='Basic Command without Arg' cmd='trv' args={['basic:arg']} config={config} />
 
     Additionally, if you provide a field as an array, it will collect all valid values (excludes flags, and any arguments past a {d.input('--')}).
 
     <c.Code title='Basic Command with Arg List' src='doc/cli.basic_arglist.ts' />
-    <c.Execution title='Basic Command' cmd='trv' args={['basic:arglist', '-h']} config={cfg} />
-    <c.Execution title='Basic Arg List' cmd='trv' args={['basic:arglist', '10', '5', '3', '9', '8', '1']} config={cfg} />
-    <c.Execution title='Basic Arg List with Invalid Number' cmd='trv' args={['basic:arglist', '10', '5', '3', '9', '20', '1']} config={cfg} />
-    <c.Execution title='Basic Arg List with Reverse' cmd='trv' args={['basic:arglist', '-r', '10', '5', '3', '9', '8', '1']} config={cfg} />
+    <c.Execution title='Basic Command' cmd='trv' args={['basic:arglist', '-h']} config={config} />
+    <c.Execution title='Basic Arg List' cmd='trv' args={['basic:arglist', '10', '5', '3', '9', '8', '1']} config={config} />
+    <c.Execution title='Basic Arg List with Invalid Number' cmd='trv' args={['basic:arglist', '10', '5', '3', '9', '20', '1']} config={config} />
+    <c.Execution title='Basic Arg List with Reverse' cmd='trv' args={['basic:arglist', '-r', '10', '5', '3', '9', '8', '1']} config={config} />
   </c.Section>
 
   <c.Section title='Customization'>
     By default, all fields are treated as flags and all parameters of {d.method('main()')} are treated as arguments within the validation process.  Like the standard {Schema} behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
 
     <c.Code title='Custom Command with Metadata' src='doc/cli.custom_arg.ts' />
-    <c.Execution title='Custom Command Help' cmd='trv' args={['custom:arg', '-h']} config={cfg} />
-    <c.Execution title='Custom Command Help with overridden Text' cmd='trv' args={['custom:arg', '10', '-m', 'cUsToM']} config={cfg} />
-    <c.Execution title='Custom Command Help with default Text' cmd='trv' args={['custom:arg', '6']} config={cfg} />
+    <c.Execution title='Custom Command Help' cmd='trv' args={['custom:arg', '-h']} config={config} />
+    <c.Execution title='Custom Command Help with overridden Text' cmd='trv' args={['custom:arg', '10', '-m', 'cUsToM']} config={config} />
+    <c.Execution title='Custom Command Help with default Text' cmd='trv' args={['custom:arg', '6']} config={config} />
   </c.Section>
 
   <c.Section title='Environment Variable Support'>
     In addition to standard flag overriding (e.g. {d.input('/** @alias -m */')}), the command execution also supports allowing environment variables to provide values (secondary to whatever is passed in on the command line).
 
     <c.Code title='Custom Command with Env Var' src='doc/cli.custom_env-arg.ts' />
-    <c.Execution title='Custom Command Help' cmd='trv' args={['custom:env-arg', '-h']} config={cfg} />
-    <c.Execution title='Custom Command Help with default Text' cmd='trv' args={['custom:env-arg', '6']} config={cfg} />
+    <c.Execution title='Custom Command Help' cmd='trv' args={['custom:env-arg', '-h']} config={config} />
+    <c.Execution title='Custom Command Help with default Text' cmd='trv' args={['custom:env-arg', '6']} config={config} />
     <c.Execution title='Custom Command Help with overridden Text' cmd='trv' args={['custom:env-arg', '10']} config={{
-      ...cfg,
+      ...config,
       env: { MESSAGE: 'CuStOm' },
       formatCommand: (cmd, ...args) => `MESSAGE=CuStOm ${cmd} ${args.flat().join(' ')}`
     }} />
     <c.Execution title='Custom Command Help with overridden Text' cmd='trv' args={['custom:env-arg', '7']} config={{
-      ...cfg,
+      ...config,
       env: { MESSAGE: 'CuStOm' },
       formatCommand: (cmd, ...args) => `MESSAGE=CuStOm ${cmd} ${args.flat().join(' ')}`
     }} />

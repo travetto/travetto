@@ -173,8 +173,8 @@ export class MongoUtil {
 
   static getPlainIndex(idx: IndexConfig<ModelType>): PlainIdx {
     let out: PlainIdx = {};
-    for (const cfg of idx.fields.map(x => this.toIndex(x))) {
-      out = Object.assign(out, cfg);
+    for (const config of idx.fields.map(x => this.toIndex(x))) {
+      out = Object.assign(out, config);
     }
     return out;
   }

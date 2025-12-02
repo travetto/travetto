@@ -5,8 +5,8 @@ import { SuiteConfig } from '../model/suite.ts';
 import { TestConfig, TestRun } from '../model/test.ts';
 import { SuiteRegistryAdapter } from './registry-adapter.ts';
 
-const sortedTests = (cfg: SuiteConfig): TestConfig[] =>
-  Object.values(cfg.tests).toSorted((a, b) => a.lineStart - b.lineStart);
+const sortedTests = (config: SuiteConfig): TestConfig[] =>
+  Object.values(config.tests).toSorted((a, b) => a.lineStart - b.lineStart);
 
 type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
 

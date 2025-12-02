@@ -38,15 +38,15 @@ export class DocRunUtil {
   static #docState = new DocState();
 
   /** Build cwd from config */
-  static cwd(cfg: RunConfig): string {
-    return path.resolve(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : Runtime.mainSourcePath);
+  static cwd(config: RunConfig): string {
+    return path.resolve(config.module ? RuntimeIndex.getModule(config.module)?.sourcePath! : Runtime.mainSourcePath);
   }
 
   /**
    * Clean run output
    */
-  static cleanRunOutput(text: string, cfg: RunConfig): string {
-    const cwd = this.cwd(cfg);
+  static cleanRunOutput(text: string, config: RunConfig): string {
+    const cwd = this.cwd(config);
     text = util.stripVTControlCharacters(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
@@ -59,11 +59,11 @@ export class DocRunUtil {
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
       .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
       .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
-    if (cfg.filter) {
-      text = text.split(/\n/g).filter(cfg.filter).join('\n');
+    if (config.filter) {
+      text = text.split(/\n/g).filter(config.filter).join('\n');
     }
-    if (cfg.rewrite) {
-      text = cfg.rewrite(text);
+    if (config.rewrite) {
+      text = config.rewrite(text);
     }
     return text;
   }

@@ -74,10 +74,10 @@ export function Accepts(types: [string, ...string[]]): EndpointDecorator {
  */
 export const ConfigureInterceptor = <T extends WebInterceptor>(
   cls: Class<T>,
-  cfg: Partial<RetainPrimitiveFields<T['config']>>,
+  config: Partial<RetainPrimitiveFields<T['config']>>,
   extra?: Partial<EndpointConfig & ControllerConfig>
 ): EndpointDecorator =>
-  ControllerRegistryIndex.createInterceptorConfigDecorator(cls, cfg, extra);
+  ControllerRegistryIndex.createInterceptorConfigDecorator(cls, config, extra);
 
 /**
  * Specifies if endpoint should be conditional

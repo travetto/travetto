@@ -5,7 +5,7 @@ import { Util } from './util.ts';
 
 export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, time: number };
 
-export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<WatchEvent> {
+export async function* watchCompiler(config?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<WatchEvent> {
   // Load at runtime
   const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
 
@@ -31,7 +31,7 @@ export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: A
 
   remove();
 
-  if (cfg?.restartOnExit) {
+  if (config?.restartOnExit) {
     // We are done, request restart
     await ShutdownManager.gracefulShutdown('@travetto/runtime:watchCompiler');
     process.exit(ExecUtil.RESTART_EXIT_CODE);

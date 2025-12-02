@@ -10,15 +10,15 @@ import { CoreCacheConfig, CacheConfig, CacheAware, CacheConfigSymbol, EvictConfi
  * @kind decorator
  */
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, maxAge: number | TimeSpan, config?: Omit<CacheConfig, 'maxAge'>): MethodDecorator;
-export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, cfg?: CacheConfig): MethodDecorator;
+export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, input?: CacheConfig): MethodDecorator;
 export function Cache<F extends string, U extends Record<F, CacheService>>(
-  field: F, cfg?: number | TimeSpan | CacheConfig, config: Exclude<CacheConfig, 'maxAge'> = {}
+  field: F, input?: number | TimeSpan | CacheConfig, config: Exclude<CacheConfig, 'maxAge'> = {}
 ): MethodDecorator {
-  if (cfg !== undefined) {
-    if (typeof cfg === 'string' || typeof cfg === 'number') {
-      config.maxAge = TimeUtil.asMillis(cfg);
+  if (input !== undefined) {
+    if (typeof input === 'string' || typeof input === 'number') {
+      config.maxAge = TimeUtil.asMillis(input);
     } else {
-      config = cfg;
+      config = input;
     }
   }
   const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {

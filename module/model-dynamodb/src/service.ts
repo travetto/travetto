@@ -405,8 +405,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const cfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, cfg, body, { emptySortValue: null });
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, config, body, { emptySortValue: null });
 
     const idxName = simpleName(idx);
 

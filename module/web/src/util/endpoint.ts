@@ -138,8 +138,8 @@ export class EndpointUtil {
     const cls = endpoint.class;
     const vals = WebCommonUtil.getRequestParams(request);
     const { parameters } = SchemaRegistryIndex.get(cls).getMethod(endpoint.methodName);
-    const combined = parameters.map((cfg) =>
-      ({ schema: cfg, param: endpoint.parameters[cfg.index], value: vals?.[cfg.index] }));
+    const combined = parameters.map((config) =>
+      ({ schema: config, param: endpoint.parameters[config.index], value: vals?.[config.index] }));
 
     try {
       const extracted = combined.map(({ param, schema, value }) =>
@@ -213,7 +213,7 @@ export class EndpointUtil {
     const endpointFilters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...(endpoint.filters ?? []).map(fn => fn.bind(endpoint.instance)),
-      ...(endpoint.parameters.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
+      ...(endpoint.parameters.filter(config => config.resolve).map(fn => fn.resolve!))
     ]
       .map(fn => ({ filter: fn }));
 
