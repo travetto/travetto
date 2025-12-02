@@ -22,12 +22,12 @@ export class Terminal {
   #height: number;
   #output: tty.WriteStream;
 
-  async #showWaitingIndicator(pos: Coord, signal: AbortSignal): Promise<void> {
+  async #showWaitingIndicator(position: Coord, signal: AbortSignal): Promise<void> {
     let done = false;
     signal.addEventListener('abort', () => done = true);
     let i = 0;
     while (!done) {
-      await this.#writer.setPosition(pos).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
+      await this.#writer.setPosition(position).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
       await Util.blockingTimeout(100);
     }
   }
@@ -65,7 +65,7 @@ export class Terminal {
    * Allows for writing at bottom of screen with scrolling support for main content
    */
   async streamToBottom(source: AsyncIterable<string | undefined>, config: TerminalStreamingConfig = {}): Promise<void> {
-    const writePos = { x: 0, y: -1 };
+    const writePosition = { x: 0, y: -1 };
     const minDelay = config.minDelay ?? 0;
 
     let previous: string | undefined;
@@ -87,12 +87,12 @@ export class Terminal {
         if (line && (Date.now() - start) >= minDelay) {
           start = Date.now();
           stop?.abort();
-          this.writer.setPosition(writePos).write(lineStatus(line)).clearLine(1).commit(true);
+          this.writer.setPosition(writePosition).write(lineStatus(line)).clearLine(1).commit(true);
 
           const idx = line.indexOf(WAIT_TOKEN);
           if (idx >= 0) {
             stop = new AbortController();
-            this.#showWaitingIndicator({ y: writePos.y, x: idx }, stop.signal);
+            this.#showWaitingIndicator({ y: writePosition.y, x: idx }, stop.signal);
           }
         }
 
@@ -104,7 +104,7 @@ export class Terminal {
         await this.writer.writeLine(lineMain(previous)).commit();
       }
 
-      await this.#writer.setPosition(writePos).clearLine().commit(true);
+      await this.#writer.setPosition(writePosition).clearLine().commit(true);
     } finally {
       await this.#writer.reset().commit();
     }

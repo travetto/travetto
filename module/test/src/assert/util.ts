@@ -87,8 +87,8 @@ export class AssertUtil {
    * Generate a suite error given a suite config, and an error
    */
   static generateSuiteFailure(suite: SuiteConfig, methodName: string, error: Error): SuiteFailure {
-    const { import: imp, ...pos } = this.getPositionOfError(error, suite.import);
-    let line = pos.line;
+    const { import: imp, ...rest } = this.getPositionOfError(error, suite.import);
+    let line = rest.line;
 
     if (line === 1 && suite.lineStart) {
       line = suite.lineStart;

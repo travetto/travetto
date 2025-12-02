@@ -100,13 +100,13 @@ export class QueryLanguageParser {
   /**
    * Parse all tokens
    */
-  static parse(tokens: Token[], pos: number = 0): AllNode {
+  static parse(tokens: Token[], position: number = 0): AllNode {
 
     let top: (AllNode | Token)[] = [];
     const stack: (typeof top)[] = [top];
     let arr: Literal[] | undefined;
 
-    let token = tokens[pos];
+    let token = tokens[position];
     while (token) {
       switch (token.type) {
         case 'grouping':
@@ -147,7 +147,7 @@ export class QueryLanguageParser {
         default:
           top.push(token);
       }
-      token = tokens[++pos];
+      token = tokens[++position];
     }
 
     this.condense(top, 'or');

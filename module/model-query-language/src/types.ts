@@ -11,7 +11,7 @@ export type TokenType =
  */
 export interface TokenizeState {
   out: Token[];
-  pos: number;
+  position: number;
   start: number;
   text: string;
   mode: TokenType;
