@@ -13,7 +13,7 @@ type StringFields<T> = {
   (T[K] extends string ? K : never)
 }[Extract<keyof T, string>];
 
-const isClass = (e: unknown): e is Class => e === Error || e === AppError || Object.getPrototypeOf(e) !== Object.getPrototypeOf(Function);
+const isClass = (input: unknown): input is Class => input === Error || input === AppError || Object.getPrototypeOf(input) !== Object.getPrototypeOf(Function);
 
 /**
  * Check assertion

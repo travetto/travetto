@@ -63,10 +63,10 @@ export class Runner {
     const target = await TestConsumerRegistryIndex.getInstance(this.#state);
 
     const consumer = new RunnableTestConsumer(target)
-      .withTransformer(e => {
+      .withTransformer(event => {
         // Copy run metadata to event
-        e.metadata = run.metadata;
-        return e;
+        event.metadata = run.metadata;
+        return event;
       });
 
     await consumer.onStart({});

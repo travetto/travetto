@@ -22,7 +22,7 @@ class TestRunnerFeature extends BaseFeature {
 
   #server: ChildProcess | undefined;
   #consumer: WorkspaceResultsManager;
-  #codeLensUpdated: (e: void) => unknown;
+  #codeLensUpdated: (event: void) => unknown;
 
   #stopServer(force = false): void {
     if (!this.#server) { return; }

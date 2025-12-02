@@ -76,13 +76,13 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    * Listen for event, process the full event, and if the event is an after test,
    * send a full suite summary
    */
-  onEventDone(e: TestEvent): void {
+  onEventDone(event: TestEvent): void {
     try {
-      if (e.type === 'test' && e.phase === 'after') {
+      if (event.type === 'test' && event.phase === 'after') {
         this.onEvent({
           type: 'suite',
           phase: 'after',
-          suite: this.summarizeSuite(e.test),
+          suite: this.summarizeSuite(event.test),
         });
       }
     } catch (error) {

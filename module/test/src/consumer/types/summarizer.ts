@@ -29,9 +29,9 @@ export class TestResultsSummarizer implements TestConsumerShape {
   /**
    * Merge all test results into a single Suite Result
    */
-  onEvent(e: TestEvent): void {
-    if (e.phase === 'after' && e.type === 'suite') {
-      this.#merge(e.suite);
+  onEvent(event: TestEvent): void {
+    if (event.phase === 'after' && event.type === 'suite') {
+      this.#merge(event.suite);
     }
   }
 }

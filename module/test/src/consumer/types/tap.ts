@@ -76,9 +76,9 @@ export class TapEmitter implements TestConsumerShape {
   /**
    * Listen for each event
    */
-  onEvent(e: TestEvent): void {
-    if (e.type === 'test' && e.phase === 'after') {
-      const { test } = e;
+  onEvent(event: TestEvent): void {
+    if (event.type === 'test' && event.phase === 'after') {
+      const { test } = event;
       const suiteId = this.#enhancer.suiteName(test.classId);
       let header = `${suiteId} - ${this.#enhancer.testName(test.methodName)}`;
       if (test.description) {

@@ -190,7 +190,7 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
-    const mgr = new TestPhaseManager(suite, result, e => this.#onSuiteFailure(e));
+    const mgr = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
 
     const originalEnv = { ...process.env };
 

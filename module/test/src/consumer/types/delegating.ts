@@ -32,18 +32,18 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     }
   }
 
-  onEvent(e: TestEvent): void {
+  onEvent(event: TestEvent): void {
     if (this.#transformer) {
-      e = this.#transformer(e);
+      event = this.#transformer(event);
     }
-    if (this.#filter?.(e) === false) {
+    if (this.#filter?.(event) === false) {
       return;
     }
     for (const c of this.#consumers) {
-      c.onEvent(e);
+      c.onEvent(event);
     }
 
-    this.onEventDone?.(e);
+    this.onEventDone?.(event);
   }
 
   async summarize(summary?: SuitesSummary): Promise<void> {
@@ -54,5 +54,5 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     }
   }
 
-  onEventDone?(e: TestEvent): void;
+  onEventDone?(event: TestEvent): void;
 }

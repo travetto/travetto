@@ -46,10 +46,10 @@ export class XunitEmitter implements TestConsumerShape {
   /**
    * Handle each test event
    */
-  onEvent(e: TestEvent): void {
-    if (e.type === 'test' && e.phase === 'after') {
+  onEvent(event: TestEvent): void {
+    if (event.type === 'test' && event.phase === 'after') {
 
-      const { test } = e;
+      const { test } = event;
 
       let name = `${test.methodName}`;
       if (test.description) {
@@ -79,8 +79,8 @@ export class XunitEmitter implements TestConsumerShape {
       <system-err>${this.buildMeta({ error: groupedByLevel.error, warn: groupedByLevel.warn })}</system-err>
     </testcase>`
       );
-    } else if (e.type === 'suite' && e.phase === 'after') {
-      const { suite } = e;
+    } else if (event.type === 'suite' && event.phase === 'after') {
+      const { suite } = event;
       const testBodies = this.#tests.slice(0);
       this.#tests = [];
 

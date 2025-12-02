@@ -252,41 +252,41 @@ export class DocumentResultsManager {
   /**
    * On a test event, update internal state
    */
-  onEvent(e: TestWatchEvent): void {
-    if (e.type === 'ready' || e.type === 'log') {
+  onEvent(event: TestWatchEvent): void {
+    if (event.type === 'ready' || event.type === 'log') {
       // Ignore
-    } else if (e.type === 'removeTest') {
-      if ('method' in e && typeof e.method === 'string') {
-        this.reset('test', `${e.classId}#${e.method}`);
+    } else if (event.type === 'removeTest') {
+      if ('method' in event && typeof event.method === 'string') {
+        this.reset('test', `${event.classId}#${event.method}`);
       } else {
-        for (const method of e.methodNames ?? []) {
-          this.reset('test', `${e.classId}#${method}`);
+        for (const method of event.methodNames ?? []) {
+          this.reset('test', `${event.classId}#${method}`);
         }
       }
-    } else if (e.phase === 'before') {
-      switch (e.type) {
+    } else if (event.phase === 'before') {
+      switch (event.type) {
         case 'suite': {
-          this.reset('suite', e.suite.classId);
-          const tests = Object.values(this.#results.test).filter(x => x.src.classId === e.suite.classId);
+          this.reset('suite', event.suite.classId);
+          const tests = Object.values(this.#results.test).filter(x => x.src.classId === event.suite.classId);
           for (const test of tests) {
             this.reset('test', `${test.src.classId}#${test.src.methodName}`);
           }
-          this.store('suite', e.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(e.suite), src: e.suite });
+          this.store('suite', event.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(event.suite), src: event.suite });
           break;
         }
         // Clear diags
         case 'test': {
-          const key = `${e.test.classId}#${e.test.methodName}`;
+          const key = `${event.test.classId}#${event.test.methodName}`;
           this.reset('test', key);
-          this.store('test', key, { status: 'unknown', decoration: Decorations.buildTest(e.test), src: e.test });
+          this.store('test', key, { status: 'unknown', decoration: Decorations.buildTest(event.test), src: event.test });
           break;
         }
       }
     } else {
-      switch (e.type) {
-        case 'suite': this.onSuite(e.suite); break;
-        case 'test': this.onTest(e.test); break;
-        case 'assertion': this.onAssertion(e.assertion); break;
+      switch (event.type) {
+        case 'suite': this.onSuite(event.suite); break;
+        case 'test': this.onTest(event.test); break;
+        case 'assertion': this.onAssertion(event.assertion); break;
       }
     }
   }
