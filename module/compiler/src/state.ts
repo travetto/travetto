@@ -235,7 +235,7 @@ export class CompilerState implements ts.CompilerHost {
   /* Start Compiler Host */
   getCanonicalFileName(file: string): string { return file; }
   getCurrentDirectory(): string { return this.#manifest.workspace.path; }
-  getDefaultLibFileName(opts: ts.CompilerOptions): string { return ts.getDefaultLibFileName(opts); }
+  getDefaultLibFileName(options: ts.CompilerOptions): string { return ts.getDefaultLibFileName(options); }
   getNewLine(): string { return ts.sys.newLine; }
   useCaseSensitiveFileNames(): boolean { return ts.sys.useCaseSensitiveFileNames; }
   getDefaultLibLocation(): string { return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions)); }

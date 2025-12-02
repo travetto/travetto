@@ -66,7 +66,7 @@ export class WebUploadUtil {
     if (MULTIPART.has(contentType.value)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
-      const itr = new AsyncQueue<UploadItem>();
+      const queue = new AsyncQueue<UploadItem>();
 
       // Upload
       bodyStream.pipe(busboy({
@@ -80,12 +80,12 @@ export class WebUploadUtil {
         },
         limits: { fileSize: largestMax }
       })
-        .on('file', (field, stream, filename) => itr.add({ stream, filename, field }))
-        .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
-        .on('finish', () => itr.close())
-        .on('error', (error) => itr.throw(error instanceof Error ? error : new Error(`${error}`))));
+        .on('file', (field, stream, filename) => queue.add({ stream, filename, field }))
+        .on('limit', field => queue.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
+        .on('finish', () => queue.close())
+        .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`))));
 
-      yield* itr;
+      yield* queue;
     } else {
       const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition')).parameters.filename;
       yield { stream: bodyStream, filename, field: 'file' };

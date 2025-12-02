@@ -50,14 +50,14 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
    * @param message The error message
    */
   constructor(
-    ...[message, opts]:
+    ...[message, options]:
       T extends undefined ? ([string] | [string, AppErrorOptions<T>]) : [string, AppErrorOptions<T>]
   ) {
-    super(message, opts?.cause ? { cause: opts.cause } : undefined);
-    this.type = opts?.type ?? this.constructor.name;
-    this.details = opts?.details!;
-    this.category = opts?.category ?? castTo<typeof AppError>(this.constructor).defaultCategory ?? 'general';
-    this.at = new Date(opts?.at ?? Date.now()).toISOString();
+    super(message, options?.cause ? { cause: options.cause } : undefined);
+    this.type = options?.type ?? this.constructor.name;
+    this.details = options?.details!;
+    this.category = options?.category ?? castTo<typeof AppError>(this.constructor).defaultCategory ?? 'general';
+    this.at = new Date(options?.at ?? Date.now()).toISOString();
   }
 
   /**

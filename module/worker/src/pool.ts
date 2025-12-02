@@ -37,7 +37,7 @@ export class WorkPool {
   static DEFAULT_SIZE = Math.max(Math.trunc(WorkPool.MAX_SIZE * .75), 4);
 
   /** Build worker pool */
-  static #buildPool<I, O>(input: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
+  static #buildPool<I, O>(input: WorkerInput<I, O>, options?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
     let pendingAcquires = 0;
 
     const trace = /@travetto\/worker/.test(Env.DEBUG.value ?? '');
@@ -67,13 +67,13 @@ export class WorkPool {
       validate: async (x: Worker<I, O>) => x.active
     }, {
       evictionRunIntervalMillis: 5000,
-      ...(opts ?? {}),
-      max: opts?.max ?? WorkPool.DEFAULT_SIZE,
-      min: opts?.min ?? 1,
+      ...(options ?? {}),
+      max: options?.max ?? WorkPool.DEFAULT_SIZE,
+      min: options?.min ?? 1,
     });
 
     // Listen for shutdown
-    opts?.shutdown?.addEventListener('abort', async () => {
+    options?.shutdown?.addEventListener('abort', async () => {
       while (pendingAcquires) {
         await Util.nonBlockingTimeout(10);
       }
@@ -87,7 +87,7 @@ export class WorkPool {
   /**
    * Process a given input source and worker, and fire on completion
    */
-  static async run<I, O>(workerFactory: WorkerInput<I, O>, src: ItrSource<I>, opts: WorkPoolConfig<I, O> = {}): Promise<void> {
+  static async run<I, O>(workerFactory: WorkerInput<I, O>, src: ItrSource<I>, options: WorkPoolConfig<I, O> = {}): Promise<void> {
 
     const trace = /@travetto\/worker/.test(Env.DEBUG.value ?? '');
     const pending = new Set<Promise<unknown>>();
@@ -95,7 +95,7 @@ export class WorkPool {
     let inputIdx = 0;
     let finishIdx = 0;
 
-    const pool = this.#buildPool(workerFactory, opts);
+    const pool = this.#buildPool(workerFactory, options);
 
     for await (const nextInput of src) {
       const worker = await pool.acquire()!;
@@ -105,10 +105,10 @@ export class WorkPool {
       }
 
       const completion = worker.execute(nextInput, inputIdx += 1)
-        .then(v => opts.onComplete?.(v, nextInput, finishIdx += 1))
+        .then(v => options.onComplete?.(v, nextInput, finishIdx += 1))
         .catch(error => {
           errors.push(error);
-          opts?.onError?.(error, nextInput, finishIdx += 1);
+          options?.onError?.(error, nextInput, finishIdx += 1);
         }) // Catch error
         .finally(async () => {
           if (trace) {
@@ -140,36 +140,36 @@ export class WorkPool {
   /**
    * Process a given input source as an async iterable
    */
-  static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolConfig<I, O>): AsyncIterable<O> {
-    const itr = new AsyncQueue<O>();
+  static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, options?: WorkPoolConfig<I, O>): AsyncIterable<O> {
+    const queue = new AsyncQueue<O>();
     const result = this.run(worker, input, {
-      ...opts,
+      ...options,
       onComplete: (event, inp, finishIdx) => {
-        itr.add(event);
-        opts?.onComplete?.(event, inp, finishIdx);
+        queue.add(event);
+        options?.onComplete?.(event, inp, finishIdx);
       }
     });
-    result.finally(() => itr.close());
-    return itr;
+    result.finally(() => queue.close());
+    return queue;
   }
 
   /**
    * Process a given input source as an async iterable with progress information
    */
-  static runStreamProgress<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, total: number, opts?: WorkPoolConfig<I, O>): AsyncIterable<{
+  static runStreamProgress<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, total: number, options?: WorkPoolConfig<I, O>): AsyncIterable<{
     idx: number;
     value: O;
     total: number;
   }> {
-    const itr = new AsyncQueue<{ idx: number, value: O, total: number }>();
+    const queue = new AsyncQueue<{ idx: number, value: O, total: number }>();
     const result = this.run(worker, input, {
-      ...opts,
+      ...options,
       onComplete: (event, inp, finishIdx) => {
-        itr.add({ value: event, idx: finishIdx, total });
-        opts?.onComplete?.(event, inp, finishIdx);
+        queue.add({ value: event, idx: finishIdx, total });
+        options?.onComplete?.(event, inp, finishIdx);
       }
     });
-    result.finally(() => itr.close());
-    return itr;
+    result.finally(() => queue.close());
+    return queue;
   }
 }

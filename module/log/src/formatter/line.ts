@@ -80,10 +80,10 @@ export class LineLogFormatterConfig {
 @Injectable()
 export class LineLogFormatter implements LogFormatter {
 
-  opts: LineLogFormatterConfig;
+  config: LineLogFormatterConfig;
 
-  constructor(opts: LineLogFormatterConfig) {
-    this.opts = opts;
+  constructor(config: LineLogFormatterConfig) {
+    this.config = config;
   }
 
   /**
@@ -92,38 +92,38 @@ export class LineLogFormatter implements LogFormatter {
   format(event: LogEvent): string {
     const out = [];
 
-    if (this.opts.timestamp) {
+    if (this.config.timestamp) {
       let timestamp = event.timestamp.toISOString();
-      if (this.opts.timestamp === 's') {
+      if (this.config.timestamp === 's') {
         timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
-      if (this.opts.colorize) {
+      if (this.config.colorize) {
         timestamp = STYLES.timestamp(timestamp);
       }
       out.push(timestamp);
     }
 
-    if (this.opts.level) {
+    if (this.config.level) {
       let level: string = event.level;
-      if (this.opts.align) {
+      if (this.config.align) {
         level = level.padEnd(5, ' ');
       }
-      if (this.opts.colorize) {
+      if (this.config.colorize) {
         level = STYLES[event.level](level);
       }
       out.push(level);
     }
 
-    if (event.modulePath && this.opts.location) {
+    if (event.modulePath && this.config.location) {
       const ns = `${event.module}:${event.modulePath}`;
       let loc = event.line ? `${ns}:${event.line}` : ns;
-      if (this.opts.colorize) {
+      if (this.config.colorize) {
         loc = STYLES.location(loc);
       }
       out.push(`[${loc}]`);
     }
 
-    out.push(LogFormatUtil.getLogMessage(event, this.opts.inspectOptions));
+    out.push(LogFormatUtil.getLogMessage(event, this.config.inspectOptions));
 
     return out.join(' ');
   }

@@ -14,10 +14,10 @@ export class JSONLogFormatterConfig {
  */
 @Injectable()
 export class JsonLogFormatter implements LogFormatter {
-  opts: JSONLogFormatterConfig;
+  config: JSONLogFormatterConfig;
 
-  constructor(opts: JSONLogFormatterConfig) {
-    this.opts = opts;
+  constructor(config: JSONLogFormatterConfig) {
+    this.config = config;
   }
 
   format(event: LogEvent): string {
@@ -28,6 +28,6 @@ export class JsonLogFormatter implements LogFormatter {
       ...rest,
       ...(message ? { message } : {}),
       ...(context ? { context } : {}),
-    }, null, this.opts.jsonIndent);
+    }, null, this.config.jsonIndent);
   }
 }

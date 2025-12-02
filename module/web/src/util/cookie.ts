@@ -66,13 +66,13 @@ export class CookieJar {
     return this;
   }
 
-  has(name: string, opts: CookieGetOptions = {}): boolean {
-    const needSigned = opts.signed ?? this.#setOptions.signed;
+  has(name: string, options: CookieGetOptions = {}): boolean {
+    const needSigned = options.signed ?? this.#setOptions.signed;
     return name in this.#cookies && this.#cookies[name].signed === needSigned;
   }
 
-  get(name: string, opts: CookieGetOptions = {}): string | undefined {
-    if (this.has(name, opts)) {
+  get(name: string, options: CookieGetOptions = {}): string | undefined {
+    if (this.has(name, options)) {
       return this.#cookies[name]?.value;
     }
   }

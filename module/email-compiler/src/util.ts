@@ -79,12 +79,12 @@ export class EmailCompileUtil {
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(src: { data: string } | { file: string }, opts: EmailTemplateResource): Promise<string> {
+  static async compileSass(src: { data: string } | { file: string }, options: EmailTemplateResource): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
       ...src,
       sourceMap: false,
-      includePaths: opts.loader.searchPaths.slice(0)
+      includePaths: options.loader.searchPaths.slice(0)
     });
     return result!.css.toString();
   }
@@ -133,7 +133,7 @@ export class EmailCompileUtil {
   /**
    * Inline image sources
    */
-  static async inlineImages(html: string, opts: EmailTemplateResource): Promise<string> {
+  static async inlineImages(html: string, options: EmailTemplateResource): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Buffer | Promise<Buffer>][] = [];
 
@@ -141,13 +141,13 @@ export class EmailCompileUtil {
       const ext = path.extname(src);
       if (/^[.](jpe?g|png)$/.test(ext)) {
         const output = await ImageUtil.convert(
-          await opts.loader.readStream(src),
+          await options.loader.readStream(src),
           { format: ext === '.png' ? 'png' : 'jpeg' }
         );
         const buffer = await toBuffer(output);
         pendingImages.push([token, ext, buffer]);
       } else {
-        pendingImages.push([token, ext, opts.loader.read(src, true)]);
+        pendingImages.push([token, ext, options.loader.read(src, true)]);
       }
     }
 
@@ -179,14 +179,14 @@ export class EmailCompileUtil {
   /**
    * Apply styles into a given html document
    */
-  static async applyStyles(html: string, opts: EmailTemplateResource): Promise<string> {
+  static async applyStyles(html: string, options: EmailTemplateResource): Promise<string> {
     const styles = [
-      opts.globalStyles ?? '',
-      await opts.loader.read('/email/main.scss').catch(() => '')
+      options.globalStyles ?? '',
+      await options.loader.read('/email/main.scss').catch(() => '')
     ].filter(x => !!x).join('\n');
 
     if (styles.length) {
-      const compiled = await this.compileSass({ data: styles }, opts);
+      const compiled = await this.compileSass({ data: styles }, options);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);

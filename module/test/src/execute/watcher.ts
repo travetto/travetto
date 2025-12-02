@@ -32,7 +32,7 @@ export class TestWatcher {
       events.push(...RunnerUtil.getTestRuns(tests));
     }
 
-    const itr = new AsyncQueue(events);
+    const queue = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(
       await TestConsumerRegistryIndex.getInstance({ consumer: format })
     )
@@ -59,7 +59,7 @@ export class TestWatcher {
             import: conf.import, classId: conf.classId, methodNames: [conf.methodName], metadata: { partial: true }
           };
           console.log('Triggering', run);
-          itr.add(run, true); // Shift to front
+          queue.add(run, true); // Shift to front
         }
       } else {
         process.send?.({
@@ -73,7 +73,7 @@ export class TestWatcher {
     }, SuiteRegistryIndex);
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    Registry.onNonClassChanges(imp => itr.add({ import: imp }));
+    Registry.onNonClassChanges(imp => queue.add({ import: imp }));
 
     process.on('message', event => {
       if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {
@@ -83,7 +83,7 @@ export class TestWatcher {
           event = { import: RuntimeIndex.getFromSource(event.file)?.import! };
         }
         console.debug('Manually triggered', event);
-        itr.add(castTo(event), true);
+        queue.add(castTo(event), true);
       }
     });
 
@@ -91,7 +91,7 @@ export class TestWatcher {
 
     await WorkPool.run(
       buildStandardTestManager.bind(null, consumer),
-      itr,
+      queue,
       {
         idleTimeoutMillis: 120000,
         min: 2,

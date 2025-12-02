@@ -12,7 +12,7 @@ export class MockService {
 
   }
 
-  async fetchImage(path: string, opts: { width?: number, height?: number }) {
+  async fetchImage(path: string, options: { width?: number, height?: number }) {
 
   }
 }

@@ -59,8 +59,8 @@ export class SchemaTransformer {
     // Determine auto enrol methods
     for (const item of state.getDecoratorList(node)) {
       if (item.targets?.includes('@travetto/schema:Schema')) {
-        for (const opt of item.options ?? []) {
-          state[AutoEnrollMethods].add(opt);
+        for (const option of item.options ?? []) {
+          state[AutoEnrollMethods].add(option);
         }
       }
     }

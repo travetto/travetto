@@ -73,10 +73,10 @@ export class PackUtil {
   /**
    * Track result response
    */
-  static async runCommand(cmd: string[], opts: SpawnOptions = {}): Promise<string> {
+  static async runCommand(cmd: string[], options: SpawnOptions = {}): Promise<string> {
     const { valid, code, stderr, message, stdout } = await ExecUtil.getResult(spawn(cmd[0], cmd.slice(1), {
       stdio: [0, 'pipe', 'pipe'],
-      ...opts,
+      ...options,
     }), { catch: true });
 
     if (!valid) {

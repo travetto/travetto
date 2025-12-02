@@ -39,12 +39,12 @@ export class ImageUtil {
   /**
    * Convert image
    */
-  static async convert<T extends Input>(image: T, { format, optimize, ...opts }: ConvertOptions): Promise<T extends string ? Readable : T> {
+  static async convert<T extends Input>(image: T, { format, optimize, ...options }: ConvertOptions): Promise<T extends string ? Readable : T> {
     const { default: sharp } = await import('sharp');
 
     let builder = sharp();
-    if (opts.w || opts.h) {
-      const dims = [opts.w, opts.h].map(x => x ? Math.trunc(x) : undefined);
+    if (options.w || options.h) {
+      const dims = [options.w, options.h].map(x => x ? Math.trunc(x) : undefined);
       const fluid = dims.some(x => !x);
       builder = builder.resize({
         width: dims[0],

@@ -42,7 +42,7 @@ export type RpcClient<T extends Record<string, {}>, E extends Record<string, Fun
 export type RpcClientFactory<T extends Record<string, {}>> =
   <R extends Record<string, Function>>(
     baseOpts: RpcRequest,
-    decorate?: (opts: RpcRequest) => R
+    decorate?: (request: RpcRequest) => R
   ) => RpcClient<T, R>;
 
 function isResponse(v: unknown): v is Response {
@@ -247,12 +247,12 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
 
 export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<T> {
   // @ts-ignore
-  return function (opts, decorate) {
+  return function (request, decorate) {
     const client: RpcRequest = {
       consumeJSON,
       consumeError,
-      ...opts,
-      core: { timeout: 0, credentials: 'include', mode: 'cors', ...opts.core },
+      ...request,
+      core: { timeout: 0, credentials: 'include', mode: 'cors', ...request.core },
     };
     const cache: Record<string, unknown> = {};
     // @ts-ignore
@@ -277,10 +277,10 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function withConfigFactoryDecorator(opts: RpcRequest) {
+export function withConfigFactoryDecorator(request: RpcRequest) {
   return {
     withConfig<V extends PromiseFn>(this: V, extra: Partial<RpcRequest['core']>, ...params: Parameters<V>): Promise<PromiseRes<V>> {
-      return invokeFetch({ ...opts, core: { ...opts.core, ...extra } }, ...params);
+      return invokeFetch({ ...request, core: { ...request.core, ...extra } }, ...params);
     }
   };
 }
