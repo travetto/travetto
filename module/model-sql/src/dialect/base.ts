@@ -437,13 +437,13 @@ export abstract class SQLDialect implements DialectState {
 
           switch (subKey) {
             case '$nin': case '$in': {
-              const arr = (Array.isArray(value) ? value : [value]).map(el => resolve(el));
+              const arr = (Array.isArray(value) ? value : [value]).map(item => resolve(item));
               items.push(`${sPath} ${SQL_OPS[subKey]} (${arr.join(',')})`);
               break;
             }
             case '$all': {
               const set = new Set();
-              const arr = [value].flat().filter(x => !set.has(x) && !!set.add(x)).map(el => resolve(el));
+              const arr = [value].flat().filter(x => !set.has(x) && !!set.add(x)).map(item => resolve(item));
               const valueTable = this.parentTable(sStack);
               const alias = `_all_${sStack.length}`;
               const pPath = this.identifier(this.parentPathField.name);
@@ -774,21 +774,21 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
 
     if (isArray) {
       const newInstances: typeof instances = [];
-      for (const el of instances) {
-        if (el.value === null || el.value === undefined) {
+      for (const instance of instances) {
+        if (instance.value === null || instance.value === undefined) {
           continue;
-        } else if (Array.isArray(el.value)) {
-          const name = el.stack.at(-1)!.name;
-          for (const sel of el.value) {
+        } else if (Array.isArray(instance.value)) {
+          const name = instance.stack.at(-1)!.name;
+          for (const sel of instance.value) {
             newInstances.push({
-              stack: el.stack,
+              stack: instance.stack,
               value: {
                 [name]: sel
               }
             });
           }
         } else {
-          newInstances.push(el);
+          newInstances.push(instance);
         }
       }
       instances = newInstances;
@@ -982,18 +982,18 @@ ${this.getWhereSQL(cls, where!)}`;
   async bulkProcess(deletes: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
     const out = {
       counts: {
-        delete: deletes.reduce((acc, el) => acc + el.ids.length, 0),
+        delete: deletes.reduce((acc, item) => acc + item.ids.length, 0),
         error: 0,
-        insert: inserts.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0),
-        update: updates.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0),
-        upsert: upserts.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0)
+        insert: inserts.filter(x => x.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0),
+        update: updates.filter(x => x.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0),
+        upsert: upserts.filter(x => x.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0)
       },
       errors: [],
       insertedIds: new Map()
     };
 
     // Full removals
-    await Promise.all(deletes.map(el => this.deleteByIds(el.stack, el.ids)));
+    await Promise.all(deletes.map(item => this.deleteByIds(item.stack, item.ids)));
 
     // Adding deletes
     if (upserts.length || updates.length) {
@@ -1014,17 +1014,17 @@ ${this.getWhereSQL(cls, where!)}`;
       if (!items.length) {
         continue;
       }
-      let lvl = 1; // Add by level
+      let level = 1; // Add by level
       for (; ;) { // Loop until done
-        const leveled = items.filter(f => f.stack.length === lvl);
+        const leveled = items.filter(f => f.stack.length === level);
         if (!leveled.length) {
           break;
         }
         await Promise.all(leveled
-          .map(iw => this.getInsertSQL(iw.stack, iw.records))
+          .map(inserted => this.getInsertSQL(inserted.stack, inserted.records))
           .filter(sql => !!sql)
           .map(sql => this.executeSQL(sql!)));
-        lvl += 1;
+        level += 1;
       }
     }
 

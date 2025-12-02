@@ -49,8 +49,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async deleteStorage(): Promise<void> { }
 
   async deleteModel(cls: Class): Promise<void> {
-    for await (const el of this.list(cls)) {
-      await this.delete(cls, el.id);
+    for await (const item of this.list(cls)) {
+      await this.delete(cls, item.id);
     }
   }
 
@@ -107,9 +107,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     const batch = await this.#getCollection(cls).select().get();
-    for (const el of batch.docs) {
+    for (const item of batch.docs) {
       try {
-        yield await this.get(cls, el.id);
+        yield await this.get(cls, item.id);
       } catch (error) {
         if (!(error instanceof NotFoundError)) {
           throw error;
@@ -160,8 +160,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');
     }
 
-    for (const el of (await query.get()).docs) {
-      yield await ModelCrudUtil.load(cls, el.data()!);
+    for (const item of (await query.get()).docs) {
+      yield await ModelCrudUtil.load(cls, item.data()!);
     }
   }
 }

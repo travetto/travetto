@@ -53,7 +53,7 @@ export class ConfigurationService {
     const providers = await DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (el) => await DependencyRegistryIndex.getInstance(el.candidateType, el.qualifier))
+      providers.map(async (candidate) => await DependencyRegistryIndex.getInstance(candidate.candidateType, candidate.qualifier))
     );
 
     const parser = await DependencyRegistryIndex.getInstance(ParserManager);
@@ -77,12 +77,12 @@ export class ConfigurationService {
 
     // Initialize Secrets
     const { secrets = [] } = this.#get<{ secrets?: string | string[] }>('config') ?? {};
-    for (const el of [secrets].flat()) {
-      if (typeof el === 'string') {
-        if (el.startsWith('/')) {
-          this.#secrets.push(DataUtil.coerceType(el, RegExp, true));
+    for (const value of [secrets].flat()) {
+      if (typeof value === 'string') {
+        if (value.startsWith('/')) {
+          this.#secrets.push(DataUtil.coerceType(value, RegExp, true));
         } else {
-          this.#secrets.push(DataUtil.coerceType(el, String, true));
+          this.#secrets.push(DataUtil.coerceType(value, String, true));
         }
       }
     }
@@ -96,19 +96,19 @@ export class ConfigurationService {
     const configTargets = await DependencyRegistryIndex.getCandidates(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
-        .filter(el => el.qualifier === getDefaultQualifier(el.class)) // Is self targeting?
+        .filter(candidate => candidate.qualifier === getDefaultQualifier(candidate.class)) // Is self targeting?
         .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
-        .map(async el => {
-          const inst = await DependencyRegistryIndex.getInstance(el.class, el.qualifier);
-          return [el, inst] as const;
+        .map(async candidate => {
+          const inst = await DependencyRegistryIndex.getInstance(candidate.class, candidate.qualifier);
+          return [candidate, inst] as const;
         })
     );
     const out: Record<string, ConfigData> = {};
-    for (const [el, inst] of configs) {
+    for (const [candidate, inst] of configs) {
       const data = BindUtil.bindSchemaToObject<ConfigData>(
         getClass(inst), {}, inst, { filterInput: f => !('secret' in f) || !f.secret, filterValue: value => value !== undefined }
       );
-      out[el.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
+      out[candidate.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
     return { sources: this.#specs, active: out };
   }

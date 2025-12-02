@@ -29,26 +29,26 @@ export class ListModuleCommand implements CliCommandShape {
 
   async main(): Promise<void> {
 
-    const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'workspace', this.fromHash, this.toHash);
+    const modules = await CliModuleUtil.findModules(this.changed ? 'changed' : 'workspace', this.fromHash, this.toHash);
     switch (this.format) {
       case 'list': {
-        for (const mod of mods.map(x => x.sourceFolder).toSorted()) {
+        for (const mod of modules.map(x => x.sourceFolder).toSorted()) {
           await write(mod);
         }
         break;
       }
       case 'json': {
-        const outputMap = CliModuleUtil.getDependencyGraph(mods);
+        const outputMap = CliModuleUtil.getDependencyGraph(modules);
         await write(JSON.stringify(Object.entries(outputMap)
           .map(([name, children]) => ({ name, children, workspace: RuntimeIndex.getModule(name)?.workspace })), null, 2));
         break;
       }
       case 'graph': {
         await write('digraph g {');
-        for (const el of mods) {
-          for (const dep of el.parents) {
+        for (const module of modules) {
+          for (const dep of module.parents) {
             if (dep !== Runtime.main.name) {
-              await write(`  "${dep}" -> "${el.name}";`);
+              await write(`  "${dep}" -> "${module.name}";`);
             }
           }
         }

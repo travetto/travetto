@@ -100,16 +100,16 @@ export class PackageModuleVisitor {
    * Propagate prod, role information through graph
    */
   async #complete(mods: Iterable<PackageModule>): Promise<PackageModule[]> {
-    const mapping = new Map([...mods].map(el => [el.name, { parent: new Set(el.state.parentSet), el }]));
+    const mapping = new Map([...mods].map(item => [item.name, { parent: new Set(item.state.parentSet), item }]));
 
     // All first-level dependencies should have role filled in (for propagation)
-    for (const dep of [...mods].filter(x => x.state.roleRoot)) {
-      dep.state.roleSet.clear(); // Ensure the roleRoot is empty
-      for (const c of dep.state.childSet) { // Visit children
-        const cDep = mapping.get(c)!.el;
-        if (cDep.state.roleRoot) { continue; }
+    for (const dependency of [...mods].filter(x => x.state.roleRoot)) {
+      dependency.state.roleSet.clear(); // Ensure the roleRoot is empty
+      for (const child of dependency.state.childSet) { // Visit children
+        const childDependency = mapping.get(child)!.item;
+        if (childDependency.state.roleRoot) { continue; }
         // Set roles for all top level modules
-        cDep.state.roleSet = new Set(cDep.state.travetto?.roles ?? ['std']);
+        childDependency.state.roleSet = new Set(childDependency.state.travetto?.roles ?? ['std']);
       }
     }
 
@@ -120,30 +120,30 @@ export class PackageModuleVisitor {
         throw new Error(`We have reached a cycle for ${[...mapping.keys()]}`);
       }
       // Propagate to children
-      for (const { el } of toProcess) {
-        for (const c of el.state.childSet) {
+      for (const { item } of toProcess) {
+        for (const c of item.state.childSet) {
           const child = mapping.get(c);
           if (!child) { continue; }
-          child.parent.delete(el.name);
+          child.parent.delete(item.name);
           // Propagate roles from parent to child
-          if (!child.el.state.roleRoot) {
-            for (const role of el.state.roleSet) {
-              child.el.state.roleSet.add(role);
+          if (!child.item.state.roleRoot) {
+            for (const role of item.state.roleSet) {
+              child.item.state.roleSet.add(role);
             }
           }
           // Allow prod to trickle down as needed
-          child.el.prod ||= (el.prod && el.state.prodDeps.has(c));
+          child.item.prod ||= (item.prod && item.state.prodDeps.has(c));
         }
       }
       // Remove from mapping
-      for (const { el } of toProcess) {
-        mapping.delete(el.name);
+      for (const { item } of toProcess) {
+        mapping.delete(item.name);
       }
     }
 
     // Mark as standard at the end
-    for (const dep of [...mods].filter(x => x.state.roleRoot)) {
-      dep.state.roleSet = new Set(['std']);
+    for (const dependency of [...mods].filter(x => x.state.roleRoot)) {
+      dependency.state.roleSet = new Set(['std']);
     }
 
     return [...mods].toSorted((a, b) => a.name.localeCompare(b.name));

@@ -45,24 +45,24 @@ export class ManifestDeltaUtil {
         .map(x => ManifestModuleUtil.withoutSourceExtension(x.replace(`${root}/`, '')))
     );
 
-    for (const el of Object.keys(left.files)) {
-      const output = ManifestModuleUtil.withOutputExtension(`${outputFolder}/${left.outputFolder}/${el}`);
-      const [, , leftTs] = left.files[el];
+    for (const file of Object.keys(left.files)) {
+      const output = ManifestModuleUtil.withOutputExtension(`${outputFolder}/${left.outputFolder}/${file}`);
+      const [, , leftTs] = left.files[file];
       const stat = await fs.stat(output).catch(() => undefined);
-      right.delete(ManifestModuleUtil.withoutSourceExtension(el));
+      right.delete(ManifestModuleUtil.withoutSourceExtension(file));
 
       if (!stat) {
-        add(el, 'added');
+        add(file, 'added');
       } else {
         const rightTs = this.#getNewest(stat);
         if (leftTs > rightTs) {
-          add(el, 'changed');
+          add(file, 'changed');
         }
       }
     }
     // Deleted
-    for (const el of right) {
-      add(el, 'removed');
+    for (const file of right) {
+      add(file, 'removed');
     }
     return out;
   }

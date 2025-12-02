@@ -230,12 +230,12 @@ export class BindUtil {
 
             if (SchemaRegistryIndex.has(field.type)) {
               if (field.array && Array.isArray(value)) {
-                value = value.map(el => this.bindSchema(field.type, el, config));
+                value = value.map(item => this.bindSchema(field.type, item, config));
               } else {
                 value = this.bindSchema(field.type, value, config);
               }
             } else if (field.array && Array.isArray(value)) {
-              value = value.map(el => this.#coerceType(field, el));
+              value = value.map(item => this.#coerceType(field, item));
             } else {
               value = this.#coerceType(field, value);
             }
@@ -298,8 +298,8 @@ export class BindUtil {
   static coerceParameters(fields: SchemaParameterConfig[], params: unknown[], applyDefaults = true): unknown[] {
     params = [...params];
     // Coerce types
-    for (const el of fields) {
-      params[el.index!] = this.coerceInput(el, params[el.index!], applyDefaults);
+    for (const field of fields) {
+      params[field.index!] = this.coerceInput(field, params[field.index!], applyDefaults);
     }
     return params;
   }

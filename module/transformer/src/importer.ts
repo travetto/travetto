@@ -46,14 +46,14 @@ export class ImportManager {
     const bindings = clause.namedBindings;
     const newBindings: ts.ImportSpecifier[] = [];
     // Remove all type only imports
-    for (const el of bindings.elements) {
-      if (!el.isTypeOnly) {
-        const type = this.#resolver.getType(el.name);
+    for (const element of bindings.elements) {
+      if (!element.isTypeOnly) {
+        const type = this.#resolver.getType(element.name);
         const objFlags = DeclarationUtil.getObjectFlags(type);
         const typeFlags = type.getFlags();
         // eslint-disable-next-line no-bitwise
         if (!(objFlags & (ts.SymbolFlags.Type | ts.SymbolFlags.Interface)) || !(typeFlags & ts.TypeFlags.Any)) {
-          newBindings.push(el);
+          newBindings.push(element);
         }
       }
     }

@@ -42,14 +42,14 @@ export class WebCommonUtil {
 
     // Build out edge map
     for (const input of items) {
-      for (const bf of input.before ?? []) {
-        if (edgeMap.has(bf)) {
-          edgeMap.get(bf)!.add(input.key);
+      for (const item of input.before ?? []) {
+        if (edgeMap.has(item)) {
+          edgeMap.get(item)!.add(input.key);
         }
       }
       const afterSet = edgeMap.get(input.key)!;
-      for (const el of input.after ?? []) {
-        afterSet.add(el);
+      for (const item of input.after ?? []) {
+        afterSet.add(item);
       }
     }
     return edgeMap;

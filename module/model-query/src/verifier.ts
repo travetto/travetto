@@ -113,8 +113,8 @@ export class QueryVerifier {
     if (isArray) {
       if (Array.isArray(value)) {
         // Handle array literal
-        for (const el of value) {
-          this.checkOperatorClause(state, declaredType, el, allowed, false);
+        for (const item of value) {
+          this.checkOperatorClause(state, declaredType, item, allowed, false);
         }
         return;
       }
@@ -151,8 +151,8 @@ export class QueryVerifier {
           return;
         }
 
-        for (const el of keyValue) {
-          const elAct = TypeUtil.getActualType(el);
+        for (const item of keyValue) {
+          const elAct = TypeUtil.getActualType(item);
           if (!this.typesMatch(declaredType, elAct)) {
             state.log(`${key} operator requires all values to be ${declaredType}, but ${elAct} was found`);
             return;
@@ -190,8 +190,8 @@ export class QueryVerifier {
             state.log(`${firstKey} requires the value to be an array`);
           } else {
             // Iterate
-            for (const el of sub) {
-              this.processWhereClause(state, cls, el);
+            for (const item of sub) {
+              this.processWhereClause(state, cls, item);
             }
             return true;
           }
@@ -306,8 +306,8 @@ export class QueryVerifier {
       const subState = state.extend(key);
 
       if (Array.isArray(value)) {
-        for (const el of value) {
-          this[fn](subState, cls, el);
+        for (const item of value) {
+          this[fn](subState, cls, item);
         }
       } else if (typeof value !== 'string') {
         this[fn](subState, cls, value);

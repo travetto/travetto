@@ -229,7 +229,7 @@ export class SQLModelUtil {
         }
       }
     }
-    return [...toGet].map(el => localMap[el]);
+    return [...toGet].map(field => localMap[field]);
   }
 
   /**
@@ -260,30 +260,30 @@ export class SQLModelUtil {
   /**
    * Find all dependent fields via child tables
    */
-  static collectDependents<T>(dct: DialectState, parent: unknown, value: T[], field?: SchemaFieldConfig): Record<string, T> {
+  static collectDependents<T>(dct: DialectState, parent: unknown, items: T[], field?: SchemaFieldConfig): Record<string, T> {
     if (field) {
       const isSimple = SchemaRegistryIndex.has(field.type);
-      for (const el of value) {
-        const parentKey: string = castTo(el[castKey<T>(dct.parentPathField.name)]);
+      for (const item of items) {
+        const parentKey: string = castTo(item[castKey<T>(dct.parentPathField.name)]);
         const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
         const fieldKey = castKey<(typeof root) | T>(field.name);
         if (field.array) {
           if (!root[fieldKey]) {
-            root[fieldKey] = [isSimple ? el : el[fieldKey]];
+            root[fieldKey] = [isSimple ? item : item[fieldKey]];
           } else if (Array.isArray(root[fieldKey])) {
-            root[fieldKey].push(isSimple ? el : el[fieldKey]);
+            root[fieldKey].push(isSimple ? item : item[fieldKey]);
           }
         } else {
-          root[fieldKey] = isSimple ? el : el[fieldKey];
+          root[fieldKey] = isSimple ? item : item[fieldKey];
         }
       }
     }
 
     const mapping: Record<string, T> = {};
-    for (const el of value) {
-      const key = el[castKey<T>(dct.pathField.name)];
+    for (const item of items) {
+      const key = item[castKey<T>(dct.pathField.name)];
       if (typeof key === 'string') {
-        mapping[key] = el;
+        mapping[key] = item;
       }
     }
     return mapping;
@@ -295,7 +295,7 @@ export class SQLModelUtil {
   static buildTable(list: VisitStack[]): string {
     const top = list.at(-1)!;
     if (!top[TableSymbol]) {
-      top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistryIndex.getStoreName(el.type) : el.name).join('_');
+      top[TableSymbol] = list.map((item, i) => i === 0 ? ModelRegistryIndex.getStoreName(item.type) : item.name).join('_');
     }
     return top[TableSymbol]!;
   }
@@ -304,7 +304,7 @@ export class SQLModelUtil {
    * Build property path for a table/field given the current stack
    */
   static buildPath(list: VisitStack[]): string {
-    return list.map((el) => `${el.name.toString()}${el.index ? `[${el.index}]` : ''}`).join('.');
+    return list.map((item) => `${item.name.toString()}${item.index ? `[${item.index}]` : ''}`).join('.');
   }
 
   /**
@@ -318,8 +318,8 @@ export class SQLModelUtil {
       (ins[key] = ins[key] ?? { stack, records: [] }).records.push({ stack, value });
     };
 
-    const all = els.map(el =>
-      this.visitSchemaInstance(cls, el, {
+    const all = els.map(item =>
+      this.visitSchemaInstance(cls, item, {
         onRoot: ({ path, value }) => track(path, value),
         onSub: ({ path, value }) => track(path, value),
         onSimple: ({ path, value }) => track(path, value)

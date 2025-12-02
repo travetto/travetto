@@ -4,7 +4,7 @@ import { JSXElementByFn, c } from './components.ts';
 export type Wrapper = Record<string, (cnt: string) => string>;
 
 export type RenderState<T extends JSXElement, C> = {
-  el: T;
+  node: T;
   props: T['props'];
   recurse: () => Promise<string>;
   stack: JSXElement[];

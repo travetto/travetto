@@ -247,9 +247,9 @@ export class ElasticsearchModelService implements
     });
 
     while (search.hits.hits.length > 0) {
-      for (const el of search.hits.hits) {
+      for (const hit of search.hits.hits) {
         try {
-          yield this.postLoad(cls, el);
+          yield this.postLoad(cls, hit);
         } catch (error) {
           if (!(error instanceof NotFoundError)) {
             throw error;
@@ -394,9 +394,9 @@ export class ElasticsearchModelService implements
     });
 
     while (search.hits.hits.length > 0) {
-      for (const el of search.hits.hits) {
+      for (const hit of search.hits.hits) {
         try {
-          yield this.postLoad(cls, el);
+          yield this.postLoad(cls, hit);
         } catch (error) {
           if (!(error instanceof NotFoundError)) {
             throw error;

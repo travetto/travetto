@@ -120,8 +120,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
 
     // Rebuild indices after every "process" batch
     this.#byDiscriminatedTypes.clear();
-    for (const el of this.store.getClasses()) {
-      this.#registerDiscriminatedTypes(el);
+    for (const cls of this.store.getClasses()) {
+      this.#registerDiscriminatedTypes(cls);
     }
   }
 

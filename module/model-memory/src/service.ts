@@ -149,11 +149,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     await ModelStorageUtil.registerModelChangeListener(this);
     ModelExpiryUtil.registerCull(this);
 
-    for (const el of ModelRegistryIndex.getClasses()) {
-      for (const idx of ModelRegistryIndex.getConfig(el).indices ?? []) {
+    for (const cls of ModelRegistryIndex.getClasses()) {
+      for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
-            console.error('Unique indices are not supported for', { cls: el.Ⲑid, idx: idx.name });
+            console.error('Unique indices are not supported for', { cls: cls.Ⲑid, idx: idx.name });
             break;
           }
         }

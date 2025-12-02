@@ -104,17 +104,17 @@ export class ClassSource implements ChangeSource<Class> {
    */
   #handleChanges(classes: Class[] = []): void {
     const classesByFile = new Map<string, Class[]>();
-    for (const el of classes) {
-      const imp = Runtime.getImport(el);
-      if (!classesByFile.has(imp)) {
-        classesByFile.set(imp, []);
+    for (const cls of classes) {
+      const importPath = Runtime.getImport(cls);
+      if (!classesByFile.has(importPath)) {
+        classesByFile.set(importPath, []);
       }
-      classesByFile.get(imp)!.push(el);
+      classesByFile.get(importPath)!.push(cls);
     }
 
-    for (const [imp, els] of classesByFile.entries()) {
-      if (!this.#handleFileChanges(imp, els)) {
-        this.#emitter.emit('unchanged-import', imp);
+    for (const [importPath, els] of classesByFile.entries()) {
+      if (!this.#handleFileChanges(importPath, els)) {
+        this.#emitter.emit('unchanged-import', importPath);
       }
     }
   }

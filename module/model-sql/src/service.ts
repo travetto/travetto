@@ -72,11 +72,11 @@ export class SQLModelService implements
         )
       )).records : [];
 
-    const allIds = new Set(all.map(el => el.id));
+    const allIds = new Set(all.map(type => type.id));
 
-    for (const [el, idx] of toCheck.entries()) {
-      if (!allIds.has(el)) { // If not found
-        addedIds.set(idx, el);
+    for (const [id, idx] of toCheck.entries()) {
+      if (!allIds.has(id)) { // If not found
+        addedIds.set(idx, id);
       }
     }
 

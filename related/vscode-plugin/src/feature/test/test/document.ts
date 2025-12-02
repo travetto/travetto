@@ -142,29 +142,29 @@ export class DocumentResultsManager {
    */
   store(level: TestLevel, key: string, result: Result<TestItem>): void {
     if (isAssertion(level, result)) {
-      const el = this.#results.test[key];
+      const state = this.#results.test[key];
       const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
-      el.assertions.push(result);
+      state.assertions.push(result);
 
-      for (const a of el.assertions) {
+      for (const a of state.assertions) {
         groups[a.status].push(a.decoration);
       }
 
       for (const s of ['passed', 'failed', 'unknown'] as const) {
-        this.setStyle(el.assertStyles[s], groups[s]);
+        this.setStyle(state.assertStyles[s], groups[s]);
       }
     } else if (isSuiteResult(level, result)) {
-      const el = this.#results.suite[key];
-      Object.assign(el, result);
+      const state = this.#results.suite[key];
+      Object.assign(state, result);
 
-      Object.keys(el.styles).forEach(x => {
-        this.setStyle(el.styles[x], x === result.status ? [el.decoration!] : []);
+      Object.keys(state.styles).forEach(x => {
+        this.setStyle(state.styles[x], x === result.status ? [state.decoration!] : []);
       });
     } else if (isTestResult(level, result)) {
-      const el = this.#results.test[key];
-      Object.assign(el, result);
-      this.setStyle(el.styles[result.status], [result.decoration]);
-      this.setStyle(el.logStyle, result.logDecorations);
+      const state = this.#results.test[key];
+      Object.assign(state, result);
+      this.setStyle(state.styles[result.status], [result.decoration]);
+      this.setStyle(state.logStyle, result.logDecorations);
     }
   }
 

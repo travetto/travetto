@@ -23,10 +23,10 @@ export class EmailCompileCommand implements CliCommandShape {
     await Registry.init();
 
     // Let the engine template
-    const all = await EmailCompiler.compileAll();
-    console!.log(cliTpl`Successfully compiled ${{ param: `${all.length}` }} templates`);
-    for (const el of all) {
-      console!.log(cliTpl`  * ${{ param: Runtime.stripWorkspacePath(el) }}`);
+    const locations = await EmailCompiler.compileAll();
+    console!.log(cliTpl`Successfully compiled ${{ param: `${locations.length}` }} templates`);
+    for (const location of locations) {
+      console!.log(cliTpl`  * ${{ param: Runtime.stripWorkspacePath(location) }}`);
     }
 
     if (this.watch) {

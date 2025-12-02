@@ -172,17 +172,17 @@ export class LiteralUtil {
    */
   static templateLiteralToRegex(template: TemplateLiteral, exact = true): string {
     const out: string[] = [];
-    for (const el of template.values) {
-      if (el === Number) {
+    for (const value of template.values) {
+      if (value === Number) {
         out.push('\\d+');
-      } else if (el === Boolean) {
+      } else if (value === Boolean) {
         out.push('(?:true|false)');
-      } else if (el === String) {
+      } else if (value === String) {
         out.push('.+');
-      } else if (typeof el === 'string' || typeof el === 'number' || typeof el === 'boolean') {
-        out.push(`${el}`);
+      } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        out.push(`${value}`);
       } else {
-        out.push(`(?:${this.templateLiteralToRegex(transformCast(el), false)})`);
+        out.push(`(?:${this.templateLiteralToRegex(transformCast(value), false)})`);
       }
     }
     const body = out.join(template.operation === 'and' ? '' : '|');

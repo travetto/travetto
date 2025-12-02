@@ -143,8 +143,8 @@ export class CompilerServer {
     log.info('Server disconnect requested');
     this.info.iteration = Date.now();
     await CommonUtil.blockingTimeout(20);
-    for (const el of this.#listenersAll) {
-      try { el.end(); } catch { }
+    for (const listener of this.#listenersAll) {
+      try { listener.end(); } catch { }
     }
     this.#listeners = {}; // Ensure its empty
     this.#listenersAll.clear();

@@ -23,8 +23,8 @@ const allowedProps = new Set([
 
 const propsToStr = combinePropsToStr.bind(null, allowedProps);
 
-const stdInline = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
-  `<${el.type} ${propsToStr(el.props)}>${await recurse()}</${el.type}>`;
+const stdInline = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
+  `<${node.type} ${propsToStr(node.props)}>${await recurse()}</${node.type}>`;
 
 const std = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `${await stdInline(state)}\n`;
 const stdFull = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `\n${await stdInline(state)}\n`;
@@ -65,7 +65,7 @@ export const Html: RenderProvider<RenderContext> = {
   Value: async ({ props }) => props.raw ? `{{{${props.attr}}}}` : `{{${props.attr}}}`,
 
   br: async () => '<br>\n',
-  hr: async (el) => `<table ${propsToStr(el.props)}><th></th></table>`,
+  hr: async (node) => `<table ${propsToStr(node.props)}><th></th></table>`,
   strong: stdInline, em: stdInline, p: stdFull,
   h1: stdFull, h2: stdFull, h3: stdFull, h4: stdFull,
   li: std, ol: stdFull, ul: stdFull,
@@ -78,7 +78,7 @@ export const Html: RenderProvider<RenderContext> = {
   Title: async ({ recurse }) => `<title>${await recurse()}</title>`,
   Summary: async ({ recurse }) => `<span id="summary" style="${SUMMARY_STYLE}">${await recurse()}</span>`,
 
-  Column: async ({ props, recurse, stack, el, context }): Promise<string> => {
+  Column: async ({ props, recurse, stack, node, context }): Promise<string> => {
 
     recurse();
 
@@ -102,14 +102,14 @@ export const Html: RenderProvider<RenderContext> = {
     }
 
     // Check for sizes. If no attribute is provided, default to small-12. Divide evenly for large columns
-    const smallSize = el.props.small ?? context.columnCount;
-    const largeSize = el.props.large ?? el.props.small ?? Math.trunc(context.columnCount / colCount);
+    const smallSize = node.props.small ?? context.columnCount;
+    const largeSize = node.props.large ?? node.props.small ?? Math.trunc(context.columnCount / colCount);
 
     // If the column contains a nested row, the .expander class should not be used
     if (largeSize === context.columnCount && !props.noExpander) {
       let hasRow = false;
-      visit(el, (node) => {
-        if (isOfType(node, 'Row')) {
+      visit(node, (child) => {
+        if (isOfType(child, 'Row')) {
           return hasRow = true;
         }
       });
@@ -134,7 +134,7 @@ export const Html: RenderProvider<RenderContext> = {
 
     // Final HTML output
     return `
-<th ${propsToStr(el.props, classes)}>
+<th ${propsToStr(node.props, classes)}>
   <table>
     <tbody>
       <tr>
@@ -152,8 +152,8 @@ export const Html: RenderProvider<RenderContext> = {
   </tbody>
 </table>`,
 
-  Row: async ({ recurse, el }): Promise<string> => `
-<table ${propsToStr(el.props, ['row'])}>
+  Row: async ({ recurse, node }): Promise<string> => `
+<table ${propsToStr(node.props, ['row'])}>
   <tbody>
     <tr>${await recurse()}</tr>
   </tbody>
@@ -216,9 +216,9 @@ export const Html: RenderProvider<RenderContext> = {
   </tbody>
 </table>`,
 
-  Menu: async ({ recurse, el, props }): Promise<string> => {
+  Menu: async ({ recurse, node, props }): Promise<string> => {
     let hasItem = false;
-    visit(el, (child) => {
+    visit(node, (child) => {
       if (isOfType(child, 'Item')) {
         return hasItem = true;
       } else if ((child.type === 'td' || child.type === 'th') && child.props.className?.includes('menu-item')) {
@@ -258,15 +258,15 @@ export const Html: RenderProvider<RenderContext> = {
        </th>`;
   },
 
-  Center: async ({ props, recurse, el }): Promise<string> => {
-    for (const kid of getKids(el)) {
+  Center: async ({ props, recurse, node }): Promise<string> => {
+    for (const kid of getKids(node)) {
       Object.assign(kid.props, {
         align: 'center',
         className: classStr(kid.props.className, 'float-center')
       });
     }
 
-    visit(el, child => {
+    visit(node, child => {
       if (isOfType(child, 'Item')) {
         child.props.className = classStr(child.props.className, 'float-center');
       }
@@ -328,8 +328,8 @@ export const Html: RenderProvider<RenderContext> = {
     return html.join('\n');
   },
 
-  Wrapper: async ({ recurse, el }) => `
-<table align="center" ${propsToStr(el.props, ['wrapper'])}>
+  Wrapper: async ({ recurse, node }) => `
+<table align="center" ${propsToStr(node.props, ['wrapper'])}>
   <tbody>
     <tr>
       <td class="wrapper-inner">

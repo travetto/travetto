@@ -80,12 +80,12 @@ export class DeclarationUtil {
   ): { getter?: ts.GetAccessorDeclaration, setter?: ts.SetAccessorDeclaration } {
     const acc = { getter: ts.isGetAccessorDeclaration(node) ? node : undefined, setter: ts.isSetAccessorDeclaration(node) ? node : undefined };
     if (ts.isClassDeclaration(node.parent)) {
-      for (const el of node.parent.members) {
-        if (el.name && el.name.getText() === node.name.getText()) {
-          if (ts.isGetAccessor(el)) {
-            acc.getter = el;
-          } else if (ts.isSetAccessor(el)) {
-            acc.setter = el;
+      for (const member of node.parent.members) {
+        if (member.name && member.name.getText() === node.name.getText()) {
+          if (ts.isGetAccessor(member)) {
+            acc.getter = member;
+          } else if (ts.isSetAccessor(member)) {
+            acc.setter = member;
           }
           if (acc.getter && acc.setter) {
             return acc;

@@ -24,12 +24,12 @@ export class DataUtil {
 
   /**
    * Is a value of primitive type
-   * @param el Value to check
+   * @param value Value to check
    */
-  static isPrimitive(el: unknown): el is (string | boolean | number | RegExp) {
-    switch (typeof el) {
+  static isPrimitive(value: unknown): value is (string | boolean | number | RegExp) {
+    switch (typeof value) {
       case 'string': case 'boolean': case 'number': case 'bigint': return true;
-      case 'object': return !!el && (el instanceof RegExp || el instanceof Date || isStr(el) || isNum(el) || isBool(el));
+      case 'object': return !!value && (value instanceof RegExp || value instanceof Date || isStr(value) || isNum(value) || isBool(value));
       default: return false;
     }
   }

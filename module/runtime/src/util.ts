@@ -57,12 +57,12 @@ export class Util {
   static mapAsyncItr<T, U, V, W>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>, fn3: MapFn<V, W>): AsyncIterable<W>;
   static mapAsyncItr<T, U, V>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>): AsyncIterable<V>;
   static mapAsyncItr<T, U>(source: AsyncIterable<T>, fn: MapFn<T, U>): AsyncIterable<U>;
-  static async * mapAsyncItr<T>(source: AsyncIterable<T>, ...fns: MapFn<unknown, unknown>[]): AsyncIterable<unknown> {
+  static async * mapAsyncItr<T>(input: AsyncIterable<T>, ...fns: MapFn<unknown, unknown>[]): AsyncIterable<unknown> {
     let idx = -1;
-    for await (const el of source) {
-      if (el !== undefined) {
+    for await (const item of input) {
+      if (item !== undefined) {
         idx += 1;
-        let m = el;
+        let m = item;
         for (const fn of fns) {
           m = castTo(await fn(m, idx));
         }

@@ -89,15 +89,15 @@ export class StyleUtil {
       if (keys.length === 0) {
         return values[0];
       } else {
-        const out = keys.map((el, i) => {
-          let final = el;
-          if (typeof el !== 'string') {
-            const subKeys = TypedObject.keys(el);
+        const out = keys.map((item, i) => {
+          let final = item;
+          if (typeof item !== 'string') {
+            const subKeys = TypedObject.keys(item);
             if (subKeys.length !== 1) {
               throw new Error('Invalid template variable, one and only one key should be specified');
             }
             const [key] = subKeys;
-            const value = el[key]!;
+            const value = item[key]!;
             final = value === undefined ? '' : palette[key](value)!;
           }
           return `${values[i] ?? ''}${final ?? ''}`;

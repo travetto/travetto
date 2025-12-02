@@ -73,10 +73,10 @@ export class SimpleResolver implements TransformResolver {
 
   /**
    * Get type from element
-   * @param el
+   * @param value
    */
-  getType(el: ts.Type | ts.Node): ts.Type {
-    return 'getSourceFile' in el ? this.#tsChecker.getTypeAtLocation(el) : el;
+  getType(value: ts.Type | ts.Node): ts.Type {
+    return 'getSourceFile' in value ? this.#tsChecker.getTypeAtLocation(value) : value;
   }
 
   /**

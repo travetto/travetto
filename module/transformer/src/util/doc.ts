@@ -72,8 +72,8 @@ export class DocUtil {
   static readDocTag(type: ts.Type | ts.Symbol, name: string): string[] {
     const tags = CoreUtil.getSymbol(type)?.getJsDocTags() ?? [];
     return tags
-      .filter(el => el.name === name && !!el.text)
-      .map(el => el.text!.map(x => x.text).join('')); // Join all text
+      .filter(tag => tag.name === name && !!tag.text)
+      .map(tag => tag.text!.map(x => x.text).join('')); // Join all text
   }
 
   /**
@@ -81,7 +81,7 @@ export class DocUtil {
    */
   static hasDocTag(type: ts.Type | ts.Symbol, name: string): boolean {
     const tags = CoreUtil.getSymbol(type)?.getJsDocTags() ?? [];
-    return tags.some(el => el.name === name);
+    return tags.some(tag => tag.name === name);
   }
 
 

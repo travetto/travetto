@@ -332,9 +332,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       });
 
       if (batch.Count && batch.Items) {
-        for (const el of batch.Items) {
+        for (const item of batch.Items) {
           try {
-            yield await loadAndCheckExpiry(cls, el.body.S!);
+            yield await loadAndCheckExpiry(cls, item.body.S!);
           } catch (error) {
             if (!(error instanceof NotFoundError)) {
               throw error;
@@ -425,9 +425,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       });
 
       if (batch.Count && batch.Items) {
-        for (const el of batch.Items) {
+        for (const item of batch.Items) {
           try {
-            yield await loadAndCheckExpiry(cls, el.body.S!);
+            yield await loadAndCheckExpiry(cls, item.body.S!);
           } catch (error) {
             if (!(error instanceof NotFoundError)) {
               throw error;

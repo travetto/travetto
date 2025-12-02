@@ -1,7 +1,7 @@
 import { JSXElement, isJSXElement } from '@travetto/email-inky/jsx-runtime';
 
-export const getKids = (el: JSXElement): JSXElement[] => {
-  const kids = el?.props?.children;
+export const getKids = (node: JSXElement): JSXElement[] => {
+  const kids = node?.props?.children;
   let result: unknown[] = [];
   if (kids) {
     result = !Array.isArray(kids) ? [kids] : kids;
@@ -9,14 +9,14 @@ export const getKids = (el: JSXElement): JSXElement[] => {
   return result.filter(isJSXElement);
 };
 
-export const visit = (el: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined | void, depth = 0): boolean | undefined => {
+export const visit = (node: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined | void, depth = 0): boolean | undefined => {
   if (depth > 0) {
-    const result = onVisit(el);
+    const result = onVisit(node);
     if (result === true) {
       return true;
     }
   }
-  for (const item of getKids(el)) {
+  for (const item of getKids(node)) {
     const result = visit(item, onVisit, depth + 1);
     if (result) {
       return;
@@ -50,4 +50,4 @@ export const combinePropsToStr = (allowedProps: Set<string>, props: { className?
     .map(([key, value]) => `${key}="${value}"`).join(' ');
 };
 
-export const isOfType = (el: JSXElement, type: string): boolean => typeof el.type === 'function' && el.type.name === type;
+export const isOfType = (node: JSXElement, type: string): boolean => typeof node.type === 'function' && node.type.name === type;

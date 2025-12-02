@@ -152,11 +152,11 @@ export class EndpointUtil {
       return params;
     } catch (error) {
       if (error instanceof ValidationResultError) {
-        for (const el of error.details?.errors ?? []) {
-          if (el.kind === 'required') {
-            const config = combined.find(x => x.schema.name === el.path);
+        for (const validationError of error.details?.errors ?? []) {
+          if (validationError.kind === 'required') {
+            const config = combined.find(x => x.schema.name === validationError.path);
             if (config) {
-              el.message = `Missing ${config.param.location} value: ${config.schema.name}`;
+              validationError.message = `Missing ${config.param.location} value: ${config.schema.name}`;
             }
           }
         }

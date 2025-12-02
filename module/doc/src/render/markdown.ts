@@ -41,37 +41,37 @@ export const Markdown: RenderProvider<RenderContext> = {
   h2: async ({ recurse }) => `\n## ${await recurse()}\n\n`,
   h3: async ({ recurse }) => `\n### ${await recurse()}\n\n`,
   h4: async ({ recurse }) => `\n#### ${await recurse()}\n\n`,
-  Execution: async ({ context, el, props, createState }) => {
-    const output = await context.execute(el);
+  Execution: async ({ context, node, props, createState }) => {
+    const output = await context.execute(node);
     const displayCmd = props.config?.formatCommand?.(props.cmd, props.args ?? []) ??
-      `${el.props.cmd} ${(el.props.args ?? []).join(' ')}`;
+      `${node.props.cmd} ${(node.props.args ?? []).join(' ')}`;
     const state = createState('Terminal', {
       language: 'bash',
-      title: el.props.title,
+      title: node.props.title,
       src: [`$ ${displayCmd}`, '', context.cleanText(output)].join('\n')
     });
     return Markdown.Terminal(state);
   },
-  Install: async ({ context, el }) =>
-    `\n\n**Install: ${el.props.title}**
+  Install: async ({ context, node }) =>
+    `\n\n**Install: ${node.props.title}**
 \`\`\`bash
-npm install ${el.props.pkg}
+npm install ${node.props.pkg}
 
 # or
 
-yarn add ${el.props.pkg}
+yarn add ${node.props.pkg}
 \`\`\`
 `,
-  Code: async ({ context, el, props }) => {
-    DocResolveUtil.applyCodePropDefaults(el.props);
+  Code: async ({ context, node, props }) => {
+    DocResolveUtil.applyCodePropDefaults(node.props);
 
-    const name = getComponentName(el.type);
-    const content = await context.resolveCode(el);
+    const name = getComponentName(node.type);
+    const content = await context.resolveCode(node);
     let lang = props.language ?? content.language;
     if (!lang) {
-      if (el.type === c.Terminal) {
+      if (node.type === c.Terminal) {
         lang = 'bash';
-      } else if (el.type === c.Code) {
+      } else if (node.type === c.Code) {
         lang = 'typescript';
       }
     }
@@ -83,9 +83,9 @@ ${context.cleanText(content.text)}
   Terminal: state => Markdown.Code(state),
   Config: state => Markdown.Code(state),
 
-  Section: async ({ el, recurse }) => `\n## ${el.props.title}\n${await recurse()}\n`,
-  SubSection: async ({ el, recurse }) => `\n### ${el.props.title}\n${await recurse()}\n`,
-  SubSubSection: async ({ el, recurse }) => `\n#### ${el.props.title}\n${await recurse()}\n`,
+  Section: async ({ node, recurse }) => `\n## ${node.props.title}\n${await recurse()}\n`,
+  SubSection: async ({ node, recurse }) => `\n### ${node.props.title}\n${await recurse()}\n`,
+  SubSubSection: async ({ node, recurse }) => `\n#### ${node.props.title}\n${await recurse()}\n`,
 
   Command: state => Markdown.Input(state),
   Method: state => Markdown.Input(state),
@@ -98,8 +98,8 @@ ${context.cleanText(content.text)}
   File: state => Markdown.Ref(state),
   Ref: async ({ context, props }) => `[${props.title}](${context.link(props.href, props)})`,
 
-  CodeLink: async ({ context, props, el }) => {
-    const target = await context.resolveCodeLink(el);
+  CodeLink: async ({ context, props, node }) => {
+    const target = await context.resolveCodeLink(node);
     return `[${props.title}](${context.link(target.file, target)})`;
   },
 
@@ -113,12 +113,12 @@ ${context.cleanText(content.text)}
   Header: async ({ props }) => `# ${props.title}\n${props.description ? `## ${props.description}\n` : ''}\n`,
 
   StdHeader: async state => {
-    const mod = state.el.props.mod ?? Runtime.main.name;
+    const mod = state.node.props.mod ?? Runtime.main.name;
     const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(mod)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;
     let install = '';
-    if (state.el.props.install !== false) {
+    if (state.node.props.install !== false) {
       const sub = state.createState('Install', { title: pkg.name, pkg: pkg.name });
       install = await Markdown.Install(sub);
     }

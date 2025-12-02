@@ -131,8 +131,8 @@ export class MongoModelService implements
     const creating = MongoUtil.getIndices(cls, ModelRegistryIndex.getConfig(cls).indices);
     if (creating.length) {
       console.debug('Creating indexes', { indices: creating });
-      for (const el of creating) {
-        await col.createIndex(...el);
+      for (const toCreate of creating) {
+        await col.createIndex(...toCreate);
       }
     }
   }
@@ -261,9 +261,9 @@ export class MongoModelService implements
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
     const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
-    for await (const el of cursor) {
+    for await (const item of cursor) {
       try {
-        yield await this.postLoad(cls, el);
+        yield await this.postLoad(cls, item);
       } catch (error) {
         if (!(error instanceof NotFoundError)) {
           throw error;
@@ -437,8 +437,8 @@ export class MongoModelService implements
     const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxCfg)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxCfg);
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
 
-    for await (const el of cursor) {
-      yield await this.postLoad(cls, el);
+    for await (const item of cursor) {
+      yield await this.postLoad(cls, item);
     }
   }
 

@@ -30,7 +30,7 @@ export class Workspace {
   static set compilerState(state: CompilerStateType) {
     if (state !== this.#compilerState) {
       this.#compilerState = state;
-      for (const el of this.#compilerStateListeners) { el(this.compilerState); }
+      for (const listener of this.#compilerStateListeners) { listener(this.compilerState); }
     }
   }
 

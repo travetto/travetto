@@ -251,9 +251,9 @@ export const TypeBuilder: {
         };
       } else if (subTypes.length === 1) {
         return { undefinable, nullable, ...first };
-      } else if (first.key === 'literal' && subTypes.every(el => el.name === first.name)) { // We have a common
+      } else if (first.key === 'literal' && subTypes.every(item => item.name === first.name)) { // We have a common
         type.commonType = first;
-      } else if (type.operation === 'and' && first.key === 'shape' && subTypes.every(el => el.key === 'shape')) { // All shapes
+      } else if (type.operation === 'and' && first.key === 'shape' && subTypes.every(item => item.key === 'shape')) { // All shapes
         return { importName: first.importName, name: first.name, key: 'shape', fieldTypes: subTypes.reduce((acc, x) => ({ ...acc, ...x.fieldTypes }), {}) };
       }
       return type;
