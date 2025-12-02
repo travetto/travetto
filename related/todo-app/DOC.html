@@ -239,6 +239,9 @@ Finally, we establish the controller at <code class="item path">src/web.ts</code
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TodoService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./service.ts'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Todo<span class="token punctuation">,</span> TodoSearch <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model.ts'</span><span class="token punctuation">;</span>
 
+<span class="token comment">/**
+ * Todo request
+ */</span>
 <span class="token keyword">type</span> <span class="token class-name">TodoRequest</span> <span class="token operator">=</span> Omit<span class="token operator">&lt;</span>Todo<span class="token punctuation">,</span> <span class="token string">'id'</span><span class="token operator">></span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/todo'</span><span class="token punctuation">)</span>

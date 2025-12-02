@@ -268,7 +268,7 @@ class Service {
 ```
 
 ## Manual Invocation
-Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the [DependencyRegistryIndex](https://github.com/travetto/travetto/tree/main/module/di/src/registry/registry-index.ts#L21). The registry allows for requesting a dependency by class reference:
+Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the [DependencyRegistryIndex](https://github.com/travetto/travetto/tree/main/module/di/src/registry/registry-index.ts#L19). The registry allows for requesting a dependency by class reference:
 
 **Code: Example of Manual Lookup**
 ```typescript

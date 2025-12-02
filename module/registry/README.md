@@ -98,7 +98,7 @@ export class SampleRegistryIndex implements RegistryIndex {
 }
 ```
 
-The registry index is a [RegistryIndex](https://github.com/travetto/travetto/tree/main/module/registry/src/service/types.ts#L34) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
+The registry index is a [RegistryIndex](https://github.com/travetto/travetto/tree/main/module/registry/src/service/types.ts#L36) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
 
 ### Live Flow
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. 
