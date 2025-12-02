@@ -8,7 +8,7 @@ export class PassportUtil {
 
   /**
    * Read passport state string as bas64 encoded JSON value
-   * @param src The input src for a state read (string, or a request obj)
+   * @param src The input src for a state read (string, or a request)
    */
   static readState<T = Record<string, unknown>>(src?: string | WebRequest): T | undefined {
     const state = (typeof src === 'string' ? src :

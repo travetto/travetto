@@ -274,11 +274,11 @@ export class SchemaValidator {
   /**
    * Validate an entire array of values
    * @param cls The class to validate the objects against
-   * @param obj The values to validate
+   * @param items The values to validate
    * @param view The view to limit by
    */
-  static async validateAll<T>(cls: Class<T>, obj: T[], view?: string): Promise<T[]> {
-    return await Promise.all<T>((obj ?? [])
+  static async validateAll<T>(cls: Class<T>, items: T[], view?: string): Promise<T[]> {
+    return await Promise.all<T>((items ?? [])
       .map(o => this.validate(cls, o, view)));
   }
 

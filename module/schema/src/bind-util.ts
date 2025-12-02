@@ -46,12 +46,12 @@ export class BindUtil {
    *
    * This will convert `{ 'a.b[3].c[age]': 5 }` => `{ a : { b : [,,,{ c: { age: 5 }}]}}`
    *
-   * @param obj The object to convert
+   * @param input The object to convert
    */
-  static expandPaths(obj: Record<string, unknown>): Record<string, unknown> {
+  static expandPaths(input: Record<string, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = {};
-    for (const property of Object.keys(obj)) {
-      const objK = obj[property];
+    for (const property of Object.keys(input)) {
+      const objK = input[property];
       const value = DataUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
       const parts = property.split('.');
       const last = parts.pop()!;
@@ -165,11 +165,11 @@ export class BindUtil {
   /**
    * Bind the schema to the object
    * @param cls The schema class
-   * @param obj The target object (instance of cls)
+   * @param input The target object (instance of cls)
    * @param data The data to bind
    * @param config The bind configuration
    */
-  static bindSchemaToObject<T>(cls: Class<T>, obj: T, data?: object, config: BindConfig = {}): T {
+  static bindSchemaToObject<T>(cls: Class<T>, input: T, data?: object, config: BindConfig = {}): T {
     const view = config.view; // Does not convey
     delete config.view;
 
@@ -180,7 +180,7 @@ export class BindUtil {
       // If no configuration
       if (!conf) {
         for (const key of TypedObject.keys(data)) {
-          obj[key] = data[key];
+          input[key] = data[key];
         }
       } else {
         let schema: SchemaFieldMap = conf.fields;
@@ -241,10 +241,10 @@ export class BindUtil {
             }
           }
 
-          obj[castKey<T>(schemaFieldName)] = castTo(value);
+          input[castKey<T>(schemaFieldName)] = castTo(value);
 
           if (field.accessor) {
-            Object.defineProperty(obj, schemaFieldName, {
+            Object.defineProperty(input, schemaFieldName, {
               ...adapter.getAccessorDescriptor(schemaFieldName),
               enumerable: true
             });
@@ -253,7 +253,7 @@ export class BindUtil {
       }
     }
 
-    return obj;
+    return input;
   }
 
   /**

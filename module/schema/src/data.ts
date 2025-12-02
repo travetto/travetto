@@ -12,24 +12,24 @@ export class DataUtil {
 
   /**
    * Is a value a plain JS object, created using {}
-   * @param obj Object to check
+   * @param value Object to check
    */
-  static isPlainObject(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === 'object' // separate from primitives
-      && obj !== undefined
-      && obj !== null         // is obvious
-      && obj.constructor === Object // separate instances (Array, DOM, ...)
-      && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
+  static isPlainObject(input: unknown): input is Record<string, unknown> {
+    return typeof input === 'object' // separate from primitives
+      && input !== undefined
+      && input !== null         // is obvious
+      && input.constructor === Object // separate instances (Array, DOM, ...)
+      && Object.prototype.toString.call(input) === '[object Object]'; // separate build-in like Math
   }
 
   /**
    * Is a value of primitive type
    * @param value Value to check
    */
-  static isPrimitive(value: unknown): value is (string | boolean | number | RegExp) {
-    switch (typeof value) {
+  static isPrimitive(input: unknown): input is (string | boolean | number | RegExp) {
+    switch (typeof input) {
       case 'string': case 'boolean': case 'number': case 'bigint': return true;
-      case 'object': return !!value && (value instanceof RegExp || value instanceof Date || isStr(value) || isNum(value) || isBool(value));
+      case 'object': return !!input && (input instanceof RegExp || input instanceof Date || isStr(input) || isNum(input) || isBool(input));
       default: return false;
     }
   }
@@ -247,18 +247,18 @@ export class DataUtil {
 
   /**
    * Filter object by excluding specific keys
-   * @param obj A value to filter, primitives will be untouched
+   * @param input A value to filter, primitives will be untouched
    * @param exclude Strings or patterns to exclude against
    * @returns
    */
-  static filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T {
-    if (Array.isArray(obj)) {
-      return castTo(obj.map(x => this.filterByKeys(x, exclude)));
-    } else if (obj !== null && obj !== undefined && typeof obj === 'object') {
+  static filterByKeys<T>(input: T, exclude: (string | RegExp)[]): T {
+    if (Array.isArray(input)) {
+      return castTo(input.map(x => this.filterByKeys(x, exclude)));
+    } else if (input !== null && input !== undefined && typeof input === 'object') {
       const out: Partial<T> = {};
-      for (const key of TypedObject.keys(obj)) {
+      for (const key of TypedObject.keys(input)) {
         if (!exclude.some(r => typeof key === 'string' && (typeof r === 'string' ? r === key : r.test(key)))) {
-          const value = obj[key];
+          const value = input[key];
           if (typeof value === 'object') {
             out[key] = this.filterByKeys(value, exclude);
           } else {
@@ -268,8 +268,7 @@ export class DataUtil {
       }
       return asFull(out);
     } else {
-      return obj;
+      return input;
     }
   }
-
 }

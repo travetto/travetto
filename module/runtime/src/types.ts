@@ -65,11 +65,11 @@ export function toConcrete<T extends unknown>(): Class<T> {
   return arguments[0];
 }
 
-export function getAllEntries<V>(obj: Record<string | symbol, V>): [string | symbol, V][] {
+export function getAllEntries<V>(input: Record<string | symbol, V>): [string | symbol, V][] {
   return [
-    ...Object.keys(obj),
-    ...Object.getOwnPropertySymbols(obj)
-  ].map(key => [key, obj[key]] as const);
+    ...Object.keys(input),
+    ...Object.getOwnPropertySymbols(input)
+  ].map(key => [key, input[key]] as const);
 }
 
 /**

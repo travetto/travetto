@@ -24,18 +24,18 @@ export class XunitEmitter implements TestConsumerShape {
   /**
    * Process metadata information (e.g. logs)
    */
-  buildMeta(obj: Record<string, unknown>): string {
-    if (!obj) {
+  buildMeta(meta: Record<string, unknown>): string {
+    if (!meta) {
       return '';
     }
 
-    for (const key of Object.keys(obj)) {
-      if (!obj[key]) {
-        delete obj[key];
+    for (const key of Object.keys(meta)) {
+      if (!meta[key]) {
+        delete meta[key];
       }
     }
-    if (Object.keys(obj).length) {
-      let body = stringify(obj);
+    if (Object.keys(meta).length) {
+      let body = stringify(meta);
       body = body.split('\n').map(x => `  ${x}`).join('\n');
       return `<![CDATA[\n${body}\n]]>`;
     } else {

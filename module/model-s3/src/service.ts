@@ -373,13 +373,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async getBlobMeta(location: string): Promise<BlobMeta> {
-    const obj = await this.headBlob(location);
+    const blob = await this.headBlob(location);
 
-    if (obj) {
+    if (blob) {
       const ret: BlobMeta = {
         contentType: '',
-        ...obj.Metadata,
-        size: obj.ContentLength!,
+        ...blob.Metadata,
+        size: blob.ContentLength!,
       };
       if (hasContentType(ret)) {
         ret['contentType'] = ret['contenttype']!;

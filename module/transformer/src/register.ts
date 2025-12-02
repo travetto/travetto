@@ -12,10 +12,10 @@ function isTransformer(x: unknown): x is Transformer {
 
 /**
  * Get all transformers
- * @param obj Object to search for transformers
+ * @param inputs Object to search for transformers
  */
-export function getAllTransformers(obj: Record<string, { [HandlersSymbol]?: NodeTransformer[] }>, module: string): NodeTransformer[] {
-  return Object.values(obj)
+export function getAllTransformers(inputs: Record<string, { [HandlersSymbol]?: NodeTransformer[] }>, module: string): NodeTransformer[] {
+  return Object.values(inputs)
     .flatMap(x => {
       if (isTransformer(x)) {
         x[ModuleNameSymbol] = module;

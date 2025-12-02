@@ -4,12 +4,12 @@ export class CoerceUtil {
   /**
    * Is a value a plain JS object, created using {}
    */
-  static #isPlainObject(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === 'object' // separate from primitives
-      && obj !== undefined
-      && obj !== null         // is obvious
-      && obj.constructor === Object // separate instances (Array, DOM, ...)
-      && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
+  static #isPlainObject(input: unknown): input is Record<string, unknown> {
+    return typeof input === 'object' // separate from primitives
+      && input !== undefined
+      && input !== null         // is obvious
+      && input.constructor === Object // separate instances (Array, DOM, ...)
+      && Object.prototype.toString.call(input) === '[object Object]'; // separate build-in like Math
   }
 
   /**

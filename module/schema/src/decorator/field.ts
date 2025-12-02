@@ -5,21 +5,21 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, property: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
-function field<V>(...obj: Partial<SchemaFieldConfig>[]): PropType<V> {
+function field<V>(...configs: Partial<SchemaFieldConfig>[]): PropType<V> {
   return (instance: ClassInstance, property: string | symbol): void => {
-    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, ...obj);
+    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, ...configs);
   };
 }
 
 /**
  * Registering a field
  * @param type The type for the field
- * @param config The field configuration
+ * @param configs The field configuration
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Field(type: Pick<SchemaFieldConfig, 'type' | 'array'>, ...config: Partial<SchemaFieldConfig>[]): PropType<unknown> {
-  return field(type, ...config);
+export function Field(type: Pick<SchemaFieldConfig, 'type' | 'array'>, ...configs: Partial<SchemaFieldConfig>[]): PropType<unknown> {
+  return field(type, ...configs);
 }
 
 /**
