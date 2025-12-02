@@ -80,14 +80,14 @@ export abstract class Connection<C = unknown> {
     }
 
     return this.context.run(async () => {
-      let conn;
+      let connection;
       try {
-        conn = await this.acquire();
-        this.#active.set(conn);
+        connection = await this.acquire();
+        this.#active.set(connection);
         return await operation();
       } finally {
-        if (conn) {
-          this.release(conn);
+        if (connection) {
+          this.release(connection);
         }
       }
     });
@@ -147,42 +147,42 @@ export abstract class Connection<C = unknown> {
   /**
    * Start a transaction
    */
-  async startTx(conn: C, transactionId?: string): Promise<void> {
+  async startTx(connection: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(conn, this.transactionDialect.beginNested, [transactionId]);
+        await this.execute(connection, this.transactionDialect.beginNested, [transactionId]);
       }
     } else {
       if (this.isolatedTransactions) {
-        await this.execute(conn, this.transactionDialect.isolate);
+        await this.execute(connection, this.transactionDialect.isolate);
       }
-      await this.execute(conn, this.transactionDialect.begin);
+      await this.execute(connection, this.transactionDialect.begin);
     }
   }
 
   /**
    * Commit active transaction
    */
-  async commitTx(conn: C, transactionId?: string): Promise<void> {
+  async commitTx(connection: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(conn, this.transactionDialect.commitNested, [transactionId]);
+        await this.execute(connection, this.transactionDialect.commitNested, [transactionId]);
       }
     } else {
-      await this.execute(conn, this.transactionDialect.commit);
+      await this.execute(connection, this.transactionDialect.commit);
     }
   }
 
   /**
    * Rollback active transaction
    */
-  async rollbackTx(conn: C, transactionId?: string): Promise<void> {
+  async rollbackTx(connection: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.isolatedTransactions) {
-        await this.execute(conn, this.transactionDialect.rollbackNested, [transactionId]);
+        await this.execute(connection, this.transactionDialect.rollbackNested, [transactionId]);
       }
     } else {
-      await this.execute(conn, this.transactionDialect.rollback);
+      await this.execute(connection, this.transactionDialect.rollback);
     }
   }
 }

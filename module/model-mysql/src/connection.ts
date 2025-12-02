@@ -59,12 +59,12 @@ export class MySQLConnection extends Connection<PoolConnection> {
     return result;
   }
 
-  async execute<T = unknown>(conn: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(pool: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
     console.debug('Executing query', { query });
     let prepared;
     try {
-      prepared = (values?.length ?? 0) > 0 ? await conn.prepare(query) : undefined;
-      const [results,] = await (prepared ? prepared.execute(values) : conn.query(query));
+      prepared = (values?.length ?? 0) > 0 ? await pool.prepare(query) : undefined;
+      const [results,] = await (prepared ? prepared.execute(values) : pool.query(query));
       if (isSimplePacket(results)) {
         return { records: [], count: results.affectedRows };
       } else {
@@ -75,7 +75,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
         return { records, count: records.length };
       }
     } catch (error) {
-      console.debug('Failed query', { error: error, query });
+      console.debug('Failed query', { error, query });
       if (error instanceof Error && error.message.startsWith('Duplicate entry')) {
         throw new ExistsError('query', query);
       } else {
@@ -92,7 +92,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
     return this.#pool.getConnection();
   }
 
-  release(conn: PoolConnection): void {
-    conn.release();
+  release(pool: PoolConnection): void {
+    pool.release();
   }
 }

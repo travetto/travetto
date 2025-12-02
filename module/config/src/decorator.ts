@@ -19,12 +19,12 @@ export function Config(ns: string) {
 
     DependencyRegistryIndex.getForRegister(cls).registerClass();
 
-    const og: Function = cls.prototype.postConstruct;
+    const handle: Function = cls.prototype.postConstruct;
     cls.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
       const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
       await config.bindTo(cls, this, ns);
-      await og?.call(this);
+      await handle?.call(this);
     };
     return cls;
   };

@@ -100,8 +100,8 @@ export class SQLModelService implements
 
   async postConstruct(): Promise<void> {
     if (this.#dialect) {
-      if (this.#dialect.conn.init) {
-        await this.#dialect.conn.init();
+      if (this.#dialect.connection.init) {
+        await this.#dialect.connection.init();
       }
       this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LEN);
       this.#manager = new TableManager(this.#context, this.#dialect);
@@ -110,8 +110,8 @@ export class SQLModelService implements
     }
   }
 
-  get conn(): Connection {
-    return this.#dialect.conn;
+  get connection(): Connection {
+    return this.#dialect.connection;
   }
 
   async exportModel<T extends ModelType>(cls: Class<T>): Promise<string> {

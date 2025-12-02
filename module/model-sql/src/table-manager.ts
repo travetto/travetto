@@ -98,8 +98,8 @@ export class TableManager {
   /**
    * Get a valid connection
    */
-  get conn(): Connection {
-    return this.#dialect.conn;
+  get connection(): Connection {
+    return this.#dialect.connection;
   }
 
   /**

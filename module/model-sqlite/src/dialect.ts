@@ -14,12 +14,12 @@ import { SqliteConnection } from './connection.ts';
 @Injectable()
 export class SqliteDialect extends SQLDialect {
 
-  conn: SqliteConnection;
+  connection: SqliteConnection;
   config: SQLModelConfig;
 
   constructor(context: AsyncContext, config: SQLModelConfig) {
     super(config.namespace);
-    this.conn = new SqliteConnection(context, config);
+    this.connection = new SqliteConnection(context, config);
     this.config = config;
 
     // Special operators

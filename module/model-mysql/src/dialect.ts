@@ -14,12 +14,12 @@ import { MySQLConnection } from './connection.ts';
 @Injectable()
 export class MySQLDialect extends SQLDialect {
 
-  conn: MySQLConnection;
+  connection: MySQLConnection;
   tablePostfix = 'COLLATE=utf8mb4_bin ENGINE=InnoDB';
 
   constructor(context: AsyncContext, config: SQLModelConfig) {
     super(config.namespace);
-    this.conn = new MySQLConnection(context, config);
+    this.connection = new MySQLConnection(context, config);
 
     // Custom types
     Object.assign(this.COLUMN_TYPES, {

@@ -149,7 +149,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Get connection
    */
-  abstract get conn(): Connection<unknown>;
+  abstract get connection(): Connection<unknown>;
 
   /**
    * Hash a value
@@ -157,7 +157,7 @@ export abstract class SQLDialect implements DialectState {
   abstract hash(inp: string): string;
 
   executeSQL<T>(sql: string): Promise<{ records: T[], count: number }> {
-    return this.conn.execute<T>(this.conn.active, sql);
+    return this.connection.execute<T>(this.connection.active, sql);
   }
 
   /**

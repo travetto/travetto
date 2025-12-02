@@ -14,11 +14,11 @@ import { PostgreSQLConnection } from './connection.ts';
 @Injectable()
 export class PostgreSQLDialect extends SQLDialect {
 
-  conn: PostgreSQLConnection;
+  connection: PostgreSQLConnection;
 
   constructor(context: AsyncContext, config: SQLModelConfig) {
     super(config.namespace);
-    this.conn = new PostgreSQLConnection(context, config);
+    this.connection = new PostgreSQLConnection(context, config);
     this.ID_AFFIX = '"';
 
     // Special operators
