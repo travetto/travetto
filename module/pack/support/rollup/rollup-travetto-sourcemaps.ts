@@ -33,8 +33,8 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
           return { code, map };
         }
         return { code, map: null };
-      } catch (e) {
-        this.warn({ message: toString(e), id });
+      } catch (error) {
+        this.warn({ message: toString(error), id });
         return null;
       }
     },

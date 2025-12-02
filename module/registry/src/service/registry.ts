@@ -53,22 +53,22 @@ class $Registry {
   }
 
   process(events: ChangeEvent<Class>[]): void {
-    this.#finalizeItems(events.filter(ev => 'curr' in ev).map(ev => ev.curr));
+    this.#finalizeItems(events.filter(event => 'curr' in event).map(event => event.curr));
 
     for (const indexCls of this.#indexOrder) { // Visit every index, in order
       const inst = this.instance(indexCls);
-      const matched = events.filter(e => inst.store.has('curr' in e ? e.curr : e.prev!));
+      const matched = events.filter(event => inst.store.has('curr' in event ? event.curr : event.prev!));
       if (matched.length) {
         inst.process(matched);
       }
     }
 
     Util.queueMacroTask().then(() => {
-      this.#removeItems(events.filter(ev => 'prev' in ev).map(ev => ev.prev!));
+      this.#removeItems(events.filter(event => 'prev' in event).map(event => event.prev!));
     });
 
-    for (const e of events) {
-      this.#emitter.emit('event', e);
+    for (const event of events) {
+      this.#emitter.emit('event', event);
     }
   }
 
@@ -85,7 +85,7 @@ class $Registry {
 
       const added = await this.#classSource.init();
       this.process(added.map(cls => ({ type: 'added', curr: cls })));
-      this.#classSource.on(e => this.process([e]));
+      this.#classSource.on(event => this.process([event]));
     } finally {
       this.#resolved = true;
     }

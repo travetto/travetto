@@ -28,9 +28,9 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
     return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };
   }
 
-  async throw(e?: Error): Promise<IteratorResult<X>> {
+  async throw(error?: Error): Promise<IteratorResult<X>> {
     this.#done = true;
-    this.#ready.reject(e);
+    this.#ready.reject(error);
     return { value: undefined, done: this.#done };
   }
 

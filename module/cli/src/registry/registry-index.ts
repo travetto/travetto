@@ -38,12 +38,12 @@ export class CliCommandRegistryIndex implements RegistryIndex {
   get #commandMapping(): Map<string, string> {
     if (!this.#fileMapping) {
       const all = new Map<string, string>();
-      for (const e of RuntimeIndex.find({
+      for (const entry of RuntimeIndex.find({
         module: m => !Runtime.production || m.prod,
         folder: f => f === 'support',
         file: f => f.role === 'std' && CLI_FILE_REGEX.test(f.sourceFile)
       })) {
-        all.set(getName(e.sourceFile), e.import);
+        all.set(getName(entry.sourceFile), entry.import);
       }
       this.#fileMapping = all;
     }

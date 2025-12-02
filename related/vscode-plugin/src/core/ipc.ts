@@ -35,9 +35,9 @@ export class IpcSupport {
         }
         res.statusCode = 200;
         res.end(JSON.stringify({ ok: true }));
-      } catch (e) {
+      } catch (error) {
         res.statusCode = 500;
-        res.end(JSON.stringify({ error: `${e}` }));
+        res.end(JSON.stringify({ error: `${error}` }));
       }
     });
     await new Promise<void>(resolve => {

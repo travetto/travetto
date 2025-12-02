@@ -132,14 +132,14 @@ export class HelpUtil {
   /**
    * Render validation error to a string
    */
-  static renderValidationError(err: CliValidationResultError): string {
+  static renderValidationError(validationError: CliValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
-      ...err.details.errors.map(e => {
-        if (e.source && e.source in validationSourceMap) {
-          return cliTpl` * ${{ identifier: validationSourceMap[e.source] }} ${{ subtitle: e.message }}`;
+      ...validationError.details.errors.map(error => {
+        if (error.source && error.source in validationSourceMap) {
+          return cliTpl` * ${{ identifier: validationSourceMap[error.source] }} ${{ subtitle: error.message }}`;
         }
-        return cliTpl` * ${{ failure: e.message }}`;
+        return cliTpl` * ${{ failure: error.message }}`;
       }),
       '',
     ].join('\n');

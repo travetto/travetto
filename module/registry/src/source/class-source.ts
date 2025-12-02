@@ -122,15 +122,15 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Emit a change event
    */
-  emit(e: ChangeEvent<Class>): void {
+  emit(event: ChangeEvent<Class>): void {
     if (this.trace) {
       console.debug('Emitting change', {
-        type: e.type,
-        curr: (e.type !== 'removing' ? e.curr?.Ⲑid : undefined),
-        prev: (e.type !== 'added' ? e.prev?.Ⲑid : undefined)
+        type: event.type,
+        curr: (event.type !== 'removing' ? event.curr?.Ⲑid : undefined),
+        prev: (event.type !== 'added' ? event.prev?.Ⲑid : undefined)
       });
     }
-    this.#emitter.emit('change', e);
+    this.#emitter.emit('change', event);
   }
 
   /**

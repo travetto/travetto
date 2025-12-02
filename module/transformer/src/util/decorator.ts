@@ -6,17 +6,17 @@ import { CoreUtil } from './core.ts';
  */
 export class DecoratorUtil {
 
-  static #getIdentFromExpression(e: ts.Expression): ts.Identifier {
-    if (ts.isCallExpression(e) && ts.isIdentifier(e.expression)) {
-      return e.expression;
-    } else if (ts.isIdentifier(e)) {
-      return e;
-    } else if (ts.isCallExpression(e) && ts.isPropertyAccessExpression(e.expression) && ts.isIdentifier(e.expression.expression)) {
-      return e.expression.expression;
-    } else if (ts.isPropertyAccessExpression(e) && ts.isCallExpression(e.expression) && ts.isIdentifier(e.expression.expression)) {
-      return e.expression.expression;
-    } else if (ts.isParenthesizedExpression(e)) {
-      return this.#getIdentFromExpression(e.expression);
+  static #getIdentFromExpression(expr: ts.Expression): ts.Identifier {
+    if (ts.isCallExpression(expr) && ts.isIdentifier(expr.expression)) {
+      return expr.expression;
+    } else if (ts.isIdentifier(expr)) {
+      return expr;
+    } else if (ts.isCallExpression(expr) && ts.isPropertyAccessExpression(expr.expression) && ts.isIdentifier(expr.expression.expression)) {
+      return expr.expression.expression;
+    } else if (ts.isPropertyAccessExpression(expr) && ts.isCallExpression(expr.expression) && ts.isIdentifier(expr.expression.expression)) {
+      return expr.expression.expression;
+    } else if (ts.isParenthesizedExpression(expr)) {
+      return this.#getIdentFromExpression(expr.expression);
     } else {
       throw new Error('No Identifier');
     }
@@ -25,8 +25,8 @@ export class DecoratorUtil {
   /**
    * Get identifier for a decorator
    */
-  static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
-    const ident = this.#getIdentFromExpression(d.expression);
+  static getDecoratorIdent(decorator: ts.Decorator): ts.Identifier {
+    const ident = this.#getIdentFromExpression(decorator.expression);
     if (!ident) {
       throw new Error('No Identifier');
     } else {
@@ -37,18 +37,18 @@ export class DecoratorUtil {
   /**
    * Replace or add a decorator to a list of decorators
    */
-  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1): ts.ModifierLike[] {
+  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], index = -1): ts.ModifierLike[] {
     if (!ts.canHaveDecorators(node)) {
       return [];
     }
-    if (idx < 0 && target) {
-      idx = node.modifiers?.indexOf(target) ?? -1;
+    if (index < 0 && target) {
+      index = node.modifiers?.indexOf(target) ?? -1;
     }
     const out = (node.modifiers ?? []).filter(x => x !== target);
-    if (idx < 0) {
+    if (index < 0) {
       out.push(...replacements);
     } else {
-      out.splice(idx, 0, ...replacements);
+      out.splice(index, 0, ...replacements);
     }
     return out;
   }

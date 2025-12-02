@@ -147,8 +147,8 @@ export class EmailCompilerFeature extends BaseFeature {
     }
   }
 
-  activeEditorChanged(e?: vscode.TextEditor): void {
-    this.setActiveFile(e?.document.fileName);
+  activeEditorChanged(editor?: vscode.TextEditor): void {
+    this.setActiveFile(editor?.document.fileName);
   }
 
   /**

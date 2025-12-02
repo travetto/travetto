@@ -57,7 +57,7 @@ export class IpcChannel<V = unknown> {
   /**
    * Listen for a specific message type
    */
-  on(eventType: string, callback: (e: V & { type: string }) => unknown | void): () => void {
+  on(eventType: string, callback: (event: V & { type: string }) => unknown | void): () => void {
     this.#emitter.on(eventType, callback);
     return () => this.off(eventType, callback);
   }
@@ -65,7 +65,7 @@ export class IpcChannel<V = unknown> {
   /**
    * Remove event listener
    */
-  off(eventType: string, callback: (e: V & { type: string }) => unknown | void): void {
+  off(eventType: string, callback: (event: V & { type: string }) => unknown | void): void {
     this.#emitter.off(eventType, callback);
   }
 

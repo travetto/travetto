@@ -9,7 +9,7 @@ export type ChangeEvent<T> =
 /**
  * Change handler
  */
-export type ChangeHandler<T> = (e: ChangeEvent<T>) => unknown;
+export type ChangeHandler<T> = (event: ChangeEvent<T>) => unknown;
 
 /**
  * Change source

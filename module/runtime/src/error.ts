@@ -28,14 +28,14 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
   static defaultCategory?: ErrorCategory;
 
   /** Convert from JSON object */
-  static fromJSON(e: unknown): AppError | undefined {
-    if (!!e && typeof e === 'object' &&
-      ('message' in e && typeof e.message === 'string') &&
-      ('category' in e && typeof e.category === 'string') &&
-      ('type' in e && typeof e.type === 'string') &&
-      ('at' in e && typeof e.at === 'string')
+  static fromJSON(error: unknown): AppError | undefined {
+    if (!!error && typeof error === 'object' &&
+      ('message' in error && typeof error.message === 'string') &&
+      ('category' in error && typeof error.category === 'string') &&
+      ('type' in error && typeof error.type === 'string') &&
+      ('at' in error && typeof error.at === 'string')
     ) {
-      return new AppError(e.message, castTo<AppErrorOptions<Record<string, unknown>>>(e));
+      return new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(error));
     }
   }
 

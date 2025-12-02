@@ -96,9 +96,9 @@ export class Workspace {
 
   /** Get the editor for a doc */
   static getEditor(doc: vscode.TextDocument): vscode.TextEditor | undefined {
-    for (const e of vscode.window.visibleTextEditors) {
-      if (e.document === doc) {
-        return e;
+    for (const editor of vscode.window.visibleTextEditors) {
+      if (editor.document === doc) {
+        return editor;
       }
     }
   }
@@ -114,7 +114,7 @@ export class Workspace {
     });
   }
 
-  static reloadManifest() {
+  static reloadManifest(): void {
     this.workspaceIndex.reinitForModule(this.workspaceIndex.mainModule.name);
   }
 

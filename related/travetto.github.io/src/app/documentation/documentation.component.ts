@@ -21,9 +21,9 @@ export class DocumentationComponent {
   active = {};
 
   constructor(router: Router) {
-    router.events.subscribe((e) => {
-      if (e instanceof NavigationEnd) {
-        this.url = e.url;
+    router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.url = event.url;
       }
     });
   }
