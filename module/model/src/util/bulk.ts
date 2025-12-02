@@ -1,6 +1,6 @@
 import { Class, hasFunction } from '@travetto/runtime';
 
-import { BulkOp, ModelBulkSupport } from '../types/bulk.ts';
+import { BulkOperation, ModelBulkSupport } from '../types/bulk.ts';
 import { ModelType } from '../types/model.ts';
 import { ModelCrudProvider, ModelCrudUtil } from './crud.ts';
 
@@ -9,7 +9,7 @@ export type BulkPreStore<T extends ModelType> = {
   upsertedIds: Map<number, string>;
   updatedIds: Map<number, string>;
   existingUpsertedIds: Map<number, string>;
-  operations: BulkOp<T>[];
+  operations: BulkOperation<T>[];
 };
 
 export class ModelBulkUtil {
@@ -25,7 +25,7 @@ export class ModelBulkUtil {
    * @param operations
    * @param provider
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[], provider: ModelCrudProvider): Promise<BulkPreStore<T>> {
+  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[], provider: ModelCrudProvider): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
     const upsertedIds = new Map<number, string>();
     const updatedIds = new Map<number, string>();

@@ -1,7 +1,7 @@
 import { Client, errors, estypes } from '@elastic/elasticsearch';
 
 import {
-  ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
+  ModelCrudSupport, BulkOperation, BulkResponse, ModelBulkSupport, ModelExpirySupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistryIndex, OptionalId,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
@@ -263,7 +263,7 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse<EsBulkError>> {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<EsBulkError>> {
 
     await ModelBulkUtil.preStore(cls, operations, this);
 

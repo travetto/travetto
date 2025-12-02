@@ -16,7 +16,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   /** Application Environment */
   env?: string;
 
-  abstract getOp(): keyof ModelStorageSupport;
+  abstract getOperation(): keyof ModelStorageSupport;
 
   preMain(): void {
     Env.DEBUG.set(false);
@@ -25,7 +25,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   async help(): Promise<string[]> {
     await Registry.init();
 
-    const candidates = await ModelCandidateUtil.export(this.getOp());
+    const candidates = await ModelCandidateUtil.export(this.getOperation());
     return [
       cliTpl`${{ title: 'Providers' }}`,
       '-'.repeat(20),
@@ -40,7 +40,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   async validate(provider: string, models: string[]): Promise<CliValidationError | undefined> {
     await Registry.init();
 
-    const candidates = await ModelCandidateUtil.export(this.getOp());
+    const candidates = await ModelCandidateUtil.export(this.getOperation());
     if (provider && !candidates.providers.includes(provider)) {
       return { message: `provider: ${provider} is not a valid provider`, source: 'arg' };
     }

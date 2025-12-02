@@ -75,7 +75,7 @@ export type AllNode = ArrayNode | UnaryNode | GroupNode | ClauseNode;
 /**
  * Translation of operators to model query keys
  */
-export const OP_TRANSLATION: Record<string, string> = {
+export const OPERATION_TRANSLATION: Record<string, string> = {
   '<': '$lt', '<=': '$lte',
   '>': '$gt', '>=': '$gte',
   '!=': '$ne', '==': '$eq',
@@ -83,4 +83,4 @@ export const OP_TRANSLATION: Record<string, string> = {
   in: '$in', 'not-in': '$nin'
 };
 
-export const VALID_OPS = new Set(Object.keys(OP_TRANSLATION));
+export const VALID_OPS = new Set(Object.keys(OPERATION_TRANSLATION));

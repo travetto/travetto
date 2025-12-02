@@ -10,7 +10,7 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 @CliCommand({ with: { env: true, module: true } })
 export class ModelExportCommand extends BaseModelCommand {
 
-  getOp(): 'exportModel' { return 'exportModel'; }
+  getOperation(): 'exportModel' { return 'exportModel'; }
 
   async main(provider: string, models: string[]): Promise<void> {
     const resolved = await ModelCandidateUtil.resolve(provider, models);

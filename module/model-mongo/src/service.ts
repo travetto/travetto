@@ -8,7 +8,7 @@ import {
 
 import {
   ModelRegistryIndex, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
-  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
+  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOperation, BulkResponse,
   NotFoundError, ExistsError, ModelBlobSupport,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil,
 } from '@travetto/model';
@@ -313,7 +313,7 @@ export class MongoModelService implements
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse<{ index: number }>> {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<{ index: number }>> {
     const out: BulkResponse<{ index: number }> = {
       errors: [],
       counts: {

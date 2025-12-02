@@ -7,7 +7,7 @@ import { ModelType, OptionalId } from '../types/model.ts';
 /**
  * Bulk operation. Each operation has a single action and payload
  */
-export type BulkOp<T extends ModelType> =
+export type BulkOperation<T extends ModelType> =
   { delete?: T } &
   { insert?: OptionalId<T> } &
   { update?: T } &
@@ -62,5 +62,5 @@ export class BulkProcessError extends AppError<{ errors: BulkErrorItem[] }> {
  * @concrete
  */
 export interface ModelBulkSupport extends ModelCrudSupport {
-  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;
+  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse>;
 }

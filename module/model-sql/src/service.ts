@@ -1,6 +1,6 @@
 import {
   ModelType,
-  BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
+  BulkOperation, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
   NotFoundError, ModelRegistryIndex, ExistsError, OptionalId, ModelIdSource,
   ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
@@ -203,7 +203,7 @@ export class SQLModelService implements
   }
 
   @Transactional()
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
 
     const { insertedIds, upsertedIds, existingUpsertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
 
@@ -214,10 +214,10 @@ export class SQLModelService implements
       new Map([...existingUpsertedIds.entries()].map(([key, value]) => [value, key]))
     );
 
-    const get = <K extends keyof BulkOp<T>>(key: K): Required<BulkOp<T>>[K][] =>
-      operations.map(x => x[key]).filter((x): x is Required<BulkOp<T>>[K] => !!x);
+    const get = <K extends keyof BulkOperation<T>>(key: K): Required<BulkOperation<T>>[K][] =>
+      operations.map(x => x[key]).filter((x): x is Required<BulkOperation<T>>[K] => !!x);
 
-    const getStatements = async (key: keyof BulkOp<T>): Promise<InsertWrapper[]> =>
+    const getStatements = async (key: keyof BulkOperation<T>): Promise<InsertWrapper[]> =>
       (await SQLModelUtil.getInserts(cls, get(key))).filter(x => !!x.records.length);
 
     const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);

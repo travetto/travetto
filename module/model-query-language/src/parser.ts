@@ -2,7 +2,7 @@ import { castTo } from '@travetto/runtime';
 import { WhereClauseRaw } from '@travetto/model-query';
 
 import { QueryLanguageTokenizer } from './tokenizer.ts';
-import { Token, Literal, GroupNode, OP_TRANSLATION, ArrayNode, AllNode } from './types.ts';
+import { Token, Literal, GroupNode, OPERATION_TRANSLATION, ArrayNode, AllNode } from './types.ts';
 
 /**
  * Determine if a token is boolean
@@ -35,16 +35,16 @@ export class QueryLanguageParser {
     }
 
     // If operator is not known, bail
-    const finalOp = OP_TRANSLATION[operation.value];
+    const finalOperation = OPERATION_TRANSLATION[operation.value];
 
-    if (!finalOp) {
+    if (!finalOperation) {
       throw new Error(`Unexpected operator: ${operation.value}`);
     }
 
     nodes.push({
       type: 'clause',
       field: identifier.value,
-      operation: finalOp,
+      operation: finalOperation,
       value: value.value
     });
 
