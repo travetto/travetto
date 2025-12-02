@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-redis",
-  "version": "7.0.0-rc.0",
+  "version": "7.0.0-rc.1",
   "description": "Redis backing for the travetto model module.",
   "keywords": [
     "typescript",
@@ -26,9 +26,9 @@
   },
   "dependencies": {
     "@redis/client": "^5.10.0",
-    "@travetto/cli": "^7.0.0-rc.0",
-    "@travetto/config": "^7.0.0-rc.0",
-    "@travetto/model": "^7.0.0-rc.0"
+    "@travetto/cli": "^7.0.0-rc.1",
+    "@travetto/config": "^7.0.0-rc.1",
+    "@travetto/model": "^7.0.0-rc.1"
   },
   "travetto": {
     "displayName": "Redis Model Support"

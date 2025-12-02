@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth",
-  "version": "7.0.0-rc.0",
+  "version": "7.0.0-rc.1",
   "description": "Authentication scaffolding for the Travetto framework",
   "keywords": [
     "authentication",
@@ -23,7 +23,7 @@
     "directory": "module/auth"
   },
   "dependencies": {
-    "@travetto/context": "^7.0.0-rc.0"
+    "@travetto/context": "^7.0.0-rc.1"
   },
   "travetto": {
     "displayName": "Authentication"
