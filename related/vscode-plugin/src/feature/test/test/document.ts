@@ -150,8 +150,8 @@ export class DocumentResultsManager {
         groups[a.status].push(a.decoration);
       }
 
-      for (const s of ['passed', 'failed', 'unknown'] as const) {
-        this.setStyle(state.assertStyles[s], groups[s]);
+      for (const style of ['passed', 'failed', 'unknown'] as const) {
+        this.setStyle(state.assertStyles[style], groups[style]);
       }
     } else if (isSuiteResult(level, result)) {
       const state = this.#results.suite[key];

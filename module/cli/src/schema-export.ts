@@ -48,7 +48,7 @@ export class CliSchemaExportUtil {
           case x.specifiers?.includes('module'): return { type: 'module' };
           case x.specifiers?.includes('file'): return {
             type: 'file',
-            fileExtensions: x.specifiers?.map(s => s.split('ext:')[1]).filter(s => !!s)
+            fileExtensions: x.specifiers?.map(specifier => specifier.split('ext:')[1]).filter(specifier => !!specifier)
           };
         }
       }

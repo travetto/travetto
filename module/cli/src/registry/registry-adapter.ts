@@ -7,9 +7,9 @@ import { CliParseUtil, ENV_PREFIX } from '../parse.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 
-const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
-const stripDashes = (x?: string): string | undefined => x?.replace(/^-+/, '');
-const toFlagName = (x: string): string => x.replace(/([a-z])([A-Z])/g, (_, left: string, right: string) => `${left}-${right.toLowerCase()}`);
+const getName = (name: string): string => (name.match(CLI_FILE_REGEX)?.groups?.name ?? name).replaceAll('_', ':');
+const stripDashes = (flag?: string): string | undefined => flag?.replace(/^-+/, '');
+const toFlagName = (field: string): string => field.replace(/([a-z])([A-Z])/g, (_, left: string, right: string) => `${left}-${right.toLowerCase()}`);
 
 export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConfig> {
   #cls: Class;

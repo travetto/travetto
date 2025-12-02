@@ -13,11 +13,11 @@ export class DeclarationUtil {
    * and then checks the toString for `const `
    */
   static isConstantDeclaration(node: ts.Node): boolean {
-    let s: ts.Node = node;
-    while (s && !ts.isVariableDeclarationList(s)) {
-      s = s.parent;
+    let root: ts.Node = node;
+    while (root && !ts.isVariableDeclarationList(root)) {
+      root = root.parent;
     }
-    return s?.getText().startsWith('const '); // Cheap out on check, ts is being weird
+    return root?.getText().startsWith('const '); // Cheap out on check, ts is being weird
   }
 
   /**

@@ -48,9 +48,9 @@ async function getContext() {
     tsconfig: path.resolve(ctx.workspace.path, 'tsconfig.json'),
     cleanImports: (t = '') => t
       .replace(/from ['"]((@travetto|[.]+)[^'"]+)['"]/g, (_, location, module) => {
-        const s = (module === '@travetto' ? destPath(location) : location).replace(SOURCE_EXT_RE, OUTPUT_EXT);
-        const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(location) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
-        return `from '${s}${suf}'`;
+        const root = (module === '@travetto' ? destPath(location) : location).replace(SOURCE_EXT_RE, OUTPUT_EXT);
+        const suffix = root.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(location) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
+        return `from '${root}${suffix}'`;
       }),
     loadMain: () => import(destPath(`${COMP_MOD}/support/entry.main.ts`))
       .then((/** @type {import('../support/entry.main.ts')} */  value) => value.main(ctx)),

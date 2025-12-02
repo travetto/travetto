@@ -164,7 +164,7 @@ export class CompilerClient {
     const set = new Set(states);
     // Loop until
     this.#log.debug(`Waiting for states, ${states.join(', ')}`);
-    for await (const _ of this.fetchEvents('state', { signal, until: s => set.has(s.state) })) { }
+    for await (const _ of this.fetchEvents('state', { signal, until: event => set.has(event.state) })) { }
     this.#log.debug(`Found state, one of ${states.join(', ')} `);
     if (message) {
       this.#log.info(message);

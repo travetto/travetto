@@ -90,11 +90,11 @@ export class TimeUtil {
    * @param time Time in milliseconds
    */
   static asClock(time: number): string {
-    const s = Math.trunc(time / 1000);
+    const seconds = Math.trunc(time / 1000);
     return [
-      s > 3600 ? `${Math.trunc(s / 3600).toString().padStart(2, '0')}h` : '',
-      s > 60 ? `${Math.trunc((s % 3600) / 60).toString().padStart(2, '0')}m` : '',
-      `${(s % 60).toString().padStart(2, '0')}s`
+      seconds > 3600 ? `${Math.trunc(seconds / 3600).toString().padStart(2, '0')}h` : '',
+      seconds > 60 ? `${Math.trunc((seconds % 3600) / 60).toString().padStart(2, '0')}m` : '',
+      `${(seconds % 60).toString().padStart(2, '0')}s`
     ].filter(x => !!x).slice(0, 2).join(' ');
   }
 }

@@ -7,7 +7,7 @@ import { CliUnknownCommandError } from '../error.ts';
 import { CliCommandRegistryAdapter } from './registry-adapter.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
-const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
+const getName = (field: string): string => (field.match(CLI_FILE_REGEX)?.groups?.name ?? field).replaceAll('_', ':');
 
 type CliCommandLoadResult = { command: string, config: CliCommandConfig, instance: CliCommandShape, schema: SchemaClassConfig };
 

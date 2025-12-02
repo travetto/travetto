@@ -58,10 +58,10 @@ export class CompilerSetup {
 
       const text = (await fs.readFile(sourceFile, 'utf8'))
         .replace(/from ['"](([.]+|@travetto)[/][^']+)['"]/g, (_, clause, moduleName) => {
-          const s = this.#sourceToOutputExt(clause);
-          const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
-          const pre = moduleName === '@travetto' ? `${compilerOut}/` : '';
-          return `from '${pre}${s}${suf}'`;
+          const root = this.#sourceToOutputExt(clause);
+          const suffix = root.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
+          const prefix = moduleName === '@travetto' ? `${compilerOut}/` : '';
+          return `from '${prefix}${root}${suffix}'`;
         });
 
       const ts = (await import('typescript')).default;
