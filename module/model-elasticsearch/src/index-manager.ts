@@ -139,7 +139,7 @@ export class IndexManager implements ModelStorageSupport {
     const removes = change.subs.reduce<string[]>((acc, subChange) => {
       acc.push(...subChange.fields
         .filter(event => event.type === 'removing')
-        .map(event => [...subChange.path.map(f => f.name), event.previous!.name].join('.')));
+        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
       return acc;
     }, []);
 
@@ -148,7 +148,7 @@ export class IndexManager implements ModelStorageSupport {
       acc.push(...subChange.fields
         .filter(event => event.type === 'changed')
         .filter(event => event.previous?.type !== event.current?.type)
-        .map(event => [...subChange.path.map(f => f.name), event.previous!.name].join('.')));
+        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
       return acc;
     }, []);
 

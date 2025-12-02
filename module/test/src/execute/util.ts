@@ -40,9 +40,9 @@ export class RunnerUtil {
    */
   static async* getTestImports(globs?: string[]): AsyncIterable<string> {
     const all = RuntimeIndex.find({
-      module: m => m.roles.includes('test') || m.roles.includes('std'),
-      folder: f => f === 'test',
-      file: f => f.role === 'test'
+      module: mod => mod.roles.includes('test') || mod.roles.includes('std'),
+      folder: folder => folder === 'test',
+      file: file => file.role === 'test'
     });
 
     // Collect globs

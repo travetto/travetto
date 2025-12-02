@@ -30,8 +30,8 @@ export class CompilerSetup {
   static #importManifest = (ctx: ManifestContext): Promise<
     Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil'>
   > => {
-    const all = ['util', 'delta'].map(f =>
-      import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}${OUTPUT_EXT}`))
+    const all = ['util', 'delta'].map(file =>
+      import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${file}${OUTPUT_EXT}`))
     );
     return Promise.all(all).then(results => Object.assign({}, ...results));
   };
@@ -57,10 +57,10 @@ export class CompilerSetup {
       const compilerOut = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules');
 
       const text = (await fs.readFile(sourceFile, 'utf8'))
-        .replace(/from ['"](([.]+|@travetto)[/][^']+)['"]/g, (_, clause, m) => {
+        .replace(/from ['"](([.]+|@travetto)[/][^']+)['"]/g, (_, clause, moduleName) => {
           const s = this.#sourceToOutputExt(clause);
           const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
-          const pre = m === '@travetto' ? `${compilerOut}/` : '';
+          const pre = moduleName === '@travetto' ? `${compilerOut}/` : '';
           return `from '${pre}${s}${suf}'`;
         });
 
@@ -139,7 +139,7 @@ export class CompilerSetup {
 
     try {
       await Log.wrap(scope, async log => {
-        if (files.some(f => f.stale)) {
+        if (files.some(file => file.stale)) {
           log.debug('Starting', mod);
           for (const file of files.filter(x => x.stale)) {
             await this.#transpileFile(ctx, file.input, file.output);
@@ -195,8 +195,10 @@ export class CompilerSetup {
       ManifestUtil.buildManifest(ManifestUtil.getWorkspaceContext(ctx)));
 
     await Log.wrap('transformers', async () => {
-      for (const mod of Object.values(manifest.modules).filter(m => m.files.$transformer?.length)) {
-        changes += (await this.#compileIfStale(ctx, 'transformers', mod.name, ['package.json', ...mod.files.$transformer!.map(x => x[0])])).length;
+      for (const mod of Object.values(manifest.modules)) {
+        if (mod.files.$transformer?.length) {
+          changes += (await this.#compileIfStale(ctx, 'transformers', mod.name, ['package.json', ...mod.files.$transformer!.map(x => x[0])])).length;
+        }
       }
     });
 

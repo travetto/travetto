@@ -19,7 +19,7 @@ export class TransformerManager {
    * @returns
    */
   static async create(manifestIndex: ManifestIndex): Promise<TransformerManager> {
-    const transformerFiles = manifestIndex.find({ folder: f => f === '$transformer' }).map(f => f.sourceFile);
+    const transformerFiles = manifestIndex.find({ folder: folder => folder === '$transformer' }).map(file => file.sourceFile);
 
     const transformers: NodeTransformer<TransformerState>[] = [];
 

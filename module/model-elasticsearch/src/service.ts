@@ -417,7 +417,7 @@ export class ElasticsearchModelService implements
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const results = await this.execSearch(cls, search);
     const shouldRemoveIds = query.select && 'id' in query.select && !query.select.id;
-    return Promise.all(results.hits.hits.map(m => this.postLoad(cls, m).then(item => {
+    return Promise.all(results.hits.hits.map(hit => this.postLoad(cls, hit).then(item => {
       if (shouldRemoveIds) {
         delete castTo<OptionalId<T>>(item).id;
       }

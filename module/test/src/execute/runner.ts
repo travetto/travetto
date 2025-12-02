@@ -35,7 +35,7 @@ export class Runner {
 
     await consumer.onStart({ testCount: tests.length });
     await WorkPool.run(
-      f => buildStandardTestManager(consumer, f),
+      run => buildStandardTestManager(consumer, run),
       testRuns,
       {
         idleTimeoutMillis: TimeUtil.asMillis(10, 's'),

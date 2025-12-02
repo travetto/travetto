@@ -106,12 +106,12 @@ export class SchemaValidator {
    * @param value The value to validate
    */
   static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | number | Date): boolean {
-    const f = input[key]!;
+    const config = input[key]!;
     const valueNum = (typeof value === 'string') ?
       (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
       (value instanceof Date ? value.getTime() : value);
 
-    const boundary = (typeof f.n === 'number' ? f.n : f.n.getTime());
+    const boundary = (typeof config.n === 'number' ? config.n : config.n.getTime());
     return key === 'min' ? valueNum < boundary : valueNum > boundary;
   }
 

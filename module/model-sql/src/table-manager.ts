@@ -113,7 +113,7 @@ export class TableManager {
       const rootStack = SQLModelUtil.classToStack(cls);
 
       const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((acc, value) => {
-        const path = value.path.map(f => ({ ...f }));
+        const path = value.path.map(field => ({ ...field }));
         for (const event of value.fields) {
           acc[event.type].push([...rootStack, ...path, { ...(event.type === 'removing' ? event.previous : event.current)! }]);
         }

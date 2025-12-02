@@ -23,12 +23,12 @@ export class EmailCompiler {
   /**
    * Grab list of all available templates
    */
-  static findAllTemplates(mod?: string): string[] {
+  static findAllTemplates(moduleName?: string): string[] {
     return RuntimeIndex
       .find({
-        module: m => !mod ? m.roles.includes('std') : mod === m.name,
-        folder: f => f === 'support',
-        file: f => EmailCompileUtil.isTemplateFile(f.sourceFile)
+        module: mod => !moduleName ? mod.roles.includes('std') : moduleName === mod.name,
+        folder: folder => folder === 'support',
+        file: file => EmailCompileUtil.isTemplateFile(file.sourceFile)
       })
       .map(x => x.sourceFile);
   }

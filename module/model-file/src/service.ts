@@ -34,7 +34,7 @@ export class FileModelConfig {
   }
 }
 
-const exists = (f: string): Promise<boolean> => fs.stat(f).then(() => true, () => false);
+const exists = (file: string): Promise<boolean> => fs.stat(file).then(() => true, () => false);
 
 /**
  * Standard file support

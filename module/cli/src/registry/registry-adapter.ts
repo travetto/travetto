@@ -36,8 +36,8 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     };
 
     const used = new Set(Object.values(schema.fields)
-      .flatMap(f => f.aliases ?? [])
-      .filter(x => !x.startsWith(ENV_PREFIX))
+      .flatMap(field => field.aliases ?? [])
+      .filter(alias => !alias.startsWith(ENV_PREFIX))
       .map(stripDashes)
     );
 

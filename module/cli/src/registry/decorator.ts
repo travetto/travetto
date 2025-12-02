@@ -91,7 +91,7 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
       return;
     }
 
-    const VALID_FIELDS = FIELD_CONFIG.filter(f => !!config.with?.[f.name]);
+    const VALID_FIELDS = FIELD_CONFIG.filter(field => !!config.with?.[field.name]);
 
     CliCommandRegistryIndex.getForRegister(target).register({
       runTarget: config.runTarget,

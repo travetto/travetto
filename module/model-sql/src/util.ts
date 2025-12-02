@@ -73,7 +73,7 @@ export class SQLModelUtil {
 
     // Polymorphic
     if (hasModel && config.discriminatedBase) {
-      const fieldMap = new Set(fields.map(f => f.name));
+      const fieldMap = new Set(fields.map(field => field.name));
       for (const type of SchemaRegistryIndex.getDiscriminatedClasses(config.class)) {
         const typeConfig = SchemaRegistryIndex.getConfig(type);
         for (const [fieldName, field] of Object.entries<SchemaFieldConfig>(typeConfig.fields)) {
@@ -92,8 +92,8 @@ export class SQLModelUtil {
       foreign: fields.filter(x => SchemaRegistryIndex.has(x.type) || x.array)
     };
 
-    ret.local.reduce((acc, f) => (acc[f.name] = f) && acc, ret.localMap);
-    ret.foreign.reduce((acc, f) => (acc[f.name] = f) && acc, ret.foreignMap);
+    ret.local.reduce((acc, field) => (acc[field.name] = field) && acc, ret.localMap);
+    ret.foreign.reduce((acc, field) => (acc[field.name] = field) && acc, ret.foreignMap);
 
     this.#schemaFieldsCache.set(config.class, ret);
 

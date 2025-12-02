@@ -97,11 +97,11 @@ export class CompilerWatcher {
       const mod = event.entry.module;
       const moduleSet = new Set(this.#state.manifestIndex.getDependentModules(mod.name, 'parents').map(x => x.name));
       moduleSet.add(this.#state.manifest.workspace.name);
-      for (const m of moduleSet) {
-        if (!eventsByMod.has(m)) {
-          eventsByMod.set(m, []);
+      for (const moduleName of moduleSet) {
+        if (!eventsByMod.has(moduleName)) {
+          eventsByMod.set(moduleName, []);
         }
-        eventsByMod.get(m)!.push(event);
+        eventsByMod.get(moduleName)!.push(event);
       }
     }
     return eventsByMod;
@@ -204,11 +204,11 @@ export class CompilerWatcher {
 
     await this.#cleanup.tool?.();
 
-    const listener = watch(toolRootFolder, { encoding: 'utf8' }, async (event, f) => {
-      if (!f) {
+    const listener = watch(toolRootFolder, { encoding: 'utf8' }, async (event, file) => {
+      if (!file) {
         return;
       }
-      const full = path.resolve(toolRootFolder, f);
+      const full = path.resolve(toolRootFolder, file);
       const stat = await fs.stat(full).catch(() => null);
       if (toolFolders.has(full) && !stat) {
         this.#q.throw(new CompilerReset(`Tooling folder removal ${full}`));

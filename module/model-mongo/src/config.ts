@@ -93,7 +93,7 @@ export class MongoModelConfig {
     const options = this.options;
     if (options.ssl) {
       if (options.cert) {
-        options.cert = await Promise.all([options.cert].flat(2).map(f => Buffer.isBuffer(f) ? f : resolve(f)));
+        options.cert = await Promise.all([options.cert].flat(2).map(data => Buffer.isBuffer(data) ? data : resolve(data)));
       }
       if (options.tlsCertificateKeyFile) {
         options.tlsCertificateKeyFile = await resolve(options.tlsCertificateKeyFile);

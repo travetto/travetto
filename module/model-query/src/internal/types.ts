@@ -36,8 +36,8 @@ export class TypeUtil {
   /**
    * Get declared type of a given field, only for primitive types
    */
-  static getDeclaredType(f: SchemaFieldConfig | Class): keyof typeof TypeUtil.OPERATORS | undefined {
-    const type = 'type' in f ? f.type : f;
+  static getDeclaredType(field: SchemaFieldConfig | Class): keyof typeof TypeUtil.OPERATORS | undefined {
+    const type = 'type' in field ? field.type : field;
     switch (type) {
       case String: return 'string';
       case Number: return 'number';
@@ -45,8 +45,8 @@ export class TypeUtil {
       case Date: return 'Date';
       case PointImpl: return 'Point';
       default: {
-        if ('type' in f && f.array) {
-          return this.getDeclaredType(f.type);
+        if ('type' in field && field.array) {
+          return this.getDeclaredType(field.type);
         }
       }
     }

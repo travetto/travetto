@@ -379,7 +379,7 @@ export class TransformerState implements State {
   findMethodByName(cls: ts.ClassLikeDeclaration | ts.Type, method: string): ts.MethodDeclaration | undefined {
     if ('getSourceFile' in cls) {
       return cls.members.find(
-        (m): m is ts.MethodDeclaration => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === method
+        (value): value is ts.MethodDeclaration => ts.isMethodDeclaration(value) && ts.isIdentifier(value.name) && value.name.escapedText === method
       );
     } else {
       const properties = this.#resolver.getPropertiesOfType(cls);

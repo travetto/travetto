@@ -658,9 +658,9 @@ ${this.getLimitSQL(cls, query)}`;
     }
 
     const fieldSql = fields
-      .map(f => {
-        const def = this.getColumnDefinition(f) || '';
-        return f.name === this.idField.name && !parent ?
+      .map(field => {
+        const def = this.getColumnDefinition(field) || '';
+        return field.name === this.idField.name && !parent ?
           def.replace('DEFAULT NULL', 'NOT NULL') : def;
       })
       .filter(x => !!x.trim())
@@ -727,7 +727,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       }
       return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
     });
-    const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
+    const constraint = `idx_${table}_${fields.map(([field]) => field).join('_')}`;
     return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
       .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')});`;
@@ -918,7 +918,7 @@ ${this.getWhereSQL(cls, where!)}`;
 
         // See if a selection exists at all
         const sel: SchemaFieldConfig[] = subSelectTop ? fields
-          .filter(f => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(f.name)] === 1)
+          .filter(field => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(field.name)] === 1)
           : [];
 
         if (sel.length) {
@@ -1016,7 +1016,7 @@ ${this.getWhereSQL(cls, where!)}`;
       }
       let level = 1; // Add by level
       for (; ;) { // Loop until done
-        const leveled = items.filter(f => f.stack.length === level);
+        const leveled = items.filter(insertWrapper => insertWrapper.stack.length === level);
         if (!leveled.length) {
           break;
         }

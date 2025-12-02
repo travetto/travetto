@@ -18,7 +18,7 @@ function NodeList({ src }: { src: string }): DocJSXElement {
     });
 
   const children = features.toSorted((a, b) => a.name.localeCompare(b.name))
-    .map(f => <li>{d.method(f.name)} - {f.desc}</li>);
+    .map(feature => <li>{d.method(feature.name)} - {feature.desc}</li>);
 
   return <ul>{...children}</ul>;
 }

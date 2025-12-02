@@ -155,16 +155,16 @@ export class ClassSource implements ChangeSource<Class> {
 
     // Ensure everything is loaded
     for (const entry of RuntimeIndex.find({
-      module: (m) => {
+      module: (mod) => {
         const role = Env.TRV_ROLE.value;
         return role !== 'test' && // Skip all modules when in test
-          m.roles.includes('std') &&
+          mod.roles.includes('std') &&
           (
-            !Runtime.production || m.prod ||
-            (role === 'doc' && m.roles.includes(role))
+            !Runtime.production || mod.prod ||
+            (role === 'doc' && mod.roles.includes(role))
           );
       },
-      folder: f => f === 'src' || f === '$index'
+      folder: folder => folder === 'src' || folder === '$index'
     })) {
       await Runtime.importFrom(entry.import);
     }

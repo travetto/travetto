@@ -8,25 +8,24 @@ export class CoreUtil {
   /**
    * See if inbound node has an original property
    */
-  static hasOriginal(o: ts.Node): o is (ts.Node & { original: ts.Node }) {
-    return 'original' in o && !!o.original;
+  static hasOriginal(value: ts.Node): value is (ts.Node & { original: ts.Node }) {
+    return 'original' in value && !!value.original;
   }
 
   /**
    * See if type has target
    */
-  static hasTarget(o: ts.Type): o is (ts.Type & { target: ts.Type }) {
-    return 'target' in o && !!o.target;
+  static hasTarget(value: ts.Type): value is (ts.Type & { target: ts.Type }) {
+    return 'target' in value && !!value.target;
   }
 
   /**
    * Get code range of node
-   * @param m
    */
-  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined): [start: number, end: number] | undefined {
-    if (o && o.pos >= 0) {
-      const start = ts.getLineAndCharacterOfPosition(source, o.getStart(source));
-      const end = ts.getLineAndCharacterOfPosition(source, o.getEnd());
+  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, value: T | undefined): [start: number, end: number] | undefined {
+    if (value && value.pos >= 0) {
+      const start = ts.getLineAndCharacterOfPosition(source, value.getStart(source));
+      const end = ts.getLineAndCharacterOfPosition(source, value.getEnd());
       return [start.line + 1, end.line + 1];
     }
   }

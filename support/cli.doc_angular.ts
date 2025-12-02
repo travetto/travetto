@@ -6,7 +6,7 @@ import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 
-const page = (f: string): string => path.resolve('related/travetto.github.io/src', f);
+const page = (file: string): string => path.resolve('related/travetto.github.io/src', file);
 
 /**
  * Generate documentation into the angular webapp under related/travetto.github.io
@@ -21,8 +21,8 @@ export class DocAngularCommand {
     }
 
     const mods = new Set((await CliModuleUtil.findModules('workspace'))
-      .filter(x => !target || x.sourcePath === path.resolve(root, target))
-      .filter(x => (x.files.doc ?? []).some(f => /DOC[.]tsx?$/.test(f.sourceFile))));
+      .filter(mod => !target || mod.sourcePath === path.resolve(root, target))
+      .filter(mod => (mod.files.doc ?? []).some(file => /DOC[.]tsx?$/.test(file.sourceFile))));
 
     if (mods.size > 1) {
       // Build out docs

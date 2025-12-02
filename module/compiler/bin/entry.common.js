@@ -55,7 +55,7 @@ async function getContext() {
     loadMain: () => import(destPath(`${COMP_MOD}/support/entry.main.ts`))
       .then((/** @type {import('../support/entry.main.ts')} */  value) => value.main(ctx)),
     supportFiles: () => readdir(srcPath('support'), { recursive: true, encoding: 'utf8' })
-      .then(files => files.filter(f => f.endsWith('.ts')).map(j => `support/${j}`))
+      .then(files => files.filter(file => file.endsWith('.ts')).map(file => `support/${file}`))
   };
 }
 
@@ -70,8 +70,8 @@ async function load(/** @type {(operations: import('../support/entry.main.ts').O
     await writeIfStale(ctx.srcPath('package.json'), ctx.destPath(`${COMP_MOD}/package.json`),
       async text => JSON.stringify({ ...JSON.parse(text || '{}'), type: ctx.packageType }, null, 2));
 
-    await Promise.all((await ctx.supportFiles()).map(f =>
-      writeIfStale(ctx.srcPath(f), ctx.destPath(`${COMP_MOD}/${f}`),
+    await Promise.all((await ctx.supportFiles()).map(file =>
+      writeIfStale(ctx.srcPath(file), ctx.destPath(`${COMP_MOD}/${file}`),
         t => transpile(ctx.cleanImports(t), ctx.packageType === 'module'))));
 
     process.setSourceMapsEnabled(true); // Ensure source map during compilation/development

@@ -74,8 +74,8 @@ export class CliParseUtil {
     const flags = new Set(input?.aliases ?? []);
     const check = (key?: string, value?: string): string | undefined => flags.has(key!) ? value : undefined;
     return args.reduce(
-      (m, x, i, arr) =>
-        (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? m,
+      (name, x, i, arr) =>
+        (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? name,
       process.env[ENV_KEY]
     );
   }
@@ -143,7 +143,7 @@ export class CliParseUtil {
    */
   static async parse(schema: SchemaClassConfig, inputs: string[]): Promise<ParsedState> {
     const flagMap = new Map<string, SchemaFieldConfig>(
-      Object.values(schema.fields).flatMap(f => (f.aliases ?? []).map(name => [name, f]))
+      Object.values(schema.fields).flatMap(field => (field.aliases ?? []).map(name => [name, field]))
     );
 
     const out: ParsedInput[] = [];

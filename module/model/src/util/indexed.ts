@@ -46,35 +46,35 @@ export class ModelIndexedUtil {
     let sorted: IndexSortPart | undefined;
 
     for (const field of config.fields) {
-      let f: Record<string, unknown> = field;
-      let o: Record<string, unknown> = item;
+      let fieldRef: Record<string, unknown> = field;
+      let itemRef: Record<string, unknown> = item;
       const parts = [];
 
-      while (o !== undefined && o !== null) {
-        const key = TypedObject.keys(f)[0];
-        o = castTo(o[key]);
+      while (itemRef !== undefined && itemRef !== null) {
+        const key = TypedObject.keys(fieldRef)[0];
+        itemRef = castTo(itemRef[key]);
         parts.push(key);
-        if (typeof f[key] === 'boolean' || typeof f[key] === 'number') {
+        if (typeof fieldRef[key] === 'boolean' || typeof fieldRef[key] === 'number') {
           if (config.type === 'sorted') {
-            sortDir = f[key] === true ? 1 : f[key] === false ? 0 : f[key];
+            sortDir = fieldRef[key] === true ? 1 : fieldRef[key] === false ? 0 : fieldRef[key];
           }
           break; // At the bottom
         } else {
-          f = castTo(f[key]);
+          fieldRef = castTo(fieldRef[key]);
         }
       }
       if (field === sortField) {
-        sorted = { path: parts, dir: sortDir, value: castTo(o) };
+        sorted = { path: parts, dir: sortDir, value: castTo(itemRef) };
       }
-      if (o === undefined || o === null) {
+      if (itemRef === undefined || itemRef === null) {
         const empty = field === sortField ? opts.emptySortValue : opts.emptyValue;
         if (empty === undefined || empty === Error) {
           throw new IndexNotSupported(cls, config, `Missing field value for ${parts.join('.')}`);
         }
-        o = castTo(empty!);
+        itemRef = castTo(empty!);
       } else {
         if (field !== sortField || (opts.includeSortInFields ?? true)) {
-          fields.push({ path: parts, value: castTo(o) });
+          fields.push({ path: parts, value: castTo(itemRef) });
         }
       }
     }

@@ -28,8 +28,8 @@ export class DocumentationComponent {
     });
   }
 
-  hasFragment(f): boolean {
-    return this.url.endsWith(`#${f}`);
+  hasFragment(fragment: string): boolean {
+    return this.url.endsWith(`#${fragment}`);
   }
 
   setActive(page: (typeof PAGES)[number]): void {

@@ -13,9 +13,9 @@ export class CliServiceCommand implements CliCommandShape {
   async #getServices(services: string[]): Promise<ServiceDescriptor[]> {
     return (await Promise.all(
       RuntimeIndex.find({
-        module: m => m.roles.includes('std'),
-        folder: f => f === 'support',
-        file: f => /support\/service[.]/.test(f.sourceFile)
+        module: mod => mod.roles.includes('std'),
+        folder: folder => folder === 'support',
+        file: file => /support\/service[.]/.test(file.sourceFile)
       })
         .map(x => Runtime.importFrom<{ service: ServiceDescriptor }>(x.import).then(value => value.service))
     ))

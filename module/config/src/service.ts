@@ -106,7 +106,7 @@ export class ConfigurationService {
     const out: Record<string, ConfigData> = {};
     for (const [candidate, inst] of configs) {
       const data = BindUtil.bindSchemaToObject<ConfigData>(
-        getClass(inst), {}, inst, { filterInput: f => !('secret' in f) || !f.secret, filterValue: value => value !== undefined }
+        getClass(inst), {}, inst, { filterInput: field => !('secret' in field) || !field.secret, filterValue: value => value !== undefined }
       );
       out[candidate.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
     }

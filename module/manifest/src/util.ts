@@ -48,8 +48,8 @@ export class ManifestUtil {
       },
       main: manifest.main,
       modules: Object.fromEntries(
-        prodModules.map(m => [m.name, Object.assign(m, {
-          parents: m.parents.filter(x => prodModNames.has(x))
+        prodModules.map(mod => [mod.name, Object.assign(mod, {
+          parents: mod.parents.filter(x => prodModNames.has(x))
         })])
       ),
     };

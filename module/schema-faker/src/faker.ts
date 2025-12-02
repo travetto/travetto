@@ -189,14 +189,14 @@ export class SchemaFaker {
     const fields = SchemaRegistryIndex.get(cls).getFields(view);
     const out: Record<string, unknown> = {};
 
-    for (const [f, fieldConfig] of Object.entries(fields)) {
-      if (f === 'type' || f === 'id') { // Do not set primary fields
+    for (const [name, fieldConfig] of Object.entries(fields)) {
+      if (name === 'type' || name === 'id') { // Do not set primary fields
         continue;
       }
       if (fieldConfig.required?.active === false && (Math.random() < .5)) {
         continue;
       }
-      out[f] = this.#value(fieldConfig);
+      out[name] = this.#value(fieldConfig);
     }
 
     return BindUtil.bindSchema(cls, out, { view });

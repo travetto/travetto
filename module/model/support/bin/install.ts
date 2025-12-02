@@ -6,9 +6,9 @@ export class ModelInstallUtil {
     if (!provider.createModel) {
       throw new Error(`${provider} does not support model installation`);
     }
-    for (const m of models) {
-      console.log('Installing', { name: m.Ⲑid });
-      await provider.createModel(m);
+    for (const cls of models) {
+      console.log('Installing', { name: cls.Ⲑid });
+      await provider.createModel(cls);
     }
   }
 }

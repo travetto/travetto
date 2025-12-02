@@ -78,7 +78,7 @@ export class ModelQuerySuggestUtil {
     for (const result of results) {
       const resultValue = result[field];
       if (Array.isArray(resultValue)) {
-        out.push(...resultValue.filter(f => pattern.test(f)).map((value: string) => [value, transform(value, result)] as const));
+        out.push(...resultValue.filter(item => pattern.test(item)).map((item: string) => [item, transform(item, result)] as const));
       } else if (typeof resultValue === 'string') {
         out.push([resultValue, transform(resultValue, result)]);
       }

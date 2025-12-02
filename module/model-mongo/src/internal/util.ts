@@ -31,14 +31,14 @@ export type PlainIdx = Record<string, -1 | 0 | 1>;
  */
 export class MongoUtil {
 
-  static toIndex<T extends ModelType>(f: IndexField<T>): PlainIdx {
+  static toIndex<T extends ModelType>(field: IndexField<T>): PlainIdx {
     const keys = [];
-    while (typeof f !== 'number' && typeof f !== 'boolean' && Object.keys(f)) {
-      const key = TypedObject.keys(f)[0];
-      f = castTo(f[key]);
+    while (typeof field !== 'number' && typeof field !== 'boolean' && Object.keys(field)) {
+      const key = TypedObject.keys(field)[0];
+      field = castTo(field[key]);
       keys.push(key);
     }
-    const rf: number | boolean = castTo(f);
+    const rf: number | boolean = castTo(field);
     return {
       [keys.join('.')]: typeof rf === 'boolean' ? (rf ? 1 : 0) : castTo<-1 | 1 | 0>(rf)
     };

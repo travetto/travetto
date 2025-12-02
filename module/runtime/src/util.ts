@@ -62,11 +62,11 @@ export class Util {
     for await (const item of input) {
       if (item !== undefined) {
         idx += 1;
-        let m = item;
+        let result = item;
         for (const fn of fns) {
-          m = castTo(await fn(m, idx));
+          result = castTo(await fn(result, idx));
         }
-        yield m;
+        yield result;
       }
     }
   }

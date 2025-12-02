@@ -42,7 +42,7 @@ export class Compiler {
     this.#state = state;
     this.#dirtyFiles = dirtyFiles[0] === '*' ?
       this.#state.getAllFiles() :
-      dirtyFiles.map(f => this.#state.getBySource(f)!.sourceFile);
+      dirtyFiles.map(file => this.#state.getBySource(file)!.sourceFile);
     this.#watch = watch;
 
     this.#controller = new AbortController();

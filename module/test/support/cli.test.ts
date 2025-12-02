@@ -70,7 +70,7 @@ export class TestCommand implements CliCommandShape {
 
     const isFirst = await this.isFirstFile(first);
     const isSingle = this.mode === 'single' || (isFirst && globs.length === 0);
-    const options = Object.fromEntries((this.formatOptions ?? [])?.map(f => [...f.split(':'), true]));
+    const options = Object.fromEntries((this.formatOptions ?? [])?.map(option => [...option.split(':'), true]));
 
     return runTests({
       concurrency: this.concurrency,

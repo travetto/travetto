@@ -18,8 +18,8 @@ const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
 };
 
 const INDEX_FILES = new Set(
-  ['__index__', '__index', 'index', 'jsx-runtime'].flatMap(f =>
-    ['ts', 'tsx', 'js'].map(ext => `${f}.${ext}`)
+  ['__index__', '__index', 'index', 'jsx-runtime'].flatMap(file =>
+    ['ts', 'tsx', 'js'].map(ext => `${file}.${ext}`)
   )
 );
 
@@ -235,7 +235,7 @@ export class ManifestModuleUtil {
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
     const pkgs = await PackageModuleVisitor.visit(ctx);
     const modules = await Promise.all([...pkgs].map(x => this.describeModule(ctx, x)));
-    return Object.fromEntries(modules.map(m => [m.name, m]));
+    return Object.fromEntries(modules.map(mod => [mod.name, mod]));
   }
 
   /**

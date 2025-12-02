@@ -8,7 +8,7 @@ const extensionPath = vscode.extensions.getExtension('arcsine.travetto-plugin')?
 const found = [
   path.resolve(extensionPath ?? '.', 'dist', 'manifest.json'),
   __dirname.replace(/support$/, 'manifest.json'),
-].find(f => fs.existsSync(f));
+].find(file => fs.existsSync(file));
 
 process.env.TRV_MANIFEST = found;
 

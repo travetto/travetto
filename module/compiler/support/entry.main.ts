@@ -64,7 +64,7 @@ export const main = (ctx: ManifestContext) => {
         return console.log(`Clean triggered ${ctx.workspace.path}:`, buildFolders);
       } else {
         try {
-          await Promise.all(buildFolders.map(f => fs.rm(CommonUtil.resolveWorkspace(ctx, f), { force: true, recursive: true })));
+          await Promise.all(buildFolders.map(file => fs.rm(CommonUtil.resolveWorkspace(ctx, file), { force: true, recursive: true })));
         } catch { }
         return console.log(`Cleaned ${ctx.workspace.path}:`, buildFolders);
       }

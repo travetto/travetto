@@ -248,7 +248,7 @@ export class SQLModelService implements
     }
 
     const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, records);
-    return await Promise.all(cleaned.map(m => ModelCrudUtil.load(cls, m)));
+    return await Promise.all(cleaned.map(item => ModelCrudUtil.load(cls, item)));
   }
 
   @Connected()

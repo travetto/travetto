@@ -13,7 +13,7 @@ import { Workspace } from '../../../core/workspace.ts';
 import { BaseFeature } from '../../base.ts';
 
 const isResource = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml|html)$/.test(file) && !/[.]compiled[.]/.test(file);
-const isTemplate = (f?: string): boolean => /[.]email[.]tsx$/.test(f ?? '');
+const isTemplate = (file?: string): boolean => /[.]email[.]tsx$/.test(file ?? '');
 
 /**
  * Email Template Feature

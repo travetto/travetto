@@ -17,9 +17,9 @@ export abstract class BasePackCommand implements CliCommandShape {
 
   static get entryPoints(): string[] {
     return RuntimeIndex.find({
-      module: m => m.prod,
-      folder: f => f === 'support',
-      file: f => f.sourceFile.includes('entry.')
+      module: mod => mod.prod,
+      folder: folder => folder === 'support',
+      file: file => file.sourceFile.includes('entry.')
     })
       .map(x => x.import.replace(/[.][^.]+s$/, ''));
   }
