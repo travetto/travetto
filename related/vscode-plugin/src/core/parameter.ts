@@ -149,13 +149,13 @@ export class ParameterSelector {
 
             input.busy = true;
             const items: { label: string, description: string }[] = [];
-            const proc = spawn(rgPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd, });
+            const subProcess = spawn(rgPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd, });
 
-            if (proc.stdout) {
-              ExecUtil.readLines(proc.stdout,
+            if (subProcess.stdout) {
+              ExecUtil.readLines(subProcess.stdout,
                 item => items.push({ label: item, description: path.resolve(cwd, item.trim()) }));
             }
-            await ExecUtil.getResult(proc, { catch: true });
+            await ExecUtil.getResult(subProcess, { catch: true });
             input.items = items;
             input.busy = false;
           }),

@@ -64,18 +64,18 @@ export class ExecUtil {
     }
 
     for (; ;) {
-      const proc = run();
-      const interrupt = (): void => { proc.kill('SIGINT'); };
-      const toMessage = (value: unknown): void => { proc.send?.(value!); };
+      const subProcess = run();
+      const interrupt = (): void => { subProcess.kill('SIGINT'); };
+      const toMessage = (value: unknown): void => { subProcess.send?.(value!); };
 
       // Proxy kill requests
       process.on('message', toMessage);
       if (relayInterrupt) {
         process.on('SIGINT', interrupt);
       }
-      proc.on('message', value => process.send?.(value));
+      subProcess.on('message', value => process.send?.(value));
 
-      const result = await this.getResult(proc, { catch: true });
+      const result = await this.getResult(subProcess, { catch: true });
       if (result.code !== this.RESTART_EXIT_CODE) {
         return result;
       } else {
@@ -101,14 +101,14 @@ export class ExecUtil {
    * represents the entire execution.  On successful completion the promise will resolve, and
    * on failed completion the promise will reject.
    *
-   * @param proc The process to enhance
+   * @param subProcess The process to enhance
    * @param options The options to use to enhance the process
    */
-  static getResult(proc: ChildProcess): Promise<ExecutionResult<string>>;
-  static getResult(proc: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
-  static getResult(proc: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
-  static getResult<T extends string | Buffer>(proc: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
-    const _proc: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = proc;
+  static getResult(subProcess: ChildProcess): Promise<ExecutionResult<string>>;
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
+  static getResult<T extends string | Buffer>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
+    const _proc: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
     const result = _proc[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
@@ -136,17 +136,17 @@ export class ExecUtil {
         );
       };
 
-      proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
-      proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
+      subProcess.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
+      subProcess.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
 
-      proc.on('error', (error: Error) =>
+      subProcess.on('error', (error: Error) =>
         finish({ code: 1, message: error.message, valid: false }));
 
-      proc.on('close', (code: number) =>
+      subProcess.on('close', (code: number) =>
         finish({ code, valid: code === null || code === 0 }));
 
-      if (proc.exitCode !== null) { // We are already done
-        finish({ code: proc.exitCode, valid: proc.exitCode === 0 });
+      if (subProcess.exitCode !== null) { // We are already done
+        finish({ code: subProcess.exitCode, valid: subProcess.exitCode === 0 });
       }
     });
 

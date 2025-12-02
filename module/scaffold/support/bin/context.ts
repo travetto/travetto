@@ -53,19 +53,19 @@ export class Context {
   }
 
   #exec(cmd: string, args: string[]): Promise<void> {
-    const term = new Terminal();
-    const proc = spawn(cmd, args, {
+    const terminal = new Terminal();
+    const subProcess = spawn(cmd, args, {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
       env: { PATH: process.env.PATH },
     });
 
-    if (proc.stderr) {
-      ExecUtil.readLines(proc.stderr,
-        line => term.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
+    if (subProcess.stderr) {
+      ExecUtil.readLines(subProcess.stderr,
+        line => terminal.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
     }
 
-    return ExecUtil.getResult(proc).then(() => { });
+    return ExecUtil.getResult(subProcess).then(() => { });
   }
 
   get selfPath(): string {

@@ -73,9 +73,9 @@ export class ServiceRunner {
   }
 
   async * #pullImage(): AsyncIterable<string> {
-    const proc = spawn('docker', ['pull', this.svc.image], { stdio: [0, 'pipe', 'pipe'] });
-    yield* rl.createInterface(proc.stdout!);
-    await ExecUtil.getResult(proc);
+    const subProcess = spawn('docker', ['pull', this.svc.image], { stdio: [0, 'pipe', 'pipe'] });
+    yield* rl.createInterface(subProcess.stdout!);
+    await ExecUtil.getResult(subProcess);
   }
 
   async #startContainer(): Promise<string> {

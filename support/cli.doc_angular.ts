@@ -28,7 +28,7 @@ export class DocAngularCommand {
       // Build out docs
       await RepoExecUtil.execOnModules('workspace',
         mod => {
-          const proc = spawn('trv', ['doc'], {
+          const subProcess = spawn('trv', ['doc'], {
             timeout: 20000,
             cwd: mod.sourceFolder,
             env: {
@@ -39,9 +39,9 @@ export class DocAngularCommand {
             }
           });
 
-          ExecUtil.getResult(proc).catch(() => console.error(`${mod.name} - failed`));
+          ExecUtil.getResult(subProcess).catch(() => console.error(`${mod.name} - failed`));
 
-          return proc;
+          return subProcess;
         },
         {
           showStdout: false,

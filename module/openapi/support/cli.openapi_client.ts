@@ -32,7 +32,7 @@ export class OpenApiClientCommand implements CliCommandShape {
     this.output = path.resolve(this.output);
     this.input = path.resolve(this.input);
 
-    const proc = cp.spawn('docker', [
+    const subProcess = cp.spawn('docker', [
       'run',
       '--rm',
       '-i',
@@ -52,7 +52,7 @@ export class OpenApiClientCommand implements CliCommandShape {
       stdio: 'inherit'
     });
 
-    const result = await ExecUtil.getResult(proc);
+    const result = await ExecUtil.getResult(subProcess);
 
     if (!result.valid) {
       process.exitCode = 1;

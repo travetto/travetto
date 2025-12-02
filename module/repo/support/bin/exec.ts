@@ -69,21 +69,21 @@ export class RepoExecUtil {
       try {
         if (!(await config.filter?.(mod) === false)) {
           const prefix = prefixes[mod.sourceFolder] ?? '';
-          const proc = operation(mod);
-          processes.set(mod, proc);
+          const subProcess = operation(mod);
+          processes.set(mod, subProcess);
 
-          if (config.showStdout && proc.stdout) {
-            ExecUtil.readLines(proc.stdout, line =>
+          if (config.showStdout && subProcess.stdout) {
+            ExecUtil.readLines(subProcess.stdout, line =>
               stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
             );
           }
-          if (config.showStderr && proc.stderr) {
-            ExecUtil.readLines(proc.stderr, line =>
+          if (config.showStderr && subProcess.stderr) {
+            ExecUtil.readLines(subProcess.stderr, line =>
               stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
             );
           }
 
-          const result = await ExecUtil.getResult(proc, { catch: true });
+          const result = await ExecUtil.getResult(subProcess, { catch: true });
           const output = transform(mod, result);
           results.set(mod, output);
         }

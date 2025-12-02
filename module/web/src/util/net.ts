@@ -14,8 +14,8 @@ export class NetUtil {
 
   /** Get the port process id */
   static async getPortProcessId(port: number): Promise<number | undefined> {
-    const proc = spawn('lsof', ['-t', '-i', `tcp:${port}`]);
-    const result = await ExecUtil.getResult(proc, { catch: true });
+    const subProcess = spawn('lsof', ['-t', '-i', `tcp:${port}`]);
+    const result = await ExecUtil.getResult(subProcess, { catch: true });
     const [pid] = result.stdout.trim().split(/\n/g);
     if (pid && +pid > 0) {
       return +pid;

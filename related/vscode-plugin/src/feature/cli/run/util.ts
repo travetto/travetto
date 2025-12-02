@@ -95,12 +95,12 @@ export class CliRunUtil {
 
   /** Spawn CLI  */
   static async #startCli(command: string, args: string[], action: string): Promise<{ stdout: string, stderr: string }> {
-    const proc = spawn('node', [RunUtil.cliFile, command, ...args], {
+    const subProcess = spawn('node', [RunUtil.cliFile, command, ...args], {
       stdio: [0, 'pipe', 'pipe', 'ignore'],
       cwd: Workspace.path,
       env: { ...process.env, ...RunUtil.buildEnv(), ...Env.TRV_QUIET.export(true) }
     });
-    const data = await ExecUtil.getResult(proc, { catch: true });
+    const data = await ExecUtil.getResult(subProcess, { catch: true });
     if (!data.valid) {
       throw new Error(`Unable to ${action}: ${data.message}`);
     }

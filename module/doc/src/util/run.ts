@@ -95,8 +95,8 @@ export class DocRunUtil {
   static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
     let final: string;
     try {
-      const proc = this.spawn(cmd, args, config);
-      const result = await ExecUtil.getResult(proc, { catch: true });
+      const subProcess = this.spawn(cmd, args, config);
+      const result = await ExecUtil.getResult(subProcess, { catch: true });
       if (!result.valid) {
         throw new Error(result.stderr);
       }

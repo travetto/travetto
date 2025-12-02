@@ -72,7 +72,7 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#log.trace('Running Compiler', 'npx', 'trvc', command, args);
     const starting = command === 'start' || command === 'restart';
     this.#started ||= starting;
-    const proc = spawn('npx', ['trvc', command, ...args ?? []], {
+    const subProcess = spawn('npx', ['trvc', command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
       stdio: ['pipe', starting ? 'ignore' : 'pipe', 'pipe'],
@@ -85,15 +85,15 @@ export class CompilerWatchFeature extends BaseFeature {
       this.#log.debug('Finished command', command, 'with', code);
     });
 
-    if (debug && proc.stderr) {
-      ExecUtil.readLines(proc.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+    if (debug && subProcess.stderr) {
+      ExecUtil.readLines(subProcess.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
     }
 
-    if (debug && proc.stdout) {
-      ExecUtil.readLines(proc.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+    if (debug && subProcess.stdout) {
+      ExecUtil.readLines(subProcess.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
     }
 
-    return proc;
+    return subProcess;
   }
 
   /**
@@ -117,8 +117,8 @@ export class CompilerWatchFeature extends BaseFeature {
         if (state && state !== 'closed') {
           connected = true;
           this.#log.info('Connected', state);
-          const proc = this.run('event', ['all'], controller.signal);
-          await ExecUtil.readLines(proc.stdout!, line => {
+          const subProcess = this.run('event', ['all'], controller.signal);
+          await ExecUtil.readLines(subProcess.stdout!, line => {
             const { type, payload }: CompilerEvent = JSON.parse(line);
             switch (type) {
               case 'log': this.#ongLogEvent(payload); break;

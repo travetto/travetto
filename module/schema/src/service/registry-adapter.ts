@@ -13,8 +13,8 @@ const classToDiscriminatedType = (cls: Class): string => cls.name
   .toLowerCase();
 
 function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {
-  const md = base.metadata ??= {};
-  const out = md[key] ??= {};
+  const metadata = base.metadata ??= {};
+  const out = metadata[key] ??= {};
   for (const d of data) {
     safeAssign(out, d);
   }

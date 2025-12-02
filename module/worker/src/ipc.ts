@@ -9,17 +9,17 @@ import { ShutdownManager, Util } from '@travetto/runtime';
 export class IpcChannel<V = unknown> {
 
   #emitter = new EventEmitter();
-  proc: NodeJS.Process | ChildProcess;
+  subProcess: NodeJS.Process | ChildProcess;
   parentId: number;
 
-  constructor(proc: NodeJS.Process | ChildProcess = process) {
-    this.proc = proc;
-    this.parentId = proc instanceof ChildProcess ? process.pid : process.ppid;
+  constructor(subProcess: NodeJS.Process | ChildProcess = process) {
+    this.subProcess = subProcess;
+    this.parentId = subProcess instanceof ChildProcess ? process.pid : process.ppid;
 
     // Close on shutdown
     ShutdownManager.onGracefulShutdown(() => this.destroy());
 
-    this.proc.on('message', (event: { type: string }) => {
+    this.subProcess.on('message', (event: { type: string }) => {
       console.debug('Received', { pid: this.parentId, id: this.id, type: event.type });
       this.#emitter.emit(event.type, event);
       this.#emitter.emit('*', event);
@@ -30,14 +30,14 @@ export class IpcChannel<V = unknown> {
    * Gets channel unique identifier
    */
   get id(): number | undefined {
-    return this.proc.pid;
+    return this.subProcess.pid;
   }
 
   /**
    * Determines if channel is active
    */
   get active(): boolean {
-    return (this.proc instanceof ChildProcess) ? !this.proc.killed : !!this.proc.connected;
+    return (this.subProcess instanceof ChildProcess) ? !this.subProcess.killed : !!this.subProcess.connected;
   }
 
   /**
@@ -47,10 +47,10 @@ export class IpcChannel<V = unknown> {
     console.debug('Sending', { pid: this.parentId, id: this.id, eventType });
     if (!this.active) {
       throw new Error('Cannot send message to inactive process');
-    } else if (this.proc.send && this.proc.connected) {
-      this.proc.send({ ...(data ?? {}), type: eventType }, undefined, undefined, (error) => error && console.error(error));
+    } else if (this.subProcess.send && this.subProcess.connected) {
+      this.subProcess.send({ ...(data ?? {}), type: eventType }, undefined, undefined, (error) => error && console.error(error));
     } else {
-      throw new Error('this.proc.send was not defined');
+      throw new Error('this.subProcess.send was not defined');
     }
   }
 
@@ -83,9 +83,9 @@ export class IpcChannel<V = unknown> {
     if (this.active) {
       try {
         console.debug('Killing', { pid: this.parentId, id: this.id });
-        if (this.proc instanceof ChildProcess) {
-          const complete = new Promise<void>(resolve => this.proc.on('close', resolve));
-          this.proc.kill();
+        if (this.subProcess instanceof ChildProcess) {
+          const complete = new Promise<void>(resolve => this.subProcess.on('close', resolve));
+          this.subProcess.kill();
           await Promise.race([complete, Util.nonBlockingTimeout(1000)]);
         }
       } catch { }
@@ -98,7 +98,7 @@ export class IpcChannel<V = unknown> {
    */
   release(): void {
     console.debug('Released', { pid: this.parentId, id: this.id });
-    this.proc.removeAllListeners();
+    this.subProcess.removeAllListeners();
     this.#emitter.removeAllListeners();
   }
 }

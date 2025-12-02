@@ -45,7 +45,7 @@ export class CompilerRunner {
       await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
 
       log.info('Launching compiler');
-      const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+      const subProcess = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
         env: {
           ...process.env,
           TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
@@ -58,7 +58,7 @@ export class CompilerRunner {
 
       const kill = (): unknown => {
         log.debug('Shutting down process');
-        return (proc.connected ? proc.send('shutdown', () => proc.kill()) : proc.kill());
+        return (subProcess.connected ? subProcess.send('shutdown', () => subProcess.kill()) : subProcess.kill());
       };
 
       process.once('SIGINT', kill);
@@ -66,8 +66,8 @@ export class CompilerRunner {
 
       yield* queue;
 
-      if (proc.exitCode !== 0) {
-        log.error(`Terminated during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
+      if (subProcess.exitCode !== 0) {
+        log.error(`Terminated during compilation, code=${subProcess.exitCode}, killed=${subProcess.killed}`);
       }
       process.off('SIGINT', kill);
 
