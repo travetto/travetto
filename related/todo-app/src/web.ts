@@ -8,7 +8,7 @@ import { Todo, TodoSearch } from './model.ts';
 /**
  * Todo request
  */
-type TodoRequest = Required<Todo>;
+type TodoRequest = Omit<Todo, 'id'>;
 
 @Controller('/todo')
 export class TodoController {
@@ -25,10 +25,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(search: TodoSearch): Promise<Todo[]> {
-    return this._svc.getAll(search).then(x => x.map(y => {
-      y.id = y.id.toUpperCase();
-      return y;
-    }));
+    return this._svc.getAll(search);
   }
 
   /**
