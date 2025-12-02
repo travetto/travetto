@@ -24,13 +24,13 @@ class SampleRegistryAdapter implements RegistryAdapter<Group> {
     this.#class = cls;
   }
 
-  register(...data: Partial<Partial<Group>>[]): Group {
-    for (const d of data) {
+  register(...groups: Partial<Partial<Group>>[]): Group {
+    for (const group of groups) {
       Object.assign(this.#config, {
-        ...d,
+        ...group,
         children: [
           ...(this.#config?.children ?? []),
-          ...(d.children ?? [])
+          ...(group.children ?? [])
         ]
       });
     }

@@ -106,7 +106,7 @@ export class PackageUtil {
           case 'yarn':
           case 'npm': {
             const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
-            out = workspaces.map(d => ({ path: path.resolve(ctx.workspace.path, d.location), name: d.name }));
+            out = workspaces.map(mod => ({ path: path.resolve(ctx.workspace.path, mod.location), name: mod.name }));
             break;
           }
         }

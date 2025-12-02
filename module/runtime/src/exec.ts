@@ -136,8 +136,8 @@ export class ExecUtil {
         );
       };
 
-      subProcess.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
-      subProcess.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
+      subProcess.stdout?.on('data', (data: string | Buffer) => stdout.push(Buffer.isBuffer(data) ? data : Buffer.from(data)));
+      subProcess.stderr?.on('data', (data: string | Buffer) => stderr.push(Buffer.isBuffer(data) ? data : Buffer.from(data)));
 
       subProcess.on('error', (error: Error) =>
         finish({ code: 1, message: error.message, valid: false }));

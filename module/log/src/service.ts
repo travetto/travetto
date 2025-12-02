@@ -46,8 +46,8 @@ export class LogService implements ConsoleListener {
     let outEvent: LogEvent = { ...event, message, args };
 
     // Decorate event as needed
-    for (const d of this.#decorators) {
-      outEvent = d.decorate(outEvent);
+    for (const decorators of this.#decorators) {
+      outEvent = decorators.decorate(outEvent);
     }
 
     for (const l of this.#listeners) {
