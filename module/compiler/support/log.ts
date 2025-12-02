@@ -97,8 +97,8 @@ class $RootLogger extends Logger {
 
   /** Scope and provide a callback pattern for access to a logger */
   wrap<T = unknown>(scope: string, operation: (log: Logger) => Promise<T>, basic = true): Promise<T> {
-    const l = this.scoped(scope);
-    return basic ? (l.debug('Started'), operation(l).finally(() => l.debug('Completed'))) : operation(l);
+    const logger = this.scoped(scope);
+    return basic ? (logger.debug('Started'), operation(logger).finally(() => logger.debug('Completed'))) : operation(logger);
   }
 
   /** Write progress event, if active */

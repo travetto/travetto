@@ -50,8 +50,8 @@ export class LogService implements ConsoleListener {
       outEvent = decorators.decorate(outEvent);
     }
 
-    for (const l of this.#listeners) {
-      l.log(outEvent);
+    for (const listener of this.#listeners) {
+      listener.log(outEvent);
     }
   }
 }

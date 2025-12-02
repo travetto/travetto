@@ -50,7 +50,7 @@ export class DocResolveUtil {
   static async resolveSnippet(file: Function | string, startPattern: RegExp, endPattern?: RegExp, outline = false): Promise<ResolvedSnippet> {
     const { lines, startIdx, language, file: resolvedFile } = await DocFileUtil.readCodeSnippet(file, startPattern);
 
-    const endIdx = endPattern ? lines.findIndex((l, i) => i > startIdx && endPattern.test(l)) : lines.length;
+    const endIdx = endPattern ? lines.findIndex((line, i) => i > startIdx && endPattern.test(line)) : lines.length;
     let text = lines.slice(startIdx, endIdx + 1).join('\n');
 
     if (outline) {

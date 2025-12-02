@@ -216,8 +216,8 @@ class TestRunnerFeature extends BaseFeature {
       }
     }, {
       provideCodeLenses: doc => this.buildCodeLenses(doc),
-      onDidChangeCodeLenses: l => {
-        this.#codeLensUpdated = l;
+      onDidChangeCodeLenses: listener => {
+        this.#codeLensUpdated = listener;
         return { dispose: (): void => { } };
       }
     }));

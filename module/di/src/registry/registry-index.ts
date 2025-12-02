@@ -162,7 +162,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
    */
   getInstances<T>(candidateType: Class<T>, predicate?: (config: InjectableCandidate<T>) => boolean): Promise<T[]> {
     const inputs = this.getCandidates<T>(candidateType).filter(x => !predicate || predicate(x));
-    return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
+    return Promise.all(inputs.map(candidate => this.getInstance<T>(candidate.class, candidate.qualifier)));
   }
 
   /**

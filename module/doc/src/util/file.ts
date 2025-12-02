@@ -86,7 +86,7 @@ export class DocFileUtil {
   static async readCodeSnippet(src: string | Function, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
     const result = this.readSource(src);
     const lines = result.content.split(/\n/);
-    const startIdx = lines.findIndex(l => startPattern.test(l));
+    const startIdx = lines.findIndex(line => startPattern.test(line));
     if (startIdx < 0) {
       throw new Error(`Pattern ${startPattern.source} not found in ${src}`);
     }

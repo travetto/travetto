@@ -10,8 +10,8 @@ type Coord = { x: number, y: number };
 export const WAIT_TOKEN = '%WAIT%';
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
-const lineStatus = (l: string): string => l.replace(WAIT_TOKEN, ' ');
-const lineMain = (l: string): string => l.replace(WAIT_TOKEN, '').trim();
+const lineStatus = (line: string): string => line.replace(WAIT_TOKEN, ' ');
+const lineMain = (line: string): string => line.replace(WAIT_TOKEN, '').trim();
 
 /** An basic tty wrapper */
 export class Terminal {
