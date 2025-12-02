@@ -21,18 +21,18 @@ export class BindUtil {
 
   /**
    * Coerce a value to match the field config type
-   * @param conf The field config to coerce to
+   * @param config The field config to coerce to
    * @param value The provided value
    */
-  static #coerceType<T>(conf: SchemaInputConfig, value: unknown): T | null | undefined {
-    if (conf.type?.bindSchema) {
-      value = conf.type.bindSchema(value);
+  static #coerceType<T>(config: SchemaInputConfig, value: unknown): T | null | undefined {
+    if (config.type?.bindSchema) {
+      value = config.type.bindSchema(value);
     } else {
-      value = DataUtil.coerceType(value, conf.type, false);
+      value = DataUtil.coerceType(value, config.type, false);
 
-      if (conf.type === Number && conf.precision && typeof value === 'number') {
-        if (conf.precision[1]) { // Supports decimal
-          value = +value.toFixed(conf.precision[1]);
+      if (config.type === Number && config.precision && typeof value === 'number') {
+        if (config.precision[1]) { // Supports decimal
+          value = +value.toFixed(config.precision[1]);
         } else { // 0 digits
           value = Math.trunc(value);
         }
@@ -175,15 +175,15 @@ export class BindUtil {
 
     if (!!data && isInstance<T>(data)) {
       const adapter = SchemaRegistryIndex.get(cls);
-      const conf = adapter.get();
+      const schemaConfig = adapter.get();
 
       // If no configuration
-      if (!conf) {
+      if (!schemaConfig) {
         for (const key of TypedObject.keys(data)) {
           input[key] = data[key];
         }
       } else {
-        let schema: SchemaFieldMap = conf.fields;
+        let schema: SchemaFieldMap = schemaConfig.fields;
         if (view) {
           schema = adapter.getFields(view);
           if (!schema) {

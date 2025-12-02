@@ -11,12 +11,12 @@ import { ModelRegistryIndex } from './registry-index.ts';
  * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
-export function Model(conf: Partial<ModelConfig<ModelType>> | string = {}) {
+export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
   return function <T extends ModelType, U extends Class<T>>(cls: U): U {
-    if (typeof conf === 'string') {
-      conf = { store: conf };
+    if (typeof config === 'string') {
+      config = { store: config };
     }
-    ModelRegistryIndex.getForRegister(cls).register(conf);
+    ModelRegistryIndex.getForRegister(cls).register(config);
     if (SchemaRegistryIndex.getForRegister(cls).get().fields.id) {
       SchemaRegistryIndex.getForRegister(cls).registerField('id', { required: { active: false } });
     }

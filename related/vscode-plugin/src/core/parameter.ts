@@ -24,24 +24,24 @@ type Complex = vscode.InputBox | vscode.QuickPick<vscode.QuickPickItem>;
  * Selects a parameter
  */
 export class ParameterSelector {
-  static #rgPath: string;
+  static #ripGrepPath: string;
 
-  static async #getRgPath(): Promise<string> {
-    if (!this.#rgPath) {
+  static async #getRipGrepPath(): Promise<string> {
+    if (!this.#ripGrepPath) {
       for (const folder of ['node_modules.asar.unpacked', 'node_modules']) {
         for (const mod of ['vscode-ripgrep', '@vscode/ripgrep']) {
           const file = path.resolve(vscode.env.appRoot, folder, mod, 'bin', 'rg');
           if (await fs.stat(file).catch(() => false)) {
-            this.#rgPath = file;
+            this.#ripGrepPath = file;
             break;
           }
         }
       }
     }
-    if (!this.#rgPath) {
+    if (!this.#ripGrepPath) {
       throw new Error('Unable to find ripgrep path');
     }
-    return this.#rgPath;
+    return this.#ripGrepPath;
   }
 
   /**
@@ -62,34 +62,34 @@ export class ParameterSelector {
 
   /**
    * Build quick input
-   * @param conf
+   * @param input
    */
-  static buildQuickInput(conf: InputWithMeta): vscode.InputBox {
-    return this.buildQuick(conf, vscode.window.createInputBox);
+  static buildQuickInput(input: InputWithMeta): vscode.InputBox {
+    return this.buildQuick(input, vscode.window.createInputBox);
   }
 
   /**
    * Create a quick pick list
-   * @param conf The parameter to pick for
+   * @param input The parameter to pick for
    * @param choices List of choices
    */
-  static buildQuickPickList(conf: InputWithMeta, choices: unknown[]): vscode.QuickPick<vscode.QuickPickItem> {
-    const qp = this.buildQuick(conf, vscode.window.createQuickPick);
-    qp.title = `Select ${conf.param.description || conf.param.name}`;
-    qp.items = choices.map(x => ({ label: `${x}` }));
-    qp.canSelectMany = false;
+  static buildQuickPickList(input: InputWithMeta, choices: unknown[]): vscode.QuickPick<vscode.QuickPickItem> {
+    const quickPick = this.buildQuick(input, vscode.window.createQuickPick);
+    quickPick.title = `Select ${input.param.description || input.param.name}`;
+    quickPick.items = choices.map(x => ({ label: `${x}` }));
+    quickPick.canSelectMany = false;
 
-    if (qp.value !== undefined && conf.param.type === 'boolean') {
-      qp.value = `${qp.value}` === 'true' ? 'yes' : 'no';
+    if (quickPick.value !== undefined && input.param.type === 'boolean') {
+      quickPick.value = `${quickPick.value}` === 'true' ? 'yes' : 'no';
     }
 
-    if (qp.value !== undefined) {
-      qp.activeItems = qp.items.filter(x => x.label === qp.value);
+    if (quickPick.value !== undefined) {
+      quickPick.activeItems = quickPick.items.filter(x => x.label === quickPick.value);
     }
 
-    qp.value = undefined!;
+    quickPick.value = undefined!;
 
-    return qp;
+    return quickPick;
   }
 
   /**
@@ -116,17 +116,17 @@ export class ParameterSelector {
 
   /**
    * Prompt for a file
-   * @param conf The parameter to look for
+   * @param config The parameter to look for
    * @param root The root to search in
    */
-  static async getFile(conf: InputWithMeta, root?: string): Promise<string | undefined> {
+  static async getFile(config: InputWithMeta, root?: string): Promise<string | undefined> {
     const disposables: vscode.Disposable[] = [];
-    const rgPath = await this.#getRgPath();
+    const ripGrepPath = await this.#getRipGrepPath();
     const baseArgs = ['--max-count', '50', '--files'];
     const quote = process.platform === 'win32' ? '"' : '\'';
     const cwd = root ?? Workspace.uri.fsPath;
     const placeholder = 'Type to search for files';
-    const exts: string[] = conf.param.fileExtensions ?? [];
+    const exts: string[] = config.param.fileExtensions ?? [];
 
     try {
       return await new Promise<string | undefined>((resolve) => {
@@ -149,7 +149,7 @@ export class ParameterSelector {
 
             input.busy = true;
             const items: { label: string, description: string }[] = [];
-            const subProcess = spawn(rgPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd, });
+            const subProcess = spawn(ripGrepPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd, });
 
             if (subProcess.stdout) {
               ExecUtil.readLines(subProcess.stdout,
@@ -179,21 +179,21 @@ export class ParameterSelector {
 
   /**
    * Get quick pick input
-   * @param conf
+   * @param input
    */
-  static getQuickInput(conf: InputWithMeta): Promise<string> {
-    return this.getInput(this.buildQuickInput(conf));
+  static getQuickInput(input: InputWithMeta): Promise<string> {
+    return this.getInput(this.buildQuickInput(input));
   }
 
   /**
    * Get quick pick list
    *
-   * @param conf
+   * @param input
    * @param choices
    */
-  static getQuickPickList(conf: InputWithMeta, choices: unknown[]): Promise<string> {
+  static getQuickPickList(input: InputWithMeta, choices: unknown[]): Promise<string> {
     return this.getInputComplex(
-      this.buildQuickPickList(conf, choices),
+      this.buildQuickPickList(input, choices),
       x => x.value ?? x.selectedItems[0].label);
   }
 
@@ -214,19 +214,19 @@ export class ParameterSelector {
 
   /**
    * Build input depending on provided configuration
-   * @param conf Parameter configuration
+   * @param input Parameter configuration
    */
-  static async getParameter(conf: InputWithMeta): Promise<string | undefined> {
-    switch (conf.param.type) {
-      case 'number': return this.getQuickInput(conf);
-      case 'boolean': return this.getQuickPickList(conf, ['yes', 'no']).then(x => `${x === 'yes'}`);
-      case 'file': return this.getFile(conf);
+  static async getParameter(input: InputWithMeta): Promise<string | undefined> {
+    switch (input.param.type) {
+      case 'number': return this.getQuickInput(input);
+      case 'boolean': return this.getQuickPickList(input, ['yes', 'no']).then(x => `${x === 'yes'}`);
+      case 'file': return this.getFile(input);
       case 'string':
       default: {
-        if (conf.param.choices) {
-          return this.getQuickPickList(conf, conf.param.choices);
+        if (input.param.choices) {
+          return this.getQuickPickList(input, input.param.choices);
         } else {
-          return this.getQuickInput(conf);
+          return this.getQuickInput(input);
         }
       }
     }

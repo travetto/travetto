@@ -5,7 +5,7 @@ export class Init {
   @InjectableFactory({
     primary: true
   })
-  static getModelSource(conf: ElasticsearchModelConfig) {
-    return new ElasticsearchModelService(conf);
+  static getModelSource(config: ElasticsearchModelConfig) {
+    return new ElasticsearchModelService(config);
   }
 }

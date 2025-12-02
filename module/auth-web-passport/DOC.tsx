@@ -10,7 +10,7 @@ export const text = <>
 
   <strong>NOTE:</strong> Given that {d.library('Passport')} is oriented around {d.library('Express')}, this module relies on {d.mod('WebConnect')} as an adapter for the request/response handoff.  There are some limitations listed in the module, and those would translate to any {d.library('Passport')} strategies that are being used.
 
-  <c.Code title='Sample Facebook/passport config' src='doc/conf.ts' />
+  <c.Code title='Sample Facebook/passport config' src='doc/config.ts' />
 
   As you can see, {PassportAuthenticator} will take care of the majority of the work, and all that is required is:
   <ul>

@@ -73,18 +73,18 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build a mapping for a given class
    */
-  static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): estypes.MappingTypeMapping {
+  static generateSingleMapping<T>(cls: Class<T>, esSchema?: EsSchemaConfig): estypes.MappingTypeMapping {
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
     const properties: Record<string, estypes.MappingProperty> = {};
 
-    for (const [field, conf] of Object.entries(fields)) {
-      if (conf.type === PointImpl) {
+    for (const [field, config] of Object.entries(fields)) {
+      if (config.type === PointImpl) {
         properties[field] = { type: 'geo_point' };
-      } else if (conf.type === Number) {
+      } else if (config.type === Number) {
         let property: Record<string, unknown> = { type: 'integer' };
-        if (conf.precision) {
-          const [digits, decimals] = conf.precision;
+        if (config.precision) {
+          const [digits, decimals] = config.precision;
           if (decimals) {
             if ((decimals + digits) < 16) {
               property = { type: 'scaled_float', ['scaling_factor']: decimals };
@@ -110,19 +110,19 @@ export class ElasticsearchSchemaUtil {
           }
         }
         properties[field] = property;
-      } else if (conf.type === Date) {
+      } else if (config.type === Date) {
         properties[field] = { type: 'date', format: 'date_optional_time' };
-      } else if (conf.type === Boolean) {
+      } else if (config.type === Boolean) {
         properties[field] = { type: 'boolean' };
-      } else if (conf.type === String) {
+      } else if (config.type === String) {
         let text = {};
-        if (conf.specifiers?.includes('text')) {
+        if (config.specifiers?.includes('text')) {
           text = {
             fields: {
               text: { type: 'text' }
             }
           };
-          if (config && config.caseSensitive) {
+          if (esSchema && esSchema.caseSensitive) {
             DataUtil.deepAssign(text, {
               fields: {
                 ['text_cs']: { type: 'text', analyzer: 'whitespace' }
@@ -131,12 +131,12 @@ export class ElasticsearchSchemaUtil {
           }
         }
         properties[field] = { type: 'keyword', ...text };
-      } else if (conf.type === Object) {
+      } else if (config.type === Object) {
         properties[field] = { type: 'object', dynamic: true };
-      } else if (SchemaRegistryIndex.has(conf.type)) {
+      } else if (SchemaRegistryIndex.has(config.type)) {
         properties[field] = {
-          type: conf.array ? 'nested' : 'object',
-          ...this.generateSingleMapping(conf.type, config)
+          type: config.array ? 'nested' : 'object',
+          ...this.generateSingleMapping(config.type, esSchema)
         };
       }
     }

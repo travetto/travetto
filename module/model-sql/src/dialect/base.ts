@@ -189,44 +189,44 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Convert value to SQL valid representation
    */
-  resolveValue(conf: SchemaFieldConfig, value: unknown): string {
+  resolveValue(config: SchemaFieldConfig, value: unknown): string {
     if (value === undefined || value === null) {
       return 'NULL';
-    } else if (conf.type === String) {
+    } else if (config.type === String) {
       if (value instanceof RegExp) {
         const src = DataUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return this.quote(src);
       } else {
         return this.quote(castTo(value));
       }
-    } else if (conf.type === Boolean) {
+    } else if (config.type === Boolean) {
       return `${value ? 'TRUE' : 'FALSE'}`;
-    } else if (conf.type === Number) {
+    } else if (config.type === Number) {
       return `${value}`;
-    } else if (conf.type === Date) {
+    } else if (config.type === Date) {
       if (typeof value === 'string' && TimeUtil.isTimeSpan(value)) {
         return this.resolveDateValue(TimeUtil.fromNow(value));
       } else {
         return this.resolveDateValue(DataUtil.coerceType(value, Date, true));
       }
-    } else if (conf.type === PointImpl && Array.isArray(value)) {
+    } else if (config.type === PointImpl && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
-    } else if (conf.type === Object) {
+    } else if (config.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, "''"));
     }
-    throw new AppError(`Unknown value type for field ${conf.name.toString()}, ${value}`, { category: 'data' });
+    throw new AppError(`Unknown value type for field ${config.name.toString()}, ${value}`, { category: 'data' });
   }
 
   /**
    * Get column type from field config
    */
-  getColumnType(conf: SchemaFieldConfig): string {
+  getColumnType(config: SchemaFieldConfig): string {
     let type: string = '';
 
-    if (conf.type === Number) {
+    if (config.type === Number) {
       type = this.COLUMN_TYPES.INT;
-      if (conf.precision) {
-        const [digits, decimals] = conf.precision;
+      if (config.precision) {
+        const [digits, decimals] = config.precision;
         if (decimals) {
           type = this.PARAMETERIZED_COLUMN_TYPES.DECIMAL(digits, decimals);
         } else if (digits) {
@@ -245,19 +245,19 @@ export abstract class SQLDialect implements DialectState {
       } else {
         type = this.COLUMN_TYPES.INT;
       }
-    } else if (conf.type === Date) {
+    } else if (config.type === Date) {
       type = this.COLUMN_TYPES.TIMESTAMP;
-    } else if (conf.type === Boolean) {
+    } else if (config.type === Boolean) {
       type = this.COLUMN_TYPES.BOOLEAN;
-    } else if (conf.type === String) {
-      if (conf.specifiers?.includes('text')) {
+    } else if (config.type === String) {
+      if (config.specifiers?.includes('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : this.DEFAULT_STRING_LEN);
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.n : this.DEFAULT_STRING_LEN);
       }
-    } else if (conf.type === PointImpl) {
+    } else if (config.type === PointImpl) {
       type = this.COLUMN_TYPES.POINT;
-    } else if (conf.type === Object) {
+    } else if (config.type === Object) {
       type = this.COLUMN_TYPES.JSON;
     }
 
@@ -267,12 +267,12 @@ export abstract class SQLDialect implements DialectState {
   /**
    * FieldConfig to Column definition
    */
-  getColumnDefinition(conf: SchemaFieldConfig): string | undefined {
-    const type = this.getColumnType(conf);
+  getColumnDefinition(config: SchemaFieldConfig): string | undefined {
+    const type = this.getColumnType(config);
     if (!type) {
       return;
     }
-    return `${this.identifier(conf)} ${type} ${(conf.required?.active !== false) ? 'NOT NULL' : 'DEFAULT NULL'}`;
+    return `${this.identifier(config)} ${type} ${(config.required?.active !== false) ? 'NOT NULL' : 'DEFAULT NULL'}`;
   }
 
   /**

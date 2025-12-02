@@ -51,11 +51,11 @@ export class TestWatcher {
         return;
       }
 
-      const conf = SuiteRegistryIndex.getTestConfig(cls, method)!;
+      const config = SuiteRegistryIndex.getTestConfig(cls, method)!;
       if (event.type !== 'removing') {
-        if (conf) {
+        if (config) {
           const run: TestRun = {
-            import: conf.import, classId: conf.classId, methodNames: [conf.methodName], metadata: { partial: true }
+            import: config.import, classId: config.classId, methodNames: [config.methodName], metadata: { partial: true }
           };
           console.log('Triggering', run);
           queue.add(run, true); // Shift to front

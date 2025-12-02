@@ -134,15 +134,15 @@ export class SchemaRegistryIndex implements RegistryIndex {
    */
   getBaseClass(cls: Class): Class {
     if (!this.#baseSchema.has(cls)) {
-      let conf = this.getClassConfig(cls);
+      let config = this.getClassConfig(cls);
       let parent: Class | undefined = cls;
-      while (parent && conf.discriminatedType && !conf.discriminatedBase) {
+      while (parent && config.discriminatedType && !config.discriminatedBase) {
         parent = getParentClass(parent);
         if (parent) {
-          conf = this.store.getOptional(parent)?.get() ?? conf;
+          config = this.store.getOptional(parent)?.get() ?? config;
         }
       }
-      this.#baseSchema.set(cls, conf.class);
+      this.#baseSchema.set(cls, config.class);
     }
     return this.#baseSchema.get(cls)!;
   }

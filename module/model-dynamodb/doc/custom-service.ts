@@ -4,7 +4,7 @@ import { DynamoDBModelService, DynamoDBModelConfig } from '@travetto/model-dynam
 
 export class Init {
   @InjectableFactory({ primary: true })
-  static getModelService(conf: DynamoDBModelConfig) {
-    return new DynamoDBModelService(conf);
+  static getModelService(config: DynamoDBModelConfig) {
+    return new DynamoDBModelService(config);
   }
 }

@@ -66,13 +66,13 @@ export class ModelQueryUtil {
       ));
     }
 
-    const conf = ModelRegistryIndex.getConfig(cls);
-    if (checkExpiry && conf.expiresAt) {
+    const indexConfig = ModelRegistryIndex.getConfig(cls);
+    if (checkExpiry && indexConfig.expiresAt) {
       clauses.push(castTo({
         $or: [
-          { [conf.expiresAt]: { $exists: false } },
-          { [conf.expiresAt]: undefined },
-          { [conf.expiresAt]: { $gte: new Date() } },
+          { [indexConfig.expiresAt]: { $exists: false } },
+          { [indexConfig.expiresAt]: undefined },
+          { [indexConfig.expiresAt]: { $gte: new Date() } },
         ]
       }));
     }

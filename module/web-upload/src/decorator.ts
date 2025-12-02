@@ -21,7 +21,7 @@ export function Upload(
   param: Partial<EndpointParameterConfig> & UploadConfig = {},
 ): (instance: ClassInstance, property: string | symbol, idx: number) => void {
 
-  const finalConf = { ...param };
+  const finalConfig = { ...param };
 
   return (instance: ClassInstance, property: string | symbol, idx: number): void => {
     // Register field
@@ -35,14 +35,14 @@ export function Upload(
         WebUploadInterceptor,
         {
           applies: true,
-          maxSize: finalConf.maxSize,
-          types: finalConf.types,
-          cleanupFiles: finalConf.cleanupFiles,
+          maxSize: finalConfig.maxSize,
+          types: finalConfig.types,
+          cleanupFiles: finalConfig.cleanupFiles,
           uploads: {
             [getName()]: {
-              maxSize: finalConf.maxSize,
-              types: finalConf.types,
-              cleanupFiles: finalConf.cleanupFiles
+              maxSize: finalConfig.maxSize,
+              types: finalConfig.types,
+              cleanupFiles: finalConfig.cleanupFiles
             }
           }
         }
@@ -50,7 +50,7 @@ export function Upload(
     });
 
     return Param('body', {
-      ...finalConf,
+      ...finalConfig,
       extract: (request) => {
         const input = SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx];
 

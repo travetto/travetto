@@ -5,7 +5,7 @@ export class Init {
   @InjectableFactory({
     primary: true
   })
-  static getModelSource(conf: MongoModelConfig) {
-    return new MongoModelService(conf);
+  static getModelSource(config: MongoModelConfig) {
+    return new MongoModelService(config);
   }
 }

@@ -54,13 +54,13 @@ export class SQLModelUtil {
    */
   static getFieldsByLocation(stack: VisitStack[]): FieldCacheEntry {
     const top = stack.at(-1)!;
-    const conf = SchemaRegistryIndex.has(top.type) ? SchemaRegistryIndex.getConfig(top.type) : undefined;
+    const config = SchemaRegistryIndex.getOptional(top.type)?.get();
 
-    if (conf && this.#schemaFieldsCache.has(conf.class)) {
-      return this.#schemaFieldsCache.get(conf.class)!;
+    if (config && this.#schemaFieldsCache.has(config.class)) {
+      return this.#schemaFieldsCache.get(config.class)!;
     }
 
-    if (!conf) { // If a simple type, it is it's own field
+    if (!config) { // If a simple type, it is it's own field
       const field: SchemaFieldConfig = castTo({ ...top });
       return {
         local: [field], localMap: { [field.name]: field },
@@ -68,15 +68,15 @@ export class SQLModelUtil {
       };
     }
 
-    const hasModel = ModelRegistryIndex.has(conf.class)!;
-    const fields = Object.values(conf.fields).map(field => ({ ...field }));
+    const hasModel = ModelRegistryIndex.has(config.class)!;
+    const fields = Object.values(config.fields).map(field => ({ ...field }));
 
     // Polymorphic
-    if (hasModel && conf.discriminatedBase) {
+    if (hasModel && config.discriminatedBase) {
       const fieldMap = new Set(fields.map(f => f.name));
-      for (const type of SchemaRegistryIndex.getDiscriminatedClasses(conf.class)) {
-        const typeConf = SchemaRegistryIndex.getConfig(type);
-        for (const [fieldName, field] of Object.entries<SchemaFieldConfig>(typeConf.fields)) {
+      for (const type of SchemaRegistryIndex.getDiscriminatedClasses(config.class)) {
+        const typeConfig = SchemaRegistryIndex.getConfig(type);
+        for (const [fieldName, field] of Object.entries<SchemaFieldConfig>(typeConfig.fields)) {
           if (!fieldMap.has(fieldName)) {
             fieldMap.add(fieldName);
             fields.push({ ...field, required: { active: false } });
@@ -95,7 +95,7 @@ export class SQLModelUtil {
     ret.local.reduce((acc, f) => (acc[f.name] = f) && acc, ret.localMap);
     ret.foreign.reduce((acc, f) => (acc[f.name] = f) && acc, ret.foreignMap);
 
-    this.#schemaFieldsCache.set(conf.class, ret);
+    this.#schemaFieldsCache.set(config.class, ret);
 
     return ret;
   }

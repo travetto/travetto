@@ -86,8 +86,8 @@ export class Context {
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
     const listing = Object.entries(await this.sourceListing)
-      .filter(([, conf]) => !conf.requires ||
-        Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], conf.requires));
+      .filter(([, entry]) => !entry.requires ||
+        Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], entry.requires));
 
     return listing;
   }

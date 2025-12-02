@@ -110,8 +110,8 @@ export class SuiteRegistryIndex implements RegistryIndex {
    */
   getTestConfig(cls: Class, method: Function): TestConfig | undefined {
     if (this.store.has(cls)) {
-      const conf = this.getConfig(cls);
-      return Object.values(conf.tests).find(x => x.methodName === method.name);
+      const config = this.getConfig(cls);
+      return Object.values(config.tests).find(x => x.methodName === method.name);
     }
   }
 }
