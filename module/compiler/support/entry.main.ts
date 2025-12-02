@@ -35,10 +35,10 @@ export const main = (ctx: ManifestContext) => {
       log.debug('End Server');
     } else {
       log.info('Server already running, waiting for initial compile to complete');
-      const ctrl = new AbortController();
-      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: ctrl.signal }));
+      const controller = new AbortController();
+      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: controller.signal }));
       await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
-      ctrl.abort();
+      controller.abort();
     }
   };
 

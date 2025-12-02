@@ -37,9 +37,9 @@ export class CompilerWatchFeature extends BaseFeature {
   async #buildProgressBar(type: string, signal: AbortSignal): Promise<ProgressState> {
     this.#progress[type]?.cleanup();
 
-    const ctrl = new AbortController();
+    const controller = new AbortController();
     const complete = resolvablePromise<void>();
-    const kill = (): void => ctrl.abort();
+    const kill = (): void => controller.abort();
     signal.addEventListener('abort', kill);
 
     const title = type.charAt(0).toUpperCase() + type.substring(1);
@@ -109,7 +109,7 @@ export class CompilerWatchFeature extends BaseFeature {
 
   async #trackConnected(): Promise<void> {
     while (!this.#shuttingDown) {
-      const ctrl = this.#stateController = new AbortController();
+      const controller = this.#stateController = new AbortController();
       let connected = false;
       let state: string | undefined;
       try {
@@ -117,13 +117,13 @@ export class CompilerWatchFeature extends BaseFeature {
         if (state && state !== 'closed') {
           connected = true;
           this.#log.info('Connected', state);
-          const proc = this.run('event', ['all'], ctrl.signal);
+          const proc = this.run('event', ['all'], controller.signal);
           await ExecUtil.readLines(proc.stdout!, line => {
             const { type, payload }: CompilerEvent = JSON.parse(line);
             switch (type) {
               case 'log': this.#ongLogEvent(payload); break;
               case 'state': this.#onStateEvent(payload); break;
-              case 'progress': this.#onProgressEvent(payload, ctrl.signal); break;
+              case 'progress': this.#onProgressEvent(payload, controller.signal); break;
             }
           });
         }
@@ -132,10 +132,10 @@ export class CompilerWatchFeature extends BaseFeature {
       }
 
       if (connected) {
-        this.#log.info('Disconnecting', !!ctrl.signal.aborted, state);
+        this.#log.info('Disconnecting', !!controller.signal.aborted, state);
       }
 
-      ctrl.abort();
+      controller.abort();
 
       if (Workspace.compilerState !== 'closed') {
         this.#onStateEvent('closed');

@@ -246,15 +246,15 @@ export class EndpointUtil {
 
     // Filter out conditional endpoints
     const endpoints = (await Promise.all(
-      config.endpoints.map(ep => Promise.resolve(ep.conditional?.() ?? true).then(v => v ? ep : undefined))
+      config.endpoints.map(endpoint => Promise.resolve(endpoint.conditional?.() ?? true).then(v => v ? endpoint : undefined))
     )).filter(x => !!x);
 
     if (!endpoints.length) {
       return [];
     }
 
-    for (const ep of endpoints) {
-      ep.instance = config.instance;
+    for (const endpoint of endpoints) {
+      endpoint.instance = config.instance;
     }
 
     return endpoints;
@@ -265,12 +265,12 @@ export class EndpointUtil {
    */
   static orderEndpoints(endpoints: EndpointConfig[]): EndpointConfig[] {
     return endpoints
-      .map(ep => {
-        const parts = ep.path.replace(/^[/]|[/]$/g, '').split('/');
-        return [ep, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
+      .map(endpoint => {
+        const parts = endpoint.path.replace(/^[/]|[/]$/g, '').split('/');
+        return [endpoint, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
       })
       .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
-      .map(([ep,]) => ep);
+      .map(([endpoint,]) => endpoint);
   }
 
 

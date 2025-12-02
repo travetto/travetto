@@ -30,7 +30,7 @@ function combineClassConfigs(base: ControllerConfig, ...overrides: Partial<Contr
   return base;
 }
 
-function combineEndpointConfigs(ctrl: ControllerConfig, base: EndpointConfig, ...overrides: Partial<EndpointConfig>[]): EndpointConfig {
+function combineEndpointConfigs(controller: ControllerConfig, base: EndpointConfig, ...overrides: Partial<EndpointConfig>[]): EndpointConfig {
   for (const override of overrides) {
     combineCommon(base, override);
     Object.assign(
@@ -55,17 +55,17 @@ function combineEndpointConfigs(ctrl: ControllerConfig, base: EndpointConfig, ..
 /**
  * Compute the location of a parameter within an endpoint
  */
-function computeParameterLocation(ep: EndpointConfig, schema: SchemaParameterConfig): EndpointParamLocation {
-  const name = schema?.name;
-  if (!SchemaRegistryIndex.has(schema.type)) {
-    if ((schema.type === String || schema.type === Number) && name && ep.path.includes(`:${name.toString()}`)) {
+function computeParameterLocation(endpoint: EndpointConfig, param: SchemaParameterConfig): EndpointParamLocation {
+  const name = param?.name;
+  if (!SchemaRegistryIndex.has(param.type)) {
+    if ((param.type === String || param.type === Number) && name && endpoint.path.includes(`:${name.toString()}`)) {
       return 'path';
-    } else if (schema.type === Blob || schema.type === File || schema.type === ArrayBuffer || schema.type === Uint8Array) {
+    } else if (param.type === Blob || param.type === File || param.type === ArrayBuffer || param.type === Uint8Array) {
       return 'body';
     }
     return 'query';
   } else {
-    return ep.allowsBody ? 'body' : 'query';
+    return endpoint.allowsBody ? 'body' : 'query';
   }
 }
 
@@ -125,22 +125,22 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   }
 
   registerEndpointParameter(method: string | symbol, idx: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {
-    const ep = this.registerEndpoint(method);
-    ep.parameters[idx] ??= { index: idx, location: 'query' };
-    safeAssign(ep.parameters[idx], ...config);
-    return ep.parameters[idx];
+    const endpoint = this.registerEndpoint(method);
+    endpoint.parameters[idx] ??= { index: idx, location: 'query' };
+    safeAssign(endpoint.parameters[idx], ...config);
+    return endpoint.parameters[idx];
   }
 
   finalize(): void {
     // Merge into controller
-    for (const ep of this.#config.endpoints) {
+    for (const endpoint of this.#config.endpoints) {
       // Store full path from base for use in other contexts
-      ep.fullPath = `/${this.#config.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
-      ep.finalizedResponseHeaders = new WebHeaders({ ...this.#config.responseHeaders, ...ep.responseHeaders });
-      ep.responseContext = { ...this.#config.responseContext, ...ep.responseContext };
-      for (const schema of SchemaRegistryIndex.get(this.#cls).getMethod(ep.methodName).parameters) {
-        ep.parameters[schema.index!] ??= { index: schema.index!, location: undefined! };
-        ep.parameters[schema.index!].location ??= computeParameterLocation(ep, schema);
+      endpoint.fullPath = `/${this.#config.basePath}/${endpoint.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
+      endpoint.finalizedResponseHeaders = new WebHeaders({ ...this.#config.responseHeaders, ...endpoint.responseHeaders });
+      endpoint.responseContext = { ...this.#config.responseContext, ...endpoint.responseContext };
+      for (const schema of SchemaRegistryIndex.get(this.#cls).getMethod(endpoint.methodName).parameters) {
+        endpoint.parameters[schema.index!] ??= { index: schema.index!, location: undefined! };
+        endpoint.parameters[schema.index!].location ??= computeParameterLocation(endpoint, schema);
       }
     }
     for (const item of this.#finalizeHandlers) {

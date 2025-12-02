@@ -26,8 +26,8 @@ export abstract class BaseWebRouter implements WebRouter {
     let endpoints = await EndpointUtil.getBoundEndpoints(c);
     endpoints = EndpointUtil.orderEndpoints(endpoints);
 
-    for (const ep of endpoints) {
-      ep.filter = EndpointUtil.createEndpointHandler(this.#interceptors, ep, config);
+    for (const endpoint of endpoints) {
+      endpoint.filter = EndpointUtil.createEndpointHandler(this.#interceptors, endpoint, config);
     }
 
     const fn = await this.register(endpoints, config);

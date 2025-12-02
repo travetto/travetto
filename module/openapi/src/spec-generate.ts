@@ -260,7 +260,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: EndpointParameterConfig, input: SchemaParameterConfig): (
+  #processEndpointParam(endpoint: EndpointConfig, param: EndpointParameterConfig, input: SchemaParameterConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined
@@ -269,7 +269,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     if (param.location) {
       if (param.location === 'body') {
-        const acceptsMime = ep.finalizedResponseHeaders.get('accepts');
+        const acceptsMime = endpoint.finalizedResponseHeaders.get('accepts');
         return {
           requestBody: input.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(input, acceptsMime)
         };
@@ -291,33 +291,33 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process controller endpoint
    */
-  onEndpointEnd(ep: EndpointConfig, ctrl: ControllerConfig): void {
-    if (this.#config.skipEndpoints || !ep.httpMethod) {
+  onEndpointEnd(endpoint: EndpointConfig, controller: ControllerConfig): void {
+    if (this.#config.skipEndpoints || !endpoint.httpMethod) {
       return;
     }
 
-    const tagName = ctrl.externalName;
+    const tagName = controller.externalName;
 
-    const schema = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
+    const schema = SchemaRegistryIndex.get(endpoint.class).getMethod(endpoint.methodName);
 
     const apiConfig: OperationObject = {
       tags: [tagName],
       responses: {},
       summary: schema.description,
       description: schema.description,
-      operationId: `${ep.class.name}_${ep.methodName.toString()}`,
+      operationId: `${endpoint.class.name}_${endpoint.methodName.toString()}`,
       parameters: []
     };
 
-    const contentTypeMime = ep.finalizedResponseHeaders.get('content-type');
+    const contentTypeMime = endpoint.finalizedResponseHeaders.get('content-type');
     const pConf = this.#getEndpointBody(schema.returnType, contentTypeMime);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     apiConfig.responses![code] = pConf;
 
-    const methodSchema = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
+    const methodSchema = SchemaRegistryIndex.get(endpoint.class).getMethod(endpoint.methodName);
 
     for (const param of methodSchema.parameters) {
-      const result = this.#processEndpointParam(ep, ep.parameters[param.index] ?? {}, param);
+      const result = this.#processEndpointParam(endpoint, endpoint.parameters[param.index] ?? {}, param);
       if (result) {
         if ('parameters' in result) {
           (apiConfig.parameters ??= []).push(...result.parameters);
@@ -327,11 +327,11 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       }
     }
 
-    const key = ep.fullPath.replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
+    const key = endpoint.fullPath.replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
 
     this.#paths[key] = {
       ...(this.#paths[key] ?? {}),
-      [HTTP_METHODS[ep.httpMethod].lower]: apiConfig
+      [HTTP_METHODS[endpoint.httpMethod].lower]: apiConfig
     };
   }
 

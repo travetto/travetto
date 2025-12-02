@@ -16,7 +16,7 @@ export class IpcSupport {
     return JSON.parse(Buffer.concat(chunks).toString('utf8'));
   }
 
-  #ctrl = new AbortController();
+  #controller = new AbortController();
   #handler: (response: TargetEvent) => void | Promise<void>;
   #log = new Log('travetto.vscode.ipc');
 
@@ -42,7 +42,7 @@ export class IpcSupport {
     });
     await new Promise<void>(resolve => {
       server.listen(undefined, '0.0.0.0', () => {
-        this.#ctrl.signal.addEventListener('onabort', () => {
+        this.#controller.signal.addEventListener('onabort', () => {
           server.closeAllConnections();
           server.close();
         });
@@ -56,6 +56,6 @@ export class IpcSupport {
   }
 
   deactivate(): void {
-    this.#ctrl.abort();
+    this.#controller.abort();
   }
 }

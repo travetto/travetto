@@ -45,19 +45,19 @@ export class CompilerClient {
   }
 
   async #fetch(rel: string, opts?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean, text: string }> {
-    const ctrl = new AbortController();
-    const timeoutCtrl = new AbortController();
+    const controller = new AbortController();
+    const timeoutController = new AbortController();
 
-    opts?.signal?.addEventListener('abort', () => ctrl.abort());
-    timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false, signal: timeoutCtrl.signal })
+    opts?.signal?.addEventListener('abort', () => controller.abort());
+    timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false, signal: timeoutController.signal })
       .then(() => {
         logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
-        ctrl.abort('TIMEOUT');
+        controller.abort('TIMEOUT');
       })
       .catch(() => { });
-    const response = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+    const response = await fetch(`${this.#url}${rel}`, { ...opts, signal: controller.signal });
     const out = { ok: response.ok, text: await response.text() };
-    timeoutCtrl.abort();
+    timeoutController.abort();
     return out;
   }
 
@@ -108,20 +108,20 @@ export class CompilerClient {
 
     // Ensure we capture end of process at least
     if (!signal) {
-      const ctrl = new AbortController();
-      process.on('SIGINT', () => ctrl.abort());
-      signal = ctrl.signal;
+      const controller = new AbortController();
+      process.on('SIGINT', () => controller.abort());
+      signal = controller.signal;
     }
 
     const { iteration } = info;
 
     for (; ;) {
-      const ctrl = new AbortController();
-      const quit = (): void => ctrl.abort();
+      const controller = new AbortController();
+      const quit = (): void => controller.abort();
       try {
         signal.addEventListener('abort', quit);
         const response = await new Promise<http.IncomingMessage>((resolve, reject) =>
-          http.get(`${this.#url}/event/${type}`, { agent: streamAgent, signal: ctrl.signal }, resolve)
+          http.get(`${this.#url}/event/${type}`, { agent: streamAgent, signal: controller.signal }, resolve)
             .on('error', reject)
         );
 
@@ -130,13 +130,13 @@ export class CompilerClient {
             const event: T = JSON.parse(line);
             if (config.until?.(event)) {
               await CommonUtil.queueMacroTask();
-              ctrl.abort();
+              controller.abort();
             }
             yield event;
           }
         }
       } catch (error) {
-        const aborted = ctrl.signal.aborted || (typeof error === 'object' && error && 'code' in error && error.code === 'ECONNRESET');
+        const aborted = controller.signal.aborted || (typeof error === 'object' && error && 'code' in error && error.code === 'ECONNRESET');
         if (!aborted) { throw error; }
       }
       signal.removeEventListener('abort', quit);
@@ -145,12 +145,12 @@ export class CompilerClient {
 
       info = await this.info();
 
-      if (ctrl.signal.reason === 'TIMEOUT') {
+      if (controller.signal.reason === 'TIMEOUT') {
         this.#log.debug('Failed due to timeout');
         return;
       }
 
-      if (ctrl.signal.aborted || !info || (config.enforceIteration && info.iteration !== iteration)) { // If health check fails, or aborted
+      if (controller.signal.aborted || !info || (config.enforceIteration && info.iteration !== iteration)) { // If health check fails, or aborted
         this.#log.debug(`Stopping watch for events of type "${type}"`);
         return;
       } else {

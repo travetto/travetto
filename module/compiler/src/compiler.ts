@@ -34,7 +34,7 @@ export class Compiler {
   #state: CompilerState;
   #dirtyFiles: string[];
   #watch?: boolean;
-  #ctrl: AbortController;
+  #controller: AbortController;
   #signal: AbortSignal;
   #shuttingDown = false;
 
@@ -45,8 +45,8 @@ export class Compiler {
       dirtyFiles.map(f => this.#state.getBySource(f)!.sourceFile);
     this.#watch = watch;
 
-    this.#ctrl = new AbortController();
-    this.#signal = this.#ctrl.signal;
+    this.#controller = new AbortController();
+    this.#signal = this.#controller.signal;
     setMaxListeners(1000, this.#signal);
     process
       .once('disconnect', () => this.#shutdown('manual'))
@@ -83,7 +83,7 @@ export class Compiler {
     // No longer listen to disconnect
     process.removeAllListeners('disconnect');
     process.removeAllListeners('message');
-    this.#ctrl.abort();
+    this.#controller.abort();
     CommonUtil.nonBlockingTimeout(1000).then(() => process.exit()); // Allow upto 1s to shutdown gracefully
   }
 

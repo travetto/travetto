@@ -108,9 +108,9 @@ export class Workspace {
     await vscode.window.withProgress({
       location: vscode.ProgressLocation.Notification, title: text, cancellable: true,
     }, async (_, token) => {
-      const ctrl = new AbortController();
-      token.onCancellationRequested(() => ctrl.abort());
-      await timers.setTimeout(duration, undefined, { signal: ctrl.signal }).catch(() => { });
+      const controller = new AbortController();
+      token.onCancellationRequested(() => controller.abort());
+      await timers.setTimeout(duration, undefined, { signal: controller.signal }).catch(() => { });
     });
   }
 
