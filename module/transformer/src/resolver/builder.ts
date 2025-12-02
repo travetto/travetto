@@ -19,8 +19,8 @@ const isMappedType = (type: string | undefined): type is MappedType['operation']
 const getMappedFields = (type: ts.Type): string[] | undefined => {
   if (type.isStringLiteral()) {
     return [type.value];
-  } else if (type.isUnion() && type.types.every(t => t.isStringLiteral())) {
-    return type.types.map(t => t.value);
+  } else if (type.isUnion() && type.types.every(subType => subType.isStringLiteral())) {
+    return type.types.map(subType => subType.value);
   }
 };
 
@@ -333,7 +333,7 @@ export const TypeBuilder: {
       // Resolving relative to source file
       if (!importName || importName.startsWith('.')) {
         const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
-          ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
+          ?.find(x => ts.getAllJSDocTags(x, (node): node is ts.JSDocTag => node.tagName.getText() === 'concrete').length)
           ?.getSourceFile().fileName ?? '';
 
         if (!importName || importName === '.') {

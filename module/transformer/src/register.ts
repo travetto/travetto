@@ -25,7 +25,7 @@ export function getAllTransformers(inputs: Record<string, { [HandlersSymbol]?: N
     .map(handler => ({
       ...handler,
       key: `${module}:${handler.key}`,
-      target: handler.target?.map(t => `${module}:${t}`)
+      target: handler.target?.map(target => `${module}:${target}`)
     }));
 }
 

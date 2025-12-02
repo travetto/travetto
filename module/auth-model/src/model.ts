@@ -31,8 +31,8 @@ export interface RegisteredPrincipal extends Principal {
   password?: string;
 }
 
-type ToPrincipal<T extends ModelType> = (t: OptionalId<T>) => RegisteredPrincipal;
-type FromPrincipal<T extends ModelType> = (t: Partial<RegisteredPrincipal>) => Partial<T>;
+type ToPrincipal<T extends ModelType> = (item: OptionalId<T>) => RegisteredPrincipal;
+type FromPrincipal<T extends ModelType> = (item: Partial<RegisteredPrincipal>) => Partial<T>;
 
 /**
  * A model-based auth service

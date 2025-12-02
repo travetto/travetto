@@ -47,13 +47,13 @@ export const Html: RenderProvider<RenderContext> = {
         .replace('<!-- BODY -->', html)
         .replace(/<title>.*?<\/title>/, a => { headerTop.push(a); return ''; })
         .replace(/<span[^>]+id="summary"[^>]*>(.*?)<\/span>/sm, a => { bodyTop.push(a); return ''; })
-        .replace(/<head( [^>]*)?>/, t => `${t}\n${headerTop.join('\n')}`)
-        .replace(/<body[^>]*>/, t => `${t}\n${bodyTop.join('\n')}`);
+        .replace(/<head( [^>]*)?>/, tag => `${tag}\n${headerTop.join('\n')}`)
+        .replace(/<body[^>]*>/, tag => `${tag}\n${bodyTop.join('\n')}`);
 
       // Allow tag suffixes/prefixes via comments
       html = final
-        .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
-        .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`);
+        .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suffix, tag) => `${tag}${suffix}`)
+        .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, prefix) => `${prefix}${tag}`);
     }
 
     return html;

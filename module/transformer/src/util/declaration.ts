@@ -64,7 +64,7 @@ export class DeclarationUtil {
    * Resolve the `ts.ObjectFlags`
    */
   static getObjectFlags(type: ts.Type): ts.ObjectFlags {
-    const _ts: typeof ts & { getObjectFlags?(t: ts.Type): ts.ObjectFlags } = ts;
+    const _ts: typeof ts & { getObjectFlags?(node: ts.Type): ts.ObjectFlags } = ts;
     // eslint-disable-next-line no-bitwise
     return _ts.getObjectFlags!(type) & ~(ts.NodeFlags.ThisNodeOrAnySubNodesHasError);
   }

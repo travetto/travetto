@@ -71,7 +71,7 @@ export class EmailCompileUtil {
         text = text.replace(all, `${pre}${token}`);
       }
     }
-    const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]{1,100}@@/g, t => onToken(t));
+    const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]{1,100}@@/g, token => onToken(token));
 
     return { text, tokens, finalize };
   }

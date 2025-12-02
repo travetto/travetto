@@ -46,7 +46,7 @@ async function getContext() {
     srcPath,
     destPath,
     tsconfig: path.resolve(ctx.workspace.path, 'tsconfig.json'),
-    cleanImports: (t = '') => t
+    cleanImports: (text = '') => text
       .replace(/from ['"]((@travetto|[.]+)[^'"]+)['"]/g, (_, location, module) => {
         const root = (module === '@travetto' ? destPath(location) : location).replace(SOURCE_EXT_RE, OUTPUT_EXT);
         const suffix = root.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(location) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
@@ -72,7 +72,7 @@ async function load(/** @type {(operations: import('../support/entry.main.ts').O
 
     await Promise.all((await ctx.supportFiles()).map(file =>
       writeIfStale(ctx.srcPath(file), ctx.destPath(`${COMP_MOD}/${file}`),
-        t => transpile(ctx.cleanImports(t), ctx.packageType === 'module'))));
+        text => transpile(ctx.cleanImports(text), ctx.packageType === 'module'))));
 
     process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
     process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
