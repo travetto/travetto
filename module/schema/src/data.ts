@@ -257,7 +257,7 @@ export class DataUtil {
     } else if (input !== null && input !== undefined && typeof input === 'object') {
       const out: Partial<T> = {};
       for (const key of TypedObject.keys(input)) {
-        if (!exclude.some(r => typeof key === 'string' && (typeof r === 'string' ? r === key : r.test(key)))) {
+        if (!exclude.some(toMatch => typeof key === 'string' && (typeof toMatch === 'string' ? toMatch === key : toMatch.test(key)))) {
           const value = input[key];
           if (typeof value === 'object') {
             out[key] = this.filterByKeys(value, exclude);

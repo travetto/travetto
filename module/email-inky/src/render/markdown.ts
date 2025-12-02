@@ -11,7 +11,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   finalize: (text) => {
     text = text
       .replace(/(\[[^\]]{1,100}\]\([^)]{1,1000}\))([A-Za-z0-9$]{1,100})/g, (all, link, value) => value === 's' ? all : `${link} ${value}`)
-      .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`);
+      .replace(/(\S)\n(#)/g, (_, left, right) => `${left}\n\n${right}`);
     return text;
   },
 

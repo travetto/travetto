@@ -75,12 +75,12 @@ export class ModelQuerySuggestUtil {
     const pattern = this.getSuggestRegex(prefix);
 
     const out: ([string, U] | readonly [string, U])[] = [];
-    for (const r of results) {
-      const value = r[field];
-      if (Array.isArray(value)) {
-        out.push(...value.filter(f => pattern.test(f)).map((f: string) => [f, transform(f, r)] as const));
-      } else if (typeof value === 'string') {
-        out.push([value, transform(value, r)]);
+    for (const result of results) {
+      const resultValue = result[field];
+      if (Array.isArray(resultValue)) {
+        out.push(...resultValue.filter(f => pattern.test(f)).map((value: string) => [value, transform(value, result)] as const));
+      } else if (typeof resultValue === 'string') {
+        out.push([resultValue, transform(resultValue, result)]);
       }
     }
     return out

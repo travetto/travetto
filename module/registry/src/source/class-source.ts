@@ -112,8 +112,8 @@ export class ClassSource implements ChangeSource<Class> {
       classesByFile.get(importPath)!.push(cls);
     }
 
-    for (const [importPath, els] of classesByFile.entries()) {
-      if (!this.#handleFileChanges(importPath, els)) {
+    for (const [importPath, items] of classesByFile.entries()) {
+      if (!this.#handleFileChanges(importPath, items)) {
         this.#emitter.emit('unchanged-import', importPath);
       }
     }

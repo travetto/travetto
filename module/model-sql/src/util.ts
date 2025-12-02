@@ -310,7 +310,7 @@ export class SQLModelUtil {
   /**
    * Get insert statements for a given class, and its child tables
    */
-  static async getInserts<T extends ModelType>(cls: Class<T>, els: (T | OptionalId<T>)[]): Promise<InsertWrapper[]> {
+  static async getInserts<T extends ModelType>(cls: Class<T>, items: (T | OptionalId<T>)[]): Promise<InsertWrapper[]> {
     const ins: Record<string, InsertWrapper> = {};
 
     const track = (stack: VisitStack[], value: unknown): void => {
@@ -318,7 +318,7 @@ export class SQLModelUtil {
       (ins[key] = ins[key] ?? { stack, records: [] }).records.push({ stack, value });
     };
 
-    const all = els.map(item =>
+    const all = items.map(item =>
       this.visitSchemaInstance(cls, item, {
         onRoot: ({ path, value }) => track(path, value),
         onSub: ({ path, value }) => track(path, value),

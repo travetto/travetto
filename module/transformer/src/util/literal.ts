@@ -143,7 +143,7 @@ export class LiteralUtil {
     if (rest.find(x => !!x)) {
       literal = factory.createObjectLiteralExpression([
         factory.createSpreadAssignment(literal),
-        ...(rest.filter(x => !!x).map(r => factory.createSpreadAssignment(this.fromLiteral(factory, r))))
+        ...(rest.filter(x => !!x).map(expression => factory.createSpreadAssignment(this.fromLiteral(factory, expression))))
       ]);
     }
     return literal;

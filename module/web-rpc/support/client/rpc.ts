@@ -200,7 +200,7 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
         break;
       } catch (error) {
         if (i < (core.retriesOnConnectFailure ?? 0)) {
-          await new Promise(r => setTimeout(r, 1000)); // Wait 1s
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
           continue;
         } else {
           throw error;

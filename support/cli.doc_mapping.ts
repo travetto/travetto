@@ -26,7 +26,7 @@ export class DocModuleMapping {
       const simpleName = pkg.name
         .split('/')[1]
         .replace(/^[a-z]/, x => x.toUpperCase())
-        .replace(/([a-z])-([a-z])/g, (_, l, r) => `${l}${r.toUpperCase()}`);
+        .replace(/([a-z])-([a-z])/g, (_, left, right) => `${left}${right.toUpperCase()}`);
       out.push({
         simpleName,
         name: module.name,

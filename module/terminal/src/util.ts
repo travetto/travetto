@@ -34,10 +34,10 @@ export class TerminalUtil {
       const line = ` ${text.replace(/[%](idx|total|pct)/g, (_, key) => state[key])} `;
       const full = term.writer.padToWidth(line, config?.withWaiting ? 2 : 0);
       const mid = Math.trunc(pct * term.width);
-      const [l, r] = [full.substring(0, mid), full.substring(mid)];
+      const [left, right] = [full.substring(0, mid), full.substring(mid)];
 
       const { complete, incomplete } = style();
-      return `${config?.withWaiting ? `${WAIT_TOKEN} ` : ''}${complete(l)}${incomplete?.(r) ?? r}`;
+      return `${config?.withWaiting ? `${WAIT_TOKEN} ` : ''}${complete(left)}${incomplete?.(right) ?? right}`;
     };
   }
 }

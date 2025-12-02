@@ -25,7 +25,7 @@ const ModelImplementations = () => {
     [d.mod('ModelMemory'), 'X', 'X', 'X', 'X', 'X', 'X'],
     [d.mod('ModelFile'), 'X', 'X', ' ', 'X', 'X', 'X']
   ] as const)
-    .map(r => <tr>{...r.map(cell => <td>{cell}</td>)}</tr>);
+    .map(node => <tr>{...node.map(cell => <td>{cell}</td>)}</tr>);
 
   return <table>
     <thead><tr>{...modelImplHeader}</tr></thead>

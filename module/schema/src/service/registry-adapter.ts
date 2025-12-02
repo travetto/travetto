@@ -8,8 +8,8 @@ import {
 } from './types';
 
 const classToDiscriminatedType = (cls: Class): string => cls.name
-  .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
-  .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
+  .replace(/([A-Z])([A-Z][a-z])/g, (all, left, right) => `${left}_${right.toLowerCase()}`)
+  .replace(/([a-z]|\b)([A-Z])/g, (all, left, right) => left ? `${left}_${right.toLowerCase()}` : right.toLowerCase())
   .toLowerCase();
 
 function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {

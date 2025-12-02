@@ -84,7 +84,7 @@ export class IpcChannel<V = unknown> {
       try {
         console.debug('Killing', { pid: this.parentId, id: this.id });
         if (this.proc instanceof ChildProcess) {
-          const complete = new Promise<void>(r => this.proc.on('close', r));
+          const complete = new Promise<void>(resolve => this.proc.on('close', resolve));
           this.proc.kill();
           await Promise.race([complete, Util.nonBlockingTimeout(1000)]);
         }

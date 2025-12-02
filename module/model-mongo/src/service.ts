@@ -450,7 +450,7 @@ export class MongoModelService implements
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
     const cursor = col.find(filter, {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
-    return await Promise.all(items.map(r => this.postLoad(cls, r)));
+    return await Promise.all(items.map(item => this.postLoad(cls, item)));
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -582,6 +582,6 @@ export class MongoModelService implements
 
     const cursor = col.find(castTo({ $and: [{ $text: search }, filter] }), {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
-    return await Promise.all(items.map(r => this.postLoad(cls, r)));
+    return await Promise.all(items.map(item => this.postLoad(cls, item)));
   }
 }

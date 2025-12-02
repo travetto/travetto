@@ -61,7 +61,7 @@ export class WebHttpUtil {
       }
     }
 
-    const complete = new Promise<void>(r => target.on('close', r));
+    const complete = new Promise<void>(onClose => target.on('close', onClose));
 
     // Track connections for shutdown
     const activeConnections = new Set<HttpSocket>();

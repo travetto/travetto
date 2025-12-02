@@ -31,7 +31,7 @@ export class Logger implements LogConfig, LogShape {
     const done = process.stdout.write(`${ESC}1G${text}${ESC}0K`);
     this.#linePartial = !!text;
     if (!done) {
-      return new Promise<void>(r => process.stdout.once('drain', r));
+      return new Promise<void>(resolve => process.stdout.once('drain', resolve));
     }
   }
 

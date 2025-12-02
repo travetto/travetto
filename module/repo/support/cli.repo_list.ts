@@ -1,7 +1,7 @@
 import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
-const write = (line: string): Promise<void> => new Promise(r => process.stdout.write(`${line}\n`, () => r()));
+const write = (line: string): Promise<void> => new Promise(resolve => process.stdout.write(`${line}\n`, () => resolve()));
 
 /**
  * Allows for listing of modules

@@ -6,6 +6,6 @@ export async function main(key: string, port: number) {
       'Content-Type': 'application/json'
     }
   })
-    .then(r => r.json());
+    .then(result => result.json());
   console.log!(response);
 }

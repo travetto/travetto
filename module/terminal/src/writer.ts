@@ -80,7 +80,7 @@ export class TerminalWriter {
       q.push(Codes.POSITION_RESTORE);
     }
     if (q.length && !this.#term.output.write(q.join(''))) {
-      return new Promise<void>(r => this.#term.output.once('drain', r));
+      return new Promise<void>(resolve => this.#term.output.once('drain', resolve));
     } else {
       return Promise.resolve();
     }

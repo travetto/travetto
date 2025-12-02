@@ -20,7 +20,7 @@ export class CliSchemaCommand implements CliCommandShape {
       return;
     }
     const resolved = await CliCommandRegistryIndex.load(names);
-    const invalid = names.find(x => !resolved.find(r => r.command === x));
+    const invalid = names.find(x => !resolved.find(result => result.command === x));
 
     if (invalid) {
       return {

@@ -84,7 +84,7 @@ export class CliScmUtil {
    * Create a commit
    */
   static createCommit(message: string): Promise<string> {
-    return ExecUtil.getResult(spawn('git', ['commit', '.', '-m', message])).then(r => r.stdout);
+    return ExecUtil.getResult(spawn('git', ['commit', '.', '-m', message])).then(result => result.stdout);
   }
 
   /**
@@ -92,7 +92,7 @@ export class CliScmUtil {
    */
   static createTag(version: string): Promise<string> {
     version = version.replace(/[^0-9a-z_\-.]/g, '');
-    return ExecUtil.getResult(spawn('git', ['tag', '-a', `${version}`, '-m', `Release ${version}`])).then(r => r.stdout);
+    return ExecUtil.getResult(spawn('git', ['tag', '-a', `${version}`, '-m', `Release ${version}`])).then(result => result.stdout);
   }
 
   /**

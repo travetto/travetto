@@ -105,7 +105,7 @@ export class Util {
 
     const rawRules = (Array.isArray(rules) ? rules : rules.split(/,/g).map(x => x.trim()));
     const convertedRules = rawRules.map(rule => this.#allowDenyRuleInput(rule, convert));
-    const unmatchedValue = !convertedRules.some(r => r.positive);
+    const unmatchedValue = !convertedRules.some(rule => rule.positive);
 
     if (convertedRules.length) {
       if (cacheKey) {

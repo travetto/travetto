@@ -9,7 +9,7 @@ const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 const stripDashes = (x?: string): string | undefined => x?.replace(/^-+/, '');
-const toFlagName = (x: string): string => x.replace(/([a-z])([A-Z])/g, (_, l: string, r: string) => `${l}-${r.toLowerCase()}`);
+const toFlagName = (x: string): string => x.replace(/([a-z])([A-Z])/g, (_, left: string, right: string) => `${left}-${right.toLowerCase()}`);
 
 export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConfig> {
   #cls: Class;

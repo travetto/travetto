@@ -563,8 +563,8 @@ export abstract class SQLDialect implements DialectState {
   getOrderBySQL<T>(cls: Class<T>, sortBy?: SortClause<T>[]): string {
     return !sortBy ?
       '' :
-      `ORDER BY ${SQLModelUtil.orderBy(cls, sortBy).map((ob) =>
-        `${this.resolveName(ob.stack)} ${ob.asc ? 'ASC' : 'DESC'}`
+      `ORDER BY ${SQLModelUtil.orderBy(cls, sortBy).map((item) =>
+        `${this.resolveName(item.stack)} ${item.asc ? 'ASC' : 'DESC'}`
       ).join(', ')}`;
   }
 
