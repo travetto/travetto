@@ -114,8 +114,8 @@ export class TableManager {
 
       const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((acc, v) => {
         const path = v.path.map(f => ({ ...f }));
-        for (const ev of v.fields) {
-          acc[ev.type].push([...rootStack, ...path, { ...(ev.type === 'removing' ? ev.prev : ev.curr)! }]);
+        for (const event of v.fields) {
+          acc[event.type].push([...rootStack, ...path, { ...(event.type === 'removing' ? event.prev : event.curr)! }]);
         }
         return acc;
       }, { added: [], changed: [], removing: [] });

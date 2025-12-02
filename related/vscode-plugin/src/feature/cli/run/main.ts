@@ -113,15 +113,15 @@ export class CliRunFeature extends BaseFeature {
   /**
    * On IPC trigger to run a target
    */
-  async onEvent(ev: TargetEvent<{ name: string, args: string[], module: string, env: EnvDict }>): Promise<void> {
-    const args = ev.data.args;
+  async onEvent(event: TargetEvent<{ name: string, args: string[], module: string, env: EnvDict }>): Promise<void> {
+    const args = event.data.args;
     await RunUtil.debug({
-      name: `[Travetto] ${ev.data.name}${args ? `: ${args.join(' ')}` : ''}`,
+      name: `[Travetto] ${event.data.name}${args ? `: ${args.join(' ')}` : ''}`,
       useCli: true,
-      main: ev.data.name,
+      main: event.data.name,
       args,
-      cliModule: ev.data.module,
-      env: ev.data.env
+      cliModule: event.data.module,
+      env: event.data.env
     });
   }
 }

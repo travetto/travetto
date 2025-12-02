@@ -20,10 +20,10 @@ export class JsonLogFormatter implements LogFormatter {
     this.opts = opts;
   }
 
-  format(ev: LogEvent): string {
-    const { message: _m, args: _a, ...rest } = ev;
-    const message = LogFormatUtil.getLogMessage(ev);
-    const context = LogFormatUtil.getContext(ev);
+  format(event: LogEvent): string {
+    const { message: _m, args: _a, ...rest } = event;
+    const message = LogFormatUtil.getLogMessage(event);
+    const context = LogFormatUtil.getContext(event);
     return JSON.stringify({
       ...rest,
       ...(message ? { message } : {}),

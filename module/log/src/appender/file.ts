@@ -38,7 +38,7 @@ export class FileLogAppender implements LogAppender {
     }
   }
 
-  append(ev: LogEvent, formatted: string): void {
+  append(event: LogEvent, formatted: string): void {
     if (this.stream) {
       this.stream.write(`${formatted}\n`);
     } else {

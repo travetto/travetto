@@ -36,7 +36,7 @@ export const main = (ctx: ManifestContext) => {
     } else {
       log.info('Server already running, waiting for initial compile to complete');
       const ctrl = new AbortController();
-      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete, signal: ctrl.signal }));
+      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: ctrl.signal }));
       await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
       ctrl.abort();
     }
@@ -71,10 +71,10 @@ export const main = (ctx: ManifestContext) => {
     },
 
     /** Stream events */
-    events: async (type: string, handler: (ev: unknown) => unknown): Promise<void> => {
+    events: async (type: string, handler: (event: unknown) => unknown): Promise<void> => {
       if (type === 'change' || type === 'log' || type === 'progress' || type === 'state' || type === 'all') {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        for await (const ev of client.fetchEvents(type as 'change')) { await handler(ev); }
+        for await (const event of client.fetchEvents(type as 'change')) { await handler(event); }
       } else {
         throw new Error(`Unknown event type: ${type}`);
       }

@@ -27,19 +27,19 @@ export class DynamicFileLoader {
       .on('uncaughtException', handle);
 
     // Fire off, and let it run in the bg. Restart on exit
-    for await (const ev of watchCompiler({ restartOnExit: true })) {
-      if (ev.file && RuntimeIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
-        if (ev.action === 'update' || ev.action === 'delete') {
-          await loader.unload(ev.output);
+    for await (const event of watchCompiler({ restartOnExit: true })) {
+      if (event.file && RuntimeIndex.hasModule(event.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
+        if (event.action === 'update' || event.action === 'delete') {
+          await loader.unload(event.output);
         }
-        if (ev.action === 'create' || ev.action === 'delete') {
+        if (event.action === 'create' || event.action === 'delete') {
           RuntimeIndex.reinitForModule(Runtime.main.name);
         }
-        if (ev.action === 'create' || ev.action === 'update') {
-          await loader.load(ev.output);
+        if (event.action === 'create' || event.action === 'update') {
+          await loader.load(event.output);
         }
 
-        yield ev;
+        yield event;
       }
     }
   }

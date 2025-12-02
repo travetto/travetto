@@ -39,7 +39,7 @@ export class CommonLogger implements Logger {
     this.appender ??= await DependencyRegistryIndex.getInstance(appenderCls);
   }
 
-  log(ev: LogEvent): void {
-    this.appender.append(ev, this.formatter.format(ev));
+  log(event: LogEvent): void {
+    this.appender.append(event, this.formatter.format(event));
   }
 }

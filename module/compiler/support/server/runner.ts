@@ -37,7 +37,7 @@ export class CompilerRunner {
     const main = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
     const deltaFile = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, `manifest-delta-${Date.now()}.json`);
 
-    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev => ev.sourceFile);
+    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(event => event.sourceFile);
 
     const queue = new AsyncQueue<CompilerEvent>();
 

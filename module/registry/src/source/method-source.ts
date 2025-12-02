@@ -21,8 +21,8 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
 
   async init(): Promise<void> { }
 
-  emit(ev: ChangeEvent<[Class, Function]>): void {
-    this.#emitter.emit('change', ev);
+  emit(event: ChangeEvent<[Class, Function]>): void {
+    this.#emitter.emit('change', event);
   }
 
   /**

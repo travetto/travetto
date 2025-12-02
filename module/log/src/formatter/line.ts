@@ -89,11 +89,11 @@ export class LineLogFormatter implements LogFormatter {
   /**
    * Format an event into a single line
    */
-  format(ev: LogEvent): string {
+  format(event: LogEvent): string {
     const out = [];
 
     if (this.opts.timestamp) {
-      let timestamp = ev.timestamp.toISOString();
+      let timestamp = event.timestamp.toISOString();
       if (this.opts.timestamp === 's') {
         timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
@@ -104,26 +104,26 @@ export class LineLogFormatter implements LogFormatter {
     }
 
     if (this.opts.level) {
-      let level: string = ev.level;
+      let level: string = event.level;
       if (this.opts.align) {
         level = level.padEnd(5, ' ');
       }
       if (this.opts.colorize) {
-        level = STYLES[ev.level](level);
+        level = STYLES[event.level](level);
       }
       out.push(level);
     }
 
-    if (ev.modulePath && this.opts.location) {
-      const ns = `${ev.module}:${ev.modulePath}`;
-      let loc = ev.line ? `${ns}:${ev.line}` : ns;
+    if (event.modulePath && this.opts.location) {
+      const ns = `${event.module}:${event.modulePath}`;
+      let loc = event.line ? `${ns}:${event.line}` : ns;
       if (this.opts.colorize) {
         loc = STYLES.location(loc);
       }
       out.push(`[${loc}]`);
     }
 
-    out.push(LogFormatUtil.getLogMessage(ev, this.opts.inspectOptions));
+    out.push(LogFormatUtil.getLogMessage(event, this.opts.inspectOptions));
 
     return out.join(' ');
   }

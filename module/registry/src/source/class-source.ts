@@ -139,14 +139,14 @@ export class ClassSource implements ChangeSource<Class> {
   async init(): Promise<Class[]> {
     if (Runtime.dynamic && !this.#listening) {
       this.#listening = (async (): Promise<void> => {
-        for await (const ev of await DynamicFileLoader.listen()) {
-          if (ev.action === 'delete') {
-            this.#removeFile(ev.file); // File no longer exists
+        for await (const event of await DynamicFileLoader.listen()) {
+          if (event.action === 'delete') {
+            this.#removeFile(event.file); // File no longer exists
           } else {
             this.#handleChanges(flushPendingFunctions().filter(isClass));
           }
 
-          if (ev.action === 'create') {
+          if (event.action === 'create') {
             this.#flush();
           }
         }

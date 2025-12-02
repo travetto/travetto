@@ -50,7 +50,7 @@ export class Compiler {
     setMaxListeners(1000, this.#signal);
     process
       .once('disconnect', () => this.#shutdown('manual'))
-      .on('message', ev => (ev === 'shutdown') && this.#shutdown('manual'));
+      .on('message', event => (event === 'shutdown') && this.#shutdown('manual'));
   }
 
   #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', err?: Error): void {
@@ -170,13 +170,13 @@ export class Compiler {
     const metrics: CompileEmitEvent[] = [];
 
     if (this.#dirtyFiles.length) {
-      for await (const ev of this.emit(this.#dirtyFiles, emitter)) {
-        if (ev.err) {
-          const compileError = CompilerUtil.buildTranspileError(ev.file, ev.err);
+      for await (const event of this.emit(this.#dirtyFiles, emitter)) {
+        if (event.err) {
+          const compileError = CompilerUtil.buildTranspileError(event.file, event.err);
           failure ??= compileError;
           EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
         }
-        metrics.push(ev);
+        metrics.push(event);
       }
       if (this.#signal.aborted) {
         log.debug('Compilation aborted');
@@ -203,29 +203,29 @@ export class Compiler {
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {
-        for await (const ev of new CompilerWatcher(this.#state, this.#signal)) {
-          if (ev.action !== 'delete') {
-            const err = await emitter(ev.entry.sourceFile, true);
+        for await (const event of new CompilerWatcher(this.#state, this.#signal)) {
+          if (event.action !== 'delete') {
+            const err = await emitter(event.entry.sourceFile, true);
             if (err) {
-              log.info('Compilation Error', CompilerUtil.buildTranspileError(ev.entry.sourceFile, err));
+              log.info('Compilation Error', CompilerUtil.buildTranspileError(event.entry.sourceFile, err));
             } else {
-              log.info(`Compiled ${ev.entry.sourceFile} on ${ev.action}`);
+              log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
             }
           } else {
-            if (ev.entry.outputFile) {
+            if (event.entry.outputFile) {
               // Remove output
-              log.info(`Removed ${ev.entry.sourceFile}, ${ev.entry.outputFile}`);
-              await fs.rm(ev.entry.outputFile, { force: true }); // Ensure output is deleted
+              log.info(`Removed ${event.entry.sourceFile}, ${event.entry.outputFile}`);
+              await fs.rm(event.entry.outputFile, { force: true }); // Ensure output is deleted
             }
           }
 
           // Send change events
           EventUtil.sendEvent('change', {
-            action: ev.action,
+            action: event.action,
             time: Date.now(),
-            file: ev.file,
-            output: ev.entry.outputFile!,
-            module: ev.entry.module.name
+            file: event.file,
+            output: event.entry.outputFile!,
+            module: event.entry.module.name
           });
         }
         EventUtil.sendEvent('state', { state: 'watch-end' });

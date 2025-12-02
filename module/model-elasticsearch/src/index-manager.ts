@@ -138,17 +138,17 @@ export class IndexManager implements ModelStorageSupport {
     // Find which fields are gone
     const removes = change.subs.reduce<string[]>((acc, v) => {
       acc.push(...v.fields
-        .filter(ev => ev.type === 'removing')
-        .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
+        .filter(event => event.type === 'removing')
+        .map(event => [...v.path.map(f => f.name), event.prev!.name].join('.')));
       return acc;
     }, []);
 
     // Find which types have changed
     const fieldChanges = change.subs.reduce<string[]>((acc, v) => {
       acc.push(...v.fields
-        .filter(ev => ev.type === 'changed')
-        .filter(ev => ev.prev?.type !== ev.curr?.type)
-        .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
+        .filter(event => event.type === 'changed')
+        .filter(event => event.prev?.type !== event.curr?.type)
+        .map(event => [...v.path.map(f => f.name), event.prev!.name].join('.')));
       return acc;
     }, []);
 

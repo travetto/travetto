@@ -19,10 +19,10 @@ export class IpcChannel<V = unknown> {
     // Close on shutdown
     ShutdownManager.onGracefulShutdown(() => this.destroy());
 
-    this.proc.on('message', (ev: { type: string }) => {
-      console.debug('Received', { pid: this.parentId, id: this.id, type: ev.type });
-      this.#emitter.emit(ev.type, ev);
-      this.#emitter.emit('*', ev);
+    this.proc.on('message', (event: { type: string }) => {
+      console.debug('Received', { pid: this.parentId, id: this.id, type: event.type });
+      this.#emitter.emit(event.type, event);
+      this.#emitter.emit('*', event);
     });
   }
 

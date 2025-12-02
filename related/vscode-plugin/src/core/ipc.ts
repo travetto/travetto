@@ -29,9 +29,9 @@ export class IpcSupport {
       res.setHeader('Content-Type', 'application/json');
       try {
         if (/post/i.test(req.method || '')) {
-          const ev = await IpcSupport.readJSONRequest<TargetEvent>(req);
-          this.#log.info('Received IPC event', ev);
-          this.#handler(ev);
+          const event = await IpcSupport.readJSONRequest<TargetEvent>(req);
+          this.#log.info('Received IPC event', event);
+          this.#handler(event);
         }
         res.statusCode = 200;
         res.end(JSON.stringify({ ok: true }));

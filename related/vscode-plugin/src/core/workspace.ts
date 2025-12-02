@@ -17,12 +17,12 @@ export class Workspace {
   static #manifestContext: ManifestContext;
   static #workspaceIndex: ManifestIndex;
   static #compilerState: CompilerStateType = 'closed';
-  static #compilerStateListeners: ((ev: CompilerStateType) => void)[] = [];
+  static #compilerStateListeners: ((event: CompilerStateType) => void)[] = [];
   static #importToFile: Record<string, string | undefined> = {};
 
   static readonly folder: vscode.WorkspaceFolder;
 
-  static onCompilerState(handler: (ev: CompilerStateType) => void): void {
+  static onCompilerState(handler: (event: CompilerStateType) => void): void {
     this.#compilerStateListeners.push(handler);
     handler(this.compilerState);
   }

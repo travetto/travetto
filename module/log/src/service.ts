@@ -34,8 +34,8 @@ export class LogService implements ConsoleListener {
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  log(ev: ConsoleEvent): void {
-    const args = [...ev.args];
+  log(event: ConsoleEvent): void {
+    const args = [...event.args];
     let message: string | undefined;
     if (typeof args[0] === 'string') {
       message = args[0];
@@ -43,7 +43,7 @@ export class LogService implements ConsoleListener {
     }
 
     // Allow for controlled order of event properties
-    let outEvent: LogEvent = { ...ev, message, args };
+    let outEvent: LogEvent = { ...event, message, args };
 
     // Decorate event as needed
     for (const d of this.#decorators) {

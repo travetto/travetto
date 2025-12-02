@@ -20,7 +20,7 @@ export class ConsoleLogAppender implements LogAppender {
     this.config = config;
   }
 
-  append(ev: LogEvent, formatted: string): void {
-    console![this.config.logToLevel ? ev.level : 'log'](formatted);
+  append(event: LogEvent, formatted: string): void {
+    console![this.config.logToLevel ? event.level : 'log'](formatted);
   }
 }

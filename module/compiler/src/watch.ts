@@ -69,16 +69,16 @@ export class CompilerWatcher {
     return { entry, file: entry?.sourceFile ?? file, action };
   }
 
-  #isValidEvent(ev: CompilerWatchEventCandidate): ev is CompilerWatchEvent {
-    const relativeFile = ev.file.replace(`${this.#root}/`, '');
+  #isValidEvent(event: CompilerWatchEventCandidate): event is CompilerWatchEvent {
+    const relativeFile = event.file.replace(`${this.#root}/`, '');
     if (relativeFile === this.#watchCanary) {
       return false;
     } else if (relativeFile.startsWith('.')) {
       return false;
-    } else if (!ev.entry) {
+    } else if (!event.entry) {
       log.debug(`Skipping unknown file ${relativeFile}`);
       return false;
-    } else if (ev.action === 'update' && !this.#state.checkIfSourceChanged(ev.entry.sourceFile)) {
+    } else if (event.action === 'update' && !this.#state.checkIfSourceChanged(event.entry.sourceFile)) {
       log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
       return false;
     } else if (!CompilerUtil.validFile(ManifestModuleUtil.getFileType(relativeFile))) {
@@ -89,19 +89,19 @@ export class CompilerWatcher {
 
   #getManifestUpdateEventsByParents(events: CompilerWatchEvent[]): Map<string, CompilerWatchEvent[]> {
     const eventsByMod = new Map<string, CompilerWatchEvent[]>();
-    for (const ev of events) {
-      if (ev.action === 'update') {
+    for (const event of events) {
+      if (event.action === 'update') {
         continue;
       }
 
-      const mod = ev.entry.module;
+      const mod = event.entry.module;
       const moduleSet = new Set(this.#state.manifestIndex.getDependentModules(mod.name, 'parents').map(x => x.name));
       moduleSet.add(this.#state.manifest.workspace.name);
       for (const m of moduleSet) {
         if (!eventsByMod.has(m)) {
           eventsByMod.set(m, []);
         }
-        eventsByMod.get(m)!.push(ev);
+        eventsByMod.get(m)!.push(event);
       }
     }
     return eventsByMod;
@@ -137,8 +137,8 @@ export class CompilerWatcher {
       const moduleManifest = ManifestUtil.readManifestSync(manifestLocation);
 
       log.debug('Updating manifest', { module: mod, events: events.length });
-      for (const ev of events) {
-        this.#updateManifestForEvent(ev, moduleManifest);
+      for (const event of events) {
+        this.#updateManifestForEvent(event, moduleManifest);
       }
       await ManifestUtil.writeManifest(moduleManifest);
     }
@@ -164,7 +164,7 @@ export class CompilerWatcher {
           throw err instanceof Error ? err : new Error(`${err}`);
         } else if (events.length > 25) {
           throw new CompilerReset(`Large influx of file changes: ${events.length}`);
-        } else if (events.some(ev => packageFiles.has(path.toPosix(ev.path)))) {
+        } else if (events.some(event => packageFiles.has(path.toPosix(event.path)))) {
           throw new CompilerReset('Package information changed');
         }
 
@@ -204,7 +204,7 @@ export class CompilerWatcher {
 
     await this.#cleanup.tool?.();
 
-    const listener = watch(toolRootFolder, { encoding: 'utf8' }, async (ev, f) => {
+    const listener = watch(toolRootFolder, { encoding: 'utf8' }, async (event, f) => {
       if (!f) {
         return;
       }

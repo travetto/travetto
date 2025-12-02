@@ -116,9 +116,9 @@ export class Terminal {
   async streamList(source: AsyncIterable<{ idx: number, text: string, done?: boolean }>): Promise<void> {
     if (!this.#interactive) {
       const collected = [];
-      for await (const ev of source) {
-        if (ev.done) {
-          collected[ev.idx] = ev.text;
+      for await (const event of source) {
+        if (event.done) {
+          collected[event.idx] = event.text;
         }
       }
       await this.#writer.writeLines(collected).commit();

@@ -27,7 +27,7 @@ export interface ConsoleEvent {
  * @concrete
  */
 export interface ConsoleListener {
-  log(ev: ConsoleEvent): void;
+  log(event: ConsoleEvent): void;
 }
 
 const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
@@ -111,12 +111,12 @@ class $ConsoleManager implements ConsoleListener {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  log(ev: ConsoleEvent & { import?: [string, string] }): void {
+  log(event: ConsoleEvent & { import?: [string, string] }): void {
     const outEv = {
-      ...ev,
+      ...event,
       timestamp: new Date(),
-      module: ev.module ?? ev.import?.[0],
-      modulePath: ev.modulePath ?? ev.import?.[1]
+      module: event.module ?? event.import?.[0],
+      modulePath: event.modulePath ?? event.import?.[1]
     };
 
     if (this.#filters[outEv.level] && !this.#filters[outEv.level]!(outEv)) {
@@ -141,5 +141,5 @@ class $ConsoleManager implements ConsoleListener {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager({ log(ev): void { console![ev.level](...ev.args); } });
+export const ConsoleManager = new $ConsoleManager({ log(event): void { console![event.level](...event.args); } });
 export const log = ConsoleManager.log.bind(ConsoleManager);

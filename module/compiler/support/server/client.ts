@@ -11,7 +11,7 @@ import { ProcessHandle } from './process-handle.ts';
 
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;
-  until?: (ev: T) => boolean;
+  until?: (event: T) => boolean;
   enforceIteration?: boolean;
 };
 

@@ -46,21 +46,21 @@ export class Logger implements LogConfig, LogShape {
     Object.assign(this, cfg);
   }
 
-  valid(ev: CompilerLogEvent): boolean {
-    return LEVEL_TO_PRI[this.level ?? this.parent?.level!] <= LEVEL_TO_PRI[ev.level];
+  valid(event: CompilerLogEvent): boolean {
+    return LEVEL_TO_PRI[this.level ?? this.parent?.level!] <= LEVEL_TO_PRI[event.level];
   }
 
   /** Log event with filtering by level */
-  render(ev: CompilerLogEvent): void {
-    if (!this.valid(ev)) { return; }
-    const params = [ev.message, ...ev.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(this.root ?? this.parent?.root!, '.') : x);
-    if (ev.scope ?? this.scope) {
-      params.unshift(`[${(ev.scope ?? this.scope!).padEnd(SCOPE_MAX, ' ')}]`);
+  render(event: CompilerLogEvent): void {
+    if (!this.valid(event)) { return; }
+    const params = [event.message, ...event.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(this.root ?? this.parent?.root!, '.') : x);
+    if (event.scope ?? this.scope) {
+      params.unshift(`[${(event.scope ?? this.scope!).padEnd(SCOPE_MAX, ' ')}]`);
     }
-    params.unshift(new Date().toISOString(), `${ev.level.padEnd(5)}`);
+    params.unshift(new Date().toISOString(), `${event.level.padEnd(5)}`);
     Logger.rewriteLine(''); // Clear out progress line, if active
     // eslint-disable-next-line no-console
-    console[ev.level]!(...params);
+    console[event.level]!(...params);
   }
 
   info(message: string, ...args: unknown[]): void { return this.render({ level: 'info', message, args }); }
@@ -102,17 +102,17 @@ class $RootLogger extends Logger {
   }
 
   /** Write progress event, if active */
-  onProgressEvent(ev: CompilerProgressEvent): void | Promise<void> {
+  onProgressEvent(event: CompilerProgressEvent): void | Promise<void> {
     if (!(this.logProgress)) { return; }
-    const pct = Math.trunc(ev.idx * 100 / ev.total);
-    const text = ev.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${ev.idx}/${ev.total}] ${ev.message}`;
+    const pct = Math.trunc(event.idx * 100 / event.total);
+    const text = event.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${event.idx}/${event.total}] ${event.message}`;
     return Logger.rewriteLine(text);
   }
 
   /** Write all progress events if active */
   async consumeProgressEvents(src: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
     if (!(this.logProgress)) { return; }
-    for await (const ev of src()) { this.onProgressEvent(ev); }
+    for await (const event of src()) { this.onProgressEvent(event); }
     Logger.reset();
   }
 }
@@ -120,13 +120,13 @@ class $RootLogger extends Logger {
 export const Log = new $RootLogger();
 
 export class IpcLogger extends Logger {
-  render(ev: CompilerLogEvent): void {
-    if (!this.valid(ev)) { return; }
+  render(event: CompilerLogEvent): void {
+    if (!this.valid(event)) { return; }
     if (process.connected && process.send) {
-      process.send({ type: 'log', payload: ev });
+      process.send({ type: 'log', payload: event });
     }
     if (!process.connected) {
-      super.render(ev);
+      super.render(event);
     }
   }
 }

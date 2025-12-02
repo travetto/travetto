@@ -43,22 +43,22 @@ export class EmailCompilerFeature extends BaseFeature {
       cwd: Workspace.path,
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     })
-      .on('message', async (ev: EditorResponse) => {
-        switch (ev.type) {
+      .on('message', async (event: EditorResponse) => {
+        switch (event.type) {
           case 'compiled': {
-            if (ev.file === this.#activeFile) {
-              this.setActiveContent(ev.content);
+            if (event.file === this.#activeFile) {
+              this.setActiveContent(event.content);
             }
             break;
           }
-          case 'compiled-failed': return this.log.info('Email template', ev);
+          case 'compiled-failed': return this.log.info('Email template', event);
           case 'configured': {
-            const doc = await vscode.workspace.openTextDocument(ev.file);
+            const doc = await vscode.workspace.openTextDocument(event.file);
             await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
             break;
           }
-          case 'sent': return Workspace.showEphemeralMessage(`Message Sent to ${ev.to}`);
-          case 'sent-failed': return vscode.window.showErrorMessage(`Message not Sent. ${ev.message}`);
+          case 'sent': return Workspace.showEphemeralMessage(`Message Sent to ${event.to}`);
+          case 'sent-failed': return vscode.window.showErrorMessage(`Message not Sent. ${event.message}`);
           case 'init': {
             if (vscode.window.activeTextEditor) {
               this.setActiveFile(vscode.window.activeTextEditor.document.fileName);

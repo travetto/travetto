@@ -106,9 +106,9 @@ class $SchemaChangeListener {
    * @param prev The previous class config
    * @param curr The current class config
    */
-  emitFieldChanges(ev: ChangeEvent<SchemaClassConfig>): void {
-    const prev = 'prev' in ev ? ev.prev : undefined;
-    const curr = 'curr' in ev ? ev.curr : undefined;
+  emitFieldChanges(event: ChangeEvent<SchemaClassConfig>): void {
+    const prev = 'prev' in event ? event.prev : undefined;
+    const curr = 'curr' in event ? event.curr : undefined;
 
     const prevFields = new Set(Object.keys(prev?.fields ?? {}));
     const currFields = new Set(Object.keys(curr?.fields ?? {}));

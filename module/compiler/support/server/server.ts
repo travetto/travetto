@@ -60,8 +60,8 @@ export class CompilerServer {
     return this.info.mode;
   }
 
-  isResetEvent(ev: CompilerEvent): boolean {
-    return ev.type === 'state' && ev.payload.state === 'reset';
+  isResetEvent(event: CompilerEvent): boolean {
+    return event.type === 'state' && event.payload.state === 'reset';
   }
 
   async #tryListen(attempt = 0): Promise<'ok' | 'running'> {
@@ -116,9 +116,9 @@ export class CompilerServer {
     });
   }
 
-  #emitEvent(ev: CompilerEvent, to?: string): void {
+  #emitEvent(event: CompilerEvent, to?: string): void {
     if (this.#listeners.all) {
-      const msg = JSON.stringify(ev);
+      const msg = JSON.stringify(event);
       for (const [id, item] of Object.entries(this.#listeners.all)) {
         if (item.closed || (to && id !== to)) {
           continue;
@@ -127,9 +127,9 @@ export class CompilerServer {
         item.write('\n');
       }
     }
-    if (this.#listeners[ev.type]) {
-      const msg = JSON.stringify(ev.payload);
-      for (const [id, item] of Object.entries(this.#listeners[ev.type]!)) {
+    if (this.#listeners[event.type]) {
+      const msg = JSON.stringify(event.payload);
+      for (const [id, item] of Object.entries(this.#listeners[event.type]!)) {
         if (item.closed || (to && id !== to)) {
           continue;
         }
@@ -189,28 +189,28 @@ export class CompilerServer {
    * Process events
    */
   async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-    for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
-      if (ev.type === 'progress') {
-        await Log.onProgressEvent(ev.payload);
+    for await (const event of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
+      if (event.type === 'progress') {
+        await Log.onProgressEvent(event.payload);
       }
 
-      this.#emitEvent(ev);
+      this.#emitEvent(event);
 
-      if (ev.type === 'state') {
-        this.info.state = ev.payload.state;
-        if (ev.payload.state === 'init' && ev.payload.extra && 'pid' in ev.payload.extra && typeof ev.payload.extra.pid === 'number') {
+      if (event.type === 'state') {
+        this.info.state = event.payload.state;
+        if (event.payload.state === 'init' && event.payload.extra && 'pid' in event.payload.extra && typeof event.payload.extra.pid === 'number') {
           if (this.info.mode === 'watch' && !this.info.compilerPid) {
             // Ensure we are killing in watch mode on first set
             await this.#handle.compiler.kill();
           }
-          this.info.compilerPid = ev.payload.extra.pid;
+          this.info.compilerPid = event.payload.extra.pid;
           await this.#handle.compiler.writePid(this.info.compilerPid);
         }
         log.info(`State changed: ${this.info.state}`);
-      } else if (ev.type === 'log') {
-        log.render(ev.payload);
+      } else if (event.type === 'log') {
+        log.render(event.payload);
       }
-      if (this.isResetEvent(ev)) {
+      if (this.isResetEvent(event)) {
         await this.#disconnectActive();
       }
     }

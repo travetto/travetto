@@ -18,7 +18,7 @@ export interface LogEvent extends ConsoleEvent {
  * @concrete
  */
 export interface LogDecorator {
-  decorate(ev: LogEvent): LogEvent;
+  decorate(event: LogEvent): LogEvent;
 }
 
 /**

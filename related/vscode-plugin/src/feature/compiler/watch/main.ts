@@ -145,8 +145,8 @@ export class CompilerWatchFeature extends BaseFeature {
     }
   }
 
-  #onStateEvent(ev: CompilerStateEvent | CompilerStateType | undefined): void {
-    const state = (typeof ev === 'string' ? ev : ev?.state ?? 'closed');
+  #onStateEvent(event: CompilerStateEvent | CompilerStateType | undefined): void {
+    const state = (typeof event === 'string' ? event : event?.state ?? 'closed');
 
     this.#log.info('Compiler state changed', state);
     let v: string | undefined;
@@ -162,28 +162,28 @@ export class CompilerWatchFeature extends BaseFeature {
     Workspace.compilerState = state;
   }
 
-  async #ongLogEvent(ev: CompilerLogEvent): Promise<void> {
-    const message = ev.message.replaceAll(Workspace.path, '.');
+  async #ongLogEvent(event: CompilerLogEvent): Promise<void> {
+    const message = event.message.replaceAll(Workspace.path, '.');
     let first = message;
-    const params = [...ev.args ?? []];
-    if (ev.scope) {
+    const params = [...event.args ?? []];
+    if (event.scope) {
       params.unshift(message);
-      first = `[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`;
+      first = `[${event.scope.padEnd(SCOPE_MAX, ' ')}]`;
     }
-    this.#log[ev.level](first, ...params);
+    this.#log[event.level](first, ...params);
   }
 
-  async #onProgressEvent(ev: CompilerProgressEvent, signal: AbortSignal): Promise<void> {
-    let pState = this.#progress[ev.operation];
+  async #onProgressEvent(event: CompilerProgressEvent, signal: AbortSignal): Promise<void> {
+    let pState = this.#progress[event.operation];
 
-    const value = 100 * (ev.idx / ev.total);
+    const value = 100 * (event.idx / event.total);
     const delta = value - (pState?.prev ?? 0);
 
-    if (ev.complete || delta < 0 || ev.total < 5) {
+    if (event.complete || delta < 0 || event.total < 5) {
       pState?.cleanup();
     } else {
-      pState ??= await this.#buildProgressBar(ev.operation, signal);
-      pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1}/${ev.total})`, increment: delta });
+      pState ??= await this.#buildProgressBar(event.operation, signal);
+      pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${event.idx + 1}/${event.total})`, increment: delta });
       pState.prev = value;
     }
   }

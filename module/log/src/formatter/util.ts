@@ -9,9 +9,9 @@ const INSPECT_OPTIONS = { colors: false, showHidden: false, depth: 5, breakLengt
 
 export class LogFormatUtil {
   /** Generate log context */
-  static getContext(ev: LogEvent): Record<string, unknown> | undefined {
+  static getContext(event: LogEvent): Record<string, unknown> | undefined {
     const out: Record<string, unknown> = {};
-    for (const o of ev.args ?? []) {
+    for (const o of event.args ?? []) {
       if (DataUtil.isPlainObject(o)) {
         safeAssign(out, o);
       }
@@ -20,8 +20,8 @@ export class LogFormatUtil {
   }
 
   /** Get log message */
-  static getLogMessage(ev: LogEvent, options: InspectOptions = INSPECT_OPTIONS): string {
-    const formatted = ev.args?.map(x => typeof x === 'string' ? x : inspect(x, options)) ?? [];
-    return (ev.message ? [ev.message, ...formatted] : formatted).join(' ');
+  static getLogMessage(event: LogEvent, options: InspectOptions = INSPECT_OPTIONS): string {
+    const formatted = event.args?.map(x => typeof x === 'string' ? x : inspect(x, options)) ?? [];
+    return (event.message ? [event.message, ...formatted] : formatted).join(' ');
   }
 }

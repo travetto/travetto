@@ -22,7 +22,7 @@ type WorkerFactoryInput<I, O = unknown> = Partial<Worker<I, O>> & { execute: Wor
 type WorkerInput<I, O> = (() => WorkerFactoryInput<I, O>) | WorkerExecutor<I, O>;
 type WorkPoolConfig<I, O> = Options & {
   onComplete?: (output: O, input: I, finishIdx: number) => void;
-  onError?(ev: Error, input: I, finishIdx: number): (unknown | Promise<unknown>);
+  onError?(event: Error, input: I, finishIdx: number): (unknown | Promise<unknown>);
   shutdown?: AbortSignal;
 };
 
@@ -144,9 +144,9 @@ export class WorkPool {
     const itr = new AsyncQueue<O>();
     const result = this.run(worker, input, {
       ...opts,
-      onComplete: (ev, inp, finishIdx) => {
-        itr.add(ev);
-        opts?.onComplete?.(ev, inp, finishIdx);
+      onComplete: (event, inp, finishIdx) => {
+        itr.add(event);
+        opts?.onComplete?.(event, inp, finishIdx);
       }
     });
     result.finally(() => itr.close());
@@ -164,9 +164,9 @@ export class WorkPool {
     const itr = new AsyncQueue<{ idx: number, value: O, total: number }>();
     const result = this.run(worker, input, {
       ...opts,
-      onComplete: (ev, inp, finishIdx) => {
-        itr.add({ value: ev, idx: finishIdx, total });
-        opts?.onComplete?.(ev, inp, finishIdx);
+      onComplete: (event, inp, finishIdx) => {
+        itr.add({ value: event, idx: finishIdx, total });
+        opts?.onComplete?.(event, inp, finishIdx);
       }
     });
     result.finally(() => itr.close());

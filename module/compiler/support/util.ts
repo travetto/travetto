@@ -43,9 +43,9 @@ export class CommonUtil {
       log.debug('Started event stream');
 
       // Wait for all events, close at the end
-      for await (const ev of comp) {
-        yield ev;
-        if (shouldRestart(ev)) {
+      for await (const event of comp) {
+        yield event;
+        if (shouldRestart(event)) {
           log.debug('Restarting stream');
           controller.abort(); // Ensure terminated of process
           parent.removeEventListener('abort', kill);
