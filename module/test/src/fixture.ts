@@ -7,6 +7,6 @@ export class TestFixtures extends FileLoader {
       '@#support/fixtures',
       ...modules.flat().map(x => `${x}#support/fixtures`),
       '@@#support/fixtures'
-    ].map(v => Runtime.modulePath(v)));
+    ].map(value => Runtime.modulePath(value)));
   }
 }

@@ -62,11 +62,11 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   }
 
   finalize(): void {
-    for (const [k] of getAllEntries(this.#config.candidates)) {
-      const v = this.#config.candidates[k];
-      const candidateType = SchemaRegistryIndex.get(v.class).getMethodReturnType(k);
-      v.candidateType = candidateType;
-      v.qualifier ??= getDefaultQualifier(candidateType);
+    for (const [method] of getAllEntries(this.#config.candidates)) {
+      const candidate = this.#config.candidates[method];
+      const candidateType = SchemaRegistryIndex.get(candidate.class).getMethodReturnType(method);
+      candidate.candidateType = candidateType;
+      candidate.qualifier ??= getDefaultQualifier(candidateType);
     }
   }
 

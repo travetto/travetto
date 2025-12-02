@@ -54,12 +54,12 @@ export class EmailCompiler {
    */
   static async writeTemplate(file: string, msg: EmailCompiled): Promise<void> {
     const outs = this.getOutputFiles(file);
-    await Promise.all(TypedObject.keys(outs).map(async k => {
-      if (msg[k]) {
-        const content = MailUtil.buildBrand(file, msg[k], 'trv email:compile');
-        await BinaryUtil.bufferedFileWrite(outs[k], content);
+    await Promise.all(TypedObject.keys(outs).map(async key => {
+      if (msg[key]) {
+        const content = MailUtil.buildBrand(file, msg[key], 'trv email:compile');
+        await BinaryUtil.bufferedFileWrite(outs[key], content);
       } else {
-        await fs.rm(outs[k], { force: true }); // Remove file if data not provided
+        await fs.rm(outs[key], { force: true }); // Remove file if data not provided
       }
     }));
   }

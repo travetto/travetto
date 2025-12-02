@@ -17,6 +17,6 @@ export async function buildEslintConfig(): Promise<string> {
   );
 
   return tpl
-    .replace(/'(@travetto\/[^']+)'/g, (_, v) => `'${RuntimeIndex.resolveFileImport(v)}'`)
+    .replace(/'(@travetto\/[^']+)'/g, (_, module) => `'${RuntimeIndex.resolveFileImport(module)}'`)
     .replace('%MANIFEST_FILE%', outputPath);
 }

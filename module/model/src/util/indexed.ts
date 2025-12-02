@@ -51,16 +51,16 @@ export class ModelIndexedUtil {
       const parts = [];
 
       while (o !== undefined && o !== null) {
-        const k = TypedObject.keys(f)[0];
-        o = castTo(o[k]);
-        parts.push(k);
-        if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
+        const key = TypedObject.keys(f)[0];
+        o = castTo(o[key]);
+        parts.push(key);
+        if (typeof f[key] === 'boolean' || typeof f[key] === 'number') {
           if (config.type === 'sorted') {
-            sortDir = f[k] === true ? 1 : f[k] === false ? 0 : f[k];
+            sortDir = f[key] === true ? 1 : f[key] === false ? 0 : f[key];
           }
           break; // At the bottom
         } else {
-          f = castTo(f[k]);
+          f = castTo(f[key]);
         }
       }
       if (field === sortField) {
@@ -93,8 +93,8 @@ export class ModelIndexedUtil {
       let sub: Record<string, unknown> = response;
       const all = path.slice(0);
       const last = all.pop()!;
-      for (const k of all) {
-        sub = castTo(sub[k] ??= {});
+      for (const key of all) {
+        sub = castTo(sub[key] ??= {});
       }
       sub[last] = value;
     }

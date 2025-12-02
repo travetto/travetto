@@ -4,7 +4,7 @@ import { CommonRegExp } from '../validate/regexp.ts';
 import { CONSTRUCTOR_PROPERTY, SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
-type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
+type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, property: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
 function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
   return (instanceOrCls: ClassInstance | Class, property: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
@@ -197,7 +197,7 @@ export function Specifier(...specifiers: string[]): PropType<unknown> { return i
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function DiscriminatorField(): ((t: ClassInstance, k: string) => void) {
+export function DiscriminatorField(): ((t: ClassInstance, property: string) => void) {
   return (instance: ClassInstance, property: string): void => {
     SchemaRegistryIndex.getForRegister(getClass(instance)).register({
       discriminatedBase: true,

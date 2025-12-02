@@ -36,11 +36,11 @@ export class SQLModelUtil {
     if (Array.isArray(o)) {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x));
     } else if (!DataUtil.isSimpleValue(o)) {
-      for (const k of TypedObject.keys(o)) {
-        if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name || k === dct.idxField.name) {
-          delete o[k];
+      for (const key of TypedObject.keys(o)) {
+        if (o[key] === null || o[key] === undefined || key === dct.parentPathField.name || key === dct.pathField.name || key === dct.idxField.name) {
+          delete o[key];
         } else {
-          o[k] = this.cleanResults(dct, o[k]);
+          o[key] = this.cleanResults(dct, o[key]);
         }
       }
       return castTo({ ...o });
@@ -217,15 +217,15 @@ export class SQLModelUtil {
 
     let toGet = new Set<string>();
 
-    for (const [k, v] of TypedObject.entries(select)) {
-      if (typeof k === 'string' && !DataUtil.isPlainObject(select[k]) && localMap[k]) {
-        if (!v) {
+    for (const [key, value] of TypedObject.entries(select)) {
+      if (typeof key === 'string' && !DataUtil.isPlainObject(select[key]) && localMap[key]) {
+        if (!value) {
           if (toGet.size === 0) {
             toGet = new Set(Object.keys(SchemaRegistryIndex.getConfig(cls).fields));
           }
-          toGet.delete(k);
+          toGet.delete(key);
         } else {
-          toGet.add(k);
+          toGet.add(key);
         }
       }
     }
@@ -260,10 +260,10 @@ export class SQLModelUtil {
   /**
    * Find all dependent fields via child tables
    */
-  static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: SchemaFieldConfig): Record<string, T> {
+  static collectDependents<T>(dct: DialectState, parent: unknown, value: T[], field?: SchemaFieldConfig): Record<string, T> {
     if (field) {
       const isSimple = SchemaRegistryIndex.has(field.type);
-      for (const el of v) {
+      for (const el of value) {
         const parentKey: string = castTo(el[castKey<T>(dct.parentPathField.name)]);
         const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
         const fieldKey = castKey<(typeof root) | T>(field.name);
@@ -280,7 +280,7 @@ export class SQLModelUtil {
     }
 
     const mapping: Record<string, T> = {};
-    for (const el of v) {
+    for (const el of value) {
       const key = el[castKey<T>(dct.pathField.name)];
       if (typeof key === 'string') {
         mapping[key] = el;

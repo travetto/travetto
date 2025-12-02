@@ -136,7 +136,7 @@ export class ManifestUtil {
    * Efficient lookup for path-based graphs
    */
   static lookupTrie<T>(
-    inputs: T[], getPath: (v: T) => string[], validateUnknown?: (pth: string[]) => boolean
+    inputs: T[], getPath: (value: T) => string[], validateUnknown?: (pth: string[]) => boolean
   ): (pth: string[]) => T | undefined {
     type TrieNode = { value?: T, subs: Record<string, TrieNode> };
     const root: TrieNode = { subs: {} };

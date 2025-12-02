@@ -76,18 +76,18 @@ class ${uniqueId} extends ${type.mappedClassName} {
             ],
             id, [], [],
             Object.entries(type.fieldTypes)
-              .map(([k, v]) =>
+              .map(([key, value]) =>
                 this.computeInput(state, state.factory.createPropertyDeclaration(
-                  [], /\W/.test(k) ? state.factory.createComputedPropertyName(state.fromLiteral(k)) : k,
-                  v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-                  v.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
-                ), { type: v, root })
+                  [], /\W/.test(key) ? state.factory.createComputedPropertyName(state.fromLiteral(key)) : key,
+                  value.undefinable || value.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+                  value.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
+                ), { type: value, root })
               )
           );
           cls.getText = (): string => [
             `class ${uniqueId} {`,
             ...Object.entries(type.fieldTypes)
-              .map(([k, v]) => `  ${k}${v.nullable ? '?' : ''}: ${v.name};`),
+              .map(([key, value]) => `  ${key}${value.nullable ? '?' : ''}: ${value.name};`),
             '}'
           ].join('\n');
           state.addStatements([cls], root || node);

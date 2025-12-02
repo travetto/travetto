@@ -56,7 +56,7 @@ export class WebRpcClientGeneratorService {
     const flavorOutputFile = path.resolve(config.output, path.basename(flavorSourceFile));
     const flavorSourceContents = (await fs.readFile(flavorSourceFile, 'utf8').catch(() => ''))
       .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gsm, '')
-      .replaceAll(/^\/\/\s*#UNCOMMENT (.*)/gm, (_, v) => v);
+      .replaceAll(/^\/\/\s*#UNCOMMENT (.*)/gm, (_, line) => line);
 
     const factoryOutputFile = path.resolve(config.output, 'factory.ts');
     const factorySourceContents = [

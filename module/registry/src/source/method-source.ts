@@ -35,20 +35,20 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
     /**
      * Go through each method, comparing hashes.  To see added/removed and changed
      */
-    for (const k of Object.keys(next)) {
-      if ((!prev[k] || !('prev' in event)) && event.type !== 'removing') {
-        this.emit({ type: 'added', curr: [event.curr!, event.curr!.prototype[k]] });
-      } else if (next[k].hash !== prev[k].hash && event.type === 'changed') {
+    for (const key of Object.keys(next)) {
+      if ((!prev[key] || !('prev' in event)) && event.type !== 'removing') {
+        this.emit({ type: 'added', curr: [event.curr!, event.curr!.prototype[key]] });
+      } else if (next[key].hash !== prev[key].hash && event.type === 'changed') {
         // FIXME: Why is event.prev undefined sometimes?
-        this.emit({ type: 'changed', curr: [event.curr, event.curr.prototype[k]], prev: [event.prev, event.prev.prototype[k]] });
+        this.emit({ type: 'changed', curr: [event.curr, event.curr.prototype[key]], prev: [event.prev, event.prev.prototype[key]] });
       } else {
         // Method Unchanged
       }
     }
 
-    for (const k of Object.keys(prev)) {
-      if (!next[k] && event.type !== 'added') {
-        this.emit({ type: 'removing', prev: [event.prev, event.prev.prototype[k]] });
+    for (const key of Object.keys(prev)) {
+      if (!next[key] && event.type !== 'added') {
+        this.emit({ type: 'removing', prev: [event.prev, event.prev.prototype[key]] });
       }
     }
   }

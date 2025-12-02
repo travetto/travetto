@@ -356,8 +356,8 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       paths: Object.fromEntries(
         Object.entries(this.#paths)
           .toSorted(([a], [b]) => a.localeCompare(b))
-          .map(([k, v]) => [k, Object.fromEntries(
-            Object.entries(v)
+          .map(([key, value]) => [key, Object.fromEntries(
+            Object.entries(value)
               .toSorted(([a], [b]) => a.localeCompare(b))
           )])
       ),

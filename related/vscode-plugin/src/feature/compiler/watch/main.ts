@@ -149,16 +149,16 @@ export class CompilerWatchFeature extends BaseFeature {
     const state = (typeof event === 'string' ? event : event?.state ?? 'closed');
 
     this.#log.info('Compiler state changed', state);
-    let v: string | undefined;
+    let status: string | undefined;
     switch (state) {
-      case 'reset': v = '$(flame) Restarting'; break;
+      case 'reset': status = '$(flame) Restarting'; break;
       case 'startup':
-      case 'init': v = '$(flame) Initializing'; break;
-      case 'compile-start': v = '$(flame) Compiling'; break;
-      case 'watch-start': v = '$(pass-filled) Ready'; break;
-      case 'closed': v = '$(debug-pause) Disconnected'; break;
+      case 'init': status = '$(flame) Initializing'; break;
+      case 'compile-start': status = '$(flame) Compiling'; break;
+      case 'watch-start': status = '$(pass-filled) Ready'; break;
+      case 'closed': status = '$(debug-pause) Disconnected'; break;
     }
-    this.#status.text = v ?? this.#status.text;
+    this.#status.text = status ?? this.#status.text;
     Workspace.compilerState = state;
   }
 

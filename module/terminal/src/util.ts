@@ -31,7 +31,7 @@ export class TerminalUtil {
         width ??= Math.trunc(Math.ceil(Math.log10(event.total ?? 10000)));
       }
       const state: Record<string, string> = { total: `${event.total}`, idx: `${event.idx}`.padStart(width ?? 0), pct: `${Math.trunc(pct * 100)}` };
-      const line = ` ${text.replace(/[%](idx|total|pct)/g, (_, k) => state[k])} `;
+      const line = ` ${text.replace(/[%](idx|total|pct)/g, (_, key) => state[key])} `;
       const full = term.writer.padToWidth(line, config?.withWaiting ? 2 : 0);
       const mid = Math.trunc(pct * term.width);
       const [l, r] = [full.substring(0, mid), full.substring(mid)];

@@ -46,7 +46,7 @@ export class LiteralUtil {
     if (isNode(value)) { // If already a node
       return value;
     } else if (Array.isArray(value)) {
-      value = factory.createArrayLiteralExpression(value.map(v => this.fromLiteral(factory, v)));
+      value = factory.createArrayLiteralExpression(value.map(element => this.fromLiteral(factory, element)));
     } else if (value === undefined) {
       value = factory.createIdentifier('undefined');
     } else if (value === null) {
@@ -65,10 +65,10 @@ export class LiteralUtil {
     } else {
       const ov = value;
       const pairs: ts.PropertyAssignment[] = [];
-      for (const k of TypedObject.keys(ov)) {
-        if (ov[k] !== undefined) {
+      for (const key of TypedObject.keys(ov)) {
+        if (ov[key] !== undefined) {
           pairs.push(
-            factory.createPropertyAssignment(k, this.fromLiteral(factory, ov[k]))
+            factory.createPropertyAssignment(key, this.fromLiteral(factory, ov[key]))
           );
         }
       }

@@ -14,8 +14,8 @@ const validationSourceMap: Record<string, string> = {
   flag: 'Flag'
 };
 
-const ifDefined = <T>(v: T | null | '' | undefined): T | undefined =>
-  (v === null || v === '' || v === undefined) ? undefined : v;
+const ifDefined = <T>(value: T | null | '' | undefined): T | undefined =>
+  (value === null || value === '' || value === undefined) ? undefined : value;
 
 /**
  * Utilities for showing help

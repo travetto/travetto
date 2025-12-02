@@ -24,7 +24,7 @@ export class WebAuthConfig {
     this.signingKey ??= 'dummy';
 
     const all = [this.signingKey].flat().map(key => ({ key, id: BinaryUtil.hash(key, 8) }));
-    this.keyMap = Object.fromEntries(all.map(k => [k.id, k]));
+    this.keyMap = Object.fromEntries(all.map(entry => [entry.id, entry]));
     this.keyMap.default = all[0];
   }
 }

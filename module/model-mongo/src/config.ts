@@ -66,7 +66,7 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resolve = (file: string): Promise<string> => RuntimeResources.resolve(file).then(v => v, () => file);
+    const resolve = (file: string): Promise<string> => RuntimeResources.resolve(file).catch(() => file);
 
     if (this.connectionString) {
       const details = new URL(this.connectionString);
@@ -118,7 +118,7 @@ export class MongoModelConfig {
     const hosts = this.hosts!
       .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port ?? 27017}`)
       .join(',');
-    const optionString = Object.entries(this.options).map(([k, v]) => `${k}=${v}`).join('&');
+    const optionString = Object.entries(this.options).map(([key, value]) => `${key}=${value}`).join('&');
     let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(x => !!x).join(':')}@`;

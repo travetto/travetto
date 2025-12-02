@@ -5,7 +5,7 @@ import { KeyGrip } from './keygrip.ts';
 import { WebHeaderUtil } from './header.ts';
 
 const pairText = (c: Cookie): string => `${c.name}=${c.value}`;
-const pair = (k: string, v: unknown): string => `${k}=${v}`;
+const pair = (key: string, value: unknown): string => `${key}=${value}`;
 
 type CookieJarOptions = { keys?: string[] } & CookieSetOptions;
 

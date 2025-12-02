@@ -34,7 +34,7 @@ export const ModelTypes = (fn: | Function): DocJSXElement[] => {
       found.push(link);
     }
   }
-  return found.map(v => <li>{v}</li>);
+  return found.map(type => <li>{type}</li>);
 };
 
 export const ModelCustomConfig = ({ config }: { config: Function }): DocJSXElement => <>

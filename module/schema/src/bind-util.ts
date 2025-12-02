@@ -50,10 +50,10 @@ export class BindUtil {
    */
   static expandPaths(obj: Record<string, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = {};
-    for (const k of Object.keys(obj)) {
-      const objK = obj[k];
+    for (const property of Object.keys(obj)) {
+      const objK = obj[property];
       const value = DataUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
-      const parts = k.split('.');
+      const parts = property.split('.');
       const last = parts.pop()!;
       let sub = out;
       while (parts.length > 0) {
@@ -117,11 +117,11 @@ export class BindUtil {
         );
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
-          const v = value[i];
-          if (DataUtil.isPlainObject(v)) {
-            Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`));
+          const element = value[i];
+          if (DataUtil.isPlainObject(element)) {
+            Object.assign(out, this.flattenPaths(element, `${pre}[${i}].`));
           } else {
-            out[`${pre}[${i}]`] = v ?? '';
+            out[`${pre}[${i}]`] = element ?? '';
           }
         }
       } else {
@@ -150,9 +150,9 @@ export class BindUtil {
       const resolvedCls = SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data));
       const instance = classConstruct<T & { type?: string }>(resolvedCls);
 
-      for (const k of TypedObject.keys(instance)) { // Do not retain undefined fields
-        if (instance[k] === undefined) {
-          delete instance[k];
+      for (const key of TypedObject.keys(instance)) { // Do not retain undefined fields
+        if (instance[key] === undefined) {
+          delete instance[key];
         }
       }
 
@@ -179,8 +179,8 @@ export class BindUtil {
 
       // If no configuration
       if (!conf) {
-        for (const k of TypedObject.keys(data)) {
-          obj[k] = data[k];
+        for (const key of TypedObject.keys(data)) {
+          obj[key] = data[key];
         }
       } else {
         let schema: SchemaFieldMap = conf.fields;
@@ -211,37 +211,37 @@ export class BindUtil {
             continue;
           }
 
-          let v: unknown = data[castKey<T>(inboundField)];
+          let value: unknown = data[castKey<T>(inboundField)];
 
           // Filtering values
-          if (config.filterValue && !config.filterValue(v, field)) {
+          if (config.filterValue && !config.filterValue(value, field)) {
             continue;
           }
 
-          if (v !== undefined && v !== null) {
+          if (value !== undefined && value !== null) {
             // Ensure its an array
-            if (!Array.isArray(v) && field.array) {
-              if (typeof v === 'string' && v.includes(',')) {
-                v = v.split(/,/).map(x => x.trim());
+            if (!Array.isArray(value) && field.array) {
+              if (typeof value === 'string' && value.includes(',')) {
+                value = value.split(/,/).map(x => x.trim());
               } else {
-                v = [v];
+                value = [value];
               }
             }
 
             if (SchemaRegistryIndex.has(field.type)) {
-              if (field.array && Array.isArray(v)) {
-                v = v.map(el => this.bindSchema(field.type, el, config));
+              if (field.array && Array.isArray(value)) {
+                value = value.map(el => this.bindSchema(field.type, el, config));
               } else {
-                v = this.bindSchema(field.type, v, config);
+                value = this.bindSchema(field.type, value, config);
               }
-            } else if (field.array && Array.isArray(v)) {
-              v = v.map(el => this.#coerceType(field, el));
+            } else if (field.array && Array.isArray(value)) {
+              value = value.map(el => this.#coerceType(field, el));
             } else {
-              v = this.#coerceType(field, v);
+              value = this.#coerceType(field, value);
             }
           }
 
-          obj[castKey<T>(schemaFieldName)] = castTo(v);
+          obj[castKey<T>(schemaFieldName)] = castTo(value);
 
           if (field.accessor) {
             Object.defineProperty(obj, schemaFieldName, {

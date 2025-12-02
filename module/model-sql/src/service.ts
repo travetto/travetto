@@ -211,14 +211,14 @@ export class SQLModelService implements
 
     await this.#checkUpsertedIds(cls,
       addedIds,
-      new Map([...existingUpsertedIds.entries()].map(([k, v]) => [v, k]))
+      new Map([...existingUpsertedIds.entries()].map(([key, value]) => [value, key]))
     );
 
-    const get = <K extends keyof BulkOp<T>>(k: K): Required<BulkOp<T>>[K][] =>
-      operations.map(x => x[k]).filter((x): x is Required<BulkOp<T>>[K] => !!x);
+    const get = <K extends keyof BulkOp<T>>(key: K): Required<BulkOp<T>>[K][] =>
+      operations.map(x => x[key]).filter((x): x is Required<BulkOp<T>>[K] => !!x);
 
-    const getStatements = async (k: keyof BulkOp<T>): Promise<InsertWrapper[]> =>
-      (await SQLModelUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
+    const getStatements = async (key: keyof BulkOp<T>): Promise<InsertWrapper[]> =>
+      (await SQLModelUtil.getInserts(cls, get(key))).filter(x => !!x.records.length);
 
     const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
 

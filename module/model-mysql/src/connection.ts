@@ -71,7 +71,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
         if (isSimplePacket(results[0])) {
           return { records: [], count: results[0].affectedRows };
         }
-        const records: T[] = [...results].map(v => castTo({ ...v }));
+        const records: T[] = [...results].map(value => castTo({ ...value }));
         return { records, count: records.length };
       }
     } catch (error) {

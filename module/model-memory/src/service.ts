@@ -31,7 +31,7 @@ function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | n
   if (data instanceof Set) {
     id = data.values().next().value;
   } else {
-    id = [...data.entries()].find(([, v]) => value === undefined || v === value)?.[0];
+    id = [...data.entries()].find(([, item]) => value === undefined || item === value)?.[0];
   }
   return id;
 }

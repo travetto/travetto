@@ -77,7 +77,7 @@ export class PackOperation {
     };
 
     const properties = (['minify', 'sourcemap', 'entryPoint'] as const)
-      .map(k => cliTpl`${{ subtitle: k }}=${{ param: config[k] }}`).join(' ');
+      .map(key => cliTpl`${{ subtitle: key }}=${{ param: config[key] }}`).join(' ');
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Bundling Output' }} ${properties}`);
 
@@ -231,7 +231,7 @@ export class PackOperation {
     yield* PackOperation.title(config, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: config.manifestFile }}`);
 
     if (config.ejectFile) {
-      yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];
+      yield [...Object.entries(env).map(([key, value]) => `${key}=${value}`), ...cmd];
     } else {
       await PackUtil.runCommand(cmd, { env: { ...process.env, ...env } });
     }

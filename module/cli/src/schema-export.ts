@@ -68,21 +68,21 @@ export class CliSchemaExportUtil {
       required: x.required?.active !== false,
       choices: x.enum?.values,
       default: Array.isArray(x.default) ? x.default.slice(0) : x.default,
-      flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
-      envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))
+      flagNames: (x.aliases ?? []).slice(0).filter(value => !value.startsWith('env.')),
+      envVars: (x.aliases ?? []).slice(0).filter(value => value.startsWith('env.')).map(value => value.replace('env.', ''))
     };
   }
 
   static exportSchema(cls: Class): CliCommandSchema {
     const schema = SchemaRegistryIndex.getConfig(cls);
     const config = CliCommandRegistryIndex.get(cls);
-    const processed = Object.values(schema.fields).map(v => this.processInput(v));
+    const processed = Object.values(schema.fields).map(value => this.processInput(value));
     return {
       name: config.name,
       module: describeFunction(config.cls).module,
       description: schema.description,
-      flags: processed.filter(v => v.flagNames && v.flagNames.length > 0),
-      args: processed.filter(v => !v.flagNames || v.flagNames.length === 0),
+      flags: processed.filter(value => value.flagNames && value.flagNames.length > 0),
+      args: processed.filter(value => !value.flagNames || value.flagNames.length === 0),
       runTarget: config.runTarget ?? false,
       commandModule: describeFunction(cls).module,
     };

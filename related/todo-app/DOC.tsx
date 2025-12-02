@@ -18,8 +18,8 @@ async function init() {
 
   ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); });
 
-  cmd.stdout?.on('data', v =>
-    startupBuffer.push(Buffer.from(v)));
+  cmd.stdout?.on('data', chunk =>
+    startupBuffer.push(Buffer.from(chunk)));
 
   while (startupBuffer.length === 0) {
     await Util.blockingTimeout(100);
@@ -36,7 +36,7 @@ function TableOfContents({ root }: { root: () => DocJSXElement }) {
   const sections: DocJSXElementByFn<'Section'>[] =
     final.filter(x => isDocJSXElement(x) && x.type === c.Section && castTo<DocJSXElementByFn<'Section'>>(x).props.title !== 'Overview');
   return <ol>
-    {...sections.map(v => <li><c.Anchor title={v.props.title} href={v.props.title} /></li>)}
+    {...sections.map(item => <li><c.Anchor title={item.props.title} href={item.props.title} /></li>)}
   </ol>;
 }
 
@@ -151,8 +151,8 @@ $ npx trv eslint:register
         config={{
           env: { TRV_LOG_PLAIN: '1' },
           rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
-          formatCommand: (name, args) => [name, ...args].map(v =>
-            v.replaceAll('doc/create', 'support/create').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')
+          formatCommand: (name, args) => [name, ...args].map(arg =>
+            arg.replaceAll('doc/create', 'support/create').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')
           ).join(' ')
         }}
       />
@@ -165,7 +165,7 @@ $ npx trv eslint:register
         env: { TRV_LOG_PLAIN: '1' },
         rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
         formatCommand: (name, args) => [name, ...args].map(
-          v => v.replaceAll('doc/list', 'support/list').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')
+          arg => arg.replaceAll('doc/list', 'support/list').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')
         ).join(' ')
       }} />
     </c.Section>

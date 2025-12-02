@@ -70,28 +70,28 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     const found = this.#commandMapping.get(name)!;
     const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
     const filtered = values
-      .filter((v): v is Class => typeof v === 'function')
-      .reduce<Class[]>((acc, v) => {
-        const parent = getParentClass(v);
+      .filter((value): value is Class => typeof value === 'function')
+      .reduce<Class[]>((acc, cls) => {
+        const parent = getParentClass(cls);
         if (parent && !acc.includes(parent)) {
           acc.push(parent);
         }
-        acc.push(v);
+        acc.push(cls);
         return acc;
       }, []);
 
     const uninitialized = filtered
-      .filter(v => !this.store.finalized(v));
+      .filter(cls => !this.store.finalized(cls));
 
 
     // Initialize any uninitialized commands
     if (uninitialized.length) {
       // Ensure processed
-      Registry.process(uninitialized.map(v => ({ type: 'added', curr: v })));
+      Registry.process(uninitialized.map(cls => ({ type: 'added', curr: cls })));
     }
 
-    for (const v of values) {
-      const config = this.store.get(v);
+    for (const cls of values) {
+      const config = this.store.get(cls);
       if (!config) {
         continue;
       }

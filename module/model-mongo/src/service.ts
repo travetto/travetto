@@ -226,11 +226,11 @@ export class MongoModelService implements
 
     const operation: Partial<T> = castTo(Object
       .entries(simple)
-      .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((acc, [k, v]) => {
-        if (v === null || v === undefined) {
-          (acc.$unset ??= {})[k] = v;
+      .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((acc, [key, value]) => {
+        if (value === null || value === undefined) {
+          (acc.$unset ??= {})[key] = value;
         } else {
-          (acc.$set ??= {})[k] = v;
+          (acc.$set ??= {})[key] = value;
         }
         return acc;
       }, {}));
@@ -376,8 +376,8 @@ export class MongoModelService implements
       out.errors = result.getWriteErrors();
       for (const error of out.errors) {
         const operation = operations[error.index];
-        const k = TypedObject.keys(operation)[0];
-        out.counts[k] -= 1;
+        const key = TypedObject.keys(operation)[0];
+        out.counts[key] -= 1;
       }
       out.counts.error = out.errors.length;
     }
@@ -500,11 +500,11 @@ export class MongoModelService implements
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
     const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>(
-      (acc, [k, v]) => {
-        if (v === null || v === undefined) {
-          (acc.$unset ??= {})[k] = v;
+      (acc, [key, value]) => {
+        if (value === null || value === undefined) {
+          (acc.$unset ??= {})[key] = value;
         } else {
-          (acc.$set ??= {})[k] = v;
+          (acc.$set ??= {})[key] = value;
         }
         return acc;
       }, {});

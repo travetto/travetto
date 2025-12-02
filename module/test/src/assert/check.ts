@@ -109,7 +109,7 @@ export class AssertCheck {
           assertion.message = (OP_MAPPING[fn] ?? '{state} be {expected}');
         }
         assertion.message = assertion.message
-          .replace(/[{]([A-Za-z]+)[}]/g, (a, k: StringFields<Assertion>) => common[k] || assertion[k]!)
+          .replace(/[{]([A-Za-z]+)[}]/g, (a, key: StringFields<Assertion>) => common[key] || assertion[key]!)
           .replace(/not not/g, ''); // Handle double negatives
         assertion.error = error;
         error.message = assertion.message;

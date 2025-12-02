@@ -76,7 +76,7 @@ export class CliCommandSchemaUtil {
       if (!(error instanceof CliValidationResultError) && !(error instanceof ValidationResultError)) {
         throw error;
       }
-      return error.details.errors.map(v => ({ ...v, source: getSource(v.source, SOURCES[i]) }));
+      return error.details.errors.map(value => ({ ...value, source: getSource(value.source, SOURCES[i]) }));
     }));
 
     const errors = (await Promise.all(results)).flatMap(x => (x ?? []));

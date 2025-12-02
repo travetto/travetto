@@ -209,7 +209,7 @@ export class ParameterSelector {
     qp.title = title;
     qp.items = items;
 
-    return this.getInputComplex(qp, v => v.activeItems[0]);
+    return this.getInputComplex(qp, item => item.activeItems[0]);
   }
 
   /**

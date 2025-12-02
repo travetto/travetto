@@ -35,7 +35,7 @@ async function getContext() {
   const ctxSrc = require.resolve('@travetto/manifest/src/context.ts');
   const ctxDest = path.resolve(__dirname, 'gen.context.mjs');
   await writeIfStale(ctxSrc, ctxDest, content => transpile(content, true, false));
-  const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest')} */ v) => v.getManifestContext());
+  const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest')} */ value) => value.getManifestContext());
 
   const srcPath = path.resolve.bind(path, ctx.workspace.path, ctx.build.compilerModuleFolder);
   const destPath = (file = '') =>
@@ -47,15 +47,15 @@ async function getContext() {
     destPath,
     tsconfig: path.resolve(ctx.workspace.path, 'tsconfig.json'),
     cleanImports: (t = '') => t
-      .replace(/from ['"]((@travetto|[.]+)[^'"]+)['"]/g, (_, v, m) => {
-        const s = (m === '@travetto' ? destPath(v) : v).replace(SOURCE_EXT_RE, OUTPUT_EXT);
-        const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(v) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
+      .replace(/from ['"]((@travetto|[.]+)[^'"]+)['"]/g, (_, location, module) => {
+        const s = (module === '@travetto' ? destPath(location) : location).replace(SOURCE_EXT_RE, OUTPUT_EXT);
+        const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(location) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
         return `from '${s}${suf}'`;
       }),
     loadMain: () => import(destPath(`${COMP_MOD}/support/entry.main.ts`))
-      .then((/** @type {import('../support/entry.main.ts')} */ v) => v.main(ctx)),
+      .then((/** @type {import('../support/entry.main.ts')} */  value) => value.main(ctx)),
     supportFiles: () => readdir(srcPath('support'), { recursive: true, encoding: 'utf8' })
-      .then(v => v.filter(f => f.endsWith('.ts')).map(j => `support/${j}`))
+      .then(files => files.filter(f => f.endsWith('.ts')).map(j => `support/${j}`))
   };
 }
 

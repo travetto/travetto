@@ -89,8 +89,8 @@ export class WorkspaceResultsManager {
     const entries = [...this.#results.entries()];
     this.#results.clear();
     this.#diagnostics.reset();
-    for (const [, v] of entries) {
-      v.dispose();
+    for (const [, entry] of entries) {
+      entry.dispose();
     }
   }
 

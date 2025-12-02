@@ -74,8 +74,8 @@ export class ConnectResponse implements Pick<ServerResponse,
 
   writeHead(statusCode: unknown, statusMessage?: unknown, headers?: unknown): this {
     this.#response.context.httpStatusCode = castTo(statusCode);
-    for (const [k, v] of Object.entries(headers ?? {})) {
-      this.#response.headers.set(k, v);
+    for (const [key, value] of Object.entries(headers ?? {})) {
+      this.#response.headers.set(key, value);
     }
     this.#headersSent = true;
     return this;

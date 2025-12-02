@@ -432,18 +432,18 @@ export abstract class SQLDialect implements DialectState {
           const inner = this.getWhereFieldSQL(sStack, top);
           items.push(inner);
         } else {
-          const v = top[subKey];
+          const value = top[subKey];
           const resolve = this.resolveValue.bind(this, field);
 
           switch (subKey) {
             case '$nin': case '$in': {
-              const arr = (Array.isArray(v) ? v : [v]).map(el => resolve(el));
+              const arr = (Array.isArray(value) ? value : [value]).map(el => resolve(el));
               items.push(`${sPath} ${SQL_OPS[subKey]} (${arr.join(',')})`);
               break;
             }
             case '$all': {
               const set = new Set();
-              const arr = [v].flat().filter(x => !set.has(x) && !!set.add(x)).map(el => resolve(el));
+              const arr = [value].flat().filter(x => !set.has(x) && !!set.add(x)).map(el => resolve(el));
               const valueTable = this.parentTable(sStack);
               const alias = `_all_${sStack.length}`;
               const pPath = this.identifier(this.parentPathField.name);
@@ -458,7 +458,7 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$regex': {
-              const re = DataUtil.toRegex(castTo(v));
+              const re = DataUtil.toRegex(castTo(value));
               const src = re.source;
               const ins = re.flags && re.flags.includes('i');
 
@@ -471,11 +471,11 @@ export abstract class SQLDialect implements DialectState {
                 }
               } else {
                 if (!ins || SQL_OPS.$iregex) {
-                  const value = resolve(v);
-                  items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${value}`);
+                  const result = resolve(value);
+                  items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${result}`);
                 } else {
-                  const value = resolve(new RegExp(src.toLowerCase(), re.flags));
-                  items.push(`LOWER(${sPath}) ${SQL_OPS[subKey]} ${value}`);
+                  const result = resolve(new RegExp(src.toLowerCase(), re.flags));
+                  items.push(`LOWER(${sPath}) ${SQL_OPS[subKey]} ${result}`);
                 }
               }
               break;
@@ -487,21 +487,21 @@ export abstract class SQLDialect implements DialectState {
                 const pPath = this.identifier(this.parentPathField.name);
                 const rpPath = this.resolveName([...sStack, field, this.parentPathField]);
 
-                items.push(`0 ${!v ? '=' : '<>'} (
+                items.push(`0 ${!value ? '=' : '<>'} (
                   SELECT COUNT(${alias}.${this.identifier(field.name)})
                   FROM ${valueTable} ${alias} 
                   WHERE ${alias}.${pPath} = ${rpPath}
                 )`);
               } else {
-                items.push(`${sPath} ${v ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
+                items.push(`${sPath} ${value ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
               }
               break;
             }
             case '$ne': case '$eq': {
-              if (v === null || v === undefined) {
+              if (value === null || value === undefined) {
                 items.push(`${sPath} ${subKey === '$ne' ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
               } else {
-                const base = `${sPath} ${SQL_OPS[subKey]} ${resolve(v)}`;
+                const base = `${sPath} ${SQL_OPS[subKey]} ${resolve(value)}`;
                 items.push(subKey === '$ne' ? `(${base} OR ${sPath} ${SQL_OPS.$is} NULL)` : base);
               }
               break;
@@ -854,8 +854,8 @@ UPDATE ${this.table(stack)} ${this.rootAlias}
 SET
   ${Object
         .entries(data)
-        .filter(([k]) => k in localMap)
-        .map(([k, v]) => `${this.identifier(k)}=${this.resolveValue(localMap[k], v)}`).join(', ')}
+        .filter(([key]) => key in localMap)
+        .map(([key, value]) => `${this.identifier(key)}=${this.resolveValue(localMap[key], value)}`).join(', ')}
   ${this.getWhereSQL(type, where)};`;
   }
 
@@ -1001,10 +1001,10 @@ ${this.getWhereSQL(cls, where!)}`;
 
       await Promise.all([
         ...upserts.filter(x => x.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string | symbol, string>>(v.value)[idx]))
+          this.deleteByIds(i.stack, i.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
         ),
         ...updates.filter(x => x.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string | symbol, string>>(v.value)[idx]))
+          this.deleteByIds(i.stack, i.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
         ),
       ]);
     }

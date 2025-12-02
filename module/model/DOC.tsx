@@ -12,7 +12,7 @@ import { Links } from './support/doc.support.ts';
 const ModelTypeContract = toConcrete<ModelType>();
 
 const ModelImplementations = () => {
-  const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Blob', 'Bulk'].map(v => <td>{v}</td>);
+  const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Blob', 'Bulk'].map(name => <td>{name}</td>);
 
   const modelImplRows = ([
     [d.mod('ModelDynamodb'), 'X', 'X', 'X', 'X', ' ', ' '],

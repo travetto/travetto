@@ -45,9 +45,9 @@ export const classStr = (existing: string | undefined, ...toAdd: string[]): stri
 export const combinePropsToStr = (allowedProps: Set<string>, props: { className?: string } & Record<string, unknown>, addClasses: string[] = []): string => {
   const out = { ...props, className: classStr(props.className, ...addClasses) };
   return Object.entries(out)
-    .filter(([k, v]) => allowedProps.has(k) && v !== undefined && v !== null && v !== '')
-    .map(([k, v]) => [k === 'className' ? 'class' : k, v])
-    .map(([k, v]) => `${k}="${v}"`).join(' ');
+    .filter(([key, value]) => allowedProps.has(key) && value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => [key === 'className' ? 'class' : key, value])
+    .map(([key, value]) => `${key}="${value}"`).join(' ');
 };
 
 export const isOfType = (el: JSXElement, type: string): boolean => typeof el.type === 'function' && el.type.name === type;

@@ -6,7 +6,9 @@ import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
-const validEnv = (k: string): boolean => IPC_ALLOWED_ENV.has(k) || (!IPC_INVALID_ENV.has(k) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(k) && !/VSCODE/.test(k));
+const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
+  !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
+);
 
 export class CliUtil {
   /**
@@ -71,7 +73,7 @@ export class CliUtil {
     };
     console.log('Triggering IPC request', request);
 
-    Object.entries(process.env).forEach(([k, v]) => validEnv(k) && (env[k] = v!));
+    Object.entries(process.env).forEach(([key, value]) => validEnv(key) && (env[key] = value!));
     const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSON.stringify(request) });
     return sent.ok;
   }

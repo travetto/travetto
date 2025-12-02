@@ -7,7 +7,7 @@ import { Required } from '@travetto/schema';
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types.ts';
 import { WebAuthConfig } from '../config.ts';
 
-const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
+const toDate = (value: string | Date | undefined): Date | undefined => (typeof value === 'string') ? new Date(value) : value;
 
 /**
  * Auth Context interceptor

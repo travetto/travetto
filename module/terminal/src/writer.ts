@@ -6,9 +6,9 @@ type State = { output: tty.WriteStream, height: number, width: number };
 type TermCoord = { x: number, y: number };
 
 const ESC = '\x1b[';
-const clamp = (v: number, size: number): number => Math.max(Math.min(v + (v < 0 ? size : 0), size - 1), 0);
-const delta = (v: number | undefined, pos: string, neg: string): string =>
-  !v ? '' : `${ESC}${Math.abs(v)}${v < 0 ? neg : pos}`;
+const clamp = (input: number, size: number): number => Math.max(Math.min(input + (input < 0 ? size : 0), size - 1), 0);
+const delta = (input: number | undefined, pos: string, neg: string): string =>
+  !input ? '' : `${ESC}${Math.abs(input)}${input < 0 ? neg : pos}`;
 
 const Codes = {
   SHOW_CURSOR: `${ESC}?25h`,

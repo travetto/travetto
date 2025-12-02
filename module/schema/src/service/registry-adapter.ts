@@ -92,8 +92,8 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     case 'Required':
     case 'Partial': {
       base.fields = Object.fromEntries(
-        Object.entries(parent.fields).map(([k, v]) => [k, {
-          ...v,
+        Object.entries(parent.fields).map(([key, value]) => [key, {
+          ...value,
           required: {
             active: base.mappedOperation === 'Required'
           }
@@ -105,8 +105,8 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     case 'Omit': {
       const keys = new Set<string>(base.mappedFields ?? []);
       base.fields = Object.fromEntries(
-        Object.entries(parent.fields).filter(([k]) =>
-          base.mappedOperation === 'Pick' ? keys.has(k) : !keys.has(k)
+        Object.entries(parent.fields).filter(([key]) =>
+          base.mappedOperation === 'Pick' ? keys.has(key) : !keys.has(key)
         )
       );
       break;
@@ -260,8 +260,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
         ('with' in fields ? fields.with : []);
 
       this.#views.set(view,
-        fieldList.reduce<SchemaFieldMap>((acc, v) => {
-          acc[v] = config.fields[v];
+        fieldList.reduce<SchemaFieldMap>((acc, value) => {
+          acc[value] = config.fields[value];
           return acc;
         }, {})
       );

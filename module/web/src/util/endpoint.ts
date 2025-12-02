@@ -175,7 +175,7 @@ export class EndpointUtil {
       const headers = endpoint.finalizedResponseHeaders;
       let response: WebResponse;
       if (body instanceof WebResponse) {
-        for (const [k, v] of headers) { body.headers.setIfAbsent(k, v); }
+        for (const [key, value] of headers) { body.headers.setIfAbsent(key, value); }
         // Rewrite context
         Object.assign(body.context, { ...endpoint.responseContext, ...body.context });
         response = body;
@@ -246,7 +246,7 @@ export class EndpointUtil {
 
     // Filter out conditional endpoints
     const endpoints = (await Promise.all(
-      config.endpoints.map(endpoint => Promise.resolve(endpoint.conditional?.() ?? true).then(v => v ? endpoint : undefined))
+      config.endpoints.map(endpoint => Promise.resolve(endpoint.conditional?.() ?? true).then(value => value ? endpoint : undefined))
     )).filter(x => !!x);
 
     if (!endpoints.length) {

@@ -17,7 +17,7 @@ export class CliServiceCommand implements CliCommandShape {
         folder: f => f === 'support',
         file: f => /support\/service[.]/.test(f.sourceFile)
       })
-        .map(x => Runtime.importFrom<{ service: ServiceDescriptor }>(x.import).then(v => v.service))
+        .map(x => Runtime.importFrom<{ service: ServiceDescriptor }>(x.import).then(value => value.service))
     ))
       .filter(x => !!x)
       .filter(x => services?.length ? services.includes(x.name) : true)
@@ -48,11 +48,11 @@ export class CliServiceCommand implements CliCommandShape {
     const maxStatus = 20;
     const q = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
 
-    const jobs = all.map(async (v, i) => {
-      const identifier = v.name.padEnd(maxName);
-      const type = `${v.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
+    const jobs = all.map(async (descriptor, i) => {
+      const identifier = descriptor.name.padEnd(maxName);
+      const type = `${descriptor.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
       let msg: string;
-      for await (const [valueType, value] of new ServiceRunner(v).action(action)) {
+      for await (const [valueType, value] of new ServiceRunner(descriptor).action(action)) {
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
         q.add({ idx: i, text: msg = cliTpl`${{ identifier }} ${{ type }} ${details}` });
       }

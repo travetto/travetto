@@ -12,8 +12,8 @@ export class PackUtil {
    */
   static buildEnvFile(env: Record<string, string | number | boolean | undefined>): string[] {
     return Object.entries(env)
-      .filter(([, v]) => (v !== undefined))
-      .map(([k, v]) => `${k}=${v}`);
+      .filter(([, value]) => (value !== undefined))
+      .map(([key, value]) => `${key}=${value}`);
   }
 
   /**
@@ -43,10 +43,10 @@ export class PackUtil {
     const vars = { DIST: workspace, TRV_OUT: RuntimeIndex.outputRoot, ROOT: path.resolve(), MOD: module };
 
     const replaceArgs = (text: string): string => Object.entries(vars)
-      .reduce((str, [k, v]) => str.replaceAll(v, ActiveShellCommand.var(k)), text);
+      .reduce((str, [key, value]) => str.replaceAll(value, ActiveShellCommand.var(key)), text);
 
     const preamble = ActiveShellCommand.script(
-      Object.entries(vars).map(([k, v]) => ActiveShellCommand.export(k, v).join(' ')),
+      Object.entries(vars).map(([key, value]) => ActiveShellCommand.export(key, value).join(' ')),
     ).contents;
 
     let stream: fs.FileHandle | undefined;

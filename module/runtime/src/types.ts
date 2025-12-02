@@ -69,7 +69,7 @@ export function getAllEntries<V>(obj: Record<string | symbol, V>): [string | sym
   return [
     ...Object.keys(obj),
     ...Object.getOwnPropertySymbols(obj)
-  ].map(k => [k, obj[k]] as const);
+  ].map(key => [key, obj[key]] as const);
 }
 
 /**

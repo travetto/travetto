@@ -15,7 +15,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   finalize: (text, context) => {
     const brand = `<!-- ${context.generatedStamp} -->\n<!-- ${context.rebuildStamp} -->`;
     const cleaned = text
-      .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, v) => v === 's' ? _ : `${link} ${v}`)
+      .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, value) => value === 's' ? _ : `${link} ${value}`)
       .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`);
     return `${brand}\n${cleaned}`;
   },

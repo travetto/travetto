@@ -29,9 +29,9 @@ export class XunitEmitter implements TestConsumerShape {
       return '';
     }
 
-    for (const k of Object.keys(obj)) {
-      if (!obj[k]) {
-        delete obj[k];
+    for (const key of Object.keys(obj)) {
+      if (!obj[key]) {
+        delete obj[key];
       }
     }
     if (Object.keys(obj).length) {

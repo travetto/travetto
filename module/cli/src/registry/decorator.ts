@@ -53,7 +53,7 @@ const FIELD_CONFIG: {
     },
     {
       name: 'debugIpc',
-      run: cmd => CliUtil.debugIfIpc(cmd).then((v) => v && process.exit(0)),
+      run: cmd => CliUtil.debugIfIpc(cmd).then((flag) => flag && process.exit(0)),
       field: {
         type: Boolean,
         aliases: ['-di'],
@@ -64,7 +64,7 @@ const FIELD_CONFIG: {
     },
     {
       name: 'canRestart',
-      run: cmd => CliUtil.runWithRestart(cmd)?.then((v) => v && process.exit(0)),
+      run: cmd => CliUtil.runWithRestart(cmd)?.then((flag) => flag && process.exit(0)),
       field: {
         type: Boolean,
         aliases: ['-cr'],

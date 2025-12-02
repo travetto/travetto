@@ -64,7 +64,7 @@ export class WebCommonUtil {
       rules,
       this.#convert.bind(this),
       (regex, mime) => regex.test(mime),
-      k => k
+      key => key
     );
   }
 
@@ -95,7 +95,7 @@ export class WebCommonUtil {
     }
 
     const inputMap = new Map(items.map(x => [x.key, x]));
-    return keys.map(k => inputMap.get(k)!);
+    return keys.map(key => inputMap.get(key)!);
   }
 
   /**

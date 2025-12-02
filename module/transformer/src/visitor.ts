@@ -111,7 +111,7 @@ export class VisitorFactory<S extends State = State> {
           for (const [idx, all] of [...state.added].toSorted(([idxA], [idxB]) => idxB - idxA)) {
             statements = [
               ...statements.slice(0, Math.max(idx, 0)),
-              ...all.map(v => this.visit(state, context, v)),
+              ...all.map(value => this.visit(state, context, value)),
               ...statements.slice(Math.max(idx, 0))
             ];
             state.added.delete(idx);

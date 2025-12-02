@@ -63,7 +63,7 @@ export class CompilerClient {
 
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
-    return this.#fetch('/info', { timeout: 200 }, false).then(v => JSON.parse(v.text), () => undefined);
+    return this.#fetch('/info', { timeout: 200 }, false).then(response => JSON.parse(response.text), () => undefined);
   }
 
   async isWatching(): Promise<boolean> {
@@ -72,7 +72,7 @@ export class CompilerClient {
 
   /** Clean the server */
   clean(): Promise<boolean> {
-    return this.#fetch('/clean', { timeout: 300 }).then(v => v.ok, () => false);
+    return this.#fetch('/clean', { timeout: 300 }).then(response => response.ok, () => false);
   }
 
   /** Stop server and wait for shutdown */
@@ -81,7 +81,7 @@ export class CompilerClient {
     if (!info) {
       this.#log.debug('Stopping server, info not found, manual killing');
       return Promise.all([this.#handle.server.kill(), this.#handle.compiler.kill()])
-        .then(v => v.some(x => x));
+        .then(results => results.some(x => x));
     }
 
     await this.#fetch('/stop').catch(() => { }); // Trigger

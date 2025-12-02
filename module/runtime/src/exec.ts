@@ -66,14 +66,14 @@ export class ExecUtil {
     for (; ;) {
       const proc = run();
       const interrupt = (): void => { proc.kill('SIGINT'); };
-      const toMessage = (v: unknown): void => { proc.send?.(v!); };
+      const toMessage = (value: unknown): void => { proc.send?.(value!); };
 
       // Proxy kill requests
       process.on('message', toMessage);
       if (relayInterrupt) {
         process.on('SIGINT', interrupt);
       }
-      proc.on('message', v => process.send?.(v));
+      proc.on('message', value => process.send?.(value));
 
       const result = await this.getResult(proc, { catch: true });
       if (result.code !== this.RESTART_EXIT_CODE) {
@@ -150,11 +150,11 @@ export class ExecUtil {
       }
     });
 
-    return castTo(options.catch ? result : result.then(v => {
-      if (v.valid) {
-        return v;
+    return castTo(options.catch ? result : result.then(executionResult => {
+      if (executionResult.valid) {
+        return executionResult;
       } else {
-        throw new Error(v.message);
+        throw new Error(executionResult.message);
       }
     }));
   }

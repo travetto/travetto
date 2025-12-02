@@ -13,7 +13,7 @@ export const SUMMARY_STYLE = Object.entries({
   'max-width': '0px',
   opacity: '0',
   overflow: 'hidden'
-}).map(([k, v]) => `${k}: ${v}`).join('; ');
+}).map(([key, value]) => `${key}: ${value}`).join('; ');
 
 const allowedProps = new Set([
   'className', 'id', 'dir', 'name', 'src',
@@ -32,7 +32,7 @@ const stdFull = async (state: RenderState<JSXElement, RenderContext>): Promise<s
 export const Html: RenderProvider<RenderContext> = {
   finalize: async (html, context, isRoot = false) => {
     html = html
-      .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, v) => `${tag} ${v}`)
+      .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, value) => `${tag} ${value}`)
       .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`);
 
     if (isRoot) {

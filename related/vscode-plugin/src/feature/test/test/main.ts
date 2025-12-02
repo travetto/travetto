@@ -155,14 +155,14 @@ class TestRunnerFeature extends BaseFeature {
    */
   buildCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
     return (this.#consumer.getResults(document)?.getListOfTests() || [])
-      .filter(v => v.lineStart < document.lineCount && document.lineAt(v.lineStart - 1).text.includes('@Test'))
-      .map(v => ({
-        range: document.lineAt(v.lineStart - 1).range,
+      .filter(test => test.lineStart < document.lineCount && document.lineAt(test.lineStart - 1).text.includes('@Test'))
+      .map(test => ({
+        range: document.lineAt(test.lineStart - 1).range,
         isResolved: true,
         command: {
           command: this.commandName('line'),
           title: 'Debug Test',
-          arguments: [v.lineBodyStart]
+          arguments: [test.lineBodyStart]
         }
       }));
   }

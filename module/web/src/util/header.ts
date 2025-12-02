@@ -32,17 +32,17 @@ export class WebHeaderUtil {
   static parseSetCookieHeader(header: string): Cookie {
     const parts = header.split(SPLIT_SEMI);
     const [name, value] = parts[0].split(SPLIT_EQ);
-    const c: Cookie = { name, value };
-    for (const p of parts.slice(1)) {
-      const [k, pv = ''] = p.toLowerCase().split(SPLIT_EQ);
-      const v = pv.charCodeAt(0) === QUOTE ? pv.slice(1, -1) : pv;
-      if (k === 'expires') {
-        c[k] = new Date(v);
+    const result: Cookie = { name, value };
+    for (const part of parts.slice(1)) {
+      const [key, partValue = ''] = part.toLowerCase().split(SPLIT_EQ);
+      const cleanedValue = partValue.charCodeAt(0) === QUOTE ? partValue.slice(1, -1) : partValue;
+      if (key === 'expires') {
+        result[key] = new Date(cleanedValue);
       } else {
-        c[castKey(k)] = castTo(v || true);
+        result[castKey(key)] = castTo(cleanedValue || true);
       }
     }
-    return c;
+    return result;
   }
 
   /**
@@ -53,20 +53,20 @@ export class WebHeaderUtil {
     if (!input) {
       return { value: '', parameters: {} };
     }
-    const [rv, ...parts] = input.split(SPLIT_SEMI);
+    const [rawValue, ...parts] = input.split(SPLIT_SEMI);
     const item: WebParsedHeader = { value: '', parameters: {} };
-    const value = rv.charCodeAt(0) === QUOTE ? rv.slice(1, -1) : rv;
+    const value = rawValue.charCodeAt(0) === QUOTE ? rawValue.slice(1, -1) : rawValue;
     if (value.includes('=')) {
       parts.unshift(value);
     } else {
       item.value = value;
     }
     for (const part of parts) {
-      const [k, pv = ''] = part.split(SPLIT_EQ);
-      const v = (pv.charCodeAt(0) === QUOTE) ? pv.slice(1, -1) : pv;
-      item.parameters[k] = v;
-      if (k === 'q') {
-        item.q = parseFloat(v);
+      const [key, partValue = ''] = part.split(SPLIT_EQ);
+      const cleanedValue = (partValue.charCodeAt(0) === QUOTE) ? partValue.slice(1, -1) : partValue;
+      item.parameters[key] = cleanedValue;
+      if (key === 'q') {
+        item.q = parseFloat(cleanedValue);
       }
     }
     return item;
@@ -76,9 +76,9 @@ export class WebHeaderUtil {
    * Parse full header
    */
   static parseHeader(input: string): WebParsedHeader[] {
-    const v = input.trim();
+    const value = input.trim();
     if (!input) { return []; }
-    return v.split(SPLIT_COMMA).map(x => this.parseHeaderSegment(x));
+    return value.split(SPLIT_COMMA).map(x => this.parseHeaderSegment(x));
   }
 
   /**
@@ -146,7 +146,7 @@ export class WebHeaderUtil {
     const noneMatch = request.get('If-None-Match');
     if (noneMatch) {
       const etag = response.get('ETag');
-      const validTag = (v: string): boolean => v === etag || v === `W/${etag}` || `W/${v}` === etag;
+      const validTag = (value: string): boolean => value === etag || value === `W/${etag}` || `W/${value}` === etag;
       return noneMatch === '*' || (!!etag && noneMatch.split(SPLIT_COMMA).some(validTag));
     } else {
       const modifiedSince = request.get('If-Modified-Since');

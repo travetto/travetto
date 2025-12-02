@@ -155,8 +155,8 @@ export class Util {
    * Serialize to JSON
    */
   static serializeToJSON<T>(out: T): string {
-    return JSON.stringify(out, function (k, v) {
-      const ov = this[k];
+    return JSON.stringify(out, function (key, value) {
+      const ov = this[key];
       if (ov && ov instanceof Error) {
         return {
           $: true,
@@ -165,10 +165,10 @@ export class Util {
           message: ov.message,
           stack: ov.stack,
         };
-      } else if (typeof v === 'bigint') {
-        return `${v.toString()}$n`;
+      } else if (typeof value === 'bigint') {
+        return `${value.toString()}$n`;
       } else {
-        return v;
+        return value;
       }
     });
   }
@@ -177,21 +177,21 @@ export class Util {
    * Deserialize from JSON
    */
   static deserializeFromJson<T = unknown>(input: string): T {
-    return JSON.parse(input, function (k, v) {
-      if (v && typeof v === 'object' && '$' in v) {
-        const error = AppError.fromJSON(v) ?? new Error();
+    return JSON.parse(input, function (key, value) {
+      if (value && typeof value === 'object' && '$' in value) {
+        const error = AppError.fromJSON(value) ?? new Error();
         if (!(error instanceof AppError)) {
-          const { $: _, ...rest } = v;
+          const { $: _, ...rest } = value;
           Object.assign(error, rest);
         }
-        error.message = v.message;
-        error.stack = v.stack;
-        error.name = v.name;
+        error.message = value.message;
+        error.stack = value.stack;
+        error.name = value.name;
         return error;
-      } else if (typeof v === 'string' && /^\d+[$]n$/.test(v)) {
-        return BigInt(v.split('$')[0]);
+      } else if (typeof value === 'string' && /^\d+[$]n$/.test(value)) {
+        return BigInt(value.split('$')[0]);
       } else {
-        return v;
+        return value;
       }
     });
   }

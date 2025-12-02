@@ -74,22 +74,22 @@ export class IndexManager implements ModelStorageSupport {
    */
   async createIndex(cls: Class, alias = true): Promise<string> {
     const mapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
-    const { index } = this.getIdentity(cls); // Already namespaced
-    const concreteIndex = `${index}_${Date.now()}`;
+    const ident = this.getIdentity(cls); // Already namespaced
+    const concreteIndex = `${ident.index}_${Date.now()}`;
     try {
       await this.#client.indices.create({
         index: concreteIndex,
         mappings: mapping,
         settings: this.config.indexCreate,
-        ...(alias ? { aliases: { [index]: {} } } : {})
+        ...(alias ? { aliases: { [ident.index]: {} } } : {})
       });
-      console.debug('Index created', { index, concrete: concreteIndex });
+      console.debug('Index created', { index: ident.index, concrete: concreteIndex });
       console.debug('Index Config', {
         mappings: mapping,
         settings: this.config.indexCreate
       });
     } catch (error) {
-      console.warn('Index already created', { index, error });
+      console.warn('Index already created', { index: ident.index, error });
     }
     return concreteIndex;
   }
@@ -99,9 +99,9 @@ export class IndexManager implements ModelStorageSupport {
    */
   async createIndexIfMissing(cls: Class): Promise<void> {
     const baseCls = SchemaRegistryIndex.getBaseClass(cls);
-    const identity = this.getIdentity(baseCls);
+    const ident = this.getIdentity(baseCls);
     try {
-      await this.#client.search(identity);
+      await this.#client.search(ident);
     } catch {
       await this.createIndex(baseCls);
     }
@@ -114,8 +114,8 @@ export class IndexManager implements ModelStorageSupport {
 
   async exportModel(cls: Class<ModelType>): Promise<string> {
     const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
-    const { index } = this.getIdentity(cls); // Already namespaced
-    return `curl -XPOST $ES_HOST/${index} -d '${JSON.stringify({
+    const ident = this.getIdentity(cls); // Already namespaced
+    return `curl -XPOST $ES_HOST/${ident.index} -d '${JSON.stringify({
       mappings: schema,
       settings: this.config.indexCreate
     })}'`;
@@ -136,19 +136,19 @@ export class IndexManager implements ModelStorageSupport {
    */
   async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
     // Find which fields are gone
-    const removes = change.subs.reduce<string[]>((acc, v) => {
-      acc.push(...v.fields
+    const removes = change.subs.reduce<string[]>((acc, subChange) => {
+      acc.push(...subChange.fields
         .filter(event => event.type === 'removing')
-        .map(event => [...v.path.map(f => f.name), event.prev!.name].join('.')));
+        .map(event => [...subChange.path.map(f => f.name), event.prev!.name].join('.')));
       return acc;
     }, []);
 
     // Find which types have changed
-    const fieldChanges = change.subs.reduce<string[]>((acc, v) => {
-      acc.push(...v.fields
+    const fieldChanges = change.subs.reduce<string[]>((acc, subChange) => {
+      acc.push(...subChange.fields
         .filter(event => event.type === 'changed')
         .filter(event => event.prev?.type !== event.curr?.type)
-        .map(event => [...v.path.map(f => f.name), event.prev!.name].join('.')));
+        .map(event => [...subChange.path.map(f => f.name), event.prev!.name].join('.')));
       return acc;
     }, []);
 

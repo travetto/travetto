@@ -3,7 +3,7 @@ import { Any, ClassInstance, getClass } from '@travetto/runtime';
 import { SchemaFieldConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
-type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
+type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, property: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
 function field<V>(...obj: Partial<SchemaFieldConfig>[]): PropType<V> {
   return (instance: ClassInstance, property: string | symbol): void => {

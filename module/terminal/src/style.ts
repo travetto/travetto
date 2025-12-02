@@ -76,7 +76,7 @@ export class StyleUtil {
    */
   static getPalette<K extends string>(inp: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
     return TypedObject.fromEntries(
-      TypedObject.entries(inp).map(([k, v]) => [k, this.getThemedStyle(v)]));
+      TypedObject.entries(inp).map(([key, value]) => [key, this.getThemedStyle(value)]));
   }
 
   /**
@@ -96,9 +96,9 @@ export class StyleUtil {
             if (subKeys.length !== 1) {
               throw new Error('Invalid template variable, one and only one key should be specified');
             }
-            const [k] = subKeys;
-            const v = el[k]!;
-            final = v === undefined ? '' : palette[k](v)!;
+            const [key] = subKeys;
+            const value = el[key]!;
+            final = value === undefined ? '' : palette[key](value)!;
           }
           return `${values[i] ?? ''}${final ?? ''}`;
         });

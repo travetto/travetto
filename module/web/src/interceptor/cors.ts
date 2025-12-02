@@ -72,13 +72,13 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
   decorate(request: WebRequest, resolved: CorsConfig['resolved'], response: WebResponse,): WebResponse {
     const origin = request.headers.get('Origin');
     if (resolved.origins.size === 0 || resolved.origins.has(origin!)) {
-      for (const [k, v] of [
+      for (const [header, value] of [
         ['Access-Control-Allow-Origin', origin || '*'],
         ['Access-Control-Allow-Credentials', `${resolved.credentials}`],
         ['Access-Control-Allow-Methods', resolved.methods],
         ['Access-Control-Allow-Headers', resolved.headers || request.headers.get('Access-Control-Request-Headers') || '*'],
       ]) {
-        response.headers.setIfAbsent(k, v);
+        response.headers.setIfAbsent(header, value);
       }
     }
     return response;

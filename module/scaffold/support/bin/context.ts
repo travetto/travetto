@@ -108,7 +108,7 @@ export class Context {
 
   templateContext(): Record<string, unknown> {
     const modules = [...this.#dependencies, ...this.#devDependencies]
-      .map(x => path.basename(x)).reduce((acc, v) => ({ ...acc, [v.replace(/[-]/g, '_')]: true }), {});
+      .map(x => path.basename(x)).reduce((acc, value) => ({ ...acc, [value.replace(/[-]/g, '_')]: true }), {});
     const moduleNames = [...Object.keys(modules)];
 
     /** Get framework version at runtime */

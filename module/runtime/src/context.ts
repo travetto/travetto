@@ -87,14 +87,14 @@ class $Runtime {
   modulePath(modulePath: string, overrides?: Record<string, string>): string {
     const combined = { ...this.#resourceOverrides, ...overrides };
     const [base, sub] = (combined[modulePath] ?? modulePath)
-      .replace(/^([^#]*)(#|$)/g, (_, v, r) => `${this.#moduleAliases[v] ?? v}${r}`)
+      .replace(/^([^#]*)(#|$)/g, (_, module, relativePath) => `${this.#moduleAliases[module] ?? module}${relativePath}`)
       .split('#');
     return path.resolve(this.#idx.getModule(base)?.sourcePath ?? base, sub ?? '.');
   }
 
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[] {
-    return [...new Set([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(v => this.modulePath(v)))];
+    return [...new Set([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(module => this.modulePath(module)))];
   }
 
   /** Get source for function */

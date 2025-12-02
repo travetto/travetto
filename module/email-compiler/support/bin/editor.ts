@@ -27,7 +27,8 @@ export class EditorService {
   async #renderTemplate(rel: string, context: Record<string, unknown>): Promise<EmailCompiled> {
     const p = await EmailCompiler.compile(rel);
     return TypedObject.fromEntries(
-      await Promise.all(TypedObject.entries(p).map(([k, v]) => this.#interpolate(v, context).then((t) => [k, t])))
+      await Promise.all(TypedObject.entries(p).map(([key, value]) =>
+        this.#interpolate(value, context).then((result) => [key, result])))
     );
   }
 
@@ -36,7 +37,7 @@ export class EditorService {
     return { content, file };
   }
 
-  async #response<T>(operation: Promise<T>, success: (v: T) => EditorResponse, fail?: (error: Error) => EditorResponse): Promise<void> {
+  async #response<T>(operation: Promise<T>, success: (value: T) => EditorResponse, fail?: (error: Error) => EditorResponse): Promise<void> {
     try {
       const response = await operation;
       if (process.connected) { process.send?.(success(response)); }

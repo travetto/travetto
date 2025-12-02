@@ -29,7 +29,7 @@ export const Html: RenderProvider<RenderContext> = {
   finalize: (text, context) => {
     const brand = `<!-- ${context.generatedStamp} -->\n<!-- ${context.rebuildStamp} -->`;
     const cleaned = text
-      .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, v) => `${tag} ${v}`)
+      .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, value) => `${tag} ${value}`)
       .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`);
     return `${brand}\n${cleaned}`;
   },
@@ -73,7 +73,7 @@ yarn add ${el.props.pkg}
   Code: async ({ context, el, props }) => {
     DocResolveUtil.applyCodePropDefaults(el.props);
 
-    const cls = getComponentName(el.type).replace(/^[A-Z]/g, v => v.toLowerCase());
+    const cls = getComponentName(el.type).replace(/^[A-Z]/g, value => value.toLowerCase());
     const content = await context.resolveCode(el);
     let link: string = '';
     if ('src' in props && content.file) {
@@ -113,8 +113,8 @@ yarn add ${el.props.pkg}
   Class: state => Html.Input(state),
   Field: state => Html.Input(state),
   Input: async ({ el, context }) => {
-    const cls = getComponentName(el.type).replace(/^[A-Z]/g, v => v.toLowerCase());
-    return `<code class="item ${cls}">${context.cleanText(el.props.name.replace(ENTITY_RE, k => ESCAPE_ENTITIES[k]))}</code>`;
+    const cls = getComponentName(el.type).replace(/^[A-Z]/g, value => value.toLowerCase());
+    return `<code class="item ${cls}">${context.cleanText(el.props.name.replace(ENTITY_RE, key => ESCAPE_ENTITIES[key]))}</code>`;
   },
   CodeLink: async ({ context, props, el }) => {
     const target = await context.resolveCodeLink(el);

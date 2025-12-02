@@ -11,7 +11,7 @@ const DeltaRef = d.codeLink(ManifestDeltaUtil.name, 'src/delta.ts', new RegExp(`
 
 const manifest = () => {
   const obj: Partial<Pick<ManifestRoot, 'modules'>> & Omit<ManifestRoot, 'modules'> = JSON.parse(readFileSync(path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
-  const modules = Object.fromEntries(Object.entries(obj.modules!).filter(([k]) => k === '@travetto/manifest'));
+  const modules = Object.fromEntries(Object.entries(obj.modules!).filter(([key]) => key === '@travetto/manifest'));
   delete obj.modules;
   obj.workspace.path = '<generated>';
   obj.generated = COMMON_DATE;
@@ -24,7 +24,7 @@ const manifest = () => {
       }
     }
   }
-  return JSON.stringify({ ...obj, modules }, null, 2).replace(/\[[^[]*?\]/gsm, v => v.replace(/\s+/gs, ' '));
+  return JSON.stringify({ ...obj, modules }, null, 2).replace(/\[[^[]*?\]/gsm, value => value.replace(/\s+/gs, ' '));
 };
 
 export const text = <>

@@ -33,7 +33,7 @@ export class EnvProp<T> {
     } else if (Array.isArray(value)) {
       out = value.join(',');
     } else if (typeof value === 'object') {
-      out = Object.entries(value).map(([k, v]) => `${k}=${v}`).join(',');
+      out = Object.entries(value).map(([key, keyValue]) => `${key}=${keyValue}`).join(',');
     } else {
       out = `${value}`;
     }

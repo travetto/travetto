@@ -67,10 +67,10 @@ export class DocumentResultsManager {
    * Get list of known tests
    */
   getListOfTests(): Pick<TestConfig, 'methodName' | 'lineStart' | 'lineBodyStart'>[] {
-    return Object.values(this.#results.test).map(v => ({
-      methodName: v.src.methodName,
-      lineStart: v.src.lineStart,
-      lineBodyStart: v.src.lineBodyStart
+    return Object.values(this.#results.test).map(test => ({
+      methodName: test.src.methodName,
+      lineStart: test.src.lineStart,
+      lineBodyStart: test.src.lineBodyStart
     }));
   }
 
@@ -111,8 +111,8 @@ export class DocumentResultsManager {
       for (const assertion of test.assertions) {
         out[assertion.status].push(assertion.decoration);
       }
-      for (const k of TypedObject.keys<Record<StatusUnknown, unknown>>(out)) {
-        this.setStyle(test.assertStyles[k], out[k]);
+      for (const key of TypedObject.keys<Record<StatusUnknown, unknown>>(out)) {
+        this.setStyle(test.assertStyles[key], out[key]);
       }
     }
   }
@@ -230,7 +230,7 @@ export class DocumentResultsManager {
       decoration: Decorations.buildTest(test),
       logDecorations: test.output
         .filter(x => Workspace.resolveImport(`${x.module}/${x.modulePath}`) === this.#document.fileName)
-        .map(v => Decorations.buildTestLog(v)),
+        .map(log => Decorations.buildTestLog(log)),
       src: test
     });
     this.refreshTest(`${test.classId}#${test.methodName}`);

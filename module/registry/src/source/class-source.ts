@@ -76,22 +76,22 @@ export class ClassSource implements ChangeSource<Class> {
     let changes = 0;
 
     // Determine delta based on the various classes (if being added, removed or updated)
-    for (const k of keys) {
-      if (!next.has(k)) {
+    for (const key of keys) {
+      if (!next.has(key)) {
         changes += 1;
-        this.emit({ type: 'removing', prev: prev.get(k)! });
-        this.#classes.get(sourceFile)!.delete(k);
+        this.emit({ type: 'removing', prev: prev.get(key)! });
+        this.#classes.get(sourceFile)!.delete(key);
       } else {
-        this.#classes.get(sourceFile)!.set(k, next.get(k)!);
-        if (!prev.has(k)) {
+        this.#classes.get(sourceFile)!.set(key, next.get(key)!);
+        if (!prev.has(key)) {
           changes += 1;
-          this.emit({ type: 'added', curr: next.get(k)! });
+          this.emit({ type: 'added', curr: next.get(key)! });
         } else {
-          const prevHash = describeFunction(prev.get(k)!)?.hash;
-          const nextHash = describeFunction(next.get(k)!)?.hash;
+          const prevHash = describeFunction(prev.get(key)!)?.hash;
+          const nextHash = describeFunction(next.get(key)!)?.hash;
           if (prevHash !== nextHash) {
             changes += 1;
-            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
+            this.emit({ type: 'changed', curr: next.get(key)!, prev: prev.get(key)! });
           }
         }
       }

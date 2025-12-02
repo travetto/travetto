@@ -78,7 +78,7 @@ export class SqliteConnection extends Connection<Database> {
       try {
         const out = await connection.prepare<unknown[], T>(query)[query.trim().startsWith('SELECT') ? 'all' : 'run'](...values ?? []);
         if (Array.isArray(out)) {
-          const records: T[] = out.map(v => ({ ...v }));
+          const records: T[] = out.map(item => ({ ...item }));
           return { count: out.length, records };
         } else {
           return { count: out.changes, records: [] };

@@ -14,8 +14,8 @@ Available Commands:
  * manifest --prod [output]   - Generate the project manifest
 `;
 
-const toJson = (/** @type {number} */ depth) => v => process.stdout.write(`${JSON.stringify(v, undefined, depth)}\n`) ||
-  new Promise(r => process.stdout.once('drain', r));
+const toJson = (/** @type {number} */ depth) => value => process.stdout.write(`${JSON.stringify(value, undefined, depth)}\n`) ||
+  new Promise(resolve => process.stdout.once('drain', resolve));
 
 require('./entry.common.js').load(operations => {
   const [operation, ...all] = process.argv.slice(2);

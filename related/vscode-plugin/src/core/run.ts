@@ -27,8 +27,8 @@ export class RunUtil {
 
   static registerEnvVars(context: vscode.ExtensionContext, data: Record<string, unknown>): void {
     Object.assign(this.#baseEnv, data);
-    for (const [k, v] of Object.entries(data)) {
-      context.environmentVariableCollection.replace(k, `${v ?? ''}`);
+    for (const [key, value] of Object.entries(data)) {
+      context.environmentVariableCollection.replace(key, `${value ?? ''}`);
     }
   }
 

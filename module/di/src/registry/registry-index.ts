@@ -185,13 +185,13 @@ export class DependencyRegistryIndex implements RegistryIndex {
     const inputs = SchemaRegistryIndex.getOptional(candidateType)?.getFields() ?? {};
 
     const promises = TypedObject.entries(inputs)
-      .filter(([k, input]) => readMetadata(input) !== undefined && (input.access !== 'readonly' && instance[castKey(k)] === undefined))
-      .map(async ([k, input]) => [k, await this.#resolveDependencyValue(readMetadata(input) ?? {}, input, srcClass)] as const);
+      .filter(([key, input]) => readMetadata(input) !== undefined && (input.access !== 'readonly' && instance[castKey(key)] === undefined))
+      .map(async ([key, input]) => [key, await this.#resolveDependencyValue(readMetadata(input) ?? {}, input, srcClass)] as const);
 
     const pairs = await Promise.all(promises);
 
-    for (const [k, v] of pairs) {
-      instance[castKey(k)] = castTo(v);
+    for (const [key, value] of pairs) {
+      instance[castKey(key)] = castTo(value);
     }
     return instance;
   }

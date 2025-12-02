@@ -73,7 +73,7 @@ export class ConfigurationService {
       DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(spec.data), 'coerce');
     }
 
-    this.#specs = specs.map(({ data: _, ...v }) => v);
+    this.#specs = specs.map(({ data: _, ...spec }) => spec);
 
     // Initialize Secrets
     const { secrets = [] } = this.#get<{ secrets?: string | string[] }>('config') ?? {};
@@ -106,7 +106,7 @@ export class ConfigurationService {
     const out: Record<string, ConfigData> = {};
     for (const [el, inst] of configs) {
       const data = BindUtil.bindSchemaToObject<ConfigData>(
-        getClass(inst), {}, inst, { filterInput: f => !('secret' in f) || !f.secret, filterValue: v => v !== undefined }
+        getClass(inst), {}, inst, { filterInput: f => !('secret' in f) || !f.secret, filterValue: value => value !== undefined }
       );
       out[el.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
     }

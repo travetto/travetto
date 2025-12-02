@@ -13,7 +13,7 @@ const isBlobLike = (x: any): x is Record<string, Blob> | Blob => x instanceof Bl
 
 const extendHeaders = (base: RequestInit['headers'], toAdd: Record<string, string>): Headers => {
   const headers = new Headers(base);
-  for (const [k, v] of Object.entries(toAdd)) { headers.set(k, v); }
+  for (const [key, value] of Object.entries(toAdd)) { headers.set(key, value); }
   return headers;
 };
 
@@ -45,8 +45,8 @@ export type RpcClientFactory<T extends Record<string, {}>> =
     decorate?: (request: RpcRequest) => R
   ) => RpcClient<T, R>;
 
-function isResponse(v: unknown): v is Response {
-  return !!v && typeof v === 'object' && 'status' in v && !!v.status && 'headers' in v && !!v.headers;
+function isResponse(result: unknown): result is Response {
+  return !!result && typeof result === 'object' && 'status' in result && !!result.status && 'headers' in result && !!result.headers;
 }
 
 function isPlainObject(obj: unknown): obj is Record<string, unknown> {
@@ -267,7 +267,7 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
             return cache[`${controller}/${endpoint}`] ??= Object.defineProperties(
               invokeFetch.bind(null, final),
               Object.fromEntries(
-                Object.entries(decorate?.(final) ?? {}).map(([k, v]) => [k, { value: v }])
+                Object.entries(decorate?.(final) ?? {}).map(([key, value]) => [key, { value }])
               )
             );
           }

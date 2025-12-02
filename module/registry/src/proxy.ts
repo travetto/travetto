@@ -43,8 +43,8 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
     return classConstruct(castTo(this.target), argArray);
   }
 
-  setPrototypeOf(target: T, v: unknown): boolean {
-    return Object.setPrototypeOf(this.target, castTo(v));
+  setPrototypeOf(target: T, value: unknown): boolean {
+    return Object.setPrototypeOf(this.target, castTo(value));
   }
 
   getPrototypeOf(target: T): object | null {

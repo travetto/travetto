@@ -105,7 +105,7 @@ export class WorkPool {
       }
 
       const completion = worker.execute(nextInput, inputIdx += 1)
-        .then(v => options.onComplete?.(v, nextInput, finishIdx += 1))
+        .then(output => options.onComplete?.(output, nextInput, finishIdx += 1))
         .catch(error => {
           errors.push(error);
           options?.onError?.(error, nextInput, finishIdx += 1);

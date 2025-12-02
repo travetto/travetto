@@ -64,7 +64,7 @@ export class DocFileUtil {
       content = content.split(/\n/)
         .map(x => x
           .replace(ESLINT_PATTERN, '')
-          .replace(ENV_KEY, (_, k) => `'${k}'`)
+          .replace(ENV_KEY, (_, key) => `'${key}'`)
         )
         .join('\n')
         .replace(/^\/\/# sourceMap.*$/gsm, '')

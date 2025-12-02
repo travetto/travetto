@@ -36,13 +36,13 @@ export class ElasticsearchQueryUtil {
     const simp = this.extractSimple(clause);
     const include: string[] = [];
     const exclude: string[] = [];
-    for (const k of Object.keys(simp)) {
-      const nk = k === 'id' ? '_id' : k;
-      const v: 1 | 0 | boolean = castTo(simp[k]);
-      if (v === 0 || v === false) {
-        exclude.push(nk);
+    for (const key of Object.keys(simp)) {
+      const translatedKey = key === 'id' ? '_id' : key;
+      const value: 1 | 0 | boolean = castTo(simp[key]);
+      if (value === 0 || value === false) {
+        exclude.push(translatedKey);
       } else {
-        include.push(nk);
+        include.push(translatedKey);
       }
     }
     return [include, exclude];
@@ -54,9 +54,9 @@ export class ElasticsearchQueryUtil {
   static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): estypes.Sort {
     return sort.map<estypes.SortOptions>(x => {
       const o = this.extractSimple(x);
-      const k = Object.keys(o)[0];
-      const v: boolean | -1 | 1 = castTo(o[k]);
-      return { [k]: { order: v === 1 || v === true ? 'asc' : 'desc' } };
+      const key = Object.keys(o)[0];
+      const value: boolean | -1 | 1 = castTo(o[key]);
+      return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
     });
   }
 
@@ -67,58 +67,58 @@ export class ElasticsearchQueryUtil {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
-    for (const key of TypedObject.keys(o)) {
-      const top = o[key];
-      const declaredSchema = fields[key];
+    for (const property of TypedObject.keys(o)) {
+      const top = o[property];
+      const declaredSchema = fields[property];
       const declaredType = declaredSchema.type;
-      const sPath = declaredType === String ?
-        ((key === 'id' && !path) ? '_id' : `${path}${key}`) :
-        `${path}${key}`;
+      const subPath = declaredType === String ?
+        ((property === 'id' && !path) ? '_id' : `${path}${property}`) :
+        `${path}${property}`;
 
-      const sPathQuery = (value: unknown): {} => (key === 'id' && !path) ?
+      const subPathQuery = (value: unknown): {} => (property === 'id' && !path) ?
         { ids: { values: Array.isArray(value) ? value : [value] } } :
-        { [Array.isArray(value) ? 'terms' : 'term']: { [sPath]: value } };
+        { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
 
       if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
-          const inner = this.extractWhereTermQuery(declaredType, top, config, `${sPath}.`);
+          const inner = this.extractWhereTermQuery(declaredType, top, config, `${subPath}.`);
           items.push(declaredSchema.array ?
-            { nested: { path: sPath, query: inner } } :
+            { nested: { path: subPath, query: inner } } :
             inner
           );
         } else {
-          const v = top[subKey];
+          const value = top[subKey];
 
           switch (subKey) {
             case '$all': {
-              const arr = Array.isArray(v) ? v : [v];
+              const arr = Array.isArray(value) ? value : [value];
               items.push({
                 bool: {
-                  must: arr.map(x => ({ term: { [sPath]: x } }))
+                  must: arr.map(x => ({ term: { [subPath]: x } }))
                 }
               });
               break;
             }
             case '$in': {
-              items.push(sPathQuery(Array.isArray(v) ? v : [v]));
+              items.push(subPathQuery(Array.isArray(value) ? value : [value]));
               break;
             }
             case '$nin': {
-              items.push({ bool: { ['must_not']: [sPathQuery(Array.isArray(v) ? v : [v])] } });
+              items.push({ bool: { ['must_not']: [subPathQuery(Array.isArray(value) ? value : [value])] } });
               break;
             }
             case '$eq': {
-              items.push(sPathQuery(v));
+              items.push(subPathQuery(value));
               break;
             }
             case '$ne': {
-              items.push({ bool: { ['must_not']: [sPathQuery(v)] } });
+              items.push({ bool: { ['must_not']: [subPathQuery(value)] } });
               break;
             }
             case '$exists': {
-              const q = { exists: { field: sPath } };
-              items.push(v ? q : { bool: { ['must_not']: q } });
+              const q = { exists: { field: subPath } };
+              items.push(value ? q : { bool: { ['must_not']: q } });
               break;
             }
             case '$lt':
@@ -126,18 +126,18 @@ export class ElasticsearchQueryUtil {
             case '$gte':
             case '$lte': {
               const out: Record<string, unknown> = {};
-              for (const k of Object.keys(top)) {
-                out[k.replace(/^[$]/, '')] = ModelQueryUtil.resolveComparator(top[k]);
+              for (const key of Object.keys(top)) {
+                out[key.replace(/^[$]/, '')] = ModelQueryUtil.resolveComparator(top[key]);
               }
-              items.push({ range: { [sPath]: out } });
+              items.push({ range: { [subPath]: out } });
               break;
             }
             case '$regex': {
-              const pattern = DataUtil.toRegex(castTo(v));
+              const pattern = DataUtil.toRegex(castTo(value));
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
-                  `${sPath}.text_cs` :
-                  `${sPath}.text`;
+                  `${subPath}.text_cs` :
+                  `${subPath}.text`;
                 const query = pattern.source.substring(2, pattern.source.length - 2);
                 items.push({
                   ['match_phrase_prefix']: {
@@ -145,12 +145,12 @@ export class ElasticsearchQueryUtil {
                   }
                 });
               } else {
-                items.push({ regexp: { [sPath]: pattern.source } });
+                items.push({ regexp: { [subPath]: pattern.source } });
               }
               break;
             }
             case '$geoWithin': {
-              items.push({ ['geo_polygon']: { [sPath]: { points: v } } });
+              items.push({ ['geo_polygon']: { [subPath]: { points: value } } });
               break;
             }
             case '$unit':
@@ -165,7 +165,7 @@ export class ElasticsearchQueryUtil {
               items.push({
                 ['geo_distance']: {
                   distance: `${dist}${unit}`,
-                  [sPath]: top.$near
+                  [subPath]: top.$near
                 }
               });
               break;
@@ -174,7 +174,7 @@ export class ElasticsearchQueryUtil {
         }
         // Handle operations
       } else {
-        items.push(sPathQuery(top));
+        items.push(subPathQuery(top));
       }
     }
     if (items.length === 1) {

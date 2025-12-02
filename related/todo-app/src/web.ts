@@ -16,8 +16,8 @@ export class TodoController {
   _svc: TodoService;
 
   @Inject()
-  set svc(v: TodoService) {
-    this._svc = v;
+  set svc(service: TodoService) {
+    this._svc = service;
   }
 
   /**

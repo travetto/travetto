@@ -306,35 +306,35 @@ export class ElasticsearchModelService implements
       errors: []
     };
 
-    type Count = keyof typeof out['counts'];
+    type CountProperty = keyof typeof out['counts'];
 
     for (let i = 0; i < result.items.length; i++) {
       const item = result.items[i];
-      const [k] = TypedObject.keys(item);
-      const v = item[k]!;
-      if (v.error) {
+      const [key] = TypedObject.keys(item);
+      const responseItem = item[key]!;
+      if (responseItem.error) {
         out.errors.push({
-          reason: v.error!.reason!,
-          type: v.error!.type
+          reason: responseItem.error!.reason!,
+          type: responseItem.error!.type
         });
         out.counts.error += 1;
       } else {
-        let sk: Count;
-        switch (k) {
-          case 'create': sk = 'insert'; break;
-          case 'index': sk = operations[i].insert ? 'insert' : 'upsert'; break;
-          case 'delete': case 'update': sk = k; break;
+        let property: CountProperty;
+        switch (key) {
+          case 'create': property = 'insert'; break;
+          case 'index': property = operations[i].insert ? 'insert' : 'upsert'; break;
+          case 'delete': case 'update': property = key; break;
           default: {
-            throw new Error(`Unknown response key: ${k}`);
+            throw new Error(`Unknown response key: ${key}`);
           }
         }
 
-        if (v.result === 'created') {
-          out.insertedIds.set(i, v._id!);
-          (operations[i].insert ?? operations[i].upsert)!.id = v._id!;
+        if (responseItem.result === 'created') {
+          out.insertedIds.set(i, responseItem._id!);
+          (operations[i].insert ?? operations[i].upsert)!.id = responseItem._id!;
         }
 
-        out.counts[sk] += 1;
+        out.counts[property] += 1;
       }
     }
 
@@ -417,11 +417,11 @@ export class ElasticsearchModelService implements
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const results = await this.execSearch(cls, search);
     const shouldRemoveIds = query.select && 'id' in query.select && !query.select.id;
-    return Promise.all(results.hits.hits.map(m => this.postLoad(cls, m).then(v => {
+    return Promise.all(results.hits.hits.map(m => this.postLoad(cls, m).then(item => {
       if (shouldRemoveIds) {
-        delete castTo<OptionalId<T>>(v).id;
+        delete castTo<OptionalId<T>>(item).id;
       }
-      return v;
+      return item;
     })));
   }
 
@@ -520,7 +520,7 @@ export class ElasticsearchModelService implements
     const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
     const result = await this.execSearch(cls, search);
     const all = await Promise.all(result.hits.hits.map(x => this.postLoad(cls, x)));
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (x, v) => v, query && query.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (x, value) => value, query && query.limit);
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {

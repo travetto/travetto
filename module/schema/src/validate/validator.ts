@@ -205,7 +205,7 @@ export class SchemaValidator {
       );
 
       error.message = msg
-        .replace(/\{([^}]+)\}/g, (_, k: (keyof ValidationError)) => `${error[k]}`);
+        .replace(/\{([^}]+)\}/g, (_, key: (keyof ValidationError)) => `${error[key]}`);
 
       out.push(error);
     }

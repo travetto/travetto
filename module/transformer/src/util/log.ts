@@ -33,7 +33,7 @@ export class LogUtil {
     }
 
     if (Array.isArray(x)) {
-      return x.map(v => this.collapseNode(v, cache));
+      return x.map(node => this.collapseNode(node, cache));
     } else {
       const ox = x;
       const out: Record<string, unknown> = {};

@@ -141,30 +141,30 @@ export class QueryVerifier {
     }
 
     // Should only be one?
-    for (const [k, v] of Object.entries(value)) {
-      if (k === '$all' || k === '$elemMatch' || k === '$in' || k === '$nin') {
-        if (!Array.isArray(v)) {
-          state.log(`${k} operator requires comparison to be an array, not ${typeof v}`);
+    for (const [key, keyValue] of Object.entries(value)) {
+      if (key === '$all' || key === '$elemMatch' || key === '$in' || key === '$nin') {
+        if (!Array.isArray(keyValue)) {
+          state.log(`${key} operator requires comparison to be an array, not ${typeof keyValue}`);
           return;
-        } else if (v.length === 0) {
-          state.log(`${k} operator requires comparison to be a non-empty array`);
+        } else if (keyValue.length === 0) {
+          state.log(`${key} operator requires comparison to be a non-empty array`);
           return;
         }
 
-        for (const el of v) {
+        for (const el of keyValue) {
           const elAct = TypeUtil.getActualType(el);
           if (!this.typesMatch(declaredType, elAct)) {
-            state.log(`${k} operator requires all values to be ${declaredType}, but ${elAct} was found`);
+            state.log(`${key} operator requires all values to be ${declaredType}, but ${elAct} was found`);
             return;
           }
         }
-      } else if (!(k in allowed)) {
-        state.log(`Operation ${k}, not allowed for field of type ${declaredType}`);
+      } else if (!(key in allowed)) {
+        state.log(`Operation ${key}, not allowed for field of type ${declaredType}`);
       } else {
-        const actualSubType = TypeUtil.getActualType(v)!;
+        const actualSubType = TypeUtil.getActualType(keyValue)!;
 
-        if (!allowed[k].has(actualSubType)) {
-          state.log(`Passed in value ${actualSubType} mismatches with expected type(s) ${Array.from(allowed[k])}`);
+        if (!allowed[key].has(actualSubType)) {
+          state.log(`Passed in value ${actualSubType} mismatches with expected type(s) ${Array.from(allowed[key])}`);
         }
       }
     }

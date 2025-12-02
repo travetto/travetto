@@ -181,8 +181,8 @@ export class PackageModuleVisitor {
       }
 
       const next = Object.entries(children)
-        .map(([n, v]) => PackageUtil.resolveVersionPath(pkg, v) ?? PackageUtil.resolvePackagePath(n))
-        .map(loc => this.#create(loc, { parent: node }));
+        .map(([n, location]) => PackageUtil.resolveVersionPath(pkg, location) ?? PackageUtil.resolvePackagePath(n))
+        .map(location => this.#create(location, { parent: node }));
 
       queue.push(...next);
     }

@@ -24,8 +24,8 @@ export class BinaryUtil {
   /** Is ReadableStream */
   static isReadableStream = hasFunction<ReadableStream>('pipeTo');
   /** Is Async Iterable */
-  static isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
-    !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
+  static isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
+    !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
 
   /**
    * Is src a binary type
@@ -88,7 +88,7 @@ export class BinaryUtil {
   static readableBlob(input: () => (Readable | Promise<Readable>), metadata: BlobMeta = {}): Blob | File {
     const go = (): Readable => {
       const stream = new PassThrough();
-      Promise.resolve(input()).then(v => v.pipe(stream), (error) => stream.destroy(error));
+      Promise.resolve(input()).then(readable => readable.pipe(stream), (error) => stream.destroy(error));
       return stream;
     };
 
@@ -102,7 +102,7 @@ export class BinaryUtil {
       stream: { value: () => ReadableStream.from(go()) },
       arrayBuffer: { value: () => toArrayBuffer(go()) },
       text: { value: () => toText(go()) },
-      bytes: { value: () => toArrayBuffer(go()).then(v => new Uint8Array(v)) },
+      bytes: { value: () => toArrayBuffer(go()).then(buffer => new Uint8Array(buffer)) },
       [BlobMetaSymbol]: { value: metadata }
     });
   }

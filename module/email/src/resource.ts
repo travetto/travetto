@@ -13,6 +13,6 @@ export class EmailResourceLoader extends FileLoader {
       ...RuntimeIndex.getDependentModules(mod, 'children').map(x => `${x.name}#resources`),
       '@@#resources',
       ...globalResources ?? []
-    ].map(v => Runtime.modulePath(v)));
+    ].map(name => Runtime.modulePath(name)));
   }
 }

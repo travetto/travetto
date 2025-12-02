@@ -38,7 +38,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   async verify(token: string): Promise<Principal> {
     try {
       const jwt: Jwt & { body: { core: Principal } } = await new Promise((resolve, reject) =>
-        this.#verifier.verify(token, (error, v) => error ? reject(error) : resolve(castTo(v)))
+        this.#verifier.verify(token, (error, verified) => error ? reject(error) : resolve(castTo(verified)))
       );
       return jwt.body.core;
     } catch (error) {

@@ -86,64 +86,64 @@ export class MongoUtil {
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;
-      const v: Record<string, unknown> = castTo(sub[key]);
+      const value: Record<string, unknown> = castTo(sub[key]);
       const subField = fields?.[key];
 
-      const isPlain = v && DataUtil.isPlainObject(v);
-      const firstKey = isPlain ? Object.keys(v)[0] : '';
+      const isPlain = value && DataUtil.isPlainObject(value);
+      const firstKey = isPlain ? Object.keys(value)[0] : '';
 
       if (subpath === 'id') {
         if (!firstKey) {
-          out._id = Array.isArray(v) ? v.map(x => this.uuid(x)) : this.uuid(`${v}`);
+          out._id = Array.isArray(value) ? value.map(x => this.uuid(x)) : this.uuid(`${value}`);
         } else if (firstKey === '$in' || firstKey === '$nin' || firstKey === '$eq' || firstKey === '$ne') {
-          const temp = v[firstKey];
+          const temp = value[firstKey];
           out._id = { [firstKey]: Array.isArray(temp) ? temp.map(x => this.uuid(x)) : this.uuid(`${temp}`) };
         } else {
           throw new AppError('Invalid id query');
         }
-      } else if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.Ⲑid) {
+      } else if ((isPlain && !firstKey.startsWith('$')) || value?.constructor?.Ⲑid) {
         if (recursive) {
-          Object.assign(out, this.extractSimple(subField?.type, v, `${subpath}.`, recursive));
+          Object.assign(out, this.extractSimple(subField?.type, value, `${subpath}.`, recursive));
         } else {
-          out[subpath] = v;
+          out[subpath] = value;
         }
       } else {
         if (firstKey === '$gt' || firstKey === '$lt' || firstKey === '$gte' || firstKey === '$lte') {
-          for (const [sk, sv] of Object.entries(v)) {
-            v[sk] = ModelQueryUtil.resolveComparator(sv);
+          for (const [sk, sv] of Object.entries(value)) {
+            value[sk] = ModelQueryUtil.resolveComparator(sv);
           }
         } else if (firstKey === '$exists' && subField?.array) {
-          const exists = v.$exists;
+          const exists = value.$exists;
           if (!exists) {
-            delete v.$exists;
-            v.$in = [null, []];
+            delete value.$exists;
+            value.$in = [null, []];
           } else {
-            v.$exists = true;
-            v.$nin = [null, []];
+            value.$exists = true;
+            value.$nin = [null, []];
           }
         } else if (firstKey === '$regex') {
-          v.$regex = DataUtil.toRegex(castTo(v.$regex));
-        } else if (firstKey && '$near' in v) {
-          const dist: number = castTo(v.$maxDistance);
-          const distance = dist / RADIANS_TO[(castTo<DistanceUnit>(v.$unit) ?? 'km')];
-          v.$maxDistance = distance;
-          delete v.$unit;
-        } else if (firstKey && '$geoWithin' in v) {
-          const coords: [number, number][] = castTo(v.$geoWithin);
+          value.$regex = DataUtil.toRegex(castTo(value.$regex));
+        } else if (firstKey && '$near' in value) {
+          const dist: number = castTo(value.$maxDistance);
+          const distance = dist / RADIANS_TO[(castTo<DistanceUnit>(value.$unit) ?? 'km')];
+          value.$maxDistance = distance;
+          delete value.$unit;
+        } else if (firstKey && '$geoWithin' in value) {
+          const coords: [number, number][] = castTo(value.$geoWithin);
           const first = coords[0];
           const last = coords.at(-1)!;
           // Connect if not
           if (first[0] !== last[0] || first[1] !== last[1]) {
             coords.push(first);
           }
-          v.$geoWithin = {
+          value.$geoWithin = {
             $geometry: {
               type: 'Polygon',
               coordinates: [coords]
             }
           };
         }
-        out[subpath === 'id' ? '_id' : subpath] = v;
+        out[subpath === 'id' ? '_id' : subpath] = value;
       }
     }
     return out;

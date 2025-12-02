@@ -2,7 +2,7 @@ import { SchemaFieldConfig, Point } from '@travetto/schema';
 import { Class, toConcrete } from '@travetto/runtime';
 
 const st = (t: string | string[], isArr: boolean = false): Set<string> =>
-  new Set((Array.isArray(t) ? t : [t]).map(v => isArr ? `${v}[]` : v));
+  new Set((Array.isArray(t) ? t : [t]).map(value => isArr ? `${value}[]` : value));
 
 const basic = (types: Set<string>): Record<string, Set<string>> => ({ $ne: types, $eq: types, $exists: st('boolean') });
 const scalar = (types: Set<string>): Record<string, Set<string>> => ({ $in: types, $nin: types });
@@ -55,22 +55,22 @@ export class TypeUtil {
   /**
    * Get the actual type of a given field, only for primitive types
    */
-  static getActualType(v: unknown): string {
-    const type = typeof v;
+  static getActualType(value: unknown): string {
+    const type = typeof value;
     if (['string', 'number', 'boolean'].includes(type)) {
       return type;
-    } else if (v instanceof RegExp) {
+    } else if (value instanceof RegExp) {
       return 'RegExp';
-    } else if (v instanceof Date) {
+    } else if (value instanceof Date) {
       return 'Date';
-    } else if (Array.isArray(v)) {
-      const typeString: string = `${this.getActualType(v[0])}[]`;
-      if (v.length === 2 && typeString === 'number[]') {
+    } else if (Array.isArray(value)) {
+      const typeString: string = `${this.getActualType(value[0])}[]`;
+      if (value.length === 2 && typeString === 'number[]') {
         return 'Point';
       } else {
         return typeString;
       }
     }
-    throw new Error(`Unknown type for ${v}`);
+    throw new Error(`Unknown type for ${value}`);
   }
 }

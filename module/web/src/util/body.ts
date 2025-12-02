@@ -19,13 +19,13 @@ export class WebBodyUtil {
    */
   static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<string | Buffer> {
     const nl = '\r\n';
-    for (const [k, v] of form.entries()) {
-      const data = v.slice();
+    for (const [key, value] of form.entries()) {
+      const data = value.slice();
       const filename = data instanceof File ? data.name : undefined;
       const size = data instanceof Blob ? data.size : data.length;
       const type = data instanceof Blob ? data.type : undefined;
       yield `--${boundary}${nl}`;
-      yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"${nl}`;
+      yield `Content-Disposition: form-data; name="${key}"; filename="${filename ?? key}"${nl}`;
       yield `Content-Length: ${size}${nl}`;
       if (type) {
         yield `Content-Type: ${type}${nl}`;
@@ -97,8 +97,8 @@ export class WebBodyUtil {
 
     const out: Omit<WebMessage<WebBinaryBody>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
     if (body instanceof Blob) {
-      for (const [k, v] of this.getBlobHeaders(body)) {
-        out.headers.set(k, v);
+      for (const [key, value] of this.getBlobHeaders(body)) {
+        out.headers.set(key, value);
       }
       out.body = Readable.fromWeb(body.stream());
     } else if (body instanceof FormData) {

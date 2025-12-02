@@ -23,7 +23,7 @@ export class ProcessHandle {
 
   getPid(): Promise<number | undefined> {
     return fs.readFile(this.#file, 'utf8')
-      .then(v => +v > 0 ? +v : undefined, () => undefined);
+      .then(pid => +pid > 0 ? +pid : undefined, () => undefined);
   }
 
   async isRunning(): Promise<boolean> {

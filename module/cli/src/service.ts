@@ -85,9 +85,9 @@ export class ServiceRunner {
       '--detach',
       ...this.svc.privileged ? ['--privileged'] : [],
       '--label', `trv-${this.svc.name}`,
-      ...Object.entries(this.svc.env ?? {}).flatMap(([k, v]) => ['--env', `${k}=${v}`]),
+      ...Object.entries(this.svc.env ?? {}).flatMap(([key, value]) => ['--env', `${key}=${value}`]),
       ...this.svc.port ? ['-p', ports(this.svc.port).join(':')] : [],
-      ...Object.entries(this.svc.volumes ?? {}).flatMap(([k, v]) => ['--volume', `${k}:${v}`]),
+      ...Object.entries(this.svc.volumes ?? {}).flatMap(([key, value]) => ['--volume', `${key}:${value}`]),
       this.svc.image,
       ...this.svc.args ?? [],
     ];

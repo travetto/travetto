@@ -56,7 +56,7 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
     console.debug('Executing query', { query });
     try {
       const out = await pool.query(query, values);
-      const records: T[] = [...out.rows].map(v => ({ ...v }));
+      const records: T[] = [...out.rows].map(value => ({ ...value }));
       return { count: out.rowCount!, records };
     } catch (error) {
       if (error instanceof Error && error.message.includes('duplicate key value')) {

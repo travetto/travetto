@@ -66,8 +66,8 @@ class $ConsoleManager implements ConsoleListener {
   filter(level: ConsoleEvent['level'], filter?: boolean | ((ctx: ConsoleEvent) => boolean)): void {
     if (filter !== undefined) {
       if (typeof filter === 'boolean') {
-        const v = filter;
-        filter = (): boolean => v;
+        const filterValue = filter;
+        filter = (): boolean => filterValue;
       }
       this.#filters[level] = filter;
     } else {

@@ -25,8 +25,8 @@ export type AliasesParseResult = Record<'long' | 'short' | 'raw' | 'env', string
  */
 export class CliParseUtil {
 
-  static toEnvField(k: string): string {
-    return k.startsWith(ENV_PREFIX) ? k : `${ENV_PREFIX}${k}`;
+  static toEnvField(key: string): string {
+    return key.startsWith(ENV_PREFIX) ? key : `${ENV_PREFIX}${key}`;
   }
 
   static readToken(text: string, start = 0): { next: number, value?: string } {
@@ -72,7 +72,7 @@ export class CliParseUtil {
     const input = Object.values(schema.fields).find(x => x.specifiers?.includes('module'));
     const ENV_KEY = input?.aliases?.filter(x => x.startsWith(ENV_PREFIX)).map(x => x.replace(ENV_PREFIX, ''))[0] ?? '';
     const flags = new Set(input?.aliases ?? []);
-    const check = (k?: string, v?: string): string | undefined => flags.has(k!) ? v : undefined;
+    const check = (key?: string, value?: string): string | undefined => flags.has(key!) ? value : undefined;
     return args.reduce(
       (m, x, i, arr) =>
         (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? m,
@@ -155,7 +155,7 @@ export class CliParseUtil {
         if (simple in process.env) {
           const value: string = process.env[simple]!;
           if (field.array) {
-            out.push(...value.split(/\s*,\s*/g).map(v => ({ type: 'flag', fieldName: field.name.toString(), input: envName, value: v }) as const));
+            out.push(...value.split(/\s*,\s*/g).map(item => ({ type: 'flag', fieldName: field.name.toString(), input: envName, value: item }) as const));
           } else {
             out.push({ type: 'flag', fieldName: field.name.toString(), input: envName, value });
           }
@@ -172,10 +172,10 @@ export class CliParseUtil {
         out.push(...inputs.slice(i + 1).map((x, idx) => ({ type: 'unknown', input: x, index: argIdx + idx }) as const));
         break;
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
-        const [k, ...v] = input.split('=');
-        const field = flagMap.get(k);
+        const [key, ...values] = input.split('=');
+        const field = flagMap.get(key);
         if (field) {
-          out.push({ type: 'flag', fieldName: field.name.toString(), input: k, value: v.join('=') });
+          out.push({ type: 'flag', fieldName: field.name.toString(), input: key, value: values.join('=') });
         } else {
           out.push({ type: 'unknown', input });
         }
