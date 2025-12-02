@@ -139,29 +139,29 @@ export class WebBodyUtil {
   /**
    * Set body and mark as unprocessed
    */
-  static markRaw(val: WebBinaryBody | undefined): typeof val {
-    if (val) {
-      Object.defineProperty(val, WebRawStreamSymbol, { value: val });
+  static markRaw(body: WebBinaryBody | undefined): typeof body {
+    if (body) {
+      Object.defineProperty(body, WebRawStreamSymbol, { value: body });
     }
-    return val;
+    return body;
   }
 
   /**
    * Is the input raw
    */
-  static isRaw(val: unknown): val is WebBinaryBody {
+  static isRaw(body: unknown): body is WebBinaryBody {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!val && ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebRawStreamSymbol] === val);
+    return !!body && ((Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) && (body as Any)[WebRawStreamSymbol] === body);
   }
 
   /**
    * Simple parse support
    */
-  static parseBody(type: string, val: string): unknown {
+  static parseBody(type: string, body: string): unknown {
     switch (type) {
-      case 'text': return val;
-      case 'json': return JSON.parse(val);
-      case 'form': return Object.fromEntries(new URLSearchParams(val));
+      case 'text': return body;
+      case 'json': return JSON.parse(body);
+      case 'form': return Object.fromEntries(new URLSearchParams(body));
     }
   }
 

@@ -35,8 +35,8 @@ export class CliRunUtil {
   static #buildChoiceParams(choice: RunChoice): string {
     const out = (choice.args ?? [])
       .map((x, i) => {
-        const val = choice.inputs[i] !== undefined ? choice.inputs[i] : (x.choices?.join(',') ?? x.default);
-        return `${x.description || x.name}${val !== undefined ? `=${val}` : ''}`;
+        const value = choice.inputs[i] !== undefined ? choice.inputs[i] : (x.choices?.join(',') ?? x.default);
+        return `${x.description || x.name}${value !== undefined ? `=${value}` : ''}`;
       })
       .join(', ');
     return out;

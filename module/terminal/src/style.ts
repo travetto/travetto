@@ -43,7 +43,7 @@ export class StyleUtil {
    * Read foreground/background color if env var is set
    */
   static isBackgroundDark(): boolean {
-    const key = Env.COLORFGBG.val ?? '';
+    const key = Env.COLORFGBG.value ?? '';
 
     if (this.#scheme.key === key) {
       return this.#scheme.dark;

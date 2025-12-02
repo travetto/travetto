@@ -258,11 +258,11 @@ export class DataUtil {
       const out: Partial<T> = {};
       for (const key of TypedObject.keys(obj)) {
         if (!exclude.some(r => typeof key === 'string' && (typeof r === 'string' ? r === key : r.test(key)))) {
-          const val = obj[key];
-          if (typeof val === 'object') {
-            out[key] = this.filterByKeys(val, exclude);
+          const value = obj[key];
+          if (typeof value === 'object') {
+            out[key] = this.filterByKeys(value, exclude);
           } else {
-            out[key] = val;
+            out[key] = value;
           }
         }
       }

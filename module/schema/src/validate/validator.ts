@@ -53,13 +53,13 @@ export class SchemaValidator {
   /**
    * Validate a single input config against a passed in value
    * @param input The input schema configuration
-   * @param val The raw value, could be an array or not
+   * @param value The raw value, could be an array or not
    * @param relative The relative path of object traversal
    */
-  static #validateInputSchema(input: SchemaInputConfig, val: unknown, relative: string = ''): ValidationError[] {
+  static #validateInputSchema(input: SchemaInputConfig, value: unknown, relative: string = ''): ValidationError[] {
     const key = 'name' in input ? input.name : ('index' in input ? input.index : 'unknown');
     const path = `${relative}${relative ? '.' : ''}${key}`;
-    const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
+    const hasValue = !(value === undefined || value === null || (typeof value === 'string' && value === '') || (Array.isArray(value) && value.length === 0));
 
     if (!hasValue) {
       if (input.required?.active !== false) {
@@ -75,26 +75,26 @@ export class SchemaValidator {
     if (type === Object) {
       return [];
     } else if (array) {
-      if (!Array.isArray(val)) {
-        return this.#prepareErrors(path, [{ kind: 'type', type: Array, value: val }]);
+      if (!Array.isArray(value)) {
+        return this.#prepareErrors(path, [{ kind: 'type', type: Array, value }]);
       }
       let errors: ValidationError[] = [];
       if (complex) {
-        for (let i = 0; i < val.length; i++) {
-          const subErrors = this.#validateFields(resolveFieldMap(type, val[i]), val[i], `${path}[${i}]`);
+        for (let i = 0; i < value.length; i++) {
+          const subErrors = this.#validateFields(resolveFieldMap(type, value[i]), value[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
-        for (let i = 0; i < val.length; i++) {
-          const subErrors = this.#validateInput(input, val[i]);
+        for (let i = 0; i < value.length; i++) {
+          const subErrors = this.#validateInput(input, value[i]);
           errors.push(...this.#prepareErrors(`${path}[${i}]`, subErrors));
         }
       }
       return errors;
     } else if (complex) {
-      return this.#validateFields(resolveFieldMap(type, val), val, path);
+      return this.#validateFields(resolveFieldMap(type, value), value, path);
     } else {
-      const fieldErrors = this.#validateInput(input, val);
+      const fieldErrors = this.#validateInput(input, value);
       return this.#prepareErrors(path, fieldErrors);
     }
   }

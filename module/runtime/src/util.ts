@@ -4,7 +4,7 @@ import timers from 'node:timers/promises';
 import { castTo, hasToJSON } from './types.ts';
 import { AppError } from './error.ts';
 
-type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
+type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
 
 /**
  * Grab bag of common utilities

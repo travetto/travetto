@@ -174,15 +174,15 @@ export class SQLModelUtil {
         const top = config.path.at(-1)!;
 
         if (field.name in topObj) {
-          const value = topObj[field.name];
-          const values = Array.isArray(value) ? value : [value];
+          const valuesInput = topObj[field.name];
+          const values = Array.isArray(valuesInput) ? valuesInput : [valuesInput];
 
           let i = 0;
-          for (const val of values) {
+          for (const value of values) {
             try {
-              pathObj.push(val);
+              pathObj.push(value);
               config.path[config.path.length - 1] = { ...top, index: i++ };
-              handler.onSub({ ...config, value: val });
+              handler.onSub({ ...config, value });
               if (!field.array) {
                 config.descend();
               }
@@ -242,15 +242,15 @@ export class SQLModelUtil {
       let found: OrderBy | undefined;
       while (!found) {
         const key = Object.keys(cl)[0];
-        const val = cl[key];
+        const value = cl[key];
         const field = { ...schema.fields[key] };
-        if (DataUtil.isPrimitive(val)) {
+        if (DataUtil.isPrimitive(value)) {
           stack.push(field);
-          found = { stack, asc: val === 1 };
+          found = { stack, asc: value === 1 };
         } else {
           stack.push(field);
           schema = SchemaRegistryIndex.getConfig(field.type);
-          cl = castTo(val);
+          cl = castTo(value);
         }
       }
       return found;

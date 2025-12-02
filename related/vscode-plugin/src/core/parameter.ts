@@ -96,7 +96,7 @@ export class ParameterSelector {
    * Convert input to resolvable value
    * @param input
    */
-  static async getInputComplex<T extends Complex, U>(input: T, transform: (val: T) => U): Promise<U> {
+  static async getInputComplex<T extends Complex, U>(input: T, transform: (value: T) => U): Promise<U> {
     input.show();
     return new Promise<U>((resolve) => {
       input.onDidAccept(() => resolve(transform(input!)));

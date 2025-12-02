@@ -20,18 +20,18 @@ function simpleName(idx: string): string {
   return idx.replace(/[^A-Za-z0-9]/g, '');
 }
 
-function toValue(val: string | number | boolean | Date | undefined | null): AttributeValue;
-function toValue(val: unknown): AttributeValue | undefined {
-  if (val === undefined || val === null || val === '') {
+function toValue(value: string | number | boolean | Date | undefined | null): AttributeValue;
+function toValue(value: unknown): AttributeValue | undefined {
+  if (value === undefined || value === null || value === '') {
     return { NULL: true };
-  } else if (typeof val === 'string') {
-    return { S: val };
-  } else if (typeof val === 'number') {
-    return { N: `${val}` };
-  } else if (typeof val === 'boolean') {
-    return { BOOL: val };
-  } else if (val instanceof Date) {
-    return { N: `${val.getTime()}` };
+  } else if (typeof value === 'string') {
+    return { S: value };
+  } else if (typeof value === 'number') {
+    return { N: `${value}` };
+  } else if (typeof value === 'boolean') {
+    return { BOOL: value };
+  } else if (value instanceof Date) {
+    return { N: `${value.getTime()}` };
   }
 }
 

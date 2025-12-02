@@ -471,11 +471,11 @@ export abstract class SQLDialect implements DialectState {
                 }
               } else {
                 if (!ins || SQL_OPS.$iregex) {
-                  const val = resolve(v);
-                  items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${val}`);
+                  const value = resolve(v);
+                  items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${value}`);
                 } else {
-                  const val = resolve(new RegExp(src.toLowerCase(), re.flags));
-                  items.push(`LOWER(${sPath}) ${SQL_OPS[subKey]} ${val}`);
+                  const value = resolve(new RegExp(src.toLowerCase(), re.flags));
+                  items.push(`LOWER(${sPath}) ${SQL_OPS[subKey]} ${value}`);
                 }
               }
               break;
@@ -721,11 +721,11 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const table = this.namespace(SQLModelUtil.classToStack(cls));
     const fields: [string, boolean][] = idx.fields.map(x => {
       const key = TypedObject.keys(x)[0];
-      const val = x[key];
-      if (DataUtil.isPlainObject(val)) {
+      const value = x[key];
+      if (DataUtil.isPlainObject(value)) {
         throw new Error('Unable to supported nested fields for indices');
       }
-      return [castTo(key), typeof val === 'number' ? val === 1 : (!!val)];
+      return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
     });
     const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
     return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields

@@ -27,7 +27,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Are we in a mode that should have enhanced debug info
    */
-  trace = Env.DEBUG.val?.includes('@travetto/registry');
+  trace = Env.DEBUG.value?.includes('@travetto/registry');
 
   /**
    * Flush classes
@@ -156,7 +156,7 @@ export class ClassSource implements ChangeSource<Class> {
     // Ensure everything is loaded
     for (const entry of RuntimeIndex.find({
       module: (m) => {
-        const role = Env.TRV_ROLE.val;
+        const role = Env.TRV_ROLE.value;
         return role !== 'test' && // Skip all modules when in test
           m.roles.includes('std') &&
           (

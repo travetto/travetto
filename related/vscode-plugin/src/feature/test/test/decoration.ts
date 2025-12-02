@@ -106,11 +106,11 @@ export class Decorations {
         suffix = title;
       }
 
-      const getVal = (val: unknown): string => {
+      const getVal = (value: unknown): string => {
         try {
-          return util.inspect(JSON.parse(`${val}`), false, 10).replace(/\n/g, '  \n\t');
+          return util.inspect(JSON.parse(`${value}`), false, 10).replace(/\n/g, '  \n\t');
         } catch {
-          return `${val}`;
+          return `${value}`;
         }
       };
 

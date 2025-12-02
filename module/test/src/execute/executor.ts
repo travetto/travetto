@@ -15,7 +15,7 @@ import { Barrier } from './barrier.ts';
 import { ExecutionError } from './error.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
-const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
+const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.value) ?? 5000;
 
 /**
  * Support execution of the tests

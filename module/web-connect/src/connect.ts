@@ -68,8 +68,8 @@ export class ConnectResponse implements Pick<ServerResponse,
     return this.#response.context.httpStatusCode;
   }
 
-  set statusCode(val: number) {
-    this.#response.context.httpStatusCode = val;
+  set statusCode(code: number) {
+    this.#response.context.httpStatusCode = code;
   }
 
   writeHead(statusCode: unknown, statusMessage?: unknown, headers?: unknown): this {

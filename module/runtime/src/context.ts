@@ -28,7 +28,7 @@ class $Runtime {
 
   /** Get env name, with support for the default env */
   get env(): string | undefined {
-    return Env.TRV_ENV.val || (!this.production ? this.#idx.manifest.workspace.defaultEnv : undefined);
+    return Env.TRV_ENV.value || (!this.production ? this.#idx.manifest.workspace.defaultEnv : undefined);
   }
 
   /** Are we in development mode */
@@ -43,8 +43,8 @@ class $Runtime {
 
   /** Get debug value */
   get debug(): false | string {
-    const val = Env.DEBUG.val ?? '';
-    return (!val && this.production) || Env.DEBUG.isFalse ? false : val;
+    const value = Env.DEBUG.value ?? '';
+    return (!value && this.production) || Env.DEBUG.isFalse ? false : value;
   }
 
   /** Manifest main */

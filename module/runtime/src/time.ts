@@ -22,8 +22,8 @@ export class TimeUtil {
    * Test to see if a string is valid for relative time
    * @param val
    */
-  static isTimeSpan(val: string): val is TimeSpan {
-    return TIME_PATTERN.test(val);
+  static isTimeSpan(value: string): value is TimeSpan {
+    return TIME_PATTERN.test(value);
   }
 
   /**
@@ -69,11 +69,11 @@ export class TimeUtil {
     if (value === undefined) {
       return value;
     }
-    const val = (typeof value === 'string' && /\d{1,30}[a-z]$/i.test(value)) ?
+    const result = (typeof value === 'string' && /\d{1,30}[a-z]$/i.test(value)) ?
       (this.isTimeSpan(value) ? this.asMillis(value) : undefined) :
       (typeof value === 'string' ? parseInt(value, 10) :
         (value instanceof Date ? value.getTime() : value));
-    return Number.isNaN(val) ? undefined : val;
+    return Number.isNaN(result) ? undefined : result;
   }
 
   /**

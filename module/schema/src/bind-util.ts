@@ -22,23 +22,23 @@ export class BindUtil {
   /**
    * Coerce a value to match the field config type
    * @param conf The field config to coerce to
-   * @param val The provided value
+   * @param value The provided value
    */
-  static #coerceType<T>(conf: SchemaInputConfig, val: unknown): T | null | undefined {
+  static #coerceType<T>(conf: SchemaInputConfig, value: unknown): T | null | undefined {
     if (conf.type?.bindSchema) {
-      val = conf.type.bindSchema(val);
+      value = conf.type.bindSchema(value);
     } else {
-      val = DataUtil.coerceType(val, conf.type, false);
+      value = DataUtil.coerceType(value, conf.type, false);
 
-      if (conf.type === Number && conf.precision && typeof val === 'number') {
+      if (conf.type === Number && conf.precision && typeof value === 'number') {
         if (conf.precision[1]) { // Supports decimal
-          val = +val.toFixed(conf.precision[1]);
+          value = +value.toFixed(conf.precision[1]);
         } else { // 0 digits
-          val = Math.trunc(val);
+          value = Math.trunc(value);
         }
       }
     }
-    return castTo(val);
+    return castTo(value);
   }
 
   /**
@@ -52,7 +52,7 @@ export class BindUtil {
     const out: Record<string, unknown> = {};
     for (const k of Object.keys(obj)) {
       const objK = obj[k];
-      const val = DataUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
+      const value = DataUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
       const parts = k.split('.');
       const last = parts.pop()!;
       let sub = out;
@@ -77,10 +77,10 @@ export class BindUtil {
       const arr = last.indexOf('[') > 0;
 
       if (!arr) {
-        if (sub[last] && DataUtil.isPlainObject(val)) {
-          sub[last] = DataUtil.deepAssign(sub[last], val, 'coerce');
+        if (sub[last] && DataUtil.isPlainObject(value)) {
+          sub[last] = DataUtil.deepAssign(sub[last], value, 'coerce');
         } else {
-          sub[last] = val;
+          sub[last] = value;
         }
       } else {
         const name = last.split(/[^A-Za-z_0-9]/)[0];
@@ -93,10 +93,10 @@ export class BindUtil {
         if (key === undefined) {
           key = arrSub.length;
         }
-        if (arrSub[key] && DataUtil.isPlainObject(val) && DataUtil.isPlainObject(arrSub[key])) {
-          arrSub[key] = DataUtil.deepAssign(arrSub[key], val, 'coerce');
+        if (arrSub[key] && DataUtil.isPlainObject(value) && DataUtil.isPlainObject(arrSub[key])) {
+          arrSub[key] = DataUtil.deepAssign(arrSub[key], value, 'coerce');
         } else {
-          arrSub[key] = val;
+          arrSub[key] = value;
         }
       }
     }
@@ -105,8 +105,8 @@ export class BindUtil {
 
   /**
    * Convert full object with nesting, into flat set of keys
-   * @param conf The object to flatten the paths for
-   * @param val The starting prefix
+   * @param data The object to flatten the paths for
+   * @param prefix The starting prefix
    */
   static flattenPaths<V extends string = string>(data: Record<string, unknown>, prefix: string = ''): Record<string, V> {
     const out: Record<string, V> = {};
@@ -259,34 +259,34 @@ export class BindUtil {
   /**
    * Coerce field to type
    * @param cfg
-   * @param val
+   * @param value
    * @param applyDefaults
    * @returns
    */
-  static coerceInput(cfg: SchemaInputConfig, val: unknown, applyDefaults = false): unknown {
-    if ((val === undefined || val === null) && applyDefaults) {
-      val = Array.isArray(cfg.default) ? cfg.default.slice(0) : cfg.default;
+  static coerceInput(cfg: SchemaInputConfig, value: unknown, applyDefaults = false): unknown {
+    if ((value === undefined || value === null) && applyDefaults) {
+      value = Array.isArray(cfg.default) ? cfg.default.slice(0) : cfg.default;
     }
-    if (cfg.required?.active === false && (val === undefined || val === null)) {
-      return val;
+    if (cfg.required?.active === false && (value === undefined || value === null)) {
+      return value;
     }
     const complex = SchemaRegistryIndex.has(cfg.type);
     const bindCfg: BindConfig | undefined = (complex && 'view' in cfg && typeof cfg.view === 'string') ? { view: cfg.view } : undefined;
     if (cfg.array) {
-      const valArr = !Array.isArray(val) ? [val] : val;
+      const valArr = !Array.isArray(value) ? [value] : value;
       if (complex) {
-        val = valArr.map(x => this.bindSchema(cfg.type, x, bindCfg));
+        value = valArr.map(x => this.bindSchema(cfg.type, x, bindCfg));
       } else {
-        val = valArr.map(x => DataUtil.coerceType(x, cfg.type, false));
+        value = valArr.map(x => DataUtil.coerceType(x, cfg.type, false));
       }
     } else {
       if (complex) {
-        val = this.bindSchema(cfg.type, val, bindCfg);
+        value = this.bindSchema(cfg.type, value, bindCfg);
       } else {
-        val = DataUtil.coerceType(val, cfg.type, false);
+        value = DataUtil.coerceType(value, cfg.type, false);
       }
     }
-    return val;
+    return value;
   }
 
   /**

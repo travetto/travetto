@@ -76,8 +76,8 @@ export class CliModuleUtil {
         for (const parent of el.parents ?? []) {
           const par = childMap.get(parent)!;
           // Extend children into parents
-          for (const val of el.children) {
-            par.children.add(val);
+          for (const child of el.children) {
+            par.children.add(child);
           }
           par.active.delete(el.name);
         }

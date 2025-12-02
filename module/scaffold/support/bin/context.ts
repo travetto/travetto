@@ -81,7 +81,7 @@ export class Context {
   }
 
   get sourceListing(): Promise<Listing> {
-    return fs.readFile(this.source('listing.json'), 'utf8').then(val => JSON.parse(val));
+    return fs.readFile(this.source('listing.json'), 'utf8').then(text => JSON.parse(text));
   }
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {

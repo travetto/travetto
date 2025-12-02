@@ -91,6 +91,6 @@ export function ConditionalRegister(handler: () => (boolean | Promise<boolean>))
  * Registers an interceptor exclusion filter
  * @kind decorator
  */
-export function ExcludeInterceptors(interceptorExclude: (val: WebInterceptor) => boolean): EndpointDecorator {
+export function ExcludeInterceptors(interceptorExclude: (value: WebInterceptor) => boolean): EndpointDecorator {
   return register({ interceptorExclude });
 };

@@ -19,8 +19,8 @@ export class WebHeaderUtil {
    * Parse cookie header
    */
   static parseCookieHeader(header: string): Cookie[] {
-    const val = header.trim();
-    return !val ? [] : val.split(SPLIT_SEMI).map(item => {
+    const text = header.trim();
+    return !text ? [] : text.split(SPLIT_SEMI).map(item => {
       const [name, value] = item.split(SPLIT_EQ);
       return { name, value };
     });

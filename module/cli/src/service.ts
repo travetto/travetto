@@ -5,11 +5,11 @@ import net from 'node:net';
 
 import { ExecUtil, TimeUtil, Util } from '@travetto/runtime';
 
-const ports = (val: number | `${number}:${number}`): [number, number] =>
-  typeof val === 'number' ?
-    [val, val] :
+const ports = (value: number | `${number}:${number}`): [number, number] =>
+  typeof value === 'number' ?
+    [value, value] :
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    val.split(':').map(x => parseInt(x, 10)) as [number, number];
+    value.split(':').map(x => parseInt(x, 10)) as [number, number];
 
 type BodyCheck = (body: string) => boolean;
 

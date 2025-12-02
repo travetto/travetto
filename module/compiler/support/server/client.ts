@@ -127,12 +127,12 @@ export class CompilerClient {
 
         for await (const line of rl.createInterface(response)) {
           if (line.trim().charAt(0) === '{') {
-            const val: T = JSON.parse(line);
-            if (cfg.until?.(val)) {
+            const event: T = JSON.parse(line);
+            if (cfg.until?.(event)) {
               await CommonUtil.queueMacroTask();
               ctrl.abort();
             }
-            yield val;
+            yield event;
           }
         }
       } catch (error) {

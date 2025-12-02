@@ -82,9 +82,9 @@ class $RootLogger extends Logger {
 
   /** Set level for operation */
   initLevel(defaultLevel: CompilerLogLevel | 'none'): void {
-    const val = process.env.TRV_QUIET !== 'true' ? process.env.TRV_BUILD : 'none';
-    switch (val) {
-      case 'debug': case 'warn': case 'error': case 'info': this.level = val; break;
+    const value = process.env.TRV_QUIET !== 'true' ? process.env.TRV_BUILD : 'none';
+    switch (value) {
+      case 'debug': case 'warn': case 'error': case 'info': this.level = value; break;
       case undefined: this.level = defaultLevel; break;
       case 'none': default: this.level = 'none';
     }

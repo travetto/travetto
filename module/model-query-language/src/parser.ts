@@ -20,13 +20,13 @@ export class QueryLanguageParser {
    * Handle all clauses
    */
   static handleClause(nodes: (AllNode | Token)[]): void {
-    const val: Token | ArrayNode = castTo(nodes.pop());
+    const value: Token | ArrayNode = castTo(nodes.pop());
     const operation: Token & { value: string } = castTo(nodes.pop());
     const ident: Token & { value: string } = castTo(nodes.pop());
 
     // value isn't a literal or a list, bail
-    if (val.type !== 'literal' && val.type !== 'list') {
-      throw new Error(`Unexpected token: ${val.value}`);
+    if (value.type !== 'literal' && value.type !== 'list') {
+      throw new Error(`Unexpected token: ${value.value}`);
     }
 
     // If operator is not an operator, bail
@@ -45,7 +45,7 @@ export class QueryLanguageParser {
       type: 'clause',
       field: ident.value,
       operation: finalOp,
-      value: val.value
+      value: value.value
     });
 
     // Handle unary support

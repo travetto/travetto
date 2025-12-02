@@ -75,9 +75,9 @@ export class ElasticsearchQueryUtil {
         ((key === 'id' && !path) ? '_id' : `${path}${key}`) :
         `${path}${key}`;
 
-      const sPathQuery = (val: unknown): {} => (key === 'id' && !path) ?
-        { ids: { values: Array.isArray(val) ? val : [val] } } :
-        { [Array.isArray(val) ? 'terms' : 'term']: { [sPath]: val } };
+      const sPathQuery = (value: unknown): {} => (key === 'id' && !path) ?
+        { ids: { values: Array.isArray(value) ? value : [value] } } :
+        { [Array.isArray(value) ? 'terms' : 'term']: { [sPath]: value } };
 
       if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];

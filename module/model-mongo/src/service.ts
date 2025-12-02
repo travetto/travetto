@@ -544,9 +544,9 @@ export class MongoModelService implements
     const result = await col.aggregate<{ _id: ObjectId, count: number }>(aggregations).toArray();
 
     return result
-      .map(val => ({
-        key: MongoUtil.idToString(val._id),
-        count: val.count
+      .map(item => ({
+        key: MongoUtil.idToString(item._id),
+        count: item.count
       }))
       .toSorted((a, b) => b.count - a.count);
   }

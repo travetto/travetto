@@ -8,11 +8,11 @@ import {
 } from '@travetto/web';
 
 @Controller('/rpc')
-@ExcludeInterceptors(val => !(
-  val instanceof DecompressInterceptor ||
-  val instanceof BodyInterceptor ||
-  val instanceof RespondInterceptor ||
-  val.category === 'global'
+@ExcludeInterceptors(value => !(
+  value instanceof DecompressInterceptor ||
+  value instanceof BodyInterceptor ||
+  value instanceof RespondInterceptor ||
+  value.category === 'global'
 ))
 @IsPrivate()
 export class WebRpcController {

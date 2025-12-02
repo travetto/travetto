@@ -44,8 +44,8 @@ export class MongoUtil {
     };
   }
 
-  static uuid(val: string): Binary {
-    return new Binary(Buffer.from(val.replaceAll('-', ''), 'hex'), Binary.SUBTYPE_UUID);
+  static uuid(value: string): Binary {
+    return new Binary(Buffer.from(value.replaceAll('-', ''), 'hex'), Binary.SUBTYPE_UUID);
   }
 
   static idToString(id: string | ObjectId | Binary): string {

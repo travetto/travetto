@@ -10,11 +10,11 @@ export class EnvProp<T> {
   constructor(key: string) { this.key = key; }
 
   /** Set value according to prop type */
-  set(val: T | undefined | null): void {
-    if (val === undefined || val === null) {
+  set(value: T | undefined | null): void {
+    if (value === undefined || value === null) {
       delete process.env[this.key];
     } else {
-      process.env[this.key] = Array.isArray(val) ? `${val.join(',')}` : `${val}`;
+      process.env[this.key] = Array.isArray(value) ? `${value.join(',')}` : `${value}`;
     }
   }
 
@@ -24,30 +24,30 @@ export class EnvProp<T> {
   }
 
   /** Export value */
-  export(val?: T | undefined | null): Record<string, string> {
+  export(value?: T | undefined | null): Record<string, string> {
     let out: string;
     if (arguments.length === 0) { // If nothing passed in
-      out = `${this.val}`;
-    } else if (val === undefined || val === null) {
+      out = `${this.value}`;
+    } else if (value === undefined || value === null) {
       out = '';
-    } else if (Array.isArray(val)) {
-      out = val.join(',');
-    } else if (typeof val === 'object') {
-      out = Object.entries(val).map(([k, v]) => `${k}=${v}`).join(',');
+    } else if (Array.isArray(value)) {
+      out = value.join(',');
+    } else if (typeof value === 'object') {
+      out = Object.entries(value).map(([k, v]) => `${k}=${v}`).join(',');
     } else {
-      out = `${val}`;
+      out = `${value}`;
     }
     return { [this.key]: out };
   }
 
   /** Read value as string */
-  get val(): string | undefined { return process.env[this.key] || undefined; }
+  get value(): string | undefined { return process.env[this.key] || undefined; }
 
   /** Read value as list */
   get list(): string[] | undefined {
-    const val = this.val;
-    return (val === undefined || val === '') ?
-      undefined : val.split(/[, ]+/g).map(x => x.trim()).filter(x => !!x);
+    const value = this.value;
+    return (value === undefined || value === '') ?
+      undefined : value.split(/[, ]+/g).map(x => x.trim()).filter(x => !!x);
   }
 
   /** Read value as object */
@@ -63,35 +63,35 @@ export class EnvProp<T> {
 
   /** Read value as int  */
   get int(): number | undefined {
-    const vi = parseInt(this.val ?? '', 10);
+    const vi = parseInt(this.value ?? '', 10);
     return Number.isNaN(vi) ? undefined : vi;
   }
 
   /** Read value as boolean */
   get bool(): boolean | undefined {
-    const val = this.val;
-    return (val === undefined || val === '') ? undefined : IS_TRUE.test(val);
+    const value = this.value;
+    return (value === undefined || value === '') ? undefined : IS_TRUE.test(value);
   }
 
   /** Determine if the underlying value is truthy */
   get isTrue(): boolean {
-    return IS_TRUE.test(this.val ?? '');
+    return IS_TRUE.test(this.value ?? '');
   }
 
   /** Determine if the underlying value is falsy */
   get isFalse(): boolean {
-    return IS_FALSE.test(this.val ?? '');
+    return IS_FALSE.test(this.value ?? '');
   }
 
   /** Determine if the underlying value is set */
   get isSet(): boolean {
-    const val = this.val;
-    return val !== undefined && val !== '';
+    const value = this.value;
+    return value !== undefined && value !== '';
   }
 }
 
 type AllType = {
-  [K in keyof EnvData]: Pick<EnvProp<EnvData[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
+  [K in keyof EnvData]: Pick<EnvProp<EnvData[K]>, 'key' | 'export' | 'value' | 'set' | 'clear' | 'isSet' |
     (EnvData[K] extends unknown[] ? 'list' | 'add' : never) |
     (Extract<EnvData[K], object> extends never ? never : 'object') |
     (Extract<EnvData[K], number> extends never ? never : 'int') |

@@ -24,7 +24,7 @@ type ModuleRunConfig<T = ExecutionResult<string>> = {
   stableOutput?: boolean;
 };
 
-const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
+const colorize = (value: string, idx: number): string => COLORS[idx % COLORS.length](value);
 
 /**
  * Tools for running commands across all modules of the monorepo

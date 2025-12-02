@@ -85,7 +85,7 @@ export function getCoreConfig(): CoreRollupConfig {
   const ignoreModules = getIgnoredModules();
   const ignoreFiles = ignoreModules.flatMap(getFilesFromModule);
   const minify = getMinifyConfig();
-  const envFile = new EnvProp('BUNDLE_ENV_FILE').val;
+  const envFile = new EnvProp('BUNDLE_ENV_FILE').value;
   const external = new EnvProp('BUNDLE_EXTERNAL').list ?? [];
 
   return {

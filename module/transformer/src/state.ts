@@ -241,14 +241,14 @@ export class TransformerState implements State {
   /**
    * From literal
    */
-  fromLiteral<T extends ts.Expression>(val: T): T;
-  fromLiteral(val: undefined): ts.Identifier;
-  fromLiteral(val: null): ts.NullLiteral;
-  fromLiteral(val: object): ts.ObjectLiteralExpression;
-  fromLiteral(val: unknown[]): ts.ArrayLiteralExpression;
-  fromLiteral(val: string | boolean | number): ts.LiteralExpression;
-  fromLiteral(val: unknown): ts.Node {
-    return LiteralUtil.fromLiteral(this.factory, val!);
+  fromLiteral<T extends ts.Expression>(value: T): T;
+  fromLiteral(value: undefined): ts.Identifier;
+  fromLiteral(value: null): ts.NullLiteral;
+  fromLiteral(value: object): ts.ObjectLiteralExpression;
+  fromLiteral(value: unknown[]): ts.ArrayLiteralExpression;
+  fromLiteral(value: string | boolean | number): ts.LiteralExpression;
+  fromLiteral(value: unknown): ts.Node {
+    return LiteralUtil.fromLiteral(this.factory, value!);
   }
 
   /**
@@ -268,8 +268,8 @@ export class TransformerState implements State {
   /**
    * Create a static field for a class
    */
-  createStaticField(name: string, val: ts.Expression): ts.PropertyDeclaration {
-    return CoreUtil.createStaticField(this.factory, name, val);
+  createStaticField(name: string, value: ts.Expression): ts.PropertyDeclaration {
+    return CoreUtil.createStaticField(this.factory, name, value);
   }
 
   /**

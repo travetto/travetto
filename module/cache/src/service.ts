@@ -187,7 +187,7 @@ export class CacheService {
   async evict(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown> {
     const config = target[EvictConfigSymbol]![method];
     const id = CacheUtil.generateKey(config, params);
-    const val = await fn.apply(target, params);
+    const result = await fn.apply(target, params);
     try {
       await this.delete(id); // Ignore failure on delete
     } catch (error) {
@@ -195,6 +195,6 @@ export class CacheService {
         throw error;
       }
     }
-    return val;
+    return result;
   }
 }

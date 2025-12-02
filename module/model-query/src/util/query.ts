@@ -17,14 +17,14 @@ export class ModelQueryUtil {
 
   /**
    * Resolve comparator
-   * @param val
+   * @param value
    * @returns
    */
-  static resolveComparator(val: unknown): unknown {
-    if (typeof val === 'string' && TimeUtil.isTimeSpan(val)) {
-      return TimeUtil.fromNow(val);
+  static resolveComparator(value: unknown): unknown {
+    if (typeof value === 'string' && TimeUtil.isTimeSpan(value)) {
+      return TimeUtil.fromNow(value);
     } else {
-      return val;
+      return value;
     }
   }
 

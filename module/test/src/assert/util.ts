@@ -15,25 +15,25 @@ export class AssertUtil {
   /**
    * Clean a value for displaying in the output
    */
-  static cleanValue(val: unknown): unknown {
-    switch (typeof val) {
-      case 'number': case 'boolean': case 'bigint': case 'string': case 'undefined': return val;
+  static cleanValue(value: unknown): unknown {
+    switch (typeof value) {
+      case 'number': case 'boolean': case 'bigint': case 'string': case 'undefined': return value;
       case 'object': {
-        if (isCleanable(val)) {
-          return val.toClean();
-        } else if (val === null || val.constructor === Object || Array.isArray(val) || val instanceof Date) {
-          return JSON.stringify(val);
+        if (isCleanable(value)) {
+          return value.toClean();
+        } else if (value === null || value.constructor === Object || Array.isArray(value) || value instanceof Date) {
+          return JSON.stringify(value);
         }
         break;
       }
       case 'function': {
-        if (val.Ⲑid || !val.constructor) {
-          return val.name;
+        if (value.Ⲑid || !value.constructor) {
+          return value.name;
         }
         break;
       }
     }
-    return util.inspect(val, false, 1).replace(/\n/g, ' ');
+    return util.inspect(value, false, 1).replace(/\n/g, ' ');
   }
 
   /**

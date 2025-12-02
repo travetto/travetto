@@ -12,8 +12,8 @@ class SimpleTest {
 
   @Test()
   async test1() {
-    const val = await this.#complexService.doLongOp();
-    assert(val === 5);
+    const value = await this.#complexService.doLongOp();
+    assert(value === 5);
   }
 
   @Test()

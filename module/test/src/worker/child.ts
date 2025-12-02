@@ -33,7 +33,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
    * Start the worker
    */
   async activate(): Promise<void> {
-    if (/\b@travetto[/]test\b/.test(Env.DEBUG.val ?? '')) {
+    if (/\b@travetto[/]test\b/.test(Env.DEBUG.value ?? '')) {
       const file = Runtime.toolPath(`test-worker.${process.pid}.log`);
       const stdout = createWriteStream(file, { flags: 'a' });
       const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });

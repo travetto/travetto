@@ -52,10 +52,10 @@ export class CoreUtil {
   /**
    * Create a static field for a class
    */
-  static createStaticField(factory: ts.NodeFactory, name: string, val: ts.Expression): ts.PropertyDeclaration {
+  static createStaticField(factory: ts.NodeFactory, name: string, value: ts.Expression): ts.PropertyDeclaration {
     return factory.createPropertyDeclaration(
       [factory.createToken(ts.SyntaxKind.StaticKeyword)],
-      name, undefined, undefined, val
+      name, undefined, undefined, value
     );
   }
 

@@ -61,7 +61,7 @@ function registerTimeout<T extends (number | string | { unref(): unknown })>(
   controller: AbortController,
   timeout: number,
   start: (fn: (...args: unknown[]) => unknown, delay: number) => T,
-  stop: (val: T) => void
+  stop: (value: T) => void
 ): void {
   const timer = start(() => controller.abort(), timeout);
   if (!(typeof timer === 'number' || typeof timer === 'string')) {

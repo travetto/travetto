@@ -102,9 +102,9 @@ export class SchemaFaker {
 
     const range = (max - min) * offset;
 
-    const val = Math.trunc(Math.random() * range);
+    const result = Math.trunc(Math.random() * range);
 
-    return (val / offset) + min;
+    return (result / offset) + min;
   }
 
   /**

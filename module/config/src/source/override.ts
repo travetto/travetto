@@ -11,9 +11,9 @@ export class OverrideConfigSource implements ConfigSource {
     const out: ConfigData = {};
     for (const { namespace, fields } of ConfigOverrideUtil.getAllOverrideConfigs()) {
       for (const [key, value] of Object.entries(fields)) {
-        const val = value();
-        if (val !== undefined && val !== '') {
-          out[`${namespace}.${key}`] = val;
+        const data = value();
+        if (data !== undefined && data !== '') {
+          out[`${namespace}.${key}`] = data;
         }
       }
     }

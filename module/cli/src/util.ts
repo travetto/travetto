@@ -51,7 +51,7 @@ export class CliUtil {
       return false;
     }
 
-    const info = await fetch(Env.TRV_CLI_IPC.val!).catch(() => ({ ok: false }));
+    const info = await fetch(Env.TRV_CLI_IPC.value!).catch(() => ({ ok: false }));
 
     if (!info.ok) { // Server not running
       return false;
@@ -72,7 +72,7 @@ export class CliUtil {
     console.log('Triggering IPC request', request);
 
     Object.entries(process.env).forEach(([k, v]) => validEnv(k) && (env[k] = v!));
-    const sent = await fetch(Env.TRV_CLI_IPC.val!, { method: 'POST', body: JSON.stringify(request) });
+    const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSON.stringify(request) });
     return sent.ok;
   }
 

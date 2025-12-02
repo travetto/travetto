@@ -46,7 +46,7 @@ export const text = async () => {
       <c.Execution title='Sample trv output with debug logging' cmd='trvc' args={['build']} config={{
         env: { TRV_BUILD: 'debug' },
         cwd: './doc-exec',
-        rewrite: val => val.replace(/pid=\d+/g, 'pid=000000'),
+        rewrite: value => value.replace(/pid=\d+/g, 'pid=000000'),
         formatCommand: (cmd, args) => `TRV_BUILD=debug ${cmd} ${args.join(' ')}`
       }} />
 

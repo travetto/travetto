@@ -48,7 +48,7 @@ interface CoreConfig {
   /**
    * Control which interceptors are excluded
    */
-  interceptorExclude?: (val: WebInterceptor) => boolean;
+  interceptorExclude?: (value: WebInterceptor) => boolean;
   /**
    * Response headers
    */

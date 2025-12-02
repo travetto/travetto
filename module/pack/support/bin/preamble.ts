@@ -4,7 +4,7 @@ import { readFileSync as readSyncPreamble } from 'node:fs';
 const objectProto = Object.prototype.__proto__;
 Object.defineProperty(Object.prototype, '__proto__', {
   get() { return objectProto; },
-  set(val) { Object.setPrototypeOf(this, val); }
+  set(value) { Object.setPrototypeOf(this, value); }
 });
 
 if (!process.env.TRV_MODULE && '%%ENV_FILE%%') {

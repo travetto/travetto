@@ -40,7 +40,7 @@ export class WorkPool {
   static #buildPool<I, O>(input: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
     let pendingAcquires = 0;
 
-    const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
+    const trace = /@travetto\/worker/.test(Env.DEBUG.value ?? '');
 
     // Create the pool
     const pool = createPool({
@@ -89,7 +89,7 @@ export class WorkPool {
    */
   static async run<I, O>(workerFactory: WorkerInput<I, O>, src: ItrSource<I>, opts: WorkPoolConfig<I, O> = {}): Promise<void> {
 
-    const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
+    const trace = /@travetto\/worker/.test(Env.DEBUG.value ?? '');
     const pending = new Set<Promise<unknown>>();
     const errors: Error[] = [];
     let inputIdx = 0;

@@ -51,19 +51,19 @@ export class QueryVerifier {
   /**
    * Handle generic clauses
    */
-  static processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler): void {
+  static processGenericClause<T>(state: State, cls: Class<T>, clause: object, handler: ProcessingHandler): void {
     const view = SchemaRegistryIndex.getConfig(cls).fields;
 
-    if (val === undefined || val === null) {
+    if (clause === undefined || clause === null) {
       state.log('Value cannot be undefined or null');
       return;
     }
 
-    if (handler.preMember && handler.preMember(state, val)) {
+    if (handler.preMember && handler.preMember(state, clause)) {
       return;
     }
 
-    for (const [key, value] of Object.entries(val)) {
+    for (const [key, value] of Object.entries(clause)) {
 
       // Validate value is correct, and key is valid
       if (value === undefined || value === null) {
@@ -302,15 +302,15 @@ export class QueryVerifier {
         continue;
       }
 
-      const val = query[key];
+      const value = query[key];
       const subState = state.extend(key);
 
-      if (Array.isArray(val)) {
-        for (const el of val) {
+      if (Array.isArray(value)) {
+        for (const el of value) {
           this[fn](subState, cls, el);
         }
-      } else if (typeof val !== 'string') {
-        this[fn](subState, cls, val);
+      } else if (typeof value !== 'string') {
+        this[fn](subState, cls, value);
       }
     }
 
