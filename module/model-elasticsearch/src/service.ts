@@ -267,22 +267,24 @@ export class ElasticsearchModelService implements
 
     await ModelBulkUtil.preStore(cls, operations, this);
 
-    const body = operations.reduce<(T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]>((acc, op) => {
+    type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>>;
+    const body = operations.reduce<(T | BulkDoc | { doc: T })[]>((acc, operation) => {
 
-      const esIdent = this.manager.getIdentity(asConstructable<T>((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls })).constructor);
+      const core = (operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls });
+      const esIdent = this.manager.getIdentity(asConstructable<T>(core).constructor);
       const ident: { _index: string, _type?: unknown } = { _index: esIdent.index };
 
-      if (op.delete) {
-        acc.push({ delete: { ...ident, _id: op.delete.id } });
-      } else if (op.insert) {
-        const id = this.preUpdate(op.insert);
-        acc.push({ create: { ...ident, _id: id } }, castTo(op.insert));
-      } else if (op.upsert) {
-        const id = this.preUpdate(op.upsert);
-        acc.push({ index: { ...ident, _id: id } }, castTo(op.upsert));
-      } else if (op.update) {
-        const id = this.preUpdate(op.update);
-        acc.push({ update: { ...ident, _id: id } }, { doc: op.update });
+      if (operation.delete) {
+        acc.push({ delete: { ...ident, _id: operation.delete.id } });
+      } else if (operation.insert) {
+        const id = this.preUpdate(operation.insert);
+        acc.push({ create: { ...ident, _id: id } }, castTo(operation.insert));
+      } else if (operation.upsert) {
+        const id = this.preUpdate(operation.upsert);
+        acc.push({ index: { ...ident, _id: id } }, castTo(operation.upsert));
+      } else if (operation.update) {
+        const id = this.preUpdate(operation.update);
+        acc.push({ update: { ...ident, _id: id } }, { doc: operation.update });
       }
       return acc;
     }, []);

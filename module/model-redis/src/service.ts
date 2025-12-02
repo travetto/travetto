@@ -40,7 +40,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return key;
   }
 
-  async * #streamValues(op: 'scan' | 'sScan' | 'zScan', search: RedisScan, count = 100): AsyncIterable<string[]> {
+  async * #streamValues(operation: 'scan' | 'sScan' | 'zScan', search: RedisScan, count = 100): AsyncIterable<string[]> {
     let prevCursor = '0';
     let done = false;
 
@@ -49,9 +49,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
     while (!done) {
       const [cursor, results] = await (
-        op === 'scan' ?
+        operation === 'scan' ?
           this.client.scan(prevCursor, flags).then(x => [x.cursor, x.keys] as const) :
-          op === 'sScan' ?
+          operation === 'sScan' ?
             this.client.sScan(key, prevCursor, flags).then(x => [x.cursor, x.members] as const) :
             this.client.zScan(key, prevCursor, flags).then(x => [x.cursor, x.members.map(y => y.value)] as const)
       );

@@ -217,8 +217,8 @@ export class DependencyRegistryIndex implements RegistryIndex {
       SchemaRegistryIndex.get(targetType).getMetadata<InjectableClassMetadata>(MetadataSymbol) : undefined;
 
     // Run post constructors
-    for (const op of Object.values(metadata?.postConstruct ?? {})) {
-      await op(inst);
+    for (const operation of Object.values(metadata?.postConstruct ?? {})) {
+      await operation(inst);
     }
 
     // Proxy if necessary

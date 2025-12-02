@@ -300,7 +300,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const schema = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
 
-    const op: OperationObject = {
+    const apiConfig: OperationObject = {
       tags: [tagName],
       responses: {},
       summary: schema.description,
@@ -312,7 +312,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const contentTypeMime = ep.finalizedResponseHeaders.get('content-type');
     const pConf = this.#getEndpointBody(schema.returnType, contentTypeMime);
     const code = Object.keys(pConf.content).length ? 200 : 201;
-    op.responses![code] = pConf;
+    apiConfig.responses![code] = pConf;
 
     const methodSchema = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
 
@@ -320,9 +320,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       const result = this.#processEndpointParam(ep, ep.parameters[param.index] ?? {}, param);
       if (result) {
         if ('parameters' in result) {
-          (op.parameters ??= []).push(...result.parameters);
+          (apiConfig.parameters ??= []).push(...result.parameters);
         } else {
-          op.requestBody ??= result.requestBody;
+          apiConfig.requestBody ??= result.requestBody;
         }
       }
     }
@@ -331,7 +331,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     this.#paths[key] = {
       ...(this.#paths[key] ?? {}),
-      [HTTP_METHODS[ep.httpMethod].lower]: op
+      [HTTP_METHODS[ep.httpMethod].lower]: apiConfig
     };
   }
 

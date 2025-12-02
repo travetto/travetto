@@ -18,10 +18,10 @@ const toJson = (/** @type {number} */ depth) => v => process.stdout.write(`${JSO
   new Promise(r => process.stdout.once('drain', r));
 
 require('./entry.common.js').load(ops => {
-  const [op, ...all] = process.argv.slice(2);
+  const [operation, ...all] = process.argv.slice(2);
   const args = all.filter(x => !x.startsWith('-'));
 
-  switch (op) {
+  switch (operation) {
     case undefined:
     case 'help': return console.log(help);
     case 'info': return ops.info().then(toJson(2));
@@ -34,6 +34,6 @@ require('./entry.common.js').load(ops => {
     case 'watch': return ops.watch();
     case 'stop': return ops.stop();
     case 'restart': return ops.restart();
-    default: console.error(`\nUnknown trvc operation: ${op}\n${help}`);
+    default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
   }
 });

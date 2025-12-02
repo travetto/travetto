@@ -71,12 +71,12 @@ export abstract class Connection<C = unknown> {
   /**
    * Run operation with active connection
    * @param context
-   * @param op
+   * @param operation
    * @param args
    */
-  async runWithActive<R>(op: () => Promise<R>): Promise<R> {
+  async runWithActive<R>(operation: () => Promise<R>): Promise<R> {
     if (this.active) {
-      return op();
+      return operation();
     }
 
     return this.context.run(async () => {
@@ -84,7 +84,7 @@ export abstract class Connection<C = unknown> {
       try {
         conn = await this.acquire();
         this.#active.set(conn);
-        return await op();
+        return await operation();
       } finally {
         if (conn) {
           this.release(conn);
@@ -96,19 +96,19 @@ export abstract class Connection<C = unknown> {
   /**
    * Iterate with active connection
    * @param context
-   * @param op
+   * @param operation
    * @param args
    */
-  async * iterateWithActive<R>(op: () => AsyncIterable<R>): AsyncIterable<R> {
+  async * iterateWithActive<R>(operation: () => AsyncIterable<R>): AsyncIterable<R> {
     if (this.active) {
-      yield* op();
+      yield* operation();
     }
 
     const self = castTo<Connection>(this);
     yield* this.context.iterate(async function* () {
       try {
         self.#active.set(await self.acquire());
-        yield* op();
+        yield* operation();
       } finally {
         if (self.active) {
           self.release(self.active);
@@ -120,13 +120,13 @@ export abstract class Connection<C = unknown> {
   /**
    * Run a function within a valid sql transaction.  Relies on @travetto/context.
    */
-  async runWithTransaction<R>(mode: TransactionType, op: () => Promise<R>): Promise<R> {
+  async runWithTransaction<R>(mode: TransactionType, operation: () => Promise<R>): Promise<R> {
     if (this.activeTx) {
       if (mode === 'isolated' || mode === 'force') {
         const txId = mode === 'isolated' ? `tx${Util.uuid()}` : undefined;
         try {
           await this.startTx(this.active!, txId);
-          const result = await op();
+          const result = await operation();
           await this.commitTx(this.active!, txId);
           return result;
         } catch (err) {
@@ -134,12 +134,12 @@ export abstract class Connection<C = unknown> {
           throw err;
         }
       } else {
-        return await op();
+        return await operation();
       }
     } else {
       return this.runWithActive(() => {
         this.#activeTx.set(true);
-        return this.runWithTransaction('force', op);
+        return this.runWithTransaction('force', operation);
       });
     }
   }

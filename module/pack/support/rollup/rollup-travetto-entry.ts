@@ -12,12 +12,12 @@ export function travettoEntryPlugin(config: CoreRollupConfig): Plugin {
     .map(x => x.split('node_modules/').pop()!)
     .flatMap(x => x.endsWith('/__index__.js') ? [x.replace('/__index__.js', ''), x] : [x]);
 
-  const op = config.output.format === 'module' ? 'import' : 'require';
+  const operation = config.output.format === 'module' ? 'import' : 'require';
   const importer = `
 function trvImp(path) {
   switch (path) {
-${imports.map(x => `    case '${x}': return ${op}('${x}')`).join('\n')}
-    default: return ${op}(path); // Fall back for built-ins
+${imports.map(x => `    case '${x}': return ${operation}('${x}')`).join('\n')}
+    default: return ${operation}(path); // Fall back for built-ins
   }
 }
 globalThis.${GLOBAL_IMPORT} = trvImp;

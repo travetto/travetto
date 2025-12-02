@@ -21,7 +21,7 @@ export class QueryLanguageParser {
    */
   static handleClause(nodes: (AllNode | Token)[]): void {
     const val: Token | ArrayNode = castTo(nodes.pop());
-    const op: Token & { value: string } = castTo(nodes.pop());
+    const operation: Token & { value: string } = castTo(nodes.pop());
     const ident: Token & { value: string } = castTo(nodes.pop());
 
     // value isn't a literal or a list, bail
@@ -30,21 +30,21 @@ export class QueryLanguageParser {
     }
 
     // If operator is not an operator, bail
-    if (op.type !== 'operator') {
-      throw new Error(`Unexpected token: ${op.value}`);
+    if (operation.type !== 'operator') {
+      throw new Error(`Unexpected token: ${operation.value}`);
     }
 
     // If operator is not known, bail
-    const finalOp = OP_TRANSLATION[op.value];
+    const finalOp = OP_TRANSLATION[operation.value];
 
     if (!finalOp) {
-      throw new Error(`Unexpected operator: ${op.value}`);
+      throw new Error(`Unexpected operator: ${operation.value}`);
     }
 
     nodes.push({
       type: 'clause',
       field: ident.value,
-      op: finalOp,
+      operation: finalOp,
       value: val.value
     });
 
@@ -58,21 +58,21 @@ export class QueryLanguageParser {
    * Condense nodes to remove unnecessary groupings
    * (a AND (b AND (c AND d))) => (a AND b AND c)
    */
-  static condense(nodes: (AllNode | Token)[], op: 'and' | 'or'): void {
+  static condense(nodes: (AllNode | Token)[], operation: 'and' | 'or'): void {
     let second = nodes[nodes.length - 2];
 
-    while (isBoolean(second) && second.value === op) {
+    while (isBoolean(second) && second.value === operation) {
       const right: AllNode = castTo(nodes.pop());
       nodes.pop()!;
       const left: AllNode = castTo(nodes.pop());
       const rg: GroupNode = castTo(right);
-      if (rg.type === 'group' && rg.op === op) {
+      if (rg.type === 'group' && rg.operation === operation) {
         rg.value.unshift(left);
         nodes.push(rg);
       } else {
         nodes.push({
           type: 'group',
-          op,
+          operation,
           value: [left, right]
         });
       }
@@ -91,7 +91,7 @@ export class QueryLanguageParser {
       nodes.pop(); // This is second
       nodes.push({
         type: 'unary',
-        op: 'not',
+        operation: 'not',
         value: castTo<AllNode>(node)
       });
     }
@@ -161,10 +161,10 @@ export class QueryLanguageParser {
   static convert<T = unknown>(node: AllNode): WhereClauseRaw<T> {
     switch (node.type) {
       case 'unary': {
-        return castTo({ [`$${node.op!}`]: this.convert(node.value) });
+        return castTo({ [`$${node.operation!}`]: this.convert(node.value) });
       }
       case 'group': {
-        return castTo({ [`$${node.op!}`]: node.value.map(x => this.convert(x)) });
+        return castTo({ [`$${node.operation!}`]: node.value.map(x => this.convert(x)) });
       }
       case 'clause': {
         const parts = node.field!.split('.');
@@ -173,14 +173,14 @@ export class QueryLanguageParser {
         for (const p of parts) {
           sub = sub[p] = {};
         }
-        if (node.op === '$regex' && typeof node.value === 'string') {
-          sub[node.op!] = new RegExp(`^${node.value}`);
-        } else if ((node.op === '$eq' || node.op === '$ne') && node.value === null) {
-          sub.$exists = node.op !== '$eq';
-        } else if ((node.op === '$in' || node.op === '$nin') && !Array.isArray(node.value)) {
-          throw new Error(`Expected array literal for ${node.op}`);
+        if (node.operation === '$regex' && typeof node.value === 'string') {
+          sub[node.operation!] = new RegExp(`^${node.value}`);
+        } else if ((node.operation === '$eq' || node.operation === '$ne') && node.value === null) {
+          sub.$exists = node.operation !== '$eq';
+        } else if ((node.operation === '$in' || node.operation === '$nin') && !Array.isArray(node.value)) {
+          throw new Error(`Expected array literal for ${node.operation}`);
         } else {
-          sub[node.op!] = node.value;
+          sub[node.operation!] = node.value;
         }
         return top;
       }

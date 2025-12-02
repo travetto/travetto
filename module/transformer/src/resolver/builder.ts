@@ -160,7 +160,7 @@ export const TypeBuilder: {
             }
           }
           if (values.length > 0) {
-            return ({ key: 'template', template: { op: 'and', values }, ctor: String });
+            return ({ key: 'template', template: { operation: 'and', values }, ctor: String });
           }
         }
       }
@@ -247,7 +247,7 @@ export const TypeBuilder: {
           ctor: String,
           nullable: type.nullable,
           undefinable: type.undefinable,
-          template: { op: 'or', values: subTypes.map(x => transformCast<TemplateType>(x).template!) }
+          template: { operation: 'or', values: subTypes.map(x => transformCast<TemplateType>(x).template!) }
         };
       } else if (subTypes.length === 1) {
         return { undefinable, nullable, ...first };

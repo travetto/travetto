@@ -32,13 +32,13 @@ export class TableManager {
    */
   async exportTables(cls: Class): Promise<string[]> {
     const out: string[] = [];
-    for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
-      out.push(op);
+    for (const command of this.#dialect.getCreateAllTablesSQL(cls)) {
+      out.push(command);
     }
     const indices = ModelRegistryIndex.getConfig(cls).indices;
     if (indices) {
-      for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
-        out.push(op);
+      for (const command of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
+        out.push(command);
       }
     }
     return out;
@@ -51,14 +51,14 @@ export class TableManager {
   @Connected()
   @Transactional()
   async createTables(cls: Class): Promise<void> {
-    for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
-      await this.#exec(op);
+    for (const command of this.#dialect.getCreateAllTablesSQL(cls)) {
+      await this.#exec(command);
     }
     const indices = ModelRegistryIndex.getConfig(cls).indices;
     if (indices) {
-      for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
+      for (const command of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
-          await this.#exec(op);
+          await this.#exec(command);
         } catch (err) {
           if (!(err instanceof Error)) {
             throw err;
@@ -78,8 +78,8 @@ export class TableManager {
   @Connected()
   @Transactional()
   async dropTables(cls: Class): Promise<void> {
-    for (const op of this.#dialect.getDropAllTablesSQL(cls)) {
-      await this.#exec(op);
+    for (const command of this.#dialect.getDropAllTablesSQL(cls)) {
+      await this.#exec(command);
     }
   }
 
@@ -90,8 +90,8 @@ export class TableManager {
   @Connected()
   @Transactional()
   async truncateTables(cls: Class): Promise<void> {
-    for (const op of this.#dialect.getTruncateAllTablesSQL(cls)) {
-      await this.#exec(op);
+    for (const command of this.#dialect.getTruncateAllTablesSQL(cls)) {
+      await this.#exec(command);
     }
   }
 

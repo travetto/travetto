@@ -116,8 +116,8 @@ export abstract class BasePackCommand implements CliCommandShape {
    * Run all operations
    */
   async * runOperations(): AsyncIterable<string> {
-    for (const op of this.getOperations()) {
-      for await (const msg of op(this)) {
+    for (const operation of this.getOperations()) {
+      for await (const msg of operation(this)) {
         yield msg.join(' ');
       }
     }

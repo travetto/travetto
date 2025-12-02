@@ -107,31 +107,31 @@ export class ServiceRunner {
     await ExecUtil.getResult(spawn('docker', ['kill', cid]));
   }
 
-  async * action(op: ServiceAction): AsyncIterable<['success' | 'failure' | 'message', string]> {
+  async * action(operation: ServiceAction): AsyncIterable<['success' | 'failure' | 'message', string]> {
     try {
       const cid = await this.#getContainerId();
       const port = this.svc.port ? ports(this.svc.port)[0] : 0;
       const running = !!cid && (!port || await this.#isRunning());
 
       if (running && !cid) { // We don't own
-        return yield [op === 'status' ? 'message' : 'failure', 'Running but not managed'];
+        return yield [operation === 'status' ? 'message' : 'failure', 'Running but not managed'];
       }
 
-      if (op === 'status') {
+      if (operation === 'status') {
         return yield !cid ? ['message', 'Not running'] : ['success', `Running ${cid}`];
-      } else if (op === 'start' && running) {
+      } else if (operation === 'start' && running) {
         return yield ['message', 'Skipping, already running'];
-      } else if (op === 'stop' && !running) {
+      } else if (operation === 'stop' && !running) {
         return yield ['message', 'Skipping, already stopped'];
       }
 
-      if (running && (op === 'restart' || op === 'stop')) {
+      if (running && (operation === 'restart' || operation === 'stop')) {
         yield ['message', 'Stopping'];
         await this.#killContainer(cid);
         yield ['success', 'Stopped'];
       }
 
-      if (op === 'restart' || op === 'start') {
+      if (operation === 'restart' || operation === 'start') {
         if (!await this.#hasImage()) {
           yield ['message', 'Starting image download'];
           for await (const line of await this.#pullImage()) {

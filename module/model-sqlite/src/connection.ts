@@ -27,10 +27,10 @@ export class SqliteConnection extends Connection<Database> {
     this.#config = config;
   }
 
-  async #withRetries<T>(op: () => Promise<T>, retries = 10, delay = 250): Promise<T> {
+  async #withRetries<T>(operation: () => Promise<T>, retries = 10, delay = 250): Promise<T> {
     for (; ;) {
       try {
-        return await op();
+        return await operation();
       } catch (err) {
         if (err instanceof Error && retries > 1 && err.message.includes('database is locked')) {
           console.error('Failed, and waiting', retries);

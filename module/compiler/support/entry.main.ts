@@ -19,8 +19,8 @@ export const main = (ctx: ManifestContext) => {
   Log.initLevel('error');
 
   /** Main entry point for compilation */
-  const compile = async (op: CompilerMode, setupOnly = false): Promise<void> => {
-    const server = await new CompilerServer(ctx, op).listen();
+  const compile = async (operation: CompilerMode, setupOnly = false): Promise<void> => {
+    const server = await new CompilerServer(ctx, operation).listen();
     const log = Log.scoped('main');
 
     // Wait for build to be ready
@@ -29,7 +29,7 @@ export const main = (ctx: ManifestContext) => {
       await server.processEvents(async function* (signal) {
         const changed = await CompilerSetup.setup(ctx);
         if (!setupOnly) {
-          yield* CompilerRunner.runProcess(ctx, changed, op, signal);
+          yield* CompilerRunner.runProcess(ctx, changed, operation, signal);
         }
       });
       log.debug('End Server');

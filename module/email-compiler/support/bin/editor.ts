@@ -36,9 +36,9 @@ export class EditorService {
     return { content, file };
   }
 
-  async #response<T>(op: Promise<T>, success: (v: T) => EditorResponse, fail?: (err: Error) => EditorResponse): Promise<void> {
+  async #response<T>(operation: Promise<T>, success: (v: T) => EditorResponse, fail?: (err: Error) => EditorResponse): Promise<void> {
     try {
-      const response = await op;
+      const response = await operation;
       if (process.connected) { process.send?.(success(response)); }
     } catch (err) {
       if (fail && process.connected && err && err instanceof Error) {

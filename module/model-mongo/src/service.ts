@@ -336,26 +336,26 @@ export class MongoModelService implements
 
     out.insertedIds = new Map([...upsertedIds.entries(), ...insertedIds.entries()]);
 
-    for (const op of operations) {
-      if (op.insert) {
-        this.preUpdate(op.insert);
-        bulk.insert(op.insert);
-      } else if (op.upsert) {
-        const id = this.preUpdate(op.upsert);
-        bulk.find({ _id: MongoUtil.uuid(id!) }).upsert().updateOne({ $set: op.upsert });
-      } else if (op.update) {
-        const id = this.preUpdate(op.update);
-        bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: op.update });
-      } else if (op.delete) {
-        bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).deleteOne();
+    for (const operation of operations) {
+      if (operation.insert) {
+        this.preUpdate(operation.insert);
+        bulk.insert(operation.insert);
+      } else if (operation.upsert) {
+        const id = this.preUpdate(operation.upsert);
+        bulk.find({ _id: MongoUtil.uuid(id!) }).upsert().updateOne({ $set: operation.upsert });
+      } else if (operation.update) {
+        const id = this.preUpdate(operation.update);
+        bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: operation.update });
+      } else if (operation.delete) {
+        bulk.find({ _id: MongoUtil.uuid(operation.delete.id) }).deleteOne();
       }
     }
 
     const result = await bulk.execute({});
 
     // Restore all ids
-    for (const op of operations) {
-      const core = op.insert ?? op.upsert ?? op.update;
+    for (const operation of operations) {
+      const core = operation.insert ?? operation.upsert ?? operation.update;
       if (core) {
         this.postUpdate(asFull(core));
       }
@@ -375,8 +375,8 @@ export class MongoModelService implements
     if (result.hasWriteErrors()) {
       out.errors = result.getWriteErrors();
       for (const err of out.errors) {
-        const op = operations[err.index];
-        const k = TypedObject.keys(op)[0];
+        const operation = operations[err.index];
+        const k = TypedObject.keys(operation)[0];
         out.counts[k] -= 1;
       }
       out.counts.error = out.errors.length;

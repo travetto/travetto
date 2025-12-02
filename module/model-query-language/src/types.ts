@@ -42,7 +42,7 @@ export interface Node<T extends string = string> {
  */
 export interface ClauseNode extends Node<'clause'> {
   field?: string;
-  op?: string;
+  operation?: string;
   value?: Literal | Literal[];
 }
 
@@ -50,7 +50,7 @@ export interface ClauseNode extends Node<'clause'> {
  * Grouping
  */
 export interface GroupNode extends Node<'group'> {
-  op?: 'and' | 'or';
+  operation?: 'and' | 'or';
   value: AllNode[];
 }
 
@@ -58,7 +58,7 @@ export interface GroupNode extends Node<'group'> {
  * Unary node
  */
 export interface UnaryNode extends Node<'unary'> {
-  op?: 'not';
+  operation?: 'not';
   value: AllNode;
 }
 
@@ -66,7 +66,7 @@ export interface UnaryNode extends Node<'unary'> {
  * Array node
  */
 export interface ArrayNode extends Node<'list'> {
-  op?: 'not';
+  operation?: 'not';
   value: Literal[];
 }
 

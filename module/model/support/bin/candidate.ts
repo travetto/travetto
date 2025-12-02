@@ -11,10 +11,10 @@ import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
  */
 export class ModelCandidateUtil {
 
-  static async export(op: keyof ModelStorageSupport): Promise<{ models: string[], providers: string[] }> {
+  static async export(operation: keyof ModelStorageSupport): Promise<{ models: string[], providers: string[] }> {
     return {
       models: await this.getModelNames(),
-      providers: await this.getProviderNames(op)
+      providers: await this.getProviderNames(operation)
     };
   }
 
@@ -39,16 +39,16 @@ export class ModelCandidateUtil {
   /**
    * Get all providers that are viable candidates
    */
-  static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectableCandidate[]> {
+  static async getProviders(operation?: keyof ModelStorageSupport): Promise<InjectableCandidate[]> {
     const types = DependencyRegistryIndex.getCandidates(toConcrete<ModelStorageSupport>());
-    return types.filter(x => !op || x.class.prototype?.[op]);
+    return types.filter(x => !operation || x.class.prototype?.[operation]);
   }
 
   /**
    * Get list of names of all viable providers
    */
-  static async getProviderNames(op?: keyof ModelStorageSupport): Promise<string[]> {
-    return (await this.getProviders(op))
+  static async getProviderNames(operation?: keyof ModelStorageSupport): Promise<string[]> {
+    return (await this.getProviders(operation))
       .map(x => x.class.name.replace(/ModelService/, ''))
       .toSorted();
   }

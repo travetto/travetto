@@ -198,18 +198,18 @@ export class Util {
 
   /**
    * Retry an operation, with a custom conflict handler
-   * @param op The operation to retry
+   * @param operation The operation to retry
    * @param isHandledConflict Function to determine if the error is a handled conflict
    * @param maxTries Maximum number of retries
    */
   static async acquireWithRetry<T>(
-    op: () => T | Promise<T>,
+    operation: () => T | Promise<T>,
     prepareRetry: (err: unknown, count: number) => (void | undefined | boolean | Promise<(void | undefined | boolean)>),
     maxTries = 5,
   ): Promise<T> {
     for (let i = 0; i < maxTries; i++) {
       try {
-        return await op();
+        return await operation();
       } catch (err) {
         if (i === maxTries - 1 || await prepareRetry(err, i) === false) {
           throw err; // Stop retrying if we reached max tries or prepareRetry returns false

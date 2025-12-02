@@ -208,8 +208,8 @@ export class CompilerWatchFeature extends BaseFeature {
     await Util.nonBlockingTimeout(1000); // Add buffer
     this.run('start');
 
-    for (const op of ['start', 'stop', 'restart', 'clean'] as const) {
-      this.register(op, () => this.run(op));
+    for (const operation of ['start', 'stop', 'restart', 'clean'] as const) {
+      this.register(operation, () => this.run(operation));
     }
   }
 

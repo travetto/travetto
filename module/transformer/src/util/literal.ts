@@ -185,7 +185,7 @@ export class LiteralUtil {
         out.push(`(?:${this.templateLiteralToRegex(transformCast(el), false)})`);
       }
     }
-    const body = out.join(template.op === 'and' ? '' : '|');
+    const body = out.join(template.operation === 'and' ? '' : '|');
     if (exact) {
       return `^(?:${body})$`;
     } else {

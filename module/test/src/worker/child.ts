@@ -16,9 +16,9 @@ export class TestChildWorker extends IpcChannel<TestRun> {
 
   #done = Promise.withResolvers<void>();
 
-  async #exec(op: () => Promise<unknown>, type: string): Promise<void> {
+  async #exec(operation: () => Promise<unknown>, type: string): Promise<void> {
     try {
-      await op();
+      await operation();
       this.send(type); // Respond
     } catch (err) {
       if (!(err instanceof Error)) {

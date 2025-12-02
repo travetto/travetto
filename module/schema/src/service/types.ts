@@ -3,7 +3,7 @@ import { Any, Class, Primitive } from '@travetto/runtime';
 import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
-export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
+export type TemplateLiteral = { operation: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
 export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 
