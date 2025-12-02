@@ -47,17 +47,17 @@ export class ParameterSelector {
   /**
    * Create the input handler
    * @param provider Input Parameter provider
-   * @param config The configuration for the parameter
+   * @param input The configuration for the parameter
    */
-  static buildQuick<T extends Complex>(config: InputWithMeta, provider: () => T): T {
-    const qp = provider();
-    qp.ignoreFocusOut = true;
-    qp.step = config.step;
-    qp.totalSteps = config.total;
-    qp.value = (config.input || (config.param.default !== undefined ? `${config.param.default}` : undefined))!;
-    qp.placeholder = qp.title;
-    qp.title = `Enter value for ${config.param.description || config.param.name}`;
-    return qp;
+  static buildQuick<T extends Complex>(input: InputWithMeta, provider: () => T): T {
+    const quickPick = provider();
+    quickPick.ignoreFocusOut = true;
+    quickPick.step = input.step;
+    quickPick.totalSteps = input.total;
+    quickPick.value = (input.input || (input.param.default !== undefined ? `${input.param.default}` : undefined))!;
+    quickPick.placeholder = quickPick.title;
+    quickPick.title = `Enter value for ${input.param.description || input.param.name}`;
+    return quickPick;
   }
 
   /**
@@ -116,27 +116,27 @@ export class ParameterSelector {
 
   /**
    * Prompt for a file
-   * @param config The parameter to look for
+   * @param input The parameter to look for
    * @param root The root to search in
    */
-  static async getFile(config: InputWithMeta, root?: string): Promise<string | undefined> {
+  static async getFile(input: InputWithMeta, root?: string): Promise<string | undefined> {
     const disposables: vscode.Disposable[] = [];
     const ripGrepPath = await this.#getRipGrepPath();
     const baseArgs = ['--max-count', '50', '--files'];
     const quote = process.platform === 'win32' ? '"' : '\'';
     const cwd = root ?? Workspace.uri.fsPath;
     const placeholder = 'Type to search for files';
-    const exts: string[] = config.param.fileExtensions ?? [];
+    const exts: string[] = input.param.fileExtensions ?? [];
 
     try {
       return await new Promise<string | undefined>((resolve) => {
-        const input = vscode.window.createQuickPick<{ label: string, description: string }>();
-        input.placeholder = exts.length ? `${placeholder} (${exts.map(x => `.${x}`).join(', ')})` : placeholder;
+        const quickPick = vscode.window.createQuickPick<{ label: string, description: string }>();
+        quickPick.placeholder = exts.length ? `${placeholder} (${exts.map(x => `.${x}`).join(', ')})` : placeholder;
 
         disposables.push(
-          input.onDidChangeValue(async value => {
+          quickPick.onDidChangeValue(async value => {
             if (!value) {
-              input.items = [];
+              quickPick.items = [];
               return;
             }
             value = value.replace(/[*?]/g, '').replace(/[.]$/, '');
@@ -147,7 +147,7 @@ export class ParameterSelector {
 
             const args = [...baseArgs, '-g', [quote, query, quote].join('')];
 
-            input.busy = true;
+            quickPick.busy = true;
             const items: { label: string, description: string }[] = [];
             const subProcess = spawn(ripGrepPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd, });
 
@@ -156,21 +156,21 @@ export class ParameterSelector {
                 item => items.push({ label: item, description: path.resolve(cwd, item.trim()) }));
             }
             await ExecUtil.getResult(subProcess, { catch: true });
-            input.items = items;
-            input.busy = false;
+            quickPick.items = items;
+            quickPick.busy = false;
           }),
-          input.onDidChangeSelection(items => {
+          quickPick.onDidChangeSelection(items => {
             if (items[0]) {
               resolve(items[0].description);
             }
-            input.hide();
+            quickPick.hide();
           }),
-          input.onDidHide(() => {
+          quickPick.onDidHide(() => {
             resolve(undefined);
-            input.dispose();
+            quickPick.dispose();
           })
         );
-        input.show();
+        quickPick.show();
       });
     } finally {
       disposables.forEach(d => d.dispose());
@@ -203,13 +203,13 @@ export class ParameterSelector {
    * @param items
    */
   static getObjectQuickPickList<T extends vscode.QuickPickItem>(title: string, items: T[]): Promise<T> {
-    const qp = vscode.window.createQuickPick<T>();
-    qp.ignoreFocusOut = true;
-    qp.placeholder = 'Select ...';
-    qp.title = title;
-    qp.items = items;
+    const quickPick = vscode.window.createQuickPick<T>();
+    quickPick.ignoreFocusOut = true;
+    quickPick.placeholder = 'Select ...';
+    quickPick.title = title;
+    quickPick.items = items;
 
-    return this.getInputComplex(qp, item => item.activeItems[0]);
+    return this.getInputComplex(quickPick, item => item.activeItems[0]);
   }
 
   /**
