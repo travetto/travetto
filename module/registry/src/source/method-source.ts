@@ -29,26 +29,30 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
    * On a class being emitted, check methods
    */
   onClassEvent(event: ChangeEvent<Class>): void {
-    const next = (event.type !== 'removing' ? describeFunction(event.curr!)?.methods : null) ?? {};
-    const prev = (event.type !== 'added' ? describeFunction(event.prev!)?.methods : null) ?? {};
+    const next = (event.type !== 'removing' ? describeFunction(event.current!)?.methods : null) ?? {};
+    const previous = (event.type !== 'added' ? describeFunction(event.previous!)?.methods : null) ?? {};
 
     /**
      * Go through each method, comparing hashes.  To see added/removed and changed
      */
     for (const key of Object.keys(next)) {
-      if ((!prev[key] || !('prev' in event)) && event.type !== 'removing') {
-        this.emit({ type: 'added', curr: [event.curr!, event.curr!.prototype[key]] });
-      } else if (next[key].hash !== prev[key].hash && event.type === 'changed') {
-        // FIXME: Why is event.prev undefined sometimes?
-        this.emit({ type: 'changed', curr: [event.curr, event.curr.prototype[key]], prev: [event.prev, event.prev.prototype[key]] });
+      if ((!previous[key] || !('previous' in event)) && event.type !== 'removing') {
+        this.emit({ type: 'added', current: [event.current!, event.current!.prototype[key]] });
+      } else if (next[key].hash !== previous[key].hash && event.type === 'changed') {
+        // FIXME: Why is event.previous undefined sometimes?
+        this.emit({
+          type: 'changed',
+          current: [event.current, event.current.prototype[key]],
+          previous: [event.previous, event.previous.prototype[key]]
+        });
       } else {
         // Method Unchanged
       }
     }
 
-    for (const key of Object.keys(prev)) {
+    for (const key of Object.keys(previous)) {
       if (!next[key] && event.type !== 'added') {
-        this.emit({ type: 'removing', prev: [event.prev, event.prev.prototype[key]] });
+        this.emit({ type: 'removing', previous: [event.previous, event.previous.prototype[key]] });
       }
     }
   }

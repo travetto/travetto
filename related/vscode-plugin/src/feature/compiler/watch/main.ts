@@ -11,7 +11,7 @@ import { Workspace } from '../../../core/workspace.ts';
 import { Activatible } from '../../../core/activation.ts';
 
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
-type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
+type ProgressState = { previous: number, bar: ProgressBar, cleanup: () => void };
 
 const resolvablePromise = <T = void>(): PromiseWithResolvers<T> => {
   let result: Pick<PromiseWithResolvers<T>, 'reject' | 'resolve'>;
@@ -45,7 +45,7 @@ export class CompilerWatchFeature extends BaseFeature {
     const title = type.charAt(0).toUpperCase() + type.substring(1);
 
     return this.#progress[type] = {
-      prev: 0,
+      previous: 0,
       cleanup: (): void => {
         signal.removeEventListener('abort', kill);
         delete this.#progress[type];
@@ -177,14 +177,14 @@ export class CompilerWatchFeature extends BaseFeature {
     let pState = this.#progress[event.operation];
 
     const value = 100 * (event.idx / event.total);
-    const delta = value - (pState?.prev ?? 0);
+    const delta = value - (pState?.previous ?? 0);
 
     if (event.complete || delta < 0 || event.total < 5) {
       pState?.cleanup();
     } else {
       pState ??= await this.#buildProgressBar(event.operation, signal);
       pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${event.idx + 1}/${event.total})`, increment: delta });
-      pState.prev = value;
+      pState.previous = value;
     }
   }
 

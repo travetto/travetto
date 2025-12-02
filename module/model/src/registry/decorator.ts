@@ -69,7 +69,7 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
  * @augments `@travetto/schema:Field`
  * @kind decorator
  */
-export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
+export function PersistValue<T>(handler: (current: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
     ModelRegistryIndex.getForRegister(getClass(instance)).register({
       prePersist: [{

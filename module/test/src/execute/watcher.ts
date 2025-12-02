@@ -39,8 +39,7 @@ export class TestWatcher {
       .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
 
     Registry.onMethodChange((event) => {
-      const [cls, method] = ('prev' in event && event.prev ? event.prev : null) ??
-        ('curr' in event && event.curr ? event.curr : []);
+      const [cls, method] = 'previous' in event ? event.previous : event.current;
 
       if (!cls || describeFunction(cls).abstract) {
         return;

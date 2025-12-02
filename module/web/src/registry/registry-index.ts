@@ -95,13 +95,13 @@ export class ControllerRegistryIndex implements RegistryIndex {
 
   process(events: ChangeEvent<Class>[]): void {
     for (const evt of events) {
-      if ('curr' in evt) {
-        for (const endpoint of this.getController(evt.curr).endpoints) {
-          this.#endpointsById.set(`${evt.curr.name}#${endpoint.methodName.toString()}`, endpoint);
+      if ('current' in evt) {
+        for (const endpoint of this.getController(evt.current).endpoints) {
+          this.#endpointsById.set(`${evt.current.name}#${endpoint.methodName.toString()}`, endpoint);
         }
       } else {
         // Match by name
-        const toDelete = [...this.#endpointsById.values()].filter(x => x.class.name === evt.prev.name);
+        const toDelete = [...this.#endpointsById.values()].filter(x => x.class.name === evt.previous.name);
         for (const endpoint of toDelete) {
           this.#endpointsById.delete(endpoint.id);
         }

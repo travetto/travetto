@@ -88,21 +88,21 @@ export class SchemaRegistryIndex implements RegistryIndex {
     Util.queueMacroTask().then(() => {
       SchemaChangeListener.emitFieldChanges({
         type: 'changed',
-        curr: this.getClassConfig(event.curr),
-        prev: this.getClassConfig(event.prev)
+        current: this.getClassConfig(event.current),
+        previous: this.getClassConfig(event.previous)
       });
     });
   }
 
   #onRemoving(event: ChangeEvent<Class> & { type: 'removing' }): void {
-    SchemaChangeListener.clearSchemaDependency(event.prev);
+    SchemaChangeListener.clearSchemaDependency(event.previous);
   }
 
   #onAdded(event: ChangeEvent<Class> & { type: 'added' }): void {
     Util.queueMacroTask().then(() => {
       SchemaChangeListener.emitFieldChanges({
         type: 'added',
-        curr: this.getClassConfig(event.curr)
+        current: this.getClassConfig(event.current)
       });
     });
   }
@@ -177,13 +177,13 @@ export class SchemaRegistryIndex implements RegistryIndex {
   /**
    * Track changes to schemas, and track the dependent changes
    * @param cls The root class of the hierarchy
-   * @param curr The new class
+   * @param current The new class
    * @param path The path within the object hierarchy
    */
-  trackSchemaDependencies(cls: Class, curr: Class = cls, path: SchemaFieldConfig[] = []): void {
-    const config = this.getClassConfig(curr);
+  trackSchemaDependencies(cls: Class, current: Class = cls, path: SchemaFieldConfig[] = []): void {
+    const config = this.getClassConfig(current);
 
-    SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.getClassConfig(cls));
+    SchemaChangeListener.trackSchemaDependency(current, cls, path, this.getClassConfig(cls));
 
     // Read children
     for (const field of Object.values(config.fields)) {

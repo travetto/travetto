@@ -68,7 +68,7 @@ export class Terminal {
     const writePos = { x: 0, y: -1 };
     const minDelay = config.minDelay ?? 0;
 
-    let prev: string | undefined;
+    let previous: string | undefined;
     let stop: AbortController | undefined;
     let start = Date.now();
 
@@ -80,8 +80,8 @@ export class Terminal {
 
       for await (const line of source) {
         // Previous line
-        if (prev && config.outputStreamToMain) {
-          await this.writer.writeLine(lineMain(prev)).commit();
+        if (previous && config.outputStreamToMain) {
+          await this.writer.writeLine(lineMain(previous)).commit();
         }
 
         if (line && (Date.now() - start) >= minDelay) {
@@ -96,12 +96,12 @@ export class Terminal {
           }
         }
 
-        prev = line;
+        previous = line;
       }
 
       stop?.abort();
-      if (prev !== undefined && config.outputStreamToMain) {
-        await this.writer.writeLine(lineMain(prev)).commit();
+      if (previous !== undefined && config.outputStreamToMain) {
+        await this.writer.writeLine(lineMain(previous)).commit();
       }
 
       await this.#writer.setPosition(writePos).clearLine().commit(true);

@@ -141,11 +141,11 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   process(events: ChangeEvent<Class>[]): void {
     for (const event of events) {
-      if ('prev' in event) {
-        this.#removeClass(event.prev);
+      if ('previous' in event) {
+        this.#removeClass(event.previous);
       }
-      if ('curr' in event) {
-        this.#addClass(event.curr, 'prev' in event);
+      if ('current' in event) {
+        this.#addClass(event.current, 'previous' in event);
       }
     }
   }

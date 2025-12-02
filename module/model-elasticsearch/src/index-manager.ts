@@ -139,7 +139,7 @@ export class IndexManager implements ModelStorageSupport {
     const removes = change.subs.reduce<string[]>((acc, subChange) => {
       acc.push(...subChange.fields
         .filter(event => event.type === 'removing')
-        .map(event => [...subChange.path.map(f => f.name), event.prev!.name].join('.')));
+        .map(event => [...subChange.path.map(f => f.name), event.previous!.name].join('.')));
       return acc;
     }, []);
 
@@ -147,8 +147,8 @@ export class IndexManager implements ModelStorageSupport {
     const fieldChanges = change.subs.reduce<string[]>((acc, subChange) => {
       acc.push(...subChange.fields
         .filter(event => event.type === 'changed')
-        .filter(event => event.prev?.type !== event.curr?.type)
-        .map(event => [...subChange.path.map(f => f.name), event.prev!.name].join('.')));
+        .filter(event => event.previous?.type !== event.current?.type)
+        .map(event => [...subChange.path.map(f => f.name), event.previous!.name].join('.')));
       return acc;
     }, []);
 
@@ -159,12 +159,12 @@ export class IndexManager implements ModelStorageSupport {
       const next = await this.createIndex(cls, false);
 
       const aliases = (await this.#client.indices.getAlias({ index })).body;
-      const curr = Object.keys(aliases)[0];
+      const current = Object.keys(aliases)[0];
 
       const allChange = removes.concat(fieldChanges);
 
       const reindexBody: estypes.ReindexRequest = {
-        source: { index: curr },
+        source: { index: current },
         dest: { index: next },
         script: {
           lang: 'painless',

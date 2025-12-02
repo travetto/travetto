@@ -2,9 +2,9 @@
  * A change event
  */
 export type ChangeEvent<T> =
-  { type: 'changed', prev: T, curr: T } |
-  { type: 'added', curr: T } |
-  { type: 'removing', prev: T };
+  { type: 'changed', previous: T, current: T } |
+  { type: 'added', current: T } |
+  { type: 'removing', previous: T };
 
 /**
  * Change handler

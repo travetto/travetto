@@ -53,18 +53,18 @@ class $Registry {
   }
 
   process(events: ChangeEvent<Class>[]): void {
-    this.#finalizeItems(events.filter(event => 'curr' in event).map(event => event.curr));
+    this.#finalizeItems(events.filter(event => 'current' in event).map(event => event.current));
 
     for (const indexCls of this.#indexOrder) { // Visit every index, in order
       const inst = this.instance(indexCls);
-      const matched = events.filter(event => inst.store.has('curr' in event ? event.curr : event.prev!));
+      const matched = events.filter(event => inst.store.has('current' in event ? event.current : event.previous!));
       if (matched.length) {
         inst.process(matched);
       }
     }
 
     Util.queueMacroTask().then(() => {
-      this.#removeItems(events.filter(event => 'prev' in event).map(event => event.prev!));
+      this.#removeItems(events.filter(event => 'previous' in event).map(event => event.previous!));
     });
 
     for (const event of events) {
@@ -84,7 +84,7 @@ class $Registry {
       }
 
       const added = await this.#classSource.init();
-      this.process(added.map(cls => ({ type: 'added', curr: cls })));
+      this.process(added.map(cls => ({ type: 'added', current: cls })));
       this.#classSource.on(event => this.process([event]));
     } finally {
       this.#resolved = true;
@@ -134,7 +134,7 @@ class $Registry {
     } else {
       const inst = this.instance(matches);
       this.#emitter.on('event', (event) => {
-        if (inst.store.has('curr' in event ? event.curr : event.prev!)) {
+        if (inst.store.has('current' in event ? event.current : event.previous!)) {
           handler(event);
         }
       });
@@ -155,7 +155,7 @@ class $Registry {
     } else {
       const inst = this.instance(matches);
       src.on((event) => {
-        if (inst.store.has('curr' in event ? event.curr[0] : event.prev[0])) {
+        if (inst.store.has('current' in event ? event.current[0] : event.previous[0])) {
           handler(event);
         }
       });

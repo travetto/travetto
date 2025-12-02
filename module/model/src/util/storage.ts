@@ -35,9 +35,9 @@ export class ModelStorageUtil {
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
       Registry.onClassChange(event => {
         switch (event.type) {
-          case 'added': checkType(event.curr) ? storage.createModel?.(event.curr) : undefined; break;
-          case 'changed': checkType(event.curr, false) ? storage.changeModel?.(event.curr) : undefined; break;
-          case 'removing': checkType(event.prev) ? storage.deleteModel?.(event.prev) : undefined; break;
+          case 'added': checkType(event.current) ? storage.createModel?.(event.current) : undefined; break;
+          case 'changed': checkType(event.current, false) ? storage.changeModel?.(event.current) : undefined; break;
+          case 'removing': checkType(event.previous) ? storage.deleteModel?.(event.previous) : undefined; break;
         }
       }, ModelRegistryIndex);
     }

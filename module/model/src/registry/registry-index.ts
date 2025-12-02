@@ -88,11 +88,11 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   process(events: ChangeEvent<Class>[]): void {
     for (const event of events) {
-      if ('prev' in event) {
-        this.#removeClass(event.prev);
+      if ('previous' in event) {
+        this.#removeClass(event.previous);
       }
-      if ('curr' in event) {
-        this.#addClass(event.curr);
+      if ('current' in event) {
+        this.#addClass(event.current);
       }
     }
   }

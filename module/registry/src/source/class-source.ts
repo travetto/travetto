@@ -40,7 +40,7 @@ export class ClassSource implements ChangeSource<Class> {
         this.#classes.set(src, new Map());
       }
       this.#classes.get(src)!.set(cls.Ⲑid, cls);
-      this.emit({ type: 'added', curr: cls });
+      this.emit({ type: 'added', current: cls });
     }
     return flushed;
   }
@@ -50,7 +50,7 @@ export class ClassSource implements ChangeSource<Class> {
     if (data) {
       this.#classes.delete(file);
       for (const cls of data) {
-        this.emit({ type: 'removing', prev: cls[1] });
+        this.emit({ type: 'removing', previous: cls[1] });
       }
     }
   }
@@ -62,12 +62,12 @@ export class ClassSource implements ChangeSource<Class> {
     const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
     const sourceFile = RuntimeIndex.getSourceFile(importFile);
 
-    let prev = new Map<string, Class>();
+    let previous = new Map<string, Class>();
     if (this.#classes.has(sourceFile)) {
-      prev = new Map(this.#classes.get(sourceFile)!.entries());
+      previous = new Map(this.#classes.get(sourceFile)!.entries());
     }
 
-    const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
+    const keys = new Set([...Array.from(previous.keys()), ...Array.from(next.keys())]);
 
     if (!this.#classes.has(sourceFile)) {
       this.#classes.set(sourceFile, new Map());
@@ -79,19 +79,19 @@ export class ClassSource implements ChangeSource<Class> {
     for (const key of keys) {
       if (!next.has(key)) {
         changes += 1;
-        this.emit({ type: 'removing', prev: prev.get(key)! });
+        this.emit({ type: 'removing', previous: previous.get(key)! });
         this.#classes.get(sourceFile)!.delete(key);
       } else {
         this.#classes.get(sourceFile)!.set(key, next.get(key)!);
-        if (!prev.has(key)) {
+        if (!previous.has(key)) {
           changes += 1;
-          this.emit({ type: 'added', curr: next.get(key)! });
+          this.emit({ type: 'added', current: next.get(key)! });
         } else {
-          const prevHash = describeFunction(prev.get(key)!)?.hash;
+          const prevHash = describeFunction(previous.get(key)!)?.hash;
           const nextHash = describeFunction(next.get(key)!)?.hash;
           if (prevHash !== nextHash) {
             changes += 1;
-            this.emit({ type: 'changed', curr: next.get(key)!, prev: prev.get(key)! });
+            this.emit({ type: 'changed', current: next.get(key)!, previous: previous.get(key)! });
           }
         }
       }
@@ -126,8 +126,8 @@ export class ClassSource implements ChangeSource<Class> {
     if (this.trace) {
       console.debug('Emitting change', {
         type: event.type,
-        curr: (event.type !== 'removing' ? event.curr?.Ⲑid : undefined),
-        prev: (event.type !== 'added' ? event.prev?.Ⲑid : undefined)
+        current: (event.type !== 'removing' ? event.current?.Ⲑid : undefined),
+        previous: (event.type !== 'added' ? event.previous?.Ⲑid : undefined)
       });
     }
     this.#emitter.emit('change', event);

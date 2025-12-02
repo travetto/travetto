@@ -55,13 +55,13 @@ export class PackageUtil {
         return path.join(resolved.split(name)[0], name);
       } catch { // When import lookup fails
         let folder = root ?? process.cwd();
-        let prev = '';
-        while (folder !== prev) {
+        let previous = '';
+        while (folder !== previous) {
           const pkg = path.resolve(folder, 'node_modules', name, 'package.json');
           if (existsSync(pkg)) {
             return pkg;
           }
-          prev = folder;
+          previous = folder;
           folder = path.dirname(folder);
         }
       }

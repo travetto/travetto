@@ -103,49 +103,49 @@ class $SchemaChangeListener {
 
   /**
    * Emit field level changes in the schema
-   * @param prev The previous class config
-   * @param curr The current class config
+   * @param previous The previous class config
+   * @param current The current class config
    */
   emitFieldChanges(event: ChangeEvent<SchemaClassConfig>): void {
-    const prev = 'prev' in event ? event.prev : undefined;
-    const curr = 'curr' in event ? event.curr : undefined;
+    const previous = 'previous' in event ? event.previous : undefined;
+    const current = 'current' in event ? event.current : undefined;
 
-    const prevFields = new Set(Object.keys(prev?.fields ?? {}));
-    const currFields = new Set(Object.keys(curr?.fields ?? {}));
+    const previousFields = new Set(Object.keys(previous?.fields ?? {}));
+    const currentFields = new Set(Object.keys(current?.fields ?? {}));
 
     const changes: ChangeEvent<SchemaFieldConfig>[] = [];
 
-    for (const c of currFields) {
-      if (!prevFields.has(c) && curr) {
-        changes.push({ curr: curr.fields[c], type: 'added' });
+    for (const field of currentFields) {
+      if (!previousFields.has(field) && current) {
+        changes.push({ current: current.fields[field], type: 'added' });
       }
     }
 
-    for (const c of prevFields) {
-      if (!currFields.has(c) && prev) {
-        changes.push({ prev: prev.fields[c], type: 'removing' });
+    for (const field of previousFields) {
+      if (!currentFields.has(field) && previous) {
+        changes.push({ previous: previous.fields[field], type: 'removing' });
       }
     }
 
     // Handle class references changing, but keeping same id
     const compareTypes = (a: Class, b: Class): boolean => a.Ⲑid ? a.Ⲑid === b.Ⲑid : a === b;
 
-    for (const c of currFields) {
-      if (prevFields.has(c) && prev && curr) {
-        const prevSchema = prev.fields[c];
-        const currSchema = curr.fields[c];
+    for (const c of currentFields) {
+      if (previousFields.has(c) && previous && current) {
+        const prevSchema = previous.fields[c];
+        const currSchema = current.fields[c];
         if (
           JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
           !compareTypes(prevSchema.type, currSchema.type)
         ) {
-          changes.push({ prev: prev.fields[c], curr: curr.fields[c], type: 'changed' });
+          changes.push({ previous: previous.fields[c], current: current.fields[c], type: 'changed' });
         }
       }
     }
 
     // Send field changes
-    this.#emitter.emit('field', { cls: curr!.class, changes });
-    this.emitSchemaChanges({ cls: curr!.class, changes });
+    this.#emitter.emit('field', { cls: current!.class, changes });
+    this.emitSchemaChanges({ cls: current!.class, changes });
   }
 }
 

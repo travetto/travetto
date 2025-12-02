@@ -15,18 +15,18 @@ const readPackage = (file: string): Pkg => ({ ...JSON.parse(readFileSync(file, '
 /** Find package */
 function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
   let folder = `${base}/.`;
-  let prev: string;
+  let previous: string;
   let pkg: Pkg | undefined;
   const packages: Pkg[] = [];
 
   do {
     pkg && packages.push(pkg);
-    prev = folder;
+    previous = folder;
     folder = path.dirname(folder);
     const folderPkg = path.resolve(folder, 'package.json');
     pkg = existsSync(folderPkg) ? readPackage(folderPkg) : pkg;
   } while (
-    prev !== folder && // Not at root
+    previous !== folder && // Not at root
     !pred(pkg) && // Matches criteria
     !existsSync(path.resolve(folder, '.git')) // Not at source root
   );
