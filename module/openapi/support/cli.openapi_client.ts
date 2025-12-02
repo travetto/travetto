@@ -16,7 +16,7 @@ export class OpenApiClientCommand implements CliCommandShape {
   extendedHelp: boolean = false;
   /** Additional Properties */
   @CliFlag({ short: '-a', full: '--additional-properties' })
-  props: string[] = [];
+  properties: string[] = [];
   /** Input file */
   input = './openapi.yml';
   /** Output folder */
@@ -47,7 +47,7 @@ export class OpenApiClientCommand implements CliCommandShape {
       '-g', format,
       '-o', '/workspace',
       '-i', `/input/${path.basename(this.input)}`,
-      ...(this.props.length ? ['--additional-properties', this.props.join(',')] : [])
+      ...(this.properties.length ? ['--additional-properties', this.properties.join(',')] : [])
     ], {
       stdio: 'inherit'
     });

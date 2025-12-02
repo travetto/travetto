@@ -382,11 +382,11 @@ export class TransformerState implements State {
         (m): m is ts.MethodDeclaration => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === method
       );
     } else {
-      const props = this.#resolver.getPropertiesOfType(cls);
-      for (const prop of props) {
-        const decl = prop.declarations?.[0];
-        if (decl && prop.escapedName === method && ts.isMethodDeclaration(decl)) {
-          return decl;
+      const properties = this.#resolver.getPropertiesOfType(cls);
+      for (const property of properties) {
+        const declaration = property.declarations?.[0];
+        if (declaration && property.escapedName === method && ts.isMethodDeclaration(declaration)) {
+          return declaration;
         }
       }
     }
@@ -435,7 +435,7 @@ export class TransformerState implements State {
    */
   getApparentTypeOfField(value: ts.Type, field: string): AnyType | undefined {
     const checker = this.#resolver.getChecker();
-    const props = checker.getApparentType(value).getApparentProperties().find(x => x.escapedName === field);
-    return props ? this.resolveType(checker.getTypeOfSymbol(props)) : undefined;
+    const properties = checker.getApparentType(value).getApparentProperties().find(x => x.escapedName === field);
+    return properties ? this.resolveType(checker.getTypeOfSymbol(properties)) : undefined;
   }
 }

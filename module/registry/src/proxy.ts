@@ -51,11 +51,11 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
     return Object.getPrototypeOf(this.target);
   }
 
-  get(target: T, prop: PropertyKey, receiver: unknown): Any {
-    if (prop === ProxyTargetSymbol) {
+  get(target: T, property: PropertyKey, receiver: unknown): Any {
+    if (property === ProxyTargetSymbol) {
       return this.target;
     }
-    let result = this.target[castKey<T>(prop)];
+    let result = this.target[castKey<T>(property)];
     if (isFunction(result) && !/^class\s/.test(Function.prototype.toString.call(result))) {
       // Bind class members to class instance instead of proxy propagating
       result = result.bind(this.target);
@@ -63,12 +63,12 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
     return result;
   }
 
-  has(target: T, prop: PropertyKey): boolean {
-    return castTo<object>(this.target).hasOwnProperty(prop);
+  has(target: T, property: PropertyKey): boolean {
+    return castTo<object>(this.target).hasOwnProperty(property);
   }
 
-  set(target: T, prop: PropertyKey, value: unknown): boolean {
-    this.target[castKey<T>(prop)] = castTo(value);
+  set(target: T, property: PropertyKey, value: unknown): boolean {
+    this.target[castKey<T>(property)] = castTo(value);
     return true;
   }
 

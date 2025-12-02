@@ -9,7 +9,7 @@ export class EnvProp<T> {
   readonly key: string;
   constructor(key: string) { this.key = key; }
 
-  /** Set value according to prop type */
+  /** Set value according to type */
   set(value: T | undefined | null): void {
     if (value === undefined || value === null) {
       delete process.env[this.key];
@@ -101,10 +101,10 @@ type AllType = {
 
 function delegate<T extends object>(base: T): AllType & T {
   return new Proxy(castTo(base), {
-    get(target, prop): unknown {
-      return typeof prop !== 'string' ? undefined :
-        (prop in base ? base[castKey(prop)] :
-          target[castKey<typeof target>(prop)] ??= castTo(new EnvProp(prop))
+    get(target, property): unknown {
+      return typeof property !== 'string' ? undefined :
+        (property in base ? base[castKey(property)] :
+          target[castKey<typeof target>(property)] ??= castTo(new EnvProp(property))
         );
     }
   });

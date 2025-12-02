@@ -76,10 +76,10 @@ export class PackOperation {
       ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(cfg.module)!.outputPath),
     };
 
-    const props = (['minify', 'sourcemap', 'entryPoint'] as const)
+    const properties = (['minify', 'sourcemap', 'entryPoint'] as const)
       .map(k => cliTpl`${{ subtitle: k }}=${{ param: cfg[k] }}`).join(' ');
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Bundling Output' }} ${props}`);
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Bundling Output' }} ${properties}`);
 
     if (cfg.ejectFile) {
       yield* Object.entries(env).filter(x => !!x[1]).map(x =>

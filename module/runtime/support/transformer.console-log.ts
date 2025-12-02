@@ -83,9 +83,9 @@ export class ConsoleLogTransformer {
 
     const chain = node.expression;
     const name = chain.name;
-    const prop = chain.expression;
+    const expr = chain.expression;
 
-    if (!ts.isIdentifier(prop) || prop.escapedText !== 'console' || !ts.isIdentifier(name)) {
+    if (!ts.isIdentifier(expr) || expr.escapedText !== 'console' || !ts.isIdentifier(name)) {
       return node;
     }
 

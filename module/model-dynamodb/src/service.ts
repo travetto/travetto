@@ -84,10 +84,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const prop = simpleName(idx.name);
-          indices[`${prop}__`] = toValue(key);
+          const property = simpleName(idx.name);
+          indices[`${property}__`] = toValue(key);
           if (sort) {
-            indices[`${prop}_sort__`] = toValue(+sort);
+            indices[`${property}_sort__`] = toValue(+sort);
           }
         }
         const query: PutItemCommandInput = {
@@ -108,12 +108,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const expr: string[] = [];
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const prop = simpleName(idx.name);
-          indices[`:${prop}`] = toValue(key);
-          expr.push(`${prop}__ = :${prop}`);
+          const property = simpleName(idx.name);
+          indices[`:${property}`] = toValue(key);
+          expr.push(`${property}__ = :${property}`);
           if (sort) {
-            indices[`:${prop}_sort`] = toValue(+sort);
-            expr.push(`${prop}_sort__ = :${prop}_sort`);
+            indices[`:${property}_sort`] = toValue(+sort);
+            expr.push(`${property}_sort__ = :${property}_sort`);
           }
         }
 

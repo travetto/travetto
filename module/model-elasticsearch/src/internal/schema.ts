@@ -76,44 +76,44 @@ export class ElasticsearchSchemaUtil {
   static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): estypes.MappingTypeMapping {
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
-    const props: Record<string, estypes.MappingProperty> = {};
+    const properties: Record<string, estypes.MappingProperty> = {};
 
     for (const [field, conf] of Object.entries(fields)) {
       if (conf.type === PointImpl) {
-        props[field] = { type: 'geo_point' };
+        properties[field] = { type: 'geo_point' };
       } else if (conf.type === Number) {
-        let prop: Record<string, unknown> = { type: 'integer' };
+        let property: Record<string, unknown> = { type: 'integer' };
         if (conf.precision) {
           const [digits, decimals] = conf.precision;
           if (decimals) {
             if ((decimals + digits) < 16) {
-              prop = { type: 'scaled_float', ['scaling_factor']: decimals };
+              property = { type: 'scaled_float', ['scaling_factor']: decimals };
             } else {
               if (digits < 6 && decimals < 9) {
-                prop = { type: 'half_float' };
+                property = { type: 'half_float' };
               } else if (digits > 20) {
-                prop = { type: 'double' };
+                property = { type: 'double' };
               } else {
-                prop = { type: 'float' };
+                property = { type: 'float' };
               }
             }
           } else if (digits) {
             if (digits <= 2) {
-              prop = { type: 'byte' };
+              property = { type: 'byte' };
             } else if (digits <= 4) {
-              prop = { type: 'short' };
+              property = { type: 'short' };
             } else if (digits <= 9) {
-              prop = { type: 'integer' };
+              property = { type: 'integer' };
             } else {
-              prop = { type: 'long' };
+              property = { type: 'long' };
             }
           }
         }
-        props[field] = prop;
+        properties[field] = property;
       } else if (conf.type === Date) {
-        props[field] = { type: 'date', format: 'date_optional_time' };
+        properties[field] = { type: 'date', format: 'date_optional_time' };
       } else if (conf.type === Boolean) {
-        props[field] = { type: 'boolean' };
+        properties[field] = { type: 'boolean' };
       } else if (conf.type === String) {
         let text = {};
         if (conf.specifiers?.includes('text')) {
@@ -130,17 +130,17 @@ export class ElasticsearchSchemaUtil {
             });
           }
         }
-        props[field] = { type: 'keyword', ...text };
+        properties[field] = { type: 'keyword', ...text };
       } else if (conf.type === Object) {
-        props[field] = { type: 'object', dynamic: true };
+        properties[field] = { type: 'object', dynamic: true };
       } else if (SchemaRegistryIndex.has(conf.type)) {
-        props[field] = {
+        properties[field] = {
           type: conf.array ? 'nested' : 'object',
           ...this.generateSingleMapping(conf.type, config)
         };
       }
     }
 
-    return { properties: props, dynamic: false };
+    return { properties, dynamic: false };
   }
 }

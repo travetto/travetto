@@ -298,12 +298,12 @@ export const TypeBuilder: {
       const name = CoreUtil.getSymbol(context?.alias ?? type)?.getName();
       const importName = resolver.getTypeImportName(type) ?? '<unknown>';
       const tsTypeArguments = resolver.getAllTypeArguments(type);
-      const props = resolver.getPropertiesOfType(type);
-      if (props.length === 0) {
+      const properties = resolver.getPropertiesOfType(type);
+      if (properties.length === 0) {
         return { key: 'literal', name: 'Object', ctor: Object, importName };
       }
 
-      for (const member of props) {
+      for (const member of properties) {
         const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
         if (DeclarationUtil.isPublic(dec)) { // If public
           const memberType = resolver.getType(dec);

@@ -131,48 +131,48 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Process schema field
    */
   #processSchemaField(input: SchemaInputConfig, required: string[]): SchemaObject {
-    let prop: SchemaObject = this.#getType(input);
+    let config: SchemaObject = this.#getType(input);
 
     if (input.examples) {
-      prop.example = input.examples;
+      config.example = input.examples;
     }
-    prop.description = input.description;
+    config.description = input.description;
     if (input.match) {
-      prop.pattern = input.match.re!.source;
+      config.pattern = input.match.re!.source;
     }
     if (input.maxlength) {
-      prop.maxLength = input.maxlength.n;
+      config.maxLength = input.maxlength.n;
     }
     if (input.minlength) {
-      prop.minLength = input.minlength.n;
+      config.minLength = input.minlength.n;
     }
     if (input.min) {
-      prop.minimum = typeof input.min.n === 'number' ? input.min.n : input.min.n.getTime();
+      config.minimum = typeof input.min.n === 'number' ? input.min.n : input.min.n.getTime();
     }
     if (input.max) {
-      prop.maximum = typeof input.max.n === 'number' ? input.max.n : input.max.n.getTime();
+      config.maximum = typeof input.max.n === 'number' ? input.max.n : input.max.n.getTime();
     }
     if (input.enum) {
-      prop.enum = input.enum.values;
+      config.enum = input.enum.values;
     }
     if (isFieldConfig(input)) {
       if (input.required?.active !== false) {
         required.push(input.name.toString());
       }
       if (input.access === 'readonly') {
-        prop.readOnly = true;
+        config.readOnly = true;
       } else if (input.access === 'writeonly') {
-        prop.writeOnly = true;
+        config.writeOnly = true;
       }
     }
     if (input.array) {
-      prop = {
+      config = {
         type: 'array',
-        items: prop
+        items: config
       };
     }
 
-    return prop;
+    return config;
   }
 
   /**

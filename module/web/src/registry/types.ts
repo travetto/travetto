@@ -16,7 +16,7 @@ export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunctio
  */
 export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
-  (<U>(target: U, prop: string | symbol, descriptor?: EndpointFunctionDescriptor) => void)
+  (<U>(target: U, property: string | symbol, descriptor?: EndpointFunctionDescriptor) => void)
 );
 
 export type EndpointParamLocation = 'path' | 'query' | 'body' | 'header';

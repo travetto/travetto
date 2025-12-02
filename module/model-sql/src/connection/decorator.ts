@@ -14,10 +14,10 @@ export interface ConnectionAware<C = unknown> {
  */
 export function Connected() {
   return function <T extends { conn?: Connection }>(
-    target: T, prop: string | symbol, desc: AsyncMethodDescriptor<T>
+    target: T, property: string | symbol, descriptor: AsyncMethodDescriptor<T>
   ): void {
-    const og = desc.value!;
-    desc.value = function (...args: unknown[]): ReturnType<typeof og> {
+    const og = descriptor.value!;
+    descriptor.value = function (...args: unknown[]): ReturnType<typeof og> {
       return this.conn!.runWithActive(() => og.call(this, ...args));
     };
   };
@@ -29,10 +29,10 @@ export function Connected() {
  */
 export function ConnectedIterator() {
   return function <T extends { conn?: Connection }>(
-    target: T, prop: string | symbol, desc: AsyncItrMethodDescriptor<T>
+    target: T, property: string | symbol, descriptor: AsyncItrMethodDescriptor<T>
   ): void {
-    const og = desc.value!;
-    desc.value = async function* (...args: unknown[]): ReturnType<typeof og> {
+    const og = descriptor.value!;
+    descriptor.value = async function* (...args: unknown[]): ReturnType<typeof og> {
       yield* this.conn!.iterateWithActive(() => og.call(this, ...args));
     };
   };
@@ -44,10 +44,10 @@ export function ConnectedIterator() {
  */
 export function Transactional(mode: TransactionType = 'required') {
   return function <T extends { conn?: Connection }>(
-    target: unknown, prop: string | symbol, desc: AsyncMethodDescriptor<T>
+    target: unknown, property: string | symbol, descriptor: AsyncMethodDescriptor<T>
   ): void {
-    const og = desc.value!;
-    desc.value = function (...args: unknown[]): ReturnType<typeof og> {
+    const og = descriptor.value!;
+    descriptor.value = function (...args: unknown[]): ReturnType<typeof og> {
       return this.conn!.runWithTransaction(mode, () => og.call(this, ...args));
     };
   };

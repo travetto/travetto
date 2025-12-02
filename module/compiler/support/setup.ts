@@ -33,7 +33,7 @@ export class CompilerSetup {
     const all = ['util', 'delta'].map(f =>
       import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}${OUTPUT_EXT}`))
     );
-    return Promise.all(all).then(props => Object.assign({}, ...props));
+    return Promise.all(all).then(results => Object.assign({}, ...results));
   };
 
   /**  Convert a file to a given ext */

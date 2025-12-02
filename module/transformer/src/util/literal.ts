@@ -154,12 +154,12 @@ export class LiteralUtil {
    */
   static getObjectValue(node: ts.Expression | undefined, key: string): ts.Expression | undefined {
     if (node && ts.isObjectLiteralExpression(node) && node.properties) {
-      for (const prop of node.properties) {
-        if (prop.name!.getText() === key) {
-          if (ts.isPropertyAssignment(prop)) {
-            return prop.initializer;
-          } else if (ts.isShorthandPropertyAssignment(prop)) {
-            return prop.name;
+      for (const property of node.properties) {
+        if (property.name!.getText() === key) {
+          if (ts.isPropertyAssignment(property)) {
+            return property.initializer;
+          } else if (ts.isShorthandPropertyAssignment(property)) {
+            return property.name;
           }
         }
       }
