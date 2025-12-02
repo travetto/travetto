@@ -253,9 +253,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       for (const body of bodies) {
         try {
           yield await ModelCrudUtil.load(cls, body);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
       }
@@ -335,9 +335,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       for (const full of bodies) {
         try {
           yield await ModelCrudUtil.load(cls, full);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
       }

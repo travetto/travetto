@@ -82,8 +82,8 @@ export class OpenApiService {
         stringify(spec);
 
       await BinaryUtil.bufferedFileWrite(this.apiSpecConfig.output, output, true);
-    } catch (err) {
-      console.error('Unable to persist openapi spec', err);
+    } catch (error) {
+      console.error('Unable to persist openapi spec', error);
     }
   }
 }

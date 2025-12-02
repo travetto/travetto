@@ -87,8 +87,8 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
   async filter({ request, config: { resolved }, next }: WebChainedContext<CorsConfig>): Promise<WebResponse> {
     try {
       return this.decorate(request, resolved, await next());
-    } catch (err) {
-      throw this.decorate(request, resolved, WebCommonUtil.catchResponse(err));
+    } catch (error) {
+      throw this.decorate(request, resolved, WebCommonUtil.catchResponse(error));
     }
   }
 }

@@ -12,7 +12,7 @@ interface State {
   path: string;
   collect(element: string, message: string): void;
   extend(path: string): State;
-  log(err: string): void;
+  log(error: string): void;
 }
 
 interface ProcessingHandler {
@@ -281,8 +281,8 @@ export class QueryVerifier {
       collect(path: string, message: string): void {
         errors.push({ message: `${path}: ${message}`, path, kind: 'model' });
       },
-      log(err: string): void {
-        this.collect(this.path, err);
+      log(error: string): void {
+        this.collect(this.path, error);
       },
       extend<S extends { path: string }>(this: S, sub: string): S {
         return { ...this, path: !this.path ? sub : `${this.path}.${sub}` };

@@ -55,11 +55,11 @@ export class ElasticsearchModelService implements
         query
       });
       return result;
-    } catch (err) {
-      if (err instanceof errors.ResponseError && err.meta.body && typeof err.meta.body === 'object' && 'error' in err.meta.body) {
-        console.error(err.meta.body.error);
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.meta.body && typeof error.meta.body === 'object' && 'error' in error.meta.body) {
+        console.error(error.meta.body.error);
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -149,11 +149,11 @@ export class ElasticsearchModelService implements
       if (result.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }
-    } catch (err) {
-      if (err && err instanceof errors.ResponseError && err.body && err.body.result === 'not_found') {
+    } catch (error) {
+      if (error && error instanceof errors.ResponseError && error.body && error.body.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -170,9 +170,9 @@ export class ElasticsearchModelService implements
       });
 
       return this.postUpdate(clean, id);
-    } catch (err) {
-      console.error(err);
-      throw err;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   }
 
@@ -229,11 +229,11 @@ export class ElasticsearchModelService implements
         refresh: true,
         script,
       });
-    } catch (err) {
-      if (err instanceof Error && /document_missing_exception/.test(err.message)) {
+    } catch (error) {
+      if (error instanceof Error && /document_missing_exception/.test(error.message)) {
         throw new NotFoundError(cls, id);
       }
-      throw err;
+      throw error;
     }
 
     return this.get(cls, id);
@@ -250,9 +250,9 @@ export class ElasticsearchModelService implements
       for (const el of search.hits.hits) {
         try {
           yield this.postLoad(cls, el);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
         search = await this.client.scroll({
@@ -397,9 +397,9 @@ export class ElasticsearchModelService implements
       for (const el of search.hits.hits) {
         try {
           yield this.postLoad(cls, el);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
         search = await this.client.scroll({
@@ -472,11 +472,11 @@ export class ElasticsearchModelService implements
       if (result.version_conflicts || result.updated === undefined || result.updated === 0) {
         throw new NotFoundError(cls, id);
       }
-    } catch (err) {
-      if (err instanceof errors.ResponseError && 'version_conflicts' in err.body) {
+    } catch (error) {
+      if (error instanceof errors.ResponseError && 'version_conflicts' in error.body) {
         throw new NotFoundError(cls, id);
       } else {
-        throw err;
+        throw error;
       }
     }
 

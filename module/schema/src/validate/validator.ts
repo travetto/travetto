@@ -184,7 +184,7 @@ export class SchemaValidator {
   static #prepareErrors(path: string, results: ValidationResult[]): ValidationError[] {
     const out: ValidationError[] = [];
     for (const result of results) {
-      const err: ValidationError = {
+      const error: ValidationError = {
         ...result,
         kind: result.kind,
         value: result.value,
@@ -194,20 +194,20 @@ export class SchemaValidator {
         type: (typeof result.type === 'function' ? result.type.name : result.type)
       };
 
-      if (!err.re) {
-        delete err.re;
+      if (!error.re) {
+        delete error.re;
       }
 
       const msg = result.message ?? (
-        Messages.get(err.re ?? '') ??
-        Messages.get(err.kind) ??
+        Messages.get(error.re ?? '') ??
+        Messages.get(error.kind) ??
         Messages.get('default')!
       );
 
-      err.message = msg
-        .replace(/\{([^}]+)\}/g, (_, k: (keyof ValidationError)) => `${err[k]}`);
+      error.message = msg
+        .replace(/\{([^}]+)\}/g, (_, k: (keyof ValidationError)) => `${error[k]}`);
 
-      out.push(err);
+      out.push(error);
     }
     return out;
   }
@@ -234,11 +234,11 @@ export class SchemaValidator {
             errors.push(error);
           }
         }
-      } catch (err: unknown) {
-        if (isValidationError(err)) {
-          errors.push(err);
+      } catch (error: unknown) {
+        if (isValidationError(error)) {
+          errors.push(error);
         } else {
-          throw err;
+          throw error;
         }
       }
     }
@@ -292,12 +292,12 @@ export class SchemaValidator {
   static async validatePartial<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
     try {
       await this.validate(cls, o, view);
-    } catch (err) {
-      if (err instanceof ValidationResultError) { // Don't check required fields
-        const errs = err.details.errors.filter(x => x.kind !== 'required');
+    } catch (error) {
+      if (error instanceof ValidationResultError) { // Don't check required fields
+        const errs = error.details.errors.filter(x => x.kind !== 'required');
         if (errs.length) {
-          err.details.errors = errs;
-          throw err;
+          error.details.errors = errs;
+          throw error;
         }
       }
     }

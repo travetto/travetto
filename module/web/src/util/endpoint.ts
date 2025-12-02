@@ -150,9 +150,9 @@ export class EndpointUtil {
       const params = BindUtil.coerceMethodParams(cls, endpoint.methodName, extracted);
       await SchemaValidator.validateMethod(cls, endpoint.methodName, params, endpoint.parameters.map(x => x.prefix));
       return params;
-    } catch (err) {
-      if (err instanceof ValidationResultError) {
-        for (const el of err.details?.errors ?? []) {
+    } catch (error) {
+      if (error instanceof ValidationResultError) {
+        for (const el of error.details?.errors ?? []) {
           if (el.kind === 'required') {
             const config = combined.find(x => x.schema.name === el.path);
             if (config) {
@@ -161,7 +161,7 @@ export class EndpointUtil {
           }
         }
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -183,8 +183,8 @@ export class EndpointUtil {
         response = new WebResponse({ body, headers, context: { ...endpoint.responseContext } });
       }
       return endpoint.responseFinalizer?.(response) ?? response;
-    } catch (err) {
-      throw WebCommonUtil.catchResponse(err);
+    } catch (error) {
+      throw WebCommonUtil.catchResponse(error);
     }
   }
 

@@ -179,15 +179,15 @@ export class Util {
   static deserializeFromJson<T = unknown>(input: string): T {
     return JSON.parse(input, function (k, v) {
       if (v && typeof v === 'object' && '$' in v) {
-        const err = AppError.fromJSON(v) ?? new Error();
-        if (!(err instanceof AppError)) {
+        const error = AppError.fromJSON(v) ?? new Error();
+        if (!(error instanceof AppError)) {
           const { $: _, ...rest } = v;
-          Object.assign(err, rest);
+          Object.assign(error, rest);
         }
-        err.message = v.message;
-        err.stack = v.stack;
-        err.name = v.name;
-        return err;
+        error.message = v.message;
+        error.stack = v.stack;
+        error.name = v.name;
+        return error;
       } else if (typeof v === 'string' && /^\d+[$]n$/.test(v)) {
         return BigInt(v.split('$')[0]);
       } else {
@@ -204,15 +204,15 @@ export class Util {
    */
   static async acquireWithRetry<T>(
     operation: () => T | Promise<T>,
-    prepareRetry: (err: unknown, count: number) => (void | undefined | boolean | Promise<(void | undefined | boolean)>),
+    prepareRetry: (error: unknown, count: number) => (void | undefined | boolean | Promise<(void | undefined | boolean)>),
     maxTries = 5,
   ): Promise<T> {
     for (let i = 0; i < maxTries; i++) {
       try {
         return await operation();
-      } catch (err) {
-        if (i === maxTries - 1 || await prepareRetry(err, i) === false) {
-          throw err; // Stop retrying if we reached max tries or prepareRetry returns false
+      } catch (error) {
+        if (i === maxTries - 1 || await prepareRetry(error, i) === false) {
+          throw error; // Stop retrying if we reached max tries or prepareRetry returns false
         }
       }
     }

@@ -53,7 +53,7 @@ export class Compiler {
       .on('message', event => (event === 'shutdown') && this.#shutdown('manual'));
   }
 
-  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', err?: Error): void {
+  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', error?: Error): void {
     if (this.#shuttingDown) {
       return;
     }
@@ -67,14 +67,14 @@ export class Compiler {
       }
       case 'error': {
         process.exitCode = 1;
-        if (err) {
-          EventUtil.sendEvent('log', { level: 'error', message: err.toString(), time: Date.now() });
-          log.error('Shutting down due to failure', err.stack);
+        if (error) {
+          EventUtil.sendEvent('log', { level: 'error', message: error.toString(), time: Date.now() });
+          log.error('Shutting down due to failure', error.stack);
         }
         break;
       }
       case 'reset': {
-        log.info('Reset due to', err?.message);
+        log.info('Reset due to', error?.message);
         EventUtil.sendEvent('state', { state: 'reset' });
         process.exitCode = 0;
         break;
@@ -131,12 +131,12 @@ export class Compiler {
 
     for (const file of files) {
       const start = Date.now();
-      const err = await emitter(file);
+      const error = await emitter(file);
       const duration = Date.now() - start;
       const nodeModSep = 'node_modules/';
       const nodeModIdx = file.lastIndexOf(nodeModSep);
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSep.length) : file;
-      yield { file: imp, i: i += 1, err, total: files.length, duration };
+      yield { file: imp, i: i += 1, error, total: files.length, duration };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
         EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
@@ -171,8 +171,8 @@ export class Compiler {
 
     if (this.#dirtyFiles.length) {
       for await (const event of this.emit(this.#dirtyFiles, emitter)) {
-        if (event.err) {
-          const compileError = CompilerUtil.buildTranspileError(event.file, event.err);
+        if (event.error) {
+          const compileError = CompilerUtil.buildTranspileError(event.file, event.error);
           failure ??= compileError;
           EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
         }
@@ -205,9 +205,9 @@ export class Compiler {
       try {
         for await (const event of new CompilerWatcher(this.#state, this.#signal)) {
           if (event.action !== 'delete') {
-            const err = await emitter(event.entry.sourceFile, true);
-            if (err) {
-              log.info('Compilation Error', CompilerUtil.buildTranspileError(event.entry.sourceFile, err));
+            const error = await emitter(event.entry.sourceFile, true);
+            if (error) {
+              log.info('Compilation Error', CompilerUtil.buildTranspileError(event.entry.sourceFile, error));
             } else {
               log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
             }
@@ -229,9 +229,9 @@ export class Compiler {
           });
         }
         EventUtil.sendEvent('state', { state: 'watch-end' });
-      } catch (err) {
-        if (err instanceof Error) {
-          this.#shutdown(err instanceof CompilerReset ? 'reset' : 'error', err);
+      } catch (error) {
+        if (error instanceof Error) {
+          this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error);
         }
       }
     }

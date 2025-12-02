@@ -3,11 +3,11 @@ import { watchCompiler, WatchEvent, Runtime, RuntimeIndex } from '@travetto/runt
 
 const VALID_FILE_TYPES = new Set(['js', 'ts']);
 
-const handle = (err: Error): void => {
-  if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
-    console.error('Cannot find module', { error: err });
+const handle = (error: Error): void => {
+  if (error && (error.message ?? '').includes('Cannot find module')) { // Handle module reloading
+    console.error('Cannot find module', { error });
   } else {
-    throw err;
+    throw error;
   }
 };
 

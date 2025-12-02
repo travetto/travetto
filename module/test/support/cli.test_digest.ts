@@ -22,8 +22,8 @@ export class TestDigestCommand {
     for await (const imp of await RunnerUtil.getTestImports(globs)) {
       try {
         await Runtime.importFrom(imp);
-      } catch (err) {
-        console.error('Failed to import', imp, err);
+      } catch (error) {
+        console.error('Failed to import', imp, error);
       }
     }
 

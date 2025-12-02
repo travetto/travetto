@@ -77,9 +77,9 @@ export class DocAngularCommand {
         }
 
         await fs.writeFile(page(`app/documentation/gen/${modName}/${modName}.component.html`), html, 'utf8');
-      } catch (err) {
-        if (err instanceof Error) {
-          console.error(`${mod.name}: ${err.message}`);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`${mod.name}: ${error.message}`);
         }
       }
     }

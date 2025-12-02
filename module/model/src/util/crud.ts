@@ -82,9 +82,9 @@ export class ModelCrudUtil {
     let errors: ValidationError[] = [];
     try {
       await SchemaValidator.validate(cls, item);
-    } catch (err) {
-      if (err instanceof ValidationResultError) {
-        errors = err.details.errors;
+    } catch (error) {
+      if (error instanceof ValidationResultError) {
+        errors = error.details.errors;
       }
     }
 

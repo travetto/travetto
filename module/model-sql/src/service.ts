@@ -144,11 +144,11 @@ export class SQLModelService implements
       for (const ins of this.#dialect.getAllInsertSQL(cls, prepped)) {
         await this.#exec(ins);
       }
-    } catch (err) {
-      if (err instanceof ExistsError) {
+    } catch (error) {
+      if (error instanceof ExistsError) {
         throw new ExistsError(cls, prepped.id);
       } else {
-        throw err;
+        throw error;
       }
     }
     return prepped;
@@ -166,9 +166,9 @@ export class SQLModelService implements
       if (item.id) {
         await this.#deleteRaw(cls, item.id, {}, false);
       }
-    } catch (err) {
-      if (!(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
     }
     return await this.create(cls, item);

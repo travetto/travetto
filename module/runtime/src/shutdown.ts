@@ -73,8 +73,8 @@ export class ShutdownManager {
         if (scope) {
           console.debug('Stopped', { scope });
         }
-      } catch (err) {
-        console.error('Error stopping', { err, scope });
+      } catch (error) {
+        console.error('Error stopping', { error, scope });
       }
     }));
 

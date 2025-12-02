@@ -134,11 +134,11 @@ export class ModelIndexedUtil {
       const { id } = await service.getByIndex(cls, idx, castTo(body));
       body.id = id;
       return await service.update(cls, castTo(body));
-    } catch (err) {
-      if (err instanceof NotFoundError) {
+    } catch (error) {
+      if (error instanceof NotFoundError) {
         return await service.create(cls, body);
       } else {
-        throw err;
+        throw error;
       }
     }
   }

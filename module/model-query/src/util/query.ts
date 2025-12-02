@@ -41,9 +41,9 @@ export class ModelQueryUtil {
       if (requestedId) {
         throw new NotFoundError(cls, requestedId);
       } else {
-        const err = new NotFoundError(cls, 'unknown');
-        err.message = 'No results found for query';
-        throw err;
+        const error = new NotFoundError(cls, 'unknown');
+        error.message = 'No results found for query';
+        throw error;
       }
     } else {
       throw new AppError(`Invalid number of results: ${result.length}`, { category: 'data' });

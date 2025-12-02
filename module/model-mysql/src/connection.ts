@@ -74,12 +74,12 @@ export class MySQLConnection extends Connection<PoolConnection> {
         const records: T[] = [...results].map(v => castTo({ ...v }));
         return { records, count: records.length };
       }
-    } catch (err) {
-      console.debug('Failed query', { error: err, query });
-      if (err instanceof Error && err.message.startsWith('Duplicate entry')) {
+    } catch (error) {
+      console.debug('Failed query', { error: error, query });
+      if (error instanceof Error && error.message.startsWith('Duplicate entry')) {
         throw new ExistsError('query', query);
       } else {
-        throw err;
+        throw error;
       }
     } finally {
       try {

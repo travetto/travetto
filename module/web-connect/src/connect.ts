@@ -119,7 +119,7 @@ export class ConnectResponse implements Pick<ServerResponse,
   flushHeaders(): void {
     this.#headersSent = true;
   }
-  write(chunk: unknown, encoding?: unknown, callback?: (err?: Error) => void): boolean {
+  write(chunk: unknown, encoding?: unknown, callback?: (error?: Error) => void): boolean {
     if (this.#headersSent) {
       this.flushHeaders();
     }

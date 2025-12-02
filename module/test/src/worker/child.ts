@@ -20,12 +20,12 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     try {
       await operation();
       this.send(type); // Respond
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
       }
       // Mark as errored out
-      this.send(type, JSON.parse(Util.serializeToJSON({ error: err })));
+      this.send(type, JSON.parse(Util.serializeToJSON({ error })));
     }
   }
 

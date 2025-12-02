@@ -13,11 +13,11 @@ class UserService {
   async authenticate(identity: User) {
     try {
       return await this.auth.authenticate(identity);
-    } catch (err) {
-      if (err instanceof AppError && err.category === 'notfound') {
+    } catch (error) {
+      if (error instanceof AppError && error.category === 'notfound') {
         return await this.auth.register(identity);
       } else {
-        throw err;
+        throw error;
       }
     }
   }

@@ -38,14 +38,14 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   async verify(token: string): Promise<Principal> {
     try {
       const jwt: Jwt & { body: { core: Principal } } = await new Promise((resolve, reject) =>
-        this.#verifier.verify(token, (err, v) => err ? reject(err) : resolve(castTo(v)))
+        this.#verifier.verify(token, (error, v) => error ? reject(error) : resolve(castTo(v)))
       );
       return jwt.body.core;
-    } catch (err) {
-      if (err instanceof Error && err.name.startsWith('Jwt')) {
-        throw new AuthenticationError(err.message, { category: 'permissions' });
+    } catch (error) {
+      if (error instanceof Error && error.name.startsWith('Jwt')) {
+        throw new AuthenticationError(error.message, { category: 'permissions' });
       }
-      throw err;
+      throw error;
     }
   }
 

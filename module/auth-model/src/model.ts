@@ -115,9 +115,9 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
         await this.#retrieve(ident.id);
         throw new AuthenticationError('That id is already taken.', { category: 'data' });
       }
-    } catch (err) {
-      if (!(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
     }
 

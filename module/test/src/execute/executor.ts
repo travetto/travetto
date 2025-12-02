@@ -226,8 +226,8 @@ export class TestExecutor {
 
       // Handle after all
       await mgr.endPhase('all');
-    } catch (err) {
-      await mgr.onError(err);
+    } catch (error) {
+      await mgr.onError(error);
     }
 
     // Restore env
@@ -246,12 +246,12 @@ export class TestExecutor {
   async execute(run: TestRun): Promise<void> {
     try {
       await Runtime.importFrom(run.import);
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
       }
-      console.error(err);
-      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(run.import, err));
+      console.error(error);
+      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(run.import, error));
       return;
     }
 

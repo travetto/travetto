@@ -101,11 +101,11 @@ export class DocRunUtil {
         throw new Error(result.stderr);
       }
       final = util.stripVTControlCharacters(result.stdout).trim() || util.stripVTControlCharacters(result.stderr).trim();
-    } catch (err) {
-      if (err instanceof Error) {
-        final = err.message;
+    } catch (error) {
+      if (error instanceof Error) {
+        final = error.message;
       } else {
-        throw err;
+        throw error;
       }
     }
 

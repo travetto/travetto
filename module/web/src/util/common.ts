@@ -110,18 +110,18 @@ export class WebCommonUtil {
   /**
    * From catch value
    */
-  static catchResponse(err: unknown): WebResponse<Error> {
-    if (err instanceof WebResponse) {
-      return err;
+  static catchResponse(error: unknown): WebResponse<Error> {
+    if (error instanceof WebResponse) {
+      return error;
     }
 
-    const body = err instanceof Error ? err :
-      (!!err && typeof err === 'object' && ('message' in err && typeof err.message === 'string')) ?
-        new AppError(err.message, { details: err }) :
-        new AppError(`${err}`);
+    const body = error instanceof Error ? error :
+      (!!error && typeof error === 'object' && ('message' in error && typeof error.message === 'string')) ?
+        new AppError(error.message, { details: error }) :
+        new AppError(`${error}`);
 
-    const error: Error & Partial<WebError> = body;
-    const statusCode = error.details?.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
+    const webError: Error & Partial<WebError> = body;
+    const statusCode = webError.details?.statusCode ?? ERROR_CATEGORY_STATUS[webError.category!] ?? 500;
 
     return new WebResponse({ body, context: { httpStatusCode: statusCode } });
   }

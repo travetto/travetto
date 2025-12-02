@@ -85,8 +85,8 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
           suite: this.summarizeSuite(e.test),
         });
       }
-    } catch (err) {
-      console.warn('Summarization Error', { error: err });
+    } catch (error) {
+      console.warn('Summarization Error', { error });
     }
   }
 }

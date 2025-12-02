@@ -30,15 +30,15 @@ export class DynamicCommonjsLoader {
       let mod: unknown;
       try {
         mod = moduleLoad.apply(null, [request, parent]);
-      } catch (err: unknown) {
+      } catch (error: unknown) {
         const name = Module._resolveFilename!(request, parent);
-        if (err instanceof Error && Runtime.dynamic && !name.startsWith('test/')) {
-          const errMsg = err.message;
+        if (error instanceof Error && Runtime.dynamic && !name.startsWith('test/')) {
+          const errMsg = error.message;
           console.debug(`Unable to load ${name}: stubbing out with error proxy.`, errMsg);
           const fail = (): never => { throw new Error(errMsg); };
           mod = new Proxy({}, { getOwnPropertyDescriptor: fail, get: fail, has: fail });
         } else {
-          throw err;
+          throw error;
         }
       }
 

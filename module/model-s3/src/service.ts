@@ -149,9 +149,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         UploadId,
         MultipartUpload: { Parts: parts }
       }));
-    } catch (err) {
+    } catch (error) {
       await this.client.abortMultipartUpload(this.#qBlob(id, { UploadId }));
-      throw err;
+      throw error;
     }
   }
 
@@ -163,9 +163,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
           Objects: items
         }
       });
-    } catch (err) {
+    } catch (error) {
       // Handle GCS
-      if (err instanceof Error && err.name === 'NotImplemented') {
+      if (error instanceof Error && error.name === 'NotImplemented') {
         for (const item of items) {
           await this.client.deleteObject({
             Bucket: this.config.bucket,
@@ -173,7 +173,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
           });
         }
       } else {
-        throw err;
+        throw error;
       }
     }
   }
@@ -201,13 +201,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         return false;
       }
       return true;
-    } catch (err) {
-      if (isMetadataBearer(err)) {
-        if (err.$metadata.httpStatusCode === 404) {
+    } catch (error) {
+      if (isMetadataBearer(error)) {
+        if (error.$metadata.httpStatusCode === 404) {
           return false;
         }
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -230,13 +230,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         }
       }
       throw new NotFoundError(cls, id);
-    } catch (err) {
-      if (isMetadataBearer(err)) {
-        if (err.$metadata.httpStatusCode === 404) {
-          err = new NotFoundError(cls, id);
+    } catch (error) {
+      if (isMetadataBearer(error)) {
+        if (error.$metadata.httpStatusCode === 404) {
+          error = new NotFoundError(cls, id);
         }
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -297,9 +297,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       for (const { id } of batch) {
         try {
           yield await this.get(cls, id);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
       }
@@ -362,13 +362,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const query = this.#qBlob(location);
     try {
       return (await this.client.headObject(query));
-    } catch (err) {
-      if (isMetadataBearer(err)) {
-        if (err.$metadata.httpStatusCode === 404) {
-          err = new NotFoundError('Blob', location);
+    } catch (error) {
+      if (isMetadataBearer(error)) {
+        if (error.$metadata.httpStatusCode === 404) {
+          error = new NotFoundError('Blob', location);
         }
       }
-      throw err;
+      throw error;
     }
   }
 

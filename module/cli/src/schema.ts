@@ -72,11 +72,11 @@ export class CliCommandSchemaUtil {
 
     const SOURCES = ['flag', 'arg', 'custom'] as const;
 
-    const results = validators.map((x, i) => x().catch(err => {
-      if (!(err instanceof CliValidationResultError) && !(err instanceof ValidationResultError)) {
-        throw err;
+    const results = validators.map((x, i) => x().catch(error => {
+      if (!(error instanceof CliValidationResultError) && !(error instanceof ValidationResultError)) {
+        throw error;
       }
-      return err.details.errors.map(v => ({ ...v, source: getSource(v.source, SOURCES[i]) }));
+      return error.details.errors.map(v => ({ ...v, source: getSource(v.source, SOURCES[i]) }));
     }));
 
     const errors = (await Promise.all(results)).flatMap(x => (x ?? []));

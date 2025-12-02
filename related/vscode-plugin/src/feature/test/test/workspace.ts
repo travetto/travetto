@@ -118,11 +118,11 @@ export class WorkspaceResultsManager {
           this.#log.info('Tracking', editor.document.fileName);
           return results.getListOfTests().length > 0;
         }
-      } catch (err) {
-        if (err instanceof Error) {
-          this.#log.error(err.message, err);
+      } catch (error) {
+        if (error instanceof Error) {
+          this.#log.error(error.message, error);
         } else {
-          throw err;
+          throw error;
         }
       }
     }

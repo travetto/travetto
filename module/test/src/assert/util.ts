@@ -39,15 +39,15 @@ export class AssertUtil {
   /**
    * Determine file location for a given error and the stack trace
    */
-  static getPositionOfError(err: Error, imp: string): { import: string, line: number } {
+  static getPositionOfError(error: Error, importLocation: string): { import: string, line: number } {
     const cwd = Runtime.mainSourcePath;
-    const lines = (err.stack ?? new Error().stack!)
+    const lines = (error.stack ?? new Error().stack!)
       .replace(/[\\/]/g, '/')
       .split('\n')
       // Exclude node_modules, target self
       .filter(x => x.includes(cwd) && (!x.includes('node_modules') || x.includes('/support/')));
 
-    const filename = RuntimeIndex.getFromImport(imp)?.sourceFile!;
+    const filename = RuntimeIndex.getFromImport(importLocation)?.sourceFile!;
 
     let best = lines.filter(x => x.includes(filename))[0];
 
@@ -56,12 +56,12 @@ export class AssertUtil {
     }
 
     if (!best) {
-      return { import: imp, line: 1 };
+      return { import: importLocation, line: 1 };
     }
 
     const pth = best.trim().split(/\s+/g).slice(1).pop()!;
     if (!pth) {
-      return { import: imp, line: 1 };
+      return { import: importLocation, line: 1 };
     }
 
     const [file, lineNo] = pth
@@ -118,13 +118,13 @@ export class AssertUtil {
   /**
    * Define import failure as a SuiteFailure object
    */
-  static gernerateImportFailure(imp: string, err: Error): SuiteFailure {
-    const name = path.basename(imp);
-    const classId = `${RuntimeIndex.getFromImport(imp)?.id}#${name}`;
+  static gernerateImportFailure(importLocation: string, error: Error): SuiteFailure {
+    const name = path.basename(importLocation);
+    const classId = `${RuntimeIndex.getFromImport(importLocation)?.id}#${name}`;
     const suite = asFull<SuiteConfig & SuiteResult>({
-      class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp
+      class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: importLocation
     });
-    err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
-    return this.generateSuiteFailure(suite, 'require', err);
+    error.message = error.message.replaceAll(Runtime.mainSourcePath, '.');
+    return this.generateSuiteFailure(suite, 'require', error);
   }
 }

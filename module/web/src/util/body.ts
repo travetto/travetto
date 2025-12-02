@@ -199,11 +199,11 @@ export class WebBodyUtil {
       }
       all.push(decoder.decode(Buffer.alloc(0), { stream: false }));
       return { text: all.join(''), read: received };
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
         throw WebError.for('Request Aborted', 400, { received });
       } else {
-        throw err;
+        throw error;
       }
     }
   }

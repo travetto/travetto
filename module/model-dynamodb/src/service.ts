@@ -134,15 +134,15 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           ReturnValues: 'ALL_NEW'
         });
       }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'ConditionalCheckFailedException') {
+    } catch (error) {
+      if (error instanceof Error && error.name === 'ConditionalCheckFailedException') {
         if (mode === 'create') {
           throw new ExistsError(cls, id);
         } else if (mode === 'update') {
           throw new NotFoundError(cls, id);
         }
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -335,9 +335,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         for (const el of batch.Items) {
           try {
             yield await loadAndCheckExpiry(cls, el.body.S!);
-          } catch (err) {
-            if (!(err instanceof NotFoundError)) {
-              throw err;
+          } catch (error) {
+            if (!(error instanceof NotFoundError)) {
+              throw error;
             }
           }
         }
@@ -428,9 +428,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         for (const el of batch.Items) {
           try {
             yield await loadAndCheckExpiry(cls, el.body.S!);
-          } catch (err) {
-            if (!(err instanceof NotFoundError)) {
-              throw err;
+          } catch (error) {
+            if (!(error instanceof NotFoundError)) {
+              throw error;
             }
           }
         }

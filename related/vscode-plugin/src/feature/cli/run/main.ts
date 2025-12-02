@@ -50,8 +50,8 @@ export class CliRunFeature extends BaseFeature {
       await launchConfig.update('configurations', configurations, false);
 
       vscode.window.showInformationMessage('Added new configuration to launch.json!');
-    } catch (err) {
-      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
+    } catch (error) {
+      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
     }
   }
 
@@ -70,8 +70,8 @@ export class CliRunFeature extends BaseFeature {
         this.#storage.set(choice.key!, choice);
         return this.debugTarget(choice, choice.inputs);
       }
-    } catch (err) {
-      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
+    } catch (error) {
+      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
     }
   }
 

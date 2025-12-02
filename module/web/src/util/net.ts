@@ -8,8 +8,8 @@ import { ExecUtil } from '@travetto/runtime';
 export class NetUtil {
 
   /** Is an error an address in use error */
-  static isPortUsedError(err: unknown): err is Error & { port: number } {
-    return !!err && err instanceof Error && err.message.includes('EADDRINUSE');
+  static isPortUsedError(error: unknown): error is Error & { port: number } {
+    return !!error && error instanceof Error && error.message.includes('EADDRINUSE');
   }
 
   /** Get the port process id */
@@ -61,12 +61,12 @@ export class NetUtil {
 
   /**
    * Free a port if it is in use, typically used to resolve port conflicts.
-   * @param err The error that may indicate a port conflict
+   * @param error The error that may indicate a port conflict
    * @returns Returns true if the port was freed, false if not handled
    */
-  static async freePortOnConflict(err: unknown): Promise<boolean> {
-    if (NetUtil.isPortUsedError(err) && typeof err.port === 'number') {
-      await NetUtil.freePort(err.port);
+  static async freePortOnConflict(error: unknown): Promise<boolean> {
+    if (NetUtil.isPortUsedError(error) && typeof error.port === 'number') {
+      await NetUtil.freePort(error.port);
       return true;
     } else {
       return false;

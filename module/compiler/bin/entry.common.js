@@ -80,9 +80,9 @@ async function load(/** @type {(operations: import('../support/entry.main.ts').O
     // @ts-ignore
     try { module.enableCompileCache(); } catch { }
     return cb(result);
-  } catch (err) {
+  } catch (error) {
     await rm(ctx.destPath(COMP_MOD), { recursive: true, force: true });
-    throw err;
+    throw error;
   }
 }
 

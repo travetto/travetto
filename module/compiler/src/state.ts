@@ -149,11 +149,11 @@ export class CompilerState implements ts.CompilerHost {
           return result?.diagnostics?.length ? result.diagnostics : undefined;
         }
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        return err;
+    } catch (error) {
+      if (error instanceof Error) {
+        return error;
       } else {
-        throw err;
+        throw error;
       }
     }
   }

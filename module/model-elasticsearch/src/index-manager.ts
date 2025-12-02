@@ -88,8 +88,8 @@ export class IndexManager implements ModelStorageSupport {
         mappings: mapping,
         settings: this.config.indexCreate
       });
-    } catch (err) {
-      console.warn('Index already created', { index: ident.index, error: err });
+    } catch (error) {
+      console.warn('Index already created', { index: ident.index, error });
     }
     return concreteIndex;
   }

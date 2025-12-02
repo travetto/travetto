@@ -121,14 +121,14 @@ export class DependencyRegistryIndex implements RegistryIndex {
     try {
       const target = dependency.target ?? input.type;
       return await this.getInstance(target, dependency.qualifier, dependency.resolution);
-    } catch (err) {
-      if (input.required?.active === false && err instanceof InjectionError && err.category === 'notfound') {
+    } catch (error) {
+      if (input.required?.active === false && error instanceof InjectionError && error.category === 'notfound') {
         return undefined;
       } else {
-        if (err && err instanceof Error) {
-          err.message = `${err.message} via=${src.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
+        if (error && error instanceof Error) {
+          error.message = `${error.message} via=${src.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
         }
-        throw err;
+        throw error;
       }
     }
   }
@@ -250,10 +250,10 @@ export class DependencyRegistryIndex implements RegistryIndex {
       const instance = await instancePromise;
       this.#instances.get(target)!.set(qualifier, instance);
       return instance;
-    } catch (err) {
+    } catch (error) {
       // Clear it out, don't save failed constructions
       this.#instancePromises.get(target)!.delete(qualifier);
-      throw err;
+      throw error;
     }
   }
 

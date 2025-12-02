@@ -141,9 +141,9 @@ export class CacheService {
 
     try {
       result = await this.get(id, extendOnAccess);
-    } catch (err) {
-      if (!(err instanceof CacheError) && !(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof CacheError) && !(error instanceof NotFoundError)) {
+        throw error;
       }
     }
     return result;
@@ -190,9 +190,9 @@ export class CacheService {
     const val = await fn.apply(target, params);
     try {
       await this.delete(id); // Ignore failure on delete
-    } catch (err) {
-      if (!(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
     }
     return val;

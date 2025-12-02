@@ -208,11 +208,11 @@ export class MongoModelService implements
         { $set: cleaned },
         { upsert: true }
       );
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('duplicate key error')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('duplicate key error')) {
         throw new ExistsError(cls, id);
       } else {
-        throw err;
+        throw error;
       }
     }
     return this.postUpdate(cleaned, id);
@@ -264,9 +264,9 @@ export class MongoModelService implements
     for await (const el of cursor) {
       try {
         yield await this.postLoad(cls, el);
-      } catch (err) {
-        if (!(err instanceof NotFoundError)) {
-          throw err;
+      } catch (error) {
+        if (!(error instanceof NotFoundError)) {
+          throw error;
         }
       }
     }
@@ -374,8 +374,8 @@ export class MongoModelService implements
 
     if (result.hasWriteErrors()) {
       out.errors = result.getWriteErrors();
-      for (const err of out.errors) {
-        const operation = operations[err.index];
+      for (const error of out.errors) {
+        const operation = operations[error.index];
         const k = TypedObject.keys(operation)[0];
         out.counts[k] -= 1;
       }

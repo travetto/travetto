@@ -18,8 +18,8 @@ export class RespondInterceptor implements WebInterceptor {
     let response;
     try {
       response = await ctx.next();
-    } catch (err) {
-      response = WebCommonUtil.catchResponse(err);
+    } catch (error) {
+      response = WebCommonUtil.catchResponse(error);
     }
     return response;
   }

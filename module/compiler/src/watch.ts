@@ -156,12 +156,12 @@ export class CompilerWatcher {
 
     await this.#cleanup.workspace?.();
 
-    const listener = await lib.subscribe(this.#root, async (err, events) => {
+    const listener = await lib.subscribe(this.#root, async (error, events) => {
       this.#lastWorkspaceModified = Date.now();
 
       try {
-        if (err) {
-          throw err instanceof Error ? err : new Error(`${err}`);
+        if (error) {
+          throw error instanceof Error ? error : new Error(`${error}`);
         } else if (events.length > 25) {
           throw new CompilerReset(`Large influx of file changes: ${events.length}`);
         } else if (events.some(event => packageFiles.has(path.toPosix(event.path)))) {

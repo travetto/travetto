@@ -134,21 +134,21 @@ export function consumeJSON<T>(text: string | unknown): T {
         return value;
       }
     });
-  } catch (err) {
-    throw new Error(`Unable to parse response: ${text}, Unknown error: ${err}`);
+  } catch (error) {
+    throw new Error(`Unable to parse response: ${text}, Unknown error: ${error}`);
   }
 }
 
-export async function consumeError(err: unknown): Promise<Error> {
-  if (err instanceof Error) {
-    return err;
-  } else if (isResponse(err)) {
-    const out = new Error(err.statusText);
-    Object.assign(out, { status: err.status });
+export async function consumeError(error: unknown): Promise<Error> {
+  if (error instanceof Error) {
+    return error;
+  } else if (isResponse(error)) {
+    const out = new Error(error.statusText);
+    Object.assign(out, { status: error.status });
     return consumeError(out);
-  } else if (isPlainObject(err)) {
+  } else if (isPlainObject(error)) {
     const out = new Error();
-    Object.assign(out, err);
+    Object.assign(out, error);
     return consumeError(out);
   } else {
     return new Error('Unknown error');
@@ -198,12 +198,12 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
       try {
         resolved = await fetch(url, core);
         break;
-      } catch (err) {
+      } catch (error) {
         if (i < (core.retriesOnConnectFailure ?? 0)) {
           await new Promise(r => setTimeout(r, 1000)); // Wait 1s
           continue;
         } else {
-          throw err;
+          throw error;
         }
       }
     }
@@ -240,8 +240,8 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
       }
       throw responseObject;
     }
-  } catch (err) {
-    throw await request.consumeError!(err);
+  } catch (error) {
+    throw await request.consumeError!(error);
   }
 }
 

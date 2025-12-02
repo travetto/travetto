@@ -48,7 +48,7 @@ export class IpcChannel<V = unknown> {
     if (!this.active) {
       throw new Error('Cannot send message to inactive process');
     } else if (this.proc.send && this.proc.connected) {
-      this.proc.send({ ...(data ?? {}), type: eventType }, undefined, undefined, (err) => err && console.error(err));
+      this.proc.send({ ...(data ?? {}), type: eventType }, undefined, undefined, (error) => error && console.error(error));
     } else {
       throw new Error('this.proc.send was not defined');
     }

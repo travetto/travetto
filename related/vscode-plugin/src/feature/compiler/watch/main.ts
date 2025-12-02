@@ -127,8 +127,8 @@ export class CompilerWatchFeature extends BaseFeature {
             }
           });
         }
-      } catch (err) {
-        this.#log.info('Failed to connect', `${err} `);
+      } catch (error) {
+        this.#log.info('Failed to connect', `${error} `);
       }
 
       if (connected) {

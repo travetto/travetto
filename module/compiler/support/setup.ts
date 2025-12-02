@@ -153,8 +153,8 @@ export class CompilerSetup {
           log.debug('Skipped', mod);
         }
       }, false);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
     return out;
   }

@@ -88,7 +88,7 @@ export class ImageUtil {
     const out = await ((Buffer.isBuffer(image) || typeof image === 'string') ?
       sharp(image).metadata() :
       new Promise<Metadata>((resolve, reject) =>
-        pipeline(image, sharp().metadata((err, metadata) => err ? reject(err) : resolve(metadata)))
+        pipeline(image, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
       ));
     return {
       width: out.width!,

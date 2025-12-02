@@ -31,13 +31,13 @@ export class SqliteConnection extends Connection<Database> {
     for (; ;) {
       try {
         return await operation();
-      } catch (err) {
-        if (err instanceof Error && retries > 1 && err.message.includes('database is locked')) {
+      } catch (error) {
+        if (error instanceof Error && retries > 1 && error.message.includes('database is locked')) {
           console.error('Failed, and waiting', retries);
           await Util.blockingTimeout(delay);
           retries -= 1;
         } else {
-          throw err;
+          throw error;
         }
       }
     }
@@ -83,11 +83,11 @@ export class SqliteConnection extends Connection<Database> {
         } else {
           return { count: out.changes, records: [] };
         }
-      } catch (err) {
-        if (err instanceof Error && err.message.includes('UNIQUE constraint failed')) {
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
           throw new ExistsError('query', query);
         } else {
-          throw err;
+          throw error;
         }
       }
     });

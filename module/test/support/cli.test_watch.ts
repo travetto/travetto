@@ -29,8 +29,8 @@ export class TestWatcherCommand {
     try {
       const { TestWatcher } = await import('../src/execute/watcher.ts');
       await TestWatcher.watch(this.format, this.mode === 'all');
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   }
 }

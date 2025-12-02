@@ -44,4 +44,4 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'disabled' }))
   ]
 })
-  .catch(err => console.log(err));
+  .catch(error => console.log(error));

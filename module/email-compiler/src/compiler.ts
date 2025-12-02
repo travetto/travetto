@@ -97,8 +97,8 @@ export class EmailCompiler {
         await this.compile(file);
         console.log('Successfully compiled template', { changed: [file] });
         yield file;
-      } catch (err) {
-        console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
+      } catch (error) {
+        console.error(`Error in compiling ${file}`, error && error instanceof Error ? error.message : `${error}`);
       }
     }
   }

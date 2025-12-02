@@ -113,11 +113,11 @@ export class HelpUtil {
         if (schema && !schema.private) {
           rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.description || '' }}`);
         }
-      } catch (err) {
-        if (err instanceof Error) {
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure: err.message.split(/\n/)[0] }}`);
+      } catch (error) {
+        if (error instanceof Error) {
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure: error.message.split(/\n/)[0] }}`);
         } else {
-          throw err;
+          throw error;
         }
       }
     }

@@ -83,7 +83,7 @@ export class WebUploadUtil {
         .on('file', (field, stream, filename) => itr.add({ stream, filename, field }))
         .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => itr.close())
-        .on('error', (err) => itr.throw(err instanceof Error ? err : new Error(`${err}`))));
+        .on('error', (error) => itr.throw(error instanceof Error ? error : new Error(`${error}`))));
 
       yield* itr;
     } else {
@@ -132,9 +132,9 @@ export class WebUploadUtil {
       Object.assign(file, { [RawFileSymbol]: location });
 
       return file;
-    } catch (err) {
+    } catch (error) {
       await remove();
-      throw err;
+      throw error;
     }
   }
 

@@ -59,16 +59,16 @@ export class TapEmitter implements TestConsumerShape {
    * Error to string
    * @param error
    */
-  errorToString(err?: Error): string | undefined {
-    if (err && err.name !== 'AssertionError') {
-      if (err instanceof Error) {
-        let out = JSON.stringify(hasToJSON(err) ? err.toJSON() : err, null, 2);
-        if (this.#options?.verbose && err.stack) {
-          out = `${out}\n${err.stack}`;
+  errorToString(error?: Error): string | undefined {
+    if (error && error.name !== 'AssertionError') {
+      if (error instanceof Error) {
+        let out = JSON.stringify(hasToJSON(error) ? error.toJSON() : error, null, 2);
+        if (this.#options?.verbose && error.stack) {
+          out = `${out}\n${error.stack}`;
         }
         return out;
       } else {
-        return `${err}`;
+        return `${error}`;
       }
     }
   }
@@ -155,8 +155,8 @@ export class TapEmitter implements TestConsumerShape {
 
     if (summary.errors.length) {
       this.log('---\n');
-      for (const err of summary.errors) {
-        const msg = this.errorToString(err);
+      for (const error of summary.errors) {
+        const msg = this.errorToString(error);
         if (msg) {
           this.log(this.#enhancer.failure(msg));
         }

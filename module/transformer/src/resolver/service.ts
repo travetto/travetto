@@ -161,11 +161,11 @@ export class SimpleResolver implements TransformResolver {
 
     try {
       return resolve(this.getType(node));
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
       }
-      console.error(`Unable to resolve type in ${importName}`, err.stack);
+      console.error(`Unable to resolve type in ${importName}`, error.stack);
       return { key: 'literal', ctor: Object, name: 'object' };
     }
   }

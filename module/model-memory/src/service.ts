@@ -81,9 +81,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
         const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
         this.#indices[idx.type].get(idxName)?.get(key)?.delete(id);
       }
-    } catch (err) {
-      if (!(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
     }
   }
@@ -221,9 +221,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     for (const id of this.#getStore(cls).keys()) {
       try {
         yield await this.get(cls, id);
-      } catch (err) {
-        if (!(err instanceof NotFoundError)) {
-          throw err;
+      } catch (error) {
+        if (!(error instanceof NotFoundError)) {
+          throw error;
         }
       }
     }

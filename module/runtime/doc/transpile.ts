@@ -3,8 +3,8 @@ export function work() {
 
   try {
     1 / 0;
-  } catch (err) {
-    console.error('Divide by zero', { error: err });
+  } catch (error) {
+    console.error('Divide by zero', { error });
   }
   console.debug('End Work');
 }

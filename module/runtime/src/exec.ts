@@ -139,8 +139,8 @@ export class ExecUtil {
       proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
       proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
 
-      proc.on('error', (err: Error) =>
-        finish({ code: 1, message: err.message, valid: false }));
+      proc.on('error', (error: Error) =>
+        finish({ code: 1, message: error.message, valid: false }));
 
       proc.on('close', (code: number) =>
         finish({ code, valid: code === null || code === 0 }));

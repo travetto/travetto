@@ -135,9 +135,9 @@ export class CompilerClient {
             yield val;
           }
         }
-      } catch (err) {
-        const aborted = ctrl.signal.aborted || (typeof err === 'object' && err && 'code' in err && err.code === 'ECONNRESET');
-        if (!aborted) { throw err; }
+      } catch (error) {
+        const aborted = ctrl.signal.aborted || (typeof error === 'object' && error && 'code' in error && error.code === 'ECONNRESET');
+        if (!aborted) { throw error; }
       }
       signal.removeEventListener('abort', quit);
 

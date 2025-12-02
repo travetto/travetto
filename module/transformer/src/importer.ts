@@ -192,12 +192,12 @@ export class ImportManager {
         ...importStmts,
         ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
       ]);
-    } catch (err) { // Missing import
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (error) { // Missing import
+      if (!(error instanceof Error)) {
+        throw error;
       }
-      const out = new Error(`${err.message} in ${file.fileName.replace(process.cwd(), '.')}`);
-      out.stack = err.stack;
+      const out = new Error(`${error.message} in ${file.fileName.replace(process.cwd(), '.')}`);
+      out.stack = error.stack;
       throw out;
     }
   }

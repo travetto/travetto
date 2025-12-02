@@ -36,15 +36,15 @@ export class EditorService {
     return { content, file };
   }
 
-  async #response<T>(operation: Promise<T>, success: (v: T) => EditorResponse, fail?: (err: Error) => EditorResponse): Promise<void> {
+  async #response<T>(operation: Promise<T>, success: (v: T) => EditorResponse, fail?: (error: Error) => EditorResponse): Promise<void> {
     try {
       const response = await operation;
       if (process.connected) { process.send?.(success(response)); }
-    } catch (err) {
-      if (fail && process.connected && err && err instanceof Error) {
-        process.send?.(fail(err));
+    } catch (error) {
+      if (fail && process.connected && error && error instanceof Error) {
+        process.send?.(fail(error));
       } else {
-        console.error(err);
+        console.error(error);
       }
     }
   }
@@ -71,14 +71,14 @@ export class EditorService {
         case 'compile': {
           return await this.#response(this.#renderFile(msg.file),
             result => ({ type: 'compiled', ...result }),
-            err => ({ type: 'compiled-failed', message: err.message, stack: err.stack, file: msg.file })
+            error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file: msg.file })
           );
         }
         case 'send': {
           return await this.#response(
             this.sendFile(msg.file, msg.to),
             result => ({ type: 'sent', ...result }),
-            err => ({ type: 'sent-failed', message: err.message, stack: err.stack, to: msg.to!, file: msg.file })
+            error => ({ type: 'sent-failed', message: error.message, stack: error.stack, to: msg.to!, file: msg.file })
           );
         }
       }
@@ -89,7 +89,7 @@ export class EditorService {
     for await (const file of EmailCompiler.watchCompile()) {
       await this.#response(this.#renderFile(file),
         response => ({ type: 'compiled', ...response }),
-        err => ({ type: 'compiled-failed', message: err.message, stack: err.stack, file })
+        error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
       );
     }
   }

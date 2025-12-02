@@ -129,9 +129,9 @@ export abstract class Connection<C = unknown> {
           const result = await operation();
           await this.commitTx(this.active!, txId);
           return result;
-        } catch (err) {
+        } catch (error) {
           try { await this.rollbackTx(this.active!, txId); } catch { }
-          throw err;
+          throw error;
         }
       } else {
         return await operation();

@@ -234,14 +234,14 @@ export class Decorations {
    * @param test
    */
   static buildTest(test: TestResult | TestConfig): vscode.DecorationOptions {
-    let err: ErrorHoverAssertion | Assertion | undefined;
+    let error: ErrorHoverAssertion | Assertion | undefined;
     if ('error' in test) {
       const tt = test;
-      err = (tt.assertions || []).find(x => !!x.error) ||
+      error = (tt.assertions || []).find(x => !!x.error) ||
         (tt.error && { error: tt.error, message: tt.error.message });
     }
-    if (err) {
-      const hover = this.buildErrorHover(err);
+    if (error) {
+      const hover = this.buildErrorHover(error);
       const tt = test;
       return {
         ...this.line(tt.lineStart),

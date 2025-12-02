@@ -114,8 +114,8 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
         WebBodyUtil.parseBody(parserType, text);
 
       return next();
-    } catch (err) {
-      throw WebError.for('Malformed input', 400, { cause: err });
+    } catch (error) {
+      throw WebError.for('Malformed input', 400, { cause: error });
     }
   }
 }

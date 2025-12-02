@@ -68,13 +68,13 @@ export class CompilerServer {
     const output = await new Promise<'ok' | 'running' | 'retry'>((resolve, reject) => {
       this.#server
         .on('listening', () => resolve('ok'))
-        .on('error', async err => {
-          if ('code' in err && err.code === 'EADDRINUSE') {
+        .on('error', async error => {
+          if ('code' in error && error.code === 'EADDRINUSE') {
             const info = await this.#client.info();
             resolve((info && info.mode === 'build' && this.mode === 'watch') ? 'retry' : 'running');
           } else {
-            log.warn('Failed in running server', err);
-            reject(err);
+            log.warn('Failed in running server', error);
+            reject(error);
           }
         })
         .on('close', () => log.debug('Server close event'));

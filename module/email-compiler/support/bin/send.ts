@@ -65,9 +65,9 @@ export class EditorSendService {
         console.log('Sent email', { to });
         return {};
       }
-    } catch (err) {
-      console.warn('Failed to send email', { to, error: err });
-      throw err;
+    } catch (error) {
+      console.warn('Failed to send email', { to, error });
+      throw error;
     }
   }
 }

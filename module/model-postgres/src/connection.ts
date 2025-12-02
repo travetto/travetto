@@ -40,9 +40,9 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
 
     await this.runWithActive(() =>
       this.runWithTransaction('required', () =>
-        this.execute(this.active!, 'CREATE EXTENSION IF NOT EXISTS pgcrypto;').catch(err => {
-          if (!(err instanceof Error && err.message.includes('already exists'))) {
-            throw err;
+        this.execute(this.active!, 'CREATE EXTENSION IF NOT EXISTS pgcrypto;').catch(error => {
+          if (!(error instanceof Error && error.message.includes('already exists'))) {
+            throw error;
           }
         })
       )
@@ -58,11 +58,11 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
       const out = await conn.query(query, values);
       const records: T[] = [...out.rows].map(v => ({ ...v }));
       return { count: out.rowCount!, records };
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('duplicate key value')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('duplicate key value')) {
         throw new ExistsError('query', query);
       } else {
-        throw err;
+        throw error;
       }
     }
   }

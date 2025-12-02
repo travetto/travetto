@@ -31,7 +31,7 @@ export class Barrier {
    */
   static uncaughtErrorPromise(): { promise: Promise<void>, resolve: () => unknown } {
     const uncaught = Promise.withResolvers<void>();
-    const onError = (err: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(err)); };
+    const onError = (error: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(error)); };
     UNCAUGHT_ERR_EVENTS.map(k => process.on(k, onError));
     uncaught.promise.finally(() => { UNCAUGHT_ERR_EVENTS.map(k => process.off(k, onError)); });
     return uncaught;
@@ -90,7 +90,7 @@ export class Barrier {
       let capturedError: Error | undefined;
       const opProm = operation().then(() => promises.finish());
 
-      await Promise.race([opProm, uncaught.promise, timer.promise]).catch(err => capturedError ??= err);
+      await Promise.race([opProm, uncaught.promise, timer.promise]).catch(error => capturedError ??= error);
 
       return capturedError;
     } finally {

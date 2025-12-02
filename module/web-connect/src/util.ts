@@ -5,7 +5,7 @@ import { WebFilterContext } from '@travetto/web';
 import { ConnectRequest, ConnectResponse } from './connect';
 
 
-type Middleware = (request: IncomingMessage, response: ServerResponse, next: (err?: unknown) => void) => void;
+type Middleware = (request: IncomingMessage, response: ServerResponse, next: (error?: unknown) => void) => void;
 
 /**
  * Utilities for invoking express middleware with a WebFilterContext
@@ -20,7 +20,7 @@ export class WebConnectUtil {
     handler: (
       request: IncomingMessage,
       response: ServerResponse,
-      next: (err: Error | null | undefined, value: T | undefined | null) => void
+      next: (error: Error | null | undefined, value: T | undefined | null) => void
     ) => Middleware
   ): Promise<T | undefined> {
     const connectReq = ConnectRequest.get(ctx.request);
@@ -29,7 +29,7 @@ export class WebConnectUtil {
     const p = Promise.withResolvers<T | undefined>();
     connectRes.on('end', () => p.resolve(null!));
 
-    handler(connectReq, connectRes, (err, value) => err ? p.reject(err) : p.resolve(value!));
+    handler(connectReq, connectRes, (error, value) => error ? p.reject(error) : p.resolve(value!));
     const result = await p.promise;
     connectRes.throwIfSent();
     return result;

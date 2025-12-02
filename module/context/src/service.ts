@@ -73,8 +73,8 @@ export class AsyncContext {
           out.add(item);
         }
         out.close();
-      } catch (err) {
-        out.throw(castTo(err));
+      } catch (error) {
+        out.throw(castTo(error));
       }
     });
     return out;
