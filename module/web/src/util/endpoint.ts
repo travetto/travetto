@@ -65,12 +65,12 @@ export class EndpointUtil {
 
     const inputByClass = Map.groupBy(
       [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []],
-      x => x[0]
+      entry => entry[0]
     );
 
     const configs = new Map<Class, unknown>(interceptors.map(inst => {
       const cls = asConstructable<WebInterceptor>(inst).constructor;
-      const inputs = (inputByClass.get(cls) ?? []).map(x => x[1]);
+      const inputs = (inputByClass.get(cls) ?? []).map(entry => entry[1]);
       const config = Object.assign({}, inst.config, ...inputs);
       return [cls, inst.finalizeConfig?.({ config, endpoint }, castTo(inputs)) ?? config];
     }));
@@ -148,13 +148,13 @@ export class EndpointUtil {
           this.extractParameter(request, param, schema)
       );
       const params = BindUtil.coerceMethodParams(cls, endpoint.methodName, extracted);
-      await SchemaValidator.validateMethod(cls, endpoint.methodName, params, endpoint.parameters.map(x => x.prefix));
+      await SchemaValidator.validateMethod(cls, endpoint.methodName, params, endpoint.parameters.map(paramConfig => paramConfig.prefix));
       return params;
     } catch (error) {
       if (error instanceof ValidationResultError) {
         for (const validationError of error.details?.errors ?? []) {
           if (validationError.kind === 'required') {
-            const config = combined.find(x => x.schema.name === validationError.path);
+            const config = combined.find(paramConfig => paramConfig.schema.name === validationError.path);
             if (config) {
               validationError.message = `Missing ${config.param.location} value: ${config.schema.name}`;
             }
@@ -202,7 +202,7 @@ export class EndpointUtil {
 
     // Filter interceptors if needed
     for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
-      interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
+      interceptors = filter ? interceptors.filter(interceptor => !filter(interceptor)) : interceptors;
     }
 
     const interceptorFilters =
@@ -247,7 +247,7 @@ export class EndpointUtil {
     // Filter out conditional endpoints
     const endpoints = (await Promise.all(
       config.endpoints.map(endpoint => Promise.resolve(endpoint.conditional?.() ?? true).then(value => value ? endpoint : undefined))
-    )).filter(x => !!x);
+    )).filter(endpoint => !!endpoint);
 
     if (!endpoints.length) {
       return [];
@@ -267,7 +267,7 @@ export class EndpointUtil {
     return endpoints
       .map(endpoint => {
         const parts = endpoint.path.replace(/^[/]|[/]$/g, '').split('/');
-        return [endpoint, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
+        return [endpoint, parts.map(part => /[*]/.test(part) ? 1 : /:/.test(part) ? 2 : 3)] as const;
       })
       .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
       .map(([endpoint,]) => endpoint);
@@ -278,25 +278,25 @@ export class EndpointUtil {
    * Order interceptors
    */
   static orderInterceptors(instances: WebInterceptor[]): WebInterceptor[] {
-    const cats = WEB_INTERCEPTOR_CATEGORIES.map(x => ({
-      key: x,
-      start: castTo<Class<WebInterceptor>>({ name: `${x}Start` }),
-      end: castTo<Class<WebInterceptor>>({ name: `${x}End` }),
+    const categoryList = WEB_INTERCEPTOR_CATEGORIES.map(category => ({
+      key: category,
+      start: castTo<Class<WebInterceptor>>({ name: `${category}Start` }),
+      end: castTo<Class<WebInterceptor>>({ name: `${category}End` }),
     }));
 
-    const categoryMapping = TypedObject.fromEntries(cats.map(x => [x.key, x]));
+    const categoryMapping = TypedObject.fromEntries(categoryList.map(category => [category.key, category]));
 
-    const ordered = instances.map(x => {
-      const group = categoryMapping[x.category];
-      const after = [...x.dependsOn ?? [], group.start];
-      const before = [...x.runsBefore ?? [], group.end];
-      return ({ key: x.constructor, before, after, target: x, placeholder: false });
+    const ordered = instances.map(category => {
+      const group = categoryMapping[category.category];
+      const after = [...category.dependsOn ?? [], group.start];
+      const before = [...category.runsBefore ?? [], group.end];
+      return ({ key: category.constructor, before, after, target: category, placeholder: false });
     });
 
     // Add category sets into the ordering
     let i = 0;
-    for (const cat of cats) {
-      const prevEnd = cats[i - 1]?.end ? [cats[i - 1].end] : [];
+    for (const cat of categoryList) {
+      const prevEnd = categoryList[i - 1]?.end ? [categoryList[i - 1].end] : [];
       ordered.push(
         { key: cat.start, before: [cat.end], after: prevEnd, placeholder: true, target: undefined! },
         { key: cat.end, before: [], after: [cat.start], placeholder: true, target: undefined! }
@@ -305,7 +305,7 @@ export class EndpointUtil {
     }
 
     return WebCommonUtil.ordered(ordered)
-      .filter(x => !x.placeholder)  // Drop out the placeholders
-      .map(x => x.target);
+      .filter(category => !category.placeholder)  // Drop out the placeholders
+      .map(category => category.target);
   }
 }

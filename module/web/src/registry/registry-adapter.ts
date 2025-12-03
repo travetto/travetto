@@ -40,7 +40,7 @@ function combineEndpointConfigs(controller: ControllerConfig, base: EndpointConf
         httpMethod: override.httpMethod ?? base.httpMethod,
         allowsBody: override.allowsBody ?? base.allowsBody,
         path: override.path || base.path,
-        parameters: (override.parameters ?? base.parameters).map(x => ({ ...x })),
+        parameters: (override.parameters ?? base.parameters).map(endpoint => ({ ...endpoint })),
         responseFinalizer: override.responseFinalizer ?? base.responseFinalizer,
       }
     );

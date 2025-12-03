@@ -21,7 +21,7 @@ export class AuthModelUtil {
    */
   static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string> {
     const half = Math.trunc(Math.ceil(keylen / 2));
-    return pbkdf2(value, salt, iterations, half, digest).then(x => x.toString('hex').substring(0, keylen));
+    return pbkdf2(value, salt, iterations, half, digest).then(buffer => buffer.toString('hex').substring(0, keylen));
   }
 
   /**

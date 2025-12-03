@@ -49,9 +49,9 @@ export class HelpUtil {
       const key = castKey<CliCommandShape>(field.name);
       const def = ifDefined(command[key]) ?? ifDefined(field.default);
       const aliases = (field.aliases ?? [])
-        .filter(x => x.startsWith('-'))
-        .filter(x =>
-          (field.type !== Boolean) || ((def !== true || field.name === 'help') ? !x.startsWith('--no-') : x.startsWith('--'))
+        .filter(flag => flag.startsWith('-'))
+        .filter(flag =>
+          (field.type !== Boolean) || ((def !== true || field.name === 'help') ? !flag.startsWith('--no-') : flag.startsWith('--'))
         );
       let type: string | undefined;
 
@@ -75,8 +75,8 @@ export class HelpUtil {
       descriptions.push(desc.join(' '));
     }
 
-    const paramWidths = params.map(x => util.stripVTControlCharacters(x).length);
-    const descWidths = descriptions.map(x => util.stripVTControlCharacters(x).length);
+    const paramWidths = params.map(item => util.stripVTControlCharacters(item).length);
+    const descWidths = descriptions.map(item => util.stripVTControlCharacters(item).length);
 
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
@@ -95,7 +95,7 @@ export class HelpUtil {
       ),
       '',
       ...helpText
-    ].map(x => x.trimEnd()).join('\n');
+    ].map(line => line.trimEnd()).join('\n');
   }
 
   /**
@@ -126,7 +126,7 @@ export class HelpUtil {
 
     lines.unshift(title ? cliTpl`${{ title }}` : cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`, '');
 
-    return lines.map(x => x.trimEnd()).join('\n');
+    return lines.map(line => line.trimEnd()).join('\n');
   }
 
   /**

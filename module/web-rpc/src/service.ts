@@ -28,16 +28,16 @@ export class WebRpcClientGeneratorService {
 
   async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {
     return ControllerRegistryIndex.getClasses()
-      .filter(x => {
-        const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(x));
+      .filter(cls => {
+        const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(cls));
         return entry && entry.role === 'std';
       })
-      .filter(x => SchemaRegistryIndex.getConfig(x).private !== true)
-      .map(x => {
-        const imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(x));
+      .filter(cls => SchemaRegistryIndex.getConfig(cls).private !== true)
+      .map(config => {
+        const imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(config));
         const base = Runtime.workspaceRelative(RuntimeIndex.manifest.build.typesFolder);
         return {
-          name: x.name,
+          name: config.name,
           import: path.relative(relativeTo, `${base}/node_modules/${imp}`)
         };
       });

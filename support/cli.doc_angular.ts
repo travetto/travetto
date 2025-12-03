@@ -68,12 +68,15 @@ export class DocAngularCommand {
           .replace(/^src="images\//g, `src="/assets/images/${modName}/`)
           .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
           .replaceAll('@', '&#64;')
-          .replaceAll('process.env.NODE_ENV', x => x.replaceAll('.', '\u2024'));
+          .replaceAll('process.env.NODE_ENV', text => text.replaceAll('.', '\u2024'));
 
         if (modName === 'todo-app') {
           html = html
-            .replace(/(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
-              (_, h, toc, text) => `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${h}\n${text}\n</div>\n`);
+            .replace(
+              /(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
+              (_, heading, toc, text) =>
+                `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${heading}\n${text}\n</div>\n`
+            );
         }
 
         await fs.writeFile(page(`app/documentation/gen/${modName}/${modName}.component.html`), html, 'utf8');

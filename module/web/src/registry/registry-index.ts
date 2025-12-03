@@ -101,7 +101,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
         }
       } else {
         // Match by name
-        const toDelete = [...this.#endpointsById.values()].filter(x => x.class.name === evt.previous.name);
+        const toDelete = [...this.#endpointsById.values()].filter(endpoint => endpoint.class.name === evt.previous.name);
         for (const endpoint of toDelete) {
           this.#endpointsById.delete(endpoint.id);
         }

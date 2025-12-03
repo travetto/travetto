@@ -24,7 +24,7 @@ export class CliRunUtil {
    */
   static #buildChoiceDetail(choice: RunChoice): string {
     const detail = [choice.description];
-    const out = detail.filter(x => !!x).join(' ').trim();
+    const out = detail.filter(part => !!part).join(' ').trim();
     return out ? `${'\u00A0'.repeat(4)}${out}` : out;
   }
 
@@ -34,9 +34,9 @@ export class CliRunUtil {
    */
   static #buildChoiceParams(choice: RunChoice): string {
     const out = (choice.args ?? [])
-      .map((x, i) => {
-        const value = choice.inputs[i] !== undefined ? choice.inputs[i] : (x.choices?.join(',') ?? x.default);
-        return `${x.description || x.name}${value !== undefined ? `=${value}` : ''}`;
+      .map((input, i) => {
+        const value = choice.inputs[i] !== undefined ? choice.inputs[i] : (input.choices?.join(',') ?? input.default);
+        return `${input.description || input.name}${value !== undefined ? `=${value}` : ''}`;
       })
       .join(', ');
     return out;
@@ -114,7 +114,7 @@ export class CliRunUtil {
     const data = await this.#startCli('repo:list', ['-f', 'json'], 'collect module list');
     try {
       const result: ModuleGraphItem<string[]>[] = JSON.parse(data.stdout);
-      return result.map(x => ({ name: x.name, children: new Set(x.children), local: !!x.local }));
+      return result.map(item => ({ name: item.name, children: new Set(item.children), local: !!item.local }));
     } catch {
       throw new Error(`Unable to collect module list: ${data.stderr || data.stdout}`);
     }
@@ -129,12 +129,12 @@ export class CliRunUtil {
     let modules: ModuleGraphItem<Set<string>>[];
 
     // Only return `run:* targets
-    choices = choices.filter(x => x.runTarget);
+    choices = choices.filter(choice => choice.runTarget);
 
     const output: RunChoice[] = [];
     for (const choice of choices) {
       choice.inputs = [];
-      const moduleFlag = choice.flags.find(x => x.type === 'module');
+      const moduleFlag = choice.flags.find(flag => flag.type === 'module');
       if (moduleFlag?.required) {
         modules ??= await this.getModules();
         for (const module of modules.filter(mod => mod.local && mod.children.has(choice.module))) {
@@ -167,8 +167,8 @@ export class CliRunUtil {
   static async makeChoice(title: string, choices: RunChoice[]): Promise<RunChoice | undefined>;
   static async makeChoice(title: string, choices: RunChoice[]): Promise<RunChoice | ResolvedRunChoice | undefined> {
     const items = choices
-      .map(x => this.#buildQuickPickItem(x))
-      .filter(x => !!x);
+      .map(item => this.#buildQuickPickItem(item))
+      .filter(item => !!item);
 
     const result = await ParameterSelector.getObjectQuickPickList(title, items);
     let choice: RunChoice | undefined = result?.target;
@@ -189,7 +189,7 @@ export class CliRunUtil {
    * @param choice
    */
   static getLaunchConfig(choice: ResolvedRunChoice): LaunchConfig {
-    const args = choice.inputs.map(x => `${x}`.replace(Workspace.path, '.')).join(', ');
+    const args = choice.inputs.map(input => `${input}`.replace(Workspace.path, '.')).join(', ');
 
     return {
       name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,

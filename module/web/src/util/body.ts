@@ -66,7 +66,7 @@ export class WebBodyUtil {
       toAdd.push(['Content-disposition', `attachment; filename="${value.name}"`]);
     }
 
-    return toAdd.filter((x): x is [string, string] => !!x[1]);
+    return toAdd.filter((pair): pair is [string, string] => !!pair[1]);
   }
 
   /**

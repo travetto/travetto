@@ -25,7 +25,7 @@ export class LogFeature extends BaseFeature {
    */
   async handleTerminalLink({ file, line, cls }: Link): Promise<void> {
     if (cls && !line) {
-      line = (await fs.readFile(file, 'utf8')).split(/\n/).findIndex(x => x.includes(`class ${cls}`));
+      line = (await fs.readFile(file, 'utf8')).split(/\n/).findIndex(fileLine => fileLine.includes(`class ${cls}`));
       if (line >= 0) {
         line += 1;
       }

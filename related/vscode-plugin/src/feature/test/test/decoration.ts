@@ -87,7 +87,7 @@ export class Decorations {
     if (isBatchError(error)) {
       title = error.message;
       const messages = error.details.errors
-        .map(x => typeof x === 'string' ? x : x.message);
+        .map(subError => typeof subError === 'string' ? subError : subError.message);
 
       suffix = `(${title}) ${messages.join(', ')}`;
       if (suffix.length > 120) {
@@ -237,7 +237,7 @@ export class Decorations {
     let error: ErrorHoverAssertion | Assertion | undefined;
     if ('error' in test) {
       const tt = test;
-      error = (tt.assertions || []).find(x => !!x.error) ||
+      error = (tt.assertions || []).find(assertion => !!assertion.error) ||
         (tt.error && { error: tt.error, message: tt.error.message });
     }
     if (error) {

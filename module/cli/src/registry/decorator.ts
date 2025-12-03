@@ -145,7 +145,7 @@ export function CliFlag(config: { full?: string, short?: string, fileExtensions?
       ...(config.short ? [config.short.startsWith('-') ? config.short : `-${config.short}`] : []),
       ...(config.envVars ? config.envVars.map(CliParseUtil.toEnvField) : [])
     ];
-    const specifiers = config.fileExtensions?.length ? ['file', ...config.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : [];
+    const specifiers = config.fileExtensions?.length ? ['file', ...config.fileExtensions.map(ext => `ext:${ext.replace(/[*.]/g, '')}`)] : [];
 
     SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, { aliases, specifiers });
   };

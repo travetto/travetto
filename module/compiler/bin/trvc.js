@@ -19,14 +19,14 @@ const toJson = (/** @type {number} */ depth) => value => process.stdout.write(`$
 
 require('./entry.common.js').load(operations => {
   const [operation, ...all] = process.argv.slice(2);
-  const args = all.filter(x => !x.startsWith('-'));
+  const args = all.filter(arg => !arg.startsWith('-'));
 
   switch (operation) {
     case undefined:
     case 'help': return console.log(help);
     case 'info': return operations.info().then(toJson(2));
     case 'event': return operations.events(args[0], toJson(0));
-    case 'manifest': return operations.manifest(args[0], all.some(x => x === '--prod'));
+    case 'manifest': return operations.manifest(args[0], all.some(arg => arg === '--prod'));
     case 'exec': return operations.exec(args[0], all.slice(1));
     case 'build': return operations.build();
     case 'clean': return operations.clean();

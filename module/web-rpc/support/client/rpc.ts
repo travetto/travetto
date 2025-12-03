@@ -6,10 +6,10 @@ type PromiseFn = (...args: any) => Promise<unknown>;
 type PromiseRes<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isBlobMap = (x: any): x is Record<string, Blob> => x && typeof x === 'object' && x[Object.keys(x)[0]] instanceof Blob;
+const isBlobMap = (value: any): value is Record<string, Blob> => value && typeof value === 'object' && value[Object.keys(value)[0]] instanceof Blob;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isBlobLike = (x: any): x is Record<string, Blob> | Blob => x instanceof Blob || isBlobMap(x);
+const isBlobLike = (value: any): value is Record<string, Blob> | Blob => value instanceof Blob || isBlobMap(value);
 
 const extendHeaders = (base: RequestInit['headers'], toAdd: Record<string, string>): Headers => {
   const headers = new Headers(base);
@@ -99,7 +99,7 @@ export function getBody(inputs: unknown[], isBodyRequest: boolean): { body: Form
     };
   }
 
-  const plainInputs = inputs.map(x => isBlobLike(x) ? null : x);
+  const plainInputs = inputs.map(value => isBlobLike(value) ? null : value);
   const form = new FormData();
 
   for (const inp of inputs.filter(isBlobLike)) {

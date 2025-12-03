@@ -45,8 +45,8 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       const fieldName = field.name.toString();
       const { long: longAliases, short: shortAliases, raw: rawAliases, env: envAliases } = CliParseUtil.parseAliases(field.aliases ?? []);
 
-      let short = stripDashes(shortAliases?.[0]) ?? rawAliases.find(x => x.length <= 2);
-      const long = stripDashes(longAliases?.[0]) ?? rawAliases.find(x => x.length >= 3) ?? toFlagName(fieldName);
+      let short = stripDashes(shortAliases?.[0]) ?? rawAliases.find(alias => alias.length <= 2);
+      const long = stripDashes(longAliases?.[0]) ?? rawAliases.find(alias => alias.length >= 3) ?? toFlagName(fieldName);
       const aliases: string[] = field.aliases = [...envAliases];
 
       if (short === undefined) {

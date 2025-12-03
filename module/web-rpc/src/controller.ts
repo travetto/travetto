@@ -49,7 +49,7 @@ export class WebRpcController {
     } else if (Array.isArray(body)) { // Params passed via body
       params = body;
 
-      const bodyParamIdx = endpoint.parameters.findIndex((x) => x.location === 'body');
+      const bodyParamIdx = endpoint.parameters.findIndex((config) => config.location === 'body');
       if (bodyParamIdx >= 0) { // Re-assign body
         request.body = params[bodyParamIdx];
       }
@@ -59,7 +59,7 @@ export class WebRpcController {
       params = [];
     }
 
-    const final = endpoint.parameters.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
+    const final = endpoint.parameters.map((config, i) => (config.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
     WebCommonUtil.setRequestParams(request, final);
 
     // Dispatch

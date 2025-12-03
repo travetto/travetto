@@ -78,7 +78,7 @@ export class WebHeaderUtil {
   static parseHeader(input: string): WebParsedHeader[] {
     const value = input.trim();
     if (!input) { return []; }
-    return value.split(SPLIT_COMMA).map(x => this.parseHeaderSegment(x));
+    return value.split(SPLIT_COMMA).map(part => this.parseHeaderSegment(part));
   }
 
   /**
@@ -104,7 +104,9 @@ export class WebHeaderUtil {
     if (header === '*' || header === '*/*') {
       return values[0];
     }
-    const sorted = this.parseHeader(header.toLowerCase()).filter(x => (x.q ?? 1) > 0).toSorted((a, b) => (b.q ?? 1) - (a.q ?? 1));
+    const sorted = this.parseHeader(header.toLowerCase())
+      .filter(item => (item.q ?? 1) > 0).toSorted((a, b) => (b.q ?? 1) - (a.q ?? 1));
+
     const set = new Set(values);
     for (const { value } of sorted) {
       const vk: K = castKey(value);
@@ -127,7 +129,7 @@ export class WebHeaderUtil {
     const { parameters } = this.parseHeaderSegment(headers.get('Range'));
     if ('bytes' in parameters) {
       const [start, end] = parameters.bytes.split('-')
-        .map(x => x ? parseInt(x, 10) : undefined);
+        .map(value => value ? parseInt(value, 10) : undefined);
       if (start !== undefined) {
         return { start, end: end ?? (start + chunkSize) };
       }

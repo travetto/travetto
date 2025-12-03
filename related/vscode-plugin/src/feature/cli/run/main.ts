@@ -25,10 +25,10 @@ export class CliRunFeature extends BaseFeature {
   async getValidRecent(count: number): Promise<RunChoice[]> {
     const choices = await CliRunUtil.getChoices();
 
-    return this.#storage.getRecentAndFilterState(count * 2, x =>
-      !choices.some(a => a.name === x.name)
+    return this.#storage.getRecentAndFilterState(count * 2, choice =>
+      !choices.some(a => a.name === choice.name)
     )
-      .map(x => x.data)
+      .map(choice => choice.data)
       .slice(0, count);
   }
 

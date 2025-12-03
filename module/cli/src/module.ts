@@ -47,8 +47,8 @@ export class CliModuleUtil {
   static async findModules(mode: 'all' | 'changed' | 'workspace', fromHash?: string, toHash?: string): Promise<IndexedModule[]> {
     return (mode === 'changed' ?
       await this.findChangedModulesRecursive(fromHash, toHash, true) :
-      [...RuntimeIndex.getModuleList(mode)].map(x => RuntimeIndex.getModule(x)!)
-    ).filter(x => x.sourcePath !== Runtime.workspace.path);
+      [...RuntimeIndex.getModuleList(mode)].map(name => RuntimeIndex.getModule(name)!)
+    ).filter(mod => mod.sourcePath !== Runtime.workspace.path);
   }
 
   /**
@@ -71,7 +71,7 @@ export class CliModuleUtil {
     const output: Record<string, string[]> = {};
 
     while (childMap.size > 0) {
-      for (const item of [...childMap.values()].filter(x => x.active.size === 0)) {
+      for (const item of [...childMap.values()].filter(entry => entry.active.size === 0)) {
         output[item.name] = [...item.children];
         for (const parent of item.parents ?? []) {
           const par = childMap.get(parent)!;
@@ -106,7 +106,7 @@ export class CliModuleUtil {
     if (config.since) {
       try {
         const files = await CliScmUtil.findChangedFiles(config.since, 'HEAD');
-        return files.filter(x => !x.endsWith('package.json') && !x.endsWith('package-lock.json'));
+        return files.filter(file => !file.endsWith('package.json') && !file.endsWith('package-lock.json'));
       } catch (error) {
         if (config.logError && error instanceof Error) {
           console.error(error.message);
@@ -115,7 +115,7 @@ export class CliModuleUtil {
       }
     } else {
       const modules = await this.findModules(config.changed ? 'changed' : 'workspace', undefined, 'HEAD');
-      return modules.map(x => x.sourcePath);
+      return modules.map(mod => mod.sourcePath);
     }
   }
 }

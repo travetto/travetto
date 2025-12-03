@@ -80,13 +80,13 @@ export class ActionStorage<T> {
    * @param size
    * @param remove
    */
-  getRecentAndFilterState(size: number, remove: (x: T) => boolean): TimeEntry<T>[] {
+  getRecentAndFilterState(size: number, remove: (item: T) => boolean): TimeEntry<T>[] {
     return this.getRecent(size)
-      .filter(x => {
-        if (remove(x.data)) {
-          this.set(x.key!);
+      .filter(item => {
+        if (remove(item.data)) {
+          this.set(item.key!);
         }
-        return x;
+        return item;
       });
   }
 }

@@ -72,7 +72,7 @@ export class AuthService {
     }
 
     if (lastError) {
-      console.warn('Failed to authenticate', { error: lastError, sources: authenticators.map(x => x.toString()) });
+      console.warn('Failed to authenticate', { error: lastError, sources: authenticators.map(symbol => symbol.toString()) });
     }
 
     // Take the last error and return

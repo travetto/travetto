@@ -24,7 +24,7 @@ export class CompilerUtil {
   static rewritePackageJSON(manifest: ManifestRoot, text: string): string {
     const pkg: Package = JSON.parse(text);
     if (pkg.files) {
-      pkg.files = pkg.files.map(x => ManifestModuleUtil.withOutputExtension(x));
+      pkg.files = pkg.files.map(file => ManifestModuleUtil.withOutputExtension(file));
     }
     if (pkg.main) {
       pkg.main = ManifestModuleUtil.withOutputExtension(pkg.main);

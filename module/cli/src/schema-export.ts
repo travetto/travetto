@@ -37,18 +37,18 @@ export class CliSchemaExportUtil {
   /**
     * Get the base type for a CLI command input
     */
-  static baseInputType(x: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
-    switch (x.type) {
+  static baseInputType(config: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
+    switch (config.type) {
       case Date: return { type: 'date' };
       case Boolean: return { type: 'boolean' };
       case Number: return { type: 'number' };
       case RegExp: return { type: 'regex' };
       case String: {
         switch (true) {
-          case x.specifiers?.includes('module'): return { type: 'module' };
-          case x.specifiers?.includes('file'): return {
+          case config.specifiers?.includes('module'): return { type: 'module' };
+          case config.specifiers?.includes('file'): return {
             type: 'file',
-            fileExtensions: x.specifiers?.map(specifier => specifier.split('ext:')[1]).filter(specifier => !!specifier)
+            fileExtensions: config.specifiers?.map(specifier => specifier.split('ext:')[1]).filter(specifier => !!specifier)
           };
         }
       }
@@ -59,17 +59,17 @@ export class CliSchemaExportUtil {
   /**
    * Process input configuration for CLI commands
    */
-  static processInput(x: SchemaInputConfig): CliCommandInput {
+  static processInput(config: SchemaInputConfig): CliCommandInput {
     return {
-      ...this.baseInputType(x),
-      ...(('name' in x && typeof x.name === 'string') ? { name: x.name } : { name: '' }),
-      description: x.description,
-      array: x.array,
-      required: x.required?.active !== false,
-      choices: x.enum?.values,
-      default: Array.isArray(x.default) ? x.default.slice(0) : x.default,
-      flagNames: (x.aliases ?? []).slice(0).filter(value => !value.startsWith('env.')),
-      envVars: (x.aliases ?? []).slice(0).filter(value => value.startsWith('env.')).map(value => value.replace('env.', ''))
+      ...this.baseInputType(config),
+      ...(('name' in config && typeof config.name === 'string') ? { name: config.name } : { name: '' }),
+      description: config.description,
+      array: config.array,
+      required: config.required?.active !== false,
+      choices: config.enum?.values,
+      default: Array.isArray(config.default) ? config.default.slice(0) : config.default,
+      flagNames: (config.aliases ?? []).slice(0).filter(value => !value.startsWith('env.')),
+      envVars: (config.aliases ?? []).slice(0).filter(value => value.startsWith('env.')).map(value => value.replace('env.', ''))
     };
   }
 

@@ -76,7 +76,7 @@ export class ParameterSelector {
   static buildQuickPickList(input: InputWithMeta, choices: unknown[]): vscode.QuickPick<vscode.QuickPickItem> {
     const quickPick = this.buildQuick(input, vscode.window.createQuickPick);
     quickPick.title = `Select ${input.param.description || input.param.name}`;
-    quickPick.items = choices.map(x => ({ label: `${x}` }));
+    quickPick.items = choices.map(choice => ({ label: `${choice}` }));
     quickPick.canSelectMany = false;
 
     if (quickPick.value !== undefined && input.param.type === 'boolean') {
@@ -84,7 +84,7 @@ export class ParameterSelector {
     }
 
     if (quickPick.value !== undefined) {
-      quickPick.activeItems = quickPick.items.filter(x => x.label === quickPick.value);
+      quickPick.activeItems = quickPick.items.filter(item => item.label === quickPick.value);
     }
 
     quickPick.value = undefined!;
@@ -111,7 +111,7 @@ export class ParameterSelector {
    * @param input
    */
   static async getInput<T extends Complex>(input: T): Promise<string> {
-    return this.getInputComplex(input, x => x.value);
+    return this.getInputComplex(input, item => item.value);
   }
 
   /**
@@ -131,7 +131,7 @@ export class ParameterSelector {
     try {
       return await new Promise<string | undefined>((resolve) => {
         const quickPick = vscode.window.createQuickPick<{ label: string, description: string }>();
-        quickPick.placeholder = exts.length ? `${placeholder} (${exts.map(x => `.${x}`).join(', ')})` : placeholder;
+        quickPick.placeholder = exts.length ? `${placeholder} (${exts.map(ext => `.${ext}`).join(', ')})` : placeholder;
 
         disposables.push(
           quickPick.onDidChangeValue(async value => {
@@ -194,7 +194,7 @@ export class ParameterSelector {
   static getQuickPickList(input: InputWithMeta, choices: unknown[]): Promise<string> {
     return this.getInputComplex(
       this.buildQuickPickList(input, choices),
-      x => x.value ?? x.selectedItems[0].label);
+      item => item.value ?? item.selectedItems[0].label);
   }
 
   /**
@@ -219,7 +219,7 @@ export class ParameterSelector {
   static async getParameter(input: InputWithMeta): Promise<string | undefined> {
     switch (input.param.type) {
       case 'number': return this.getQuickInput(input);
-      case 'boolean': return this.getQuickPickList(input, ['yes', 'no']).then(x => `${x === 'yes'}`);
+      case 'boolean': return this.getQuickPickList(input, ['yes', 'no']).then(choice => `${choice === 'yes'}`);
       case 'file': return this.getFile(input);
       case 'string':
       default: {

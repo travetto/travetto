@@ -20,7 +20,7 @@ export class CliSchemaCommand implements CliCommandShape {
       return;
     }
     const resolved = await CliCommandRegistryIndex.load(names);
-    const invalid = names.find(x => !resolved.find(result => result.command === x));
+    const invalid = names.find(name => !resolved.find(result => result.command === name));
 
     if (invalid) {
       return {
@@ -38,7 +38,7 @@ export class CliSchemaCommand implements CliCommandShape {
     const resolved = await CliCommandRegistryIndex.load(names);
 
     const output = resolved
-      .map(x => CliSchemaExportUtil.exportSchema(x.config.cls));
+      .map(result => CliSchemaExportUtil.exportSchema(result.config.cls));
 
     await CliUtil.writeAndEnsureComplete(output);
   }

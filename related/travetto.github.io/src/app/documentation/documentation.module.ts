@@ -11,5 +11,5 @@ export const ROUTES: Route[] = [
     path: 'overview',
     loadComponent: () => import('./gen/overview/overview.component').then(mod => mod.OverviewComponent)
   },
-  ...PAGES.map(x => [x, ...(x.subs ?? [])]).flat().filter(x => !!x.loadComponent)
+  ...PAGES.map(page => [page, ...(page.subs ?? [])]).flat().filter(page => !!page.loadComponent)
 ];

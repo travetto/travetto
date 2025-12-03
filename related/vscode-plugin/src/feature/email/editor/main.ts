@@ -155,8 +155,8 @@ export class EmailCompilerFeature extends BaseFeature {
    * On initial activation
    */
   activate(context: vscode.ExtensionContext): void {
-    vscode.workspace.onDidSaveTextDocument(x => this.savedFile(x), null, context.subscriptions);
-    vscode.window.onDidChangeActiveTextEditor(x => this.activeEditorChanged(x), null, context.subscriptions);
+    vscode.workspace.onDidSaveTextDocument(document => this.savedFile(document), null, context.subscriptions);
+    vscode.window.onDidChangeActiveTextEditor(editor => this.activeEditorChanged(editor), null, context.subscriptions);
 
     Workspace.onCompilerState(state => state === 'watch-start' ?
       this.activeEditorChanged(vscode.window.activeTextEditor) :

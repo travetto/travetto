@@ -41,7 +41,7 @@ export abstract class BaseWebRouter implements WebRouter {
 
     this.#interceptors = await DependencyRegistryIndex.getInstances(toConcrete<WebInterceptor>());
     this.#interceptors = EndpointUtil.orderInterceptors(this.#interceptors);
-    const names = this.#interceptors.map(x => x.constructor.name);
+    const names = this.#interceptors.map(interceptor => interceptor.constructor.name);
     console.debug('Sorting interceptors', { count: names.length, names });
 
     // Register all active

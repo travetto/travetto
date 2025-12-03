@@ -53,7 +53,9 @@ export class Logger implements LogConfig, LogShape {
   /** Log event with filtering by level */
   render(event: CompilerLogEvent): void {
     if (!this.valid(event)) { return; }
-    const params = [event.message, ...event.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(this.root ?? this.parent?.root!, '.') : x);
+    const params = [event.message, ...event.args ?? []]
+      .map(arg => typeof arg === 'string' ? arg.replaceAll(this.root ?? this.parent?.root!, '.') : arg);
+
     if (event.scope ?? this.scope) {
       params.unshift(`[${(event.scope ?? this.scope!).padEnd(SCOPE_MAX, ' ')}]`);
     }

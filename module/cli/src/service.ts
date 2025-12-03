@@ -9,7 +9,7 @@ const ports = (value: number | `${number}:${number}`): [number, number] =>
   typeof value === 'number' ?
     [value, value] :
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    value.split(':').map(x => parseInt(x, 10)) as [number, number];
+    value.split(':').map(number => parseInt(number, 10)) as [number, number];
 
 type BodyCheck = (body: string) => boolean;
 

@@ -112,11 +112,11 @@ export class CliCommandRegistryIndex implements RegistryIndex {
   async load(names?: string[]): Promise<CliCommandLoadResult[]> {
     const keys = names ?? [...this.#commandMapping.keys()];
 
-    const list = await Promise.all(keys.map(async x => {
-      const instance = await this.#getInstance(x);
+    const list = await Promise.all(keys.map(async key => {
+      const instance = await this.#getInstance(key);
       const config = this.store.get(getClass(instance)).get();
       const schema = SchemaRegistryIndex.getConfig(getClass(instance));
-      return { command: x, instance, config, schema };
+      return { command: key, instance, config, schema };
     }));
 
     return list.sort((a, b) => a.command.localeCompare(b.command));

@@ -27,7 +27,7 @@ export class CompilerWatcher {
     this.#state = state;
     this.#root = state.manifest.workspace.path;
     this.#queue = new AsyncQueue(signal);
-    signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(x => x()));
+    signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(fn => fn()));
   }
 
   async #getWatchIgnores(): Promise<string[]> {
@@ -53,7 +53,7 @@ export class CompilerWatcher {
         ignores.add(item);
       }
     }
-    return [...ignores].toSorted().map(x => x.endsWith('/') ? x : `${x}/`);
+    return [...ignores].toSorted().map(ignore => ignore.endsWith('/') ? ignore : `${ignore}/`);
   }
 
   #toCandidateEvent(action: CompilerWatchEvent['action'], file: string): CompilerWatchEventCandidate {
@@ -95,7 +95,7 @@ export class CompilerWatcher {
       }
 
       const mod = event.entry.module;
-      const moduleSet = new Set(this.#state.manifestIndex.getDependentModules(mod.name, 'parents').map(x => x.name));
+      const moduleSet = new Set(this.#state.manifestIndex.getDependentModules(mod.name, 'parents').map(indexedMod => indexedMod.name));
       moduleSet.add(this.#state.manifest.workspace.name);
       for (const moduleName of moduleSet) {
         if (!eventsByMod.has(moduleName)) {
@@ -120,7 +120,7 @@ export class CompilerWatcher {
     const roleType = ManifestModuleUtil.getFileRole(relativeFile)!;
 
     const manifestModuleFiles = manifest.modules[moduleName].files[folderKey] ??= [];
-    const idx = manifestModuleFiles.findIndex(x => x[0] === relativeFile);
+    const idx = manifestModuleFiles.findIndex(indexedFile => indexedFile[0] === relativeFile);
     const wrappedIdx = idx < 0 ? manifestModuleFiles.length : idx;
 
     switch (action) {
@@ -149,7 +149,7 @@ export class CompilerWatcher {
   async #listenWorkspace(): Promise<void> {
     const lib = await import('@parcel/watcher');
     const ignore = await this.#getWatchIgnores();
-    const packageFiles = new Set(['package-lock.json', 'yarn.lock', 'package.json'].map(x => path.resolve(this.#root, x)));
+    const packageFiles = new Set(['package-lock.json', 'yarn.lock', 'package.json'].map(file => path.resolve(this.#root, file)));
 
     log.debug('Ignore Globs', ignore);
     log.debug('Watching', this.#root);
@@ -169,8 +169,8 @@ export class CompilerWatcher {
         }
 
         const items = events
-          .map(x => this.#toCandidateEvent(x.type, path.toPosix(x.path)))
-          .filter(x => this.#isValidEvent(x));
+          .map(event => this.#toCandidateEvent(event.type, path.toPosix(event.path)))
+          .filter(event => this.#isValidEvent(event));
 
         try {
           await this.#reconcileManifestUpdates(items);
@@ -198,9 +198,9 @@ export class CompilerWatcher {
     const toolRootFolder = path.dirname(path.resolve(this.#root, build.compilerFolder));
     const toolFolders = new Set([
       toolRootFolder, build.compilerFolder, build.typesFolder, build.outputFolder
-    ].map(x => path.resolve(this.#root, x)));
+    ].map(folder => path.resolve(this.#root, folder)));
 
-    log.debug('Tooling Folders', [...toolFolders].map(x => x.replace(`${this.#root}/`, '')));
+    log.debug('Tooling Folders', [...toolFolders].map(folder => folder.replace(`${this.#root}/`, '')));
 
     await this.#cleanup.tool?.();
 

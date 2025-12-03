@@ -64,7 +64,9 @@ export class WebUploadUtil {
     const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
 
     if (MULTIPART.has(contentType.value)) {
-      const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
+      const fileMaxes = Object.values(config.uploads ?? {})
+        .map(uploadConfig => uploadConfig.maxSize)
+        .filter(uploadConfig => uploadConfig !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
       const queue = new AsyncQueue<UploadItem>();
 

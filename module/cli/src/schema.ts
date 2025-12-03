@@ -57,7 +57,7 @@ export class CliCommandSchemaUtil {
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
     const cls = getClass(cmd);
-    const paramNames = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(x => x.name!);
+    const paramNames = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(config => config.name!);
 
     const validators = [
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),
@@ -72,14 +72,14 @@ export class CliCommandSchemaUtil {
 
     const SOURCES = ['flag', 'arg', 'custom'] as const;
 
-    const results = validators.map((x, i) => x().catch(error => {
+    const results = validators.map((validator, i) => validator().catch(error => {
       if (!(error instanceof CliValidationResultError) && !(error instanceof ValidationResultError)) {
         throw error;
       }
       return error.details.errors.map(value => ({ ...value, source: getSource(value.source, SOURCES[i]) }));
     }));
 
-    const errors = (await Promise.all(results)).flatMap(x => (x ?? []));
+    const errors = (await Promise.all(results)).flatMap(result => (result ?? []));
     if (errors.length) {
       throw new CliValidationResultError(cmd, errors);
     }

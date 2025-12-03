@@ -17,10 +17,10 @@ export class CliServiceCommand implements CliCommandShape {
         folder: folder => folder === 'support',
         file: file => /support\/service[.]/.test(file.sourceFile)
       })
-        .map(x => Runtime.importFrom<{ service: ServiceDescriptor }>(x.import).then(value => value.service))
+        .map(file => Runtime.importFrom<{ service: ServiceDescriptor }>(file.import).then(value => value.service))
     ))
-      .filter(x => !!x)
-      .filter(x => services?.length ? services.includes(x.name) : true)
+      .filter(file => !!file)
+      .filter(file => services?.length ? services.includes(file.name) : true)
       .toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -37,14 +37,14 @@ export class CliServiceCommand implements CliCommandShape {
     return [
       cliTpl`${{ title: 'Available Services' }}`,
       '-'.repeat(20),
-      ...all.map(x => cliTpl` * ${{ identifier: x.name }}@${{ type: x.version }}`)
+      ...all.map(service => cliTpl` * ${{ identifier: service.name }}@${{ type: service.version }}`)
     ];
   }
 
   async main(action: ServiceAction, services: string[] = []): Promise<void> {
     const all = await this.#getServices(services);
-    const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
-    const maxVersion = Math.max(...all.map(x => `${x.version}`.length), 'Version'.length) + 3;
+    const maxName = Math.max(...all.map(service => service.name.length), 'Service'.length) + 3;
+    const maxVersion = Math.max(...all.map(service => `${service.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;
     const queue = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
 

@@ -26,7 +26,8 @@ export class Compiler {
     const [dirty, watch] = process.argv.slice(2);
     const state = await CompilerState.get(new ManifestIndex());
     log.debug('Running compiler with dirty file', dirty);
-    const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] : (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
+    const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] :
+      (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(line => !!line);
     log.debug('Running compiler with dirty file', dirtyFiles);
     await new Compiler(state, dirtyFiles, watch === 'true').run();
   }
@@ -92,7 +93,7 @@ export class Compiler {
    */
   logStatistics(metrics: CompileEmitEvent[]): void {
     // Simple metrics
-    const durations = metrics.map(x => x.duration);
+    const durations = metrics.map(event => event.duration);
     const total = durations.reduce((a, b) => a + b, 0);
     const avg = total / durations.length;
     const sorted = [...durations].sort((a, b) => a - b);
@@ -102,7 +103,7 @@ export class Compiler {
     const slowest = [...metrics]
       .sort((a, b) => b.duration - a.duration)
       .slice(0, 5)
-      .map(x => ({ file: x.file, duration: x.duration }));
+      .map(event => ({ file: event.file, duration: event.duration }));
 
     log.debug('Compilation Statistics', {
       files: metrics.length,

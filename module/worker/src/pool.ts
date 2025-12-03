@@ -58,13 +58,13 @@ export class WorkPool {
           pendingAcquires -= 1;
         }
       },
-      async destroy(x) {
+      async destroy(worker) {
         if (trace) {
-          console.debug('Destroying', { pid: process.pid, worker: x.id });
+          console.debug('Destroying', { pid: process.pid, worker: worker.id });
         }
-        return x.destroy?.();
+        return worker.destroy?.();
       },
-      validate: async (x: Worker<I, O>) => x.active
+      validate: async (worker: Worker<I, O>) => worker.active
     }, {
       evictionRunIntervalMillis: 5000,
       ...(options ?? {}),

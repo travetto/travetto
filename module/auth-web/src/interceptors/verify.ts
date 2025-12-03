@@ -54,7 +54,7 @@ export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig
 
   finalizeConfig({ config }: WebInterceptorContext<WebAuthVerifyConfig>): WebAuthVerifyConfig {
     config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [],
-      x => x.split('|'),
+      item => item.split('|'),
       matchPermissionSet,
     );
     return config;

@@ -38,7 +38,7 @@ export class CliScmUtil {
     const result = await ExecUtil.getResult(spawn('git', ['log', '--pretty=oneline'], { cwd: Runtime.workspace.path }));
     return result.stdout
       .split(/\n/)
-      .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
+      .find(line => /Publish /.test(line))?.split(/\s+/)?.[0];
   }
 
   /**
@@ -71,10 +71,10 @@ export class CliScmUtil {
   static async findChangedModules(fromHash: string, toHash?: string): Promise<IndexedModule[]> {
     const files = await this.findChangedFiles(fromHash, toHash);
     const mods = files
-      .map(x => RuntimeIndex.getFromSource(x))
-      .filter(x => !!x)
-      .map(x => RuntimeIndex.getModule(x.module))
-      .filter(x => !!x);
+      .map(file => RuntimeIndex.getFromSource(file))
+      .filter(file => !!file)
+      .map(file => RuntimeIndex.getModule(file.module))
+      .filter(mod => !!mod);
 
     return [...new Set(mods)]
       .toSorted((a, b) => a.name.localeCompare(b.name));

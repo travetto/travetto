@@ -16,7 +16,7 @@ const CONFIG_PRE = '+=';
 const SPACE = new Set([32, 7, 13, 10]);
 
 export const ENV_PREFIX = 'env.';
-export const isBoolFlag = (x?: SchemaInputConfig): boolean => x?.type === Boolean && !x.array;
+export const isBoolFlag = (value?: SchemaInputConfig): boolean => value?.type === Boolean && !value.array;
 
 export type AliasesParseResult = Record<'long' | 'short' | 'raw' | 'env', string[]>;
 
@@ -69,13 +69,13 @@ export class CliParseUtil {
    */
   static getSpecifiedModule(schema: SchemaClassConfig, args: string[]): string | undefined {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
-    const input = Object.values(schema.fields).find(x => x.specifiers?.includes('module'));
-    const ENV_KEY = input?.aliases?.filter(x => x.startsWith(ENV_PREFIX)).map(x => x.replace(ENV_PREFIX, ''))[0] ?? '';
+    const input = Object.values(schema.fields).find(config => config.specifiers?.includes('module'));
+    const ENV_KEY = input?.aliases?.filter(alias => alias.startsWith(ENV_PREFIX)).map(alias => alias.replace(ENV_PREFIX, ''))[0] ?? '';
     const flags = new Set(input?.aliases ?? []);
     const check = (key?: string, value?: string): string | undefined => flags.has(key!) ? value : undefined;
     return args.reduce(
-      (name, x, i, arr) =>
-        (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? name,
+      (name, value, i, arr) =>
+        (i < SEP ? check(arr[i - 1], value) ?? check(...value.split('=')) : undefined) ?? name,
       process.env[ENV_KEY]
     );
   }
@@ -122,7 +122,7 @@ export class CliParseUtil {
     const max = out.includes(RAW_SEP) ? out.indexOf(RAW_SEP) : out.length;
     const valid = out.slice(0, max);
     const cmd = valid.length > 0 && !valid[0].startsWith('-') ? valid[0] : undefined;
-    const helpIdx = valid.findIndex(x => HELP_FLAG.test(x));
+    const helpIdx = valid.findIndex(flag => HELP_FLAG.test(flag));
     const args = out.slice(cmd ? 1 : 0);
     const result = { cmd, args, help: helpIdx >= 0 };
     return result;
@@ -134,8 +134,8 @@ export class CliParseUtil {
   static async expandArgs(schema: SchemaClassConfig, args: string[]): Promise<string[]> {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
     const mod = this.getSpecifiedModule(schema, args);
-    return (await Promise.all(args.map((x, i) =>
-      x.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(x, mod) : x))).flat();
+    return (await Promise.all(args.map((arg, i) =>
+      arg.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(arg, mod) : arg))).flat();
   }
 
   /**
@@ -150,7 +150,7 @@ export class CliParseUtil {
 
     // Load env vars to front
     for (const field of Object.values(schema.fields)) {
-      for (const envName of (field.aliases ?? []).filter(x => x.startsWith(ENV_PREFIX))) {
+      for (const envName of (field.aliases ?? []).filter(alias => alias.startsWith(ENV_PREFIX))) {
         const simple = envName.replace(ENV_PREFIX, '');
         if (simple in process.env) {
           const value: string = process.env[simple]!;
@@ -169,7 +169,7 @@ export class CliParseUtil {
       const input = inputs[i];
 
       if (input === RAW_SEP) { // Raw separator
-        out.push(...inputs.slice(i + 1).map((x, idx) => ({ type: 'unknown', input: x, index: argIdx + idx }) as const));
+        out.push(...inputs.slice(i + 1).map((arg, idx) => ({ type: 'unknown', input: arg, index: argIdx + idx }) as const));
         break;
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
         const [key, ...values] = input.split('=');
@@ -211,8 +211,8 @@ export class CliParseUtil {
     return {
       inputs,
       all: out,
-      unknown: out.filter(x => x.type === 'unknown').map(x => x.input),
-      flags: out.filter(x => x.type === 'flag')
+      unknown: out.filter(input => input.type === 'unknown').map(input => input.input),
+      flags: out.filter(input => input.type === 'flag')
     };
   }
 

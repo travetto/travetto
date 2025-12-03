@@ -38,7 +38,7 @@ export class WebCommonUtil {
   }
 
   static #buildEdgeMap<T, U extends OrderedState<T>>(items: List<U>): Map<T, Set<T>> {
-    const edgeMap = new Map(items.map(x => [x.key, new Set(x.after ?? [])]));
+    const edgeMap = new Map(items.map(item => [item.key, new Set(item.after ?? [])]));
 
     // Build out edge map
     for (const input of items) {
@@ -94,7 +94,7 @@ export class WebCommonUtil {
       }
     }
 
-    const inputMap = new Map(items.map(x => [x.key, x]));
+    const inputMap = new Map(items.map(item => [item.key, item]));
     return keys.map(key => inputMap.get(key)!);
   }
 
@@ -147,7 +147,7 @@ export class WebCommonUtil {
     if (typeof input === 'number') {
       return input;
     }
-    const [, num, unit] = input.toLowerCase().split(/(\d+)/);
-    return parseInt(num, 10) * (UNIT_MAPPING[unit] ?? 1);
+    const [, value, unit] = input.toLowerCase().split(/(\d+)/);
+    return parseInt(value, 10) * (UNIT_MAPPING[unit] ?? 1);
   }
 }

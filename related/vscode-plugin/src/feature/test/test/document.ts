@@ -157,8 +157,8 @@ export class DocumentResultsManager {
       const state = this.#results.suite[key];
       Object.assign(state, result);
 
-      Object.keys(state.styles).forEach(x => {
-        this.setStyle(state.styles[x], x === result.status ? [state.decoration!] : []);
+      Object.keys(state.styles).forEach(style => {
+        this.setStyle(state.styles[style], style === result.status ? [state.decoration!] : []);
       });
     } else if (isTestResult(level, result)) {
       const state = this.#results.test[key];
@@ -194,10 +194,10 @@ export class DocumentResultsManager {
     };
 
     if (existing) {
-      Object.values(existing.styles).forEach(x => x.dispose());
+      Object.values(existing.styles).forEach(style => style.dispose());
       if (isTestState(level, existing)) {
         existing.logStyle.dispose();
-        Object.values(existing.assertStyles).forEach(x => x.dispose());
+        Object.values(existing.assertStyles).forEach(style => style.dispose());
       }
     }
     if (isTestState(level, base)) {
@@ -229,7 +229,7 @@ export class DocumentResultsManager {
       status: test.status === 'skipped' ? 'unknown' : test.status,
       decoration: Decorations.buildTest(test),
       logDecorations: test.output
-        .filter(x => Workspace.resolveImport(`${x.module}/${x.modulePath}`) === this.#document.fileName)
+        .filter(log => Workspace.resolveImport(`${log.module}/${log.modulePath}`) === this.#document.fileName)
         .map(log => Decorations.buildTestLog(log)),
       src: test
     });
@@ -267,7 +267,7 @@ export class DocumentResultsManager {
       switch (event.type) {
         case 'suite': {
           this.reset('suite', event.suite.classId);
-          const tests = Object.values(this.#results.test).filter(x => x.src.classId === event.suite.classId);
+          const tests = Object.values(this.#results.test).filter(test => test.src.classId === event.suite.classId);
           for (const test of tests) {
             this.reset('test', `${test.src.classId}#${test.src.methodName}`);
           }
