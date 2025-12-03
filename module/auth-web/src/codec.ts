@@ -62,8 +62,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   async create(value: Principal, keyId: string = 'default'): Promise<string> {
-    const keyRec = this.config.keyMap[keyId];
-    if (!keyRec) {
+    const entry = this.config.keyMap[keyId];
+    if (!entry) {
       throw new AppError('Requested unknown key for signing');
     }
     const jwt = create({}, '-')
@@ -73,8 +73,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
       .setIssuer(value.issuer!)
       .setJti(value.sessionId!)
       .setSubject(value.id)
-      .setHeader('kid', keyRec.id)
-      .setSigningKey(keyRec.key)
+      .setHeader('kid', entry.id)
+      .setSigningKey(entry.key)
       .setSigningAlgorithm(this.#algorithm);
     return jwt.toString();
   }

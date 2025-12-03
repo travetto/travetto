@@ -209,11 +209,11 @@ export class ManifestIndex {
     const active = new Set<string>(mode === 'workspace' ? this.getWorkspaceModules().map(item => item.name) : allMods);
 
     for (const expr of exprList.split(/,/g)) {
-      const [, neg, mod] = expr.trim().match(/(-|[+])?([^+\- ]{1,150})$/) ?? [];
+      const [, negative, mod] = expr.trim().match(/(-|[+])?([^+\- ]{1,150})$/) ?? [];
       if (mod) {
         const pattern = new RegExp(`^${mod.replace(/[*]/g, '.*')}$`);
         for (const moduleName of allMods.filter(item => pattern.test(item))) {
-          active[neg ? 'delete' : 'add'](moduleName);
+          active[negative ? 'delete' : 'add'](moduleName);
         }
       }
     }

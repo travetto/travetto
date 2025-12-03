@@ -35,20 +35,20 @@ export class MailUtil {
     html = html.replace(/data:(image\/[^;]{1,50});base64,([^"']{1,10000000})/g, (__, contentType, content) => {
       // Ensure same data uris map to a single cid
       if (!contentMap.has(content)) {
-        const cid = `image-${idx += 1}`;
+        const contentId = `image-${idx += 1}`;
         const ext = contentType.split('/')[1];
         attachments.push({
-          cid,
-          filename: `${cid}.${ext}`,
+          cid: contentId,
+          filename: `${contentId}.${ext}`,
           headers: {
-            'X-Attachment-Id': `${cid}`
+            'X-Attachment-Id': `${contentId}`
           },
           content: Buffer.from(content, 'base64'),
           contentDisposition: 'inline',
           contentType
         });
-        contentMap.set(content, cid);
-        return `cid:${cid}`;
+        contentMap.set(content, contentId);
+        return `cid:${contentId}`;
       } else {
         return contentMap.get(content)!;
       }
@@ -78,7 +78,7 @@ export class MailUtil {
   static buildUniqueMessageId(message: EmailOptions): string {
     const from = this.getPrimaryEmail(message.from)!;
     const to = this.getPrimaryEmail(message.to)!;
-    const uid = BinaryUtil.hash(`${to}${from}${message.subject}${Date.now()}`, 12);
-    return `<${uid}@${from.split('@')[1]}>`;
+    const uniqueId = BinaryUtil.hash(`${to}${from}${message.subject}${Date.now()}`, 12);
+    return `<${uniqueId}@${from.split('@')[1]}>`;
   }
 }

@@ -11,7 +11,7 @@ class $Registry {
   #resolved = false;
   #initialized?: Promise<unknown>;
   trace = false;
-  #uid = Util.uuid();
+  #uniqueId = Util.uuid();
 
   // Lookups
   #indexes = new Map<RegistryIndexClass, RegistryIndex>();
@@ -80,7 +80,7 @@ class $Registry {
       this.#resolved = false;
 
       if (this.trace) {
-        console.debug('Initializing', { uid: this.#uid });
+        console.debug('Initializing', { uniqueId: this.#uniqueId });
       }
 
       const added = await this.#classSource.init();
@@ -116,7 +116,7 @@ class $Registry {
    */
   async init(): Promise<unknown> {
     if (this.trace && this.#initialized) {
-      console.trace('Trying to re-initialize', { uid: this.#uid, initialized: !!this.#initialized });
+      console.trace('Trying to re-initialize', { uniqueId: this.#uniqueId, initialized: !!this.#initialized });
     }
     return this.#initialized ??= this.#init();
   }

@@ -37,8 +37,8 @@ export class CompilerServer {
       state: 'startup',
       iteration: Date.now(),
       mode,
-      serverPid: process.pid,
-      compilerPid: -1,
+      serverProcessId: process.pid,
+      compilerProcessId: -1,
       path: ctx.workspace.path,
       url: this.#url
     };
@@ -92,7 +92,7 @@ export class CompilerServer {
       await this.#client.waitForState(['closed'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
     } else if (output === 'ok') {
-      await this.#handle.server.writePidFile(this.info.serverPid);
+      await this.#handle.server.writePidFile(this.info.serverProcessId);
     }
 
     return output;
@@ -198,13 +198,13 @@ export class CompilerServer {
 
       if (event.type === 'state') {
         this.info.state = event.payload.state;
-        if (event.payload.state === 'init' && event.payload.extra && 'pid' in event.payload.extra && typeof event.payload.extra.pid === 'number') {
-          if (this.info.mode === 'watch' && !this.info.compilerPid) {
+        if (event.payload.state === 'init' && event.payload.extra && 'processId' in event.payload.extra && typeof event.payload.extra.processId === 'number') {
+          if (this.info.mode === 'watch' && !this.info.compilerProcessId) {
             // Ensure we are killing in watch mode on first set
             await this.#handle.compiler.kill();
           }
-          this.info.compilerPid = event.payload.extra.pid;
-          await this.#handle.compiler.writePidFile(this.info.compilerPid);
+          this.info.compilerProcessId = event.payload.extra.processId;
+          await this.#handle.compiler.writePidFile(this.info.compilerProcessId);
         }
         log.info(`State changed: ${this.info.state}`);
       } else if (event.type === 'log') {

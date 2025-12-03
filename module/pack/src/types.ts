@@ -40,9 +40,9 @@ export type DockerPackConfig = {
     packages?: string[];
     folder: string;
     user: string;
-    uid: number;
+    userId: number;
     group: string;
-    gid: number;
+    groupId: number;
   };
 } & CommonPackConfig;
 

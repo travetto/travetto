@@ -17,8 +17,8 @@ export type CompilerEventType = CompilerEvent['type'];
 
 export type CompilerServerInfo = {
   path: string;
-  serverPid: number;
-  compilerPid: number;
+  serverProcessId: number;
+  compilerProcessId: number;
   state: CompilerStateType;
   mode: CompilerMode;
   iteration: number;

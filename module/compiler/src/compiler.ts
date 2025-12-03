@@ -159,7 +159,7 @@ export class Compiler {
   async run(): Promise<void> {
     log.debug('Compilation started');
 
-    EventUtil.sendEvent('state', { state: 'init', extra: { pid: process.pid } });
+    EventUtil.sendEvent('state', { state: 'init', extra: { processId: process.pid } });
 
     const emitter = await this.getCompiler();
     let failure: Error | undefined;

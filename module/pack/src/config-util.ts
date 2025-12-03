@@ -60,14 +60,14 @@ export class PackConfigUtil {
    * Setup docker user
    */
   static dockerUser(config: DockerPackConfig): string {
-    const { os, user, group, uid, gid } = config.dockerRuntime;
+    const { os, user, group, userId, groupId } = config.dockerRuntime;
     if (user === 'root') {
       return '';
     } else {
       switch (os) {
-        case 'alpine': return `RUN addgroup -g ${gid} ${group} && adduser -D -G ${group} -u ${uid} ${user}`;
+        case 'alpine': return `RUN addgroup -g ${groupId} ${group} && adduser -D -G ${group} -u ${userId} ${user}`;
         case 'debian':
-        case 'centos': return `RUN groupadd --gid ${gid} ${group} && useradd -u ${uid} -g ${group} ${user}`;
+        case 'centos': return `RUN groupadd --gid ${groupId} ${group} && useradd -u ${userId} -g ${group} ${user}`;
         case 'unknown':
         default: throw new Error('Unable to add user/group for an unknown os');
       }

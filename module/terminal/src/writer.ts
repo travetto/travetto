@@ -7,8 +7,8 @@ type TermCoord = { x: number, y: number };
 
 const ESC = '\x1b[';
 const clamp = (input: number, size: number): number => Math.max(Math.min(input + (input < 0 ? size : 0), size - 1), 0);
-const delta = (input: number | undefined, position: string, neg: string): string =>
-  !input ? '' : `${ESC}${Math.abs(input)}${input < 0 ? neg : position}`;
+const delta = (input: number | undefined, position: string, negative: string): string =>
+  !input ? '' : `${ESC}${Math.abs(input)}${input < 0 ? negative : position}`;
 
 const Codes = {
   SHOW_CURSOR: `${ESC}?25h`,

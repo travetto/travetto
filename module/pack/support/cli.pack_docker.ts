@@ -85,15 +85,15 @@ export class PackDockerCommand extends BasePackCommand {
     this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module || undefined);
 
     // Finalize user/group and ids
-    const [userOrUid, groupOrGid = userOrUid] = (this.dockerRuntimeUser ?? '').split(':');
-    const groupIsNumber = /^\d+$/.test(groupOrGid);
+    const [userOrUid, groupOrGroupId = userOrUid] = (this.dockerRuntimeUser ?? '').split(':');
+    const groupIsNumber = /^\d+$/.test(groupOrGroupId);
     const userIsNumber = /^\d+$/.test(userOrUid);
 
-    const uid = userIsNumber ? +userOrUid : this.defaultUserId;
-    const gid = groupIsNumber ? +groupOrGid : this.defaultUserId;
-    const group = (!groupIsNumber ? groupOrGid : undefined) || this.defaultUser;
+    const userId = userIsNumber ? +userOrUid : this.defaultUserId;
+    const groupId = groupIsNumber ? +groupOrGroupId : this.defaultUserId;
+    const group = (!groupIsNumber ? groupOrGroupId : undefined) || this.defaultUser;
     const user = (!userIsNumber ? userOrUid : undefined) || this.defaultUser;
-    this.dockerRuntime = { user, uid, group, gid, folder: `/${this.appFolder}`, packages: this.dockerRuntimePackages };
+    this.dockerRuntime = { user, userId, group, groupId, folder: `/${this.appFolder}`, packages: this.dockerRuntimePackages };
 
     if (this.dockerStageOnly) {
       if (this.dockerRegistry) {

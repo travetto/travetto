@@ -19,7 +19,7 @@ export class SchemaNameResolver {
     const id = cls.Ⲑid;
     if (ID_RE.test(cls.name)) {
       if (!this.#schemaIdToName.has(id)) {
-        const name = cls.name.replace(ID_RE, (_, uid) => uid.slice(-this.#digits));
+        const name = cls.name.replace(ID_RE, (_, uniqueId) => uniqueId.slice(-this.#digits));
         this.#schemaIdToName.set(id, name);
       }
       return this.#schemaIdToName.get(id)!;
