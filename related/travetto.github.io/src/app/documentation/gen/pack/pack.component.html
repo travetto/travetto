@@ -33,7 +33,7 @@ There are three primary cli commands for packing your code:
 Usage: pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
 Options:
-  -b, --build-dir <span class="token operator">&lt;</span>string<span class="token operator">></span>             Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
+  -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>              Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
   --clean, --no-clean                  Clean workspace <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
@@ -105,7 +105,7 @@ This command is nearly identical to the standard <code class="item input">pack</
 Usage: pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
 Options:
-  -b, --build-dir <span class="token operator">&lt;</span>string<span class="token operator">></span>             Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
+  -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>              Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
   --clean, --no-clean                  Clean workspace <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Output location <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack.zip"</span><span class="token punctuation">)</span>
   --main-scripts, --no-main-scripts    Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
@@ -137,7 +137,7 @@ This command starts off identical to the standard <code class="item input">pack<
 Usage: pack:docker <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
 Options:
-  -b, --build-dir <span class="token operator">&lt;</span>string<span class="token operator">></span>               Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
+  -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
   --clean, --no-clean                    Clean workspace <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                  Output location
   --main-scripts, --no-main-scripts      Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>

@@ -149,9 +149,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   postConstruct(): void {
     this.#verifier = createVerifier()
       .setSigningAlgorithm(this.#algorithm)
-      .withKeyResolver((kid, callback) => {
-        const rec = this.config.keyMap[kid];
-        return callback(rec ? null : new AuthenticationError('Invalid'), rec.key);
+      .withKeyResolver((keyId, callback) => {
+        const entry = this.config.keyMap[keyId];
+        return callback(entry ? null : new AuthenticationError('Invalid'), entry.key);
       });
   }
 

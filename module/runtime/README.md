@@ -51,7 +51,7 @@ class $Runtime {
   /** Main source path */
   get mainSourcePath(): string;
   /** Produce a workspace relative path */
-  workspaceRelative(...rel: string[]): string;
+  workspaceRelative(...parts: string[]): string;
   /** Strip off the workspace path from a file */
   stripWorkspacePath(full: string): string;
   /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */

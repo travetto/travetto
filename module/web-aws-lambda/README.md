@@ -26,7 +26,7 @@ $ trv pack:lambda -h
 Usage: pack:lambda [options] [args...:string]
 
 Options:
-  -b, --build-dir <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                  Clean workspace (default: true)
   -o, --output <string>                Output location (default: "<module>.zip")
   -es, --main-scripts                  Create entry scripts (default: false)

@@ -113,9 +113,9 @@ Additionally, there exists a common practice of mapping various external securit
 
 <span class="token keyword">class</span> <span class="token class-name">AuthConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getModelAuthService</span><span class="token punctuation">(</span>svc<span class="token operator">:</span> ModelCrudSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">static</span> <span class="token function">getModelAuthService</span><span class="token punctuation">(</span>service<span class="token operator">:</span> ModelCrudSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ModelAuthService</span><span class="token punctuation">(</span>
-      svc<span class="token punctuation">,</span>
+      service<span class="token punctuation">,</span>
       User<span class="token punctuation">,</span>
       user <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>    <span class="token comment">// This converts User to a RegisteredPrincipal</span>
         source<span class="token operator">:</span> <span class="token string">'model'</span><span class="token punctuation">,</span>

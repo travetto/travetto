@@ -29,7 +29,7 @@ $ trv pack --help
 Usage: pack [options] [args...:string]
 
 Options:
-  -b, --build-dir <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                  Clean workspace (default: true)
   -o, --output <string>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
@@ -95,7 +95,7 @@ $ trv pack:zip --help
 Usage: pack:zip [options] [args...:string]
 
 Options:
-  -b, --build-dir <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                  Clean workspace (default: true)
   -o, --output <string>                Output location (default: "travetto_pack.zip")
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
@@ -124,7 +124,7 @@ $ trv pack:docker --help
 Usage: pack:docker [options] [args...:string]
 
 Options:
-  -b, --build-dir <string>               Workspace for building (default: "/tmp/<temp-folder>")
+  -b, --buildDir <string>                Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                    Clean workspace (default: true)
   -o, --output <string>                  Output location
   --main-scripts, --no-main-scripts      Create entry scripts (default: true)
