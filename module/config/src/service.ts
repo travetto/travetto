@@ -127,9 +127,9 @@ export class ConfigurationService {
         await SchemaValidator.validate(cls, item);
       } catch (error) {
         if (error instanceof ValidationResultError) {
-          const ogMessage = error.message;
+          const originalMessage = error.message;
           error.message = `Failed to construct ${classId} as validation errors have occurred`;
-          error.stack = error.stack?.replace(ogMessage, error.message);
+          error.stack = error.stack?.replace(originalMessage, error.message);
           const imp = Runtime.getImport(cls);
           Object.defineProperty(error, 'details', { value: { class: classId, import: imp, ...(error.details ?? {}) } });
         }

@@ -25,12 +25,12 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
       )
     ],
     copy: (sourceFile, destinationFile) => ['copy', sourceFile, destinationFile],
-    copyRecursive: (sourceFolder, destinationFolder, inclusive) =>
-      ['xcopy', '/y', '/h', '/s', inclusive ? `${toWin(sourceFolder)}\\*.*` : toWin(sourceFolder), toWin(destinationFolder)],
-    rmRecursive: (destinationFolder) => ['rmdir', '/Q', '/S', destinationFolder],
-    mkdir: (destinationFolder) => ['md', destinationFolder],
+    copyRecursive: (sourceDirectory, destinationDirectory, inclusive) =>
+      ['xcopy', '/y', '/h', '/s', inclusive ? `${toWin(sourceDirectory)}\\*.*` : toWin(sourceDirectory), toWin(destinationDirectory)],
+    rmRecursive: (destinationDirectory) => ['rmdir', '/Q', '/S', destinationDirectory],
+    mkdir: (destinationDirectory) => ['md', destinationDirectory],
     export: (key, value) => ['set', `${key}=${value}`],
-    chdir: (destinationFolder) => ['cd', destinationFolder],
+    chdir: (destinationDirectory) => ['cd', destinationDirectory],
     comment: (message) => ['\nREM', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile],
@@ -51,12 +51,12 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
       ...(mode ? [['chmod', mode, file]] : [])
     ],
     copy: (sourceFile, destinationFile) => ['cp', sourceFile, destinationFile],
-    copyRecursive: (sourceFolder, destinationFolder, inclusive) =>
-      ['cp', '-r', '-p', inclusive ? `${sourceFolder}/*` : sourceFolder, destinationFolder],
-    rmRecursive: (destinationFolder) => ['rm', '-rf', destinationFolder],
-    mkdir: (destinationFolder) => ['mkdir', '-p', destinationFolder],
+    copyRecursive: (sourceDirectory, destinationDirectory, inclusive) =>
+      ['cp', '-r', '-p', inclusive ? `${sourceDirectory}/*` : sourceDirectory, destinationDirectory],
+    rmRecursive: (destinationDirectory) => ['rm', '-rf', destinationDirectory],
+    mkdir: (destinationDirectory) => ['mkdir', '-p', destinationDirectory],
     export: (key, value) => ['export', `${key}=${value}`],
-    chdir: (destinationFolder) => ['cd', destinationFolder],
+    chdir: (destinationDirectory) => ['cd', destinationDirectory],
     comment: (message) => ['\n#', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.'],

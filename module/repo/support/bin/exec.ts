@@ -37,7 +37,7 @@ export class RepoExecUtil {
    * @returns
    */
   static #buildPrefixes(mods: IndexedModule[]): Record<string, string> {
-    const folders = mods.map(folder => folder.sourceFolder);
+    const folders = mods.map(mod => mod.sourceFolder);
     const maxWidth = Math.max(...folders.map(folder => folder.length));
     return Object.fromEntries(folders.map((folder, i) => [folder, colorize(folder.padStart(maxWidth, ' ').padEnd(maxWidth + 1), i)]));
   }

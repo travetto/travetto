@@ -2,7 +2,7 @@ import { castTo } from '@travetto/runtime';
 import { WhereClauseRaw } from '@travetto/model-query';
 
 import { QueryLanguageTokenizer } from './tokenizer.ts';
-import { Token, Literal, GroupNode, OPERATION_TRANSLATION, ArrayNode, AllNode } from './types.ts';
+import { Token, Literal, GroupNode, OPERATOR_TRANSLATION, ArrayNode, AllNode } from './types.ts';
 
 /**
  * Determine if a token is boolean
@@ -21,7 +21,7 @@ export class QueryLanguageParser {
    */
   static handleClause(nodes: (AllNode | Token)[]): void {
     const value: Token | ArrayNode = castTo(nodes.pop());
-    const operation: Token & { value: string } = castTo(nodes.pop());
+    const operator: Token & { value: string } = castTo(nodes.pop());
     const identifier: Token & { value: string } = castTo(nodes.pop());
 
     // value isn't a literal or a list, bail
@@ -30,21 +30,21 @@ export class QueryLanguageParser {
     }
 
     // If operator is not an operator, bail
-    if (operation.type !== 'operator') {
-      throw new Error(`Unexpected token: ${operation.value}`);
+    if (operator.type !== 'operator') {
+      throw new Error(`Unexpected token: ${operator.value}`);
     }
 
     // If operator is not known, bail
-    const finalOperation = OPERATION_TRANSLATION[operation.value];
+    const finalOperation = OPERATOR_TRANSLATION[operator.value];
 
     if (!finalOperation) {
-      throw new Error(`Unexpected operator: ${operation.value}`);
+      throw new Error(`Unexpected operator: ${operator.value}`);
     }
 
     nodes.push({
       type: 'clause',
       field: identifier.value,
-      operation: finalOperation,
+      operator: finalOperation,
       value: value.value
     });
 
@@ -58,21 +58,21 @@ export class QueryLanguageParser {
    * Condense nodes to remove unnecessary groupings
    * (a AND (b AND (c AND d))) => (a AND b AND c)
    */
-  static condense(nodes: (AllNode | Token)[], operation: 'and' | 'or'): void {
+  static condense(nodes: (AllNode | Token)[], operator: 'and' | 'or'): void {
     let second = nodes[nodes.length - 2];
 
-    while (isBoolean(second) && second.value === operation) {
+    while (isBoolean(second) && second.value === operator) {
       const right: AllNode = castTo(nodes.pop());
       nodes.pop()!;
       const left: AllNode = castTo(nodes.pop());
       const rightGroup: GroupNode = castTo(right);
-      if (rightGroup.type === 'group' && rightGroup.operation === operation) {
+      if (rightGroup.type === 'group' && rightGroup.operator === operator) {
         rightGroup.value.unshift(left);
         nodes.push(rightGroup);
       } else {
         nodes.push({
           type: 'group',
-          operation,
+          operator,
           value: [left, right]
         });
       }
@@ -91,7 +91,7 @@ export class QueryLanguageParser {
       nodes.pop(); // This is second
       nodes.push({
         type: 'unary',
-        operation: 'not',
+        operator: 'not',
         value: castTo<AllNode>(node)
       });
     }
@@ -161,10 +161,10 @@ export class QueryLanguageParser {
   static convert<T = unknown>(node: AllNode): WhereClauseRaw<T> {
     switch (node.type) {
       case 'unary': {
-        return castTo({ [`$${node.operation!}`]: this.convert(node.value) });
+        return castTo({ [`$${node.operator!}`]: this.convert(node.value) });
       }
       case 'group': {
-        return castTo({ [`$${node.operation!}`]: node.value.map(value => this.convert(value)) });
+        return castTo({ [`$${node.operator!}`]: node.value.map(value => this.convert(value)) });
       }
       case 'clause': {
         const parts = node.field!.split('.');
@@ -173,14 +173,14 @@ export class QueryLanguageParser {
         for (const part of parts) {
           sub = sub[part] = {};
         }
-        if (node.operation === '$regex' && typeof node.value === 'string') {
-          sub[node.operation!] = new RegExp(`^${node.value}`);
-        } else if ((node.operation === '$eq' || node.operation === '$ne') && node.value === null) {
-          sub.$exists = node.operation !== '$eq';
-        } else if ((node.operation === '$in' || node.operation === '$nin') && !Array.isArray(node.value)) {
-          throw new Error(`Expected array literal for ${node.operation}`);
+        if (node.operator === '$regex' && typeof node.value === 'string') {
+          sub[node.operator!] = new RegExp(`^${node.value}`);
+        } else if ((node.operator === '$eq' || node.operator === '$ne') && node.value === null) {
+          sub.$exists = node.operator !== '$eq';
+        } else if ((node.operator === '$in' || node.operator === '$nin') && !Array.isArray(node.value)) {
+          throw new Error(`Expected array literal for ${node.operator}`);
         } else {
-          sub[node.operation!] = node.value;
+          sub[node.operator!] = node.value;
         }
         return top;
       }

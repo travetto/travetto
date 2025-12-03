@@ -45,16 +45,16 @@ export type RpcClientFactory<T extends Record<string, {}>> =
     decorate?: (request: RpcRequest) => R
   ) => RpcClient<T, R>;
 
-function isResponse(result: unknown): result is Response {
-  return !!result && typeof result === 'object' && 'status' in result && !!result.status && 'headers' in result && !!result.headers;
+function isResponse(value: unknown): value is Response {
+  return !!value && typeof value === 'object' && 'status' in value && !!value.status && 'headers' in value && !!value.headers;
 }
 
-function isPlainObject(input: unknown): input is Record<string, unknown> {
-  return typeof input === 'object' // separate from primitives
-    && input !== undefined
-    && input !== null         // is obvious
-    && input.constructor === Object // separate instances (Array, DOM, ...)
-    && Object.prototype.toString.call(input) === '[object Object]'; // separate build-in like Math
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' // separate from primitives
+    && value !== undefined
+    && value !== null         // is obvious
+    && value.constructor === Object // separate instances (Array, DOM, ...)
+    && Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
 }
 
 function registerTimeout<T extends (number | string | { unref(): unknown })>(

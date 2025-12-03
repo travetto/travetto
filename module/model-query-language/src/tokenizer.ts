@@ -108,17 +108,17 @@ export class QueryLanguageTokenizer {
    */
   static readString(text: string, position: number): number {
     const length = text.length;
-    const char = text.charCodeAt(position);
+    const ch = text.charCodeAt(position);
     position += 1;
     while (position < length) {
-      if (text.charCodeAt(position) === char) {
+      if (text.charCodeAt(position) === ch) {
         break;
       } else if (text.charCodeAt(position) === BACKSLASH) {
         position += 1;
       }
       position += 1;
     }
-    if (position === length && text.charCodeAt(position) !== char) {
+    if (position === length && text.charCodeAt(position) !== ch) {
       throw new Error('Unterminated string literal');
     }
     return position;

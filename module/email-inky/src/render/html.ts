@@ -85,16 +85,16 @@ export const Html: RenderProvider<RenderContext> = {
     let expander = '';
 
     const parent = stack.at(-1)!;
-    const sibs = getChildren(parent).filter(child => isOfType(child, 'Column'));
-    const colCount = sibs.length || 1;
+    const siblings = getChildren(parent).filter(child => isOfType(child, 'Column'));
+    const colCount = siblings.length || 1;
 
     if (parent) {
-      const elParent: (typeof parent) & { columnVisited?: boolean } = parent;
-      if (!elParent.columnVisited) {
-        elParent.columnVisited = true;
-        if (sibs.length) {
-          sibs[0].props.className = classString(sibs[0].props.className ?? '', 'first');
-          sibs.at(-1)!.props.className = classString(sibs.at(-1)!.props.className ?? '', 'last');
+      const parentNode: (typeof parent) & { columnVisited?: boolean } = parent;
+      if (!parentNode.columnVisited) {
+        parentNode.columnVisited = true;
+        if (siblings.length) {
+          siblings[0].props.className = classString(siblings[0].props.className ?? '', 'first');
+          siblings.at(-1)!.props.className = classString(siblings.at(-1)!.props.className ?? '', 'last');
         }
       }
     } else {

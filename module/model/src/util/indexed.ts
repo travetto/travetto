@@ -93,8 +93,8 @@ export class ModelIndexedUtil {
       let sub: Record<string, unknown> = response;
       const all = path.slice(0);
       const last = all.pop()!;
-      for (const key of all) {
-        sub = castTo(sub[key] ??= {});
+      for (const part of all) {
+        sub = castTo(sub[part] ??= {});
       }
       sub[last] = value;
     }

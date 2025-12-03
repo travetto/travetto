@@ -96,16 +96,16 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async * #iterateBucket(cls?: string | Class): AsyncIterable<{ Key: string, id: string }[]> {
     let Marker: string | undefined;
     for (; ;) {
-      const objects = await this.client.listObjects({
+      const items = await this.client.listObjects({
         Bucket: this.config.bucket,
         Prefix: cls ? this.#resolveKey(cls) : this.config.namespace,
         Marker
       });
-      if (objects.Contents?.length) {
-        yield objects.Contents.map(item => ({ Key: item.Key!, id: item.Key!.split(':').pop()! }));
+      if (items.Contents?.length) {
+        yield items.Contents.map(item => ({ Key: item.Key!, id: item.Key!.split(':').pop()! }));
       }
-      if (objects.NextMarker) {
-        Marker = objects.NextMarker;
+      if (items.NextMarker) {
+        Marker = items.NextMarker;
       } else {
         return;
       }

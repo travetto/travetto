@@ -188,13 +188,13 @@ export class PackOperation {
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Copying over workspace resources' }}`);
 
-    const destinationFolder = path.resolve(config.buildDirectory, config.workspaceResourceFolder);
-    const sourceFolder = Runtime.workspaceRelative('resources');
+    const destinationDirectory = path.resolve(config.buildDirectory, config.workspaceResourceFolder);
+    const sourceDirectory = Runtime.workspaceRelative('resources');
 
     if (config.ejectFile) {
-      yield ActiveShellCommand.copyRecursive(sourceFolder, destinationFolder, true);
+      yield ActiveShellCommand.copyRecursive(sourceDirectory, destinationDirectory, true);
     } else {
-      await PackUtil.copyRecursive(sourceFolder, destinationFolder, true);
+      await PackUtil.copyRecursive(sourceDirectory, destinationDirectory, true);
     }
   }
 
@@ -204,19 +204,19 @@ export class PackOperation {
   static async * copyResources(config: CommonPackConfig): AsyncIterable<string[]> {
     const resources = {
       count: RuntimeIndex.mainModule.files.resources?.length ?? 0,
-      sourceFolder: path.resolve(Runtime.mainSourcePath, 'resources'),
-      destinationFolder: path.resolve(config.buildDirectory, 'resources')
+      sourceDirectory: path.resolve(Runtime.mainSourcePath, 'resources'),
+      destinationDirectory: path.resolve(config.buildDirectory, 'resources')
     };
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Copying over module resources' }}`);
 
     if (config.ejectFile) {
       if (resources.count) {
-        yield ActiveShellCommand.copyRecursive(resources.sourceFolder, path.resolve(config.buildDirectory, 'resources'), true);
+        yield ActiveShellCommand.copyRecursive(resources.sourceDirectory, path.resolve(config.buildDirectory, 'resources'), true);
       }
     } else {
       if (resources.count) {
-        await PackUtil.copyRecursive(resources.sourceFolder, resources.destinationFolder, true);
+        await PackUtil.copyRecursive(resources.sourceDirectory, resources.destinationDirectory, true);
       }
     }
   }

@@ -51,11 +51,11 @@ export type ShellCommandImpl = {
   createFile(file: string, text: string[], mode?: string): string[][];
   callCommandWithAllArgs(cmd: string, ...args: string[]): string[];
   copy(sourceFile: string, destinationFile: string): string[];
-  copyRecursive(sourceFolder: string, destinationFolder: string, inclusive?: boolean): string[];
-  rmRecursive(destinationFolder: string): string[];
-  mkdir(destinationFolder: string): string[];
+  copyRecursive(sourceDirectory: string, destinationDirectory: string, inclusive?: boolean): string[];
+  rmRecursive(destinationDirectory: string): string[];
+  mkdir(destinationDirectory: string): string[];
   export(key: string, value: string): string[];
-  chdir(destinationFolder: string): string[];
+  chdir(destinationDirectory: string): string[];
   comment(message: string): string[];
   echo(text: string): string[];
   zip(output: string): string[];

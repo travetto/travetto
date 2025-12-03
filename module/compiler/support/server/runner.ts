@@ -32,7 +32,7 @@ export class CompilerRunner {
       return;
     } else {
       const changedList = changed.slice(0, 10).map(event => `${event.module}/${event.file}`);
-      log.debug(`Started watch=${watch} changed=${changedList.join(', ')}`);
+      log.debug(`Started watch=${watch} changed=${changedList}`);
     }
 
     const main = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
@@ -54,7 +54,7 @@ export class CompilerRunner {
         detached: true,
         stdio: ['pipe', 1, 2, 'ipc'],
       })
-        .on('message', input => isEvent(input) && queue.add(input))
+        .on('message', message => isEvent(message) && queue.add(message))
         .on('exit', () => queue.close());
 
       const kill = (): unknown => {

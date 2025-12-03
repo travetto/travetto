@@ -12,8 +12,8 @@ import { ApiSpecConfig } from './config.ts';
 
 const DEFINITION = '#/components/schemas';
 
-const isInputConfig = (config: object): config is SchemaInputConfig => !!config && 'owner' in config && 'type' in config;
-const isFieldConfig = (config: object): config is SchemaFieldConfig => isInputConfig(config) && 'name' in config;
+const isInputConfig = (value: object): value is SchemaInputConfig => !!value && 'owner' in value && 'type' in value;
+const isFieldConfig = (value: object): value is SchemaFieldConfig => isInputConfig(value) && 'name' in value;
 
 type GeneratedSpec = {
   tags: TagObject[];

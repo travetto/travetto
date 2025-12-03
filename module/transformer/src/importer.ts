@@ -182,7 +182,7 @@ export class ImportManager {
       const importStmts = [...this.#newImports.values()].map(({ path: resolved, identifier }) => {
         const importStmt = this.factory.createImportDeclaration(
           undefined,
-          this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(identifier)),
+          this.factory.createImportClause(undefined, undefined, this.factory.createNamespaceImport(identifier)),
           this.factory.createStringLiteral(resolved)
         );
         return importStmt;
@@ -218,7 +218,7 @@ export class ImportManager {
           ));
         }
       } else if (ts.isImportDeclaration(statement)) {
-        if (!statement.importClause?.isTypeOnly) {
+        if (statement.importClause?.phaseModifier !== ts.SyntaxKind.TypeKeyword) {
           toAdd.push(this.factory.updateImportDeclaration(
             statement,
             statement.modifiers,

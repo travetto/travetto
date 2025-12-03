@@ -14,23 +14,23 @@ export class DataUtil {
    * Is a value a plain JS object, created using {}
    * @param value Object to check
    */
-  static isPlainObject(input: unknown): input is Record<string, unknown> {
-    return typeof input === 'object' // separate from primitives
-      && input !== undefined
-      && input !== null         // is obvious
-      && input.constructor === Object // separate instances (Array, DOM, ...)
-      && Object.prototype.toString.call(input) === '[object Object]'; // separate build-in like Math
+  static isPlainObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' // separate from primitives
+      && value !== undefined
+      && value !== null         // is obvious
+      && value.constructor === Object // separate instances (Array, DOM, ...)
+      && Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
   }
 
   /**
    * Is a value of primitive type
    * @param value Value to check
    */
-  static isPrimitive(input: unknown): input is (string | boolean | number | RegExp) {
-    switch (typeof input) {
+  static isPrimitive(value: unknown): value is (string | boolean | number | RegExp) {
+    switch (typeof value) {
       case 'string': case 'boolean': case 'number': case 'bigint': return true;
-      case 'object': return !!input && (
-        input instanceof RegExp || input instanceof Date || isStringObject(input) || isNumberObject(input) || isBooleanObject(input)
+      case 'object': return !!value && (
+        value instanceof RegExp || value instanceof Date || isStringObject(value) || isNumberObject(value) || isBooleanObject(value)
       );
       default: return false;
     }
@@ -39,8 +39,8 @@ export class DataUtil {
   /**
    * Is simple, as a primitive, function or class
    */
-  static isSimpleValue(a: unknown): a is Function | Class | string | number | RegExp | Date {
-    return this.isPrimitive(a) || typeof a === 'function';
+  static isSimpleValue(value: unknown): value is Function | Class | string | number | RegExp | Date {
+    return this.isPrimitive(value) || typeof value === 'function';
   }
 
   static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): unknown {
@@ -70,10 +70,10 @@ export class DataUtil {
         if (mode === 'replace') {
           value = b;
         } else {
-          const retArray: unknown[] = castTo(value);
+          const valueArray: unknown[] = castTo(value);
           const bArray = b;
           for (let i = 0; i < bArray.length; i++) {
-            retArray[i] = this.#deepAssignRaw(retArray[i], bArray[i], mode);
+            valueArray[i] = this.#deepAssignRaw(valueArray[i], bArray[i], mode);
           }
         }
       } else if (isSimpB) { // Scalars

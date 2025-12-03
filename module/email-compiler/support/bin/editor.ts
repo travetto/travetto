@@ -89,7 +89,7 @@ export class EditorService {
 
     for await (const file of EmailCompiler.watchCompile()) {
       await this.#response(this.#renderFile(file),
-        response => ({ type: 'compiled', ...response }),
+        result => ({ type: 'compiled', ...result }),
         error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
       );
     }

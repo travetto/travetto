@@ -327,8 +327,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
         return;
       }
 
-      const bodies = (await this.client
-        .mGet(ids.map(id => this.#resolveKey(cls, id))))
+      const bodies = (await this.client.mGet(
+        ids.map(id => this.#resolveKey(cls, id))
+      ))
         .filter((result): result is string => !!result);
 
       for (const full of bodies) {

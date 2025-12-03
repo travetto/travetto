@@ -105,7 +105,8 @@ export class WebHeaderUtil {
       return values[0];
     }
     const sorted = this.parseHeader(header.toLowerCase())
-      .filter(item => (item.q ?? 1) > 0).toSorted((a, b) => (b.q ?? 1) - (a.q ?? 1));
+      .filter(item => (item.q ?? 1) > 0)
+      .toSorted((a, b) => (b.q ?? 1) - (a.q ?? 1));
 
     const set = new Set(values);
     for (const { value } of sorted) {

@@ -37,18 +37,18 @@ export class DecoratorUtil {
   /**
    * Replace or add a decorator to a list of decorators
    */
-  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], index = -1): ts.ModifierLike[] {
+  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1): ts.ModifierLike[] {
     if (!ts.canHaveDecorators(node)) {
       return [];
     }
-    if (index < 0 && target) {
-      index = node.modifiers?.indexOf(target) ?? -1;
+    if (idx < 0 && target) {
+      idx = node.modifiers?.indexOf(target) ?? -1;
     }
     const out = (node.modifiers ?? []).filter(modifier => modifier !== target);
-    if (index < 0) {
+    if (idx < 0) {
       out.push(...replacements);
     } else {
-      out.splice(index, 0, ...replacements);
+      out.splice(idx, 0, ...replacements);
     }
     return out;
   }

@@ -18,20 +18,20 @@ export class PackUtil {
 
   /**
    * Remove directory, determine if errors should be ignored
-   * @param sourceFolder The folder to copy
-   * @param destinationFolder The folder to copy to
+   * @param sourceDirectory The folder to copy
+   * @param destinationDirectory The folder to copy to
    */
-  static async copyRecursive(sourceFolder: string, destinationFolder: string, inclusive: boolean = false, ignoreFailure = false): Promise<void> {
+  static async copyRecursive(sourceDirectory: string, destinationDirectory: string, inclusive: boolean = false, ignoreFailure = false): Promise<void> {
     try {
-      let final = destinationFolder;
+      let final = destinationDirectory;
       if (!inclusive) {
-        final = path.resolve(destinationFolder, path.basename(sourceFolder));
+        final = path.resolve(destinationDirectory, path.basename(sourceDirectory));
       }
       await fs.mkdir(final, { recursive: true });
-      await fs.cp(sourceFolder, final, { recursive: true });
+      await fs.cp(sourceDirectory, final, { recursive: true });
     } catch {
       if (!ignoreFailure) {
-        throw new Error(`Failed to copy ${sourceFolder} to ${destinationFolder}`);
+        throw new Error(`Failed to copy ${sourceDirectory} to ${destinationDirectory}`);
       }
     }
   }

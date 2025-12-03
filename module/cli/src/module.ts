@@ -59,12 +59,12 @@ export class CliModuleUtil {
     const get = (name: string): ModuleGraphEntry =>
       childMap.has(name) ? childMap.get(name)! : childMap.set(name, { children: new Set(), name, active: new Set() }).get(name)!;
 
-    for (const element of modules) {
-      get(element.name).parents = element.parents;
-      for (const parentModule of element.parents) {
+    for (const mod of modules) {
+      get(mod.name).parents = mod.parents;
+      for (const parentModule of mod.parents) {
         const parent = get(parentModule);
-        parent.children.add(element.name); // Store child into parent
-        parent.active.add(element.name);
+        parent.children.add(mod.name); // Store child into parent
+        parent.active.add(mod.name);
       }
     }
 
@@ -94,8 +94,8 @@ export class CliModuleUtil {
     if (modName === depModName) {
       return true;
     }
-    const modules = await this.findModules('all');
-    const graph = this.getDependencyGraph(modules);
+    const mods = await this.findModules('all');
+    const graph = this.getDependencyGraph(mods);
     return graph[modName].includes(depModName);
   }
 
@@ -114,8 +114,8 @@ export class CliModuleUtil {
         return [];
       }
     } else {
-      const modules = await this.findModules(config.changed ? 'changed' : 'workspace', undefined, 'HEAD');
-      return modules.map(mod => mod.sourcePath);
+      const mods = await this.findModules(config.changed ? 'changed' : 'workspace', undefined, 'HEAD');
+      return mods.map(mod => mod.sourcePath);
     }
   }
 }

@@ -73,17 +73,17 @@ export class OpenApiService {
    */
   async persist(): Promise<void> {
     try {
-      console.debug('Generating OpenAPI Specification', { output: this.apiSpecConfig.output });
+      console.debug('Generating OpenAPI Spec', { output: this.apiSpecConfig.output });
 
-      const specification = await this.getSpec();
+      const spec = await this.getSpec();
 
       const output = this.apiSpecConfig.output.endsWith('.json') ?
-        JSON.stringify(specification, undefined, 2) :
-        stringify(specification);
+        JSON.stringify(spec, undefined, 2) :
+        stringify(spec);
 
       await BinaryUtil.bufferedFileWrite(this.apiSpecConfig.output, output, true);
     } catch (error) {
-      console.error('Unable to persist openapi specification', error);
+      console.error('Unable to persist openapi spec', error);
     }
   }
 }
