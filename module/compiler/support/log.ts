@@ -1,6 +1,6 @@
 import { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from './types.ts';
 
-const LEVEL_TO_PRI: Record<CompilerLogLevel | 'none', number> = { debug: 1, info: 2, warn: 3, error: 4, none: 5 };
+const LEVEL_TO_PRIORITY: Record<CompilerLogLevel | 'none', number> = { debug: 1, info: 2, warn: 3, error: 4, none: 5 };
 const SCOPE_MAX = 15;
 
 type LogConfig = {
@@ -47,7 +47,7 @@ export class Logger implements LogConfig, LogShape {
   }
 
   valid(event: CompilerLogEvent): boolean {
-    return LEVEL_TO_PRI[this.level ?? this.parent?.level!] <= LEVEL_TO_PRI[event.level];
+    return LEVEL_TO_PRIORITY[this.level ?? this.parent?.level!] <= LEVEL_TO_PRIORITY[event.level];
   }
 
   /** Log event with filtering by level */
