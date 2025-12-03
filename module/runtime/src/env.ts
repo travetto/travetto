@@ -47,13 +47,13 @@ export class EnvProp<T> {
   get list(): string[] | undefined {
     const value = this.value;
     return (value === undefined || value === '') ?
-      undefined : value.split(/[, ]+/g).map(x => x.trim()).filter(x => !!x);
+      undefined : value.split(/[, ]+/g).map(item => item.trim()).filter(item => !!item);
   }
 
   /** Read value as object */
   get object(): Record<string, string> | undefined {
     const items = this.list;
-    return items ? Object.fromEntries(items.map(x => x.split(/[:=]/g))) : undefined;
+    return items ? Object.fromEntries(items.map(item => item.split(/[:=]/g))) : undefined;
   }
 
   /** Add values to list */

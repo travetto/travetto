@@ -73,7 +73,7 @@ export class DocUtil {
     const tags = CoreUtil.getSymbol(type)?.getJsDocTags() ?? [];
     return tags
       .filter(tag => tag.name === name && !!tag.text)
-      .map(tag => tag.text!.map(x => x.text).join('')); // Join all text
+      .map(tag => tag.text!.map(part => part.text).join('')); // Join all text
   }
 
   /**
@@ -90,7 +90,7 @@ export class DocUtil {
    * @param type
    */
   static readAugments(type: ts.Type | ts.Symbol): string[] {
-    return this.readDocTag(type, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
+    return this.readDocTag(type, 'augments').map(line => line.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
   }
 
   /**
@@ -98,6 +98,6 @@ export class DocUtil {
    * @param type
    */
   static readExample(type: ts.Type | ts.Symbol): string[] {
-    return this.readDocTag(type, 'example').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
+    return this.readDocTag(type, 'example').map(line => line.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
   }
 }

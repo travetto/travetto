@@ -190,7 +190,7 @@ export class ImportManager {
 
       return CoreUtil.updateSource(this.factory, file, [
         ...importStmts,
-        ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
+        ...file.statements.filter((node: ts.Statement & { remove?: boolean }) => !node.remove) // Exclude culled imports
       ]);
     } catch (error) { // Missing import
       if (!(error instanceof Error)) {

@@ -78,9 +78,9 @@ class $Runtime {
   }
 
   /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */
-  toolPath(...rel: string[]): string {
-    rel = rel.flatMap(x => x === '@' ? ['node_modules', this.#idx.manifest.main.name] : [x]);
-    return path.resolve(this.workspace.path, this.#idx.manifest.build.toolFolder, ...rel);
+  toolPath(...parts: string[]): string {
+    parts = parts.flatMap(part => part === '@' ? ['node_modules', this.#idx.manifest.main.name] : [part]);
+    return path.resolve(this.workspace.path, this.#idx.manifest.build.toolFolder, ...parts);
   }
 
   /** Resolve single module path */

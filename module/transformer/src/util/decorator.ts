@@ -44,7 +44,7 @@ export class DecoratorUtil {
     if (index < 0 && target) {
       index = node.modifiers?.indexOf(target) ?? -1;
     }
-    const out = (node.modifiers ?? []).filter(x => x !== target);
+    const out = (node.modifiers ?? []).filter(modifier => modifier !== target);
     if (index < 0) {
       out.push(...replacements);
     } else {

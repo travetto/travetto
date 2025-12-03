@@ -102,7 +102,7 @@ export class ConsoleLogTransformer {
             level: state.factory.createStringLiteral(VALID_LEVELS[level]),
             import: state.getModuleIdentifier(),
             line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
-            scope: state.scope?.map(x => x.name).join(':'),
+            scope: state.scope?.map(part => part.name).join(':'),
             args: node.arguments.slice(0)
           }),
         ]

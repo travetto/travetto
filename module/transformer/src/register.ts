@@ -6,8 +6,8 @@ const HandlersSymbol = Symbol();
 
 type TransformerWithHandlers = Transformer & { [HandlersSymbol]?: NodeTransformer[] };
 
-function isTransformer(x: unknown): x is Transformer {
-  return x !== null && x !== undefined && typeof x === 'function';
+function isTransformer(value: unknown): value is Transformer {
+  return value !== null && value !== undefined && typeof value === 'function';
 }
 
 /**
@@ -16,11 +16,11 @@ function isTransformer(x: unknown): x is Transformer {
  */
 export function getAllTransformers(inputs: Record<string, { [HandlersSymbol]?: NodeTransformer[] }>, module: string): NodeTransformer[] {
   return Object.values(inputs)
-    .flatMap(x => {
-      if (isTransformer(x)) {
-        x[ModuleNameSymbol] = module;
+    .flatMap(value => {
+      if (isTransformer(value)) {
+        value[ModuleNameSymbol] = module;
       }
-      return (x[HandlersSymbol] ?? []);
+      return (value[HandlersSymbol] ?? []);
     })
     .map(handler => ({
       ...handler,

@@ -33,7 +33,10 @@ export class CoreUtil {
   /**
    * Find the primary argument of a call expression, or decorator.
    */
-  static findArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined, pred: (x: ts.Expression) => x is T): T | undefined {
+  static findArgument<T extends ts.Expression = ts.Expression>(
+    node: ts.CallExpression | undefined,
+    pred: (expr: ts.Expression) => expr is T
+  ): T | undefined {
     if (node && node.arguments && node.arguments.length) {
       return node.arguments.find(pred);
     }
@@ -110,7 +113,7 @@ export class CoreUtil {
       factory.createCallExpression(
         name,
         undefined,
-        contents.filter(x => !!x)
+        contents.filter(expr => !!expr)
       )
     );
   }

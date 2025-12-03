@@ -53,7 +53,7 @@ export class PackConfigUtil {
    * Setup docker ports
    */
   static dockerPorts(config: DockerPackConfig): string {
-    return (config.dockerPort?.map(x => `EXPOSE ${x}`) ?? []).join('\n');
+    return (config.dockerPort?.map(port => `EXPOSE ${port}`) ?? []).join('\n');
   }
 
   /**
@@ -123,7 +123,7 @@ export class PackConfigUtil {
       this.dockerAppFolder(config),
       this.dockerAppFiles(config),
       this.dockerEnvVars(config),
-    ].filter(x => !!x).join('\n');
+    ].filter(arg => !!arg).join('\n');
   }
 
   /**

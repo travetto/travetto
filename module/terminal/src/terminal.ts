@@ -57,7 +57,7 @@ export class Terminal {
         }
       }
     } else {
-      await this.streamToBottom(Util.mapAsyncItr(source, x => `%WAIT% ${x}`), { outputStreamToMain: true });
+      await this.streamToBottom(Util.mapAsyncItr(source, line => `%WAIT% ${line}`), { outputStreamToMain: true });
     }
   }
 

@@ -45,7 +45,7 @@ export class TestCommand implements CliCommandShape {
   }
 
   isFirstFile(first: string): Promise<boolean> {
-    return fs.stat(path.resolve(first ?? '')).then(x => x.isFile(), () => false);
+    return fs.stat(path.resolve(first ?? '')).then(stat => stat.isFile(), () => false);
   }
 
   async resolvedMode(first: string, rest: string[]): Promise<string> {

@@ -35,7 +35,7 @@ export class AssertCheck {
     };
 
     // Invert check for negative
-    const assertFn = positive ? assert : (x: unknown, msg?: string): unknown => assert(!x, msg);
+    const assertFn = positive ? assert : (value: unknown, msg?: string): unknown => assert(!value, msg);
 
     // Check fn to call
     if (fn === 'fail') {

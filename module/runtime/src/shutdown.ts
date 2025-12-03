@@ -40,7 +40,7 @@ export class ShutdownManager {
     this.#ensureExitListeners();
     this.#handlers.push({ handler, scope });
     return () => {
-      const idx = this.#handlers.findIndex(x => x.handler === handler);
+      const idx = this.#handlers.findIndex(item => item.handler === handler);
       if (idx >= 0) {
         this.#handlers.splice(idx, 1);
       }

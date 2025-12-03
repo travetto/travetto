@@ -95,6 +95,6 @@ export class TimeUtil {
       seconds > 3600 ? `${Math.trunc(seconds / 3600).toString().padStart(2, '0')}h` : '',
       seconds > 60 ? `${Math.trunc((seconds % 3600) / 60).toString().padStart(2, '0')}m` : '',
       `${(seconds % 60).toString().padStart(2, '0')}s`
-    ].filter(x => !!x).slice(0, 2).join(' ');
+    ].filter(part => !!part).slice(0, 2).join(' ');
   }
 }

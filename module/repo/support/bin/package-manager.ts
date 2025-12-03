@@ -116,7 +116,7 @@ export class PackageManager {
    */
   static async synchronizeVersions(): Promise<Record<string, string>> {
     const versions: Record<string, string> = {};
-    const folders = (await CliModuleUtil.findModules('workspace')).map(x => x.sourcePath);
+    const folders = (await CliModuleUtil.findModules('workspace')).map(mod => mod.sourcePath);
     const packages = folders.map(folder => {
       const pkg = PackageUtil.readPackage(folder, true);
       versions[pkg.name] = `^${pkg.version}`;

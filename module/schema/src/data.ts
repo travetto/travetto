@@ -253,7 +253,7 @@ export class DataUtil {
    */
   static filterByKeys<T>(input: T, exclude: (string | RegExp)[]): T {
     if (Array.isArray(input)) {
-      return castTo(input.map(x => this.filterByKeys(x, exclude)));
+      return castTo(input.map(value => this.filterByKeys(value, exclude)));
     } else if (input !== null && input !== undefined && typeof input === 'object') {
       const out: Partial<T> = {};
       for (const key of TypedObject.keys(input)) {

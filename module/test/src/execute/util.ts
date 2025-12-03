@@ -47,7 +47,7 @@ export class RunnerUtil {
 
     // Collect globs
     if (globs?.length) {
-      const allFiles = new Map(all.map(x => [x.sourceFile, x]));
+      const allFiles = new Map(all.map(file => [file.sourceFile, file]));
       for await (const item of fs.glob(globs)) {
         const src = Runtime.workspaceRelative(path.resolve(item));
         const match = allFiles.get(src);

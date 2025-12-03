@@ -113,7 +113,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   } else if (type.isLiteral()) {
     return { category: 'shape', type };
   } else if (objectFlags & ts.ObjectFlags.Mapped) { // Mapped types
-    if (type.getProperties().some(x => x.declarations || x.valueDeclaration)) {
+    if (type.getProperties().some(property => property.declarations || property.valueDeclaration)) {
       return { category: 'mapped', type };
     }
   }
@@ -247,14 +247,19 @@ export const TypeBuilder: {
           ctor: String,
           nullable: type.nullable,
           undefinable: type.undefinable,
-          template: { operation: 'or', values: subTypes.map(x => transformCast<TemplateType>(x).template!) }
+          template: { operation: 'or', values: subTypes.map(subType => transformCast<TemplateType>(subType).template!) }
         };
       } else if (subTypes.length === 1) {
         return { undefinable, nullable, ...first };
       } else if (first.key === 'literal' && subTypes.every(item => item.name === first.name)) { // We have a common
         type.commonType = first;
       } else if (type.operation === 'and' && first.key === 'shape' && subTypes.every(item => item.key === 'shape')) { // All shapes
-        return { importName: first.importName, name: first.name, key: 'shape', fieldTypes: subTypes.reduce((acc, x) => ({ ...acc, ...x.fieldTypes }), {}) };
+        return {
+          importName: first.importName,
+          name: first.name,
+          key: 'shape',
+          fieldTypes: subTypes.reduce((acc, subType) => ({ ...acc, ...subType.fieldTypes }), {})
+        };
       }
       return type;
     }
@@ -266,8 +271,8 @@ export const TypeBuilder: {
       let operation: string | undefined;
       let name: string | undefined;
 
-      const decls = DeclarationUtil.getDeclarations(type).filter(x => ts.isTypeAliasDeclaration(x));
-      const ref = decls[0]?.type;
+      const declarations = DeclarationUtil.getDeclarations(type).filter(declaration => ts.isTypeAliasDeclaration(declaration));
+      const ref = declarations[0]?.type;
 
       if (ref && ts.isTypeReferenceNode(ref) && ref.typeArguments && ref.typeArguments.length > 0) {
         const [first, second] = ref.typeArguments;
@@ -333,7 +338,7 @@ export const TypeBuilder: {
       // Resolving relative to source file
       if (!importName || importName.startsWith('.')) {
         const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
-          ?.find(x => ts.getAllJSDocTags(x, (node): node is ts.JSDocTag => node.tagName.getText() === 'concrete').length)
+          ?.find(declaration => ts.getAllJSDocTags(declaration, (node): node is ts.JSDocTag => node.tagName.getText() === 'concrete').length)
           ?.getSourceFile().fileName ?? '';
 
         if (!importName || importName === '.') {
@@ -346,8 +351,9 @@ export const TypeBuilder: {
 
       // Convert name to $Concrete suffix if not provided
       if (!name) {
-        const [declaration] = DeclarationUtil.getDeclarations(type).filter(x => ts.isInterfaceDeclaration(x) || ts.isTypeAliasDeclaration(x));
-        name = `${declaration.name.text}$Concrete`;
+        const [primaryDeclaration] = DeclarationUtil.getDeclarations(type)
+          .filter(declaration => ts.isInterfaceDeclaration(declaration) || ts.isTypeAliasDeclaration(declaration));
+        name = `${primaryDeclaration.name.text}$Concrete`;
       }
 
       return { key: 'managed', name, importName };

@@ -8,8 +8,8 @@ const escape = (text: string): string =>
     .replaceAll('"', '\\"')
     .replaceAll('$', '\\$');
 
-const escapedArgs = (args: string[]): string[] => args.map(x =>
-  x.includes(' ') || x.includes('"') ? `'${x}'` : (x.includes("'") ? `"${x}"` : x)
+const escapedArgs = (args: string[]): string[] => args.map(arg =>
+  arg.includes(' ') || arg.includes('"') ? `'${arg}'` : (arg.includes("'") ? `"${arg}"` : arg)
 );
 
 const toWin = (file: string): string => file.replace(/[\\\/]+/g, path.win32.sep);

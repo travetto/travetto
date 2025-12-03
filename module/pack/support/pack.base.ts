@@ -21,7 +21,7 @@ export abstract class BasePackCommand implements CliCommandShape {
       folder: folder => folder === 'support',
       file: file => file.sourceFile.includes('entry.')
     })
-      .map(x => x.import.replace(/[.][^.]+s$/, ''));
+      .map(file => file.import.replace(/[.][^.]+s$/, ''));
   }
 
   @Ignore()

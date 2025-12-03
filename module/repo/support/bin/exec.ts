@@ -11,7 +11,7 @@ const COLORS = ([...[
   '#afffd7', '#afffff', '#d787ff', '#d7afaf', '#d7afd7', '#d7afff', '#d7d7af', '#d7d7d7', '#d7d7ff', '#d7ff87', '#d7ffaf', '#d7ffd7', '#d7ffff', '#ff8787', '#ff87af',
   '#ff87d7', '#ff87ff', '#ffaf87', '#ffafaf', '#ffafd7', '#ffafff', '#ffd787', '#ffd7af', '#ffd7d7', '#ffd7ff', '#ffff87', '#ffffaf', '#ffffd7', '#ffffff', '#bcbcbc',
   '#c6c6c6', '#d0d0d0', '#dadada', '#e4e4e4', '#eeeeee'
-] as const]).toSorted(() => Math.random() < .5 ? -1 : 1).map(x => StyleUtil.getStyle(x));
+] as const]).toSorted(() => Math.random() < .5 ? -1 : 1).map(color => StyleUtil.getStyle(color));
 
 type ModuleRunConfig<T = ExecutionResult<string>> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -37,9 +37,9 @@ export class RepoExecUtil {
    * @returns
    */
   static #buildPrefixes(mods: IndexedModule[]): Record<string, string> {
-    const folders = mods.map(x => x.sourceFolder);
-    const maxWidth = Math.max(...folders.map(x => x.length));
-    return Object.fromEntries(folders.map((x, i) => [x, colorize(x.padStart(maxWidth, ' ').padEnd(maxWidth + 1), i)]));
+    const folders = mods.map(folder => folder.sourceFolder);
+    const maxWidth = Math.max(...folders.map(folder => folder.length));
+    return Object.fromEntries(folders.map((folder, i) => [folder, colorize(folder.padStart(maxWidth, ' ').padEnd(maxWidth + 1), i)]));
   }
 
   /**

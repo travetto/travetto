@@ -108,7 +108,8 @@ export class Context {
 
   templateContext(): Record<string, unknown> {
     const modules = [...this.#dependencies, ...this.#devDependencies]
-      .map(x => path.basename(x)).reduce((acc, value) => ({ ...acc, [value.replace(/[-]/g, '_')]: true }), {});
+      .map(mod => path.basename(mod))
+      .reduce((acc, value) => ({ ...acc, [value.replace(/[-]/g, '_')]: true }), {});
     const moduleNames = [...Object.keys(modules)];
 
     /** Get framework version at runtime */
@@ -126,7 +127,7 @@ export class Context {
         devDependencies: [...new Set(this.#devDependencies)].toSorted((a, b) => a.localeCompare(b)),
       },
       ...this.#featureContexts,
-      ...moduleNames.map(x => ({ [`module_${x}`]: true }))
+      ...moduleNames.map(mod => ({ [`module_${mod}`]: true }))
     );
 
     return context;

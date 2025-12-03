@@ -92,7 +92,7 @@ export class LiteralUtil {
     if (!value) {
       throw new Error('Val is not defined');
     } else if (ts.isArrayLiteralExpression(value)) {
-      return value.elements.map(x => this.toLiteral(x, strict));
+      return value.elements.map(item => this.toLiteral(item, strict));
     } else if (ts.isIdentifier(value)) {
       if (value.getText() === 'undefined') {
         return undefined;
@@ -140,10 +140,10 @@ export class LiteralUtil {
    */
   static extendObjectLiteral(factory: ts.NodeFactory, src: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
     let literal = this.fromLiteral(factory, src);
-    if (rest.find(x => !!x)) {
+    if (rest.find(item => !!item)) {
       literal = factory.createObjectLiteralExpression([
         factory.createSpreadAssignment(literal),
-        ...(rest.filter(x => !!x).map(expression => factory.createSpreadAssignment(this.fromLiteral(factory, expression))))
+        ...(rest.filter(item => !!item).map(expression => factory.createSpreadAssignment(this.fromLiteral(factory, expression))))
       ]);
     }
     return literal;

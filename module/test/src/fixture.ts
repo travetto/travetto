@@ -5,7 +5,7 @@ export class TestFixtures extends FileLoader {
     super([
       '@#test/fixtures',
       '@#support/fixtures',
-      ...modules.flat().map(x => `${x}#support/fixtures`),
+      ...modules.flat().map(mod => `${mod}#support/fixtures`),
       '@@#support/fixtures'
     ].map(value => Runtime.modulePath(value)));
   }

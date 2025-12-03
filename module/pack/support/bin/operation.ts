@@ -68,10 +68,10 @@ export class PackOperation {
         ['BUNDLE_OUTPUT', config.buildDir],
         ['BUNDLE_FORMAT', Runtime.workspace.type],
         ['BUNDLE_ENV_FILE', config.envFile],
-        ['BUNDLE_EXTERNAL', config.externalDependencies.map(x => x.split(':')[0]).join(',')]
+        ['BUNDLE_EXTERNAL', config.externalDependencies.map(mod => mod.split(':')[0]).join(',')]
       ] as const)
-        .filter(x => x[1] === false || x[1])
-        .map(x => [x[0], `${x[1]}`])
+        .filter(pair => pair[1] === false || pair[1])
+        .map(pair => [pair[0], `${pair[1]}`])
       ),
       ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(config.module)!.outputPath),
     };
@@ -82,9 +82,10 @@ export class PackOperation {
     yield* PackOperation.title(config, cliTpl`${{ title: 'Bundling Output' }} ${properties}`);
 
     if (config.ejectFile) {
-      yield* Object.entries(env).filter(x => !!x[1]).map(x =>
-        ActiveShellCommand.export(x[0], x[1])
-      );
+      yield* Object
+        .entries(env)
+        .filter(pair => !!pair[1])
+        .map(pair => ActiveShellCommand.export(pair[0], pair[1]));
       yield ActiveShellCommand.chdir(cwd);
       yield bundleCommand;
       yield ActiveShellCommand.chdir(path.resolve());

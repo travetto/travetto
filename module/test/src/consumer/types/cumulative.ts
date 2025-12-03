@@ -30,7 +30,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     // Was only loading to verify existence (TODO: double-check)
     if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
       (this.#state[test.classId] ??= {})[test.methodName] = test.status;
-      const SuiteCls = SuiteRegistryIndex.getClasses().find(x => x.Ⲑid === test.classId);
+      const SuiteCls = SuiteRegistryIndex.getClasses().find(cls => cls.Ⲑid === test.classId);
       return SuiteCls ? this.computeTotal(SuiteCls) : this.removeClass(test.classId);
     } else {
       return this.removeClass(test.classId);
@@ -52,8 +52,8 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    */
   computeTotal(cls: Class): SuiteResult {
     const suite = SuiteRegistryIndex.getConfig(cls);
-    const total = Object.values(suite.tests).reduce((acc, x) => {
-      const status = this.#state[x.classId][x.methodName] ?? 'unknown';
+    const total = Object.values(suite.tests).reduce((acc, config) => {
+      const status = this.#state[config.classId][config.methodName] ?? 'unknown';
       acc[status] += 1;
       return acc;
     }, { skipped: 0, passed: 0, failed: 0, unknown: 0 });

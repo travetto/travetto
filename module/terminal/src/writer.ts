@@ -73,7 +73,7 @@ export class TerminalWriter {
   }
 
   commit(restorePosition: boolean = this.#restoreOnCommit): Promise<void> {
-    const queue = this.#buffer.filter(x => x !== undefined);
+    const queue = this.#buffer.filter(line => line !== undefined);
     this.#buffer = [];
     if (queue.length && restorePosition) {
       queue.unshift(Codes.POSITION_SAVE);
@@ -127,7 +127,7 @@ export class TerminalWriter {
 
   /** Write multiple lines */
   writeLines(lines: (string | undefined)[], clear = false): this {
-    lines = lines.filter(x => x !== undefined);
+    lines = lines.filter(line => line !== undefined);
     let text = lines.join('\n');
     if (text.length > 0) {
       if (clear) {

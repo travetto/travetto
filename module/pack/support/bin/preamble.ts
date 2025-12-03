@@ -11,8 +11,8 @@ if (!process.env.TRV_MODULE && '%%ENV_FILE%%') {
   try {
     readSyncPreamble('%%ENV_FILE%%', 'utf8')
       .split('\n')
-      .map(x => x.match(/\s*(?<key>[^ =]+)\s*=\s*(?<value>\S+)/)?.groups)
-      .filter(x => !!x)
-      .forEach(x => process.env[x.key] = x.value);
+      .map(line => line.match(/\s*(?<key>[^ =]+)\s*=\s*(?<value>\S+)/)?.groups)
+      .filter(pair => !!pair)
+      .forEach(pair => process.env[pair.key] = pair.value);
   } catch { }
 }

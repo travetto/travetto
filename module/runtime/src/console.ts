@@ -50,7 +50,7 @@ class $ConsoleManager implements ConsoleListener {
   /**
    * List of logging filters
    */
-  #filters: Partial<Record<ConsoleEvent['level'], (x: ConsoleEvent) => boolean>> = {};
+  #filters: Partial<Record<ConsoleEvent['level'], (event: ConsoleEvent) => boolean>> = {};
 
   constructor(listener: ConsoleListener) {
     this.set(listener);

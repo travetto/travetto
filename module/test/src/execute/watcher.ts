@@ -36,7 +36,7 @@ export class TestWatcher {
     const consumer = new CumulativeSummaryConsumer(
       await TestConsumerRegistryIndex.getInstance({ consumer: format })
     )
-      .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
+      .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
 
     Registry.onMethodChange((event) => {
       const [cls, method] = 'previous' in event ? event.previous : event.current;

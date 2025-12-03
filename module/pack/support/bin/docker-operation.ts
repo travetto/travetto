@@ -12,7 +12,7 @@ import { PackUtil } from './util.ts';
 export class DockerPackOperation {
 
   static getDockerTags(config: DockerPackConfig): string[] {
-    return (config.dockerTag ?? []).map(x => config.dockerRegistry ? `${config.dockerRegistry}/${config.dockerName}:${x}` : `${config.dockerName}:${x}`);
+    return (config.dockerTag ?? []).map(tag => config.dockerRegistry ? `${config.dockerRegistry}/${config.dockerName}:${tag}` : `${config.dockerName}:${tag}`);
   }
 
   /**
@@ -71,7 +71,7 @@ export class DockerPackOperation {
     const cmd = [
       'docker', 'build',
       ...(config.dockerBuildPlatform ? ['--platform', config.dockerBuildPlatform] : []),
-      ...DockerPackOperation.getDockerTags(config).flatMap(x => ['-t', x]), '.'
+      ...DockerPackOperation.getDockerTags(config).flatMap(tag => ['-t', tag]), '.'
     ];
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Building Docker Container' }} ${{ param: config.dockerTag?.join(',') }}`);

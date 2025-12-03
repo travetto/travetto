@@ -42,11 +42,13 @@ export class ScaffoldCommand implements CliCommandShape {
       name: 'choice',
       message: 'Please select one',
       initial: feature.default,
-      choices: feature.choices!.map(x => x.title).filter((x?: string): x is string => !!x),
+      choices: feature.choices!
+        .map(subFeature => subFeature.title)
+        .filter((name?: string): name is string => !!name),
     };
 
     const response = await prompt<{ choice: string }>(choice);
-    return feature.choices?.find(x => x.title === response.choice);
+    return feature.choices?.find(subFeature => subFeature.title === response.choice);
   }
 
   async * #resolveFeatures(features: Feature[], chosen = false, depth = 0): AsyncGenerator<Feature> {

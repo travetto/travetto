@@ -52,7 +52,7 @@ export function getEntry(): string {
 
 export function getFiles(entry?: string): string[] {
   return [...RuntimeIndex.getModuleList('all')]
-    .map(x => RuntimeIndex.getManifestModule(x))
+    .map(name => RuntimeIndex.getManifestModule(name))
     .filter(mod => mod.prod)
     .flatMap(getFilesFromModule)
     .filter(file => (!entry || !file.endsWith(entry)) && !file.includes('@travetto/pack/support/'));
@@ -90,6 +90,6 @@ export function getCoreConfig(): CoreRollupConfig {
 
   return {
     output, entry, files, envFile, minify, external,
-    ignore: new Set([...ignoreModules.map(x => x.name), ...ignoreFiles]),
+    ignore: new Set([...ignoreModules.map(mod => mod.name), ...ignoreFiles]),
   };
 }

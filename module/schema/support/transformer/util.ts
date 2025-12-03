@@ -22,7 +22,7 @@ export class SchemaTransformUtil {
     switch (type.key) {
       case 'pointer': return this.toConcreteType(state, type.target, node, root);
       case 'managed': return state.getOrImport(type);
-      case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toConcreteType(state, x, node, root)!));
+      case 'tuple': return state.fromLiteral(type.subTypes.map(subType => this.toConcreteType(state, subType, node, root)!));
       case 'template': return state.createIdentifier(type.ctor.name);
       case 'literal': {
         if ((type.ctor === Array) && type.typeArguments?.length) {
@@ -160,8 +160,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
     // We need to ensure we aren't being tripped up by the wrapper for arrays, sets, etc.
     // If we have a composition type
     if (primaryExpr.key === 'composition') {
-      const values = primaryExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
-        .filter(x => x !== undefined && x !== null);
+      const values = primaryExpr.subTypes
+        .map(subType => subType.key === 'literal' ? subType.value : undefined)
+        .filter(value => value !== undefined && value !== null);
 
       if (values.length === primaryExpr.subTypes.length) {
         attrs.enum = {
@@ -180,7 +181,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
 
     if (ts.isParameter(node)) {
       const parentComments = DocUtil.describeDocs(node.parent);
-      const paramComments: Partial<ParamDocumentation> = (parentComments.params ?? []).find(x => x.name === node.name.getText()) || {};
+      const paramComments: Partial<ParamDocumentation> = (parentComments.params ?? [])
+        .find(param => param.name === node.name.getText()) || {};
+
       if (paramComments.description) {
         attrs.description = paramComments.description;
       }
@@ -192,9 +195,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     const tags = ts.getJSDocTags(node);
-    const aliases = tags.filter(x => x.tagName.getText() === 'alias');
+    const aliases = tags.filter(tag => tag.tagName.getText() === 'alias');
     if (aliases.length) {
-      attrs.aliases = aliases.map(x => x.comment).filter(x => !!x);
+      attrs.aliases = aliases.map(alias => alias.comment).filter(alias => !!alias);
     }
 
     const params: ts.Expression[] = [];

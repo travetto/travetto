@@ -9,14 +9,14 @@ export const GLOBAL_IMPORT = '__trv_imp';
 
 export function travettoEntryPlugin(config: CoreRollupConfig): Plugin {
   const imports = config.files
-    .map(x => x.split('node_modules/').pop()!)
-    .flatMap(x => x.endsWith('/__index__.js') ? [x.replace('/__index__.js', ''), x] : [x]);
+    .map(file => file.split('node_modules/').pop()!)
+    .flatMap(file => file.endsWith('/__index__.js') ? [file.replace('/__index__.js', ''), file] : [file]);
 
   const operation = config.output.format === 'module' ? 'import' : 'require';
   const importer = `
 function trvImp(path) {
   switch (path) {
-${imports.map(x => `    case '${x}': return ${operation}('${x}')`).join('\n')}
+${imports.map(file => `    case '${file}': return ${operation}('${file}')`).join('\n')}
     default: return ${operation}(path); // Fall back for built-ins
   }
 }

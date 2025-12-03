@@ -28,8 +28,13 @@ export class TransformerManager {
       transformers.push(...getAllTransformers(await import(ManifestModuleUtil.withOutputExtension(entry.import)), entry.module));
     }
 
-    for (const x of transformers) {
-      process.send?.({ type: 'log', payload: { level: 'debug', message: `Loaded Transformer: ${x.key}#${x.type}`, scope: 'transformers' } });
+    for (const transformer of transformers) {
+      process.send?.({
+        type: 'log', payload: {
+          level: 'debug',
+          message: `Loaded Transformer: ${transformer.key}#${transformer.type}`, scope: 'transformers'
+        }
+      });
     }
 
     // Prepare a new visitor factory with a given type checker

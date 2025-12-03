@@ -45,14 +45,14 @@ export class AssertUtil {
       .replace(/[\\/]/g, '/')
       .split('\n')
       // Exclude node_modules, target self
-      .filter(x => x.includes(cwd) && (!x.includes('node_modules') || x.includes('/support/')));
+      .filter(lineText => lineText.includes(cwd) && (!lineText.includes('node_modules') || lineText.includes('/support/')));
 
     const filename = RuntimeIndex.getFromImport(importLocation)?.sourceFile!;
 
-    let best = lines.filter(x => x.includes(filename))[0];
+    let best = lines.filter(lineText => lineText.includes(filename))[0];
 
     if (!best) {
-      [best] = lines.filter(x => x.includes(`${cwd}/test`));
+      [best] = lines.filter(lineText => lineText.includes(`${cwd}/test`));
     }
 
     if (!best) {

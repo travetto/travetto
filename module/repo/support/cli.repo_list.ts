@@ -32,8 +32,8 @@ export class ListModuleCommand implements CliCommandShape {
     const modules = await CliModuleUtil.findModules(this.changed ? 'changed' : 'workspace', this.fromHash, this.toHash);
     switch (this.format) {
       case 'list': {
-        for (const mod of modules.map(x => x.sourceFolder).toSorted()) {
-          await write(mod);
+        for (const folder of modules.map(mod => mod.sourceFolder).toSorted()) {
+          await write(folder);
         }
         break;
       }

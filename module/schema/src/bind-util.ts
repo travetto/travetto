@@ -222,7 +222,7 @@ export class BindUtil {
             // Ensure its an array
             if (!Array.isArray(value) && field.array) {
               if (typeof value === 'string' && value.includes(',')) {
-                value = value.split(/,/).map(x => x.trim());
+                value = value.split(/,/).map(part => part.trim());
               } else {
                 value = [value];
               }
@@ -273,11 +273,11 @@ export class BindUtil {
     const complex = SchemaRegistryIndex.has(config.type);
     const bindCfg: BindConfig | undefined = (complex && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
     if (config.array) {
-      const valArr = !Array.isArray(value) ? [value] : value;
+      const subValue = !Array.isArray(value) ? [value] : value;
       if (complex) {
-        value = valArr.map(x => this.bindSchema(config.type, x, bindCfg));
+        value = subValue.map(item => this.bindSchema(config.type, item, bindCfg));
       } else {
-        value = valArr.map(x => DataUtil.coerceType(x, config.type, false));
+        value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
       if (complex) {

@@ -103,7 +103,7 @@ export class Util {
     cacheKey?: (...keyInput: K) => string
   ): (...input: K) => boolean {
 
-    const rawRules = (Array.isArray(rules) ? rules : rules.split(/,/g).map(x => x.trim()));
+    const rawRules = (Array.isArray(rules) ? rules : rules.split(/,/g).map(rule => rule.trim()));
     const convertedRules = rawRules.map(rule => this.#allowDenyRuleInput(rule, convert));
     const unmatchedValue = !convertedRules.some(rule => rule.positive);
 

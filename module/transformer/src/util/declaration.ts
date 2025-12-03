@@ -39,7 +39,7 @@ export class DeclarationUtil {
     } else {
       decls = CoreUtil.getSymbol(type)?.getDeclarations?.() ?? [];
     }
-    return decls.filter(x => !!x);
+    return decls.filter(declaration => !!declaration);
   }
 
   /**
@@ -98,7 +98,7 @@ export class DeclarationUtil {
 
   static isStatic(node: ts.Declaration): boolean {
     if ('modifiers' in node && Array.isArray(node.modifiers)) {
-      return node.modifiers?.some(x => x.kind === ts.SyntaxKind.StaticKeyword) ?? false;
+      return node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.StaticKeyword) ?? false;
     }
     return false;
   }

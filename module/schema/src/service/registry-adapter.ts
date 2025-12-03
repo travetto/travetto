@@ -256,7 +256,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       const fields = config.views[view];
       const withoutSet = 'without' in fields ? new Set<string>(fields.without) : undefined;
       const fieldList = withoutSet ?
-        Object.keys(config.fields).filter(x => !withoutSet.has(x)) :
+        Object.keys(config.fields).filter(field => !withoutSet.has(field)) :
         ('with' in fields ? fields.with : []);
 
       this.#views.set(view,

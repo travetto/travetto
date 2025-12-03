@@ -36,7 +36,7 @@ export class XunitEmitter implements TestConsumerShape {
     }
     if (Object.keys(meta).length) {
       let body = stringify(meta);
-      body = body.split('\n').map(x => `  ${x}`).join('\n');
+      body = body.split('\n').map(line => `  ${line}`).join('\n');
       return `<![CDATA[\n${body}\n]]>`;
     } else {
       return '';
@@ -59,7 +59,7 @@ export class XunitEmitter implements TestConsumerShape {
       let body = '';
 
       if (test.error) {
-        const assertErr = test.assertions.find(x => !!x.error)!;
+        const assertErr = test.assertions.find(assertion => !!assertion.error)!;
         body = `<failure type="${assertErr.text}" message="${encodeURIComponent(assertErr.message!)}"><![CDATA[${assertErr.error!.stack}]]></failure>`;
       }
 

@@ -294,7 +294,7 @@ export class SchemaValidator {
       await this.validate(cls, item, view);
     } catch (error) {
       if (error instanceof ValidationResultError) { // Don't check required fields
-        const errs = error.details.errors.filter(x => x.kind !== 'required');
+        const errs = error.details.errors.filter(validationError => validationError.kind !== 'required');
         if (errs.length) {
           error.details.errors = errs;
           throw error;
@@ -320,13 +320,13 @@ export class SchemaValidator {
       errors.push(...[
         ... this.#validateInputSchema(param, params[i]),
         ... await this.#validateClassLevel(param.type, params[i])
-      ].map(x => {
+      ].map(error => {
         if (param.name && typeof param.name === 'string') {
-          x.path = !prefixes[i] ?
-            x.path.replace(`${param.name}.`, '') :
-            x.path.replace(param.name, prefixes[i]!.toString());
+          error.path = !prefixes[i] ?
+            error.path.replace(`${param.name}.`, '') :
+            error.path.replace(param.name, prefixes[i]!.toString());
         }
-        return x;
+        return error;
       }));
     }
     for (const validator of config.validators) {

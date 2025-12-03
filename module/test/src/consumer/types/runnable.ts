@@ -12,7 +12,7 @@ export class RunnableTestConsumer extends DelegatingConsumer {
 
   constructor(...consumers: TestConsumerShape[]) {
     super(consumers);
-    this.#results = consumers.find(x => !!x.onSummary) ? new TestResultsSummarizer() : undefined;
+    this.#results = consumers.find(consumer => !!consumer.onSummary) ? new TestResultsSummarizer() : undefined;
   }
 
   onEventDone(event: TestEvent): void {

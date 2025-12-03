@@ -127,8 +127,8 @@ export class TapSummaryEmitter implements TestConsumerShape {
         await this.#consumer.log(`${this.#enhancer.suiteName(`Top ${count} slowest ${title}s`)}: `);
         const top10 = [...results.values()].toSorted((a, b) => b.duration - a.duration).slice(0, count);
 
-        for (const x of top10) {
-          console.log(`  * ${this.#enhancer.testName(x.key)} - ${this.#enhancer.total(x.duration)}ms / ${this.#enhancer.total(x.tests)} tests`);
+        for (const result of top10) {
+          console.log(`  * ${this.#enhancer.testName(result.key)} - ${this.#enhancer.total(result.duration)}ms / ${this.#enhancer.total(result.tests)} tests`);
         }
         await this.#consumer.log('');
       }

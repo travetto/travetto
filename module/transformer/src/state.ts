@@ -23,8 +23,8 @@ function hasEscapedName(node: ts.Node): node is ts.Node & { name: { escapedText:
   return !!node && 'name' in node && typeof node.name === 'object' && !!node.name && 'escapedText' in node.name && !!node.name.escapedText;
 }
 
-function isRedefinableDeclaration(x: ts.Node): x is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
-  return ts.isFunctionDeclaration(x) || ts.isClassDeclaration(x) || ts.isInterfaceDeclaration(x);
+function isRedefinableDeclaration(node: ts.Node): node is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
+  return ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node);
 }
 
 const FOREIGN_TYPE_REGISTRY_FILE = '@travetto/runtime/src/function';
@@ -136,9 +136,9 @@ export class TransformerState implements State {
    */
   readDocTagList(node: ts.Declaration, name: string): string[] {
     return this.readDocTag(node, name)
-      .flatMap(x => x.split(/\s*,\s*/g))
-      .map(x => x.replace(/`/g, ''))
-      .filter(x => !!x);
+      .flatMap(tag => tag.split(/\s*,\s*/g))
+      .map(tag => tag.replace(/`/g, ''))
+      .filter(tag => !!tag);
   }
 
   /**
@@ -189,7 +189,7 @@ export class TransformerState implements State {
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? [])
       .map(decorator => this.getDecoratorMeta(decorator))
-      .filter(x => !!x) : [];
+      .filter(meta => !!meta) : [];
   }
 
   /**
@@ -309,7 +309,7 @@ export class TransformerState implements State {
     mod = typeof mod === 'string' ? mod : mod[ModuleNameSymbol]!;
     const target = `${mod}:${name}`;
     const list = this.getDecoratorList(node);
-    return list.find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.decorator;
+    return list.find(meta => meta.targets?.includes(target) && (!module || meta.name === name && meta.module === module))?.decorator;
   }
 
   /**
@@ -435,7 +435,7 @@ export class TransformerState implements State {
    */
   getApparentTypeOfField(value: ts.Type, field: string): AnyType | undefined {
     const checker = this.#resolver.getChecker();
-    const properties = checker.getApparentType(value).getApparentProperties().find(x => x.escapedName === field);
+    const properties = checker.getApparentType(value).getApparentProperties().find(property => property.escapedName === field);
     return properties ? this.resolveType(checker.getTypeOfSymbol(properties)) : undefined;
   }
 }

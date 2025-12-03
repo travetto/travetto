@@ -22,7 +22,7 @@ export class RepoPublishCommand implements CliCommandShape {
     });
 
     if (this.dryRun) {
-      console.log('Unpublished modules', [...published.entries()].filter(x => !x[1]).map(([mod]) => mod.sourceFolder));
+      console.log('Unpublished modules', [...published.entries()].filter(entry => !entry[1]).map(([mod]) => mod.sourceFolder));
     }
 
     await RepoExecUtil.execOnModules(
