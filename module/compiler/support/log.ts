@@ -106,8 +106,8 @@ class $RootLogger extends Logger {
   /** Write progress event, if active */
   onProgressEvent(event: CompilerProgressEvent): void | Promise<void> {
     if (!(this.logProgress)) { return; }
-    const pct = Math.trunc(event.idx * 100 / event.total);
-    const text = event.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${event.idx}/${event.total}] ${event.message}`;
+    const progress = Math.trunc(event.idx * 100 / event.total);
+    const text = event.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(progress / 10)).padEnd(10, ' ')}] [${event.idx}/${event.total}] ${event.message}`;
     return Logger.rewriteLine(text);
   }
 

@@ -26,14 +26,14 @@ export class TerminalUtil {
     let width: number;
     return event => {
       const text = event.value ?? (event.total ? '%idx/%total' : '%idx');
-      const pct = event.total === undefined ? 0 : (event.idx / event.total);
+      const progress = event.total === undefined ? 0 : (event.idx / event.total);
       if (event.total) {
         width ??= Math.trunc(Math.ceil(Math.log10(event.total ?? 10000)));
       }
-      const state: Record<string, string> = { total: `${event.total}`, idx: `${event.idx}`.padStart(width ?? 0), pct: `${Math.trunc(pct * 100)}` };
-      const line = ` ${text.replace(/[%](idx|total|pct)/g, (_, key) => state[key])} `;
+      const state: Record<string, string> = { total: `${event.total}`, idx: `${event.idx}`.padStart(width ?? 0), progress: `${Math.trunc(progress * 100)}` };
+      const line = ` ${text.replace(/[%](idx|total|progress)/g, (_, key) => state[key])} `;
       const full = term.writer.padToWidth(line, config?.withWaiting ? 2 : 0);
-      const mid = Math.trunc(pct * term.width);
+      const mid = Math.trunc(progress * term.width);
       const [left, right] = [full.substring(0, mid), full.substring(mid)];
 
       const { complete, incomplete } = style();
