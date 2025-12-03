@@ -133,7 +133,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     if (item && !item.empty) {
       return item.docs[0].id;
     }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, { sep: '; ' })?.key);
+    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, { separator: '; ' })?.key);
   }
 
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {

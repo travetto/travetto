@@ -32,9 +32,9 @@ export class CompilerUtil {
     pkg.type = manifest.workspace.type;
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
       if (key in pkg) {
-        for (const dep of Object.keys(pkg[key] ?? {})) {
-          if (dep in manifest.modules) {
-            pkg[key]![dep] = manifest.modules[dep].version;
+        for (const dependency of Object.keys(pkg[key] ?? {})) {
+          if (dependency in manifest.modules) {
+            pkg[key]![dependency] = manifest.modules[dependency].version;
           }
         }
       }

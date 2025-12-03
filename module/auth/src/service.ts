@@ -27,9 +27,9 @@ export class AuthService {
     // Find all authenticators
     const AuthenticatorTarget = toConcrete<Authenticator>();
     for (const source of DependencyRegistryIndex.getCandidates(AuthenticatorTarget)) {
-      const qual = source.qualifier || getDefaultQualifier(source.class);
-      const dep = DependencyRegistryIndex.getInstance(AuthenticatorTarget, qual);
-      this.#authenticators.set(qual, dep);
+      const qualifier = source.qualifier || getDefaultQualifier(source.class);
+      const instance = DependencyRegistryIndex.getInstance(AuthenticatorTarget, qualifier);
+      this.#authenticators.set(qualifier, instance);
     }
   }
 

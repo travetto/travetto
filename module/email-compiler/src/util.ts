@@ -11,7 +11,7 @@ type Tokenized = {
   finalize: (onToken: (token: string) => string) => string;
 };
 
-const SUPPORT_SRC = /(?:support|src)\//;
+const SUPPORT_SOURCE = /(?:support|src)\//;
 
 const HTML_CSS_IMAGE_URLS = [
   /(?<prefix><img[^>]src=\s{0,10}["'])(?<source>[^"{}]{1,1000})/g,
@@ -36,7 +36,7 @@ export class EmailCompileUtil {
    * Generate singular output path given a file
    */
   static buildOutputPath(file: string, suffix: string, prefix?: string): string {
-    const location = (SUPPORT_SRC.test(file) ? file.split(SUPPORT_SRC)[1] : file).replace(EXT, suffix);
+    const location = (SUPPORT_SOURCE.test(file) ? file.split(SUPPORT_SOURCE)[1] : file).replace(EXT, suffix);
     return prefix ? path.join(prefix, location) : location;
   }
 

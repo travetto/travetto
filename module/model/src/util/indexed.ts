@@ -111,10 +111,10 @@ export class ModelIndexedUtil {
     cls: Class<T>,
     idx: IndexConfig<T> | string,
     item: DeepPartial<T> = {},
-    config?: ComputeConfig & { sep?: string }
+    config?: ComputeConfig & { separator?: string }
   ): { type: string, key: string, sort?: number | Date } {
     const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(config ?? {}), includeSortInFields: false });
-    const key = fields.map(({ value }) => value).map(value => `${value}`).join(config?.sep ?? DEFAULT_SEP);
+    const key = fields.map(({ value }) => value).map(value => `${value}`).join(config?.separator ?? DEFAULT_SEP);
     const indexConfig = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
     return !sorted ? { type: indexConfig.type, key } : { type: indexConfig.type, key, sort: sorted.value };
   }

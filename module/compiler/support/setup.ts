@@ -13,10 +13,10 @@ type ModFile = { input: string, output: string, stale: boolean };
 const SOURCE_SEED = ['package.json', '__index__.ts', 'src', 'support', 'bin'];
 const PRECOMPILE_MODS = ['@travetto/manifest', '@travetto/transformer', '@travetto/compiler'];
 const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
-const REQ = createRequire(path.resolve('node_modules')).resolve.bind(null);
+const REQUIRE = createRequire(path.resolve('node_modules')).resolve.bind(null);
 
-const SOURCE_EXT_RE = /[.][cm]?[tj]s$/;
-const BARE_IMPORT_RE = /^(@[^/]+[/])?[^.][^@/]+$/;
+const SOURCE_EXT_REGEX = /[.][cm]?[tj]s$/;
+const BARE_IMPORT_REGEX = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
 
 /**
@@ -38,7 +38,7 @@ export class CompilerSetup {
 
   /**  Convert a file to a given ext */
   static #sourceToExtension(sourceFile: string, ext: string): string {
-    return sourceFile.replace(SOURCE_EXT_RE, ext);
+    return sourceFile.replace(SOURCE_EXT_REGEX, ext);
   }
 
   /**
@@ -59,7 +59,7 @@ export class CompilerSetup {
       const text = (await fs.readFile(sourceFile, 'utf8'))
         .replace(/from ['"](([.]+|@travetto)[/][^']+)['"]/g, (_, clause, moduleName) => {
           const root = this.#sourceToOutputExt(clause);
-          const suffix = root.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
+          const suffix = root.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_REGEX.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
           const prefix = moduleName === '@travetto' ? `${compilerOut}/` : '';
           return `from '${prefix}${root}${suffix}'`;
         });
@@ -86,7 +86,7 @@ export class CompilerSetup {
    * Scan directory to find all project sources for comparison
    */
   static async #getModuleSources(ctx: ManifestContext, module: string, seed: string[]): Promise<ModFile[]> {
-    const inputFolder = path.dirname(REQ(`${module}/package.json`));
+    const inputFolder = path.dirname(REQUIRE(`${module}/package.json`));
 
     const folders = seed.filter(folder => !/[.]/.test(folder)).map(folder => path.resolve(inputFolder, folder));
     const files = seed.filter(file => /[.]/.test(file)).map(file => path.resolve(inputFolder, file));

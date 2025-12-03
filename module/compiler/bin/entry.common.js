@@ -4,8 +4,8 @@ const { stat, readFile, writeFile, mkdir, rm, readdir } = require('node:fs/promi
 const path = require('node:path');
 
 const COMP_MOD = '@travetto/compiler';
-const SOURCE_EXT_RE = /[.][cm]?[tj]sx?$/;
-const BARE_IMPORT_RE = /^(@[^/]+[/])?[^.][^@/]+$/;
+const SOURCE_EXT_REGEX = /[.][cm]?[tj]sx?$/;
+const BARE_IMPORT_REGEX = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
 
 async function writeIfStale(sourceFile = '', destinationFile = '', transform = async (text = '') => text) {
@@ -39,7 +39,7 @@ async function getContext() {
 
   const srcPath = path.resolve.bind(path, ctx.workspace.path, ctx.build.compilerModuleFolder);
   const destPath = (file = '') =>
-    path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', file).replace(SOURCE_EXT_RE, OUTPUT_EXT);
+    path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', file).replace(SOURCE_EXT_REGEX, OUTPUT_EXT);
 
   return {
     packageType: ctx.workspace.type,
@@ -48,8 +48,8 @@ async function getContext() {
     tsconfig: path.resolve(ctx.workspace.path, 'tsconfig.json'),
     cleanImports: (text = '') => text
       .replace(/from ['"]((@travetto|[.]+)[^'"]+)['"]/g, (_, location, module) => {
-        const root = (module === '@travetto' ? destPath(location) : location).replace(SOURCE_EXT_RE, OUTPUT_EXT);
-        const suffix = root.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(location) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
+        const root = (module === '@travetto' ? destPath(location) : location).replace(SOURCE_EXT_REGEX, OUTPUT_EXT);
+        const suffix = root.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_REGEX.test(location) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
         return `from '${root}${suffix}'`;
       }),
     loadMain: () => import(destPath(`${COMP_MOD}/support/entry.main.ts`))

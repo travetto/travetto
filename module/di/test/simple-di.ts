@@ -10,7 +10,7 @@ import {
   CustomDatabaseSymbol, Database, CustomEmptySymbol, BasePattern,
   SpecificPattern, InterfaceType, BaseType, CustomInterfaceSymbol, UsableMainClass, UsableSubClass,
   UsableSubSubClass, LooseResolutionClass, LooseSymbol, SetterInject
-} from './deps.ts';
+} from './dependencies.ts';
 
 import { DbConfig } from './config.ts';
 

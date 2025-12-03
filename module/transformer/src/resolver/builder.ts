@@ -82,7 +82,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     try {
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
       const sourceFile = source.fileName;
-      if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_RE.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
+      if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_REGEX.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
         return { category: 'foreign', type };
       }
     } catch { }
@@ -101,7 +101,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     const sourceFile = source.fileName;
     if (sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_RE.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
+    } else if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_REGEX.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
       return { category: 'foreign', type: resolvedType };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };

@@ -56,12 +56,12 @@ export class PackageModuleVisitor {
       outputFolder: `node_modules/${pkg.name}`,
       state: {
         childSet: new Set(), parentSet: new Set(), roleSet: new Set(), roleRoot,
-        travetto: pkg.travetto, prodDeps: new Set(Object.keys(pkg.dependencies ?? {}))
+        travetto: pkg.travetto, prodDependencies: new Set(Object.keys(pkg.dependencies ?? {}))
       }
     };
 
-    const deps: PackageDependencyType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
-    const children = Object.fromEntries(deps.flatMap(dependency => Object.entries(pkg[dependency] ?? {})));
+    const dependencies: PackageDependencyType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
+    const children = Object.fromEntries(dependencies.flatMap(dependency => Object.entries(pkg[dependency] ?? {})));
     return { pkg, value, children, parent };
   }
 
@@ -133,7 +133,7 @@ export class PackageModuleVisitor {
             }
           }
           // Allow prod to trickle down as needed
-          child.item.prod ||= (item.prod && item.state.prodDeps.has(childName));
+          child.item.prod ||= (item.prod && item.state.prodDependencies.has(childName));
         }
       }
       // Remove from mapping

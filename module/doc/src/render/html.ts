@@ -13,7 +13,7 @@ import { RenderContext } from './context.ts';
 import { DocResolveUtil } from '../util/resolve.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
-const ENTITY_RE = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');
+const ENTITY_REGEX = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');
 
 const stdInline = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
   `<${node.type}>${await recurse()}</${node.type}>`;
@@ -114,7 +114,7 @@ yarn add ${node.props.pkg}
   Field: state => Html.Input(state),
   Input: async ({ node, context }) => {
     const cls = getComponentName(node.type).replace(/^[A-Z]/g, value => value.toLowerCase());
-    return `<code class="item ${cls}">${context.cleanText(node.props.name.replace(ENTITY_RE, key => ESCAPE_ENTITIES[key]))}</code>`;
+    return `<code class="item ${cls}">${context.cleanText(node.props.name.replace(ENTITY_REGEX, key => ESCAPE_ENTITIES[key]))}</code>`;
   },
   CodeLink: async ({ context, props, node }) => {
     const target = await context.resolveCodeLink(node);

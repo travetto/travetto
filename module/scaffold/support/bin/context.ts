@@ -14,7 +14,7 @@ import { Feature } from './features.ts';
 type ListingEntry = { requires?: string[], rename?: string };
 type Listing = Record<string, ListingEntry>;
 
-const DEV_DEPS = new Set([
+const DEV_DEPENDENCIES = new Set([
   '@travetto/test',
   '@travetto/pack',
   '@travetto/compiler',
@@ -161,7 +161,7 @@ export class Context {
       const pkgs = Array.isArray(feat.package) ? feat.package : [feat.package];
       for (const pkg of pkgs) {
         if (pkg.startsWith('@travetto')) {
-          if (DEV_DEPS.has(pkg)) {
+          if (DEV_DEPENDENCIES.has(pkg)) {
             this.#devDependencies.push(pkg);
           } else {
             this.#dependencies.push(pkg);

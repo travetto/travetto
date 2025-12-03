@@ -31,9 +31,9 @@ export class MySQLDialect extends SQLDialect {
      * Set string length limit based on version
      */
     if (/^5[.][56]/.test(config.version)) {
-      this.DEFAULT_STRING_LEN = 191; // Mysql limitation with utf8 and keys
+      this.DEFAULT_STRING_LENGTH = 191; // Mysql limitation with utf8 and keys
     } else {
-      this.DEFAULT_STRING_LEN = 3072 / 4 - 1;
+      this.DEFAULT_STRING_LENGTH = 3072 / 4 - 1;
     }
 
     if (/^5[.].*/.test(config.version)) {

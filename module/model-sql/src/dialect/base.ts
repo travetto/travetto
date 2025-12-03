@@ -39,17 +39,17 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Default length of unique ids
    */
-  ID_LEN = 32;
+  ID_LENGTH = 32;
 
   /**
    * Hash Length
    */
-  HASH_LEN = 64;
+  HASH_LENGTH = 64;
 
   /**
    * Default length for varchar
    */
-  DEFAULT_STRING_LEN = 1024;
+  DEFAULT_STRING_LENGTH = 1024;
 
   /**
    * Mapping between query operators and SQL operations
@@ -105,8 +105,8 @@ export abstract class SQLDialect implements DialectState {
    * Generate an id field
    */
   idField = makeField('id', String, true, {
-    maxlength: { n: this.ID_LEN },
-    minlength: { n: this.ID_LEN }
+    maxlength: { n: this.ID_LENGTH },
+    minlength: { n: this.ID_LENGTH }
   });
 
   /**
@@ -118,8 +118,8 @@ export abstract class SQLDialect implements DialectState {
    * Parent path reference
    */
   parentPathField = makeField('__parent_path', String, true, {
-    maxlength: { n: this.HASH_LEN },
-    minlength: { n: this.HASH_LEN },
+    maxlength: { n: this.HASH_LENGTH },
+    minlength: { n: this.HASH_LENGTH },
     required: { active: true }
   });
 
@@ -127,8 +127,8 @@ export abstract class SQLDialect implements DialectState {
    * Path reference
    */
   pathField = makeField('__path', String, true, {
-    maxlength: { n: this.HASH_LEN },
-    minlength: { n: this.HASH_LEN },
+    maxlength: { n: this.HASH_LENGTH },
+    minlength: { n: this.HASH_LENGTH },
     required: { active: true }
   });
 
@@ -253,7 +253,7 @@ export abstract class SQLDialect implements DialectState {
       if (config.specifiers?.includes('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.n : this.DEFAULT_STRING_LEN);
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.n : this.DEFAULT_STRING_LENGTH);
       }
     } else if (config.type === PointImpl) {
       type = this.COLUMN_TYPES.POINT;
@@ -653,7 +653,7 @@ ${this.getLimitSQL(cls, query)}`;
       if (!idField) {
         fields.push(idField = this.idField);
       } else {
-        idField.maxlength = { n: this.ID_LEN };
+        idField.maxlength = { n: this.ID_LENGTH };
       }
     }
 

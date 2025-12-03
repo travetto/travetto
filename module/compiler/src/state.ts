@@ -46,7 +46,7 @@ export class CompilerState implements ts.CompilerHost {
   #writeExternalTypings(location: string, text: string, bom: boolean): void {
     let core = location.replace('.map', '');
     if (!this.#outputToEntry.has(core)) {
-      core = core.replace(ManifestModuleUtil.TYPINGS_EXT_RE, ManifestModuleUtil.OUTPUT_EXT);
+      core = core.replace(ManifestModuleUtil.TYPINGS_EXT_REGEX, ManifestModuleUtil.OUTPUT_EXT);
     }
     const entry = this.#outputToEntry.get(core);
     if (entry) {
@@ -258,7 +258,7 @@ export class CompilerState implements ts.CompilerHost {
     }
     const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
 
-    if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_RE.test(outputFile) || outputFile.endsWith('package.json')) {
+    if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(outputFile) || outputFile.endsWith('package.json')) {
       this.#writeExternalTypings(location, text, bom);
     }
 

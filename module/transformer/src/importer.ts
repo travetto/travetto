@@ -9,7 +9,7 @@ import { Import } from './types/shared.ts';
 import { LiteralUtil } from './util/literal.ts';
 import { DeclarationUtil } from './util/declaration.ts';
 
-const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
+const D_OR_D_TS_EXT_REGEX = /[.]d([.]ts)?$/;
 
 /**
  * Manages imports within a ts.SourceFile
@@ -134,10 +134,10 @@ export class ImportManager {
 
     // Allow for node classes to be imported directly
     if (/@types\/node\//.test(file)) {
-      file = PackageUtil.resolveImport(file.split('@types/node/')[1].replace(D_OR_D_TS_EXT_RE, ''));
+      file = PackageUtil.resolveImport(file.split('@types/node/')[1].replace(D_OR_D_TS_EXT_REGEX, ''));
     }
 
-    if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {
+    if (!D_OR_D_TS_EXT_REGEX.test(file) && !this.#newImports.has(file)) {
       const identifier = this.getIdentifier(file, name);
       const uniqueName = identifier.text;
 

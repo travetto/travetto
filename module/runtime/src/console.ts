@@ -30,7 +30,7 @@ export interface ConsoleListener {
   log(event: ConsoleEvent): void;
 }
 
-const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
+const DEBUG_HANDLE = { formatArgs: debug.formatArgs, log: debug.log };
 
 /**
  * Provides a general abstraction against the console.* methods to allow for easier capture and redirection.
@@ -90,8 +90,8 @@ class $ConsoleManager implements ConsoleListener {
         args: [util.format(...args)], line: 0, timestamp: new Date()
       });
     } else {
-      debug.formatArgs = DEBUG_OG.formatArgs;
-      debug.log = DEBUG_OG.log;
+      debug.formatArgs = DEBUG_HANDLE.formatArgs;
+      debug.log = DEBUG_HANDLE.log;
     }
   }
 

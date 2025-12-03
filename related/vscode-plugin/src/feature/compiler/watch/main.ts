@@ -20,7 +20,7 @@ const resolvablePromise = <T = void>(): PromiseWithResolvers<T> => {
 };
 
 const SCOPE_MAX = 15;
-const SUB_LOG_RE = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?\s+(info|error|debug|warn)/;
+const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?\s+(info|error|debug|warn)/;
 
 /**
  * Workspace Compilation Support
@@ -86,11 +86,11 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      ExecUtil.readLines(subProcess.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+      ExecUtil.readLines(subProcess.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
     }
 
     if (debug && subProcess.stdout) {
-      ExecUtil.readLines(subProcess.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+      ExecUtil.readLines(subProcess.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
     }
 
     return subProcess;

@@ -103,7 +103,7 @@ export class SQLModelService implements
       if (this.#dialect.connection.init) {
         await this.#dialect.connection.init();
       }
-      this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LEN);
+      this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LENGTH);
       this.#manager = new TableManager(this.#context, this.#dialect);
       await ModelStorageUtil.registerModelChangeListener(this);
       ModelExpiryUtil.registerCull(this);

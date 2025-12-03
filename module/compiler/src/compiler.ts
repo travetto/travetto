@@ -134,9 +134,9 @@ export class Compiler {
       const start = Date.now();
       const error = await emitter(file);
       const duration = Date.now() - start;
-      const nodeModSep = 'node_modules/';
-      const nodeModIdx = file.lastIndexOf(nodeModSep);
-      const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSep.length) : file;
+      const nodeModSeparator = 'node_modules/';
+      const nodeModIdx = file.lastIndexOf(nodeModSeparator);
+      const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
       yield { file: imp, i: i += 1, error, total: files.length, duration };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
