@@ -87,14 +87,14 @@ export class DataUtil {
         }
       } else { // Object merge
         value = a;
-        const bObj: Record<string, unknown> = castTo(b);
-        const retObj: Record<string, unknown> = castTo(value);
+        const bObject: Record<string, unknown> = castTo(b);
+        const valueObject: Record<string, unknown> = castTo(value);
 
-        for (const key of Object.keys(bObj)) {
+        for (const key of Object.keys(bObject)) {
           if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
             continue;
           }
-          retObj[key] = this.#deepAssignRaw(retObj[key], bObj[key], mode);
+          valueObject[key] = this.#deepAssignRaw(valueObject[key], bObject[key], mode);
         }
       }
     }

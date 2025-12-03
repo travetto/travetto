@@ -403,13 +403,13 @@ export class TransformerState implements State {
   /**
    * Produce a foreign target type
    */
-  getForeignTarget(ret: ForeignType): ts.Expression {
+  getForeignTarget(type: ForeignType): ts.Expression {
     const file = this.importFile(FOREIGN_TYPE_REGISTRY_FILE);
     return this.factory.createCallExpression(this.createAccess(
       file.identifier,
       this.factory.createIdentifier('foreignType'),
     ), [], [
-      this.fromLiteral(`${ret.source.split('node_modules/')[1]}+${ret.name}`)
+      this.fromLiteral(`${type.source.split('node_modules/')[1]}+${type.name}`)
     ]);
   }
 

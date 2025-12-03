@@ -376,16 +376,16 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const blob = await this.headBlob(location);
 
     if (blob) {
-      const ret: BlobMeta = {
+      const meta: BlobMeta = {
         contentType: '',
         ...blob.Metadata,
         size: blob.ContentLength!,
       };
-      if (hasContentType(ret)) {
-        ret['contentType'] = ret['contenttype']!;
-        delete ret['contenttype'];
+      if (hasContentType(meta)) {
+        meta['contentType'] = meta['contenttype']!;
+        delete meta['contenttype'];
       }
-      return ret;
+      return meta;
     } else {
       throw new NotFoundError('Blob', location);
     }

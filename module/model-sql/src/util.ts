@@ -85,19 +85,19 @@ export class SQLModelUtil {
       }
     }
 
-    const ret: FieldCacheEntry = {
+    const entry: FieldCacheEntry = {
       localMap: {},
       foreignMap: {},
       local: fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array),
       foreign: fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array)
     };
 
-    ret.local.reduce((acc, field) => (acc[field.name] = field) && acc, ret.localMap);
-    ret.foreign.reduce((acc, field) => (acc[field.name] = field) && acc, ret.foreignMap);
+    entry.local.reduce((acc, field) => (acc[field.name] = field) && acc, entry.localMap);
+    entry.foreign.reduce((acc, field) => (acc[field.name] = field) && acc, entry.foreignMap);
 
-    this.#schemaFieldsCache.set(config.class, ret);
+    this.#schemaFieldsCache.set(config.class, entry);
 
-    return ret;
+    return entry;
   }
 
   /**
@@ -160,7 +160,7 @@ export class SQLModelUtil {
    * Process a schema instance by visiting it synchronously.  This is synchronous to prevent concurrent calls from breaking
    */
   static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T | OptionalId<T>, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>): void {
-    const pathObj: unknown[] = [instance];
+    const pathStack: unknown[] = [instance];
     this.visitSchemaSync(SchemaRegistryIndex.getConfig(cls), {
       onRoot: (config) => {
         const { path } = config;
@@ -170,24 +170,24 @@ export class SQLModelUtil {
       },
       onSub: (config) => {
         const { config: field } = config;
-        const topObj: Record<string | symbol, unknown> = castTo(pathObj.at(-1));
+        const topObject: Record<string | symbol, unknown> = castTo(pathStack.at(-1));
         const top = config.path.at(-1)!;
 
-        if (field.name in topObj) {
-          const valuesInput = topObj[field.name];
+        if (field.name in topObject) {
+          const valuesInput = topObject[field.name];
           const values = Array.isArray(valuesInput) ? valuesInput : [valuesInput];
 
           let i = 0;
           for (const value of values) {
             try {
-              pathObj.push(value);
+              pathStack.push(value);
               config.path[config.path.length - 1] = { ...top, index: i++ };
               handler.onSub({ ...config, value });
               if (!field.array) {
                 config.descend();
               }
             } finally {
-              pathObj.pop();
+              pathStack.pop();
             }
             i += 1;
           }
@@ -198,8 +198,8 @@ export class SQLModelUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
-        const topObj: Record<string | symbol, unknown> = castTo(pathObj.at(-1));
-        const value = topObj[field.name];
+        const topObject: Record<string | symbol, unknown> = castTo(pathStack.at(-1));
+        const value = topObject[field.name];
         return handler.onSimple({ ...config, value });
       }
     });

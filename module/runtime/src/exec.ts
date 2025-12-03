@@ -108,8 +108,8 @@ export class ExecUtil {
   static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
   static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
   static getResult<T extends string | Buffer>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
-    const _proc: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
-    const result = _proc[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
+    const typed: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
+    const result = typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;

@@ -112,17 +112,17 @@ class $ConsoleManager implements ConsoleListener {
    * Handle direct call in lieu of the console.* commands
    */
   log(event: ConsoleEvent & { import?: [string, string] }): void {
-    const outEv = {
+    const result = {
       ...event,
       timestamp: new Date(),
       module: event.module ?? event.import?.[0],
       modulePath: event.modulePath ?? event.import?.[1]
     };
 
-    if (this.#filters[outEv.level] && !this.#filters[outEv.level]!(outEv)) {
+    if (this.#filters[result.level] && !this.#filters[result.level]!(result)) {
       return; // Do nothing
     } else {
-      return this.#listener.log(outEv);
+      return this.#listener.log(result);
     }
   }
 

@@ -12,7 +12,7 @@ import { FirestoreModelConfig } from './config.ts';
 
 const clone = structuredClone;
 
-const toSimpleObj = <T>(input: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
+const toSimpleObject = <T>(input: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
   JSON.parse(JSON.stringify(input, (_, value) => value ?? null), (_, value) => value ?? missingValue);
 
 /**
@@ -88,7 +88,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
-    const cleaned = toSimpleObj(full, FieldValue.delete());
+    const cleaned = toSimpleObject(full, FieldValue.delete());
     await this.#getCollection(cls).doc(id).set(cleaned, { mergeFields: Object.keys(full) });
     return this.get(cls, id);
   }

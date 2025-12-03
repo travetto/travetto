@@ -202,10 +202,10 @@ export class ImportManager {
     }
   }
 
-  finalizeImportExportExtension(ret: ts.SourceFile): ts.SourceFile {
+  finalizeImportExportExtension(source: ts.SourceFile): ts.SourceFile {
     const toAdd: ts.Statement[] = [];
 
-    for (const statement of ret.statements) {
+    for (const statement of source.statements) {
       if (ts.isExportDeclaration(statement)) {
         if (!statement.isTypeOnly) {
           toAdd.push(this.factory.updateExportDeclaration(
@@ -231,7 +231,7 @@ export class ImportManager {
         toAdd.push(statement);
       }
     }
-    return CoreUtil.updateSource(this.factory, ret, toAdd);
+    return CoreUtil.updateSource(this.factory, source, toAdd);
   }
 
   /**
