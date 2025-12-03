@@ -322,7 +322,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
 /**
  * Geometric Point as [number,number] with validation and binding support
  *
- * @concrete ./internal/types.ts#PointImpl
+ * @concrete ./internal/types.ts#PointImplementation
  */
 export type Point = [number, number];
 ```
@@ -336,7 +336,7 @@ const InvalidSymbol = Symbol();
 /**
  * Point Implementation
  */
-export class PointImpl {
+export class PointImplementation {
 
   /**
    * Validate we have an actual point
@@ -359,7 +359,7 @@ export class PointImpl {
   }
 }
 
-Object.defineProperty(PointImpl, 'name', { value: 'Point' });
+Object.defineProperty(PointImplementation, 'name', { value: 'Point' });
 ```
 
 What you can see here is that the `Point` type is now backed by a class that supports:

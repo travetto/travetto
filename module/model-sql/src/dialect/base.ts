@@ -9,7 +9,7 @@ import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts
 import { Connection } from '../connection/base.ts';
 import { VisitStack } from '../types.ts';
 
-const PointImpl = toConcrete<Point>();
+const PointConcrete = toConcrete<Point>();
 
 interface Alias {
   alias: string;
@@ -209,7 +209,7 @@ export abstract class SQLDialect implements DialectState {
       } else {
         return this.resolveDateValue(DataUtil.coerceType(value, Date, true));
       }
-    } else if (config.type === PointImpl && Array.isArray(value)) {
+    } else if (config.type === PointConcrete && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
     } else if (config.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, "''"));
@@ -255,7 +255,7 @@ export abstract class SQLDialect implements DialectState {
       } else {
         type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.n : this.DEFAULT_STRING_LENGTH);
       }
-    } else if (config.type === PointImpl) {
+    } else if (config.type === PointConcrete) {
       type = this.COLUMN_TYPES.POINT;
     } else if (config.type === Object) {
       type = this.COLUMN_TYPES.JSON;

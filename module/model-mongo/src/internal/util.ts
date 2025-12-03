@@ -7,7 +7,7 @@ import { type DistanceUnit, type PageableModelQuery, type WhereClause, ModelQuer
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
 
-const PointImpl = toConcrete<Point>();
+const PointConcrete = toConcrete<Point>();
 
 type IdxConfig = CreateIndexesOptions;
 
@@ -153,7 +153,7 @@ export class MongoUtil {
     const out: BasicIdx[] = [];
     const textFields: string[] = [];
     SchemaRegistryIndex.visitFields(cls, (field, path) => {
-      if (field.type === PointImpl) {
+      if (field.type === PointConcrete) {
         const name = [...path, field].map(schema => schema.name).join('.');
         out.push({ [name]: '2d' });
       } else if (field.specifiers?.includes('text') && (field.specifiers?.includes('long') || field.specifiers.includes('search'))) {

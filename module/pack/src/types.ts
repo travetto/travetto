@@ -46,7 +46,7 @@ export type DockerPackConfig = {
   };
 } & CommonPackConfig;
 
-export type ShellCommandImpl = {
+export type ShellCommandProvider = {
   var(name: string): string;
   createFile(file: string, text: string[], mode?: string): string[][];
   callCommandWithAllArgs(cmd: string, ...args: string[]): string[];

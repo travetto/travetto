@@ -361,7 +361,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
     <pre><code class="language-typescript"><span class="token comment">/**
  * Geometric Point as [number,number] with validation and binding support
  *
- * @concrete ./internal/types.ts#PointImpl
+ * @concrete ./internal/types.ts#PointImplementation
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">Point</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token builtin">number</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
   </figure>
@@ -378,7 +378,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
 <span class="token comment">/**
  * Point Implementation
  */</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">PointImpl</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">PointImplementation</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token comment">/**
    * Validate we have an actual point
@@ -401,7 +401,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 
-Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>PointImpl<span class="token punctuation">,</span> <span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> value<span class="token operator">:</span> <span class="token string">'Point'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>PointImplementation<span class="token punctuation">,</span> <span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> value<span class="token operator">:</span> <span class="token string">'Point'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
   </figure>
 
 What you can see here is that the <code class="item input">Point</code> type is now backed by a class that supports:

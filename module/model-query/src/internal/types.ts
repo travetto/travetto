@@ -16,7 +16,7 @@ const geo = (type: string): Record<string, Set<string>> => ({
   $geoIntersects: st(type, true)
 });
 
-const PointImpl = toConcrete<Point>();
+const PointConcrete = toConcrete<Point>();
 
 /**
  * Basic type support
@@ -43,7 +43,7 @@ export class TypeUtil {
       case Number: return 'number';
       case Boolean: return 'boolean';
       case Date: return 'Date';
-      case PointImpl: return 'Point';
+      case PointConcrete: return 'Point';
       default: {
         if ('type' in field && field.array) {
           return this.getDeclaredType(field.type);

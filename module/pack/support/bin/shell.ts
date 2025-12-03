@@ -1,7 +1,7 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { ShellCommandImpl } from '../../src/types.ts';
+import { ShellCommandProvider } from '../../src/types.ts';
 
 const escape = (text: string): string =>
   text
@@ -14,7 +14,7 @@ const escapedArgs = (args: string[]): string[] => args.map(arg =>
 
 const toWin = (file: string): string => file.replace(/[\\\/]+/g, path.win32.sep);
 
-export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
+export const ShellCommands: Record<'win32' | 'posix', ShellCommandProvider> = {
   win32: {
     var: (name: string) => `%${name}%`,
     callCommandWithAllArgs: (cmd, ...args) => [[cmd, ...escapedArgs(args), '%*'].join(' ')],

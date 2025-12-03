@@ -5,7 +5,7 @@ const InvalidSymbol = Symbol();
 /**
  * Point Implementation
  */
-export class PointImpl {
+export class PointImplementation {
 
   /**
    * Validate we have an actual point
@@ -28,4 +28,4 @@ export class PointImpl {
   }
 }
 
-Object.defineProperty(PointImpl, 'name', { value: 'Point' });
+Object.defineProperty(PointImplementation, 'name', { value: 'Point' });

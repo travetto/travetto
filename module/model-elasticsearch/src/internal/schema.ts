@@ -5,7 +5,7 @@ import { Point, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types.ts';
 
-const PointImpl = toConcrete<Point>();
+const PointConcrete = toConcrete<Point>();
 
 /**
  * Utils for ES Schema management
@@ -79,7 +79,7 @@ export class ElasticsearchSchemaUtil {
     const properties: Record<string, estypes.MappingProperty> = {};
 
     for (const [field, config] of Object.entries(fields)) {
-      if (config.type === PointImpl) {
+      if (config.type === PointConcrete) {
         properties[field] = { type: 'geo_point' };
       } else if (config.type === Number) {
         let property: Record<string, unknown> = { type: 'integer' };
