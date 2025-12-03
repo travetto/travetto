@@ -76,12 +76,12 @@ export class CoreUtil {
 
   /**
    * Updates source
-   * @param src
+   * @param source
    * @param statements
    */
-  static updateSource(factory: ts.NodeFactory, src: ts.SourceFile, statements: ts.NodeArray<ts.Statement> | ts.Statement[]): ts.SourceFile {
+  static updateSource(factory: ts.NodeFactory, source: ts.SourceFile, statements: ts.NodeArray<ts.Statement> | ts.Statement[]): ts.SourceFile {
     return factory.updateSourceFile(
-      src, statements, src.isDeclarationFile, src.referencedFiles, src.typeReferenceDirectives, src.hasNoDefaultLib
+      source, statements, source.isDeclarationFile, source.referencedFiles, source.typeReferenceDirectives, source.hasNoDefaultLib
     );
   }
 

@@ -79,7 +79,7 @@ export class EmailCompiler {
    */
   static async compileAll(mod?: string): Promise<string[]> {
     const keys = this.findAllTemplates(mod);
-    await Promise.all(keys.map(src => this.compile(src)));
+    await Promise.all(keys.map(key => this.compile(key)));
     return keys;
   }
 
@@ -89,8 +89,8 @@ export class EmailCompiler {
   static async * watchCompile(signal?: AbortSignal): AsyncIterable<string> {
     // Watch template files
     for await (const { file, action } of watchCompiler({ signal })) {
-      const src = RuntimeIndex.getEntry(file);
-      if (!src || !EmailCompileUtil.isTemplateFile(src.sourceFile) || action === 'delete') {
+      const entry = RuntimeIndex.getEntry(file);
+      if (!entry || !EmailCompileUtil.isTemplateFile(entry.sourceFile) || action === 'delete') {
         continue;
       }
       try {

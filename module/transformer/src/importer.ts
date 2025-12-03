@@ -237,8 +237,8 @@ export class ImportManager {
   /**
    * Reset the imports into the source file
    */
-  finalize(src: ts.SourceFile): ts.SourceFile {
-    let node = this.finalizeNewImports(src) ?? src;
+  finalize(source: ts.SourceFile): ts.SourceFile {
+    let node = this.finalizeNewImports(source) ?? source;
     node = this.finalizeImportExportExtension(node) ?? node;
     return node;
   }

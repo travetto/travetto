@@ -93,8 +93,8 @@ export class TransformerState implements State {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'managed') {
       const file = node.getSourceFile().fileName;
-      const src = this.#resolver.getFileImportName(file);
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${src}`);
+      const source = this.#resolver.getFileImportName(file);
+      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${source}`);
     }
     return resolved;
   }
@@ -168,8 +168,8 @@ export class TransformerState implements State {
     const identifier = DecoratorUtil.getDecoratorIdentifier(decorator);
     const type = this.#resolver.getType(identifier);
     const declaration = DeclarationUtil.getOptionalPrimaryDeclarationNode(type);
-    const src = declaration?.getSourceFile().fileName;
-    const mod = src ? this.#resolver.getFileImportName(src, true) : undefined;
+    const source = declaration?.getSourceFile().fileName;
+    const mod = source ? this.#resolver.getFileImportName(source, true) : undefined;
     const file = this.#manifestIndex.getFromImport(mod ?? '')?.outputFile;
     const targets = DocUtil.readAugments(type);
     const example = DocUtil.readExample(type);
@@ -254,8 +254,8 @@ export class TransformerState implements State {
   /**
    * Extend
    */
-  extendObjectLiteral(src: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
-    return LiteralUtil.extendObjectLiteral(this.factory, src, ...rest);
+  extendObjectLiteral(source: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
+    return LiteralUtil.extendObjectLiteral(this.factory, source, ...rest);
   }
 
   /**
@@ -425,8 +425,8 @@ export class TransformerState implements State {
       return this.getForeignTarget(type);
     } else {
       const file = node.getSourceFile().fileName;
-      const src = this.getFileImportName(file);
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${type.key}: ${src}`);
+      const source = this.getFileImportName(file);
+      throw new Error(`Unable to import non-external type: ${node.getText()} ${type.key}: ${source}`);
     }
   }
 

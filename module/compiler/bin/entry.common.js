@@ -8,13 +8,13 @@ const SOURCE_EXT_RE = /[.][cm]?[tj]sx?$/;
 const BARE_IMPORT_RE = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
 
-async function writeIfStale(src = '', dest = '', transform = async (text = '') => text) {
-  const [srcStat, destStat] = await Promise.all([src, dest].map(file => stat(`${file}`).then(stats => stats.mtimeMs, () => 0)));
+async function writeIfStale(sourceFile = '', destinationFile = '', transform = async (text = '') => text) {
+  const [srcStat, destStat] = await Promise.all([sourceFile, destinationFile].map(file => stat(`${file}`).then(stats => stats.mtimeMs, () => 0)));
 
   if (!destStat || destStat < srcStat) {
-    const text = src ? await readFile(src, 'utf8') : '';
-    await mkdir(path.dirname(dest), { recursive: true });
-    await writeFile(dest, await transform(text), 'utf8');
+    const text = sourceFile ? await readFile(sourceFile, 'utf8') : '';
+    await mkdir(path.dirname(destinationFile), { recursive: true });
+    await writeFile(destinationFile, await transform(text), 'utf8');
   }
 }
 

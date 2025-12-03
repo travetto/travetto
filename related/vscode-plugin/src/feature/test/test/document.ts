@@ -68,9 +68,9 @@ export class DocumentResultsManager {
    */
   getListOfTests(): Pick<TestConfig, 'methodName' | 'lineStart' | 'lineBodyStart'>[] {
     return Object.values(this.#results.test).map(test => ({
-      methodName: test.src.methodName,
-      lineStart: test.src.lineStart,
-      lineBodyStart: test.src.lineBodyStart
+      methodName: test.source.methodName,
+      lineStart: test.source.lineStart,
+      lineBodyStart: test.source.lineBodyStart
     }));
   }
 
@@ -190,7 +190,7 @@ export class DocumentResultsManager {
     const base: ResultState<unknown> = {
       status: 'unknown',
       styles: this.genStyles(level),
-      src: (existing && existing.src)
+      source: (existing && existing.source)
     };
 
     if (existing) {
@@ -217,7 +217,7 @@ export class DocumentResultsManager {
   onSuite(suite: SuiteResult): void {
     const status = (suite.failed ? 'failed' : suite.passed ? 'passed' : 'skipped');
     this.reset('suite', suite.classId);
-    this.store('suite', suite.classId, { status, decoration: Decorations.buildSuite(suite), src: suite });
+    this.store('suite', suite.classId, { status, decoration: Decorations.buildSuite(suite), source: suite });
   }
 
   /**
@@ -231,7 +231,7 @@ export class DocumentResultsManager {
       logDecorations: test.output
         .filter(log => Workspace.resolveImport(`${log.module}/${log.modulePath}`) === this.#document.fileName)
         .map(log => Decorations.buildTestLog(log)),
-      src: test
+      source: test
     });
     this.refreshTest(`${test.classId}#${test.methodName}`);
   }
@@ -246,7 +246,7 @@ export class DocumentResultsManager {
     if (status === 'failed') {
       this.#failedAssertions[Decorations.line(assertion.line).range.start.line] = assertion;
     }
-    this.store('assertion', key, { status, decoration: Decorations.buildAssertion(assertion), src: assertion });
+    this.store('assertion', key, { status, decoration: Decorations.buildAssertion(assertion), source: assertion });
   }
 
   /**
@@ -267,18 +267,18 @@ export class DocumentResultsManager {
       switch (event.type) {
         case 'suite': {
           this.reset('suite', event.suite.classId);
-          const tests = Object.values(this.#results.test).filter(test => test.src.classId === event.suite.classId);
+          const tests = Object.values(this.#results.test).filter(test => test.source.classId === event.suite.classId);
           for (const test of tests) {
-            this.reset('test', `${test.src.classId}#${test.src.methodName}`);
+            this.reset('test', `${test.source.classId}#${test.source.methodName}`);
           }
-          this.store('suite', event.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(event.suite), src: event.suite });
+          this.store('suite', event.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(event.suite), source: event.suite });
           break;
         }
         // Clear diags
         case 'test': {
           const key = `${event.test.classId}#${event.test.methodName}`;
           this.reset('test', key);
-          this.store('test', key, { status: 'unknown', decoration: Decorations.buildTest(event.test), src: event.test });
+          this.store('test', key, { status: 'unknown', decoration: Decorations.buildTest(event.test), source: event.test });
           break;
         }
       }

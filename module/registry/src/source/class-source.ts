@@ -35,11 +35,11 @@ export class ClassSource implements ChangeSource<Class> {
   #flush(): Class[] {
     const flushed = flushPendingFunctions().filter(isClass);
     for (const cls of flushed) {
-      const src = Runtime.getSourceFile(cls);
-      if (!this.#classes.has(src)) {
-        this.#classes.set(src, new Map());
+      const source = Runtime.getSourceFile(cls);
+      if (!this.#classes.has(source)) {
+        this.#classes.set(source, new Map());
       }
-      this.#classes.get(src)!.set(cls.Ⲑid, cls);
+      this.#classes.get(source)!.set(cls.Ⲑid, cls);
       this.emit({ type: 'added', current: cls });
     }
     return flushed;

@@ -149,12 +149,12 @@ class $Registry {
     handler: (event: ChangeEvent<[Class, Function]>) => void,
     matches?: RegistryIndexClass,
   ): void {
-    const src = this.#methodSource ??= new MethodSource(this.#classSource);
+    const emitter = this.#methodSource ??= new MethodSource(this.#classSource);
     if (!matches) {
-      src.on(handler);
+      emitter.on(handler);
     } else {
       const inst = this.instance(matches);
-      src.on((event) => {
+      emitter.on((event) => {
         if (inst.store.has('current' in event ? event.current[0] : event.previous[0])) {
           handler(event);
         }

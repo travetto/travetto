@@ -117,7 +117,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
   }
 
 
-  async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, src: Class): Promise<unknown> {
+  async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
       const target = dependency.target ?? input.type;
       return await this.getInstance(target, dependency.qualifier, dependency.resolution);
@@ -126,7 +126,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
         return undefined;
       } else {
         if (error && error instanceof Error) {
-          error.message = `${error.message} via=${src.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
+          error.message = `${error.message} via=${cls.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
         }
         throw error;
       }

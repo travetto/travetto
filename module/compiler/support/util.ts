@@ -29,7 +29,7 @@ export class CommonUtil {
   /**
    * Restartable Event Stream
    */
-  static async * restartableEvents<T>(src: (signal: AbortSignal) => AsyncIterable<T>, parent: AbortSignal, shouldRestart: (item: T) => boolean): AsyncIterable<T> {
+  static async * restartableEvents<T>(input: (signal: AbortSignal) => AsyncIterable<T>, parent: AbortSignal, shouldRestart: (item: T) => boolean): AsyncIterable<T> {
     const log = Log.scoped('event-stream');
     outer: while (!parent.aborted) {
       const controller = new AbortController();
@@ -38,7 +38,7 @@ export class CommonUtil {
       const kill = (): void => controller.abort();
       parent.addEventListener('abort', kill);
 
-      const comp = src(controller.signal);
+      const comp = input(controller.signal);
 
       log.debug('Started event stream');
 

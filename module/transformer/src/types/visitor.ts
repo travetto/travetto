@@ -18,7 +18,7 @@ export type State = {
   importName: string;
   added: Map<number, ts.Statement[]>;
   getDecoratorList(node: ts.Node): DecoratorMeta[];
-  finalize(src: ts.SourceFile): ts.SourceFile;
+  finalize(source: ts.SourceFile): ts.SourceFile;
 };
 
 export type TransformPhase = 'before' | 'after';

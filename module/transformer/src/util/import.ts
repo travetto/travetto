@@ -31,13 +31,13 @@ export class ImportUtil {
   /**
    * Collect all imports for a source file, as a hash map
    */
-  static collectImports(src: ts.SourceFile): Map<string, Import> {
+  static collectImports(source: ts.SourceFile): Map<string, Import> {
     // TODO: Replace with manifest reverse lookup
-    const base = path.toPosix(src.fileName);
+    const base = path.toPosix(source.fileName);
 
     const imports = new Map<string, Import>();
 
-    for (const statement of src.statements) {
+    for (const statement of source.statements) {
       if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)) {
         const resolved = this.optionalResolve(statement.moduleSpecifier.text, base);
 

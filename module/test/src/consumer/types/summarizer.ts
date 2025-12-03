@@ -17,13 +17,13 @@ export class TestResultsSummarizer implements TestConsumerShape {
     errors: []
   };
 
-  #merge(src: SuiteResult): void {
-    this.summary.suites.push(src);
-    this.summary.failed += src.failed;
-    this.summary.passed += src.passed;
-    this.summary.skipped += src.skipped;
-    this.summary.duration += src.duration;
-    this.summary.total += (src.failed + src.passed + src.skipped);
+  #merge(result: SuiteResult): void {
+    this.summary.suites.push(result);
+    this.summary.failed += result.failed;
+    this.summary.passed += result.passed;
+    this.summary.skipped += result.skipped;
+    this.summary.duration += result.duration;
+    this.summary.total += (result.failed + result.passed + result.skipped);
   }
 
   /**

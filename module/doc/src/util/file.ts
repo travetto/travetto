@@ -31,31 +31,31 @@ export class DocFileUtil {
 
   static #decCache: Record<string, boolean> = {};
 
-  static isFile(src: string): boolean {
-    return /^[@:A-Za-z0-9\/\\\-_.]+[.]([a-z]{2,10})$/.test(src);
+  static isFile(file: string): boolean {
+    return /^[@:A-Za-z0-9\/\\\-_.]+[.]([a-z]{2,10})$/.test(file);
   }
 
-  static readSource(src: string | Function): { content: string, language: string, file: string } {
+  static readSource(input: string | Function): { content: string, language: string, file: string } {
     let file: string | undefined;
     let content: string | undefined;
 
-    if (typeof src === 'string') {
-      if (src.includes('\n') || src.includes(' ')) {
-        content = src;
+    if (typeof input === 'string') {
+      if (input.includes('\n') || input.includes(' ')) {
+        content = input;
       } else {
-        const resolved = path.resolve(src);
+        const resolved = path.resolve(input);
         if (existsSync(resolved)) {
           content = readFileSync(resolved, 'utf8');
           file = resolved;
         } else {
-          file = RuntimeIndex.getSourceFile(src);
+          file = RuntimeIndex.getSourceFile(input);
           content = readFileSync(file, 'utf8');
         }
       }
     } else {
-      file = Runtime.getSourceFile(src);
+      file = Runtime.getSourceFile(input);
       if (!existsSync(file)) {
-        throw new AppError(`Unknown file: ${typeof src === 'string' ? src : src.name} => ${file}`);
+        throw new AppError(`Unknown file: ${typeof input === 'string' ? input : input.name} => ${file}`);
       }
       content = readFileSync(file, 'utf8');
     }
@@ -83,12 +83,12 @@ export class DocFileUtil {
     }
   }
 
-  static async readCodeSnippet(src: string | Function, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
-    const result = this.readSource(src);
+  static async readCodeSnippet(input: string | Function, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
+    const result = this.readSource(input);
     const lines = result.content.split(/\n/);
     const startIdx = lines.findIndex(line => startPattern.test(line));
     if (startIdx < 0) {
-      throw new Error(`Pattern ${startPattern.source} not found in ${src}`);
+      throw new Error(`Pattern ${startPattern.source} not found in ${input}`);
     }
     return { file: result.file, startIdx, lines, language: result.language };
   }

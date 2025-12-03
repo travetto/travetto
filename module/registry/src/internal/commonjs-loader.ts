@@ -43,9 +43,9 @@ export class DynamicCommonjsLoader {
       }
 
       const file = Module._resolveFilename!(request, parent);
-      const src = RuntimeIndex.getEntry(file)?.sourceFile;
+      const source = RuntimeIndex.getEntry(file)?.sourceFile;
       // Only proxy workspace modules
-      if (src && RuntimeIndex.getModuleFromSource(src)?.workspace) {
+      if (source && RuntimeIndex.getModuleFromSource(source)?.workspace) {
         return proxyModuleLoad ? proxyModuleLoad(file, mod) : mod;
       } else {
         return mod;

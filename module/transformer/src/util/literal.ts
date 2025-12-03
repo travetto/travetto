@@ -138,8 +138,8 @@ export class LiteralUtil {
   /**
    * Extend object literal, whether JSON or ts.ObjectLiteralExpression
    */
-  static extendObjectLiteral(factory: ts.NodeFactory, src: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
-    let literal = this.fromLiteral(factory, src);
+  static extendObjectLiteral(factory: ts.NodeFactory, source: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
+    let literal = this.fromLiteral(factory, source);
     if (rest.find(item => !!item)) {
       literal = factory.createObjectLiteralExpression([
         factory.createSpreadAssignment(literal),

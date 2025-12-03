@@ -188,8 +188,8 @@ export class CompilerServer {
   /**
    * Process events
    */
-  async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-    for await (const event of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
+  async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
+    for await (const event of CommonUtil.restartableEvents(input, this.signal, this.isResetEvent)) {
       if (event.type === 'progress') {
         await Log.onProgressEvent(event.payload);
       }

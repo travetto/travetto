@@ -188,13 +188,13 @@ export class PackOperation {
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Copying over workspace resources' }}`);
 
-    const dest = path.resolve(config.buildDir, config.workspaceResourceFolder);
-    const src = Runtime.workspaceRelative('resources');
+    const destinationFolder = path.resolve(config.buildDir, config.workspaceResourceFolder);
+    const sourceFolder = Runtime.workspaceRelative('resources');
 
     if (config.ejectFile) {
-      yield ActiveShellCommand.copyRecursive(src, dest, true);
+      yield ActiveShellCommand.copyRecursive(sourceFolder, destinationFolder, true);
     } else {
-      await PackUtil.copyRecursive(src, dest, true);
+      await PackUtil.copyRecursive(sourceFolder, destinationFolder, true);
     }
   }
 
@@ -204,19 +204,19 @@ export class PackOperation {
   static async * copyResources(config: CommonPackConfig): AsyncIterable<string[]> {
     const resources = {
       count: RuntimeIndex.mainModule.files.resources?.length ?? 0,
-      src: path.resolve(Runtime.mainSourcePath, 'resources'),
-      dest: path.resolve(config.buildDir, 'resources')
+      sourceFolder: path.resolve(Runtime.mainSourcePath, 'resources'),
+      destinationFolder: path.resolve(config.buildDir, 'resources')
     };
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Copying over module resources' }}`);
 
     if (config.ejectFile) {
       if (resources.count) {
-        yield ActiveShellCommand.copyRecursive(resources.src, path.resolve(config.buildDir, 'resources'), true);
+        yield ActiveShellCommand.copyRecursive(resources.sourceFolder, path.resolve(config.buildDir, 'resources'), true);
       }
     } else {
       if (resources.count) {
-        await PackUtil.copyRecursive(resources.src, resources.dest, true);
+        await PackUtil.copyRecursive(resources.sourceFolder, resources.destinationFolder, true);
       }
     }
   }

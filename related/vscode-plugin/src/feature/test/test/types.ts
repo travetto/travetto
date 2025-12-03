@@ -11,12 +11,12 @@ export interface Result<T> {
   status: StatusUnknown;
   decoration: vscode.DecorationOptions;
   logDecorations?: vscode.DecorationOptions[];
-  src: T;
+  source: T;
 }
 
-export interface ResultState<T> extends Omit<Partial<Result<T>>, 'src'> {
+export interface ResultState<T> extends Omit<Partial<Result<T>>, 'source'> {
   styles: ResultStyles;
-  src: T;
+  source: T;
 }
 
 export interface SuiteState extends ResultState<SuiteConfig | SuiteResult> {

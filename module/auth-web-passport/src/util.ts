@@ -8,12 +8,12 @@ export class PassportUtil {
 
   /**
    * Read passport state string as bas64 encoded JSON value
-   * @param src The input src for a state read (string, or a request)
+   * @param input The input for a state read (string, or a request)
    */
-  static readState<T = Record<string, unknown>>(src?: string | WebRequest): T | undefined {
-    const state = (typeof src === 'string' ? src :
-      (typeof src?.context.httpQuery?.state === 'string' ?
-        src?.context.httpQuery?.state : ''));
+  static readState<T = Record<string, unknown>>(input?: string | WebRequest): T | undefined {
+    const state = (typeof input === 'string' ? input :
+      (typeof input?.context.httpQuery?.state === 'string' ?
+        input?.context.httpQuery?.state : ''));
     if (state) {
       try {
         return Util.decodeSafeJSON(state);

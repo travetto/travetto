@@ -112,9 +112,9 @@ class $RootLogger extends Logger {
   }
 
   /** Write all progress events if active */
-  async consumeProgressEvents(src: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
+  async consumeProgressEvents(input: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
     if (!(this.logProgress)) { return; }
-    for await (const event of src()) { this.onProgressEvent(event); }
+    for await (const event of input()) { this.onProgressEvent(event); }
     Logger.reset();
   }
 }

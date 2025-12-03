@@ -14,8 +14,8 @@ type Tokenized = {
 const SUPPORT_SRC = /(?:support|src)\//;
 
 const HTML_CSS_IMAGE_URLS = [
-  /(?<pre><img[^>]src=\s{0,10}["'])(?<src>[^"{}]{1,1000})/g,
-  /(?<pre>background(?:-image)?:\s{0,10}url[(]['"]?)(?<src>[^"'){}]{1,1000})/g
+  /(?<prefix><img[^>]src=\s{0,10}["'])(?<source>[^"{}]{1,1000})/g,
+  /(?<prefix>background(?:-image)?:\s{0,10}url[(]['"]?)(?<source>[^"'){}]{1,1000})/g
 ];
 
 const EXT = /[.]email[.]tsx$/;
@@ -62,13 +62,13 @@ export class EmailCompileUtil {
     let id = 0;
     const tokens = new Map();
     for (const pattern of patterns) {
-      for (const { [0]: all, groups: { pre, src } = { pre: '', src: '' } } of text.matchAll(pattern)) {
-        if (src.includes('://')) { // No urls
+      for (const { [0]: all, groups: { prefix, source } = { prefix: '', source: '' } } of text.matchAll(pattern)) {
+        if (source.includes('://')) { // No urls
           continue;
         }
         const token = `@@${id += 1}@@`;
-        tokens.set(token, src);
-        text = text.replace(all, `${pre}${token}`);
+        tokens.set(token, source);
+        text = text.replace(all, `${prefix}${token}`);
       }
     }
     const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]{1,100}@@/g, token => onToken(token));
@@ -79,10 +79,10 @@ export class EmailCompileUtil {
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(src: { data: string } | { file: string }, options: EmailTemplateResource): Promise<string> {
+  static async compileSass(input: { data: string } | { file: string }, options: EmailTemplateResource): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
-      ...src,
+      ...input,
       sourceMap: false,
       includePaths: options.loader.searchPaths.slice(0)
     });
@@ -137,17 +137,17 @@ export class EmailCompileUtil {
     const { tokens, finalize } = await this.tokenizeResources(html, HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Buffer | Promise<Buffer>][] = [];
 
-    for (const [token, src] of tokens) {
-      const ext = path.extname(src);
+    for (const [token, source] of tokens) {
+      const ext = path.extname(source);
       if (/^[.](jpe?g|png)$/.test(ext)) {
         const output = await ImageUtil.convert(
-          await options.loader.readStream(src),
+          await options.loader.readStream(source),
           { format: ext === '.png' ? 'png' : 'jpeg' }
         );
         const buffer = await toBuffer(output);
         pendingImages.push([token, ext, buffer]);
       } else {
-        pendingImages.push([token, ext, options.loader.read(src, true)]);
+        pendingImages.push([token, ext, options.loader.read(source, true)]);
       }
     }
 
@@ -200,21 +200,21 @@ export class EmailCompileUtil {
     return html;
   }
 
-  static async compile(src: EmailTemplateModule): Promise<EmailCompiled> {
-    const subject = await this.simplifiedText(await src.subject());
-    const text = await this.simplifiedText(await src.text());
+  static async compile(input: EmailTemplateModule): Promise<EmailCompiled> {
+    const subject = await this.simplifiedText(await input.subject());
+    const text = await this.simplifiedText(await input.text());
 
-    let html = await src.html();
+    let html = await input.html();
 
-    if (src.inlineStyle !== false) {
-      html = await this.applyStyles(html, src);
+    if (input.inlineStyle !== false) {
+      html = await this.applyStyles(html, input);
     }
 
     // Fix up html edge cases
     html = this.handleHtmlEdgeCases(html);
 
-    if (src.inlineImages !== false) {
-      html = await this.inlineImages(html, src);
+    if (input.inlineImages !== false) {
+      html = await this.inlineImages(html, input);
     }
 
     return { html, subject, text };

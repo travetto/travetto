@@ -24,13 +24,13 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
         ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]
       )
     ],
-    copy: (src, dest) => ['copy', src, dest],
-    copyRecursive: (src, dest, inclusive) =>
-      ['xcopy', '/y', '/h', '/s', inclusive ? `${toWin(src)}\\*.*` : toWin(src), toWin(dest)],
-    rmRecursive: (dest) => ['rmdir', '/Q', '/S', dest],
-    mkdir: (dest) => ['md', dest],
+    copy: (sourceFile, destinationFile) => ['copy', sourceFile, destinationFile],
+    copyRecursive: (sourceFolder, destinationFolder, inclusive) =>
+      ['xcopy', '/y', '/h', '/s', inclusive ? `${toWin(sourceFolder)}\\*.*` : toWin(sourceFolder), toWin(destinationFolder)],
+    rmRecursive: (destinationFolder) => ['rmdir', '/Q', '/S', destinationFolder],
+    mkdir: (destinationFolder) => ['md', destinationFolder],
     export: (key, value) => ['set', `${key}=${value}`],
-    chdir: (dest) => ['cd', dest],
+    chdir: (destinationFolder) => ['cd', destinationFolder],
     comment: (message) => ['\nREM', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile],
@@ -50,13 +50,13 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
         ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]),
       ...(mode ? [['chmod', mode, file]] : [])
     ],
-    copy: (src, dest) => ['cp', src, dest],
-    copyRecursive: (src, dest, inclusive) =>
-      ['cp', '-r', '-p', inclusive ? `${src}/*` : src, dest],
-    rmRecursive: (dest) => ['rm', '-rf', dest],
-    mkdir: (dest) => ['mkdir', '-p', dest],
+    copy: (sourceFile, destinationFile) => ['cp', sourceFile, destinationFile],
+    copyRecursive: (sourceFolder, destinationFolder, inclusive) =>
+      ['cp', '-r', '-p', inclusive ? `${sourceFolder}/*` : sourceFolder, destinationFolder],
+    rmRecursive: (destinationFolder) => ['rm', '-rf', destinationFolder],
+    mkdir: (destinationFolder) => ['mkdir', '-p', destinationFolder],
     export: (key, value) => ['export', `${key}=${value}`],
-    chdir: (dest) => ['cd', dest],
+    chdir: (destinationFolder) => ['cd', destinationFolder],
     comment: (message) => ['\n#', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.'],

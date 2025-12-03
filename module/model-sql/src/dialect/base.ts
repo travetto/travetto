@@ -194,8 +194,8 @@ export abstract class SQLDialect implements DialectState {
       return 'NULL';
     } else if (config.type === String) {
       if (value instanceof RegExp) {
-        const src = DataUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
-        return this.quote(src);
+        const regexSource = DataUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
+        return this.quote(regexSource);
       } else {
         return this.quote(castTo(value));
       }
@@ -458,12 +458,12 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$regex': {
-              const re = DataUtil.toRegex(castTo(value));
-              const src = re.source;
-              const ins = re.flags && re.flags.includes('i');
+              const regex = DataUtil.toRegex(castTo(value));
+              const regexSource = regex.source;
+              const ins = regex.flags && regex.flags.includes('i');
 
-              if (/^[\^]\S+[.][*][$]?$/.test(src)) {
-                const inner = src.substring(1, src.length - 2);
+              if (/^[\^]\S+[.][*][$]?$/.test(regexSource)) {
+                const inner = regexSource.substring(1, regexSource.length - 2);
                 if (!ins || SQL_OPS.$ilike) {
                   items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(`${inner}%`)}`);
                 } else {
@@ -474,7 +474,7 @@ export abstract class SQLDialect implements DialectState {
                   const result = resolve(value);
                   items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${result}`);
                 } else {
-                  const result = resolve(new RegExp(src.toLowerCase(), re.flags));
+                  const result = resolve(new RegExp(regexSource.toLowerCase(), regex.flags));
                   items.push(`LOWER(${sPath}) ${SQL_OPS[subKey]} ${result}`);
                 }
               }

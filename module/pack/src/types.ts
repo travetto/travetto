@@ -50,12 +50,12 @@ export type ShellCommandImpl = {
   var(name: string): string;
   createFile(file: string, text: string[], mode?: string): string[][];
   callCommandWithAllArgs(cmd: string, ...args: string[]): string[];
-  copy(src: string, dest: string): string[];
-  copyRecursive(src: string, dest: string, inclusive?: boolean): string[];
-  rmRecursive(dest: string): string[];
-  mkdir(dest: string): string[];
+  copy(sourceFile: string, destinationFile: string): string[];
+  copyRecursive(sourceFolder: string, destinationFolder: string, inclusive?: boolean): string[];
+  rmRecursive(destinationFolder: string): string[];
+  mkdir(destinationFolder: string): string[];
   export(key: string, value: string): string[];
-  chdir(dest: string): string[];
+  chdir(destinationFolder: string): string[];
   comment(message: string): string[];
   echo(text: string): string[];
   zip(output: string): string[];

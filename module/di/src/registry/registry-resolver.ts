@@ -6,11 +6,11 @@ import { InjectionError } from '../error';
 
 type Resolved<T> = { candidate: InjectableCandidate<T>, qualifier: symbol, target: Class };
 
-function setInMap<T>(map: Map<Class, Map<typeof key, T>>, src: Class, key: symbol | string, dest: T): void {
-  if (!map.has(src)) {
-    map.set(src, new Map());
+function setInMap<T>(map: Map<Class, Map<typeof key, T>>, cls: Class, key: symbol | string, dest: T): void {
+  if (!map.has(cls)) {
+    map.set(cls, new Map());
   }
-  map.get(src)!.set(key, dest);
+  map.get(cls)!.set(key, dest);
 }
 
 export class DependencyRegistryResolver {

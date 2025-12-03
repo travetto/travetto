@@ -63,13 +63,13 @@ class $SchemaChangeListener {
 
   /**
    * Track a specific class for dependencies
-   * @param src The target class
+   * @param cls The target class
    * @param parent The parent class
    * @param path The path within the object hierarchy to arrive at the class
    * @param config The configuration or the class
    */
-  trackSchemaDependency(src: Class, parent: Class, path: SchemaFieldConfig[], config: SchemaClassConfig): void {
-    const idValue = src.Ⲑid;
+  trackSchemaDependency(cls: Class, parent: Class, path: SchemaFieldConfig[], config: SchemaClassConfig): void {
+    const idValue = cls.Ⲑid;
     if (!this.#mapping.has(idValue)) {
       this.#mapping.set(idValue, new Map());
     }

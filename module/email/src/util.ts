@@ -62,14 +62,14 @@ export class MailUtil {
   /**
    * Get the primary email, if set from an email identity or identity list
    */
-  static getPrimaryEmail(src?: EmailIdentity | EmailIdentityList): string | undefined {
-    if (!src) {
+  static getPrimaryEmail(identity?: EmailIdentity | EmailIdentityList): string | undefined {
+    if (!identity) {
       return;
     }
-    if (Array.isArray(src)) {
-      src = src[0];
+    if (Array.isArray(identity)) {
+      identity = identity[0];
     }
-    return (typeof src === 'string') ? src : src.address;
+    return (typeof identity === 'string') ? identity : identity.address;
   }
 
   /**

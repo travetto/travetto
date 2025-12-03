@@ -53,7 +53,7 @@ export class ConfigurationService {
     const providers = await DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (candidate) => await DependencyRegistryIndex.getInstance(candidate.candidateType, candidate.qualifier))
+      providers.map(async (candidate) => await DependencyRegistryIndex.getInstance<ConfigSource>(candidate.candidateType, candidate.qualifier))
     );
 
     const parser = await DependencyRegistryIndex.getInstance(ParserManager);
@@ -62,7 +62,7 @@ export class ConfigurationService {
       new FileConfigSource(parser),
       ...configs,
       new OverrideConfigSource()
-    ].map(src => src.get()));
+    ].map(source => source.get()));
 
     const specs = possible
       .flat()

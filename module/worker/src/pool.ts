@@ -3,7 +3,7 @@ import { Options, Pool, createPool } from 'generic-pool';
 
 import { Env, Util, AsyncQueue } from '@travetto/runtime';
 
-type ItrSource<I> = Iterable<I> | AsyncIterable<I>;
+type IterableSource<I> = Iterable<I> | AsyncIterable<I>;
 type WorkerExecutor<I, O> = (input: I, idx: number) => Promise<O>;
 
 /**
@@ -87,7 +87,7 @@ export class WorkPool {
   /**
    * Process a given input source and worker, and fire on completion
    */
-  static async run<I, O>(workerFactory: WorkerInput<I, O>, src: ItrSource<I>, options: WorkPoolConfig<I, O> = {}): Promise<void> {
+  static async run<I, O>(workerFactory: WorkerInput<I, O>, source: IterableSource<I>, options: WorkPoolConfig<I, O> = {}): Promise<void> {
 
     const trace = /@travetto\/worker/.test(Env.DEBUG.value ?? '');
     const pending = new Set<Promise<unknown>>();
@@ -97,7 +97,7 @@ export class WorkPool {
 
     const pool = this.#buildPool(workerFactory, options);
 
-    for await (const nextInput of src) {
+    for await (const nextInput of source) {
       const worker = await pool.acquire()!;
 
       if (trace) {
@@ -140,7 +140,7 @@ export class WorkPool {
   /**
    * Process a given input source as an async iterable
    */
-  static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, options?: WorkPoolConfig<I, O>): AsyncIterable<O> {
+  static runStream<I, O>(worker: WorkerInput<I, O>, input: IterableSource<I>, options?: WorkPoolConfig<I, O>): AsyncIterable<O> {
     const queue = new AsyncQueue<O>();
     const result = this.run(worker, input, {
       ...options,
@@ -156,7 +156,7 @@ export class WorkPool {
   /**
    * Process a given input source as an async iterable with progress information
    */
-  static runStreamProgress<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, total: number, options?: WorkPoolConfig<I, O>): AsyncIterable<{
+  static runStreamProgress<I, O>(worker: WorkerInput<I, O>, input: IterableSource<I>, total: number, options?: WorkPoolConfig<I, O>): AsyncIterable<{
     idx: number;
     value: O;
     total: number;

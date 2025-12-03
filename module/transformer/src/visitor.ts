@@ -45,10 +45,10 @@ export class VisitorFactory<S extends State = State> {
   }
 
   #transformers = new Map<TransformerType, TransformerSet<S>>();
-  #getState: (context: ts.TransformationContext, src: ts.SourceFile) => S;
+  #getState: (context: ts.TransformationContext, source: ts.SourceFile) => S;
 
   constructor(
-    getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
+    getState: (context: ts.TransformationContext, source: ts.SourceFile) => S,
     transformers: NodeTransformer<S, TransformerType, ts.Node>[]
   ) {
     this.#getState = getState;
