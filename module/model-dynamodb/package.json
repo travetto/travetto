@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-dynamodb",
-  "version": "7.0.0-rc.1",
+  "version": "7.0.0-rc.2",
   "description": "DynamoDB backing for the travetto model module.",
   "keywords": [
     "typescript",
@@ -26,9 +26,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.940.0",
-    "@travetto/cli": "^7.0.0-rc.1",
-    "@travetto/config": "^7.0.0-rc.1",
-    "@travetto/model": "^7.0.0-rc.1"
+    "@travetto/cli": "^7.0.0-rc.2",
+    "@travetto/config": "^7.0.0-rc.2",
+    "@travetto/model": "^7.0.0-rc.2"
   },
   "travetto": {
     "displayName": "DynamoDB Model Support"
