@@ -123,7 +123,7 @@ export class PackConfigUtil {
       this.dockerAppFolder(config),
       this.dockerAppFiles(config),
       this.dockerEnvVars(config),
-    ].filter(arg => !!arg).join('\n');
+    ].filter(line => !!line).join('\n');
   }
 
   /**
