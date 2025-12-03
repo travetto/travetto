@@ -15,8 +15,8 @@ class AuthConfig {
   }
 
   @InjectableFactory(SessionModelSymbol)
-  static getStore(svc: MemoryModelService): ModelExpirySupport {
-    return svc;
+  static getStore(service: MemoryModelService): ModelExpirySupport {
+    return service;
   }
 
   @InjectableFactory(BasicAuthSymbol)

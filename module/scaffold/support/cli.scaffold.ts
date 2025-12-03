@@ -19,7 +19,8 @@ export class ScaffoldCommand implements CliCommandShape {
   @CliFlag({ short: 'c', full: 'cwd' })
   workingDirectory: string = path.resolve();
   /** Target Directory */
-  dir?: string;
+  @CliFlag({ short: 'd', full: 'dir' })
+  targetDirectory?: string;
   /** Force writing into an existing directory */
   force = false;
 
@@ -85,15 +86,15 @@ export class ScaffoldCommand implements CliCommandShape {
   async main(name?: string): Promise<void> {
     name = await this.#getName(name);
 
-    if (!name && this.dir) {
-      name = path.basename(this.dir);
-    } else if (name && !this.dir) {
-      this.dir = path.resolve(this.workingDirectory, name);
-    } else if (!name && !this.dir) {
+    if (!name && this.targetDirectory) {
+      name = path.basename(this.targetDirectory);
+    } else if (name && !this.targetDirectory) {
+      this.targetDirectory = path.resolve(this.workingDirectory, name);
+    } else if (!name && !this.targetDirectory) {
       throw new Error('Either a name or a target directory are required');
     }
 
-    const ctx = new Context(name, this.template, path.resolve(this.workingDirectory, this.dir!));
+    const ctx = new Context(name, this.template, path.resolve(this.workingDirectory, this.targetDirectory!));
 
     if (!this.force) {
       await ctx.initialize();

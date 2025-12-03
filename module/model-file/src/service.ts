@@ -71,13 +71,13 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     if (id) {
       resolved = path.resolve(resolved, id.replace(/^[/]/, '').substring(0, 3));
     }
-    let dir = resolved;
+    let folder = resolved;
     if (id) {
       resolved = path.resolve(resolved, `${id}${suffix}`);
-      dir = path.dirname(resolved);
+      folder = path.dirname(resolved);
     }
 
-    await fs.mkdir(dir, { recursive: true });
+    await fs.mkdir(folder, { recursive: true });
     return resolved;
   }
 
@@ -231,8 +231,8 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   // Storage management
   async createStorage(): Promise<void> {
-    const dir = path.resolve(this.config.folder, this.config.namespace);
-    await fs.mkdir(dir, { recursive: true });
+    const folder = path.resolve(this.config.folder, this.config.namespace);
+    await fs.mkdir(folder, { recursive: true });
   }
 
   async deleteStorage(): Promise<void> {
