@@ -92,7 +92,7 @@ export class CompilerServer {
       await this.#client.waitForState(['closed'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
     } else if (output === 'ok') {
-      await this.#handle.server.writePid(this.info.serverPid);
+      await this.#handle.server.writePidFile(this.info.serverPid);
     }
 
     return output;
@@ -118,22 +118,22 @@ export class CompilerServer {
 
   #emitEvent(event: CompilerEvent, to?: string): void {
     if (this.#listeners.all) {
-      const msg = JSON.stringify(event);
+      const eventText = JSON.stringify(event);
       for (const [id, item] of Object.entries(this.#listeners.all)) {
         if (item.closed || (to && id !== to)) {
           continue;
         }
-        item.write(msg);
+        item.write(eventText);
         item.write('\n');
       }
     }
     if (this.#listeners[event.type]) {
-      const msg = JSON.stringify(event.payload);
+      const eventText = JSON.stringify(event.payload);
       for (const [id, item] of Object.entries(this.#listeners[event.type]!)) {
         if (item.closed || (to && id !== to)) {
           continue;
         }
-        item.write(msg);
+        item.write(eventText);
         item.write('\n');
       }
     }
@@ -204,7 +204,7 @@ export class CompilerServer {
             await this.#handle.compiler.kill();
           }
           this.info.compilerPid = event.payload.extra.pid;
-          await this.#handle.compiler.writePid(this.info.compilerPid);
+          await this.#handle.compiler.writePidFile(this.info.compilerPid);
         }
         log.info(`State changed: ${this.info.state}`);
       } else if (event.type === 'log') {

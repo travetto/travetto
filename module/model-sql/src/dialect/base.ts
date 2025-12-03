@@ -508,7 +508,7 @@ export abstract class SQLDialect implements DialectState {
             }
             case '$lt': case '$gt': case '$gte': case '$lte': {
               const subItems = TypedObject.keys(castTo<typeof SQL_OPS>(top))
-                .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
+                .map(subSubKey => `${sPath} ${SQL_OPS[subSubKey]} ${resolve(top[subSubKey])}`);
               items.push(subItems.length > 1 ? `(${subItems.join(` ${SQL_OPS.$and} `)})` : subItems[0]);
               break;
             }
@@ -918,23 +918,23 @@ ${this.getWhereSQL(cls, where!)}`;
         const subSelectTop: SelectClause<T> | undefined = castTo(selectTop?.[fieldKey]);
 
         // See if a selection exists at all
-        const sel: SchemaFieldConfig[] = subSelectTop ? fields
+        const selected: SchemaFieldConfig[] = subSelectTop ? fields
           .filter(field => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(field.name)] === 1)
           : [];
 
-        if (sel.length) {
-          sel.push(this.pathField, this.parentPathField);
+        if (selected.length) {
+          selected.push(this.pathField, this.parentPathField);
           if (config.array) {
-            sel.push(this.idxField);
+            selected.push(this.idxField);
           }
         }
 
         // If children and selection exists
-        if (ids.length && (!subSelectTop || sel)) {
+        if (ids.length && (!subSelectTop || selected)) {
           const { records: children } = await this.executeSQL<unknown[]>(this.getSelectRowsByIdsSQL(
             path,
             ids,
-            sel
+            selected
           ));
 
           const fieldSet = buildSet(children, config);
@@ -1001,12 +1001,16 @@ ${this.getWhereSQL(cls, where!)}`;
       const idx = this.idField.name;
 
       await Promise.all([
-        ...upserts.filter(item => item.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
-        ),
-        ...updates.filter(item => item.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
-        ),
+        ...upserts
+          .filter(item => item.stack.length === 1)
+          .map(item =>
+            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
+          ),
+        ...updates
+          .filter(item => item.stack.length === 1)
+          .map(item =>
+            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
+          ),
       ]);
     }
 

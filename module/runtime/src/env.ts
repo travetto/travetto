@@ -63,8 +63,8 @@ export class EnvProp<T> {
 
   /** Read value as int  */
   get int(): number | undefined {
-    const vi = parseInt(this.value ?? '', 10);
-    return Number.isNaN(vi) ? undefined : vi;
+    const parsed = parseInt(this.value ?? '', 10);
+    return Number.isNaN(parsed) ? undefined : parsed;
   }
 
   /** Read value as boolean */

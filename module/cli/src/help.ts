@@ -47,11 +47,11 @@ export class HelpUtil {
 
     for (const field of Object.values(schema.fields)) {
       const key = castKey<CliCommandShape>(field.name);
-      const def = ifDefined(command[key]) ?? ifDefined(field.default);
+      const defaultValue = ifDefined(command[key]) ?? ifDefined(field.default);
       const aliases = (field.aliases ?? [])
         .filter(flag => flag.startsWith('-'))
         .filter(flag =>
-          (field.type !== Boolean) || ((def !== true || field.name === 'help') ? !flag.startsWith('--no-') : flag.startsWith('--'))
+          (field.type !== Boolean) || ((defaultValue !== true || field.name === 'help') ? !flag.startsWith('--no-') : flag.startsWith('--'))
         );
       let type: string | undefined;
 
@@ -69,8 +69,8 @@ export class HelpUtil {
       params.push(param.join(' '));
       const desc = [cliTpl`${{ title: field.description }}`];
 
-      if (key !== 'help' && def !== undefined) {
-        desc.push(cliTpl`(default: ${{ input: JSON.stringify(def) }})`);
+      if (key !== 'help' && defaultValue !== undefined) {
+        desc.push(cliTpl`(default: ${{ input: JSON.stringify(defaultValue) }})`);
       }
       descriptions.push(desc.join(' '));
     }

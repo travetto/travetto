@@ -74,8 +74,8 @@ export class CliParseUtil {
     const flags = new Set(input?.aliases ?? []);
     const check = (key?: string, value?: string): string | undefined => flags.has(key!) ? value : undefined;
     return args.reduce(
-      (name, value, i, arr) =>
-        (i < SEP ? check(arr[i - 1], value) ?? check(...value.split('=')) : undefined) ?? name,
+      (name, value, i, values) =>
+        (i < SEP ? check(values[i - 1], value) ?? check(...value.split('=')) : undefined) ?? name,
       process.env[ENV_KEY]
     );
   }
@@ -88,10 +88,10 @@ export class CliParseUtil {
     const overrides = { '@': mod ?? Runtime.main.name };
 
     // We have a file
-    const rel = (key.includes('/') ? key : `@#support/pack.${key}.flags`)
+    const relativePath = (key.includes('/') ? key : `@#support/pack.${key}.flags`)
       .replace(/^(@[^#]*)#(.*)$/, (_, imp, rest) => `${Runtime.modulePath(imp, overrides)}/${rest}`);
 
-    const file = path.resolve(rel);
+    const file = path.resolve(relativePath);
 
     if (!await fs.stat(file).catch(() => false)) {
       throw new Error(`Missing flag file: ${key}, unable to proceed`);

@@ -27,12 +27,12 @@ export class FileLogAppenderConfig {
 @Injectable()
 export class FileLogAppender implements LogAppender {
   stream?: WriteStream;
-  appendFd?: number;
+  appendDescriptor?: number;
 
   constructor(config: FileLogAppenderConfig) {
     mkdirSync(path.dirname(config.output!), { recursive: true });
     if (config.writeSync) {
-      this.appendFd = openSync(config.output!, 'a');
+      this.appendDescriptor = openSync(config.output!, 'a');
     } else {
       this.stream = createWriteStream(config.output!, { autoClose: true, flags: 'a' });
     }
@@ -42,7 +42,7 @@ export class FileLogAppender implements LogAppender {
     if (this.stream) {
       this.stream.write(`${formatted}\n`);
     } else {
-      appendFileSync(this.appendFd!, `${formatted}\n`);
+      appendFileSync(this.appendDescriptor!, `${formatted}\n`);
     }
   }
 }

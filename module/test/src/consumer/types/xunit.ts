@@ -59,8 +59,8 @@ export class XunitEmitter implements TestConsumerShape {
       let body = '';
 
       if (test.error) {
-        const assertErr = test.assertions.find(assertion => !!assertion.error)!;
-        body = `<failure type="${assertErr.text}" message="${encodeURIComponent(assertErr.message!)}"><![CDATA[${assertErr.error!.stack}]]></failure>`;
+        const assertion = test.assertions.find(item => !!item.error)!;
+        body = `<failure type="${assertion.text}" message="${encodeURIComponent(assertion.message!)}"><![CDATA[${assertion.error!.stack}]]></failure>`;
       }
 
       const groupedByLevel: Record<string, string[]> = {};

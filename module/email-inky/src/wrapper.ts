@@ -9,10 +9,10 @@ import { Html } from './render/html.ts';
 import { Markdown } from './render/markdown.ts';
 import { Subject } from './render/subject.ts';
 
-export async function prepare(node: JSXElement, loc: EmailTemplateLocation): Promise<EmailTemplateModule> {
+export async function prepare(node: JSXElement, location: EmailTemplateLocation): Promise<EmailTemplateModule> {
   const ctx = {
-    ...loc,
-    loader: new EmailResourceLoader(loc.module, [path.dirname(PackageUtil.resolveImport('foundation-emails/scss/_global.scss'))])
+    ...location,
+    loader: new EmailResourceLoader(location.module, [path.dirname(PackageUtil.resolveImport('foundation-emails/scss/_global.scss'))])
   };
   return {
     loader: ctx.loader,

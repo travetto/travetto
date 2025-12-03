@@ -74,7 +74,7 @@ export class PackageModuleVisitor {
     }
 
     return Object.values(this.#workspaceModules)
-      .map(loc => this.#create(loc, { main: true, workspace: true, roleRoot: true, parent: parent.value }));
+      .map(folder => this.#create(folder, { main: true, workspace: true, roleRoot: true, parent: parent.value }));
   }
 
   /**
@@ -92,8 +92,8 @@ export class PackageModuleVisitor {
       );
     } else {
       return Object.values(this.#workspaceModules)
-        .filter((loc) => PackageUtil.readPackage(loc).travetto?.workspaceInclude)
-        .map(loc => this.#create(loc, { workspace: true, parent: parent.value }));
+        .filter((folder) => PackageUtil.readPackage(folder).travetto?.workspaceInclude)
+        .map(folder => this.#create(folder, { workspace: true, parent: parent.value }));
     }
   }
 
@@ -155,12 +155,12 @@ export class PackageModuleVisitor {
    */
   async visit(): Promise<Iterable<PackageModule>> {
     const seen = new Set<PackageModule>();
-    const mainReq = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
+    const mainRequire = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
 
     const queue = [
-      mainReq,
-      ...this.#getMonoRootIncludes(mainReq),
-      ...this.#getIncludes(mainReq)
+      mainRequire,
+      ...this.#getMonoRootIncludes(mainRequire),
+      ...this.#getIncludes(mainRequire)
     ];
 
     while (queue.length) {

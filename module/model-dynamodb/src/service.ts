@@ -360,12 +360,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body);
+    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body);
 
-    if (idxCfg.type === 'sorted' && sort === undefined) {
-      throw new IndexNotSupported(cls, idxCfg, 'Sorted indices require the sort field');
+    if (idxConfig.type === 'sorted' && sort === undefined) {
+      throw new IndexNotSupported(cls, idxConfig, 'Sorted indices require the sort field');
     }
 
     const idxName = simpleName(idx);

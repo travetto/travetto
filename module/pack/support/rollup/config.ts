@@ -31,7 +31,7 @@ function getFormat(value: string = 'commonjs'): NodeModuleType {
 
 export function getOutput(): OutputOptions {
   const format = getFormat(process.env.BUNDLE_FORMAT);
-  const dir = process.env.BUNDLE_OUTPUT!;
+  const output = process.env.BUNDLE_OUTPUT!;
   const mainFile = process.env.BUNDLE_MAIN_FILE!;
   return {
     format,
@@ -41,7 +41,7 @@ export function getOutput(): OutputOptions {
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
     sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
     compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,
-    file: path.resolve(dir, mainFile),
+    file: path.resolve(output, mainFile),
     inlineDynamicImports: true
   };
 }

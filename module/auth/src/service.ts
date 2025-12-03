@@ -51,12 +51,12 @@ export class AuthService {
     /**
      * Attempt to authenticate, checking with multiple authentication sources
      */
-    for (const idp of await this.getAuthenticators<T, C>(authenticators)) {
+    for (const authenticator of await this.getAuthenticators<T, C>(authenticators)) {
       try {
-        const principal = await idp.authenticate(payload, context);
+        const principal = await authenticator.authenticate(payload, context);
 
-        if (idp.getState) {
-          this.authContext.authenticatorState = await idp.getState(context);
+        if (authenticator.getState) {
+          this.authContext.authenticatorState = await authenticator.getState(context);
         }
 
         if (!principal) { // Multi-step login process

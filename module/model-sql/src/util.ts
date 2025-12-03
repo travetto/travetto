@@ -311,11 +311,11 @@ export class SQLModelUtil {
    * Get insert statements for a given class, and its child tables
    */
   static async getInserts<T extends ModelType>(cls: Class<T>, items: (T | OptionalId<T>)[]): Promise<InsertWrapper[]> {
-    const ins: Record<string, InsertWrapper> = {};
+    const wrappers: Record<string, InsertWrapper> = {};
 
     const track = (stack: VisitStack[], value: unknown): void => {
       const key = this.buildTable(stack);
-      (ins[key] = ins[key] ?? { stack, records: [] }).records.push({ stack, value });
+      (wrappers[key] ??= { stack, records: [] }).records.push({ stack, value });
     };
 
     const all = items.map(item =>
@@ -327,7 +327,7 @@ export class SQLModelUtil {
 
     await Promise.all(all);
 
-    const result = [...Object.values(ins)].toSorted((a, b) => a.stack.length - b.stack.length);
+    const result = [...Object.values(wrappers)].toSorted((a, b) => a.stack.length - b.stack.length);
     return result;
   }
 }

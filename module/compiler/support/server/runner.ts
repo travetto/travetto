@@ -9,7 +9,7 @@ import { Log } from '../log.ts';
 import { CommonUtil } from '../util.ts';
 
 const log = Log.scoped('compiler-exec');
-const isEvent = (msg: unknown): msg is CompilerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
+const isEvent = (value: unknown): value is CompilerEvent => !!value && typeof value === 'object' && 'type' in value;
 
 /**
  * Running the compiler
@@ -54,7 +54,7 @@ export class CompilerRunner {
         detached: true,
         stdio: ['pipe', 1, 2, 'ipc'],
       })
-        .on('message', msg => isEvent(msg) && queue.add(msg))
+        .on('message', input => isEvent(input) && queue.add(input))
         .on('exit', () => queue.close());
 
       const kill = (): unknown => {

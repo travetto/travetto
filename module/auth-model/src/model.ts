@@ -141,8 +141,8 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
         throw new AuthenticationError('Reset token has expired', { category: 'data' });
       }
     } else if (oldPassword !== undefined) {
-      const pw = await AuthModelUtil.generateHash(oldPassword, identity.salt!);
-      if (pw !== identity.hash) {
+      const oldPasswordHash = await AuthModelUtil.generateHash(oldPassword, identity.salt!);
+      if (oldPasswordHash !== identity.hash) {
         throw new AuthenticationError('Old password is required to change');
       }
     }

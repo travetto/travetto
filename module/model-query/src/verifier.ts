@@ -152,9 +152,9 @@ export class QueryVerifier {
         }
 
         for (const item of keyValue) {
-          const elAct = TypeUtil.getActualType(item);
-          if (!this.typesMatch(declaredType, elAct)) {
-            state.log(`${key} operator requires all values to be ${declaredType}, but ${elAct} was found`);
+          const itemType = TypeUtil.getActualType(item);
+          if (!this.typesMatch(declaredType, itemType)) {
+            state.log(`${key} operator requires all values to be ${declaredType}, but ${itemType} was found`);
             return;
           }
         }

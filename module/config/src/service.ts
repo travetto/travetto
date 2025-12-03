@@ -6,11 +6,11 @@ import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationRes
 
 import { ParserManager } from './parser/parser.ts';
 import { ConfigData } from './parser/types.ts';
-import { ConfigSource, ConfigSpec } from './source/types.ts';
+import { ConfigSource, ConfigPayload } from './source/types.ts';
 import { FileConfigSource } from './source/file.ts';
 import { OverrideConfigSource } from './source/override.ts';
 
-type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
+type ConfigSpecSimple = Omit<ConfigPayload, 'data'>;
 
 /**
  * Common Type for all configuration classes
@@ -24,7 +24,7 @@ export class ConfigBaseType { }
 export class ConfigurationService {
 
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
-  #specs: ConfigSpecSimple[] = [];
+  #payloads: ConfigSpecSimple[] = [];
   #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(\bkey|key\b)|serviceAccount|(api(-|_)?key)/i];
 
   /**
@@ -64,16 +64,16 @@ export class ConfigurationService {
       new OverrideConfigSource()
     ].map(source => source.get()));
 
-    const specs = possible
+    const payloads = possible
       .flat()
       .filter(data => !!data)
       .toSorted((a, b) => a.priority - b.priority);
 
-    for (const spec of specs) {
-      DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(spec.data), 'coerce');
+    for (const payload of payloads) {
+      DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(payload.data), 'coerce');
     }
 
-    this.#specs = specs.map(({ data: _, ...spec }) => spec);
+    this.#payloads = payloads.map(({ data: _, ...payload }) => payload);
 
     // Initialize Secrets
     const { secrets = [] } = this.#get<{ secrets?: string | string[] }>('config') ?? {};
@@ -110,7 +110,7 @@ export class ConfigurationService {
       );
       out[candidate.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
-    return { sources: this.#specs, active: out };
+    return { sources: this.#payloads, active: out };
   }
 
   /**

@@ -54,14 +54,14 @@ export class ScaffoldCommand implements CliCommandShape {
   async * #resolveFeatures(features: Feature[], chosen = false, depth = 0): AsyncGenerator<Feature> {
     for (const feat of features) {
       if (!chosen && !feat.required) {
-        const ans = await prompt<{ choice: boolean | string }>([{
+        const answer = await prompt<{ choice: boolean | string }>([{
           type: 'confirm',
           name: 'choice',
           message: `${'='.repeat(depth * 2)}${depth > 0 ? '| ' : ''}Include ${feat.title} support?`,
           initial: true
         }]);
 
-        if (ans.choice === 'No' || ans.choice === false) {
+        if (answer.choice === 'No' || answer.choice === false) {
           continue;
         }
       }

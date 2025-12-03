@@ -8,7 +8,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
 
 import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config.ts';
-import { OpenapiVisitor } from './spec-generate.ts';
+import { OpenapiVisitor } from './generate.ts';
 
 /**
  * Open API generation service
@@ -73,17 +73,17 @@ export class OpenApiService {
    */
   async persist(): Promise<void> {
     try {
-      console.debug('Generating OpenAPI Spec', { output: this.apiSpecConfig.output });
+      console.debug('Generating OpenAPI Specification', { output: this.apiSpecConfig.output });
 
-      const spec = await this.getSpec();
+      const specification = await this.getSpec();
 
       const output = this.apiSpecConfig.output.endsWith('.json') ?
-        JSON.stringify(spec, undefined, 2) :
-        stringify(spec);
+        JSON.stringify(specification, undefined, 2) :
+        stringify(specification);
 
       await BinaryUtil.bufferedFileWrite(this.apiSpecConfig.output, output, true);
     } catch (error) {
-      console.error('Unable to persist openapi spec', error);
+      console.error('Unable to persist openapi specification', error);
     }
   }
 }

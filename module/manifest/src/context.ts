@@ -8,8 +8,8 @@ import type { ManifestContext } from './types/context.ts';
 type Pkg = Package & { path: string };
 
 // eslint-disable-next-line no-bitwise
-const toPort = (pth: string): number => (Math.abs([...pth].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
-const toPosix = (pth: string): string => pth.replaceAll('\\', '/');
+const toPort = (location: string): number => (Math.abs([...location].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
+const toPosix = (location: string): string => location.replaceAll('\\', '/');
 const readPackage = (file: string): Pkg => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: toPosix(path.dirname(file)) });
 
 /** Find package */

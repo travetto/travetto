@@ -51,17 +51,17 @@ export class BindUtil {
   static expandPaths(input: Record<string, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const property of Object.keys(input)) {
-      const objK = input[property];
-      const value = DataUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
+      const valueInput = input[property];
+      const value = DataUtil.isPlainObject(valueInput) ? this.expandPaths(valueInput) : valueInput;
       const parts = property.split('.');
       const last = parts.pop()!;
       let sub = out;
       while (parts.length > 0) {
         const part = parts.shift()!;
-        const partArr = part.indexOf('[') > 0;
+        const partArrayIndex = part.indexOf('[') > 0;
         const name = part.split(/[^A-Za-z_0-9]/)[0];
-        const idx = partArr ? part.split(/[\[\]]/)[1] : '';
-        const key = partArr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
+        const idx = partArrayIndex ? part.split(/[\[\]]/)[1] : '';
+        const key = partArrayIndex ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
 
         if (!(name in sub)) {
           sub[name] = typeof key === 'number' ? [] : {};
@@ -271,17 +271,17 @@ export class BindUtil {
       return value;
     }
     const complex = SchemaRegistryIndex.has(config.type);
-    const bindCfg: BindConfig | undefined = (complex && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
+    const bindConfig: BindConfig | undefined = (complex && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
       if (complex) {
-        value = subValue.map(item => this.bindSchema(config.type, item, bindCfg));
+        value = subValue.map(item => this.bindSchema(config.type, item, bindConfig));
       } else {
         value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
       if (complex) {
-        value = this.bindSchema(config.type, value, bindCfg);
+        value = this.bindSchema(config.type, value, bindConfig);
       } else {
         value = DataUtil.coerceType(value, config.type, false);
       }

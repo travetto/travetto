@@ -83,8 +83,8 @@ class TestRunnerFeature extends BaseFeature {
     }
   }
 
-  #isTestDoc(doc: vscode.TextEditor | vscode.TextDocument | undefined): doc is Exclude<typeof doc, undefined> {
-    const file = doc ? ('fileName' in doc ? doc.fileName : doc.document.fileName) : undefined;
+  #isTestDocument(input: vscode.TextEditor | vscode.TextDocument | undefined): input is Exclude<typeof input, undefined> {
+    const file = input ? ('fileName' in input ? input.fileName : input.document.fileName) : undefined;
     return Workspace.isCompilerWatching && !!this.#getTestModule(file);
   }
 
@@ -108,7 +108,7 @@ class TestRunnerFeature extends BaseFeature {
 
   #rerunActive(): void {
     const editor = vscode.window.activeTextEditor;
-    if (this.#isTestDoc(editor)) {
+    if (this.#isTestDocument(editor)) {
       this.#startServer();
       const doc = editor.document;
       this.#consumer.reset(doc);
@@ -127,7 +127,7 @@ class TestRunnerFeature extends BaseFeature {
    */
   async #launchTestDebugger(line?: number): Promise<void> {
     const editor = vscode.window.activeTextEditor;
-    if (!editor || !this.#isTestDoc(editor)) {
+    if (!editor || !this.#isTestDocument(editor)) {
       return;
     }
 
@@ -168,7 +168,7 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
-    if (editor && this.#isTestDoc(editor)) {
+    if (editor && this.#isTestDocument(editor)) {
       this.#startServer();
 
       if (!this.#consumer.setEditor(editor)) {
@@ -180,7 +180,7 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onOpenTextDocument(document: vscode.TextDocument): Promise<void> {
-    if (this.#isTestDoc(document)) {
+    if (this.#isTestDocument(document)) {
       this.#startServer();
       this.#consumer.openDocument(document);
     }

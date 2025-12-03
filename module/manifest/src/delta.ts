@@ -47,15 +47,15 @@ export class ManifestDeltaUtil {
 
     for (const file of Object.keys(left.files)) {
       const output = ManifestModuleUtil.withOutputExtension(`${outputFolder}/${left.outputFolder}/${file}`);
-      const [, , leftTs] = left.files[file];
+      const [, , leftTimestamp] = left.files[file];
       const stat = await fs.stat(output).catch(() => undefined);
       right.delete(ManifestModuleUtil.withoutSourceExtension(file));
 
       if (!stat) {
         add(file, 'added');
       } else {
-        const rightTs = this.#getNewest(stat);
-        if (leftTs > rightTs) {
+        const rightTimestamp = this.#getNewest(stat);
+        if (leftTimestamp > rightTimestamp) {
           add(file, 'changed');
         }
       }
@@ -99,8 +99,8 @@ export class ManifestDeltaUtil {
     const out: DeltaEvent[] = [];
     const outputFolder = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
 
-    for (const lMod of Object.values(deltaLeft)) {
-      out.push(...await this.#deltaModules(manifest, outputFolder, lMod));
+    for (const leftMod of Object.values(deltaLeft)) {
+      out.push(...await this.#deltaModules(manifest, outputFolder, leftMod));
     }
 
     return out;

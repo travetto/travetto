@@ -259,10 +259,10 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   Center: async ({ props, recurse, node }): Promise<string> => {
-    for (const kid of getChildren(node)) {
-      Object.assign(kid.props, {
+    for (const child of getChildren(node)) {
+      Object.assign(child.props, {
         align: 'center',
-        className: classString(kid.props.className, 'float-center')
+        className: classString(child.props.className, 'float-center')
       });
     }
 
@@ -311,15 +311,15 @@ export const Html: RenderProvider<RenderContext> = {
 </table>
       `;
 
-    const sm = props.small ?? undefined;
-    const lg = props.large ?? undefined;
+    const small = props.small ?? undefined;
+    const large = props.large ?? undefined;
 
-    if (sm || lg) {
-      if (sm) {
-        html.push(buildSpacer(sm, 'hide-for-large'));
+    if (small || large) {
+      if (small) {
+        html.push(buildSpacer(small, 'hide-for-large'));
       }
-      if (lg) {
-        html.push(buildSpacer(lg, 'show-for-large'));
+      if (large) {
+        html.push(buildSpacer(large, 'show-for-large'));
       }
     } else {
       html.push(buildSpacer(props.size || 16));

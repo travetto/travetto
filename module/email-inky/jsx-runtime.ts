@@ -44,8 +44,8 @@ export function createRootElement<T extends string | Class | JSXComponentFunctio
   const node = createElement(type, props);
 
   Object.assign(node, {
-    prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> {
-      return import('@travetto/email-inky').then(value => value.prepare(castTo(node), loc));
+    prepare(location: EmailTemplateLocation): Promise<EmailTemplateModule> {
+      return import('@travetto/email-inky').then(value => value.prepare(castTo(node), location));
     }
   });
 

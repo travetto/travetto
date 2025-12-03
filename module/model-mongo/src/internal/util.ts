@@ -9,7 +9,7 @@ import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
 
 const PointImpl = toConcrete<Point>();
 
-type IdxCfg = CreateIndexesOptions;
+type IdxConfig = CreateIndexesOptions;
 
 /**
  * Converting units to various radians
@@ -179,7 +179,7 @@ export class MongoUtil {
     return out;
   }
 
-  static getIndices<T extends ModelType>(cls: Class<T>, indices: IndexConfig<ModelType>[] = []): [BasicIdx, IdxCfg][] {
+  static getIndices<T extends ModelType>(cls: Class<T>, indices: IndexConfig<ModelType>[] = []): [BasicIdx, IdxConfig][] {
     return [
       ...indices.map(idx => [this.getPlainIndex(idx), (idx.type === 'unique' ? { unique: true } : {})] as const),
       ...this.getExtraIndices(cls).map((idx) => [idx, {}] as const)

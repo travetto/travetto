@@ -36,13 +36,13 @@ export type ServiceAction = 'start' | 'stop' | 'status' | 'restart';
  */
 export class ServiceRunner {
 
-  svc: ServiceDescriptor;
-  constructor(svc: ServiceDescriptor) { this.svc = svc; }
+  #descriptor: ServiceDescriptor;
+  constructor(descriptor: ServiceDescriptor) { this.#descriptor = descriptor; }
 
   async #isRunning(full = false): Promise<boolean> {
-    const port = ports(this.svc.port!)[0];
+    const port = ports(this.#descriptor.port!)[0];
     const start = Date.now();
-    const timeoutMs = TimeUtil.asMillis(full ? this.svc.startupTimeout ?? 5000 : 100);
+    const timeoutMs = TimeUtil.asMillis(full ? this.#descriptor.startupTimeout ?? 5000 : 100);
     while ((Date.now() - start) < timeoutMs) {
       try {
         const sock = net.createConnection(port, 'localhost');
@@ -50,12 +50,12 @@ export class ServiceRunner {
           sock.on('connect', resolve).on('timeout', reject).on('error', reject)
         ).finally(() => sock.destroy());
 
-        if (!this.svc.ready?.url || !full) {
+        if (!this.#descriptor.ready?.url || !full) {
           return true;
         } else {
-          const response = await fetch(this.svc.ready.url, { method: 'GET' });
+          const response = await fetch(this.#descriptor.ready.url, { method: 'GET' });
           const text = await response.text();
-          if (response.ok && (this.svc.ready.test?.(text) ?? true)) {
+          if (response.ok && (this.#descriptor.ready.test?.(text) ?? true)) {
             return true;
           }
         }
@@ -68,12 +68,12 @@ export class ServiceRunner {
   }
 
   async #hasImage(): Promise<boolean> {
-    const result = await ExecUtil.getResult(spawn('docker', ['image', 'inspect', this.svc.image]), { catch: true });
+    const result = await ExecUtil.getResult(spawn('docker', ['image', 'inspect', this.#descriptor.image]), { catch: true });
     return result.valid;
   }
 
   async * #pullImage(): AsyncIterable<string> {
-    const subProcess = spawn('docker', ['pull', this.svc.image], { stdio: [0, 'pipe', 'pipe'] });
+    const subProcess = spawn('docker', ['pull', this.#descriptor.image], { stdio: [0, 'pipe', 'pipe'] });
     yield* rl.createInterface(subProcess.stdout!);
     await ExecUtil.getResult(subProcess);
   }
@@ -83,16 +83,16 @@ export class ServiceRunner {
       'run',
       '--rm',
       '--detach',
-      ...this.svc.privileged ? ['--privileged'] : [],
-      '--label', `trv-${this.svc.name}`,
-      ...Object.entries(this.svc.env ?? {}).flatMap(([key, value]) => ['--env', `${key}=${value}`]),
-      ...this.svc.port ? ['-p', ports(this.svc.port).join(':')] : [],
-      ...Object.entries(this.svc.volumes ?? {}).flatMap(([key, value]) => ['--volume', `${key}:${value}`]),
-      this.svc.image,
-      ...this.svc.args ?? [],
+      ...this.#descriptor.privileged ? ['--privileged'] : [],
+      '--label', `trv-${this.#descriptor.name}`,
+      ...Object.entries(this.#descriptor.env ?? {}).flatMap(([key, value]) => ['--env', `${key}=${value}`]),
+      ...this.#descriptor.port ? ['-p', ports(this.#descriptor.port).join(':')] : [],
+      ...Object.entries(this.#descriptor.volumes ?? {}).flatMap(([key, value]) => ['--volume', `${key}:${value}`]),
+      this.#descriptor.image,
+      ...this.#descriptor.args ?? [],
     ];
 
-    for (const item of Object.keys(this.svc.volumes ?? {})) {
+    for (const item of Object.keys(this.#descriptor.volumes ?? {})) {
       await fs.mkdir(item, { recursive: true });
     }
 
@@ -100,25 +100,25 @@ export class ServiceRunner {
   }
 
   async #getContainerId(): Promise<string | undefined> {
-    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=trv-${this.svc.name}`]))).stdout.trim();
+    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=trv-${this.#descriptor.name}`]))).stdout.trim();
   }
 
-  async #killContainer(cid: string): Promise<void> {
-    await ExecUtil.getResult(spawn('docker', ['kill', cid]));
+  async #killContainer(containerId: string): Promise<void> {
+    await ExecUtil.getResult(spawn('docker', ['kill', containerId]));
   }
 
   async * action(operation: ServiceAction): AsyncIterable<['success' | 'failure' | 'message', string]> {
     try {
-      const cid = await this.#getContainerId();
-      const port = this.svc.port ? ports(this.svc.port)[0] : 0;
-      const running = !!cid && (!port || await this.#isRunning());
+      const containerId = await this.#getContainerId();
+      const port = this.#descriptor.port ? ports(this.#descriptor.port)[0] : 0;
+      const running = !!containerId && (!port || await this.#isRunning());
 
-      if (running && !cid) { // We don't own
+      if (running && !containerId) { // We don't own
         return yield [operation === 'status' ? 'message' : 'failure', 'Running but not managed'];
       }
 
       if (operation === 'status') {
-        return yield !cid ? ['message', 'Not running'] : ['success', `Running ${cid}`];
+        return yield !containerId ? ['message', 'Not running'] : ['success', `Running ${containerId}`];
       } else if (operation === 'start' && running) {
         return yield ['message', 'Skipping, already running'];
       } else if (operation === 'stop' && !running) {
@@ -127,7 +127,7 @@ export class ServiceRunner {
 
       if (running && (operation === 'restart' || operation === 'stop')) {
         yield ['message', 'Stopping'];
-        await this.#killContainer(cid);
+        await this.#killContainer(containerId);
         yield ['success', 'Stopped'];
       }
 
@@ -144,7 +144,7 @@ export class ServiceRunner {
         const out = await this.#startContainer();
 
         if (port) {
-          yield ['message', `Waiting for ${this.svc.ready?.url ?? 'container'}...`];
+          yield ['message', `Waiting for ${this.#descriptor.ready?.url ?? 'container'}...`];
           if (!await this.#isRunning(true)) {
             yield ['failure', 'Failed to start service correctly'];
           }

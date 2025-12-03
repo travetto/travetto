@@ -40,16 +40,16 @@ export class PassportUtil {
    * @returns
    */
   static addToState(state: string | Record<string, unknown>, current?: string | WebRequest, key?: string): string {
-    const pre = this.readState(current) ?? {};
+    const original = this.readState(current) ?? {};
     const toAdd = typeof state === 'string' ? JSON.parse(state) : state;
-    const base: Record<string, unknown> = key ? castTo(pre[key] ??= {}) : pre;
+    const base: Record<string, unknown> = key ? castTo(original[key] ??= {}) : original;
     for (const property of Object.keys(toAdd)) {
       if (property === '__proto__' || property === 'constructor' || property === 'prototype') {
         continue;
       }
       base[property] = toAdd[property];
     }
-    return this.writeState(pre)!;
+    return this.writeState(original)!;
   }
 
   /**

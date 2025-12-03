@@ -27,7 +27,7 @@ export class PackDockerCommand extends BasePackCommand {
   dockerName: string;
   /**  Docker Runtime user */
   @CliFlag({ short: 'ru', full: 'runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
-  dockerRuntimeUserSrc?: string;
+  dockerRuntimeUser?: string;
   /**  Docker Runtime Packages */
   @CliFlag({ short: 'rp', full: 'runtime-package', envVars: ['PACK_DOCKER_RUNTIME_PACKAGES'] })
   dockerRuntimePackages: string[] = [];
@@ -85,7 +85,7 @@ export class PackDockerCommand extends BasePackCommand {
     this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module || undefined);
 
     // Finalize user/group and ids
-    const [userOrUid, groupOrGid = userOrUid] = (this.dockerRuntimeUserSrc ?? '').split(':');
+    const [userOrUid, groupOrGid = userOrUid] = (this.dockerRuntimeUser ?? '').split(':');
     const groupIsNum = /^\d+$/.test(groupOrGid);
     const userIsNum = /^\d+$/.test(userOrUid);
 

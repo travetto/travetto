@@ -148,14 +148,14 @@ export class WebUploadUtil {
     const { fromStream } = await import('strtok3');
 
     const parser = new FileTypeParser();
-    let tok: ReturnType<typeof fromStream> | undefined;
+    let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
 
     try {
-      tok = await fromStream(typeof input === 'string' ? createReadStream(input) : input);
-      matched = await parser.fromTokenizer(tok);
+      token = await fromStream(typeof input === 'string' ? createReadStream(input) : input);
+      matched = await parser.fromTokenizer(token);
     } finally {
-      await tok?.close();
+      await token?.close();
     }
 
     if (!matched && typeof input === 'string') {

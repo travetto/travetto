@@ -141,20 +141,20 @@ export class DocRenderer {
    * Render a context given a specific renderer
    * @param renderer
    */
-  async render(fmt: keyof typeof providers): Promise<string> {
-    if (!providers[fmt]) {
-      throw new Error(`Unknown renderer with format: ${fmt}`);
+  async render(format: keyof typeof providers): Promise<string> {
+    if (!providers[format]) {
+      throw new Error(`Unknown renderer with format: ${format}`);
     }
     if (!this.#rootNode) {
       this.#rootNode = (Array.isArray(this.#root.text) || isJSXElement(this.#root.text)) ?
         this.#root.text : await (this.#root.text());
     }
 
-    const text = await this.#render(providers[fmt], this.#rootNode);
+    const text = await this.#render(providers[format], this.#rootNode);
     let cleaned = `${text?.replace(/\n{3,100}/msg, '\n\n').trim()}\n`;
-    if (this.#root.wrap?.[fmt]) {
-      cleaned = this.#root.wrap[fmt](cleaned);
+    if (this.#root.wrap?.[format]) {
+      cleaned = this.#root.wrap[format](cleaned);
     }
-    return providers[fmt].finalize(cleaned, this.#support);
+    return providers[format].finalize(cleaned, this.#support);
   }
 }

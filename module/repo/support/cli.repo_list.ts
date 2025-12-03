@@ -46,9 +46,9 @@ export class ListModuleCommand implements CliCommandShape {
       case 'graph': {
         await write('digraph g {');
         for (const module of modules) {
-          for (const dep of module.parents) {
-            if (dep !== Runtime.main.name) {
-              await write(`  "${dep}" -> "${module.name}";`);
+          for (const parent of module.parents) {
+            if (parent !== Runtime.main.name) {
+              await write(`  "${parent}" -> "${module.name}";`);
             }
           }
         }

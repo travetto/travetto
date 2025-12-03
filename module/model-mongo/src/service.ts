@@ -427,14 +427,14 @@ export class MongoModelService implements
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
-    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     const where = this.getWhereFilter(
       cls,
       castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
     );
 
-    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxCfg)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxCfg);
+    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxConfig)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxConfig);
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
 
     for await (const item of cursor) {

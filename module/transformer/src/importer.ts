@@ -34,12 +34,12 @@ export class ImportManager {
     this.factory = factory;
   }
 
-  #rewriteImportClause(spec: ts.Expression | undefined, clause: ts.ImportClause | undefined): ts.ImportClause | undefined {
-    if (!(spec && clause?.namedBindings && ts.isNamedImports(clause.namedBindings))) {
+  #rewriteImportClause(expr: ts.Expression | undefined, clause: ts.ImportClause | undefined): ts.ImportClause | undefined {
+    if (!(expr && clause?.namedBindings && ts.isNamedImports(clause.namedBindings))) {
       return clause;
     }
 
-    if (spec && ts.isStringLiteral(spec) && !this.#isKnownImport(spec)) {
+    if (expr && ts.isStringLiteral(expr) && !this.#isKnownImport(expr)) {
       return clause;
     }
 
@@ -90,9 +90,9 @@ export class ImportManager {
   /**
    * Normalize module specifier
    */
-  normalizeModuleSpecifier<T extends ts.Expression | undefined>(spec: T): T {
-    if (spec && ts.isStringLiteral(spec) && this.#isKnownImport(spec.text)) {
-      const specText = spec.text.replace(/['"]/g, '');
+  normalizeModuleSpecifier<T extends ts.Expression | undefined>(specifier: T): T {
+    if (specifier && ts.isStringLiteral(specifier) && this.#isKnownImport(specifier.text)) {
+      const specText = specifier.text.replace(/['"]/g, '');
 
       const type = ManifestModuleUtil.getFileType(specText);
       if (type === 'js' || type === 'ts') {
@@ -103,7 +103,7 @@ export class ImportManager {
         return LiteralUtil.fromLiteral(this.factory, `${specText}${ManifestModuleUtil.OUTPUT_EXT}`) as unknown as T;
       }
     }
-    return spec;
+    return specifier;
   }
 
   /**

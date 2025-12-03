@@ -6,9 +6,9 @@ import { User } from './model.ts';
 
 class AuthConfig {
   @InjectableFactory()
-  static getModelAuthService(svc: ModelCrudSupport) {
+  static getModelAuthService(service: ModelCrudSupport) {
     return new ModelAuthService(
-      svc,
+      service,
       User,
       user => ({    // This converts User to a RegisteredPrincipal
         source: 'model',

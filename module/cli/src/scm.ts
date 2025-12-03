@@ -47,14 +47,14 @@ export class CliScmUtil {
    * @returns
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
-    const ws = Runtime.workspace.path;
-    const result = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }), { catch: true });
+    const rootPath = Runtime.workspace.path;
+    const result = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: rootPath }), { catch: true });
     if (!result.valid) {
       throw new AppError('Unable to detect changes between', { category: 'data', details: { fromHash, toHash, output: (result.stderr || result.stdout) } });
     }
     const out = new Set<string>();
     for (const line of result.stdout.split(/\n/g)) {
-      const entry = RuntimeIndex.getEntry(path.resolve(ws, line));
+      const entry = RuntimeIndex.getEntry(path.resolve(rootPath, line));
       if (entry) {
         out.add(entry.sourceFile);
       }

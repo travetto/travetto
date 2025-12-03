@@ -41,18 +41,18 @@ export class DocumentResultsManager {
   #editor?: vscode.TextEditor;
   active = false;
 
-  constructor(doc: vscode.TextDocument) {
-    this.#document = doc;
+  constructor(document: vscode.TextDocument) {
+    this.#document = document;
   }
 
   get editor(): vscode.TextEditor | undefined {
     return this.#editor;
   }
 
-  set editor(ed: vscode.TextEditor | undefined) {
-    if (ed !== this.#editor || ed === undefined) {
-      this.#editor = ed;
-      if (ed) {
+  set editor(editor: vscode.TextEditor | undefined) {
+    if (editor !== this.#editor || editor === undefined) {
+      this.#editor = editor;
+      if (editor) {
         this.refresh();
       }
     }

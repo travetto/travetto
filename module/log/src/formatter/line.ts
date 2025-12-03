@@ -116,11 +116,11 @@ export class LineLogFormatter implements LogFormatter {
 
     if (event.modulePath && this.config.location) {
       const namespace = `${event.module}:${event.modulePath}`;
-      let loc = event.line ? `${namespace}:${event.line}` : namespace;
+      let location = event.line ? `${namespace}:${event.line}` : namespace;
       if (this.config.colorize) {
-        loc = STYLES.location(loc);
+        location = STYLES.location(location);
       }
-      out.push(`[${loc}]`);
+      out.push(`[${location}]`);
     }
 
     out.push(LogFormatUtil.getLogMessage(event, this.config.inspectOptions));

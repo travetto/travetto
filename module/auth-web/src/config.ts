@@ -2,7 +2,7 @@ import { Config } from '@travetto/config';
 import { Runtime, AppError, BinaryUtil } from '@travetto/runtime';
 import { Ignore, Secret } from '@travetto/schema';
 
-type KeyRec = { key: string, id: string };
+type KeyEntry = { key: string, id: string };
 
 @Config('web.auth')
 export class WebAuthConfig {
@@ -15,7 +15,7 @@ export class WebAuthConfig {
   @Secret()
   signingKey?: string | string[];
   @Ignore()
-  keyMap: Record<string, KeyRec> & { default?: KeyRec } = {};
+  keyMap: Record<string, KeyEntry> & { default?: KeyEntry } = {};
 
   postConstruct(): void {
     if (!this.signingKey && Runtime.production) {

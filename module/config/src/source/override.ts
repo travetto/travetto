@@ -1,5 +1,5 @@
 import { ConfigData } from '../parser/types.ts';
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigSource, ConfigPayload } from './types.ts';
 import { ConfigOverrideUtil } from '../util.ts';
 
 /**
@@ -20,7 +20,7 @@ export class OverrideConfigSource implements ConfigSource {
     return out;
   }
 
-  get(): ConfigSpec {
+  get(): ConfigPayload {
     return { data: this.#build(), priority: 999, source: 'memory://override' };
   }
 }

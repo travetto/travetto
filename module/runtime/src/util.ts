@@ -38,17 +38,17 @@ export class Util {
 
   /**
    * Generate a random UUID
-   * @param len The length of the uuid to generate
+   * @param length The length of the uuid to generate
    */
-  static uuid(len: number = 32): string {
-    const bytes = crypto.randomBytes(Math.ceil(len / 2));
-    if (len === 32) { // Make valid uuid-v4
+  static uuid(length: number = 32): string {
+    const bytes = crypto.randomBytes(Math.ceil(length / 2));
+    if (length === 32) { // Make valid uuid-v4
       // eslint-disable-next-line no-bitwise
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
       // eslint-disable-next-line no-bitwise
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
     }
-    return bytes.toString('hex').substring(0, len);
+    return bytes.toString('hex').substring(0, length);
   }
 
   /**
@@ -156,14 +156,14 @@ export class Util {
    */
   static serializeToJSON<T>(out: T): string {
     return JSON.stringify(out, function (key, value) {
-      const ov = this[key];
-      if (ov && ov instanceof Error) {
+      const objectValue = this[key];
+      if (objectValue && objectValue instanceof Error) {
         return {
           $: true,
-          ...hasToJSON(ov) ? ov.toJSON() : ov,
-          name: ov.name,
-          message: ov.message,
-          stack: ov.stack,
+          ...hasToJSON(objectValue) ? objectValue.toJSON() : objectValue,
+          name: objectValue.name,
+          message: objectValue.message,
+          stack: objectValue.stack,
         };
       } else if (typeof value === 'bigint') {
         return `${value.toString()}$n`;

@@ -149,11 +149,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body);
-    const fullKey = this.#resolveKey(cls, idxCfg.name, key);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body);
+    const fullKey = this.#resolveKey(cls, idxConfig.name, key);
     let id: string | undefined;
-    if (idxCfg.type === 'unsorted') {
+    if (idxConfig.type === 'unsorted') {
       id = (await this.client.sRandMember(fullKey))!;
     } else {
       const result = await this.client.zRangeByScore(
@@ -309,14 +309,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     let stream: AsyncIterable<string[]>;
 
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body, { emptySortValue: null });
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body, { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx, key);
 
-    if (idxCfg.type === 'unsorted') {
+    if (idxConfig.type === 'unsorted') {
       stream = this.#streamValues('sScan', { key: fullKey });
     } else {
       stream = this.#streamValues('zScan', { key: fullKey });

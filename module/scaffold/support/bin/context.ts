@@ -36,7 +36,7 @@ export class Context {
   }
 
   #template: string;
-  #targetDir: string;
+  #targetDirectory: string;
   #dependencies: string[] = [];
   #devDependencies: string[] = [];
   #peerDependencies: string[] = [];
@@ -46,10 +46,10 @@ export class Context {
 
   readonly name: string;
 
-  constructor(name: string, template: string, targetDir: string) {
+  constructor(name: string, template: string, targetDirectory: string) {
     this.name = name.replace(/[^a-zA-Z0-9]+/, '-').replace(/-+$/, '');
     this.#template = template;
-    this.#targetDir = path.resolve(targetDir);
+    this.#targetDirectory = path.resolve(targetDirectory);
   }
 
   #exec(cmd: string, args: string[]): Promise<void> {
@@ -77,7 +77,7 @@ export class Context {
   }
 
   destination(file?: string): string {
-    return path.resolve(this.#targetDir, ...file ? [file] : []);
+    return path.resolve(this.#targetDirectory, ...file ? [file] : []);
   }
 
   get sourceListing(): Promise<Listing> {
@@ -211,6 +211,6 @@ export class Context {
       await this.#exec('npx', ['trv', 'eslint:register']);
     }
 
-    yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDir }} `;
+    yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDirectory }} `;
   }
 }

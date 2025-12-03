@@ -16,17 +16,17 @@ export class NetUtil {
   static async getPortProcessId(port: number): Promise<number | undefined> {
     const subProcess = spawn('lsof', ['-t', '-i', `tcp:${port}`]);
     const result = await ExecUtil.getResult(subProcess, { catch: true });
-    const [pid] = result.stdout.trim().split(/\n/g);
-    if (pid && +pid > 0) {
-      return +pid;
+    const [processId] = result.stdout.trim().split(/\n/g);
+    if (processId && +processId > 0) {
+      return +processId;
     }
   }
 
   /** Free port if in use */
   static async freePort(port: number): Promise<void> {
-    const pid = await this.getPortProcessId(port);
-    if (pid) {
-      process.kill(pid);
+    const processId = await this.getPortProcessId(port);
+    if (processId) {
+      process.kill(processId);
     }
   }
 
@@ -54,7 +54,7 @@ export class NetUtil {
    */
   static getLocalAddress(): string {
     const useIPv4 = !![...Object.values(os.networkInterfaces())]
-      .find(interfaces => interfaces?.find(nic => nic.family === 'IPv4'));
+      .find(interfaces => interfaces?.find(item => item.family === 'IPv4'));
 
     return useIPv4 ? '0.0.0.0' : '::';
   }

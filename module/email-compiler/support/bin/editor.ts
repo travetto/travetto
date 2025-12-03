@@ -64,22 +64,22 @@ export class EditorService {
     if (!process.connected || !process.send) {
       throw new AppError('Unable to run email editor, missing ipc channel');
     }
-    process.on('message', async (msg: EditorRequest) => {
-      switch (msg.type) {
+    process.on('message', async (request: EditorRequest) => {
+      switch (request.type) {
         case 'configure': {
           return await this.#response(EditorConfig.ensureConfig(), file => ({ type: 'configured', file }));
         }
         case 'compile': {
-          return await this.#response(this.#renderFile(msg.file),
+          return await this.#response(this.#renderFile(request.file),
             result => ({ type: 'compiled', ...result }),
-            error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file: msg.file })
+            error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file: request.file })
           );
         }
         case 'send': {
           return await this.#response(
-            this.sendFile(msg.file, msg.to),
+            this.sendFile(request.file, request.to),
             result => ({ type: 'sent', ...result }),
-            error => ({ type: 'sent-failed', message: error.message, stack: error.stack, to: msg.to!, file: msg.file })
+            error => ({ type: 'sent-failed', message: error.message, stack: error.stack, to: request.to!, file: request.file })
           );
         }
       }

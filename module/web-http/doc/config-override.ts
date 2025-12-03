@@ -1,9 +1,9 @@
-import { ConfigSource, ConfigSpec } from '@travetto/config';
+import { ConfigSource, ConfigPayload } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-class Cfg implements ConfigSource {
-  get(): ConfigSpec {
+class ConfigOverride implements ConfigSource {
+  get(): ConfigPayload {
     return {
       data: {
         'web.cookie.keys': ['test']

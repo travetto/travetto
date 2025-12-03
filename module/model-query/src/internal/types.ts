@@ -1,8 +1,8 @@
 import { SchemaFieldConfig, Point } from '@travetto/schema';
 import { Class, toConcrete } from '@travetto/runtime';
 
-const st = (value: string | string[], isArr: boolean = false): Set<string> =>
-  new Set((Array.isArray(value) ? value : [value]).map(item => isArr ? `${item}[]` : item));
+const st = (value: string | string[], isArray: boolean = false): Set<string> =>
+  new Set((Array.isArray(value) ? value : [value]).map(item => isArray ? `${item}[]` : item));
 
 const basic = (types: Set<string>): Record<string, Set<string>> => ({ $ne: types, $eq: types, $exists: st('boolean') });
 const scalar = (types: Set<string>): Record<string, Set<string>> => ({ $in: types, $nin: types });

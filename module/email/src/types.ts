@@ -84,4 +84,4 @@ type EmailTemplateContent = Record<EmailContentType, () => (Promise<string> | st
 
 export type EmailTemplateLocation = { file: string, module: string };
 export type EmailTemplateModule = EmailTemplateResource & EmailTemplateContent;
-export type EmailTemplateImport = { prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> };
+export type EmailTemplateImport = { prepare(location: EmailTemplateLocation): Promise<EmailTemplateModule> };

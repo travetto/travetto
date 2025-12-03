@@ -73,8 +73,8 @@ export class DocCommand implements CliCommandShape {
         [output, null] as const
     );
 
-    for (const [fmt, out] of outputs) {
-      const result = await ctx.render(fmt);
+    for (const [format, out] of outputs) {
+      const result = await ctx.render(format);
       if (out) {
         const finalName = path.resolve(out);
         await fs.writeFile(finalName, result, 'utf8');

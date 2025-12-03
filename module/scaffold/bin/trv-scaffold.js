@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // @ts-check
 
-async function getScaffoldCwd() {
+async function getScaffoldDirectory() {
   if (process.env.npm_lifecycle_script?.includes('trv-scaffold')) { // Is npx  run
     const { delimiter } = await import('node:path');
     const parts = process.env.PATH?.split(delimiter) ?? [];
@@ -24,12 +24,12 @@ async function getVersion(cwd) {
 }
 
 (async function () {
-  const scaffoldCwd = await getScaffoldCwd();
-  const version = await getVersion(scaffoldCwd);
+  const scaffoldDirectory = await getScaffoldDirectory();
+  const version = await getVersion(scaffoldDirectory);
 
   const { spawn, execSync } = await import('node:child_process');
   // Ensure we install the compiler first
-  execSync(`npm i @travetto/compiler@${version}`, { stdio: 'pipe', cwd: scaffoldCwd });
+  execSync(`npm i @travetto/compiler@${version}`, { stdio: 'pipe', cwd: scaffoldDirectory });
 
   spawn('npx', [
     'trvc', 'exec',
@@ -39,7 +39,7 @@ async function getVersion(cwd) {
     ...process.argv.slice(2)
   ], {
     stdio: 'inherit',
-    cwd: scaffoldCwd,
+    cwd: scaffoldDirectory,
     env: {
       ...process.env,
       TRV_QUIET: '1',

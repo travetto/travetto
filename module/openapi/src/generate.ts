@@ -195,14 +195,14 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         };
 
         const properties: Record<string, SchemaObject> = {};
-        const def = config;
+        const base = config;
         const required: string[] = [];
 
-        for (const fieldName of Object.keys(def.fields)) {
-          if (SchemaRegistryIndex.has(def.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistryIndex.getConfig(def.fields[fieldName].type));
+        for (const fieldName of Object.keys(base.fields)) {
+          if (SchemaRegistryIndex.has(base.fields[fieldName].type)) {
+            this.onSchema(SchemaRegistryIndex.getConfig(base.fields[fieldName].type));
           }
-          properties[fieldName] = this.#processSchemaField(def.fields[fieldName], required);
+          properties[fieldName] = this.#processSchemaField(base.fields[fieldName], required);
         }
 
         const extra: Record<string, unknown> = {};

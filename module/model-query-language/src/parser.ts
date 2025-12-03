@@ -65,10 +65,10 @@ export class QueryLanguageParser {
       const right: AllNode = castTo(nodes.pop());
       nodes.pop()!;
       const left: AllNode = castTo(nodes.pop());
-      const rg: GroupNode = castTo(right);
-      if (rg.type === 'group' && rg.operation === operation) {
-        rg.value.unshift(left);
-        nodes.push(rg);
+      const rightGroup: GroupNode = castTo(right);
+      if (rightGroup.type === 'group' && rightGroup.operation === operation) {
+        rightGroup.value.unshift(left);
+        nodes.push(rightGroup);
       } else {
         nodes.push({
           type: 'group',
@@ -104,7 +104,7 @@ export class QueryLanguageParser {
 
     let top: (AllNode | Token)[] = [];
     const stack: (typeof top)[] = [top];
-    let arr: Literal[] | undefined;
+    let list: Literal[] | undefined;
 
     let token = tokens[position];
     while (token) {
@@ -123,24 +123,24 @@ export class QueryLanguageParser {
           break;
         case 'array':
           if (token.value === 'start') {
-            arr = [];
+            list = [];
           } else {
-            const arrNode: ArrayNode = { type: 'list', value: arr! };
+            const arrNode: ArrayNode = { type: 'list', value: list! };
             top.push(arrNode);
-            arr = undefined;
+            list = undefined;
             this.handleClause(top);
           }
           break;
         case 'literal':
-          if (arr !== undefined) {
-            arr.push(token.value);
+          if (list !== undefined) {
+            list.push(token.value);
           } else {
             top.push(token);
             this.handleClause(top);
           }
           break;
         case 'punctuation':
-          if (!arr) {
+          if (!list) {
             throw new Error(`Invalid token: ${token.value}`);
           }
           break;

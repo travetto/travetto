@@ -164,11 +164,11 @@ export class AssertCheck {
         } else if (typeof result === 'string') {
           return new assert.AssertionError({ message: result, actual: error });
         }
-      } catch (checkErr) {
-        if (checkErr instanceof assert.AssertionError) {
-          return checkErr;
+      } catch (checkError) {
+        if (checkError instanceof assert.AssertionError) {
+          return checkError;
         } else {
-          return new assert.AssertionError({ message: `Checking function ${target} threw an error`, actual: checkErr });
+          return new assert.AssertionError({ message: `Checking function ${target} threw an error`, actual: checkError });
         }
       }
     }
@@ -193,10 +193,10 @@ export class AssertCheck {
       missed.stack = error.stack;
     }
 
-    const resolvedErr = (missed && error) ?? this.checkError(shouldThrow, error);
-    if (resolvedErr) {
-      assertion.message = message || missed?.message || resolvedErr.message;
-      throw (assertion.error = resolvedErr);
+    const resolvedError = (missed && error) ?? this.checkError(shouldThrow, error);
+    if (resolvedError) {
+      assertion.message = message || missed?.message || resolvedError.message;
+      throw (assertion.error = resolvedError);
     }
   }
 

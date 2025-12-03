@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { Env, Runtime, RuntimeResources } from '@travetto/runtime';
 
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigSource, ConfigPayload } from './types.ts';
 import { ParserManager } from '../parser/parser.ts';
 
 type Profile = [string, number] | readonly [string, number];
@@ -28,9 +28,9 @@ export class FileConfigSource implements ConfigSource {
     ] as const).filter(entry => !!entry[0]);
   }
 
-  async get(): Promise<ConfigSpec[]> {
+  async get(): Promise<ConfigPayload[]> {
     const cache: Record<string, Promise<string[]>> = {};
-    const configs: Promise<ConfigSpec>[] = [];
+    const configs: Promise<ConfigPayload>[] = [];
 
     for (const [profile, priority] of this.#profiles) {
       let i = priority;

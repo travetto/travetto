@@ -6,8 +6,8 @@ class CustomService {
 
   dependentService: DependentService;
 
-  constructor(svc: DependentService) {
-    this.dependentService = svc;
+  constructor(service: DependentService) {
+    this.dependentService = service;
   }
 
   async coolOperation() {

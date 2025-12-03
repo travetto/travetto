@@ -174,9 +174,9 @@ export class CompilerWatcher {
 
         try {
           await this.#reconcileManifestUpdates(items);
-        } catch (mErr) {
-          log.info('Restarting due to manifest rebuild failure', mErr);
-          throw new CompilerReset(`Manifest rebuild failure: ${mErr}`);
+        } catch (manifestError) {
+          log.info('Restarting due to manifest rebuild failure', manifestError);
+          throw new CompilerReset(`Manifest rebuild failure: ${manifestError}`);
         }
 
         for (const item of items) {

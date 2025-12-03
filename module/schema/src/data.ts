@@ -68,10 +68,10 @@ export class DataUtil {
         if (mode === 'replace') {
           value = b;
         } else {
-          const retArr: unknown[] = castTo(value);
-          const bArr = b;
-          for (let i = 0; i < bArr.length; i++) {
-            retArr[i] = this.#deepAssignRaw(retArr[i], bArr[i], mode);
+          const retArray: unknown[] = castTo(value);
+          const bArray = b;
+          for (let i = 0; i < bArray.length; i++) {
+            retArray[i] = this.#deepAssignRaw(retArray[i], bArray[i], mode);
           }
         }
       } else if (isSimpB) { // Scalars
@@ -119,7 +119,7 @@ export class DataUtil {
   /**
    * Coerce an input of any type to the class provided
    * @param input Input value
-   * @param type Class to coerce to (String, Boolean, Number, Date, RegEx, Object)
+   * @param type Class to coerce to (String, Boolean, Number, Date, RegExp, Object)
    * @param strict Should a failure to coerce throw an error?
    */
   static coerceType(input: unknown, type: typeof String, strict?: boolean): string;
