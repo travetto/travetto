@@ -28,18 +28,17 @@ export class CliWebRpcCommand implements CliCommandShape {
   }
 
   async main(type: WebRpcClient['type'] | 'config', output?: string): Promise<void> {
+    const service = await this.#service;
     if (type === 'config') {
-      const svc = await this.#service;
-      await svc.render();
+      await service.render();
     } else {
       if (!output) {
         throw new CliValidationResultError(this, [
           { message: 'output is required when type is not `config`', source: 'arg' }
         ]);
       }
-      const svc = await this.#service;
       output = path.resolve(output);
-      return svc.renderProvider({ type, output });
+      return service.renderProvider({ type, output });
     }
   }
 }

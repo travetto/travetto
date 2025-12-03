@@ -13,11 +13,11 @@ type TodoRequest = Omit<Todo, 'id'>;
 @Controller('/todo')
 export class TodoController {
 
-  _svc: TodoService;
+  _service: TodoService;
 
   @Inject()
-  set svc(service: TodoService) {
-    this._svc = service;
+  set service(service: TodoService) {
+    this._service = service;
   }
 
   /**
@@ -25,7 +25,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(search: TodoSearch): Promise<Todo[]> {
-    return this._svc.getAll(search);
+    return this._service.getAll(search);
   }
 
   /**
@@ -33,7 +33,7 @@ export class TodoController {
    */
   @Delete('/')
   async deleteAllCompleted(): Promise<void> {
-    await this._svc.deleteAllCompleted();
+    await this._service.deleteAllCompleted();
   }
 
   /**
@@ -42,7 +42,7 @@ export class TodoController {
    */
   @Get('/:id')
   async getById(id: string): Promise<Todo> {
-    return this._svc.get(id);
+    return this._service.get(id);
   }
 
   /**
@@ -50,7 +50,7 @@ export class TodoController {
    */
   @Post('/')
   async create(todo: TodoRequest): Promise<Todo> {
-    return await this._svc.add({ ...todo, id: undefined! });
+    return await this._service.add({ ...todo, id: undefined! });
   }
 
   /**
@@ -60,7 +60,7 @@ export class TodoController {
    */
   @Put('/:id')
   async update(id: string, todo: TodoRequest): Promise<Todo> {
-    return await this._svc.update({ ...todo, id });
+    return await this._service.update({ ...todo, id });
   }
 
   /**
@@ -70,7 +70,7 @@ export class TodoController {
   @Put('/:id/complete')
   async complete(id: string, completed: boolean = true): Promise<Todo> {
     console.log('Completing', id, completed);
-    return await this._svc.complete(id, completed);
+    return await this._service.complete(id, completed);
   }
 
   /**
@@ -80,6 +80,6 @@ export class TodoController {
   @Delete('/:id')
   async remove(id: string): Promise<void> {
     console.log('Hello');
-    await this._svc.remove(id);
+    await this._service.remove(id);
   }
 }
