@@ -12,7 +12,7 @@ interface State {
   path: string;
   collect(element: string, message: string): void;
   extend(path: string): State;
-  log(err: string): void;
+  log(error: string): void;
 }
 
 interface ProcessingHandler {
@@ -51,19 +51,19 @@ export class QueryVerifier {
   /**
    * Handle generic clauses
    */
-  static processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler): void {
+  static processGenericClause<T>(state: State, cls: Class<T>, clause: object, handler: ProcessingHandler): void {
     const view = SchemaRegistryIndex.getConfig(cls).fields;
 
-    if (val === undefined || val === null) {
+    if (clause === undefined || clause === null) {
       state.log('Value cannot be undefined or null');
       return;
     }
 
-    if (handler.preMember && handler.preMember(state, val)) {
+    if (handler.preMember && handler.preMember(state, clause)) {
       return;
     }
 
-    for (const [key, value] of Object.entries(val)) {
+    for (const [key, value] of Object.entries(clause)) {
 
       // Validate value is correct, and key is valid
       if (value === undefined || value === null) {
@@ -82,19 +82,19 @@ export class QueryVerifier {
 
       // Find field
       const field = view[key];
-      const op = TypeUtil.getDeclaredType(field);
+      const type = TypeUtil.getDeclaredType(field);
 
       // If a simple operation
-      if (op) {
-        handler.onSimpleType(state.extend(key), op, value, field.array ?? false);
+      if (type) {
+        handler.onSimpleType(state.extend(key), type, value, field.array ?? false);
       } else {
         // Otherwise recurse
         const subCls = field.type;
-        const subVal = value;
-        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.array ?? false)) {
+        const subValue = value;
+        if (handler.onComplexType && handler.onComplexType(state, subCls, subValue, field.array ?? false)) {
           continue;
         }
-        this.processGenericClause(state.extend(key), subCls, subVal, handler);
+        this.processGenericClause(state.extend(key), subCls, subValue, handler);
       }
     }
   }
@@ -113,8 +113,8 @@ export class QueryVerifier {
     if (isArray) {
       if (Array.isArray(value)) {
         // Handle array literal
-        for (const el of value) {
-          this.checkOperatorClause(state, declaredType, el, allowed, false);
+        for (const item of value) {
+          this.checkOperatorClause(state, declaredType, item, allowed, false);
         }
         return;
       }
@@ -141,30 +141,30 @@ export class QueryVerifier {
     }
 
     // Should only be one?
-    for (const [k, v] of Object.entries(value)) {
-      if (k === '$all' || k === '$elemMatch' || k === '$in' || k === '$nin') {
-        if (!Array.isArray(v)) {
-          state.log(`${k} operator requires comparison to be an array, not ${typeof v}`);
+    for (const [key, keyValue] of Object.entries(value)) {
+      if (key === '$all' || key === '$elemMatch' || key === '$in' || key === '$nin') {
+        if (!Array.isArray(keyValue)) {
+          state.log(`${key} operator requires comparison to be an array, not ${typeof keyValue}`);
           return;
-        } else if (v.length === 0) {
-          state.log(`${k} operator requires comparison to be a non-empty array`);
+        } else if (keyValue.length === 0) {
+          state.log(`${key} operator requires comparison to be a non-empty array`);
           return;
         }
 
-        for (const el of v) {
-          const elAct = TypeUtil.getActualType(el);
-          if (!this.typesMatch(declaredType, elAct)) {
-            state.log(`${k} operator requires all values to be ${declaredType}, but ${elAct} was found`);
+        for (const item of keyValue) {
+          const itemType = TypeUtil.getActualType(item);
+          if (!this.typesMatch(declaredType, itemType)) {
+            state.log(`${key} operator requires all values to be ${declaredType}, but ${itemType} was found`);
             return;
           }
         }
-      } else if (!(k in allowed)) {
-        state.log(`Operation ${k}, not allowed for field of type ${declaredType}`);
+      } else if (!(key in allowed)) {
+        state.log(`Operation ${key}, not allowed for field of type ${declaredType}`);
       } else {
-        const actualSubType = TypeUtil.getActualType(v)!;
+        const actualSubType = TypeUtil.getActualType(keyValue)!;
 
-        if (!allowed[k].has(actualSubType)) {
-          state.log(`Passed in value ${actualSubType} mismatches with expected type(s) ${Array.from(allowed[k])}`);
+        if (!allowed[key].has(actualSubType)) {
+          state.log(`Passed in value ${actualSubType} mismatches with expected type(s) ${Array.from(allowed[key])}`);
         }
       }
     }
@@ -190,8 +190,8 @@ export class QueryVerifier {
             state.log(`${firstKey} requires the value to be an array`);
           } else {
             // Iterate
-            for (const el of sub) {
-              this.processWhereClause(state, cls, el);
+            for (const item of sub) {
+              this.processWhereClause(state, cls, item);
             }
             return true;
           }
@@ -208,7 +208,7 @@ export class QueryVerifier {
       onSimpleType: (state: State, type: SimpleType, value: unknown, isArray: boolean) => {
         this.checkOperatorClause(state, type, value, TypeUtil.OPERATORS[type], isArray);
       },
-      onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => false
+      onComplexType: (state: State, subCls: Class<T>, subValue: T, isArray: boolean): boolean => false
     });
   }
 
@@ -281,8 +281,8 @@ export class QueryVerifier {
       collect(path: string, message: string): void {
         errors.push({ message: `${path}: ${message}`, path, kind: 'model' });
       },
-      log(err: string): void {
-        this.collect(this.path, err);
+      log(error: string): void {
+        this.collect(this.path, error);
       },
       extend<S extends { path: string }>(this: S, sub: string): S {
         return { ...this, path: !this.path ? sub : `${this.path}.${sub}` };
@@ -302,15 +302,15 @@ export class QueryVerifier {
         continue;
       }
 
-      const val = query[key];
+      const value = query[key];
       const subState = state.extend(key);
 
-      if (Array.isArray(val)) {
-        for (const el of val) {
-          this[fn](subState, cls, el);
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          this[fn](subState, cls, item);
         }
-      } else if (typeof val !== 'string') {
-        this[fn](subState, cls, val);
+      } else if (typeof value !== 'string') {
+        this[fn](subState, cls, value);
       }
     }
 

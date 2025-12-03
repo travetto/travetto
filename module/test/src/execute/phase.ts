@@ -8,7 +8,7 @@ class TestBreakout extends Error {
   source?: Error;
 }
 
-const TEST_PHASE_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_PHASE_TIMEOUT.val) ?? 15000;
+const TEST_PHASE_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_PHASE_TIMEOUT.value) ?? 15000;
 
 /**
  * Test Phase Execution Manager.
@@ -67,9 +67,9 @@ export class TestPhaseManager {
   /**
    * On error, handle stubbing out error for the phases in progress
    */
-  async onError(err: Error | unknown): Promise<void> {
-    if (!(err instanceof Error)) {
-      throw err;
+  async onError(error: Error | unknown): Promise<void> {
+    if (!(error instanceof Error)) {
+      throw error;
     }
 
     for (const ph of this.#progress) {
@@ -82,8 +82,8 @@ export class TestPhaseManager {
 
     const failure = AssertUtil.generateSuiteFailure(
       this.#suite,
-      err instanceof TestBreakout ? err.message : 'all',
-      err instanceof TestBreakout ? err.source! : err
+      error instanceof TestBreakout ? error.message : 'all',
+      error instanceof TestBreakout ? error.source! : error
     );
 
     this.#onSuiteFailure(failure);

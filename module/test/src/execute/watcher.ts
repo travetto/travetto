@@ -32,15 +32,14 @@ export class TestWatcher {
       events.push(...RunnerUtil.getTestRuns(tests));
     }
 
-    const itr = new AsyncQueue(events);
+    const queue = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(
       await TestConsumerRegistryIndex.getInstance({ consumer: format })
     )
-      .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
+      .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
 
     Registry.onMethodChange((event) => {
-      const [cls, method] = ('prev' in event && event.prev ? event.prev : null) ??
-        ('curr' in event && event.curr ? event.curr : []);
+      const [cls, method] = 'previous' in event ? event.previous : event.current;
 
       if (!cls || describeFunction(cls).abstract) {
         return;
@@ -52,14 +51,14 @@ export class TestWatcher {
         return;
       }
 
-      const conf = SuiteRegistryIndex.getTestConfig(cls, method)!;
+      const config = SuiteRegistryIndex.getTestConfig(cls, method)!;
       if (event.type !== 'removing') {
-        if (conf) {
+        if (config) {
           const run: TestRun = {
-            import: conf.import, classId: conf.classId, methodNames: [conf.methodName], metadata: { partial: true }
+            import: config.import, classId: config.classId, methodNames: [config.methodName], metadata: { partial: true }
           };
           console.log('Triggering', run);
-          itr.add(run, true); // Shift to front
+          queue.add(run, true); // Shift to front
         }
       } else {
         process.send?.({
@@ -73,17 +72,17 @@ export class TestWatcher {
     }, SuiteRegistryIndex);
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    Registry.onNonClassChanges(imp => itr.add({ import: imp }));
+    Registry.onNonClassChanges(imp => queue.add({ import: imp }));
 
-    process.on('message', ev => {
-      if (typeof ev === 'object' && ev && 'type' in ev && ev.type === 'run-test') {
-        console.log('Received message', ev);
+    process.on('message', event => {
+      if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {
+        console.log('Received message', event);
         // Legacy
-        if ('file' in ev && typeof ev.file === 'string') {
-          ev = { import: RuntimeIndex.getFromSource(ev.file)?.import! };
+        if ('file' in event && typeof event.file === 'string') {
+          event = { import: RuntimeIndex.getFromSource(event.file)?.import! };
         }
-        console.debug('Manually triggered', ev);
-        itr.add(castTo(ev), true);
+        console.debug('Manually triggered', event);
+        queue.add(castTo(event), true);
       }
     });
 
@@ -91,7 +90,7 @@ export class TestWatcher {
 
     await WorkPool.run(
       buildStandardTestManager.bind(null, consumer),
-      itr,
+      queue,
       {
         idleTimeoutMillis: 120000,
         min: 2,

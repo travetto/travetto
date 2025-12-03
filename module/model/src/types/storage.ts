@@ -32,23 +32,23 @@ export interface ModelStorageSupport {
   /**
    * Installs model
    */
-  createModel?<T extends ModelType>(e: Class<T>): Promise<void>;
+  createModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
    * Installs model
    */
-  exportModel?<T extends ModelType>(e: Class<T>): Promise<string>;
+  exportModel?<T extends ModelType>(cls: Class<T>): Promise<string>;
   /**
    * Installs model
    */
-  deleteModel?<T extends ModelType>(e: Class<T>): Promise<void>;
+  deleteModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
    * Removes all data from a model, but leaving the structure in place
    */
-  truncateModel?<T extends ModelType>(e: Class<T>): Promise<void>;
+  truncateModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
    * Deals with model internals changing
    */
-  changeModel?<T extends ModelType>(e: Class<T>): Promise<void>;
+  changeModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
    * An event listener for whenever a model schema is changed
    */

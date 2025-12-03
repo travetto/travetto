@@ -74,22 +74,22 @@ export class IndexManager implements ModelStorageSupport {
    */
   async createIndex(cls: Class, alias = true): Promise<string> {
     const mapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
-    const ident = this.getIdentity(cls); // Already namespaced
-    const concreteIndex = `${ident.index}_${Date.now()}`;
+    const { index } = this.getIdentity(cls); // Already namespaced
+    const concreteIndex = `${index}_${Date.now()}`;
     try {
       await this.#client.indices.create({
         index: concreteIndex,
         mappings: mapping,
         settings: this.config.indexCreate,
-        ...(alias ? { aliases: { [ident.index]: {} } } : {})
+        ...(alias ? { aliases: { [index]: {} } } : {})
       });
-      console.debug('Index created', { index: ident.index, concrete: concreteIndex });
+      console.debug('Index created', { index, concrete: concreteIndex });
       console.debug('Index Config', {
         mappings: mapping,
         settings: this.config.indexCreate
       });
-    } catch (err) {
-      console.warn('Index already created', { index: ident.index, error: err });
+    } catch (error) {
+      console.warn('Index already created', { index, error });
     }
     return concreteIndex;
   }
@@ -99,9 +99,9 @@ export class IndexManager implements ModelStorageSupport {
    */
   async createIndexIfMissing(cls: Class): Promise<void> {
     const baseCls = SchemaRegistryIndex.getBaseClass(cls);
-    const ident = this.getIdentity(baseCls);
+    const identity = this.getIdentity(baseCls);
     try {
-      await this.#client.search(ident);
+      await this.#client.search(identity);
     } catch {
       await this.createIndex(baseCls);
     }
@@ -114,8 +114,8 @@ export class IndexManager implements ModelStorageSupport {
 
   async exportModel(cls: Class<ModelType>): Promise<string> {
     const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
-    const ident = this.getIdentity(cls); // Already namespaced
-    return `curl -XPOST $ES_HOST/${ident.index} -d '${JSON.stringify({
+    const { index } = this.getIdentity(cls); // Already namespaced
+    return `curl -XPOST $ES_HOST/${index} -d '${JSON.stringify({
       mappings: schema,
       settings: this.config.indexCreate
     })}'`;
@@ -136,20 +136,20 @@ export class IndexManager implements ModelStorageSupport {
    */
   async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
     // Find which fields are gone
-    const removes = change.subs.reduce<string[]>((acc, v) => {
-      acc.push(...v.fields
-        .filter(ev => ev.type === 'removing')
-        .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
-      return acc;
+    const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
+      toRemove.push(...subChange.fields
+        .filter(event => event.type === 'removing')
+        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
+      return toRemove;
     }, []);
 
     // Find which types have changed
-    const fieldChanges = change.subs.reduce<string[]>((acc, v) => {
-      acc.push(...v.fields
-        .filter(ev => ev.type === 'changed')
-        .filter(ev => ev.prev?.type !== ev.curr?.type)
-        .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
-      return acc;
+    const fieldChanges = change.subs.reduce<string[]>((toChange, subChange) => {
+      toChange.push(...subChange.fields
+        .filter(event => event.type === 'changed')
+        .filter(event => event.previous?.type !== event.current?.type)
+        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
+      return toChange;
     }, []);
 
     const { index } = this.getIdentity(cls);
@@ -159,16 +159,16 @@ export class IndexManager implements ModelStorageSupport {
       const next = await this.createIndex(cls, false);
 
       const aliases = (await this.#client.indices.getAlias({ index })).body;
-      const curr = Object.keys(aliases)[0];
+      const current = Object.keys(aliases)[0];
 
       const allChange = removes.concat(fieldChanges);
 
       const reindexBody: estypes.ReindexRequest = {
-        source: { index: curr },
+        source: { index: current },
         dest: { index: next },
         script: {
           lang: 'painless',
-          source: allChange.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
+          source: allChange.map(part => `ctx._source.remove("${part}");`).join(' ') // Removing
         },
         wait_for_completion: true
       };
@@ -177,7 +177,7 @@ export class IndexManager implements ModelStorageSupport {
       await this.#client.reindex(reindexBody);
 
       await Promise.all(Object.keys(aliases)
-        .map(x => this.#client.indices.delete({ index: x })));
+        .map(alias => this.#client.indices.delete({ index: alias })));
 
       await this.#client.indices.putAlias({ index: next, name: index });
     } else { // Only update the schema

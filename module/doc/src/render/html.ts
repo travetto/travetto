@@ -13,23 +13,23 @@ import { RenderContext } from './context.ts';
 import { DocResolveUtil } from '../util/resolve.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
-const ENTITY_RE = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');
+const ENTITY_REGEX = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');
 
-const stdInline = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
-  `<${el.type}>${await recurse()}</${el.type}>`;
+const stdInline = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
+  `<${node.type}>${await recurse()}</${node.type}>`;
 
-const std = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
-  `<${el.type}>${await recurse()}</${el.type}>\n`;
+const std = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
+  `<${node.type}>${await recurse()}</${node.type}>\n`;
 
-const stdFull = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
-  `\n<${el.type}>${await recurse()}</${el.type}>\n`;
+const stdFull = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
+  `\n<${node.type}>${await recurse()}</${node.type}>\n`;
 
 export const Html: RenderProvider<RenderContext> = {
   ext: 'html',
   finalize: (text, context) => {
     const brand = `<!-- ${context.generatedStamp} -->\n<!-- ${context.rebuildStamp} -->`;
     const cleaned = text
-      .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, v) => `${tag} ${v}`)
+      .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, value) => `${tag} ${value}`)
       .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`);
     return `${brand}\n${cleaned}`;
   },
@@ -39,10 +39,10 @@ export const Html: RenderProvider<RenderContext> = {
   h2: stdFull, h3: stdFull, h4: stdFull,
   li: std, ol: stdFull, ul: stdFull,
   table: stdFull, thead: std, tr: std, td: std, tbody: std,
-  Execution: async ({ context, el, props, createState }) => {
-    const output = await context.execute(el);
+  Execution: async ({ context, node, props, createState }) => {
+    const output = await context.execute(node);
     const displayCmd = props.config?.formatCommand?.(props.cmd, props.args ?? []) ??
-      `${el.props.cmd} ${(el.props.args ?? []).join(' ')}`;
+      `${node.props.cmd} ${(node.props.args ?? []).join(' ')}`;
     const sub = createState('Terminal', {
       language: 'bash',
       title: props.title,
@@ -50,18 +50,18 @@ export const Html: RenderProvider<RenderContext> = {
     });
     return Html.Terminal(sub);
   },
-  Install: async ({ context, el }) => {
+  Install: async ({ context, node }) => {
     const highlighted = highlight(`
-npm install ${el.props.pkg}
+npm install ${node.props.pkg}
 
 # or
 
-yarn add ${el.props.pkg}
+yarn add ${node.props.pkg}
 `, 'bash');
 
     return `\n
   <figure class="install">
-    <figcaption class="install">Install ${el.props.title}
+    <figcaption class="install">Install ${node.props.title}
     
     </figcaption>
     <pre><code class="language-bash">${highlighted}</code></pre>
@@ -70,11 +70,11 @@ yarn add ${el.props.pkg}
   },
   Terminal: state => Html.Code(state),
   Config: state => Html.Code(state),
-  Code: async ({ context, el, props }) => {
-    DocResolveUtil.applyCodePropDefaults(el.props);
+  Code: async ({ context, node, props }) => {
+    DocResolveUtil.applyCodePropDefaults(node.props);
 
-    const cls = getComponentName(el.type).replace(/^[A-Z]/g, v => v.toLowerCase());
-    const content = await context.resolveCode(el);
+    const cls = getComponentName(node.type).replace(/^[A-Z]/g, value => value.toLowerCase());
+    const content = await context.resolveCode(node);
     let link: string = '';
     if ('src' in props && content.file) {
       let linkCtx: { file: string, line?: number } = { file: content.file! };
@@ -85,9 +85,9 @@ yarn add ${el.props.pkg}
     }
     let lang = props.language ?? content.language;
     if (!lang) {
-      if (el.type === c.Terminal) {
+      if (node.type === c.Terminal) {
         lang = 'bash';
-      } else if (el.type === c.Code) {
+      } else if (node.type === c.Code) {
         lang = 'typescript';
       }
     }
@@ -112,12 +112,12 @@ yarn add ${el.props.pkg}
   Path: state => Html.Input(state),
   Class: state => Html.Input(state),
   Field: state => Html.Input(state),
-  Input: async ({ el, context }) => {
-    const cls = getComponentName(el.type).replace(/^[A-Z]/g, v => v.toLowerCase());
-    return `<code class="item ${cls}">${context.cleanText(el.props.name.replace(ENTITY_RE, k => ESCAPE_ENTITIES[k]))}</code>`;
+  Input: async ({ node, context }) => {
+    const cls = getComponentName(node.type).replace(/^[A-Z]/g, value => value.toLowerCase());
+    return `<code class="item ${cls}">${context.cleanText(node.props.name.replace(ENTITY_REGEX, key => ESCAPE_ENTITIES[key]))}</code>`;
   },
-  CodeLink: async ({ context, props, el }) => {
-    const target = await context.resolveCodeLink(el);
+  CodeLink: async ({ context, props, node }) => {
+    const target = await context.resolveCodeLink(node);
     return `<a target="_blank" class="source-link" href="${context.link(target.file, target)}">${props.title}</a>`;
   },
   Anchor: async ({ context, props }) =>
@@ -134,24 +134,24 @@ yarn add ${el.props.pkg}
   },
 
   Mod: async ({ context, props }) => {
-    const cfg = MOD_MAPPING[props.name];
-    return `<a class="module-link" href="${context.link(cfg.folder, cfg)}" title="${cfg.description}">${cfg.displayName}</a>`;
+    const config = MOD_MAPPING[props.name];
+    return `<a class="module-link" href="${context.link(config.folder, config)}" title="${config.description}">${config.displayName}</a>`;
   },
   Library: async ({ context, props }) => {
-    const cfg = LIB_MAPPING[props.name];
-    return `<a target="_blank" class="external-link" href="${context.link(cfg.href, cfg)}">${cfg.title}</a>`;
+    const config = LIB_MAPPING[props.name];
+    return `<a target="_blank" class="external-link" href="${context.link(config.href, config)}">${config.title}</a>`;
   },
 
   Note: async ({ recurse }) => `\n\n<p class="note"><strong>Note</strong> ${await recurse()}</p>\n`,
   Header: async ({ props }) => `<h1>${props.title} ${props.description ? `\n<small>${props.description}</small>\n` : ''}</h1>\n`,
 
   StdHeader: async state => {
-    const mod = state.el.props.mod ?? Runtime.main.name;
+    const mod = state.node.props.mod ?? Runtime.main.name;
     const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(mod)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;
     let install = '';
-    if (state.el.props.install !== false) {
+    if (state.node.props.install !== false) {
       const sub = state.createState('Install', {
         title: pkg.name,
         pkg: pkg.name,

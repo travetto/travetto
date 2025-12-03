@@ -38,11 +38,11 @@ export class SessionContext {
   get(createIfMissing: true): Session;
   get(): Session | undefined;
   get(createIfMissing?: boolean): Session | undefined {
-    let val = this.#value.get();
-    if (!val && createIfMissing) {
-      this.set(val = this.#create());
+    let value = this.#value.get();
+    if (!value && createIfMissing) {
+      this.set(value = this.#create());
     }
-    return val;
+    return value;
   }
 
   /**

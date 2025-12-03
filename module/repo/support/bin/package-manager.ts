@@ -55,7 +55,7 @@ export class PackageManager {
    * Setting the version
    */
   static async version(ctx: Ctx, modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
-    const mods = modules.flatMap(m => ['-w', m.sourceFolder]);
+    const mods = modules.flatMap(mod => ['-w', mod.sourceFolder]);
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -116,7 +116,7 @@ export class PackageManager {
    */
   static async synchronizeVersions(): Promise<Record<string, string>> {
     const versions: Record<string, string> = {};
-    const folders = (await CliModuleUtil.findModules('workspace')).map(x => x.sourcePath);
+    const folders = (await CliModuleUtil.findModules('workspace')).map(mod => mod.sourcePath);
     const packages = folders.map(folder => {
       const pkg = PackageUtil.readPackage(folder, true);
       versions[pkg.name] = `^${pkg.version}`;

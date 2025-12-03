@@ -52,15 +52,15 @@ export class DocCommand implements CliCommandShape {
       return;
     }
 
-    const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
+    const args = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
     for await (const { action, file } of watchCompiler({ restartOnExit: true })) {
       if (action === 'update' && file === this.input) {
-        const proc = spawn('npx', ['trv', ...args], {
+        const subProcess = spawn('npx', ['trv', ...args], {
           cwd: Runtime.mainSourcePath,
           env: { ...process.env, ...Env.TRV_QUIET.export(true) },
           stdio: 'inherit'
         });
-        await ExecUtil.getResult(proc, { catch: true });
+        await ExecUtil.getResult(subProcess, { catch: true });
       }
     }
   }
@@ -73,8 +73,8 @@ export class DocCommand implements CliCommandShape {
         [output, null] as const
     );
 
-    for (const [fmt, out] of outputs) {
-      const result = await ctx.render(fmt);
+    for (const [format, out] of outputs) {
+      const result = await ctx.render(format);
       if (out) {
         const finalName = path.resolve(out);
         await fs.writeFile(finalName, result, 'utf8');

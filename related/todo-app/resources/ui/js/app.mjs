@@ -9,7 +9,7 @@ import { factory } from './api-client/factory.js';
 
 const { TodoController: api, AuthController: auth } = factory({
   url: 'https://localhost:3000'
-}, opts => {
+}, options => {
   const result = {
     /**
      * @template {Function} V
@@ -18,7 +18,7 @@ const { TodoController: api, AuthController: auth } = factory({
      * @returns {Promise<[Awaited<ReturnType<V>>]>}
      */
     async $stream(...params) {
-      console.log(opts, params);
+      console.log(options, params);
       // @ts-ignore
       return null;
     }

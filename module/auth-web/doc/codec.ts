@@ -11,9 +11,9 @@ export class CustomCodec implements PrincipalCodec {
   decode(request: WebRequest): Promise<Principal | undefined> | Principal | undefined {
     const [userId, sig] = request.headers.get('USER_ID')?.split(':') ?? [];
     if (userId && sig === BinaryUtil.hash(userId + this.secret)) {
-      let p: Principal | undefined;
+      let principal: Principal | undefined;
       // Lookup user from db, remote system, etc.,
-      return p;
+      return principal;
     }
     return;
   }

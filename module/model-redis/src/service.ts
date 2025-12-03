@@ -40,8 +40,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return key;
   }
 
-  async * #streamValues(op: 'scan' | 'sScan' | 'zScan', search: RedisScan, count = 100): AsyncIterable<string[]> {
-    let prevCursor = '0';
+  async * #streamValues(operation: 'scan' | 'sScan' | 'zScan', search: RedisScan, count = 100): AsyncIterable<string[]> {
+    let previousCursor = '0';
     let done = false;
 
     const flags = { COUNT: count, ...('match' in search ? { MATCH: search.match } : {}) };
@@ -49,14 +49,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
     while (!done) {
       const [cursor, results] = await (
-        op === 'scan' ?
-          this.client.scan(prevCursor, flags).then(x => [x.cursor, x.keys] as const) :
-          op === 'sScan' ?
-            this.client.sScan(key, prevCursor, flags).then(x => [x.cursor, x.members] as const) :
-            this.client.zScan(key, prevCursor, flags).then(x => [x.cursor, x.members.map(y => y.value)] as const)
+        operation === 'scan' ?
+          this.client.scan(previousCursor, flags).then(result => [result.cursor, result.keys] as const) :
+          operation === 'sScan' ?
+            this.client.sScan(key, previousCursor, flags).then(result => [result.cursor, result.members] as const) :
+            this.client.zScan(key, previousCursor, flags).then(result => [result.cursor, result.members.map(item => item.value)] as const)
       );
 
-      prevCursor = cursor;
+      previousCursor = cursor;
 
       yield results;
 
@@ -149,17 +149,17 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body);
-    const fullKey = this.#resolveKey(cls, idxCfg.name, key);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body);
+    const fullKey = this.#resolveKey(cls, idxConfig.name, key);
     let id: string | undefined;
-    if (idxCfg.type === 'unsorted') {
+    if (idxConfig.type === 'unsorted') {
       id = (await this.client.sRandMember(fullKey))!;
     } else {
-      const res = await this.client.zRangeByScore(
+      const result = await this.client.zRangeByScore(
         fullKey, +sort!, +sort!
       );
-      id = res[0];
+      id = result[0];
     }
     if (id) {
       return id;
@@ -172,11 +172,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     await this.client.connect();
     await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onGracefulShutdown(() => this.client.destroy());
-    for (const el of ModelRegistryIndex.getClasses()) {
-      for (const idx of ModelRegistryIndex.getConfig(el).indices ?? []) {
+    for (const cls of ModelRegistryIndex.getClasses()) {
+      for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
-            console.error('Unique indices are not supported in redis for', { cls: el.Ⲑid, idx: idx.name });
+            console.error('Unique indices are not supported in redis for', { cls: cls.Ⲑid, idx: idx.name });
             break;
           }
         }
@@ -185,10 +185,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'exists'): Promise<void> {
-    const res = await this.client.exists(this.#resolveKey(cls, id));
-    if (res === 0 && error === 'notfound') {
+    const result = await this.client.exists(this.#resolveKey(cls, id));
+    if (result === 0 && error === 'notfound') {
       throw new NotFoundError(cls, id);
-    } else if (res === 1 && error === 'exists') {
+    } else if (result === 1 && error === 'exists') {
       throw new ExistsError(cls, id);
     }
   }
@@ -248,14 +248,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       }
 
       const bodies = (await this.client.mGet(ids))
-        .filter((x): x is string => !!x);
+        .filter((result): result is string => !!result);
 
       for (const body of bodies) {
         try {
           yield await ModelCrudUtil.load(cls, body);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
       }
@@ -309,14 +309,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     let stream: AsyncIterable<string[]>;
 
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body, { emptySortValue: null });
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body, { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx, key);
 
-    if (idxCfg.type === 'unsorted') {
+    if (idxConfig.type === 'unsorted') {
       stream = this.#streamValues('sScan', { key: fullKey });
     } else {
       stream = this.#streamValues('zScan', { key: fullKey });
@@ -328,16 +328,16 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       }
 
       const bodies = (await this.client.mGet(
-        ids.map(x => this.#resolveKey(cls, x))
+        ids.map(id => this.#resolveKey(cls, id))
       ))
-        .filter((x): x is string => !!x);
+        .filter((result): result is string => !!result);
 
       for (const full of bodies) {
         try {
           yield await ModelCrudUtil.load(cls, full);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
       }

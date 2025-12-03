@@ -21,8 +21,8 @@ class SimpleTest {
 
     await assert.rejects(() => {
       throw new Error('Big Error');
-    }, (err: Error) =>
-      err.message.startsWith('Big') && err.message.length > 4
+    }, (error: Error) =>
+      error.message.startsWith('Big') && error.message.length > 4
     );
   }
 }

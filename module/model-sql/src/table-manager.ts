@@ -32,13 +32,13 @@ export class TableManager {
    */
   async exportTables(cls: Class): Promise<string[]> {
     const out: string[] = [];
-    for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
-      out.push(op);
+    for (const command of this.#dialect.getCreateAllTablesSQL(cls)) {
+      out.push(command);
     }
     const indices = ModelRegistryIndex.getConfig(cls).indices;
     if (indices) {
-      for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
-        out.push(op);
+      for (const command of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
+        out.push(command);
       }
     }
     return out;
@@ -51,20 +51,20 @@ export class TableManager {
   @Connected()
   @Transactional()
   async createTables(cls: Class): Promise<void> {
-    for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
-      await this.#exec(op);
+    for (const command of this.#dialect.getCreateAllTablesSQL(cls)) {
+      await this.#exec(command);
     }
     const indices = ModelRegistryIndex.getConfig(cls).indices;
     if (indices) {
-      for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
+      for (const command of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
-          await this.#exec(op);
-        } catch (err) {
-          if (!(err instanceof Error)) {
-            throw err;
+          await this.#exec(command);
+        } catch (error) {
+          if (!(error instanceof Error)) {
+            throw error;
           }
-          if (!/\bexists|duplicate\b/i.test(err.message)) {
-            throw err;
+          if (!/\bexists|duplicate\b/i.test(error.message)) {
+            throw error;
           }
         }
       }
@@ -78,8 +78,8 @@ export class TableManager {
   @Connected()
   @Transactional()
   async dropTables(cls: Class): Promise<void> {
-    for (const op of this.#dialect.getDropAllTablesSQL(cls)) {
-      await this.#exec(op);
+    for (const command of this.#dialect.getDropAllTablesSQL(cls)) {
+      await this.#exec(command);
     }
   }
 
@@ -90,16 +90,16 @@ export class TableManager {
   @Connected()
   @Transactional()
   async truncateTables(cls: Class): Promise<void> {
-    for (const op of this.#dialect.getTruncateAllTablesSQL(cls)) {
-      await this.#exec(op);
+    for (const command of this.#dialect.getTruncateAllTablesSQL(cls)) {
+      await this.#exec(command);
     }
   }
 
   /**
    * Get a valid connection
    */
-  get conn(): Connection {
-    return this.#dialect.conn;
+  get connection(): Connection {
+    return this.#dialect.connection;
   }
 
   /**
@@ -112,20 +112,20 @@ export class TableManager {
     try {
       const rootStack = SQLModelUtil.classToStack(cls);
 
-      const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((acc, v) => {
-        const path = v.path.map(f => ({ ...f }));
-        for (const ev of v.fields) {
-          acc[ev.type].push([...rootStack, ...path, { ...(ev.type === 'removing' ? ev.prev : ev.curr)! }]);
+      const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((result, value) => {
+        const path = value.path.map(field => ({ ...field }));
+        for (const event of value.fields) {
+          result[event.type].push([...rootStack, ...path, { ...(event.type === 'removing' ? event.previous : event.current)! }]);
         }
-        return acc;
+        return result;
       }, { added: [], changed: [], removing: [] });
 
-      await Promise.all(changes.added.map(v => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(v))));
-      await Promise.all(changes.changed.map(v => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(v))));
-      await Promise.all(changes.removing.map(v => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(v))));
-    } catch (err) {
+      await Promise.all(changes.added.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));
+      await Promise.all(changes.changed.map(value => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(value))));
+      await Promise.all(changes.removing.map(value => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(value))));
+    } catch (error) {
       // Failed to change
-      console.error('Unable to change field', { error: err });
+      console.error('Unable to change field', { error });
     }
   }
 }

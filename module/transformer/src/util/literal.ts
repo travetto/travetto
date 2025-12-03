@@ -3,17 +3,17 @@ import ts from 'typescript';
 import { transformCast, TemplateLiteral } from '../types/shared.ts';
 
 const TypedObject: {
-  keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
+  keys<T = unknown, K extends keyof T = keyof T>(value: T): K[];
 } & ObjectConstructor = Object;
 
-function isNode(n: unknown): n is ts.Node {
-  return !!n && typeof n === 'object' && 'kind' in n;
+function isNode(value: unknown): value is ts.Node {
+  return !!value && typeof value === 'object' && 'kind' in value;
 }
 
 const KNOWN_FNS = new Set<unknown>([String, Number, Boolean, Date, RegExp]);
 
-function isKnownFn(n: unknown): n is Function {
-  return KNOWN_FNS.has(n);
+function isKnownFn(value: unknown): value is Function {
+  return KNOWN_FNS.has(value);
 }
 
 /**
@@ -34,96 +34,96 @@ export class LiteralUtil {
   /**
    * Convert literal to a `ts.Node` type
    */
-  static fromLiteral<T extends ts.Expression>(factory: ts.NodeFactory, val: T): T;
-  static fromLiteral(factory: ts.NodeFactory, val: undefined): ts.Identifier;
-  static fromLiteral(factory: ts.NodeFactory, val: null): ts.NullLiteral;
-  static fromLiteral(factory: ts.NodeFactory, val: object): ts.ObjectLiteralExpression;
-  static fromLiteral(factory: ts.NodeFactory, val: unknown[]): ts.ArrayLiteralExpression;
-  static fromLiteral(factory: ts.NodeFactory, val: string): ts.StringLiteral;
-  static fromLiteral(factory: ts.NodeFactory, val: number): ts.NumericLiteral;
-  static fromLiteral(factory: ts.NodeFactory, val: boolean): ts.BooleanLiteral;
-  static fromLiteral(factory: ts.NodeFactory, val: unknown): ts.Node {
-    if (isNode(val)) { // If already a node
-      return val;
-    } else if (Array.isArray(val)) {
-      val = factory.createArrayLiteralExpression(val.map(v => this.fromLiteral(factory, v)));
-    } else if (val === undefined) {
-      val = factory.createIdentifier('undefined');
-    } else if (val === null) {
-      val = factory.createNull();
-    } else if (typeof val === 'string') {
-      val = factory.createStringLiteral(val);
-    } else if (typeof val === 'number') {
-      const res = factory.createNumericLiteral(Math.abs(val));
-      val = val < 0 ? factory.createPrefixMinus(res) : res;
-    } else if (typeof val === 'boolean') {
-      val = val ? factory.createTrue() : factory.createFalse();
-    } else if (val instanceof RegExp) {
-      val = factory.createRegularExpressionLiteral(`/${val.source}/${val.flags ?? ''}`);
-    } else if (isKnownFn(val)) {
-      val = factory.createIdentifier(val.name);
+  static fromLiteral<T extends ts.Expression>(factory: ts.NodeFactory, value: T): T;
+  static fromLiteral(factory: ts.NodeFactory, value: undefined): ts.Identifier;
+  static fromLiteral(factory: ts.NodeFactory, value: null): ts.NullLiteral;
+  static fromLiteral(factory: ts.NodeFactory, value: object): ts.ObjectLiteralExpression;
+  static fromLiteral(factory: ts.NodeFactory, value: unknown[]): ts.ArrayLiteralExpression;
+  static fromLiteral(factory: ts.NodeFactory, value: string): ts.StringLiteral;
+  static fromLiteral(factory: ts.NodeFactory, value: number): ts.NumericLiteral;
+  static fromLiteral(factory: ts.NodeFactory, value: boolean): ts.BooleanLiteral;
+  static fromLiteral(factory: ts.NodeFactory, value: unknown): ts.Node {
+    if (isNode(value)) { // If already a node
+      return value;
+    } else if (Array.isArray(value)) {
+      value = factory.createArrayLiteralExpression(value.map(element => this.fromLiteral(factory, element)));
+    } else if (value === undefined) {
+      value = factory.createIdentifier('undefined');
+    } else if (value === null) {
+      value = factory.createNull();
+    } else if (typeof value === 'string') {
+      value = factory.createStringLiteral(value);
+    } else if (typeof value === 'number') {
+      const number = factory.createNumericLiteral(Math.abs(value));
+      value = value < 0 ? factory.createPrefixMinus(number) : number;
+    } else if (typeof value === 'boolean') {
+      value = value ? factory.createTrue() : factory.createFalse();
+    } else if (value instanceof RegExp) {
+      value = factory.createRegularExpressionLiteral(`/${value.source}/${value.flags ?? ''}`);
+    } else if (isKnownFn(value)) {
+      value = factory.createIdentifier(value.name);
     } else {
-      const ov = val;
+      const ov = value;
       const pairs: ts.PropertyAssignment[] = [];
-      for (const k of TypedObject.keys(ov)) {
-        if (ov[k] !== undefined) {
+      for (const key of TypedObject.keys(ov)) {
+        if (ov[key] !== undefined) {
           pairs.push(
-            factory.createPropertyAssignment(k, this.fromLiteral(factory, ov[k]))
+            factory.createPropertyAssignment(key, this.fromLiteral(factory, ov[key]))
           );
         }
       }
       return factory.createObjectLiteralExpression(pairs);
     }
-    return transformCast(val);
+    return transformCast(value);
   }
 
   /**
    * Convert a `ts.Node` to a JS literal
    */
-  static toLiteral(val: ts.NullLiteral, strict?: boolean): null;
-  static toLiteral(val: ts.NumericLiteral, strict?: boolean): number;
-  static toLiteral(val: ts.StringLiteral, strict?: boolean): string;
-  static toLiteral(val: ts.BooleanLiteral, strict?: boolean): boolean;
-  static toLiteral(val: ts.ObjectLiteralExpression, strict?: boolean): object;
-  static toLiteral(val: ts.ArrayLiteralExpression, strict?: boolean): unknown[];
-  static toLiteral(val: undefined, strict?: boolean): undefined;
-  static toLiteral(val: ts.Node, strict?: boolean): unknown;
-  static toLiteral(val?: ts.Node, strict = true): unknown {
-    if (!val) {
-      throw new Error('Val is not defined');
-    } else if (ts.isArrayLiteralExpression(val)) {
-      return val.elements.map(x => this.toLiteral(x, strict));
-    } else if (ts.isIdentifier(val)) {
-      if (val.getText() === 'undefined') {
+  static toLiteral(value: ts.NullLiteral, strict?: boolean): null;
+  static toLiteral(value: ts.NumericLiteral, strict?: boolean): number;
+  static toLiteral(value: ts.StringLiteral, strict?: boolean): string;
+  static toLiteral(value: ts.BooleanLiteral, strict?: boolean): boolean;
+  static toLiteral(value: ts.ObjectLiteralExpression, strict?: boolean): object;
+  static toLiteral(value: ts.ArrayLiteralExpression, strict?: boolean): unknown[];
+  static toLiteral(value: undefined, strict?: boolean): undefined;
+  static toLiteral(value: ts.Node, strict?: boolean): unknown;
+  static toLiteral(value?: ts.Node, strict = true): unknown {
+    if (!value) {
+      throw new Error('Value is not defined');
+    } else if (ts.isArrayLiteralExpression(value)) {
+      return value.elements.map(item => this.toLiteral(item, strict));
+    } else if (ts.isIdentifier(value)) {
+      if (value.getText() === 'undefined') {
         return undefined;
       } else if (!strict) {
-        return val.getText();
+        return value.getText();
       }
-    } else if (val.kind === ts.SyntaxKind.NullKeyword) {
+    } else if (value.kind === ts.SyntaxKind.NullKeyword) {
       return null;
-    } else if (ts.isStringLiteral(val)) {
-      return val.text;
-    } else if (ts.isNumericLiteral(val)) {
-      const txt = val.text;
+    } else if (ts.isStringLiteral(value)) {
+      return value.text;
+    } else if (ts.isNumericLiteral(value)) {
+      const txt = value.text;
       if (txt.includes('.')) {
         return parseFloat(txt);
       } else {
         return parseInt(txt, 10);
       }
-    } else if (ts.isPrefixUnaryExpression(val) && val.operator === ts.SyntaxKind.MinusToken && ts.isNumericLiteral(val.operand)) {
-      const txt = val.operand.text;
+    } else if (ts.isPrefixUnaryExpression(value) && value.operator === ts.SyntaxKind.MinusToken && ts.isNumericLiteral(value.operand)) {
+      const txt = value.operand.text;
       if (txt.includes('.')) {
         return -parseFloat(txt);
       } else {
         return -parseInt(txt, 10);
       }
-    } else if (val.kind === ts.SyntaxKind.FalseKeyword) {
+    } else if (value.kind === ts.SyntaxKind.FalseKeyword) {
       return false;
-    } else if (val.kind === ts.SyntaxKind.TrueKeyword) {
+    } else if (value.kind === ts.SyntaxKind.TrueKeyword) {
       return true;
-    } else if (ts.isObjectLiteralExpression(val)) {
+    } else if (ts.isObjectLiteralExpression(value)) {
       const out: Record<string, unknown> = {};
-      for (const pair of val.properties) {
+      for (const pair of value.properties) {
         if (ts.isPropertyAssignment(pair)) {
           out[pair.name.getText()] = this.toLiteral(pair.initializer, strict);
         }
@@ -131,19 +131,19 @@ export class LiteralUtil {
       return out;
     }
     if (strict) {
-      throw new Error(`Not a valid input, should be a valid ts.Node: ${val.kind}`);
+      throw new Error(`Not a valid input, should be a valid ts.Node: ${value.kind}`);
     }
   }
 
   /**
    * Extend object literal, whether JSON or ts.ObjectLiteralExpression
    */
-  static extendObjectLiteral(factory: ts.NodeFactory, src: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
-    let literal = this.fromLiteral(factory, src);
-    if (rest.find(x => !!x)) {
+  static extendObjectLiteral(factory: ts.NodeFactory, source: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
+    let literal = this.fromLiteral(factory, source);
+    if (rest.find(item => !!item)) {
       literal = factory.createObjectLiteralExpression([
         factory.createSpreadAssignment(literal),
-        ...(rest.filter(x => !!x).map(r => factory.createSpreadAssignment(this.fromLiteral(factory, r))))
+        ...(rest.filter(item => !!item).map(expression => factory.createSpreadAssignment(this.fromLiteral(factory, expression))))
       ]);
     }
     return literal;
@@ -154,12 +154,12 @@ export class LiteralUtil {
    */
   static getObjectValue(node: ts.Expression | undefined, key: string): ts.Expression | undefined {
     if (node && ts.isObjectLiteralExpression(node) && node.properties) {
-      for (const prop of node.properties) {
-        if (prop.name!.getText() === key) {
-          if (ts.isPropertyAssignment(prop)) {
-            return prop.initializer;
-          } else if (ts.isShorthandPropertyAssignment(prop)) {
-            return prop.name;
+      for (const property of node.properties) {
+        if (property.name!.getText() === key) {
+          if (ts.isPropertyAssignment(property)) {
+            return property.initializer;
+          } else if (ts.isShorthandPropertyAssignment(property)) {
+            return property.name;
           }
         }
       }
@@ -172,20 +172,20 @@ export class LiteralUtil {
    */
   static templateLiteralToRegex(template: TemplateLiteral, exact = true): string {
     const out: string[] = [];
-    for (const el of template.values) {
-      if (el === Number) {
+    for (const value of template.values) {
+      if (value === Number) {
         out.push('\\d+');
-      } else if (el === Boolean) {
+      } else if (value === Boolean) {
         out.push('(?:true|false)');
-      } else if (el === String) {
+      } else if (value === String) {
         out.push('.+');
-      } else if (typeof el === 'string' || typeof el === 'number' || typeof el === 'boolean') {
-        out.push(`${el}`);
+      } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        out.push(`${value}`);
       } else {
-        out.push(`(?:${this.templateLiteralToRegex(transformCast(el), false)})`);
+        out.push(`(?:${this.templateLiteralToRegex(transformCast(value), false)})`);
       }
     }
-    const body = out.join(template.op === 'and' ? '' : '|');
+    const body = out.join(template.operation === 'and' ? '' : '|');
     if (exact) {
       return `^(?:${body})$`;
     } else {

@@ -13,10 +13,10 @@ type ModFile = { input: string, output: string, stale: boolean };
 const SOURCE_SEED = ['package.json', '__index__.ts', 'src', 'support', 'bin'];
 const PRECOMPILE_MODS = ['@travetto/manifest', '@travetto/transformer', '@travetto/compiler'];
 const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
-const REQ = createRequire(path.resolve('node_modules')).resolve.bind(null);
+const REQUIRE = createRequire(path.resolve('node_modules')).resolve.bind(null);
 
-const SOURCE_EXT_RE = /[.][cm]?[tj]s$/;
-const BARE_IMPORT_RE = /^(@[^/]+[/])?[^.][^@/]+$/;
+const SOURCE_EXT_REGEX = /[.][cm]?[tj]s$/;
+const BARE_IMPORT_REGEX = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
 
 /**
@@ -30,15 +30,15 @@ export class CompilerSetup {
   static #importManifest = (ctx: ManifestContext): Promise<
     Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil'>
   > => {
-    const all = ['util', 'delta'].map(f =>
-      import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}${OUTPUT_EXT}`))
+    const all = ['util', 'delta'].map(file =>
+      import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${file}${OUTPUT_EXT}`))
     );
-    return Promise.all(all).then(props => Object.assign({}, ...props));
+    return Promise.all(all).then(results => Object.assign({}, ...results));
   };
 
   /**  Convert a file to a given ext */
   static #sourceToExtension(sourceFile: string, ext: string): string {
-    return sourceFile.replace(SOURCE_EXT_RE, ext);
+    return sourceFile.replace(SOURCE_EXT_REGEX, ext);
   }
 
   /**
@@ -57,11 +57,11 @@ export class CompilerSetup {
       const compilerOut = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules');
 
       const text = (await fs.readFile(sourceFile, 'utf8'))
-        .replace(/from ['"](([.]+|@travetto)[/][^']+)['"]/g, (_, clause, m) => {
-          const s = this.#sourceToOutputExt(clause);
-          const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
-          const pre = m === '@travetto' ? `${compilerOut}/` : '';
-          return `from '${pre}${s}${suf}'`;
+        .replace(/from ['"](([.]+|@travetto)[/][^']+)['"]/g, (_, clause, moduleName) => {
+          const root = this.#sourceToOutputExt(clause);
+          const suffix = root.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_REGEX.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
+          const prefix = moduleName === '@travetto' ? `${compilerOut}/` : '';
+          return `from '${prefix}${root}${suffix}'`;
         });
 
       const ts = (await import('typescript')).default;
@@ -75,7 +75,7 @@ export class CompilerSetup {
     } else if (type === 'package-json') {
       const pkg: Package = JSON.parse(await fs.readFile(sourceFile, 'utf8'));
       const main = pkg.main ? this.#sourceToOutputExt(pkg.main) : undefined;
-      const files = pkg.files?.map(x => this.#sourceToOutputExt(x));
+      const files = pkg.files?.map(file => this.#sourceToOutputExt(file));
 
       const content = JSON.stringify({ ...pkg, main, type: ctx.workspace.type, files }, null, 2);
       await CommonUtil.writeTextFile(outputFile, content);
@@ -86,10 +86,10 @@ export class CompilerSetup {
    * Scan directory to find all project sources for comparison
    */
   static async #getModuleSources(ctx: ManifestContext, module: string, seed: string[]): Promise<ModFile[]> {
-    const inputFolder = path.dirname(REQ(`${module}/package.json`));
+    const inputFolder = path.dirname(REQUIRE(`${module}/package.json`));
 
-    const folders = seed.filter(x => !/[.]/.test(x)).map(x => path.resolve(inputFolder, x));
-    const files = seed.filter(x => /[.]/.test(x)).map(x => path.resolve(inputFolder, x));
+    const folders = seed.filter(folder => !/[.]/.test(folder)).map(folder => path.resolve(inputFolder, folder));
+    const files = seed.filter(file => /[.]/.test(file)).map(file => path.resolve(inputFolder, file));
 
     while (folders.length) {
       const sub = folders.pop();
@@ -134,18 +134,20 @@ export class CompilerSetup {
    */
   static async #compileIfStale(ctx: ManifestContext, scope: string, mod: string, seed: string[]): Promise<string[]> {
     const files = await this.#getModuleSources(ctx, mod, seed);
-    const changes = files.filter(x => x.stale).map(x => x.input);
+    const changes = files.filter(file => file.stale).map(file => file.input);
     const out: string[] = [];
 
     try {
       await Log.wrap(scope, async log => {
-        if (files.some(f => f.stale)) {
+        if (files.some(file => file.stale)) {
           log.debug('Starting', mod);
-          for (const file of files.filter(x => x.stale)) {
-            await this.#transpileFile(ctx, file.input, file.output);
+          for (const file of files) {
+            if (file.stale) {
+              await this.#transpileFile(ctx, file.input, file.output);
+            }
           }
           if (changes.length) {
-            out.push(...changes.map(x => `${mod}/${x}`));
+            out.push(...changes.map(file => `${mod}/${file}`));
             log.debug(`Source changed: ${changes.join(', ')}`, mod);
           }
           log.debug('Completed', mod);
@@ -153,8 +155,8 @@ export class CompilerSetup {
           log.debug('Skipped', mod);
         }
       }, false);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
     return out;
   }
@@ -195,8 +197,11 @@ export class CompilerSetup {
       ManifestUtil.buildManifest(ManifestUtil.getWorkspaceContext(ctx)));
 
     await Log.wrap('transformers', async () => {
-      for (const mod of Object.values(manifest.modules).filter(m => m.files.$transformer?.length)) {
-        changes += (await this.#compileIfStale(ctx, 'transformers', mod.name, ['package.json', ...mod.files.$transformer!.map(x => x[0])])).length;
+      for (const mod of Object.values(manifest.modules)) {
+        if (mod.files.$transformer?.length) {
+          changes += (await this.#compileIfStale(ctx, 'transformers', mod.name,
+            ['package.json', ...mod.files.$transformer!.map(file => file[0])])).length;
+        }
       }
     });
 
@@ -224,18 +229,18 @@ export class CompilerSetup {
       // Update all manifests when in mono repo
       if (delta.length && ctx.workspace.mono) {
         const names: string[] = [];
-        const mods = Object.values(manifest.modules).filter(x => x.workspace && x.name !== ctx.workspace.name);
+        const mods = Object.values(manifest.modules).filter(mod => mod.workspace && mod.name !== ctx.workspace.name);
         for (const mod of mods) {
           const modCtx = ManifestUtil.getModuleContext(ctx, mod.sourceFolder, true);
           const modManifest = await ManifestUtil.buildManifest(modCtx);
           await ManifestUtil.writeManifest(modManifest);
           names.push(mod.name);
         }
-        log.debug(`Changes triggered ${delta.slice(0, 10).map(x => `${x.type}:${x.module}:${x.file}`)}`);
+        log.debug(`Changes triggered ${delta.slice(0, 10).map(event => `${event.type}:${event.module}:${event.file}`)}`);
         log.debug(`Rewrote monorepo manifests [changes=${delta.length}] ${names.slice(0, 10).join(', ')}`);
       }
     });
 
-    return delta.filter(x => x.type === 'added' || x.type === 'changed');
+    return delta.filter(event => event.type === 'added' || event.type === 'changed');
   }
 }

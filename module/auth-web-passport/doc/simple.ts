@@ -2,7 +2,7 @@ import { Controller, Get, Post, WebRequest, ContextParam, WebResponse } from '@t
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
-import { FbAuthSymbol } from './conf.ts';
+import { FbAuthSymbol } from './config.ts';
 
 @Controller('/auth')
 export class SampleAuth {

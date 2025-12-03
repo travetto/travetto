@@ -12,12 +12,12 @@ export function WithAsyncContext() {
     property: string,
     descriptor: AsyncMethodDescriptor<T>
   ): typeof descriptor {
-    const og = descriptor.value!;
-    descriptor.value = function (...args: unknown[]): ReturnType<typeof og> {
-      return this.context.run(og.bind(this, ...args));
+    const handle = descriptor.value!;
+    descriptor.value = function (...args: unknown[]): ReturnType<typeof handle> {
+      return this.context.run(handle.bind(this, ...args));
     };
 
-    Object.defineProperty(descriptor.value, 'name', { value: og.name });
+    Object.defineProperty(descriptor.value, 'name', { value: handle.name });
 
     return descriptor;
   };

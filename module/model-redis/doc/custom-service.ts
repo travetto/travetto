@@ -5,7 +5,7 @@ export class Init {
   @InjectableFactory({
     primary: true
   })
-  static getModelSource(conf: RedisModelConfig) {
-    return new RedisModelService(conf);
+  static getModelSource(config: RedisModelConfig) {
+    return new RedisModelService(config);
   }
 }

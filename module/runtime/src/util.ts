@@ -4,7 +4,7 @@ import timers from 'node:timers/promises';
 import { castTo, hasToJSON } from './types.ts';
 import { AppError } from './error.ts';
 
-type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
+type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
 
 /**
  * Grab bag of common utilities
@@ -38,35 +38,35 @@ export class Util {
 
   /**
    * Generate a random UUID
-   * @param len The length of the uuid to generate
+   * @param length The length of the uuid to generate
    */
-  static uuid(len: number = 32): string {
-    const bytes = crypto.randomBytes(Math.ceil(len / 2));
-    if (len === 32) { // Make valid uuid-v4
+  static uuid(length: number = 32): string {
+    const bytes = crypto.randomBytes(Math.ceil(length / 2));
+    if (length === 32) { // Make valid uuid-v4
       // eslint-disable-next-line no-bitwise
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
       // eslint-disable-next-line no-bitwise
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
     }
-    return bytes.toString('hex').substring(0, len);
+    return bytes.toString('hex').substring(0, length);
   }
 
   /**
    * Map an async iterable with various mapping functions
    */
-  static mapAsyncItr<T, U, V, W>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>, fn3: MapFn<V, W>): AsyncIterable<W>;
-  static mapAsyncItr<T, U, V>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>): AsyncIterable<V>;
-  static mapAsyncItr<T, U>(source: AsyncIterable<T>, fn: MapFn<T, U>): AsyncIterable<U>;
-  static async * mapAsyncItr<T>(source: AsyncIterable<T>, ...fns: MapFn<unknown, unknown>[]): AsyncIterable<unknown> {
+  static mapAsyncIterable<T, U, V, W>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>, fn3: MapFn<V, W>): AsyncIterable<W>;
+  static mapAsyncIterable<T, U, V>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>): AsyncIterable<V>;
+  static mapAsyncIterable<T, U>(source: AsyncIterable<T>, fn: MapFn<T, U>): AsyncIterable<U>;
+  static async * mapAsyncIterable<T>(input: AsyncIterable<T>, ...fns: MapFn<unknown, unknown>[]): AsyncIterable<unknown> {
     let idx = -1;
-    for await (const el of source) {
-      if (el !== undefined) {
+    for await (const item of input) {
+      if (item !== undefined) {
         idx += 1;
-        let m = el;
+        let result = item;
         for (const fn of fns) {
-          m = castTo(await fn(m, idx));
+          result = castTo(await fn(result, idx));
         }
-        yield m;
+        yield result;
       }
     }
   }
@@ -103,9 +103,9 @@ export class Util {
     cacheKey?: (...keyInput: K) => string
   ): (...input: K) => boolean {
 
-    const rawRules = (Array.isArray(rules) ? rules : rules.split(/,/g).map(x => x.trim()));
+    const rawRules = (Array.isArray(rules) ? rules : rules.split(/,/g).map(rule => rule.trim()));
     const convertedRules = rawRules.map(rule => this.#allowDenyRuleInput(rule, convert));
-    const unmatchedValue = !convertedRules.some(r => r.positive);
+    const unmatchedValue = !convertedRules.some(rule => rule.positive);
 
     if (convertedRules.length) {
       if (cacheKey) {
@@ -127,8 +127,8 @@ export class Util {
     if (value === undefined) {
       return;
     }
-    const res = JSON.stringify(value);
-    return Buffer.from(res, 'utf8').toString('base64');
+    const text = JSON.stringify(value);
+    return Buffer.from(text, 'utf8').toString('base64');
   }
 
   /**
@@ -155,20 +155,20 @@ export class Util {
    * Serialize to JSON
    */
   static serializeToJSON<T>(out: T): string {
-    return JSON.stringify(out, function (k, v) {
-      const ov = this[k];
-      if (ov && ov instanceof Error) {
+    return JSON.stringify(out, function (key, value) {
+      const objectValue = this[key];
+      if (objectValue && objectValue instanceof Error) {
         return {
           $: true,
-          ...hasToJSON(ov) ? ov.toJSON() : ov,
-          name: ov.name,
-          message: ov.message,
-          stack: ov.stack,
+          ...hasToJSON(objectValue) ? objectValue.toJSON() : objectValue,
+          name: objectValue.name,
+          message: objectValue.message,
+          stack: objectValue.stack,
         };
-      } else if (typeof v === 'bigint') {
-        return `${v.toString()}$n`;
+      } else if (typeof value === 'bigint') {
+        return `${value.toString()}$n`;
       } else {
-        return v;
+        return value;
       }
     });
   }
@@ -177,42 +177,42 @@ export class Util {
    * Deserialize from JSON
    */
   static deserializeFromJson<T = unknown>(input: string): T {
-    return JSON.parse(input, function (k, v) {
-      if (v && typeof v === 'object' && '$' in v) {
-        const err = AppError.fromJSON(v) ?? new Error();
-        if (!(err instanceof AppError)) {
-          const { $: _, ...rest } = v;
-          Object.assign(err, rest);
+    return JSON.parse(input, function (key, value) {
+      if (value && typeof value === 'object' && '$' in value) {
+        const error = AppError.fromJSON(value) ?? new Error();
+        if (!(error instanceof AppError)) {
+          const { $: _, ...rest } = value;
+          Object.assign(error, rest);
         }
-        err.message = v.message;
-        err.stack = v.stack;
-        err.name = v.name;
-        return err;
-      } else if (typeof v === 'string' && /^\d+[$]n$/.test(v)) {
-        return BigInt(v.split('$')[0]);
+        error.message = value.message;
+        error.stack = value.stack;
+        error.name = value.name;
+        return error;
+      } else if (typeof value === 'string' && /^\d+[$]n$/.test(value)) {
+        return BigInt(value.split('$')[0]);
       } else {
-        return v;
+        return value;
       }
     });
   }
 
   /**
    * Retry an operation, with a custom conflict handler
-   * @param op The operation to retry
+   * @param operation The operation to retry
    * @param isHandledConflict Function to determine if the error is a handled conflict
    * @param maxTries Maximum number of retries
    */
   static async acquireWithRetry<T>(
-    op: () => T | Promise<T>,
-    prepareRetry: (err: unknown, count: number) => (void | undefined | boolean | Promise<(void | undefined | boolean)>),
+    operation: () => T | Promise<T>,
+    prepareRetry: (error: unknown, count: number) => (void | undefined | boolean | Promise<(void | undefined | boolean)>),
     maxTries = 5,
   ): Promise<T> {
     for (let i = 0; i < maxTries; i++) {
       try {
-        return await op();
-      } catch (err) {
-        if (i === maxTries - 1 || await prepareRetry(err, i) === false) {
-          throw err; // Stop retrying if we reached max tries or prepareRetry returns false
+        return await operation();
+      } catch (error) {
+        if (i === maxTries - 1 || await prepareRetry(error, i) === false) {
+          throw error; // Stop retrying if we reached max tries or prepareRetry returns false
         }
       }
     }

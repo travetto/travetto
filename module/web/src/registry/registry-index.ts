@@ -37,19 +37,19 @@ export class ControllerRegistryIndex implements RegistryIndex {
   /**
    * Register a controller/endpoint with specific config for an interceptor
    * @param cls The interceptor to register data for
-   * @param cfg The partial config override
+   * @param config The partial config override
    */
   static createInterceptorConfigDecorator<T extends WebInterceptor>(
     cls: Class<T>,
-    cfg: Partial<RetainPrimitiveFields<T['config']>>,
+    config: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
-    return (instanceOrCls: Class | ClassInstance, property?: symbol | string): void => {
+    return (instanceOrCls: Class | ClassInstance, property?: string): void => {
       const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
       if (isClass(property, instanceOrCls)) {
-        adapter.registerInterceptorConfig(cls, cfg, extra);
+        adapter.registerInterceptorConfig(cls, config, extra);
       } else {
-        adapter.registerEndpointInterceptorConfig(property!, cls, cfg, extra);
+        adapter.registerEndpointInterceptorConfig(property!, cls, config, extra);
       }
     };
   }
@@ -85,8 +85,8 @@ export class ControllerRegistryIndex implements RegistryIndex {
     return this.store.get(cls).get();
   }
 
-  getEndpoint(cls: Class, method: string | symbol): EndpointConfig {
-    return this.getController(cls).endpoints.find(e => e.methodName === method)!;
+  getEndpoint(cls: Class, method: string): EndpointConfig {
+    return this.getController(cls).endpoints.find(endpoint => endpoint.methodName === method)!;
   }
 
   getEndpointById(id: string): EndpointConfig | undefined {
@@ -94,16 +94,16 @@ export class ControllerRegistryIndex implements RegistryIndex {
   }
 
   process(events: ChangeEvent<Class>[]): void {
-    for (const evt of events) {
-      if ('curr' in evt) {
-        for (const ep of this.getController(evt.curr).endpoints) {
-          this.#endpointsById.set(`${evt.curr.name}#${ep.methodName.toString()}`, ep);
+    for (const event of events) {
+      if ('current' in event) {
+        for (const endpoint of this.getController(event.current).endpoints) {
+          this.#endpointsById.set(`${event.current.name}#${endpoint.methodName}`, endpoint);
         }
       } else {
         // Match by name
-        const toDelete = [...this.#endpointsById.values()].filter(x => x.class.name === evt.prev.name);
-        for (const ep of toDelete) {
-          this.#endpointsById.delete(ep.id);
+        const toDelete = [...this.#endpointsById.values()].filter(endpoint => endpoint.class.name === event.previous.name);
+        for (const endpoint of toDelete) {
+          this.#endpointsById.delete(endpoint.id);
         }
       }
     }

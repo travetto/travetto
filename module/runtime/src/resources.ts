@@ -15,9 +15,9 @@ class $RuntimeResources extends FileLoader {
   }
 
   override get searchPaths(): readonly string[] {
-    if (!this.#computed || this.#env !== Env.TRV_RESOURCES.val || this.#mod !== Env.TRV_MODULE.val) {
-      this.#env = Env.TRV_RESOURCES.val!;
-      this.#mod = Env.TRV_MODULE.val!;
+    if (!this.#computed || this.#env !== Env.TRV_RESOURCES.value || this.#mod !== Env.TRV_MODULE.value) {
+      this.#env = Env.TRV_RESOURCES.value!;
+      this.#mod = Env.TRV_MODULE.value!;
       this.#computed = Runtime.resourcePaths();
     }
     return this.#computed;

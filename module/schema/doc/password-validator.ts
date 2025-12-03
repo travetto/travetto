@@ -1,11 +1,11 @@
 import { Schema, Validator, ValidationError } from '@travetto/schema';
 
 const passwordValidator = (user: User): ValidationError | undefined => {
-  const p = user.password;
-  const hasNum = /\d/.test(p);
-  const hasSpecial = /[!@#$%%^&*()<>?/,.;':"']/.test(p);
-  const noRepeat = !/(.)(\1)/.test(p);
-  if (!hasNum || !hasSpecial || !noRepeat) {
+  const password = user.password;
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[!@#$%%^&*()<>?/,.;':"']/.test(password);
+  const noRepeat = !/(.)(\1)/.test(password);
+  if (!hasNumber || !hasSpecial || !noRepeat) {
     return {
       kind: 'password-rules',
       path: 'password',

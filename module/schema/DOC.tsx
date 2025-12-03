@@ -174,7 +174,7 @@ export const text = <>
       </li>
       <li>{d.method('coerceType(input: unknown, type: Class<unknown>, strict = true)')} which allows for converting an input type into a specified {d.input('type')} instance, or throw an error if the types are incompatible.</li>
       <li>{d.method('shallowClone<T = unknown>(a: T): T')} will shallowly clone a field</li>
-      <li>{d.method('filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T')} will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the {d.input('exclude')} input</li>
+      <li>{d.method('filterByKeys<T>(input: T, exclude: (string | RegExp)[]): T')} will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the {d.input('exclude')} input</li>
     </ul>
   </c.Section>
 </>;

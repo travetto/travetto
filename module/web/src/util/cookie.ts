@@ -4,8 +4,8 @@ import { Cookie, CookieGetOptions, CookieSetOptions } from '../types/cookie.ts';
 import { KeyGrip } from './keygrip.ts';
 import { WebHeaderUtil } from './header.ts';
 
-const pairText = (c: Cookie): string => `${c.name}=${c.value}`;
-const pair = (k: string, v: unknown): string => `${k}=${v}`;
+const pairText = (cookie: Cookie): string => `${cookie.name}=${cookie.value}`;
+const pair = (key: string, value: unknown): string => `${key}=${value}`;
 
 type CookieJarOptions = { keys?: string[] } & CookieSetOptions;
 
@@ -66,13 +66,13 @@ export class CookieJar {
     return this;
   }
 
-  has(name: string, opts: CookieGetOptions = {}): boolean {
-    const needSigned = opts.signed ?? this.#setOptions.signed;
+  has(name: string, options: CookieGetOptions = {}): boolean {
+    const needSigned = options.signed ?? this.#setOptions.signed;
     return name in this.#cookies && this.#cookies[name].signed === needSigned;
   }
 
-  get(name: string, opts: CookieGetOptions = {}): string | undefined {
-    if (this.has(name, opts)) {
+  get(name: string, options: CookieGetOptions = {}): string | undefined {
+    if (this.has(name, options)) {
       return this.#cookies[name]?.value;
     }
   }
@@ -111,12 +111,12 @@ export class CookieJar {
   }
 
   exportCookieHeader(): string {
-    return this.getAll().flatMap(c => this.#exportCookie(c)).join('; ');
+    return this.getAll().flatMap(cookie => this.#exportCookie(cookie)).join('; ');
   }
 
   exportSetCookieHeader(): string[] {
     return this.getAll()
-      .filter(x => x.response)
-      .flatMap(c => this.#exportCookie(c, true));
+      .filter(cookie => cookie.response)
+      .flatMap(cookie => this.#exportCookie(cookie, true));
   }
 }

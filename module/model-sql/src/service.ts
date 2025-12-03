@@ -1,6 +1,6 @@
 import {
   ModelType,
-  BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
+  BulkOperation, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
   NotFoundError, ModelRegistryIndex, ExistsError, OptionalId, ModelIdSource,
   ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
@@ -72,11 +72,11 @@ export class SQLModelService implements
         )
       )).records : [];
 
-    const allIds = new Set(all.map(el => el.id));
+    const allIds = new Set(all.map(type => type.id));
 
-    for (const [el, idx] of toCheck.entries()) {
-      if (!allIds.has(el)) { // If not found
-        addedIds.set(idx, el);
+    for (const [id, idx] of toCheck.entries()) {
+      if (!allIds.has(id)) { // If not found
+        addedIds.set(idx, id);
       }
     }
 
@@ -100,22 +100,22 @@ export class SQLModelService implements
 
   async postConstruct(): Promise<void> {
     if (this.#dialect) {
-      if (this.#dialect.conn.init) {
-        await this.#dialect.conn.init();
+      if (this.#dialect.connection.init) {
+        await this.#dialect.connection.init();
       }
-      this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LEN);
+      this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LENGTH);
       this.#manager = new TableManager(this.#context, this.#dialect);
       await ModelStorageUtil.registerModelChangeListener(this);
       ModelExpiryUtil.registerCull(this);
     }
   }
 
-  get conn(): Connection {
-    return this.#dialect.conn;
+  get connection(): Connection {
+    return this.#dialect.connection;
   }
 
-  async exportModel<T extends ModelType>(e: Class<T>): Promise<string> {
-    return (await this.#manager.exportTables(e)).join('\n');
+  async exportModel<T extends ModelType>(cls: Class<T>): Promise<string> {
+    return (await this.#manager.exportTables(cls)).join('\n');
   }
 
   async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
@@ -144,11 +144,11 @@ export class SQLModelService implements
       for (const ins of this.#dialect.getAllInsertSQL(cls, prepped)) {
         await this.#exec(ins);
       }
-    } catch (err) {
-      if (err instanceof ExistsError) {
+    } catch (error) {
+      if (error instanceof ExistsError) {
         throw new ExistsError(cls, prepped.id);
       } else {
-        throw err;
+        throw error;
       }
     }
     return prepped;
@@ -166,9 +166,9 @@ export class SQLModelService implements
       if (item.id) {
         await this.#deleteRaw(cls, item.id, {}, false);
       }
-    } catch (err) {
-      if (!(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
     }
     return await this.create(cls, item);
@@ -203,7 +203,7 @@ export class SQLModelService implements
   }
 
   @Transactional()
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
 
     const { insertedIds, upsertedIds, existingUpsertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
 
@@ -211,16 +211,17 @@ export class SQLModelService implements
 
     await this.#checkUpsertedIds(cls,
       addedIds,
-      new Map([...existingUpsertedIds.entries()].map(([k, v]) => [v, k]))
+      new Map([...existingUpsertedIds.entries()].map(([key, value]) => [value, key]))
     );
 
-    const get = <K extends keyof BulkOp<T>>(k: K): Required<BulkOp<T>>[K][] =>
-      operations.map(x => x[k]).filter((x): x is Required<BulkOp<T>>[K] => !!x);
+    const get = <K extends keyof BulkOperation<T>>(key: K): Required<BulkOperation<T>>[K][] =>
+      operations.map(item => item[key]).filter((item): item is Required<BulkOperation<T>>[K] => !!item);
 
-    const getStatements = async (k: keyof BulkOp<T>): Promise<InsertWrapper[]> =>
-      (await SQLModelUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
+    const getStatements = async (key: keyof BulkOperation<T>): Promise<InsertWrapper[]> =>
+      (await SQLModelUtil.getInserts(cls, get(key))).filter(wrapper => !!wrapper.records.length);
 
-    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
+    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(wrapper => wrapper.id) }]
+      .filter(wrapper => !!wrapper.ids.length);
 
     const [inserts, upserts, updates] = await Promise.all([
       getStatements('insert'),
@@ -242,19 +243,19 @@ export class SQLModelService implements
   @Connected()
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
-    const { records: res } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
+    const { records } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
     if (ModelRegistryIndex.has(cls)) {
-      await this.#dialect.fetchDependents(cls, res, query && query.select);
+      await this.#dialect.fetchDependents(cls, records, query && query.select);
     }
 
-    const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, res);
-    return await Promise.all(cleaned.map(m => ModelCrudUtil.load(cls, m)));
+    const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, records);
+    return await Promise.all(cleaned.map(item => ModelCrudUtil.load(cls, item)));
   }
 
   @Connected()
   async queryOne<T extends ModelType>(cls: Class<T>, builder: ModelQuery<T>, failOnMany = true): Promise<T> {
-    const res = await this.query<T>(cls, { ...builder, limit: failOnMany ? 2 : 1 });
-    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, res, builder.where);
+    const results = await this.query<T>(cls, { ...builder, limit: failOnMany ? 2 : 1 });
+    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, results, builder.where);
   }
 
   @Connected()
@@ -294,43 +295,43 @@ export class SQLModelService implements
   @Connected()
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
-    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
-    const results = await this.query<T>(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, resolvedQuery);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query?.limit);
   }
 
   @Connected()
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
-    const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
-    const results = await this.query(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
+    const results = await this.query(cls, resolvedQuery);
 
     const modelTypeField: ValidStringFields<ModelType> = castTo(field);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, modelTypeField, prefix, results, x => x, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, modelTypeField, prefix, results, result => result, query?.limit);
   }
 
   @Connected()
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
-    const col = this.#dialect.ident(field);
-    const ttl = this.#dialect.ident('count');
-    const key = this.#dialect.ident('key');
-    const q = [
+    const col = this.#dialect.identifier(field);
+    const ttl = this.#dialect.identifier('count');
+    const key = this.#dialect.identifier('key');
+    const sql = [
       `SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`,
       this.#dialect.getFromSQL(cls),
     ];
-    q.push(
+    sql.push(
       this.#dialect.getWhereSQL(cls, ModelQueryUtil.getWhereClause(cls, query?.where))
     );
-    q.push(
+    sql.push(
       `GROUP BY ${col}`,
       `ORDER BY ${ttl} DESC`
     );
 
-    const results = await this.#exec<{ key: string, count: number }>(q.join('\n'));
-    return results.records.map(x => {
-      x.count = DataUtil.coerceType(x.count, Number);
-      return x;
+    const results = await this.#exec<{ key: string, count: number }>(sql.join('\n'));
+    return results.records.map(result => {
+      result.count = DataUtil.coerceType(result.count, Number);
+      return result;
     });
   }
 }

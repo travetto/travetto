@@ -21,7 +21,7 @@ This module provides unit testing functionality that integrates with the framewo
 **Note**: All tests should be under the `**/*` folders.  The pattern for tests is defined as as a standard glob using [Node](https://nodejs.org)'s built in globbing support.
 
 ## Definition
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L23) decorator.  All tests intrinsically support `async`/`await`. 
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L25) decorator.  All tests intrinsically support `async`/`await`. 
 
 A simple example would be:
 
@@ -35,14 +35,14 @@ import { Suite, Test } from '@travetto/test';
 class SimpleTest {
 
   #complexService: {
-    doLongOp(): Promise<number>;
+    doLongOperation(): Promise<number>;
     getText(): string;
   };
 
   @Test()
   async test1() {
-    const val = await this.#complexService.doLongOp();
-    assert(val === 5);
+    const value = await this.#complexService.doLongOperation();
+    assert(value === 5);
   }
 
   @Test()
@@ -212,8 +212,8 @@ class SimpleTest {
 
     await assert.rejects(() => {
       throw new Error('Big Error');
-    }, (err: Error) =>
-      err.message.startsWith('Big') && err.message.length > 4
+    }, (error: Error) =>
+      error.message.startsWith('Big') && error.message.length > 4
     );
   }
 }

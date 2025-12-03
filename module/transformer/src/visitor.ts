@@ -5,7 +5,7 @@ import { ManifestModuleFolderType, ManifestModuleUtil } from '@travetto/manifest
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor.ts';
 import { CoreUtil } from './util/core.ts';
 
-const COMPILER_SRC = new Set<ManifestModuleFolderType>(['support', 'src', '$index']);
+const COMPILER_SOURCE = new Set<ManifestModuleFolderType>(['support', 'src', '$index']);
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
@@ -45,10 +45,10 @@ export class VisitorFactory<S extends State = State> {
   }
 
   #transformers = new Map<TransformerType, TransformerSet<S>>();
-  #getState: (context: ts.TransformationContext, src: ts.SourceFile) => S;
+  #getState: (context: ts.TransformationContext, source: ts.SourceFile) => S;
 
   constructor(
-    getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
+    getState: (context: ts.TransformationContext, source: ts.SourceFile) => S,
     transformers: NodeTransformer<S, TransformerType, ts.Node>[]
   ) {
     this.#getState = getState;
@@ -97,7 +97,7 @@ export class VisitorFactory<S extends State = State> {
         // Skip transforming all the compiler related content
         if (
           /@travetto[/](compiler|manifest|transformer)/.test(state.importName) &&
-          COMPILER_SRC.has(ManifestModuleUtil.getFolderKey(state.importName.replace(/@travetto[/][^/]+[/]/, '')))
+          COMPILER_SOURCE.has(ManifestModuleUtil.getFolderKey(state.importName.replace(/@travetto[/][^/]+[/]/, '')))
         ) {
           return state.finalize(file);
         }
@@ -111,7 +111,7 @@ export class VisitorFactory<S extends State = State> {
           for (const [idx, all] of [...state.added].toSorted(([idxA], [idxB]) => idxB - idxA)) {
             statements = [
               ...statements.slice(0, Math.max(idx, 0)),
-              ...all.map(v => this.visit(state, context, v)),
+              ...all.map(value => this.visit(state, context, value)),
               ...statements.slice(Math.max(idx, 0))
             ];
             state.added.delete(idx);
@@ -122,13 +122,13 @@ export class VisitorFactory<S extends State = State> {
           node = CoreUtil.updateSource(context.factory, node, statements);
         }
         return state.finalize(node);
-      } catch (err) {
-        if (!(err instanceof Error)) {
-          throw err;
+      } catch (error) {
+        if (!(error instanceof Error)) {
+          throw error;
         }
-        console!.error('Failed transforming', { error: `${err.message}\n${err.stack}`, file: file.fileName });
-        const out = new Error(`Failed transforming: ${file.fileName}: ${err.message}`);
-        out.stack = err.stack;
+        console!.error('Failed transforming', { error: `${error.message}\n${error.stack}`, file: file.fileName });
+        const out = new Error(`Failed transforming: ${file.fileName}: ${error.message}`);
+        out.stack = error.stack;
         throw out;
       }
     };
@@ -158,9 +158,9 @@ export class VisitorFactory<S extends State = State> {
 
     // Checks for matches of decorators to registered items
     const targets = new Map<string, DecoratorMeta>();
-    for (const dec of state.getDecoratorList(node)) {
-      for (const sub of dec.targets ?? []) {
-        targets.set(sub, dec);
+    for (const decorator of state.getDecoratorList(node)) {
+      for (const sub of decorator.targets ?? []) {
+        targets.set(sub, decorator);
       }
     }
 
@@ -168,7 +168,7 @@ export class VisitorFactory<S extends State = State> {
       return;
     }
 
-    for (const [key, dec] of targets.entries()) {
+    for (const [key, decorator] of targets.entries()) {
       const values = set[phase]!.get(key);
       if (!values || !values.length) {
         continue;
@@ -176,7 +176,7 @@ export class VisitorFactory<S extends State = State> {
 
       // For all matching handlers, execute
       for (const item of values) {
-        node = item[phase]!<T>(state, node, dec) ?? node;
+        node = item[phase]!<T>(state, node, decorator) ?? node;
       }
     }
     return node;
@@ -190,13 +190,13 @@ export class VisitorFactory<S extends State = State> {
     const target = this.#transformers.get(targetType);
 
     if (!target) {
-      return ts.visitEachChild(node, c => this.visit(state, context, c), context);
+      return ts.visitEachChild(node, child => this.visit(state, context, child), context);
     } else {
       // Before
       node = this.executePhaseAlways(state, target, 'before', node) ?? node;
       node = this.executePhase(state, target, 'before', node) ?? node;
 
-      node = ts.visitEachChild(node, c => this.visit(state, context, c), context);
+      node = ts.visitEachChild(node, child => this.visit(state, context, child), context);
       // After
       node = this.executePhaseAlways(state, target, 'after', node) ?? node;
       node = this.executePhase(state, target, 'after', node) ?? node;

@@ -17,8 +17,8 @@ export class AppComponent {
       this.href = router.url.split('/')[1];
     });
 
-    router.events.subscribe(s => {
-      if (s instanceof NavigationEnd) {
+    router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
         const tree = router.parseUrl(router.url);
         if (tree.fragment) {
           const element = document.querySelector<HTMLElement>(`#${tree.fragment}`);

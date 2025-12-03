@@ -10,8 +10,8 @@ type Coord = { x: number, y: number };
 export const WAIT_TOKEN = '%WAIT%';
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
-const lineStatus = (l: string): string => l.replace(WAIT_TOKEN, ' ');
-const lineMain = (l: string): string => l.replace(WAIT_TOKEN, '').trim();
+const lineStatus = (line: string): string => line.replace(WAIT_TOKEN, ' ');
+const lineMain = (line: string): string => line.replace(WAIT_TOKEN, '').trim();
 
 /** An basic tty wrapper */
 export class Terminal {
@@ -22,12 +22,12 @@ export class Terminal {
   #height: number;
   #output: tty.WriteStream;
 
-  async #showWaitingIndicator(pos: Coord, signal: AbortSignal): Promise<void> {
+  async #showWaitingIndicator(position: Coord, signal: AbortSignal): Promise<void> {
     let done = false;
     signal.addEventListener('abort', () => done = true);
     let i = 0;
     while (!done) {
-      await this.#writer.setPosition(pos).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
+      await this.#writer.setPosition(position).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
       await Util.blockingTimeout(100);
     }
   }
@@ -57,7 +57,7 @@ export class Terminal {
         }
       }
     } else {
-      await this.streamToBottom(Util.mapAsyncItr(source, x => `%WAIT% ${x}`), { outputStreamToMain: true });
+      await this.streamToBottom(Util.mapAsyncIterable(source, line => `%WAIT% ${line}`), { outputStreamToMain: true });
     }
   }
 
@@ -65,10 +65,10 @@ export class Terminal {
    * Allows for writing at bottom of screen with scrolling support for main content
    */
   async streamToBottom(source: AsyncIterable<string | undefined>, config: TerminalStreamingConfig = {}): Promise<void> {
-    const writePos = { x: 0, y: -1 };
+    const writePosition = { x: 0, y: -1 };
     const minDelay = config.minDelay ?? 0;
 
-    let prev: string | undefined;
+    let previous: string | undefined;
     let stop: AbortController | undefined;
     let start = Date.now();
 
@@ -80,31 +80,31 @@ export class Terminal {
 
       for await (const line of source) {
         // Previous line
-        if (prev && config.outputStreamToMain) {
-          await this.writer.writeLine(lineMain(prev)).commit();
+        if (previous && config.outputStreamToMain) {
+          await this.writer.writeLine(lineMain(previous)).commit();
         }
 
         if (line && (Date.now() - start) >= minDelay) {
           start = Date.now();
           stop?.abort();
-          this.writer.setPosition(writePos).write(lineStatus(line)).clearLine(1).commit(true);
+          this.writer.setPosition(writePosition).write(lineStatus(line)).clearLine(1).commit(true);
 
           const idx = line.indexOf(WAIT_TOKEN);
           if (idx >= 0) {
             stop = new AbortController();
-            this.#showWaitingIndicator({ y: writePos.y, x: idx }, stop.signal);
+            this.#showWaitingIndicator({ y: writePosition.y, x: idx }, stop.signal);
           }
         }
 
-        prev = line;
+        previous = line;
       }
 
       stop?.abort();
-      if (prev !== undefined && config.outputStreamToMain) {
-        await this.writer.writeLine(lineMain(prev)).commit();
+      if (previous !== undefined && config.outputStreamToMain) {
+        await this.writer.writeLine(lineMain(previous)).commit();
       }
 
-      await this.#writer.setPosition(writePos).clearLine().commit(true);
+      await this.#writer.setPosition(writePosition).clearLine().commit(true);
     } finally {
       await this.#writer.reset().commit();
     }
@@ -116,9 +116,9 @@ export class Terminal {
   async streamList(source: AsyncIterable<{ idx: number, text: string, done?: boolean }>): Promise<void> {
     if (!this.#interactive) {
       const collected = [];
-      for await (const ev of source) {
-        if (ev.done) {
-          collected[ev.idx] = ev.text;
+      for await (const event of source) {
+        if (event.done) {
+          collected[event.idx] = event.text;
         }
       }
       await this.#writer.writeLines(collected).commit();

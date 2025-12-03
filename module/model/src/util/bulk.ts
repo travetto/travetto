@@ -1,6 +1,6 @@
 import { Class, hasFunction } from '@travetto/runtime';
 
-import { BulkOp, ModelBulkSupport } from '../types/bulk.ts';
+import { BulkOperation, ModelBulkSupport } from '../types/bulk.ts';
 import { ModelType } from '../types/model.ts';
 import { ModelCrudProvider, ModelCrudUtil } from './crud.ts';
 
@@ -9,7 +9,7 @@ export type BulkPreStore<T extends ModelType> = {
   upsertedIds: Map<number, string>;
   updatedIds: Map<number, string>;
   existingUpsertedIds: Map<number, string>;
-  operations: BulkOp<T>[];
+  operations: BulkOperation<T>[];
 };
 
 export class ModelBulkUtil {
@@ -20,12 +20,12 @@ export class ModelBulkUtil {
   static isSupported = hasFunction<ModelBulkSupport>('processBulk');
 
   /**
-   * Prepares bulk ops for storage
+   * Prepares bulk operations for storage
    * @param cls
    * @param operations
    * @param provider
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[], provider: ModelCrudProvider): Promise<BulkPreStore<T>> {
+  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[], provider: ModelCrudProvider): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
     const upsertedIds = new Map<number, string>();
     const updatedIds = new Map<number, string>();
@@ -33,20 +33,20 @@ export class ModelBulkUtil {
 
     // Pre store
     let i = 0;
-    for (const op of operations) {
-      if ('insert' in op && op.insert) {
-        op.insert = await ModelCrudUtil.preStore(cls, op.insert, provider);
-        insertedIds.set(i, op.insert.id!);
-      } else if ('update' in op && op.update) {
-        op.update = await ModelCrudUtil.preStore(cls, op.update, provider);
-        updatedIds.set(i, op.update.id);
-      } else if ('upsert' in op && op.upsert) {
-        const isNew = !op.upsert.id;
-        op.upsert = await ModelCrudUtil.preStore(cls, op.upsert, provider);
+    for (const operation of operations) {
+      if ('insert' in operation && operation.insert) {
+        operation.insert = await ModelCrudUtil.preStore(cls, operation.insert, provider);
+        insertedIds.set(i, operation.insert.id!);
+      } else if ('update' in operation && operation.update) {
+        operation.update = await ModelCrudUtil.preStore(cls, operation.update, provider);
+        updatedIds.set(i, operation.update.id);
+      } else if ('upsert' in operation && operation.upsert) {
+        const isNew = !operation.upsert.id;
+        operation.upsert = await ModelCrudUtil.preStore(cls, operation.upsert, provider);
         if (isNew) {
-          upsertedIds.set(i, op.upsert.id!);
+          upsertedIds.set(i, operation.upsert.id!);
         } else {
-          existingUpsertedIds.set(i, op.upsert.id!);
+          existingUpsertedIds.set(i, operation.upsert.id!);
         }
       }
       i += 1;

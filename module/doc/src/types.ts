@@ -13,7 +13,7 @@ export interface DocumentShape {
 }
 
 export type RenderState<T extends JSXElement, C> = {
-  el: T;
+  node: T;
   props: T['props'];
   recurse: () => Promise<string | undefined>;
   stack: JSXElement[];

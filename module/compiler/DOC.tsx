@@ -4,7 +4,7 @@ import { d, c, DocRunUtil } from '@travetto/doc';
 const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /entry.common/);
 
 export const text = async () => {
-  await DocRunUtil.run('npx', ['trvc', 'build'], { cwd: './doc-exec' });
+  await DocRunUtil.run('npx', ['trvc', 'build'], { workingDirectory: './doc-exec' });
 
   const output =
     (await DocRunUtil.run('npx', ['trvc', 'help']))
@@ -45,8 +45,8 @@ export const text = async () => {
 
       <c.Execution title='Sample trv output with debug logging' cmd='trvc' args={['build']} config={{
         env: { TRV_BUILD: 'debug' },
-        cwd: './doc-exec',
-        rewrite: val => val.replace(/pid=\d+/g, 'pid=000000'),
+        workingDirectory: './doc-exec',
+        rewrite: value => value.replace(/pid=\d+/g, 'pid=000000'),
         formatCommand: (cmd, args) => `TRV_BUILD=debug ${cmd} ${args.join(' ')}`
       }} />
 

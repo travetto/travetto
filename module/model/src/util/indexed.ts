@@ -38,43 +38,43 @@ export class ModelIndexedUtil {
   static computeIndexParts<T extends ModelType>(
     cls: Class<T>, idx: IndexConfig<T> | string, item: DeepPartial<T>, opts: ComputeConfig = {}
   ): { fields: IndexFieldPart[], sorted: IndexSortPart | undefined } {
-    const cfg = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
-    const sortField = cfg.type === 'sorted' ? cfg.fields.at(-1) : undefined;
+    const config = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
+    const sortField = config.type === 'sorted' ? config.fields.at(-1) : undefined;
 
     const fields: IndexFieldPart[] = [];
-    let sortDir: number = 0;
+    let sortDirection: number = 0;
     let sorted: IndexSortPart | undefined;
 
-    for (const field of cfg.fields) {
-      let f: Record<string, unknown> = field;
-      let o: Record<string, unknown> = item;
+    for (const field of config.fields) {
+      let fieldRef: Record<string, unknown> = field;
+      let itemRef: Record<string, unknown> = item;
       const parts = [];
 
-      while (o !== undefined && o !== null) {
-        const k = TypedObject.keys(f)[0];
-        o = castTo(o[k]);
-        parts.push(k);
-        if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
-          if (cfg.type === 'sorted') {
-            sortDir = f[k] === true ? 1 : f[k] === false ? 0 : f[k];
+      while (itemRef !== undefined && itemRef !== null) {
+        const key = TypedObject.keys(fieldRef)[0];
+        itemRef = castTo(itemRef[key]);
+        parts.push(key);
+        if (typeof fieldRef[key] === 'boolean' || typeof fieldRef[key] === 'number') {
+          if (config.type === 'sorted') {
+            sortDirection = fieldRef[key] === true ? 1 : fieldRef[key] === false ? 0 : fieldRef[key];
           }
           break; // At the bottom
         } else {
-          f = castTo(f[k]);
+          fieldRef = castTo(fieldRef[key]);
         }
       }
       if (field === sortField) {
-        sorted = { path: parts, dir: sortDir, value: castTo(o) };
+        sorted = { path: parts, dir: sortDirection, value: castTo(itemRef) };
       }
-      if (o === undefined || o === null) {
+      if (itemRef === undefined || itemRef === null) {
         const empty = field === sortField ? opts.emptySortValue : opts.emptyValue;
         if (empty === undefined || empty === Error) {
-          throw new IndexNotSupported(cls, cfg, `Missing field value for ${parts.join('.')}`);
+          throw new IndexNotSupported(cls, config, `Missing field value for ${parts.join('.')}`);
         }
-        o = castTo(empty!);
+        itemRef = castTo(empty!);
       } else {
         if (field !== sortField || (opts.includeSortInFields ?? true)) {
-          fields.push({ path: parts, value: castTo(o) });
+          fields.push({ path: parts, value: castTo(itemRef) });
         }
       }
     }
@@ -87,18 +87,18 @@ export class ModelIndexedUtil {
    * @param cls Type to get index for
    * @param idx Index config
    */
-  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: DeepPartial<T>, cfg?: ComputeConfig): Record<string, unknown> {
-    const res: Record<string, unknown> = {};
-    for (const { path, value } of this.computeIndexParts(cls, idx, item ?? {}, cfg).fields) {
-      let sub: Record<string, unknown> = res;
+  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: DeepPartial<T>, config?: ComputeConfig): Record<string, unknown> {
+    const response: Record<string, unknown> = {};
+    for (const { path, value } of this.computeIndexParts(cls, idx, item ?? {}, config).fields) {
+      let sub: Record<string, unknown> = response;
       const all = path.slice(0);
       const last = all.pop()!;
-      for (const k of all) {
-        sub = castTo(sub[k] ??= {});
+      for (const part of all) {
+        sub = castTo(sub[part] ??= {});
       }
       sub[last] = value;
     }
-    return res;
+    return response;
   }
 
   /**
@@ -111,12 +111,12 @@ export class ModelIndexedUtil {
     cls: Class<T>,
     idx: IndexConfig<T> | string,
     item: DeepPartial<T> = {},
-    opts?: ComputeConfig & { sep?: string }
+    config?: ComputeConfig & { separator?: string }
   ): { type: string, key: string, sort?: number | Date } {
-    const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(opts ?? {}), includeSortInFields: false });
-    const key = fields.map(({ value }) => value).map(x => `${x}`).join(opts?.sep ?? DEFAULT_SEP);
-    const cfg = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
-    return !sorted ? { type: cfg.type, key } : { type: cfg.type, key, sort: sorted.value };
+    const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(config ?? {}), includeSortInFields: false });
+    const key = fields.map(({ value }) => value).map(value => `${value}`).join(config?.separator ?? DEFAULT_SEP);
+    const indexConfig = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
+    return !sorted ? { type: indexConfig.type, key } : { type: indexConfig.type, key, sort: sorted.value };
   }
 
   /**
@@ -134,11 +134,11 @@ export class ModelIndexedUtil {
       const { id } = await service.getByIndex(cls, idx, castTo(body));
       body.id = id;
       return await service.update(cls, castTo(body));
-    } catch (err) {
-      if (err instanceof NotFoundError) {
+    } catch (error) {
+      if (error instanceof NotFoundError) {
         return await service.create(cls, body);
       } else {
-        throw err;
+        throw error;
       }
     }
   }

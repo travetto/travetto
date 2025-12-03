@@ -11,7 +11,7 @@ export class AlowDenyController {
   }
 
   @Get('/raw')
-  @ExcludeInterceptors(v => v.category === 'response')
+  @ExcludeInterceptors(({ category }) => category === 'response')
   withoutResponse(@QueryParam() value: string) {
 
   }

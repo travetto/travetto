@@ -5,7 +5,7 @@ import { WebFilterContext } from '@travetto/web';
 import { ConnectRequest, ConnectResponse } from './connect';
 
 
-type Middleware = (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => void;
+type Middleware = (request: IncomingMessage, response: ServerResponse, next: (error?: unknown) => void) => void;
 
 /**
  * Utilities for invoking express middleware with a WebFilterContext
@@ -18,20 +18,20 @@ export class WebConnectUtil {
    */
   static async invoke<T>(ctx: WebFilterContext,
     handler: (
-      req: IncomingMessage,
-      res: ServerResponse,
-      next: (err: Error | null | undefined, value: T | undefined | null) => void
+      request: IncomingMessage,
+      response: ServerResponse,
+      next: (error: Error | null | undefined, value: T | undefined | null) => void
     ) => Middleware
   ): Promise<T | undefined> {
-    const connectReq = ConnectRequest.get(ctx.request);
-    const connectRes = ConnectResponse.get();
+    const connectRequest = ConnectRequest.get(ctx.request);
+    const connectResponse = ConnectResponse.get();
 
-    const p = Promise.withResolvers<T | undefined>();
-    connectRes.on('end', () => p.resolve(null!));
+    const promise = Promise.withResolvers<T | undefined>();
+    connectResponse.on('end', () => promise.resolve(null!));
 
-    handler(connectReq, connectRes, (err, value) => err ? p.reject(err) : p.resolve(value!));
-    const result = await p.promise;
-    connectRes.throwIfSent();
+    handler(connectRequest, connectResponse, (error, value) => error ? promise.reject(error) : promise.resolve(value!));
+    const result = await promise.promise;
+    connectResponse.throwIfSent();
     return result;
   }
 }

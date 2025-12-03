@@ -27,9 +27,9 @@ export class AuthService {
     // Find all authenticators
     const AuthenticatorTarget = toConcrete<Authenticator>();
     for (const source of DependencyRegistryIndex.getCandidates(AuthenticatorTarget)) {
-      const qual = source.qualifier || getDefaultQualifier(source.class);
-      const dep = DependencyRegistryIndex.getInstance(AuthenticatorTarget, qual);
-      this.#authenticators.set(qual, dep);
+      const qualifier = source.qualifier || getDefaultQualifier(source.class);
+      const instance = DependencyRegistryIndex.getInstance(AuthenticatorTarget, qualifier);
+      this.#authenticators.set(qualifier, instance);
     }
   }
 
@@ -51,28 +51,28 @@ export class AuthService {
     /**
      * Attempt to authenticate, checking with multiple authentication sources
      */
-    for (const idp of await this.getAuthenticators<T, C>(authenticators)) {
+    for (const authenticator of await this.getAuthenticators<T, C>(authenticators)) {
       try {
-        const principal = await idp.authenticate(payload, context);
+        const principal = await authenticator.authenticate(payload, context);
 
-        if (idp.getState) {
-          this.authContext.authenticatorState = await idp.getState(context);
+        if (authenticator.getState) {
+          this.authContext.authenticatorState = await authenticator.getState(context);
         }
 
         if (!principal) { // Multi-step login process
           return;
         }
         return this.authContext.principal = (await this.authorizer?.authorize(principal)) ?? principal;
-      } catch (err) {
-        if (!(err instanceof Error)) {
-          throw err;
+      } catch (error) {
+        if (!(error instanceof Error)) {
+          throw error;
         }
-        lastError = err;
+        lastError = error;
       }
     }
 
     if (lastError) {
-      console.warn('Failed to authenticate', { error: lastError, sources: authenticators.map(x => x.toString()) });
+      console.warn('Failed to authenticate', { error: lastError, sources: authenticators.map(symbol => symbol.toString()) });
     }
 
     // Take the last error and return
@@ -82,23 +82,23 @@ export class AuthService {
   /**
    * Manage expiry state, renewing if allowed
    */
-  manageExpiry(p?: Principal): void {
-    if (!p) {
+  manageExpiry(principal?: Principal): void {
+    if (!principal) {
       return;
     }
 
     if (this.config.maxAgeMs) {
-      p.expiresAt ??= TimeUtil.fromNow(this.config.maxAgeMs);
+      principal.expiresAt ??= TimeUtil.fromNow(this.config.maxAgeMs);
     }
 
-    p.issuedAt ??= new Date();
+    principal.issuedAt ??= new Date();
 
-    if (p.expiresAt && this.config.maxAgeMs && this.config.rollingRenew) { // Session behavior
-      const end = p.expiresAt.getTime();
+    if (principal.expiresAt && this.config.maxAgeMs && this.config.rollingRenew) { // Session behavior
+      const end = principal.expiresAt.getTime();
       const midPoint = end - this.config.maxAgeMs / 2;
       if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
-        p.issuedAt = new Date();
-        p.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
+        principal.issuedAt = new Date();
+        principal.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
       }
     }
   }
@@ -106,10 +106,10 @@ export class AuthService {
   /**
    * Enforce expiry, invalidating the principal if expired
    */
-  enforceExpiry(p?: Principal): Principal | undefined {
-    if (p && p.expiresAt && p.expiresAt.getTime() < Date.now()) {
+  enforceExpiry(principal?: Principal): Principal | undefined {
+    if (principal && principal.expiresAt && principal.expiresAt.getTime() < Date.now()) {
       return undefined;
     }
-    return p;
+    return principal;
   }
 }

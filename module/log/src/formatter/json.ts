@@ -14,20 +14,20 @@ export class JSONLogFormatterConfig {
  */
 @Injectable()
 export class JsonLogFormatter implements LogFormatter {
-  opts: JSONLogFormatterConfig;
+  config: JSONLogFormatterConfig;
 
-  constructor(opts: JSONLogFormatterConfig) {
-    this.opts = opts;
+  constructor(config: JSONLogFormatterConfig) {
+    this.config = config;
   }
 
-  format(ev: LogEvent): string {
-    const { message: _m, args: _a, ...rest } = ev;
-    const message = LogFormatUtil.getLogMessage(ev);
-    const context = LogFormatUtil.getContext(ev);
+  format(event: LogEvent): string {
+    const { message: _m, args: _a, ...rest } = event;
+    const message = LogFormatUtil.getLogMessage(event);
+    const context = LogFormatUtil.getContext(event);
     return JSON.stringify({
       ...rest,
       ...(message ? { message } : {}),
       ...(context ? { context } : {}),
-    }, null, this.opts.jsonIndent);
+    }, null, this.config.jsonIndent);
   }
 }

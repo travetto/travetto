@@ -9,12 +9,12 @@ export class EnvProp<T> {
   readonly key: string;
   constructor(key: string) { this.key = key; }
 
-  /** Set value according to prop type */
-  set(val: T | undefined | null): void {
-    if (val === undefined || val === null) {
+  /** Set value according to type */
+  set(value: T | undefined | null): void {
+    if (value === undefined || value === null) {
       delete process.env[this.key];
     } else {
-      process.env[this.key] = Array.isArray(val) ? `${val.join(',')}` : `${val}`;
+      process.env[this.key] = Array.isArray(value) ? `${value.join(',')}` : `${value}`;
     }
   }
 
@@ -24,36 +24,36 @@ export class EnvProp<T> {
   }
 
   /** Export value */
-  export(val?: T | undefined | null): Record<string, string> {
+  export(value?: T | undefined | null): Record<string, string> {
     let out: string;
     if (arguments.length === 0) { // If nothing passed in
-      out = `${this.val}`;
-    } else if (val === undefined || val === null) {
+      out = `${this.value}`;
+    } else if (value === undefined || value === null) {
       out = '';
-    } else if (Array.isArray(val)) {
-      out = val.join(',');
-    } else if (typeof val === 'object') {
-      out = Object.entries(val).map(([k, v]) => `${k}=${v}`).join(',');
+    } else if (Array.isArray(value)) {
+      out = value.join(',');
+    } else if (typeof value === 'object') {
+      out = Object.entries(value).map(([key, keyValue]) => `${key}=${keyValue}`).join(',');
     } else {
-      out = `${val}`;
+      out = `${value}`;
     }
     return { [this.key]: out };
   }
 
   /** Read value as string */
-  get val(): string | undefined { return process.env[this.key] || undefined; }
+  get value(): string | undefined { return process.env[this.key] || undefined; }
 
   /** Read value as list */
   get list(): string[] | undefined {
-    const val = this.val;
-    return (val === undefined || val === '') ?
-      undefined : val.split(/[, ]+/g).map(x => x.trim()).filter(x => !!x);
+    const value = this.value;
+    return (value === undefined || value === '') ?
+      undefined : value.split(/[, ]+/g).map(item => item.trim()).filter(item => !!item);
   }
 
   /** Read value as object */
   get object(): Record<string, string> | undefined {
     const items = this.list;
-    return items ? Object.fromEntries(items.map(x => x.split(/[:=]/g))) : undefined;
+    return items ? Object.fromEntries(items.map(item => item.split(/[:=]/g))) : undefined;
   }
 
   /** Add values to list */
@@ -63,35 +63,35 @@ export class EnvProp<T> {
 
   /** Read value as int  */
   get int(): number | undefined {
-    const vi = parseInt(this.val ?? '', 10);
-    return Number.isNaN(vi) ? undefined : vi;
+    const parsed = parseInt(this.value ?? '', 10);
+    return Number.isNaN(parsed) ? undefined : parsed;
   }
 
   /** Read value as boolean */
   get bool(): boolean | undefined {
-    const val = this.val;
-    return (val === undefined || val === '') ? undefined : IS_TRUE.test(val);
+    const value = this.value;
+    return (value === undefined || value === '') ? undefined : IS_TRUE.test(value);
   }
 
   /** Determine if the underlying value is truthy */
   get isTrue(): boolean {
-    return IS_TRUE.test(this.val ?? '');
+    return IS_TRUE.test(this.value ?? '');
   }
 
   /** Determine if the underlying value is falsy */
   get isFalse(): boolean {
-    return IS_FALSE.test(this.val ?? '');
+    return IS_FALSE.test(this.value ?? '');
   }
 
   /** Determine if the underlying value is set */
   get isSet(): boolean {
-    const val = this.val;
-    return val !== undefined && val !== '';
+    const value = this.value;
+    return value !== undefined && value !== '';
   }
 }
 
 type AllType = {
-  [K in keyof EnvData]: Pick<EnvProp<EnvData[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
+  [K in keyof EnvData]: Pick<EnvProp<EnvData[K]>, 'key' | 'export' | 'value' | 'set' | 'clear' | 'isSet' |
     (EnvData[K] extends unknown[] ? 'list' | 'add' : never) |
     (Extract<EnvData[K], object> extends never ? never : 'object') |
     (Extract<EnvData[K], number> extends never ? never : 'int') |
@@ -101,10 +101,10 @@ type AllType = {
 
 function delegate<T extends object>(base: T): AllType & T {
   return new Proxy(castTo(base), {
-    get(target, prop): unknown {
-      return typeof prop !== 'string' ? undefined :
-        (prop in base ? base[castKey(prop)] :
-          target[castKey<typeof target>(prop)] ??= castTo(new EnvProp(prop))
+    get(target, property): unknown {
+      return typeof property !== 'string' ? undefined :
+        (property in base ? base[castKey(property)] :
+          target[castKey<typeof target>(property)] ??= castTo(new EnvProp(property))
         );
     }
   });

@@ -15,7 +15,7 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(o: Record<string, unknown>): estypes.Script {
+  static generateUpdateScript(item: Record<string, unknown>): estypes.Script {
     const out: estypes.Script = {
       lang: 'painless',
       source: `
@@ -32,21 +32,21 @@ export class ElasticsearchSchemaUtil {
   }
  }
 `,
-      params: { body: o },
+      params: { body: item },
     };
     return out;
   }
 
   /**
    * Generate replace script
-   * @param o
+   * @param item
    * @returns
    */
-  static generateReplaceScript(o: Record<string, unknown>): estypes.Script {
+  static generateReplaceScript(item: Record<string, unknown>): estypes.Script {
     return {
       lang: 'painless',
       source: 'ctx._source.clear(); ctx._source.putAll(params.body)',
-      params: { body: o }
+      params: { body: item }
     };
   }
 
@@ -64,65 +64,65 @@ export class ElasticsearchSchemaUtil {
    */
   static generateAllMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
     const allTypes = SchemaRegistryIndex.getDiscriminatedClasses(cls);
-    return allTypes.reduce<estypes.MappingTypeMapping>((acc, schemaCls) => {
-      DataUtil.deepAssign(acc, this.generateSingleMapping(schemaCls, config));
-      return acc;
+    return allTypes.reduce<estypes.MappingTypeMapping>((mapping, schemaCls) => {
+      DataUtil.deepAssign(mapping, this.generateSingleMapping(schemaCls, config));
+      return mapping;
     }, { properties: {}, dynamic: false });
   }
 
   /**
    * Build a mapping for a given class
    */
-  static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): estypes.MappingTypeMapping {
+  static generateSingleMapping<T>(cls: Class<T>, esSchema?: EsSchemaConfig): estypes.MappingTypeMapping {
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
-    const props: Record<string, estypes.MappingProperty> = {};
+    const properties: Record<string, estypes.MappingProperty> = {};
 
-    for (const [field, conf] of Object.entries(fields)) {
-      if (conf.type === PointImpl) {
-        props[field] = { type: 'geo_point' };
-      } else if (conf.type === Number) {
-        let prop: Record<string, unknown> = { type: 'integer' };
-        if (conf.precision) {
-          const [digits, decimals] = conf.precision;
+    for (const [field, config] of Object.entries(fields)) {
+      if (config.type === PointImpl) {
+        properties[field] = { type: 'geo_point' };
+      } else if (config.type === Number) {
+        let property: Record<string, unknown> = { type: 'integer' };
+        if (config.precision) {
+          const [digits, decimals] = config.precision;
           if (decimals) {
             if ((decimals + digits) < 16) {
-              prop = { type: 'scaled_float', ['scaling_factor']: decimals };
+              property = { type: 'scaled_float', ['scaling_factor']: decimals };
             } else {
               if (digits < 6 && decimals < 9) {
-                prop = { type: 'half_float' };
+                property = { type: 'half_float' };
               } else if (digits > 20) {
-                prop = { type: 'double' };
+                property = { type: 'double' };
               } else {
-                prop = { type: 'float' };
+                property = { type: 'float' };
               }
             }
           } else if (digits) {
             if (digits <= 2) {
-              prop = { type: 'byte' };
+              property = { type: 'byte' };
             } else if (digits <= 4) {
-              prop = { type: 'short' };
+              property = { type: 'short' };
             } else if (digits <= 9) {
-              prop = { type: 'integer' };
+              property = { type: 'integer' };
             } else {
-              prop = { type: 'long' };
+              property = { type: 'long' };
             }
           }
         }
-        props[field] = prop;
-      } else if (conf.type === Date) {
-        props[field] = { type: 'date', format: 'date_optional_time' };
-      } else if (conf.type === Boolean) {
-        props[field] = { type: 'boolean' };
-      } else if (conf.type === String) {
+        properties[field] = property;
+      } else if (config.type === Date) {
+        properties[field] = { type: 'date', format: 'date_optional_time' };
+      } else if (config.type === Boolean) {
+        properties[field] = { type: 'boolean' };
+      } else if (config.type === String) {
         let text = {};
-        if (conf.specifiers?.includes('text')) {
+        if (config.specifiers?.includes('text')) {
           text = {
             fields: {
               text: { type: 'text' }
             }
           };
-          if (config && config.caseSensitive) {
+          if (esSchema && esSchema.caseSensitive) {
             DataUtil.deepAssign(text, {
               fields: {
                 ['text_cs']: { type: 'text', analyzer: 'whitespace' }
@@ -130,17 +130,17 @@ export class ElasticsearchSchemaUtil {
             });
           }
         }
-        props[field] = { type: 'keyword', ...text };
-      } else if (conf.type === Object) {
-        props[field] = { type: 'object', dynamic: true };
-      } else if (SchemaRegistryIndex.has(conf.type)) {
-        props[field] = {
-          type: conf.array ? 'nested' : 'object',
-          ...this.generateSingleMapping(conf.type, config)
+        properties[field] = { type: 'keyword', ...text };
+      } else if (config.type === Object) {
+        properties[field] = { type: 'object', dynamic: true };
+      } else if (SchemaRegistryIndex.has(config.type)) {
+        properties[field] = {
+          type: config.array ? 'nested' : 'object',
+          ...this.generateSingleMapping(config.type, esSchema)
         };
       }
     }
 
-    return { properties: props, dynamic: false };
+    return { properties, dynamic: false };
   }
 }

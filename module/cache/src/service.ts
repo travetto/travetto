@@ -137,16 +137,16 @@ export class CacheService {
    * @param extendOnAccess should the expiry be extended on access
    */
   async getOptional(id: string, extendOnAccess = true): Promise<unknown | undefined> {
-    let res: unknown;
+    let result: unknown;
 
     try {
-      res = await this.get(id, extendOnAccess);
-    } catch (err) {
-      if (!(err instanceof CacheError) && !(err instanceof NotFoundError)) {
-        throw err;
+      result = await this.get(id, extendOnAccess);
+    } catch (error) {
+      if (!(error instanceof CacheError) && !(error instanceof NotFoundError)) {
+        throw error;
       }
     }
-    return res;
+    return result;
   }
 
   /**
@@ -162,18 +162,18 @@ export class CacheService {
 
     const id = CacheUtil.generateKey(config, params);
 
-    let res = await this.getOptional(id, config.extendOnAccess);
+    let result = await this.getOptional(id, config.extendOnAccess);
 
-    if (res === undefined) {
+    if (result === undefined) {
       const data = await fn.apply(target, params);
-      res = await this.set(id, config.keySpace!, data, config.maxAge);
+      result = await this.set(id, config.keySpace!, data, config.maxAge);
     }
 
     if (config.reinstate) { // Reinstate result value if needed
-      res = config.reinstate(res);
+      result = config.reinstate(result);
     }
 
-    return res;
+    return result;
   }
 
   /**
@@ -187,14 +187,14 @@ export class CacheService {
   async evict(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown> {
     const config = target[EvictConfigSymbol]![method];
     const id = CacheUtil.generateKey(config, params);
-    const val = await fn.apply(target, params);
+    const result = await fn.apply(target, params);
     try {
       await this.delete(id); // Ignore failure on delete
-    } catch (err) {
-      if (!(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
     }
-    return val;
+    return result;
   }
 }

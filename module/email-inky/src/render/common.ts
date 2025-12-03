@@ -1,7 +1,7 @@
 import { JSXElement, isJSXElement } from '@travetto/email-inky/jsx-runtime';
 
-export const getKids = (el: JSXElement): JSXElement[] => {
-  const kids = el?.props?.children;
+export const getChildren = (node: JSXElement): JSXElement[] => {
+  const kids = node?.props?.children;
   let result: unknown[] = [];
   if (kids) {
     result = !Array.isArray(kids) ? [kids] : kids;
@@ -9,22 +9,22 @@ export const getKids = (el: JSXElement): JSXElement[] => {
   return result.filter(isJSXElement);
 };
 
-export const visit = (el: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined | void, depth = 0): boolean | undefined => {
+export const visit = (node: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined | void, depth = 0): boolean | undefined => {
   if (depth > 0) {
-    const res = onVisit(el);
-    if (res === true) {
+    const result = onVisit(node);
+    if (result === true) {
       return true;
     }
   }
-  for (const item of getKids(el)) {
-    const res = visit(item, onVisit, depth + 1);
-    if (res) {
+  for (const item of getChildren(node)) {
+    const result = visit(item, onVisit, depth + 1);
+    if (result) {
       return;
     }
   }
 };
 
-export const classStr = (existing: string | undefined, ...toAdd: string[]): string => {
+export const classString = (existing: string | undefined, ...toAdd: string[]): string => {
   const out = [];
   const seen = new Set<string>();
   for (const item of existing?.split(/\s+/) ?? []) {
@@ -42,12 +42,12 @@ export const classStr = (existing: string | undefined, ...toAdd: string[]): stri
   return out.join(' ');
 };
 
-export const combinePropsToStr = (allowedProps: Set<string>, props: { className?: string } & Record<string, unknown>, addClasses: string[] = []): string => {
-  const out = { ...props, className: classStr(props.className, ...addClasses) };
+export const combinePropsToString = (allowedProps: Set<string>, props: { className?: string } & Record<string, unknown>, addClasses: string[] = []): string => {
+  const out = { ...props, className: classString(props.className, ...addClasses) };
   return Object.entries(out)
-    .filter(([k, v]) => allowedProps.has(k) && v !== undefined && v !== null && v !== '')
-    .map(([k, v]) => [k === 'className' ? 'class' : k, v])
-    .map(([k, v]) => `${k}="${v}"`).join(' ');
+    .filter(([key, value]) => allowedProps.has(key) && value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => [key === 'className' ? 'class' : key, value])
+    .map(([key, value]) => `${key}="${value}"`).join(' ');
 };
 
-export const isOfType = (el: JSXElement, type: string): boolean => typeof el.type === 'function' && el.type.name === type;
+export const isOfType = (node: JSXElement, type: string): boolean => typeof node.type === 'function' && node.type.name === type;

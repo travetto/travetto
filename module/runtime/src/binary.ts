@@ -24,27 +24,27 @@ export class BinaryUtil {
   /** Is ReadableStream */
   static isReadableStream = hasFunction<ReadableStream>('pipeTo');
   /** Is Async Iterable */
-  static isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
-    !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
+  static isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
+    !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
 
   /**
-   * Is src a binary type
+   * Is value a binary type
    */
-  static isBinaryType(src: unknown): boolean {
-    return src instanceof Blob || Buffer.isBuffer(src) || this.isReadable(src) ||
-      this.isArrayBuffer(src) || this.isReadableStream(src) || this.isAsyncIterable(src);
+  static isBinaryType(value: unknown): boolean {
+    return value instanceof Blob || Buffer.isBuffer(value) || this.isReadable(value) ||
+      this.isArrayBuffer(value) || this.isReadableStream(value) || this.isAsyncIterable(value);
   }
 
   /**
-   * Generate a proper sha512 hash from a src value
-   * @param src The seed value to build the hash from
-   * @param len The optional length of the hash to generate
+   * Generate a proper sha512 hash from an input value
+   * @param input The seed value to build the hash from
+   * @param length The optional length of the hash to generate
    */
-  static hash(src: string, len: number = -1): string {
+  static hash(input: string, length: number = -1): string {
     const hash = crypto.createHash('sha512');
-    hash.update(src);
+    hash.update(input);
     const digest = hash.digest('hex');
-    return len > 0 ? digest.substring(0, len) : digest;
+    return length > 0 ? digest.substring(0, length) : digest;
   }
 
   /**
@@ -88,7 +88,7 @@ export class BinaryUtil {
   static readableBlob(input: () => (Readable | Promise<Readable>), metadata: BlobMeta = {}): Blob | File {
     const go = (): Readable => {
       const stream = new PassThrough();
-      Promise.resolve(input()).then(v => v.pipe(stream), (err) => stream.destroy(err));
+      Promise.resolve(input()).then(readable => readable.pipe(stream), (error) => stream.destroy(error));
       return stream;
     };
 
@@ -102,7 +102,7 @@ export class BinaryUtil {
       stream: { value: () => ReadableStream.from(go()) },
       arrayBuffer: { value: () => toArrayBuffer(go()) },
       text: { value: () => toText(go()) },
-      bytes: { value: () => toArrayBuffer(go()).then(v => new Uint8Array(v)) },
+      bytes: { value: () => toArrayBuffer(go()).then(buffer => new Uint8Array(buffer)) },
       [BlobMetaSymbol]: { value: metadata }
     });
   }

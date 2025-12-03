@@ -18,7 +18,7 @@ export class TodoTest {
   configClass = MongoModelConfig;
 
   @Inject()
-  svc: TodoService;
+  service: TodoService;
 
   @Test('Create todo')
   async create() {
@@ -26,7 +26,7 @@ export class TodoTest {
       text: 'Sample Task'
     });
 
-    const saved = await this.svc.add(test);
+    const saved = await this.service.add(test);
 
     assert.ok(saved.id);
   }
@@ -37,13 +37,13 @@ export class TodoTest {
       text: 'Sample Task'
     });
 
-    const saved = await this.svc.add(test);
+    const saved = await this.service.add(test);
     assert.ok(saved.id);
 
-    let updated = await this.svc.complete(saved.id);
+    let updated = await this.service.complete(saved.id);
     assert(updated.completed === true);
 
-    updated = await this.svc.complete(saved.id, false);
+    updated = await this.service.complete(saved.id, false);
     assert(updated.completed === false);
   }
 
@@ -53,12 +53,12 @@ export class TodoTest {
       text: 'Sample Task'
     });
 
-    const saved = await this.svc.add(test);
+    const saved = await this.service.add(test);
     assert.ok(saved.id);
     assert(test.text === 'Sample Task');
 
-    await this.svc.remove(saved.id);
+    await this.service.remove(saved.id);
 
-    await assert.rejects(() => this.svc.get(saved.id), /Todo with id .* not found/);
+    await assert.rejects(() => this.service.get(saved.id), /Todo with id .* not found/);
   }
 }

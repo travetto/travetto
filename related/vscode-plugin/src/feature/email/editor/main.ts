@@ -13,7 +13,7 @@ import { Workspace } from '../../../core/workspace.ts';
 import { BaseFeature } from '../../base.ts';
 
 const isResource = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml|html)$/.test(file) && !/[.]compiled[.]/.test(file);
-const isTemplate = (f?: string): boolean => /[.]email[.]tsx$/.test(f ?? '');
+const isTemplate = (file?: string): boolean => /[.]email[.]tsx$/.test(file ?? '');
 
 /**
  * Email Template Feature
@@ -43,22 +43,22 @@ export class EmailCompilerFeature extends BaseFeature {
       cwd: Workspace.path,
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     })
-      .on('message', async (ev: EditorResponse) => {
-        switch (ev.type) {
+      .on('message', async (event: EditorResponse) => {
+        switch (event.type) {
           case 'compiled': {
-            if (ev.file === this.#activeFile) {
-              this.setActiveContent(ev.content);
+            if (event.file === this.#activeFile) {
+              this.setActiveContent(event.content);
             }
             break;
           }
-          case 'compiled-failed': return this.log.info('Email template', ev);
+          case 'compiled-failed': return this.log.info('Email template', event);
           case 'configured': {
-            const doc = await vscode.workspace.openTextDocument(ev.file);
+            const doc = await vscode.workspace.openTextDocument(event.file);
             await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
             break;
           }
-          case 'sent': return Workspace.showEphemeralMessage(`Message Sent to ${ev.to}`);
-          case 'sent-failed': return vscode.window.showErrorMessage(`Message not Sent. ${ev.message}`);
+          case 'sent': return Workspace.showEphemeralMessage(`Message Sent to ${event.to}`);
+          case 'sent-failed': return vscode.window.showErrorMessage(`Message not Sent. ${event.message}`);
           case 'init': {
             if (vscode.window.activeTextEditor) {
               this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
@@ -147,16 +147,16 @@ export class EmailCompilerFeature extends BaseFeature {
     }
   }
 
-  activeEditorChanged(e?: vscode.TextEditor): void {
-    this.setActiveFile(e?.document.fileName);
+  activeEditorChanged(editor?: vscode.TextEditor): void {
+    this.setActiveFile(editor?.document.fileName);
   }
 
   /**
    * On initial activation
    */
   activate(context: vscode.ExtensionContext): void {
-    vscode.workspace.onDidSaveTextDocument(x => this.savedFile(x), null, context.subscriptions);
-    vscode.window.onDidChangeActiveTextEditor(x => this.activeEditorChanged(x), null, context.subscriptions);
+    vscode.workspace.onDidSaveTextDocument(document => this.savedFile(document), null, context.subscriptions);
+    vscode.window.onDidChangeActiveTextEditor(editor => this.activeEditorChanged(editor), null, context.subscriptions);
 
     Workspace.onCompilerState(state => state === 'watch-start' ?
       this.activeEditorChanged(vscode.window.activeTextEditor) :

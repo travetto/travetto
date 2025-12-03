@@ -31,7 +31,7 @@ export class TestDirectCommand {
 
   main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
 
-    const options = Object.fromEntries((this.formatOptions ?? [])?.map(f => [...f.split(':'), true]));
+    const options = Object.fromEntries((this.formatOptions ?? [])?.map(option => [...option.split(':'), true]));
 
     return runTests({
       consumer: this.format,

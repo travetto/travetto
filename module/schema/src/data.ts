@@ -1,4 +1,4 @@
-import { isNumberObject as isNum, isBooleanObject as isBool, isStringObject as isStr } from 'node:util/types';
+import { isNumberObject, isBooleanObject, isStringObject } from 'node:util/types';
 
 import { asConstructable, castTo, Class, asFull, TypedObject } from '@travetto/runtime';
 import { UnknownType } from './types.ts';
@@ -12,24 +12,26 @@ export class DataUtil {
 
   /**
    * Is a value a plain JS object, created using {}
-   * @param obj Object to check
+   * @param value Object to check
    */
-  static isPlainObject(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === 'object' // separate from primitives
-      && obj !== undefined
-      && obj !== null         // is obvious
-      && obj.constructor === Object // separate instances (Array, DOM, ...)
-      && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
+  static isPlainObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' // separate from primitives
+      && value !== undefined
+      && value !== null         // is obvious
+      && value.constructor === Object // separate instances (Array, DOM, ...)
+      && Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
   }
 
   /**
    * Is a value of primitive type
-   * @param el Value to check
+   * @param value Value to check
    */
-  static isPrimitive(el: unknown): el is (string | boolean | number | RegExp) {
-    switch (typeof el) {
+  static isPrimitive(value: unknown): value is (string | boolean | number | RegExp) {
+    switch (typeof value) {
       case 'string': case 'boolean': case 'number': case 'bigint': return true;
-      case 'object': return !!el && (el instanceof RegExp || el instanceof Date || isStr(el) || isNum(el) || isBool(el));
+      case 'object': return !!value && (
+        value instanceof RegExp || value instanceof Date || isStringObject(value) || isNumberObject(value) || isBooleanObject(value)
+      );
       default: return false;
     }
   }
@@ -37,8 +39,8 @@ export class DataUtil {
   /**
    * Is simple, as a primitive, function or class
    */
-  static isSimpleValue(a: unknown): a is Function | Class | string | number | RegExp | Date {
-    return this.isPrimitive(a) || typeof a === 'function';
+  static isSimpleValue(value: unknown): value is Function | Class | string | number | RegExp | Date {
+    return this.isPrimitive(value) || typeof value === 'function';
   }
 
   static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): unknown {
@@ -68,10 +70,10 @@ export class DataUtil {
         if (mode === 'replace') {
           value = b;
         } else {
-          const retArr: unknown[] = castTo(value);
-          const bArr = b;
-          for (let i = 0; i < bArr.length; i++) {
-            retArr[i] = this.#deepAssignRaw(retArr[i], bArr[i], mode);
+          const valueArray: unknown[] = castTo(value);
+          const bArray = b;
+          for (let i = 0; i < bArray.length; i++) {
+            valueArray[i] = this.#deepAssignRaw(valueArray[i], bArray[i], mode);
           }
         }
       } else if (isSimpB) { // Scalars
@@ -87,14 +89,14 @@ export class DataUtil {
         }
       } else { // Object merge
         value = a;
-        const bObj: Record<string, unknown> = castTo(b);
-        const retObj: Record<string, unknown> = castTo(value);
+        const bObject: Record<string, unknown> = castTo(b);
+        const valueObject: Record<string, unknown> = castTo(value);
 
-        for (const key of Object.keys(bObj)) {
+        for (const key of Object.keys(bObject)) {
           if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
             continue;
           }
-          retObj[key] = this.#deepAssignRaw(retObj[key], bObj[key], mode);
+          valueObject[key] = this.#deepAssignRaw(valueObject[key], bObject[key], mode);
         }
       }
     }
@@ -119,7 +121,7 @@ export class DataUtil {
   /**
    * Coerce an input of any type to the class provided
    * @param input Input value
-   * @param type Class to coerce to (String, Boolean, Number, Date, RegEx, Object)
+   * @param type Class to coerce to (String, Boolean, Number, Date, RegExp, Object)
    * @param strict Should a failure to coerce throw an error?
    */
   static coerceType(input: unknown, type: typeof String, strict?: boolean): string;
@@ -226,10 +228,10 @@ export class DataUtil {
 
   /**
    * Clone top level properties to a new object
-   * @param o Object to clone
+   * @param value Object to clone
    */
-  static shallowClone<T>(a: T): T {
-    return castTo(Array.isArray(a) ? a.slice(0) : (this.isSimpleValue(a) ? a : { ...castTo<object>(a) }));
+  static shallowClone<T>(value: T): T {
+    return castTo(Array.isArray(value) ? value.slice(0) : (this.isSimpleValue(value) ? value : { ...castTo<object>(value) }));
   }
 
   /**
@@ -247,29 +249,28 @@ export class DataUtil {
 
   /**
    * Filter object by excluding specific keys
-   * @param obj A value to filter, primitives will be untouched
+   * @param input A value to filter, primitives will be untouched
    * @param exclude Strings or patterns to exclude against
    * @returns
    */
-  static filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T {
-    if (Array.isArray(obj)) {
-      return castTo(obj.map(x => this.filterByKeys(x, exclude)));
-    } else if (obj !== null && obj !== undefined && typeof obj === 'object') {
+  static filterByKeys<T>(input: T, exclude: (string | RegExp)[]): T {
+    if (Array.isArray(input)) {
+      return castTo(input.map(value => this.filterByKeys(value, exclude)));
+    } else if (input !== null && input !== undefined && typeof input === 'object') {
       const out: Partial<T> = {};
-      for (const key of TypedObject.keys(obj)) {
-        if (!exclude.some(r => typeof key === 'string' && (typeof r === 'string' ? r === key : r.test(key)))) {
-          const val = obj[key];
-          if (typeof val === 'object') {
-            out[key] = this.filterByKeys(val, exclude);
+      for (const key of TypedObject.keys(input)) {
+        if (!exclude.some(toMatch => typeof key === 'string' && (typeof toMatch === 'string' ? toMatch === key : toMatch.test(key)))) {
+          const value = input[key];
+          if (typeof value === 'object') {
+            out[key] = this.filterByKeys(value, exclude);
           } else {
-            out[key] = val;
+            out[key] = value;
           }
         }
       }
       return asFull(out);
     } else {
-      return obj;
+      return input;
     }
   }
-
 }

@@ -32,7 +32,7 @@ export interface InjectableCandidate<T = unknown> {
   /**
    * Method that is injectable on class
    */
-  method: string | symbol;
+  method: string;
   /**
    * Method handle
    */
@@ -74,7 +74,7 @@ export interface InjectableConfig<T = unknown> {
   /**
    * Candidates that are injectable
    */
-  candidates: Record<string | symbol, InjectableCandidate>;
+  candidates: Record<string, InjectableCandidate>;
 }
 
 export function getDefaultQualifier(cls: Class): symbol {
@@ -85,5 +85,5 @@ export function getDefaultQualifier(cls: Class): symbol {
 export const PrimaryCandidateSymbol = Symbol();
 
 export type InjectableClassMetadata = {
-  postConstruct: Record<string | symbol, (<T>(inst: T) => Promise<void>)>;
+  postConstruct: Record<string, (<T>(inst: T) => Promise<void>)>;
 };

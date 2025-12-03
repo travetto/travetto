@@ -22,7 +22,7 @@ class TestRunnerFeature extends BaseFeature {
 
   #server: ChildProcess | undefined;
   #consumer: WorkspaceResultsManager;
-  #codeLensUpdated: (e: void) => unknown;
+  #codeLensUpdated: (event: void) => unknown;
 
   #stopServer(force = false): void {
     if (!this.#server) { return; }
@@ -56,12 +56,12 @@ class TestRunnerFeature extends BaseFeature {
     };
 
     this.#server = spawn('node', [RunUtil.cliFile, 'test:watch', '--format', 'exec', '--mode', 'change'], config)
-      .on('message', (ev: TestWatchEvent) => {
-        switch (ev.type) {
-          case 'log': this.log.info('[Log  ]', ev.message); return;
-          case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
+      .on('message', (event: TestWatchEvent) => {
+        switch (event.type) {
+          case 'log': this.log.info('[Log  ]', event.message); return;
+          case 'test': this.log.info('[Event]', event.type, event.phase, event.test.classId, event.test.methodName); break;
         }
-        this.#consumer.onEvent(ev);
+        this.#consumer.onEvent(event);
         this.#codeLensUpdated?.();
       });
 
@@ -83,8 +83,8 @@ class TestRunnerFeature extends BaseFeature {
     }
   }
 
-  #isTestDoc(doc: vscode.TextEditor | vscode.TextDocument | undefined): doc is Exclude<typeof doc, undefined> {
-    const file = doc ? ('fileName' in doc ? doc.fileName : doc.document.fileName) : undefined;
+  #isTestDocument(input: vscode.TextEditor | vscode.TextDocument | undefined): input is Exclude<typeof input, undefined> {
+    const file = input ? ('fileName' in input ? input.fileName : input.document.fileName) : undefined;
     return Workspace.isCompilerWatching && !!this.#getTestModule(file);
   }
 
@@ -108,7 +108,7 @@ class TestRunnerFeature extends BaseFeature {
 
   #rerunActive(): void {
     const editor = vscode.window.activeTextEditor;
-    if (this.#isTestDoc(editor)) {
+    if (this.#isTestDocument(editor)) {
       this.#startServer();
       const doc = editor.document;
       this.#consumer.reset(doc);
@@ -127,7 +127,7 @@ class TestRunnerFeature extends BaseFeature {
    */
   async #launchTestDebugger(line?: number): Promise<void> {
     const editor = vscode.window.activeTextEditor;
-    if (!editor || !this.#isTestDoc(editor)) {
+    if (!editor || !this.#isTestDocument(editor)) {
       return;
     }
 
@@ -155,20 +155,20 @@ class TestRunnerFeature extends BaseFeature {
    */
   buildCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
     return (this.#consumer.getResults(document)?.getListOfTests() || [])
-      .filter(v => v.lineStart < document.lineCount && document.lineAt(v.lineStart - 1).text.includes('@Test'))
-      .map(v => ({
-        range: document.lineAt(v.lineStart - 1).range,
+      .filter(test => test.lineStart < document.lineCount && document.lineAt(test.lineStart - 1).text.includes('@Test'))
+      .map(test => ({
+        range: document.lineAt(test.lineStart - 1).range,
         isResolved: true,
         command: {
           command: this.commandName('line'),
           title: 'Debug Test',
-          arguments: [v.lineBodyStart]
+          arguments: [test.lineBodyStart]
         }
       }));
   }
 
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
-    if (editor && this.#isTestDoc(editor)) {
+    if (editor && this.#isTestDocument(editor)) {
       this.#startServer();
 
       if (!this.#consumer.setEditor(editor)) {
@@ -180,7 +180,7 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onOpenTextDocument(document: vscode.TextDocument): Promise<void> {
-    if (this.#isTestDoc(document)) {
+    if (this.#isTestDocument(document)) {
       this.#startServer();
       this.#consumer.openDocument(document);
     }
@@ -204,9 +204,9 @@ class TestRunnerFeature extends BaseFeature {
       this.onChangedActiveEditor(vscode.window.activeTextEditor) :
       this.#stopServer()
     );
-    vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
-    vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
-    vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);
+    vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
+    vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
+    vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
 
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({
       pattern: {
@@ -216,8 +216,8 @@ class TestRunnerFeature extends BaseFeature {
       }
     }, {
       provideCodeLenses: doc => this.buildCodeLenses(doc),
-      onDidChangeCodeLenses: l => {
-        this.#codeLensUpdated = l;
+      onDidChangeCodeLenses: listener => {
+        this.#codeLensUpdated = listener;
         return { dispose: (): void => { } };
       }
     }));

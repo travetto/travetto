@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { prompt } from 'enquirer';
 
-import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliCommand, cliTpl, CliFlag } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
 
 import { Context } from './bin/context.ts';
@@ -16,9 +16,11 @@ export class ScaffoldCommand implements CliCommandShape {
   /** Template */
   template = 'todo';
   /** Current Working Directory override */
-  cwd: string = path.resolve();
+  @CliFlag({ short: 'c', full: 'cwd' })
+  workingDirectory: string = path.resolve();
   /** Target Directory */
-  dir?: string;
+  @CliFlag({ short: 'd', full: 'dir' })
+  targetDirectory?: string;
   /** Force writing into an existing directory */
   force = false;
 
@@ -42,24 +44,26 @@ export class ScaffoldCommand implements CliCommandShape {
       name: 'choice',
       message: 'Please select one',
       initial: feature.default,
-      choices: feature.choices!.map(x => x.title).filter((x?: string): x is string => !!x),
+      choices: feature.choices!
+        .map(subFeature => subFeature.title)
+        .filter((name?: string): name is string => !!name),
     };
 
     const response = await prompt<{ choice: string }>(choice);
-    return feature.choices?.find(x => x.title === response.choice);
+    return feature.choices?.find(subFeature => subFeature.title === response.choice);
   }
 
   async * #resolveFeatures(features: Feature[], chosen = false, depth = 0): AsyncGenerator<Feature> {
     for (const feat of features) {
       if (!chosen && !feat.required) {
-        const ans = await prompt<{ choice: boolean | string }>([{
+        const answer = await prompt<{ choice: boolean | string }>([{
           type: 'confirm',
           name: 'choice',
           message: `${'='.repeat(depth * 2)}${depth > 0 ? '| ' : ''}Include ${feat.title} support?`,
           initial: true
         }]);
 
-        if (ans.choice === 'No' || ans.choice === false) {
+        if (answer.choice === 'No' || answer.choice === false) {
           continue;
         }
       }
@@ -82,15 +86,15 @@ export class ScaffoldCommand implements CliCommandShape {
   async main(name?: string): Promise<void> {
     name = await this.#getName(name);
 
-    if (!name && this.dir) {
-      name = path.basename(this.dir);
-    } else if (name && !this.dir) {
-      this.dir = path.resolve(this.cwd, name);
-    } else if (!name && !this.dir) {
+    if (!name && this.targetDirectory) {
+      name = path.basename(this.targetDirectory);
+    } else if (name && !this.targetDirectory) {
+      this.targetDirectory = path.resolve(this.workingDirectory, name);
+    } else if (!name && !this.targetDirectory) {
       throw new Error('Either a name or a target directory are required');
     }
 
-    const ctx = new Context(name, this.template, path.resolve(this.cwd, this.dir!));
+    const ctx = new Context(name, this.template, path.resolve(this.workingDirectory, this.targetDirectory!));
 
     if (!this.force) {
       await ctx.initialize();

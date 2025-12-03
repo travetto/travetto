@@ -33,15 +33,15 @@ export class DependencyRegistryIndex implements RegistryIndex {
   }
 
   static getCandidateTypes<T>(candidateType: Class<T>): Class<T>[] {
-    return this.#instance.getCandidates(candidateType).map(c => c.candidateType);
+    return this.#instance.getCandidates(candidateType).map(candidate => candidate.candidateType);
   }
 
-  static getInstances<T>(candidateType: Class<T>, predicate?: (cfg: InjectableCandidate<T>) => boolean): Promise<T[]> {
+  static getInstances<T>(candidateType: Class<T>, predicate?: (config: InjectableCandidate<T>) => boolean): Promise<T[]> {
     return this.#instance.getInstances<T>(candidateType, predicate);
   }
 
-  static injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<T> {
-    return this.#instance.injectFields(cls, o, cls);
+  static injectFields<T extends { constructor: Class<T> }>(item: T, cls = item.constructor): Promise<T> {
+    return this.#instance.injectFields(cls, item, cls);
   }
 
   static getOptional(cls: Class): InjectableConfig | undefined {
@@ -52,11 +52,11 @@ export class DependencyRegistryIndex implements RegistryIndex {
     SchemaRegistryIndex.getForRegister(cls).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
   }
 
-  static registerParameterMetadata(cls: Class, method: string | symbol, index: number, metadata: Dependency): void {
+  static registerParameterMetadata(cls: Class, method: string, index: number, metadata: Dependency): void {
     SchemaRegistryIndex.getForRegister(cls).registerParameterMetadata(method, index, MetadataSymbol, metadata);
   }
 
-  static registerFieldMetadata(cls: Class, field: string | symbol, metadata: Dependency): void {
+  static registerFieldMetadata(cls: Class, field: string, metadata: Dependency): void {
     SchemaRegistryIndex.getForRegister(cls).registerFieldMetadata(field, MetadataSymbol, metadata);
   }
 
@@ -117,18 +117,18 @@ export class DependencyRegistryIndex implements RegistryIndex {
   }
 
 
-  async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, src: Class): Promise<unknown> {
+  async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
       const target = dependency.target ?? input.type;
       return await this.getInstance(target, dependency.qualifier, dependency.resolution);
-    } catch (err) {
-      if (input.required?.active === false && err instanceof InjectionError && err.category === 'notfound') {
+    } catch (error) {
+      if (input.required?.active === false && error instanceof InjectionError && error.category === 'notfound') {
         return undefined;
       } else {
-        if (err && err instanceof Error) {
-          err.message = `${err.message} via=${src.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
+        if (error && error instanceof Error) {
+          error.message = `${error.message} via=${cls.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
         }
-        throw err;
+        throw error;
       }
     }
   }
@@ -140,12 +140,12 @@ export class DependencyRegistryIndex implements RegistryIndex {
   }
 
   process(events: ChangeEvent<Class>[]): void {
-    for (const ev of events) {
-      if ('prev' in ev) {
-        this.#removeClass(ev.prev);
+    for (const event of events) {
+      if ('previous' in event) {
+        this.#removeClass(event.previous);
       }
-      if ('curr' in ev) {
-        this.#addClass(ev.curr, 'prev' in ev);
+      if ('current' in event) {
+        this.#addClass(event.current, 'previous' in event);
       }
     }
   }
@@ -154,15 +154,15 @@ export class DependencyRegistryIndex implements RegistryIndex {
    * Get all available candidates for a given type
    */
   getCandidates<T>(candidateType: Class<T>): InjectableCandidate<T>[] {
-    return this.#resolver.getCandidateEntries(candidateType).map(([_, x]) => castTo<InjectableCandidate<T>>(x));
+    return this.#resolver.getCandidateEntries(candidateType).map(([_, candidate]) => castTo<InjectableCandidate<T>>(candidate));
   }
 
   /**
    * Get candidate instances by target type, with an optional filter
    */
-  getInstances<T>(candidateType: Class<T>, predicate?: (cfg: InjectableCandidate<T>) => boolean): Promise<T[]> {
-    const inputs = this.getCandidates<T>(candidateType).filter(x => !predicate || predicate(x));
-    return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
+  getInstances<T>(candidateType: Class<T>, predicate?: (config: InjectableCandidate<T>) => boolean): Promise<T[]> {
+    const inputs = this.getCandidates<T>(candidateType).filter(candidate => !predicate || predicate(candidate));
+    return Promise.all(inputs.map(candidate => this.getInstance<T>(candidate.class, candidate.qualifier)));
   }
 
   /**
@@ -185,13 +185,13 @@ export class DependencyRegistryIndex implements RegistryIndex {
     const inputs = SchemaRegistryIndex.getOptional(candidateType)?.getFields() ?? {};
 
     const promises = TypedObject.entries(inputs)
-      .filter(([k, input]) => readMetadata(input) !== undefined && (input.access !== 'readonly' && instance[castKey(k)] === undefined))
-      .map(async ([k, input]) => [k, await this.#resolveDependencyValue(readMetadata(input) ?? {}, input, srcClass)] as const);
+      .filter(([key, input]) => readMetadata(input) !== undefined && (input.access !== 'readonly' && instance[castKey(key)] === undefined))
+      .map(async ([key, input]) => [key, await this.#resolveDependencyValue(readMetadata(input) ?? {}, input, srcClass)] as const);
 
     const pairs = await Promise.all(promises);
 
-    for (const [k, v] of pairs) {
-      instance[castKey(k)] = castTo(v);
+    for (const [key, value] of pairs) {
+      instance[castKey(key)] = castTo(value);
     }
     return instance;
   }
@@ -217,8 +217,8 @@ export class DependencyRegistryIndex implements RegistryIndex {
       SchemaRegistryIndex.get(targetType).getMetadata<InjectableClassMetadata>(MetadataSymbol) : undefined;
 
     // Run post constructors
-    for (const op of Object.values(metadata?.postConstruct ?? {})) {
-      await op(inst);
+    for (const operation of Object.values(metadata?.postConstruct ?? {})) {
+      await operation(inst);
     }
 
     // Proxy if necessary
@@ -250,10 +250,10 @@ export class DependencyRegistryIndex implements RegistryIndex {
       const instance = await instancePromise;
       this.#instances.get(target)!.set(qualifier, instance);
       return instance;
-    } catch (err) {
+    } catch (error) {
       // Clear it out, don't save failed constructions
       this.#instancePromises.get(target)!.delete(qualifier);
-      throw err;
+      throw error;
     }
   }
 

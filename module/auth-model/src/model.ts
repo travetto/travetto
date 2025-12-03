@@ -31,8 +31,8 @@ export interface RegisteredPrincipal extends Principal {
   password?: string;
 }
 
-type ToPrincipal<T extends ModelType> = (t: OptionalId<T>) => RegisteredPrincipal;
-type FromPrincipal<T extends ModelType> = (t: Partial<RegisteredPrincipal>) => Partial<T>;
+type ToPrincipal<T extends ModelType> = (item: OptionalId<T>) => RegisteredPrincipal;
+type FromPrincipal<T extends ModelType> = (item: Partial<RegisteredPrincipal>) => Partial<T>;
 
 /**
  * A model-based auth service
@@ -74,10 +74,10 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
 
   /**
    * Convert identity to a principal
-   * @param ident The registered identity to resolve
+   * @param identity The registered identity to resolve
    */
-  async #resolvePrincipal(ident: RegisteredPrincipal): Promise<RegisteredPrincipal> {
-    const user = await this.#retrieve(ident.id);
+  async #resolvePrincipal(identity: RegisteredPrincipal): Promise<RegisteredPrincipal> {
+    const user = await this.#retrieve(identity.id);
     return this.toPrincipal(user);
   }
 
@@ -87,13 +87,13 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
    * @param password The password to authenticate against
    */
   async #authenticate(userId: string, password: string): Promise<RegisteredPrincipal> {
-    const ident = await this.#resolvePrincipal({ id: userId, details: {} });
+    const identity = await this.#resolvePrincipal({ id: userId, details: {} });
 
-    const hash = await AuthModelUtil.generateHash(password, ident.salt!);
-    if (hash !== ident.hash) {
+    const hash = await AuthModelUtil.generateHash(password, identity.salt!);
+    if (hash !== identity.hash) {
       throw new AuthenticationError('Invalid password');
     } else {
-      return ident;
+      return identity;
     }
   }
 
@@ -108,20 +108,20 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
    * @param user The user to register
    */
   async register(user: OptionalId<T>): Promise<T> {
-    const ident = this.toPrincipal(user);
+    const identity = this.toPrincipal(user);
 
     try {
-      if (ident.id) {
-        await this.#retrieve(ident.id);
+      if (identity.id) {
+        await this.#retrieve(identity.id);
         throw new AuthenticationError('That id is already taken.', { category: 'data' });
       }
-    } catch (err) {
-      if (!(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
     }
 
-    const fields = await AuthModelUtil.generatePassword(ident.password!);
+    const fields = await AuthModelUtil.generatePassword(identity.password!);
     const output: Partial<T> = { ...user, ...this.fromPrincipal(fields) };
     return await this.#modelService.create(this.#cls, this.#cls.from(castTo(output)));
   }
@@ -134,15 +134,15 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
    */
   async changePassword(userId: string, password: string, oldPassword?: string): Promise<T> {
     const user = await this.#retrieve(userId);
-    const ident = this.toPrincipal(user);
+    const identity = this.toPrincipal(user);
 
-    if (oldPassword === ident.resetToken) {
-      if (ident.resetExpires && ident.resetExpires.getTime() < Date.now()) {
+    if (oldPassword === identity.resetToken) {
+      if (identity.resetExpires && identity.resetExpires.getTime() < Date.now()) {
         throw new AuthenticationError('Reset token has expired', { category: 'data' });
       }
     } else if (oldPassword !== undefined) {
-      const pw = await AuthModelUtil.generateHash(oldPassword, ident.salt!);
-      if (pw !== ident.hash) {
+      const oldPasswordHash = await AuthModelUtil.generateHash(oldPassword, identity.salt!);
+      if (oldPasswordHash !== identity.hash) {
         throw new AuthenticationError('Old password is required to change');
       }
     }
@@ -158,15 +158,15 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
    */
   async generateResetToken(userId: string): Promise<RegisteredPrincipal> {
     const user = await this.#retrieve(userId);
-    const ident = this.toPrincipal(user);
+    const identity = this.toPrincipal(user);
     const salt = await Util.uuid();
 
-    ident.resetToken = await AuthModelUtil.generateHash(Util.uuid(), salt, 25000, 32);
-    ident.resetExpires = TimeUtil.fromNow(1, 'h');
+    identity.resetToken = await AuthModelUtil.generateHash(Util.uuid(), salt, 25000, 32);
+    identity.resetExpires = TimeUtil.fromNow(1, 'h');
 
-    const output: Partial<T> = { ...user, ...this.fromPrincipal(ident) };
+    const output: Partial<T> = { ...user, ...this.fromPrincipal(identity) };
     await this.#modelService.update(this.#cls, this.#cls.from(castTo(output)));
-    return ident;
+    return identity;
   }
 
   /**

@@ -6,14 +6,14 @@ import { Suite, Test } from '@travetto/test';
 class SimpleTest {
 
   #complexService: {
-    doLongOp(): Promise<number>;
+    doLongOperation(): Promise<number>;
     getText(): string;
   };
 
   @Test()
   async test1() {
-    const val = await this.#complexService.doLongOp();
-    assert(val === 5);
+    const value = await this.#complexService.doLongOperation();
+    assert(value === 5);
   }
 
   @Test()

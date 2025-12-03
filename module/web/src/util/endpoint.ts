@@ -65,12 +65,12 @@ export class EndpointUtil {
 
     const inputByClass = Map.groupBy(
       [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []],
-      x => x[0]
+      entry => entry[0]
     );
 
     const configs = new Map<Class, unknown>(interceptors.map(inst => {
       const cls = asConstructable<WebInterceptor>(inst).constructor;
-      const inputs = (inputByClass.get(cls) ?? []).map(x => x[1]);
+      const inputs = (inputByClass.get(cls) ?? []).map(entry => entry[1]);
       const config = Object.assign({}, inst.config, ...inputs);
       return [cls, inst.finalizeConfig?.({ config, endpoint }, castTo(inputs)) ?? config];
     }));
@@ -96,8 +96,8 @@ export class EndpointUtil {
       case 'header': return isArray ? request.headers.getList(name) : request.headers.get(name);
       case 'query': {
         const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
-        const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
-        return q[name];
+        const query = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
+        return query[name];
       }
     }
   }
@@ -114,33 +114,32 @@ export class EndpointUtil {
     } else if (param.location === 'query') {
       // TODO: Revisit this logic?
       const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
-      const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
+      const query = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
       if (param.prefix) { // Has a prefix provided
-        return q[param.prefix];
+        return query[param.prefix];
       } else if (input.type.Ⲑid) { // Is a full type
-        return q;
+        return query;
       }
     }
 
-    let res = this.extractParameterValue(request, param, input.name!.toString(), input.array) ?? undefined;
-    for (let i = 0; res === undefined && input.aliases && i < input.aliases.length; i += 1) {
-      res = this.extractParameterValue(request, param, input.aliases[i], input.array) ?? undefined;
+    let result = this.extractParameterValue(request, param, input.name!, input.array) ?? undefined;
+    for (let i = 0; result === undefined && input.aliases && i < input.aliases.length; i += 1) {
+      result = this.extractParameterValue(request, param, input.aliases[i], input.array) ?? undefined;
     }
-    return res;
+    return result;
   }
 
   /**
    * Extract all parameters for a given endpoint/request/response combo
    * @param endpoint The endpoint to extract for
-   * @param req The request
-   * @param res The response
+   * @param request The request
    */
   static async extractParameters(endpoint: EndpointConfig, request: WebRequest): Promise<unknown[]> {
     const cls = endpoint.class;
     const vals = WebCommonUtil.getRequestParams(request);
     const { parameters } = SchemaRegistryIndex.get(cls).getMethod(endpoint.methodName);
-    const combined = parameters.map((cfg) =>
-      ({ schema: cfg, param: endpoint.parameters[cfg.index], value: vals?.[cfg.index] }));
+    const combined = parameters.map((config) =>
+      ({ schema: config, param: endpoint.parameters[config.index], value: vals?.[config.index] }));
 
     try {
       const extracted = combined.map(({ param, schema, value }) =>
@@ -149,20 +148,20 @@ export class EndpointUtil {
           this.extractParameter(request, param, schema)
       );
       const params = BindUtil.coerceMethodParams(cls, endpoint.methodName, extracted);
-      await SchemaValidator.validateMethod(cls, endpoint.methodName, params, endpoint.parameters.map(x => x.prefix));
+      await SchemaValidator.validateMethod(cls, endpoint.methodName, params, endpoint.parameters.map(paramConfig => paramConfig.prefix));
       return params;
-    } catch (err) {
-      if (err instanceof ValidationResultError) {
-        for (const el of err.details?.errors ?? []) {
-          if (el.kind === 'required') {
-            const config = combined.find(x => x.schema.name === el.path);
+    } catch (error) {
+      if (error instanceof ValidationResultError) {
+        for (const validationError of error.details?.errors ?? []) {
+          if (validationError.kind === 'required') {
+            const config = combined.find(paramConfig => paramConfig.schema.name === validationError.path);
             if (config) {
-              el.message = `Missing ${config.param.location} value: ${config.schema.name}`;
+              validationError.message = `Missing ${config.param.location} value: ${config.schema.name}`;
             }
           }
         }
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -176,7 +175,7 @@ export class EndpointUtil {
       const headers = endpoint.finalizedResponseHeaders;
       let response: WebResponse;
       if (body instanceof WebResponse) {
-        for (const [k, v] of headers) { body.headers.setIfAbsent(k, v); }
+        for (const [key, value] of headers) { body.headers.setIfAbsent(key, value); }
         // Rewrite context
         Object.assign(body.context, { ...endpoint.responseContext, ...body.context });
         response = body;
@@ -184,8 +183,8 @@ export class EndpointUtil {
         response = new WebResponse({ body, headers, context: { ...endpoint.responseContext } });
       }
       return endpoint.responseFinalizer?.(response) ?? response;
-    } catch (err) {
-      throw WebCommonUtil.catchResponse(err);
+    } catch (error) {
+      throw WebCommonUtil.catchResponse(error);
     }
   }
 
@@ -203,7 +202,7 @@ export class EndpointUtil {
 
     // Filter interceptors if needed
     for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
-      interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
+      interceptors = filter ? interceptors.filter(interceptor => !filter(interceptor)) : interceptors;
     }
 
     const interceptorFilters =
@@ -214,7 +213,7 @@ export class EndpointUtil {
     const endpointFilters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...(endpoint.filters ?? []).map(fn => fn.bind(endpoint.instance)),
-      ...(endpoint.parameters.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
+      ...(endpoint.parameters.filter(config => config.resolve).map(fn => fn.resolve!))
     ]
       .map(fn => ({ filter: fn }));
 
@@ -231,8 +230,8 @@ export class EndpointUtil {
   /**
    * Get bound endpoints, honoring the conditional status
    */
-  static async getBoundEndpoints(c: Class): Promise<EndpointConfig[]> {
-    const config = ControllerRegistryIndex.getConfig(c);
+  static async getBoundEndpoints(cls: Class): Promise<EndpointConfig[]> {
+    const config = ControllerRegistryIndex.getConfig(cls);
 
     // Skip registering conditional controllers
     if (config.conditional && !await config.conditional()) {
@@ -247,15 +246,15 @@ export class EndpointUtil {
 
     // Filter out conditional endpoints
     const endpoints = (await Promise.all(
-      config.endpoints.map(ep => Promise.resolve(ep.conditional?.() ?? true).then(v => v ? ep : undefined))
-    )).filter(x => !!x);
+      config.endpoints.map(endpoint => Promise.resolve(endpoint.conditional?.() ?? true).then(value => value ? endpoint : undefined))
+    )).filter(endpoint => !!endpoint);
 
     if (!endpoints.length) {
       return [];
     }
 
-    for (const ep of endpoints) {
-      ep.instance = config.instance;
+    for (const endpoint of endpoints) {
+      endpoint.instance = config.instance;
     }
 
     return endpoints;
@@ -266,12 +265,12 @@ export class EndpointUtil {
    */
   static orderEndpoints(endpoints: EndpointConfig[]): EndpointConfig[] {
     return endpoints
-      .map(ep => {
-        const parts = ep.path.replace(/^[/]|[/]$/g, '').split('/');
-        return [ep, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
+      .map(endpoint => {
+        const parts = endpoint.path.replace(/^[/]|[/]$/g, '').split('/');
+        return [endpoint, parts.map(part => /[*]/.test(part) ? 1 : /:/.test(part) ? 2 : 3)] as const;
       })
       .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
-      .map(([ep,]) => ep);
+      .map(([endpoint,]) => endpoint);
   }
 
 
@@ -279,25 +278,25 @@ export class EndpointUtil {
    * Order interceptors
    */
   static orderInterceptors(instances: WebInterceptor[]): WebInterceptor[] {
-    const cats = WEB_INTERCEPTOR_CATEGORIES.map(x => ({
-      key: x,
-      start: castTo<Class<WebInterceptor>>({ name: `${x}Start` }),
-      end: castTo<Class<WebInterceptor>>({ name: `${x}End` }),
+    const categoryList = WEB_INTERCEPTOR_CATEGORIES.map(category => ({
+      key: category,
+      start: castTo<Class<WebInterceptor>>({ name: `${category}Start` }),
+      end: castTo<Class<WebInterceptor>>({ name: `${category}End` }),
     }));
 
-    const categoryMapping = TypedObject.fromEntries(cats.map(x => [x.key, x]));
+    const categoryMapping = TypedObject.fromEntries(categoryList.map(category => [category.key, category]));
 
-    const ordered = instances.map(x => {
-      const group = categoryMapping[x.category];
-      const after = [...x.dependsOn ?? [], group.start];
-      const before = [...x.runsBefore ?? [], group.end];
-      return ({ key: x.constructor, before, after, target: x, placeholder: false });
+    const ordered = instances.map(category => {
+      const group = categoryMapping[category.category];
+      const after = [...category.dependsOn ?? [], group.start];
+      const before = [...category.runsBefore ?? [], group.end];
+      return ({ key: category.constructor, before, after, target: category, placeholder: false });
     });
 
     // Add category sets into the ordering
     let i = 0;
-    for (const cat of cats) {
-      const prevEnd = cats[i - 1]?.end ? [cats[i - 1].end] : [];
+    for (const cat of categoryList) {
+      const prevEnd = categoryList[i - 1]?.end ? [categoryList[i - 1].end] : [];
       ordered.push(
         { key: cat.start, before: [cat.end], after: prevEnd, placeholder: true, target: undefined! },
         { key: cat.end, before: [], after: [cat.start], placeholder: true, target: undefined! }
@@ -306,7 +305,7 @@ export class EndpointUtil {
     }
 
     return WebCommonUtil.ordered(ordered)
-      .filter(x => !x.placeholder)  // Drop out the placeholders
-      .map(x => x.target);
+      .filter(category => !category.placeholder)  // Drop out the placeholders
+      .map(category => category.target);
   }
 }

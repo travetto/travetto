@@ -16,12 +16,12 @@ import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, Bina
 
 import { S3ModelConfig } from './config.ts';
 
-function isMetadataBearer(o: unknown): o is MetadataBearer {
-  return !!o && typeof o === 'object' && '$metadata' in o;
+function isMetadataBearer(value: unknown): value is MetadataBearer {
+  return !!value && typeof value === 'object' && '$metadata' in value;
 }
 
-function hasContentType<T>(o: T): o is T & { contenttype?: string } {
-  return o !== undefined && o !== null && Object.hasOwn(o, 'contenttype');
+function hasContentType<T>(value: T): value is T & { contenttype?: string } {
+  return value !== undefined && value !== null && Object.hasOwn(value, 'contenttype');
 }
 
 type MetaBase = Pick<CreateMultipartUploadRequest,
@@ -72,12 +72,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return this.#basicKey(key);
   }
 
-  #q<U extends object>(cls: string | Class, id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
+  #query<U extends object>(cls: string | Class, id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
     const key = this.#resolveKey(cls, id);
     return { Key: key, Bucket: this.config.bucket, ...extra };
   }
 
-  #qBlob<U extends object>(id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
+  #queryBlob<U extends object>(id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
     const key = this.#basicKey(id);
     return { Key: key, Bucket: this.config.bucket, ...extra };
   }
@@ -96,16 +96,16 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async * #iterateBucket(cls?: string | Class): AsyncIterable<{ Key: string, id: string }[]> {
     let Marker: string | undefined;
     for (; ;) {
-      const obs = await this.client.listObjects({
+      const items = await this.client.listObjects({
         Bucket: this.config.bucket,
         Prefix: cls ? this.#resolveKey(cls) : this.config.namespace,
         Marker
       });
-      if (obs.Contents?.length) {
-        yield obs.Contents.map(o => ({ Key: o.Key!, id: o.Key!.split(':').pop()! }));
+      if (items.Contents?.length) {
+        yield items.Contents.map(item => ({ Key: item.Key!, id: item.Key!.split(':').pop()! }));
       }
-      if (obs.NextMarker) {
-        Marker = obs.NextMarker;
+      if (items.NextMarker) {
+        Marker = items.NextMarker;
       } else {
         return;
       }
@@ -116,21 +116,21 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
    * Write multipart file upload, in chunks
    */
   async #writeMultipart(id: string, input: Readable, meta: BlobMeta): Promise<void> {
-    const { UploadId } = await this.client.createMultipartUpload(this.#qBlob(id, this.#getMetaBase(meta)));
+    const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(meta)));
 
     const parts: CompletedPart[] = [];
     let buffers: Buffer[] = [];
     let total = 0;
-    let n = 1;
+    let i = 1;
     const flush = async (): Promise<void> => {
       if (!total) { return; }
-      const part = await this.client.uploadPart(this.#qBlob(id, {
+      const part = await this.client.uploadPart(this.#queryBlob(id, {
         Body: Buffer.concat(buffers),
-        PartNumber: n,
+        PartNumber: i,
         UploadId
       }));
-      parts.push({ PartNumber: n, ETag: part.ETag });
-      n += 1;
+      parts.push({ PartNumber: i, ETag: part.ETag });
+      i += 1;
       buffers = [];
       total = 0;
     };
@@ -145,13 +145,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       }
       await flush();
 
-      await this.client.completeMultipartUpload(this.#qBlob(id, {
+      await this.client.completeMultipartUpload(this.#queryBlob(id, {
         UploadId,
         MultipartUpload: { Parts: parts }
       }));
-    } catch (err) {
-      await this.client.abortMultipartUpload(this.#qBlob(id, { UploadId }));
-      throw err;
+    } catch (error) {
+      await this.client.abortMultipartUpload(this.#queryBlob(id, { UploadId }));
+      throw error;
     }
   }
 
@@ -163,9 +163,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
           Objects: items
         }
       });
-    } catch (err) {
+    } catch (error) {
       // Handle GCS
-      if (err instanceof Error && err.name === 'NotImplemented') {
+      if (error instanceof Error && error.name === 'NotImplemented') {
         for (const item of items) {
           await this.client.deleteObject({
             Bucket: this.config.bucket,
@@ -173,7 +173,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
           });
         }
       } else {
-        throw err;
+        throw error;
       }
     }
   }
@@ -195,25 +195,25 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async head<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {
     try {
-      const result = await this.client.headObject(this.#q(cls, id));
+      const result = await this.client.headObject(this.#query(cls, id));
       const { expiresAt } = ModelRegistryIndex.getConfig(cls);
       if (expiresAt && result.ExpiresString && Date.parse(result.ExpiresString) < Date.now()) {
         return false;
       }
       return true;
-    } catch (err) {
-      if (isMetadataBearer(err)) {
-        if (err.$metadata.httpStatusCode === 404) {
+    } catch (error) {
+      if (isMetadataBearer(error)) {
+        if (error.$metadata.httpStatusCode === 404) {
           return false;
         }
       }
-      throw err;
+      throw error;
     }
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     try {
-      const result = await this.client.getObject(this.#q(cls, id));
+      const result = await this.client.getObject(this.#query(cls, id));
       if (result.Body) {
         const body = await toText(castTo(result.Body));
         const output = await ModelCrudUtil.load(cls, body);
@@ -230,13 +230,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         }
       }
       throw new NotFoundError(cls, id);
-    } catch (err) {
-      if (isMetadataBearer(err)) {
-        if (err.$metadata.httpStatusCode === 404) {
-          err = new NotFoundError(cls, id);
+    } catch (error) {
+      if (isMetadataBearer(error)) {
+        if (error.$metadata.httpStatusCode === 404) {
+          error = new NotFoundError(cls, id);
         }
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -246,7 +246,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
     const content = Buffer.from(JSON.stringify(prepped), 'utf8');
-    await this.client.putObject(this.#q(cls, prepped.id, {
+    await this.client.putObject(this.#query(cls, prepped.id, {
       Body: content,
       ContentType: 'application/json',
       ContentLength: content.length,
@@ -289,7 +289,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
     }
-    await this.client.deleteObject(this.#q(cls, id));
+    await this.client.deleteObject(this.#query(cls, id));
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
@@ -297,9 +297,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       for (const { id } of batch) {
         try {
           yield await this.get(cls, id);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
       }
@@ -321,7 +321,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
     if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
-      await this.client.putObject(this.#qBlob(location, {
+      await this.client.putObject(this.#queryBlob(location, {
         Body: await toBuffer(stream),
         ContentLength: blobMeta.size,
         ...this.#getMetaBase(blobMeta),
@@ -333,7 +333,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async #getObject(location: string, range?: Required<ByteRange>): Promise<Readable> {
     // Read from s3
-    const result = await this.client.getObject(this.#qBlob(location, range ? {
+    const result = await this.client.getObject(this.#queryBlob(location, range ? {
       Range: `bytes=${range.start}-${range.end}`
     } : {}));
 
@@ -359,40 +359,40 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {
-    const query = this.#qBlob(location);
+    const query = this.#queryBlob(location);
     try {
       return (await this.client.headObject(query));
-    } catch (err) {
-      if (isMetadataBearer(err)) {
-        if (err.$metadata.httpStatusCode === 404) {
-          err = new NotFoundError('Blob', location);
+    } catch (error) {
+      if (isMetadataBearer(error)) {
+        if (error.$metadata.httpStatusCode === 404) {
+          error = new NotFoundError('Blob', location);
         }
       }
-      throw err;
+      throw error;
     }
   }
 
   async getBlobMeta(location: string): Promise<BlobMeta> {
-    const obj = await this.headBlob(location);
+    const blob = await this.headBlob(location);
 
-    if (obj) {
-      const ret: BlobMeta = {
+    if (blob) {
+      const meta: BlobMeta = {
         contentType: '',
-        ...obj.Metadata,
-        size: obj.ContentLength!,
+        ...blob.Metadata,
+        size: blob.ContentLength!,
       };
-      if (hasContentType(ret)) {
-        ret['contentType'] = ret['contenttype']!;
-        delete ret['contenttype'];
+      if (hasContentType(meta)) {
+        meta['contentType'] = meta['contenttype']!;
+        delete meta['contenttype'];
       }
-      return ret;
+      return meta;
     } else {
       throw new NotFoundError('Blob', location);
     }
   }
 
   async deleteBlob(location: string): Promise<void> {
-    await this.client.deleteObject(this.#qBlob(location));
+    await this.client.deleteObject(this.#queryBlob(location));
   }
 
   async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
@@ -409,7 +409,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlobReadUrl(location: string, exp: TimeSpan = '1h'): Promise<string> {
     return await getSignedUrl(
       this.client,
-      new GetObjectCommand(this.#qBlob(location)),
+      new GetObjectCommand(this.#queryBlob(location)),
       { expiresIn: TimeUtil.asSeconds(exp) }
     );
   }
@@ -419,7 +419,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return await getSignedUrl(
       this.client,
       new PutObjectCommand({
-        ...this.#qBlob(location),
+        ...this.#queryBlob(location),
         ...base,
         ...(meta.size ? { ContentLength: meta.size } : {}),
         ...((meta.hash && meta.hash !== '-1') ? { ChecksumSHA256: meta.hash } : {}),

@@ -10,8 +10,8 @@ import { LogFormatUtil } from './util.ts';
  */
 @Injectable()
 export class GoogleLogFormatter implements LogFormatter {
-  format(ev: LogEvent): string {
-    const context = LogFormatUtil.getContext(ev);
+  format(event: LogEvent): string {
+    const context = LogFormatUtil.getContext(event);
 
     const extra: Record<string, unknown> = {};
     // Http request specific
@@ -28,11 +28,11 @@ export class GoogleLogFormatter implements LogFormatter {
 
     return JSON.stringify({
       context,
-      'logging.googleapis.com/sourceLocation': { file: `${ev.module}/${ev.modulePath}`, line: ev.line },
-      'logging.googleapis.com/labels': { module: ev.module, scope: ev.scope },
-      severity: ev.level,
-      message: LogFormatUtil.getLogMessage(ev),
-      timestamp: ev.timestamp,
+      'logging.googleapis.com/sourceLocation': { file: `${event.module}/${event.modulePath}`, line: event.line },
+      'logging.googleapis.com/labels': { module: event.module, scope: event.scope },
+      severity: event.level,
+      message: LogFormatUtil.getLogMessage(event),
+      timestamp: event.timestamp,
       ...extra,
     });
   }

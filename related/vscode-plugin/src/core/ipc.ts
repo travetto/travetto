@@ -8,15 +8,15 @@ import { Log } from './log.ts';
 
 export class IpcSupport {
 
-  static async readJSONRequest<T>(req: http.IncomingMessage): Promise<T> {
+  static async readJSONRequest<T>(request: http.IncomingMessage): Promise<T> {
     const chunks: Buffer[] = [];
-    for await (const chunk of req) {
+    for await (const chunk of request) {
       chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
     }
     return JSON.parse(Buffer.concat(chunks).toString('utf8'));
   }
 
-  #ctrl = new AbortController();
+  #controller = new AbortController();
   #handler: (response: TargetEvent) => void | Promise<void>;
   #log = new Log('travetto.vscode.ipc');
 
@@ -25,24 +25,24 @@ export class IpcSupport {
   }
 
   async activate(ctx: ExtensionContext): Promise<void> {
-    const server = new http.Server(async (req, res) => {
-      res.setHeader('Content-Type', 'application/json');
+    const server = new http.Server(async (request, response) => {
+      response.setHeader('Content-Type', 'application/json');
       try {
-        if (/post/i.test(req.method || '')) {
-          const ev = await IpcSupport.readJSONRequest<TargetEvent>(req);
-          this.#log.info('Received IPC event', ev);
-          this.#handler(ev);
+        if (/post/i.test(request.method || '')) {
+          const event = await IpcSupport.readJSONRequest<TargetEvent>(request);
+          this.#log.info('Received IPC event', event);
+          this.#handler(event);
         }
-        res.statusCode = 200;
-        res.end(JSON.stringify({ ok: true }));
-      } catch (e) {
-        res.statusCode = 500;
-        res.end(JSON.stringify({ error: `${e}` }));
+        response.statusCode = 200;
+        response.end(JSON.stringify({ ok: true }));
+      } catch (error) {
+        response.statusCode = 500;
+        response.end(JSON.stringify({ error: `${error}` }));
       }
     });
     await new Promise<void>(resolve => {
       server.listen(undefined, '0.0.0.0', () => {
-        this.#ctrl.signal.addEventListener('onabort', () => {
+        this.#controller.signal.addEventListener('onabort', () => {
           server.closeAllConnections();
           server.close();
         });
@@ -56,6 +56,6 @@ export class IpcSupport {
   }
 
   deactivate(): void {
-    this.#ctrl.abort();
+    this.#controller.abort();
   }
 }

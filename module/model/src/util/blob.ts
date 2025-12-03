@@ -15,22 +15,22 @@ export class ModelBlobUtil {
   /**
    * Convert input to a Readable, and get what metadata is available
    */
-  static async getInput(src: BinaryInput, metadata: BlobMeta = {}): Promise<[Readable, BlobMeta]> {
-    let input: Readable;
-    if (src instanceof Blob) {
-      metadata = { ...BinaryUtil.getBlobMeta(src), ...metadata };
-      metadata.size ??= src.size;
-      input = Readable.fromWeb(src.stream());
-    } else if (typeof src === 'object' && 'pipeThrough' in src) {
-      input = Readable.fromWeb(src);
-    } else if (typeof src === 'object' && 'pipe' in src) {
-      input = src;
+  static async getInput(input: BinaryInput, metadata: BlobMeta = {}): Promise<[Readable, BlobMeta]> {
+    let result: Readable;
+    if (input instanceof Blob) {
+      metadata = { ...BinaryUtil.getBlobMeta(input), ...metadata };
+      metadata.size ??= input.size;
+      result = Readable.fromWeb(input.stream());
+    } else if (typeof input === 'object' && 'pipeThrough' in input) {
+      result = Readable.fromWeb(input);
+    } else if (typeof input === 'object' && 'pipe' in input) {
+      result = input;
     } else {
-      metadata.size = src.length;
-      input = Readable.from(src);
+      metadata.size = input.length;
+      result = Readable.from(input);
     }
 
-    return [input, metadata ?? {}];
+    return [result, metadata ?? {}];
   }
 
   /**

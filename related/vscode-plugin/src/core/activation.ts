@@ -22,7 +22,7 @@ class $ActivationManager {
 
   #registry = new Set<ActivationConfig>();
   #commandRegistry = new Map<string, ActivationConfig>();
-  #ipcSupport = new IpcSupport(e => this.onTargetEvent(e));
+  #ipcSupport = new IpcSupport(event => this.onTargetEvent(event));
   #log = new Log('travetto.vscode.activation');
 
   add(config: ActivationConfig): void {
@@ -70,8 +70,8 @@ class $ActivationManager {
       } else {
         this.#log.warn('Unknown event type', event.type, event);
       }
-    } catch (e) {
-      this.#log.error('Unknown error', e);
+    } catch (error) {
+      this.#log.error('Unknown error', error);
     }
   }
 }

@@ -5,7 +5,7 @@ import { EXPIRED_CLASS, RegistrationMethods, RegistryAdapter } from './types';
 function ExchangeExpired<R = unknown>() {
   return function (
     target: Any,
-    propertyKey: string | symbol,
+    propertyKey: string,
     descriptor: TypedPropertyDescriptor<(this: RegistryIndexStore, cls: Class) => R>
   ): void {
     if (Runtime.dynamic) {

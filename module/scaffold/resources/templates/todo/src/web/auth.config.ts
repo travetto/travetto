@@ -11,22 +11,22 @@ type User = { username: string, password: string };
 class AuthConfig {
   @InjectableFactory()
   static getAuthorizer(): Authorizer { // Simply mirrors the identity back as the principal
-    return { authorize: p => p };
+    return { authorize: principal => principal };
   }
 
   @InjectableFactory(SessionModelSymbol)
-  static getStore(svc: MemoryModelService): ModelExpirySupport {
-    return svc;
+  static getStore(service: MemoryModelService): ModelExpirySupport {
+    return service;
   }
 
   @InjectableFactory(BasicAuthSymbol)
   static getAuthenticator(): Authenticator<User> {
     return {
-      authenticate(u) {
-        if (u.username && u.password === 'password') {
+      authenticate(user) {
+        if (user.username && user.password === 'password') {
           return {
             issuer: 'self',
-            id: u.username,
+            id: user.username,
             permissions: [],
             details: {},
             source: 'insecure'

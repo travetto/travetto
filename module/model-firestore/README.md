@@ -30,8 +30,8 @@ export class Init {
   @InjectableFactory({
     primary: true
   })
-  static getModelSource(conf: FirestoreModelConfig) {
-    return new FirestoreModelService(conf);
+  static getModelSource(config: FirestoreModelConfig) {
+    return new FirestoreModelService(config);
   }
 }
 ```

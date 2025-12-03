@@ -14,7 +14,7 @@ export type TypedFunction<R = Any, V = unknown> = (this: V, ...args: Any[]) => R
 
 export type MethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<R, V>>;
 export type AsyncMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<Promise<R>, V>>;
-export type AsyncItrMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<AsyncIterable<R>, V>>;
+export type AsyncIterableMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<AsyncIterable<R>, V>>;
 export type ClassTDecorator<T extends Class = Class> = (target: T) => T | void;
 
 export type Primitive = number | bigint | boolean | string | Date;
@@ -34,7 +34,7 @@ type ValidPrimitiveFields<T, Z = undefined> = {
 export type RetainPrimitiveFields<T, Z = undefined> = Pick<T, ValidPrimitiveFields<T, Z>>;
 
 export const TypedObject: {
-  keys<T = unknown, K extends keyof T = keyof T & string>(o: T): K[];
+  keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
 } & ObjectConstructor = Object;
@@ -56,20 +56,13 @@ export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassIns
   return castTo(new cons(...args));
 }
 
-export const hasFunction = <T>(key: keyof T) => (o: unknown): o is T =>
-  typeof o === 'object' && o !== null && typeof o[castKey(key)] === 'function';
+export const hasFunction = <T>(key: keyof T) => (value: unknown): value is T =>
+  typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 
 export function toConcrete<T extends unknown>(): Class<T> {
   return arguments[0];
-}
-
-export function getAllEntries<V>(obj: Record<string | symbol, V>): [string | symbol, V][] {
-  return [
-    ...Object.keys(obj),
-    ...Object.getOwnPropertySymbols(obj)
-  ].map(k => [k, obj[k]] as const);
 }
 
 /**
@@ -83,7 +76,8 @@ export function getParentClass(cls: Class): Class | undefined {
 /**
  * Get the class from an instance or class
  */
-export const getClass = <T = unknown>(x: ClassInstance | Class): Class<T> => 'Ⲑid' in x ? castTo(x) : asConstructable<T>(x).constructor;
+export const getClass = <T = unknown>(value: ClassInstance | Class): Class<T> =>
+  'Ⲑid' in value ? castTo(value) : asConstructable<T>(value).constructor;
 
 /**
  * Range of bytes, inclusive

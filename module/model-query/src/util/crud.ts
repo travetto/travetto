@@ -12,15 +12,15 @@ export class ModelQueryCrudUtil {
   /**
    * Delete all expired
    */
-  static async deleteExpired<T extends ModelType>(svc: ModelQueryCrudSupport & ModelCrudSupport, cls: Class<T>): Promise<number> {
+  static async deleteExpired<T extends ModelType>(service: ModelQueryCrudSupport & ModelCrudSupport, cls: Class<T>): Promise<number> {
     const expiry = await ModelRegistryIndex.getExpiryFieldName(cls);
-    const res = await svc.deleteByQuery<ModelType>(cls, {
+    const count = await service.deleteByQuery<ModelType>(cls, {
       where: {
         [expiry]: {
           $lt: new Date()
         }
       }
     });
-    return res ?? 0;
+    return count ?? 0;
   }
 }

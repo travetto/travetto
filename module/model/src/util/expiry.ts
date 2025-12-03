@@ -29,13 +29,13 @@ export class ModelExpiryUtil {
 
   /**
    * Delete all expired on a fixed interval, if supported and needed
-   * @param svc
+   * @param service
    */
-  static registerCull(svc: ModelExpirySupport & { readonly config?: { cullRate?: number | TimeSpan } }): void {
+  static registerCull(service: ModelExpirySupport & { readonly config?: { cullRate?: number | TimeSpan } }): void {
     const cullable = ModelRegistryIndex.getClasses().filter(cls => !!ModelRegistryIndex.getConfig(cls).expiresAt);
-    if (svc.deleteExpired && cullable.length) {
+    if (service.deleteExpired && cullable.length) {
       const running = new AbortController();
-      const cullInterval = TimeUtil.asMillis(svc.config?.cullRate ?? '10m');
+      const cullInterval = TimeUtil.asMillis(service.config?.cullRate ?? '10m');
 
       ShutdownManager.onGracefulShutdown(async () => running.abort());
 
@@ -43,7 +43,7 @@ export class ModelExpiryUtil {
         await Util.nonBlockingTimeout(1000);
         while (!running.signal.aborted) {
           await Util.nonBlockingTimeout(cullInterval);
-          await Promise.all(cullable.map(cls => svc.deleteExpired(cls)));
+          await Promise.all(cullable.map(cls => service.deleteExpired(cls)));
         }
       })();
     }

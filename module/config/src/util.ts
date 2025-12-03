@@ -22,9 +22,9 @@ export class ConfigOverrideUtil {
   static getAllOverrideConfigs(): Required<OverrideConfig>[] {
     const out: Required<OverrideConfig>[] = [];
     for (const cls of SchemaRegistryIndex.getClasses()) {
-      const cfg = this.getOverrideConfig(cls);
-      if (cfg && cfg.fields && cfg.namespace) {
-        out.push(asFull(cfg));
+      const config = this.getOverrideConfig(cls);
+      if (config && config.fields && config.namespace) {
+        out.push(asFull(config));
       }
     }
     return out;
@@ -35,7 +35,7 @@ export class ConfigOverrideUtil {
       .registerMetadata<OverrideConfig>(OverrideConfigSymbol, {});
 
     (env.fields ??= {})[field] = (): string | undefined =>
-      process.env[names.find(x => !!process.env[x])!];
+      process.env[names.find(name => !!process.env[name])!];
   }
 
   static setOverrideConfig(cls: Class<Any>, namespace: string): void {

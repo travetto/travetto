@@ -1,13 +1,13 @@
 import { PackageUtil } from './package.ts';
 import { path } from './path.ts';
 
-import type { Package, PackageDepType } from './types/package.ts';
+import type { Package, PackageDependencyType } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 import type { PackageModule } from './types/manifest.ts';
 
 type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { roleRoot?: boolean, parent?: PackageModule };
 
-type Req = {
+type VisitableNode = {
   /** Request package */
   pkg: Package;
   /** Children to visit */
@@ -24,7 +24,8 @@ type Req = {
 export class PackageModuleVisitor {
 
   static async visit(ctx: ManifestContext): Promise<Iterable<PackageModule>> {
-    const visitor = new PackageModuleVisitor(ctx, Object.fromEntries((await PackageUtil.resolveWorkspaces(ctx)).map(x => [x.name, x.path])));
+    const visitor = new PackageModuleVisitor(ctx, Object.fromEntries((await PackageUtil.resolveWorkspaces(ctx))
+      .map(workspace => [workspace.name, workspace.path])));
     return visitor.visit();
   }
 
@@ -42,7 +43,7 @@ export class PackageModuleVisitor {
   /**
    * Build a package module
    */
-  #create(sourcePath: string, { main, workspace, prod = false, roleRoot = false, parent }: CreateOpts = {}): Req {
+  #create(sourcePath: string, { main, workspace, prod = false, roleRoot = false, parent }: CreateOpts = {}): VisitableNode {
     const pkg = PackageUtil.readPackage(sourcePath);
     const value = this.#cache[sourcePath] ??= {
       main,
@@ -55,31 +56,31 @@ export class PackageModuleVisitor {
       outputFolder: `node_modules/${pkg.name}`,
       state: {
         childSet: new Set(), parentSet: new Set(), roleSet: new Set(), roleRoot,
-        travetto: pkg.travetto, prodDeps: new Set(Object.keys(pkg.dependencies ?? {}))
+        travetto: pkg.travetto, prodDependencies: new Set(Object.keys(pkg.dependencies ?? {}))
       }
     };
 
-    const deps: PackageDepType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
-    const children = Object.fromEntries(deps.flatMap(x => Object.entries(pkg[x] ?? {})));
+    const dependencies: PackageDependencyType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
+    const children = Object.fromEntries(dependencies.flatMap(dependency => Object.entries(pkg[dependency] ?? {})));
     return { pkg, value, children, parent };
   }
 
   /**
    * Get monorepo root includes
    */
-  #getMonoRootIncludes(parent: Req): Req[] {
+  #getMonoRootIncludes(parent: VisitableNode): VisitableNode[] {
     if (!(this.#ctx.workspace.mono && !this.#ctx.main.folder)) { // If not mono root, bail
       return [];
     }
 
     return Object.values(this.#workspaceModules)
-      .map(loc => this.#create(loc, { main: true, workspace: true, roleRoot: true, parent: parent.value }));
+      .map(folder => this.#create(folder, { main: true, workspace: true, roleRoot: true, parent: parent.value }));
   }
 
   /**
    * Determine default includes
    */
-  #getIncludes(parent: Req): Req[] {
+  #getIncludes(parent: VisitableNode): VisitableNode[] {
     if (this.#ctx.workspace.mono && !this.#ctx.main.folder) { // If mono and not at mono root, bail
       return [];
     }
@@ -91,8 +92,8 @@ export class PackageModuleVisitor {
       );
     } else {
       return Object.values(this.#workspaceModules)
-        .filter((loc) => PackageUtil.readPackage(loc).travetto?.workspaceInclude)
-        .map(loc => this.#create(loc, { workspace: true, parent: parent.value }));
+        .filter((folder) => PackageUtil.readPackage(folder).travetto?.workspaceInclude)
+        .map(folder => this.#create(folder, { workspace: true, parent: parent.value }));
     }
   }
 
@@ -100,50 +101,50 @@ export class PackageModuleVisitor {
    * Propagate prod, role information through graph
    */
   async #complete(mods: Iterable<PackageModule>): Promise<PackageModule[]> {
-    const mapping = new Map([...mods].map(el => [el.name, { parent: new Set(el.state.parentSet), el }]));
+    const mapping = new Map([...mods].map(item => [item.name, { parent: new Set(item.state.parentSet), item }]));
 
     // All first-level dependencies should have role filled in (for propagation)
-    for (const dep of [...mods].filter(x => x.state.roleRoot)) {
-      dep.state.roleSet.clear(); // Ensure the roleRoot is empty
-      for (const c of dep.state.childSet) { // Visit children
-        const cDep = mapping.get(c)!.el;
-        if (cDep.state.roleRoot) { continue; }
+    for (const dependency of [...mods].filter(mod => mod.state.roleRoot)) {
+      dependency.state.roleSet.clear(); // Ensure the roleRoot is empty
+      for (const child of dependency.state.childSet) { // Visit children
+        const childDependency = mapping.get(child)!.item;
+        if (childDependency.state.roleRoot) { continue; }
         // Set roles for all top level modules
-        cDep.state.roleSet = new Set(cDep.state.travetto?.roles ?? ['std']);
+        childDependency.state.roleSet = new Set(childDependency.state.travetto?.roles ?? ['std']);
       }
     }
 
     // Visit all nodes
     while (mapping.size > 0) {
-      const toProcess = [...mapping.values()].filter(x => x.parent.size === 0);
+      const toProcess = [...mapping.values()].filter(item => item.parent.size === 0);
       if (!toProcess.length) {
         throw new Error(`We have reached a cycle for ${[...mapping.keys()]}`);
       }
       // Propagate to children
-      for (const { el } of toProcess) {
-        for (const c of el.state.childSet) {
-          const child = mapping.get(c);
+      for (const { item } of toProcess) {
+        for (const childName of item.state.childSet) {
+          const child = mapping.get(childName);
           if (!child) { continue; }
-          child.parent.delete(el.name);
+          child.parent.delete(item.name);
           // Propagate roles from parent to child
-          if (!child.el.state.roleRoot) {
-            for (const role of el.state.roleSet) {
-              child.el.state.roleSet.add(role);
+          if (!child.item.state.roleRoot) {
+            for (const role of item.state.roleSet) {
+              child.item.state.roleSet.add(role);
             }
           }
           // Allow prod to trickle down as needed
-          child.el.prod ||= (el.prod && el.state.prodDeps.has(c));
+          child.item.prod ||= (item.prod && item.state.prodDependencies.has(childName));
         }
       }
       // Remove from mapping
-      for (const { el } of toProcess) {
-        mapping.delete(el.name);
+      for (const { item } of toProcess) {
+        mapping.delete(item.name);
       }
     }
 
     // Mark as standard at the end
-    for (const dep of [...mods].filter(x => x.state.roleRoot)) {
-      dep.state.roleSet = new Set(['std']);
+    for (const dependency of [...mods].filter(mod => mod.state.roleRoot)) {
+      dependency.state.roleSet = new Set(['std']);
     }
 
     return [...mods].toSorted((a, b) => a.name.localeCompare(b.name));
@@ -154,12 +155,12 @@ export class PackageModuleVisitor {
    */
   async visit(): Promise<Iterable<PackageModule>> {
     const seen = new Set<PackageModule>();
-    const mainReq = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
+    const mainRequire = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
 
     const queue = [
-      mainReq,
-      ...this.#getMonoRootIncludes(mainReq),
-      ...this.#getIncludes(mainReq)
+      mainRequire,
+      ...this.#getMonoRootIncludes(mainRequire),
+      ...this.#getIncludes(mainRequire)
     ];
 
     while (queue.length) {
@@ -181,8 +182,8 @@ export class PackageModuleVisitor {
       }
 
       const next = Object.entries(children)
-        .map(([n, v]) => PackageUtil.resolveVersionPath(pkg, v) ?? PackageUtil.resolvePackagePath(n))
-        .map(loc => this.#create(loc, { parent: node }));
+        .map(([name, location]) => PackageUtil.resolveVersionPath(pkg, location) ?? PackageUtil.resolvePackagePath(name))
+        .map(location => this.#create(location, { parent: node }));
 
       queue.push(...next);
     }

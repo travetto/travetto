@@ -34,18 +34,18 @@ export function highlight(text: string, lang: string): string | undefined {
   });
 
   text = text
-    .replace(/&#(\d+);/g, (x, code) => String.fromCharCode(code))
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(code))
     .replace(/&[a-z][^;]*;/g, a => tokenMapping[a] || a);
 
   try {
     return prismJs.highlight(text, prismJs.languages[lang], lang)
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message, { error: err });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message, { error });
     } else {
-      throw err;
+      throw error;
     }
   }
 }

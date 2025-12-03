@@ -9,7 +9,7 @@ import { Log } from '../log.ts';
 import { CommonUtil } from '../util.ts';
 
 const log = Log.scoped('compiler-exec');
-const isEvent = (msg: unknown): msg is CompilerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
+const isEvent = (value: unknown): value is CompilerEvent => !!value && typeof value === 'object' && 'type' in value;
 
 /**
  * Running the compiler
@@ -31,13 +31,14 @@ export class CompilerRunner {
       log.debug('Skipped');
       return;
     } else {
-      log.debug(`Started watch=${watch} changed=${changed.slice(0, 10).map(x => `${x.module}/${x.file}`)}`);
+      const changedList = changed.slice(0, 10).map(event => `${event.module}/${event.file}`);
+      log.debug(`Started watch=${watch} changed=${changedList}`);
     }
 
     const main = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
     const deltaFile = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, `manifest-delta-${Date.now()}.json`);
 
-    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev => ev.sourceFile);
+    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(event => event.sourceFile);
 
     const queue = new AsyncQueue<CompilerEvent>();
 
@@ -45,7 +46,7 @@ export class CompilerRunner {
       await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
 
       log.info('Launching compiler');
-      const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+      const subProcess = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
         env: {
           ...process.env,
           TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
@@ -53,12 +54,12 @@ export class CompilerRunner {
         detached: true,
         stdio: ['pipe', 1, 2, 'ipc'],
       })
-        .on('message', msg => isEvent(msg) && queue.add(msg))
+        .on('message', message => isEvent(message) && queue.add(message))
         .on('exit', () => queue.close());
 
       const kill = (): unknown => {
         log.debug('Shutting down process');
-        return (proc.connected ? proc.send('shutdown', () => proc.kill()) : proc.kill());
+        return (subProcess.connected ? subProcess.send('shutdown', () => subProcess.kill()) : subProcess.kill());
       };
 
       process.once('SIGINT', kill);
@@ -66,8 +67,8 @@ export class CompilerRunner {
 
       yield* queue;
 
-      if (proc.exitCode !== 0) {
-        log.error(`Terminated during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
+      if (subProcess.exitCode !== 0) {
+        log.error(`Terminated during compilation, code=${subProcess.exitCode}, killed=${subProcess.killed}`);
       }
       process.off('SIGINT', kill);
 

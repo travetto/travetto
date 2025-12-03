@@ -24,19 +24,19 @@ export class XunitEmitter implements TestConsumerShape {
   /**
    * Process metadata information (e.g. logs)
    */
-  buildMeta(obj: Record<string, unknown>): string {
-    if (!obj) {
+  buildMeta(meta: Record<string, unknown>): string {
+    if (!meta) {
       return '';
     }
 
-    for (const k of Object.keys(obj)) {
-      if (!obj[k]) {
-        delete obj[k];
+    for (const key of Object.keys(meta)) {
+      if (!meta[key]) {
+        delete meta[key];
       }
     }
-    if (Object.keys(obj).length) {
-      let body = stringify(obj);
-      body = body.split('\n').map(x => `  ${x}`).join('\n');
+    if (Object.keys(meta).length) {
+      let body = stringify(meta);
+      body = body.split('\n').map(line => `  ${line}`).join('\n');
       return `<![CDATA[\n${body}\n]]>`;
     } else {
       return '';
@@ -46,10 +46,10 @@ export class XunitEmitter implements TestConsumerShape {
   /**
    * Handle each test event
    */
-  onEvent(e: TestEvent): void {
-    if (e.type === 'test' && e.phase === 'after') {
+  onEvent(event: TestEvent): void {
+    if (event.type === 'test' && event.phase === 'after') {
 
-      const { test } = e;
+      const { test } = event;
 
       let name = `${test.methodName}`;
       if (test.description) {
@@ -59,8 +59,8 @@ export class XunitEmitter implements TestConsumerShape {
       let body = '';
 
       if (test.error) {
-        const assertErr = test.assertions.find(x => !!x.error)!;
-        body = `<failure type="${assertErr.text}" message="${encodeURIComponent(assertErr.message!)}"><![CDATA[${assertErr.error!.stack}]]></failure>`;
+        const assertion = test.assertions.find(item => !!item.error)!;
+        body = `<failure type="${assertion.text}" message="${encodeURIComponent(assertion.message!)}"><![CDATA[${assertion.error!.stack}]]></failure>`;
       }
 
       const groupedByLevel: Record<string, string[]> = {};
@@ -79,8 +79,8 @@ export class XunitEmitter implements TestConsumerShape {
       <system-err>${this.buildMeta({ error: groupedByLevel.error, warn: groupedByLevel.warn })}</system-err>
     </testcase>`
       );
-    } else if (e.type === 'suite' && e.phase === 'after') {
-      const { suite } = e;
+    } else if (event.type === 'suite' && event.phase === 'after') {
+      const { suite } = event;
       const testBodies = this.#tests.slice(0);
       this.#tests = [];
 

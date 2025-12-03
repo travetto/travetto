@@ -30,7 +30,7 @@ export class KeyGrip {
       .createHmac(this.#algorithm, key ?? this.#keys[0])
       .update(data)
       .digest(this.#encoding)
-      .replace(/[/+=]/g, x => CHAR_MAPPING[castKey(x)]);
+      .replace(/[/+=]/g, ch => CHAR_MAPPING[castKey(ch)]);
   }
 
   verify(data: string, digest: string): boolean {

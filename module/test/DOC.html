@@ -25,7 +25,7 @@ This module provides unit testing functionality that integrates with the framewo
 
 <h2 id="definition">Definition</h2>
 
-A test suite is a collection of individual tests.  All test suites are classes with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14">@Suite</a> decorator. Tests are defined as methods on the suite class, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L23">@Test</a> decorator.  All tests intrinsically support <code class="item input">async</code>/<code class="item input">await</code>. <br><br>
+A test suite is a collection of individual tests.  All test suites are classes with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14">@Suite</a> decorator. Tests are defined as methods on the suite class, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L25">@Test</a> decorator.  All tests intrinsically support <code class="item input">async</code>/<code class="item input">await</code>. <br><br>
 A simple example would be:
 
   <figure class="code">
@@ -41,14 +41,14 @@ A simple example would be:
 <span class="token keyword">class</span> <span class="token class-name">SimpleTest</span> <span class="token punctuation">{{'{'}}</span>
 
   #complexService<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token function">doLongOp</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">number</span><span class="token operator">></span><span class="token punctuation">;</span>
+    <span class="token function">doLongOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">number</span><span class="token operator">></span><span class="token punctuation">;</span>
     <span class="token function">getText</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Test</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">test1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> val <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#complexService<span class="token punctuation">.</span><span class="token function">doLongOp</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">assert</span><span class="token punctuation">(</span>val <span class="token operator">===</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#complexService<span class="token punctuation">.</span><span class="token function">doLongOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">assert</span><span class="token punctuation">(</span>value <span class="token operator">===</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Test</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -239,8 +239,8 @@ Additionally, the <code class="item method">throws</code>/<code class="item meth
 
     <span class="token keyword">await</span> assert<span class="token punctuation">.</span><span class="token function">rejects</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'Big Error'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>err<span class="token operator">:</span> Error<span class="token punctuation">)</span> <span class="token operator">=></span>
-      err<span class="token punctuation">.</span>message<span class="token punctuation">.</span><span class="token function">startsWith</span><span class="token punctuation">(</span><span class="token string">'Big'</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> err<span class="token punctuation">.</span>message<span class="token punctuation">.</span>length <span class="token operator">></span> <span class="token number">4</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>error<span class="token operator">:</span> Error<span class="token punctuation">)</span> <span class="token operator">=></span>
+      error<span class="token punctuation">.</span>message<span class="token punctuation">.</span><span class="token function">startsWith</span><span class="token punctuation">(</span><span class="token string">'Big'</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> error<span class="token punctuation">.</span>message<span class="token punctuation">.</span>length <span class="token operator">></span> <span class="token number">4</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

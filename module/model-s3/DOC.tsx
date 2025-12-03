@@ -14,7 +14,7 @@ export const text = <>
     {...ModelTypes(S3ModelService)}
   </ul>
 
-  <ModelCustomConfig cfg={S3ModelConfig} />
+  <ModelCustomConfig config={S3ModelConfig} />
 
   <c.Note>
     Do not commit your {d.input('accessKeyId')} or {d.input('secretAccessKey')} values to your source repository, especially if it is public facing.  Not only is it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.

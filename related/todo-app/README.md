@@ -159,7 +159,7 @@ export class TodoTest {
   configClass = MongoModelConfig;
 
   @Inject()
-  svc: TodoService;
+  service: TodoService;
 
   @Test('Create todo')
   async create() {
@@ -167,7 +167,7 @@ export class TodoTest {
       text: 'Sample Task'
     });
 
-    const saved = await this.svc.add(test);
+    const saved = await this.service.add(test);
 
     assert.ok(saved.id);
   }
@@ -178,13 +178,13 @@ export class TodoTest {
       text: 'Sample Task'
     });
 
-    const saved = await this.svc.add(test);
+    const saved = await this.service.add(test);
     assert.ok(saved.id);
 
-    let updated = await this.svc.complete(saved.id);
+    let updated = await this.service.complete(saved.id);
     assert(updated.completed === true);
 
-    updated = await this.svc.complete(saved.id, false);
+    updated = await this.service.complete(saved.id, false);
     assert(updated.completed === false);
   }
 
@@ -194,13 +194,13 @@ export class TodoTest {
       text: 'Sample Task'
     });
 
-    const saved = await this.svc.add(test);
+    const saved = await this.service.add(test);
     assert.ok(saved.id);
     assert(test.text === 'Sample Task');
 
-    await this.svc.remove(saved.id);
+    await this.service.remove(saved.id);
 
-    await assert.rejects(() => this.svc.get(saved.id), /Todo with id .* not found/);
+    await assert.rejects(() => this.service.get(saved.id), /Todo with id .* not found/);
   }
 }
 ```
@@ -226,11 +226,11 @@ type TodoRequest = Omit<Todo, 'id'>;
 @Controller('/todo')
 export class TodoController {
 
-  _svc: TodoService;
+  _service: TodoService;
 
   @Inject()
-  set svc(v: TodoService) {
-    this._svc = v;
+  set service(service: TodoService) {
+    this._service = service;
   }
 
   /**
@@ -238,7 +238,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(search: TodoSearch): Promise<Todo[]> {
-    return this._svc.getAll(search);
+    return this._service.getAll(search);
   }
 
   /**
@@ -246,7 +246,7 @@ export class TodoController {
    */
   @Delete('/')
   async deleteAllCompleted(): Promise<void> {
-    await this._svc.deleteAllCompleted();
+    await this._service.deleteAllCompleted();
   }
 
   /**
@@ -255,7 +255,7 @@ export class TodoController {
    */
   @Get('/:id')
   async getById(id: string): Promise<Todo> {
-    return this._svc.get(id);
+    return this._service.get(id);
   }
 
   /**
@@ -263,7 +263,7 @@ export class TodoController {
    */
   @Post('/')
   async create(todo: TodoRequest): Promise<Todo> {
-    return await this._svc.add({ ...todo, id: undefined! });
+    return await this._service.add({ ...todo, id: undefined! });
   }
 
   /**
@@ -273,7 +273,7 @@ export class TodoController {
    */
   @Put('/:id')
   async update(id: string, todo: TodoRequest): Promise<Todo> {
-    return await this._svc.update({ ...todo, id });
+    return await this._service.update({ ...todo, id });
   }
 
   /**
@@ -283,7 +283,7 @@ export class TodoController {
   @Put('/:id/complete')
   async complete(id: string, completed: boolean = true): Promise<Todo> {
     console.log('Completing', id, completed);
-    return await this._svc.complete(id, completed);
+    return await this._service.complete(id, completed);
   }
 
   /**
@@ -293,7 +293,7 @@ export class TodoController {
   @Delete('/:id')
   async remove(id: string): Promise<void> {
     console.log('Hello');
-    await this._svc.remove(id);
+    await this._service.remove(id);
   }
 }
 ```
@@ -463,15 +463,15 @@ Create `support/create-todo.ts` with the following contents:
 **Code: Creating Todo by fetch**
 ```typescript
 export async function main(key: string, port: number) {
-  const res = await fetch(`http://localhost:${port}/todo`, {
+  const result = await fetch(`http://localhost:${port}/todo`, {
     method: 'POST',
     body: JSON.stringify({ text: `New Todo - ${key}` }),
     headers: {
       'Content-Type': 'application/json'
     }
   })
-    .then(r => r.json());
-  console.log!(res);
+    .then(response => response.json());
+  console.log!(result);
 }
 ```
 
@@ -491,8 +491,8 @@ Now create `support/list-todo.ts` with the following contents:
 **Code: Listing Todos by fetch**
 ```typescript
 export async function main(key: string, port: number) {
-  const res = await fetch(`http://localhost:${port}/todo?q=${key}`).then(r => r.json());
-  console.log!(res);
+  const result = await fetch(`http://localhost:${port}/todo?q=${key}`).then(response => response.json());
+  console.log!(result);
 }
 ```
 

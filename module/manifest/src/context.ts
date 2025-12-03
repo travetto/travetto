@@ -8,25 +8,25 @@ import type { ManifestContext } from './types/context.ts';
 type Pkg = Package & { path: string };
 
 // eslint-disable-next-line no-bitwise
-const toPort = (pth: string): number => (Math.abs([...pth].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
-const toPosix = (pth: string): string => pth.replaceAll('\\', '/');
+const toPort = (location: string): number => (Math.abs([...location].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
+const toPosix = (location: string): string => location.replaceAll('\\', '/');
 const readPackage = (file: string): Pkg => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: toPosix(path.dirname(file)) });
 
 /** Find package */
 function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
   let folder = `${base}/.`;
-  let prev: string;
+  let previous: string;
   let pkg: Pkg | undefined;
   const packages: Pkg[] = [];
 
   do {
     pkg && packages.push(pkg);
-    prev = folder;
+    previous = folder;
     folder = path.dirname(folder);
     const folderPkg = path.resolve(folder, 'package.json');
     pkg = existsSync(folderPkg) ? readPackage(folderPkg) : pkg;
   } while (
-    prev !== folder && // Not at root
+    previous !== folder && // Not at root
     !pred(pkg) && // Matches criteria
     !existsSync(path.resolve(folder, '.git')) // Not at source root
   );

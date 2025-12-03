@@ -8,12 +8,12 @@ export class PassportUtil {
 
   /**
    * Read passport state string as bas64 encoded JSON value
-   * @param src The input src for a state read (string, or a request obj)
+   * @param input The input for a state read (string, or a request)
    */
-  static readState<T = Record<string, unknown>>(src?: string | WebRequest): T | undefined {
-    const state = (typeof src === 'string' ? src :
-      (typeof src?.context.httpQuery?.state === 'string' ?
-        src?.context.httpQuery?.state : ''));
+  static readState<T = Record<string, unknown>>(input?: string | WebRequest): T | undefined {
+    const state = (typeof input === 'string' ? input :
+      (typeof input?.context.httpQuery?.state === 'string' ?
+        input?.context.httpQuery?.state : ''));
     if (state) {
       try {
         return Util.decodeSafeJSON(state);
@@ -40,16 +40,16 @@ export class PassportUtil {
    * @returns
    */
   static addToState(state: string | Record<string, unknown>, current?: string | WebRequest, key?: string): string {
-    const pre = this.readState(current) ?? {};
+    const original = this.readState(current) ?? {};
     const toAdd = typeof state === 'string' ? JSON.parse(state) : state;
-    const base: Record<string, unknown> = key ? castTo(pre[key] ??= {}) : pre;
-    for (const k of Object.keys(toAdd)) {
-      if (k === '__proto__' || k === 'constructor' || k === 'prototype') {
+    const base: Record<string, unknown> = key ? castTo(original[key] ??= {}) : original;
+    for (const property of Object.keys(toAdd)) {
+      if (property === '__proto__' || property === 'constructor' || property === 'prototype') {
         continue;
       }
-      base[k] = toAdd[k];
+      base[property] = toAdd[property];
     }
-    return this.writeState(pre)!;
+    return this.writeState(original)!;
   }
 
   /**

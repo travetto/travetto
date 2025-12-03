@@ -38,7 +38,7 @@ export class CliScmUtil {
     const result = await ExecUtil.getResult(spawn('git', ['log', '--pretty=oneline'], { cwd: Runtime.workspace.path }));
     return result.stdout
       .split(/\n/)
-      .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
+      .find(line => /Publish /.test(line))?.split(/\s+/)?.[0];
   }
 
   /**
@@ -47,14 +47,14 @@ export class CliScmUtil {
    * @returns
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
-    const ws = Runtime.workspace.path;
-    const result = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }), { catch: true });
+    const rootPath = Runtime.workspace.path;
+    const result = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: rootPath }), { catch: true });
     if (!result.valid) {
       throw new AppError('Unable to detect changes between', { category: 'data', details: { fromHash, toHash, output: (result.stderr || result.stdout) } });
     }
     const out = new Set<string>();
     for (const line of result.stdout.split(/\n/g)) {
-      const entry = RuntimeIndex.getEntry(path.resolve(ws, line));
+      const entry = RuntimeIndex.getEntry(path.resolve(rootPath, line));
       if (entry) {
         out.add(entry.sourceFile);
       }
@@ -71,10 +71,10 @@ export class CliScmUtil {
   static async findChangedModules(fromHash: string, toHash?: string): Promise<IndexedModule[]> {
     const files = await this.findChangedFiles(fromHash, toHash);
     const mods = files
-      .map(x => RuntimeIndex.getFromSource(x))
-      .filter(x => !!x)
-      .map(x => RuntimeIndex.getModule(x.module))
-      .filter(x => !!x);
+      .map(file => RuntimeIndex.getFromSource(file))
+      .filter(file => !!file)
+      .map(file => RuntimeIndex.getModule(file.module))
+      .filter(mod => !!mod);
 
     return [...new Set(mods)]
       .toSorted((a, b) => a.name.localeCompare(b.name));
@@ -84,7 +84,7 @@ export class CliScmUtil {
    * Create a commit
    */
   static createCommit(message: string): Promise<string> {
-    return ExecUtil.getResult(spawn('git', ['commit', '.', '-m', message])).then(r => r.stdout);
+    return ExecUtil.getResult(spawn('git', ['commit', '.', '-m', message])).then(result => result.stdout);
   }
 
   /**
@@ -92,7 +92,7 @@ export class CliScmUtil {
    */
   static createTag(version: string): Promise<string> {
     version = version.replace(/[^0-9a-z_\-.]/g, '');
-    return ExecUtil.getResult(spawn('git', ['tag', '-a', `${version}`, '-m', `Release ${version}`])).then(r => r.stdout);
+    return ExecUtil.getResult(spawn('git', ['tag', '-a', `${version}`, '-m', `Release ${version}`])).then(result => result.stdout);
   }
 
   /**

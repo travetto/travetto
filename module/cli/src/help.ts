@@ -14,8 +14,8 @@ const validationSourceMap: Record<string, string> = {
   flag: 'Flag'
 };
 
-const ifDefined = <T>(v: T | null | '' | undefined): T | undefined =>
-  (v === null || v === '' || v === undefined) ? undefined : v;
+const ifDefined = <T>(value: T | null | '' | undefined): T | undefined =>
+  (value === null || value === '' || value === undefined) ? undefined : value;
 
 /**
  * Utilities for showing help
@@ -47,11 +47,11 @@ export class HelpUtil {
 
     for (const field of Object.values(schema.fields)) {
       const key = castKey<CliCommandShape>(field.name);
-      const def = ifDefined(command[key]) ?? ifDefined(field.default);
+      const defaultValue = ifDefined(command[key]) ?? ifDefined(field.default);
       const aliases = (field.aliases ?? [])
-        .filter(x => x.startsWith('-'))
-        .filter(x =>
-          (field.type !== Boolean) || ((def !== true || field.name === 'help') ? !x.startsWith('--no-') : x.startsWith('--'))
+        .filter(flag => flag.startsWith('-'))
+        .filter(flag =>
+          (field.type !== Boolean) || ((defaultValue !== true || field.name === 'help') ? !flag.startsWith('--no-') : flag.startsWith('--'))
         );
       let type: string | undefined;
 
@@ -69,14 +69,14 @@ export class HelpUtil {
       params.push(param.join(' '));
       const desc = [cliTpl`${{ title: field.description }}`];
 
-      if (key !== 'help' && def !== undefined) {
-        desc.push(cliTpl`(default: ${{ input: JSON.stringify(def) }})`);
+      if (key !== 'help' && defaultValue !== undefined) {
+        desc.push(cliTpl`(default: ${{ input: JSON.stringify(defaultValue) }})`);
       }
       descriptions.push(desc.join(' '));
     }
 
-    const paramWidths = params.map(x => util.stripVTControlCharacters(x).length);
-    const descWidths = descriptions.map(x => util.stripVTControlCharacters(x).length);
+    const paramWidths = params.map(item => util.stripVTControlCharacters(item).length);
+    const descWidths = descriptions.map(item => util.stripVTControlCharacters(item).length);
 
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
@@ -95,7 +95,7 @@ export class HelpUtil {
       ),
       '',
       ...helpText
-    ].map(x => x.trimEnd()).join('\n');
+    ].map(line => line.trimEnd()).join('\n');
   }
 
   /**
@@ -113,11 +113,11 @@ export class HelpUtil {
         if (schema && !schema.private) {
           rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.description || '' }}`);
         }
-      } catch (err) {
-        if (err instanceof Error) {
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure: err.message.split(/\n/)[0] }}`);
+      } catch (error) {
+        if (error instanceof Error) {
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure: error.message.split(/\n/)[0] }}`);
         } else {
-          throw err;
+          throw error;
         }
       }
     }
@@ -126,20 +126,20 @@ export class HelpUtil {
 
     lines.unshift(title ? cliTpl`${{ title }}` : cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`, '');
 
-    return lines.map(x => x.trimEnd()).join('\n');
+    return lines.map(line => line.trimEnd()).join('\n');
   }
 
   /**
    * Render validation error to a string
    */
-  static renderValidationError(err: CliValidationResultError): string {
+  static renderValidationError(validationError: CliValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
-      ...err.details.errors.map(e => {
-        if (e.source && e.source in validationSourceMap) {
-          return cliTpl` * ${{ identifier: validationSourceMap[e.source] }} ${{ subtitle: e.message }}`;
+      ...validationError.details.errors.map(error => {
+        if (error.source && error.source in validationSourceMap) {
+          return cliTpl` * ${{ identifier: validationSourceMap[error.source] }} ${{ subtitle: error.message }}`;
         }
-        return cliTpl` * ${{ failure: e.message }}`;
+        return cliTpl` * ${{ failure: error.message }}`;
       }),
       '',
     ].join('\n');

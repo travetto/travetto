@@ -38,18 +38,18 @@ export class WebCommonUtil {
   }
 
   static #buildEdgeMap<T, U extends OrderedState<T>>(items: List<U>): Map<T, Set<T>> {
-    const edgeMap = new Map(items.map(x => [x.key, new Set(x.after ?? [])]));
+    const edgeMap = new Map(items.map(item => [item.key, new Set(item.after ?? [])]));
 
     // Build out edge map
     for (const input of items) {
-      for (const bf of input.before ?? []) {
-        if (edgeMap.has(bf)) {
-          edgeMap.get(bf)!.add(input.key);
+      for (const item of input.before ?? []) {
+        if (edgeMap.has(item)) {
+          edgeMap.get(item)!.add(input.key);
         }
       }
       const afterSet = edgeMap.get(input.key)!;
-      for (const el of input.after ?? []) {
-        afterSet.add(el);
+      for (const item of input.after ?? []) {
+        afterSet.add(item);
       }
     }
     return edgeMap;
@@ -64,7 +64,7 @@ export class WebCommonUtil {
       rules,
       this.#convert.bind(this),
       (regex, mime) => regex.test(mime),
-      k => k
+      key => key
     );
   }
 
@@ -94,8 +94,8 @@ export class WebCommonUtil {
       }
     }
 
-    const inputMap = new Map(items.map(x => [x.key, x]));
-    return keys.map(k => inputMap.get(k)!);
+    const inputMap = new Map(items.map(item => [item.key, item]));
+    return keys.map(key => inputMap.get(key)!);
   }
 
   /**
@@ -110,18 +110,18 @@ export class WebCommonUtil {
   /**
    * From catch value
    */
-  static catchResponse(err: unknown): WebResponse<Error> {
-    if (err instanceof WebResponse) {
-      return err;
+  static catchResponse(error: unknown): WebResponse<Error> {
+    if (error instanceof WebResponse) {
+      return error;
     }
 
-    const body = err instanceof Error ? err :
-      (!!err && typeof err === 'object' && ('message' in err && typeof err.message === 'string')) ?
-        new AppError(err.message, { details: err }) :
-        new AppError(`${err}`);
+    const body = error instanceof Error ? error :
+      (!!error && typeof error === 'object' && ('message' in error && typeof error.message === 'string')) ?
+        new AppError(error.message, { details: error }) :
+        new AppError(`${error}`);
 
-    const error: Error & Partial<WebError> = body;
-    const statusCode = error.details?.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
+    const webError: Error & Partial<WebError> = body;
+    const statusCode = webError.details?.statusCode ?? ERROR_CATEGORY_STATUS[webError.category!] ?? 500;
 
     return new WebResponse({ body, context: { httpStatusCode: statusCode } });
   }
@@ -147,7 +147,7 @@ export class WebCommonUtil {
     if (typeof input === 'number') {
       return input;
     }
-    const [, num, unit] = input.toLowerCase().split(/(\d+)/);
-    return parseInt(num, 10) * (UNIT_MAPPING[unit] ?? 1);
+    const [, value, unit] = input.toLowerCase().split(/(\d+)/);
+    return parseInt(value, 10) * (UNIT_MAPPING[unit] ?? 1);
   }
 }

@@ -22,7 +22,7 @@ export class ConsoleCapture implements ConsoleListener {
     this.out.push({
       ...rest,
       message: args
-        .map((x => typeof x === 'string' ? x : util.inspect(x, false, 5)))
+        .map((arg => typeof arg === 'string' ? arg : util.inspect(arg, false, 5)))
         .join(' ')
     });
   }

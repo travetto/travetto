@@ -14,7 +14,7 @@ export async function main(): Promise<void> {
 
   try {
     await SchemaValidator.validate(LocationAware, la);
-  } catch (err) {
-    console.warn!('Validation Failed', JSON.stringify(err, null, 2));
+  } catch (error) {
+    console.warn!('Validation Failed', JSON.stringify(error, null, 2));
   }
 }

@@ -16,7 +16,7 @@ export class OpenApiClientCommand implements CliCommandShape {
   extendedHelp: boolean = false;
   /** Additional Properties */
   @CliFlag({ short: '-a', full: '--additional-properties' })
-  props: string[] = [];
+  properties: string[] = [];
   /** Input file */
   input = './openapi.yml';
   /** Output folder */
@@ -32,7 +32,7 @@ export class OpenApiClientCommand implements CliCommandShape {
     this.output = path.resolve(this.output);
     this.input = path.resolve(this.input);
 
-    const proc = cp.spawn('docker', [
+    const subProcess = cp.spawn('docker', [
       'run',
       '--rm',
       '-i',
@@ -47,12 +47,12 @@ export class OpenApiClientCommand implements CliCommandShape {
       '-g', format,
       '-o', '/workspace',
       '-i', `/input/${path.basename(this.input)}`,
-      ...(this.props.length ? ['--additional-properties', this.props.join(',')] : [])
+      ...(this.properties.length ? ['--additional-properties', this.properties.join(',')] : [])
     ], {
       stdio: 'inherit'
     });
 
-    const result = await ExecUtil.getResult(proc);
+    const result = await ExecUtil.getResult(subProcess);
 
     if (!result.valid) {
       process.exitCode = 1;

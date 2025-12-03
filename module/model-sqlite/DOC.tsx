@@ -18,5 +18,5 @@ export const text = <>
     {...ModelQueryTypes(SQLModelService)}
   </ul>
 
-  <ModelCustomConfig cfg={SQLModelConfig} />
+  <ModelCustomConfig config={SQLModelConfig} />
 </>;

@@ -13,7 +13,7 @@ type StringFields<T> = {
   (T[K] extends string ? K : never)
 }[Extract<keyof T, string>];
 
-const isClass = (e: unknown): e is Class => e === Error || e === AppError || Object.getPrototypeOf(e) !== Object.getPrototypeOf(Function);
+const isClass = (input: unknown): input is Class => input === Error || input === AppError || Object.getPrototypeOf(input) !== Object.getPrototypeOf(Function);
 
 /**
  * Check assertion
@@ -35,7 +35,7 @@ export class AssertCheck {
     };
 
     // Invert check for negative
-    const assertFn = positive ? assert : (x: unknown, msg?: string): unknown => assert(!x, msg);
+    const assertFn = positive ? assert : (value: unknown, msg?: string): unknown => assert(!value, msg);
 
     // Check fn to call
     if (fn === 'fail') {
@@ -102,36 +102,36 @@ export class AssertCheck {
 
       // Pushing on not error
       AssertCapture.add(assertion);
-    } catch (err) {
+    } catch (error) {
       // On error, produce the appropriate error message
-      if (err instanceof assert.AssertionError) {
+      if (error instanceof assert.AssertionError) {
         if (!assertion.message) {
           assertion.message = (OP_MAPPING[fn] ?? '{state} be {expected}');
         }
         assertion.message = assertion.message
-          .replace(/[{]([A-Za-z]+)[}]/g, (a, k: StringFields<Assertion>) => common[k] || assertion[k]!)
+          .replace(/[{]([A-Za-z]+)[}]/g, (a, key: StringFields<Assertion>) => common[key] || assertion[key]!)
           .replace(/not not/g, ''); // Handle double negatives
-        assertion.error = err;
-        err.message = assertion.message;
+        assertion.error = error;
+        error.message = assertion.message;
         AssertCapture.add(assertion);
       }
-      throw err;
+      throw error;
     }
   }
 
   /**
    * Check a given error
    * @param shouldThrow  Should the test throw anything
-   * @param err The provided error
+   * @param error The provided error
    */
-  static checkError(shouldThrow: ThrowableError | undefined, err: Error | string | undefined): Error | undefined {
+  static checkError(shouldThrow: ThrowableError | undefined, error: Error | string | undefined): Error | undefined {
     if (!shouldThrow) { // If we shouldn't be throwing anything, we are good
       return;
-    } else if (!err) {
+    } else if (!error) {
       return new assert.AssertionError({ message: 'Expected to throw an error, but got nothing' });
     } else if (typeof shouldThrow === 'string') {
-      if (!(err instanceof Error ? err.message : err).includes(shouldThrow)) {
-        const actual = err instanceof Error ? `'${err.message}'` : `'${err}'`;
+      if (!(error instanceof Error ? error.message : error).includes(shouldThrow)) {
+        const actual = error instanceof Error ? `'${error.message}'` : `'${error}'`;
         return new assert.AssertionError({
           message: `Expected error containing text '${shouldThrow}', but got ${actual}`,
           actual,
@@ -139,8 +139,8 @@ export class AssertCheck {
         });
       }
     } else if (shouldThrow instanceof RegExp) {
-      if (!shouldThrow.test(typeof err === 'string' ? err : err.message)) {
-        const actual = err instanceof Error ? `'${err.message}'` : `'${err}'`;
+      if (!shouldThrow.test(typeof error === 'string' ? error : error.message)) {
+        const actual = error instanceof Error ? `'${error.message}'` : `'${error}'`;
         return new assert.AssertionError({
           message: `Expected error with message matching '${shouldThrow.source}', but got ${actual}`,
           actual,
@@ -148,27 +148,27 @@ export class AssertCheck {
         });
       }
     } else if (isClass(shouldThrow)) {
-      if (!(err instanceof shouldThrow)) {
+      if (!(error instanceof shouldThrow)) {
         return new assert.AssertionError({
-          message: `Expected to throw ${shouldThrow.name}, but got ${err}`,
-          actual: (err ?? 'nothing'),
+          message: `Expected to throw ${shouldThrow.name}, but got ${error}`,
+          actual: (error ?? 'nothing'),
           expected: shouldThrow.name
         });
       }
     } else if (typeof shouldThrow === 'function') {
       const target = shouldThrow.name ? `("${shouldThrow.name}")` : '';
       try {
-        const res = shouldThrow(err);
-        if (res === false) {
-          return new assert.AssertionError({ message: `Checking function ${target} indicated an invalid error`, actual: err });
-        } else if (typeof res === 'string') {
-          return new assert.AssertionError({ message: res, actual: err });
+        const result = shouldThrow(error);
+        if (result === false) {
+          return new assert.AssertionError({ message: `Checking function ${target} indicated an invalid error`, actual: error });
+        } else if (typeof result === 'string') {
+          return new assert.AssertionError({ message: result, actual: error });
         }
-      } catch (checkErr) {
-        if (checkErr instanceof assert.AssertionError) {
-          return checkErr;
+      } catch (checkError) {
+        if (checkError instanceof assert.AssertionError) {
+          return checkError;
         } else {
-          return new assert.AssertionError({ message: `Checking function ${target} threw an error`, actual: checkErr });
+          return new assert.AssertionError({ message: `Checking function ${target} threw an error`, actual: checkError });
         }
       }
     }
@@ -177,26 +177,26 @@ export class AssertCheck {
   static #onError(
     positive: boolean,
     message: string | undefined,
-    err: unknown,
+    error: unknown,
     missed: Error | undefined,
     shouldThrow: ThrowableError | undefined,
     assertion: CaptureAssert
   ): void {
-    if (!(err instanceof Error)) {
-      err = new Error(`${err}`);
+    if (!(error instanceof Error)) {
+      error = new Error(`${error}`);
     }
-    if (!(err instanceof Error)) {
-      throw err;
+    if (!(error instanceof Error)) {
+      throw error;
     }
     if (positive) {
       missed = new assert.AssertionError({ message: 'Error thrown, but expected no errors' });
-      missed.stack = err.stack;
+      missed.stack = error.stack;
     }
 
-    const resolvedErr = (missed && err) ?? this.checkError(shouldThrow, err);
-    if (resolvedErr) {
-      assertion.message = message || missed?.message || resolvedErr.message;
-      throw (assertion.error = resolvedErr);
+    const resolvedError = (missed && error) ?? this.checkError(shouldThrow, error);
+    if (resolvedError) {
+      assertion.message = message || missed?.message || resolvedError.message;
+      throw (assertion.error = resolvedError);
     }
   }
 
@@ -225,8 +225,8 @@ export class AssertCheck {
         }
         throw (missed = new assert.AssertionError({ message: `No error thrown, but expected ${shouldThrow ?? 'an error'}`, expected: shouldThrow ?? 'an error' }));
       }
-    } catch (err) {
-      this.#onError(positive, message, err, missed, shouldThrow, assertion);
+    } catch (error) {
+      this.#onError(positive, message, error, missed, shouldThrow, assertion);
     } finally {
       AssertCapture.add(assertion);
     }
@@ -261,8 +261,8 @@ export class AssertCheck {
         }
         throw (missed = new assert.AssertionError({ message: `No error thrown, but expected ${shouldThrow ?? 'an error'}`, expected: shouldThrow ?? 'an error' }));
       }
-    } catch (err) {
-      this.#onError(positive, message, err, missed, shouldThrow, assertion);
+    } catch (error) {
+      this.#onError(positive, message, error, missed, shouldThrow, assertion);
     } finally {
       AssertCapture.add(assertion);
     }
@@ -271,8 +271,8 @@ export class AssertCheck {
   /**
    * Look for any unhandled exceptions
    */
-  static checkUnhandled(test: TestConfig, err: Error | assert.AssertionError): void {
-    let line = AssertUtil.getPositionOfError(err, test.sourceImport ?? test.import).line;
+  static checkUnhandled(test: TestConfig, error: Error | assert.AssertionError): void {
+    let line = AssertUtil.getPositionOfError(error, test.sourceImport ?? test.import).line;
     if (line === 1) {
       line = test.lineStart;
     }
@@ -281,9 +281,9 @@ export class AssertCheck {
       import: test.import,
       line,
       operator: 'throws',
-      error: err,
-      message: err.message,
-      text: ('operator' in err ? err.operator : '') || '(uncaught)'
+      error,
+      message: error.message,
+      text: ('operator' in error ? error.operator : '') || '(uncaught)'
     });
   }
 }

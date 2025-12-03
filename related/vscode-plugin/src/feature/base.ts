@@ -18,7 +18,7 @@ export abstract class BaseFeature implements ActivationTarget {
   ) {
     this.module = module!;
     this.command = command!;
-    this.log = new Log([this.moduleBase, this.command].filter(x => !!x).join('.'));
+    this.log = new Log([this.moduleBase, this.command].filter(part => !!part).join('.'));
   }
 
   get moduleBase(): string {
@@ -26,7 +26,7 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   commandName(task: string): string {
-    const prefix = [this.moduleBase, this.command].filter(x => !!x).join('.');
+    const prefix = [this.moduleBase, this.command].filter(part => !!part).join('.');
     return `${prefix}:${task}`;
   }
 

@@ -1,11 +1,11 @@
-import { AsyncItrMethodDescriptor, AsyncMethodDescriptor } from '@travetto/runtime';
+import { AsyncIterableMethodDescriptor, AsyncMethodDescriptor } from '@travetto/runtime';
 import { Connection, TransactionType } from './base.ts';
 
 /**
  * Indicating something is aware of connections
  */
 export interface ConnectionAware<C = unknown> {
-  conn: Connection<C>;
+  connection: Connection<C>;
 }
 
 /**
@@ -13,12 +13,12 @@ export interface ConnectionAware<C = unknown> {
  * @kind decorator
  */
 export function Connected() {
-  return function <T extends { conn?: Connection }>(
-    target: T, prop: string | symbol, desc: AsyncMethodDescriptor<T>
+  return function <T extends { connection?: Connection }>(
+    target: T, property: string, descriptor: AsyncMethodDescriptor<T>
   ): void {
-    const og = desc.value!;
-    desc.value = function (...args: unknown[]): ReturnType<typeof og> {
-      return this.conn!.runWithActive(() => og.call(this, ...args));
+    const handle = descriptor.value!;
+    descriptor.value = function (...args: unknown[]): ReturnType<typeof handle> {
+      return this.connection!.runWithActive(() => handle.call(this, ...args));
     };
   };
 }
@@ -28,12 +28,12 @@ export function Connected() {
  * @kind decorator
  */
 export function ConnectedIterator() {
-  return function <T extends { conn?: Connection }>(
-    target: T, prop: string | symbol, desc: AsyncItrMethodDescriptor<T>
+  return function <T extends { connection?: Connection }>(
+    target: T, property: string, descriptor: AsyncIterableMethodDescriptor<T>
   ): void {
-    const og = desc.value!;
-    desc.value = async function* (...args: unknown[]): ReturnType<typeof og> {
-      yield* this.conn!.iterateWithActive(() => og.call(this, ...args));
+    const handle = descriptor.value!;
+    descriptor.value = async function* (...args: unknown[]): ReturnType<typeof handle> {
+      yield* this.connection!.iterateWithActive(() => handle.call(this, ...args));
     };
   };
 }
@@ -43,12 +43,12 @@ export function ConnectedIterator() {
  * @kind decorator
  */
 export function Transactional(mode: TransactionType = 'required') {
-  return function <T extends { conn?: Connection }>(
-    target: unknown, prop: string | symbol, desc: AsyncMethodDescriptor<T>
+  return function <T extends { connection?: Connection }>(
+    target: unknown, property: string, descriptor: AsyncMethodDescriptor<T>
   ): void {
-    const og = desc.value!;
-    desc.value = function (...args: unknown[]): ReturnType<typeof og> {
-      return this.conn!.runWithTransaction(mode, () => og.call(this, ...args));
+    const handle = descriptor.value!;
+    descriptor.value = function (...args: unknown[]): ReturnType<typeof handle> {
+      return this.connection!.runWithTransaction(mode, () => handle.call(this, ...args));
     };
   };
 }

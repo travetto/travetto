@@ -13,20 +13,20 @@ import { CliCommandShape } from './types.ts';
 export class ExecutionManager {
 
   /** Error handler */
-  static async #onError(err: unknown): Promise<void> {
+  static async #onError(error: unknown): Promise<void> {
     process.exitCode ??= 1;
-    if (err instanceof CliValidationResultError) {
-      console.error!(await HelpUtil.renderValidationError(err));
-      console.error!(await HelpUtil.renderCommandHelp(err.command));
-    } else if (err instanceof CliUnknownCommandError) {
-      if (err.help) {
-        console.error!(err.help);
+    if (error instanceof CliValidationResultError) {
+      console.error!(await HelpUtil.renderValidationError(error));
+      console.error!(await HelpUtil.renderCommandHelp(error.command));
+    } else if (error instanceof CliUnknownCommandError) {
+      if (error.help) {
+        console.error!(error.help);
       } else {
-        console.error!(err.defaultMessage, '\n');
+        console.error!(error.defaultMessage, '\n');
         console.error!(await HelpUtil.renderAllHelp(''));
       }
     } else {
-      console.error!(err);
+      console.error!(error);
     }
     console.error!();
   }
@@ -72,8 +72,8 @@ export class ExecutionManager {
       } else {
         await this.#runCommand(cmd, args);
       }
-    } catch (err) {
-      await this.#onError(err);
+    } catch (error) {
+      await this.#onError(error);
     } finally {
       await ShutdownManager.gracefulShutdown('@travetto/cli:execute');
     }

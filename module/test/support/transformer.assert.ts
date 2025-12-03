@@ -96,10 +96,10 @@ export class AssertTransformer {
   static lookupOpToken(key: number): string | undefined {
     if (OP_TOKEN_TO_NAME.size === 0) {
       Object.keys(ts.SyntaxKind)
-        .filter(x => !/^\d+$/.test(x))
-        .filter((x): x is keyof typeof OPTOKEN_ASSERT => !/^(Last|First)/.test(x))
-        .forEach(x =>
-          OP_TOKEN_TO_NAME.set(ts.SyntaxKind[x], x));
+        .filter(kind => !/^\d+$/.test(kind))
+        .filter((kind): kind is keyof typeof OPTOKEN_ASSERT => !/^(Last|First)/.test(kind))
+        .forEach(kind =>
+          OP_TOKEN_TO_NAME.set(ts.SyntaxKind[kind], kind));
     }
 
     const name = OP_TOKEN_TO_NAME.get(key)!;
@@ -123,10 +123,10 @@ export class AssertTransformer {
 
     // If looking at an identifier, see if it's in a diff file or if its const
     if (!found && ts.isIdentifier(node)) {
-      found = !!state.getDeclarations(node).find(x =>
+      found = !!state.getDeclarations(node).find(declaration =>
         // In a separate file or is const
-        x.getSourceFile().fileName !== state.source.fileName ||
-        DeclarationUtil.isConstantDeclaration(x));
+        declaration.getSourceFile().fileName !== state.source.fileName ||
+        DeclarationUtil.isConstantDeclaration(declaration));
     }
 
     return found;
@@ -137,7 +137,7 @@ export class AssertTransformer {
    */
   static initState(state: TransformerState & AssertState): void {
     if (!state[AssertSymbol]) {
-      const asrt = state.importFile('@travetto/test/src/assert/check.ts').ident;
+      const asrt = state.importFile('@travetto/test/src/assert/check.ts').identifier;
       state[AssertSymbol] = {
         assert: asrt,
         assertCheck: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'check'),
@@ -156,7 +156,7 @@ export class AssertTransformer {
     const first = CoreUtil.firstArgument(node);
     const firstText = first?.getText() ?? node.getText();
 
-    cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
+    cmd.args = cmd.args.filter(arg => arg !== undefined && arg !== null);
     const check = state.factory.createCallExpression(state[AssertSymbol]!.assertCheck, undefined, state.factory.createNodeArray([
       state.fromLiteral({
         module: state.getModuleIdentifier(),
@@ -236,7 +236,7 @@ export class AssertTransformer {
       const matched = METHODS[key.text!];
       if (matched) {
         const resolved = state.resolveType(root);
-        if (resolved.key === 'literal' && matched.find(x => resolved.ctor === x)) { // Ensure method is against real type
+        if (resolved.key === 'literal' && matched.find(type => resolved.ctor === type)) { // Ensure method is against real type
           switch (key.text) {
             case 'includes': return { fn: key.text, args: [comp.expression.expression, comp.arguments[0], ...args.slice(1)] };
             case 'test': return { fn: key.text, args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)] };
@@ -298,9 +298,9 @@ export class AssertTransformer {
       }
       // If calling `assert.*`
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) { // Assert method call
-      const ident = exp.expression;
+      const identifier = exp.expression;
       const fn = exp.name.escapedText.toString();
-      if (ident.escapedText === ASSERT_CMD) {
+      if (identifier.escapedText === ASSERT_CMD) {
         // Look for reject/throw
         if (fn === 'fail') {
           node = this.doAssert(state, node, { fn: 'fail', args: node.arguments.slice() });

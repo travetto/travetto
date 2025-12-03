@@ -30,11 +30,11 @@ export class WebHttpUtil {
    * Build a simple request handler
    * @param dispatcher
    */
-  static buildHandler(dispatcher: WebDispatcher): (req: HttpRequest, res: HttpResponse) => Promise<void> {
-    return async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-      const request = this.toWebRequest(req);
-      const response = await dispatcher.dispatch({ request });
-      this.respondToServerResponse(response, res);
+  static buildHandler(dispatcher: WebDispatcher): (request: HttpRequest, response: HttpResponse) => Promise<void> {
+    return async (request: HttpRequest, response: HttpResponse): Promise<void> => {
+      const webRequest = this.toWebRequest(request);
+      const webResponse = await dispatcher.dispatch({ request: webRequest });
+      this.respondToServerResponse(webResponse, response);
     };
   }
 
@@ -61,7 +61,7 @@ export class WebHttpUtil {
       }
     }
 
-    const complete = new Promise<void>(r => target.on('close', r));
+    const complete = new Promise<void>(onClose => target.on('close', onClose));
 
     // Track connections for shutdown
     const activeConnections = new Set<HttpSocket>();
@@ -103,43 +103,43 @@ export class WebHttpUtil {
   /**
    * Create a WebRequest given an incoming http request
    */
-  static toWebRequest(req: HttpRequest): WebRequest {
-    const secure = req.socket instanceof TLSSocket;
-    const [path, query] = (req.url ?? '/').split('?') ?? [];
+  static toWebRequest(request: HttpRequest): WebRequest {
+    const secure = request.socket instanceof TLSSocket;
+    const [path, query] = (request.url ?? '/').split('?') ?? [];
     return new WebRequest({
       context: {
         connection: {
-          ip: req.socket.remoteAddress!,
-          host: req.headers.host,
+          ip: request.socket.remoteAddress!,
+          host: request.headers.host,
           httpProtocol: secure ? 'https' : 'http',
-          port: req.socket.localPort
+          port: request.socket.localPort
         },
-        httpMethod: castTo(req.method?.toUpperCase()),
+        httpMethod: castTo(request.method?.toUpperCase()),
         path,
         httpQuery: Object.fromEntries(new URLSearchParams(query)),
       },
-      headers: req.headers,
-      body: WebBodyUtil.markRaw(req)
+      headers: request.headers,
+      body: WebBodyUtil.markRaw(request)
     });
   }
 
   /**
    * Send WebResponse to outbound http response
    */
-  static async respondToServerResponse(webRes: WebResponse, res: HttpResponse): Promise<void> {
-    const binaryResponse = new WebResponse({ context: webRes.context, ...WebBodyUtil.toBinaryMessage(webRes) });
-    binaryResponse.headers.forEach((v, k) => res.setHeader(k, v));
-    res.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
+  static async respondToServerResponse(webResponse: WebResponse, response: HttpResponse): Promise<void> {
+    const binaryResponse = new WebResponse({ context: webResponse.context, ...WebBodyUtil.toBinaryMessage(webResponse) });
+    binaryResponse.headers.forEach((value, key) => response.setHeader(key, value));
+    response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
     const body = binaryResponse.body;
 
     if (BinaryUtil.isReadable(body)) {
-      await pipeline(body, res);
+      await pipeline(body, response);
     } else {
       if (body) {
         // Weird type union that http2 uses
-        'stream' in res ? res.write(body) : res.write(body);
+        'stream' in response ? response.write(body) : response.write(body);
       }
-      res.end();
+      response.end();
     }
   }
 }

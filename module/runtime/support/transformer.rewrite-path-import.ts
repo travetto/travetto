@@ -5,6 +5,9 @@ import { TransformerState, OnFile } from '@travetto/transformer';
 const PATH_REGEX = /^['"](node:)?path['"]$/;
 const PATH_IMPORT = '@travetto/manifest/src/path.ts';
 
+const isImport = (node: ts.Node): node is ts.ImportDeclaration =>
+  ts.isImportDeclaration(node) && PATH_REGEX.test(node.moduleSpecifier?.getText() ?? '');
+
 /**
  * Rewriting path imports to use manifest's path
  */
@@ -15,18 +18,17 @@ export class PathImportTransformer {
    */
   @OnFile()
   static rewritePathImport(state: TransformerState, node: ts.SourceFile): ts.SourceFile {
-    const stmt = node.statements.find((x): x is ts.ImportDeclaration =>
-      ts.isImportDeclaration(x) && PATH_REGEX.test(x.moduleSpecifier?.getText() ?? ''));
-    if (stmt) {
+    const statement = node.statements.find(isImport);
+    if (statement) {
       const updated = state.factory.updateImportDeclaration(
-        stmt,
-        stmt.modifiers,
-        stmt.importClause,
+        statement,
+        statement.modifiers,
+        statement.importClause,
         state.factory.createStringLiteral(PATH_IMPORT),
-        stmt.attributes
+        statement.attributes
       );
-      return state.factory.updateSourceFile(node, node.statements.map(x =>
-        x === stmt ? updated : x
+      return state.factory.updateSourceFile(node, node.statements.map(item =>
+        item === statement ? updated : item
       ));
     }
     return node;

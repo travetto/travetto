@@ -20,18 +20,18 @@ export abstract class BaseWebRouter implements WebRouter {
   #cleanup = new Map<string, Function>();
   #interceptors: WebInterceptor[];
 
-  async #register(c: Class): Promise<void> {
-    const config = ControllerRegistryIndex.getConfig(c);
+  async #register(cls: Class): Promise<void> {
+    const config = ControllerRegistryIndex.getConfig(cls);
 
-    let endpoints = await EndpointUtil.getBoundEndpoints(c);
+    let endpoints = await EndpointUtil.getBoundEndpoints(cls);
     endpoints = EndpointUtil.orderEndpoints(endpoints);
 
-    for (const ep of endpoints) {
-      ep.filter = EndpointUtil.createEndpointHandler(this.#interceptors, ep, config);
+    for (const endpoint of endpoints) {
+      endpoint.filter = EndpointUtil.createEndpointHandler(this.#interceptors, endpoint, config);
     }
 
     const fn = await this.register(endpoints, config);
-    this.#cleanup.set(c.Ⲑid, fn);
+    this.#cleanup.set(cls.Ⲑid, fn);
   };
 
   /**
@@ -41,25 +41,25 @@ export abstract class BaseWebRouter implements WebRouter {
 
     this.#interceptors = await DependencyRegistryIndex.getInstances(toConcrete<WebInterceptor>());
     this.#interceptors = EndpointUtil.orderInterceptors(this.#interceptors);
-    const names = this.#interceptors.map(x => x.constructor.name);
+    const names = this.#interceptors.map(interceptor => interceptor.constructor.name);
     console.debug('Sorting interceptors', { count: names.length, names });
 
     // Register all active
-    for (const c of ControllerRegistryIndex.getClasses()) {
-      await this.#register(c);
+    for (const cls of ControllerRegistryIndex.getClasses()) {
+      await this.#register(cls);
     }
 
     // Listen for updates
-    Registry.onClassChange(async e => {
-      const targetCls = 'curr' in e ? e.curr : e.prev;
-      console.debug('Registry event', { type: e.type, target: targetCls.Ⲑid });
+    Registry.onClassChange(async event => {
+      const targetCls = 'current' in event ? event.current : event.previous;
+      console.debug('Registry event', { type: event.type, target: targetCls.Ⲑid });
 
-      if ('prev' in e) {
-        this.#cleanup.get(e.prev.Ⲑid)?.();
-        this.#cleanup.delete(e.prev.Ⲑid);
+      if ('previous' in event) {
+        this.#cleanup.get(event.previous.Ⲑid)?.();
+        this.#cleanup.delete(event.previous.Ⲑid);
       }
-      if ('curr' in e) {
-        await this.#register(e.curr);
+      if ('current' in event) {
+        await this.#register(event.current);
       }
     }, ControllerRegistryIndex);
   }

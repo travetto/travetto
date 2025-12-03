@@ -96,7 +96,7 @@ export class CookieInterceptor implements WebInterceptor<CookieConfig> {
     this.#cookieJar.set(jar);
 
     const response = await next();
-    for (const c of jar.exportSetCookieHeader()) { response.headers.append('Set-Cookie', c); }
+    for (const cookie of jar.exportSetCookieHeader()) { response.headers.append('Set-Cookie', cookie); }
     return response;
   }
 }

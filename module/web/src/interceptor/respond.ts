@@ -15,12 +15,12 @@ export class RespondInterceptor implements WebInterceptor {
   dependsOn = [LoggingInterceptor];
 
   async filter(ctx: WebChainedContext): Promise<WebResponse> {
-    let res;
+    let response;
     try {
-      res = await ctx.next();
-    } catch (err) {
-      res = WebCommonUtil.catchResponse(err);
+      response = await ctx.next();
+    } catch (error) {
+      response = WebCommonUtil.catchResponse(error);
     }
-    return res;
+    return response;
   }
 }

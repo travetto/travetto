@@ -68,14 +68,14 @@ export class ConnectResponse implements Pick<ServerResponse,
     return this.#response.context.httpStatusCode;
   }
 
-  set statusCode(val: number) {
-    this.#response.context.httpStatusCode = val;
+  set statusCode(code: number) {
+    this.#response.context.httpStatusCode = code;
   }
 
   writeHead(statusCode: unknown, statusMessage?: unknown, headers?: unknown): this {
     this.#response.context.httpStatusCode = castTo(statusCode);
-    for (const [k, v] of Object.entries(headers ?? {})) {
-      this.#response.headers.set(k, v);
+    for (const [key, value] of Object.entries(headers ?? {})) {
+      this.#response.headers.set(key, value);
     }
     this.#headersSent = true;
     return this;
@@ -119,7 +119,7 @@ export class ConnectResponse implements Pick<ServerResponse,
   flushHeaders(): void {
     this.#headersSent = true;
   }
-  write(chunk: unknown, encoding?: unknown, callback?: (err?: Error) => void): boolean {
+  write(chunk: unknown, encoding?: unknown, callback?: (error?: Error) => void): boolean {
     if (this.#headersSent) {
       this.flushHeaders();
     }
@@ -137,13 +137,13 @@ export class ConnectResponse implements Pick<ServerResponse,
     return this;
   }
 
-  end(chunk?: unknown, encoding?: unknown, cb?: () => void): this {
+  end(chunk?: unknown, encoding?: unknown, callback?: () => void): this {
     this.flushHeaders();
     if (chunk) {
       this.write(chunk, encoding);
     }
     this.#finished = true;
-    cb?.();
+    callback?.();
     for (const item of this.#onEndHandlers) {
       item();
     }

@@ -26,9 +26,9 @@ export class ModelCrudUtil {
   /**
    * Build a uuid generator
    */
-  static uuidSource(len: number = 32): ModelIdSource {
-    const create = (): string => Util.uuid(len);
-    const valid = (id: string): boolean => id.length === len && /^[0-9a-f]+$/i.test(id);
+  static uuidSource(length: number = 32): ModelIdSource {
+    const create = (): string => Util.uuid(length);
+    const valid = (id: string): boolean => id.length === length && /^[0-9a-f]+$/i.test(id);
     return { create, valid };
   }
 
@@ -82,9 +82,9 @@ export class ModelCrudUtil {
     let errors: ValidationError[] = [];
     try {
       await SchemaValidator.validate(cls, item);
-    } catch (err) {
-      if (err instanceof ValidationResultError) {
-        errors = err.details.errors;
+    } catch (error) {
+      if (error instanceof ValidationResultError) {
+        errors = error.details.errors;
       }
     }
 
@@ -153,9 +153,9 @@ export class ModelCrudUtil {
       item = { ...item };
       delete item.id;
     }
-    const res = await this.prePersist(cls, castTo(item), 'partial');
+    const result = await this.prePersist(cls, castTo(item), 'partial');
     await SchemaValidator.validatePartial(cls, item, view);
-    return res;
+    return result;
   }
 
   /**

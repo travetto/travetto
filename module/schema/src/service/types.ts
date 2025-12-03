@@ -3,7 +3,7 @@ import { Any, Class, Primitive } from '@travetto/runtime';
 import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
-export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
+export type TemplateLiteral = { operation: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
 export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 
@@ -83,7 +83,7 @@ export interface SchemaFieldMap {
   /**
    * List of all fields
    */
-  [key: string | symbol]: SchemaFieldConfig;
+  [key: string]: SchemaFieldConfig;
 }
 
 /**
@@ -121,7 +121,7 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
   /**
    * Method configs
    */
-  methods: Record<string | symbol, SchemaMethodConfig>;
+  methods: Record<string, SchemaMethodConfig>;
   /**
    * Interfaces that the class implements
    */
@@ -209,7 +209,7 @@ export interface SchemaParameterConfig extends SchemaInputConfig {
   /**
    * Method the parameter belongs to
    */
-  method: string | symbol;
+  method: string;
   /**
    * Source text for the parameter
    */
@@ -223,7 +223,7 @@ export interface SchemaFieldConfig extends SchemaInputConfig {
   /**
    * Field name
    */
-  name: string | symbol;
+  name: string;
   /**
    * Is the field readonly, or write only?, defaults to no restrictions
    */

@@ -20,7 +20,7 @@ export class PointImpl {
    */
   static bindSchema(input: unknown): [number, number] | typeof InvalidSymbol | undefined {
     if (Array.isArray(input) && input.length === 2) {
-      const [a, b] = input.map(x => DataUtil.coerceType(x, Number, false));
+      const [a, b] = input.map(value => DataUtil.coerceType(value, Number, false));
       return [a, b];
     } else {
       return InvalidSymbol;

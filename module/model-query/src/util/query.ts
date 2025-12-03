@@ -17,14 +17,14 @@ export class ModelQueryUtil {
 
   /**
    * Resolve comparator
-   * @param val
+   * @param value
    * @returns
    */
-  static resolveComparator(val: unknown): unknown {
-    if (typeof val === 'string' && TimeUtil.isTimeSpan(val)) {
-      return TimeUtil.fromNow(val);
+  static resolveComparator(value: unknown): unknown {
+    if (typeof value === 'string' && TimeUtil.isTimeSpan(value)) {
+      return TimeUtil.fromNow(value);
     } else {
-      return val;
+      return value;
     }
   }
 
@@ -41,9 +41,9 @@ export class ModelQueryUtil {
       if (requestedId) {
         throw new NotFoundError(cls, requestedId);
       } else {
-        const err = new NotFoundError(cls, 'unknown');
-        err.message = 'No results found for query';
-        throw err;
+        const error = new NotFoundError(cls, 'unknown');
+        error.message = 'No results found for query';
+        throw error;
       }
     } else {
       throw new AppError(`Invalid number of results: ${result.length}`, { category: 'data' });
@@ -53,8 +53,8 @@ export class ModelQueryUtil {
   /**
    * Get a where clause with type
    */
-  static getWhereClause<T extends ModelType>(cls: Class<T>, q: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
-    const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
+  static getWhereClause<T extends ModelType>(cls: Class<T>, where: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
+    const clauses: WhereClauseRaw<T>[] = (where ? [where] : []);
 
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     if (polymorphicConfig) {
@@ -66,28 +66,28 @@ export class ModelQueryUtil {
       ));
     }
 
-    const conf = ModelRegistryIndex.getConfig(cls);
-    if (checkExpiry && conf.expiresAt) {
+    const indexConfig = ModelRegistryIndex.getConfig(cls);
+    if (checkExpiry && indexConfig.expiresAt) {
       clauses.push(castTo({
         $or: [
-          { [conf.expiresAt]: { $exists: false } },
-          { [conf.expiresAt]: undefined },
-          { [conf.expiresAt]: { $gte: new Date() } },
+          { [indexConfig.expiresAt]: { $exists: false } },
+          { [indexConfig.expiresAt]: undefined },
+          { [indexConfig.expiresAt]: { $gte: new Date() } },
         ]
       }));
     }
     if (clauses.length > 1) {
-      q = { $and: clauses };
+      where = { $and: clauses };
     } else {
-      q = clauses[0];
+      where = clauses[0];
     }
-    return q!;
+    return where!;
   }
 
-  static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>
-    !!o && typeof o === 'object' && '$and' in o;
-  static has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) =>
-    !!o && typeof o === 'object' && '$or' in o;
-  static has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) =>
-    !!o && typeof o === 'object' && '$not' in o;
+  static has$And = (value: unknown): value is ({ $and: WhereClause<unknown>[] }) =>
+    !!value && typeof value === 'object' && '$and' in value;
+  static has$Or = (value: unknown): value is ({ $or: WhereClause<unknown>[] }) =>
+    !!value && typeof value === 'object' && '$or' in value;
+  static has$Not = (value: unknown): value is ({ $not: WhereClause<unknown> }) =>
+    !!value && typeof value === 'object' && '$not' in value;
 }

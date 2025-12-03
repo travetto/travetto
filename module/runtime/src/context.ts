@@ -28,7 +28,7 @@ class $Runtime {
 
   /** Get env name, with support for the default env */
   get env(): string | undefined {
-    return Env.TRV_ENV.val || (!this.production ? this.#idx.manifest.workspace.defaultEnv : undefined);
+    return Env.TRV_ENV.value || (!this.production ? this.#idx.manifest.workspace.defaultEnv : undefined);
   }
 
   /** Are we in development mode */
@@ -43,8 +43,8 @@ class $Runtime {
 
   /** Get debug value */
   get debug(): false | string {
-    const val = Env.DEBUG.val ?? '';
-    return (!val && this.production) || Env.DEBUG.isFalse ? false : val;
+    const value = Env.DEBUG.value ?? '';
+    return (!value && this.production) || Env.DEBUG.isFalse ? false : value;
   }
 
   /** Manifest main */
@@ -68,8 +68,8 @@ class $Runtime {
   }
 
   /** Produce a workspace relative path */
-  workspaceRelative(...rel: string[]): string {
-    return path.resolve(this.workspace.path, ...rel);
+  workspaceRelative(...parts: string[]): string {
+    return path.resolve(this.workspace.path, ...parts);
   }
 
   /** Strip off the workspace path from a file */
@@ -78,23 +78,23 @@ class $Runtime {
   }
 
   /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */
-  toolPath(...rel: string[]): string {
-    rel = rel.flatMap(x => x === '@' ? ['node_modules', this.#idx.manifest.main.name] : [x]);
-    return path.resolve(this.workspace.path, this.#idx.manifest.build.toolFolder, ...rel);
+  toolPath(...parts: string[]): string {
+    parts = parts.flatMap(part => part === '@' ? ['node_modules', this.#idx.manifest.main.name] : [part]);
+    return path.resolve(this.workspace.path, this.#idx.manifest.build.toolFolder, ...parts);
   }
 
   /** Resolve single module path */
   modulePath(modulePath: string, overrides?: Record<string, string>): string {
     const combined = { ...this.#resourceOverrides, ...overrides };
     const [base, sub] = (combined[modulePath] ?? modulePath)
-      .replace(/^([^#]*)(#|$)/g, (_, v, r) => `${this.#moduleAliases[v] ?? v}${r}`)
+      .replace(/^([^#]*)(#|$)/g, (_, module, relativePath) => `${this.#moduleAliases[module] ?? module}${relativePath}`)
       .split('#');
     return path.resolve(this.#idx.getModule(base)?.sourcePath ?? base, sub ?? '.');
   }
 
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[] {
-    return [...new Set([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(v => this.modulePath(v)))];
+    return [...new Set([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(module => this.modulePath(module)))];
   }
 
   /** Get source for function */
@@ -121,7 +121,7 @@ class $Runtime {
       return fs.readFile(imp, 'utf8').then(JSON.parse);
     }
 
-    if (!ManifestModuleUtil.SOURCE_EXT_RE.test(imp)) {
+    if (!ManifestModuleUtil.SOURCE_EXT_REGEX.test(imp)) {
       if (imp.startsWith('@')) {
         if (/[/].*?[/]/.test(imp)) {
           imp = `${imp}.ts`;
@@ -132,16 +132,16 @@ class $Runtime {
     }
 
     imp = ManifestModuleUtil.withOutputExtension(imp);
-    const res = await import(imp);
-    if (res?.default?.default) {
+    const imported = await import(imp);
+    if (imported?.default?.default) {
       // Unpack default.default, typescript does this in a way that requires recreating the whole object
-      const def = res?.default?.default;
+      const def = imported?.default?.default;
       return Object.defineProperties(castTo({}), {
-        ...Object.getOwnPropertyDescriptors(res),
+        ...Object.getOwnPropertyDescriptors(imported),
         default: { get: () => def, configurable: false }
       });
     }
-    return res;
+    return imported;
   }
 }
 

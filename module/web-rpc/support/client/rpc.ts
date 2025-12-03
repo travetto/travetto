@@ -6,14 +6,14 @@ type PromiseFn = (...args: any) => Promise<unknown>;
 type PromiseRes<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isBlobMap = (x: any): x is Record<string, Blob> => x && typeof x === 'object' && x[Object.keys(x)[0]] instanceof Blob;
+const isBlobMap = (value: any): value is Record<string, Blob> => value && typeof value === 'object' && value[Object.keys(value)[0]] instanceof Blob;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isBlobLike = (x: any): x is Record<string, Blob> | Blob => x instanceof Blob || isBlobMap(x);
+const isBlobLike = (value: any): value is Record<string, Blob> | Blob => value instanceof Blob || isBlobMap(value);
 
 const extendHeaders = (base: RequestInit['headers'], toAdd: Record<string, string>): Headers => {
   const headers = new Headers(base);
-  for (const [k, v] of Object.entries(toAdd)) { headers.set(k, v); }
+  for (const [key, value] of Object.entries(toAdd)) { headers.set(key, value); }
   return headers;
 };
 
@@ -42,26 +42,26 @@ export type RpcClient<T extends Record<string, {}>, E extends Record<string, Fun
 export type RpcClientFactory<T extends Record<string, {}>> =
   <R extends Record<string, Function>>(
     baseOpts: RpcRequest,
-    decorate?: (opts: RpcRequest) => R
+    decorate?: (request: RpcRequest) => R
   ) => RpcClient<T, R>;
 
-function isResponse(v: unknown): v is Response {
-  return !!v && typeof v === 'object' && 'status' in v && !!v.status && 'headers' in v && !!v.headers;
+function isResponse(value: unknown): value is Response {
+  return !!value && typeof value === 'object' && 'status' in value && !!value.status && 'headers' in value && !!value.headers;
 }
 
-function isPlainObject(obj: unknown): obj is Record<string, unknown> {
-  return typeof obj === 'object' // separate from primitives
-    && obj !== undefined
-    && obj !== null         // is obvious
-    && obj.constructor === Object // separate instances (Array, DOM, ...)
-    && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' // separate from primitives
+    && value !== undefined
+    && value !== null         // is obvious
+    && value.constructor === Object // separate instances (Array, DOM, ...)
+    && Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
 }
 
 function registerTimeout<T extends (number | string | { unref(): unknown })>(
   controller: AbortController,
   timeout: number,
   start: (fn: (...args: unknown[]) => unknown, delay: number) => T,
-  stop: (val: T) => void
+  stop: (value: T) => void
 ): void {
   const timer = start(() => controller.abort(), timeout);
   if (!(typeof timer === 'number' || typeof timer === 'string')) {
@@ -99,14 +99,14 @@ export function getBody(inputs: unknown[], isBodyRequest: boolean): { body: Form
     };
   }
 
-  const plainInputs = inputs.map(x => isBlobLike(x) ? null : x);
+  const plainInputs = inputs.map(value => isBlobLike(value) ? null : value);
   const form = new FormData();
 
-  for (const inp of inputs.filter(isBlobLike)) {
-    if (inp instanceof Blob) {
-      form.append('file', inp, (inp instanceof File) ? inp.name : undefined);
+  for (const input of inputs.filter(isBlobLike)) {
+    if (input instanceof Blob) {
+      form.append('file', input, (input instanceof File) ? input.name : undefined);
     } else {
-      for (const [name, blob] of Object.entries(inp)) {
+      for (const [name, blob] of Object.entries(input)) {
         form.append(name, blob, (blob instanceof File) ? blob.name : undefined);
       }
     }
@@ -134,21 +134,21 @@ export function consumeJSON<T>(text: string | unknown): T {
         return value;
       }
     });
-  } catch (err) {
-    throw new Error(`Unable to parse response: ${text}, Unknown error: ${err}`);
+  } catch (error) {
+    throw new Error(`Unable to parse response: ${text}, Unknown error: ${error}`);
   }
 }
 
-export async function consumeError(err: unknown): Promise<Error> {
-  if (err instanceof Error) {
-    return err;
-  } else if (isResponse(err)) {
-    const out = new Error(err.statusText);
-    Object.assign(out, { status: err.status });
+export async function consumeError(error: unknown): Promise<Error> {
+  if (error instanceof Error) {
+    return error;
+  } else if (isResponse(error)) {
+    const out = new Error(error.statusText);
+    Object.assign(out, { status: error.status });
     return consumeError(out);
-  } else if (isPlainObject(err)) {
+  } else if (isPlainObject(error)) {
     const out = new Error();
-    Object.assign(out, err);
+    Object.assign(out, error);
     return consumeError(out);
   } else {
     return new Error('Unknown error');
@@ -198,12 +198,12 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
       try {
         resolved = await fetch(url, core);
         break;
-      } catch (err) {
+      } catch (error) {
         if (i < (core.retriesOnConnectFailure ?? 0)) {
-          await new Promise(r => setTimeout(r, 1000)); // Wait 1s
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
           continue;
         } else {
-          throw err;
+          throw error;
         }
       }
     }
@@ -240,19 +240,19 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
       }
       throw responseObject;
     }
-  } catch (err) {
-    throw await request.consumeError!(err);
+  } catch (error) {
+    throw await request.consumeError!(error);
   }
 }
 
 export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<T> {
   // @ts-ignore
-  return function (opts, decorate) {
+  return function (request, decorate) {
     const client: RpcRequest = {
       consumeJSON,
       consumeError,
-      ...opts,
-      core: { timeout: 0, credentials: 'include', mode: 'cors', ...opts.core },
+      ...request,
+      core: { timeout: 0, credentials: 'include', mode: 'cors', ...request.core },
     };
     const cache: Record<string, unknown> = {};
     // @ts-ignore
@@ -267,7 +267,7 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
             return cache[`${controller}/${endpoint}`] ??= Object.defineProperties(
               invokeFetch.bind(null, final),
               Object.fromEntries(
-                Object.entries(decorate?.(final) ?? {}).map(([k, v]) => [k, { value: v }])
+                Object.entries(decorate?.(final) ?? {}).map(([key, value]) => [key, { value }])
               )
             );
           }
@@ -277,10 +277,10 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function withConfigFactoryDecorator(opts: RpcRequest) {
+export function withConfigFactoryDecorator(request: RpcRequest) {
   return {
     withConfig<V extends PromiseFn>(this: V, extra: Partial<RpcRequest['core']>, ...params: Parameters<V>): Promise<PromiseRes<V>> {
-      return invokeFetch({ ...opts, core: { ...opts.core, ...extra } }, ...params);
+      return invokeFetch({ ...request, core: { ...request.core, ...extra } }, ...params);
     }
   };
 }

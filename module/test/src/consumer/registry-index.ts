@@ -39,11 +39,11 @@ export class TestConsumerRegistryIndex implements RegistryIndex {
    */
   async #init(): Promise<void> {
     const allFiles = RuntimeIndex.find({
-      module: m => m.name === '@travetto/test',
-      file: f => f.relativeFile.startsWith('src/consumer/types/')
+      module: mod => mod.name === '@travetto/test',
+      file: file => file.relativeFile.startsWith('src/consumer/types/')
     });
-    for (const f of allFiles) {
-      await import(f.outputFile);
+    for (const file of allFiles) {
+      await import(file.outputFile);
     }
     for (const cls of this.store.getClasses()) {
       this.store.finalize(cls);

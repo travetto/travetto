@@ -45,8 +45,8 @@ export class AppConfig {
           callbackURL: 'http://localhost:3000/auth/facebook/callback',
           profileFields: ['id', 'username', 'displayName', 'photos', 'email'],
         },
-        (accessToken, refreshToken, profile, cb) =>
-          cb(undefined, profile)
+        (accessToken, refreshToken, profile, callback) =>
+          callback(undefined, profile)
       ),
       (user: FbUser) => ({
         id: user.username,
@@ -59,8 +59,8 @@ export class AppConfig {
   @InjectableFactory()
   static principalSource(): Authorizer {
     return new class implements Authorizer {
-      async authorize(p: Principal) {
-        return p;
+      async authorize(principal: Principal) {
+        return principal;
       }
     }();
   }
@@ -81,7 +81,7 @@ import { Controller, Get, Post, WebRequest, ContextParam, WebResponse } from '@t
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
-import { FbAuthSymbol } from './conf.ts';
+import { FbAuthSymbol } from './config.ts';
 
 @Controller('/auth')
 export class SampleAuth {

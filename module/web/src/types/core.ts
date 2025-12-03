@@ -3,8 +3,8 @@ function verb<
   M extends string,
   L extends string,
   C extends Partial<MethodConfig>
->(method: M, lower: L, cfg: C): { method: M, lower: L } & C & MethodConfig {
-  return { body: false, cacheable: false, emptyStatusCode: 204, ...cfg, method, lower, };
+>(method: M, lower: L, config: C): { method: M, lower: L } & C & MethodConfig {
+  return { body: false, cacheable: false, emptyStatusCode: 204, ...config, method, lower, };
 }
 
 export const HTTP_METHODS = {

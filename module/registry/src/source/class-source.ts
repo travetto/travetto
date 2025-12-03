@@ -27,7 +27,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Are we in a mode that should have enhanced debug info
    */
-  trace = Env.DEBUG.val?.includes('@travetto/registry');
+  trace = Env.DEBUG.value?.includes('@travetto/registry');
 
   /**
    * Flush classes
@@ -35,12 +35,12 @@ export class ClassSource implements ChangeSource<Class> {
   #flush(): Class[] {
     const flushed = flushPendingFunctions().filter(isClass);
     for (const cls of flushed) {
-      const src = Runtime.getSourceFile(cls);
-      if (!this.#classes.has(src)) {
-        this.#classes.set(src, new Map());
+      const source = Runtime.getSourceFile(cls);
+      if (!this.#classes.has(source)) {
+        this.#classes.set(source, new Map());
       }
-      this.#classes.get(src)!.set(cls.Ⲑid, cls);
-      this.emit({ type: 'added', curr: cls });
+      this.#classes.get(source)!.set(cls.Ⲑid, cls);
+      this.emit({ type: 'added', current: cls });
     }
     return flushed;
   }
@@ -50,7 +50,7 @@ export class ClassSource implements ChangeSource<Class> {
     if (data) {
       this.#classes.delete(file);
       for (const cls of data) {
-        this.emit({ type: 'removing', prev: cls[1] });
+        this.emit({ type: 'removing', previous: cls[1] });
       }
     }
   }
@@ -62,12 +62,12 @@ export class ClassSource implements ChangeSource<Class> {
     const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
     const sourceFile = RuntimeIndex.getSourceFile(importFile);
 
-    let prev = new Map<string, Class>();
+    let previous = new Map<string, Class>();
     if (this.#classes.has(sourceFile)) {
-      prev = new Map(this.#classes.get(sourceFile)!.entries());
+      previous = new Map(this.#classes.get(sourceFile)!.entries());
     }
 
-    const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
+    const keys = new Set([...Array.from(previous.keys()), ...Array.from(next.keys())]);
 
     if (!this.#classes.has(sourceFile)) {
       this.#classes.set(sourceFile, new Map());
@@ -76,22 +76,22 @@ export class ClassSource implements ChangeSource<Class> {
     let changes = 0;
 
     // Determine delta based on the various classes (if being added, removed or updated)
-    for (const k of keys) {
-      if (!next.has(k)) {
+    for (const key of keys) {
+      if (!next.has(key)) {
         changes += 1;
-        this.emit({ type: 'removing', prev: prev.get(k)! });
-        this.#classes.get(sourceFile)!.delete(k);
+        this.emit({ type: 'removing', previous: previous.get(key)! });
+        this.#classes.get(sourceFile)!.delete(key);
       } else {
-        this.#classes.get(sourceFile)!.set(k, next.get(k)!);
-        if (!prev.has(k)) {
+        this.#classes.get(sourceFile)!.set(key, next.get(key)!);
+        if (!previous.has(key)) {
           changes += 1;
-          this.emit({ type: 'added', curr: next.get(k)! });
+          this.emit({ type: 'added', current: next.get(key)! });
         } else {
-          const prevHash = describeFunction(prev.get(k)!)?.hash;
-          const nextHash = describeFunction(next.get(k)!)?.hash;
+          const prevHash = describeFunction(previous.get(key)!)?.hash;
+          const nextHash = describeFunction(next.get(key)!)?.hash;
           if (prevHash !== nextHash) {
             changes += 1;
-            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
+            this.emit({ type: 'changed', current: next.get(key)!, previous: previous.get(key)! });
           }
         }
       }
@@ -104,17 +104,17 @@ export class ClassSource implements ChangeSource<Class> {
    */
   #handleChanges(classes: Class[] = []): void {
     const classesByFile = new Map<string, Class[]>();
-    for (const el of classes) {
-      const imp = Runtime.getImport(el);
-      if (!classesByFile.has(imp)) {
-        classesByFile.set(imp, []);
+    for (const cls of classes) {
+      const importPath = Runtime.getImport(cls);
+      if (!classesByFile.has(importPath)) {
+        classesByFile.set(importPath, []);
       }
-      classesByFile.get(imp)!.push(el);
+      classesByFile.get(importPath)!.push(cls);
     }
 
-    for (const [imp, els] of classesByFile.entries()) {
-      if (!this.#handleFileChanges(imp, els)) {
-        this.#emitter.emit('unchanged-import', imp);
+    for (const [importPath, items] of classesByFile.entries()) {
+      if (!this.#handleFileChanges(importPath, items)) {
+        this.#emitter.emit('unchanged-import', importPath);
       }
     }
   }
@@ -122,15 +122,15 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Emit a change event
    */
-  emit(e: ChangeEvent<Class>): void {
+  emit(event: ChangeEvent<Class>): void {
     if (this.trace) {
       console.debug('Emitting change', {
-        type: e.type,
-        curr: (e.type !== 'removing' ? e.curr?.Ⲑid : undefined),
-        prev: (e.type !== 'added' ? e.prev?.Ⲑid : undefined)
+        type: event.type,
+        current: (event.type !== 'removing' ? event.current?.Ⲑid : undefined),
+        previous: (event.type !== 'added' ? event.previous?.Ⲑid : undefined)
       });
     }
-    this.#emitter.emit('change', e);
+    this.#emitter.emit('change', event);
   }
 
   /**
@@ -139,14 +139,14 @@ export class ClassSource implements ChangeSource<Class> {
   async init(): Promise<Class[]> {
     if (Runtime.dynamic && !this.#listening) {
       this.#listening = (async (): Promise<void> => {
-        for await (const ev of await DynamicFileLoader.listen()) {
-          if (ev.action === 'delete') {
-            this.#removeFile(ev.file); // File no longer exists
+        for await (const event of await DynamicFileLoader.listen()) {
+          if (event.action === 'delete') {
+            this.#removeFile(event.file); // File no longer exists
           } else {
             this.#handleChanges(flushPendingFunctions().filter(isClass));
           }
 
-          if (ev.action === 'create') {
+          if (event.action === 'create') {
             this.#flush();
           }
         }
@@ -155,16 +155,16 @@ export class ClassSource implements ChangeSource<Class> {
 
     // Ensure everything is loaded
     for (const entry of RuntimeIndex.find({
-      module: (m) => {
-        const role = Env.TRV_ROLE.val;
+      module: (mod) => {
+        const role = Env.TRV_ROLE.value;
         return role !== 'test' && // Skip all modules when in test
-          m.roles.includes('std') &&
+          mod.roles.includes('std') &&
           (
-            !Runtime.production || m.prod ||
-            (role === 'doc' && m.roles.includes(role))
+            !Runtime.production || mod.prod ||
+            (role === 'doc' && mod.roles.includes(role))
           );
       },
-      folder: f => f === 'src' || f === '$index'
+      folder: folder => folder === 'src' || folder === '$index'
     })) {
       await Runtime.importFrom(entry.import);
     }

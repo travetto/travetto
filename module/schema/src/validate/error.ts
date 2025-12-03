@@ -22,6 +22,6 @@ export class TypeMismatchError extends AppError {
   }
 }
 
-export function isValidationError(err: unknown): err is ValidationError {
-  return !!err && err instanceof Error && 'path' in err;
+export function isValidationError(error: unknown): error is ValidationError {
+  return !!error && error instanceof Error && 'path' in error;
 }

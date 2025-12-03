@@ -36,8 +36,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.getDiscriminatedTypes(cls);
   }
 
-  static resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    return this.#instance.resolveInstanceType(cls, o);
+  static resolveInstanceType<T>(cls: Class<T>, item: T): Class {
+    return this.#instance.resolveInstanceType(cls, item);
   }
 
   static visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void): void {
@@ -88,21 +88,21 @@ export class SchemaRegistryIndex implements RegistryIndex {
     Util.queueMacroTask().then(() => {
       SchemaChangeListener.emitFieldChanges({
         type: 'changed',
-        curr: this.getClassConfig(event.curr),
-        prev: this.getClassConfig(event.prev)
+        current: this.getClassConfig(event.current),
+        previous: this.getClassConfig(event.previous)
       });
     });
   }
 
   #onRemoving(event: ChangeEvent<Class> & { type: 'removing' }): void {
-    SchemaChangeListener.clearSchemaDependency(event.prev);
+    SchemaChangeListener.clearSchemaDependency(event.previous);
   }
 
   #onAdded(event: ChangeEvent<Class> & { type: 'added' }): void {
     Util.queueMacroTask().then(() => {
       SchemaChangeListener.emitFieldChanges({
         type: 'added',
-        curr: this.getClassConfig(event.curr)
+        current: this.getClassConfig(event.current)
       });
     });
   }
@@ -120,8 +120,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
 
     // Rebuild indices after every "process" batch
     this.#byDiscriminatedTypes.clear();
-    for (const el of this.store.getClasses()) {
-      this.#registerDiscriminatedTypes(el);
+    for (const cls of this.store.getClasses()) {
+      this.#registerDiscriminatedTypes(cls);
     }
   }
 
@@ -134,15 +134,15 @@ export class SchemaRegistryIndex implements RegistryIndex {
    */
   getBaseClass(cls: Class): Class {
     if (!this.#baseSchema.has(cls)) {
-      let conf = this.getClassConfig(cls);
+      let config = this.getClassConfig(cls);
       let parent: Class | undefined = cls;
-      while (parent && conf.discriminatedType && !conf.discriminatedBase) {
+      while (parent && config.discriminatedType && !config.discriminatedBase) {
         parent = getParentClass(parent);
         if (parent) {
-          conf = this.store.getOptional(parent)?.get() ?? conf;
+          config = this.store.getOptional(parent)?.get() ?? config;
         }
       }
-      this.#baseSchema.set(cls, conf.class);
+      this.#baseSchema.set(cls, config.class);
     }
     return this.#baseSchema.get(cls)!;
   }
@@ -150,16 +150,16 @@ export class SchemaRegistryIndex implements RegistryIndex {
   /**
    * Find the resolved type for a given instance
    * @param cls Class for instance
-   * @param o Actual instance
+   * @param item Actual instance
    */
-  resolveInstanceType<T>(cls: Class<T>, o: T): Class {
+  resolveInstanceType<T>(cls: Class<T>, item: T): Class {
     const { discriminatedField, discriminatedType, class: targetClass } = this.store.get(cls).get();
     if (!discriminatedField) {
       return targetClass;
     } else {
       const base = this.getBaseClass(targetClass);
       const map = this.#byDiscriminatedTypes.get(base);
-      const type = castTo<string>(o[castKey<T>(discriminatedField)]) ?? discriminatedType;
+      const type = castTo<string>(item[castKey<T>(discriminatedField)]) ?? discriminatedType;
       if (!type) {
         throw new AppError(`Unable to resolve discriminated type for class ${base.name} without a type`);
       }
@@ -177,13 +177,13 @@ export class SchemaRegistryIndex implements RegistryIndex {
   /**
    * Track changes to schemas, and track the dependent changes
    * @param cls The root class of the hierarchy
-   * @param curr The new class
+   * @param current The new class
    * @param path The path within the object hierarchy
    */
-  trackSchemaDependencies(cls: Class, curr: Class = cls, path: SchemaFieldConfig[] = []): void {
-    const config = this.getClassConfig(curr);
+  trackSchemaDependencies(cls: Class, current: Class = cls, path: SchemaFieldConfig[] = []): void {
+    const config = this.getClassConfig(current);
 
-    SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.getClassConfig(cls));
+    SchemaChangeListener.trackSchemaDependency(current, cls, path, this.getClassConfig(cls));
 
     // Read children
     for (const field of Object.values(config.fields)) {

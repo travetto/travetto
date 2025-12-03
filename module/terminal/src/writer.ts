@@ -6,9 +6,9 @@ type State = { output: tty.WriteStream, height: number, width: number };
 type TermCoord = { x: number, y: number };
 
 const ESC = '\x1b[';
-const clamp = (v: number, size: number): number => Math.max(Math.min(v + (v < 0 ? size : 0), size - 1), 0);
-const delta = (v: number | undefined, pos: string, neg: string): string =>
-  !v ? '' : `${ESC}${Math.abs(v)}${v < 0 ? neg : pos}`;
+const clamp = (input: number, size: number): number => Math.max(Math.min(input + (input < 0 ? size : 0), size - 1), 0);
+const delta = (input: number | undefined, position: string, negative: string): string =>
+  !input ? '' : `${ESC}${Math.abs(input)}${input < 0 ? negative : position}`;
 
 const Codes = {
   SHOW_CURSOR: `${ESC}?25h`,
@@ -73,14 +73,14 @@ export class TerminalWriter {
   }
 
   commit(restorePosition: boolean = this.#restoreOnCommit): Promise<void> {
-    const q = this.#buffer.filter(x => x !== undefined);
+    const queue = this.#buffer.filter(line => line !== undefined);
     this.#buffer = [];
-    if (q.length && restorePosition) {
-      q.unshift(Codes.POSITION_SAVE);
-      q.push(Codes.POSITION_RESTORE);
+    if (queue.length && restorePosition) {
+      queue.unshift(Codes.POSITION_SAVE);
+      queue.push(Codes.POSITION_RESTORE);
     }
-    if (q.length && !this.#term.output.write(q.join(''))) {
-      return new Promise<void>(r => this.#term.output.once('drain', r));
+    if (queue.length && !this.#term.output.write(queue.join(''))) {
+      return new Promise<void>(resolve => this.#term.output.once('drain', resolve));
     } else {
       return Promise.resolve();
     }
@@ -127,7 +127,7 @@ export class TerminalWriter {
 
   /** Write multiple lines */
   writeLines(lines: (string | undefined)[], clear = false): this {
-    lines = lines.filter(x => x !== undefined);
+    lines = lines.filter(line => line !== undefined);
     let text = lines.join('\n');
     if (text.length > 0) {
       if (clear) {

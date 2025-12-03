@@ -35,7 +35,7 @@ export class MailService {
         RuntimeResources.read(`${key}.compiled.html`),
         RuntimeResources.read(`${key}.compiled.text`),
         RuntimeResources.read(`${key}.compiled.subject`)
-      ].map(x => x.then(MailUtil.purgeBrand)));
+      ].map(file => file.then(MailUtil.purgeBrand)));
 
       this.#compiled.set(key, { html, text, subject });
     }
@@ -49,12 +49,12 @@ export class MailService {
    * @returns
    */
   async renderMessage(keyOrMessage: string | EmailCompiled | EmailOptions, ctx: Record<string, unknown>): Promise<EmailCompiled> {
-    const tpl = (typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage);
+    const template = (typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage);
 
     const [html, text, subject] = await Promise.all([
-      this.#interpolator.render(tpl.html, ctx),
-      this.#interpolator.render(tpl.text ?? '', ctx),
-      this.#interpolator.render(tpl.subject, ctx)
+      this.#interpolator.render(template.html, ctx),
+      this.#interpolator.render(template.text ?? '', ctx),
+      this.#interpolator.render(template.subject, ctx)
     ]);
 
     return { html, text, subject };
@@ -107,13 +107,13 @@ export class MailService {
    * Send multiple messages.
    */
   async sendAll<S extends SentEmail = SentEmail>(messages: EmailOptions[], base: Partial<EmailOptions> = {}): Promise<S[]> {
-    return Promise.all(messages.map(msg => this.send<S>({
+    return Promise.all(messages.map(message => this.send<S>({
       ...base,
-      ...msg,
-      ...(msg.context || base.context ? {
+      ...message,
+      ...(message.context || base.context ? {
         context: {
           ...(base.context || {}),
-          ...(msg.context || {})
+          ...(message.context || {})
         }
       } : {})
     })));

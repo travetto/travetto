@@ -41,8 +41,8 @@ export class LoggingInterceptor implements WebInterceptor {
     const response = await next();
     const duration = Date.now() - createdDate;
 
-    const err = response.body instanceof Error ? response.body : undefined;
-    const code = response.context.httpStatusCode ??= (!!err ? 500 : 200);
+    const error = response.body instanceof Error ? response.body : undefined;
+    const code = response.context.httpStatusCode ??= (!!error ? 500 : 200);
 
     const logMessage = {
       method: request.context.httpMethod,
@@ -61,8 +61,8 @@ export class LoggingInterceptor implements WebInterceptor {
       console.error('Request', logMessage);
     }
 
-    if (this.config.showStackTrace && err) {
-      console.error(err.message, { error: err });
+    if (this.config.showStackTrace && error) {
+      console.error(error.message, { error });
     }
 
     return response;

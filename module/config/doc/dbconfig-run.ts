@@ -15,7 +15,7 @@ export async function main(): Promise<void> {
   try {
     await config.bindTo(DBConfig, new DBConfig(), 'database');
     console.log('Config', await config.exportActive());
-  } catch (err) {
-    console.error(hasToJSON(err) ? err.toJSON() : err);
+  } catch (error) {
+    console.error(hasToJSON(error) ? error.toJSON() : error);
   }
 }

@@ -2,7 +2,7 @@ import { type OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
 export type CommonPackConfig = {
-  buildDir: string;
+  buildDirectory: string;
   output: string;
   clean: boolean;
   ejectFile?: string;
@@ -40,9 +40,9 @@ export type DockerPackConfig = {
     packages?: string[];
     folder: string;
     user: string;
-    uid: number;
+    userId: number;
     group: string;
-    gid: number;
+    groupId: number;
   };
 } & CommonPackConfig;
 
@@ -50,19 +50,19 @@ export type ShellCommandImpl = {
   var(name: string): string;
   createFile(file: string, text: string[], mode?: string): string[][];
   callCommandWithAllArgs(cmd: string, ...args: string[]): string[];
-  copy(src: string, dest: string): string[];
-  copyRecursive(src: string, dest: string, inclusive?: boolean): string[];
-  rmRecursive(dest: string): string[];
-  mkdir(dest: string): string[];
+  copy(sourceFile: string, destinationFile: string): string[];
+  copyRecursive(sourceDirectory: string, destinationDirectory: string, inclusive?: boolean): string[];
+  rmRecursive(destinationDirectory: string): string[];
+  mkdir(destinationDirectory: string): string[];
   export(key: string, value: string): string[];
-  chdir(dest: string): string[];
+  chdir(destinationDirectory: string): string[];
   comment(message: string): string[];
   echo(text: string): string[];
   zip(output: string): string[];
   script(lines: string[], chdir?: boolean): { ext: string, contents: string[] };
 };
 
-export type DockerPackFactory = (cfg: DockerPackConfig) => (string | Promise<string>);
+export type DockerPackFactory = (config: DockerPackConfig) => (string | Promise<string>);
 export type DockerPackFactoryModule = { factory: DockerPackFactory };
 
 export type CoreRollupConfig = {

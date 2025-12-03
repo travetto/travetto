@@ -8,25 +8,24 @@ export class CoreUtil {
   /**
    * See if inbound node has an original property
    */
-  static hasOriginal(o: ts.Node): o is (ts.Node & { original: ts.Node }) {
-    return 'original' in o && !!o.original;
+  static hasOriginal(value: ts.Node): value is (ts.Node & { original: ts.Node }) {
+    return 'original' in value && !!value.original;
   }
 
   /**
    * See if type has target
    */
-  static hasTarget(o: ts.Type): o is (ts.Type & { target: ts.Type }) {
-    return 'target' in o && !!o.target;
+  static hasTarget(value: ts.Type): value is (ts.Type & { target: ts.Type }) {
+    return 'target' in value && !!value.target;
   }
 
   /**
    * Get code range of node
-   * @param m
    */
-  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined): [start: number, end: number] | undefined {
-    if (o && o.pos >= 0) {
-      const start = ts.getLineAndCharacterOfPosition(source, o.getStart(source));
-      const end = ts.getLineAndCharacterOfPosition(source, o.getEnd());
+  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, value: T | undefined): [start: number, end: number] | undefined {
+    if (value && value.pos >= 0) {
+      const start = ts.getLineAndCharacterOfPosition(source, value.getStart(source));
+      const end = ts.getLineAndCharacterOfPosition(source, value.getEnd());
       return [start.line + 1, end.line + 1];
     }
   }
@@ -34,7 +33,10 @@ export class CoreUtil {
   /**
    * Find the primary argument of a call expression, or decorator.
    */
-  static findArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined, pred: (x: ts.Expression) => x is T): T | undefined {
+  static findArgument<T extends ts.Expression = ts.Expression>(
+    node: ts.CallExpression | undefined,
+    pred: (expr: ts.Expression) => expr is T
+  ): T | undefined {
     if (node && node.arguments && node.arguments.length) {
       return node.arguments.find(pred);
     }
@@ -52,10 +54,10 @@ export class CoreUtil {
   /**
    * Create a static field for a class
    */
-  static createStaticField(factory: ts.NodeFactory, name: string, val: ts.Expression): ts.PropertyDeclaration {
+  static createStaticField(factory: ts.NodeFactory, name: string, value: ts.Expression): ts.PropertyDeclaration {
     return factory.createPropertyDeclaration(
       [factory.createToken(ts.SyntaxKind.StaticKeyword)],
-      name, undefined, undefined, val
+      name, undefined, undefined, value
     );
   }
 
@@ -74,12 +76,12 @@ export class CoreUtil {
 
   /**
    * Updates source
-   * @param src
+   * @param source
    * @param statements
    */
-  static updateSource(factory: ts.NodeFactory, src: ts.SourceFile, statements: ts.NodeArray<ts.Statement> | ts.Statement[]): ts.SourceFile {
+  static updateSource(factory: ts.NodeFactory, source: ts.SourceFile, statements: ts.NodeArray<ts.Statement> | ts.Statement[]): ts.SourceFile {
     return factory.updateSourceFile(
-      src, statements, src.isDeclarationFile, src.referencedFiles, src.typeReferenceDirectives, src.hasNoDefaultLib
+      source, statements, source.isDeclarationFile, source.referencedFiles, source.typeReferenceDirectives, source.hasNoDefaultLib
     );
   }
 
@@ -96,9 +98,9 @@ export class CoreUtil {
       first = factory.createIdentifier(first);
     }
     return items.reduce<ts.Expression>(
-      (acc, p) => typeof p === 'number' ?
-        factory.createElementAccessExpression(acc, p) :
-        factory.createPropertyAccessExpression(acc, p),
+      (expr, value) => typeof value === 'number' ?
+        factory.createElementAccessExpression(expr, value) :
+        factory.createPropertyAccessExpression(expr, value),
       factory.createPropertyAccessExpression(first, second)
     );
   }
@@ -111,7 +113,7 @@ export class CoreUtil {
       factory.createCallExpression(
         name,
         undefined,
-        contents.filter(x => !!x)
+        contents.filter(expr => !!expr)
       )
     );
   }

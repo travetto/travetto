@@ -43,8 +43,8 @@ export class AsyncContext {
   /**
    * Set context field by key
    */
-  set<T = unknown>(key: string | symbol, val: T | undefined): void {
-    this.#get()[key] = val;
+  set<T = unknown>(key: string | symbol, value: T | undefined): void {
+    this.#get()[key] = value;
   }
 
   /**
@@ -73,8 +73,8 @@ export class AsyncContext {
           out.add(item);
         }
         out.close();
-      } catch (err) {
-        out.throw(castTo(err));
+      } catch (error) {
+        out.throw(castTo(error));
       }
     });
     return out;

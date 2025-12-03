@@ -16,35 +16,35 @@ export class ProcessHandle {
     this.#log = Log.scoped(`process-handle.${name}`);
   }
 
-  async writePid(pid: number): Promise<void> {
+  async writePidFile(processId: number): Promise<void> {
     await fs.mkdir(path.dirname(this.#file), { recursive: true });
-    return fs.writeFile(this.#file, JSON.stringify(pid), 'utf8');
+    return fs.writeFile(this.#file, JSON.stringify(processId), 'utf8');
   }
 
-  getPid(): Promise<number | undefined> {
+  getProcessId(): Promise<number | undefined> {
     return fs.readFile(this.#file, 'utf8')
-      .then(v => +v > 0 ? +v : undefined, () => undefined);
+      .then(processId => +processId > 0 ? +processId : undefined, () => undefined);
   }
 
   async isRunning(): Promise<boolean> {
-    const pid = await this.getPid();
-    if (!pid) { return false; }
+    const processId = await this.getProcessId();
+    if (!processId) { return false; }
     try {
-      process.kill(pid, 0); // See if process is still running
-      this.#log.debug('Is running', pid);
+      process.kill(processId, 0); // See if process is still running
+      this.#log.debug('Is running', processId);
       return true;
     } catch {
-      this.#log.debug('Is not running', pid);
+      this.#log.debug('Is not running', processId);
     }
     return false; // Not running
   }
 
   async kill(): Promise<boolean> {
-    const pid = await this.getPid();
-    if (pid && await this.isRunning()) {
+    const processId = await this.getProcessId();
+    if (processId && await this.isRunning()) {
       try {
-        this.#log.debug('Killing', pid);
-        return process.kill(pid);
+        this.#log.debug('Killing', processId);
+        return process.kill(processId);
       } catch { }
     }
     return false;
@@ -52,12 +52,12 @@ export class ProcessHandle {
 
   async ensureKilled(gracePeriod: number = 3000): Promise<boolean> {
     const start = Date.now();
-    const pid = await this.getPid();
-    if (!pid) {
+    const processId = await this.getProcessId();
+    if (!processId) {
       return false;
     }
 
-    this.#log.debug('Ensuring Killed', pid);
+    this.#log.debug('Ensuring Killed', processId);
     while ((Date.now() - start) < gracePeriod) { // Ensure its done
       if (!await this.isRunning()) {
         return true;
@@ -65,10 +65,10 @@ export class ProcessHandle {
       await CommonUtil.blockingTimeout(100);
     }
     try {
-      this.#log.debug('Force Killing', pid);
-      process.kill(pid); // Force kill
+      this.#log.debug('Force Killing', processId);
+      process.kill(processId); // Force kill
     } catch { }
-    this.#log.debug('Did Kill', this.#file, !!pid);
+    this.#log.debug('Did Kill', this.#file, !!processId);
     return true;
   }
 }

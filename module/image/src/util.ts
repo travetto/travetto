@@ -39,13 +39,13 @@ export class ImageUtil {
   /**
    * Convert image
    */
-  static async convert<T extends Input>(image: T, { format, optimize, ...opts }: ConvertOptions): Promise<T extends string ? Readable : T> {
+  static async convert<T extends Input>(image: T, { format, optimize, ...options }: ConvertOptions): Promise<T extends string ? Readable : T> {
     const { default: sharp } = await import('sharp');
 
     let builder = sharp();
-    if (opts.w || opts.h) {
-      const dims = [opts.w, opts.h].map(x => x ? Math.trunc(x) : undefined);
-      const fluid = dims.some(x => !x);
+    if (options.w || options.h) {
+      const dims = [options.w, options.h].map(value => value ? Math.trunc(value) : undefined);
+      const fluid = dims.some(value => !value);
       builder = builder.resize({
         width: dims[0],
         height: dims[1],
@@ -88,7 +88,7 @@ export class ImageUtil {
     const out = await ((Buffer.isBuffer(image) || typeof image === 'string') ?
       sharp(image).metadata() :
       new Promise<Metadata>((resolve, reject) =>
-        pipeline(image, sharp().metadata((err, metadata) => err ? reject(err) : resolve(metadata)))
+        pipeline(image, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
       ));
     return {
       width: out.width!,

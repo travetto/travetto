@@ -16,7 +16,7 @@ export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunctio
  */
 export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
-  (<U>(target: U, prop: string | symbol, descriptor?: EndpointFunctionDescriptor) => void)
+  (<U>(target: U, property: string, descriptor?: EndpointFunctionDescriptor) => void)
 );
 
 export type EndpointParamLocation = 'path' | 'query' | 'body' | 'header';
@@ -48,7 +48,7 @@ interface CoreConfig {
   /**
    * Control which interceptors are excluded
    */
-  interceptorExclude?: (val: WebInterceptor) => boolean;
+  interceptorExclude?: (value: WebInterceptor) => boolean;
   /**
    * Response headers
    */
@@ -72,7 +72,7 @@ export interface EndpointParameterConfig {
    */
   location: EndpointParamLocation;
   /**
-   * Resolves the value by executing with req/res as input
+   * Resolves the value by executing with request/response as input
    */
   resolve?: WebFilter;
   /**
@@ -97,7 +97,7 @@ export interface EndpointConfig extends CoreConfig {
   /**
    * Name of the endpoint (method name)
    */
-  methodName: string | symbol;
+  methodName: string;
   /**
    * Instance the endpoint is for
    */
@@ -133,7 +133,7 @@ export interface EndpointConfig extends CoreConfig {
   /**
    * Response finalizer
    */
-  responseFinalizer?: (res: WebResponse) => WebResponse;
+  responseFinalizer?: (response: WebResponse) => WebResponse;
   /**
    * Response headers finalized
    */
@@ -159,7 +159,7 @@ export interface ControllerConfig extends CoreConfig {
   /**
    * Context parameters to bind at create
    */
-  contextParams: Record<string | symbol, boolean>;
+  contextParams: Record<string, boolean>;
 }
 
 /**

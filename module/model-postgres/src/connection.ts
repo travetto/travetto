@@ -40,9 +40,9 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
 
     await this.runWithActive(() =>
       this.runWithTransaction('required', () =>
-        this.execute(this.active!, 'CREATE EXTENSION IF NOT EXISTS pgcrypto;').catch(err => {
-          if (!(err instanceof Error && err.message.includes('already exists'))) {
-            throw err;
+        this.execute(this.active!, 'CREATE EXTENSION IF NOT EXISTS pgcrypto;').catch(error => {
+          if (!(error instanceof Error && error.message.includes('already exists'))) {
+            throw error;
           }
         })
       )
@@ -52,17 +52,17 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
     ShutdownManager.onGracefulShutdown(() => this.#pool.end());
   }
 
-  async execute<T = unknown>(conn: PoolClient, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(pool: PoolClient, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
     console.debug('Executing query', { query });
     try {
-      const out = await conn.query(query, values);
-      const records: T[] = [...out.rows].map(v => ({ ...v }));
+      const out = await pool.query(query, values);
+      const records: T[] = [...out.rows].map(value => ({ ...value }));
       return { count: out.rowCount!, records };
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('duplicate key value')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('duplicate key value')) {
         throw new ExistsError('query', query);
       } else {
-        throw err;
+        throw error;
       }
     }
   }
@@ -71,7 +71,7 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
     return this.#pool.connect();
   }
 
-  release(conn: PoolClient): void {
-    conn.release();
+  release(pool: PoolClient): void {
+    pool.release();
   }
 }

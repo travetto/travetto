@@ -39,20 +39,20 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Default length of unique ids
    */
-  ID_LEN = 32;
+  ID_LENGTH = 32;
 
   /**
    * Hash Length
    */
-  HASH_LEN = 64;
+  HASH_LENGTH = 64;
 
   /**
    * Default length for varchar
    */
-  DEFAULT_STRING_LEN = 1024;
+  DEFAULT_STRING_LENGTH = 1024;
 
   /**
-   * Mapping between query ops and SQL operations
+   * Mapping between query operators and SQL operations
    */
   SQL_OPS = {
     $and: 'AND',
@@ -95,8 +95,8 @@ export abstract class SQLDialect implements DialectState {
    * Column types with inputs
    */
   PARAMETERIZED_COLUMN_TYPES: Record<'VARCHAR' | 'DECIMAL', (...values: number[]) => string> = {
-    VARCHAR: n => `VARCHAR(${n})`,
-    DECIMAL: (d, p) => `DECIMAL(${d},${p})`
+    VARCHAR: count => `VARCHAR(${count})`,
+    DECIMAL: (digits, precision) => `DECIMAL(${digits},${precision})`
   };
 
   ID_AFFIX = '`';
@@ -105,8 +105,8 @@ export abstract class SQLDialect implements DialectState {
    * Generate an id field
    */
   idField = makeField('id', String, true, {
-    maxlength: { n: this.ID_LEN },
-    minlength: { n: this.ID_LEN }
+    maxlength: { n: this.ID_LENGTH },
+    minlength: { n: this.ID_LENGTH }
   });
 
   /**
@@ -118,8 +118,8 @@ export abstract class SQLDialect implements DialectState {
    * Parent path reference
    */
   parentPathField = makeField('__parent_path', String, true, {
-    maxlength: { n: this.HASH_LEN },
-    minlength: { n: this.HASH_LEN },
+    maxlength: { n: this.HASH_LENGTH },
+    minlength: { n: this.HASH_LENGTH },
     required: { active: true }
   });
 
@@ -127,8 +127,8 @@ export abstract class SQLDialect implements DialectState {
    * Path reference
    */
   pathField = makeField('__path', String, true, {
-    maxlength: { n: this.HASH_LEN },
-    minlength: { n: this.HASH_LEN },
+    maxlength: { n: this.HASH_LENGTH },
+    minlength: { n: this.HASH_LENGTH },
     required: { active: true }
   });
 
@@ -137,38 +137,38 @@ export abstract class SQLDialect implements DialectState {
   rootAlias = '_ROOT';
 
   aliasCache = new Map<Class, Map<string, Alias>>();
-  ns: string;
+  namespacePrefix: string;
 
-  constructor(ns: string) {
+  constructor(namespacePrefix: string) {
     this.namespace = this.namespace.bind(this);
     this.table = this.table.bind(this);
-    this.ident = this.ident.bind(this);
-    this.ns = ns ? `${ns}_` : ns;
+    this.identifier = this.identifier.bind(this);
+    this.namespacePrefix = namespacePrefix ? `${namespacePrefix}_` : namespacePrefix;
   }
 
   /**
    * Get connection
    */
-  abstract get conn(): Connection<unknown>;
+  abstract get connection(): Connection<unknown>;
 
   /**
    * Hash a value
    */
-  abstract hash(inp: string): string;
+  abstract hash(input: string): string;
 
   executeSQL<T>(sql: string): Promise<{ records: T[], count: number }> {
-    return this.conn.execute<T>(this.conn.active, sql);
+    return this.connection.execute<T>(this.connection.active, sql);
   }
 
   /**
    * Identify a name or field (escape it)
    */
-  ident(field: SchemaFieldConfig | string | symbol): string {
+  identifier(field: SchemaFieldConfig | string): string {
     if (field === '*') {
       return field;
     } else {
-      const name = (typeof field === 'symbol' || typeof field === 'string') ? field : field.name;
-      return `${this.ID_AFFIX}${name.toString()}${this.ID_AFFIX}`;
+      const name = (typeof field === 'string') ? field : field.name;
+      return `${this.ID_AFFIX}${name}${this.ID_AFFIX}`;
     }
   }
 
@@ -189,44 +189,44 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Convert value to SQL valid representation
    */
-  resolveValue(conf: SchemaFieldConfig, value: unknown): string {
+  resolveValue(config: SchemaFieldConfig, value: unknown): string {
     if (value === undefined || value === null) {
       return 'NULL';
-    } else if (conf.type === String) {
+    } else if (config.type === String) {
       if (value instanceof RegExp) {
-        const src = DataUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
-        return this.quote(src);
+        const regexSource = DataUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
+        return this.quote(regexSource);
       } else {
         return this.quote(castTo(value));
       }
-    } else if (conf.type === Boolean) {
+    } else if (config.type === Boolean) {
       return `${value ? 'TRUE' : 'FALSE'}`;
-    } else if (conf.type === Number) {
+    } else if (config.type === Number) {
       return `${value}`;
-    } else if (conf.type === Date) {
+    } else if (config.type === Date) {
       if (typeof value === 'string' && TimeUtil.isTimeSpan(value)) {
         return this.resolveDateValue(TimeUtil.fromNow(value));
       } else {
         return this.resolveDateValue(DataUtil.coerceType(value, Date, true));
       }
-    } else if (conf.type === PointImpl && Array.isArray(value)) {
+    } else if (config.type === PointImpl && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
-    } else if (conf.type === Object) {
+    } else if (config.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, "''"));
     }
-    throw new AppError(`Unknown value type for field ${conf.name.toString()}, ${value}`, { category: 'data' });
+    throw new AppError(`Unknown value type for field ${config.name}, ${value}`, { category: 'data' });
   }
 
   /**
    * Get column type from field config
    */
-  getColumnType(conf: SchemaFieldConfig): string {
+  getColumnType(config: SchemaFieldConfig): string {
     let type: string = '';
 
-    if (conf.type === Number) {
+    if (config.type === Number) {
       type = this.COLUMN_TYPES.INT;
-      if (conf.precision) {
-        const [digits, decimals] = conf.precision;
+      if (config.precision) {
+        const [digits, decimals] = config.precision;
         if (decimals) {
           type = this.PARAMETERIZED_COLUMN_TYPES.DECIMAL(digits, decimals);
         } else if (digits) {
@@ -245,19 +245,19 @@ export abstract class SQLDialect implements DialectState {
       } else {
         type = this.COLUMN_TYPES.INT;
       }
-    } else if (conf.type === Date) {
+    } else if (config.type === Date) {
       type = this.COLUMN_TYPES.TIMESTAMP;
-    } else if (conf.type === Boolean) {
+    } else if (config.type === Boolean) {
       type = this.COLUMN_TYPES.BOOLEAN;
-    } else if (conf.type === String) {
-      if (conf.specifiers?.includes('text')) {
+    } else if (config.type === String) {
+      if (config.specifiers?.includes('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : this.DEFAULT_STRING_LEN);
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.n : this.DEFAULT_STRING_LENGTH);
       }
-    } else if (conf.type === PointImpl) {
+    } else if (config.type === PointImpl) {
       type = this.COLUMN_TYPES.POINT;
-    } else if (conf.type === Object) {
+    } else if (config.type === Object) {
       type = this.COLUMN_TYPES.JSON;
     }
 
@@ -267,12 +267,12 @@ export abstract class SQLDialect implements DialectState {
   /**
    * FieldConfig to Column definition
    */
-  getColumnDefinition(conf: SchemaFieldConfig): string | undefined {
-    const type = this.getColumnType(conf);
+  getColumnDefinition(config: SchemaFieldConfig): string | undefined {
+    const type = this.getColumnType(config);
     if (!type) {
       return;
     }
-    return `${this.ident(conf)} ${type} ${(conf.required?.active !== false) ? 'NOT NULL' : 'DEFAULT NULL'}`;
+    return `${this.identifier(config)} ${type} ${(config.required?.active !== false) ? 'NOT NULL' : 'DEFAULT NULL'}`;
   }
 
   /**
@@ -297,7 +297,7 @@ export abstract class SQLDialect implements DialectState {
    */
   getDropColumnSQL(stack: VisitStack[]): string {
     const field = stack.at(-1)!;
-    return `ALTER TABLE ${this.parentTable(stack)} DROP COLUMN ${this.ident(field.name)};`;
+    return `ALTER TABLE ${this.parentTable(stack)} DROP COLUMN ${this.identifier(field.name)};`;
   }
 
   /**
@@ -317,7 +317,7 @@ export abstract class SQLDialect implements DialectState {
    * Determine table/field namespace for a given stack location
    */
   namespace(stack: VisitStack[]): string {
-    return `${this.ns}${SQLModelUtil.buildTable(stack)}`;
+    return `${this.namespacePrefix}${SQLModelUtil.buildTable(stack)}`;
   }
 
   /**
@@ -331,7 +331,7 @@ export abstract class SQLDialect implements DialectState {
    * Determine table name for a given stack location
    */
   table(stack: VisitStack[]): string {
-    return this.ident(this.namespace(stack));
+    return this.identifier(this.namespace(stack));
   }
 
   /**
@@ -351,8 +351,8 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Alias a field for usage
    */
-  alias(field: string | symbol | SchemaFieldConfig, alias: string = this.rootAlias): string {
-    return `${alias}.${this.ident(field)}`;
+  alias(field: string | SchemaFieldConfig, alias: string = this.rootAlias): string {
+    return `${alias}.${this.identifier(field)}`;
   }
 
   /**
@@ -376,12 +376,12 @@ export abstract class SQLDialect implements DialectState {
       },
       onSub: ({ descend, config, path }) => {
         const table = resolve(path);
-        clauses.set(table, { alias: `${config.name.toString().charAt(0)}${idx++}`, path });
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
         return descend();
       },
       onSimple: ({ config, path }) => {
         const table = resolve(path);
-        clauses.set(table, { alias: `${config.name.toString().charAt(0)}${idx++}`, path });
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
       }
     });
 
@@ -404,13 +404,13 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Generate WHERE field clause
    */
-  getWhereFieldSQL(stack: VisitStack[], o: Record<string, unknown>): string {
+  getWhereFieldSQL(stack: VisitStack[], input: Record<string, unknown>): string {
     const items = [];
     const { foreignMap, localMap } = SQLModelUtil.getFieldsByLocation(stack);
     const SQL_OPS = this.SQL_OPS;
 
-    for (const key of Object.keys(o)) {
-      const top = o[key];
+    for (const key of Object.keys(input)) {
+      const top = input[key];
       const field = localMap[key] ?? foreignMap[key];
       if (!field) {
         throw new Error(`Unknown field: ${key}`);
@@ -432,38 +432,38 @@ export abstract class SQLDialect implements DialectState {
           const inner = this.getWhereFieldSQL(sStack, top);
           items.push(inner);
         } else {
-          const v = top[subKey];
+          const value = top[subKey];
           const resolve = this.resolveValue.bind(this, field);
 
           switch (subKey) {
             case '$nin': case '$in': {
-              const arr = (Array.isArray(v) ? v : [v]).map(el => resolve(el));
+              const arr = (Array.isArray(value) ? value : [value]).map(item => resolve(item));
               items.push(`${sPath} ${SQL_OPS[subKey]} (${arr.join(',')})`);
               break;
             }
             case '$all': {
               const set = new Set();
-              const arr = [v].flat().filter(x => !set.has(x) && !!set.add(x)).map(el => resolve(el));
+              const arr = [value].flat().filter(item => !set.has(item) && !!set.add(item)).map(item => resolve(item));
               const valueTable = this.parentTable(sStack);
               const alias = `_all_${sStack.length}`;
-              const pPath = this.ident(this.parentPathField.name);
+              const pPath = this.identifier(this.parentPathField.name);
               const rpPath = this.resolveName([...sStack, field, this.parentPathField]);
 
               items.push(`${arr.length} = (
-                SELECT COUNT(DISTINCT ${alias}.${this.ident(field.name)}) 
+                SELECT COUNT(DISTINCT ${alias}.${this.identifier(field.name)}) 
                 FROM ${valueTable} ${alias} 
                 WHERE ${alias}.${pPath} = ${rpPath}
-                AND ${alias}.${this.ident(field.name)} IN (${arr.join(',')})
+                AND ${alias}.${this.identifier(field.name)} IN (${arr.join(',')})
               )`);
               break;
             }
             case '$regex': {
-              const re = DataUtil.toRegex(castTo(v));
-              const src = re.source;
-              const ins = re.flags && re.flags.includes('i');
+              const regex = DataUtil.toRegex(castTo(value));
+              const regexSource = regex.source;
+              const ins = regex.flags && regex.flags.includes('i');
 
-              if (/^[\^]\S+[.][*][$]?$/.test(src)) {
-                const inner = src.substring(1, src.length - 2);
+              if (/^[\^]\S+[.][*][$]?$/.test(regexSource)) {
+                const inner = regexSource.substring(1, regexSource.length - 2);
                 if (!ins || SQL_OPS.$ilike) {
                   items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(`${inner}%`)}`);
                 } else {
@@ -471,11 +471,11 @@ export abstract class SQLDialect implements DialectState {
                 }
               } else {
                 if (!ins || SQL_OPS.$iregex) {
-                  const val = resolve(v);
-                  items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${val}`);
+                  const result = resolve(value);
+                  items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${result}`);
                 } else {
-                  const val = resolve(new RegExp(src.toLowerCase(), re.flags));
-                  items.push(`LOWER(${sPath}) ${SQL_OPS[subKey]} ${val}`);
+                  const result = resolve(new RegExp(regexSource.toLowerCase(), regex.flags));
+                  items.push(`LOWER(${sPath}) ${SQL_OPS[subKey]} ${result}`);
                 }
               }
               break;
@@ -484,31 +484,31 @@ export abstract class SQLDialect implements DialectState {
               if (field.array) {
                 const valueTable = this.parentTable(sStack);
                 const alias = `_all_${sStack.length}`;
-                const pPath = this.ident(this.parentPathField.name);
+                const pPath = this.identifier(this.parentPathField.name);
                 const rpPath = this.resolveName([...sStack, field, this.parentPathField]);
 
-                items.push(`0 ${!v ? '=' : '<>'} (
-                  SELECT COUNT(${alias}.${this.ident(field.name)})
+                items.push(`0 ${!value ? '=' : '<>'} (
+                  SELECT COUNT(${alias}.${this.identifier(field.name)})
                   FROM ${valueTable} ${alias} 
                   WHERE ${alias}.${pPath} = ${rpPath}
                 )`);
               } else {
-                items.push(`${sPath} ${v ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
+                items.push(`${sPath} ${value ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
               }
               break;
             }
             case '$ne': case '$eq': {
-              if (v === null || v === undefined) {
+              if (value === null || value === undefined) {
                 items.push(`${sPath} ${subKey === '$ne' ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
               } else {
-                const base = `${sPath} ${SQL_OPS[subKey]} ${resolve(v)}`;
+                const base = `${sPath} ${SQL_OPS[subKey]} ${resolve(value)}`;
                 items.push(subKey === '$ne' ? `(${base} OR ${sPath} ${SQL_OPS.$is} NULL)` : base);
               }
               break;
             }
             case '$lt': case '$gt': case '$gte': case '$lte': {
               const subItems = TypedObject.keys(castTo<typeof SQL_OPS>(top))
-                .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
+                .map(subSubKey => `${sPath} ${SQL_OPS[subSubKey]} ${resolve(top[subSubKey])}`);
               items.push(subItems.length > 1 ? `(${subItems.join(` ${SQL_OPS.$and} `)})` : subItems[0]);
               break;
             }
@@ -534,17 +534,17 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Grouping of where clauses
    */
-  getWhereGroupingSQL<T>(cls: Class<T>, o: WhereClause<T>): string {
+  getWhereGroupingSQL<T>(cls: Class<T>, clause: WhereClause<T>): string {
     const SQL_OPS = this.SQL_OPS;
 
-    if (ModelQueryUtil.has$And(o)) {
-      return `(${o.$and.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$and} `)})`;
-    } else if (ModelQueryUtil.has$Or(o)) {
-      return `(${o.$or.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$or} `)})`;
-    } else if (ModelQueryUtil.has$Not(o)) {
-      return `${SQL_OPS.$not} (${this.getWhereGroupingSQL<T>(cls, o.$not)})`;
+    if (ModelQueryUtil.has$And(clause)) {
+      return `(${clause.$and.map(item => this.getWhereGroupingSQL<T>(cls, item)).join(` ${SQL_OPS.$and} `)})`;
+    } else if (ModelQueryUtil.has$Or(clause)) {
+      return `(${clause.$or.map(item => this.getWhereGroupingSQL<T>(cls, item)).join(` ${SQL_OPS.$or} `)})`;
+    } else if (ModelQueryUtil.has$Not(clause)) {
+      return `${SQL_OPS.$not} (${this.getWhereGroupingSQL<T>(cls, clause.$not)})`;
     } else {
-      return this.getWhereFieldSQL(SQLModelUtil.classToStack(cls), o);
+      return this.getWhereFieldSQL(SQLModelUtil.classToStack(cls), clause);
     }
   }
 
@@ -563,8 +563,8 @@ export abstract class SQLDialect implements DialectState {
   getOrderBySQL<T>(cls: Class<T>, sortBy?: SortClause<T>[]): string {
     return !sortBy ?
       '' :
-      `ORDER BY ${SQLModelUtil.orderBy(cls, sortBy).map((ob) =>
-        `${this.resolveName(ob.stack)} ${ob.asc ? 'ASC' : 'DESC'}`
+      `ORDER BY ${SQLModelUtil.orderBy(cls, sortBy).map((item) =>
+        `${this.resolveName(item.stack)} ${item.asc ? 'ASC' : 'DESC'}`
       ).join(', ')}`;
   }
 
@@ -591,7 +591,7 @@ export abstract class SQLDialect implements DialectState {
     const tables = [...aliases.keys()].toSorted((a, b) => a.length - b.length); // Shortest first
     return `FROM ${tables.map((table) => {
       const { alias, path } = aliases.get(table)!;
-      let from = `${this.ident(table)} ${alias}`;
+      let from = `${this.identifier(table)} ${alias}`;
       if (path.length > 1) {
         const key = this.namespaceParent(path);
         const { alias: parentAlias } = aliases.get(key)!;
@@ -620,7 +620,7 @@ LEFT OUTER JOIN ${from} ON
     const sortFields = !query.sort ?
       '' :
       SQLModelUtil.orderBy(cls, query.sort)
-        .map(x => this.resolveName(x.stack))
+        .map(item => this.resolveName(item.stack))
         .join(', ');
 
     // TODO: Really confused on this
@@ -649,21 +649,21 @@ ${this.getLimitSQL(cls, query)}`;
       (array ? [castTo<SchemaFieldConfig>(config)] : []);
 
     if (!parent) {
-      let idField = fields.find(x => x.name === this.idField.name);
+      let idField = fields.find(field => field.name === this.idField.name);
       if (!idField) {
         fields.push(idField = this.idField);
       } else {
-        idField.maxlength = { n: this.ID_LEN };
+        idField.maxlength = { n: this.ID_LENGTH };
       }
     }
 
     const fieldSql = fields
-      .map(f => {
-        const def = this.getColumnDefinition(f) || '';
-        return f.name === this.idField.name && !parent ?
+      .map(field => {
+        const def = this.getColumnDefinition(field) || '';
+        return field.name === this.idField.name && !parent ?
           def.replace('DEFAULT NULL', 'NOT NULL') : def;
       })
-      .filter(x => !!x.trim())
+      .filter(line => !!line.trim())
       .join(',\n  ');
 
     const out = `
@@ -671,11 +671,11 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   ${fieldSql}${fieldSql.length ? ',' : ''}
   ${this.getColumnDefinition(this.pathField)} UNIQUE,
   ${!parent ?
-        `PRIMARY KEY (${this.ident(this.idField)})` :
+        `PRIMARY KEY (${this.identifier(this.idField)})` :
         `${this.getColumnDefinition(this.parentPathField)},
     ${array ? `${this.getColumnDefinition(this.idxField)},` : ''}
-  PRIMARY KEY (${this.ident(this.pathField)}),
-  FOREIGN KEY (${this.ident(this.parentPathField)}) REFERENCES ${this.parentTable(stack)}(${this.ident(this.pathField)}) ON DELETE CASCADE`}
+  PRIMARY KEY (${this.identifier(this.pathField)}),
+  FOREIGN KEY (${this.identifier(this.parentPathField)}) REFERENCES ${this.parentTable(stack)}(${this.identifier(this.pathField)}) ON DELETE CASCADE`}
 );`;
     return out;
   }
@@ -719,17 +719,17 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
     const table = this.namespace(SQLModelUtil.classToStack(cls));
-    const fields: [string, boolean][] = idx.fields.map(x => {
-      const key = TypedObject.keys(x)[0];
-      const val = x[key];
-      if (DataUtil.isPlainObject(val)) {
+    const fields: [string, boolean][] = idx.fields.map(field => {
+      const key = TypedObject.keys(field)[0];
+      const value = field[key];
+      if (DataUtil.isPlainObject(value)) {
         throw new Error('Unable to supported nested fields for indices');
       }
-      return [castTo(key), typeof val === 'number' ? val === 1 : (!!val)];
+      return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
     });
-    const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
-    return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
-      .map(([name, sel]) => `${this.ident(name)} ${sel ? 'ASC' : 'DESC'}`)
+    const constraint = `idx_${table}_${fields.map(([field]) => field).join('_')}`;
+    return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
+      .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')});`;
   }
 
@@ -765,30 +765,30 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']): string | undefined {
     const config = stack.at(-1)!;
     const columns = SQLModelUtil.getFieldsByLocation(stack).local
-      .filter(x => !SchemaRegistryIndex.has(x.type))
-      .toSorted((a, b) => a.name.toString().localeCompare(b.name.toString()));
-    const columnNames = columns.map(c => c.name);
+      .filter(field => !SchemaRegistryIndex.has(field.type))
+      .toSorted((a, b) => a.name.localeCompare(b.name));
+    const columnNames = columns.map(column => column.name);
 
     const hasParent = stack.length > 1;
     const isArray = !!config.array;
 
     if (isArray) {
       const newInstances: typeof instances = [];
-      for (const el of instances) {
-        if (el.value === null || el.value === undefined) {
+      for (const instance of instances) {
+        if (instance.value === null || instance.value === undefined) {
           continue;
-        } else if (Array.isArray(el.value)) {
-          const name = el.stack.at(-1)!.name;
-          for (const sel of el.value) {
+        } else if (Array.isArray(instance.value)) {
+          const name = instance.stack.at(-1)!.name;
+          for (const sel of instance.value) {
             newInstances.push({
-              stack: el.stack,
+              stack: instance.stack,
               value: {
                 [name]: sel
               }
             });
           }
         } else {
-          newInstances.push(el);
+          newInstances.push(instance);
         }
       }
       instances = newInstances;
@@ -798,7 +798,8 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return;
     }
 
-    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, castTo<Record<string | symbol, unknown>>(inst.value)[c.name])));
+    const matrix = instances.map(inst => columns.map(column =>
+      this.resolveValue(column, castTo<Record<string, unknown>>(inst.value)[column.name])));
 
     columnNames.push(this.pathField.name);
     if (hasParent) {
@@ -824,7 +825,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     }
 
     return `
-INSERT INTO ${this.table(stack)} (${columnNames.map(this.ident).join(', ')})
+INSERT INTO ${this.table(stack)} (${columnNames.map(this.identifier).join(', ')})
 VALUES
 ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   }
@@ -854,8 +855,8 @@ UPDATE ${this.table(stack)} ${this.rootAlias}
 SET
   ${Object
         .entries(data)
-        .filter(([k]) => k in localMap)
-        .map(([k, v]) => `${this.ident(k)}=${this.resolveValue(localMap[k], v)}`).join(', ')}
+        .filter(([key]) => key in localMap)
+        .map(([key, value]) => `${this.identifier(key)}=${this.resolveValue(localMap[key], value)}`).join(', ')}
   ${this.getWhereSQL(type, where)};`;
   }
 
@@ -874,12 +875,12 @@ ${this.getWhereSQL(type, where)};`;
     const config = stack.at(-1)!;
     const orderBy = !config.array ?
       '' :
-      `ORDER BY ${this.rootAlias}.${this.idxField.name.toString()} ASC`;
+      `ORDER BY ${this.rootAlias}.${this.idxField.name} ASC`;
 
     const idField = (stack.length > 1 ? this.parentPathField : this.idField);
 
     return `
-SELECT ${select.length ? select.map(x => this.alias(x)).join(',') : '*'}
+SELECT ${select.length ? select.map(field => this.alias(field)).join(',') : '*'}
 FROM ${this.table(stack)} ${this.rootAlias}
 WHERE ${this.alias(idField)} IN (${ids.map(id => this.resolveValue(idField, id)).join(', ')})
 ${orderBy};`;
@@ -904,9 +905,9 @@ ${this.getWhereSQL(cls, where!)}`;
 
     await SQLModelUtil.visitSchema(SchemaRegistryIndex.getConfig(cls), {
       onRoot: async (config) => {
-        const res = buildSet(items); // Already filtered by initial select query
+        const fieldSet = buildSet(items); // Already filtered by initial select query
         selectStack.push(select);
-        stack.push(res);
+        stack.push(fieldSet);
         await config.descend();
       },
       onSub: async ({ config, descend, fields, path }) => {
@@ -917,28 +918,28 @@ ${this.getWhereSQL(cls, where!)}`;
         const subSelectTop: SelectClause<T> | undefined = castTo(selectTop?.[fieldKey]);
 
         // See if a selection exists at all
-        const sel: SchemaFieldConfig[] = subSelectTop ? fields
-          .filter(f => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(f.name)] === 1)
+        const selected: SchemaFieldConfig[] = subSelectTop ? fields
+          .filter(field => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(field.name)] === 1)
           : [];
 
-        if (sel.length) {
-          sel.push(this.pathField, this.parentPathField);
+        if (selected.length) {
+          selected.push(this.pathField, this.parentPathField);
           if (config.array) {
-            sel.push(this.idxField);
+            selected.push(this.idxField);
           }
         }
 
         // If children and selection exists
-        if (ids.length && (!subSelectTop || sel)) {
+        if (ids.length && (!subSelectTop || selected)) {
           const { records: children } = await this.executeSQL<unknown[]>(this.getSelectRowsByIdsSQL(
             path,
             ids,
-            sel
+            selected
           ));
 
-          const res = buildSet(children, config);
+          const fieldSet = buildSet(children, config);
           try {
-            stack.push(res);
+            stack.push(fieldSet);
             selectStack.push(subSelectTop);
             await descend();
           } finally {
@@ -982,30 +983,34 @@ ${this.getWhereSQL(cls, where!)}`;
   async bulkProcess(deletes: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
     const out = {
       counts: {
-        delete: deletes.reduce((acc, el) => acc + el.ids.length, 0),
+        delete: deletes.reduce((count, item) => count + item.ids.length, 0),
         error: 0,
-        insert: inserts.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0),
-        update: updates.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0),
-        upsert: upserts.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0)
+        insert: inserts.filter(item => item.stack.length === 1).reduce((count, item) => count + item.records.length, 0),
+        update: updates.filter(item => item.stack.length === 1).reduce((count, item) => count + item.records.length, 0),
+        upsert: upserts.filter(item => item.stack.length === 1).reduce((count, item) => count + item.records.length, 0)
       },
       errors: [],
       insertedIds: new Map()
     };
 
     // Full removals
-    await Promise.all(deletes.map(el => this.deleteByIds(el.stack, el.ids)));
+    await Promise.all(deletes.map(item => this.deleteByIds(item.stack, item.ids)));
 
     // Adding deletes
     if (upserts.length || updates.length) {
       const idx = this.idField.name;
 
       await Promise.all([
-        ...upserts.filter(x => x.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string | symbol, string>>(v.value)[idx]))
-        ),
-        ...updates.filter(x => x.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string | symbol, string>>(v.value)[idx]))
-        ),
+        ...upserts
+          .filter(item => item.stack.length === 1)
+          .map(item =>
+            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string, string>>(value.value)[idx]))
+          ),
+        ...updates
+          .filter(item => item.stack.length === 1)
+          .map(item =>
+            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string, string>>(value.value)[idx]))
+          ),
       ]);
     }
 
@@ -1014,17 +1019,17 @@ ${this.getWhereSQL(cls, where!)}`;
       if (!items.length) {
         continue;
       }
-      let lvl = 1; // Add by level
+      let level = 1; // Add by level
       for (; ;) { // Loop until done
-        const leveled = items.filter(f => f.stack.length === lvl);
+        const leveled = items.filter(insertWrapper => insertWrapper.stack.length === level);
         if (!leveled.length) {
           break;
         }
         await Promise.all(leveled
-          .map(iw => this.getInsertSQL(iw.stack, iw.records))
+          .map(inserted => this.getInsertSQL(inserted.stack, inserted.records))
           .filter(sql => !!sql)
           .map(sql => this.executeSQL(sql!)));
-        lvl += 1;
+        level += 1;
       }
     }
 

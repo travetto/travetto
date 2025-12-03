@@ -18,11 +18,11 @@ export class RepoPublishCommand implements CliCommandShape {
       filter: mod => !!mod.workspace && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
       showStderr: false,
-      transformResult: (mod, res) => PackageManager.validatePublishedResult(Runtime, mod, res),
+      transformResult: (mod, result) => PackageManager.validatePublishedResult(Runtime, mod, result),
     });
 
     if (this.dryRun) {
-      console.log('Unpublished modules', [...published.entries()].filter(x => !x[1]).map(([mod]) => mod.sourceFolder));
+      console.log('Unpublished modules', [...published.entries()].filter(entry => !entry[1]).map(([mod]) => mod.sourceFolder));
     }
 
     await RepoExecUtil.execOnModules(

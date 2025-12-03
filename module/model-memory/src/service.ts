@@ -23,7 +23,7 @@ export class MemoryModelConfig {
 }
 
 function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string): string {
-  return [cls.Ⲑid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
+  return [cls.Ⲑid, typeof idx === 'string' ? idx : idx.name, suffix].filter(part => !!part).join(':');
 }
 
 function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number): string | undefined {
@@ -31,7 +31,7 @@ function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | n
   if (data instanceof Set) {
     id = data.values().next().value;
   } else {
-    id = [...data.entries()].find(([, v]) => value === undefined || v === value)?.[0];
+    id = [...data.entries()].find(([, item]) => value === undefined || item === value)?.[0];
   }
   return id;
 }
@@ -81,9 +81,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
         const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
         this.#indices[idx.type].get(idxName)?.get(key)?.delete(id);
       }
-    } catch (err) {
-      if (!(err instanceof NotFoundError)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
     }
   }
@@ -149,11 +149,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     await ModelStorageUtil.registerModelChangeListener(this);
     ModelExpiryUtil.registerCull(this);
 
-    for (const el of ModelRegistryIndex.getClasses()) {
-      for (const idx of ModelRegistryIndex.getConfig(el).indices ?? []) {
+    for (const cls of ModelRegistryIndex.getClasses()) {
+      for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
-            console.error('Unique indices are not supported for', { cls: el.Ⲑid, idx: idx.name });
+            console.error('Unique indices are not supported for', { cls: cls.Ⲑid, idx: idx.name });
             break;
           }
         }
@@ -165,14 +165,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const store = this.#getStore(cls);
     if (store.has(id)) {
-      const res = await ModelCrudUtil.load(cls, store.get(id)!);
-      if (res) {
+      const result = await ModelCrudUtil.load(cls, store.get(id)!);
+      if (result) {
         if (ModelRegistryIndex.getConfig(cls).expiresAt) {
-          if (!ModelExpiryUtil.getExpiryState(cls, res).expired) {
-            return res;
+          if (!ModelExpiryUtil.getExpiryState(cls, result).expired) {
+            return result;
           }
         } else {
-          return res;
+          return result;
         }
       }
     }
@@ -221,9 +221,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     for (const id of this.#getStore(cls).keys()) {
       try {
         yield await this.get(cls, id);
-      } catch (err) {
-        if (!(err instanceof NotFoundError)) {
-          throw err;
+      } catch (error) {
+        if (!(error instanceof NotFoundError)) {
+          throw error;
         }
       }
     }
@@ -281,8 +281,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     let deleted = 0;
     for (const key of [...store.keys()]) {
       try {
-        const res = await ModelCrudUtil.load(cls, store.get(key)!);
-        if (ModelExpiryUtil.getExpiryState(cls, res).expired) {
+        const result = await ModelCrudUtil.load(cls, store.get(key)!);
+        if (ModelExpiryUtil.getExpiryState(cls, result).expired) {
           store.delete(key);
           deleted += 1;
         }

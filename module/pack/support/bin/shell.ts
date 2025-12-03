@@ -8,8 +8,8 @@ const escape = (text: string): string =>
     .replaceAll('"', '\\"')
     .replaceAll('$', '\\$');
 
-const escapedArgs = (args: string[]): string[] => args.map(x =>
-  x.includes(' ') || x.includes('"') ? `'${x}'` : (x.includes("'") ? `"${x}"` : x)
+const escapedArgs = (args: string[]): string[] => args.map(arg =>
+  arg.includes(' ') || arg.includes('"') ? `'${arg}'` : (arg.includes("'") ? `"${arg}"` : arg)
 );
 
 const toWin = (file: string): string => file.replace(/[\\\/]+/g, path.win32.sep);
@@ -24,20 +24,20 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
         ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]
       )
     ],
-    copy: (src, dest) => ['copy', src, dest],
-    copyRecursive: (src, dest, inclusive) =>
-      ['xcopy', '/y', '/h', '/s', inclusive ? `${toWin(src)}\\*.*` : toWin(src), toWin(dest)],
-    rmRecursive: (dest) => ['rmdir', '/Q', '/S', dest],
-    mkdir: (dest) => ['md', dest],
+    copy: (sourceFile, destinationFile) => ['copy', sourceFile, destinationFile],
+    copyRecursive: (sourceDirectory, destinationDirectory, inclusive) =>
+      ['xcopy', '/y', '/h', '/s', inclusive ? `${toWin(sourceDirectory)}\\*.*` : toWin(sourceDirectory), toWin(destinationDirectory)],
+    rmRecursive: (destinationDirectory) => ['rmdir', '/Q', '/S', destinationDirectory],
+    mkdir: (destinationDirectory) => ['md', destinationDirectory],
     export: (key, value) => ['set', `${key}=${value}`],
-    chdir: (dest) => ['cd', dest],
+    chdir: (destinationDirectory) => ['cd', destinationDirectory],
     comment: (message) => ['\nREM', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile],
-    script: (lines: string[], changeDir: boolean = false) => ({
+    script: (lines: string[], changeDirectory: boolean = false) => ({
       ext: '.cmd',
       contents: [
-        ...(changeDir ? ['cd %~p0'] : []),
+        ...(changeDirectory ? ['cd %~p0'] : []),
         ...lines,
       ]
     })
@@ -50,21 +50,21 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
         ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]),
       ...(mode ? [['chmod', mode, file]] : [])
     ],
-    copy: (src, dest) => ['cp', src, dest],
-    copyRecursive: (src, dest, inclusive) =>
-      ['cp', '-r', '-p', inclusive ? `${src}/*` : src, dest],
-    rmRecursive: (dest) => ['rm', '-rf', dest],
-    mkdir: (dest) => ['mkdir', '-p', dest],
+    copy: (sourceFile, destinationFile) => ['cp', sourceFile, destinationFile],
+    copyRecursive: (sourceDirectory, destinationDirectory, inclusive) =>
+      ['cp', '-r', '-p', inclusive ? `${sourceDirectory}/*` : sourceDirectory, destinationDirectory],
+    rmRecursive: (destinationDirectory) => ['rm', '-rf', destinationDirectory],
+    mkdir: (destinationDirectory) => ['mkdir', '-p', destinationDirectory],
     export: (key, value) => ['export', `${key}=${value}`],
-    chdir: (dest) => ['cd', dest],
+    chdir: (destinationDirectory) => ['cd', destinationDirectory],
     comment: (message) => ['\n#', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.'],
-    script: (lines: string[], changeDir: boolean = false) => ({
+    script: (lines: string[], changeDirectory: boolean = false) => ({
       ext: '.sh',
       contents: [
         '#!/bin/sh',
-        ...(changeDir ? ['cd $(dirname "$0")'] : []),
+        ...(changeDirectory ? ['cd $(dirname "$0")'] : []),
         ...lines,
       ]
     })

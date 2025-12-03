@@ -24,10 +24,11 @@ export class EditorService {
     return Promise.resolve(this.engine.render(text, context)).then(MailUtil.purgeBrand);
   }
 
-  async #renderTemplate(rel: string, context: Record<string, unknown>): Promise<EmailCompiled> {
-    const p = await EmailCompiler.compile(rel);
+  async #renderTemplate(templateFile: string, context: Record<string, unknown>): Promise<EmailCompiled> {
+    const email = await EmailCompiler.compile(templateFile);
     return TypedObject.fromEntries(
-      await Promise.all(TypedObject.entries(p).map(([k, v]) => this.#interpolate(v, context).then((t) => [k, t])))
+      await Promise.all(TypedObject.entries(email).map(([key, value]) =>
+        this.#interpolate(value, context).then((result) => [key, result])))
     );
   }
 
@@ -36,24 +37,24 @@ export class EditorService {
     return { content, file };
   }
 
-  async #response<T>(op: Promise<T>, success: (v: T) => EditorResponse, fail?: (err: Error) => EditorResponse): Promise<void> {
+  async #response<T>(operation: Promise<T>, success: (value: T) => EditorResponse, fail?: (error: Error) => EditorResponse): Promise<void> {
     try {
-      const res = await op;
-      if (process.connected) { process.send?.(success(res)); }
-    } catch (err) {
-      if (fail && process.connected && err && err instanceof Error) {
-        process.send?.(fail(err));
+      const response = await operation;
+      if (process.connected) { process.send?.(success(response)); }
+    } catch (error) {
+      if (fail && process.connected && error && error instanceof Error) {
+        process.send?.(fail(error));
       } else {
-        console.error(err);
+        console.error(error);
       }
     }
   }
 
   async sendFile(file: string, to?: string): Promise<{ to: string, file: string, url?: string | false | undefined }> {
-    const cfg = await EditorConfig.get();
-    to ||= cfg.to;
-    const content = await this.#renderTemplate(file, cfg.context ?? {});
-    return { to, file, ...await this.sender.send({ from: cfg.from, to, ...content, }) };
+    const config = await EditorConfig.get();
+    to ||= config.to;
+    const content = await this.#renderTemplate(file, config.context ?? {});
+    return { to, file, ...await this.sender.send({ from: config.from, to, ...content, }) };
   }
 
   /**
@@ -63,22 +64,22 @@ export class EditorService {
     if (!process.connected || !process.send) {
       throw new AppError('Unable to run email editor, missing ipc channel');
     }
-    process.on('message', async (msg: EditorRequest) => {
-      switch (msg.type) {
+    process.on('message', async (request: EditorRequest) => {
+      switch (request.type) {
         case 'configure': {
           return await this.#response(EditorConfig.ensureConfig(), file => ({ type: 'configured', file }));
         }
         case 'compile': {
-          return await this.#response(this.#renderFile(msg.file),
-            res => ({ type: 'compiled', ...res }),
-            err => ({ type: 'compiled-failed', message: err.message, stack: err.stack, file: msg.file })
+          return await this.#response(this.#renderFile(request.file),
+            result => ({ type: 'compiled', ...result }),
+            error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file: request.file })
           );
         }
         case 'send': {
           return await this.#response(
-            this.sendFile(msg.file, msg.to),
-            res => ({ type: 'sent', ...res }),
-            err => ({ type: 'sent-failed', message: err.message, stack: err.stack, to: msg.to!, file: msg.file })
+            this.sendFile(request.file, request.to),
+            result => ({ type: 'sent', ...result }),
+            error => ({ type: 'sent-failed', message: error.message, stack: error.stack, to: request.to!, file: request.file })
           );
         }
       }
@@ -88,8 +89,8 @@ export class EditorService {
 
     for await (const file of EmailCompiler.watchCompile()) {
       await this.#response(this.#renderFile(file),
-        res => ({ type: 'compiled', ...res }),
-        err => ({ type: 'compiled-failed', message: err.message, stack: err.stack, file })
+        result => ({ type: 'compiled', ...result }),
+        error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
       );
     }
   }

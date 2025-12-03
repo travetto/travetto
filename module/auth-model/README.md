@@ -100,29 +100,29 @@ import { User } from './model.ts';
 
 class AuthConfig {
   @InjectableFactory()
-  static getModelAuthService(svc: ModelCrudSupport) {
+  static getModelAuthService(service: ModelCrudSupport) {
     return new ModelAuthService(
-      svc,
+      service,
       User,
-      u => ({    // This converts User to a RegisteredPrincipal
+      user => ({    // This converts User to a RegisteredPrincipal
         source: 'model',
         provider: 'model',
-        id: u.id!,
-        permissions: u.permissions,
-        hash: u.hash,
-        salt: u.salt,
-        resetToken: u.resetToken,
-        resetExpires: u.resetExpires,
-        password: u.password,
-        details: u,
+        id: user.id!,
+        permissions: user.permissions,
+        hash: user.hash,
+        salt: user.salt,
+        resetToken: user.resetToken,
+        resetExpires: user.resetExpires,
+        password: user.password,
+        details: user,
       }),
-      u => User.from(({   // This converts a RegisteredPrincipal to a User
-        id: u.id,
-        permissions: [...(u.permissions || [])],
-        hash: u.hash,
-        salt: u.salt,
-        resetToken: u.resetToken,
-        resetExpires: u.resetExpires,
+      user => User.from(({   // This converts a RegisteredPrincipal to a User
+        id: user.id,
+        permissions: [...(user.permissions || [])],
+        hash: user.hash,
+        salt: user.salt,
+        resetToken: user.resetToken,
+        resetExpires: user.resetExpires,
       })
       )
     );
@@ -147,11 +147,11 @@ class UserService {
   async authenticate(identity: User) {
     try {
       return await this.auth.authenticate(identity);
-    } catch (err) {
-      if (err instanceof AppError && err.category === 'notfound') {
+    } catch (error) {
+      if (error instanceof AppError && error.category === 'notfound') {
         return await this.auth.register(identity);
       } else {
-        throw err;
+        throw error;
       }
     }
   }

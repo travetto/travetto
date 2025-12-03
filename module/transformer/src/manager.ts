@@ -19,7 +19,7 @@ export class TransformerManager {
    * @returns
    */
   static async create(manifestIndex: ManifestIndex): Promise<TransformerManager> {
-    const transformerFiles = manifestIndex.find({ folder: f => f === '$transformer' }).map(f => f.sourceFile);
+    const transformerFiles = manifestIndex.find({ folder: folder => folder === '$transformer' }).map(file => file.sourceFile);
 
     const transformers: NodeTransformer<TransformerState>[] = [];
 
@@ -28,8 +28,13 @@ export class TransformerManager {
       transformers.push(...getAllTransformers(await import(ManifestModuleUtil.withOutputExtension(entry.import)), entry.module));
     }
 
-    for (const x of transformers) {
-      process.send?.({ type: 'log', payload: { level: 'debug', message: `Loaded Transformer: ${x.key}#${x.type}`, scope: 'transformers' } });
+    for (const transformer of transformers) {
+      process.send?.({
+        type: 'log', payload: {
+          level: 'debug',
+          message: `Loaded Transformer: ${transformer.key}#${transformer.type}`, scope: 'transformers'
+        }
+      });
     }
 
     // Prepare a new visitor factory with a given type checker
@@ -51,7 +56,7 @@ export class TransformerManager {
    */
   init(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(
-      (ctx, src) => new TransformerState(src, ctx.factory, checker, this.#manifestIndex),
+      (ctx, source) => new TransformerState(source, ctx.factory, checker, this.#manifestIndex),
       this.#transformers
     );
 

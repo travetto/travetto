@@ -47,41 +47,41 @@ export class CliModuleUtil {
   static async findModules(mode: 'all' | 'changed' | 'workspace', fromHash?: string, toHash?: string): Promise<IndexedModule[]> {
     return (mode === 'changed' ?
       await this.findChangedModulesRecursive(fromHash, toHash, true) :
-      [...RuntimeIndex.getModuleList(mode)].map(x => RuntimeIndex.getModule(x)!)
-    ).filter(x => x.sourcePath !== Runtime.workspace.path);
+      [...RuntimeIndex.getModuleList(mode)].map(name => RuntimeIndex.getModule(name)!)
+    ).filter(mod => mod.sourcePath !== Runtime.workspace.path);
   }
 
   /**
    * Get module dependency graph, fully collapsed
    */
-  static getDependencyGraph(mods: IndexedModule[]): Record<string, string[]> {
+  static getDependencyGraph(modules: IndexedModule[]): Record<string, string[]> {
     const childMap: Map<string, ModuleGraphEntry> = new Map();
     const get = (name: string): ModuleGraphEntry =>
       childMap.has(name) ? childMap.get(name)! : childMap.set(name, { children: new Set(), name, active: new Set() }).get(name)!;
 
-    for (const el of mods) {
-      get(el.name).parents = el.parents;
-      for (const dep of el.parents) {
-        const par = get(dep);
-        par.children.add(el.name); // Store child into parent
-        par.active.add(el.name);
+    for (const mod of modules) {
+      get(mod.name).parents = mod.parents;
+      for (const parentModule of mod.parents) {
+        const parent = get(parentModule);
+        parent.children.add(mod.name); // Store child into parent
+        parent.active.add(mod.name);
       }
     }
 
     const output: Record<string, string[]> = {};
 
     while (childMap.size > 0) {
-      for (const el of [...childMap.values()].filter(x => x.active.size === 0)) {
-        output[el.name] = [...el.children];
-        for (const parent of el.parents ?? []) {
+      for (const item of [...childMap.values()].filter(entry => entry.active.size === 0)) {
+        output[item.name] = [...item.children];
+        for (const parent of item.parents ?? []) {
           const par = childMap.get(parent)!;
           // Extend children into parents
-          for (const val of el.children) {
-            par.children.add(val);
+          for (const child of item.children) {
+            par.children.add(child);
           }
-          par.active.delete(el.name);
+          par.active.delete(item.name);
         }
-        childMap.delete(el.name);
+        childMap.delete(item.name);
       }
     }
     return output;
@@ -106,16 +106,16 @@ export class CliModuleUtil {
     if (config.since) {
       try {
         const files = await CliScmUtil.findChangedFiles(config.since, 'HEAD');
-        return files.filter(x => !x.endsWith('package.json') && !x.endsWith('package-lock.json'));
-      } catch (err) {
-        if (config.logError && err instanceof Error) {
-          console.error(err.message);
+        return files.filter(file => !file.endsWith('package.json') && !file.endsWith('package-lock.json'));
+      } catch (error) {
+        if (config.logError && error instanceof Error) {
+          console.error(error.message);
         }
         return [];
       }
     } else {
       const mods = await this.findModules(config.changed ? 'changed' : 'workspace', undefined, 'HEAD');
-      return mods.map(x => x.sourcePath);
+      return mods.map(mod => mod.sourcePath);
     }
   }
 }

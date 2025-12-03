@@ -39,8 +39,8 @@ import { LogFormatter, LogCommonSymbol, LogEvent } from '@travetto/log';
 @Injectable(LogCommonSymbol)
 export class SampleFormatter implements LogFormatter {
 
-  format(e: LogEvent): string {
-    return `${e.timestamp} [${e.level}]#[${e.scope ?? 'unknown'}] ${e.message ?? 'NO MESSAGE'} ${(e.args ?? []).join(' ')}`;
+  format(event: LogEvent): string {
+    return `${event.timestamp} [${event.level}]#[${event.scope ?? 'unknown'}] ${event.message ?? 'NO MESSAGE'} ${(event.args ?? []).join(' ')}`;
   }
 }
 ```
@@ -53,7 +53,7 @@ The default pattern for logging is to create a [Logger](https://github.com/trave
 **Code: Logger Shape**
 ```typescript
 export interface Logger {
-  log(ev: LogEvent): unknown;
+  log(event: LogEvent): unknown;
 }
 ```
 
@@ -98,10 +98,10 @@ import { LogEvent, Logger } from '@travetto/log';
 
 @Injectable()
 export class CustomLogger implements Logger {
-  log(ev: LogEvent): void {
+  log(event: LogEvent): void {
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');
-    const body = JSON.stringify(ev);
+    const body = JSON.stringify(event);
     fetch('http://localhost:8080/log', { method: 'POST', headers, body, });
   }
 }
@@ -113,7 +113,7 @@ In addition to being able to control the entire logging experience, there are al
 **Code: Log Decorator Shape**
 ```typescript
 export interface LogDecorator {
-  decorate(ev: LogEvent): LogEvent;
+  decorate(event: LogEvent): LogEvent;
 }
 ```
 
@@ -126,12 +126,12 @@ import { LogDecorator, LogEvent } from '@travetto/log';
 
 @Injectable()
 export class CustomDecorator implements LogDecorator {
-  decorate(ev: LogEvent): LogEvent {
-    ev.args.push({
+  decorate(event: LogEvent): LogEvent {
+    event.args.push({
       memory: process.memoryUsage,
       hostname: os.hostname()
     });
-    return ev;
+    return event;
   }
 }
 ```

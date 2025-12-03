@@ -80,50 +80,50 @@ export class LineLogFormatterConfig {
 @Injectable()
 export class LineLogFormatter implements LogFormatter {
 
-  opts: LineLogFormatterConfig;
+  config: LineLogFormatterConfig;
 
-  constructor(opts: LineLogFormatterConfig) {
-    this.opts = opts;
+  constructor(config: LineLogFormatterConfig) {
+    this.config = config;
   }
 
   /**
    * Format an event into a single line
    */
-  format(ev: LogEvent): string {
+  format(event: LogEvent): string {
     const out = [];
 
-    if (this.opts.timestamp) {
-      let timestamp = ev.timestamp.toISOString();
-      if (this.opts.timestamp === 's') {
+    if (this.config.timestamp) {
+      let timestamp = event.timestamp.toISOString();
+      if (this.config.timestamp === 's') {
         timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
-      if (this.opts.colorize) {
+      if (this.config.colorize) {
         timestamp = STYLES.timestamp(timestamp);
       }
       out.push(timestamp);
     }
 
-    if (this.opts.level) {
-      let level: string = ev.level;
-      if (this.opts.align) {
+    if (this.config.level) {
+      let level: string = event.level;
+      if (this.config.align) {
         level = level.padEnd(5, ' ');
       }
-      if (this.opts.colorize) {
-        level = STYLES[ev.level](level);
+      if (this.config.colorize) {
+        level = STYLES[event.level](level);
       }
       out.push(level);
     }
 
-    if (ev.modulePath && this.opts.location) {
-      const ns = `${ev.module}:${ev.modulePath}`;
-      let loc = ev.line ? `${ns}:${ev.line}` : ns;
-      if (this.opts.colorize) {
-        loc = STYLES.location(loc);
+    if (event.modulePath && this.config.location) {
+      const namespace = `${event.module}:${event.modulePath}`;
+      let location = event.line ? `${namespace}:${event.line}` : namespace;
+      if (this.config.colorize) {
+        location = STYLES.location(location);
       }
-      out.push(`[${loc}]`);
+      out.push(`[${location}]`);
     }
 
-    out.push(LogFormatUtil.getLogMessage(ev, this.opts.inspectOptions));
+    out.push(LogFormatUtil.getLogMessage(event, this.config.inspectOptions));
 
     return out.join(' ');
   }

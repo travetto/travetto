@@ -18,7 +18,7 @@ function NodeList({ src }: { src: string }): DocJSXElement {
     });
 
   const children = features.toSorted((a, b) => a.name.localeCompare(b.name))
-    .map(f => <li>{d.method(f.name)} - {f.desc}</li>);
+    .map(feature => <li>{d.method(feature.name)} - {feature.desc}</li>);
 
   return <ul>{...children}</ul>;
 }
@@ -55,11 +55,11 @@ export const text = async () => {
     <c.Section title='CLI - doc'>
       The run command allows for generating documentation output.
       <c.Execution title='CLI Doc Help' cmd='trv' args={['doc', '--help']}
-        config={{ cwd: './doc-exec' }} />
+        config={{ workingDirectory: './doc-exec' }} />
 
       By default, running the command will output the {d.library('Markdown')} content directly to the terminal.
       <c.Execution title='Sample CLI Output' cmd='trv' args={['doc', '-o', 'html']}
-        config={{ cwd: './doc-exec' }} />
+        config={{ workingDirectory: './doc-exec' }} />
     </c.Section>
   </>;
 };

@@ -22,7 +22,7 @@ export class SchemaTransformUtil {
     switch (type.key) {
       case 'pointer': return this.toConcreteType(state, type.target, node, root);
       case 'managed': return state.getOrImport(type);
-      case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toConcreteType(state, x, node, root)!));
+      case 'tuple': return state.fromLiteral(type.subTypes.map(subType => this.toConcreteType(state, subType, node, root)!));
       case 'template': return state.createIdentifier(type.ctor.name);
       case 'literal': {
         if ((type.ctor === Array) && type.typeArguments?.length) {
@@ -60,7 +60,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
       }
       case 'unknown': {
         const imp = state.importFile(this.TYPES_IMPORT);
-        return state.createAccess(imp.ident, 'UnknownType');
+        return state.createAccess(imp.identifier, 'UnknownType');
       }
       case 'shape': {
         const uniqueId = state.generateUniqueIdentifier(node, type, 'Δ');
@@ -76,18 +76,18 @@ class ${uniqueId} extends ${type.mappedClassName} {
             ],
             id, [], [],
             Object.entries(type.fieldTypes)
-              .map(([k, v]) =>
+              .map(([key, value]) =>
                 this.computeInput(state, state.factory.createPropertyDeclaration(
-                  [], /\W/.test(k) ? state.factory.createComputedPropertyName(state.fromLiteral(k)) : k,
-                  v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-                  v.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
-                ), { type: v, root })
+                  [], /\W/.test(key) ? state.factory.createComputedPropertyName(state.fromLiteral(key)) : key,
+                  value.undefinable || value.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+                  value.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
+                ), { type: value, root })
               )
           );
           cls.getText = (): string => [
             `class ${uniqueId} {`,
             ...Object.entries(type.fieldTypes)
-              .map(([k, v]) => `  ${k}${v.nullable ? '?' : ''}: ${v.name};`),
+              .map(([key, value]) => `  ${key}${value.nullable ? '?' : ''}: ${value.name};`),
             '}'
           ].join('\n');
           state.addStatements([cls], root || node);
@@ -135,12 +135,12 @@ class ${uniqueId} extends ${type.mappedClassName} {
         attrs.default = node.initializer;
       }
     } else {
-      const acc = DeclarationUtil.getAccessorPair(node);
+      const pair = DeclarationUtil.getAccessorPair(node);
       attrs.accessor = true;
-      if (!acc.setter) {
+      if (!pair.setter) {
         attrs.access = 'readonly';
       }
-      if (!acc.getter) {
+      if (!pair.getter) {
         attrs.access = 'writeonly';
       } else if (!!typeExpr.undefinable) {
         attrs.required = { active: false };
@@ -160,8 +160,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
     // We need to ensure we aren't being tripped up by the wrapper for arrays, sets, etc.
     // If we have a composition type
     if (primaryExpr.key === 'composition') {
-      const values = primaryExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
-        .filter(x => x !== undefined && x !== null);
+      const values = primaryExpr.subTypes
+        .map(subType => subType.key === 'literal' ? subType.value : undefined)
+        .filter(value => value !== undefined && value !== null);
 
       if (values.length === primaryExpr.subTypes.length) {
         attrs.enum = {
@@ -180,7 +181,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
 
     if (ts.isParameter(node)) {
       const parentComments = DocUtil.describeDocs(node.parent);
-      const paramComments: Partial<ParamDocumentation> = (parentComments.params ?? []).find(x => x.name === node.name.getText()) || {};
+      const paramComments: Partial<ParamDocumentation> = (parentComments.params ?? [])
+        .find(param => param.name === node.name.getText()) || {};
+
       if (paramComments.description) {
         attrs.description = paramComments.description;
       }
@@ -192,9 +195,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     const tags = ts.getJSDocTags(node);
-    const aliases = tags.filter(x => x.tagName.getText() === 'alias');
+    const aliases = tags.filter(tag => tag.tagName.getText() === 'alias');
     if (aliases.length) {
-      attrs.aliases = aliases.map(x => x.comment).filter(x => !!x);
+      attrs.aliases = aliases.map(alias => alias.comment).filter(alias => !!alias);
     }
 
     const params: ts.Expression[] = [];
@@ -241,15 +244,15 @@ class ${uniqueId} extends ${type.mappedClassName} {
   ): T {
     const existingField = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
     const existingInput = state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
-    const decParams = this.computeInputDecoratorParams(state, node, config);
+    const params = this.computeInputDecoratorParams(state, node, config);
 
     let modifiers: ts.ModifierLike[];
     if (existingField) {
-      const dec = state.createDecorator(this.FIELD_IMPORT, 'Field', ...decParams);
-      modifiers = DecoratorUtil.spliceDecorators(node, existingField, [dec]);
+      const decorator = state.createDecorator(this.FIELD_IMPORT, 'Field', ...params);
+      modifiers = DecoratorUtil.spliceDecorators(node, existingField, [decorator]);
     } else {
-      const dec = state.createDecorator(this.INPUT_IMPORT, 'Input', ...decParams);
-      modifiers = DecoratorUtil.spliceDecorators(node, existingInput, [dec]);
+      const decorator = state.createDecorator(this.INPUT_IMPORT, 'Input', ...params);
+      modifiers = DecoratorUtil.spliceDecorators(node, existingInput, [decorator]);
     }
 
     let result: unknown;
@@ -324,8 +327,8 @@ class ${uniqueId} extends ${type.mappedClassName} {
     let cls;
     switch (type?.key) {
       case 'managed': {
-        const [dec] = DeclarationUtil.getDeclarations(type.original!);
-        cls = dec && ts.isClassDeclaration(dec) ? dec : undefined;
+        const [decorator] = DeclarationUtil.getDeclarations(type.original!);
+        cls = decorator && ts.isClassDeclaration(decorator) ? decorator : undefined;
         break;
       }
       case 'shape': cls = type.original; break;

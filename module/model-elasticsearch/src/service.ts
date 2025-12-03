@@ -1,7 +1,7 @@
 import { Client, errors, estypes } from '@elastic/elasticsearch';
 
 import {
-  ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
+  ModelCrudSupport, BulkOperation, BulkResponse, ModelBulkSupport, ModelExpirySupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistryIndex, OptionalId,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
@@ -55,41 +55,41 @@ export class ElasticsearchModelService implements
         query
       });
       return result;
-    } catch (err) {
-      if (err instanceof errors.ResponseError && err.meta.body && typeof err.meta.body === 'object' && 'error' in err.meta.body) {
-        console.error(err.meta.body.error);
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.meta.body && typeof error.meta.body === 'object' && 'error' in error.meta.body) {
+        console.error(error.meta.body.error);
       }
-      throw err;
+      throw error;
     }
   }
 
-  preUpdate(o: { id: string }): string;
-  preUpdate(o: {}): undefined;
-  preUpdate(o: { id?: string }): string | undefined {
-    if ('id' in o && typeof o.id === 'string') {
-      const id = o.id;
+  preUpdate(item: { id: string }): string;
+  preUpdate(item: {}): undefined;
+  preUpdate(item: { id?: string }): string | undefined {
+    if ('id' in item && typeof item.id === 'string') {
+      const id = item.id;
       if (!this.config.storeId) {
-        delete o.id;
+        delete item.id;
       }
       return id;
     }
     return;
   }
 
-  postUpdate<T extends ModelType>(o: T, id?: string): T {
+  postUpdate<T extends ModelType>(item: T, id?: string): T {
     if (!this.config.storeId) {
-      o.id = id!;
+      item.id = id!;
     }
-    return o;
+    return item;
   }
 
   /**
    * Convert _id to id
    */
-  async postLoad<T extends ModelType>(cls: Class<T>, inp: estypes.SearchHit<T> | estypes.GetGetResult<T>): Promise<T> {
+  async postLoad<T extends ModelType>(cls: Class<T>, input: estypes.SearchHit<T> | estypes.GetGetResult<T>): Promise<T> {
     let item = {
-      ...(inp._id ? { id: inp._id } : {}),
-      ...inp._source!,
+      ...(input._id ? { id: input._id } : {}),
+      ...input._source!,
     };
 
     item = await ModelCrudUtil.load(cls, item);
@@ -149,17 +149,17 @@ export class ElasticsearchModelService implements
       if (result.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }
-    } catch (err) {
-      if (err && err instanceof errors.ResponseError && err.body && err.body.result === 'not_found') {
+    } catch (error) {
+      if (error && error instanceof errors.ResponseError && error.body && error.body.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }
-      throw err;
+      throw error;
     }
   }
 
-  async create<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     try {
-      const clean = await ModelCrudUtil.preStore(cls, o, this);
+      const clean = await ModelCrudUtil.preStore(cls, item, this);
       const id = this.preUpdate(clean);
 
       await this.client.index({
@@ -170,18 +170,18 @@ export class ElasticsearchModelService implements
       });
 
       return this.postUpdate(clean, id);
-    } catch (err) {
-      console.error(err);
-      throw err;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   }
 
-  async update<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
+  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    o = await ModelCrudUtil.preStore(cls, o, this);
+    item = await ModelCrudUtil.preStore(cls, item, this);
 
-    const id = this.preUpdate(o);
+    const id = this.preUpdate(item);
 
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, id);
@@ -192,16 +192,16 @@ export class ElasticsearchModelService implements
       id,
       op_type: 'index',
       refresh: true,
-      body: castTo<T & { id: never }>(o)
+      body: castTo<T & { id: never }>(item)
     });
 
-    return this.postUpdate(o, id);
+    return this.postUpdate(item, id);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, input: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const item = await ModelCrudUtil.preStore(cls, o, this);
+    const item = await ModelCrudUtil.preStore(cls, input, this);
     const id = this.preUpdate(item);
 
     await this.client.update({
@@ -229,11 +229,11 @@ export class ElasticsearchModelService implements
         refresh: true,
         script,
       });
-    } catch (err) {
-      if (err instanceof Error && /document_missing_exception/.test(err.message)) {
+    } catch (error) {
+      if (error instanceof Error && /document_missing_exception/.test(error.message)) {
         throw new NotFoundError(cls, id);
       }
-      throw err;
+      throw error;
     }
 
     return this.get(cls, id);
@@ -247,12 +247,12 @@ export class ElasticsearchModelService implements
     });
 
     while (search.hits.hits.length > 0) {
-      for (const el of search.hits.hits) {
+      for (const hit of search.hits.hits) {
         try {
-          yield this.postLoad(cls, el);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+          yield this.postLoad(cls, hit);
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
         search = await this.client.scroll({
@@ -263,28 +263,30 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse<EsBulkError>> {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<EsBulkError>> {
 
     await ModelBulkUtil.preStore(cls, operations, this);
 
-    const body = operations.reduce<(T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]>((acc, op) => {
+    type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>>;
+    const body = operations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
 
-      const esIdent = this.manager.getIdentity(asConstructable<T>((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls })).constructor);
-      const ident: { _index: string, _type?: unknown } = { _index: esIdent.index };
+      const core = (operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls });
+      const { index } = this.manager.getIdentity(asConstructable<T>(core).constructor);
+      const identity: { _index: string, _type?: unknown } = { _index: index };
 
-      if (op.delete) {
-        acc.push({ delete: { ...ident, _id: op.delete.id } });
-      } else if (op.insert) {
-        const id = this.preUpdate(op.insert);
-        acc.push({ create: { ...ident, _id: id } }, castTo(op.insert));
-      } else if (op.upsert) {
-        const id = this.preUpdate(op.upsert);
-        acc.push({ index: { ...ident, _id: id } }, castTo(op.upsert));
-      } else if (op.update) {
-        const id = this.preUpdate(op.update);
-        acc.push({ update: { ...ident, _id: id } }, { doc: op.update });
+      if (operation.delete) {
+        toRun.push({ delete: { ...identity, _id: operation.delete.id } });
+      } else if (operation.insert) {
+        const id = this.preUpdate(operation.insert);
+        toRun.push({ create: { ...identity, _id: id } }, castTo(operation.insert));
+      } else if (operation.upsert) {
+        const id = this.preUpdate(operation.upsert);
+        toRun.push({ index: { ...identity, _id: id } }, castTo(operation.upsert));
+      } else if (operation.update) {
+        const id = this.preUpdate(operation.update);
+        toRun.push({ update: { ...identity, _id: id } }, { doc: operation.update });
       }
-      return acc;
+      return toRun;
     }, []);
 
     const result = await this.client.bulk({
@@ -304,35 +306,35 @@ export class ElasticsearchModelService implements
       errors: []
     };
 
-    type Count = keyof typeof out['counts'];
+    type CountProperty = keyof typeof out['counts'];
 
     for (let i = 0; i < result.items.length; i++) {
       const item = result.items[i];
-      const [k] = TypedObject.keys(item);
-      const v = item[k]!;
-      if (v.error) {
+      const [key] = TypedObject.keys(item);
+      const responseItem = item[key]!;
+      if (responseItem.error) {
         out.errors.push({
-          reason: v.error!.reason!,
-          type: v.error!.type
+          reason: responseItem.error!.reason!,
+          type: responseItem.error!.type
         });
         out.counts.error += 1;
       } else {
-        let sk: Count;
-        switch (k) {
-          case 'create': sk = 'insert'; break;
-          case 'index': sk = operations[i].insert ? 'insert' : 'upsert'; break;
-          case 'delete': case 'update': sk = k; break;
+        let property: CountProperty;
+        switch (key) {
+          case 'create': property = 'insert'; break;
+          case 'index': property = operations[i].insert ? 'insert' : 'upsert'; break;
+          case 'delete': case 'update': property = key; break;
           default: {
-            throw new Error(`Unknown response key: ${k}`);
+            throw new Error(`Unknown response key: ${key}`);
           }
         }
 
-        if (v.result === 'created') {
-          out.insertedIds.set(i, v._id!);
-          (operations[i].insert ?? operations[i].upsert)!.id = v._id!;
+        if (responseItem.result === 'created') {
+          out.insertedIds.set(i, responseItem._id!);
+          (operations[i].insert ?? operations[i].upsert)!.id = responseItem._id!;
         }
 
-        out.counts[sk] += 1;
+        out.counts[property] += 1;
       }
     }
 
@@ -380,7 +382,7 @@ export class ElasticsearchModelService implements
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    const cfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     let search = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,
@@ -388,16 +390,16 @@ export class ElasticsearchModelService implements
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
       ),
-      sort: ElasticsearchQueryUtil.getSort(cfg.fields)
+      sort: ElasticsearchQueryUtil.getSort(config.fields)
     });
 
     while (search.hits.hits.length > 0) {
-      for (const el of search.hits.hits) {
+      for (const hit of search.hits.hits) {
         try {
-          yield this.postLoad(cls, el);
-        } catch (err) {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
+          yield this.postLoad(cls, hit);
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
         search = await this.client.scroll({
@@ -412,14 +414,14 @@ export class ElasticsearchModelService implements
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
 
-    const req = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
-    const results = await this.execSearch(cls, req);
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
+    const results = await this.execSearch(cls, search);
     const shouldRemoveIds = query.select && 'id' in query.select && !query.select.id;
-    return Promise.all(results.hits.hits.map(m => this.postLoad(cls, m).then(v => {
+    return Promise.all(results.hits.hits.map(hit => this.postLoad(cls, hit).then(item => {
       if (shouldRemoveIds) {
-        delete castTo<OptionalId<T>>(v).id;
+        delete castTo<OptionalId<T>>(item).id;
       }
-      return v;
+      return item;
     })));
   }
 
@@ -431,8 +433,8 @@ export class ElasticsearchModelService implements
   async queryCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
 
-    const req = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
-    const result: number | { value: number } = (await this.execSearch(cls, req)).hits.total || { value: 0 };
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
+    const result: number | { value: number } = (await this.execSearch(cls, search)).hits.total || { value: 0 };
     return typeof result !== 'number' ? result.value : result;
   }
 
@@ -470,11 +472,11 @@ export class ElasticsearchModelService implements
       if (result.version_conflicts || result.updated === undefined || result.updated === 0) {
         throw new NotFoundError(cls, id);
       }
-    } catch (err) {
-      if (err instanceof errors.ResponseError && 'version_conflicts' in err.body) {
+    } catch (error) {
+      if (error instanceof errors.ResponseError && 'version_conflicts' in error.body) {
         throw new NotFoundError(cls, id);
       } else {
-        throw err;
+        throw error;
       }
     }
 
@@ -484,10 +486,10 @@ export class ElasticsearchModelService implements
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     await QueryVerifier.verify(cls, query);
 
-    const { sort: _, ...q } = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false);
+    const { sort: _, ...rest } = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false);
     const result = await this.client.deleteByQuery({
       ...this.manager.getIdentity(cls),
-      ...q,
+      ...rest,
       refresh: true,
     });
     return result.deleted ?? 0;
@@ -514,34 +516,34 @@ export class ElasticsearchModelService implements
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
 
-    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
-    const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = await Promise.all(result.hits.hits.map(x => this.postLoad(cls, x)));
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (x, v) => v, query && query.limit);
+    const all = await Promise.all(result.hits.hits.map(hit => this.postLoad(cls, hit)));
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (_, value) => value, query && query.limit);
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
 
-    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
       select: castTo({ [field]: 1 }),
       ...query
     });
-    const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = await Promise.all(result.hits.hits.map(x => castTo<T>(({ [field]: field === 'id' ? x._id : x._source![field] }))));
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, x => x, query && query.limit);
+    const all = await Promise.all(result.hits.hits.map(hit => castTo<T>(({ [field]: field === 'id' ? hit._id : hit._source![field] }))));
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query && query.limit);
   }
 
   // Facet
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
-    const q = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
+    const resolvedSearch = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
 
     const search: estypes.SearchRequest = {
-      query: q.query ?? { ['match_all']: {} },
+      query: resolvedSearch.query ?? { ['match_all']: {} },
       aggs: { [field]: { terms: { field, size: 100 } } },
       size: 0
     };

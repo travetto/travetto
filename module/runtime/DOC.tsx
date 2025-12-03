@@ -132,7 +132,7 @@ $ DEBUG=express:*,@travetto/web npx trv run web
     </ul>
 
     <c.Code title='Sample makeTemplate Usage' src={`
-const tpl = makeTemplate((name: 'age'|'name', val) => \`**\${name}: \${val}**\`); 
+const tpl = makeTemplate((name: 'age'|'name', value) => \`**\${name}: \${value}**\`); 
 tpl\`{{age:20}} {{name: 'bob'}}\</>;
 // produces
 '**age: 20** **name: bob**'

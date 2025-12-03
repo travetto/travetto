@@ -18,8 +18,8 @@ export class OpenApiClientHelp {
         .split('DOCUMENTATION')[0]
         .trim()
         .split(/\n/g)
-        .filter(x => /^\s+-/.test(x) && !/\((beta|experimental)\)/.test(x))
-        .map(x => x.replace(/^\s+-\s+/, '').trim());
+        .filter(line => /^\s+-/.test(line) && !/\((beta|experimental)\)/.test(line))
+        .map(line => line.replace(/^\s+-\s+/, '').trim());
 
       await fs.mkdir(path.dirname(formatCache), { recursive: true });
       await fs.writeFile(formatCache, JSON.stringify([...lines.toSorted(),]));
@@ -36,7 +36,7 @@ export class OpenApiClientHelp {
         '',
         cliTpl`${{ subtitle: 'Available Formats' }}`,
         '----------------------------------',
-        ...formats.map(x => cliTpl`* ${{ input: x }}`)
+        ...formats.map(format => cliTpl`* ${{ input: format }}`)
       );
     }
     return help;

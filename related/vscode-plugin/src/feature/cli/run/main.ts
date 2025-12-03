@@ -25,10 +25,10 @@ export class CliRunFeature extends BaseFeature {
   async getValidRecent(count: number): Promise<RunChoice[]> {
     const choices = await CliRunUtil.getChoices();
 
-    return this.#storage.getRecentAndFilterState(count * 2, x =>
-      !choices.some(a => a.name === x.name)
+    return this.#storage.getRecentAndFilterState(count * 2, choice =>
+      !choices.some(a => a.name === choice.name)
     )
-      .map(x => x.data)
+      .map(choice => choice.data)
       .slice(0, count);
   }
 
@@ -50,8 +50,8 @@ export class CliRunFeature extends BaseFeature {
       await launchConfig.update('configurations', configurations, false);
 
       vscode.window.showInformationMessage('Added new configuration to launch.json!');
-    } catch (err) {
-      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
+    } catch (error) {
+      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
     }
   }
 
@@ -70,8 +70,8 @@ export class CliRunFeature extends BaseFeature {
         this.#storage.set(choice.key!, choice);
         return this.debugTarget(choice, choice.inputs);
       }
-    } catch (err) {
-      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
+    } catch (error) {
+      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
     }
   }
 
@@ -113,15 +113,15 @@ export class CliRunFeature extends BaseFeature {
   /**
    * On IPC trigger to run a target
    */
-  async onEvent(ev: TargetEvent<{ name: string, args: string[], module: string, env: EnvDict }>): Promise<void> {
-    const args = ev.data.args;
+  async onEvent(event: TargetEvent<{ name: string, args: string[], module: string, env: EnvDict }>): Promise<void> {
+    const args = event.data.args;
     await RunUtil.debug({
-      name: `[Travetto] ${ev.data.name}${args ? `: ${args.join(' ')}` : ''}`,
+      name: `[Travetto] ${event.data.name}${args ? `: ${args.join(' ')}` : ''}`,
       useCli: true,
-      main: ev.data.name,
+      main: event.data.name,
       args,
-      cliModule: ev.data.module,
-      env: ev.data.env
+      cliModule: event.data.module,
+      env: event.data.env
     });
   }
 }

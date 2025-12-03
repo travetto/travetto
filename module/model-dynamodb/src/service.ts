@@ -20,18 +20,18 @@ function simpleName(idx: string): string {
   return idx.replace(/[^A-Za-z0-9]/g, '');
 }
 
-function toValue(val: string | number | boolean | Date | undefined | null): AttributeValue;
-function toValue(val: unknown): AttributeValue | undefined {
-  if (val === undefined || val === null || val === '') {
+function toValue(value: string | number | boolean | Date | undefined | null): AttributeValue;
+function toValue(value: unknown): AttributeValue | undefined {
+  if (value === undefined || value === null || value === '') {
     return { NULL: true };
-  } else if (typeof val === 'string') {
-    return { S: val };
-  } else if (typeof val === 'number') {
-    return { N: `${val}` };
-  } else if (typeof val === 'boolean') {
-    return { BOOL: val };
-  } else if (val instanceof Date) {
-    return { N: `${val.getTime()}` };
+  } else if (typeof value === 'string') {
+    return { S: value };
+  } else if (typeof value === 'number') {
+    return { N: `${value}` };
+  } else if (typeof value === 'boolean') {
+    return { BOOL: value };
+  } else if (value instanceof Date) {
+    return { N: `${value.getTime()}` };
   }
 }
 
@@ -84,10 +84,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const prop = simpleName(idx.name);
-          indices[`${prop}__`] = toValue(key);
+          const property = simpleName(idx.name);
+          indices[`${property}__`] = toValue(key);
           if (sort) {
-            indices[`${prop}_sort__`] = toValue(+sort);
+            indices[`${property}_sort__`] = toValue(+sort);
           }
         }
         const query: PutItemCommandInput = {
@@ -108,12 +108,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const expr: string[] = [];
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const prop = simpleName(idx.name);
-          indices[`:${prop}`] = toValue(key);
-          expr.push(`${prop}__ = :${prop}`);
+          const property = simpleName(idx.name);
+          indices[`:${property}`] = toValue(key);
+          expr.push(`${property}__ = :${property}`);
           if (sort) {
-            indices[`:${prop}_sort`] = toValue(+sort);
-            expr.push(`${prop}_sort__ = :${prop}_sort`);
+            indices[`:${property}_sort`] = toValue(+sort);
+            expr.push(`${property}_sort__ = :${property}_sort`);
           }
         }
 
@@ -125,7 +125,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             'body=:body',
             expiry !== undefined ? `${EXP_ATTR}=:expr` : undefined,
             ...expr
-          ].filter(x => !!x).join(', ')}`,
+          ].filter(part => !!part).join(', ')}`,
           ExpressionAttributeValues: {
             ':body': toValue(JSON.stringify(item)),
             ...(expiry !== undefined ? { ':expr': toValue(expiry) } : {}),
@@ -134,15 +134,15 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           ReturnValues: 'ALL_NEW'
         });
       }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'ConditionalCheckFailedException') {
+    } catch (error) {
+      if (error instanceof Error && error.name === 'ConditionalCheckFailedException') {
         if (mode === 'create') {
           throw new ExistsError(cls, id);
         } else if (mode === 'update') {
           throw new NotFoundError(cls, id);
         }
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -332,12 +332,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       });
 
       if (batch.Count && batch.Items) {
-        for (const el of batch.Items) {
+        for (const item of batch.Items) {
           try {
-            yield await loadAndCheckExpiry(cls, el.body.S!);
-          } catch (err) {
-            if (!(err instanceof NotFoundError)) {
-              throw err;
+            yield await loadAndCheckExpiry(cls, item.body.S!);
+          } catch (error) {
+            if (!(error instanceof NotFoundError)) {
+              throw error;
             }
           }
         }
@@ -360,12 +360,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body);
+    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body);
 
-    if (idxCfg.type === 'sorted' && sort === undefined) {
-      throw new IndexNotSupported(cls, idxCfg, 'Sorted indices require the sort field');
+    if (idxConfig.type === 'sorted' && sort === undefined) {
+      throw new IndexNotSupported(cls, idxConfig, 'Sorted indices require the sort field');
     }
 
     const idxName = simpleName(idx);
@@ -374,7 +374,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       TableName: this.#resolveTable(cls),
       IndexName: idxName,
       ProjectionExpression: 'id',
-      KeyConditionExpression: [sort ? `${idxName}_sort__ = :${idxName}_sort` : '', `${idxName}__ = :${idxName}`].filter(x => !!x).join(' and '),
+      KeyConditionExpression: [sort ? `${idxName}_sort__ = :${idxName}_sort` : '', `${idxName}__ = :${idxName}`]
+        .filter(expr => !!expr)
+        .join(' and '),
       ExpressionAttributeValues: {
         [`:${idxName}`]: toValue(key),
         ...(sort ? { [`:${idxName}_sort`]: toValue(+sort) } : {})
@@ -405,8 +407,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const cfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, cfg, body, { emptySortValue: null });
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, config, body, { emptySortValue: null });
 
     const idxName = simpleName(idx);
 
@@ -425,12 +427,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       });
 
       if (batch.Count && batch.Items) {
-        for (const el of batch.Items) {
+        for (const item of batch.Items) {
           try {
-            yield await loadAndCheckExpiry(cls, el.body.S!);
-          } catch (err) {
-            if (!(err instanceof NotFoundError)) {
-              throw err;
+            yield await loadAndCheckExpiry(cls, item.body.S!);
+          } catch (error) {
+            if (!(error instanceof NotFoundError)) {
+              throw error;
             }
           }
         }

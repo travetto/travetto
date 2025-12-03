@@ -33,11 +33,11 @@ export class ModelStorageUtil {
 
     // If listening for model add/removes/updates
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
-      Registry.onClassChange(ev => {
-        switch (ev.type) {
-          case 'added': checkType(ev.curr) ? storage.createModel?.(ev.curr) : undefined; break;
-          case 'changed': checkType(ev.curr, false) ? storage.changeModel?.(ev.curr) : undefined; break;
-          case 'removing': checkType(ev.prev) ? storage.deleteModel?.(ev.prev) : undefined; break;
+      Registry.onClassChange(event => {
+        switch (event.type) {
+          case 'added': checkType(event.current) ? storage.createModel?.(event.current) : undefined; break;
+          case 'changed': checkType(event.current, false) ? storage.changeModel?.(event.current) : undefined; break;
+          case 'removing': checkType(event.previous) ? storage.deleteModel?.(event.previous) : undefined; break;
         }
       }, ModelRegistryIndex);
     }
@@ -55,9 +55,9 @@ export class ModelStorageUtil {
 
     // If listening for model add/removes/updates
     if (storage.changeSchema) {
-      SchemaChangeListener.onSchemaChange(ev => {
-        if (checkType(ev.cls)) {
-          storage.changeSchema!(ev.cls, ev.change);
+      SchemaChangeListener.onSchemaChange(event => {
+        if (checkType(event.cls)) {
+          storage.changeSchema!(event.cls, event.change);
         }
       });
     }

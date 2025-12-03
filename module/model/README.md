@@ -236,7 +236,7 @@ Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/m
 **Code: Bulk Contract**
 ```typescript
 export interface ModelBulkSupport extends ModelCrudSupport {
-  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;
+  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse>;
 }
 ```
 

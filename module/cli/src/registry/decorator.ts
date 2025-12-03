@@ -53,7 +53,7 @@ const FIELD_CONFIG: {
     },
     {
       name: 'debugIpc',
-      run: cmd => CliUtil.debugIfIpc(cmd).then((v) => v && process.exit(0)),
+      run: cmd => CliUtil.debugIfIpc(cmd).then((flag) => flag && process.exit(0)),
       field: {
         type: Boolean,
         aliases: ['-di'],
@@ -64,7 +64,7 @@ const FIELD_CONFIG: {
     },
     {
       name: 'canRestart',
-      run: cmd => CliUtil.runWithRestart(cmd)?.then((v) => v && process.exit(0)),
+      run: cmd => CliUtil.runWithRestart(cmd)?.then((flag) => flag && process.exit(0)),
       field: {
         type: Boolean,
         aliases: ['-cr'],
@@ -82,20 +82,19 @@ const FIELD_CONFIG: {
  * @example main
  * @kind decorator
  */
-export function CliCommand(cfg: CliCommandConfigOptions = {}) {
+export function CliCommand(config: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
     const adapter = SchemaRegistryIndex.getForRegister(target);
     const description = describeFunction(target) ?? {};
-
 
     if (!target.Ⲑid || description.abstract) {
       return;
     }
 
-    const VALID_FIELDS = FIELD_CONFIG.filter(f => !!cfg.with?.[f.name]);
+    const VALID_FIELDS = FIELD_CONFIG.filter(field => !!config.with?.[field.name]);
 
     CliCommandRegistryIndex.getForRegister(target).register({
-      runTarget: cfg.runTarget,
+      runTarget: config.runTarget,
       preMain: async (cmd: Cmd) => {
         for (const field of VALID_FIELDS) {
           await field.run(cmd);
@@ -109,7 +108,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       adapter.registerField(name, field, { type });
     }
 
-    const runtimeModule = cfg.runtimeModule ?? (cfg.with?.module ? 'current' : undefined);
+    const runtimeModule = config.runtimeModule ?? (config.with?.module ? 'current' : undefined);
 
     if (runtimeModule) { // Validate module
       adapter.register({
@@ -139,14 +138,14 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function CliFlag(cfg: { full?: string, short?: string, fileExtensions?: string[], envVars?: string[] } = {}) {
-  return function (instance: ClassInstance, property: string | symbol): void {
+export function CliFlag(config: { full?: string, short?: string, fileExtensions?: string[], envVars?: string[] } = {}) {
+  return function (instance: ClassInstance, property: string): void {
     const aliases = [
-      ...(cfg.full ? [cfg.full.startsWith('-') ? cfg.full : `--${cfg.full}`] : []),
-      ...(cfg.short ? [cfg.short.startsWith('-') ? cfg.short : `-${cfg.short}`] : []),
-      ...(cfg.envVars ? cfg.envVars.map(CliParseUtil.toEnvField) : [])
+      ...(config.full ? [config.full.startsWith('-') ? config.full : `--${config.full}`] : []),
+      ...(config.short ? [config.short.startsWith('-') ? config.short : `-${config.short}`] : []),
+      ...(config.envVars ? config.envVars.map(CliParseUtil.toEnvField) : [])
     ];
-    const specifiers = cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : [];
+    const specifiers = config.fileExtensions?.length ? ['file', ...config.fileExtensions.map(ext => `ext:${ext.replace(/[*.]/g, '')}`)] : [];
 
     SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, { aliases, specifiers });
   };

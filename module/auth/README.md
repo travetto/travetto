@@ -126,11 +126,11 @@ export class AuthService {
   /**
    * Manage expiry state, renewing if allowed
    */
-  manageExpiry(p?: Principal): void;
+  manageExpiry(principal?: Principal): void;
   /**
    * Enforce expiry, invalidating the principal if expired
    */
-  enforceExpiry(p?: Principal): Principal | undefined;
+  enforceExpiry(principal?: Principal): Principal | undefined;
 }
 ```
 
@@ -155,7 +155,7 @@ export class AuthContext {
   /**
    * Set principal
    */
-  set principal(p: Principal | undefined);
+  set principal(value: Principal | undefined);
   /**
    * Get the authentication token, if it exists
    */

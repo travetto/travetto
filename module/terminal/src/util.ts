@@ -11,33 +11,33 @@ export class TerminalUtil {
    */
   static progressBarUpdater(
     term: Terminal,
-    cfg?: {
+    config?: {
       withWaiting?: boolean;
       style?: { complete: TermStyleInput, incomplete?: TermStyleInput } | (() => ProgressStyle);
     }
-  ): (ev: ProgressEvent<string>) => string {
-    const styleBase = typeof cfg?.style !== 'function' ? {
-      complete: StyleUtil.getStyle(cfg?.style?.complete ?? { background: '#248613', text: '#ffffff' }),
-      incomplete: cfg?.style?.incomplete ? StyleUtil.getStyle(cfg.style.incomplete) : undefined,
+  ): (event: ProgressEvent<string>) => string {
+    const styleBase = typeof config?.style !== 'function' ? {
+      complete: StyleUtil.getStyle(config?.style?.complete ?? { background: '#248613', text: '#ffffff' }),
+      incomplete: config?.style?.incomplete ? StyleUtil.getStyle(config.style.incomplete) : undefined,
     } : undefined;
 
-    const style = typeof cfg?.style === 'function' ? cfg.style : (): ProgressStyle => styleBase!;
+    const style = typeof config?.style === 'function' ? config.style : (): ProgressStyle => styleBase!;
 
     let width: number;
-    return ev => {
-      const text = ev.value ?? (ev.total ? '%idx/%total' : '%idx');
-      const pct = ev.total === undefined ? 0 : (ev.idx / ev.total);
-      if (ev.total) {
-        width ??= Math.trunc(Math.ceil(Math.log10(ev.total ?? 10000)));
+    return event => {
+      const text = event.value ?? (event.total ? '%idx/%total' : '%idx');
+      const progress = event.total === undefined ? 0 : (event.idx / event.total);
+      if (event.total) {
+        width ??= Math.trunc(Math.ceil(Math.log10(event.total ?? 10000)));
       }
-      const state: Record<string, string> = { total: `${ev.total}`, idx: `${ev.idx}`.padStart(width ?? 0), pct: `${Math.trunc(pct * 100)}` };
-      const line = ` ${text.replace(/[%](idx|total|pct)/g, (_, k) => state[k])} `;
-      const full = term.writer.padToWidth(line, cfg?.withWaiting ? 2 : 0);
-      const mid = Math.trunc(pct * term.width);
-      const [l, r] = [full.substring(0, mid), full.substring(mid)];
+      const state: Record<string, string> = { total: `${event.total}`, idx: `${event.idx}`.padStart(width ?? 0), progress: `${Math.trunc(progress * 100)}` };
+      const line = ` ${text.replace(/[%](idx|total|progress)/g, (_, key) => state[key])} `;
+      const full = term.writer.padToWidth(line, config?.withWaiting ? 2 : 0);
+      const mid = Math.trunc(progress * term.width);
+      const [left, right] = [full.substring(0, mid), full.substring(mid)];
 
       const { complete, incomplete } = style();
-      return `${cfg?.withWaiting ? `${WAIT_TOKEN} ` : ''}${complete(l)}${incomplete?.(r) ?? r}`;
+      return `${config?.withWaiting ? `${WAIT_TOKEN} ` : ''}${complete(left)}${incomplete?.(right) ?? right}`;
     };
   }
 }

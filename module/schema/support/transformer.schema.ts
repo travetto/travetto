@@ -59,8 +59,8 @@ export class SchemaTransformer {
     // Determine auto enrol methods
     for (const item of state.getDecoratorList(node)) {
       if (item.targets?.includes('@travetto/schema:Schema')) {
-        for (const opt of item.options ?? []) {
-          state[AutoEnrollMethods].add(opt);
+        for (const option of item.options ?? []) {
+          state[AutoEnrollMethods].add(option);
         }
       }
     }
@@ -76,7 +76,7 @@ export class SchemaTransformer {
     const comments = DocUtil.describeDocs(node);
 
     const existing = state.findDecorator(this, node, 'Schema', SchemaTransformUtil.SCHEMA_IMPORT);
-    const cons = node.members.find(x => ts.isConstructorDeclaration(x));
+    const cons = node.members.find(member => ts.isConstructorDeclaration(member));
 
     const attrs: Record<string, string | boolean | ts.Expression | number | object | unknown[]> = {};
 
@@ -105,9 +105,9 @@ export class SchemaTransformer {
     if (cons) {
       attrs.methods = {
         [CONSTRUCTOR_PROPERTY]: {
-          parameters: cons.parameters.map((p, i) => SchemaTransformUtil.computeInputDecoratorParams(state, p, { index: i })).map(x =>
-            state.extendObjectLiteral({}, ...x)
-          ),
+          parameters: cons.parameters
+            .map((parameter, i) => SchemaTransformUtil.computeInputDecoratorParams(state, parameter, { index: i }))
+            .map(expr => state.extendObjectLiteral({}, ...expr)),
         }
       };
     }
@@ -163,7 +163,7 @@ export class SchemaTransformer {
       node.name,
       node.questionToken,
       node.typeParameters,
-      node.parameters.map((y, i) => SchemaTransformUtil.computeInput(state, y, { index: i })),
+      node.parameters.map((parameter, i) => SchemaTransformUtil.computeInput(state, parameter, { index: i })),
       node.type,
       node.body
     );

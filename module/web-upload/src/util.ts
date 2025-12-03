@@ -64,9 +64,11 @@ export class WebUploadUtil {
     const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
 
     if (MULTIPART.has(contentType.value)) {
-      const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
+      const fileMaxes = Object.values(config.uploads ?? {})
+        .map(uploadConfig => uploadConfig.maxSize)
+        .filter(uploadConfig => uploadConfig !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
-      const itr = new AsyncQueue<UploadItem>();
+      const queue = new AsyncQueue<UploadItem>();
 
       // Upload
       bodyStream.pipe(busboy({
@@ -80,12 +82,12 @@ export class WebUploadUtil {
         },
         limits: { fileSize: largestMax }
       })
-        .on('file', (field, stream, filename) => itr.add({ stream, filename, field }))
-        .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
-        .on('finish', () => itr.close())
-        .on('error', (err) => itr.throw(err instanceof Error ? err : new Error(`${err}`))));
+        .on('file', (field, stream, filename) => queue.add({ stream, filename, field }))
+        .on('limit', field => queue.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
+        .on('finish', () => queue.close())
+        .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`))));
 
-      yield* itr;
+      yield* queue;
     } else {
       const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition')).parameters.filename;
       yield { stream: bodyStream, filename, field: 'file' };
@@ -96,12 +98,12 @@ export class WebUploadUtil {
    * Convert an UploadItem to a File
    */
   static async toFile({ stream, filename, field }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
-    const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
-    await fs.mkdir(uniqueDir, { recursive: true });
+    const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
+    await fs.mkdir(uniqueDirectory, { recursive: true });
 
     filename = filename ? path.basename(filename) : `unknown_${Date.now()}`;
 
-    const location = path.resolve(uniqueDir, filename);
+    const location = path.resolve(uniqueDirectory, filename);
     const remove = (): Promise<void> => fs.rm(location).catch(() => { });
     const mimeCheck = config.matcher ??= WebCommonUtil.mimeTypeMatcher(config.types);
 
@@ -132,9 +134,9 @@ export class WebUploadUtil {
       Object.assign(file, { [RawFileSymbol]: location });
 
       return file;
-    } catch (err) {
+    } catch (error) {
       await remove();
-      throw err;
+      throw error;
     }
   }
 
@@ -146,14 +148,14 @@ export class WebUploadUtil {
     const { fromStream } = await import('strtok3');
 
     const parser = new FileTypeParser();
-    let tok: ReturnType<typeof fromStream> | undefined;
+    let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
 
     try {
-      tok = await fromStream(typeof input === 'string' ? createReadStream(input) : input);
-      matched = await parser.fromTokenizer(tok);
+      token = await fromStream(typeof input === 'string' ? createReadStream(input) : input);
+      matched = await parser.fromTokenizer(token);
     } finally {
-      await tok?.close();
+      await token?.close();
     }
 
     if (!matched && typeof input === 'string') {

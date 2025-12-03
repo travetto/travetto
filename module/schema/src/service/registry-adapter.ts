@@ -8,13 +8,13 @@ import {
 } from './types';
 
 const classToDiscriminatedType = (cls: Class): string => cls.name
-  .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
-  .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
+  .replace(/([A-Z])([A-Z][a-z])/g, (all, left, right) => `${left}_${right.toLowerCase()}`)
+  .replace(/([a-z]|\b)([A-Z])/g, (all, left, right) => left ? `${left}_${right.toLowerCase()}` : right.toLowerCase())
   .toLowerCase();
 
 function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {
-  const md = base.metadata ??= {};
-  const out = md[key] ??= {};
+  const metadata = base.metadata ??= {};
+  const out = metadata[key] ??= {};
   for (const d of data) {
     safeAssign(out, d);
   }
@@ -92,8 +92,8 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     case 'Required':
     case 'Partial': {
       base.fields = Object.fromEntries(
-        Object.entries(parent.fields).map(([k, v]) => [k, {
-          ...v,
+        Object.entries(parent.fields).map(([key, value]) => [key, {
+          ...value,
           required: {
             active: base.mappedOperation === 'Required'
           }
@@ -105,8 +105,8 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     case 'Omit': {
       const keys = new Set<string>(base.mappedFields ?? []);
       base.fields = Object.fromEntries(
-        Object.entries(parent.fields).filter(([k]) =>
-          base.mappedOperation === 'Pick' ? keys.has(k) : !keys.has(k)
+        Object.entries(parent.fields).filter(([key]) =>
+          base.mappedOperation === 'Pick' ? keys.has(key) : !keys.has(key)
         )
       );
       break;
@@ -145,7 +145,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   register(...data: Partial<SchemaClassConfig>[]): SchemaClassConfig {
-    const cfg = this.#config ??= {
+    const config = this.#config ??= {
       methods: {},
       class: this.#cls,
       views: {},
@@ -153,38 +153,38 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       interfaces: [],
       fields: {},
     };
-    return combineClasses(cfg, data);
+    return combineClasses(config, data);
   }
 
   registerMetadata<T>(key: symbol, ...data: Partial<T>[]): T {
-    const cfg = this.register({});
-    return assignMetadata(key, cfg, data);
+    const config = this.register({});
+    return assignMetadata(key, config, data);
   }
 
   getMetadata<T>(key: symbol): T | undefined {
-    const md = this.#config?.metadata;
-    return castTo<T>(md?.[key]);
+    const metadata = this.#config?.metadata;
+    return castTo<T>(metadata?.[key]);
   }
 
-  registerField(field: string | symbol, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
-    const config = this.register({});
-    const cfg = config.fields[field] ??= { name: field, owner: this.#cls, type: null! };
-    const combined = combineInputs(cfg, data);
+  registerField(field: string, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
+    const classConfig = this.register({});
+    const config = classConfig.fields[field] ??= { name: field, owner: this.#cls, type: null! };
+    const combined = combineInputs(config, data);
     return combined;
   }
 
-  registerFieldMetadata<T>(field: string | symbol, key: symbol, ...data: Partial<T>[]): T {
-    const cfg = this.registerField(field);
-    return assignMetadata(key, cfg, data);
+  registerFieldMetadata<T>(field: string, key: symbol, ...data: Partial<T>[]): T {
+    const config = this.registerField(field);
+    return assignMetadata(key, config, data);
   }
 
-  getFieldMetadata<T>(field: string | symbol, key: symbol): T | undefined {
-    const md = this.#config?.fields[field]?.metadata;
-    return castTo<T>(md?.[key]);
+  getFieldMetadata<T>(field: string, key: symbol): T | undefined {
+    const metadata = this.#config?.fields[field]?.metadata;
+    return castTo<T>(metadata?.[key]);
   }
 
-  registerClass({ methods, ...cfg }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
-    this.register({ ...cfg });
+  registerClass({ methods, ...config }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
+    this.register({ ...config });
     if (methods?.[CONSTRUCTOR_PROPERTY]) {
       const { parameters, ...rest } = methods[CONSTRUCTOR_PROPERTY];
       this.registerMethod(CONSTRUCTOR_PROPERTY, rest);
@@ -195,36 +195,36 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return this.#config;
   }
 
-  registerMethod(method: string | symbol, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
-    const config = this.register();
-    const cfg = config.methods[method] ??= { parameters: [], validators: [] };
-    return combineMethods(cfg, data);
+  registerMethod(method: string, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
+    const classConfig = this.register();
+    const config = classConfig.methods[method] ??= { parameters: [], validators: [] };
+    return combineMethods(config, data);
   }
 
-  registerMethodMetadata<T>(method: string | symbol, key: symbol, ...data: Partial<T>[]): T {
-    const cfg = this.registerMethod(method);
-    return assignMetadata(key, cfg, data);
+  registerMethodMetadata<T>(method: string, key: symbol, ...data: Partial<T>[]): T {
+    const config = this.registerMethod(method);
+    return assignMetadata(key, config, data);
   }
 
-  getMethodMetadata<T>(method: string | symbol, key: symbol): T | undefined {
-    const md = this.#config?.methods[method]?.metadata;
-    return castTo<T>(md?.[key]);
+  getMethodMetadata<T>(method: string, key: symbol): T | undefined {
+    const metadata = this.#config?.methods[method]?.metadata;
+    return castTo<T>(metadata?.[key]);
   }
 
-  registerParameter(method: string | symbol, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
+  registerParameter(method: string, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
-    const cfg = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
-    return combineInputs(cfg, data);
+    const config = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
+    return combineInputs(config, data);
   }
 
-  registerParameterMetadata<T>(method: string | symbol, idx: number, key: symbol, ...data: Partial<T>[]): T {
-    const cfg = this.registerParameter(method, idx);
-    return assignMetadata(key, cfg, data);
+  registerParameterMetadata<T>(method: string, idx: number, key: symbol, ...data: Partial<T>[]): T {
+    const config = this.registerParameter(method, idx);
+    return assignMetadata(key, config, data);
   }
 
-  getParameterMetadata<T>(method: string | symbol, idx: number, key: symbol): T | undefined {
-    const md = this.#config?.methods[method]?.parameters[idx]?.metadata;
-    return castTo<T>(md?.[key]);
+  getParameterMetadata<T>(method: string, idx: number, key: symbol): T | undefined {
+    const metadata = this.#config?.methods[method]?.parameters[idx]?.metadata;
+    return castTo<T>(metadata?.[key]);
   }
 
   finalize(parent?: SchemaClassConfig): void {
@@ -256,13 +256,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       const fields = config.views[view];
       const withoutSet = 'without' in fields ? new Set<string>(fields.without) : undefined;
       const fieldList = withoutSet ?
-        Object.keys(config.fields).filter(x => !withoutSet.has(x)) :
+        Object.keys(config.fields).filter(field => !withoutSet.has(field)) :
         ('with' in fields ? fields.with : []);
 
       this.#views.set(view,
-        fieldList.reduce<SchemaFieldMap>((acc, v) => {
-          acc[v] = config.fields[v];
-          return acc;
+        fieldList.reduce<SchemaFieldMap>((map, value) => {
+          map[value] = config.fields[value];
+          return map;
         }, {})
       );
     }
@@ -278,19 +278,19 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return this.#config;
   }
 
-  getField(field: string | symbol): SchemaFieldConfig {
+  getField(field: string): SchemaFieldConfig {
     return this.#config.fields[field];
   }
 
-  getMethod(method: string | symbol): SchemaMethodConfig {
-    const res = this.#config.methods[method];
-    if (!res) {
+  getMethod(method: string): SchemaMethodConfig {
+    const methodConfig = this.#config.methods[method];
+    if (!methodConfig) {
       throw new AppError(`Unknown method ${String(method)} on class ${this.#cls.Ⲑid}`);
     }
-    return res;
+    return methodConfig;
   }
 
-  getMethodReturnType(method: string | symbol): Class {
+  getMethodReturnType(method: string): Class {
     return this.getMethod(method).returnType!.type;
   }
 
@@ -321,13 +321,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   /**
    * Ensure type is set properly
    */
-  ensureInstanceTypeField<T>(o: T): T {
+  ensureInstanceTypeField<T>(value: T): T {
     const config = this.getDiscriminatedConfig();
     if (config) {
       const typeField = castKey<T>(config.discriminatedField);
-      o[typeField] ??= castTo(config.discriminatedType); // Assign if missing
+      value[typeField] ??= castTo(config.discriminatedType); // Assign if missing
     }
-    return o;
+    return value;
   }
 
   getDiscriminatedConfig(): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {

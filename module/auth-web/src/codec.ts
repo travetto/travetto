@@ -29,23 +29,23 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   postConstruct(): void {
     this.#verifier = createVerifier()
       .setSigningAlgorithm(this.#algorithm)
-      .withKeyResolver((kid, cb) => {
-        const rec = this.config.keyMap[kid];
-        return cb(rec ? null : new AuthenticationError('Invalid'), rec.key);
+      .withKeyResolver((keyId, callback) => {
+        const entry = this.config.keyMap[keyId];
+        return callback(entry ? null : new AuthenticationError('Invalid'), entry.key);
       });
   }
 
   async verify(token: string): Promise<Principal> {
     try {
-      const jwt: Jwt & { body: { core: Principal } } = await new Promise((res, rej) =>
-        this.#verifier.verify(token, (err, v) => err ? rej(err) : res(castTo(v)))
+      const jwt: Jwt & { body: { core: Principal } } = await new Promise((resolve, reject) =>
+        this.#verifier.verify(token, (error, verified) => error ? reject(error) : resolve(castTo(verified)))
       );
       return jwt.body.core;
-    } catch (err) {
-      if (err instanceof Error && err.name.startsWith('Jwt')) {
-        throw new AuthenticationError(err.message, { category: 'permissions' });
+    } catch (error) {
+      if (error instanceof Error && error.name.startsWith('Jwt')) {
+        throw new AuthenticationError(error.message, { category: 'permissions' });
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -62,8 +62,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   async create(value: Principal, keyId: string = 'default'): Promise<string> {
-    const keyRec = this.config.keyMap[keyId];
-    if (!keyRec) {
+    const entry = this.config.keyMap[keyId];
+    if (!entry) {
       throw new AppError('Requested unknown key for signing');
     }
     const jwt = create({}, '-')
@@ -73,8 +73,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
       .setIssuer(value.issuer!)
       .setJti(value.sessionId!)
       .setSubject(value.id)
-      .setHeader('kid', keyRec.id)
-      .setSigningKey(keyRec.key)
+      .setHeader('kid', entry.id)
+      .setSigningKey(entry.key)
       .setSigningAlgorithm(this.#algorithm);
     return jwt.toString();
   }

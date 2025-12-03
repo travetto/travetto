@@ -16,12 +16,12 @@ type ValidStringField<T> = { [K in Extract<keyof T, string>]: T[K] extends strin
  * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
-export function Schema(cfg?: Partial<Pick<SchemaClassConfig, 'validators' | 'methods'>>) {
+export function Schema(config?: Partial<Pick<SchemaClassConfig, 'validators' | 'methods'>>) {
   return <T, U extends Class<T>>(cls: U): void => {
     cls.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
       return BindUtil.bindSchema(this, data, { view });
     };
-    SchemaRegistryIndex.getForRegister(cls).registerClass(cfg);
+    SchemaRegistryIndex.getForRegister(cls).registerClass(config);
   };
 }
 

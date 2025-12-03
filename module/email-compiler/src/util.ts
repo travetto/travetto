@@ -11,11 +11,11 @@ type Tokenized = {
   finalize: (onToken: (token: string) => string) => string;
 };
 
-const SUPPORT_SRC = /(?:support|src)\//;
+const SUPPORT_SOURCE = /(?:support|src)\//;
 
 const HTML_CSS_IMAGE_URLS = [
-  /(?<pre><img[^>]src=\s{0,10}["'])(?<src>[^"{}]{1,1000})/g,
-  /(?<pre>background(?:-image)?:\s{0,10}url[(]['"]?)(?<src>[^"'){}]{1,1000})/g
+  /(?<prefix><img[^>]src=\s{0,10}["'])(?<source>[^"{}]{1,1000})/g,
+  /(?<prefix>background(?:-image)?:\s{0,10}url[(]['"]?)(?<source>[^"'){}]{1,1000})/g
 ];
 
 const EXT = /[.]email[.]tsx$/;
@@ -36,8 +36,8 @@ export class EmailCompileUtil {
    * Generate singular output path given a file
    */
   static buildOutputPath(file: string, suffix: string, prefix?: string): string {
-    const res = (SUPPORT_SRC.test(file) ? file.split(SUPPORT_SRC)[1] : file).replace(EXT, suffix);
-    return prefix ? path.join(prefix, res) : res;
+    const location = (SUPPORT_SOURCE.test(file) ? file.split(SUPPORT_SOURCE)[1] : file).replace(EXT, suffix);
+    return prefix ? path.join(prefix, location) : location;
   }
 
   /**
@@ -62,16 +62,16 @@ export class EmailCompileUtil {
     let id = 0;
     const tokens = new Map();
     for (const pattern of patterns) {
-      for (const { [0]: all, groups: { pre, src } = { pre: '', src: '' } } of text.matchAll(pattern)) {
-        if (src.includes('://')) { // No urls
+      for (const { [0]: all, groups: { prefix, source } = { prefix: '', source: '' } } of text.matchAll(pattern)) {
+        if (source.includes('://')) { // No urls
           continue;
         }
         const token = `@@${id += 1}@@`;
-        tokens.set(token, src);
-        text = text.replace(all, `${pre}${token}`);
+        tokens.set(token, source);
+        text = text.replace(all, `${prefix}${token}`);
       }
     }
-    const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]{1,100}@@/g, t => onToken(t));
+    const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]{1,100}@@/g, token => onToken(token));
 
     return { text, tokens, finalize };
   }
@@ -79,12 +79,12 @@ export class EmailCompileUtil {
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(src: { data: string } | { file: string }, opts: EmailTemplateResource): Promise<string> {
+  static async compileSass(input: { data: string } | { file: string }, options: EmailTemplateResource): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
-      ...src,
+      ...input,
       sourceMap: false,
-      includePaths: opts.loader.searchPaths.slice(0)
+      includePaths: options.loader.searchPaths.slice(0)
     });
     return result!.css.toString();
   }
@@ -133,21 +133,21 @@ export class EmailCompileUtil {
   /**
    * Inline image sources
    */
-  static async inlineImages(html: string, opts: EmailTemplateResource): Promise<string> {
+  static async inlineImages(html: string, options: EmailTemplateResource): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Buffer | Promise<Buffer>][] = [];
 
-    for (const [token, src] of tokens) {
-      const ext = path.extname(src);
+    for (const [token, source] of tokens) {
+      const ext = path.extname(source);
       if (/^[.](jpe?g|png)$/.test(ext)) {
         const output = await ImageUtil.convert(
-          await opts.loader.readStream(src),
+          await options.loader.readStream(source),
           { format: ext === '.png' ? 'png' : 'jpeg' }
         );
         const buffer = await toBuffer(output);
         pendingImages.push([token, ext, buffer]);
       } else {
-        pendingImages.push([token, ext, opts.loader.read(src, true)]);
+        pendingImages.push([token, ext, options.loader.read(source, true)]);
       }
     }
 
@@ -167,7 +167,7 @@ export class EmailCompileUtil {
       .replace(/<(meta|img|link|hr|br)[^>]{0,200}>/g, a => a.replace(/>/g, '/>')) // Fix self closing
       .replace(/&apos;/g, '&#39;') // Fix apostrophes, as outlook hates them
       .replace(/(background(?:-color)?:\s*)([#0-9a-f]{6,8})([^>.#,]+)>/ig,
-        (all, p, col, rest) => `${p}${col}${rest} bgcolor="${col}">`) // Inline bg-color
+        (all, property, color, rest) => `${property}${color}${rest} bgcolor="${color}">`) // Inline bg-color
       .replace(/<([^>]+vertical-align:\s*(top|bottom|middle)[^>]+)>/g,
         (a, tag, valign) => tag.indexOf('valign') ? `<${tag}>` : `<${tag} valign="${valign}">`) // Vertically align if it has the style
       .replace(/<(table[^>]+expand[^>]+width:\s*)(100%\s+!important)([^>]+)>/g,
@@ -179,14 +179,16 @@ export class EmailCompileUtil {
   /**
    * Apply styles into a given html document
    */
-  static async applyStyles(html: string, opts: EmailTemplateResource): Promise<string> {
+  static async applyStyles(html: string, options: EmailTemplateResource): Promise<string> {
     const styles = [
-      opts.globalStyles ?? '',
-      await opts.loader.read('/email/main.scss').catch(() => '')
-    ].filter(x => !!x).join('\n');
+      options.globalStyles ?? '',
+      await options.loader.read('/email/main.scss').catch(() => '')
+    ]
+      .filter(line => !!line)
+      .join('\n');
 
     if (styles.length) {
-      const compiled = await this.compileSass({ data: styles }, opts);
+      const compiled = await this.compileSass({ data: styles }, options);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);
@@ -198,21 +200,21 @@ export class EmailCompileUtil {
     return html;
   }
 
-  static async compile(src: EmailTemplateModule): Promise<EmailCompiled> {
-    const subject = await this.simplifiedText(await src.subject());
-    const text = await this.simplifiedText(await src.text());
+  static async compile(input: EmailTemplateModule): Promise<EmailCompiled> {
+    const subject = await this.simplifiedText(await input.subject());
+    const text = await this.simplifiedText(await input.text());
 
-    let html = await src.html();
+    let html = await input.html();
 
-    if (src.inlineStyle !== false) {
-      html = await this.applyStyles(html, src);
+    if (input.inlineStyle !== false) {
+      html = await this.applyStyles(html, input);
     }
 
     // Fix up html edge cases
     html = this.handleHtmlEdgeCases(html);
 
-    if (src.inlineImages !== false) {
-      html = await this.inlineImages(html, src);
+    if (input.inlineImages !== false) {
+      html = await this.inlineImages(html, input);
     }
 
     return { html, subject, text };

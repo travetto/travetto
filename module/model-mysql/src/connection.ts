@@ -6,9 +6,9 @@ import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';
 
-function isSimplePacket(o: unknown): o is OkPacket | ResultSetHeader {
-  return o !== null && o !== undefined && typeof o === 'object' && 'constructor' in o && (
-    o.constructor.name === 'OkPacket' || o.constructor.name === 'ResultSetHeader'
+function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
+  return value !== null && value !== undefined && typeof value === 'object' && 'constructor' in value && (
+    value.constructor.name === 'OkPacket' || value.constructor.name === 'ResultSetHeader'
   );
 }
 
@@ -59,27 +59,27 @@ export class MySQLConnection extends Connection<PoolConnection> {
     return result;
   }
 
-  async execute<T = unknown>(conn: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(pool: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
     console.debug('Executing query', { query });
     let prepared;
     try {
-      prepared = (values?.length ?? 0) > 0 ? await conn.prepare(query) : undefined;
-      const [results,] = await (prepared ? prepared.execute(values) : conn.query(query));
+      prepared = (values?.length ?? 0) > 0 ? await pool.prepare(query) : undefined;
+      const [results,] = await (prepared ? prepared.execute(values) : pool.query(query));
       if (isSimplePacket(results)) {
         return { records: [], count: results.affectedRows };
       } else {
         if (isSimplePacket(results[0])) {
           return { records: [], count: results[0].affectedRows };
         }
-        const records: T[] = [...results].map(v => castTo({ ...v }));
+        const records: T[] = [...results].map(value => castTo({ ...value }));
         return { records, count: records.length };
       }
-    } catch (err) {
-      console.debug('Failed query', { error: err, query });
-      if (err instanceof Error && err.message.startsWith('Duplicate entry')) {
+    } catch (error) {
+      console.debug('Failed query', { error, query });
+      if (error instanceof Error && error.message.startsWith('Duplicate entry')) {
         throw new ExistsError('query', query);
       } else {
-        throw err;
+        throw error;
       }
     } finally {
       try {
@@ -92,7 +92,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
     return this.#pool.getConnection();
   }
 
-  release(conn: PoolConnection): void {
-    conn.release();
+  release(pool: PoolConnection): void {
+    pool.release();
   }
 }

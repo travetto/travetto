@@ -83,26 +83,26 @@ export class ConsoleLogTransformer {
 
     const chain = node.expression;
     const name = chain.name;
-    const prop = chain.expression;
+    const expr = chain.expression;
 
-    if (!ts.isIdentifier(prop) || prop.escapedText !== 'console' || !ts.isIdentifier(name)) {
+    if (!ts.isIdentifier(expr) || expr.escapedText !== 'console' || !ts.isIdentifier(name)) {
       return node;
     }
 
     const level = name.escapedText!;
 
     if (VALID_LEVELS[level]) {
-      const ident = state.imported ??= state.importFile(CONSOLE_IMPORT).ident;
+      const identifier = state.imported ??= state.importFile(CONSOLE_IMPORT).identifier;
       return state.factory.updateCallExpression(
         node,
-        state.createAccess(ident, 'log'),
+        state.createAccess(identifier, 'log'),
         node.typeArguments,
         [
           LiteralUtil.fromLiteral(state.factory, {
             level: state.factory.createStringLiteral(VALID_LEVELS[level]),
             import: state.getModuleIdentifier(),
             line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
-            scope: state.scope?.map(x => x.name).join(':'),
+            scope: state.scope?.map(part => part.name).join(':'),
             args: node.arguments.slice(0)
           }),
         ]

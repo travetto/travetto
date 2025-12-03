@@ -19,7 +19,7 @@ export class AwsLambdaWebHandler {
     return async (event, context) => {
       if (!this.inst) {
         await Registry.init();
-        await DependencyRegistryIndex.getInstance(ConfigurationService).then(v => v.initBanner());
+        await DependencyRegistryIndex.getInstance(ConfigurationService).then(config => config.initBanner());
         this.inst = await DependencyRegistryIndex.getInstance(AwsLambdaWebHandler);
       }
       return this.inst.handle(event, context);

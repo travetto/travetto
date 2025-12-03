@@ -3,7 +3,7 @@ import { Options, Pool, createPool } from 'generic-pool';
 
 import { Env, Util, AsyncQueue } from '@travetto/runtime';
 
-type ItrSource<I> = Iterable<I> | AsyncIterable<I>;
+type IterableSource<I> = Iterable<I> | AsyncIterable<I>;
 type WorkerExecutor<I, O> = (input: I, idx: number) => Promise<O>;
 
 /**
@@ -22,11 +22,11 @@ type WorkerFactoryInput<I, O = unknown> = Partial<Worker<I, O>> & { execute: Wor
 type WorkerInput<I, O> = (() => WorkerFactoryInput<I, O>) | WorkerExecutor<I, O>;
 type WorkPoolConfig<I, O> = Options & {
   onComplete?: (output: O, input: I, finishIdx: number) => void;
-  onError?(ev: Error, input: I, finishIdx: number): (unknown | Promise<unknown>);
+  onError?(event: Error, input: I, finishIdx: number): (unknown | Promise<unknown>);
   shutdown?: AbortSignal;
 };
 
-const isWorkerFactory = <I, O>(o: WorkerInput<I, O>): o is (() => WorkerFactoryInput<I, O>) => o.length === 0;
+const isWorkerFactory = <I, O>(value: WorkerInput<I, O>): value is (() => WorkerFactoryInput<I, O>) => value.length === 0;
 
 /**
  * Work pool support
@@ -37,10 +37,10 @@ export class WorkPool {
   static DEFAULT_SIZE = Math.max(Math.trunc(WorkPool.MAX_SIZE * .75), 4);
 
   /** Build worker pool */
-  static #buildPool<I, O>(input: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
+  static #buildPool<I, O>(input: WorkerInput<I, O>, options?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
     let pendingAcquires = 0;
 
-    const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
+    const trace = /@travetto\/worker/.test(Env.DEBUG.value ?? '');
 
     // Create the pool
     const pool = createPool({
@@ -58,22 +58,22 @@ export class WorkPool {
           pendingAcquires -= 1;
         }
       },
-      async destroy(x) {
+      async destroy(worker) {
         if (trace) {
-          console.debug('Destroying', { pid: process.pid, worker: x.id });
+          console.debug('Destroying', { pid: process.pid, worker: worker.id });
         }
-        return x.destroy?.();
+        return worker.destroy?.();
       },
-      validate: async (x: Worker<I, O>) => x.active
+      validate: async (worker: Worker<I, O>) => worker.active
     }, {
       evictionRunIntervalMillis: 5000,
-      ...(opts ?? {}),
-      max: opts?.max ?? WorkPool.DEFAULT_SIZE,
-      min: opts?.min ?? 1,
+      ...(options ?? {}),
+      max: options?.max ?? WorkPool.DEFAULT_SIZE,
+      min: options?.min ?? 1,
     });
 
     // Listen for shutdown
-    opts?.shutdown?.addEventListener('abort', async () => {
+    options?.shutdown?.addEventListener('abort', async () => {
       while (pendingAcquires) {
         await Util.nonBlockingTimeout(10);
       }
@@ -87,17 +87,17 @@ export class WorkPool {
   /**
    * Process a given input source and worker, and fire on completion
    */
-  static async run<I, O>(workerFactory: WorkerInput<I, O>, src: ItrSource<I>, opts: WorkPoolConfig<I, O> = {}): Promise<void> {
+  static async run<I, O>(workerFactory: WorkerInput<I, O>, source: IterableSource<I>, options: WorkPoolConfig<I, O> = {}): Promise<void> {
 
-    const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
+    const trace = /@travetto\/worker/.test(Env.DEBUG.value ?? '');
     const pending = new Set<Promise<unknown>>();
     const errors: Error[] = [];
     let inputIdx = 0;
     let finishIdx = 0;
 
-    const pool = this.#buildPool(workerFactory, opts);
+    const pool = this.#buildPool(workerFactory, options);
 
-    for await (const nextInput of src) {
+    for await (const nextInput of source) {
       const worker = await pool.acquire()!;
 
       if (trace) {
@@ -105,10 +105,10 @@ export class WorkPool {
       }
 
       const completion = worker.execute(nextInput, inputIdx += 1)
-        .then(v => opts.onComplete?.(v, nextInput, finishIdx += 1))
-        .catch(err => {
-          errors.push(err);
-          opts?.onError?.(err, nextInput, finishIdx += 1);
+        .then(output => options.onComplete?.(output, nextInput, finishIdx += 1))
+        .catch(error => {
+          errors.push(error);
+          options?.onError?.(error, nextInput, finishIdx += 1);
         }) // Catch error
         .finally(async () => {
           if (trace) {
@@ -140,36 +140,36 @@ export class WorkPool {
   /**
    * Process a given input source as an async iterable
    */
-  static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolConfig<I, O>): AsyncIterable<O> {
-    const itr = new AsyncQueue<O>();
+  static runStream<I, O>(worker: WorkerInput<I, O>, input: IterableSource<I>, options?: WorkPoolConfig<I, O>): AsyncIterable<O> {
+    const queue = new AsyncQueue<O>();
     const result = this.run(worker, input, {
-      ...opts,
-      onComplete: (ev, inp, finishIdx) => {
-        itr.add(ev);
-        opts?.onComplete?.(ev, inp, finishIdx);
+      ...options,
+      onComplete: (event, value, finishIdx) => {
+        queue.add(event);
+        options?.onComplete?.(event, value, finishIdx);
       }
     });
-    result.finally(() => itr.close());
-    return itr;
+    result.finally(() => queue.close());
+    return queue;
   }
 
   /**
    * Process a given input source as an async iterable with progress information
    */
-  static runStreamProgress<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, total: number, opts?: WorkPoolConfig<I, O>): AsyncIterable<{
+  static runStreamProgress<I, O>(worker: WorkerInput<I, O>, input: IterableSource<I>, total: number, options?: WorkPoolConfig<I, O>): AsyncIterable<{
     idx: number;
     value: O;
     total: number;
   }> {
-    const itr = new AsyncQueue<{ idx: number, value: O, total: number }>();
+    const queue = new AsyncQueue<{ idx: number, value: O, total: number }>();
     const result = this.run(worker, input, {
-      ...opts,
-      onComplete: (ev, inp, finishIdx) => {
-        itr.add({ value: ev, idx: finishIdx, total });
-        opts?.onComplete?.(ev, inp, finishIdx);
+      ...options,
+      onComplete: (event, value, finishIdx) => {
+        queue.add({ value: event, idx: finishIdx, total });
+        options?.onComplete?.(event, value, finishIdx);
       }
     });
-    result.finally(() => itr.close());
-    return itr;
+    result.finally(() => queue.close());
+    return queue;
   }
 }

@@ -9,14 +9,14 @@ export type WebHeadersInit = Headers | Record<string, undefined | null | HeaderV
  */
 export class WebHeaders extends Headers {
 
-  constructor(o?: WebHeadersInit) {
-    const passed = (o instanceof Headers);
-    super(passed ? o : undefined);
+  constructor(input?: WebHeadersInit) {
+    const passed = (input instanceof Headers);
+    super(passed ? input : undefined);
 
-    if (o && !passed) {
-      for (const [k, v] of (Array.isArray(o) ? o : Object.entries(o))) {
-        if (v !== undefined && v !== null && !k.startsWith(':')) {
-          this.append(k, castTo(v));
+    if (input && !passed) {
+      for (const [key, value] of (Array.isArray(input) ? input : Object.entries(input))) {
+        if (value !== undefined && value !== null && !key.startsWith(':')) {
+          this.append(key, castTo(value));
         }
       }
     }
@@ -33,21 +33,21 @@ export class WebHeaders extends Headers {
    * Get a header value as a list, breaking on commas except for cookies
    */
   getList(key: string): string[] | undefined {
-    const v = this.get(key);
-    if (!v) {
+    const value = this.get(key);
+    if (!value) {
       return;
-    } else if (v.toLowerCase() === 'set-cookie') {
+    } else if (value.toLowerCase() === 'set-cookie') {
       return this.getSetCookie();
     }
-    return v.split(key === 'cookie' ? /\s{0,3};\s{0,3}/ : /\s{0,3},\s{0,3}/);
+    return value.split(key === 'cookie' ? /\s{0,3};\s{0,3}/ : /\s{0,3},\s{0,3}/);
   }
 
   // @ts-expect-error
-  forEach(set: (v: string | string[], k: string, headers: WebHeaders) => void): void;
-  forEach(set: (v: Any, k: string, headers: WebHeaders) => void): void;
-  forEach(set: (v: string | string[], k: string, headers: WebHeaders) => void): void {
-    for (const [k, v] of this.entries()) {
-      set(k === 'set-cookie' ? this.getSetCookie() : v, k, this);
+  forEach(set: (value: string | string[], key: string, headers: WebHeaders) => void): void;
+  forEach(set: (value: Any, key: string, headers: WebHeaders) => void): void;
+  forEach(set: (value: string | string[], key: string, headers: WebHeaders) => void): void {
+    for (const [key, value] of this.entries()) {
+      set(key === 'set-cookie' ? this.getSetCookie() : value, key, this);
     }
   }
 

@@ -26,7 +26,8 @@ export class Compiler {
     const [dirty, watch] = process.argv.slice(2);
     const state = await CompilerState.get(new ManifestIndex());
     log.debug('Running compiler with dirty file', dirty);
-    const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] : (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
+    const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] :
+      (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(line => !!line);
     log.debug('Running compiler with dirty file', dirtyFiles);
     await new Compiler(state, dirtyFiles, watch === 'true').run();
   }
@@ -34,7 +35,7 @@ export class Compiler {
   #state: CompilerState;
   #dirtyFiles: string[];
   #watch?: boolean;
-  #ctrl: AbortController;
+  #controller: AbortController;
   #signal: AbortSignal;
   #shuttingDown = false;
 
@@ -42,18 +43,18 @@ export class Compiler {
     this.#state = state;
     this.#dirtyFiles = dirtyFiles[0] === '*' ?
       this.#state.getAllFiles() :
-      dirtyFiles.map(f => this.#state.getBySource(f)!.sourceFile);
+      dirtyFiles.map(file => this.#state.getBySource(file)!.sourceFile);
     this.#watch = watch;
 
-    this.#ctrl = new AbortController();
-    this.#signal = this.#ctrl.signal;
+    this.#controller = new AbortController();
+    this.#signal = this.#controller.signal;
     setMaxListeners(1000, this.#signal);
     process
       .once('disconnect', () => this.#shutdown('manual'))
-      .on('message', ev => (ev === 'shutdown') && this.#shutdown('manual'));
+      .on('message', event => (event === 'shutdown') && this.#shutdown('manual'));
   }
 
-  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', err?: Error): void {
+  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', error?: Error): void {
     if (this.#shuttingDown) {
       return;
     }
@@ -67,14 +68,14 @@ export class Compiler {
       }
       case 'error': {
         process.exitCode = 1;
-        if (err) {
-          EventUtil.sendEvent('log', { level: 'error', message: err.toString(), time: Date.now() });
-          log.error('Shutting down due to failure', err.stack);
+        if (error) {
+          EventUtil.sendEvent('log', { level: 'error', message: error.toString(), time: Date.now() });
+          log.error('Shutting down due to failure', error.stack);
         }
         break;
       }
       case 'reset': {
-        log.info('Reset due to', err?.message);
+        log.info('Reset due to', error?.message);
         EventUtil.sendEvent('state', { state: 'reset' });
         process.exitCode = 0;
         break;
@@ -83,7 +84,7 @@ export class Compiler {
     // No longer listen to disconnect
     process.removeAllListeners('disconnect');
     process.removeAllListeners('message');
-    this.#ctrl.abort();
+    this.#controller.abort();
     CommonUtil.nonBlockingTimeout(1000).then(() => process.exit()); // Allow upto 1s to shutdown gracefully
   }
 
@@ -92,7 +93,7 @@ export class Compiler {
    */
   logStatistics(metrics: CompileEmitEvent[]): void {
     // Simple metrics
-    const durations = metrics.map(x => x.duration);
+    const durations = metrics.map(event => event.duration);
     const total = durations.reduce((a, b) => a + b, 0);
     const avg = total / durations.length;
     const sorted = [...durations].sort((a, b) => a - b);
@@ -102,7 +103,7 @@ export class Compiler {
     const slowest = [...metrics]
       .sort((a, b) => b.duration - a.duration)
       .slice(0, 5)
-      .map(x => ({ file: x.file, duration: x.duration }));
+      .map(event => ({ file: event.file, duration: event.duration }));
 
     log.debug('Compilation Statistics', {
       files: metrics.length,
@@ -131,12 +132,12 @@ export class Compiler {
 
     for (const file of files) {
       const start = Date.now();
-      const err = await emitter(file);
+      const error = await emitter(file);
       const duration = Date.now() - start;
-      const nodeModSep = 'node_modules/';
-      const nodeModIdx = file.lastIndexOf(nodeModSep);
-      const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSep.length) : file;
-      yield { file: imp, i: i += 1, err, total: files.length, duration };
+      const nodeModSeparator = 'node_modules/';
+      const nodeModIdx = file.lastIndexOf(nodeModSeparator);
+      const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
+      yield { file: imp, i: i += 1, error, total: files.length, duration };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
         EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
@@ -158,7 +159,7 @@ export class Compiler {
   async run(): Promise<void> {
     log.debug('Compilation started');
 
-    EventUtil.sendEvent('state', { state: 'init', extra: { pid: process.pid } });
+    EventUtil.sendEvent('state', { state: 'init', extra: { processId: process.pid } });
 
     const emitter = await this.getCompiler();
     let failure: Error | undefined;
@@ -170,13 +171,13 @@ export class Compiler {
     const metrics: CompileEmitEvent[] = [];
 
     if (this.#dirtyFiles.length) {
-      for await (const ev of this.emit(this.#dirtyFiles, emitter)) {
-        if (ev.err) {
-          const compileError = CompilerUtil.buildTranspileError(ev.file, ev.err);
+      for await (const event of this.emit(this.#dirtyFiles, emitter)) {
+        if (event.error) {
+          const compileError = CompilerUtil.buildTranspileError(event.file, event.error);
           failure ??= compileError;
           EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
         }
-        metrics.push(ev);
+        metrics.push(event);
       }
       if (this.#signal.aborted) {
         log.debug('Compilation aborted');
@@ -203,35 +204,35 @@ export class Compiler {
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {
-        for await (const ev of new CompilerWatcher(this.#state, this.#signal)) {
-          if (ev.action !== 'delete') {
-            const err = await emitter(ev.entry.sourceFile, true);
-            if (err) {
-              log.info('Compilation Error', CompilerUtil.buildTranspileError(ev.entry.sourceFile, err));
+        for await (const event of new CompilerWatcher(this.#state, this.#signal)) {
+          if (event.action !== 'delete') {
+            const error = await emitter(event.entry.sourceFile, true);
+            if (error) {
+              log.info('Compilation Error', CompilerUtil.buildTranspileError(event.entry.sourceFile, error));
             } else {
-              log.info(`Compiled ${ev.entry.sourceFile} on ${ev.action}`);
+              log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
             }
           } else {
-            if (ev.entry.outputFile) {
+            if (event.entry.outputFile) {
               // Remove output
-              log.info(`Removed ${ev.entry.sourceFile}, ${ev.entry.outputFile}`);
-              await fs.rm(ev.entry.outputFile, { force: true }); // Ensure output is deleted
+              log.info(`Removed ${event.entry.sourceFile}, ${event.entry.outputFile}`);
+              await fs.rm(event.entry.outputFile, { force: true }); // Ensure output is deleted
             }
           }
 
           // Send change events
           EventUtil.sendEvent('change', {
-            action: ev.action,
+            action: event.action,
             time: Date.now(),
-            file: ev.file,
-            output: ev.entry.outputFile!,
-            module: ev.entry.module.name
+            file: event.file,
+            output: event.entry.outputFile!,
+            module: event.entry.module.name
           });
         }
         EventUtil.sendEvent('state', { state: 'watch-end' });
-      } catch (err) {
-        if (err instanceof Error) {
-          this.#shutdown(err instanceof CompilerReset ? 'reset' : 'error', err);
+      } catch (error) {
+        if (error instanceof Error) {
+          this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error);
         }
       }
     }

@@ -8,7 +8,7 @@ import {
 
 import {
   ModelRegistryIndex, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
-  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
+  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOperation, BulkResponse,
   NotFoundError, ExistsError, ModelBlobSupport,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil,
 } from '@travetto/model';
@@ -131,8 +131,8 @@ export class MongoModelService implements
     const creating = MongoUtil.getIndices(cls, ModelRegistryIndex.getConfig(cls).indices);
     if (creating.length) {
       console.debug('Creating indexes', { indices: creating });
-      for (const el of creating) {
-        await col.createIndex(...el);
+      for (const toCreate of creating) {
+        await col.createIndex(...toCreate);
       }
     }
   }
@@ -208,11 +208,11 @@ export class MongoModelService implements
         { $set: cleaned },
         { upsert: true }
       );
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('duplicate key error')) {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('duplicate key error')) {
         throw new ExistsError(cls, id);
       } else {
-        throw err;
+        throw error;
       }
     }
     return this.postUpdate(cleaned, id);
@@ -226,13 +226,13 @@ export class MongoModelService implements
 
     const operation: Partial<T> = castTo(Object
       .entries(simple)
-      .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((acc, [k, v]) => {
-        if (v === null || v === undefined) {
-          (acc.$unset ??= {})[k] = v;
+      .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
+        if (value === null || value === undefined) {
+          (document.$unset ??= {})[key] = value;
         } else {
-          (acc.$set ??= {})[k] = v;
+          (document.$set ??= {})[key] = value;
         }
-        return acc;
+        return document;
       }, {}));
 
     const id = item.id;
@@ -261,12 +261,12 @@ export class MongoModelService implements
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
     const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
-    for await (const el of cursor) {
+    for await (const item of cursor) {
       try {
-        yield await this.postLoad(cls, el);
-      } catch (err) {
-        if (!(err instanceof NotFoundError)) {
-          throw err;
+        yield await this.postLoad(cls, item);
+      } catch (error) {
+        if (!(error instanceof NotFoundError)) {
+          throw error;
         }
       }
     }
@@ -313,7 +313,7 @@ export class MongoModelService implements
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse<{ index: number }>> {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<{ index: number }>> {
     const out: BulkResponse<{ index: number }> = {
       errors: [],
       counts: {
@@ -336,26 +336,26 @@ export class MongoModelService implements
 
     out.insertedIds = new Map([...upsertedIds.entries(), ...insertedIds.entries()]);
 
-    for (const op of operations) {
-      if (op.insert) {
-        this.preUpdate(op.insert);
-        bulk.insert(op.insert);
-      } else if (op.upsert) {
-        const id = this.preUpdate(op.upsert);
-        bulk.find({ _id: MongoUtil.uuid(id!) }).upsert().updateOne({ $set: op.upsert });
-      } else if (op.update) {
-        const id = this.preUpdate(op.update);
-        bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: op.update });
-      } else if (op.delete) {
-        bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).deleteOne();
+    for (const operation of operations) {
+      if (operation.insert) {
+        this.preUpdate(operation.insert);
+        bulk.insert(operation.insert);
+      } else if (operation.upsert) {
+        const id = this.preUpdate(operation.upsert);
+        bulk.find({ _id: MongoUtil.uuid(id!) }).upsert().updateOne({ $set: operation.upsert });
+      } else if (operation.update) {
+        const id = this.preUpdate(operation.update);
+        bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: operation.update });
+      } else if (operation.delete) {
+        bulk.find({ _id: MongoUtil.uuid(operation.delete.id) }).deleteOne();
       }
     }
 
     const result = await bulk.execute({});
 
     // Restore all ids
-    for (const op of operations) {
-      const core = op.insert ?? op.upsert ?? op.update;
+    for (const operation of operations) {
+      const core = operation.insert ?? operation.upsert ?? operation.update;
       if (core) {
         this.postUpdate(asFull(core));
       }
@@ -367,17 +367,17 @@ export class MongoModelService implements
 
     if (out.counts) {
       out.counts.delete = result.deletedCount;
-      out.counts.update = operations.filter(x => x.update).length;
+      out.counts.update = operations.filter(item => item.update).length;
       out.counts.insert = result.insertedCount;
-      out.counts.upsert = operations.filter(x => x.upsert).length;
+      out.counts.upsert = operations.filter(item => item.upsert).length;
     }
 
     if (result.hasWriteErrors()) {
       out.errors = result.getWriteErrors();
-      for (const err of out.errors) {
-        const op = operations[err.index];
-        const k = TypedObject.keys(op)[0];
-        out.counts[k] -= 1;
+      for (const error of out.errors) {
+        const operation = operations[error.index];
+        const key = TypedObject.keys(operation)[0];
+        out.counts[key] -= 1;
       }
       out.counts.error = out.errors.length;
     }
@@ -427,18 +427,18 @@ export class MongoModelService implements
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
-    const idxCfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     const where = this.getWhereFilter(
       cls,
       castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
     );
 
-    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxCfg)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxCfg);
+    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxConfig)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxConfig);
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
 
-    for await (const el of cursor) {
-      yield await this.postLoad(cls, el);
+    for await (const item of cursor) {
+      yield await this.postLoad(cls, item);
     }
   }
 
@@ -450,7 +450,7 @@ export class MongoModelService implements
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
     const cursor = col.find(filter, {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
-    return await Promise.all(items.map(r => this.postLoad(cls, r)));
+    return await Promise.all(items.map(item => this.postLoad(cls, item)));
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -500,13 +500,13 @@ export class MongoModelService implements
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
     const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>(
-      (acc, [k, v]) => {
-        if (v === null || v === undefined) {
-          (acc.$unset ??= {})[k] = v;
+      (document, [key, value]) => {
+        if (value === null || value === undefined) {
+          (document.$unset ??= {})[key] = value;
         } else {
-          (acc.$set ??= {})[k] = v;
+          (document.$set ??= {})[key] = value;
         }
-        return acc;
+        return document;
       }, {});
 
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
@@ -523,14 +523,14 @@ export class MongoModelService implements
       await QueryVerifier.verify(cls, query);
     }
 
-    let q: Record<string, unknown> = { [field]: { $exists: true } };
+    let queryObject: Record<string, unknown> = { [field]: { $exists: true } };
 
     if (query?.where) {
-      q = { $and: [q, MongoUtil.extractWhereFilter(cls, query.where)] };
+      queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(cls, query.where)] };
     }
 
     const aggregations: object[] = [
-      { $match: q },
+      { $match: queryObject },
       {
         $group: {
           _id: `$${field}`,
@@ -544,9 +544,9 @@ export class MongoModelService implements
     const result = await col.aggregate<{ _id: ObjectId, count: number }>(aggregations).toArray();
 
     return result
-      .map(val => ({
-        key: MongoUtil.idToString(val._id),
-        count: val.count
+      .map(item => ({
+        key: MongoUtil.idToString(item._id),
+        count: item.count
       }))
       .toSorted((a, b) => b.count - a.count);
   }
@@ -554,15 +554,15 @@ export class MongoModelService implements
   // Suggest
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
-    const q = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
-    const results = await this.query<T>(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, resolvedQuery);
     return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, (a) => a, query && query.limit);
   }
 
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
-    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
-    const results = await this.query<T>(cls, q);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, resolvedQuery);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query && query.limit);
   }
 
@@ -582,6 +582,6 @@ export class MongoModelService implements
 
     const cursor = col.find(castTo({ $and: [{ $text: search }, filter] }), {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
-    return await Promise.all(items.map(r => this.postLoad(cls, r)));
+    return await Promise.all(items.map(item => this.postLoad(cls, item)));
   }
 }

@@ -17,19 +17,19 @@ export abstract class BasePackCommand implements CliCommandShape {
 
   static get entryPoints(): string[] {
     return RuntimeIndex.find({
-      module: m => m.prod,
-      folder: f => f === 'support',
-      file: f => f.sourceFile.includes('entry.')
+      module: mod => mod.prod,
+      folder: folder => folder === 'support',
+      file: file => file.sourceFile.includes('entry.')
     })
-      .map(x => x.import.replace(/[.][^.]+s$/, ''));
+      .map(file => file.import.replace(/[.][^.]+s$/, ''));
   }
 
   @Ignore()
   _parsed: ParsedState;
 
   /** Workspace for building */
-  @CliFlag({ short: 'b' })
-  buildDir: string = path.resolve(os.tmpdir(), Runtime.mainSourcePath.replace(/[\/\\: ]/g, '_'));
+  @CliFlag({ short: 'b', full: 'buildDir' })
+  buildDirectory: string = path.resolve(os.tmpdir(), Runtime.mainSourcePath.replace(/[\/\\: ]/g, '_'));
 
   /** Clean workspace */
   clean = true;
@@ -116,8 +116,8 @@ export abstract class BasePackCommand implements CliCommandShape {
    * Run all operations
    */
   async * runOperations(): AsyncIterable<string> {
-    for (const op of this.getOperations()) {
-      for await (const msg of op(this)) {
+    for (const operation of this.getOperations()) {
+      for await (const msg of operation(this)) {
         yield msg.join(' ');
       }
     }
@@ -128,11 +128,11 @@ export abstract class BasePackCommand implements CliCommandShape {
    */
   getBinaryDependencies(): string[] {
     return [...RuntimeIndex.getModuleList('all')]
-      .map(m => RuntimeIndex.getModule(m))
-      .filter(m => !!m)
-      .filter(m => m.prod)
-      .map(m => PackageUtil.readPackage(m?.sourcePath))
-      .map(p => p?.travetto?.build?.binaryDependencies ?? [])
+      .map(name => RuntimeIndex.getModule(name))
+      .filter(mod => !!mod)
+      .filter(mod => mod.prod)
+      .map(mod => PackageUtil.readPackage(mod?.sourcePath))
+      .map(pkg => pkg?.travetto?.build?.binaryDependencies ?? [])
       .flat();
   }
 
@@ -141,7 +141,7 @@ export abstract class BasePackCommand implements CliCommandShape {
     // Resolve all files to absolute paths
     this.output = this.output ? path.resolve(this.output) : undefined!;
     this.ejectFile = this.ejectFile ? path.resolve(this.ejectFile) : undefined;
-    this.buildDir = path.resolve(this.buildDir);
+    this.buildDirectory = path.resolve(this.buildDirectory);
 
     // Update entry points
     this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
@@ -150,14 +150,14 @@ export abstract class BasePackCommand implements CliCommandShape {
     this.mainFile = `${this.mainName}.js`;
 
     // Collect binary dependencies
-    const binaryDeps = await this.getBinaryDependencies();
-    this.externalDependencies = [...this.externalDependencies, ...binaryDeps];
+    const dependencies = await this.getBinaryDependencies();
+    this.externalDependencies = [...this.externalDependencies, ...dependencies];
 
     const stream = this.runOperations();
 
     // Eject to file
     if (this.ejectFile) {
-      await PackUtil.writeEjectOutput(this.buildDir, this.module, stream, this.ejectFile);
+      await PackUtil.writeEjectOutput(this.buildDirectory, this.module, stream, this.ejectFile);
     } else {
       const start = Date.now();
       const term = new Terminal();

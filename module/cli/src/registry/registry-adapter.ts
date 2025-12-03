@@ -7,9 +7,9 @@ import { CliParseUtil, ENV_PREFIX } from '../parse.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 
-const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
-const stripDashes = (x?: string): string | undefined => x?.replace(/^-+/, '');
-const toFlagName = (x: string): string => x.replace(/([a-z])([A-Z])/g, (_, l: string, r: string) => `${l}-${r.toLowerCase()}`);
+const getName = (name: string): string => (name.match(CLI_FILE_REGEX)?.groups?.name ?? name).replaceAll('_', ':');
+const stripDashes = (flag?: string): string | undefined => flag?.replace(/^-+/, '');
+const toFlagName = (field: string): string => field.replace(/([a-z])([A-Z])/g, (_, left: string, right: string) => `${left}-${right.toLowerCase()}`);
 
 export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConfig> {
   #cls: Class;
@@ -36,17 +36,17 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     };
 
     const used = new Set(Object.values(schema.fields)
-      .flatMap(f => f.aliases ?? [])
-      .filter(x => !x.startsWith(ENV_PREFIX))
+      .flatMap(field => field.aliases ?? [])
+      .filter(alias => !alias.startsWith(ENV_PREFIX))
       .map(stripDashes)
     );
 
     for (const field of Object.values(schema.fields)) {
-      const fieldName = field.name.toString();
+      const fieldName = field.name;
       const { long: longAliases, short: shortAliases, raw: rawAliases, env: envAliases } = CliParseUtil.parseAliases(field.aliases ?? []);
 
-      let short = stripDashes(shortAliases?.[0]) ?? rawAliases.find(x => x.length <= 2);
-      const long = stripDashes(longAliases?.[0]) ?? rawAliases.find(x => x.length >= 3) ?? toFlagName(fieldName);
+      let short = stripDashes(shortAliases?.[0]) ?? rawAliases.find(alias => alias.length <= 2);
+      const long = stripDashes(longAliases?.[0]) ?? rawAliases.find(alias => alias.length >= 3) ?? toFlagName(fieldName);
       const aliases: string[] = field.aliases = [...envAliases];
 
       if (short === undefined) {
@@ -74,14 +74,14 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
   /**
    * Registers a cli command
    */
-  register(...cfg: Partial<CliCommandConfig>[]): CliCommandConfig {
+  register(...configs: Partial<CliCommandConfig>[]): CliCommandConfig {
     const meta = describeFunction(this.#cls);
     this.#config ??= {
       cls: this.#cls,
       preMain: undefined,
       name: getName(meta.import),
     };
-    Object.assign(this.#config, ...cfg);
+    Object.assign(this.#config, ...configs);
     return this.#config;
   }
 

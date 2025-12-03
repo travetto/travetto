@@ -28,16 +28,16 @@ export class WebRpcClientGeneratorService {
 
   async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {
     return ControllerRegistryIndex.getClasses()
-      .filter(x => {
-        const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(x));
+      .filter(cls => {
+        const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(cls));
         return entry && entry.role === 'std';
       })
-      .filter(x => SchemaRegistryIndex.getConfig(x).private !== true)
-      .map(x => {
-        const imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(x));
+      .filter(cls => SchemaRegistryIndex.getConfig(cls).private !== true)
+      .map(config => {
+        const imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(config));
         const base = Runtime.workspaceRelative(RuntimeIndex.manifest.build.typesFolder);
         return {
-          name: x.name,
+          name: config.name,
           import: path.relative(relativeTo, `${base}/node_modules/${imp}`)
         };
       });
@@ -56,15 +56,15 @@ export class WebRpcClientGeneratorService {
     const flavorOutputFile = path.resolve(config.output, path.basename(flavorSourceFile));
     const flavorSourceContents = (await fs.readFile(flavorSourceFile, 'utf8').catch(() => ''))
       .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gsm, '')
-      .replaceAll(/^\/\/\s*#UNCOMMENT (.*)/gm, (_, v) => v);
+      .replaceAll(/^\/\/\s*#UNCOMMENT (.*)/gm, (_, line) => line);
 
     const factoryOutputFile = path.resolve(config.output, 'factory.ts');
     const factorySourceContents = [
       `import { ${clientFactory.name} } from './rpc';`,
-      ...classes.map((n) => `import type { ${n.name} } from '${n.import}';`),
+      ...classes.map((cls) => `import type { ${cls.name} } from '${cls.import}';`),
       '',
       `export const factory = ${clientFactory.name}<{`,
-      ...classes.map(x => `  ${x.name}: ${x.name};`),
+      ...classes.map(cls => `  ${cls.name}: ${cls.name};`),
       '}>();',
     ].join('\n');
 

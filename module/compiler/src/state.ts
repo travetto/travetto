@@ -46,7 +46,7 @@ export class CompilerState implements ts.CompilerHost {
   #writeExternalTypings(location: string, text: string, bom: boolean): void {
     let core = location.replace('.map', '');
     if (!this.#outputToEntry.has(core)) {
-      core = core.replace(ManifestModuleUtil.TYPINGS_EXT_RE, ManifestModuleUtil.OUTPUT_EXT);
+      core = core.replace(ManifestModuleUtil.TYPINGS_EXT_REGEX, ManifestModuleUtil.OUTPUT_EXT);
     }
     const entry = this.#outputToEntry.get(core);
     if (entry) {
@@ -72,8 +72,8 @@ export class CompilerState implements ts.CompilerHost {
     this.#modules = Object.values(this.#manifest.modules);
 
     // Register all inputs
-    for (const x of this.#modules) {
-      const base = x?.files ?? {};
+    for (const mod of this.#modules) {
+      const base = mod?.files ?? {};
       const files = [
         ...base.bin ?? [],
         ...base.src ?? [],
@@ -85,7 +85,7 @@ export class CompilerState implements ts.CompilerHost {
       ];
       for (const [file, type] of files) {
         if (CompilerUtil.validFile(type)) {
-          this.registerInput(x, file);
+          this.registerInput(mod, file);
         }
       }
     }
@@ -109,7 +109,7 @@ export class CompilerState implements ts.CompilerHost {
 
   getArbitraryInputFile(): string {
     const randomSource = this.#manifestIndex.getWorkspaceModules()
-      .filter(x => x.files.src?.length)[0]
+      .filter(mod => mod.files.src?.length)[0]
       .files.src[0].sourceFile;
 
     return this.getBySource(randomSource)!.sourceFile;
@@ -149,11 +149,11 @@ export class CompilerState implements ts.CompilerHost {
           return result?.diagnostics?.length ? result.diagnostics : undefined;
         }
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        return err;
+    } catch (error) {
+      if (error instanceof Error) {
+        return error;
       } else {
-        throw err;
+        throw error;
       }
     }
   }
@@ -235,7 +235,7 @@ export class CompilerState implements ts.CompilerHost {
   /* Start Compiler Host */
   getCanonicalFileName(file: string): string { return file; }
   getCurrentDirectory(): string { return this.#manifest.workspace.path; }
-  getDefaultLibFileName(opts: ts.CompilerOptions): string { return ts.getDefaultLibFileName(opts); }
+  getDefaultLibFileName(options: ts.CompilerOptions): string { return ts.getDefaultLibFileName(options); }
   getNewLine(): string { return ts.sys.newLine; }
   useCaseSensitiveFileNames(): boolean { return ts.sys.useCaseSensitiveFileNames; }
   getDefaultLibLocation(): string { return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions)); }
@@ -244,8 +244,8 @@ export class CompilerState implements ts.CompilerHost {
     return this.#sourceToEntry.has(sourceFile) || ts.sys.fileExists(sourceFile);
   }
 
-  directoryExists(sourceDir: string): boolean {
-    return this.#sourceDirectory.has(sourceDir) || ts.sys.directoryExists(sourceDir);
+  directoryExists(sourceDirectory: string): boolean {
+    return this.#sourceDirectory.has(sourceDirectory) || ts.sys.directoryExists(sourceDirectory);
   }
 
   writeFile(
@@ -258,7 +258,7 @@ export class CompilerState implements ts.CompilerHost {
     }
     const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
 
-    if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_RE.test(outputFile) || outputFile.endsWith('package.json')) {
+    if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(outputFile) || outputFile.endsWith('package.json')) {
       this.#writeExternalTypings(location, text, bom);
     }
 
@@ -266,9 +266,9 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   readFile(sourceFile: string): string | undefined {
-    const res = this.#sourceContents.get(sourceFile) ?? this.#readFile(sourceFile);
-    this.#sourceContents.set(sourceFile, res);
-    return res;
+    const contents = this.#sourceContents.get(sourceFile) ?? this.#readFile(sourceFile);
+    this.#sourceContents.set(sourceFile, contents);
+    return contents;
   }
 
   getSourceFile(sourceFile: string, language: ts.ScriptTarget): ts.SourceFile {

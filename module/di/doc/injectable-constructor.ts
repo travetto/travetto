@@ -1,13 +1,13 @@
 import { Injectable } from '@travetto/di';
-import { DependentService } from './dep.ts';
+import { DependentService } from './dependency.ts';
 
 @Injectable()
 class CustomService {
 
   dependentService: DependentService;
 
-  constructor(svc: DependentService) {
-    this.dependentService = svc;
+  constructor(service: DependentService) {
+    this.dependentService = service;
   }
 
   async coolOperation() {

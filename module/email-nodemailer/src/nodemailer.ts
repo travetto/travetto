@@ -20,16 +20,16 @@ export class NodemailerTransport implements MailTransport {
   /**
    * Force content into alternative slots
    */
-  #forceContentToAlternative(msg: EmailOptions): EmailOptions {
+  #forceContentToAlternative(message: EmailOptions): EmailOptions {
     for (const [key, mime] of [['text', 'text/plain'], ['html', 'text/html']] as const) {
-      if (msg[key]) {
-        (msg.alternatives ??= []).push({
-          content: msg[key], contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `${mime}; charset=utf-8`
+      if (message[key]) {
+        (message.alternatives ??= []).push({
+          content: message[key], contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `${mime}; charset=utf-8`
         });
-        delete msg[key];
+        delete message[key];
       }
     }
-    return msg;
+    return message;
   }
 
   constructor(transportFactory: Transport) {

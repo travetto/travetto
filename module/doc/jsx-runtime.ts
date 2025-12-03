@@ -42,8 +42,8 @@ createFrag = createFragment;
 export const jsx = createElement;
 export const jsxs = createElement;
 export const Fragment = createFragment;
-export function isJSXElement(el: unknown): el is JSXElement {
-  return el !== undefined && el !== null && typeof el === 'object' && JSXRuntimeTag in el;
+export function isJSXElement(value: unknown): value is JSXElement {
+  return value !== undefined && value !== null && typeof value === 'object' && JSXRuntimeTag in value;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-namespace

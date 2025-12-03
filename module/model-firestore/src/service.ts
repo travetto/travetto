@@ -12,8 +12,8 @@ import { FirestoreModelConfig } from './config.ts';
 
 const clone = structuredClone;
 
-const toSimpleObj = <T>(inp: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
-  JSON.parse(JSON.stringify(inp, (_, v) => v ?? null), (_, v) => v ?? missingValue);
+const toSimpleObject = <T>(input: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
+  JSON.parse(JSON.stringify(input, (_, value) => value ?? null), (_, value) => value ?? missingValue);
 
 /**
  * A model service backed by Firestore
@@ -49,8 +49,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async deleteStorage(): Promise<void> { }
 
   async deleteModel(cls: Class): Promise<void> {
-    for await (const el of this.list(cls)) {
-      await this.delete(cls, el.id);
+    for await (const item of this.list(cls)) {
+      await this.delete(cls, item.id);
     }
   }
 
@@ -88,7 +88,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
-    const cleaned = toSimpleObj(full, FieldValue.delete());
+    const cleaned = toSimpleObject(full, FieldValue.delete());
     await this.#getCollection(cls).doc(id).set(cleaned, { mergeFields: Object.keys(full) });
     return this.get(cls, id);
   }
@@ -97,22 +97,22 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     try {
       await this.#getCollection(cls).doc(id).delete({ exists: true });
-    } catch (err) {
-      if (err && err instanceof Error && err.message.includes('NOT_FOUND')) {
+    } catch (error) {
+      if (error && error instanceof Error && error.message.includes('NOT_FOUND')) {
         throw new NotFoundError(cls, id);
       }
-      throw err;
+      throw error;
     }
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     const batch = await this.#getCollection(cls).select().get();
-    for (const el of batch.docs) {
+    for (const item of batch.docs) {
       try {
-        yield await this.get(cls, el.id);
-      } catch (err) {
-        if (!(err instanceof NotFoundError)) {
-          throw err;
+        yield await this.get(cls, item.id);
+      } catch (error) {
+        if (!(error instanceof NotFoundError)) {
+          throw error;
         }
       }
     }
@@ -124,7 +124,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
     const { fields } = ModelIndexedUtil.computeIndexParts(cls, idx, body);
     const query = fields.reduce<Query>(
-      (q, { path, value }) => q.where(path.join('.'), '==', value),
+      (result, { path, value }) => result.where(path.join('.'), '==', value),
       this.#getCollection(cls)
     );
 
@@ -133,7 +133,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     if (item && !item.empty) {
       return item.docs[0].id;
     }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, { sep: '; ' })?.key);
+    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, { separator: '; ' })?.key);
   }
 
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
@@ -151,17 +151,17 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const cfg = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, cfg, body, { emptySortValue: null });
-    let query = fields.reduce<Query>((q, { path, value }) =>
-      q.where(path.join('.'), '==', value), this.#getCollection(cls));
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, config, body, { emptySortValue: null });
+    let query = fields.reduce<Query>((result, { path, value }) =>
+      result.where(path.join('.'), '==', value), this.#getCollection(cls));
 
     if (sorted) {
       query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');
     }
 
-    for (const el of (await query.get()).docs) {
-      yield await ModelCrudUtil.load(cls, el.data()!);
+    for (const item of (await query.get()).docs) {
+      yield await ModelCrudUtil.load(cls, item.data()!);
     }
   }
 }

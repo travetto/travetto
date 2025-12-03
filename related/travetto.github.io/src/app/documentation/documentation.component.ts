@@ -21,15 +21,15 @@ export class DocumentationComponent {
   active = {};
 
   constructor(router: Router) {
-    router.events.subscribe((e) => {
-      if (e instanceof NavigationEnd) {
-        this.url = e.url;
+    router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.url = event.url;
       }
     });
   }
 
-  hasFragment(f): boolean {
-    return this.url.endsWith(`#${f}`);
+  hasFragment(fragment: string): boolean {
+    return this.url.endsWith(`#${fragment}`);
   }
 
   setActive(page: (typeof PAGES)[number]): void {

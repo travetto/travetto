@@ -27,10 +27,10 @@ export interface ConsoleEvent {
  * @concrete
  */
 export interface ConsoleListener {
-  log(ev: ConsoleEvent): void;
+  log(event: ConsoleEvent): void;
 }
 
-const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
+const DEBUG_HANDLE = { formatArgs: debug.formatArgs, log: debug.log };
 
 /**
  * Provides a general abstraction against the console.* methods to allow for easier capture and redirection.
@@ -50,7 +50,7 @@ class $ConsoleManager implements ConsoleListener {
   /**
    * List of logging filters
    */
-  #filters: Partial<Record<ConsoleEvent['level'], (x: ConsoleEvent) => boolean>> = {};
+  #filters: Partial<Record<ConsoleEvent['level'], (event: ConsoleEvent) => boolean>> = {};
 
   constructor(listener: ConsoleListener) {
     this.set(listener);
@@ -66,8 +66,8 @@ class $ConsoleManager implements ConsoleListener {
   filter(level: ConsoleEvent['level'], filter?: boolean | ((ctx: ConsoleEvent) => boolean)): void {
     if (filter !== undefined) {
       if (typeof filter === 'boolean') {
-        const v = filter;
-        filter = (): boolean => v;
+        const filterValue = filter;
+        filter = (): boolean => filterValue;
       }
       this.#filters[level] = filter;
     } else {
@@ -90,8 +90,8 @@ class $ConsoleManager implements ConsoleListener {
         args: [util.format(...args)], line: 0, timestamp: new Date()
       });
     } else {
-      debug.formatArgs = DEBUG_OG.formatArgs;
-      debug.log = DEBUG_OG.log;
+      debug.formatArgs = DEBUG_HANDLE.formatArgs;
+      debug.log = DEBUG_HANDLE.log;
     }
   }
 
@@ -111,18 +111,18 @@ class $ConsoleManager implements ConsoleListener {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  log(ev: ConsoleEvent & { import?: [string, string] }): void {
-    const outEv = {
-      ...ev,
+  log(event: ConsoleEvent & { import?: [string, string] }): void {
+    const result = {
+      ...event,
       timestamp: new Date(),
-      module: ev.module ?? ev.import?.[0],
-      modulePath: ev.modulePath ?? ev.import?.[1]
+      module: event.module ?? event.import?.[0],
+      modulePath: event.modulePath ?? event.import?.[1]
     };
 
-    if (this.#filters[outEv.level] && !this.#filters[outEv.level]!(outEv)) {
+    if (this.#filters[result.level] && !this.#filters[result.level]!(result)) {
       return; // Do nothing
     } else {
-      return this.#listener.log(outEv);
+      return this.#listener.log(result);
     }
   }
 
@@ -141,5 +141,5 @@ class $ConsoleManager implements ConsoleListener {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager({ log(ev): void { console![ev.level](...ev.args); } });
+export const ConsoleManager = new $ConsoleManager({ log(event): void { console![event.level](...event.args); } });
 export const log = ConsoleManager.log.bind(ConsoleManager);

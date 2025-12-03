@@ -88,11 +88,11 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   process(events: ChangeEvent<Class>[]): void {
     for (const event of events) {
-      if ('prev' in event) {
-        this.#removeClass(event.prev);
+      if ('previous' in event) {
+        this.#removeClass(event.previous);
       }
-      if ('curr' in event) {
-        this.#addClass(event.curr);
+      if ('current' in event) {
+        this.#addClass(event.current);
       }
     }
   }
@@ -112,21 +112,21 @@ export class ModelRegistryIndex implements RegistryIndex {
    * Get Index
    */
   getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
-    const cfg = this.getConfig(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
-    if (!cfg) {
+    const config = this.getConfig(cls).indices?.find((idx): idx is IndexConfig<T> => idx.name === name);
+    if (!config) {
       throw new NotFoundError(`${cls.name} Index`, `${name}`);
     }
-    if (supportedTypes && !supportedTypes.includes(cfg.type)) {
-      throw new IndexNotSupported(cls, cfg, `${cfg.type} indices are not supported.`);
+    if (supportedTypes && !supportedTypes.includes(config.type)) {
+      throw new IndexNotSupported(cls, config, `${config.type} indices are not supported.`);
     }
-    return cfg;
+    return config;
   }
 
   /**
    * Get Indices
    */
   getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
-    return (this.getConfig(cls).indices ?? []).filter((x): x is IndexConfig<T> => !supportedTypes || supportedTypes.includes(x.type));
+    return (this.getConfig(cls).indices ?? []).filter((idx): idx is IndexConfig<T> => !supportedTypes || supportedTypes.includes(idx.type));
   }
 
   /**

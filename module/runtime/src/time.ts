@@ -22,8 +22,8 @@ export class TimeUtil {
    * Test to see if a string is valid for relative time
    * @param val
    */
-  static isTimeSpan(val: string): val is TimeSpan {
-    return TIME_PATTERN.test(val);
+  static isTimeSpan(value: string): value is TimeSpan {
+    return TIME_PATTERN.test(value);
   }
 
   /**
@@ -36,12 +36,12 @@ export class TimeUtil {
       return amount.getTime();
     } else if (typeof amount === 'string') {
       const groups: { amount?: string, unit?: TimeUnit } = amount.match(TIME_PATTERN)?.groups ?? {};
-      const amountStr = groups.amount ?? `${amount}`;
+      const amountString = groups.amount ?? `${amount}`;
       unit = groups.unit ?? unit ?? 'ms';
       if (!TIME_UNITS[unit]) {
         return NaN;
       }
-      amount = amountStr.includes('.') ? parseFloat(amountStr) : parseInt(amountStr, 10);
+      amount = amountString.includes('.') ? parseFloat(amountString) : parseInt(amountString, 10);
     }
     return amount * TIME_UNITS[unit ?? 'ms'];
   }
@@ -69,11 +69,11 @@ export class TimeUtil {
     if (value === undefined) {
       return value;
     }
-    const val = (typeof value === 'string' && /\d{1,30}[a-z]$/i.test(value)) ?
+    const result = (typeof value === 'string' && /\d{1,30}[a-z]$/i.test(value)) ?
       (this.isTimeSpan(value) ? this.asMillis(value) : undefined) :
       (typeof value === 'string' ? parseInt(value, 10) :
         (value instanceof Date ? value.getTime() : value));
-    return Number.isNaN(val) ? undefined : val;
+    return Number.isNaN(result) ? undefined : result;
   }
 
   /**
@@ -90,11 +90,11 @@ export class TimeUtil {
    * @param time Time in milliseconds
    */
   static asClock(time: number): string {
-    const s = Math.trunc(time / 1000);
+    const seconds = Math.trunc(time / 1000);
     return [
-      s > 3600 ? `${Math.trunc(s / 3600).toString().padStart(2, '0')}h` : '',
-      s > 60 ? `${Math.trunc((s % 3600) / 60).toString().padStart(2, '0')}m` : '',
-      `${(s % 60).toString().padStart(2, '0')}s`
-    ].filter(x => !!x).slice(0, 2).join(' ');
+      seconds > 3600 ? `${Math.trunc(seconds / 3600).toString().padStart(2, '0')}h` : '',
+      seconds > 60 ? `${Math.trunc((seconds % 3600) / 60).toString().padStart(2, '0')}m` : '',
+      `${(seconds % 60).toString().padStart(2, '0')}s`
+    ].filter(part => !!part).slice(0, 2).join(' ');
   }
 }

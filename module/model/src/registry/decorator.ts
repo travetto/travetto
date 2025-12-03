@@ -11,12 +11,12 @@ import { ModelRegistryIndex } from './registry-index.ts';
  * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
-export function Model(conf: Partial<ModelConfig<ModelType>> | string = {}) {
+export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
   return function <T extends ModelType, U extends Class<T>>(cls: U): U {
-    if (typeof conf === 'string') {
-      conf = { store: conf };
+    if (typeof config === 'string') {
+      config = { store: config };
     }
-    ModelRegistryIndex.getForRegister(cls).register(conf);
+    ModelRegistryIndex.getForRegister(cls).register(config);
     if (SchemaRegistryIndex.getForRegister(cls).get().fields.id) {
       SchemaRegistryIndex.getForRegister(cls).registerField('id', { required: { active: false } });
     }
@@ -29,7 +29,7 @@ export function Model(conf: Partial<ModelConfig<ModelType>> | string = {}) {
  * @kind decorator
  */
 export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
-  if (indices.some(x => x.fields.some(f => f === 'id'))) {
+  if (indices.some(config => config.fields.some(field => field === 'id'))) {
     throw new AppError('Cannot create an index with the id field');
   }
   return function (cls: Class<T>): void {
@@ -69,7 +69,7 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
  * @augments `@travetto/schema:Field`
  * @kind decorator
  */
-export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
+export function PersistValue<T>(handler: (current: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
     ModelRegistryIndex.getForRegister(getClass(instance)).register({
       prePersist: [{

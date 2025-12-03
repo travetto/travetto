@@ -13,14 +13,14 @@ export class CliServiceCommand implements CliCommandShape {
   async #getServices(services: string[]): Promise<ServiceDescriptor[]> {
     return (await Promise.all(
       RuntimeIndex.find({
-        module: m => m.roles.includes('std'),
-        folder: f => f === 'support',
-        file: f => /support\/service[.]/.test(f.sourceFile)
+        module: mod => mod.roles.includes('std'),
+        folder: folder => folder === 'support',
+        file: file => /support\/service[.]/.test(file.sourceFile)
       })
-        .map(x => Runtime.importFrom<{ service: ServiceDescriptor }>(x.import).then(v => v.service))
+        .map(file => Runtime.importFrom<{ service: ServiceDescriptor }>(file.import).then(value => value.service))
     ))
-      .filter(x => !!x)
-      .filter(x => services?.length ? services.includes(x.name) : true)
+      .filter(file => !!file)
+      .filter(file => services?.length ? services.includes(file.name) : true)
       .toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -37,29 +37,29 @@ export class CliServiceCommand implements CliCommandShape {
     return [
       cliTpl`${{ title: 'Available Services' }}`,
       '-'.repeat(20),
-      ...all.map(x => cliTpl` * ${{ identifier: x.name }}@${{ type: x.version }}`)
+      ...all.map(service => cliTpl` * ${{ identifier: service.name }}@${{ type: service.version }}`)
     ];
   }
 
   async main(action: ServiceAction, services: string[] = []): Promise<void> {
     const all = await this.#getServices(services);
-    const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
-    const maxVersion = Math.max(...all.map(x => `${x.version}`.length), 'Version'.length) + 3;
+    const maxName = Math.max(...all.map(service => service.name.length), 'Service'.length) + 3;
+    const maxVersion = Math.max(...all.map(service => `${service.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;
-    const q = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
+    const queue = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
 
-    const jobs = all.map(async (v, i) => {
-      const identifier = v.name.padEnd(maxName);
-      const type = `${v.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
+    const jobs = all.map(async (descriptor, i) => {
+      const identifier = descriptor.name.padEnd(maxName);
+      const type = `${descriptor.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
       let msg: string;
-      for await (const [valueType, value] of new ServiceRunner(v).action(action)) {
+      for await (const [valueType, value] of new ServiceRunner(descriptor).action(action)) {
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
-        q.add({ idx: i, text: msg = cliTpl`${{ identifier }} ${{ type }} ${details}` });
+        queue.add({ idx: i, text: msg = cliTpl`${{ identifier }} ${{ type }} ${details}` });
       }
-      q.add({ idx: i, done: true, text: msg! });
+      queue.add({ idx: i, done: true, text: msg! });
     });
 
-    Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => q.close());
+    Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => queue.close());
 
     const term = new Terminal();
     await term.writer.writeLines([
@@ -68,6 +68,6 @@ export class CliServiceCommand implements CliCommandShape {
       ''.padEnd(maxName + maxVersion + maxStatus + 3, '-'),
     ]).commit();
 
-    await term.streamList(q);
+    await term.streamList(queue);
   }
 }

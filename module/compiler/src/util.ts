@@ -24,7 +24,7 @@ export class CompilerUtil {
   static rewritePackageJSON(manifest: ManifestRoot, text: string): string {
     const pkg: Package = JSON.parse(text);
     if (pkg.files) {
-      pkg.files = pkg.files.map(x => ManifestModuleUtil.withOutputExtension(x));
+      pkg.files = pkg.files.map(file => ManifestModuleUtil.withOutputExtension(file));
     }
     if (pkg.main) {
       pkg.main = ManifestModuleUtil.withOutputExtension(pkg.main);
@@ -32,9 +32,9 @@ export class CompilerUtil {
     pkg.type = manifest.workspace.type;
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
       if (key in pkg) {
-        for (const dep of Object.keys(pkg[key] ?? {})) {
-          if (dep in manifest.modules) {
-            pkg[key]![dep] = manifest.modules[dep].version;
+        for (const dependency of Object.keys(pkg[key] ?? {})) {
+          if (dependency in manifest.modules) {
+            pkg[key]![dependency] = manifest.modules[dependency].version;
           }
         }
       }

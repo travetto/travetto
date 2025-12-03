@@ -45,7 +45,7 @@ export class TestCommand implements CliCommandShape {
   }
 
   isFirstFile(first: string): Promise<boolean> {
-    return fs.stat(path.resolve(first ?? '')).then(x => x.isFile(), () => false);
+    return fs.stat(path.resolve(first ?? '')).then(stat => stat.isFile(), () => false);
   }
 
   async resolvedMode(first: string, rest: string[]): Promise<string> {
@@ -70,7 +70,7 @@ export class TestCommand implements CliCommandShape {
 
     const isFirst = await this.isFirstFile(first);
     const isSingle = this.mode === 'single' || (isFirst && globs.length === 0);
-    const options = Object.fromEntries((this.formatOptions ?? [])?.map(f => [...f.split(':'), true]));
+    const options = Object.fromEntries((this.formatOptions ?? [])?.map(option => [...option.split(':'), true]));
 
     return runTests({
       concurrency: this.concurrency,

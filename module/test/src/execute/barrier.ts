@@ -11,14 +11,14 @@ export class Barrier {
   /**
    * Track timeout
    */
-  static timeout(duration: number | TimeSpan, op: string = 'Operation'): { promise: Promise<void>, resolve: () => unknown } {
+  static timeout(duration: number | TimeSpan, operation: string = 'Operation'): { promise: Promise<void>, resolve: () => unknown } {
     const resolver = Promise.withResolvers<void>();
     const durationMs = TimeUtil.asMillis(duration);
     let timeout: NodeJS.Timeout;
     if (!durationMs) {
       resolver.resolve();
     } else {
-      const msg = `${op} timed out after ${duration}${typeof duration === 'number' ? 'ms' : ''}`;
+      const msg = `${operation} timed out after ${duration}${typeof duration === 'number' ? 'ms' : ''}`;
       timeout = setTimeout(() => resolver.reject(new TimeoutError(msg)), durationMs).unref();
     }
 
@@ -31,9 +31,9 @@ export class Barrier {
    */
   static uncaughtErrorPromise(): { promise: Promise<void>, resolve: () => unknown } {
     const uncaught = Promise.withResolvers<void>();
-    const onError = (err: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(err)); };
-    UNCAUGHT_ERR_EVENTS.map(k => process.on(k, onError));
-    uncaught.promise.finally(() => { UNCAUGHT_ERR_EVENTS.map(k => process.off(k, onError)); });
+    const onError = (error: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(error)); };
+    UNCAUGHT_ERR_EVENTS.map(key => process.on(key, onError));
+    uncaught.promise.finally(() => { UNCAUGHT_ERR_EVENTS.map(key => process.off(key, onError)); });
     return uncaught;
   }
 
@@ -80,7 +80,7 @@ export class Barrier {
   /**
    * Wait for operation to finish, with timeout and unhandled error support
    */
-  static async awaitOperation(timeout: number | TimeSpan, op: () => Promise<unknown>): Promise<Error | undefined> {
+  static async awaitOperation(timeout: number | TimeSpan, operation: () => Promise<unknown>): Promise<Error | undefined> {
     const uncaught = this.uncaughtErrorPromise();
     const timer = this.timeout(timeout);
     const promises = this.capturePromises();
@@ -88,9 +88,9 @@ export class Barrier {
     try {
       await promises.start();
       let capturedError: Error | undefined;
-      const opProm = op().then(() => promises.finish());
+      const opProm = operation().then(() => promises.finish());
 
-      await Promise.race([opProm, uncaught.promise, timer.promise]).catch(err => capturedError ??= err);
+      await Promise.race([opProm, uncaught.promise, timer.promise]).catch(error => capturedError ??= error);
 
       return capturedError;
     } finally {

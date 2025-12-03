@@ -73,10 +73,10 @@ export class SimpleResolver implements TransformResolver {
 
   /**
    * Get type from element
-   * @param el
+   * @param value
    */
-  getType(el: ts.Type | ts.Node): ts.Type {
-    return 'getSourceFile' in el ? this.#tsChecker.getTypeAtLocation(el) : el;
+  getType(value: ts.Type | ts.Node): ts.Type {
+    return 'getSourceFile' in value ? this.#tsChecker.getTypeAtLocation(value) : value;
   }
 
   /**
@@ -106,7 +106,8 @@ export class SimpleResolver implements TransformResolver {
    * Get list of properties
    */
   getPropertiesOfType(type: ts.Type): ts.Symbol[] {
-    return this.#tsChecker.getPropertiesOfType(type).filter(x => x.getName() !== '__proto__' && x.getName() !== 'prototype');
+    return this.#tsChecker.getPropertiesOfType(type)
+      .filter(property => property.getName() !== '__proto__' && property.getName() !== 'prototype');
   }
 
   /**
@@ -161,11 +162,11 @@ export class SimpleResolver implements TransformResolver {
 
     try {
       return resolve(this.getType(node));
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
       }
-      console.error(`Unable to resolve type in ${importName}`, err.stack);
+      console.error(`Unable to resolve type in ${importName}`, error.stack);
       return { key: 'literal', ctor: Object, name: 'object' };
     }
   }

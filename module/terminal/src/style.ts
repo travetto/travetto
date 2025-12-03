@@ -43,7 +43,7 @@ export class StyleUtil {
    * Read foreground/background color if env var is set
    */
   static isBackgroundDark(): boolean {
-    const key = Env.COLORFGBG.val ?? '';
+    const key = Env.COLORFGBG.value ?? '';
 
     if (this.#scheme.key === key) {
       return this.#scheme.dark;
@@ -74,9 +74,9 @@ export class StyleUtil {
   /**
    * Build style palette, with support for background theme awareness
    */
-  static getPalette<K extends string>(inp: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
+  static getPalette<K extends string>(input: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
     return TypedObject.fromEntries(
-      TypedObject.entries(inp).map(([k, v]) => [k, this.getThemedStyle(v)]));
+      TypedObject.entries(input).map(([key, value]) => [key, this.getThemedStyle(value)]));
   }
 
   /**
@@ -89,16 +89,16 @@ export class StyleUtil {
       if (keys.length === 0) {
         return values[0];
       } else {
-        const out = keys.map((el, i) => {
-          let final = el;
-          if (typeof el !== 'string') {
-            const subKeys = TypedObject.keys(el);
+        const out = keys.map((item, i) => {
+          let final = item;
+          if (typeof item !== 'string') {
+            const subKeys = TypedObject.keys(item);
             if (subKeys.length !== 1) {
               throw new Error('Invalid template variable, one and only one key should be specified');
             }
-            const [k] = subKeys;
-            const v = el[k]!;
-            final = v === undefined ? '' : palette[k](v)!;
+            const [key] = subKeys;
+            const value = item[key]!;
+            final = value === undefined ? '' : palette[key](value)!;
           }
           return `${values[i] ?? ''}${final ?? ''}`;
         });

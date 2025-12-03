@@ -11,16 +11,16 @@ import { Workspace } from '../../../core/workspace.ts';
 import { Activatible } from '../../../core/activation.ts';
 
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
-type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
+type ProgressState = { previous: number, bar: ProgressBar, cleanup: () => void };
 
 const resolvablePromise = <T = void>(): PromiseWithResolvers<T> => {
-  let ops: Pick<PromiseWithResolvers<T>, 'reject' | 'resolve'>;
-  const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
-  return { ...ops!, promise: prom };
+  let result: Pick<PromiseWithResolvers<T>, 'reject' | 'resolve'>;
+  const prom = new Promise<T>((resolve, reject) => result = { resolve, reject });
+  return { ...result!, promise: prom };
 };
 
 const SCOPE_MAX = 15;
-const SUB_LOG_RE = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?\s+(info|error|debug|warn)/;
+const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?\s+(info|error|debug|warn)/;
 
 /**
  * Workspace Compilation Support
@@ -37,15 +37,15 @@ export class CompilerWatchFeature extends BaseFeature {
   async #buildProgressBar(type: string, signal: AbortSignal): Promise<ProgressState> {
     this.#progress[type]?.cleanup();
 
-    const ctrl = new AbortController();
+    const controller = new AbortController();
     const complete = resolvablePromise<void>();
-    const kill = (): void => ctrl.abort();
+    const kill = (): void => controller.abort();
     signal.addEventListener('abort', kill);
 
     const title = type.charAt(0).toUpperCase() + type.substring(1);
 
     return this.#progress[type] = {
-      prev: 0,
+      previous: 0,
       cleanup: (): void => {
         signal.removeEventListener('abort', kill);
         delete this.#progress[type];
@@ -54,8 +54,8 @@ export class CompilerWatchFeature extends BaseFeature {
       bar: await new Promise<ProgressBar>(resolve =>
         vscode.window.withProgress(
           { location: vscode.ProgressLocation.Notification, cancellable: false, title },
-          p => {
-            resolve(p);
+          progress => {
+            resolve(progress);
             return complete.promise;
           }
         )
@@ -72,7 +72,7 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#log.trace('Running Compiler', 'npx', 'trvc', command, args);
     const starting = command === 'start' || command === 'restart';
     this.#started ||= starting;
-    const proc = spawn('npx', ['trvc', command, ...args ?? []], {
+    const subProcess = spawn('npx', ['trvc', command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
       stdio: ['pipe', starting ? 'ignore' : 'pipe', 'pipe'],
@@ -85,15 +85,15 @@ export class CompilerWatchFeature extends BaseFeature {
       this.#log.debug('Finished command', command, 'with', code);
     });
 
-    if (debug && proc.stderr) {
-      ExecUtil.readLines(proc.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+    if (debug && subProcess.stderr) {
+      ExecUtil.readLines(subProcess.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
     }
 
-    if (debug && proc.stdout) {
-      ExecUtil.readLines(proc.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+    if (debug && subProcess.stdout) {
+      ExecUtil.readLines(subProcess.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
     }
 
-    return proc;
+    return subProcess;
   }
 
   /**
@@ -109,7 +109,7 @@ export class CompilerWatchFeature extends BaseFeature {
 
   async #trackConnected(): Promise<void> {
     while (!this.#shuttingDown) {
-      const ctrl = this.#stateController = new AbortController();
+      const controller = this.#stateController = new AbortController();
       let connected = false;
       let state: string | undefined;
       try {
@@ -117,25 +117,25 @@ export class CompilerWatchFeature extends BaseFeature {
         if (state && state !== 'closed') {
           connected = true;
           this.#log.info('Connected', state);
-          const proc = this.run('event', ['all'], ctrl.signal);
-          await ExecUtil.readLines(proc.stdout!, line => {
+          const subProcess = this.run('event', ['all'], controller.signal);
+          await ExecUtil.readLines(subProcess.stdout!, line => {
             const { type, payload }: CompilerEvent = JSON.parse(line);
             switch (type) {
               case 'log': this.#ongLogEvent(payload); break;
               case 'state': this.#onStateEvent(payload); break;
-              case 'progress': this.#onProgressEvent(payload, ctrl.signal); break;
+              case 'progress': this.#onProgressEvent(payload, controller.signal); break;
             }
           });
         }
-      } catch (err) {
-        this.#log.info('Failed to connect', `${err} `);
+      } catch (error) {
+        this.#log.info('Failed to connect', `${error} `);
       }
 
       if (connected) {
-        this.#log.info('Disconnecting', !!ctrl.signal.aborted, state);
+        this.#log.info('Disconnecting', !!controller.signal.aborted, state);
       }
 
-      ctrl.abort();
+      controller.abort();
 
       if (Workspace.compilerState !== 'closed') {
         this.#onStateEvent('closed');
@@ -145,46 +145,46 @@ export class CompilerWatchFeature extends BaseFeature {
     }
   }
 
-  #onStateEvent(ev: CompilerStateEvent | CompilerStateType | undefined): void {
-    const state = (typeof ev === 'string' ? ev : ev?.state ?? 'closed');
+  #onStateEvent(event: CompilerStateEvent | CompilerStateType | undefined): void {
+    const state = (typeof event === 'string' ? event : event?.state ?? 'closed');
 
     this.#log.info('Compiler state changed', state);
-    let v: string | undefined;
+    let status: string | undefined;
     switch (state) {
-      case 'reset': v = '$(flame) Restarting'; break;
+      case 'reset': status = '$(flame) Restarting'; break;
       case 'startup':
-      case 'init': v = '$(flame) Initializing'; break;
-      case 'compile-start': v = '$(flame) Compiling'; break;
-      case 'watch-start': v = '$(pass-filled) Ready'; break;
-      case 'closed': v = '$(debug-pause) Disconnected'; break;
+      case 'init': status = '$(flame) Initializing'; break;
+      case 'compile-start': status = '$(flame) Compiling'; break;
+      case 'watch-start': status = '$(pass-filled) Ready'; break;
+      case 'closed': status = '$(debug-pause) Disconnected'; break;
     }
-    this.#status.text = v ?? this.#status.text;
+    this.#status.text = status ?? this.#status.text;
     Workspace.compilerState = state;
   }
 
-  async #ongLogEvent(ev: CompilerLogEvent): Promise<void> {
-    const message = ev.message.replaceAll(Workspace.path, '.');
+  async #ongLogEvent(event: CompilerLogEvent): Promise<void> {
+    const message = event.message.replaceAll(Workspace.path, '.');
     let first = message;
-    const params = [...ev.args ?? []];
-    if (ev.scope) {
+    const params = [...event.args ?? []];
+    if (event.scope) {
       params.unshift(message);
-      first = `[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`;
+      first = `[${event.scope.padEnd(SCOPE_MAX, ' ')}]`;
     }
-    this.#log[ev.level](first, ...params);
+    this.#log[event.level](first, ...params);
   }
 
-  async #onProgressEvent(ev: CompilerProgressEvent, signal: AbortSignal): Promise<void> {
-    let pState = this.#progress[ev.operation];
+  async #onProgressEvent(event: CompilerProgressEvent, signal: AbortSignal): Promise<void> {
+    let pState = this.#progress[event.operation];
 
-    const value = 100 * (ev.idx / ev.total);
-    const delta = value - (pState?.prev ?? 0);
+    const value = 100 * (event.idx / event.total);
+    const delta = value - (pState?.previous ?? 0);
 
-    if (ev.complete || delta < 0 || ev.total < 5) {
+    if (event.complete || delta < 0 || event.total < 5) {
       pState?.cleanup();
     } else {
-      pState ??= await this.#buildProgressBar(ev.operation, signal);
-      pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1}/${ev.total})`, increment: delta });
-      pState.prev = value;
+      pState ??= await this.#buildProgressBar(event.operation, signal);
+      pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${event.idx + 1}/${event.total})`, increment: delta });
+      pState.previous = value;
     }
   }
 
@@ -208,8 +208,8 @@ export class CompilerWatchFeature extends BaseFeature {
     await Util.nonBlockingTimeout(1000); // Add buffer
     this.run('start');
 
-    for (const op of ['start', 'stop', 'restart', 'clean'] as const) {
-      this.register(op, () => this.run(op));
+    for (const operation of ['start', 'stop', 'restart', 'clean'] as const) {
+      this.register(operation, () => this.run(operation));
     }
   }
 

@@ -1,7 +1,7 @@
 import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
-const write = (line: string): Promise<void> => new Promise(r => process.stdout.write(`${line}\n`, () => r()));
+const write = (line: string): Promise<void> => new Promise(resolve => process.stdout.write(`${line}\n`, () => resolve()));
 
 /**
  * Allows for listing of modules
@@ -32,8 +32,8 @@ export class ListModuleCommand implements CliCommandShape {
     const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'workspace', this.fromHash, this.toHash);
     switch (this.format) {
       case 'list': {
-        for (const mod of mods.map(x => x.sourceFolder).toSorted()) {
-          await write(mod);
+        for (const folder of mods.map(mod => mod.sourceFolder).toSorted()) {
+          await write(folder);
         }
         break;
       }
@@ -45,10 +45,10 @@ export class ListModuleCommand implements CliCommandShape {
       }
       case 'graph': {
         await write('digraph g {');
-        for (const el of mods) {
-          for (const dep of el.parents) {
-            if (dep !== Runtime.main.name) {
-              await write(`  "${dep}" -> "${el.name}";`);
+        for (const mod of mods) {
+          for (const parent of mod.parents) {
+            if (parent !== Runtime.main.name) {
+              await write(`  "${parent}" -> "${mod.name}";`);
             }
           }
         }

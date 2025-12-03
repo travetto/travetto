@@ -11,15 +11,15 @@ export class DocUtil {
   /**
    * See if node has js docs
    */
-  static hasJSDoc(o: ts.Node): o is (ts.Node & { jsDoc: ts.JSDoc[] }) {
-    return 'jsDoc' in o && o.jsDoc !== null && o.jsDoc !== undefined && Array.isArray(o.jsDoc) && o.jsDoc.length > 0;
+  static hasJSDoc(node: ts.Node): node is (ts.Node & { jsDoc: ts.JSDoc[] }) {
+    return 'jsDoc' in node && node.jsDoc !== null && node.jsDoc !== undefined && Array.isArray(node.jsDoc) && node.jsDoc.length > 0;
   }
 
   /**
    * Read doc comment for node
    */
-  static getDocComment(o: ts.JSDoc | ts.JSDocTag, def?: string): string | undefined {
-    return (typeof o.comment === 'string' ? o.comment : undefined) ?? def;
+  static getDocComment(node: ts.JSDoc | ts.JSDocTag, def?: string): string | undefined {
+    return (typeof node.comment === 'string' ? node.comment : undefined) ?? def;
   }
 
   /**
@@ -72,8 +72,8 @@ export class DocUtil {
   static readDocTag(type: ts.Type | ts.Symbol, name: string): string[] {
     const tags = CoreUtil.getSymbol(type)?.getJsDocTags() ?? [];
     return tags
-      .filter(el => el.name === name && !!el.text)
-      .map(el => el.text!.map(x => x.text).join('')); // Join all text
+      .filter(tag => tag.name === name && !!tag.text)
+      .map(tag => tag.text!.map(part => part.text).join('')); // Join all text
   }
 
   /**
@@ -81,7 +81,7 @@ export class DocUtil {
    */
   static hasDocTag(type: ts.Type | ts.Symbol, name: string): boolean {
     const tags = CoreUtil.getSymbol(type)?.getJsDocTags() ?? [];
-    return tags.some(el => el.name === name);
+    return tags.some(tag => tag.name === name);
   }
 
 
@@ -90,7 +90,7 @@ export class DocUtil {
    * @param type
    */
   static readAugments(type: ts.Type | ts.Symbol): string[] {
-    return this.readDocTag(type, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
+    return this.readDocTag(type, 'augments').map(line => line.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
   }
 
   /**
@@ -98,6 +98,6 @@ export class DocUtil {
    * @param type
    */
   static readExample(type: ts.Type | ts.Symbol): string[] {
-    return this.readDocTag(type, 'example').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
+    return this.readDocTag(type, 'example').map(line => line.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
   }
 }

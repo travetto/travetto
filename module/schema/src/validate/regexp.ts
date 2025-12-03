@@ -15,8 +15,8 @@ export const CommonRegExp = {
 export const CommonRegExpToName = new Map<RegExp, string>();
 
 // Rebind regexes
-for (const k of TypedObject.keys(CommonRegExp)) {
-  const name = `[[:${k}:]]`;
-  CommonRegExpToName.set(CommonRegExp[k], name);
-  Messages.set(name, Messages.get(k)!);
+for (const key of TypedObject.keys(CommonRegExp)) {
+  const name = `[[:${key}:]]`;
+  CommonRegExpToName.set(CommonRegExp[key], name);
+  Messages.set(name, Messages.get(key)!);
 }

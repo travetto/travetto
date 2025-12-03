@@ -11,16 +11,16 @@ export class ContextValueService {
   @WithAsyncContext()
   async complexOperator(name: string) {
     this.#name.set(name);
-    await this.additionalOp('extra');
-    await this.finalOp();
+    await this.additionalOperation('extra');
+    await this.finalOperation();
   }
 
-  async additionalOp(additional: string) {
+  async additionalOperation(additional: string) {
     const name = this.#name.get();
     this.#name.set(`${name} ${additional}`);
   }
 
-  async finalOp() {
+  async finalOperation() {
     const name = this.#name.get();
     // Use name
     return name;

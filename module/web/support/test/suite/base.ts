@@ -2,7 +2,7 @@ import { Registry } from '@travetto/registry';
 import { castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
-import { ConfigSource, ConfigSpec } from '@travetto/config';
+import { ConfigSource, ConfigPayload } from '@travetto/config';
 import { Schema } from '@travetto/schema';
 
 import { WebDispatcher } from '../../../src/types/dispatch.ts';
@@ -12,7 +12,7 @@ import { WebMessageInit } from '../../../src/types/message.ts';
 
 @Injectable()
 export class WebTestConfig implements ConfigSource {
-  async get(): Promise<ConfigSpec> {
+  async get(): Promise<ConfigPayload> {
     return {
       data: {
         web: {

@@ -8,17 +8,17 @@ import { EnvProp, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CoreRollupConfig } from '../../src/types.ts';
 
-function getFilesFromModule(m: ManifestModule): string[] {
+function getFilesFromModule(mod: ManifestModule): string[] {
   return [
-    ...m.files.$index ?? [],
-    ...m.files.src ?? [],
-    ...(m.files.bin ?? []).filter(f => !(/bin\/trv[.]js$/.test(f[0]) && m.name === '@travetto/cli')),
-    ...(m.files.support ?? [])
-      .filter(f => !/support\/(test|doc|pack)/.test(f[0]))
+    ...mod.files.$index ?? [],
+    ...mod.files.src ?? [],
+    ...(mod.files.bin ?? []).filter(file => !(/bin\/trv[.]js$/.test(file[0]) && mod.name === '@travetto/cli')),
+    ...(mod.files.support ?? [])
+      .filter(file => !/support\/(test|doc|pack)/.test(file[0]))
   ]
-    .filter(([, t]) => t === 'ts' || t === 'js' || t === 'json')
-    .filter(f => (f[3] ?? 'std') === 'std') // Only include standard files
-    .map(([f]) => ManifestModuleUtil.withOutputExtension(path.resolve(m.outputFolder, f)));
+    .filter(([, type]) => type === 'ts' || type === 'js' || type === 'json')
+    .filter(([, , , role]) => (role ?? 'std') === 'std') // Only include standard files
+    .map(([file]) => ManifestModuleUtil.withOutputExtension(path.resolve(mod.outputFolder, file)));
 }
 
 function getFormat(value: string = 'commonjs'): NodeModuleType {
@@ -31,17 +31,17 @@ function getFormat(value: string = 'commonjs'): NodeModuleType {
 
 export function getOutput(): OutputOptions {
   const format = getFormat(process.env.BUNDLE_FORMAT);
-  const dir = process.env.BUNDLE_OUTPUT!;
+  const output = process.env.BUNDLE_OUTPUT!;
   const mainFile = process.env.BUNDLE_MAIN_FILE!;
   return {
     format,
     interop: format === 'commonjs' ? 'auto' : undefined,
-    sourcemapPathTransform: (src, map): string =>
-      Runtime.stripWorkspacePath(path.resolve(path.dirname(map), src)),
+    sourcemapPathTransform: (source, map): string =>
+      Runtime.stripWorkspacePath(path.resolve(path.dirname(map), source)),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
     sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
     compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,
-    file: path.resolve(dir, mainFile),
+    file: path.resolve(output, mainFile),
     inlineDynamicImports: true
   };
 }
@@ -52,16 +52,16 @@ export function getEntry(): string {
 
 export function getFiles(entry?: string): string[] {
   return [...RuntimeIndex.getModuleList('all')]
-    .map(x => RuntimeIndex.getManifestModule(x))
-    .filter(m => m.prod)
+    .map(name => RuntimeIndex.getManifestModule(name))
+    .filter(mod => mod.prod)
     .flatMap(getFilesFromModule)
-    .filter(x => (!entry || !x.endsWith(entry)) && !x.includes('@travetto/pack/support/'));
+    .filter(file => (!entry || !file.endsWith(entry)) && !file.includes('@travetto/pack/support/'));
 }
 
 export function getIgnoredModules(): ManifestModule[] {
   return [...RuntimeIndex.getModuleList('all')]
-    .map(x => RuntimeIndex.getManifestModule(x))
-    .filter(m => !m.prod);
+    .map(name => RuntimeIndex.getManifestModule(name))
+    .filter(mod => !mod.prod);
 }
 
 export function getMinifyConfig(): Parameters<typeof terser>[0] {
@@ -85,11 +85,11 @@ export function getCoreConfig(): CoreRollupConfig {
   const ignoreModules = getIgnoredModules();
   const ignoreFiles = ignoreModules.flatMap(getFilesFromModule);
   const minify = getMinifyConfig();
-  const envFile = new EnvProp('BUNDLE_ENV_FILE').val;
+  const envFile = new EnvProp('BUNDLE_ENV_FILE').value;
   const external = new EnvProp('BUNDLE_EXTERNAL').list ?? [];
 
   return {
     output, entry, files, envFile, minify, external,
-    ignore: new Set([...ignoreModules.map(x => x.name), ...ignoreFiles]),
+    ignore: new Set([...ignoreModules.map(mod => mod.name), ...ignoreFiles]),
   };
 }

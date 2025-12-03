@@ -43,14 +43,14 @@ export class MetadataRegistrationUtil {
    */
   static registerFunction(state: TransformerState & MetadataInfo,
     node: ts.FunctionDeclaration | ts.FunctionExpression,
-    src?: ts.FunctionDeclaration | ts.FunctionExpression | ts.InterfaceDeclaration | ts.TypeAliasDeclaration
+    source?: ts.FunctionDeclaration | ts.FunctionExpression | ts.InterfaceDeclaration | ts.TypeAliasDeclaration
   ): void {
     // If we have a class like function
     state[RegisterImportSymbol] ??= state.importFile(this.REGISTER_IMPORT);
 
-    const tag = this.tag(state, src ?? node);
+    const tag = this.tag(state, source ?? node);
     const meta = state.factory.createCallExpression(
-      state.createAccess(state[RegisterImportSymbol].ident, this.REGISTER_FN),
+      state.createAccess(state[RegisterImportSymbol].identifier, this.REGISTER_FN),
       [],
       [
         state.createIdentifier(node.name!.text),
@@ -74,7 +74,7 @@ export class MetadataRegistrationUtil {
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = state.factory.createCallExpression(
-      state.createAccess(state[RegisterImportSymbol].ident, this.REGISTER_FN),
+      state.createAccess(state[RegisterImportSymbol].identifier, this.REGISTER_FN),
       [],
       [
         state.createIdentifier(name),

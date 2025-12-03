@@ -25,7 +25,10 @@ class DocState {
 
   getId(id: string): string {
     if (!this.ids[id]) {
-      this.ids[id] = ' '.repeat(id.length).split('').map(x => Math.trunc(this.rng() * 16).toString(16)).join('');
+      this.ids[id] = ' '.repeat(id.length)
+        .split('')
+        .map(_ => Math.trunc(this.rng() * 16).toString(16))
+        .join('');
     }
     return this.ids[id];
   }
@@ -37,18 +40,18 @@ class DocState {
 export class DocRunUtil {
   static #docState = new DocState();
 
-  /** Build cwd from config */
-  static cwd(cfg: RunConfig): string {
-    return path.resolve(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : Runtime.mainSourcePath);
+  /** Build working directory from config */
+  static workingDirectory(config: RunConfig): string {
+    return path.resolve(config.module ? RuntimeIndex.getModule(config.module)?.sourcePath! : Runtime.mainSourcePath);
   }
 
   /**
    * Clean run output
    */
-  static cleanRunOutput(text: string, cfg: RunConfig): string {
-    const cwd = this.cwd(cfg);
+  static cleanRunOutput(text: string, config: RunConfig): string {
+    const rootPath = this.workingDirectory(config);
     text = util.stripVTControlCharacters(text.trim())
-      .replaceAll(cwd, '.')
+      .replaceAll(rootPath, '.')
       .replaceAll(os.tmpdir(), '/tmp')
       .replaceAll(Runtime.workspace.path, '<workspace-root>')
       .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
@@ -58,12 +61,12 @@ export class DocRunUtil {
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
       .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
-      .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
-    if (cfg.filter) {
-      text = text.split(/\n/g).filter(cfg.filter).join('\n');
+      .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, value) => value);
+    if (config.filter) {
+      text = text.split(/\n/g).filter(config.filter).join('\n');
     }
-    if (cfg.rewrite) {
-      text = cfg.rewrite(text);
+    if (config.rewrite) {
+      text = config.rewrite(text);
     }
     return text;
   }
@@ -73,7 +76,7 @@ export class DocRunUtil {
    */
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
     return spawn(cmd, args, {
-      cwd: config.cwd ?? this.cwd(config),
+      cwd: config.workingDirectory ?? this.workingDirectory(config),
       env: {
         ...process.env,
         ...Env.DEBUG.export(false),
@@ -95,17 +98,17 @@ export class DocRunUtil {
   static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
     let final: string;
     try {
-      const proc = this.spawn(cmd, args, config);
-      const result = await ExecUtil.getResult(proc, { catch: true });
+      const subProcess = this.spawn(cmd, args, config);
+      const result = await ExecUtil.getResult(subProcess, { catch: true });
       if (!result.valid) {
         throw new Error(result.stderr);
       }
       final = util.stripVTControlCharacters(result.stdout).trim() || util.stripVTControlCharacters(result.stderr).trim();
-    } catch (err) {
-      if (err instanceof Error) {
-        final = err.message;
+    } catch (error) {
+      if (error instanceof Error) {
+        final = error.message;
       } else {
-        throw err;
+        throw error;
       }
     }
 

@@ -46,11 +46,11 @@ export class AwsLambdaWebUtil {
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};
 
-    binaryResponse.headers.forEach((v, k) => {
-      if (Array.isArray(v)) {
-        multiValueHeaders[k] = v;
+    binaryResponse.headers.forEach((value, key) => {
+      if (Array.isArray(value)) {
+        multiValueHeaders[key] = value;
       } else {
-        headers[k] = v;
+        headers[key] = value;
       }
     });
 

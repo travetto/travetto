@@ -7,7 +7,7 @@ export async function main(): Promise<void> {
 
   try {
     await validate();
-  } catch (err) {
-    console.warn!('Validation Failed', JSON.stringify(err, null, 2));
+  } catch (error) {
+    console.warn!('Validation Failed', JSON.stringify(error, null, 2));
   }
 }

@@ -28,14 +28,14 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
   static defaultCategory?: ErrorCategory;
 
   /** Convert from JSON object */
-  static fromJSON(e: unknown): AppError | undefined {
-    if (!!e && typeof e === 'object' &&
-      ('message' in e && typeof e.message === 'string') &&
-      ('category' in e && typeof e.category === 'string') &&
-      ('type' in e && typeof e.type === 'string') &&
-      ('at' in e && typeof e.at === 'string')
+  static fromJSON(error: unknown): AppError | undefined {
+    if (!!error && typeof error === 'object' &&
+      ('message' in error && typeof error.message === 'string') &&
+      ('category' in error && typeof error.category === 'string') &&
+      ('type' in error && typeof error.type === 'string') &&
+      ('at' in error && typeof error.at === 'string')
     ) {
-      return new AppError(e.message, castTo<AppErrorOptions<Record<string, unknown>>>(e));
+      return new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(error));
     }
   }
 
@@ -50,21 +50,21 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
    * @param message The error message
    */
   constructor(
-    ...[message, opts]:
+    ...[message, options]:
       T extends undefined ? ([string] | [string, AppErrorOptions<T>]) : [string, AppErrorOptions<T>]
   ) {
-    super(message, opts?.cause ? { cause: opts.cause } : undefined);
-    this.type = opts?.type ?? this.constructor.name;
-    this.details = opts?.details!;
-    this.category = opts?.category ?? castTo<typeof AppError>(this.constructor).defaultCategory ?? 'general';
-    this.at = new Date(opts?.at ?? Date.now()).toISOString();
+    super(message, options?.cause ? { cause: options.cause } : undefined);
+    this.type = options?.type ?? this.constructor.name;
+    this.details = options?.details!;
+    this.category = options?.category ?? castTo<typeof AppError>(this.constructor).defaultCategory ?? 'general';
+    this.at = new Date(options?.at ?? Date.now()).toISOString();
   }
 
   /**
    * Serializes an error to a basic object
    */
   toJSON(): AppErrorOptions<T> & { message: string } {
-    const res: AppErrorOptions<unknown> = {
+    const options: AppErrorOptions<unknown> = {
       category: this.category,
       ...(this.cause ? { cause: `${this.cause}` } : undefined),
       type: this.type,
@@ -73,6 +73,6 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
     };
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return { message: this.message, ...res as AppErrorOptions<T> };
+    return { message: this.message, ...options as AppErrorOptions<T> };
   }
 }

@@ -16,7 +16,7 @@ const CONFIG_PRE = '+=';
 const SPACE = new Set([32, 7, 13, 10]);
 
 export const ENV_PREFIX = 'env.';
-export const isBoolFlag = (x?: SchemaInputConfig): boolean => x?.type === Boolean && !x.array;
+export const isBoolFlag = (value?: SchemaInputConfig): boolean => value?.type === Boolean && !value.array;
 
 export type AliasesParseResult = Record<'long' | 'short' | 'raw' | 'env', string[]>;
 
@@ -25,8 +25,8 @@ export type AliasesParseResult = Record<'long' | 'short' | 'raw' | 'env', string
  */
 export class CliParseUtil {
 
-  static toEnvField(k: string): string {
-    return k.startsWith(ENV_PREFIX) ? k : `${ENV_PREFIX}${k}`;
+  static toEnvField(key: string): string {
+    return key.startsWith(ENV_PREFIX) ? key : `${ENV_PREFIX}${key}`;
   }
 
   static readToken(text: string, start = 0): { next: number, value?: string } {
@@ -69,13 +69,13 @@ export class CliParseUtil {
    */
   static getSpecifiedModule(schema: SchemaClassConfig, args: string[]): string | undefined {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
-    const input = Object.values(schema.fields).find(x => x.specifiers?.includes('module'));
-    const ENV_KEY = input?.aliases?.filter(x => x.startsWith(ENV_PREFIX)).map(x => x.replace(ENV_PREFIX, ''))[0] ?? '';
+    const input = Object.values(schema.fields).find(config => config.specifiers?.includes('module'));
+    const ENV_KEY = input?.aliases?.filter(alias => alias.startsWith(ENV_PREFIX)).map(alias => alias.replace(ENV_PREFIX, ''))[0] ?? '';
     const flags = new Set(input?.aliases ?? []);
-    const check = (k?: string, v?: string): string | undefined => flags.has(k!) ? v : undefined;
+    const check = (key?: string, value?: string): string | undefined => flags.has(key!) ? value : undefined;
     return args.reduce(
-      (m, x, i, arr) =>
-        (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? m,
+      (name, value, i, values) =>
+        (i < SEP ? check(values[i - 1], value) ?? check(...value.split('=')) : undefined) ?? name,
       process.env[ENV_KEY]
     );
   }
@@ -88,10 +88,10 @@ export class CliParseUtil {
     const overrides = { '@': mod ?? Runtime.main.name };
 
     // We have a file
-    const rel = (key.includes('/') ? key : `@#support/pack.${key}.flags`)
+    const relativePath = (key.includes('/') ? key : `@#support/pack.${key}.flags`)
       .replace(/^(@[^#]*)#(.*)$/, (_, imp, rest) => `${Runtime.modulePath(imp, overrides)}/${rest}`);
 
-    const file = path.resolve(rel);
+    const file = path.resolve(relativePath);
 
     if (!await fs.stat(file).catch(() => false)) {
       throw new Error(`Missing flag file: ${key}, unable to proceed`);
@@ -122,10 +122,10 @@ export class CliParseUtil {
     const max = out.includes(RAW_SEP) ? out.indexOf(RAW_SEP) : out.length;
     const valid = out.slice(0, max);
     const cmd = valid.length > 0 && !valid[0].startsWith('-') ? valid[0] : undefined;
-    const helpIdx = valid.findIndex(x => HELP_FLAG.test(x));
+    const helpIdx = valid.findIndex(flag => HELP_FLAG.test(flag));
     const args = out.slice(cmd ? 1 : 0);
-    const res = { cmd, args, help: helpIdx >= 0 };
-    return res;
+    const result = { cmd, args, help: helpIdx >= 0 };
+    return result;
   }
 
   /**
@@ -134,8 +134,8 @@ export class CliParseUtil {
   static async expandArgs(schema: SchemaClassConfig, args: string[]): Promise<string[]> {
     const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
     const mod = this.getSpecifiedModule(schema, args);
-    return (await Promise.all(args.map((x, i) =>
-      x.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(x, mod) : x))).flat();
+    return (await Promise.all(args.map((arg, i) =>
+      arg.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(arg, mod) : arg))).flat();
   }
 
   /**
@@ -143,21 +143,21 @@ export class CliParseUtil {
    */
   static async parse(schema: SchemaClassConfig, inputs: string[]): Promise<ParsedState> {
     const flagMap = new Map<string, SchemaFieldConfig>(
-      Object.values(schema.fields).flatMap(f => (f.aliases ?? []).map(name => [name, f]))
+      Object.values(schema.fields).flatMap(field => (field.aliases ?? []).map(name => [name, field]))
     );
 
     const out: ParsedInput[] = [];
 
     // Load env vars to front
     for (const field of Object.values(schema.fields)) {
-      for (const envName of (field.aliases ?? []).filter(x => x.startsWith(ENV_PREFIX))) {
+      for (const envName of (field.aliases ?? []).filter(alias => alias.startsWith(ENV_PREFIX))) {
         const simple = envName.replace(ENV_PREFIX, '');
         if (simple in process.env) {
           const value: string = process.env[simple]!;
           if (field.array) {
-            out.push(...value.split(/\s*,\s*/g).map(v => ({ type: 'flag', fieldName: field.name.toString(), input: envName, value: v }) as const));
+            out.push(...value.split(/\s*,\s*/g).map(item => ({ type: 'flag', fieldName: field.name, input: envName, value: item }) as const));
           } else {
-            out.push({ type: 'flag', fieldName: field.name.toString(), input: envName, value });
+            out.push({ type: 'flag', fieldName: field.name, input: envName, value });
           }
         }
       }
@@ -169,13 +169,13 @@ export class CliParseUtil {
       const input = inputs[i];
 
       if (input === RAW_SEP) { // Raw separator
-        out.push(...inputs.slice(i + 1).map((x, idx) => ({ type: 'unknown', input: x, index: argIdx + idx }) as const));
+        out.push(...inputs.slice(i + 1).map((arg, idx) => ({ type: 'unknown', input: arg, index: argIdx + idx }) as const));
         break;
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
-        const [k, ...v] = input.split('=');
-        const field = flagMap.get(k);
+        const [key, ...values] = input.split('=');
+        const field = flagMap.get(key);
         if (field) {
-          out.push({ type: 'flag', fieldName: field.name.toString(), input: k, value: v.join('=') });
+          out.push({ type: 'flag', fieldName: field.name, input: key, value: values.join('=') });
         } else {
           out.push({ type: 'unknown', input });
         }
@@ -185,7 +185,7 @@ export class CliParseUtil {
           out.push({ type: 'unknown', input });
         } else {
           const next = inputs[i + 1];
-          const base = { type: 'flag', fieldName: field.name.toString(), input, array: field.array } as const;
+          const base = { type: 'flag', fieldName: field.name, input, array: field.array } as const;
           if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
             if (isBoolFlag(field)) {
               out.push({ ...base, value: !input.startsWith('--no-') });
@@ -211,8 +211,8 @@ export class CliParseUtil {
     return {
       inputs,
       all: out,
-      unknown: out.filter(x => x.type === 'unknown').map(x => x.input),
-      flags: out.filter(x => x.type === 'flag')
+      unknown: out.filter(input => input.type === 'unknown').map(input => input.input),
+      flags: out.filter(input => input.type === 'flag')
     };
   }
 
@@ -220,19 +220,19 @@ export class CliParseUtil {
    * Parse aliases into categories for registration
    */
   static parseAliases(aliases: string[]): AliasesParseResult {
-    return aliases.reduce<AliasesParseResult>((acc, curr) => {
-      if (VALID_FLAG.test(curr)) {
-        if (curr.startsWith('--')) {
-          acc.long.push(curr);
+    return aliases.reduce<AliasesParseResult>((result, alias) => {
+      if (VALID_FLAG.test(alias)) {
+        if (alias.startsWith('--')) {
+          result.long.push(alias);
         } else {
-          acc.short.push(curr);
+          result.short.push(alias);
         }
-      } else if (curr.startsWith(ENV_PREFIX)) {
-        acc.env.push(curr);
+      } else if (alias.startsWith(ENV_PREFIX)) {
+        result.env.push(alias);
       } else {
-        acc.raw.push(curr);
+        result.raw.push(alias);
       }
-      return acc;
+      return result;
     }, { long: [], short: [], raw: [], env: [] });
   }
 }

@@ -71,23 +71,23 @@ export abstract class Connection<C = unknown> {
   /**
    * Run operation with active connection
    * @param context
-   * @param op
+   * @param operation
    * @param args
    */
-  async runWithActive<R>(op: () => Promise<R>): Promise<R> {
+  async runWithActive<R>(operation: () => Promise<R>): Promise<R> {
     if (this.active) {
-      return op();
+      return operation();
     }
 
     return this.context.run(async () => {
-      let conn;
+      let connection;
       try {
-        conn = await this.acquire();
-        this.#active.set(conn);
-        return await op();
+        connection = await this.acquire();
+        this.#active.set(connection);
+        return await operation();
       } finally {
-        if (conn) {
-          this.release(conn);
+        if (connection) {
+          this.release(connection);
         }
       }
     });
@@ -96,19 +96,19 @@ export abstract class Connection<C = unknown> {
   /**
    * Iterate with active connection
    * @param context
-   * @param op
+   * @param operation
    * @param args
    */
-  async * iterateWithActive<R>(op: () => AsyncIterable<R>): AsyncIterable<R> {
+  async * iterateWithActive<R>(operation: () => AsyncIterable<R>): AsyncIterable<R> {
     if (this.active) {
-      yield* op();
+      yield* operation();
     }
 
     const self = castTo<Connection>(this);
     yield* this.context.iterate(async function* () {
       try {
         self.#active.set(await self.acquire());
-        yield* op();
+        yield* operation();
       } finally {
         if (self.active) {
           self.release(self.active);
@@ -120,26 +120,26 @@ export abstract class Connection<C = unknown> {
   /**
    * Run a function within a valid sql transaction.  Relies on @travetto/context.
    */
-  async runWithTransaction<R>(mode: TransactionType, op: () => Promise<R>): Promise<R> {
+  async runWithTransaction<R>(mode: TransactionType, operation: () => Promise<R>): Promise<R> {
     if (this.activeTx) {
       if (mode === 'isolated' || mode === 'force') {
         const txId = mode === 'isolated' ? `tx${Util.uuid()}` : undefined;
         try {
           await this.startTx(this.active!, txId);
-          const res = await op();
+          const result = await operation();
           await this.commitTx(this.active!, txId);
-          return res;
-        } catch (err) {
+          return result;
+        } catch (error) {
           try { await this.rollbackTx(this.active!, txId); } catch { }
-          throw err;
+          throw error;
         }
       } else {
-        return await op();
+        return await operation();
       }
     } else {
       return this.runWithActive(() => {
         this.#activeTx.set(true);
-        return this.runWithTransaction('force', op);
+        return this.runWithTransaction('force', operation);
       });
     }
   }
@@ -147,42 +147,42 @@ export abstract class Connection<C = unknown> {
   /**
    * Start a transaction
    */
-  async startTx(conn: C, transactionId?: string): Promise<void> {
+  async startTx(connection: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(conn, this.transactionDialect.beginNested, [transactionId]);
+        await this.execute(connection, this.transactionDialect.beginNested, [transactionId]);
       }
     } else {
       if (this.isolatedTransactions) {
-        await this.execute(conn, this.transactionDialect.isolate);
+        await this.execute(connection, this.transactionDialect.isolate);
       }
-      await this.execute(conn, this.transactionDialect.begin);
+      await this.execute(connection, this.transactionDialect.begin);
     }
   }
 
   /**
    * Commit active transaction
    */
-  async commitTx(conn: C, transactionId?: string): Promise<void> {
+  async commitTx(connection: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(conn, this.transactionDialect.commitNested, [transactionId]);
+        await this.execute(connection, this.transactionDialect.commitNested, [transactionId]);
       }
     } else {
-      await this.execute(conn, this.transactionDialect.commit);
+      await this.execute(connection, this.transactionDialect.commit);
     }
   }
 
   /**
    * Rollback active transaction
    */
-  async rollbackTx(conn: C, transactionId?: string): Promise<void> {
+  async rollbackTx(connection: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.isolatedTransactions) {
-        await this.execute(conn, this.transactionDialect.rollbackNested, [transactionId]);
+        await this.execute(connection, this.transactionDialect.rollbackNested, [transactionId]);
       }
     } else {
-      await this.execute(conn, this.transactionDialect.rollback);
+      await this.execute(connection, this.transactionDialect.rollback);
     }
   }
 }

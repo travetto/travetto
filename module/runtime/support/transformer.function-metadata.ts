@@ -52,9 +52,9 @@ export class RegisterTransformer {
       return node;
     }
 
-    const { [MethodsSymbol]: m, [ClassSymbol]: c } = state;
+    const { [MethodsSymbol]: method, [ClassSymbol]: cls } = state;
     delete state[ClassSymbol];
-    return MetadataRegistrationUtil.registerClass(state, node, c!, m);
+    return MetadataRegistrationUtil.registerClass(state, node, cls!, method);
   }
 
   /**

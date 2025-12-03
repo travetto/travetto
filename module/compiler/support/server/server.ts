@@ -37,8 +37,8 @@ export class CompilerServer {
       state: 'startup',
       iteration: Date.now(),
       mode,
-      serverPid: process.pid,
-      compilerPid: -1,
+      serverProcessId: process.pid,
+      compilerProcessId: -1,
       path: ctx.workspace.path,
       url: this.#url
     };
@@ -47,7 +47,7 @@ export class CompilerServer {
       keepAlive: true,
       requestTimeout: 1000 * 60 * 60,
       keepAliveTimeout: 1000 * 60 * 60,
-    }, (req, res) => this.#onRequest(req, res));
+    }, (request, response) => this.#onRequest(request, response));
 
     setMaxListeners(1000, this.signal);
   }
@@ -60,21 +60,21 @@ export class CompilerServer {
     return this.info.mode;
   }
 
-  isResetEvent(ev: CompilerEvent): boolean {
-    return ev.type === 'state' && ev.payload.state === 'reset';
+  isResetEvent(event: CompilerEvent): boolean {
+    return event.type === 'state' && event.payload.state === 'reset';
   }
 
   async #tryListen(attempt = 0): Promise<'ok' | 'running'> {
     const output = await new Promise<'ok' | 'running' | 'retry'>((resolve, reject) => {
       this.#server
         .on('listening', () => resolve('ok'))
-        .on('error', async err => {
-          if ('code' in err && err.code === 'EADDRINUSE') {
+        .on('error', async error => {
+          if ('code' in error && error.code === 'EADDRINUSE') {
             const info = await this.#client.info();
             resolve((info && info.mode === 'build' && this.mode === 'watch') ? 'retry' : 'running');
           } else {
-            log.warn('Failed in running server', err);
-            reject(err);
+            log.warn('Failed in running server', error);
+            reject(error);
           }
         })
         .on('close', () => log.debug('Server close event'));
@@ -92,48 +92,48 @@ export class CompilerServer {
       await this.#client.waitForState(['closed'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
     } else if (output === 'ok') {
-      await this.#handle.server.writePid(this.info.serverPid);
+      await this.#handle.server.writePidFile(this.info.serverProcessId);
     }
 
     return output;
   }
 
-  #addListener(type: CompilerEventType | 'all', res: http.ServerResponse): void {
-    res.writeHead(200);
+  #addListener(type: CompilerEventType | 'all', response: http.ServerResponse): void {
+    response.writeHead(200);
     const id = `id_${Date.now()}_${Math.random()}`.replace('.', '1');
-    (this.#listeners[type] ??= {})[id] = res;
-    this.#listenersAll.add(res);
+    (this.#listeners[type] ??= {})[id] = response;
+    this.#listenersAll.add(response);
     if (type === 'state' || type === 'all') { // Send on initial connect
       this.#emitEvent({ type: 'state', payload: { state: this.info.state } }, id);
     } else {
-      res.write('\n'); // Send at least one byte on listen
+      response.write('\n'); // Send at least one byte on listen
     }
 
     // Do not wait on it
-    res.on('close', () => {
+    response.on('close', () => {
       delete this.#listeners[type]?.[id];
-      this.#listenersAll.delete(res);
+      this.#listenersAll.delete(response);
     });
   }
 
-  #emitEvent(ev: CompilerEvent, to?: string): void {
+  #emitEvent(event: CompilerEvent, to?: string): void {
     if (this.#listeners.all) {
-      const msg = JSON.stringify(ev);
+      const eventText = JSON.stringify(event);
       for (const [id, item] of Object.entries(this.#listeners.all)) {
         if (item.closed || (to && id !== to)) {
           continue;
         }
-        item.write(msg);
+        item.write(eventText);
         item.write('\n');
       }
     }
-    if (this.#listeners[ev.type]) {
-      const msg = JSON.stringify(ev.payload);
-      for (const [id, item] of Object.entries(this.#listeners[ev.type]!)) {
+    if (this.#listeners[event.type]) {
+      const eventText = JSON.stringify(event.payload);
+      for (const [id, item] of Object.entries(this.#listeners[event.type]!)) {
         if (item.closed || (to && id !== to)) {
           continue;
         }
-        item.write(msg);
+        item.write(eventText);
         item.write('\n');
       }
     }
@@ -143,8 +143,8 @@ export class CompilerServer {
     log.info('Server disconnect requested');
     this.info.iteration = Date.now();
     await CommonUtil.blockingTimeout(20);
-    for (const el of this.#listenersAll) {
-      try { el.end(); } catch { }
+    for (const listener of this.#listenersAll) {
+      try { listener.end(); } catch { }
     }
     this.#listeners = {}; // Ensure its empty
     this.#listenersAll.clear();
@@ -152,17 +152,17 @@ export class CompilerServer {
 
   async #clean(): Promise<{ clean: boolean }> {
     await Promise.all([this.#ctx.build.compilerFolder, this.#ctx.build.outputFolder]
-      .map(f => fs.rm(CommonUtil.resolveWorkspace(this.#ctx, f), { recursive: true, force: true })));
+      .map(folder => fs.rm(CommonUtil.resolveWorkspace(this.#ctx, folder), { recursive: true, force: true })));
     return { clean: true };
   }
 
   /**
    * Request handler
    */
-  async #onRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
-    res.setHeader('Content-Type', 'application/json');
+  async #onRequest(request: http.IncomingMessage, response: http.ServerResponse): Promise<void> {
+    response.setHeader('Content-Type', 'application/json');
 
-    const [, action, subAction] = new URL(`${this.#url}${req.url}`).pathname.split('/');
+    const [, action, subAction] = new URL(`${this.#url}${request.url}`).pathname.split('/');
 
     let out: unknown;
     let close = false;
@@ -170,7 +170,7 @@ export class CompilerServer {
       case 'event': {
         switch (subAction) {
           case 'change': case 'log': case 'progress': case 'state': case 'all':
-            return this.#addListener(subAction, res);
+            return this.#addListener(subAction, response);
           default: return;
         }
       }
@@ -179,7 +179,7 @@ export class CompilerServer {
       case 'info':
       default: out = this.info ?? {}; break;
     }
-    res.end(JSON.stringify(out));
+    response.end(JSON.stringify(out));
     if (close) {
       await this.close();
     }
@@ -188,29 +188,29 @@ export class CompilerServer {
   /**
    * Process events
    */
-  async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-    for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
-      if (ev.type === 'progress') {
-        await Log.onProgressEvent(ev.payload);
+  async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
+    for await (const event of CommonUtil.restartableEvents(input, this.signal, this.isResetEvent)) {
+      if (event.type === 'progress') {
+        await Log.onProgressEvent(event.payload);
       }
 
-      this.#emitEvent(ev);
+      this.#emitEvent(event);
 
-      if (ev.type === 'state') {
-        this.info.state = ev.payload.state;
-        if (ev.payload.state === 'init' && ev.payload.extra && 'pid' in ev.payload.extra && typeof ev.payload.extra.pid === 'number') {
-          if (this.info.mode === 'watch' && !this.info.compilerPid) {
+      if (event.type === 'state') {
+        this.info.state = event.payload.state;
+        if (event.payload.state === 'init' && event.payload.extra && 'processId' in event.payload.extra && typeof event.payload.extra.processId === 'number') {
+          if (this.info.mode === 'watch' && !this.info.compilerProcessId) {
             // Ensure we are killing in watch mode on first set
             await this.#handle.compiler.kill();
           }
-          this.info.compilerPid = ev.payload.extra.pid;
-          await this.#handle.compiler.writePid(this.info.compilerPid);
+          this.info.compilerProcessId = event.payload.extra.processId;
+          await this.#handle.compiler.writePidFile(this.info.compilerProcessId);
         }
         log.info(`State changed: ${this.info.state}`);
-      } else if (ev.type === 'log') {
-        log.render(ev.payload);
+      } else if (event.type === 'log') {
+        log.render(event.payload);
       }
-      if (this.isResetEvent(ev)) {
+      if (this.isResetEvent(event)) {
         await this.#disconnectActive();
       }
     }

@@ -9,20 +9,20 @@ import { ShutdownManager, Util } from '@travetto/runtime';
 export class IpcChannel<V = unknown> {
 
   #emitter = new EventEmitter();
-  proc: NodeJS.Process | ChildProcess;
+  subProcess: NodeJS.Process | ChildProcess;
   parentId: number;
 
-  constructor(proc: NodeJS.Process | ChildProcess = process) {
-    this.proc = proc;
-    this.parentId = proc instanceof ChildProcess ? process.pid : process.ppid;
+  constructor(subProcess: NodeJS.Process | ChildProcess = process) {
+    this.subProcess = subProcess;
+    this.parentId = subProcess instanceof ChildProcess ? process.pid : process.ppid;
 
     // Close on shutdown
     ShutdownManager.onGracefulShutdown(() => this.destroy());
 
-    this.proc.on('message', (ev: { type: string }) => {
-      console.debug('Received', { pid: this.parentId, id: this.id, type: ev.type });
-      this.#emitter.emit(ev.type, ev);
-      this.#emitter.emit('*', ev);
+    this.subProcess.on('message', (event: { type: string }) => {
+      console.debug('Received', { pid: this.parentId, id: this.id, type: event.type });
+      this.#emitter.emit(event.type, event);
+      this.#emitter.emit('*', event);
     });
   }
 
@@ -30,14 +30,14 @@ export class IpcChannel<V = unknown> {
    * Gets channel unique identifier
    */
   get id(): number | undefined {
-    return this.proc.pid;
+    return this.subProcess.pid;
   }
 
   /**
    * Determines if channel is active
    */
   get active(): boolean {
-    return (this.proc instanceof ChildProcess) ? !this.proc.killed : !!this.proc.connected;
+    return (this.subProcess instanceof ChildProcess) ? !this.subProcess.killed : !!this.subProcess.connected;
   }
 
   /**
@@ -47,17 +47,17 @@ export class IpcChannel<V = unknown> {
     console.debug('Sending', { pid: this.parentId, id: this.id, eventType });
     if (!this.active) {
       throw new Error('Cannot send message to inactive process');
-    } else if (this.proc.send && this.proc.connected) {
-      this.proc.send({ ...(data ?? {}), type: eventType }, undefined, undefined, (err) => err && console.error(err));
+    } else if (this.subProcess.send && this.subProcess.connected) {
+      this.subProcess.send({ ...(data ?? {}), type: eventType }, undefined, undefined, (error) => error && console.error(error));
     } else {
-      throw new Error('this.proc.send was not defined');
+      throw new Error('this.subProcess.send was not defined');
     }
   }
 
   /**
    * Listen for a specific message type
    */
-  on(eventType: string, callback: (e: V & { type: string }) => unknown | void): () => void {
+  on(eventType: string, callback: (event: V & { type: string }) => unknown | void): () => void {
     this.#emitter.on(eventType, callback);
     return () => this.off(eventType, callback);
   }
@@ -65,7 +65,7 @@ export class IpcChannel<V = unknown> {
   /**
    * Remove event listener
    */
-  off(eventType: string, callback: (e: V & { type: string }) => unknown | void): void {
+  off(eventType: string, callback: (event: V & { type: string }) => unknown | void): void {
     this.#emitter.off(eventType, callback);
   }
 
@@ -73,7 +73,7 @@ export class IpcChannel<V = unknown> {
    * Listen for a specific message type, once
    */
   once(eventType: string): Promise<V & { type: string }> {
-    return new Promise(res => this.#emitter.once(eventType, res));
+    return new Promise(resolve => this.#emitter.once(eventType, resolve));
   }
 
   /**
@@ -83,9 +83,9 @@ export class IpcChannel<V = unknown> {
     if (this.active) {
       try {
         console.debug('Killing', { pid: this.parentId, id: this.id });
-        if (this.proc instanceof ChildProcess) {
-          const complete = new Promise<void>(r => this.proc.on('close', r));
-          this.proc.kill();
+        if (this.subProcess instanceof ChildProcess) {
+          const complete = new Promise<void>(resolve => this.subProcess.on('close', resolve));
+          this.subProcess.kill();
           await Promise.race([complete, Util.nonBlockingTimeout(1000)]);
         }
       } catch { }
@@ -98,7 +98,7 @@ export class IpcChannel<V = unknown> {
    */
   release(): void {
     console.debug('Released', { pid: this.parentId, id: this.id });
-    this.proc.removeAllListeners();
+    this.subProcess.removeAllListeners();
     this.#emitter.removeAllListeners();
   }
 }

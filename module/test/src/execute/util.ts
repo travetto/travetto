@@ -40,17 +40,17 @@ export class RunnerUtil {
    */
   static async* getTestImports(globs?: string[]): AsyncIterable<string> {
     const all = RuntimeIndex.find({
-      module: m => m.roles.includes('test') || m.roles.includes('std'),
-      folder: f => f === 'test',
-      file: f => f.role === 'test'
+      module: mod => mod.roles.includes('test') || mod.roles.includes('std'),
+      folder: folder => folder === 'test',
+      file: file => file.role === 'test'
     });
 
     // Collect globs
     if (globs?.length) {
-      const allFiles = new Map(all.map(x => [x.sourceFile, x]));
+      const allFiles = new Map(all.map(file => [file.sourceFile, file]));
       for await (const item of fs.glob(globs)) {
-        const src = Runtime.workspaceRelative(path.resolve(item));
-        const match = allFiles.get(src);
+        const source = Runtime.workspaceRelative(path.resolve(item));
+        const match = allFiles.get(source);
         if (match && await this.isTestFile(match.sourceFile)) {
           yield match.import;
         }
@@ -96,12 +96,12 @@ export class RunnerUtil {
    * Get run events
    */
   static getTestRuns(tests: TestConfig[]): TestRun[] {
-    const events = tests.reduce((acc, test) => {
-      if (!acc.has(test.classId)) {
-        acc.set(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid() });
+    const events = tests.reduce((runs, test) => {
+      if (!runs.has(test.classId)) {
+        runs.set(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid() });
       }
-      acc.get(test.classId)!.methodNames!.push(test.methodName);
-      return acc;
+      runs.get(test.classId)!.methodNames!.push(test.methodName);
+      return runs;
     }, new Map<string, TestRun>());
     return [...events.values()];
   }

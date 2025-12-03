@@ -68,17 +68,17 @@ export class WorkspaceResultsManager {
 
   /**
    * On test event
-   * @param ev
+   * @param event
    */
-  onEvent(ev: TestWatchEvent): void {
-    const file = this.getLocation(ev);
+  onEvent(event: TestWatchEvent): void {
+    const file = this.getLocation(event);
     if (file) {
       const document = this.#filenameMap.get(file);
       if (document) {
-        this.#results.get(document)?.onEvent(ev);
+        this.#results.get(document)?.onEvent(event);
       }
     }
-    this.#diagnostics.onEvent(ev);
+    this.#diagnostics.onEvent(event);
   }
 
   /**
@@ -89,8 +89,8 @@ export class WorkspaceResultsManager {
     const entries = [...this.#results.entries()];
     this.#results.clear();
     this.#diagnostics.reset();
-    for (const [, v] of entries) {
-      v.dispose();
+    for (const [, entry] of entries) {
+      entry.dispose();
     }
   }
 
@@ -118,11 +118,11 @@ export class WorkspaceResultsManager {
           this.#log.info('Tracking', editor.document.fileName);
           return results.getListOfTests().length > 0;
         }
-      } catch (err) {
-        if (err instanceof Error) {
-          this.#log.error(err.message, err);
+      } catch (error) {
+        if (error instanceof Error) {
+          this.#log.error(error.message, error);
         } else {
-          throw err;
+          throw error;
         }
       }
     }

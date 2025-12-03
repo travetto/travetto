@@ -6,7 +6,7 @@ import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 
-const page = (f: string): string => path.resolve('related/travetto.github.io/src', f);
+const page = (file: string): string => path.resolve('related/travetto.github.io/src', file);
 
 /**
  * Generate documentation into the angular webapp under related/travetto.github.io
@@ -21,14 +21,14 @@ export class DocAngularCommand {
     }
 
     const mods = new Set((await CliModuleUtil.findModules('workspace'))
-      .filter(x => !target || x.sourcePath === path.resolve(root, target))
-      .filter(x => (x.files.doc ?? []).some(f => /DOC[.]tsx?$/.test(f.sourceFile))));
+      .filter(mod => !target || mod.sourcePath === path.resolve(root, target))
+      .filter(mod => (mod.files.doc ?? []).some(file => /DOC[.]tsx?$/.test(file.sourceFile))));
 
     if (mods.size > 1) {
       // Build out docs
       await RepoExecUtil.execOnModules('workspace',
         mod => {
-          const proc = spawn('trv', ['doc'], {
+          const subProcess = spawn('trv', ['doc'], {
             timeout: 20000,
             cwd: mod.sourceFolder,
             env: {
@@ -39,9 +39,9 @@ export class DocAngularCommand {
             }
           });
 
-          ExecUtil.getResult(proc).catch(() => console.error(`${mod.name} - failed`));
+          ExecUtil.getResult(subProcess).catch(() => console.error(`${mod.name} - failed`));
 
-          return proc;
+          return subProcess;
         },
         {
           showStdout: false,
@@ -68,18 +68,21 @@ export class DocAngularCommand {
           .replace(/^src="images\//g, `src="/assets/images/${modName}/`)
           .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
           .replaceAll('@', '&#64;')
-          .replaceAll('process.env.NODE_ENV', x => x.replaceAll('.', '\u2024'));
+          .replaceAll('process.env.NODE_ENV', text => text.replaceAll('.', '\u2024'));
 
         if (modName === 'todo-app') {
           html = html
-            .replace(/(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
-              (_, h, toc, text) => `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${h}\n${text}\n</div>\n`);
+            .replace(
+              /(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
+              (_, heading, toc, text) =>
+                `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${heading}\n${text}\n</div>\n`
+            );
         }
 
         await fs.writeFile(page(`app/documentation/gen/${modName}/${modName}.component.html`), html, 'utf8');
-      } catch (err) {
-        if (err instanceof Error) {
-          console.error(`${mod.name}: ${err.message}`);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`${mod.name}: ${error.message}`);
         }
       }
     }

@@ -19,8 +19,8 @@ export const main = (ctx: ManifestContext) => {
   Log.initLevel('error');
 
   /** Main entry point for compilation */
-  const compile = async (op: CompilerMode, setupOnly = false): Promise<void> => {
-    const server = await new CompilerServer(ctx, op).listen();
+  const compile = async (operation: CompilerMode, setupOnly = false): Promise<void> => {
+    const server = await new CompilerServer(ctx, operation).listen();
     const log = Log.scoped('main');
 
     // Wait for build to be ready
@@ -29,20 +29,20 @@ export const main = (ctx: ManifestContext) => {
       await server.processEvents(async function* (signal) {
         const changed = await CompilerSetup.setup(ctx);
         if (!setupOnly) {
-          yield* CompilerRunner.runProcess(ctx, changed, op, signal);
+          yield* CompilerRunner.runProcess(ctx, changed, operation, signal);
         }
       });
       log.debug('End Server');
     } else {
       log.info('Server already running, waiting for initial compile to complete');
-      const ctrl = new AbortController();
-      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete, signal: ctrl.signal }));
+      const controller = new AbortController();
+      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: controller.signal }));
       await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
-      ctrl.abort();
+      controller.abort();
     }
   };
 
-  const ops = {
+  const operations = {
     /** Stop the server */
     async stop(): Promise<void> {
       if (await client.stop()) {
@@ -53,7 +53,7 @@ export const main = (ctx: ManifestContext) => {
     },
 
     /** Restart the server */
-    async restart(): Promise<void> { await client.stop().then(() => ops.watch()); },
+    async restart(): Promise<void> { await client.stop().then(() => operations.watch()); },
 
     /** Get server info */
     info: (): Promise<CompilerServerInfo | undefined> => client.info(),
@@ -64,17 +64,17 @@ export const main = (ctx: ManifestContext) => {
         return console.log(`Clean triggered ${ctx.workspace.path}:`, buildFolders);
       } else {
         try {
-          await Promise.all(buildFolders.map(f => fs.rm(CommonUtil.resolveWorkspace(ctx, f), { force: true, recursive: true })));
+          await Promise.all(buildFolders.map(file => fs.rm(CommonUtil.resolveWorkspace(ctx, file), { force: true, recursive: true })));
         } catch { }
         return console.log(`Cleaned ${ctx.workspace.path}:`, buildFolders);
       }
     },
 
     /** Stream events */
-    events: async (type: string, handler: (ev: unknown) => unknown): Promise<void> => {
+    events: async (type: string, handler: (event: unknown) => unknown): Promise<void> => {
       if (type === 'change' || type === 'log' || type === 'progress' || type === 'state' || type === 'all') {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        for await (const ev of client.fetchEvents(type as 'change')) { await handler(ev); }
+        for await (const event of client.fetchEvents(type as 'change')) { await handler(event); }
       } else {
         throw new Error(`Unknown event type: ${type}`);
       }
@@ -113,7 +113,7 @@ export const main = (ctx: ManifestContext) => {
       await CompilerSetup.exportManifest(ctx, output, prod); return;
     }
   };
-  return ops;
+  return operations;
 };
 
 export type Operations = ReturnType<typeof main>;

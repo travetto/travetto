@@ -13,7 +13,7 @@ npm install @travetto/config
 yarn add @travetto/config
 ```
 
-The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [yaml](https://github.com/eemeli/yaml).  Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L21) functionality applies.
+The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [yaml](https://github.com/eemeli/yaml).  Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L23) functionality applies.
 
 ## Resolution
 The configuration information is comprised of:
@@ -104,27 +104,27 @@ The framework provides two simple base classes that assist with existing pattern
 **Code: Memory Provider**
 ```typescript
 import { ConfigData } from '../parser/types.ts';
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigSource, ConfigPayload } from './types.ts';
 
 /**
  * Meant to be instantiated and provided as a unique config source
  */
 export class MemoryConfigSource implements ConfigSource {
-  #spec: ConfigSpec;
+  #payload: ConfigPayload;
 
   constructor(key: string, data: ConfigData, priority: number = 500) {
-    this.#spec = { data, priority, source: `memory://${key}` };
+    this.#payload = { data, priority, source: `memory://${key}` };
   }
 
-  get(): ConfigSpec {
-    return this.#spec;
+  get(): ConfigPayload {
+    return this.#payload;
   }
 }
 ```
 
 **Code: Environment JSON Provider**
 ```typescript
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigSource, ConfigPayload } from './types.ts';
 
 /**
  * Represents the environment mapped data as a JSON blob
@@ -138,7 +138,7 @@ export class EnvConfigSource implements ConfigSource {
     this.#priority = priority;
   }
 
-  get(): ConfigSpec | undefined {
+  get(): ConfigPayload | undefined {
     try {
       const data = JSON.parse(process.env[this.#envKey] || '{}');
       return { data, priority: this.#priority, source: `env://${this.#envKey}` };
@@ -154,12 +154,12 @@ In addition to files and environment variables, configuration sources can also b
 
 **Code: Custom Configuration Source**
 ```typescript
-import { ConfigSource, ConfigSpec } from '@travetto/config';
+import { ConfigSource, ConfigPayload } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class CustomConfigSource implements ConfigSource {
-  async get(): Promise<ConfigSpec> {
+  async get(): Promise<ConfigPayload> {
     return {
       data: { user: { name: 'bob' } },
       source: 'custom://override',

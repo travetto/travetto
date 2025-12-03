@@ -19,13 +19,13 @@ export class WebBodyUtil {
    */
   static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<string | Buffer> {
     const nl = '\r\n';
-    for (const [k, v] of form.entries()) {
-      const data = v.slice();
+    for (const [key, value] of form.entries()) {
+      const data = value.slice();
       const filename = data instanceof File ? data.name : undefined;
       const size = data instanceof Blob ? data.size : data.length;
       const type = data instanceof Blob ? data.type : undefined;
       yield `--${boundary}${nl}`;
-      yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"${nl}`;
+      yield `Content-Disposition: form-data; name="${key}"; filename="${filename ?? key}"${nl}`;
       yield `Content-Length: ${size}${nl}`;
       if (type) {
         yield `Content-Type: ${type}${nl}`;
@@ -66,7 +66,7 @@ export class WebBodyUtil {
       toAdd.push(['Content-disposition', `attachment; filename="${value.name}"`]);
     }
 
-    return toAdd.filter((x): x is [string, string] => !!x[1]);
+    return toAdd.filter((pair): pair is [string, string] => !!pair[1]);
   }
 
   /**
@@ -97,8 +97,8 @@ export class WebBodyUtil {
 
     const out: Omit<WebMessage<WebBinaryBody>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
     if (body instanceof Blob) {
-      for (const [k, v] of this.getBlobHeaders(body)) {
-        out.headers.set(k, v);
+      for (const [key, value] of this.getBlobHeaders(body)) {
+        out.headers.set(key, value);
       }
       out.body = Readable.fromWeb(body.stream());
     } else if (body instanceof FormData) {
@@ -139,29 +139,29 @@ export class WebBodyUtil {
   /**
    * Set body and mark as unprocessed
    */
-  static markRaw(val: WebBinaryBody | undefined): typeof val {
-    if (val) {
-      Object.defineProperty(val, WebRawStreamSymbol, { value: val });
+  static markRaw(body: WebBinaryBody | undefined): typeof body {
+    if (body) {
+      Object.defineProperty(body, WebRawStreamSymbol, { value: body });
     }
-    return val;
+    return body;
   }
 
   /**
    * Is the input raw
    */
-  static isRaw(val: unknown): val is WebBinaryBody {
+  static isRaw(body: unknown): body is WebBinaryBody {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!val && ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebRawStreamSymbol] === val);
+    return !!body && ((Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) && (body as Any)[WebRawStreamSymbol] === body);
   }
 
   /**
    * Simple parse support
    */
-  static parseBody(type: string, val: string): unknown {
+  static parseBody(type: string, body: string): unknown {
     switch (type) {
-      case 'text': return val;
-      case 'json': return JSON.parse(val);
-      case 'form': return Object.fromEntries(new URLSearchParams(val));
+      case 'text': return body;
+      case 'json': return JSON.parse(body);
+      case 'form': return Object.fromEntries(new URLSearchParams(body));
     }
   }
 
@@ -199,11 +199,11 @@ export class WebBodyUtil {
       }
       all.push(decoder.decode(Buffer.alloc(0), { stream: false }));
       return { text: all.join(''), read: received };
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
         throw WebError.for('Request Aborted', 400, { received });
       } else {
-        throw err;
+        throw error;
       }
     }
   }

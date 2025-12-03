@@ -11,7 +11,7 @@ export type TokenType =
  */
 export interface TokenizeState {
   out: Token[];
-  pos: number;
+  position: number;
   start: number;
   text: string;
   mode: TokenType;
@@ -42,7 +42,7 @@ export interface Node<T extends string = string> {
  */
 export interface ClauseNode extends Node<'clause'> {
   field?: string;
-  op?: string;
+  operator?: string;
   value?: Literal | Literal[];
 }
 
@@ -50,7 +50,7 @@ export interface ClauseNode extends Node<'clause'> {
  * Grouping
  */
 export interface GroupNode extends Node<'group'> {
-  op?: 'and' | 'or';
+  operator?: 'and' | 'or';
   value: AllNode[];
 }
 
@@ -58,7 +58,7 @@ export interface GroupNode extends Node<'group'> {
  * Unary node
  */
 export interface UnaryNode extends Node<'unary'> {
-  op?: 'not';
+  operator?: 'not';
   value: AllNode;
 }
 
@@ -66,7 +66,7 @@ export interface UnaryNode extends Node<'unary'> {
  * Array node
  */
 export interface ArrayNode extends Node<'list'> {
-  op?: 'not';
+  operator?: 'not';
   value: Literal[];
 }
 
@@ -75,7 +75,7 @@ export type AllNode = ArrayNode | UnaryNode | GroupNode | ClauseNode;
 /**
  * Translation of operators to model query keys
  */
-export const OP_TRANSLATION: Record<string, string> = {
+export const OPERATOR_TRANSLATION: Record<string, string> = {
   '<': '$lt', '<=': '$lte',
   '>': '$gt', '>=': '$gte',
   '!=': '$ne', '==': '$eq',
@@ -83,4 +83,4 @@ export const OP_TRANSLATION: Record<string, string> = {
   in: '$in', 'not-in': '$nin'
 };
 
-export const VALID_OPS = new Set(Object.keys(OP_TRANSLATION));
+export const VALID_OPERATORS = new Set(Object.keys(OPERATOR_TRANSLATION));

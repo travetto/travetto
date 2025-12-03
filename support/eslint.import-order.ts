@@ -30,7 +30,7 @@ export const ImportOrder: TrvEslintPlugin = {
           let groupType: (keyof typeof groupTypeMap) | undefined;
           let groupSize = 0;
           let contiguous = false;
-          let prev: eslint.AST.Program['body'][number] | undefined;
+          let previous: eslint.AST.Program['body'][number] | undefined;
 
           for (const node of body) {
 
@@ -41,13 +41,13 @@ export const ImportOrder: TrvEslintPlugin = {
                 from = node.source.value;
               }
             } else if (node.type === 'VariableDeclaration' && node.kind === 'const') {
-              const [decl] = node.declarations;
+              const [declaration] = node.declarations;
               let call: Expression | undefined;
-              const initType = decl?.init?.type;
+              const initType = declaration?.init?.type;
               if (initType === 'CallExpression') {
-                call = decl.init;
+                call = declaration.init;
               } else if (initType === 'TSAsExpression') { // tslint support
-                call = decl.init.expression;
+                call = declaration.init.expression;
               }
               if (
                 call?.type === 'CallExpression' && call.callee.type === 'Identifier' &&
@@ -76,7 +76,7 @@ export const ImportOrder: TrvEslintPlugin = {
 
             if (groupType === lineType) {
               groupSize += 1;
-            } else if (((node.loc?.end.line ?? 0) - (prev?.loc?.end.line ?? 0)) > 1) {
+            } else if (((node.loc?.end.line ?? 0) - (previous?.loc?.end.line ?? 0)) > 1) {
               // Newlines
               contiguous = false;
               groupSize = 0;
@@ -93,7 +93,7 @@ export const ImportOrder: TrvEslintPlugin = {
             } else { // Contiguous diff, count > 1
               context.report({ message: `Invalid contiguous groups ${groupType} and ${lineType}`, node });
             }
-            prev = node;
+            previous = node;
           }
         }
         return { Program: check };

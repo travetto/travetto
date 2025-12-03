@@ -36,8 +36,8 @@ export class ManifestUtil {
    * Produce a production manifest from a given manifest
    */
   static createProductionManifest(manifest: ManifestRoot): ManifestRoot {
-    const prodModules = Object.values(manifest.modules).filter(x => x.prod);
-    const prodModNames = new Set([...prodModules.map(x => x.name)]);
+    const prodModules = Object.values(manifest.modules).filter(mod => mod.prod);
+    const prodModNames = new Set([...prodModules.map(mod => mod.name)]);
     return {
       generated: manifest.generated,
       workspace: manifest.workspace,
@@ -48,8 +48,8 @@ export class ManifestUtil {
       },
       main: manifest.main,
       modules: Object.fromEntries(
-        prodModules.map(m => [m.name, Object.assign(m, {
-          parents: m.parents.filter(x => prodModNames.has(x))
+        prodModules.map(mod => [mod.name, Object.assign(mod, {
+          parents: mod.parents.filter(parent => prodModNames.has(parent))
         })])
       ),
     };
@@ -136,7 +136,7 @@ export class ManifestUtil {
    * Efficient lookup for path-based graphs
    */
   static lookupTrie<T>(
-    inputs: T[], getPath: (v: T) => string[], validateUnknown?: (pth: string[]) => boolean
+    inputs: T[], getPath: (value: T) => string[], validateUnknown?: (pth: string[]) => boolean
   ): (pth: string[]) => T | undefined {
     type TrieNode = { value?: T, subs: Record<string, TrieNode> };
     const root: TrieNode = { subs: {} };

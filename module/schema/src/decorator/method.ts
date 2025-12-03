@@ -4,6 +4,8 @@ import { SchemaMethodConfig } from '../service/types';
 import { SchemaRegistryIndex } from '../service/registry-index';
 import { MethodValidatorFn } from '../validate/types';
 
+type MethodDecorator = (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => PropertyDescriptor | void;
+
 /**
  * Registering a method
  * @param config The method configuration
@@ -11,7 +13,7 @@ import { MethodValidatorFn } from '../validate/types';
  * @kind decorator
  */
 export function Method(...config: Partial<SchemaMethodConfig>[]) {
-  return (instanceOrCls: ClassInstance, property: string | symbol): void => {
+  return (instanceOrCls: ClassInstance, property: string): void => {
     SchemaRegistryIndex.getForRegister(getClass(instanceOrCls)).registerMethod(property, ...config);
   };
 }

@@ -12,8 +12,8 @@ import { ApiSpecConfig } from './config.ts';
 
 const DEFINITION = '#/components/schemas';
 
-const isInputConfig = (val: object): val is SchemaInputConfig => !!val && 'owner' in val && 'type' in val;
-const isFieldConfig = (val: object): val is SchemaFieldConfig => isInputConfig(val) && 'name' in val;
+const isInputConfig = (value: object): value is SchemaInputConfig => !!value && 'owner' in value && 'type' in value;
+const isFieldConfig = (value: object): value is SchemaFieldConfig => isInputConfig(value) && 'name' in value;
 
 type GeneratedSpec = {
   tags: TagObject[];
@@ -51,7 +51,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const fields = SchemaRegistryIndex.get(input.type).getFields(input.view);
     const params: ParameterObject[] = [];
     for (const sub of Object.values(fields)) {
-      const name = sub.name.toString();
+      const name = sub.name;
       if (SchemaRegistryIndex.has(sub.type)) {
         const suffix = (sub.array) ? '[]' : '';
         params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${name}${suffix}` : `${name}${suffix}.`, rootField));
@@ -131,48 +131,48 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Process schema field
    */
   #processSchemaField(input: SchemaInputConfig, required: string[]): SchemaObject {
-    let prop: SchemaObject = this.#getType(input);
+    let config: SchemaObject = this.#getType(input);
 
     if (input.examples) {
-      prop.example = input.examples;
+      config.example = input.examples;
     }
-    prop.description = input.description;
+    config.description = input.description;
     if (input.match) {
-      prop.pattern = input.match.re!.source;
+      config.pattern = input.match.re!.source;
     }
     if (input.maxlength) {
-      prop.maxLength = input.maxlength.n;
+      config.maxLength = input.maxlength.n;
     }
     if (input.minlength) {
-      prop.minLength = input.minlength.n;
+      config.minLength = input.minlength.n;
     }
     if (input.min) {
-      prop.minimum = typeof input.min.n === 'number' ? input.min.n : input.min.n.getTime();
+      config.minimum = typeof input.min.n === 'number' ? input.min.n : input.min.n.getTime();
     }
     if (input.max) {
-      prop.maximum = typeof input.max.n === 'number' ? input.max.n : input.max.n.getTime();
+      config.maximum = typeof input.max.n === 'number' ? input.max.n : input.max.n.getTime();
     }
     if (input.enum) {
-      prop.enum = input.enum.values;
+      config.enum = input.enum.values;
     }
     if (isFieldConfig(input)) {
       if (input.required?.active !== false) {
-        required.push(input.name.toString());
+        required.push(input.name);
       }
       if (input.access === 'readonly') {
-        prop.readOnly = true;
+        config.readOnly = true;
       } else if (input.access === 'writeonly') {
-        prop.writeOnly = true;
+        config.writeOnly = true;
       }
     }
     if (input.array) {
-      prop = {
+      config = {
         type: 'array',
-        items: prop
+        items: config
       };
     }
 
-    return prop;
+    return config;
   }
 
   /**
@@ -195,25 +195,25 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         };
 
         const properties: Record<string, SchemaObject> = {};
-        const def = config;
+        const base = config;
         const required: string[] = [];
 
-        for (const fieldName of Object.keys(def.fields)) {
-          if (SchemaRegistryIndex.has(def.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistryIndex.getConfig(def.fields[fieldName].type));
+        for (const fieldName of Object.keys(base.fields)) {
+          if (SchemaRegistryIndex.has(base.fields[fieldName].type)) {
+            this.onSchema(SchemaRegistryIndex.getConfig(base.fields[fieldName].type));
           }
-          properties[fieldName] = this.#processSchemaField(def.fields[fieldName], required);
+          properties[fieldName] = this.#processSchemaField(base.fields[fieldName], required);
         }
 
         const extra: Record<string, unknown> = {};
         if (config.discriminatedBase) {
-          const map = SchemaRegistryIndex.getDiscriminatedClasses(cls);
-          if (map) {
-            extra.oneOf = map
-              .filter(x => !describeFunction(x)?.abstract)
-              .map(c => {
-                this.onSchema(SchemaRegistryIndex.getConfig(c));
-                return this.#getType(c);
+          const subClasses = SchemaRegistryIndex.getDiscriminatedClasses(cls);
+          if (subClasses) {
+            extra.oneOf = subClasses
+              .filter(subCls => !describeFunction(subCls)?.abstract)
+              .map(subCls => {
+                this.onSchema(SchemaRegistryIndex.getConfig(subCls));
+                return this.#getType(subCls);
               });
           }
         }
@@ -260,7 +260,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: EndpointParameterConfig, input: SchemaParameterConfig): (
+  #processEndpointParam(endpoint: EndpointConfig, param: EndpointParameterConfig, input: SchemaParameterConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined
@@ -269,7 +269,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     if (param.location) {
       if (param.location === 'body') {
-        const acceptsMime = ep.finalizedResponseHeaders.get('accepts');
+        const acceptsMime = endpoint.finalizedResponseHeaders.get('accepts');
         return {
           requestBody: input.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(input, acceptsMime)
         };
@@ -291,47 +291,47 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process controller endpoint
    */
-  onEndpointEnd(ep: EndpointConfig, ctrl: ControllerConfig): void {
-    if (this.#config.skipEndpoints || !ep.httpMethod) {
+  onEndpointEnd(endpoint: EndpointConfig, controller: ControllerConfig): void {
+    if (this.#config.skipEndpoints || !endpoint.httpMethod) {
       return;
     }
 
-    const tagName = ctrl.externalName;
+    const tagName = controller.externalName;
 
-    const schema = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
+    const schema = SchemaRegistryIndex.get(endpoint.class).getMethod(endpoint.methodName);
 
-    const op: OperationObject = {
+    const apiConfig: OperationObject = {
       tags: [tagName],
       responses: {},
       summary: schema.description,
       description: schema.description,
-      operationId: `${ep.class.name}_${ep.methodName.toString()}`,
+      operationId: `${endpoint.class.name}_${endpoint.methodName}`,
       parameters: []
     };
 
-    const contentTypeMime = ep.finalizedResponseHeaders.get('content-type');
-    const pConf = this.#getEndpointBody(schema.returnType, contentTypeMime);
-    const code = Object.keys(pConf.content).length ? 200 : 201;
-    op.responses![code] = pConf;
+    const contentTypeMime = endpoint.finalizedResponseHeaders.get('content-type');
+    const bodyConfig = this.#getEndpointBody(schema.returnType, contentTypeMime);
+    const code = Object.keys(bodyConfig.content).length ? 200 : 201;
+    apiConfig.responses![code] = bodyConfig;
 
-    const methodSchema = SchemaRegistryIndex.get(ep.class).getMethod(ep.methodName);
+    const methodSchema = SchemaRegistryIndex.get(endpoint.class).getMethod(endpoint.methodName);
 
     for (const param of methodSchema.parameters) {
-      const result = this.#processEndpointParam(ep, ep.parameters[param.index] ?? {}, param);
+      const result = this.#processEndpointParam(endpoint, endpoint.parameters[param.index] ?? {}, param);
       if (result) {
         if ('parameters' in result) {
-          (op.parameters ??= []).push(...result.parameters);
+          (apiConfig.parameters ??= []).push(...result.parameters);
         } else {
-          op.requestBody ??= result.requestBody;
+          apiConfig.requestBody ??= result.requestBody;
         }
       }
     }
 
-    const key = ep.fullPath.replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
+    const key = endpoint.fullPath.replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
 
     this.#paths[key] = {
       ...(this.#paths[key] ?? {}),
-      [HTTP_METHODS[ep.httpMethod].lower]: op
+      [HTTP_METHODS[endpoint.httpMethod].lower]: apiConfig
     };
   }
 
@@ -356,8 +356,8 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       paths: Object.fromEntries(
         Object.entries(this.#paths)
           .toSorted(([a], [b]) => a.localeCompare(b))
-          .map(([k, v]) => [k, Object.fromEntries(
-            Object.entries(v)
+          .map(([key, value]) => [key, Object.fromEntries(
+            Object.entries(value)
               .toSorted(([a], [b]) => a.localeCompare(b))
           )])
       ),

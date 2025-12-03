@@ -13,23 +13,23 @@ export class InkyRenderer {
   static async #render(
     ctx: RenderContext,
     renderer: RenderProvider<RenderContext>,
-    node: JSXChild[] | JSXChild | null | undefined,
+    input: JSXChild[] | JSXChild | null | undefined,
     stack: JSXElement[] = []
   ): Promise<string> {
-    if (node === null || node === undefined) {
+    if (input === null || input === undefined) {
       return '';
-    } else if (Array.isArray(node)) {
+    } else if (Array.isArray(input)) {
       const out: string[] = [];
-      const nextStack = [...stack, { key: '', props: { children: node }, type: JSXFragmentType }];
-      for (const el of node) {
-        out.push(await this.#render(ctx, renderer, el, nextStack));
+      const nextStack = [...stack, { key: '', props: { children: input }, type: JSXFragmentType }];
+      for (const node of input) {
+        out.push(await this.#render(ctx, renderer, node, nextStack));
       }
       return out.join('');
-    } else if (isJSXElement(node)) {
-      let final: JSXElement = node;
+    } else if (isJSXElement(input)) {
+      let final: JSXElement = input;
       // Render simple element if needed
-      if (typeof node.type === 'function' && node.type !== JSXFragmentType) {
-        const out = castTo<Function>(node.type)(node.props);
+      if (typeof input.type === 'function' && input.type !== JSXFragmentType) {
+        const out = castTo<Function>(input.type)(input.props);
         final = out !== EMPTY_ELEMENT ? out : final;
       }
 
@@ -46,7 +46,7 @@ export class InkyRenderer {
         const recurse = (): Promise<string> => this.#render(ctx, renderer, final.props.children ?? [], [...stack, final]);
         // @ts-expect-error
         const state: RenderState<JSXElement, RenderContext> = {
-          el: final, props: final.props, recurse, stack, context: ctx
+          node: final, props: final.props, recurse, stack, context: ctx
         };
         // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
         state.createState = (key, props) => this.createState(ctx, renderer, state, key, props);
@@ -57,7 +57,7 @@ export class InkyRenderer {
         throw new Error(`Unknown element: ${final.type}`);
       }
     } else {
-      return `${node}`;
+      return `${input}`;
     }
   }
 
@@ -69,9 +69,9 @@ export class InkyRenderer {
     props: JSXElementByFn<K>['props'],
     // @ts-expect-error
   ): RenderState<JSXElementByFn<K>, RenderContext> {
-    const el = ctx.createElement(key, props);
-    const newStack: JSXElement[] = castTo([...state.stack, el]);
-    return { ...state, el, props: el.props, recurse: () => this.#render(ctx, renderer, el.props.children ?? [], newStack) };
+    const node = ctx.createElement(key, props);
+    const newStack: JSXElement[] = castTo([...state.stack, node]);
+    return { ...state, node, props: node.props, recurse: () => this.#render(ctx, renderer, node.props.children ?? [], newStack) };
   }
 
   /**

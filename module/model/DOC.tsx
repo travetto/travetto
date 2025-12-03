@@ -12,7 +12,7 @@ import { Links } from './support/doc.support.ts';
 const ModelTypeContract = toConcrete<ModelType>();
 
 const ModelImplementations = () => {
-  const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Blob', 'Bulk'].map(v => <td>{v}</td>);
+  const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Blob', 'Bulk'].map(name => <td>{name}</td>);
 
   const modelImplRows = ([
     [d.mod('ModelDynamodb'), 'X', 'X', 'X', 'X', ' ', ' '],
@@ -25,7 +25,7 @@ const ModelImplementations = () => {
     [d.mod('ModelMemory'), 'X', 'X', 'X', 'X', 'X', 'X'],
     [d.mod('ModelFile'), 'X', 'X', ' ', 'X', 'X', 'X']
   ] as const)
-    .map(r => <tr>{...r.map(cell => <td>{cell}</td>)}</tr>);
+    .map(node => <tr>{...node.map(cell => <td>{cell}</td>)}</tr>);
 
   return <table>
     <thead><tr>{...modelImplHeader}</tr></thead>
@@ -110,12 +110,12 @@ export const text = <>
   <c.Section title='CLI - model:export'>
     The module provides the ability to generate an export of the model structure from all the various {Model}s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
-    <c.Execution title='Running model export' cmd='trv' args={['model:export', '--help']} config={{ cwd: './doc-exec' }} />
+    <c.Execution title='Running model export' cmd='trv' args={['model:export', '--help']} config={{ workingDirectory: './doc-exec' }} />
   </c.Section>
   <c.Section title='CLI - model:install'>
 
     The module provides the ability to install all the various {Model}s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
 
-    <c.Execution title='Running model install' cmd='trv' args={['model:install', '--help']} config={{ cwd: './doc-exec' }} />
+    <c.Execution title='Running model install' cmd='trv' args={['model:install', '--help']} config={{ workingDirectory: './doc-exec' }} />
   </c.Section>
 </>;

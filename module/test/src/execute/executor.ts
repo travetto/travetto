@@ -15,7 +15,7 @@ import { Barrier } from './barrier.ts';
 import { ExecutionError } from './error.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
-const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
+const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.value) ?? 5000;
 
 /**
  * Support execution of the tests
@@ -73,8 +73,8 @@ export class TestExecutor {
   /**
    * Determining if we should skip
    */
-  async #shouldSkip(cfg: TestConfig | SuiteConfig, inst: unknown): Promise<boolean | undefined> {
-    if (typeof cfg.skip === 'function' ? await cfg.skip(inst) : cfg.skip) {
+  async #shouldSkip(config: TestConfig | SuiteConfig, inst: unknown): Promise<boolean | undefined> {
+    if (typeof config.skip === 'function' ? await config.skip(inst) : config.skip) {
       return true;
     }
   }
@@ -190,7 +190,7 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
-    const mgr = new TestPhaseManager(suite, result, e => this.#onSuiteFailure(e));
+    const mgr = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
 
     const originalEnv = { ...process.env };
 
@@ -226,8 +226,8 @@ export class TestExecutor {
 
       // Handle after all
       await mgr.endPhase('all');
-    } catch (err) {
-      await mgr.onError(err);
+    } catch (error) {
+      await mgr.onError(error);
     }
 
     // Restore env
@@ -246,12 +246,12 @@ export class TestExecutor {
   async execute(run: TestRun): Promise<void> {
     try {
       await Runtime.importFrom(run.import);
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
       }
-      console.error(err);
-      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(run.import, err));
+      console.error(error);
+      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(run.import, error));
       return;
     }
 

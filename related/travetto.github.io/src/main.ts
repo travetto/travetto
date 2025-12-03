@@ -18,7 +18,7 @@ const routes: Routes = [
       },
       {
         path: 'guide',
-        loadComponent: () => import('./app/documentation/gen/todo-app/todo-app.component').then(m => m.GuideComponent),
+        loadComponent: () => import('./app/documentation/gen/todo-app/todo-app.component').then(mod => mod.GuideComponent),
       },
       {
         path: 'blog',
@@ -27,7 +27,7 @@ const routes: Routes = [
       {
         path: 'docs',
         component: DocumentationComponent,
-        loadChildren: () => import('./app/documentation/documentation.module').then(m => m.ROUTES)
+        loadChildren: () => import('./app/documentation/documentation.module').then(mod => mod.ROUTES)
       }
     ]
   }, {
@@ -44,4 +44,4 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'disabled' }))
   ]
 })
-  .catch(err => console.log(err));
+  .catch(error => console.log(error));

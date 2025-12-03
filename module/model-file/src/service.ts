@@ -34,7 +34,7 @@ export class FileModelConfig {
   }
 }
 
-const exists = (f: string): Promise<boolean> => fs.stat(f).then(() => true, () => false);
+const exists = (file: string): Promise<boolean> => fs.stat(file).then(() => true, () => false);
 
 /**
  * Standard file support
@@ -71,13 +71,13 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     if (id) {
       resolved = path.resolve(resolved, id.replace(/^[/]/, '').substring(0, 3));
     }
-    let dir = resolved;
+    let folder = resolved;
     if (id) {
       resolved = path.resolve(resolved, `${id}${suffix}`);
-      dir = path.dirname(resolved);
+      folder = path.dirname(resolved);
     }
 
-    await fs.mkdir(dir, { recursive: true });
+    await fs.mkdir(folder, { recursive: true });
     return resolved;
   }
 
@@ -161,9 +161,9 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     for await (const [id] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
       try {
         yield await this.get(cls, id);
-      } catch (err) {
-        if (!(err instanceof NotFoundError)) {
-          throw err;
+      } catch (error) {
+        if (!(error instanceof NotFoundError)) {
+          throw error;
         }
       }
     }
@@ -219,8 +219,8 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     let deleted = 0;
     for await (const [_id, file] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
       try {
-        const res = await ModelCrudUtil.load(cls, await fs.readFile(file));
-        if (ModelExpiryUtil.getExpiryState(cls, res).expired) {
+        const item = await ModelCrudUtil.load(cls, await fs.readFile(file));
+        if (ModelExpiryUtil.getExpiryState(cls, item).expired) {
           await fs.rm(file, { force: true });
           deleted += 1;
         }
@@ -231,8 +231,8 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   // Storage management
   async createStorage(): Promise<void> {
-    const dir = path.resolve(this.config.folder, this.config.namespace);
-    await fs.mkdir(dir, { recursive: true });
+    const folder = path.resolve(this.config.folder, this.config.namespace);
+    await fs.mkdir(folder, { recursive: true });
   }
 
   async deleteStorage(): Promise<void> {

@@ -25,8 +25,8 @@ export class MainCommand implements CliCommandShape {
     try {
       const mod = await Runtime.importFrom<{ main(..._: unknown[]): Promise<unknown> }>(fileOrImport);
       result = await mod.main(...args, ...this._parsed.unknown);
-    } catch (err) {
-      result = err;
+    } catch (error) {
+      result = error;
       process.exitCode = Math.max(process.exitCode ? +process.exitCode : 1, 1);
     }
 

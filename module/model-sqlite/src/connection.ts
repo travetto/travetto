@@ -27,17 +27,17 @@ export class SqliteConnection extends Connection<Database> {
     this.#config = config;
   }
 
-  async #withRetries<T>(op: () => Promise<T>, retries = 10, delay = 250): Promise<T> {
+  async #withRetries<T>(operation: () => Promise<T>, retries = 10, delay = 250): Promise<T> {
     for (; ;) {
       try {
-        return await op();
-      } catch (err) {
-        if (err instanceof Error && retries > 1 && err.message.includes('database is locked')) {
+        return await operation();
+      } catch (error) {
+        if (error instanceof Error && retries > 1 && error.message.includes('database is locked')) {
           console.error('Failed, and waiting', retries);
           await Util.blockingTimeout(delay);
           retries -= 1;
         } else {
-          throw err;
+          throw error;
         }
       }
     }
@@ -72,22 +72,22 @@ export class SqliteConnection extends Connection<Database> {
     ShutdownManager.onGracefulShutdown(() => this.#pool.clear());
   }
 
-  async execute<T = unknown>(conn: Database, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(connection: Database, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
     return this.#withRetries(async () => {
       console.debug('Executing query', { query });
       try {
-        const out = await conn.prepare<unknown[], T>(query)[query.trim().startsWith('SELECT') ? 'all' : 'run'](...values ?? []);
+        const out = await connection.prepare<unknown[], T>(query)[query.trim().startsWith('SELECT') ? 'all' : 'run'](...values ?? []);
         if (Array.isArray(out)) {
-          const records: T[] = out.map(v => ({ ...v }));
+          const records: T[] = out.map(item => ({ ...item }));
           return { count: out.length, records };
         } else {
           return { count: out.changes, records: [] };
         }
-      } catch (err) {
-        if (err instanceof Error && err.message.includes('UNIQUE constraint failed')) {
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
           throw new ExistsError('query', query);
         } else {
-          throw err;
+          throw error;
         }
       }
     });

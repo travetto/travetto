@@ -46,10 +46,10 @@ export class QueryLanguageTokenizer {
    * Process the next token.  Can specify expected type as needed
    */
   static #processToken(state: TokenizeState, mode?: TokenType): Token {
-    const text = state.text.substring(state.start, state.pos);
-    const res = TOKEN_MAPPING[text.toLowerCase()];
+    const text = state.text.substring(state.start, state.position);
+    const result = TOKEN_MAPPING[text.toLowerCase()];
     let value: unknown = text;
-    if (!res && state.mode === 'literal') {
+    if (!result && state.mode === 'literal') {
       if (/^["']/.test(text)) {
         value = text.substring(1, text.length - 1)
           .replace(/\\[.]/g, (a, b) => ESCAPE[a] || b);
@@ -67,18 +67,18 @@ export class QueryLanguageTokenizer {
         state.mode = 'identifier';
       }
     }
-    return res ?? { value, type: state.mode || mode };
+    return result ?? { value, type: state.mode || mode };
   }
 
   /**
    * Flush state to output
    */
   static #flush(state: TokenizeState, mode?: TokenType): void {
-    if ((!mode || !state.mode || mode !== state.mode) && state.start !== state.pos) {
+    if ((!mode || !state.mode || mode !== state.mode) && state.start !== state.position) {
       if (state.mode !== 'whitespace') {
         state.out.push(this.#processToken(state, mode));
       }
-      state.start = state.pos;
+      state.start = state.position;
     }
     state.mode = mode || state.mode;
   }
@@ -106,23 +106,22 @@ export class QueryLanguageTokenizer {
   /**
    * Read string until quote
    */
-  static readString(text: string, pos: number): number {
-    const len = text.length;
-    const ch = text.charCodeAt(pos);
-    const q = ch;
-    pos += 1;
-    while (pos < len) {
-      if (text.charCodeAt(pos) === q) {
+  static readString(text: string, position: number): number {
+    const length = text.length;
+    const ch = text.charCodeAt(position);
+    position += 1;
+    while (position < length) {
+      if (text.charCodeAt(position) === ch) {
         break;
-      } else if (text.charCodeAt(pos) === BACKSLASH) {
-        pos += 1;
+      } else if (text.charCodeAt(position) === BACKSLASH) {
+        position += 1;
       }
-      pos += 1;
+      position += 1;
     }
-    if (pos === len && text.charCodeAt(pos) !== q) {
+    if (position === length && text.charCodeAt(position) !== ch) {
       throw new Error('Unterminated string literal');
     }
-    return pos;
+    return position;
   }
 
   /**
@@ -131,16 +130,16 @@ export class QueryLanguageTokenizer {
   static tokenize(text: string): Token[] {
     const state: TokenizeState = {
       out: [],
-      pos: 0,
+      position: 0,
       start: 0,
       text,
       mode: undefined!
     };
     const len = text.length;
     // Loop through each char
-    while (state.pos < len) {
+    while (state.position < len) {
       // Read code as a number, more efficient
-      const ch = text.charCodeAt(state.pos);
+      const ch = text.charCodeAt(state.position);
       switch (ch) {
         // Handle punctuation
         case OPEN_PARENS: case CLOSE_PARENS: case OPEN_BRACKET: case CLOSE_BRACKET: case COMMA:
@@ -160,10 +159,10 @@ export class QueryLanguageTokenizer {
         case DBL_QUOTE: case SGL_QUOTE: case FORWARD_SLASH:
           this.#flush(state);
           state.mode = 'literal';
-          state.pos = this.readString(text, state.pos) + 1;
+          state.position = this.readString(text, state.position) + 1;
           if (ch === FORWARD_SLASH) { // Read modifiers, not used by all, but useful in general
-            while (this.#isValidRegexFlag(text.charCodeAt(state.pos))) {
-              state.pos += 1;
+            while (this.#isValidRegexFlag(text.charCodeAt(state.position))) {
+              state.position += 1;
             }
           }
           this.#flush(state);
@@ -173,10 +172,10 @@ export class QueryLanguageTokenizer {
           if (this.#isValidIdentToken(ch)) {
             this.#flush(state, 'literal');
           } else {
-            throw new Error(`Invalid character: ${text.substring(Math.max(0, state.pos - 10), state.pos + 1)}`);
+            throw new Error(`Invalid character: ${text.substring(Math.max(0, state.position - 10), state.position + 1)}`);
           }
       }
-      state.pos += 1;
+      state.position += 1;
     }
 
     this.#flush(state);

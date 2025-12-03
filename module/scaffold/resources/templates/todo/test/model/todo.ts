@@ -15,9 +15,9 @@ class TestCRUD extends BaseModelSuite<ModelCrudSupport> {
 
   @Test('save it')
   async save(): Promise<void> {
-    const svc = await this.service;
+    const service = await this.service;
 
-    const saved = await svc.create(Todo, Todo.from({
+    const saved = await service.create(Todo, Todo.from({
       text: 'A saved todo',
       completed: false
     }));

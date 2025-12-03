@@ -15,16 +15,16 @@ import { CoreUtil } from './util/core.ts';
 import { LiteralUtil } from './util/literal.ts';
 import { SystemUtil } from './util/system.ts';
 
-function hasOriginal(n: ts.Node): n is ts.Node & { original: ts.Node } {
-  return !!n && !n.parent && 'original' in n && !!n.original;
+function hasOriginal(node: ts.Node): node is ts.Node & { original: ts.Node } {
+  return !!node && !node.parent && 'original' in node && !!node.original;
 }
 
-function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: string } } {
-  return !!n && 'name' in n && typeof n.name === 'object' && !!n.name && 'escapedText' in n.name && !!n.name.escapedText;
+function hasEscapedName(node: ts.Node): node is ts.Node & { name: { escapedText: string } } {
+  return !!node && 'name' in node && typeof node.name === 'object' && !!node.name && 'escapedText' in node.name && !!node.name.escapedText;
 }
 
-function isRedefinableDeclaration(x: ts.Node): x is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
-  return ts.isFunctionDeclaration(x) || ts.isClassDeclaration(x) || ts.isInterfaceDeclaration(x);
+function isRedefinableDeclaration(node: ts.Node): node is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
+  return ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node);
 }
 
 const FOREIGN_TYPE_REGISTRY_FILE = '@travetto/runtime/src/function';
@@ -35,7 +35,7 @@ const FOREIGN_TYPE_REGISTRY_FILE = '@travetto/runtime/src/function';
 export class TransformerState implements State {
   #resolver: SimpleResolver;
   #imports: ImportManager;
-  #modIdent: ts.Identifier;
+  #moduleIdentifier: ts.Identifier;
   #manifestIndex: ManifestIndex;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
@@ -93,8 +93,8 @@ export class TransformerState implements State {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'managed') {
       const file = node.getSourceFile().fileName;
-      const src = this.#resolver.getFileImportName(file);
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${src}`);
+      const source = this.#resolver.getFileImportName(file);
+      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${source}`);
     }
     return resolved;
   }
@@ -136,9 +136,9 @@ export class TransformerState implements State {
    */
   readDocTagList(node: ts.Declaration, name: string): string[] {
     return this.readDocTag(node, name)
-      .flatMap(x => x.split(/\s*,\s*/g))
-      .map(x => x.replace(/`/g, ''))
-      .filter(x => !!x);
+      .flatMap(tag => tag.split(/\s*,\s*/g))
+      .map(tag => tag.replace(/`/g, ''))
+      .filter(tag => !!tag);
   }
 
   /**
@@ -147,8 +147,8 @@ export class TransformerState implements State {
   importDecorator(pth: string, name: string): ts.PropertyAccessExpression | undefined {
     if (!this.#decorators.has(`${pth}:${name}`)) {
       const ref = this.#imports.importFile(pth);
-      const ident = this.factory.createIdentifier(name);
-      this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.ident, ident));
+      const identifier = this.factory.createIdentifier(name);
+      this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.identifier, identifier));
     }
     return this.#decorators.get(name);
   }
@@ -164,22 +164,22 @@ export class TransformerState implements State {
   /**
    * Read a decorator's metadata
    */
-  getDecoratorMeta(dec: ts.Decorator): DecoratorMeta | undefined {
-    const ident = DecoratorUtil.getDecoratorIdent(dec);
-    const type = this.#resolver.getType(ident);
-    const decl = DeclarationUtil.getOptionalPrimaryDeclarationNode(type);
-    const src = decl?.getSourceFile().fileName;
-    const mod = src ? this.#resolver.getFileImportName(src, true) : undefined;
+  getDecoratorMeta(decorator: ts.Decorator): DecoratorMeta | undefined {
+    const identifier = DecoratorUtil.getDecoratorIdentifier(decorator);
+    const type = this.#resolver.getType(identifier);
+    const declaration = DeclarationUtil.getOptionalPrimaryDeclarationNode(type);
+    const source = declaration?.getSourceFile().fileName;
+    const mod = source ? this.#resolver.getFileImportName(source, true) : undefined;
     const file = this.#manifestIndex.getFromImport(mod ?? '')?.outputFile;
     const targets = DocUtil.readAugments(type);
     const example = DocUtil.readExample(type);
     const module = file ? mod : undefined;
-    const name = ident ?
-      ident.escapedText?.toString()! :
+    const name = identifier ?
+      identifier.escapedText?.toString()! :
       undefined;
 
-    if (ident && name) {
-      return { dec, ident, file, module, targets, name, options: example };
+    if (identifier && name) {
+      return { decorator, identifier, file, module, targets, name, options: example };
     }
   }
 
@@ -188,8 +188,8 @@ export class TransformerState implements State {
    */
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? [])
-      .map(dec => this.getDecoratorMeta(dec))
-      .filter(x => !!x) : [];
+      .map(decorator => this.getDecoratorMeta(decorator))
+      .filter(meta => !!meta) : [];
   }
 
   /**
@@ -201,26 +201,26 @@ export class TransformerState implements State {
 
   /**
    * Register statement for inclusion in final output
-   * @param stmt
+   * @param added
    * @param before
    */
   addStatements(added: ts.Statement[], before?: ts.Node | number): void {
-    const stmts = this.source.statements.slice(0);
-    let idx = stmts.length + 1000;
+    const statements = this.source.statements.slice(0);
+    let idx = statements.length + 1000;
 
     if (before && typeof before !== 'number') {
-      let n = before;
-      if (hasOriginal(n)) {
-        n = n.original;
+      let node = before;
+      if (hasOriginal(node)) {
+        node = node.original;
       }
-      while (n && !ts.isSourceFile(n.parent) && n !== n.parent) {
-        n = n.parent;
+      while (node && !ts.isSourceFile(node.parent) && node !== node.parent) {
+        node = node.parent;
       }
-      if (!ts.isStatement(n)) {
+      if (!ts.isStatement(node)) {
         throw new Error('Unable to find statement at top level');
       }
-      if (n && ts.isSourceFile(n.parent) && stmts.indexOf(n) >= 0) {
-        idx = stmts.indexOf(n) - 1;
+      if (node && ts.isSourceFile(node.parent) && statements.indexOf(node) >= 0) {
+        idx = statements.indexOf(node) - 1;
       }
     } else if (before !== undefined) {
       idx = before;
@@ -241,21 +241,21 @@ export class TransformerState implements State {
   /**
    * From literal
    */
-  fromLiteral<T extends ts.Expression>(val: T): T;
-  fromLiteral(val: undefined): ts.Identifier;
-  fromLiteral(val: null): ts.NullLiteral;
-  fromLiteral(val: object): ts.ObjectLiteralExpression;
-  fromLiteral(val: unknown[]): ts.ArrayLiteralExpression;
-  fromLiteral(val: string | boolean | number): ts.LiteralExpression;
-  fromLiteral(val: unknown): ts.Node {
-    return LiteralUtil.fromLiteral(this.factory, val!);
+  fromLiteral<T extends ts.Expression>(value: T): T;
+  fromLiteral(value: undefined): ts.Identifier;
+  fromLiteral(value: null): ts.NullLiteral;
+  fromLiteral(value: object): ts.ObjectLiteralExpression;
+  fromLiteral(value: unknown[]): ts.ArrayLiteralExpression;
+  fromLiteral(value: string | boolean | number): ts.LiteralExpression;
+  fromLiteral(value: unknown): ts.Node {
+    return LiteralUtil.fromLiteral(this.factory, value!);
   }
 
   /**
    * Extend
    */
-  extendObjectLiteral(src: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
-    return LiteralUtil.extendObjectLiteral(this.factory, src, ...rest);
+  extendObjectLiteral(source: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
+    return LiteralUtil.extendObjectLiteral(this.factory, source, ...rest);
   }
 
   /**
@@ -268,8 +268,8 @@ export class TransformerState implements State {
   /**
    * Create a static field for a class
    */
-  createStaticField(name: string, val: ts.Expression): ts.PropertyDeclaration {
-    return CoreUtil.createStaticField(this.factory, name, val);
+  createStaticField(name: string, value: ts.Expression): ts.PropertyDeclaration {
+    return CoreUtil.createStaticField(this.factory, name, value);
   }
 
   /**
@@ -284,17 +284,17 @@ export class TransformerState implements State {
    * Get filename identifier, regardless of module system
    */
   getModuleIdentifier(): ts.Expression {
-    if (this.#modIdent === undefined) {
-      this.#modIdent = this.factory.createUniqueName('mod');
+    if (this.#moduleIdentifier === undefined) {
+      this.#moduleIdentifier = this.factory.createUniqueName('mod');
       const entry = this.#resolver.getFileImport(this.source.fileName);
-      const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
+      const declaration = this.factory.createVariableDeclaration(this.#moduleIdentifier, undefined, undefined,
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
       );
       this.addStatements([
-        this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))
+        this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([declaration]))
       ], -1);
     }
-    return this.#modIdent;
+    return this.#moduleIdentifier;
   }
 
   /**
@@ -309,7 +309,7 @@ export class TransformerState implements State {
     mod = typeof mod === 'string' ? mod : mod[ModuleNameSymbol]!;
     const target = `${mod}:${name}`;
     const list = this.getDecoratorList(node);
-    return list.find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
+    return list.find(meta => meta.targets?.includes(target) && (!module || meta.name === name && meta.module === module))?.decorator;
   }
 
   /**
@@ -379,14 +379,14 @@ export class TransformerState implements State {
   findMethodByName(cls: ts.ClassLikeDeclaration | ts.Type, method: string): ts.MethodDeclaration | undefined {
     if ('getSourceFile' in cls) {
       return cls.members.find(
-        (m): m is ts.MethodDeclaration => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === method
+        (value): value is ts.MethodDeclaration => ts.isMethodDeclaration(value) && ts.isIdentifier(value.name) && value.name.escapedText === method
       );
     } else {
-      const props = this.#resolver.getPropertiesOfType(cls);
-      for (const prop of props) {
-        const decl = prop.declarations?.[0];
-        if (decl && prop.escapedName === method && ts.isMethodDeclaration(decl)) {
-          return decl;
+      const properties = this.#resolver.getPropertiesOfType(cls);
+      for (const property of properties) {
+        const declaration = property.declarations?.[0];
+        if (declaration && property.escapedName === method && ts.isMethodDeclaration(declaration)) {
+          return declaration;
         }
       }
     }
@@ -403,13 +403,13 @@ export class TransformerState implements State {
   /**
    * Produce a foreign target type
    */
-  getForeignTarget(ret: ForeignType): ts.Expression {
+  getForeignTarget(type: ForeignType): ts.Expression {
     const file = this.importFile(FOREIGN_TYPE_REGISTRY_FILE);
     return this.factory.createCallExpression(this.createAccess(
-      file.ident,
+      file.identifier,
       this.factory.createIdentifier('foreignType'),
     ), [], [
-      this.fromLiteral(`${ret.source.split('node_modules/')[1]}+${ret.name}`)
+      this.fromLiteral(`${type.source.split('node_modules/')[1]}+${type.name}`)
     ]);
   }
 
@@ -425,8 +425,8 @@ export class TransformerState implements State {
       return this.getForeignTarget(type);
     } else {
       const file = node.getSourceFile().fileName;
-      const src = this.getFileImportName(file);
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${type.key}: ${src}`);
+      const source = this.getFileImportName(file);
+      throw new Error(`Unable to import non-external type: ${node.getText()} ${type.key}: ${source}`);
     }
   }
 
@@ -435,7 +435,7 @@ export class TransformerState implements State {
    */
   getApparentTypeOfField(value: ts.Type, field: string): AnyType | undefined {
     const checker = this.#resolver.getChecker();
-    const props = checker.getApparentType(value).getApparentProperties().find(x => x.escapedName === field);
-    return props ? this.resolveType(checker.getTypeOfSymbol(props)) : undefined;
+    const properties = checker.getApparentType(value).getApparentProperties().find(property => property.escapedName === field);
+    return properties ? this.resolveType(checker.getTypeOfSymbol(properties)) : undefined;
   }
 }

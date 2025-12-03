@@ -19,8 +19,8 @@ const isMappedType = (type: string | undefined): type is MappedType['operation']
 const getMappedFields = (type: ts.Type): string[] | undefined => {
   if (type.isStringLiteral()) {
     return [type.value];
-  } else if (type.isUnion() && type.types.every(t => t.isStringLiteral())) {
-    return type.types.map(t => t.value);
+  } else if (type.isUnion() && type.types.every(subType => subType.isStringLiteral())) {
+    return type.types.map(subType => subType.value);
   }
 };
 
@@ -82,7 +82,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     try {
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
       const sourceFile = source.fileName;
-      if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_RE.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
+      if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_REGEX.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
         return { category: 'foreign', type };
       }
     } catch { }
@@ -101,7 +101,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     const sourceFile = source.fileName;
     if (sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_RE.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
+    } else if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_REGEX.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
       return { category: 'foreign', type: resolvedType };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
@@ -113,7 +113,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   } else if (type.isLiteral()) {
     return { category: 'shape', type };
   } else if (objectFlags & ts.ObjectFlags.Mapped) { // Mapped types
-    if (type.getProperties().some(x => x.declarations || x.valueDeclaration)) {
+    if (type.getProperties().some(property => property.declarations || property.valueDeclaration)) {
       return { category: 'mapped', type };
     }
   }
@@ -160,7 +160,7 @@ export const TypeBuilder: {
             }
           }
           if (values.length > 0) {
-            return ({ key: 'template', template: { op: 'and', values }, ctor: String });
+            return ({ key: 'template', template: { operation: 'and', values }, ctor: String });
           }
         }
       }
@@ -223,11 +223,11 @@ export const TypeBuilder: {
       let undefinable = false;
       let nullable = false;
       const remainder = uType.types.filter(ut => {
-        const u = (ut.getFlags() & (ts.TypeFlags.Undefined)) > 0;
-        const n = (ut.getFlags() & (ts.TypeFlags.Null)) > 0;
-        undefinable ||= u;
-        nullable ||= n;
-        return !(u || n);
+        const isUndefined = (ut.getFlags() & (ts.TypeFlags.Undefined)) > 0;
+        const isNull = (ut.getFlags() & (ts.TypeFlags.Null)) > 0;
+        undefinable ||= isUndefined;
+        nullable ||= isNull;
+        return !(isUndefined || isNull);
       });
       const name = CoreUtil.getSymbol(uType)?.getName();
       return { key: 'composition', name, undefinable, nullable, tsSubTypes: remainder, subTypes: [], operation: uType.isUnion() ? 'or' : 'and' };
@@ -247,14 +247,19 @@ export const TypeBuilder: {
           ctor: String,
           nullable: type.nullable,
           undefinable: type.undefinable,
-          template: { op: 'or', values: subTypes.map(x => transformCast<TemplateType>(x).template!) }
+          template: { operation: 'or', values: subTypes.map(subType => transformCast<TemplateType>(subType).template!) }
         };
       } else if (subTypes.length === 1) {
         return { undefinable, nullable, ...first };
-      } else if (first.key === 'literal' && subTypes.every(el => el.name === first.name)) { // We have a common
+      } else if (first.key === 'literal' && subTypes.every(item => item.name === first.name)) { // We have a common
         type.commonType = first;
-      } else if (type.operation === 'and' && first.key === 'shape' && subTypes.every(el => el.key === 'shape')) { // All shapes
-        return { importName: first.importName, name: first.name, key: 'shape', fieldTypes: subTypes.reduce((acc, x) => ({ ...acc, ...x.fieldTypes }), {}) };
+      } else if (type.operation === 'and' && first.key === 'shape' && subTypes.every(item => item.key === 'shape')) { // All shapes
+        return {
+          importName: first.importName,
+          name: first.name,
+          key: 'shape',
+          fieldTypes: subTypes.reduce((map, subType) => ({ ...map, ...subType.fieldTypes }), {})
+        };
       }
       return type;
     }
@@ -266,8 +271,8 @@ export const TypeBuilder: {
       let operation: string | undefined;
       let name: string | undefined;
 
-      const decls = DeclarationUtil.getDeclarations(type).filter(x => ts.isTypeAliasDeclaration(x));
-      const ref = decls[0]?.type;
+      const declarations = DeclarationUtil.getDeclarations(type).filter(declaration => ts.isTypeAliasDeclaration(declaration));
+      const ref = declarations[0]?.type;
 
       if (ref && ts.isTypeReferenceNode(ref) && ref.typeArguments && ref.typeArguments.length > 0) {
         const [first, second] = ref.typeArguments;
@@ -298,20 +303,20 @@ export const TypeBuilder: {
       const name = CoreUtil.getSymbol(context?.alias ?? type)?.getName();
       const importName = resolver.getTypeImportName(type) ?? '<unknown>';
       const tsTypeArguments = resolver.getAllTypeArguments(type);
-      const props = resolver.getPropertiesOfType(type);
-      if (props.length === 0) {
+      const properties = resolver.getPropertiesOfType(type);
+      if (properties.length === 0) {
         return { key: 'literal', name: 'Object', ctor: Object, importName };
       }
 
-      for (const member of props) {
-        const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
-        if (DeclarationUtil.isPublic(dec)) { // If public
-          const memberType = resolver.getType(dec);
+      for (const member of properties) {
+        const decorator = DeclarationUtil.getPrimaryDeclarationNode(member);
+        if (DeclarationUtil.isPublic(decorator)) { // If public
+          const memberType = resolver.getType(decorator);
           if (
             !member.getName().includes('@') && // if not a symbol
             !memberType.getCallSignatures().length // if not a function
           ) {
-            if ((ts.isPropertySignature(dec) || ts.isPropertyDeclaration(dec)) && !!dec.questionToken) {
+            if ((ts.isPropertySignature(decorator) || ts.isPropertyDeclaration(decorator)) && !!decorator.questionToken) {
               Object.defineProperty(memberType, UNDEFINED, { value: true });
             }
             tsFieldTypes[member.getName()] = memberType;
@@ -333,7 +338,7 @@ export const TypeBuilder: {
       // Resolving relative to source file
       if (!importName || importName.startsWith('.')) {
         const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
-          ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
+          ?.find(declaration => ts.getAllJSDocTags(declaration, (node): node is ts.JSDocTag => node.tagName.getText() === 'concrete').length)
           ?.getSourceFile().fileName ?? '';
 
         if (!importName || importName === '.') {
@@ -346,8 +351,9 @@ export const TypeBuilder: {
 
       // Convert name to $Concrete suffix if not provided
       if (!name) {
-        const [decl] = DeclarationUtil.getDeclarations(type).filter(x => ts.isInterfaceDeclaration(x) || ts.isTypeAliasDeclaration(x));
-        name = `${decl.name.text}$Concrete`;
+        const [primaryDeclaration] = DeclarationUtil.getDeclarations(type)
+          .filter(declaration => ts.isInterfaceDeclaration(declaration) || ts.isTypeAliasDeclaration(declaration));
+        name = `${primaryDeclaration.name.text}$Concrete`;
       }
 
       return { key: 'managed', name, importName };

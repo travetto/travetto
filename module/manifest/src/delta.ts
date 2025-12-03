@@ -15,7 +15,7 @@ const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 't
 const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
 const VALID_OUTPUT_TYPE = new Set<ManifestModuleFileType>([...VALID_SOURCE_TYPE, 'typings']);
 
-const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(o: T): K[] } & ObjectConstructor = Object;
+const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(item: T): K[] } & ObjectConstructor = Object;
 
 /**
  * Produce delta for the manifest
@@ -38,47 +38,47 @@ export class ManifestDeltaUtil {
     const root = path.resolve(ctx.workspace.path, ctx.build.outputFolder, left.outputFolder);
     const right = new Set(
       (await ManifestModuleUtil.scanFolder(ctx, root, left.main))
-        .filter(x => {
-          const type = ManifestModuleUtil.getFileType(x);
+        .filter(file => {
+          const type = ManifestModuleUtil.getFileType(file);
           return VALID_SOURCE_TYPE.has(type);
         })
-        .map(x => ManifestModuleUtil.withoutSourceExtension(x.replace(`${root}/`, '')))
+        .map(file => ManifestModuleUtil.withoutSourceExtension(file.replace(`${root}/`, '')))
     );
 
-    for (const el of Object.keys(left.files)) {
-      const output = ManifestModuleUtil.withOutputExtension(`${outputFolder}/${left.outputFolder}/${el}`);
-      const [, , leftTs] = left.files[el];
+    for (const file of Object.keys(left.files)) {
+      const output = ManifestModuleUtil.withOutputExtension(`${outputFolder}/${left.outputFolder}/${file}`);
+      const [, , leftTimestamp] = left.files[file];
       const stat = await fs.stat(output).catch(() => undefined);
-      right.delete(ManifestModuleUtil.withoutSourceExtension(el));
+      right.delete(ManifestModuleUtil.withoutSourceExtension(file));
 
       if (!stat) {
-        add(el, 'added');
+        add(file, 'added');
       } else {
-        const rightTs = this.#getNewest(stat);
-        if (leftTs > rightTs) {
-          add(el, 'changed');
+        const rightTimestamp = this.#getNewest(stat);
+        if (leftTimestamp > rightTimestamp) {
+          add(file, 'changed');
         }
       }
     }
     // Deleted
-    for (const el of right) {
-      add(el, 'removed');
+    for (const file of right) {
+      add(file, 'removed');
     }
     return out;
   }
 
   /**
    * Collapse all files in a module
-   * @param {ManifestModule} m
+   * @param {ManifestModule} mod
    * @returns {}
    */
-  static #flattenModuleFiles(m: ManifestModule): Record<string, ManifestModuleFile> {
+  static #flattenModuleFiles(mod: ManifestModule): Record<string, ManifestModuleFile> {
     const out: Record<string, ManifestModuleFile> = {};
-    for (const key of TypedObject.keys(m.files)) {
+    for (const key of TypedObject.keys(mod.files)) {
       if (!VALID_SOURCE_FOLDERS.has(key)) {
         continue;
       }
-      for (const [name, type, date] of m.files?.[key] ?? []) {
+      for (const [name, type, date] of mod.files?.[key] ?? []) {
         if (VALID_OUTPUT_TYPE.has(type)) {
           out[name] = [name, type, date];
         }
@@ -93,14 +93,14 @@ export class ManifestDeltaUtil {
   static async produceDelta(manifest: ManifestRoot): Promise<DeltaEvent[]> {
     const deltaLeft = Object.fromEntries(
       Object.values(manifest.modules)
-        .map(m => [m.name, { ...m, files: this.#flattenModuleFiles(m) }])
+        .map(mod => [mod.name, { ...mod, files: this.#flattenModuleFiles(mod) }])
     );
 
     const out: DeltaEvent[] = [];
     const outputFolder = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
 
-    for (const lMod of Object.values(deltaLeft)) {
-      out.push(...await this.#deltaModules(manifest, outputFolder, lMod));
+    for (const leftMod of Object.values(deltaLeft)) {
+      out.push(...await this.#deltaModules(manifest, outputFolder, leftMod));
     }
 
     return out;

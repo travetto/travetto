@@ -4,7 +4,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointParameterConfig, EndpointParamLocation } from '../registry/types.ts';
 
-type ParamDecorator = (instance: ClassInstance, property: string | symbol, idx: number) => void;
+type ParamDecorator = (instance: ClassInstance, property: string, idx: number) => void;
 
 /**
  * Define a parameter
@@ -14,7 +14,7 @@ type ParamDecorator = (instance: ClassInstance, property: string | symbol, idx: 
  * @kind decorator
  */
 export function Param(location: EndpointParamLocation, aliasOrConfig: string | Partial<EndpointParameterConfig>): ParamDecorator {
-  return (instance: ClassInstance, property: string | symbol, idx: number): void => {
+  return (instance: ClassInstance, property: string, idx: number): void => {
     const config = typeof aliasOrConfig === 'string' ? {} : aliasOrConfig;
     const cls = getClass(instance);
     if (typeof aliasOrConfig === 'string') {
@@ -62,7 +62,7 @@ export function Body(input: Partial<EndpointParameterConfig> = {}): ParamDecorat
  * @kind decorator
  */
 export function ContextParam() {
-  return (instance: ClassInstance, property: string | symbol): void => {
+  return (instance: ClassInstance, property: string): void => {
     ControllerRegistryIndex.getForRegister(getClass(instance)).register({ contextParams: { [property]: true } });
     ControllerRegistryIndex.bindContextParamsOnPostConstruct(getClass(instance));
   };

@@ -30,7 +30,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     // Was only loading to verify existence (TODO: double-check)
     if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
       (this.#state[test.classId] ??= {})[test.methodName] = test.status;
-      const SuiteCls = SuiteRegistryIndex.getClasses().find(x => x.Ⲑid === test.classId);
+      const SuiteCls = SuiteRegistryIndex.getClasses().find(cls => cls.Ⲑid === test.classId);
       return SuiteCls ? this.computeTotal(SuiteCls) : this.removeClass(test.classId);
     } else {
       return this.removeClass(test.classId);
@@ -52,10 +52,10 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    */
   computeTotal(cls: Class): SuiteResult {
     const suite = SuiteRegistryIndex.getConfig(cls);
-    const total = Object.values(suite.tests).reduce((acc, x) => {
-      const status = this.#state[x.classId][x.methodName] ?? 'unknown';
-      acc[status] += 1;
-      return acc;
+    const total = Object.values(suite.tests).reduce((map, config) => {
+      const status = this.#state[config.classId][config.methodName] ?? 'unknown';
+      map[status] += 1;
+      return map;
     }, { skipped: 0, passed: 0, failed: 0, unknown: 0 });
 
     return {
@@ -76,17 +76,17 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    * Listen for event, process the full event, and if the event is an after test,
    * send a full suite summary
    */
-  onEventDone(e: TestEvent): void {
+  onEventDone(event: TestEvent): void {
     try {
-      if (e.type === 'test' && e.phase === 'after') {
+      if (event.type === 'test' && event.phase === 'after') {
         this.onEvent({
           type: 'suite',
           phase: 'after',
-          suite: this.summarizeSuite(e.test),
+          suite: this.summarizeSuite(event.test),
         });
       }
-    } catch (err) {
-      console.warn('Summarization Error', { error: err });
+    } catch (error) {
+      console.warn('Summarization Error', { error });
     }
   }
 }

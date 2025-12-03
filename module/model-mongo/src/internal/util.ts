@@ -9,7 +9,7 @@ import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
 
 const PointImpl = toConcrete<Point>();
 
-type IdxCfg = CreateIndexesOptions;
+type IdxConfig = CreateIndexesOptions;
 
 /**
  * Converting units to various radians
@@ -31,21 +31,21 @@ export type PlainIdx = Record<string, -1 | 0 | 1>;
  */
 export class MongoUtil {
 
-  static toIndex<T extends ModelType>(f: IndexField<T>): PlainIdx {
+  static toIndex<T extends ModelType>(field: IndexField<T>): PlainIdx {
     const keys = [];
-    while (typeof f !== 'number' && typeof f !== 'boolean' && Object.keys(f)) {
-      const key = TypedObject.keys(f)[0];
-      f = castTo(f[key]);
+    while (typeof field !== 'number' && typeof field !== 'boolean' && Object.keys(field)) {
+      const key = TypedObject.keys(field)[0];
+      field = castTo(field[key]);
       keys.push(key);
     }
-    const rf: number | boolean = castTo(f);
+    const rf: number | boolean = castTo(field);
     return {
       [keys.join('.')]: typeof rf === 'boolean' ? (rf ? 1 : 0) : castTo<-1 | 1 | 0>(rf)
     };
   }
 
-  static uuid(val: string): Binary {
-    return new Binary(Buffer.from(val.replaceAll('-', ''), 'hex'), Binary.SUBTYPE_UUID);
+  static uuid(value: string): Binary {
+    return new Binary(Buffer.from(value.replaceAll('-', ''), 'hex'), Binary.SUBTYPE_UUID);
   }
 
   static idToString(id: string | ObjectId | Binary): string {
@@ -66,84 +66,84 @@ export class MongoUtil {
   /**
    * Build mongo where clause
    */
-  static extractWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, unknown> {
-    if (ModelQueryUtil.has$And(o)) {
-      return { $and: o.$and.map(x => this.extractWhereClause<T>(cls, x)) };
-    } else if (ModelQueryUtil.has$Or(o)) {
-      return { $or: o.$or.map(x => this.extractWhereClause<T>(cls, x)) };
-    } else if (ModelQueryUtil.has$Not(o)) {
-      return { $nor: [this.extractWhereClause<T>(cls, o.$not)] };
+  static extractWhereClause<T>(cls: Class<T>, clause: WhereClause<T>): Record<string, unknown> {
+    if (ModelQueryUtil.has$And(clause)) {
+      return { $and: clause.$and.map(item => this.extractWhereClause<T>(cls, item)) };
+    } else if (ModelQueryUtil.has$Or(clause)) {
+      return { $or: clause.$or.map(item => this.extractWhereClause<T>(cls, item)) };
+    } else if (ModelQueryUtil.has$Not(clause)) {
+      return { $nor: [this.extractWhereClause<T>(cls, clause.$not)] };
     } else {
-      return this.extractSimple(cls, o);
+      return this.extractSimple(cls, clause);
     }
   }
 
   /**/
-  static extractSimple<T>(base: Class<T> | undefined, o: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
+  static extractSimple<T>(base: Class<T> | undefined, item: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
     const fields = base ? SchemaRegistryIndex.getOptional(base)?.getFields() : undefined;
     const out: Record<string, unknown> = {};
-    const sub = o;
+    const sub = item;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;
-      const v: Record<string, unknown> = castTo(sub[key]);
+      const value: Record<string, unknown> = castTo(sub[key]);
       const subField = fields?.[key];
 
-      const isPlain = v && DataUtil.isPlainObject(v);
-      const firstKey = isPlain ? Object.keys(v)[0] : '';
+      const isPlain = value && DataUtil.isPlainObject(value);
+      const firstKey = isPlain ? Object.keys(value)[0] : '';
 
       if (subpath === 'id') {
         if (!firstKey) {
-          out._id = Array.isArray(v) ? v.map(x => this.uuid(x)) : this.uuid(`${v}`);
+          out._id = Array.isArray(value) ? value.map(subValue => this.uuid(subValue)) : this.uuid(`${value}`);
         } else if (firstKey === '$in' || firstKey === '$nin' || firstKey === '$eq' || firstKey === '$ne') {
-          const temp = v[firstKey];
-          out._id = { [firstKey]: Array.isArray(temp) ? temp.map(x => this.uuid(x)) : this.uuid(`${temp}`) };
+          const temp = value[firstKey];
+          out._id = { [firstKey]: Array.isArray(temp) ? temp.map(subValue => this.uuid(subValue)) : this.uuid(`${temp}`) };
         } else {
           throw new AppError('Invalid id query');
         }
-      } else if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.Ⲑid) {
+      } else if ((isPlain && !firstKey.startsWith('$')) || value?.constructor?.Ⲑid) {
         if (recursive) {
-          Object.assign(out, this.extractSimple(subField?.type, v, `${subpath}.`, recursive));
+          Object.assign(out, this.extractSimple(subField?.type, value, `${subpath}.`, recursive));
         } else {
-          out[subpath] = v;
+          out[subpath] = value;
         }
       } else {
         if (firstKey === '$gt' || firstKey === '$lt' || firstKey === '$gte' || firstKey === '$lte') {
-          for (const [sk, sv] of Object.entries(v)) {
-            v[sk] = ModelQueryUtil.resolveComparator(sv);
+          for (const [sk, sv] of Object.entries(value)) {
+            value[sk] = ModelQueryUtil.resolveComparator(sv);
           }
         } else if (firstKey === '$exists' && subField?.array) {
-          const exists = v.$exists;
+          const exists = value.$exists;
           if (!exists) {
-            delete v.$exists;
-            v.$in = [null, []];
+            delete value.$exists;
+            value.$in = [null, []];
           } else {
-            v.$exists = true;
-            v.$nin = [null, []];
+            value.$exists = true;
+            value.$nin = [null, []];
           }
         } else if (firstKey === '$regex') {
-          v.$regex = DataUtil.toRegex(castTo(v.$regex));
-        } else if (firstKey && '$near' in v) {
-          const dist: number = castTo(v.$maxDistance);
-          const distance = dist / RADIANS_TO[(castTo<DistanceUnit>(v.$unit) ?? 'km')];
-          v.$maxDistance = distance;
-          delete v.$unit;
-        } else if (firstKey && '$geoWithin' in v) {
-          const coords: [number, number][] = castTo(v.$geoWithin);
+          value.$regex = DataUtil.toRegex(castTo(value.$regex));
+        } else if (firstKey && '$near' in value) {
+          const dist: number = castTo(value.$maxDistance);
+          const distance = dist / RADIANS_TO[(castTo<DistanceUnit>(value.$unit) ?? 'km')];
+          value.$maxDistance = distance;
+          delete value.$unit;
+        } else if (firstKey && '$geoWithin' in value) {
+          const coords: [number, number][] = castTo(value.$geoWithin);
           const first = coords[0];
           const last = coords.at(-1)!;
           // Connect if not
           if (first[0] !== last[0] || first[1] !== last[1]) {
             coords.push(first);
           }
-          v.$geoWithin = {
+          value.$geoWithin = {
             $geometry: {
               type: 'Polygon',
               coordinates: [coords]
             }
           };
         }
-        out[subpath === 'id' ? '_id' : subpath] = v;
+        out[subpath === 'id' ? '_id' : subpath] = value;
       }
     }
     return out;
@@ -154,10 +154,10 @@ export class MongoUtil {
     const textFields: string[] = [];
     SchemaRegistryIndex.visitFields(cls, (field, path) => {
       if (field.type === PointImpl) {
-        const name = [...path, field].map(x => x.name).join('.');
+        const name = [...path, field].map(schema => schema.name).join('.');
         out.push({ [name]: '2d' });
       } else if (field.specifiers?.includes('text') && (field.specifiers?.includes('long') || field.specifiers.includes('search'))) {
-        const name = [...path, field].map(x => x.name).join('.');
+        const name = [...path, field].map(schema => schema.name).join('.');
         textFields.push(name);
       }
     });
@@ -173,17 +173,17 @@ export class MongoUtil {
 
   static getPlainIndex(idx: IndexConfig<ModelType>): PlainIdx {
     let out: PlainIdx = {};
-    for (const cfg of idx.fields.map(x => this.toIndex(x))) {
-      out = Object.assign(out, cfg);
+    for (const config of idx.fields.map(value => this.toIndex(value))) {
+      out = Object.assign(out, config);
     }
     return out;
   }
 
-  static getIndices<T extends ModelType>(cls: Class<T>, indices: IndexConfig<ModelType>[] = []): [BasicIdx, IdxCfg][] {
+  static getIndices<T extends ModelType>(cls: Class<T>, indices: IndexConfig<ModelType>[] = []): [BasicIdx, IdxConfig][] {
     return [
       ...indices.map(idx => [this.getPlainIndex(idx), (idx.type === 'unique' ? { unique: true } : {})] as const),
-      ...this.getExtraIndices(cls).map((x) => [x, {}] as const)
-    ].map(x => [...x]);
+      ...this.getExtraIndices(cls).map((idx) => [idx, {}] as const)
+    ].map(idx => [...idx]);
   }
 
   static prepareCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor<T | MongoWithId<T>>, query: PageableModelQuery<T>): FindCursor<T> {
@@ -201,7 +201,7 @@ export class MongoUtil {
     }
 
     if (query.sort) {
-      cursor = cursor.sort(Object.assign({}, ...query.sort.map(x => this.extractSimple(cls, x))));
+      cursor = cursor.sort(Object.assign({}, ...query.sort.map(item => this.extractSimple(cls, item))));
     }
 
     cursor = cursor.limit(Math.trunc(query.limit ?? 200));

@@ -4,16 +4,18 @@ import { CommonRegExp } from '../validate/regexp.ts';
 import { CONSTRUCTOR_PROPERTY, SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
-type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
+type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(
+  instance: T, property: K, idx?: TypedPropertyDescriptor<Any> | number
+) => void);
 
-function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
-  return (instanceOrCls: ClassInstance | Class, property: string | symbol, idx?: number | TypedPropertyDescriptor<Any>): void => {
+function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
+  return (instanceOrCls: ClassInstance | Class, property: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
     const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
     const propertyKey = property ?? CONSTRUCTOR_PROPERTY;
     if (typeof idx === 'number') {
-      adapter.registerParameter(propertyKey, idx, ...obj);
+      adapter.registerParameter(propertyKey, idx, ...configs);
     } else {
-      adapter.registerField(propertyKey, ...obj);
+      adapter.registerField(propertyKey, ...configs);
     }
   };
 }
@@ -21,12 +23,12 @@ function input<V>(...obj: Partial<SchemaInputConfig>[]): PropType<V> {
 /**
  * Registering an input
  * @param type The type for the input
- * @param config The input configuration
+ * @param configs The input configuration
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...config: Partial<SchemaInputConfig>[]): PropType<unknown> {
-  return input(type, ...config);
+export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...configs: Partial<SchemaInputConfig>[]): PropType<unknown> {
+  return input(type, ...configs);
 }
 
 /**
@@ -197,7 +199,7 @@ export function Specifier(...specifiers: string[]): PropType<unknown> { return i
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function DiscriminatorField(): ((t: ClassInstance, k: string) => void) {
+export function DiscriminatorField(): ((instance: ClassInstance, property: string) => void) {
   return (instance: ClassInstance, property: string): void => {
     SchemaRegistryIndex.getForRegister(getClass(instance)).register({
       discriminatedBase: true,

@@ -41,15 +41,15 @@ export function createElement<T extends string | Class | JSXComponentFunction<P>
 export function createRootElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
-  const res = createElement(type, props);
+  const node = createElement(type, props);
 
-  Object.assign(res, {
-    prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> {
-      return import('@travetto/email-inky').then(v => v.prepare(castTo(res), loc));
+  Object.assign(node, {
+    prepare(location: EmailTemplateLocation): Promise<EmailTemplateModule> {
+      return import('@travetto/email-inky').then(value => value.prepare(castTo(node), location));
     }
   });
 
-  return res;
+  return node;
 }
 
 export function createFragment<P extends {}>(props: P & JSXProps): JSXElement<typeof JSXFragmentType, P> {
@@ -59,8 +59,8 @@ export function createFragment<P extends {}>(props: P & JSXProps): JSXElement<ty
 export const jsx = createElement;
 export const jsxs = createRootElement;
 export const Fragment = createFragment;
-export function isJSXElement(el: unknown): el is JSXElement {
-  return el !== undefined && el !== null && typeof el === 'object' && JSXRuntimeTag in el;
+export function isJSXElement(value: unknown): value is JSXElement {
+  return value !== undefined && value !== null && typeof value === 'object' && JSXRuntimeTag in value;
 }
 
 createFrag = Fragment;

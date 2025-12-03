@@ -9,7 +9,7 @@ import { Import } from './types/shared.ts';
 import { LiteralUtil } from './util/literal.ts';
 import { DeclarationUtil } from './util/declaration.ts';
 
-const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
+const D_OR_D_TS_EXT_REGEX = /[.]d([.]ts)?$/;
 
 /**
  * Manages imports within a ts.SourceFile
@@ -19,7 +19,7 @@ export class ImportManager {
   #newImports = new Map<string, Import>();
   #imports: Map<string, Import>;
   #idx: Record<string, number> = {};
-  #ids = new Map<string, ts.Identifier>();
+  #identifiers = new Map<string, ts.Identifier>();
   #importName: string;
   #resolver: TransformResolver;
 
@@ -34,26 +34,26 @@ export class ImportManager {
     this.factory = factory;
   }
 
-  #rewriteImportClause(spec: ts.Expression | undefined, clause: ts.ImportClause | undefined): ts.ImportClause | undefined {
-    if (!(spec && clause?.namedBindings && ts.isNamedImports(clause.namedBindings))) {
+  #rewriteImportClause(expr: ts.Expression | undefined, clause: ts.ImportClause | undefined): ts.ImportClause | undefined {
+    if (!(expr && clause?.namedBindings && ts.isNamedImports(clause.namedBindings))) {
       return clause;
     }
 
-    if (spec && ts.isStringLiteral(spec) && !this.#isKnownImport(spec)) {
+    if (expr && ts.isStringLiteral(expr) && !this.#isKnownImport(expr)) {
       return clause;
     }
 
     const bindings = clause.namedBindings;
     const newBindings: ts.ImportSpecifier[] = [];
     // Remove all type only imports
-    for (const el of bindings.elements) {
-      if (!el.isTypeOnly) {
-        const type = this.#resolver.getType(el.name);
+    for (const element of bindings.elements) {
+      if (!element.isTypeOnly) {
+        const type = this.#resolver.getType(element.name);
         const objFlags = DeclarationUtil.getObjectFlags(type);
         const typeFlags = type.getFlags();
         // eslint-disable-next-line no-bitwise
         if (!(objFlags & (ts.SymbolFlags.Type | ts.SymbolFlags.Interface)) || !(typeFlags & ts.TypeFlags.Any)) {
-          newBindings.push(el);
+          newBindings.push(element);
         }
       }
     }
@@ -90,9 +90,9 @@ export class ImportManager {
   /**
    * Normalize module specifier
    */
-  normalizeModuleSpecifier<T extends ts.Expression | undefined>(spec: T): T {
-    if (spec && ts.isStringLiteral(spec) && this.#isKnownImport(spec.text)) {
-      const specText = spec.text.replace(/['"]/g, '');
+  normalizeModuleSpecifier<T extends ts.Expression | undefined>(specifier: T): T {
+    if (specifier && ts.isStringLiteral(specifier) && this.#isKnownImport(specifier.text)) {
+      const specText = specifier.text.replace(/['"]/g, '');
 
       const type = ManifestModuleUtil.getFileType(specText);
       if (type === 'js' || type === 'ts') {
@@ -103,23 +103,23 @@ export class ImportManager {
         return LiteralUtil.fromLiteral(this.factory, `${specText}${ManifestModuleUtil.OUTPUT_EXT}`) as unknown as T;
       }
     }
-    return spec;
+    return specifier;
   }
 
   /**
-   * Produces a unique ID for a given file
+   * Produces a unique identifier for a given file
    */
-  getId(file: string, name?: string): ts.Identifier {
-    if (!this.#ids.has(file)) {
+  getIdentifier(file: string, name?: string): ts.Identifier {
+    if (!this.#identifiers.has(file)) {
       if (name) {
-        this.#ids.set(file, this.factory.createIdentifier(name));
+        this.#identifiers.set(file, this.factory.createIdentifier(name));
       } else {
         const key = path.basename(file, path.extname(file)).replace(/\W+/g, '_');
         const suffix = this.#idx[key] = (this.#idx[key] ?? -1) + 1;
-        this.#ids.set(file, this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`));
+        this.#identifiers.set(file, this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`));
       }
     }
-    return this.#ids.get(file)!;
+    return this.#identifiers.get(file)!;
   }
 
   /**
@@ -134,18 +134,18 @@ export class ImportManager {
 
     // Allow for node classes to be imported directly
     if (/@types\/node\//.test(file)) {
-      file = PackageUtil.resolveImport(file.split('@types/node/')[1].replace(D_OR_D_TS_EXT_RE, ''));
+      file = PackageUtil.resolveImport(file.split('@types/node/')[1].replace(D_OR_D_TS_EXT_REGEX, ''));
     }
 
-    if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {
-      const ident = this.getId(file, name);
-      const uniqueName = ident.text;
+    if (!D_OR_D_TS_EXT_REGEX.test(file) && !this.#newImports.has(file)) {
+      const identifier = this.getIdentifier(file, name);
+      const uniqueName = identifier.text;
 
       if (this.#imports.has(uniqueName)) { // Already imported, be cool
         return this.#imports.get(uniqueName)!;
       }
 
-      const newImport = { path: file, ident };
+      const newImport = { path: file, identifier };
       this.#imports.set(uniqueName, newImport);
       this.#newImports.set(file, newImport);
     }
@@ -179,10 +179,10 @@ export class ImportManager {
     }
 
     try {
-      const importStmts = [...this.#newImports.values()].map(({ path: resolved, ident }) => {
+      const importStmts = [...this.#newImports.values()].map(({ path: resolved, identifier }) => {
         const importStmt = this.factory.createImportDeclaration(
           undefined,
-          this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(ident)),
+          this.factory.createImportClause(undefined, undefined, this.factory.createNamespaceImport(identifier)),
           this.factory.createStringLiteral(resolved)
         );
         return importStmt;
@@ -190,55 +190,55 @@ export class ImportManager {
 
       return CoreUtil.updateSource(this.factory, file, [
         ...importStmts,
-        ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
+        ...file.statements.filter((node: ts.Statement & { remove?: boolean }) => !node.remove) // Exclude culled imports
       ]);
-    } catch (err) { // Missing import
-      if (!(err instanceof Error)) {
-        throw err;
+    } catch (error) { // Missing import
+      if (!(error instanceof Error)) {
+        throw error;
       }
-      const out = new Error(`${err.message} in ${file.fileName.replace(process.cwd(), '.')}`);
-      out.stack = err.stack;
+      const out = new Error(`${error.message} in ${file.fileName.replace(process.cwd(), '.')}`);
+      out.stack = error.stack;
       throw out;
     }
   }
 
-  finalizeImportExportExtension(ret: ts.SourceFile): ts.SourceFile {
+  finalizeImportExportExtension(source: ts.SourceFile): ts.SourceFile {
     const toAdd: ts.Statement[] = [];
 
-    for (const stmt of ret.statements) {
-      if (ts.isExportDeclaration(stmt)) {
-        if (!stmt.isTypeOnly) {
+    for (const statement of source.statements) {
+      if (ts.isExportDeclaration(statement)) {
+        if (!statement.isTypeOnly) {
           toAdd.push(this.factory.updateExportDeclaration(
-            stmt,
-            stmt.modifiers,
-            stmt.isTypeOnly,
-            stmt.exportClause,
-            this.normalizeModuleSpecifier(stmt.moduleSpecifier),
-            stmt.attributes
+            statement,
+            statement.modifiers,
+            statement.isTypeOnly,
+            statement.exportClause,
+            this.normalizeModuleSpecifier(statement.moduleSpecifier),
+            statement.attributes
           ));
         }
-      } else if (ts.isImportDeclaration(stmt)) {
-        if (!stmt.importClause?.isTypeOnly) {
+      } else if (ts.isImportDeclaration(statement)) {
+        if (statement.importClause?.phaseModifier !== ts.SyntaxKind.TypeKeyword) {
           toAdd.push(this.factory.updateImportDeclaration(
-            stmt,
-            stmt.modifiers,
-            this.#rewriteImportClause(stmt.moduleSpecifier, stmt.importClause)!,
-            this.normalizeModuleSpecifier(stmt.moduleSpecifier)!,
-            stmt.attributes
+            statement,
+            statement.modifiers,
+            this.#rewriteImportClause(statement.moduleSpecifier, statement.importClause)!,
+            this.normalizeModuleSpecifier(statement.moduleSpecifier)!,
+            statement.attributes
           ));
         }
       } else {
-        toAdd.push(stmt);
+        toAdd.push(statement);
       }
     }
-    return CoreUtil.updateSource(this.factory, ret, toAdd);
+    return CoreUtil.updateSource(this.factory, source, toAdd);
   }
 
   /**
    * Reset the imports into the source file
    */
-  finalize(src: ts.SourceFile): ts.SourceFile {
-    let node = this.finalizeNewImports(src) ?? src;
+  finalize(source: ts.SourceFile): ts.SourceFile {
+    let node = this.finalizeNewImports(source) ?? source;
     node = this.finalizeImportExportExtension(node) ?? node;
     return node;
   }
@@ -252,8 +252,8 @@ export class ImportManager {
     if (type.importName === this.#importName) {
       return factory.createIdentifier(targetName);
     } else {
-      const { ident } = this.#imports.get(type.importName) ?? this.importFile(type.importName);
-      return factory.createPropertyAccessExpression(ident, targetName);
+      const { identifier } = this.#imports.get(type.importName) ?? this.importFile(type.importName);
+      return factory.createPropertyAccessExpression(identifier, targetName);
     }
   }
 }

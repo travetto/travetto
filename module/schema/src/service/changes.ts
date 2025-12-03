@@ -40,17 +40,17 @@ class $SchemaChangeListener {
 
   /**
    * On schema change, emit the change event for the whole schema
-   * @param cb The function to call on schema change
+   * @param handler The function to call on schema change
    */
-  onSchemaChange(handler: (e: SchemaChangeEvent) => void): void {
+  onSchemaChange(handler: (event: SchemaChangeEvent) => void): void {
     this.#emitter.on('schema', handler);
   }
 
   /**
    * On schema field change, emit the change event for the whole schema
-   * @param cb The function to call on schema field change
+   * @param handler The function to call on schema field change
    */
-  onFieldChange(handler: (e: FieldChangeEvent) => void): void {
+  onFieldChange(handler: (event: FieldChangeEvent) => void): void {
     this.#emitter.on('field', handler);
   }
 
@@ -63,13 +63,13 @@ class $SchemaChangeListener {
 
   /**
    * Track a specific class for dependencies
-   * @param src The target class
+   * @param cls The target class
    * @param parent The parent class
    * @param path The path within the object hierarchy to arrive at the class
    * @param config The configuration or the class
    */
-  trackSchemaDependency(src: Class, parent: Class, path: SchemaFieldConfig[], config: SchemaClassConfig): void {
-    const idValue = src.Ⲑid;
+  trackSchemaDependency(cls: Class, parent: Class, path: SchemaFieldConfig[], config: SchemaClassConfig): void {
+    const idValue = cls.Ⲑid;
     if (!this.#mapping.has(idValue)) {
       this.#mapping.set(idValue, new Map());
     }
@@ -86,13 +86,13 @@ class $SchemaChangeListener {
     const clsId = cls.Ⲑid;
 
     if (this.#mapping.has(clsId)) {
-      const deps = this.#mapping.get(clsId)!;
-      for (const depClsId of deps.keys()) {
-        if (!updates.has(depClsId)) {
-          updates.set(depClsId, { config: deps.get(depClsId)!.config, subs: [] });
+      const dependencies = this.#mapping.get(clsId)!;
+      for (const dependencyClsId of dependencies.keys()) {
+        if (!updates.has(dependencyClsId)) {
+          updates.set(dependencyClsId, { config: dependencies.get(dependencyClsId)!.config, subs: [] });
         }
-        const c = deps.get(depClsId)!;
-        updates.get(depClsId)!.subs.push({ path: [...c.path], fields: changes });
+        const childDependency = dependencies.get(dependencyClsId)!;
+        updates.get(dependencyClsId)!.subs.push({ path: [...childDependency.path], fields: changes });
       }
     }
 
@@ -103,49 +103,49 @@ class $SchemaChangeListener {
 
   /**
    * Emit field level changes in the schema
-   * @param prev The previous class config
-   * @param curr The current class config
+   * @param previous The previous class config
+   * @param current The current class config
    */
-  emitFieldChanges(ev: ChangeEvent<SchemaClassConfig>): void {
-    const prev = 'prev' in ev ? ev.prev : undefined;
-    const curr = 'curr' in ev ? ev.curr : undefined;
+  emitFieldChanges(event: ChangeEvent<SchemaClassConfig>): void {
+    const previous = 'previous' in event ? event.previous : undefined;
+    const current = 'current' in event ? event.current : undefined;
 
-    const prevFields = new Set(Object.keys(prev?.fields ?? {}));
-    const currFields = new Set(Object.keys(curr?.fields ?? {}));
+    const previousFields = new Set(Object.keys(previous?.fields ?? {}));
+    const currentFields = new Set(Object.keys(current?.fields ?? {}));
 
     const changes: ChangeEvent<SchemaFieldConfig>[] = [];
 
-    for (const c of currFields) {
-      if (!prevFields.has(c) && curr) {
-        changes.push({ curr: curr.fields[c], type: 'added' });
+    for (const field of currentFields) {
+      if (!previousFields.has(field) && current) {
+        changes.push({ current: current.fields[field], type: 'added' });
       }
     }
 
-    for (const c of prevFields) {
-      if (!currFields.has(c) && prev) {
-        changes.push({ prev: prev.fields[c], type: 'removing' });
+    for (const field of previousFields) {
+      if (!currentFields.has(field) && previous) {
+        changes.push({ previous: previous.fields[field], type: 'removing' });
       }
     }
 
     // Handle class references changing, but keeping same id
     const compareTypes = (a: Class, b: Class): boolean => a.Ⲑid ? a.Ⲑid === b.Ⲑid : a === b;
 
-    for (const c of currFields) {
-      if (prevFields.has(c) && prev && curr) {
-        const prevSchema = prev.fields[c];
-        const currSchema = curr.fields[c];
+    for (const field of currentFields) {
+      if (previousFields.has(field) && previous && current) {
+        const prevSchema = previous.fields[field];
+        const currSchema = current.fields[field];
         if (
           JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
           !compareTypes(prevSchema.type, currSchema.type)
         ) {
-          changes.push({ prev: prev.fields[c], curr: curr.fields[c], type: 'changed' });
+          changes.push({ previous: previous.fields[field], current: current.fields[field], type: 'changed' });
         }
       }
     }
 
     // Send field changes
-    this.#emitter.emit('field', { cls: curr!.class, changes });
-    this.emitSchemaChanges({ cls: curr!.class, changes });
+    this.#emitter.emit('field', { cls: current!.class, changes });
+    this.emitSchemaChanges({ cls: current!.class, changes });
   }
 }
 

@@ -7,9 +7,9 @@ import { AuthenticationError, AuthContext } from '@travetto/auth';
 
 import { AuthContextInterceptor } from './context.ts';
 
-function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
-  for (const el of rule) {
-    if (!perms.has(el)) {
+function matchPermissionSet(rule: string[], permissions: Set<string>): boolean {
+  for (const permission of rule) {
+    if (!permissions.has(permission)) {
       return false;
     }
   }
@@ -54,7 +54,7 @@ export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig
 
   finalizeConfig({ config }: WebInterceptorContext<WebAuthVerifyConfig>): WebAuthVerifyConfig {
     config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [],
-      x => x.split('|'),
+      item => item.split('|'),
       matchPermissionSet,
     );
     return config;

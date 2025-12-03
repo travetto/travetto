@@ -6,7 +6,9 @@ import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
-const validEnv = (k: string): boolean => IPC_ALLOWED_ENV.has(k) || (!IPC_INVALID_ENV.has(k) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(k) && !/VSCODE/.test(k));
+const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
+  !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
+);
 
 export class CliUtil {
   /**
@@ -51,14 +53,14 @@ export class CliUtil {
       return false;
     }
 
-    const info = await fetch(Env.TRV_CLI_IPC.val!).catch(() => ({ ok: false }));
+    const info = await fetch(Env.TRV_CLI_IPC.value!).catch(() => ({ ok: false }));
 
     if (!info.ok) { // Server not running
       return false;
     }
 
     const env: Record<string, string> = {};
-    const req = {
+    const request = {
       type: `@travetto/cli:${action}`,
       data: {
         name: cmd._cfg!.name,
@@ -69,10 +71,10 @@ export class CliUtil {
         args: process.argv.slice(3),
       }
     };
-    console.log('Triggering IPC request', req);
+    console.log('Triggering IPC request', request);
 
-    Object.entries(process.env).forEach(([k, v]) => validEnv(k) && (env[k] = v!));
-    const sent = await fetch(Env.TRV_CLI_IPC.val!, { method: 'POST', body: JSON.stringify(req) });
+    Object.entries(process.env).forEach(([key, value]) => validEnv(key) && (env[key] = value!));
+    const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSON.stringify(request) });
     return sent.ok;
   }
 
@@ -87,6 +89,6 @@ export class CliUtil {
    * Write data to channel and ensure its flushed before continuing
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
-    return await new Promise(r => process[channel].write(typeof data === 'string' ? data : JSON.stringify(data, null, 2), () => r()));
+    return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data : JSON.stringify(data, null, 2), () => resolve()));
   }
 }

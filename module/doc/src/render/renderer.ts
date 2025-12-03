@@ -20,10 +20,10 @@ const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
 export class DocRenderer {
 
   static async get(file: string, manifest: Pick<ManifestContext, 'workspace'>): Promise<DocRenderer> {
-    const res = await Runtime.importFrom<DocumentShape>(file);
+    const document = await Runtime.importFrom<DocumentShape>(file);
     const pkg = PackageUtil.readPackage(manifest.workspace.path);
     const repoBaseUrl = pkg.travetto?.doc?.baseUrl ?? manifest.workspace.path;
-    return new DocRenderer(res,
+    return new DocRenderer(document,
       new RenderContext(file, repoBaseUrl, path.resolve(pkg.travetto?.doc?.root ?? manifest.workspace.path))
     );
   }
@@ -45,14 +45,14 @@ export class DocRenderer {
     const source = DocFileUtil.readSource(cls);
     if (source) {
       title = (await DocFileUtil.isDecorator(cls.name, source.file)) ? `@${title ?? cls.name}` : (title ?? cls.name);
-      const el = this.#support.createElement('CodeLink', {
+      const node = this.#support.createElement('CodeLink', {
         src: source.file,
         startRe: new RegExp(`(class|function|interface)\\s+(${cls.name.replaceAll('$', '\\$')})`),
         title
       });
       // @ts-expect-error
       const state: RenderState<JSXElementByFn<'CodeLink'>, RenderContext> = {
-        el, props: el.props, recurse: async () => '', context: this.#support, stack: []
+        node, props: node.props, recurse: async () => '', context: this.#support, stack: []
       };
       // @ts-expect-error
       state.createState = (key, props) => this.createState(state, key, props);
@@ -62,26 +62,26 @@ export class DocRenderer {
 
   async #render(
     renderer: RenderProvider<RenderContext>,
-    node: JSXElement[] | JSXElement | string | bigint | object | number | boolean | null | undefined,
+    input: JSXElement[] | JSXElement | string | bigint | object | number | boolean | null | undefined,
     stack: JSXElement[] = []
   ): Promise<string | undefined> {
 
-    if (node === null || node === undefined) {
+    if (input === null || input === undefined) {
       return '';
-    } else if (Array.isArray(node)) {
+    } else if (Array.isArray(input)) {
       const out: string[] = [];
-      for (const el of node) {
-        const sub = await this.#render(renderer, el, stack);
+      for (const node of input) {
+        const sub = await this.#render(renderer, node, stack);
         if (sub) {
           out.push(sub);
         }
       }
       return out.join('');
-    } else if (isJSXElement(node)) {
-      let final: JSXElement = node;
+    } else if (isJSXElement(input)) {
+      let final: JSXElement = input;
       // Render simple element if needed
-      if (typeof node.type === 'function' && node.type !== JSXFragmentType) {
-        const out = castTo<Function>(node.type)(node.props);
+      if (typeof input.type === 'function' && input.type !== JSXFragmentType) {
+        const out = castTo<Function>(input.type)(input.props);
         final = out !== EMPTY_ELEMENT ? out : final;
       }
 
@@ -98,7 +98,7 @@ export class DocRenderer {
         const recurse = () => this.#render(renderer, final.props.children ?? [], [...stack, final]);
         // @ts-expect-error
         const state: RenderState<JSXElement, RenderContext> = {
-          el: final, props: final.props, recurse, stack, context: this.#support
+          node: final, props: final.props, recurse, stack, context: this.#support
         };
         state.createState = (key, props) => this.createState(state, key, props);
         // @ts-expect-error
@@ -108,22 +108,22 @@ export class DocRenderer {
         throw new Error(`Unknown element: ${final.type}`);
       }
     } else {
-      switch (typeof node) {
-        case 'string': return node.replace(/&nbsp;/g, ' ');
+      switch (typeof input) {
+        case 'string': return input.replace(/&nbsp;/g, ' ');
         case 'number':
         case 'bigint':
-        case 'boolean': return `${node}`;
+        case 'boolean': return `${input}`;
         case 'object': {
-          if (node) {
-            return await this.#buildLink(renderer, castTo(node.constructor), node.constructor.name.replace(/^[$]/, ''));
+          if (input) {
+            return await this.#buildLink(renderer, castTo(input.constructor), input.constructor.name.replace(/^[$]/, ''));
           }
           break;
         }
         case 'function': {
-          return await this.#buildLink(renderer, castTo(node));
+          return await this.#buildLink(renderer, castTo(input));
         }
       }
-      throw new Error(`Unknown object type: ${typeof node}`);
+      throw new Error(`Unknown object type: ${typeof input}`);
     }
   }
 
@@ -133,28 +133,28 @@ export class DocRenderer {
     props: JSXElementByFn<K>['props']
     // @ts-expect-error
   ): RenderState<JSXElementByFn<K>, RenderContext> {
-    const el = this.#support.createElement(key, props);
-    return { ...state, el, props: el.props };
+    const node = this.#support.createElement(key, props);
+    return { ...state, node, props: node.props };
   }
 
   /**
    * Render a context given a specific renderer
    * @param renderer
    */
-  async render(fmt: keyof typeof providers): Promise<string> {
-    if (!providers[fmt]) {
-      throw new Error(`Unknown renderer with format: ${fmt}`);
+  async render(format: keyof typeof providers): Promise<string> {
+    if (!providers[format]) {
+      throw new Error(`Unknown renderer with format: ${format}`);
     }
     if (!this.#rootNode) {
       this.#rootNode = (Array.isArray(this.#root.text) || isJSXElement(this.#root.text)) ?
         this.#root.text : await (this.#root.text());
     }
 
-    const text = await this.#render(providers[fmt], this.#rootNode);
+    const text = await this.#render(providers[format], this.#rootNode);
     let cleaned = `${text?.replace(/\n{3,100}/msg, '\n\n').trim()}\n`;
-    if (this.#root.wrap?.[fmt]) {
-      cleaned = this.#root.wrap[fmt](cleaned);
+    if (this.#root.wrap?.[format]) {
+      cleaned = this.#root.wrap[format](cleaned);
     }
-    return providers[fmt].finalize(cleaned, this.#support);
+    return providers[format].finalize(cleaned, this.#support);
   }
 }

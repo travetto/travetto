@@ -5,7 +5,7 @@ const exclude = new Set([
   'nextContainer', 'modifierFlagsCache', 'declaredProperties'
 ]);
 
-const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(o: T): K[] } & ObjectConstructor = Object;
+const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(value: T): K[] } & ObjectConstructor = Object;
 
 /**
  * Utilities for logging typescript nodes
@@ -15,27 +15,27 @@ export class LogUtil {
    * Clean up `ts.Node` contents for logging
    */
   static collapseNodes(all: unknown[]): unknown[] {
-    return all.map(x => this.collapseNode(x));
+    return all.map(value => this.collapseNode(value));
   }
 
   /**
    * Clean up `ts.Node` contents for logging
    */
-  static collapseNode(x: unknown, cache: Set<unknown> = new Set()): unknown {
-    if (!x || !(typeof x === 'object' || typeof x === 'function')) {
-      return x;
+  static collapseNode(value: unknown, cache: Set<unknown> = new Set()): unknown {
+    if (!value || !(typeof value === 'object' || typeof value === 'function')) {
+      return value;
     }
 
-    if (cache.has(x)) {
+    if (cache.has(value)) {
       return;
     } else {
-      cache.add(x);
+      cache.add(value);
     }
 
-    if (Array.isArray(x)) {
-      return x.map(v => this.collapseNode(v, cache));
+    if (Array.isArray(value)) {
+      return value.map(node => this.collapseNode(node, cache));
     } else {
-      const ox = x;
+      const ox = value;
       const out: Record<string, unknown> = {};
       for (const key of TypedObject.keys(ox)) {
         if (ox[key] === null || ox[key] === undefined || Object.getPrototypeOf(ox[key]) === Function.prototype || exclude.has(key)) {

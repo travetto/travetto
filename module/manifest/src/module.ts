@@ -18,8 +18,8 @@ const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
 };
 
 const INDEX_FILES = new Set(
-  ['__index__', '__index', 'index', 'jsx-runtime'].flatMap(f =>
-    ['ts', 'tsx', 'js'].map(ext => `${f}.${ext}`)
+  ['__index__', '__index', 'index', 'jsx-runtime'].flatMap(file =>
+    ['ts', 'tsx', 'js'].map(ext => `${file}.${ext}`)
   )
 );
 
@@ -37,16 +37,16 @@ const SUPPORT_FILE_MAP: Record<string, ManifestModuleRole> = {
   build: 'build'
 };
 
-const SUPPORT_FILE_RE = new RegExp(`^support[/](?<name>${Object.keys(SUPPORT_FILE_MAP).join('|')})[./]`);
+const SUPPORT_FILE_REGEX = new RegExp(`^support[/](?<name>${Object.keys(SUPPORT_FILE_MAP).join('|')})[./]`);
 
 export class ManifestModuleUtil {
 
   static TYPINGS_EXT = '.d.ts';
   static OUTPUT_EXT = '.js';
   static SOURCE_DEF_EXT = '.ts';
-  static SOURCE_EXT_RE = /[.][cm]?[tj]sx?$/;
-  static TYPINGS_EXT_RE = /[.]d[.][cm]?ts$/;
-  static TYPINGS_WITH_MAP_EXT_RE = /[.]d[.][cm]?ts([.]map)?$/;
+  static SOURCE_EXT_REGEX = /[.][cm]?[tj]sx?$/;
+  static TYPINGS_EXT_REGEX = /[.]d[.][cm]?ts$/;
+  static TYPINGS_WITH_MAP_EXT_REGEX = /[.]d[.][cm]?ts([.]map)?$/;
 
   static #scanCache: Record<string, string[]> = {};
 
@@ -58,7 +58,7 @@ export class ManifestModuleUtil {
    * Replace a source file's extension with a given value
    */
   static #pathToExtension(sourceFile: string, ext: string): string {
-    return sourceFile.replace(ManifestModuleUtil.SOURCE_EXT_RE, ext);
+    return sourceFile.replace(ManifestModuleUtil.SOURCE_EXT_REGEX, ext);
   }
 
   /**
@@ -146,7 +146,7 @@ export class ManifestModuleUtil {
    * Get file type for a file name
    */
   static getFileRole(moduleFile: string): ManifestModuleRole | undefined {
-    const matched = SUPPORT_FILE_MAP[moduleFile.match(SUPPORT_FILE_RE)?.groups?.name ?? ''];
+    const matched = SUPPORT_FILE_MAP[moduleFile.match(SUPPORT_FILE_REGEX)?.groups?.name ?? ''];
     if (matched) {
       return matched;
     } else if (moduleFile.startsWith('test/')) {
@@ -199,9 +199,9 @@ export class ManifestModuleUtil {
    */
   static async transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
     const updated = this.#getNewest(await fs.stat(full).catch(() => ({ mtimeMs: 0, ctimeMs: 0 })));
-    const res: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), updated];
+    const moduleFileTuple: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), updated];
     const role = this.getFileRole(moduleFile);
-    return role ? [...res, role] : res;
+    return role ? [...moduleFileTuple, role] : moduleFileTuple;
   }
 
   /**
@@ -234,8 +234,8 @@ export class ManifestModuleUtil {
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
     const pkgs = await PackageModuleVisitor.visit(ctx);
-    const modules = await Promise.all([...pkgs].map(x => this.describeModule(ctx, x)));
-    return Object.fromEntries(modules.map(m => [m.name, m]));
+    const modules = await Promise.all([...pkgs].map(mod => this.describeModule(ctx, mod)));
+    return Object.fromEntries(modules.map(mod => [mod.name, mod]));
   }
 
   /**

@@ -4,7 +4,7 @@ import { EndpointConfig, EndpointFunctionDescriptor } from '../registry/types.ts
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 
-type EndpointFunctionDecorator = <T>(instance: T, property: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
+type EndpointFunctionDecorator = <T>(instance: T, property: string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
 
 type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
 
@@ -12,7 +12,7 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  * Generic Endpoint Decorator
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
-  return function (instance: ClassInstance, property: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
+  return function (instance: ClassInstance, property: string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
     ControllerRegistryIndex.getForRegister(getClass(instance)).registerEndpoint(property, { methodName: property }, config);
     return descriptor;
   };
@@ -25,9 +25,9 @@ function HttpEndpoint(method: HttpMethod, path: string): EndpointFunctionDecorat
     allowsBody,
     cacheable,
     httpMethod: method,
-    responseFinalizer: v => {
-      v.context.httpStatusCode ??= (v.body === null || v.body === undefined || v.body === '') ? emptyStatusCode : 200;
-      return v;
+    responseFinalizer: value => {
+      value.context.httpStatusCode ??= (value.body === null || value.body === undefined || value.body === '') ? emptyStatusCode : 200;
+      return value;
     }
   });
 }

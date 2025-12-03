@@ -16,39 +16,43 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
    * Define parent change source, generally will be the class source
    */
   constructor(classSource: ChangeSource<Class>) {
-    classSource.on(e => this.onClassEvent(e));
+    classSource.on(event => this.onClassEvent(event));
   }
 
   async init(): Promise<void> { }
 
-  emit(ev: ChangeEvent<[Class, Function]>): void {
-    this.#emitter.emit('change', ev);
+  emit(event: ChangeEvent<[Class, Function]>): void {
+    this.#emitter.emit('change', event);
   }
 
   /**
    * On a class being emitted, check methods
    */
-  onClassEvent(e: ChangeEvent<Class>): void {
-    const next = (e.type !== 'removing' ? describeFunction(e.curr!)?.methods : null) ?? {};
-    const prev = (e.type !== 'added' ? describeFunction(e.prev!)?.methods : null) ?? {};
+  onClassEvent(event: ChangeEvent<Class>): void {
+    const next = (event.type !== 'removing' ? describeFunction(event.current!)?.methods : null) ?? {};
+    const previous = (event.type !== 'added' ? describeFunction(event.previous!)?.methods : null) ?? {};
 
     /**
      * Go through each method, comparing hashes.  To see added/removed and changed
      */
-    for (const k of Object.keys(next)) {
-      if ((!prev[k] || !('prev' in e)) && e.type !== 'removing') {
-        this.emit({ type: 'added', curr: [e.curr!, e.curr!.prototype[k]] });
-      } else if (next[k].hash !== prev[k].hash && e.type === 'changed') {
-        // FIXME: Why is e.prev undefined sometimes?
-        this.emit({ type: 'changed', curr: [e.curr, e.curr.prototype[k]], prev: [e.prev, e.prev.prototype[k]] });
+    for (const key of Object.keys(next)) {
+      if ((!previous[key] || !('previous' in event)) && event.type !== 'removing') {
+        this.emit({ type: 'added', current: [event.current!, event.current!.prototype[key]] });
+      } else if (next[key].hash !== previous[key].hash && event.type === 'changed') {
+        // FIXME: Why is event.previous undefined sometimes?
+        this.emit({
+          type: 'changed',
+          current: [event.current, event.current.prototype[key]],
+          previous: [event.previous, event.previous.prototype[key]]
+        });
       } else {
         // Method Unchanged
       }
     }
 
-    for (const k of Object.keys(prev)) {
-      if (!next[k] && e.type !== 'added') {
-        this.emit({ type: 'removing', prev: [e.prev, e.prev.prototype[k]] });
+    for (const key of Object.keys(previous)) {
+      if (!next[key] && event.type !== 'added') {
+        this.emit({ type: 'removing', previous: [event.previous, event.previous.prototype[key]] });
       }
     }
   }

@@ -31,8 +31,8 @@ export class Init {
   @InjectableFactory({
     primary: true
   })
-  static getModelSource(conf: S3ModelConfig) {
-    return new S3ModelService(conf);
+  static getModelSource(config: S3ModelConfig) {
+    return new S3ModelService(config);
   }
 }
 ```

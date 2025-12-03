@@ -54,13 +54,13 @@ class SampleRegistryAdapter implements RegistryAdapter<Group> {
     this.#class = cls;
   }
 
-  register(...data: Partial<Partial<Group>>[]): Group {
-    for (const d of data) {
+  register(...groups: Partial<Partial<Group>>[]): Group {
+    for (const group of groups) {
       Object.assign(this.#config, {
-        ...d,
+        ...group,
         children: [
           ...(this.#config?.children ?? []),
-          ...(d.children ?? [])
+          ...(group.children ?? [])
         ]
       });
     }
@@ -115,12 +115,12 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
     const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
     const sourceFile = RuntimeIndex.getSourceFile(importFile);
 
-    let prev = new Map<string, Class>();
+    let previous = new Map<string, Class>();
     if (this.#classes.has(sourceFile)) {
-      prev = new Map(this.#classes.get(sourceFile)!.entries());
+      previous = new Map(this.#classes.get(sourceFile)!.entries());
     }
 
-    const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
+    const keys = new Set([...Array.from(previous.keys()), ...Array.from(next.keys())]);
 
     if (!this.#classes.has(sourceFile)) {
       this.#classes.set(sourceFile, new Map());
@@ -129,22 +129,22 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
     let changes = 0;
 
     // Determine delta based on the various classes (if being added, removed or updated)
-    for (const k of keys) {
-      if (!next.has(k)) {
+    for (const key of keys) {
+      if (!next.has(key)) {
         changes += 1;
-        this.emit({ type: 'removing', prev: prev.get(k)! });
-        this.#classes.get(sourceFile)!.delete(k);
+        this.emit({ type: 'removing', previous: previous.get(key)! });
+        this.#classes.get(sourceFile)!.delete(key);
       } else {
-        this.#classes.get(sourceFile)!.set(k, next.get(k)!);
-        if (!prev.has(k)) {
+        this.#classes.get(sourceFile)!.set(key, next.get(key)!);
+        if (!previous.has(key)) {
           changes += 1;
-          this.emit({ type: 'added', curr: next.get(k)! });
+          this.emit({ type: 'added', current: next.get(key)! });
         } else {
-          const prevHash = describeFunction(prev.get(k)!)?.hash;
-          const nextHash = describeFunction(next.get(k)!)?.hash;
+          const prevHash = describeFunction(previous.get(key)!)?.hash;
+          const nextHash = describeFunction(next.get(key)!)?.hash;
           if (prevHash !== nextHash) {
             changes += 1;
-            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
+            this.emit({ type: 'changed', current: next.get(key)!, previous: previous.get(key)! });
           }
         }
       }

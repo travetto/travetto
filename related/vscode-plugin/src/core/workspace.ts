@@ -17,12 +17,12 @@ export class Workspace {
   static #manifestContext: ManifestContext;
   static #workspaceIndex: ManifestIndex;
   static #compilerState: CompilerStateType = 'closed';
-  static #compilerStateListeners: ((ev: CompilerStateType) => void)[] = [];
+  static #compilerStateListeners: ((event: CompilerStateType) => void)[] = [];
   static #importToFile: Record<string, string | undefined> = {};
 
   static readonly folder: vscode.WorkspaceFolder;
 
-  static onCompilerState(handler: (ev: CompilerStateType) => void): void {
+  static onCompilerState(handler: (event: CompilerStateType) => void): void {
     this.#compilerStateListeners.push(handler);
     handler(this.compilerState);
   }
@@ -30,7 +30,7 @@ export class Workspace {
   static set compilerState(state: CompilerStateType) {
     if (state !== this.#compilerState) {
       this.#compilerState = state;
-      for (const el of this.#compilerStateListeners) { el(this.compilerState); }
+      for (const listener of this.#compilerStateListeners) { listener(this.compilerState); }
     }
   }
 
@@ -85,20 +85,20 @@ export class Workspace {
   }
 
   /** Find full path for a resource */
-  static getAbsoluteResource(rel: string): string {
-    return this.#context.asAbsolutePath(rel);
+  static getAbsoluteResource(relativeFile: string): string {
+    return this.#context.asAbsolutePath(relativeFile);
   }
 
   /** See if an entity is an editor */
-  static isEditor(o: unknown): o is vscode.TextEditor {
-    return !!o && typeof o === 'object' && 'document' in o;
+  static isEditor(value: unknown): value is vscode.TextEditor {
+    return !!value && typeof value === 'object' && 'document' in value;
   }
 
   /** Get the editor for a doc */
   static getEditor(doc: vscode.TextDocument): vscode.TextEditor | undefined {
-    for (const e of vscode.window.visibleTextEditors) {
-      if (e.document === doc) {
-        return e;
+    for (const editor of vscode.window.visibleTextEditors) {
+      if (editor.document === doc) {
+        return editor;
       }
     }
   }
@@ -108,13 +108,13 @@ export class Workspace {
     await vscode.window.withProgress({
       location: vscode.ProgressLocation.Notification, title: text, cancellable: true,
     }, async (_, token) => {
-      const ctrl = new AbortController();
-      token.onCancellationRequested(() => ctrl.abort());
-      await timers.setTimeout(duration, undefined, { signal: ctrl.signal }).catch(() => { });
+      const controller = new AbortController();
+      token.onCancellationRequested(() => controller.abort());
+      await timers.setTimeout(duration, undefined, { signal: controller.signal }).catch(() => { });
     });
   }
 
-  static reloadManifest() {
+  static reloadManifest(): void {
     this.workspaceIndex.reinitForModule(this.workspaceIndex.mainModule.name);
   }
 

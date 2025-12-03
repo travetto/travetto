@@ -27,7 +27,7 @@ export class PackDockerCommand extends BasePackCommand {
   dockerName: string;
   /**  Docker Runtime user */
   @CliFlag({ short: 'ru', full: 'runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
-  dockerRuntimeUserSrc?: string;
+  dockerRuntimeUser?: string;
   /**  Docker Runtime Packages */
   @CliFlag({ short: 'rp', full: 'runtime-package', envVars: ['PACK_DOCKER_RUNTIME_PACKAGES'] })
   dockerRuntimePackages: string[] = [];
@@ -85,15 +85,15 @@ export class PackDockerCommand extends BasePackCommand {
     this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module || undefined);
 
     // Finalize user/group and ids
-    const [userOrUid, groupOrGid = userOrUid] = (this.dockerRuntimeUserSrc ?? '').split(':');
-    const groupIsNum = /^\d+$/.test(groupOrGid);
-    const userIsNum = /^\d+$/.test(userOrUid);
+    const [userOrUserId, groupOrGroupId = userOrUserId] = (this.dockerRuntimeUser ?? '').split(':');
+    const groupIsNumber = /^\d+$/.test(groupOrGroupId);
+    const userIsNumber = /^\d+$/.test(userOrUserId);
 
-    const uid = userIsNum ? +userOrUid : this.defaultUserId;
-    const gid = groupIsNum ? +groupOrGid : this.defaultUserId;
-    const group = (!groupIsNum ? groupOrGid : undefined) || this.defaultUser;
-    const user = (!userIsNum ? userOrUid : undefined) || this.defaultUser;
-    this.dockerRuntime = { user, uid, group, gid, folder: `/${this.appFolder}`, packages: this.dockerRuntimePackages };
+    const userId = userIsNumber ? +userOrUserId : this.defaultUserId;
+    const groupId = groupIsNumber ? +groupOrGroupId : this.defaultUserId;
+    const group = (!groupIsNumber ? groupOrGroupId : undefined) || this.defaultUser;
+    const user = (!userIsNumber ? userOrUserId : undefined) || this.defaultUser;
+    this.dockerRuntime = { user, userId, group, groupId, folder: `/${this.appFolder}`, packages: this.dockerRuntimePackages };
 
     if (this.dockerStageOnly) {
       if (this.dockerRegistry) {

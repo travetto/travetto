@@ -10,8 +10,8 @@ type BindConfig = {
   filterValue?: (value: unknown, input: SchemaInputConfig) => boolean;
 };
 
-function isInstance<T>(o: unknown): o is T {
-  return !!o && !DataUtil.isPrimitive(o);
+function isInstance<T>(value: unknown): value is T {
+  return !!value && !DataUtil.isPrimitive(value);
 }
 
 /**
@@ -21,24 +21,24 @@ export class BindUtil {
 
   /**
    * Coerce a value to match the field config type
-   * @param conf The field config to coerce to
-   * @param val The provided value
+   * @param config The field config to coerce to
+   * @param value The provided value
    */
-  static #coerceType<T>(conf: SchemaInputConfig, val: unknown): T | null | undefined {
-    if (conf.type?.bindSchema) {
-      val = conf.type.bindSchema(val);
+  static #coerceType<T>(config: SchemaInputConfig, value: unknown): T | null | undefined {
+    if (config.type?.bindSchema) {
+      value = config.type.bindSchema(value);
     } else {
-      val = DataUtil.coerceType(val, conf.type, false);
+      value = DataUtil.coerceType(value, config.type, false);
 
-      if (conf.type === Number && conf.precision && typeof val === 'number') {
-        if (conf.precision[1]) { // Supports decimal
-          val = +val.toFixed(conf.precision[1]);
+      if (config.type === Number && config.precision && typeof value === 'number') {
+        if (config.precision[1]) { // Supports decimal
+          value = +value.toFixed(config.precision[1]);
         } else { // 0 digits
-          val = Math.trunc(val);
+          value = Math.trunc(value);
         }
       }
     }
-    return castTo(val);
+    return castTo(value);
   }
 
   /**
@@ -46,22 +46,22 @@ export class BindUtil {
    *
    * This will convert `{ 'a.b[3].c[age]': 5 }` => `{ a : { b : [,,,{ c: { age: 5 }}]}}`
    *
-   * @param obj The object to convert
+   * @param input The object to convert
    */
-  static expandPaths(obj: Record<string, unknown>): Record<string, unknown> {
+  static expandPaths(input: Record<string, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = {};
-    for (const k of Object.keys(obj)) {
-      const objK = obj[k];
-      const val = DataUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
-      const parts = k.split('.');
+    for (const property of Object.keys(input)) {
+      const valueInput = input[property];
+      const value = DataUtil.isPlainObject(valueInput) ? this.expandPaths(valueInput) : valueInput;
+      const parts = property.split('.');
       const last = parts.pop()!;
       let sub = out;
       while (parts.length > 0) {
         const part = parts.shift()!;
-        const partArr = part.indexOf('[') > 0;
+        const partArrayIndex = part.indexOf('[') > 0;
         const name = part.split(/[^A-Za-z_0-9]/)[0];
-        const idx = partArr ? part.split(/[\[\]]/)[1] : '';
-        const key = partArr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
+        const idx = partArrayIndex ? part.split(/[\[\]]/)[1] : '';
+        const key = partArrayIndex ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
 
         if (!(name in sub)) {
           sub[name] = typeof key === 'number' ? [] : {};
@@ -77,10 +77,10 @@ export class BindUtil {
       const arr = last.indexOf('[') > 0;
 
       if (!arr) {
-        if (sub[last] && DataUtil.isPlainObject(val)) {
-          sub[last] = DataUtil.deepAssign(sub[last], val, 'coerce');
+        if (sub[last] && DataUtil.isPlainObject(value)) {
+          sub[last] = DataUtil.deepAssign(sub[last], value, 'coerce');
         } else {
-          sub[last] = val;
+          sub[last] = value;
         }
       } else {
         const name = last.split(/[^A-Za-z_0-9]/)[0];
@@ -93,10 +93,10 @@ export class BindUtil {
         if (key === undefined) {
           key = arrSub.length;
         }
-        if (arrSub[key] && DataUtil.isPlainObject(val) && DataUtil.isPlainObject(arrSub[key])) {
-          arrSub[key] = DataUtil.deepAssign(arrSub[key], val, 'coerce');
+        if (arrSub[key] && DataUtil.isPlainObject(value) && DataUtil.isPlainObject(arrSub[key])) {
+          arrSub[key] = DataUtil.deepAssign(arrSub[key], value, 'coerce');
         } else {
-          arrSub[key] = val;
+          arrSub[key] = value;
         }
       }
     }
@@ -105,8 +105,8 @@ export class BindUtil {
 
   /**
    * Convert full object with nesting, into flat set of keys
-   * @param conf The object to flatten the paths for
-   * @param val The starting prefix
+   * @param data The object to flatten the paths for
+   * @param prefix The starting prefix
    */
   static flattenPaths<V extends string = string>(data: Record<string, unknown>, prefix: string = ''): Record<string, V> {
     const out: Record<string, V> = {};
@@ -117,11 +117,11 @@ export class BindUtil {
         );
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
-          const v = value[i];
-          if (DataUtil.isPlainObject(v)) {
-            Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`));
+          const element = value[i];
+          if (DataUtil.isPlainObject(element)) {
+            Object.assign(out, this.flattenPaths(element, `${pre}[${i}].`));
           } else {
-            out[`${pre}[${i}]`] = v ?? '';
+            out[`${pre}[${i}]`] = element ?? '';
           }
         }
       } else {
@@ -135,12 +135,12 @@ export class BindUtil {
    * Bind data to the schema for a class, with an optional view
    * @param cls The schema class to bind against
    * @param data The provided data to bind
-   * @param cfg The bind configuration
+   * @param config The bind configuration
    */
-  static bindSchema<T>(cls: Class<T>, data?: undefined, cfg?: BindConfig): undefined;
-  static bindSchema<T>(cls: Class<T>, data?: null, cfg?: BindConfig): null;
-  static bindSchema<T>(cls: Class<T>, data?: object | T, cfg?: BindConfig): T;
-  static bindSchema<T>(cls: Class<T>, data?: object | T, cfg?: BindConfig): T | null | undefined {
+  static bindSchema<T>(cls: Class<T>, data?: undefined, config?: BindConfig): undefined;
+  static bindSchema<T>(cls: Class<T>, data?: null, config?: BindConfig): null;
+  static bindSchema<T>(cls: Class<T>, data?: object | T, config?: BindConfig): T;
+  static bindSchema<T>(cls: Class<T>, data?: object | T, config?: BindConfig): T | null | undefined {
     if (data === null || data === undefined) {
       return data;
     }
@@ -150,13 +150,13 @@ export class BindUtil {
       const resolvedCls = SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data));
       const instance = classConstruct<T & { type?: string }>(resolvedCls);
 
-      for (const k of TypedObject.keys(instance)) { // Do not retain undefined fields
-        if (instance[k] === undefined) {
-          delete instance[k];
+      for (const key of TypedObject.keys(instance)) { // Do not retain undefined fields
+        if (instance[key] === undefined) {
+          delete instance[key];
         }
       }
 
-      const out = this.bindSchemaToObject(resolvedCls, instance, data, cfg);
+      const out = this.bindSchemaToObject(resolvedCls, instance, data, config);
       SchemaRegistryIndex.get(resolvedCls).ensureInstanceTypeField(out);
       return out;
     }
@@ -165,35 +165,35 @@ export class BindUtil {
   /**
    * Bind the schema to the object
    * @param cls The schema class
-   * @param obj The target object (instance of cls)
+   * @param input The target object (instance of cls)
    * @param data The data to bind
-   * @param cfg The bind configuration
+   * @param config The bind configuration
    */
-  static bindSchemaToObject<T>(cls: Class<T>, obj: T, data?: object, cfg: BindConfig = {}): T {
-    const view = cfg.view; // Does not convey
-    delete cfg.view;
+  static bindSchemaToObject<T>(cls: Class<T>, input: T, data?: object, config: BindConfig = {}): T {
+    const view = config.view; // Does not convey
+    delete config.view;
 
     if (!!data && isInstance<T>(data)) {
       const adapter = SchemaRegistryIndex.get(cls);
-      const conf = adapter.get();
+      const schemaConfig = adapter.get();
 
       // If no configuration
-      if (!conf) {
-        for (const k of TypedObject.keys(data)) {
-          obj[k] = data[k];
+      if (!schemaConfig) {
+        for (const key of TypedObject.keys(data)) {
+          input[key] = data[key];
         }
       } else {
-        let schema: SchemaFieldMap = conf.fields;
+        let schema: SchemaFieldMap = schemaConfig.fields;
         if (view) {
           schema = adapter.getFields(view);
           if (!schema) {
-            throw new Error(`View not found: ${view.toString()}`);
+            throw new Error(`View not found: ${view}`);
           }
         }
 
         for (const [schemaFieldName, field] of Object.entries(schema)) {
           let inboundField: string | undefined = undefined;
-          if (field.access === 'readonly' || cfg.filterInput?.(field) === false) {
+          if (field.access === 'readonly' || config.filterInput?.(field) === false) {
             continue; // Skip trying to write readonly fields
           }
           if (schemaFieldName in data) {
@@ -211,40 +211,40 @@ export class BindUtil {
             continue;
           }
 
-          let v: unknown = data[castKey<T>(inboundField)];
+          let value: unknown = data[castKey<T>(inboundField)];
 
           // Filtering values
-          if (cfg.filterValue && !cfg.filterValue(v, field)) {
+          if (config.filterValue && !config.filterValue(value, field)) {
             continue;
           }
 
-          if (v !== undefined && v !== null) {
+          if (value !== undefined && value !== null) {
             // Ensure its an array
-            if (!Array.isArray(v) && field.array) {
-              if (typeof v === 'string' && v.includes(',')) {
-                v = v.split(/,/).map(x => x.trim());
+            if (!Array.isArray(value) && field.array) {
+              if (typeof value === 'string' && value.includes(',')) {
+                value = value.split(/,/).map(part => part.trim());
               } else {
-                v = [v];
+                value = [value];
               }
             }
 
             if (SchemaRegistryIndex.has(field.type)) {
-              if (field.array && Array.isArray(v)) {
-                v = v.map(el => this.bindSchema(field.type, el, cfg));
+              if (field.array && Array.isArray(value)) {
+                value = value.map(item => this.bindSchema(field.type, item, config));
               } else {
-                v = this.bindSchema(field.type, v, cfg);
+                value = this.bindSchema(field.type, value, config);
               }
-            } else if (field.array && Array.isArray(v)) {
-              v = v.map(el => this.#coerceType(field, el));
+            } else if (field.array && Array.isArray(value)) {
+              value = value.map(item => this.#coerceType(field, item));
             } else {
-              v = this.#coerceType(field, v);
+              value = this.#coerceType(field, value);
             }
           }
 
-          obj[castKey<T>(schemaFieldName)] = castTo(v);
+          input[castKey<T>(schemaFieldName)] = castTo(value);
 
           if (field.accessor) {
-            Object.defineProperty(obj, schemaFieldName, {
+            Object.defineProperty(input, schemaFieldName, {
               ...adapter.getAccessorDescriptor(schemaFieldName),
               enumerable: true
             });
@@ -253,40 +253,40 @@ export class BindUtil {
       }
     }
 
-    return obj;
+    return input;
   }
 
   /**
    * Coerce field to type
-   * @param cfg
-   * @param val
+   * @param config
+   * @param value
    * @param applyDefaults
    * @returns
    */
-  static coerceInput(cfg: SchemaInputConfig, val: unknown, applyDefaults = false): unknown {
-    if ((val === undefined || val === null) && applyDefaults) {
-      val = Array.isArray(cfg.default) ? cfg.default.slice(0) : cfg.default;
+  static coerceInput(config: SchemaInputConfig, value: unknown, applyDefaults = false): unknown {
+    if ((value === undefined || value === null) && applyDefaults) {
+      value = Array.isArray(config.default) ? config.default.slice(0) : config.default;
     }
-    if (cfg.required?.active === false && (val === undefined || val === null)) {
-      return val;
+    if (config.required?.active === false && (value === undefined || value === null)) {
+      return value;
     }
-    const complex = SchemaRegistryIndex.has(cfg.type);
-    const bindCfg: BindConfig | undefined = (complex && 'view' in cfg && typeof cfg.view === 'string') ? { view: cfg.view } : undefined;
-    if (cfg.array) {
-      const valArr = !Array.isArray(val) ? [val] : val;
+    const complex = SchemaRegistryIndex.has(config.type);
+    const bindConfig: BindConfig | undefined = (complex && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
+    if (config.array) {
+      const subValue = !Array.isArray(value) ? [value] : value;
       if (complex) {
-        val = valArr.map(x => this.bindSchema(cfg.type, x, bindCfg));
+        value = subValue.map(item => this.bindSchema(config.type, item, bindConfig));
       } else {
-        val = valArr.map(x => DataUtil.coerceType(x, cfg.type, false));
+        value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
       if (complex) {
-        val = this.bindSchema(cfg.type, val, bindCfg);
+        value = this.bindSchema(config.type, value, bindConfig);
       } else {
-        val = DataUtil.coerceType(val, cfg.type, false);
+        value = DataUtil.coerceType(value, config.type, false);
       }
     }
-    return val;
+    return value;
   }
 
   /**
@@ -298,8 +298,8 @@ export class BindUtil {
   static coerceParameters(fields: SchemaParameterConfig[], params: unknown[], applyDefaults = true): unknown[] {
     params = [...params];
     // Coerce types
-    for (const el of fields) {
-      params[el.index!] = this.coerceInput(el, params[el.index!], applyDefaults);
+    for (const field of fields) {
+      params[field.index!] = this.coerceInput(field, params[field.index!], applyDefaults);
     }
     return params;
   }
@@ -311,7 +311,7 @@ export class BindUtil {
    * @param params
    * @returns
    */
-  static coerceMethodParams<T>(cls: Class<T>, method: string | symbol, params: unknown[], applyDefaults = true): unknown[] {
+  static coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = true): unknown[] {
     const paramConfigs = SchemaRegistryIndex.get(cls).getMethod(method).parameters;
     return this.coerceParameters(paramConfigs, params, applyDefaults);
   }

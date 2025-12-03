@@ -7,7 +7,7 @@ import { RuntimeIndex } from '@travetto/runtime';
 export const text = async () => {
 
   const output = (await fs.readFile(RuntimeIndex.getFromImport('@travetto/transformer/doc/upper')!.outputFile, 'utf8'))
-    .replace(/\b(Test|name|age|dob|computeAge)\b/g, p => p.toUpperCase());
+    .replace(/\b(Test|name|age|dob|computeAge)\b/g, value => value.toUpperCase());
 
   return <>
     <c.StdHeader />

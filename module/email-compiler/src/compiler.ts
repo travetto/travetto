@@ -23,14 +23,14 @@ export class EmailCompiler {
   /**
    * Grab list of all available templates
    */
-  static findAllTemplates(mod?: string): string[] {
+  static findAllTemplates(moduleName?: string): string[] {
     return RuntimeIndex
       .find({
-        module: m => !mod ? m.roles.includes('std') : mod === m.name,
-        folder: f => f === 'support',
-        file: f => EmailCompileUtil.isTemplateFile(f.sourceFile)
+        module: mod => !moduleName ? mod.roles.includes('std') : moduleName === mod.name,
+        folder: folder => folder === 'support',
+        file: file => EmailCompileUtil.isTemplateFile(file.sourceFile)
       })
-      .map(x => x.sourceFile);
+      .map(file => file.sourceFile);
   }
 
   /**
@@ -52,14 +52,14 @@ export class EmailCompiler {
   /**
    * Write template to file
    */
-  static async writeTemplate(file: string, msg: EmailCompiled): Promise<void> {
+  static async writeTemplate(file: string, message: EmailCompiled): Promise<void> {
     const outs = this.getOutputFiles(file);
-    await Promise.all(TypedObject.keys(outs).map(async k => {
-      if (msg[k]) {
-        const content = MailUtil.buildBrand(file, msg[k], 'trv email:compile');
-        await BinaryUtil.bufferedFileWrite(outs[k], content);
+    await Promise.all(TypedObject.keys(outs).map(async key => {
+      if (message[key]) {
+        const content = MailUtil.buildBrand(file, message[key], 'trv email:compile');
+        await BinaryUtil.bufferedFileWrite(outs[key], content);
       } else {
-        await fs.rm(outs[k], { force: true }); // Remove file if data not provided
+        await fs.rm(outs[key], { force: true }); // Remove file if data not provided
       }
     }));
   }
@@ -68,8 +68,8 @@ export class EmailCompiler {
    * Compile a file given a resource provider
    */
   static async compile(file: string): Promise<EmailCompiled> {
-    const tpl = await this.loadTemplate(file);
-    const compiled = await EmailCompileUtil.compile(tpl);
+    const template = await this.loadTemplate(file);
+    const compiled = await EmailCompileUtil.compile(template);
     await this.writeTemplate(file, compiled);
     return compiled;
   }
@@ -79,7 +79,7 @@ export class EmailCompiler {
    */
   static async compileAll(mod?: string): Promise<string[]> {
     const keys = this.findAllTemplates(mod);
-    await Promise.all(keys.map(src => this.compile(src)));
+    await Promise.all(keys.map(key => this.compile(key)));
     return keys;
   }
 
@@ -89,16 +89,16 @@ export class EmailCompiler {
   static async * watchCompile(signal?: AbortSignal): AsyncIterable<string> {
     // Watch template files
     for await (const { file, action } of watchCompiler({ signal })) {
-      const src = RuntimeIndex.getEntry(file);
-      if (!src || !EmailCompileUtil.isTemplateFile(src.sourceFile) || action === 'delete') {
+      const entry = RuntimeIndex.getEntry(file);
+      if (!entry || !EmailCompileUtil.isTemplateFile(entry.sourceFile) || action === 'delete') {
         continue;
       }
       try {
         await this.compile(file);
         console.log('Successfully compiled template', { changed: [file] });
         yield file;
-      } catch (err) {
-        console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
+      } catch (error) {
+        console.error(`Error in compiling ${file}`, error && error instanceof Error ? error.message : `${error}`);
       }
     }
   }

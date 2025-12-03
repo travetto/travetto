@@ -64,8 +64,8 @@ const Style: {
   }
 };
 
-function isBatchError(o?: Error): o is Error & { details: { errors: (Error | string)[] } } {
-  return !!o && o instanceof Error && 'errors' in o;
+function isBatchError(value?: Error): value is Error & { details: { errors: (Error | string)[] } } {
+  return !!value && value instanceof Error && 'errors' in value;
 }
 
 /**
@@ -87,7 +87,7 @@ export class Decorations {
     if (isBatchError(error)) {
       title = error.message;
       const messages = error.details.errors
-        .map(x => typeof x === 'string' ? x : x.message);
+        .map(subError => typeof subError === 'string' ? subError : subError.message);
 
       suffix = `(${title}) ${messages.join(', ')}`;
       if (suffix.length > 120) {
@@ -106,16 +106,16 @@ export class Decorations {
         suffix = title;
       }
 
-      const getVal = (val: unknown): string => {
+      const getValue = (value: unknown): string => {
         try {
-          return util.inspect(JSON.parse(`${val}`), false, 10).replace(/\n/g, '  \n\t');
+          return util.inspect(JSON.parse(`${value}`), false, 10).replace(/\n/g, '  \n\t');
         } catch {
-          return `${val}`;
+          return `${value}`;
         }
       };
 
       if (/equal/i.test(assertion.operator!)) {
-        body = `\tExpected: \n\t${getVal(assertion.expected)} \n\tActual: \n\t${getVal(assertion.actual)} \n`;
+        body = `\tExpected: \n\t${getValue(assertion.expected)} \n\tActual: \n\t${getValue(assertion.actual)} \n`;
       } else {
         body = `\t${assertion.message}`;
       }
@@ -137,11 +137,11 @@ export class Decorations {
 
   /**
    * Create a line range
-   * @param n
+   * @param start
    * @param end
    */
-  static line(n: number, end: number = 0): vscode.DecorationOptions {
-    return { range: new vscode.Range(n - 1, 0, (end || n) - 1, 100000000000) };
+  static line(start: number, end: number = 0): vscode.DecorationOptions {
+    return { range: new vscode.Range(start - 1, 0, (end || start) - 1, 100000000000) };
   }
 
   /**
@@ -234,14 +234,14 @@ export class Decorations {
    * @param test
    */
   static buildTest(test: TestResult | TestConfig): vscode.DecorationOptions {
-    let err: ErrorHoverAssertion | Assertion | undefined;
+    let error: ErrorHoverAssertion | Assertion | undefined;
     if ('error' in test) {
       const tt = test;
-      err = (tt.assertions || []).find(x => !!x.error) ||
+      error = (tt.assertions || []).find(assertion => !!assertion.error) ||
         (tt.error && { error: tt.error, message: tt.error.message });
     }
-    if (err) {
-      const hover = this.buildErrorHover(err);
+    if (error) {
+      const hover = this.buildErrorHover(error);
       const tt = test;
       return {
         ...this.line(tt.lineStart),

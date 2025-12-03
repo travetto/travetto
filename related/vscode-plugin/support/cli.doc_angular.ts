@@ -4,7 +4,7 @@ import path from 'node:path';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { Runtime } from '@travetto/runtime';
 
-const page = (f: string): string => path.resolve(Runtime.workspace.path, '..', 'travetto.github.io/src', f);
+const page = (file: string): string => path.resolve(Runtime.workspace.path, '..', 'travetto.github.io/src', file);
 
 @CliCommand()
 export class CliDocAngularCommand implements CliCommandShape {

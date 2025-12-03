@@ -81,8 +81,8 @@ export class CompressInterceptor implements WebInterceptor {
       return binaryResponse;
     }
 
-    const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
-    const stream = COMPRESSORS[type](opts);
+    const options = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
+    const stream = COMPRESSORS[type](options);
 
     // If we are compressing
     binaryResponse.headers.set('Content-Encoding', type);

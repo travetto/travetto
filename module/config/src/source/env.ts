@@ -1,4 +1,4 @@
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigSource, ConfigPayload } from './types.ts';
 
 /**
  * Represents the environment mapped data as a JSON blob
@@ -12,7 +12,7 @@ export class EnvConfigSource implements ConfigSource {
     this.#priority = priority;
   }
 
-  get(): ConfigSpec | undefined {
+  get(): ConfigPayload | undefined {
     try {
       const data = JSON.parse(process.env[this.#envKey] || '{}');
       return { data, priority: this.#priority, source: `env://${this.#envKey}` };

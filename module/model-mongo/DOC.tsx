@@ -18,7 +18,7 @@ export const text = <>
     {...ModelQueryTypes(MongoModelService)}
   </ul>
 
-  <ModelCustomConfig cfg={MongoModelConfig} />
+  <ModelCustomConfig config={MongoModelConfig} />
 
   The SSL file options in {d.input('clientOptions')} will automatically be resolved to files when given a path.  This path can be a resource path (will attempt to lookup using {RuntimeResources}) or just a standard file path.
 </>;

@@ -11,7 +11,7 @@ export class CliEchoCommand implements CliCommandShape {
 
   async main(args: string[]): Promise<void> {
     if (this.uppercase) {
-      args = args.map(x => x.toUpperCase());
+      args = args.map(arg => arg.toUpperCase());
     }
     console.log!(args);
   }

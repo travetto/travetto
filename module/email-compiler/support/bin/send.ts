@@ -33,7 +33,7 @@ export class EditorSendService {
             }
           }
         });
-        Registry.process([{ type: 'added', curr: cls }]);
+        Registry.process([{ type: 'added', current: cls }]);
 
         this.ethereal = !!senderConfig.host?.includes('ethereal.email');
       } catch {
@@ -51,23 +51,23 @@ export class EditorSendService {
     const to = message.to!;
     try {
       console.log('Sending email', { to });
-      const svc = await this.service();
+      const service = await this.service();
       if (this.ethereal) {
         const { getTestMessageUrl } = await import('nodemailer');
         const { default: _smtp } = await import('nodemailer/lib/smtp-transport/index');
         type SendMessage = Parameters<Parameters<(typeof _smtp)['prototype']['send']>[1]>[1];
-        const info = await svc.send<SendMessage>(message);
+        const info = await service.send<SendMessage>(message);
         const url = getTestMessageUrl(info);
         console.log('Sent email', { to, url });
         return { url };
       } else {
-        await svc.send(message);
+        await service.send(message);
         console.log('Sent email', { to });
         return {};
       }
-    } catch (err) {
-      console.warn('Failed to send email', { to, error: err });
-      throw err;
+    } catch (error) {
+      console.warn('Failed to send email', { to, error });
+      throw error;
     }
   }
 }

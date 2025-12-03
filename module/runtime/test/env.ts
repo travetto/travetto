@@ -12,12 +12,12 @@ export class EnvTest {
     process.env.NAME = 'BOB';
     process.env.nAmE = 'bOb';
 
-    assert(new EnvProp('name').val === 'bob');
-    assert(new EnvProp('NAME').val === 'BOB');
-    assert(new EnvProp('nAmE').val === 'bOb');
-    assert(new EnvProp('NaMe').val === undefined);
+    assert(new EnvProp('name').value === 'bob');
+    assert(new EnvProp('NAME').value === 'BOB');
+    assert(new EnvProp('nAmE').value === 'bOb');
+    assert(new EnvProp('NaMe').value === undefined);
 
-    assert(new EnvProp('Random').val === undefined);
+    assert(new EnvProp('Random').value === undefined);
   }
 
   @Test()

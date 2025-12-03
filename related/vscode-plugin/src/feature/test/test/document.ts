@@ -41,18 +41,18 @@ export class DocumentResultsManager {
   #editor?: vscode.TextEditor;
   active = false;
 
-  constructor(doc: vscode.TextDocument) {
-    this.#document = doc;
+  constructor(document: vscode.TextDocument) {
+    this.#document = document;
   }
 
   get editor(): vscode.TextEditor | undefined {
     return this.#editor;
   }
 
-  set editor(ed: vscode.TextEditor | undefined) {
-    if (ed !== this.#editor || ed === undefined) {
-      this.#editor = ed;
-      if (ed) {
+  set editor(editor: vscode.TextEditor | undefined) {
+    if (editor !== this.#editor || editor === undefined) {
+      this.#editor = editor;
+      if (editor) {
         this.refresh();
       }
     }
@@ -67,10 +67,10 @@ export class DocumentResultsManager {
    * Get list of known tests
    */
   getListOfTests(): Pick<TestConfig, 'methodName' | 'lineStart' | 'lineBodyStart'>[] {
-    return Object.values(this.#results.test).map(v => ({
-      methodName: v.src.methodName,
-      lineStart: v.src.lineStart,
-      lineBodyStart: v.src.lineBodyStart
+    return Object.values(this.#results.test).map(test => ({
+      methodName: test.source.methodName,
+      lineStart: test.source.lineStart,
+      lineBodyStart: test.source.lineBodyStart
     }));
   }
 
@@ -111,8 +111,8 @@ export class DocumentResultsManager {
       for (const assertion of test.assertions) {
         out[assertion.status].push(assertion.decoration);
       }
-      for (const k of TypedObject.keys<Record<StatusUnknown, unknown>>(out)) {
-        this.setStyle(test.assertStyles[k], out[k]);
+      for (const key of TypedObject.keys<Record<StatusUnknown, unknown>>(out)) {
+        this.setStyle(test.assertStyles[key], out[key]);
       }
     }
   }
@@ -142,29 +142,29 @@ export class DocumentResultsManager {
    */
   store(level: TestLevel, key: string, result: Result<TestItem>): void {
     if (isAssertion(level, result)) {
-      const el = this.#results.test[key];
+      const state = this.#results.test[key];
       const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
-      el.assertions.push(result);
+      state.assertions.push(result);
 
-      for (const a of el.assertions) {
+      for (const a of state.assertions) {
         groups[a.status].push(a.decoration);
       }
 
-      for (const s of ['passed', 'failed', 'unknown'] as const) {
-        this.setStyle(el.assertStyles[s], groups[s]);
+      for (const style of ['passed', 'failed', 'unknown'] as const) {
+        this.setStyle(state.assertStyles[style], groups[style]);
       }
     } else if (isSuiteResult(level, result)) {
-      const el = this.#results.suite[key];
-      Object.assign(el, result);
+      const state = this.#results.suite[key];
+      Object.assign(state, result);
 
-      Object.keys(el.styles).forEach(x => {
-        this.setStyle(el.styles[x], x === result.status ? [el.decoration!] : []);
+      Object.keys(state.styles).forEach(style => {
+        this.setStyle(state.styles[style], style === result.status ? [state.decoration!] : []);
       });
     } else if (isTestResult(level, result)) {
-      const el = this.#results.test[key];
-      Object.assign(el, result);
-      this.setStyle(el.styles[result.status], [result.decoration]);
-      this.setStyle(el.logStyle, result.logDecorations);
+      const state = this.#results.test[key];
+      Object.assign(state, result);
+      this.setStyle(state.styles[result.status], [result.decoration]);
+      this.setStyle(state.logStyle, result.logDecorations);
     }
   }
 
@@ -190,14 +190,14 @@ export class DocumentResultsManager {
     const base: ResultState<unknown> = {
       status: 'unknown',
       styles: this.genStyles(level),
-      src: (existing && existing.src)
+      source: (existing && existing.source)
     };
 
     if (existing) {
-      Object.values(existing.styles).forEach(x => x.dispose());
+      Object.values(existing.styles).forEach(style => style.dispose());
       if (isTestState(level, existing)) {
         existing.logStyle.dispose();
-        Object.values(existing.assertStyles).forEach(x => x.dispose());
+        Object.values(existing.assertStyles).forEach(style => style.dispose());
       }
     }
     if (isTestState(level, base)) {
@@ -217,7 +217,7 @@ export class DocumentResultsManager {
   onSuite(suite: SuiteResult): void {
     const status = (suite.failed ? 'failed' : suite.passed ? 'passed' : 'skipped');
     this.reset('suite', suite.classId);
-    this.store('suite', suite.classId, { status, decoration: Decorations.buildSuite(suite), src: suite });
+    this.store('suite', suite.classId, { status, decoration: Decorations.buildSuite(suite), source: suite });
   }
 
   /**
@@ -229,9 +229,9 @@ export class DocumentResultsManager {
       status: test.status === 'skipped' ? 'unknown' : test.status,
       decoration: Decorations.buildTest(test),
       logDecorations: test.output
-        .filter(x => Workspace.resolveImport(`${x.module}/${x.modulePath}`) === this.#document.fileName)
-        .map(v => Decorations.buildTestLog(v)),
-      src: test
+        .filter(log => Workspace.resolveImport(`${log.module}/${log.modulePath}`) === this.#document.fileName)
+        .map(log => Decorations.buildTestLog(log)),
+      source: test
     });
     this.refreshTest(`${test.classId}#${test.methodName}`);
   }
@@ -246,47 +246,47 @@ export class DocumentResultsManager {
     if (status === 'failed') {
       this.#failedAssertions[Decorations.line(assertion.line).range.start.line] = assertion;
     }
-    this.store('assertion', key, { status, decoration: Decorations.buildAssertion(assertion), src: assertion });
+    this.store('assertion', key, { status, decoration: Decorations.buildAssertion(assertion), source: assertion });
   }
 
   /**
    * On a test event, update internal state
    */
-  onEvent(e: TestWatchEvent): void {
-    if (e.type === 'ready' || e.type === 'log') {
+  onEvent(event: TestWatchEvent): void {
+    if (event.type === 'ready' || event.type === 'log') {
       // Ignore
-    } else if (e.type === 'removeTest') {
-      if ('method' in e && typeof e.method === 'string') {
-        this.reset('test', `${e.classId}#${e.method}`);
+    } else if (event.type === 'removeTest') {
+      if ('method' in event && typeof event.method === 'string') {
+        this.reset('test', `${event.classId}#${event.method}`);
       } else {
-        for (const method of e.methodNames ?? []) {
-          this.reset('test', `${e.classId}#${method}`);
+        for (const method of event.methodNames ?? []) {
+          this.reset('test', `${event.classId}#${method}`);
         }
       }
-    } else if (e.phase === 'before') {
-      switch (e.type) {
+    } else if (event.phase === 'before') {
+      switch (event.type) {
         case 'suite': {
-          this.reset('suite', e.suite.classId);
-          const tests = Object.values(this.#results.test).filter(x => x.src.classId === e.suite.classId);
+          this.reset('suite', event.suite.classId);
+          const tests = Object.values(this.#results.test).filter(test => test.source.classId === event.suite.classId);
           for (const test of tests) {
-            this.reset('test', `${test.src.classId}#${test.src.methodName}`);
+            this.reset('test', `${test.source.classId}#${test.source.methodName}`);
           }
-          this.store('suite', e.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(e.suite), src: e.suite });
+          this.store('suite', event.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(event.suite), source: event.suite });
           break;
         }
         // Clear diags
         case 'test': {
-          const key = `${e.test.classId}#${e.test.methodName}`;
+          const key = `${event.test.classId}#${event.test.methodName}`;
           this.reset('test', key);
-          this.store('test', key, { status: 'unknown', decoration: Decorations.buildTest(e.test), src: e.test });
+          this.store('test', key, { status: 'unknown', decoration: Decorations.buildTest(event.test), source: event.test });
           break;
         }
       }
     } else {
-      switch (e.type) {
-        case 'suite': this.onSuite(e.suite); break;
-        case 'test': this.onTest(e.test); break;
-        case 'assertion': this.onAssertion(e.assertion); break;
+      switch (event.type) {
+        case 'suite': this.onSuite(event.suite); break;
+        case 'test': this.onTest(event.test); break;
+        case 'assertion': this.onAssertion(event.assertion); break;
       }
     }
   }

@@ -26,18 +26,18 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
    * @param strategyName Name of passport strategy
    * @param strategy  A passport strategy
    * @param toPrincipal  How to convert a user to an identity
-   * @param opts Extra passport options
+   * @param options Extra passport options
    */
   constructor(
     strategyName: string,
     strategy: passport.Strategy,
     toPrincipal: (user: V) => SimplePrincipal,
-    opts: passport.AuthenticateOptions | ((ctx: WebFilterContext) => passport.AuthenticateOptions) = {},
+    options: passport.AuthenticateOptions | ((ctx: WebFilterContext) => passport.AuthenticateOptions) = {},
   ) {
     this.#strategyName = strategyName;
     this.#strategy = strategy;
     this.#toPrincipal = toPrincipal;
-    this.#passportOptions = typeof opts === 'function' ? opts : ((): Partial<passport.AuthenticateOptions> => opts);
+    this.#passportOptions = typeof options === 'function' ? options : ((): Partial<passport.AuthenticateOptions> => options);
     passport.use(this.#strategyName, this.#strategy);
   }
 
@@ -61,8 +61,8 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
       state: PassportUtil.enhanceState(ctx, requestOptions.state)
     };
 
-    const user = await WebConnectUtil.invoke<V>(ctx, (req, res, next) =>
-      passport.authenticate(this.#strategyName, options, next)(req, res)
+    const user = await WebConnectUtil.invoke<V>(ctx, (request, response, next) =>
+      passport.authenticate(this.#strategyName, options, next)(request, response)
     );
 
     if (user) {

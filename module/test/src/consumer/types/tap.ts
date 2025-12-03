@@ -48,10 +48,10 @@ export class TapEmitter implements TestConsumerShape {
   /**
    * Output supplemental data (e.g. logs)
    */
-  logMeta(obj: Record<string, unknown>): void {
+  logMeta(meta: Record<string, unknown>): void {
     const lineLength = this.#terminal.width - 5;
-    let body = stringify(obj, { lineWidth: lineLength, indent: 2 });
-    body = body.split('\n').map(x => `  ${x}`).join('\n');
+    let body = stringify(meta, { lineWidth: lineLength, indent: 2 });
+    body = body.split('\n').map(line => `  ${line}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }
 
@@ -59,16 +59,16 @@ export class TapEmitter implements TestConsumerShape {
    * Error to string
    * @param error
    */
-  errorToString(err?: Error): string | undefined {
-    if (err && err.name !== 'AssertionError') {
-      if (err instanceof Error) {
-        let out = JSON.stringify(hasToJSON(err) ? err.toJSON() : err, null, 2);
-        if (this.#options?.verbose && err.stack) {
-          out = `${out}\n${err.stack}`;
+  errorToString(error?: Error): string | undefined {
+    if (error && error.name !== 'AssertionError') {
+      if (error instanceof Error) {
+        let out = JSON.stringify(hasToJSON(error) ? error.toJSON() : error, null, 2);
+        if (this.#options?.verbose && error.stack) {
+          out = `${out}\n${error.stack}`;
         }
         return out;
       } else {
-        return `${err}`;
+        return `${error}`;
       }
     }
   }
@@ -76,9 +76,9 @@ export class TapEmitter implements TestConsumerShape {
   /**
    * Listen for each event
    */
-  onEvent(e: TestEvent): void {
-    if (e.type === 'test' && e.phase === 'after') {
-      const { test } = e;
+  onEvent(event: TestEvent): void {
+    if (event.type === 'test' && event.phase === 'after') {
+      const { test } = event;
       const suiteId = this.#enhancer.suiteName(test.classId);
       let header = `${suiteId} - ${this.#enhancer.testName(test.methodName)}`;
       if (test.description) {
@@ -155,8 +155,8 @@ export class TapEmitter implements TestConsumerShape {
 
     if (summary.errors.length) {
       this.log('---\n');
-      for (const err of summary.errors) {
-        const msg = this.errorToString(err);
+      for (const error of summary.errors) {
+        const msg = this.errorToString(error);
         if (msg) {
           this.log(this.#enhancer.failure(msg));
         }

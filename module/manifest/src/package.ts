@@ -18,9 +18,9 @@ export class PackageUtil {
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
 
-  static #exec<T>(cwd: string, cmd: string): Promise<T> {
+  static #exec<T>(workingDirectory: string, cmd: string): Promise<T> {
     const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };
-    const text = execSync(cmd, { cwd, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).toString().trim();
+    const text = execSync(cmd, { cwd: workingDirectory, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).toString().trim();
     return JSON.parse(text);
   }
 
@@ -55,13 +55,13 @@ export class PackageUtil {
         return path.join(resolved.split(name)[0], name);
       } catch { // When import lookup fails
         let folder = root ?? process.cwd();
-        let prev = '';
-        while (folder !== prev) {
+        let previous = '';
+        while (folder !== previous) {
           const pkg = path.resolve(folder, 'node_modules', name, 'package.json');
           if (existsSync(pkg)) {
             return pkg;
           }
-          prev = folder;
+          previous = folder;
           folder = path.dirname(folder);
         }
       }
@@ -106,7 +106,7 @@ export class PackageUtil {
           case 'yarn':
           case 'npm': {
             const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
-            out = workspaces.map(d => ({ path: path.resolve(ctx.workspace.path, d.location), name: d.name }));
+            out = workspaces.map(mod => ({ path: path.resolve(ctx.workspace.path, mod.location), name: mod.name }));
             break;
           }
         }

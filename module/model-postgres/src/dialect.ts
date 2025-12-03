@@ -14,11 +14,11 @@ import { PostgreSQLConnection } from './connection.ts';
 @Injectable()
 export class PostgreSQLDialect extends SQLDialect {
 
-  conn: PostgreSQLConnection;
+  connection: PostgreSQLConnection;
 
   constructor(context: AsyncContext, config: SQLModelConfig) {
     super(config.namespace);
-    this.conn = new PostgreSQLConnection(context, config);
+    this.connection = new PostgreSQLConnection(context, config);
     this.ID_AFFIX = '"';
 
     // Special operators
@@ -50,8 +50,8 @@ export class PostgreSQLDialect extends SQLDialect {
   getModifyColumnSQL(stack: VisitStack[]): string {
     const field: SchemaFieldConfig = castTo(stack.at(-1));
     const type = this.getColumnType(field);
-    const ident = this.ident(field.name.toString());
-    return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident}  TYPE ${type} USING (${ident}::${type});`;
+    const identifier = this.identifier(field.name);
+    return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${identifier}  TYPE ${type} USING (${identifier}::${type});`;
   }
 
   /**

@@ -40,7 +40,7 @@ export class ShutdownManager {
     this.#ensureExitListeners();
     this.#handlers.push({ handler, scope });
     return () => {
-      const idx = this.#handlers.findIndex(x => x.handler === handler);
+      const idx = this.#handlers.findIndex(item => item.handler === handler);
       if (idx >= 0) {
         this.#handlers.splice(idx, 1);
       }
@@ -61,7 +61,7 @@ export class ShutdownManager {
 
     await Util.queueMacroTask(); // Force the event loop to wait one cycle
 
-    const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.val) ?? 2000;
+    const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
     const items = this.#handlers.splice(0, this.#handlers.length);
     console.debug('Graceful shutdown: started', { source, timeout, count: items.length });
     const handlers = Promise.all(items.map(async ({ scope, handler }) => {
@@ -73,8 +73,8 @@ export class ShutdownManager {
         if (scope) {
           console.debug('Stopped', { scope });
         }
-      } catch (err) {
-        console.error('Error stopping', { err, scope });
+      } catch (error) {
+        console.error('Error stopping', { error, scope });
       }
     }));
 

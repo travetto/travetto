@@ -12,26 +12,26 @@ export class PackUtil {
    */
   static buildEnvFile(env: Record<string, string | number | boolean | undefined>): string[] {
     return Object.entries(env)
-      .filter(([, v]) => (v !== undefined))
-      .map(([k, v]) => `${k}=${v}`);
+      .filter(([, value]) => (value !== undefined))
+      .map(([key, value]) => `${key}=${value}`);
   }
 
   /**
    * Remove directory, determine if errors should be ignored
-   * @param src The folder to copy
-   * @param dest The folder to copy to
+   * @param sourceDirectory The folder to copy
+   * @param destinationDirectory The folder to copy to
    */
-  static async copyRecursive(src: string, dest: string, inclusive: boolean = false, ignoreFailure = false): Promise<void> {
+  static async copyRecursive(sourceDirectory: string, destinationDirectory: string, inclusive: boolean = false, ignoreFailure = false): Promise<void> {
     try {
-      let final = dest;
+      let final = destinationDirectory;
       if (!inclusive) {
-        final = path.resolve(dest, path.basename(src));
+        final = path.resolve(destinationDirectory, path.basename(sourceDirectory));
       }
       await fs.mkdir(final, { recursive: true });
-      await fs.cp(src, final, { recursive: true });
+      await fs.cp(sourceDirectory, final, { recursive: true });
     } catch {
       if (!ignoreFailure) {
-        throw new Error(`Failed to copy ${src} to ${dest}`);
+        throw new Error(`Failed to copy ${sourceDirectory} to ${destinationDirectory}`);
       }
     }
   }
@@ -43,10 +43,10 @@ export class PackUtil {
     const vars = { DIST: workspace, TRV_OUT: RuntimeIndex.outputRoot, ROOT: path.resolve(), MOD: module };
 
     const replaceArgs = (text: string): string => Object.entries(vars)
-      .reduce((str, [k, v]) => str.replaceAll(v, ActiveShellCommand.var(k)), text);
+      .reduce((result, [key, value]) => result.replaceAll(value, ActiveShellCommand.var(key)), text);
 
     const preamble = ActiveShellCommand.script(
-      Object.entries(vars).map(([k, v]) => ActiveShellCommand.export(k, v).join(' ')),
+      Object.entries(vars).map(([key, value]) => ActiveShellCommand.export(key, value).join(' ')),
     ).contents;
 
     let stream: fs.FileHandle | undefined;
@@ -73,10 +73,10 @@ export class PackUtil {
   /**
    * Track result response
    */
-  static async runCommand(cmd: string[], opts: SpawnOptions = {}): Promise<string> {
+  static async runCommand(cmd: string[], options: SpawnOptions = {}): Promise<string> {
     const { valid, code, stderr, message, stdout } = await ExecUtil.getResult(spawn(cmd[0], cmd.slice(1), {
       stdio: [0, 'pipe', 'pipe'],
-      ...opts,
+      ...options,
     }), { catch: true });
 
     if (!valid) {

@@ -14,7 +14,7 @@ import { Feature } from './features.ts';
 type ListingEntry = { requires?: string[], rename?: string };
 type Listing = Record<string, ListingEntry>;
 
-const DEV_DEPS = new Set([
+const DEV_DEPENDENCIES = new Set([
   '@travetto/test',
   '@travetto/pack',
   '@travetto/compiler',
@@ -36,7 +36,7 @@ export class Context {
   }
 
   #template: string;
-  #targetDir: string;
+  #targetDirectory: string;
   #dependencies: string[] = [];
   #devDependencies: string[] = [];
   #peerDependencies: string[] = [];
@@ -46,26 +46,26 @@ export class Context {
 
   readonly name: string;
 
-  constructor(name: string, template: string, targetDir: string) {
+  constructor(name: string, template: string, targetDirectory: string) {
     this.name = name.replace(/[^a-zA-Z0-9]+/, '-').replace(/-+$/, '');
     this.#template = template;
-    this.#targetDir = path.resolve(targetDir);
+    this.#targetDirectory = path.resolve(targetDirectory);
   }
 
   #exec(cmd: string, args: string[]): Promise<void> {
-    const term = new Terminal();
-    const proc = spawn(cmd, args, {
+    const terminal = new Terminal();
+    const subProcess = spawn(cmd, args, {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
       env: { PATH: process.env.PATH },
     });
 
-    if (proc.stderr) {
-      ExecUtil.readLines(proc.stderr,
-        line => term.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
+    if (subProcess.stderr) {
+      ExecUtil.readLines(subProcess.stderr,
+        line => terminal.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
     }
 
-    return ExecUtil.getResult(proc).then(() => { });
+    return ExecUtil.getResult(subProcess).then(() => { });
   }
 
   get selfPath(): string {
@@ -77,19 +77,19 @@ export class Context {
   }
 
   destination(file?: string): string {
-    return path.resolve(this.#targetDir, ...file ? [file] : []);
+    return path.resolve(this.#targetDirectory, ...file ? [file] : []);
   }
 
   get sourceListing(): Promise<Listing> {
-    return fs.readFile(this.source('listing.json'), 'utf8').then(val => JSON.parse(val));
+    return fs.readFile(this.source('listing.json'), 'utf8').then(text => JSON.parse(text));
   }
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
-    const res = Object.entries(await this.sourceListing)
-      .filter(([, conf]) => !conf.requires ||
-        Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], conf.requires));
+    const listing = Object.entries(await this.sourceListing)
+      .filter(([, entry]) => !entry.requires ||
+        Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], entry.requires));
 
-    return res;
+    return listing;
   }
 
   async initialize(): Promise<void> {
@@ -108,7 +108,8 @@ export class Context {
 
   templateContext(): Record<string, unknown> {
     const modules = [...this.#dependencies, ...this.#devDependencies]
-      .map(x => path.basename(x)).reduce((acc, v) => ({ ...acc, [v.replace(/[-]/g, '_')]: true }), {});
+      .map(mod => path.basename(mod))
+      .reduce((ctx, value) => ({ ...ctx, [value.replace(/[-]/g, '_')]: true }), {});
     const moduleNames = [...Object.keys(modules)];
 
     /** Get framework version at runtime */
@@ -126,7 +127,7 @@ export class Context {
         devDependencies: [...new Set(this.#devDependencies)].toSorted((a, b) => a.localeCompare(b)),
       },
       ...this.#featureContexts,
-      ...moduleNames.map(x => ({ [`module_${x}`]: true }))
+      ...moduleNames.map(mod => ({ [`module_${mod}`]: true }))
     );
 
     return context;
@@ -160,7 +161,7 @@ export class Context {
       const pkgs = Array.isArray(feat.package) ? feat.package : [feat.package];
       for (const pkg of pkgs) {
         if (pkg.startsWith('@travetto')) {
-          if (DEV_DEPS.has(pkg)) {
+          if (DEV_DEPENDENCIES.has(pkg)) {
             this.#devDependencies.push(pkg);
           } else {
             this.#dependencies.push(pkg);
@@ -210,6 +211,6 @@ export class Context {
       await this.#exec('npx', ['trv', 'eslint:register']);
     }
 
-    yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDir }} `;
+    yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDirectory }} `;
   }
 }

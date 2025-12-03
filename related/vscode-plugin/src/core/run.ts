@@ -27,8 +27,8 @@ export class RunUtil {
 
   static registerEnvVars(context: vscode.ExtensionContext, data: Record<string, unknown>): void {
     Object.assign(this.#baseEnv, data);
-    for (const [k, v] of Object.entries(data)) {
-      context.environmentVariableCollection.replace(k, `${v ?? ''}`);
+    for (const [key, value] of Object.entries(data)) {
+      context.environmentVariableCollection.replace(key, `${value ?? ''}`);
     }
   }
 
@@ -70,7 +70,7 @@ export class RunUtil {
       ...(typeof debugOverrides === 'object' ? debugOverrides : {}),
       program: config.main.replace(Workspace.path, WORKSPACE),
       cwd: WORKSPACE,
-      args: (config.args ?? []).map(x => `${x}`),
+      args: (config.args ?? []).map(arg => `${arg}`),
       env: {
         ...Env.TRV_CAN_RESTART.export(false),
         ...this.buildEnv(config.cliModule),
@@ -81,11 +81,11 @@ export class RunUtil {
   }
 
   /** Debug a given config */
-  static async debug(cfg: LaunchConfig): Promise<void> {
+  static async debug(config: LaunchConfig): Promise<void> {
     try {
-      await vscode.debug.startDebugging(Workspace.folder, this.buildDebugConfig(cfg));
-    } catch (err) {
-      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
+      await vscode.debug.startDebugging(Workspace.folder, this.buildDebugConfig(config));
+    } catch (error) {
+      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
     }
   }
 }

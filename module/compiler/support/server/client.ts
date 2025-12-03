@@ -11,7 +11,7 @@ import { ProcessHandle } from './process-handle.ts';
 
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;
-  until?: (ev: T) => boolean;
+  until?: (event: T) => boolean;
   enforceIteration?: boolean;
 };
 
@@ -44,26 +44,26 @@ export class CompilerClient {
     return this.#url;
   }
 
-  async #fetch(rel: string, opts?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean, text: string }> {
-    const ctrl = new AbortController();
-    const timeoutCtrl = new AbortController();
+  async #fetch(urlPath: string, options?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean, text: string }> {
+    const controller = new AbortController();
+    const timeoutController = new AbortController();
 
-    opts?.signal?.addEventListener('abort', () => ctrl.abort());
-    timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false, signal: timeoutCtrl.signal })
+    options?.signal?.addEventListener('abort', () => controller.abort());
+    timers.setTimeout(options?.timeout ?? 100, undefined, { ref: false, signal: timeoutController.signal })
       .then(() => {
-        logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
-        ctrl.abort('TIMEOUT');
+        logTimeout && this.#log.error(`Timeout on request to ${this.#url}${urlPath}`);
+        controller.abort('TIMEOUT');
       })
       .catch(() => { });
-    const response = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+    const response = await fetch(`${this.#url}${urlPath}`, { ...options, signal: controller.signal });
     const out = { ok: response.ok, text: await response.text() };
-    timeoutCtrl.abort();
+    timeoutController.abort();
     return out;
   }
 
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
-    return this.#fetch('/info', { timeout: 200 }, false).then(v => JSON.parse(v.text), () => undefined);
+    return this.#fetch('/info', { timeout: 200 }, false).then(response => JSON.parse(response.text), () => undefined);
   }
 
   async isWatching(): Promise<boolean> {
@@ -72,7 +72,7 @@ export class CompilerClient {
 
   /** Clean the server */
   clean(): Promise<boolean> {
-    return this.#fetch('/clean', { timeout: 300 }).then(v => v.ok, () => false);
+    return this.#fetch('/clean', { timeout: 300 }).then(response => response.ok, () => false);
   }
 
   /** Stop server and wait for shutdown */
@@ -81,7 +81,7 @@ export class CompilerClient {
     if (!info) {
       this.#log.debug('Stopping server, info not found, manual killing');
       return Promise.all([this.#handle.server.kill(), this.#handle.compiler.kill()])
-        .then(v => v.some(x => x));
+        .then(results => results.some(result => result));
     }
 
     await this.#fetch('/stop').catch(() => { }); // Trigger
@@ -94,9 +94,9 @@ export class CompilerClient {
   fetchEvents<
     V extends CompilerEventType,
     T extends (CompilerEvent & { type: V })['payload']
-  >(type: V, cfg?: FetchEventsConfig<T>): AsyncIterable<T>;
-  fetchEvents(type: 'all', cfg?: FetchEventsConfig<CompilerEvent>): AsyncIterable<CompilerEvent>;
-  async * fetchEvents<T = unknown>(type: string, cfg: FetchEventsConfig<T> = {}): AsyncIterable<T> {
+  >(type: V, config?: FetchEventsConfig<T>): AsyncIterable<T>;
+  fetchEvents(type: 'all', config?: FetchEventsConfig<CompilerEvent>): AsyncIterable<CompilerEvent>;
+  async * fetchEvents<T = unknown>(type: string, config: FetchEventsConfig<T> = {}): AsyncIterable<T> {
     let info = await this.info();
     if (!info) {
       return;
@@ -104,40 +104,40 @@ export class CompilerClient {
 
     this.#log.debug(`Starting watch for events of type "${type}"`);
 
-    let signal = cfg.signal;
+    let signal = config.signal;
 
     // Ensure we capture end of process at least
     if (!signal) {
-      const ctrl = new AbortController();
-      process.on('SIGINT', () => ctrl.abort());
-      signal = ctrl.signal;
+      const controller = new AbortController();
+      process.on('SIGINT', () => controller.abort());
+      signal = controller.signal;
     }
 
     const { iteration } = info;
 
     for (; ;) {
-      const ctrl = new AbortController();
-      const quit = (): void => ctrl.abort();
+      const controller = new AbortController();
+      const quit = (): void => controller.abort();
       try {
         signal.addEventListener('abort', quit);
         const response = await new Promise<http.IncomingMessage>((resolve, reject) =>
-          http.get(`${this.#url}/event/${type}`, { agent: streamAgent, signal: ctrl.signal }, resolve)
+          http.get(`${this.#url}/event/${type}`, { agent: streamAgent, signal: controller.signal }, resolve)
             .on('error', reject)
         );
 
         for await (const line of rl.createInterface(response)) {
           if (line.trim().charAt(0) === '{') {
-            const val: T = JSON.parse(line);
-            if (cfg.until?.(val)) {
+            const event: T = JSON.parse(line);
+            if (config.until?.(event)) {
               await CommonUtil.queueMacroTask();
-              ctrl.abort();
+              controller.abort();
             }
-            yield val;
+            yield event;
           }
         }
-      } catch (err) {
-        const aborted = ctrl.signal.aborted || (typeof err === 'object' && err && 'code' in err && err.code === 'ECONNRESET');
-        if (!aborted) { throw err; }
+      } catch (error) {
+        const aborted = controller.signal.aborted || (typeof error === 'object' && error && 'code' in error && error.code === 'ECONNRESET');
+        if (!aborted) { throw error; }
       }
       signal.removeEventListener('abort', quit);
 
@@ -145,12 +145,12 @@ export class CompilerClient {
 
       info = await this.info();
 
-      if (ctrl.signal.reason === 'TIMEOUT') {
+      if (controller.signal.reason === 'TIMEOUT') {
         this.#log.debug('Failed due to timeout');
         return;
       }
 
-      if (ctrl.signal.aborted || !info || (cfg.enforceIteration && info.iteration !== iteration)) { // If health check fails, or aborted
+      if (controller.signal.aborted || !info || (config.enforceIteration && info.iteration !== iteration)) { // If health check fails, or aborted
         this.#log.debug(`Stopping watch for events of type "${type}"`);
         return;
       } else {
@@ -164,7 +164,7 @@ export class CompilerClient {
     const set = new Set(states);
     // Loop until
     this.#log.debug(`Waiting for states, ${states.join(', ')}`);
-    for await (const _ of this.fetchEvents('state', { signal, until: s => set.has(s.state) })) { }
+    for await (const _ of this.fetchEvents('state', { signal, until: event => set.has(event.state) })) { }
     this.#log.debug(`Found state, one of ${states.join(', ')} `);
     if (message) {
       this.#log.info(message);

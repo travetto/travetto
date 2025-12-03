@@ -94,7 +94,7 @@ export class DiagnosticManager {
       }
       if (event.classId && event.method) {
         const tests = [...this.#tracked.get(file)!.values()];
-        const idx = tests.findIndex(x => x.methodName === event.method);
+        const idx = tests.findIndex(result => result.methodName === event.method);
         if (idx >= 0) {
           tests.splice(idx, 1);
         }

@@ -11,7 +11,7 @@ const COLORS = ([...[
   '#afffd7', '#afffff', '#d787ff', '#d7afaf', '#d7afd7', '#d7afff', '#d7d7af', '#d7d7d7', '#d7d7ff', '#d7ff87', '#d7ffaf', '#d7ffd7', '#d7ffff', '#ff8787', '#ff87af',
   '#ff87d7', '#ff87ff', '#ffaf87', '#ffafaf', '#ffafd7', '#ffafff', '#ffd787', '#ffd7af', '#ffd7d7', '#ffd7ff', '#ffff87', '#ffffaf', '#ffffd7', '#ffffff', '#bcbcbc',
   '#c6c6c6', '#d0d0d0', '#dadada', '#e4e4e4', '#eeeeee'
-] as const]).toSorted(() => Math.random() < .5 ? -1 : 1).map(x => StyleUtil.getStyle(x));
+] as const]).toSorted(() => Math.random() < .5 ? -1 : 1).map(color => StyleUtil.getStyle(color));
 
 type ModuleRunConfig<T = ExecutionResult<string>> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -24,7 +24,7 @@ type ModuleRunConfig<T = ExecutionResult<string>> = {
   stableOutput?: boolean;
 };
 
-const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
+const colorize = (value: string, idx: number): string => COLORS[idx % COLORS.length](value);
 
 /**
  * Tools for running commands across all modules of the monorepo
@@ -37,9 +37,9 @@ export class RepoExecUtil {
    * @returns
    */
   static #buildPrefixes(mods: IndexedModule[]): Record<string, string> {
-    const folders = mods.map(x => x.sourceFolder);
-    const maxWidth = Math.max(...folders.map(x => x.length));
-    return Object.fromEntries(folders.map((x, i) => [x, colorize(x.padStart(maxWidth, ' ').padEnd(maxWidth + 1), i)]));
+    const folders = mods.map(mod => mod.sourceFolder);
+    const maxWidth = Math.max(...folders.map(folder => folder.length));
+    return Object.fromEntries(folders.map((folder, i) => [folder, colorize(folder.padStart(maxWidth, ' ').padEnd(maxWidth + 1), i)]));
   }
 
   /**
@@ -69,21 +69,21 @@ export class RepoExecUtil {
       try {
         if (!(await config.filter?.(mod) === false)) {
           const prefix = prefixes[mod.sourceFolder] ?? '';
-          const proc = operation(mod);
-          processes.set(mod, proc);
+          const subProcess = operation(mod);
+          processes.set(mod, subProcess);
 
-          if (config.showStdout && proc.stdout) {
-            ExecUtil.readLines(proc.stdout, line =>
+          if (config.showStdout && subProcess.stdout) {
+            ExecUtil.readLines(subProcess.stdout, line =>
               stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
             );
           }
-          if (config.showStderr && proc.stderr) {
-            ExecUtil.readLines(proc.stderr, line =>
+          if (config.showStderr && subProcess.stderr) {
+            ExecUtil.readLines(subProcess.stderr, line =>
               stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
             );
           }
 
-          const result = await ExecUtil.getResult(proc, { catch: true });
+          const result = await ExecUtil.getResult(subProcess, { catch: true });
           const output = transform(mod, result);
           results.set(mod, output);
         }
@@ -94,7 +94,7 @@ export class RepoExecUtil {
     }, mods, mods.length, { max: workerCount, min: workerCount });
 
     if (config.progressMessage && stdoutTerm.interactive) {
-      await stdoutTerm.streamToBottom(Util.mapAsyncItr(work, TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })));
+      await stdoutTerm.streamToBottom(Util.mapAsyncIterable(work, TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })));
     } else {
       for await (const _ of work) {
         // Ensure its all consumed

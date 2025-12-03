@@ -52,7 +52,7 @@ export class BlogComponent {
     }),
     loader: ({ params }) =>
       fetch(`https://www.googleapis.com/blogger/v3/blogs/${params.blogId}/posts/?key=${params.key}`)
-        .then(res => res.json())
+        .then(response => response.json())
         .then<Post[]>(data => data.items.slice(0, 3))
 
   }).asReadonly();

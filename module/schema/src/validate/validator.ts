@@ -11,19 +11,19 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
  * @param base The starting type or config
- * @param o The value to use for the polymorphic check
+ * @param item The item to use for the polymorphic check
  */
-function resolveFieldMap<T>(base: Class<T>, o: T): SchemaFieldMap {
-  const target = SchemaRegistryIndex.resolveInstanceType(base, o);
+function resolveFieldMap<T>(base: Class<T>, item: T): SchemaFieldMap {
+  const target = SchemaRegistryIndex.resolveInstanceType(base, item);
   return SchemaRegistryIndex.get(target).getFields();
 }
 
-function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
-  return !DataUtil.isPlainObject(o) && o !== null && typeof o === 'object' && !!o.constructor;
+function isClassInstance<T>(value: unknown): value is ClassInstance<T> {
+  return !DataUtil.isPlainObject(value) && value !== null && typeof value === 'object' && !!value.constructor;
 }
 
-function isRangeValue(o: unknown): o is number | string | Date {
-  return typeof o === 'string' || typeof o === 'number' || o instanceof Date;
+function isRangeValue(value: unknown): value is number | string | Date {
+  return typeof value === 'string' || typeof value === 'number' || value instanceof Date;
 }
 
 /**
@@ -35,15 +35,15 @@ export class SchemaValidator {
   /**
    * Validate the schema for a given object
    * @param fields The config to validate against
-   * @param o The object to validate
+   * @param item The object to validate
    * @param relative The relative path as the validation recurses
    */
-  static #validateFields<T>(fields: SchemaFieldMap, o: T, relative: string): ValidationError[] {
+  static #validateFields<T>(fields: SchemaFieldMap, item: T, relative: string): ValidationError[] {
     let errors: ValidationError[] = [];
 
     for (const [field, fieldConfig] of TypedObject.entries(fields)) {
       if (fieldConfig.access !== 'readonly') { // Do not validate readonly fields
-        errors = errors.concat(this.#validateInputSchema(fieldConfig, o[castKey<T>(field)], relative));
+        errors = errors.concat(this.#validateInputSchema(fieldConfig, item[castKey<T>(field)], relative));
       }
     }
 
@@ -53,13 +53,13 @@ export class SchemaValidator {
   /**
    * Validate a single input config against a passed in value
    * @param input The input schema configuration
-   * @param val The raw value, could be an array or not
+   * @param value The raw value, could be an array or not
    * @param relative The relative path of object traversal
    */
-  static #validateInputSchema(input: SchemaInputConfig, val: unknown, relative: string = ''): ValidationError[] {
+  static #validateInputSchema(input: SchemaInputConfig, value: unknown, relative: string = ''): ValidationError[] {
     const key = 'name' in input ? input.name : ('index' in input ? input.index : 'unknown');
     const path = `${relative}${relative ? '.' : ''}${key}`;
-    const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
+    const hasValue = !(value === undefined || value === null || (typeof value === 'string' && value === '') || (Array.isArray(value) && value.length === 0));
 
     if (!hasValue) {
       if (input.required?.active !== false) {
@@ -75,26 +75,26 @@ export class SchemaValidator {
     if (type === Object) {
       return [];
     } else if (array) {
-      if (!Array.isArray(val)) {
-        return this.#prepareErrors(path, [{ kind: 'type', type: Array, value: val }]);
+      if (!Array.isArray(value)) {
+        return this.#prepareErrors(path, [{ kind: 'type', type: Array, value }]);
       }
       let errors: ValidationError[] = [];
       if (complex) {
-        for (let i = 0; i < val.length; i++) {
-          const subErrors = this.#validateFields(resolveFieldMap(type, val[i]), val[i], `${path}[${i}]`);
+        for (let i = 0; i < value.length; i++) {
+          const subErrors = this.#validateFields(resolveFieldMap(type, value[i]), value[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
-        for (let i = 0; i < val.length; i++) {
-          const subErrors = this.#validateInput(input, val[i]);
+        for (let i = 0; i < value.length; i++) {
+          const subErrors = this.#validateInput(input, value[i]);
           errors.push(...this.#prepareErrors(`${path}[${i}]`, subErrors));
         }
       }
       return errors;
     } else if (complex) {
-      return this.#validateFields(resolveFieldMap(type, val), val, path);
+      return this.#validateFields(resolveFieldMap(type, value), value, path);
     } else {
-      const fieldErrors = this.#validateInput(input, val);
+      const fieldErrors = this.#validateInput(input, value);
       return this.#prepareErrors(path, fieldErrors);
     }
   }
@@ -106,13 +106,13 @@ export class SchemaValidator {
    * @param value The value to validate
    */
   static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | number | Date): boolean {
-    const f = input[key]!;
-    const valueNum = (typeof value === 'string') ?
+    const config = input[key]!;
+    const parsed = (typeof value === 'string') ?
       (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
       (value instanceof Date ? value.getTime() : value);
 
-    const boundary = (typeof f.n === 'number' ? f.n : f.n.getTime());
-    return key === 'min' ? valueNum < boundary : valueNum > boundary;
+    const boundary = (typeof config.n === 'number' ? config.n : config.n.getTime());
+    return key === 'min' ? parsed < boundary : parsed > boundary;
   }
 
   /**
@@ -184,7 +184,7 @@ export class SchemaValidator {
   static #prepareErrors(path: string, results: ValidationResult[]): ValidationError[] {
     const out: ValidationError[] = [];
     for (const result of results) {
-      const err: ValidationError = {
+      const error: ValidationError = {
         ...result,
         kind: result.kind,
         value: result.value,
@@ -194,20 +194,20 @@ export class SchemaValidator {
         type: (typeof result.type === 'function' ? result.type.name : result.type)
       };
 
-      if (!err.re) {
-        delete err.re;
+      if (!error.re) {
+        delete error.re;
       }
 
       const msg = result.message ?? (
-        Messages.get(err.re ?? '') ??
-        Messages.get(err.kind) ??
+        Messages.get(error.re ?? '') ??
+        Messages.get(error.kind) ??
         Messages.get('default')!
       );
 
-      err.message = msg
-        .replace(/\{([^}]+)\}/g, (_, k: (keyof ValidationError)) => `${err[k]}`);
+      error.message = msg
+        .replace(/\{([^}]+)\}/g, (_, key: (keyof ValidationError)) => `${error[key]}`);
 
-      out.push(err);
+      out.push(error);
     }
     return out;
   }
@@ -215,7 +215,7 @@ export class SchemaValidator {
   /**
    * Validate the class level validations
    */
-  static async #validateClassLevel<T>(cls: Class<T>, o: T, view?: string): Promise<ValidationError[]> {
+  static async #validateClassLevel<T>(cls: Class<T>, item: T, view?: string): Promise<ValidationError[]> {
     if (!SchemaRegistryIndex.has(cls)) {
       return [];
     }
@@ -226,19 +226,19 @@ export class SchemaValidator {
     // Handle class level validators
     for (const fn of classConfig.validators) {
       try {
-        const res = await fn(o, view);
-        if (res) {
-          if (Array.isArray(res)) {
-            errors.push(...res);
+        const error = await fn(item, view);
+        if (error) {
+          if (Array.isArray(error)) {
+            errors.push(...error);
           } else {
-            errors.push(res);
+            errors.push(error);
           }
         }
-      } catch (err: unknown) {
-        if (isValidationError(err)) {
-          errors.push(err);
+      } catch (error: unknown) {
+        if (isValidationError(error)) {
+          errors.push(error);
         } else {
-          throw err;
+          throw error;
         }
       }
     }
@@ -248,60 +248,60 @@ export class SchemaValidator {
   /**
    * Validate an object against it's constructor's schema
    * @param cls The class to validate the objects against
-   * @param o The object to validate
+   * @param item The object to validate
    * @param view The optional view to limit the scope to
    */
-  static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
-    if (isClassInstance(o) && !(o instanceof cls || cls.Ⲑid === o.constructor.Ⲑid)) {
-      throw new TypeMismatchError(cls.name, o.constructor.name);
+  static async validate<T>(cls: Class<T>, item: T, view?: string): Promise<T> {
+    if (isClassInstance(item) && !(item instanceof cls || cls.Ⲑid === item.constructor.Ⲑid)) {
+      throw new TypeMismatchError(cls.name, item.constructor.name);
     }
-    cls = SchemaRegistryIndex.resolveInstanceType(cls, o);
+    cls = SchemaRegistryIndex.resolveInstanceType(cls, item);
 
     const fields = SchemaRegistryIndex.get(cls).getFields(view);
 
     // Validate using standard behaviors
     const errors = [
-      ...this.#validateFields(fields, o, ''),
-      ... await this.#validateClassLevel(cls, o, view)
+      ...this.#validateFields(fields, item, ''),
+      ... await this.#validateClassLevel(cls, item, view)
     ];
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
 
-    return o;
+    return item;
   }
 
   /**
    * Validate an entire array of values
    * @param cls The class to validate the objects against
-   * @param obj The values to validate
+   * @param items The values to validate
    * @param view The view to limit by
    */
-  static async validateAll<T>(cls: Class<T>, obj: T[], view?: string): Promise<T[]> {
-    return await Promise.all<T>((obj ?? [])
-      .map(o => this.validate(cls, o, view)));
+  static async validateAll<T>(cls: Class<T>, items: T[], view?: string): Promise<T[]> {
+    return await Promise.all<T>((items ?? [])
+      .map(item => this.validate(cls, item, view)));
   }
 
   /**
    * Validate partial, ignoring required fields as they are partial
    *
    * @param cls The class to validate against
-   * @param o The value to validate
+   * @param item The value to validate
    * @param view The view to limit by
    */
-  static async validatePartial<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
+  static async validatePartial<T>(cls: Class<T>, item: T, view?: string): Promise<T> {
     try {
-      await this.validate(cls, o, view);
-    } catch (err) {
-      if (err instanceof ValidationResultError) { // Don't check required fields
-        const errs = err.details.errors.filter(x => x.kind !== 'required');
+      await this.validate(cls, item, view);
+    } catch (error) {
+      if (error instanceof ValidationResultError) { // Don't check required fields
+        const errs = error.details.errors.filter(validationError => validationError.kind !== 'required');
         if (errs.length) {
-          err.details.errors = errs;
-          throw err;
+          error.details.errors = errs;
+          throw error;
         }
       }
     }
-    return o;
+    return item;
   }
 
   /**
@@ -311,7 +311,7 @@ export class SchemaValidator {
    * @param method The method being invoked
    * @param params The params to validate
    */
-  static async validateMethod<T>(cls: Class<T>, method: string | symbol, params: unknown[], prefixes: (string | symbol | undefined)[] = []): Promise<void> {
+  static async validateMethod<T>(cls: Class<T>, method: string, params: unknown[], prefixes: (string | undefined)[] = []): Promise<void> {
     const errors: ValidationError[] = [];
     const config = SchemaRegistryIndex.get(cls).getMethod(method);
 
@@ -320,22 +320,22 @@ export class SchemaValidator {
       errors.push(...[
         ... this.#validateInputSchema(param, params[i]),
         ... await this.#validateClassLevel(param.type, params[i])
-      ].map(x => {
+      ].map(error => {
         if (param.name && typeof param.name === 'string') {
-          x.path = !prefixes[i] ?
-            x.path.replace(`${param.name}.`, '') :
-            x.path.replace(param.name, prefixes[i]!.toString());
+          error.path = !prefixes[i] ?
+            error.path.replace(`${param.name}.`, '') :
+            error.path.replace(param.name, prefixes[i]!);
         }
-        return x;
+        return error;
       }));
     }
     for (const validator of config.validators) {
-      const res = await validator(...params);
-      if (res) {
-        if (Array.isArray(res)) {
-          errors.push(...res);
+      const error = await validator(...params);
+      if (error) {
+        if (Array.isArray(error)) {
+          errors.push(...error);
         } else {
-          errors.push(res);
+          errors.push(error);
         }
       }
     }

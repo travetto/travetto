@@ -29,7 +29,7 @@ export const path: posix.PlatformPath & {
     isAbsolute: (file) => native.isAbsolute(toPosix(file)),
     normalize: (file) => toPosix(native.normalize(toPosix(file))),
     parse: (file) => native.parse(toPosix(file)),
-    format: (obj) => toPosix(native.format(obj)),
+    format: (value) => toPosix(native.format(value)),
     toNamespacedPath: (file) => toPosix(native.toNamespacedPath(toPosix(file))),
   } : {
     relative: (from, to) => posix.relative(toPosix(from), toPosix(to)),
@@ -38,7 +38,7 @@ export const path: posix.PlatformPath & {
     isAbsolute: file => posix.isAbsolute(toPosix(file)),
     normalize: file => posix.normalize(toPosix(file)),
     parse: file => posix.parse(toPosix(file)),
-    format: obj => posix.format(obj),
+    format: value => posix.format(value),
     toNamespacedPath: file => toPosix(file),
   }
 };

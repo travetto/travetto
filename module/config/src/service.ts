@@ -6,11 +6,11 @@ import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationRes
 
 import { ParserManager } from './parser/parser.ts';
 import { ConfigData } from './parser/types.ts';
-import { ConfigSource, ConfigSpec } from './source/types.ts';
+import { ConfigSource, ConfigPayload } from './source/types.ts';
 import { FileConfigSource } from './source/file.ts';
 import { OverrideConfigSource } from './source/override.ts';
 
-type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
+type ConfigSpecSimple = Omit<ConfigPayload, 'data'>;
 
 /**
  * Common Type for all configuration classes
@@ -24,15 +24,15 @@ export class ConfigBaseType { }
 export class ConfigurationService {
 
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
-  #specs: ConfigSpecSimple[] = [];
+  #payloads: ConfigSpecSimple[] = [];
   #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(\bkey|key\b)|serviceAccount|(api(-|_)?key)/i];
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
-   * @param ns The namespace of the config to search for, can be dotted for accessing sub namespaces
+   * @param namespace The namespace of the config to search for, can be dotted for accessing sub namespaces
    */
-  #get<T extends Record<string, unknown> = Record<string, unknown>>(ns?: string): T {
-    const parts = (ns ? ns.split('.') : []);
+  #get<T extends Record<string, unknown> = Record<string, unknown>>(namespace?: string): T {
+    const parts = (namespace ? namespace.split('.') : []);
     let sub: Record<string, unknown> = this.#storage;
 
     while (parts.length && sub) {
@@ -53,7 +53,7 @@ export class ConfigurationService {
     const providers = await DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (el) => await DependencyRegistryIndex.getInstance(el.candidateType, el.qualifier))
+      providers.map(async (candidate) => await DependencyRegistryIndex.getInstance<ConfigSource>(candidate.candidateType, candidate.qualifier))
     );
 
     const parser = await DependencyRegistryIndex.getInstance(ParserManager);
@@ -62,27 +62,27 @@ export class ConfigurationService {
       new FileConfigSource(parser),
       ...configs,
       new OverrideConfigSource()
-    ].map(src => src.get()));
+    ].map(source => source.get()));
 
-    const specs = possible
+    const payloads = possible
       .flat()
-      .filter(x => !!x)
+      .filter(data => !!data)
       .toSorted((a, b) => a.priority - b.priority);
 
-    for (const spec of specs) {
-      DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(spec.data), 'coerce');
+    for (const payload of payloads) {
+      DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(payload.data), 'coerce');
     }
 
-    this.#specs = specs.map(({ data: _, ...v }) => v);
+    this.#payloads = payloads.map(({ data: _, ...payload }) => payload);
 
     // Initialize Secrets
     const { secrets = [] } = this.#get<{ secrets?: string | string[] }>('config') ?? {};
-    for (const el of [secrets].flat()) {
-      if (typeof el === 'string') {
-        if (el.startsWith('/')) {
-          this.#secrets.push(DataUtil.coerceType(el, RegExp, true));
+    for (const value of [secrets].flat()) {
+      if (typeof value === 'string') {
+        if (value.startsWith('/')) {
+          this.#secrets.push(DataUtil.coerceType(value, RegExp, true));
         } else {
-          this.#secrets.push(DataUtil.coerceType(el, String, true));
+          this.#secrets.push(DataUtil.coerceType(value, String, true));
         }
       }
     }
@@ -96,21 +96,21 @@ export class ConfigurationService {
     const configTargets = await DependencyRegistryIndex.getCandidates(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
-        .filter(el => el.qualifier === getDefaultQualifier(el.class)) // Is self targeting?
+        .filter(candidate => candidate.qualifier === getDefaultQualifier(candidate.class)) // Is self targeting?
         .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
-        .map(async el => {
-          const inst = await DependencyRegistryIndex.getInstance(el.class, el.qualifier);
-          return [el, inst] as const;
+        .map(async candidate => {
+          const inst = await DependencyRegistryIndex.getInstance(candidate.class, candidate.qualifier);
+          return [candidate, inst] as const;
         })
     );
     const out: Record<string, ConfigData> = {};
-    for (const [el, inst] of configs) {
+    for (const [candidate, inst] of configs) {
       const data = BindUtil.bindSchemaToObject<ConfigData>(
-        getClass(inst), {}, inst, { filterInput: f => !('secret' in f) || !f.secret, filterValue: v => v !== undefined }
+        getClass(inst), {}, inst, { filterInput: field => !('secret' in field) || !field.secret, filterValue: value => value !== undefined }
       );
-      out[el.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
+      out[candidate.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
-    return { sources: this.#specs, active: out };
+    return { sources: this.#payloads, active: out };
   }
 
   /**
@@ -125,15 +125,15 @@ export class ConfigurationService {
     if (validate) {
       try {
         await SchemaValidator.validate(cls, item);
-      } catch (err) {
-        if (err instanceof ValidationResultError) {
-          const ogMessage = err.message;
-          err.message = `Failed to construct ${classId} as validation errors have occurred`;
-          err.stack = err.stack?.replace(ogMessage, err.message);
+      } catch (error) {
+        if (error instanceof ValidationResultError) {
+          const originalMessage = error.message;
+          error.message = `Failed to construct ${classId} as validation errors have occurred`;
+          error.stack = error.stack?.replace(originalMessage, error.message);
           const imp = Runtime.getImport(cls);
-          Object.defineProperty(err, 'details', { value: { class: classId, import: imp, ...(err.details ?? {}) } });
+          Object.defineProperty(error, 'details', { value: { class: classId, import: imp, ...(error.details ?? {}) } });
         }
-        throw err;
+        throw error;
       }
     }
     return item;

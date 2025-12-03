@@ -70,7 +70,7 @@ export type PackageModule = Omit<ManifestModule, 'files' | 'parents' | 'roles'> 
     /** Travetto package info */
     travetto?: Package['travetto'];
     /** Prod dependencies */
-    prodDeps: Set<string>;
+    prodDependencies: Set<string>;
     /** Set of parent package names */
     parentSet: Set<string>;
     /** Set of child package names */

@@ -7,15 +7,15 @@ export class PackConfigUtil {
   /**
    * Docker setup
    */
-  static dockerInit(cfg: DockerPackConfig): string {
-    return `FROM ${cfg.dockerImage}`;
+  static dockerInit(config: DockerPackConfig): string {
+    return `FROM ${config.dockerImage}`;
   }
 
   /**
    * Install docker pages in either apk or apt environments
    */
-  static dockerPackageInstall(cfg: DockerPackConfig): string {
-    const { os, packages } = cfg.dockerRuntime;
+  static dockerPackageInstall(config: DockerPackConfig): string {
+    const { os, packages } = config.dockerRuntime;
     if (packages?.length) {
       switch (os) {
         case 'alpine': return `RUN apk --update add ${packages.join(' ')} && rm -rf /var/cache/apk/*`;
@@ -32,9 +32,9 @@ export class PackConfigUtil {
   /**
    * Install docker pages in either apk or apt environments
    */
-  static dockerNodePackageInstall(cfg: DockerPackConfig): string {
+  static dockerNodePackageInstall(config: DockerPackConfig): string {
     const out: string[] = [];
-    for (const item of cfg.externalDependencies ?? []) {
+    for (const item of config.externalDependencies ?? []) {
       const [name, directive] = item.split(':');
       switch (directive) {
         case 'from-source':
@@ -44,7 +44,7 @@ export class PackConfigUtil {
       }
     }
     if (out.length) {
-      out.unshift(`WORKDIR ${cfg.dockerRuntime.folder}`);
+      out.unshift(`WORKDIR ${config.dockerRuntime.folder}`);
     }
     return out.join('\n');
   }
@@ -52,22 +52,22 @@ export class PackConfigUtil {
   /**
    * Setup docker ports
    */
-  static dockerPorts(cfg: DockerPackConfig): string {
-    return (cfg.dockerPort?.map(x => `EXPOSE ${x}`) ?? []).join('\n');
+  static dockerPorts(config: DockerPackConfig): string {
+    return (config.dockerPort?.map(port => `EXPOSE ${port}`) ?? []).join('\n');
   }
 
   /**
    * Setup docker user
    */
-  static dockerUser(cfg: DockerPackConfig): string {
-    const { os, user, group, uid, gid } = cfg.dockerRuntime;
+  static dockerUser(config: DockerPackConfig): string {
+    const { os, user, group, userId, groupId } = config.dockerRuntime;
     if (user === 'root') {
       return '';
     } else {
       switch (os) {
-        case 'alpine': return `RUN addgroup -g ${gid} ${group} && adduser -D -G ${group} -u ${uid} ${user}`;
+        case 'alpine': return `RUN addgroup -g ${groupId} ${group} && adduser -D -G ${group} -u ${userId} ${user}`;
         case 'debian':
-        case 'centos': return `RUN groupadd --gid ${gid} ${group} && useradd -u ${uid} -g ${group} ${user}`;
+        case 'centos': return `RUN groupadd --gid ${groupId} ${group} && useradd -u ${userId} -g ${group} ${user}`;
         case 'unknown':
         default: throw new Error('Unable to add user/group for an unknown os');
       }
@@ -77,17 +77,17 @@ export class PackConfigUtil {
   /**
    * Setup Env Vars for NODE_OPTIONS and other standard environment variables
    */
-  static dockerEnvVars(cfg: DockerPackConfig): string {
+  static dockerEnvVars(config: DockerPackConfig): string {
     return [
-      `ENV NODE_OPTIONS="${[...(cfg.sourcemap ? ['--enable-source-maps'] : [])].join(' ')}"`,
+      `ENV NODE_OPTIONS="${[...(config.sourcemap ? ['--enable-source-maps'] : [])].join(' ')}"`,
     ].join('\n');
   }
 
   /**
    * Setup docker runtime folder
    */
-  static dockerAppFolder(cfg: DockerPackConfig): string {
-    const { folder, user, group } = cfg.dockerRuntime;
+  static dockerAppFolder(config: DockerPackConfig): string {
+    const { folder, user, group } = config.dockerRuntime;
     return [
       `RUN mkdir ${folder} && chown ${user}:${group} ${folder}`,
     ].join('\n');
@@ -96,45 +96,45 @@ export class PackConfigUtil {
   /**
    * Docker app files copied with proper permissions
    */
-  static dockerAppFiles(cfg: DockerPackConfig): string {
-    const { user, group, folder } = cfg.dockerRuntime;
+  static dockerAppFiles(config: DockerPackConfig): string {
+    const { user, group, folder } = config.dockerRuntime;
     return `COPY --chown="${user}:${group}" . ${folder}`;
   }
 
   /**
    * Entrypoint creation for a docker configuration
    */
-  static dockerEntrypoint(cfg: DockerPackConfig): string {
-    const { user, folder } = cfg.dockerRuntime;
+  static dockerEntrypoint(config: DockerPackConfig): string {
+    const { user, folder } = config.dockerRuntime;
     return [
       `USER ${user}`,
       `WORKDIR ${folder}`,
-      `ENTRYPOINT ["${folder}/${cfg.mainName}.sh"]`,
+      `ENTRYPOINT ["${folder}/${config.mainName}.sh"]`,
     ].join('\n');
   }
   /**
    * Common docker environment setup
    */
-  static dockerWorkspace(cfg: DockerPackConfig): string {
+  static dockerWorkspace(config: DockerPackConfig): string {
     return [
-      this.dockerPorts(cfg),
-      this.dockerUser(cfg),
-      this.dockerPackageInstall(cfg),
-      this.dockerAppFolder(cfg),
-      this.dockerAppFiles(cfg),
-      this.dockerEnvVars(cfg),
-    ].filter(x => !!x).join('\n');
+      this.dockerPorts(config),
+      this.dockerUser(config),
+      this.dockerPackageInstall(config),
+      this.dockerAppFolder(config),
+      this.dockerAppFiles(config),
+      this.dockerEnvVars(config),
+    ].filter(line => !!line).join('\n');
   }
 
   /**
    * Common docker file setup
    */
-  static dockerStandardFile(cfg: DockerPackConfig): string {
+  static dockerStandardFile(config: DockerPackConfig): string {
     return [
-      this.dockerInit(cfg),
-      this.dockerWorkspace(cfg),
-      this.dockerNodePackageInstall(cfg),
-      this.dockerEntrypoint(cfg)
+      this.dockerInit(config),
+      this.dockerWorkspace(config),
+      this.dockerNodePackageInstall(config),
+      this.dockerEntrypoint(config)
     ].join('\n');
   }
 }

@@ -66,11 +66,11 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resolve = (file: string): Promise<string> => RuntimeResources.resolve(file).then(v => v, () => file);
+    const resolve = (file: string): Promise<string> => RuntimeResources.resolve(file).catch(() => file);
 
     if (this.connectionString) {
       const details = new URL(this.connectionString);
-      this.hosts ??= details.hostname.split(',').filter(x => !!x);
+      this.hosts ??= details.hostname.split(',').filter(host => !!host);
       this.srvRecord ??= details.protocol === 'mongodb+srv:';
       this.namespace ??= details.pathname.replace('/', '');
       Object.assign(this.options, Object.fromEntries(details.searchParams.entries()));
@@ -90,24 +90,24 @@ export class MongoModelConfig {
       this.hosts = ['localhost'];
     }
 
-    const opts = this.options;
-    if (opts.ssl) {
-      if (opts.cert) {
-        opts.cert = await Promise.all([opts.cert].flat(2).map(f => Buffer.isBuffer(f) ? f : resolve(f)));
+    const options = this.options;
+    if (options.ssl) {
+      if (options.cert) {
+        options.cert = await Promise.all([options.cert].flat(2).map(data => Buffer.isBuffer(data) ? data : resolve(data)));
       }
-      if (opts.tlsCertificateKeyFile) {
-        opts.tlsCertificateKeyFile = await resolve(opts.tlsCertificateKeyFile);
+      if (options.tlsCertificateKeyFile) {
+        options.tlsCertificateKeyFile = await resolve(options.tlsCertificateKeyFile);
       }
-      if (opts.tlsCAFile) {
-        opts.tlsCAFile = await resolve(opts.tlsCAFile);
+      if (options.tlsCAFile) {
+        options.tlsCAFile = await resolve(options.tlsCAFile);
       }
-      if (opts.tlsCRLFile) {
-        opts.tlsCRLFile = await resolve(opts.tlsCRLFile);
+      if (options.tlsCRLFile) {
+        options.tlsCRLFile = await resolve(options.tlsCRLFile);
       }
     }
 
     if (!Runtime.production) {
-      opts.waitQueueTimeoutMS ??= TimeUtil.asMillis(1, 'd'); // Wait a day in dev mode
+      options.waitQueueTimeoutMS ??= TimeUtil.asMillis(1, 'd'); // Wait a day in dev mode
     }
   }
 
@@ -116,14 +116,14 @@ export class MongoModelConfig {
    */
   get url(): string {
     const hosts = this.hosts!
-      .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port ?? 27017}`)
+      .map(host => (this.srvRecord || host.includes(':')) ? host : `${host}:${this.port ?? 27017}`)
       .join(',');
-    const opts = Object.entries(this.options).map(([k, v]) => `${k}=${v}`).join('&');
+    const optionString = Object.entries(this.options).map(([key, value]) => `${key}=${value}`).join('&');
     let creds = '';
     if (this.username) {
-      creds = `${[this.username, this.password].filter(x => !!x).join(':')}@`;
+      creds = `${[this.username, this.password].filter(part => !!part).join(':')}@`;
     }
-    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${opts}`;
+    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${optionString}`;
     return url;
   }
 }
