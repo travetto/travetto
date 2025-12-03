@@ -90,11 +90,11 @@ export class QueryVerifier {
       } else {
         // Otherwise recurse
         const subCls = field.type;
-        const subVal = value;
-        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.array ?? false)) {
+        const subValue = value;
+        if (handler.onComplexType && handler.onComplexType(state, subCls, subValue, field.array ?? false)) {
           continue;
         }
-        this.processGenericClause(state.extend(key), subCls, subVal, handler);
+        this.processGenericClause(state.extend(key), subCls, subValue, handler);
       }
     }
   }
@@ -208,7 +208,7 @@ export class QueryVerifier {
       onSimpleType: (state: State, type: SimpleType, value: unknown, isArray: boolean) => {
         this.checkOperatorClause(state, type, value, TypeUtil.OPERATORS[type], isArray);
       },
-      onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => false
+      onComplexType: (state: State, subCls: Class<T>, subValue: T, isArray: boolean): boolean => false
     });
   }
 

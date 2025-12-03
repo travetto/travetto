@@ -162,8 +162,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getMetadata<T>(key: symbol): T | undefined {
-    const md = this.#config?.metadata;
-    return castTo<T>(md?.[key]);
+    const metadata = this.#config?.metadata;
+    return castTo<T>(metadata?.[key]);
   }
 
   registerField(field: string | symbol, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
@@ -179,8 +179,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getFieldMetadata<T>(field: string | symbol, key: symbol): T | undefined {
-    const md = this.#config?.fields[field]?.metadata;
-    return castTo<T>(md?.[key]);
+    const metadata = this.#config?.fields[field]?.metadata;
+    return castTo<T>(metadata?.[key]);
   }
 
   registerClass({ methods, ...config }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
@@ -207,8 +207,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getMethodMetadata<T>(method: string | symbol, key: symbol): T | undefined {
-    const md = this.#config?.methods[method]?.metadata;
-    return castTo<T>(md?.[key]);
+    const metadata = this.#config?.methods[method]?.metadata;
+    return castTo<T>(metadata?.[key]);
   }
 
   registerParameter(method: string | symbol, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
@@ -223,8 +223,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getParameterMetadata<T>(method: string | symbol, idx: number, key: symbol): T | undefined {
-    const md = this.#config?.methods[method]?.parameters[idx]?.metadata;
-    return castTo<T>(md?.[key]);
+    const metadata = this.#config?.methods[method]?.parameters[idx]?.metadata;
+    return castTo<T>(metadata?.[key]);
   }
 
   finalize(parent?: SchemaClassConfig): void {

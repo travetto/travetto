@@ -90,7 +90,7 @@ export class LiteralUtil {
   static toLiteral(value: ts.Node, strict?: boolean): unknown;
   static toLiteral(value?: ts.Node, strict = true): unknown {
     if (!value) {
-      throw new Error('Val is not defined');
+      throw new Error('Value is not defined');
     } else if (ts.isArrayLiteralExpression(value)) {
       return value.elements.map(item => this.toLiteral(item, strict));
     } else if (ts.isIdentifier(value)) {

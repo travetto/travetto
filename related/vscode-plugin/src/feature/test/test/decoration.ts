@@ -106,7 +106,7 @@ export class Decorations {
         suffix = title;
       }
 
-      const getVal = (value: unknown): string => {
+      const getValue = (value: unknown): string => {
         try {
           return util.inspect(JSON.parse(`${value}`), false, 10).replace(/\n/g, '  \n\t');
         } catch {
@@ -115,7 +115,7 @@ export class Decorations {
       };
 
       if (/equal/i.test(assertion.operator!)) {
-        body = `\tExpected: \n\t${getVal(assertion.expected)} \n\tActual: \n\t${getVal(assertion.actual)} \n`;
+        body = `\tExpected: \n\t${getValue(assertion.expected)} \n\tActual: \n\t${getValue(assertion.actual)} \n`;
       } else {
         body = `\t${assertion.message}`;
       }
