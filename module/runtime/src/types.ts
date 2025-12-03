@@ -65,13 +65,6 @@ export function toConcrete<T extends unknown>(): Class<T> {
   return arguments[0];
 }
 
-export function getAllEntries<V>(input: Record<string | symbol, V>): [string | symbol, V][] {
-  return [
-    ...Object.keys(input),
-    ...Object.getOwnPropertySymbols(input)
-  ].map(key => [key, input[key]] as const);
-}
-
 /**
  * Find parent class for a given class object
  */

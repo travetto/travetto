@@ -52,11 +52,11 @@ export class DependencyRegistryIndex implements RegistryIndex {
     SchemaRegistryIndex.getForRegister(cls).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
   }
 
-  static registerParameterMetadata(cls: Class, method: string | symbol, index: number, metadata: Dependency): void {
+  static registerParameterMetadata(cls: Class, method: string, index: number, metadata: Dependency): void {
     SchemaRegistryIndex.getForRegister(cls).registerParameterMetadata(method, index, MetadataSymbol, metadata);
   }
 
-  static registerFieldMetadata(cls: Class, field: string | symbol, metadata: Dependency): void {
+  static registerFieldMetadata(cls: Class, field: string, metadata: Dependency): void {
     SchemaRegistryIndex.getForRegister(cls).registerFieldMetadata(field, MetadataSymbol, metadata);
   }
 

@@ -8,9 +8,9 @@ import { TableSymbol, VisitStack } from './types.ts';
 
 type FieldCacheEntry = {
   local: SchemaFieldConfig[];
-  localMap: Record<string | symbol, SchemaFieldConfig>;
+  localMap: Record<string, SchemaFieldConfig>;
   foreign: SchemaFieldConfig[];
-  foreignMap: Record<string | symbol, SchemaFieldConfig>;
+  foreignMap: Record<string, SchemaFieldConfig>;
 };
 
 /**
@@ -170,7 +170,7 @@ export class SQLModelUtil {
       },
       onSub: (config) => {
         const { config: field } = config;
-        const topObject: Record<string | symbol, unknown> = castTo(pathStack.at(-1));
+        const topObject: Record<string, unknown> = castTo(pathStack.at(-1));
         const top = config.path.at(-1)!;
 
         if (field.name in topObject) {
@@ -198,7 +198,7 @@ export class SQLModelUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
-        const topObject: Record<string | symbol, unknown> = castTo(pathStack.at(-1));
+        const topObject: Record<string, unknown> = castTo(pathStack.at(-1));
         const value = topObject[field.name];
         return handler.onSimple({ ...config, value });
       }

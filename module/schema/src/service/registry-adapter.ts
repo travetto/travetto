@@ -195,34 +195,34 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return this.#config;
   }
 
-  registerMethod(method: string | symbol, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
+  registerMethod(method: string, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const classConfig = this.register();
     const config = classConfig.methods[method] ??= { parameters: [], validators: [] };
     return combineMethods(config, data);
   }
 
-  registerMethodMetadata<T>(method: string | symbol, key: symbol, ...data: Partial<T>[]): T {
+  registerMethodMetadata<T>(method: string, key: symbol, ...data: Partial<T>[]): T {
     const config = this.registerMethod(method);
     return assignMetadata(key, config, data);
   }
 
-  getMethodMetadata<T>(method: string | symbol, key: symbol): T | undefined {
+  getMethodMetadata<T>(method: string, key: symbol): T | undefined {
     const metadata = this.#config?.methods[method]?.metadata;
     return castTo<T>(metadata?.[key]);
   }
 
-  registerParameter(method: string | symbol, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
+  registerParameter(method: string, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
     const config = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
     return combineInputs(config, data);
   }
 
-  registerParameterMetadata<T>(method: string | symbol, idx: number, key: symbol, ...data: Partial<T>[]): T {
+  registerParameterMetadata<T>(method: string, idx: number, key: symbol, ...data: Partial<T>[]): T {
     const config = this.registerParameter(method, idx);
     return assignMetadata(key, config, data);
   }
 
-  getParameterMetadata<T>(method: string | symbol, idx: number, key: symbol): T | undefined {
+  getParameterMetadata<T>(method: string, idx: number, key: symbol): T | undefined {
     const metadata = this.#config?.methods[method]?.parameters[idx]?.metadata;
     return castTo<T>(metadata?.[key]);
   }
@@ -282,7 +282,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return this.#config.fields[field];
   }
 
-  getMethod(method: string | symbol): SchemaMethodConfig {
+  getMethod(method: string): SchemaMethodConfig {
     const methodConfig = this.#config.methods[method];
     if (!methodConfig) {
       throw new AppError(`Unknown method ${String(method)} on class ${this.#cls.Ⲑid}`);
@@ -290,7 +290,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return methodConfig;
   }
 
-  getMethodReturnType(method: string | symbol): Class {
+  getMethodReturnType(method: string): Class {
     return this.getMethod(method).returnType!.type;
   }
 

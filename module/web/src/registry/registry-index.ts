@@ -85,7 +85,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
     return this.store.get(cls).get();
   }
 
-  getEndpoint(cls: Class, method: string | symbol): EndpointConfig {
+  getEndpoint(cls: Class, method: string): EndpointConfig {
     return this.getController(cls).endpoints.find(endpoint => endpoint.methodName === method)!;
   }
 

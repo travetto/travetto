@@ -22,7 +22,7 @@ export interface SuiteConfig extends SuiteCore {
   /**
    * Tests to run
    */
-  tests: Record<string | symbol, TestConfig>;
+  tests: Record<string, TestConfig>;
   /**
    * Before all handlers
    */

@@ -34,7 +34,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
  * @kind decorator
  */
 export function BeforeAll() {
-  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor => {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).register({ beforeAll: [descriptor.value] });
     return descriptor;
   };
@@ -45,7 +45,7 @@ export function BeforeAll() {
  * @kind decorator
  */
 export function BeforeEach() {
-  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor => {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).register({ beforeEach: [descriptor.value] });
     return descriptor;
   };
@@ -56,7 +56,7 @@ export function BeforeEach() {
  * @kind decorator
  */
 export function AfterAll() {
-  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor => {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).register({ afterAll: [descriptor.value] });
     return descriptor;
   };
@@ -67,7 +67,7 @@ export function AfterAll() {
  * @kind decorator
  */
 export function AfterEach() {
-  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor => {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).register({ afterEach: [descriptor.value] });
     return descriptor;
   };

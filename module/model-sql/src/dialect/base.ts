@@ -799,7 +799,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     }
 
     const matrix = instances.map(inst => columns.map(column =>
-      this.resolveValue(column, castTo<Record<string | symbol, unknown>>(inst.value)[column.name])));
+      this.resolveValue(column, castTo<Record<string, unknown>>(inst.value)[column.name])));
 
     columnNames.push(this.pathField.name);
     if (hasParent) {
@@ -1004,12 +1004,12 @@ ${this.getWhereSQL(cls, where!)}`;
         ...upserts
           .filter(item => item.stack.length === 1)
           .map(item =>
-            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
+            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string, string>>(value.value)[idx]))
           ),
         ...updates
           .filter(item => item.stack.length === 1)
           .map(item =>
-            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
+            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string, string>>(value.value)[idx]))
           ),
       ]);
     }

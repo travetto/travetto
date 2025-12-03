@@ -74,7 +74,7 @@ function computeParameterLocation(endpoint: EndpointConfig, param: SchemaParamet
  */
 export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConfig> {
   #config: ControllerConfig;
-  #endpoints: Map<string | symbol, EndpointConfig> = new Map();
+  #endpoints: Map<string, EndpointConfig> = new Map();
   #cls: Class;
   #finalizeHandlers: Function[] = [];
 
@@ -153,7 +153,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     return this.#config;
   }
 
-  getEndpointConfig(method: string | symbol): EndpointConfig {
+  getEndpointConfig(method: string): EndpointConfig {
     const endpoint = this.#endpoints.get(method);
     if (!endpoint) {
       throw new AppError(`Endpoint not registered: ${String(method)} on ${this.#cls.name}`);

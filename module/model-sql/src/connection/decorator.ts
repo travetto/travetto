@@ -14,7 +14,7 @@ export interface ConnectionAware<C = unknown> {
  */
 export function Connected() {
   return function <T extends { connection?: Connection }>(
-    target: T, property: string | symbol, descriptor: AsyncMethodDescriptor<T>
+    target: T, property: string, descriptor: AsyncMethodDescriptor<T>
   ): void {
     const handle = descriptor.value!;
     descriptor.value = function (...args: unknown[]): ReturnType<typeof handle> {
@@ -29,7 +29,7 @@ export function Connected() {
  */
 export function ConnectedIterator() {
   return function <T extends { connection?: Connection }>(
-    target: T, property: string | symbol, descriptor: AsyncIterableMethodDescriptor<T>
+    target: T, property: string, descriptor: AsyncIterableMethodDescriptor<T>
   ): void {
     const handle = descriptor.value!;
     descriptor.value = async function* (...args: unknown[]): ReturnType<typeof handle> {
@@ -44,7 +44,7 @@ export function ConnectedIterator() {
  */
 export function Transactional(mode: TransactionType = 'required') {
   return function <T extends { connection?: Connection }>(
-    target: unknown, property: string | symbol, descriptor: AsyncMethodDescriptor<T>
+    target: unknown, property: string, descriptor: AsyncMethodDescriptor<T>
   ): void {
     const handle = descriptor.value!;
     descriptor.value = function (...args: unknown[]): ReturnType<typeof handle> {

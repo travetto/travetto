@@ -27,7 +27,7 @@ export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
  * @kind decorator
  */
 export function Inject(input?: InjectConfig | symbol) {
-  return (instanceOrCls: Class | ClassInstance, property?: string | symbol, idx?: number | PropertyDescriptor): void => {
+  return (instanceOrCls: Class | ClassInstance, property?: string, idx?: number | PropertyDescriptor): void => {
     const config = fromInput(input);
     const cls = getClass(instanceOrCls);
     const propertyKey = property ?? CONSTRUCTOR_PROPERTY;
@@ -45,7 +45,7 @@ export function Inject(input?: InjectConfig | symbol) {
  * @kind decorator
  */
 export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol) {
-  return <T extends Class>(cls: T, property: string | symbol, descriptor: TypedPropertyDescriptor<(...args: Any[]) => Any>): void => {
+  return <T extends Class>(cls: T, property: string, descriptor: TypedPropertyDescriptor<(...args: Any[]) => Any>): void => {
     DependencyRegistryIndex.getForRegister(cls).registerFactory(property, fromInput(input), {
       factory: (...params: unknown[]) => descriptor.value!.apply(cls, params),
     });

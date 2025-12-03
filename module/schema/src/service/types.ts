@@ -121,7 +121,7 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
   /**
    * Method configs
    */
-  methods: Record<string | symbol, SchemaMethodConfig>;
+  methods: Record<string, SchemaMethodConfig>;
   /**
    * Interfaces that the class implements
    */
@@ -209,7 +209,7 @@ export interface SchemaParameterConfig extends SchemaInputConfig {
   /**
    * Method the parameter belongs to
    */
-  method: string | symbol;
+  method: string;
   /**
    * Source text for the parameter
    */

@@ -1,5 +1,5 @@
 import { RegistryAdapter } from '@travetto/registry';
-import { Class, classConstruct, describeFunction, getAllEntries, safeAssign } from '@travetto/runtime';
+import { Class, classConstruct, describeFunction, safeAssign } from '@travetto/runtime';
 import { CONSTRUCTOR_PROPERTY, SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectableConfig, getDefaultQualifier, InjectableCandidate } from '../types';
@@ -38,7 +38,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     return combineClasses(this.#config, ...data);
   }
 
-  registerFactory(method: string | symbol, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
+  registerFactory(method: string, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
     const { candidates } = this.register();
     candidates[method] ??= {
       class: this.#cls,
@@ -62,7 +62,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   }
 
   finalize(): void {
-    for (const [method] of getAllEntries(this.#config.candidates)) {
+    for (const [method] of Object.keys(this.#config.candidates)) {
       const candidate = this.#config.candidates[method];
       const candidateType = SchemaRegistryIndex.get(candidate.class).getMethodReturnType(method);
       candidate.candidateType = candidateType;
@@ -71,8 +71,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   }
 
   getCandidateConfigs(): InjectableCandidate[] {
-    const entries = getAllEntries(this.#config.candidates).map(([_, item]) => item);
-    return entries
+    return Object.values(this.#config.candidates)
       .filter(item => (item.enabled ?? true) === true || (typeof item.enabled === 'function' && item.enabled()))
       .filter(item => item.method !== CONSTRUCTOR_PROPERTY || !describeFunction(item.candidateType)?.abstract);
   }

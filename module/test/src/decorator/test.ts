@@ -3,13 +3,15 @@ import { ClassInstance, getClass } from '@travetto/runtime';
 import { TestConfig, ThrowableError } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
+type MethodDecorator = (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => PropertyDescriptor | void;
+
 /**
  * The `@AssertCheck` indicates that a function's assert calls should be transformed
  * @augments `@travetto/test:AssertCheck`
  * @kind decorator
  */
 export function AssertCheck(): MethodDecorator {
-  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => descriptor;
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => descriptor;
 }
 
 /**
@@ -24,7 +26,7 @@ export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description?: string | Partial<TestConfig>, ...rest: Partial<TestConfig>[]): MethodDecorator {
-  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value,
       ...(typeof description !== 'string' && description) ? [description] : [],
       ...rest,
@@ -40,7 +42,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
  * @kind decorator
  */
 export function ShouldThrow(state: ThrowableError): MethodDecorator {
-  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value, { shouldThrow: state });
     return descriptor;
   };
@@ -52,7 +54,7 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
  * @kind decorator
  */
 export function Timeout(ms: number): MethodDecorator {
-  return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => {
+  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value, { timeout: ms });
     return descriptor;
   };
