@@ -260,9 +260,9 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
         ('with' in fields ? fields.with : []);
 
       this.#views.set(view,
-        fieldList.reduce<SchemaFieldMap>((acc, value) => {
-          acc[value] = config.fields[value];
-          return acc;
+        fieldList.reduce<SchemaFieldMap>((map, value) => {
+          map[value] = config.fields[value];
+          return map;
         }, {})
       );
     }

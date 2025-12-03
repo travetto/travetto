@@ -135,12 +135,12 @@ class ${uniqueId} extends ${type.mappedClassName} {
         attrs.default = node.initializer;
       }
     } else {
-      const acc = DeclarationUtil.getAccessorPair(node);
+      const pair = DeclarationUtil.getAccessorPair(node);
       attrs.accessor = true;
-      if (!acc.setter) {
+      if (!pair.setter) {
         attrs.access = 'readonly';
       }
-      if (!acc.getter) {
+      if (!pair.getter) {
         attrs.access = 'writeonly';
       } else if (!!typeExpr.undefinable) {
         attrs.required = { active: false };

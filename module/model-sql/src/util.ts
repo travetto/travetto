@@ -92,8 +92,8 @@ export class SQLModelUtil {
       foreign: fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array)
     };
 
-    entry.local.reduce((acc, field) => (acc[field.name] = field) && acc, entry.localMap);
-    entry.foreign.reduce((acc, field) => (acc[field.name] = field) && acc, entry.foreignMap);
+    entry.local.reduce((map, field) => (map[field.name] = field) && map, entry.localMap);
+    entry.foreign.reduce((map, field) => (map[field.name] = field) && map, entry.foreignMap);
 
     this.#schemaFieldsCache.set(config.class, entry);
 

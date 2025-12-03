@@ -71,13 +71,13 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
     const filtered = values
       .filter((value): value is Class => typeof value === 'function')
-      .reduce<Class[]>((acc, cls) => {
+      .reduce<Class[]>((classes, cls) => {
         const parent = getParentClass(cls);
-        if (parent && !acc.includes(parent)) {
-          acc.push(parent);
+        if (parent && !classes.includes(parent)) {
+          classes.push(parent);
         }
-        acc.push(cls);
-        return acc;
+        classes.push(cls);
+        return classes;
       }, []);
 
     const uninitialized = filtered

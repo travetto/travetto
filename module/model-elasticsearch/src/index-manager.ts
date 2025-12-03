@@ -136,20 +136,20 @@ export class IndexManager implements ModelStorageSupport {
    */
   async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
     // Find which fields are gone
-    const removes = change.subs.reduce<string[]>((acc, subChange) => {
-      acc.push(...subChange.fields
+    const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
+      toRemove.push(...subChange.fields
         .filter(event => event.type === 'removing')
         .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
-      return acc;
+      return toRemove;
     }, []);
 
     // Find which types have changed
-    const fieldChanges = change.subs.reduce<string[]>((acc, subChange) => {
-      acc.push(...subChange.fields
+    const fieldChanges = change.subs.reduce<string[]>((toChange, subChange) => {
+      toChange.push(...subChange.fields
         .filter(event => event.type === 'changed')
         .filter(event => event.previous?.type !== event.current?.type)
         .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
-      return acc;
+      return toChange;
     }, []);
 
     const { index } = this.getIdentity(cls);

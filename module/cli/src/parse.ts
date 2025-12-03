@@ -220,19 +220,19 @@ export class CliParseUtil {
    * Parse aliases into categories for registration
    */
   static parseAliases(aliases: string[]): AliasesParseResult {
-    return aliases.reduce<AliasesParseResult>((acc, alias) => {
+    return aliases.reduce<AliasesParseResult>((result, alias) => {
       if (VALID_FLAG.test(alias)) {
         if (alias.startsWith('--')) {
-          acc.long.push(alias);
+          result.long.push(alias);
         } else {
-          acc.short.push(alias);
+          result.short.push(alias);
         }
       } else if (alias.startsWith(ENV_PREFIX)) {
-        acc.env.push(alias);
+        result.env.push(alias);
       } else {
-        acc.raw.push(alias);
+        result.raw.push(alias);
       }
-      return acc;
+      return result;
     }, { long: [], short: [], raw: [], env: [] });
   }
 }

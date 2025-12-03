@@ -258,7 +258,7 @@ export const TypeBuilder: {
           importName: first.importName,
           name: first.name,
           key: 'shape',
-          fieldTypes: subTypes.reduce((acc, subType) => ({ ...acc, ...subType.fieldTypes }), {})
+          fieldTypes: subTypes.reduce((map, subType) => ({ ...map, ...subType.fieldTypes }), {})
         };
       }
       return type;

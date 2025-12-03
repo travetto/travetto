@@ -64,9 +64,9 @@ export class ElasticsearchSchemaUtil {
    */
   static generateAllMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
     const allTypes = SchemaRegistryIndex.getDiscriminatedClasses(cls);
-    return allTypes.reduce<estypes.MappingTypeMapping>((acc, schemaCls) => {
-      DataUtil.deepAssign(acc, this.generateSingleMapping(schemaCls, config));
-      return acc;
+    return allTypes.reduce<estypes.MappingTypeMapping>((mapping, schemaCls) => {
+      DataUtil.deepAssign(mapping, this.generateSingleMapping(schemaCls, config));
+      return mapping;
     }, { properties: {}, dynamic: false });
   }
 

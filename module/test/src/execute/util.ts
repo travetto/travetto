@@ -96,12 +96,12 @@ export class RunnerUtil {
    * Get run events
    */
   static getTestRuns(tests: TestConfig[]): TestRun[] {
-    const events = tests.reduce((acc, test) => {
-      if (!acc.has(test.classId)) {
-        acc.set(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid() });
+    const events = tests.reduce((runs, test) => {
+      if (!runs.has(test.classId)) {
+        runs.set(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid() });
       }
-      acc.get(test.classId)!.methodNames!.push(test.methodName);
-      return acc;
+      runs.get(test.classId)!.methodNames!.push(test.methodName);
+      return runs;
     }, new Map<string, TestRun>());
     return [...events.values()];
   }

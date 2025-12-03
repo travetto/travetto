@@ -226,13 +226,13 @@ export class MongoModelService implements
 
     const operation: Partial<T> = castTo(Object
       .entries(simple)
-      .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((acc, [key, value]) => {
+      .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
         if (value === null || value === undefined) {
-          (acc.$unset ??= {})[key] = value;
+          (document.$unset ??= {})[key] = value;
         } else {
-          (acc.$set ??= {})[key] = value;
+          (document.$set ??= {})[key] = value;
         }
-        return acc;
+        return document;
       }, {}));
 
     const id = item.id;
@@ -500,13 +500,13 @@ export class MongoModelService implements
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
     const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>(
-      (acc, [key, value]) => {
+      (document, [key, value]) => {
         if (value === null || value === undefined) {
-          (acc.$unset ??= {})[key] = value;
+          (document.$unset ??= {})[key] = value;
         } else {
-          (acc.$set ??= {})[key] = value;
+          (document.$set ??= {})[key] = value;
         }
-        return acc;
+        return document;
       }, {});
 
     const filter = MongoUtil.extractWhereFilter(cls, query.where);

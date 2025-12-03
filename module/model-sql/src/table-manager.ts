@@ -112,12 +112,12 @@ export class TableManager {
     try {
       const rootStack = SQLModelUtil.classToStack(cls);
 
-      const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((acc, value) => {
+      const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((result, value) => {
         const path = value.path.map(field => ({ ...field }));
         for (const event of value.fields) {
-          acc[event.type].push([...rootStack, ...path, { ...(event.type === 'removing' ? event.previous : event.current)! }]);
+          result[event.type].push([...rootStack, ...path, { ...(event.type === 'removing' ? event.previous : event.current)! }]);
         }
-        return acc;
+        return result;
       }, { added: [], changed: [], removing: [] });
 
       await Promise.all(changes.added.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));

@@ -52,10 +52,10 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    */
   computeTotal(cls: Class): SuiteResult {
     const suite = SuiteRegistryIndex.getConfig(cls);
-    const total = Object.values(suite.tests).reduce((acc, config) => {
+    const total = Object.values(suite.tests).reduce((map, config) => {
       const status = this.#state[config.classId][config.methodName] ?? 'unknown';
-      acc[status] += 1;
-      return acc;
+      map[status] += 1;
+      return map;
     }, { skipped: 0, passed: 0, failed: 0, unknown: 0 });
 
     return {

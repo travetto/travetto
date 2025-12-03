@@ -983,11 +983,11 @@ ${this.getWhereSQL(cls, where!)}`;
   async bulkProcess(deletes: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
     const out = {
       counts: {
-        delete: deletes.reduce((acc, item) => acc + item.ids.length, 0),
+        delete: deletes.reduce((count, item) => count + item.ids.length, 0),
         error: 0,
-        insert: inserts.filter(item => item.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0),
-        update: updates.filter(item => item.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0),
-        upsert: upserts.filter(item => item.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0)
+        insert: inserts.filter(item => item.stack.length === 1).reduce((count, item) => count + item.records.length, 0),
+        update: updates.filter(item => item.stack.length === 1).reduce((count, item) => count + item.records.length, 0),
+        upsert: upserts.filter(item => item.stack.length === 1).reduce((count, item) => count + item.records.length, 0)
       },
       errors: [],
       insertedIds: new Map()

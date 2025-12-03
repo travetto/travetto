@@ -268,25 +268,25 @@ export class ElasticsearchModelService implements
     await ModelBulkUtil.preStore(cls, operations, this);
 
     type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>>;
-    const body = operations.reduce<(T | BulkDoc | { doc: T })[]>((acc, operation) => {
+    const body = operations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
 
       const core = (operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls });
       const { index } = this.manager.getIdentity(asConstructable<T>(core).constructor);
       const identity: { _index: string, _type?: unknown } = { _index: index };
 
       if (operation.delete) {
-        acc.push({ delete: { ...identity, _id: operation.delete.id } });
+        toRun.push({ delete: { ...identity, _id: operation.delete.id } });
       } else if (operation.insert) {
         const id = this.preUpdate(operation.insert);
-        acc.push({ create: { ...identity, _id: id } }, castTo(operation.insert));
+        toRun.push({ create: { ...identity, _id: id } }, castTo(operation.insert));
       } else if (operation.upsert) {
         const id = this.preUpdate(operation.upsert);
-        acc.push({ index: { ...identity, _id: id } }, castTo(operation.upsert));
+        toRun.push({ index: { ...identity, _id: id } }, castTo(operation.upsert));
       } else if (operation.update) {
         const id = this.preUpdate(operation.update);
-        acc.push({ update: { ...identity, _id: id } }, { doc: operation.update });
+        toRun.push({ update: { ...identity, _id: id } }, { doc: operation.update });
       }
-      return acc;
+      return toRun;
     }, []);
 
     const result = await this.client.bulk({
