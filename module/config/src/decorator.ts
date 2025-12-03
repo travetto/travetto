@@ -10,12 +10,12 @@ import { ConfigOverrideUtil } from './util.ts';
  * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
-export function Config(ns: string) {
+export function Config(namespace: string) {
   return <T extends Class>(cls: T): T => {
     // Declare as part of global config
     SchemaRegistryIndex.getForRegister(cls).register({ interfaces: [ConfigBaseType] });
 
-    ConfigOverrideUtil.setOverrideConfig(cls, ns);
+    ConfigOverrideUtil.setOverrideConfig(cls, namespace);
 
     DependencyRegistryIndex.getForRegister(cls).registerClass();
 
@@ -23,7 +23,7 @@ export function Config(ns: string) {
     cls.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
       const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
-      await config.bindTo(cls, this, ns);
+      await config.bindTo(cls, this, namespace);
       await handle?.call(this);
     };
     return cls;

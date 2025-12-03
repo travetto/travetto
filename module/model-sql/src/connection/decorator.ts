@@ -1,4 +1,4 @@
-import { AsyncItrMethodDescriptor, AsyncMethodDescriptor } from '@travetto/runtime';
+import { AsyncIterableMethodDescriptor, AsyncMethodDescriptor } from '@travetto/runtime';
 import { Connection, TransactionType } from './base.ts';
 
 /**
@@ -29,7 +29,7 @@ export function Connected() {
  */
 export function ConnectedIterator() {
   return function <T extends { connection?: Connection }>(
-    target: T, property: string | symbol, descriptor: AsyncItrMethodDescriptor<T>
+    target: T, property: string | symbol, descriptor: AsyncIterableMethodDescriptor<T>
   ): void {
     const handle = descriptor.value!;
     descriptor.value = async function* (...args: unknown[]): ReturnType<typeof handle> {

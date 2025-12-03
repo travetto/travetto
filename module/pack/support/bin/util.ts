@@ -43,7 +43,7 @@ export class PackUtil {
     const vars = { DIST: workspace, TRV_OUT: RuntimeIndex.outputRoot, ROOT: path.resolve(), MOD: module };
 
     const replaceArgs = (text: string): string => Object.entries(vars)
-      .reduce((str, [key, value]) => str.replaceAll(value, ActiveShellCommand.var(key)), text);
+      .reduce((result, [key, value]) => result.replaceAll(value, ActiveShellCommand.var(key)), text);
 
     const preamble = ActiveShellCommand.script(
       Object.entries(vars).map(([key, value]) => ActiveShellCommand.export(key, value).join(' ')),

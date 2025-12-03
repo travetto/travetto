@@ -29,10 +29,10 @@ export class ConfigurationService {
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
-   * @param ns The namespace of the config to search for, can be dotted for accessing sub namespaces
+   * @param namespace The namespace of the config to search for, can be dotted for accessing sub namespaces
    */
-  #get<T extends Record<string, unknown> = Record<string, unknown>>(ns?: string): T {
-    const parts = (ns ? ns.split('.') : []);
+  #get<T extends Record<string, unknown> = Record<string, unknown>>(namespace?: string): T {
+    const parts = (namespace ? namespace.split('.') : []);
     let sub: Record<string, unknown> = this.#storage;
 
     while (parts.length && sub) {

@@ -14,7 +14,7 @@ export type TypedFunction<R = Any, V = unknown> = (this: V, ...args: Any[]) => R
 
 export type MethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<R, V>>;
 export type AsyncMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<Promise<R>, V>>;
-export type AsyncItrMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<AsyncIterable<R>, V>>;
+export type AsyncIterableMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<AsyncIterable<R>, V>>;
 export type ClassTDecorator<T extends Class = Class> = (target: T) => T | void;
 
 export type Primitive = number | bigint | boolean | string | Date;

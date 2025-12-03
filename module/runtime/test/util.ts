@@ -21,7 +21,7 @@ export class UtilTest {
 
     const values: string[] = [];
     let j = 0;
-    for await (const el of Util.mapAsyncItr(lines, (text, i) => `${text} = ${i}`)) {
+    for await (const el of Util.mapAsyncIterable(lines, (text, i) => `${text} = ${i}`)) {
       values.push(el);
       if ((j += 1) === 2) {
         lines.close();

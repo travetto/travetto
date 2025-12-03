@@ -137,13 +137,13 @@ export abstract class SQLDialect implements DialectState {
   rootAlias = '_ROOT';
 
   aliasCache = new Map<Class, Map<string, Alias>>();
-  ns: string;
+  namespacePrefix: string;
 
-  constructor(ns: string) {
+  constructor(namespacePrefix: string) {
     this.namespace = this.namespace.bind(this);
     this.table = this.table.bind(this);
     this.identifier = this.identifier.bind(this);
-    this.ns = ns ? `${ns}_` : ns;
+    this.namespacePrefix = namespacePrefix ? `${namespacePrefix}_` : namespacePrefix;
   }
 
   /**
@@ -317,7 +317,7 @@ export abstract class SQLDialect implements DialectState {
    * Determine table/field namespace for a given stack location
    */
   namespace(stack: VisitStack[]): string {
-    return `${this.ns}${SQLModelUtil.buildTable(stack)}`;
+    return `${this.namespacePrefix}${SQLModelUtil.buildTable(stack)}`;
   }
 
   /**

@@ -42,7 +42,7 @@ export class CliServiceCommand implements CliCommandShape {
     const maxVersion = Math.max(...all.map(x => `${x.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;
 
-    const resolved = Util.mapAsyncItr(ServiceUtil.triggerServices(action, all), ({ svc, statusText, status, idx }) => ({
+    const resolved = Util.mapAsyncIterable(ServiceUtil.triggerServices(action, all), ({ svc, statusText, status, idx }) => ({
       idx,
       text: cliTpl`${{ identifier: svc.name.padEnd(maxName) }} ${{ type: `${svc.version}`.padStart(maxVersion - 3).padEnd(maxVersion) }} ${statusText}`,
       done: status === 'started'

@@ -94,7 +94,7 @@ export class RepoExecUtil {
     }, mods, mods.length, { max: workerCount, min: workerCount });
 
     if (config.progressMessage && stdoutTerm.interactive) {
-      await stdoutTerm.streamToBottom(Util.mapAsyncItr(work, TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })));
+      await stdoutTerm.streamToBottom(Util.mapAsyncIterable(work, TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })));
     } else {
       for await (const _ of work) {
         // Ensure its all consumed

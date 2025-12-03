@@ -2,7 +2,7 @@ import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 
 import { RenderProvider, RenderState } from '../types.ts';
 import { RenderContext } from './context.ts';
-import { classStr, combinePropsToStr, getChildren, isOfType, visit } from './common.ts';
+import { classString, combinePropsToString, getChildren, isOfType, visit } from './common.ts';
 
 export const SUMMARY_STYLE = Object.entries({
   display: 'none',
@@ -21,13 +21,13 @@ const allowedProps = new Set([
   'width', 'style', 'align', 'valign'
 ]);
 
-const propsToStr = combinePropsToStr.bind(null, allowedProps);
+const propsToString = combinePropsToString.bind(null, allowedProps);
 
-const stdInline = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
-  `<${node.type} ${propsToStr(node.props)}>${await recurse()}</${node.type}>`;
+const standardInline = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
+  `<${node.type} ${propsToString(node.props)}>${await recurse()}</${node.type}>`;
 
-const std = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `${await stdInline(state)}\n`;
-const stdFull = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `\n${await stdInline(state)}\n`;
+const standard = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `${await standardInline(state)}\n`;
+const standardFull = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `\n${await standardInline(state)}\n`;
 
 export const Html: RenderProvider<RenderContext> = {
   finalize: async (html, context, isRoot = false) => {
@@ -65,14 +65,14 @@ export const Html: RenderProvider<RenderContext> = {
   Value: async ({ props }) => props.raw ? `{{{${props.attr}}}}` : `{{${props.attr}}}`,
 
   br: async () => '<br>\n',
-  hr: async (node) => `<table ${propsToStr(node.props)}><th></th></table>`,
-  strong: stdInline, em: stdInline, p: stdFull,
-  h1: stdFull, h2: stdFull, h3: stdFull, h4: stdFull,
-  li: std, ol: stdFull, ul: stdFull,
-  table: stdFull, thead: std, tr: std, td: std, th: std, tbody: std, center: std, img: stdInline,
-  title: std,
-  div: std, span: stdInline, small: stdInline,
-  a: async ({ recurse, props }) => `<a ${propsToStr(props)}>${await recurse()}</a>`,
+  hr: async (node) => `<table ${propsToString(node.props)}><th></th></table>`,
+  strong: standardInline, em: standardInline, p: standardFull,
+  h1: standardFull, h2: standardFull, h3: standardFull, h4: standardFull,
+  li: standard, ol: standardFull, ul: standardFull,
+  table: standardFull, thead: standard, tr: standard, td: standard, th: standard, tbody: standard, center: standard, img: standardInline,
+  title: standard,
+  div: standard, span: standardInline, small: standardInline,
+  a: async ({ recurse, props }) => `<a ${propsToString(props)}>${await recurse()}</a>`,
 
   InkyTemplate: ctx => ctx.recurse(),
   Title: async ({ recurse }) => `<title>${await recurse()}</title>`,
@@ -93,12 +93,12 @@ export const Html: RenderProvider<RenderContext> = {
       if (!elParent.columnVisited) {
         elParent.columnVisited = true;
         if (sibs.length) {
-          sibs[0].props.className = classStr(sibs[0].props.className ?? '', 'first');
-          sibs.at(-1)!.props.className = classStr(sibs.at(-1)!.props.className ?? '', 'last');
+          sibs[0].props.className = classString(sibs[0].props.className ?? '', 'first');
+          sibs.at(-1)!.props.className = classString(sibs.at(-1)!.props.className ?? '', 'last');
         }
       }
     } else {
-      props.className = classStr(props.className ?? '', 'first', 'last');
+      props.className = classString(props.className ?? '', 'first', 'last');
     }
 
     // Check for sizes. If no attribute is provided, default to small-12. Divide evenly for large columns
@@ -134,7 +134,7 @@ export const Html: RenderProvider<RenderContext> = {
 
     // Final HTML output
     return `
-<th ${propsToStr(node.props, classes)}>
+<th ${propsToString(node.props, classes)}>
   <table>
     <tbody>
       <tr>
@@ -146,14 +146,14 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   HLine: async ({ props }) => `
-<table ${propsToStr(props, ['h-line'])}>
+<table ${propsToString(props, ['h-line'])}>
   <tbody>
     <tr><th>&nbsp;</th></tr>
   </tbody>
 </table>`,
 
   Row: async ({ recurse, node }): Promise<string> => `
-<table ${propsToStr(node.props, ['row'])}>
+<table ${propsToString(node.props, ['row'])}>
   <tbody>
     <tr>${await recurse()}</tr>
   </tbody>
@@ -170,19 +170,19 @@ export const Html: RenderProvider<RenderContext> = {
       if (props.expanded) {
         Object.assign(linkProps, { align: 'center', className: 'float-center' });
       }
-      inner = `<a ${propsToStr(linkProps)}>${inner}</a>`;
+      inner = `<a ${propsToString(linkProps)}>${inner}</a>`;
     }
 
     // If the button is expanded, it needs a <center> tag around the content
     if (props.expanded) {
       inner = await Html.Center(createState('Center', { children: [inner] }));
-      rest.className = classStr(rest.className ?? '', 'expand');
+      rest.className = classString(rest.className ?? '', 'expand');
       expander = '\n<td class="expander"></td>';
     }
 
     // The .button class is always there, along with any others on the <button> element
     return `
-<table ${propsToStr(rest, ['button'])}>
+<table ${propsToString(rest, ['button'])}>
   <tbody>
     <tr>
       <td>
@@ -203,14 +203,14 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   Container: async ({ recurse, props }): Promise<string> => `
-<table align="center" ${propsToStr(props, ['container'])}>
+<table align="center" ${propsToString(props, ['container'])}>
   <tbody>
     <tr><td>${await recurse()}</td></tr>
   </tbody>
 </table>`,
 
   BlockGrid: async ({ recurse, props }): Promise<string> => `
-<table ${propsToStr(props, ['block-grid', props.up ? `up-${props.up}` : ''])}>
+<table ${propsToString(props, ['block-grid', props.up ? `up-${props.up}` : ''])}>
   <tbody>
     <tr>${await recurse()}</tr>
   </tbody>
@@ -233,7 +233,7 @@ export const Html: RenderProvider<RenderContext> = {
     }
 
     return `
-<table ${propsToStr(props, ['menu'])}>
+<table ${propsToString(props, ['menu'])}>
   <tbody>
     <tr>
       <td>
@@ -253,8 +253,8 @@ export const Html: RenderProvider<RenderContext> = {
   Item: async ({ recurse, props }): Promise<string> => {
     const { href, target, ...parentAttrs } = props;
     return `
-       <th ${propsToStr(parentAttrs, ['menu-item'])}>
-         <a ${propsToStr({ href, target })}>${await recurse()}</a>
+       <th ${propsToString(parentAttrs, ['menu-item'])}>
+         <a ${propsToString({ href, target })}>${await recurse()}</a>
        </th>`;
   },
 
@@ -262,19 +262,19 @@ export const Html: RenderProvider<RenderContext> = {
     for (const kid of getChildren(node)) {
       Object.assign(kid.props, {
         align: 'center',
-        className: classStr(kid.props.className, 'float-center')
+        className: classString(kid.props.className, 'float-center')
       });
     }
 
     visit(node, child => {
       if (isOfType(child, 'Item')) {
-        child.props.className = classStr(child.props.className, 'float-center');
+        child.props.className = classString(child.props.className, 'float-center');
       }
       return;
     });
 
     return `
-<center ${propsToStr(props)}>
+<center ${propsToString(props)}>
   ${await recurse()}
 </center>
     `;
@@ -286,10 +286,10 @@ export const Html: RenderProvider<RenderContext> = {
     delete props.className;
 
     return `
-<table ${propsToStr(props, ['callout'])}>
+<table ${propsToString(props, ['callout'])}>
   <tbody>
     <tr>
-      <th ${propsToStr(innerProps, ['callout-inner'])}>
+      <th ${propsToString(innerProps, ['callout-inner'])}>
         ${await recurse()}
       </th>
       <th class="expander"></th>
@@ -302,7 +302,7 @@ export const Html: RenderProvider<RenderContext> = {
     const html: string[] = [];
     const buildSpacer = (size: number | string, extraClass: string = ''): string =>
       `
-<table ${propsToStr(props, ['spacer', extraClass])}>
+<table ${propsToString(props, ['spacer', extraClass])}>
   <tbody>
     <tr>
       <td height="${size}px" style="font-size:${size}px;line-height:${size}px;">&nbsp;</td>
@@ -329,7 +329,7 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   Wrapper: async ({ recurse, node }) => `
-<table align="center" ${propsToStr(node.props, ['wrapper'])}>
+<table align="center" ${propsToString(node.props, ['wrapper'])}>
   <tbody>
     <tr>
       <td class="wrapper-inner">

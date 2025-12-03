@@ -115,8 +115,8 @@ export class LineLogFormatter implements LogFormatter {
     }
 
     if (event.modulePath && this.config.location) {
-      const ns = `${event.module}:${event.modulePath}`;
-      let loc = event.line ? `${ns}:${event.line}` : ns;
+      const namespace = `${event.module}:${event.modulePath}`;
+      let loc = event.line ? `${namespace}:${event.line}` : namespace;
       if (this.config.colorize) {
         loc = STYLES.location(loc);
       }

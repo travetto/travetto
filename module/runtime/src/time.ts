@@ -36,12 +36,12 @@ export class TimeUtil {
       return amount.getTime();
     } else if (typeof amount === 'string') {
       const groups: { amount?: string, unit?: TimeUnit } = amount.match(TIME_PATTERN)?.groups ?? {};
-      const amountStr = groups.amount ?? `${amount}`;
+      const amountString = groups.amount ?? `${amount}`;
       unit = groups.unit ?? unit ?? 'ms';
       if (!TIME_UNITS[unit]) {
         return NaN;
       }
-      amount = amountStr.includes('.') ? parseFloat(amountStr) : parseInt(amountStr, 10);
+      amount = amountString.includes('.') ? parseFloat(amountString) : parseInt(amountString, 10);
     }
     return amount * TIME_UNITS[unit ?? 'ms'];
   }

@@ -56,7 +56,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
     const success = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
     const fail = StyleUtil.getStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
     this.#progress = this.#terminal.streamToBottom(
-      Util.mapAsyncItr(
+      Util.mapAsyncIterable(
         this.#results,
         (value) => {
           failed += (value.status === 'failed' ? 1 : 0);

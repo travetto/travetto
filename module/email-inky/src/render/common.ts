@@ -24,7 +24,7 @@ export const visit = (node: JSXElement, onVisit: (fn: JSXElement) => boolean | u
   }
 };
 
-export const classStr = (existing: string | undefined, ...toAdd: string[]): string => {
+export const classString = (existing: string | undefined, ...toAdd: string[]): string => {
   const out = [];
   const seen = new Set<string>();
   for (const item of existing?.split(/\s+/) ?? []) {
@@ -42,8 +42,8 @@ export const classStr = (existing: string | undefined, ...toAdd: string[]): stri
   return out.join(' ');
 };
 
-export const combinePropsToStr = (allowedProps: Set<string>, props: { className?: string } & Record<string, unknown>, addClasses: string[] = []): string => {
-  const out = { ...props, className: classStr(props.className, ...addClasses) };
+export const combinePropsToString = (allowedProps: Set<string>, props: { className?: string } & Record<string, unknown>, addClasses: string[] = []): string => {
+  const out = { ...props, className: classString(props.className, ...addClasses) };
   return Object.entries(out)
     .filter(([key, value]) => allowedProps.has(key) && value !== undefined && value !== null && value !== '')
     .map(([key, value]) => [key === 'className' ? 'class' : key, value])
