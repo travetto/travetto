@@ -19,7 +19,7 @@ export class CompilerWatcher {
   #cleanup: Partial<Record<'tool' | 'workspace' | 'canary', () => (void | Promise<void>)>> = {};
   #watchCanary: string = '.trv/canary.id';
   #lastWorkspaceModified = Date.now();
-  #watchCanaryFreq = 5;
+  #watchCanaryFrequency = 5;
   #root: string;
   #queue: AsyncQueue<CompilerWatchEvent>;
 
@@ -228,15 +228,15 @@ export class CompilerWatcher {
       if (delta > 600) {
         log.error('Restarting canary due to extra long delay');
         this.#lastWorkspaceModified = Date.now(); // Reset
-      } else if (delta > this.#watchCanaryFreq * 2) {
+      } else if (delta > this.#watchCanaryFrequency * 2) {
         this.#queue.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
-      } else if (delta > this.#watchCanaryFreq) {
+      } else if (delta > this.#watchCanaryFrequency) {
         log.error('Restarting parcel due to inactivity');
         await this.#listenWorkspace();
       } else {
         await fs.utimes(full, new Date(), new Date());
       }
-    }, this.#watchCanaryFreq * 1000);
+    }, this.#watchCanaryFrequency * 1000);
 
     this.#cleanup.canary = (): void => clearInterval(canaryId);
   }

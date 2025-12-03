@@ -23,15 +23,15 @@ export class WebConnectUtil {
       next: (error: Error | null | undefined, value: T | undefined | null) => void
     ) => Middleware
   ): Promise<T | undefined> {
-    const connectReq = ConnectRequest.get(ctx.request);
-    const connectRes = ConnectResponse.get();
+    const connectRequest = ConnectRequest.get(ctx.request);
+    const connectResponse = ConnectResponse.get();
 
     const promise = Promise.withResolvers<T | undefined>();
-    connectRes.on('end', () => promise.resolve(null!));
+    connectResponse.on('end', () => promise.resolve(null!));
 
-    handler(connectReq, connectRes, (error, value) => error ? promise.reject(error) : promise.resolve(value!));
+    handler(connectRequest, connectResponse, (error, value) => error ? promise.reject(error) : promise.resolve(value!));
     const result = await promise.promise;
-    connectRes.throwIfSent();
+    connectResponse.throwIfSent();
     return result;
   }
 }

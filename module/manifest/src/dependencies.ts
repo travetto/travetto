@@ -7,7 +7,7 @@ import type { PackageModule } from './types/manifest.ts';
 
 type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { roleRoot?: boolean, parent?: PackageModule };
 
-type Req = {
+type VisitableNode = {
   /** Request package */
   pkg: Package;
   /** Children to visit */
@@ -43,7 +43,7 @@ export class PackageModuleVisitor {
   /**
    * Build a package module
    */
-  #create(sourcePath: string, { main, workspace, prod = false, roleRoot = false, parent }: CreateOpts = {}): Req {
+  #create(sourcePath: string, { main, workspace, prod = false, roleRoot = false, parent }: CreateOpts = {}): VisitableNode {
     const pkg = PackageUtil.readPackage(sourcePath);
     const value = this.#cache[sourcePath] ??= {
       main,
@@ -68,7 +68,7 @@ export class PackageModuleVisitor {
   /**
    * Get monorepo root includes
    */
-  #getMonoRootIncludes(parent: Req): Req[] {
+  #getMonoRootIncludes(parent: VisitableNode): VisitableNode[] {
     if (!(this.#ctx.workspace.mono && !this.#ctx.main.folder)) { // If not mono root, bail
       return [];
     }
@@ -80,7 +80,7 @@ export class PackageModuleVisitor {
   /**
    * Determine default includes
    */
-  #getIncludes(parent: Req): Req[] {
+  #getIncludes(parent: VisitableNode): VisitableNode[] {
     if (this.#ctx.workspace.mono && !this.#ctx.main.folder) { // If mono and not at mono root, bail
       return [];
     }
