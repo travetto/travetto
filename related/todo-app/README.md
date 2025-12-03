@@ -463,15 +463,15 @@ Create `support/create-todo.ts` with the following contents:
 **Code: Creating Todo by fetch**
 ```typescript
 export async function main(key: string, port: number) {
-  const response = await fetch(`http://localhost:${port}/todo`, {
+  const result = await fetch(`http://localhost:${port}/todo`, {
     method: 'POST',
     body: JSON.stringify({ text: `New Todo - ${key}` }),
     headers: {
       'Content-Type': 'application/json'
     }
   })
-    .then(result => result.json());
-  console.log!(response);
+    .then(response => response.json());
+  console.log!(result);
 }
 ```
 
@@ -491,8 +491,8 @@ Now create `support/list-todo.ts` with the following contents:
 **Code: Listing Todos by fetch**
 ```typescript
 export async function main(key: string, port: number) {
-  const response = await fetch(`http://localhost:${port}/todo?q=${key}`).then(result => result.json());
-  console.log!(response);
+  const result = await fetch(`http://localhost:${port}/todo?q=${key}`).then(response => response.json());
+  console.log!(result);
 }
 ```
 
