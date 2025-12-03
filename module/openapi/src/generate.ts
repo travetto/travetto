@@ -51,7 +51,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const fields = SchemaRegistryIndex.get(input.type).getFields(input.view);
     const params: ParameterObject[] = [];
     for (const sub of Object.values(fields)) {
-      const name = sub.name.toString();
+      const name = sub.name;
       if (SchemaRegistryIndex.has(sub.type)) {
         const suffix = (sub.array) ? '[]' : '';
         params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${name}${suffix}` : `${name}${suffix}.`, rootField));
@@ -157,7 +157,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     }
     if (isFieldConfig(input)) {
       if (input.required?.active !== false) {
-        required.push(input.name.toString());
+        required.push(input.name);
       }
       if (input.access === 'readonly') {
         config.readOnly = true;
@@ -305,7 +305,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       responses: {},
       summary: schema.description,
       description: schema.description,
-      operationId: `${endpoint.class.name}_${endpoint.methodName.toString()}`,
+      operationId: `${endpoint.class.name}_${endpoint.methodName}`,
       parameters: []
     };
 

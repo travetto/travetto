@@ -139,7 +139,7 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
  * @kind decorator
  */
 export function CliFlag(config: { full?: string, short?: string, fileExtensions?: string[], envVars?: string[] } = {}) {
-  return function (instance: ClassInstance, property: string | symbol): void {
+  return function (instance: ClassInstance, property: string): void {
     const aliases = [
       ...(config.full ? [config.full.startsWith('-') ? config.full : `--${config.full}`] : []),
       ...(config.short ? [config.short.startsWith('-') ? config.short : `-${config.short}`] : []),

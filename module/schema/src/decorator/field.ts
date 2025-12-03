@@ -8,7 +8,7 @@ type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends strin
 ) => void);
 
 function field<V>(...configs: Partial<SchemaFieldConfig>[]): PropType<V> {
-  return (instance: ClassInstance, property: string | symbol): void => {
+  return (instance: ClassInstance, property: string): void => {
     SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, ...configs);
   };
 }

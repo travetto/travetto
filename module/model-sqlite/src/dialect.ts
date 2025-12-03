@@ -52,7 +52,7 @@ export class SqliteDialect extends SQLDialect {
   getModifyColumnSQL(stack: VisitStack[]): string {
     const field: SchemaFieldConfig = castTo(stack.at(-1));
     const type = this.getColumnType(field);
-    const identifier = this.identifier(field.name.toString());
+    const identifier = this.identifier(field.name);
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${identifier} TYPE ${type} USING (${identifier}::${type});`;
   }
 

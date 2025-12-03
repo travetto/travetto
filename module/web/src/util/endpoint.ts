@@ -122,7 +122,7 @@ export class EndpointUtil {
       }
     }
 
-    let result = this.extractParameterValue(request, param, input.name!.toString(), input.array) ?? undefined;
+    let result = this.extractParameterValue(request, param, input.name!, input.array) ?? undefined;
     for (let i = 0; result === undefined && input.aliases && i < input.aliases.length; i += 1) {
       result = this.extractParameterValue(request, param, input.aliases[i], input.array) ?? undefined;
     }

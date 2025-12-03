@@ -80,7 +80,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
     return this.#config;
   }
 
-  registerTest(method: string | symbol, ...data: Partial<TestConfig>[]): TestConfig {
+  registerTest(method: string, ...data: Partial<TestConfig>[]): TestConfig {
     const suite = this.register();
 
     if (!(method in this.#config.tests)) {
@@ -92,7 +92,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
         lineBodyStart: lines?.[2],
-        methodName: method.toString(),
+        methodName: method,
       });
       this.#config.tests[method] = config;
     }

@@ -19,15 +19,15 @@ const FileMapContract = toConcrete<FileMap>();
  */
 export function Upload(
   param: Partial<EndpointParameterConfig> & UploadConfig = {},
-): (instance: ClassInstance, property: string | symbol, idx: number) => void {
+): (instance: ClassInstance, property: string, idx: number) => void {
 
   const finalConfig = { ...param };
 
-  return (instance: ClassInstance, property: string | symbol, idx: number): void => {
+  return (instance: ClassInstance, property: string, idx: number): void => {
     // Register field
     const cls = getClass(instance);
     const adapter = ControllerRegistryIndex.getForRegister(cls);
-    const getName = (): string => SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx].name!.toString();
+    const getName = (): string => SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx].name!;
 
     adapter.registerFinalizeHandler(() => {
       adapter.registerEndpointInterceptorConfig(

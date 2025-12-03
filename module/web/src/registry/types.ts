@@ -16,7 +16,7 @@ export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunctio
  */
 export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
-  (<U>(target: U, property: string | symbol, descriptor?: EndpointFunctionDescriptor) => void)
+  (<U>(target: U, property: string, descriptor?: EndpointFunctionDescriptor) => void)
 );
 
 export type EndpointParamLocation = 'path' | 'query' | 'body' | 'header';
@@ -97,7 +97,7 @@ export interface EndpointConfig extends CoreConfig {
   /**
    * Name of the endpoint (method name)
    */
-  methodName: string | symbol;
+  methodName: string;
   /**
    * Instance the endpoint is for
    */
@@ -159,7 +159,7 @@ export interface ControllerConfig extends CoreConfig {
   /**
    * Context parameters to bind at create
    */
-  contextParams: Record<string | symbol, boolean>;
+  contextParams: Record<string, boolean>;
 }
 
 /**

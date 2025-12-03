@@ -311,7 +311,7 @@ export class SchemaValidator {
    * @param method The method being invoked
    * @param params The params to validate
    */
-  static async validateMethod<T>(cls: Class<T>, method: string | symbol, params: unknown[], prefixes: (string | symbol | undefined)[] = []): Promise<void> {
+  static async validateMethod<T>(cls: Class<T>, method: string, params: unknown[], prefixes: (string | undefined)[] = []): Promise<void> {
     const errors: ValidationError[] = [];
     const config = SchemaRegistryIndex.get(cls).getMethod(method);
 
@@ -324,7 +324,7 @@ export class SchemaValidator {
         if (param.name && typeof param.name === 'string') {
           error.path = !prefixes[i] ?
             error.path.replace(`${param.name}.`, '') :
-            error.path.replace(param.name, prefixes[i]!.toString());
+            error.path.replace(param.name, prefixes[i]!);
         }
         return error;
       }));

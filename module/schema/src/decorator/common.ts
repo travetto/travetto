@@ -10,7 +10,7 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
  * @kind decorator
  */
 export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
-  return (instanceOrCls: Class | ClassInstance, property?: string | symbol, descriptorOrIdx?: PropertyDescriptor | number): void => {
+  return (instanceOrCls: Class | ClassInstance, property?: string, descriptorOrIdx?: PropertyDescriptor | number): void => {
     const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
     if (!property) {
       adapter.register(config);
@@ -31,7 +31,7 @@ export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export const IsPrivate = (): (instanceOrCls: Class | ClassInstance, property?: string | symbol) => void => Describe({ private: true });
+export const IsPrivate = (): (instanceOrCls: Class | ClassInstance, property?: string) => void => Describe({ private: true });
 
 /**
  * Mark a field/method as ignored

@@ -166,19 +166,19 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return castTo<T>(metadata?.[key]);
   }
 
-  registerField(field: string | symbol, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
+  registerField(field: string, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
     const classConfig = this.register({});
     const config = classConfig.fields[field] ??= { name: field, owner: this.#cls, type: null! };
     const combined = combineInputs(config, data);
     return combined;
   }
 
-  registerFieldMetadata<T>(field: string | symbol, key: symbol, ...data: Partial<T>[]): T {
+  registerFieldMetadata<T>(field: string, key: symbol, ...data: Partial<T>[]): T {
     const config = this.registerField(field);
     return assignMetadata(key, config, data);
   }
 
-  getFieldMetadata<T>(field: string | symbol, key: symbol): T | undefined {
+  getFieldMetadata<T>(field: string, key: symbol): T | undefined {
     const metadata = this.#config?.fields[field]?.metadata;
     return castTo<T>(metadata?.[key]);
   }
@@ -278,7 +278,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return this.#config;
   }
 
-  getField(field: string | symbol): SchemaFieldConfig {
+  getField(field: string): SchemaFieldConfig {
     return this.#config.fields[field];
   }
 

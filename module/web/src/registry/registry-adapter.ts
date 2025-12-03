@@ -58,7 +58,7 @@ function combineEndpointConfigs(controller: ControllerConfig, base: EndpointConf
 function computeParameterLocation(endpoint: EndpointConfig, param: SchemaParameterConfig): EndpointParamLocation {
   const name = param?.name;
   if (!SchemaRegistryIndex.has(param.type)) {
-    if ((param.type === String || param.type === Number) && name && endpoint.path.includes(`:${name.toString()}`)) {
+    if ((param.type === String || param.type === Number) && name && endpoint.path.includes(`:${name}`)) {
       return 'path';
     } else if (param.type === Blob || param.type === File || param.type === ArrayBuffer || param.type === Uint8Array) {
       return 'body';
@@ -97,7 +97,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     return this.#config;
   }
 
-  registerEndpoint(method: string | symbol, ...data: Partial<EndpointConfig>[]): EndpointConfig {
+  registerEndpoint(method: string, ...data: Partial<EndpointConfig>[]): EndpointConfig {
     this.register();
 
     if (!this.#endpoints.has(method)) {
@@ -108,8 +108,8 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
         allowsBody: false,
         class: this.#cls,
         filters: [],
-        methodName: method.toString(),
-        id: `${this.#cls.name}#${method.toString()}`,
+        methodName: method,
+        id: `${this.#cls.name}#${method}`,
         parameters: [],
         interceptorConfigs: [],
         responseHeaders: {},
@@ -124,7 +124,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
     return this.#endpoints.get(method)!;
   }
 
-  registerEndpointParameter(method: string | symbol, idx: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {
+  registerEndpointParameter(method: string, idx: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {
     const endpoint = this.registerEndpoint(method);
     endpoint.parameters[idx] ??= { index: idx, location: 'query' };
     safeAssign(endpoint.parameters[idx], ...config);
@@ -170,7 +170,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   }
 
   registerEndpointInterceptorConfig<T extends WebInterceptor>(
-    property: string | symbol,
+    property: string,
     cls: Class<T>,
     config: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig>

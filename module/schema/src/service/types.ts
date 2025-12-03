@@ -83,7 +83,7 @@ export interface SchemaFieldMap {
   /**
    * List of all fields
    */
-  [key: string | symbol]: SchemaFieldConfig;
+  [key: string]: SchemaFieldConfig;
 }
 
 /**
@@ -223,7 +223,7 @@ export interface SchemaFieldConfig extends SchemaInputConfig {
   /**
    * Field name
    */
-  name: string | symbol;
+  name: string;
   /**
    * Is the field readonly, or write only?, defaults to no restrictions
    */

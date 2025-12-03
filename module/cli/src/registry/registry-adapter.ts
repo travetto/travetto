@@ -42,7 +42,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     );
 
     for (const field of Object.values(schema.fields)) {
-      const fieldName = field.name.toString();
+      const fieldName = field.name;
       const { long: longAliases, short: shortAliases, raw: rawAliases, env: envAliases } = CliParseUtil.parseAliases(field.aliases ?? []);
 
       let short = stripDashes(shortAliases?.[0]) ?? rawAliases.find(alias => alias.length <= 2);

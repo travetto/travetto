@@ -163,12 +163,12 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Identify a name or field (escape it)
    */
-  identifier(field: SchemaFieldConfig | string | symbol): string {
+  identifier(field: SchemaFieldConfig | string): string {
     if (field === '*') {
       return field;
     } else {
-      const name = (typeof field === 'symbol' || typeof field === 'string') ? field : field.name;
-      return `${this.ID_AFFIX}${name.toString()}${this.ID_AFFIX}`;
+      const name = (typeof field === 'string') ? field : field.name;
+      return `${this.ID_AFFIX}${name}${this.ID_AFFIX}`;
     }
   }
 
@@ -214,7 +214,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (config.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, "''"));
     }
-    throw new AppError(`Unknown value type for field ${config.name.toString()}, ${value}`, { category: 'data' });
+    throw new AppError(`Unknown value type for field ${config.name}, ${value}`, { category: 'data' });
   }
 
   /**
@@ -351,7 +351,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Alias a field for usage
    */
-  alias(field: string | symbol | SchemaFieldConfig, alias: string = this.rootAlias): string {
+  alias(field: string | SchemaFieldConfig, alias: string = this.rootAlias): string {
     return `${alias}.${this.identifier(field)}`;
   }
 
@@ -376,12 +376,12 @@ export abstract class SQLDialect implements DialectState {
       },
       onSub: ({ descend, config, path }) => {
         const table = resolve(path);
-        clauses.set(table, { alias: `${config.name.toString().charAt(0)}${idx++}`, path });
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
         return descend();
       },
       onSimple: ({ config, path }) => {
         const table = resolve(path);
-        clauses.set(table, { alias: `${config.name.toString().charAt(0)}${idx++}`, path });
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
       }
     });
 
@@ -766,7 +766,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const config = stack.at(-1)!;
     const columns = SQLModelUtil.getFieldsByLocation(stack).local
       .filter(field => !SchemaRegistryIndex.has(field.type))
-      .toSorted((a, b) => a.name.toString().localeCompare(b.name.toString()));
+      .toSorted((a, b) => a.name.localeCompare(b.name));
     const columnNames = columns.map(column => column.name);
 
     const hasParent = stack.length > 1;
@@ -875,7 +875,7 @@ ${this.getWhereSQL(type, where)};`;
     const config = stack.at(-1)!;
     const orderBy = !config.array ?
       '' :
-      `ORDER BY ${this.rootAlias}.${this.idxField.name.toString()} ASC`;
+      `ORDER BY ${this.rootAlias}.${this.idxField.name} ASC`;
 
     const idField = (stack.length > 1 ? this.parentPathField : this.idField);
 

@@ -155,9 +155,9 @@ export class CliParseUtil {
         if (simple in process.env) {
           const value: string = process.env[simple]!;
           if (field.array) {
-            out.push(...value.split(/\s*,\s*/g).map(item => ({ type: 'flag', fieldName: field.name.toString(), input: envName, value: item }) as const));
+            out.push(...value.split(/\s*,\s*/g).map(item => ({ type: 'flag', fieldName: field.name, input: envName, value: item }) as const));
           } else {
-            out.push({ type: 'flag', fieldName: field.name.toString(), input: envName, value });
+            out.push({ type: 'flag', fieldName: field.name, input: envName, value });
           }
         }
       }
@@ -175,7 +175,7 @@ export class CliParseUtil {
         const [key, ...values] = input.split('=');
         const field = flagMap.get(key);
         if (field) {
-          out.push({ type: 'flag', fieldName: field.name.toString(), input: key, value: values.join('=') });
+          out.push({ type: 'flag', fieldName: field.name, input: key, value: values.join('=') });
         } else {
           out.push({ type: 'unknown', input });
         }
@@ -185,7 +185,7 @@ export class CliParseUtil {
           out.push({ type: 'unknown', input });
         } else {
           const next = inputs[i + 1];
-          const base = { type: 'flag', fieldName: field.name.toString(), input, array: field.array } as const;
+          const base = { type: 'flag', fieldName: field.name, input, array: field.array } as const;
           if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
             if (isBoolFlag(field)) {
               out.push({ ...base, value: !input.startsWith('--no-') });

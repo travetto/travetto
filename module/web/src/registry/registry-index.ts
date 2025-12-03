@@ -44,7 +44,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
     config: Partial<RetainPrimitiveFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
-    return (instanceOrCls: Class | ClassInstance, property?: symbol | string): void => {
+    return (instanceOrCls: Class | ClassInstance, property?: string): void => {
       const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
       if (isClass(property, instanceOrCls)) {
         adapter.registerInterceptorConfig(cls, config, extra);
@@ -97,7 +97,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
     for (const event of events) {
       if ('current' in event) {
         for (const endpoint of this.getController(event.current).endpoints) {
-          this.#endpointsById.set(`${event.current.name}#${endpoint.methodName.toString()}`, endpoint);
+          this.#endpointsById.set(`${event.current.name}#${endpoint.methodName}`, endpoint);
         }
       } else {
         // Match by name

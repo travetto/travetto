@@ -83,7 +83,7 @@ export class SchemaFaker {
     let max = config.max && typeof config.max.n === 'number' ? config.max.n : undefined;
     let precision = config.precision;
 
-    if (/(price|amt|amount)$/i.test(config.name.toString())) {
+    if (/(price|amt|amount)$/i.test(config.name)) {
       precision = [13, 2];
     }
 
@@ -112,7 +112,7 @@ export class SchemaFaker {
    * @param config Field config
    */
   static #date(config: SchemaFieldConfig): Date {
-    const name = config.name.toString().toLowerCase();
+    const name = config.name.toLowerCase();
     const min = config.min && typeof config.min.n !== 'number' ? config.min.n : undefined;
     const max = config.max && typeof config.max.n !== 'number' ? config.max.n : undefined;
 
@@ -133,7 +133,7 @@ export class SchemaFaker {
    * @param config Field config
    */
   static #string(config: SchemaFieldConfig): string {
-    const name = config.name.toString().toLowerCase();
+    const name = config.name.toLowerCase();
 
     if (config.match) {
       const mre = config.match && config.match.re;

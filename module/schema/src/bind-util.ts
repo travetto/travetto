@@ -187,7 +187,7 @@ export class BindUtil {
         if (view) {
           schema = adapter.getFields(view);
           if (!schema) {
-            throw new Error(`View not found: ${view.toString()}`);
+            throw new Error(`View not found: ${view}`);
           }
         }
 
