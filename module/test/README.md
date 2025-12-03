@@ -35,14 +35,14 @@ import { Suite, Test } from '@travetto/test';
 class SimpleTest {
 
   #complexService: {
-    doLongOp(): Promise<number>;
+    doLongOperation(): Promise<number>;
     getText(): string;
   };
 
   @Test()
   async test1() {
-    const val = await this.#complexService.doLongOp();
-    assert(val === 5);
+    const value = await this.#complexService.doLongOperation();
+    assert(value === 5);
   }
 
   @Test()
@@ -212,8 +212,8 @@ class SimpleTest {
 
     await assert.rejects(() => {
       throw new Error('Big Error');
-    }, (err: Error) =>
-      err.message.startsWith('Big') && err.message.length > 4
+    }, (error: Error) =>
+      error.message.startsWith('Big') && error.message.length > 4
     );
   }
 }

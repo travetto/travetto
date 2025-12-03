@@ -141,11 +141,11 @@ Overall, the structure is simple, but drives home the primary use cases of the f
   <span class="token comment">/**
    * Manage expiry state, renewing if allowed
    */</span>
-  <span class="token function">manageExpiry</span><span class="token punctuation">(</span>p<span class="token operator">?</span><span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">manageExpiry</span><span class="token punctuation">(</span>principal<span class="token operator">?</span><span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Enforce expiry, invalidating the principal if expired
    */</span>
-  <span class="token function">enforceExpiry</span><span class="token punctuation">(</span>p<span class="token operator">?</span><span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token function">enforceExpiry</span><span class="token punctuation">(</span>principal<span class="token operator">?</span><span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -172,7 +172,7 @@ When working with framework's authentication, the authenticated information is e
   <span class="token comment">/**
    * Set principal
    */</span>
-  <span class="token keyword">set</span> <span class="token function">principal</span><span class="token punctuation">(</span>p<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">set</span> <span class="token function">principal</span><span class="token punctuation">(</span>value<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Get the authentication token, if it exists
    */</span>

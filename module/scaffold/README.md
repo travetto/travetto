@@ -111,10 +111,10 @@ export class TodoController {
    */
   @Get('/:id')
   async getOne(id: string): Promise<Todo> {
-    const q: ModelQuery<Todo> = { where: { id } };
-    if (typeof q.where !== 'string') {
+    const query: ModelQuery<Todo> = { where: { id } };
+    if (typeof query.where !== 'string') {
     }
-    return this.source.queryOne(Todo, q);
+    return this.source.queryOne(Todo, query);
   }
 
   /**
@@ -138,10 +138,10 @@ export class TodoController {
    */
   @Delete('/:id')
   async remove(id: string): Promise<void> {
-    const q: ModelQuery<Todo> = { where: { id } };
-    if (typeof q.where !== 'string') {
+    const query: ModelQuery<Todo> = { where: { id } };
+    if (typeof query.where !== 'string') {
     }
-    if (await this.source.deleteByQuery(Todo, q) !== 1) {
+    if (await this.source.deleteByQuery(Todo, query) !== 1) {
       throw new NotFoundError(Todo, id);
     }
   }

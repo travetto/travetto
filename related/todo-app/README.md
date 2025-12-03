@@ -229,8 +229,8 @@ export class TodoController {
   _svc: TodoService;
 
   @Inject()
-  set svc(v: TodoService) {
-    this._svc = v;
+  set svc(service: TodoService) {
+    this._svc = service;
   }
 
   /**
@@ -463,15 +463,15 @@ Create `support/create-todo.ts` with the following contents:
 **Code: Creating Todo by fetch**
 ```typescript
 export async function main(key: string, port: number) {
-  const res = await fetch(`http://localhost:${port}/todo`, {
+  const response = await fetch(`http://localhost:${port}/todo`, {
     method: 'POST',
     body: JSON.stringify({ text: `New Todo - ${key}` }),
     headers: {
       'Content-Type': 'application/json'
     }
   })
-    .then(r => r.json());
-  console.log!(res);
+    .then(result => result.json());
+  console.log!(response);
 }
 ```
 
@@ -491,8 +491,8 @@ Now create `support/list-todo.ts` with the following contents:
 **Code: Listing Todos by fetch**
 ```typescript
 export async function main(key: string, port: number) {
-  const res = await fetch(`http://localhost:${port}/todo?q=${key}`).then(r => r.json());
-  console.log!(res);
+  const response = await fetch(`http://localhost:${port}/todo?q=${key}`).then(result => result.json());
+  console.log!(response);
 }
 ```
 

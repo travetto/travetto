@@ -55,7 +55,7 @@ class $Runtime {
   /** Strip off the workspace path from a file */
   stripWorkspacePath(full: string): string;
   /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */
-  toolPath(...rel: string[]): string;
+  toolPath(...parts: string[]): string;
   /** Resolve single module path */
   modulePath(modulePath: string, overrides?: Record<string, string>): string;
   /** Resolve resource paths */
@@ -145,9 +145,9 @@ export class EnvProp<T> {
   /** Remove value */
   clear(): void;
   /** Export value */
-  export(val?: T | undefined | null): Record<string, string>;
+  export(value?: T | undefined | null): Record<string, string>;
   /** Read value as string */
-  get val(): string | undefined;
+  get value(): string | undefined;
   /** Read value as list */
   get list(): string[] | undefined;
   /** Read value as object */
@@ -204,8 +204,8 @@ export function work() {
 
   try {
     1 / 0;
-  } catch (err) {
-    console.error('Divide by zero', { error: err });
+  } catch (error) {
+    console.error('Divide by zero', { error });
   }
   console.debug('End Work');
 }
@@ -225,12 +225,12 @@ function work() {
     try {
         1 / 0;
     }
-    catch (err) {
-        Δconsole.log({ level: "error", import: mod_1, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
+    catch (error) {
+        Δconsole.log({ level: "error", import: mod_1, line: 7, scope: "work", args: ['Divide by zero', { error }] });
     }
     Δconsole.log({ level: "debug", import: mod_1, line: 9, scope: "work", args: ['End Work'] });
 }
-Δfunction.registerFunction(work, mod_1, { hash: 1030247697, lines: [1, 10, 2] });
+Δfunction.registerFunction(work, mod_1, { hash: 159357293, lines: [1, 10, 2] });
 ```
 
 #### Filtering Debug
@@ -271,7 +271,7 @@ Common utilities used throughout the framework. Currently [Util](https://github.
 
 **Code: Sample makeTemplate Usage**
 ```typescript
-const tpl = makeTemplate((name: 'age'|'name', val) => `**${name}: ${val}**`); 
+const tpl = makeTemplate((name: 'age'|'name', value) => `**${name}: ${value}**`); 
 tpl`{{age:20}} {{name: 'bob'}}</>;
 // produces
 '**age: 20** **name: bob**'
@@ -287,7 +287,7 @@ export class TimeUtil {
    * Test to see if a string is valid for relative time
    * @param val
    */
-  static isTimeSpan(val: string): val is TimeSpan;
+  static isTimeSpan(value: string): value is TimeSpan;
   /**
    * Returns time units convert to ms
    * @param amount Number of units to extend

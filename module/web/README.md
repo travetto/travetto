@@ -30,7 +30,7 @@ export class BaseWebMessage<B = unknown, C = unknown> implements WebMessage<B, C
   readonly context: C;
   readonly headers: WebHeaders;
   body?: B;
-  constructor(o: WebMessageInit<B, C> = {});
+  constructor(input: WebMessageInit<B, C> = {});
 }
 ```
 
@@ -667,7 +667,7 @@ export class AlowDenyController {
   }
 
   @Get('/raw')
-  @ExcludeInterceptors(v => v.category === 'response')
+  @ExcludeInterceptors(({ category }) => category === 'response')
   withoutResponse(@QueryParam() value: string) {
 
   }
@@ -742,8 +742,8 @@ Cookies are a unique element, within the framework, as they sit on the request a
 export class CookieJar {
   constructor({ keys, ...options }: CookieJarOptions = {});
   import(cookies: Cookie[]): this;
-  has(name: string, opts: CookieGetOptions = {}): boolean;
-  get(name: string, opts: CookieGetOptions = {}): string | undefined;
+  has(name: string, options: CookieGetOptions = {}): boolean;
+  get(name: string, options: CookieGetOptions = {}): string | undefined;
   set(cookie: Cookie): void;
   getAll(): Cookie[];
   importCookieHeader(header: string | null | undefined): this;

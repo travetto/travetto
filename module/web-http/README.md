@@ -297,7 +297,7 @@ export class WebHttpUtil {
    * Build a simple request handler
    * @param dispatcher
    */
-  static buildHandler(dispatcher: WebDispatcher): (req: HttpRequest, res: HttpResponse) => Promise<void>;
+  static buildHandler(dispatcher: WebDispatcher): (request: HttpRequest, response: HttpResponse) => Promise<void>;
   /**
    * Start an http server
    */
@@ -305,11 +305,11 @@ export class WebHttpUtil {
   /**
    * Create a WebRequest given an incoming http request
    */
-  static toWebRequest(req: HttpRequest): WebRequest;
+  static toWebRequest(request: HttpRequest): WebRequest;
   /**
    * Send WebResponse to outbound http response
    */
-  static async respondToServerResponse(webRes: WebResponse, res: HttpResponse): Promise<void>;
+  static async respondToServerResponse(webResponse: WebResponse, response: HttpResponse): Promise<void>;
 }
 ```
 
@@ -317,11 +317,11 @@ Specifically, looking at `buildHandler`,
 
 **Code: Web Http Utilities**
 ```typescript
-static buildHandler(dispatcher: WebDispatcher): (req: HttpRequest, res: HttpResponse) => Promise<void> {
-    return async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-      const request = this.toWebRequest(req);
-      const response = await dispatcher.dispatch({ request });
-      this.respondToServerResponse(response, res);
+static buildHandler(dispatcher: WebDispatcher): (request: HttpRequest, response: HttpResponse) => Promise<void> {
+    return async (request: HttpRequest, response: HttpResponse): Promise<void> => {
+      const webRequest = this.toWebRequest(request);
+      const webResponse = await dispatcher.dispatch({ request: webRequest });
+      this.respondToServerResponse(webResponse, response);
     };
   }
 ```

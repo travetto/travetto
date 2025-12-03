@@ -149,23 +149,23 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   postConstruct(): void {
     this.#verifier = createVerifier()
       .setSigningAlgorithm(this.#algorithm)
-      .withKeyResolver((kid, cb) => {
+      .withKeyResolver((kid, callback) => {
         const rec = this.config.keyMap[kid];
-        return cb(rec ? null : new AuthenticationError('Invalid'), rec.key);
+        return callback(rec ? null : new AuthenticationError('Invalid'), rec.key);
       });
   }
 
   async verify(token: string): Promise<Principal> {
     try {
-      const jwt: Jwt & { body: { core: Principal } } = await new Promise((res, rej) =>
-        this.#verifier.verify(token, (err, v) => err ? rej(err) : res(castTo(v)))
+      const jwt: Jwt & { body: { core: Principal } } = await new Promise((resolve, reject) =>
+        this.#verifier.verify(token, (error, verified) => error ? reject(error) : resolve(castTo(verified)))
       );
       return jwt.body.core;
-    } catch (err) {
-      if (err instanceof Error && err.name.startsWith('Jwt')) {
-        throw new AuthenticationError(err.message, { category: 'permissions' });
+    } catch (error) {
+      if (error instanceof Error && error.name.startsWith('Jwt')) {
+        throw new AuthenticationError(error.message, { category: 'permissions' });
       }
-      throw err;
+      throw error;
     }
   }
 
@@ -231,9 +231,9 @@ export class CustomCodec implements PrincipalCodec {
   decode(request: WebRequest): Promise<Principal | undefined> | Principal | undefined {
     const [userId, sig] = request.headers.get('USER_ID')?.split(':') ?? [];
     if (userId && sig === BinaryUtil.hash(userId + this.secret)) {
-      let p: Principal | undefined;
+      let principal: Principal | undefined;
       // Lookup user from db, remote system, etc.,
-      return p;
+      return principal;
     }
     return;
   }
