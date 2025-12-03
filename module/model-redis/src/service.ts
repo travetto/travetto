@@ -50,10 +50,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     while (!done) {
       const [cursor, results] = await (
         operation === 'scan' ?
-          this.client.scan(previousCursor, flags).then(x => [x.cursor, x.keys] as const) :
+          this.client.scan(previousCursor, flags).then(result => [result.cursor, result.keys] as const) :
           operation === 'sScan' ?
-            this.client.sScan(key, previousCursor, flags).then(x => [x.cursor, x.members] as const) :
-            this.client.zScan(key, previousCursor, flags).then(x => [x.cursor, x.members.map(item => item.value)] as const)
+            this.client.sScan(key, previousCursor, flags).then(result => [result.cursor, result.members] as const) :
+            this.client.zScan(key, previousCursor, flags).then(result => [result.cursor, result.members.map(item => item.value)] as const)
       );
 
       previousCursor = cursor;
@@ -248,7 +248,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       }
 
       const bodies = (await this.client.mGet(ids))
-        .filter((x): x is string => !!x);
+        .filter((result): result is string => !!result);
 
       for (const body of bodies) {
         try {
@@ -327,10 +327,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
         return;
       }
 
-      const bodies = (await this.client.mGet(
-        ids.map(x => this.#resolveKey(cls, x))
-      ))
-        .filter((x): x is string => !!x);
+      const bodies = (await this.client
+        .mGet(ids.map(id => this.#resolveKey(cls, id))))
+        .filter((result): result is string => !!result);
 
       for (const full of bodies) {
         try {

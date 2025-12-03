@@ -70,7 +70,7 @@ export class MongoModelConfig {
 
     if (this.connectionString) {
       const details = new URL(this.connectionString);
-      this.hosts ??= details.hostname.split(',').filter(x => !!x);
+      this.hosts ??= details.hostname.split(',').filter(host => !!host);
       this.srvRecord ??= details.protocol === 'mongodb+srv:';
       this.namespace ??= details.pathname.replace('/', '');
       Object.assign(this.options, Object.fromEntries(details.searchParams.entries()));
@@ -116,12 +116,12 @@ export class MongoModelConfig {
    */
   get url(): string {
     const hosts = this.hosts!
-      .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port ?? 27017}`)
+      .map(host => (this.srvRecord || host.includes(':')) ? host : `${host}:${this.port ?? 27017}`)
       .join(',');
     const optionString = Object.entries(this.options).map(([key, value]) => `${key}=${value}`).join('&');
     let creds = '';
     if (this.username) {
-      creds = `${[this.username, this.password].filter(x => !!x).join(':')}@`;
+      creds = `${[this.username, this.password].filter(part => !!part).join(':')}@`;
     }
     const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${optionString}`;
     return url;

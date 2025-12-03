@@ -154,14 +154,14 @@ export class DependencyRegistryIndex implements RegistryIndex {
    * Get all available candidates for a given type
    */
   getCandidates<T>(candidateType: Class<T>): InjectableCandidate<T>[] {
-    return this.#resolver.getCandidateEntries(candidateType).map(([_, x]) => castTo<InjectableCandidate<T>>(x));
+    return this.#resolver.getCandidateEntries(candidateType).map(([_, candidate]) => castTo<InjectableCandidate<T>>(candidate));
   }
 
   /**
    * Get candidate instances by target type, with an optional filter
    */
   getInstances<T>(candidateType: Class<T>, predicate?: (config: InjectableCandidate<T>) => boolean): Promise<T[]> {
-    const inputs = this.getCandidates<T>(candidateType).filter(x => !predicate || predicate(x));
+    const inputs = this.getCandidates<T>(candidateType).filter(candidate => !predicate || predicate(candidate));
     return Promise.all(inputs.map(candidate => this.getInstance<T>(candidate.class, candidate.qualifier)));
   }
 

@@ -114,7 +114,7 @@ export class ModelIndexedUtil {
     config?: ComputeConfig & { sep?: string }
   ): { type: string, key: string, sort?: number | Date } {
     const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(config ?? {}), includeSortInFields: false });
-    const key = fields.map(({ value }) => value).map(x => `${x}`).join(config?.sep ?? DEFAULT_SEP);
+    const key = fields.map(({ value }) => value).map(value => `${value}`).join(config?.sep ?? DEFAULT_SEP);
     const indexConfig = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
     return !sorted ? { type: indexConfig.type, key } : { type: indexConfig.type, key, sort: sorted.value };
   }

@@ -86,7 +86,7 @@ export class ModelQuerySuggestUtil {
     return out
       .toSorted((a, b) => a[0].localeCompare(b[0]))
       .map((a) => a[1])
-      .filter((x, i, arr) => x !== arr[i - 1])
+      .filter((result, i, arr) => result !== arr[i - 1])
       .slice(0, limit ?? 10);
   }
 

@@ -34,7 +34,7 @@ export class SQLModelUtil {
   static cleanResults<T, U = T>(state: DialectState, item: T): U;
   static cleanResults<T, U = T>(state: DialectState, item: T | T[]): U | U[] {
     if (Array.isArray(item)) {
-      return item.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(state, x));
+      return item.filter(value => value !== null && value !== undefined).map(value => this.cleanResults(state, value));
     } else if (!DataUtil.isSimpleValue(item)) {
       for (const key of TypedObject.keys(item)) {
         if (item[key] === null || item[key] === undefined || key === state.parentPathField.name || key === state.pathField.name || key === state.idxField.name) {
@@ -88,8 +88,8 @@ export class SQLModelUtil {
     const ret: FieldCacheEntry = {
       localMap: {},
       foreignMap: {},
-      local: fields.filter(x => !SchemaRegistryIndex.has(x.type) && !x.array),
-      foreign: fields.filter(x => SchemaRegistryIndex.has(x.type) || x.array)
+      local: fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array),
+      foreign: fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array)
     };
 
     ret.local.reduce((acc, field) => (acc[field.name] = field) && acc, ret.localMap);

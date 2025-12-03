@@ -443,7 +443,7 @@ export abstract class SQLDialect implements DialectState {
             }
             case '$all': {
               const set = new Set();
-              const arr = [value].flat().filter(x => !set.has(x) && !!set.add(x)).map(item => resolve(item));
+              const arr = [value].flat().filter(item => !set.has(item) && !!set.add(item)).map(item => resolve(item));
               const valueTable = this.parentTable(sStack);
               const alias = `_all_${sStack.length}`;
               const pPath = this.identifier(this.parentPathField.name);
@@ -538,9 +538,9 @@ export abstract class SQLDialect implements DialectState {
     const SQL_OPS = this.SQL_OPS;
 
     if (ModelQueryUtil.has$And(clause)) {
-      return `(${clause.$and.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$and} `)})`;
+      return `(${clause.$and.map(item => this.getWhereGroupingSQL<T>(cls, item)).join(` ${SQL_OPS.$and} `)})`;
     } else if (ModelQueryUtil.has$Or(clause)) {
-      return `(${clause.$or.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$or} `)})`;
+      return `(${clause.$or.map(item => this.getWhereGroupingSQL<T>(cls, item)).join(` ${SQL_OPS.$or} `)})`;
     } else if (ModelQueryUtil.has$Not(clause)) {
       return `${SQL_OPS.$not} (${this.getWhereGroupingSQL<T>(cls, clause.$not)})`;
     } else {
@@ -620,7 +620,7 @@ LEFT OUTER JOIN ${from} ON
     const sortFields = !query.sort ?
       '' :
       SQLModelUtil.orderBy(cls, query.sort)
-        .map(x => this.resolveName(x.stack))
+        .map(item => this.resolveName(item.stack))
         .join(', ');
 
     // TODO: Really confused on this
@@ -649,7 +649,7 @@ ${this.getLimitSQL(cls, query)}`;
       (array ? [castTo<SchemaFieldConfig>(config)] : []);
 
     if (!parent) {
-      let idField = fields.find(x => x.name === this.idField.name);
+      let idField = fields.find(field => field.name === this.idField.name);
       if (!idField) {
         fields.push(idField = this.idField);
       } else {
@@ -663,7 +663,7 @@ ${this.getLimitSQL(cls, query)}`;
         return field.name === this.idField.name && !parent ?
           def.replace('DEFAULT NULL', 'NOT NULL') : def;
       })
-      .filter(x => !!x.trim())
+      .filter(line => !!line.trim())
       .join(',\n  ');
 
     const out = `
@@ -719,9 +719,9 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
     const table = this.namespace(SQLModelUtil.classToStack(cls));
-    const fields: [string, boolean][] = idx.fields.map(x => {
-      const key = TypedObject.keys(x)[0];
-      const value = x[key];
+    const fields: [string, boolean][] = idx.fields.map(field => {
+      const key = TypedObject.keys(field)[0];
+      const value = field[key];
       if (DataUtil.isPlainObject(value)) {
         throw new Error('Unable to supported nested fields for indices');
       }
@@ -765,7 +765,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']): string | undefined {
     const config = stack.at(-1)!;
     const columns = SQLModelUtil.getFieldsByLocation(stack).local
-      .filter(x => !SchemaRegistryIndex.has(x.type))
+      .filter(field => !SchemaRegistryIndex.has(field.type))
       .toSorted((a, b) => a.name.toString().localeCompare(b.name.toString()));
     const columnNames = columns.map(column => column.name);
 
@@ -880,7 +880,7 @@ ${this.getWhereSQL(type, where)};`;
     const idField = (stack.length > 1 ? this.parentPathField : this.idField);
 
     return `
-SELECT ${select.length ? select.map(x => this.alias(x)).join(',') : '*'}
+SELECT ${select.length ? select.map(field => this.alias(field)).join(',') : '*'}
 FROM ${this.table(stack)} ${this.rootAlias}
 WHERE ${this.alias(idField)} IN (${ids.map(id => this.resolveValue(idField, id)).join(', ')})
 ${orderBy};`;
@@ -985,9 +985,9 @@ ${this.getWhereSQL(cls, where!)}`;
       counts: {
         delete: deletes.reduce((acc, item) => acc + item.ids.length, 0),
         error: 0,
-        insert: inserts.filter(x => x.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0),
-        update: updates.filter(x => x.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0),
-        upsert: upserts.filter(x => x.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0)
+        insert: inserts.filter(item => item.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0),
+        update: updates.filter(item => item.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0),
+        upsert: upserts.filter(item => item.stack.length === 1).reduce((acc, item) => acc + item.records.length, 0)
       },
       errors: [],
       insertedIds: new Map()
@@ -1001,10 +1001,10 @@ ${this.getWhereSQL(cls, where!)}`;
       const idx = this.idField.name;
 
       await Promise.all([
-        ...upserts.filter(x => x.stack.length === 1).map(i =>
+        ...upserts.filter(item => item.stack.length === 1).map(i =>
           this.deleteByIds(i.stack, i.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
         ),
-        ...updates.filter(x => x.stack.length === 1).map(i =>
+        ...updates.filter(item => item.stack.length === 1).map(i =>
           this.deleteByIds(i.stack, i.records.map(value => castTo<Record<string | symbol, string>>(value.value)[idx]))
         ),
       ]);

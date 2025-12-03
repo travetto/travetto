@@ -35,7 +35,7 @@ export class ConfigOverrideUtil {
       .registerMetadata<OverrideConfig>(OverrideConfigSymbol, {});
 
     (env.fields ??= {})[field] = (): string | undefined =>
-      process.env[names.find(x => !!process.env[x])!];
+      process.env[names.find(name => !!process.env[name])!];
   }
 
   static setOverrideConfig(cls: Class<Any>, namespace: string): void {

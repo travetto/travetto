@@ -26,8 +26,8 @@ export const Markdown: RenderProvider<RenderContext> = {
   ul: async ({ recurse }) => `\n${await recurse()}\n`,
   ol: async ({ recurse }) => `\n${await recurse()}\n`,
   li: async ({ recurse, stack }) => {
-    const parent = stack.toReversed().find(x => x.type === 'ol' || x.type === 'ul');
-    const depth = stack.filter(x => x.type === 'ol' || x.type === 'ul').length;
+    const parent = stack.toReversed().find(node => node.type === 'ol' || node.type === 'ul');
+    const depth = stack.filter(node => node.type === 'ol' || node.type === 'ul').length;
     return `${'   '.repeat(depth)}${(parent && parent.type === 'ol') ? '1.' : '* '} ${await recurse()}\n`;
   },
   table: async ({ recurse }) => `${await recurse()}`,

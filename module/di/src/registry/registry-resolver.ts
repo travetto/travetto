@@ -38,15 +38,17 @@ export class DependencyRegistryResolver {
     if (qualifiers.has(PrimaryCandidateSymbol)) {
       return PrimaryCandidateSymbol;
     } else {
-      const filtered = resolved.filter(x => !!x).filter(x => this.#defaultSymbols.has(x));
+      const filtered = resolved
+        .filter(qualifier => !!qualifier)
+        .filter(qualifier => this.#defaultSymbols.has(qualifier));
       // If there is only one default symbol
       if (filtered.length === 1) {
         return filtered[0];
       } else if (filtered.length > 1) {
         // If dealing with sub types, prioritize exact matches
         const exact = this.getCandidateEntries(type)
-          .map(([_, x]) => x)
-          .filter(x => x.candidateType === type);
+          .map(([_, candidate]) => candidate)
+          .filter(candidate => candidate.candidateType === type);
 
         if (exact.length === 1) {
           return exact[0].qualifier;

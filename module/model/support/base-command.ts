@@ -44,7 +44,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
     if (provider && !candidates.providers.includes(provider)) {
       return { message: `provider: ${provider} is not a valid provider`, source: 'arg' };
     }
-    const badModel = models.find(x => x !== '*' && !candidates.models.includes(x));
+    const badModel = models.find(model => model !== '*' && !candidates.models.includes(model));
     if (badModel) {
       return { message: `model: ${badModel} is not a valid model`, source: 'arg' };
     }

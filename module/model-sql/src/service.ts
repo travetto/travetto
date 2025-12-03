@@ -215,12 +215,13 @@ export class SQLModelService implements
     );
 
     const get = <K extends keyof BulkOperation<T>>(key: K): Required<BulkOperation<T>>[K][] =>
-      operations.map(x => x[key]).filter((x): x is Required<BulkOperation<T>>[K] => !!x);
+      operations.map(item => item[key]).filter((item): item is Required<BulkOperation<T>>[K] => !!item);
 
     const getStatements = async (key: keyof BulkOperation<T>): Promise<InsertWrapper[]> =>
-      (await SQLModelUtil.getInserts(cls, get(key))).filter(x => !!x.records.length);
+      (await SQLModelUtil.getInserts(cls, get(key))).filter(wrapper => !!wrapper.records.length);
 
-    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
+    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(wrapper => wrapper.id) }]
+      .filter(wrapper => !!wrapper.ids.length);
 
     const [inserts, upserts, updates] = await Promise.all([
       getStatements('insert'),
@@ -306,7 +307,7 @@ export class SQLModelService implements
     const results = await this.query(cls, resolvedQuery);
 
     const modelTypeField: ValidStringFields<ModelType> = castTo(field);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, modelTypeField, prefix, results, x => x, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, modelTypeField, prefix, results, result => result, query?.limit);
   }
 
   @Connected()

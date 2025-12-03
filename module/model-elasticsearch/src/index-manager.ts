@@ -168,7 +168,7 @@ export class IndexManager implements ModelStorageSupport {
         dest: { index: next },
         script: {
           lang: 'painless',
-          source: allChange.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
+          source: allChange.map(part => `ctx._source.remove("${part}");`).join(' ') // Removing
         },
         wait_for_completion: true
       };
@@ -177,7 +177,7 @@ export class IndexManager implements ModelStorageSupport {
       await this.#client.reindex(reindexBody);
 
       await Promise.all(Object.keys(aliases)
-        .map(x => this.#client.indices.delete({ index: x })));
+        .map(alias => this.#client.indices.delete({ index: alias })));
 
       await this.#client.indices.putAlias({ index: next, name: index });
     } else { // Only update the schema

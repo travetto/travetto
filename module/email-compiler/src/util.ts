@@ -183,7 +183,9 @@ export class EmailCompileUtil {
     const styles = [
       options.globalStyles ?? '',
       await options.loader.read('/email/main.scss').catch(() => '')
-    ].filter(x => !!x).join('\n');
+    ]
+      .filter(line => !!line)
+      .join('\n');
 
     if (styles.length) {
       const compiled = await this.compileSass({ data: styles }, options);

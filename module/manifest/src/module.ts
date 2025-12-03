@@ -234,7 +234,7 @@ export class ManifestModuleUtil {
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
     const pkgs = await PackageModuleVisitor.visit(ctx);
-    const modules = await Promise.all([...pkgs].map(x => this.describeModule(ctx, x)));
+    const modules = await Promise.all([...pkgs].map(mod => this.describeModule(ctx, mod)));
     return Object.fromEntries(modules.map(mod => [mod.name, mod]));
   }
 

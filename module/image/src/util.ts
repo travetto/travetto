@@ -44,8 +44,8 @@ export class ImageUtil {
 
     let builder = sharp();
     if (options.w || options.h) {
-      const dims = [options.w, options.h].map(x => x ? Math.trunc(x) : undefined);
-      const fluid = dims.some(x => !x);
+      const dims = [options.w, options.h].map(value => value ? Math.trunc(value) : undefined);
+      const fluid = dims.some(value => !value);
       builder = builder.resize({
         width: dims[0],
         height: dims[1],

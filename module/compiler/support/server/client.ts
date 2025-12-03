@@ -81,7 +81,7 @@ export class CompilerClient {
     if (!info) {
       this.#log.debug('Stopping server, info not found, manual killing');
       return Promise.all([this.#handle.server.kill(), this.#handle.compiler.kill()])
-        .then(results => results.some(x => x));
+        .then(results => results.some(result => result));
     }
 
     await this.#fetch('/stop').catch(() => { }); // Trigger

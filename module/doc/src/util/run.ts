@@ -25,7 +25,10 @@ class DocState {
 
   getId(id: string): string {
     if (!this.ids[id]) {
-      this.ids[id] = ' '.repeat(id.length).split('').map(x => Math.trunc(this.rng() * 16).toString(16)).join('');
+      this.ids[id] = ' '.repeat(id.length)
+        .split('')
+        .map(_ => Math.trunc(this.rng() * 16).toString(16))
+        .join('');
     }
     return this.ids[id];
   }

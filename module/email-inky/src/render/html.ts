@@ -2,7 +2,7 @@ import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 
 import { RenderProvider, RenderState } from '../types.ts';
 import { RenderContext } from './context.ts';
-import { classStr, combinePropsToStr, getKids, isOfType, visit } from './common.ts';
+import { classStr, combinePropsToStr, getChildren, isOfType, visit } from './common.ts';
 
 export const SUMMARY_STYLE = Object.entries({
   display: 'none',
@@ -85,7 +85,7 @@ export const Html: RenderProvider<RenderContext> = {
     let expander = '';
 
     const parent = stack.at(-1)!;
-    const sibs = getKids(parent).filter(x => isOfType(x, 'Column'));
+    const sibs = getChildren(parent).filter(child => isOfType(child, 'Column'));
     const colCount = sibs.length || 1;
 
     if (parent) {
@@ -259,7 +259,7 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   Center: async ({ props, recurse, node }): Promise<string> => {
-    for (const kid of getKids(node)) {
+    for (const kid of getChildren(node)) {
       Object.assign(kid.props, {
         align: 'center',
         className: classStr(kid.props.className, 'float-center')

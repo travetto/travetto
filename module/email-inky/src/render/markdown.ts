@@ -29,8 +29,8 @@ export const Markdown: RenderProvider<RenderContext> = {
   ul: async ({ recurse }) => `\n${await recurse()}`,
   ol: async ({ recurse }) => `\n${await recurse()}`,
   li: async ({ recurse, stack }) => {
-    const parent = stack.toReversed().find(x => x.type === 'ol' || x.type === 'ul');
-    const depth = stack.filter(x => x.type === 'ol' || x.type === 'ul').length;
+    const parent = stack.toReversed().find(node => node.type === 'ol' || node.type === 'ul');
+    const depth = stack.filter(node => node.type === 'ol' || node.type === 'ul').length;
     return `${'   '.repeat(depth)}${(parent && parent.type === 'ol') ? '1.' : '* '} ${await recurse()}\n`;
   },
   th: async ({ recurse }) => `|${await recurse()}`,
@@ -53,7 +53,7 @@ export const Markdown: RenderProvider<RenderContext> = {
 
   Menu: async ({ recurse }) => `\n${await recurse()}`,
   Item: async ({ recurse, stack, props }) => {
-    const depth = stack.filter(x => x.type === 'Menu').length;
+    const depth = stack.filter(node => node.type === 'Menu').length;
     return `${'   '.repeat(depth)}* [${await recurse()}](${props.href})\n`;
   },
   Spacer: async () => '\n\n',

@@ -25,23 +25,23 @@ export class ModelCandidateUtil {
     const names = new Set(models ?? []);
     const all = names.has('*');
     return ModelRegistryIndex.getClasses()
-      .map(x => SchemaRegistryIndex.getBaseClass(x))
-      .filter(x => !models || all || names.has(ModelRegistryIndex.getStoreName(x)));
+      .map(cls => SchemaRegistryIndex.getBaseClass(cls))
+      .filter(cls => !models || all || names.has(ModelRegistryIndex.getStoreName(cls)));
   }
 
   /**
    * Get model names
    */
   static async getModelNames(): Promise<string[]> {
-    return (await this.#getModels()).map(x => ModelRegistryIndex.getStoreName(x)).toSorted();
+    return (await this.#getModels()).map(cls => ModelRegistryIndex.getStoreName(cls)).toSorted();
   }
 
   /**
    * Get all providers that are viable candidates
    */
   static async getProviders(operation?: keyof ModelStorageSupport): Promise<InjectableCandidate[]> {
-    const types = DependencyRegistryIndex.getCandidates(toConcrete<ModelStorageSupport>());
-    return types.filter(x => !operation || x.class.prototype?.[operation]);
+    const candidates = DependencyRegistryIndex.getCandidates(toConcrete<ModelStorageSupport>());
+    return candidates.filter(type => !operation || type.class.prototype?.[operation]);
   }
 
   /**
@@ -57,7 +57,7 @@ export class ModelCandidateUtil {
    * Get a single provider
    */
   static async getProvider(provider: string): Promise<ModelStorageSupport> {
-    const config = (await this.getProviders()).find(x => x.class.name === `${provider}ModelService`)!;
+    const config = (await this.getProviders()).find(candidates => candidates.class.name === `${provider}ModelService`)!;
     return DependencyRegistryIndex.getInstance<ModelStorageSupport>(config.candidateType, config.qualifier);
   }
 

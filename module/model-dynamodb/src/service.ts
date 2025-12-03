@@ -125,7 +125,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             'body=:body',
             expiry !== undefined ? `${EXP_ATTR}=:expr` : undefined,
             ...expr
-          ].filter(x => !!x).join(', ')}`,
+          ].filter(part => !!part).join(', ')}`,
           ExpressionAttributeValues: {
             ':body': toValue(JSON.stringify(item)),
             ...(expiry !== undefined ? { ':expr': toValue(expiry) } : {}),
@@ -374,7 +374,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       TableName: this.#resolveTable(cls),
       IndexName: idxName,
       ProjectionExpression: 'id',
-      KeyConditionExpression: [sort ? `${idxName}_sort__ = :${idxName}_sort` : '', `${idxName}__ = :${idxName}`].filter(x => !!x).join(' and '),
+      KeyConditionExpression: [sort ? `${idxName}_sort__ = :${idxName}_sort` : '', `${idxName}__ = :${idxName}`]
+        .filter(expr => !!expr)
+        .join(' and '),
       ExpressionAttributeValues: {
         [`:${idxName}`]: toValue(key),
         ...(sort ? { [`:${idxName}_sort`]: toValue(+sort) } : {})

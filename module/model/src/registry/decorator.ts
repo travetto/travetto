@@ -29,7 +29,7 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
  * @kind decorator
  */
 export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
-  if (indices.some(x => x.fields.some(field => field === 'id'))) {
+  if (indices.some(config => config.fields.some(field => field === 'id'))) {
     throw new AppError('Cannot create an index with the id field');
   }
   return function (cls: Class<T>): void {

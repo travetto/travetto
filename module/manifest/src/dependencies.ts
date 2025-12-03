@@ -1,7 +1,7 @@
 import { PackageUtil } from './package.ts';
 import { path } from './path.ts';
 
-import type { Package, PackageDepType } from './types/package.ts';
+import type { Package, PackageDependencyType } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 import type { PackageModule } from './types/manifest.ts';
 
@@ -24,7 +24,8 @@ type Req = {
 export class PackageModuleVisitor {
 
   static async visit(ctx: ManifestContext): Promise<Iterable<PackageModule>> {
-    const visitor = new PackageModuleVisitor(ctx, Object.fromEntries((await PackageUtil.resolveWorkspaces(ctx)).map(x => [x.name, x.path])));
+    const visitor = new PackageModuleVisitor(ctx, Object.fromEntries((await PackageUtil.resolveWorkspaces(ctx))
+      .map(workspace => [workspace.name, workspace.path])));
     return visitor.visit();
   }
 
@@ -59,8 +60,8 @@ export class PackageModuleVisitor {
       }
     };
 
-    const deps: PackageDepType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
-    const children = Object.fromEntries(deps.flatMap(x => Object.entries(pkg[x] ?? {})));
+    const deps: PackageDependencyType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
+    const children = Object.fromEntries(deps.flatMap(dependency => Object.entries(pkg[dependency] ?? {})));
     return { pkg, value, children, parent };
   }
 
@@ -103,7 +104,7 @@ export class PackageModuleVisitor {
     const mapping = new Map([...mods].map(item => [item.name, { parent: new Set(item.state.parentSet), item }]));
 
     // All first-level dependencies should have role filled in (for propagation)
-    for (const dependency of [...mods].filter(x => x.state.roleRoot)) {
+    for (const dependency of [...mods].filter(mod => mod.state.roleRoot)) {
       dependency.state.roleSet.clear(); // Ensure the roleRoot is empty
       for (const child of dependency.state.childSet) { // Visit children
         const childDependency = mapping.get(child)!.item;
@@ -115,7 +116,7 @@ export class PackageModuleVisitor {
 
     // Visit all nodes
     while (mapping.size > 0) {
-      const toProcess = [...mapping.values()].filter(x => x.parent.size === 0);
+      const toProcess = [...mapping.values()].filter(item => item.parent.size === 0);
       if (!toProcess.length) {
         throw new Error(`We have reached a cycle for ${[...mapping.keys()]}`);
       }
@@ -142,7 +143,7 @@ export class PackageModuleVisitor {
     }
 
     // Mark as standard at the end
-    for (const dependency of [...mods].filter(x => x.state.roleRoot)) {
+    for (const dependency of [...mods].filter(mod => mod.state.roleRoot)) {
       dependency.state.roleSet = new Set(['std']);
     }
 

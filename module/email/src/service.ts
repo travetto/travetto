@@ -35,7 +35,7 @@ export class MailService {
         RuntimeResources.read(`${key}.compiled.html`),
         RuntimeResources.read(`${key}.compiled.text`),
         RuntimeResources.read(`${key}.compiled.subject`)
-      ].map(x => x.then(MailUtil.purgeBrand)));
+      ].map(file => file.then(MailUtil.purgeBrand)));
 
       this.#compiled.set(key, { html, text, subject });
     }

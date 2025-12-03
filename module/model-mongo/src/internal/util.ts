@@ -68,9 +68,9 @@ export class MongoUtil {
    */
   static extractWhereClause<T>(cls: Class<T>, clause: WhereClause<T>): Record<string, unknown> {
     if (ModelQueryUtil.has$And(clause)) {
-      return { $and: clause.$and.map(x => this.extractWhereClause<T>(cls, x)) };
+      return { $and: clause.$and.map(item => this.extractWhereClause<T>(cls, item)) };
     } else if (ModelQueryUtil.has$Or(clause)) {
-      return { $or: clause.$or.map(x => this.extractWhereClause<T>(cls, x)) };
+      return { $or: clause.$or.map(item => this.extractWhereClause<T>(cls, item)) };
     } else if (ModelQueryUtil.has$Not(clause)) {
       return { $nor: [this.extractWhereClause<T>(cls, clause.$not)] };
     } else {
@@ -94,10 +94,10 @@ export class MongoUtil {
 
       if (subpath === 'id') {
         if (!firstKey) {
-          out._id = Array.isArray(value) ? value.map(x => this.uuid(x)) : this.uuid(`${value}`);
+          out._id = Array.isArray(value) ? value.map(subValue => this.uuid(subValue)) : this.uuid(`${value}`);
         } else if (firstKey === '$in' || firstKey === '$nin' || firstKey === '$eq' || firstKey === '$ne') {
           const temp = value[firstKey];
-          out._id = { [firstKey]: Array.isArray(temp) ? temp.map(x => this.uuid(x)) : this.uuid(`${temp}`) };
+          out._id = { [firstKey]: Array.isArray(temp) ? temp.map(subValue => this.uuid(subValue)) : this.uuid(`${temp}`) };
         } else {
           throw new AppError('Invalid id query');
         }
@@ -154,10 +154,10 @@ export class MongoUtil {
     const textFields: string[] = [];
     SchemaRegistryIndex.visitFields(cls, (field, path) => {
       if (field.type === PointImpl) {
-        const name = [...path, field].map(x => x.name).join('.');
+        const name = [...path, field].map(schema => schema.name).join('.');
         out.push({ [name]: '2d' });
       } else if (field.specifiers?.includes('text') && (field.specifiers?.includes('long') || field.specifiers.includes('search'))) {
-        const name = [...path, field].map(x => x.name).join('.');
+        const name = [...path, field].map(schema => schema.name).join('.');
         textFields.push(name);
       }
     });
@@ -173,7 +173,7 @@ export class MongoUtil {
 
   static getPlainIndex(idx: IndexConfig<ModelType>): PlainIdx {
     let out: PlainIdx = {};
-    for (const config of idx.fields.map(x => this.toIndex(x))) {
+    for (const config of idx.fields.map(value => this.toIndex(value))) {
       out = Object.assign(out, config);
     }
     return out;
@@ -182,8 +182,8 @@ export class MongoUtil {
   static getIndices<T extends ModelType>(cls: Class<T>, indices: IndexConfig<ModelType>[] = []): [BasicIdx, IdxCfg][] {
     return [
       ...indices.map(idx => [this.getPlainIndex(idx), (idx.type === 'unique' ? { unique: true } : {})] as const),
-      ...this.getExtraIndices(cls).map((x) => [x, {}] as const)
-    ].map(x => [...x]);
+      ...this.getExtraIndices(cls).map((idx) => [idx, {}] as const)
+    ].map(idx => [...idx]);
   }
 
   static prepareCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor<T | MongoWithId<T>>, query: PageableModelQuery<T>): FindCursor<T> {
@@ -201,7 +201,7 @@ export class MongoUtil {
     }
 
     if (query.sort) {
-      cursor = cursor.sort(Object.assign({}, ...query.sort.map(x => this.extractSimple(cls, x))));
+      cursor = cursor.sort(Object.assign({}, ...query.sort.map(item => this.extractSimple(cls, item))));
     }
 
     cursor = cursor.limit(Math.trunc(query.limit ?? 200));

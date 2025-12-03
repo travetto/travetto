@@ -30,7 +30,7 @@ export class EmailCompiler {
         folder: folder => folder === 'support',
         file: file => EmailCompileUtil.isTemplateFile(file.sourceFile)
       })
-      .map(x => x.sourceFile);
+      .map(file => file.sourceFile);
   }
 
   /**

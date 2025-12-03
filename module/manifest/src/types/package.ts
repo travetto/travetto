@@ -55,6 +55,6 @@ export type Package = {
   publishConfig?: { access?: 'restricted' | 'public' };
 };
 
-export type PackageDepType = 'dependencies' | 'devDependencies' | 'optionalDependencies' | 'peerDependencies';
+export type PackageDependencyType = 'dependencies' | 'devDependencies' | 'optionalDependencies' | 'peerDependencies';
 
 export type PackageWorkspaceEntry = { name: string, path: string };

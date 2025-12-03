@@ -34,7 +34,7 @@ export function highlight(text: string, lang: string): string | undefined {
   });
 
   text = text
-    .replace(/&#(\d+);/g, (x, code) => String.fromCharCode(code))
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(code))
     .replace(/&[a-z][^;]*;/g, a => tokenMapping[a] || a);
 
   try {

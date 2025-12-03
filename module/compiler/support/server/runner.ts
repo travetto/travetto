@@ -31,7 +31,8 @@ export class CompilerRunner {
       log.debug('Skipped');
       return;
     } else {
-      log.debug(`Started watch=${watch} changed=${changed.slice(0, 10).map(x => `${x.module}/${x.file}`)}`);
+      const changedList = changed.slice(0, 10).map(event => `${event.module}/${event.file}`);
+      log.debug(`Started watch=${watch} changed=${changedList.join(', ')}`);
     }
 
     const main = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');

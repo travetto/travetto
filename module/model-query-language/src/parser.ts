@@ -164,7 +164,7 @@ export class QueryLanguageParser {
         return castTo({ [`$${node.operation!}`]: this.convert(node.value) });
       }
       case 'group': {
-        return castTo({ [`$${node.operation!}`]: node.value.map(x => this.convert(x)) });
+        return castTo({ [`$${node.operation!}`]: node.value.map(value => this.convert(value)) });
       }
       case 'clause': {
         const parts = node.field!.split('.');

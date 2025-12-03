@@ -1,6 +1,6 @@
 import { JSXElement, isJSXElement } from '@travetto/email-inky/jsx-runtime';
 
-export const getKids = (node: JSXElement): JSXElement[] => {
+export const getChildren = (node: JSXElement): JSXElement[] => {
   const kids = node?.props?.children;
   let result: unknown[] = [];
   if (kids) {
@@ -16,7 +16,7 @@ export const visit = (node: JSXElement, onVisit: (fn: JSXElement) => boolean | u
       return true;
     }
   }
-  for (const item of getKids(node)) {
+  for (const item of getChildren(node)) {
     const result = visit(item, onVisit, depth + 1);
     if (result) {
       return;

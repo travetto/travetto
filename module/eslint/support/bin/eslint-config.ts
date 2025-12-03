@@ -38,7 +38,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
           rules: tsEslintPlugin.rules,
         },
         'unused-imports': unusedImports,
-        ...(Object.fromEntries(plugins.map(x => [x.name, x])))
+        ...(Object.fromEntries(plugins.map(plugin => [plugin.name, plugin])))
       },
       rules: {
         ...STD_RULES,
@@ -58,7 +58,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
         'unused-imports': unusedImports,
       },
       rules: {
-        ...Object.fromEntries(Object.entries(STD_RULES).filter(x => !x[0].startsWith('@typescript'))),
+        ...Object.fromEntries(Object.entries(STD_RULES).filter(rule => !rule[0].startsWith('@typescript'))),
       }
     },
     {

@@ -66,7 +66,7 @@ export class ConfigurationService {
 
     const specs = possible
       .flat()
-      .filter(x => !!x)
+      .filter(data => !!data)
       .toSorted((a, b) => a.priority - b.priority);
 
     for (const spec of specs) {

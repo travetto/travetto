@@ -23,7 +23,7 @@ export class MemoryModelConfig {
 }
 
 function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string): string {
-  return [cls.Ⲑid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
+  return [cls.Ⲑid, typeof idx === 'string' ? idx : idx.name, suffix].filter(part => !!part).join(':');
 }
 
 function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number): string | undefined {

@@ -19,7 +19,7 @@ export class DocResolveUtil {
 
     if (result.content) {
       line = result.content.split(/\n/g)
-        .findIndex(x => new RegExp(`(class|interface|function)[ ]+${title.replaceAll('$', '\\$')}`).test(x));
+        .findIndex(lineText => new RegExp(`(class|interface|function)[ ]+${title.replaceAll('$', '\\$')}`).test(lineText));
       if (line < 0) {
         line = 0;
       } else {

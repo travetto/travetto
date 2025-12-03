@@ -367,9 +367,9 @@ export class MongoModelService implements
 
     if (out.counts) {
       out.counts.delete = result.deletedCount;
-      out.counts.update = operations.filter(x => x.update).length;
+      out.counts.update = operations.filter(item => item.update).length;
       out.counts.insert = result.insertedCount;
-      out.counts.upsert = operations.filter(x => x.upsert).length;
+      out.counts.upsert = operations.filter(item => item.upsert).length;
     }
 
     if (result.hasWriteErrors()) {

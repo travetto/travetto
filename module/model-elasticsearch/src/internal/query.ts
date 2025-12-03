@@ -52,8 +52,8 @@ export class ElasticsearchQueryUtil {
    * Build sort mechanism
    */
   static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): estypes.Sort {
-    return sort.map<estypes.SortOptions>(x => {
-      const item = this.extractSimple(x);
+    return sort.map<estypes.SortOptions>(option => {
+      const item = this.extractSimple(option);
       const key = Object.keys(item)[0];
       const value: boolean | -1 | 1 = castTo(item[key]);
       return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
@@ -92,10 +92,10 @@ export class ElasticsearchQueryUtil {
 
           switch (subKey) {
             case '$all': {
-              const arr = Array.isArray(value) ? value : [value];
+              const values = Array.isArray(value) ? value : [value];
               items.push({
                 bool: {
-                  must: arr.map(x => ({ term: { [subPath]: x } }))
+                  must: values.map(term => ({ term: { [subPath]: term } }))
                 }
               });
               break;
@@ -189,9 +189,9 @@ export class ElasticsearchQueryUtil {
    */
   static extractWhereQuery<T>(cls: Class<T>, clause: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
     if (ModelQueryUtil.has$And(clause)) {
-      return { bool: { must: clause.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
+      return { bool: { must: clause.$and.map(item => this.extractWhereQuery<T>(cls, item, config)) } };
     } else if (ModelQueryUtil.has$Or(clause)) {
-      return { bool: { should: clause.$or.map(x => this.extractWhereQuery<T>(cls, x, config)), ['minimum_should_match']: 1 } };
+      return { bool: { should: clause.$or.map(item => this.extractWhereQuery<T>(cls, item, config)), ['minimum_should_match']: 1 } };
     } else if (ModelQueryUtil.has$Not(clause)) {
       return { bool: { ['must_not']: this.extractWhereQuery<T>(cls, clause.$not, config) } };
     } else {

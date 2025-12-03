@@ -21,7 +21,7 @@ export class LogFormatUtil {
 
   /** Get log message */
   static getLogMessage(event: LogEvent, options: InspectOptions = INSPECT_OPTIONS): string {
-    const formatted = event.args?.map(x => typeof x === 'string' ? x : inspect(x, options)) ?? [];
+    const formatted = event.args?.map(arg => typeof arg === 'string' ? arg : inspect(arg, options)) ?? [];
     return (event.message ? [event.message, ...formatted] : formatted).join(' ');
   }
 }

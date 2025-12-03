@@ -52,7 +52,7 @@ export class DocCommand implements CliCommandShape {
       return;
     }
 
-    const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
+    const args = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
     for await (const { action, file } of watchCompiler({ restartOnExit: true })) {
       if (action === 'update' && file === this.input) {
         const subProcess = spawn('npx', ['trv', ...args], {

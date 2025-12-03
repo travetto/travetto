@@ -47,9 +47,9 @@ export class BulkProcessError extends AppError<{ errors: BulkErrorItem[] }> {
     super('Bulk processing errors have occurred', {
       category: 'data',
       details: {
-        errors: errors.map(x => {
-          const { message, type, details: { errors: subErrors } = {} } = x.error;
-          return { message, type, errors: subErrors, idx: x.idx };
+        errors: errors.map(error => {
+          const { message, type, details: { errors: subErrors } = {} } = error.error;
+          return { message, type, errors: subErrors, idx: error.idx };
         })
       }
     });

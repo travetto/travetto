@@ -103,7 +103,7 @@ export class ManifestIndex {
         }
       }
     }
-    this.#modulesByName = Object.fromEntries(this.#modules.map(x => [x.name, x]));
+    this.#modulesByName = Object.fromEntries(this.#modules.map(mod => [mod.name, mod]));
 
     // Store child information
     for (const mod of this.#modules) {
@@ -125,7 +125,7 @@ export class ManifestIndex {
    * @returns
    */
   getWorkspaceModules(): IndexedModule[] {
-    return this.#modules.filter(x => x.workspace);
+    return this.#modules.filter(mod => mod.workspace);
   }
 
   /**
@@ -206,13 +206,13 @@ export class ManifestIndex {
    */
   getModuleList(mode: 'workspace' | 'all', exprList: string = ''): Set<string> {
     const allMods = Object.keys(this.#manifest.modules);
-    const active = new Set<string>(mode === 'workspace' ? this.getWorkspaceModules().map(x => x.name) : allMods);
+    const active = new Set<string>(mode === 'workspace' ? this.getWorkspaceModules().map(item => item.name) : allMods);
 
     for (const expr of exprList.split(/,/g)) {
       const [, neg, mod] = expr.trim().match(/(-|[+])?([^+\- ]{1,150})$/) ?? [];
       if (mod) {
         const pattern = new RegExp(`^${mod.replace(/[*]/g, '.*')}$`);
-        for (const moduleName of allMods.filter(x => pattern.test(x))) {
+        for (const moduleName of allMods.filter(item => pattern.test(item))) {
           active[neg ? 'delete' : 'add'](moduleName);
         }
       }
@@ -248,7 +248,7 @@ export class ManifestIndex {
     const base = this.#manifest.workspace.path;
     const lookup = this.#arbitraryLookup ??= ManifestUtil.lookupTrie(
       Object.values(this.#manifest.modules),
-      x => x.sourceFolder.split('/'),
+      mod => mod.sourceFolder.split('/'),
       sub =>
         !existsSync(path.resolve(base, ...sub, 'package.json')) &&
         !existsSync(path.resolve(base, ...sub, '.git'))

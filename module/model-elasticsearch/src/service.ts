@@ -519,8 +519,8 @@ export class ElasticsearchModelService implements
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = await Promise.all(result.hits.hits.map(x => this.postLoad(cls, x)));
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (x, value) => value, query && query.limit);
+    const all = await Promise.all(result.hits.hits.map(hit => this.postLoad(cls, hit)));
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (_, value) => value, query && query.limit);
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
@@ -532,8 +532,8 @@ export class ElasticsearchModelService implements
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = await Promise.all(result.hits.hits.map(x => castTo<T>(({ [field]: field === 'id' ? x._id : x._source![field] }))));
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, x => x, query && query.limit);
+    const all = await Promise.all(result.hits.hits.map(hit => castTo<T>(({ [field]: field === 'id' ? hit._id : hit._source![field] }))));
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query && query.limit);
   }
 
   // Facet

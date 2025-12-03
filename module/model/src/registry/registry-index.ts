@@ -112,7 +112,7 @@ export class ModelRegistryIndex implements RegistryIndex {
    * Get Index
    */
   getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
-    const config = this.getConfig(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
+    const config = this.getConfig(cls).indices?.find((idx): idx is IndexConfig<T> => idx.name === name);
     if (!config) {
       throw new NotFoundError(`${cls.name} Index`, `${name}`);
     }
@@ -126,7 +126,7 @@ export class ModelRegistryIndex implements RegistryIndex {
    * Get Indices
    */
   getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
-    return (this.getConfig(cls).indices ?? []).filter((x): x is IndexConfig<T> => !supportedTypes || supportedTypes.includes(x.type));
+    return (this.getConfig(cls).indices ?? []).filter((idx): idx is IndexConfig<T> => !supportedTypes || supportedTypes.includes(idx.type));
   }
 
   /**
