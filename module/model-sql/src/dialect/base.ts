@@ -154,7 +154,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Hash a value
    */
-  abstract hash(inp: string): string;
+  abstract hash(input: string): string;
 
   executeSQL<T>(sql: string): Promise<{ records: T[], count: number }> {
     return this.connection.execute<T>(this.connection.active, sql);

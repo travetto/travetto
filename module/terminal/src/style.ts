@@ -74,9 +74,9 @@ export class StyleUtil {
   /**
    * Build style palette, with support for background theme awareness
    */
-  static getPalette<K extends string>(inp: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
+  static getPalette<K extends string>(input: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
     return TypedObject.fromEntries(
-      TypedObject.entries(inp).map(([key, value]) => [key, this.getThemedStyle(value)]));
+      TypedObject.entries(input).map(([key, value]) => [key, this.getThemedStyle(value)]));
   }
 
   /**

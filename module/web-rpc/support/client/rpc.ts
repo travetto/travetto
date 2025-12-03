@@ -102,11 +102,11 @@ export function getBody(inputs: unknown[], isBodyRequest: boolean): { body: Form
   const plainInputs = inputs.map(value => isBlobLike(value) ? null : value);
   const form = new FormData();
 
-  for (const inp of inputs.filter(isBlobLike)) {
-    if (inp instanceof Blob) {
-      form.append('file', inp, (inp instanceof File) ? inp.name : undefined);
+  for (const input of inputs.filter(isBlobLike)) {
+    if (input instanceof Blob) {
+      form.append('file', input, (input instanceof File) ? input.name : undefined);
     } else {
-      for (const [name, blob] of Object.entries(inp)) {
+      for (const [name, blob] of Object.entries(input)) {
         form.append(name, blob, (blob instanceof File) ? blob.name : undefined);
       }
     }

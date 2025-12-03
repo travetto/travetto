@@ -144,9 +144,9 @@ export class WorkPool {
     const queue = new AsyncQueue<O>();
     const result = this.run(worker, input, {
       ...options,
-      onComplete: (event, inp, finishIdx) => {
+      onComplete: (event, value, finishIdx) => {
         queue.add(event);
-        options?.onComplete?.(event, inp, finishIdx);
+        options?.onComplete?.(event, value, finishIdx);
       }
     });
     result.finally(() => queue.close());
@@ -164,9 +164,9 @@ export class WorkPool {
     const queue = new AsyncQueue<{ idx: number, value: O, total: number }>();
     const result = this.run(worker, input, {
       ...options,
-      onComplete: (event, inp, finishIdx) => {
+      onComplete: (event, value, finishIdx) => {
         queue.add({ value: event, idx: finishIdx, total });
-        options?.onComplete?.(event, inp, finishIdx);
+        options?.onComplete?.(event, value, finishIdx);
       }
     });
     result.finally(() => queue.close());

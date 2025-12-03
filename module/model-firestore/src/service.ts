@@ -12,8 +12,8 @@ import { FirestoreModelConfig } from './config.ts';
 
 const clone = structuredClone;
 
-const toSimpleObj = <T>(inp: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
-  JSON.parse(JSON.stringify(inp, (_, value) => value ?? null), (_, value) => value ?? missingValue);
+const toSimpleObj = <T>(input: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
+  JSON.parse(JSON.stringify(input, (_, value) => value ?? null), (_, value) => value ?? missingValue);
 
 /**
  * A model service backed by Firestore

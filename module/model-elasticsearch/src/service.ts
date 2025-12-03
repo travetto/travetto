@@ -86,10 +86,10 @@ export class ElasticsearchModelService implements
   /**
    * Convert _id to id
    */
-  async postLoad<T extends ModelType>(cls: Class<T>, inp: estypes.SearchHit<T> | estypes.GetGetResult<T>): Promise<T> {
+  async postLoad<T extends ModelType>(cls: Class<T>, input: estypes.SearchHit<T> | estypes.GetGetResult<T>): Promise<T> {
     let item = {
-      ...(inp._id ? { id: inp._id } : {}),
-      ...inp._source!,
+      ...(input._id ? { id: input._id } : {}),
+      ...input._source!,
     };
 
     item = await ModelCrudUtil.load(cls, item);
