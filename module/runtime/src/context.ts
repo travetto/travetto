@@ -68,8 +68,8 @@ class $Runtime {
   }
 
   /** Produce a workspace relative path */
-  workspaceRelative(...rel: string[]): string {
-    return path.resolve(this.workspace.path, ...rel);
+  workspaceRelative(...parts: string[]): string {
+    return path.resolve(this.workspace.path, ...parts);
   }
 
   /** Strip off the workspace path from a file */

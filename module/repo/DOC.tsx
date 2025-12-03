@@ -54,7 +54,7 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
       <li>{d.input('json')} - Graph of modules in JSON form, with additional data (useful for quickly building a dependency graph)</li>
     </ul>
 
-    <c.Execution title='List execution of Monorepo' cmd='trv' args={['repo:list']} config={{ cwd: Runtime.workspace.path }} />
+    <c.Execution title='List execution of Monorepo' cmd='trv' args={['repo:list']} config={{ workingDirectory: Runtime.workspace.path }} />
   </c.Section>
 
   <c.Section title='CLI - Exec'>
@@ -62,6 +62,6 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
     <c.Execution title='Exec execution' cmd='trv' args={['repo:exec', '-h']} />
 
     The standard format includes prefixed output to help identify which module produced which output.
-    <c.Execution title='List execution of Monorepo' cmd='trv' args={['repo:exec', '-w', '1', 'pwd']} config={{ cwd: Runtime.workspace.path }} />
+    <c.Execution title='List execution of Monorepo' cmd='trv' args={['repo:exec', '-w', '1', 'pwd']} config={{ workingDirectory: Runtime.workspace.path }} />
   </c.Section>
 </>;

@@ -19,7 +19,7 @@ export const text = <>
     By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
 
     <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{
-      cwd: './doc-exec'
+      workingDirectory: './doc-exec'
     }} />
 
     <c.SubSection title="Configuration">
@@ -34,7 +34,7 @@ export const text = <>
 
       And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv web:custom')}.
 
-      <c.Execution title='Custom application' cmd='trv' args={['web:custom']} config={{ cwd: './doc-exec' }} />
+      <c.Execution title='Custom application' cmd='trv' args={['web:custom']} config={{ workingDirectory: './doc-exec' }} />
     </c.SubSection>
   </c.Section>
 

@@ -2,7 +2,7 @@ import { type OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
 export type CommonPackConfig = {
-  buildDir: string;
+  buildDirectory: string;
   output: string;
   clean: boolean;
   ejectFile?: string;

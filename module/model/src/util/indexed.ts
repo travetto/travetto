@@ -42,7 +42,7 @@ export class ModelIndexedUtil {
     const sortField = config.type === 'sorted' ? config.fields.at(-1) : undefined;
 
     const fields: IndexFieldPart[] = [];
-    let sortDir: number = 0;
+    let sortDirection: number = 0;
     let sorted: IndexSortPart | undefined;
 
     for (const field of config.fields) {
@@ -56,7 +56,7 @@ export class ModelIndexedUtil {
         parts.push(key);
         if (typeof fieldRef[key] === 'boolean' || typeof fieldRef[key] === 'number') {
           if (config.type === 'sorted') {
-            sortDir = fieldRef[key] === true ? 1 : fieldRef[key] === false ? 0 : fieldRef[key];
+            sortDirection = fieldRef[key] === true ? 1 : fieldRef[key] === false ? 0 : fieldRef[key];
           }
           break; // At the bottom
         } else {
@@ -64,7 +64,7 @@ export class ModelIndexedUtil {
         }
       }
       if (field === sortField) {
-        sorted = { path: parts, dir: sortDir, value: castTo(itemRef) };
+        sorted = { path: parts, dir: sortDirection, value: castTo(itemRef) };
       }
       if (itemRef === undefined || itemRef === null) {
         const empty = field === sortField ? opts.emptySortValue : opts.emptyValue;

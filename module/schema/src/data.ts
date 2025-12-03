@@ -1,4 +1,4 @@
-import { isNumberObject as isNum, isBooleanObject as isBool, isStringObject as isStr } from 'node:util/types';
+import { isNumberObject, isBooleanObject, isStringObject } from 'node:util/types';
 
 import { asConstructable, castTo, Class, asFull, TypedObject } from '@travetto/runtime';
 import { UnknownType } from './types.ts';
@@ -29,7 +29,9 @@ export class DataUtil {
   static isPrimitive(input: unknown): input is (string | boolean | number | RegExp) {
     switch (typeof input) {
       case 'string': case 'boolean': case 'number': case 'bigint': return true;
-      case 'object': return !!input && (input instanceof RegExp || input instanceof Date || isStr(input) || isNum(input) || isBool(input));
+      case 'object': return !!input && (
+        input instanceof RegExp || input instanceof Date || isStringObject(input) || isNumberObject(input) || isBooleanObject(input)
+      );
       default: return false;
     }
   }

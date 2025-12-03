@@ -40,19 +40,19 @@ export class AssertUtil {
    * Determine file location for a given error and the stack trace
    */
   static getPositionOfError(error: Error, importLocation: string): { import: string, line: number } {
-    const cwd = Runtime.mainSourcePath;
+    const workingDirectory = Runtime.mainSourcePath;
     const lines = (error.stack ?? new Error().stack!)
       .replace(/[\\/]/g, '/')
       .split('\n')
       // Exclude node_modules, target self
-      .filter(lineText => lineText.includes(cwd) && (!lineText.includes('node_modules') || lineText.includes('/support/')));
+      .filter(lineText => lineText.includes(workingDirectory) && (!lineText.includes('node_modules') || lineText.includes('/support/')));
 
     const filename = RuntimeIndex.getFromImport(importLocation)?.sourceFile!;
 
     let best = lines.filter(lineText => lineText.includes(filename))[0];
 
     if (!best) {
-      [best] = lines.filter(lineText => lineText.includes(`${cwd}/test`));
+      [best] = lines.filter(lineText => lineText.includes(`${workingDirectory}/test`));
     }
 
     if (!best) {
@@ -74,7 +74,7 @@ export class AssertUtil {
       line = -1;
     }
 
-    const outFileParts = file.split(cwd.replace(/^[A-Za-z]:/, ''));
+    const outFileParts = file.split(workingDirectory.replace(/^[A-Za-z]:/, ''));
 
     const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
 

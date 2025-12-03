@@ -244,8 +244,8 @@ export class CompilerState implements ts.CompilerHost {
     return this.#sourceToEntry.has(sourceFile) || ts.sys.fileExists(sourceFile);
   }
 
-  directoryExists(sourceDir: string): boolean {
-    return this.#sourceDirectory.has(sourceDir) || ts.sys.directoryExists(sourceDir);
+  directoryExists(sourceDirectory: string): boolean {
+    return this.#sourceDirectory.has(sourceDirectory) || ts.sys.directoryExists(sourceDirectory);
   }
 
   writeFile(

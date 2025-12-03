@@ -85,8 +85,8 @@ export class Workspace {
   }
 
   /** Find full path for a resource */
-  static getAbsoluteResource(rel: string): string {
-    return this.#context.asAbsolutePath(rel);
+  static getAbsoluteResource(relativeFile: string): string {
+    return this.#context.asAbsolutePath(relativeFile);
   }
 
   /** See if an entity is an editor */

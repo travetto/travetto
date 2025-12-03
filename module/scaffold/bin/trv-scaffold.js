@@ -14,11 +14,11 @@ async function getScaffoldDirectory() {
 }
 
 /**
- * @param {string} cwd
+ * @param {string} workingDirectory
  */
-async function getVersion(cwd) {
+async function getVersion(workingDirectory) {
   const fs = await import('node:fs/promises');
-  const pkg = JSON.parse(await fs.readFile(`${cwd}/package.json`, 'utf8'));
+  const pkg = JSON.parse(await fs.readFile(`${workingDirectory}/package.json`, 'utf8'));
   const version = `${pkg.dependencies['@travetto/scaffold']}`.replace(/\d+$/, '0');
   return version;
 }
@@ -35,7 +35,7 @@ async function getVersion(cwd) {
     'trvc', 'exec',
     '@travetto/cli/support/entry.trv.js',
     'scaffold',
-    '-c', process.cwd(),
+    '--c', process.cwd(),
     ...process.argv.slice(2)
   ], {
     stdio: 'inherit',

@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { prompt } from 'enquirer';
 
-import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliCommand, cliTpl, CliFlag } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
 
 import { Context } from './bin/context.ts';
@@ -16,7 +16,8 @@ export class ScaffoldCommand implements CliCommandShape {
   /** Template */
   template = 'todo';
   /** Current Working Directory override */
-  cwd: string = path.resolve();
+  @CliFlag({ short: 'c', full: 'cwd' })
+  workingDirectory: string = path.resolve();
   /** Target Directory */
   dir?: string;
   /** Force writing into an existing directory */
@@ -87,12 +88,12 @@ export class ScaffoldCommand implements CliCommandShape {
     if (!name && this.dir) {
       name = path.basename(this.dir);
     } else if (name && !this.dir) {
-      this.dir = path.resolve(this.cwd, name);
+      this.dir = path.resolve(this.workingDirectory, name);
     } else if (!name && !this.dir) {
       throw new Error('Either a name or a target directory are required');
     }
 
-    const ctx = new Context(name, this.template, path.resolve(this.cwd, this.dir!));
+    const ctx = new Context(name, this.template, path.resolve(this.workingDirectory, this.dir!));
 
     if (!this.force) {
       await ctx.initialize();

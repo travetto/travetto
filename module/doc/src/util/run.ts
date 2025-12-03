@@ -40,8 +40,8 @@ class DocState {
 export class DocRunUtil {
   static #docState = new DocState();
 
-  /** Build cwd from config */
-  static cwd(config: RunConfig): string {
+  /** Build working directory from config */
+  static workingDirectory(config: RunConfig): string {
     return path.resolve(config.module ? RuntimeIndex.getModule(config.module)?.sourcePath! : Runtime.mainSourcePath);
   }
 
@@ -49,9 +49,9 @@ export class DocRunUtil {
    * Clean run output
    */
   static cleanRunOutput(text: string, config: RunConfig): string {
-    const cwd = this.cwd(config);
+    const rootPath = this.workingDirectory(config);
     text = util.stripVTControlCharacters(text.trim())
-      .replaceAll(cwd, '.')
+      .replaceAll(rootPath, '.')
       .replaceAll(os.tmpdir(), '/tmp')
       .replaceAll(Runtime.workspace.path, '<workspace-root>')
       .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
@@ -76,7 +76,7 @@ export class DocRunUtil {
    */
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
     return spawn(cmd, args, {
-      cwd: config.cwd ?? this.cwd(config),
+      cwd: config.workingDirectory ?? this.workingDirectory(config),
       env: {
         ...process.env,
         ...Env.DEBUG.export(false),

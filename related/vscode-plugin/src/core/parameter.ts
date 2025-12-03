@@ -124,7 +124,7 @@ export class ParameterSelector {
     const ripGrepPath = await this.#getRipGrepPath();
     const baseArgs = ['--max-count', '50', '--files'];
     const quote = process.platform === 'win32' ? '"' : '\'';
-    const cwd = root ?? Workspace.uri.fsPath;
+    const workingDirectory = root ?? Workspace.uri.fsPath;
     const placeholder = 'Type to search for files';
     const exts: string[] = input.param.fileExtensions ?? [];
 
@@ -149,11 +149,11 @@ export class ParameterSelector {
 
             quickPick.busy = true;
             const items: { label: string, description: string }[] = [];
-            const subProcess = spawn(ripGrepPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd, });
+            const subProcess = spawn(ripGrepPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd: workingDirectory, });
 
             if (subProcess.stdout) {
               ExecUtil.readLines(subProcess.stdout,
-                item => items.push({ label: item, description: path.resolve(cwd, item.trim()) }));
+                item => items.push({ label: item, description: path.resolve(workingDirectory, item.trim()) }));
             }
             await ExecUtil.getResult(subProcess, { catch: true });
             quickPick.items = items;

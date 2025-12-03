@@ -8,13 +8,13 @@ import { CliValidationError } from './src/types.ts';
 
 const CliValidationErrorContract = toConcrete<CliValidationError>();
 
-const config = { cwd: './doc-exec' };
+const config = { workingDirectory: './doc-exec' };
 
 export const text = <>
   <c.StdHeader />
   The cli module represents the primary entry point for execution within the framework. One of the main goals for this module is extensibility, as adding new entry points is meant to be trivial. The framework leverages this module for exposing all executable tools and entry points.  To see a high level listing of all supported commands, invoke {d.input('trv --help')}
 
-  <c.Execution title='General Usage' cmd='trv' args={['--help']} config={{ cwd: Runtime.workspace.path }} />
+  <c.Execution title='General Usage' cmd='trv' args={['--help']} config={{ workingDirectory: Runtime.workspace.path }} />
 
   This listing is from the {d.library('Travetto')} monorepo, and represents the majority of tools that can be invoked from the command line. <br />
 
@@ -164,11 +164,11 @@ export const text = <>
   <c.Section title='CLI - service'>
     The module provides the ability to start/stop/restart services as {d.library('Docker')} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
-    <c.Execution title='Command Service' cmd='trv' args={['service', '--help']} config={{ cwd: Runtime.workspace.path }} />
+    <c.Execution title='Command Service' cmd='trv' args={['service', '--help']} config={{ workingDirectory: Runtime.workspace.path }} />
 
     A sample of all services available to the entire framework:
 
-    <c.Execution title='All Services' cmd='trv' args={['service', 'status']} config={{ cwd: Runtime.workspace.path }} />
+    <c.Execution title='All Services' cmd='trv' args={['service', 'status']} config={{ workingDirectory: Runtime.workspace.path }} />
 
     <c.SubSection title='Defining new Services'>
       The services are defined as plain typescript files within the framework and can easily be extended:

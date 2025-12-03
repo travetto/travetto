@@ -34,10 +34,10 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     comment: (message) => ['\nREM', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile],
-    script: (lines: string[], changeDir: boolean = false) => ({
+    script: (lines: string[], changeDirectory: boolean = false) => ({
       ext: '.cmd',
       contents: [
-        ...(changeDir ? ['cd %~p0'] : []),
+        ...(changeDirectory ? ['cd %~p0'] : []),
         ...lines,
       ]
     })
@@ -60,11 +60,11 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     comment: (message) => ['\n#', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.'],
-    script: (lines: string[], changeDir: boolean = false) => ({
+    script: (lines: string[], changeDirectory: boolean = false) => ({
       ext: '.sh',
       contents: [
         '#!/bin/sh',
-        ...(changeDir ? ['cd $(dirname "$0")'] : []),
+        ...(changeDirectory ? ['cd $(dirname "$0")'] : []),
         ...lines,
       ]
     })

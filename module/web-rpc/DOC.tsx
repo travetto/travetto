@@ -3,7 +3,7 @@ import { d, c, DocRunUtil } from '@travetto/doc';
 import { Runtime } from '@travetto/runtime';
 
 export const text = async () => {
-  await DocRunUtil.run('npx', ['trv', 'web:rpc-client', 'config'], { cwd: './doc-exec' });
+  await DocRunUtil.run('npx', ['trv', 'web:rpc-client', 'config'], { workingDirectory: './doc-exec' });
 
   return <>
     <c.StdHeader />
@@ -12,7 +12,7 @@ export const text = async () => {
     <c.Section title='CLI - web:rpc-client'>
       The library will create the RPC client in one of three flavors: fetch, fetch + node, angular.
 
-      <c.Execution title='Command Service' cmd='trv' args={['web:rpc-client', '--help']} config={{ cwd: Runtime.workspace.path }} />
+      <c.Execution title='Command Service' cmd='trv' args={['web:rpc-client', '--help']} config={{ workingDirectory: Runtime.workspace.path }} />
     </c.Section>
 
     <c.Section title='Example'>

@@ -98,12 +98,12 @@ export class WebUploadUtil {
    * Convert an UploadItem to a File
    */
   static async toFile({ stream, filename, field }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
-    const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
-    await fs.mkdir(uniqueDir, { recursive: true });
+    const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
+    await fs.mkdir(uniqueDirectory, { recursive: true });
 
     filename = filename ? path.basename(filename) : `unknown_${Date.now()}`;
 
-    const location = path.resolve(uniqueDir, filename);
+    const location = path.resolve(uniqueDirectory, filename);
     const remove = (): Promise<void> => fs.rm(location).catch(() => { });
     const mimeCheck = config.matcher ??= WebCommonUtil.mimeTypeMatcher(config.types);
 

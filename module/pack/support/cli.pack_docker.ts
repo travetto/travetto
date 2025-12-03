@@ -86,13 +86,13 @@ export class PackDockerCommand extends BasePackCommand {
 
     // Finalize user/group and ids
     const [userOrUid, groupOrGid = userOrUid] = (this.dockerRuntimeUser ?? '').split(':');
-    const groupIsNum = /^\d+$/.test(groupOrGid);
-    const userIsNum = /^\d+$/.test(userOrUid);
+    const groupIsNumber = /^\d+$/.test(groupOrGid);
+    const userIsNumber = /^\d+$/.test(userOrUid);
 
-    const uid = userIsNum ? +userOrUid : this.defaultUserId;
-    const gid = groupIsNum ? +groupOrGid : this.defaultUserId;
-    const group = (!groupIsNum ? groupOrGid : undefined) || this.defaultUser;
-    const user = (!userIsNum ? userOrUid : undefined) || this.defaultUser;
+    const uid = userIsNumber ? +userOrUid : this.defaultUserId;
+    const gid = groupIsNumber ? +groupOrGid : this.defaultUserId;
+    const group = (!groupIsNumber ? groupOrGid : undefined) || this.defaultUser;
+    const user = (!userIsNumber ? userOrUid : undefined) || this.defaultUser;
     this.dockerRuntime = { user, uid, group, gid, folder: `/${this.appFolder}`, packages: this.dockerRuntimePackages };
 
     if (this.dockerStageOnly) {

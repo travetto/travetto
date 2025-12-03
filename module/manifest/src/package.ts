@@ -18,9 +18,9 @@ export class PackageUtil {
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
 
-  static #exec<T>(cwd: string, cmd: string): Promise<T> {
+  static #exec<T>(workingDirectory: string, cmd: string): Promise<T> {
     const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };
-    const text = execSync(cmd, { cwd, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).toString().trim();
+    const text = execSync(cmd, { cwd: workingDirectory, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).toString().trim();
     return JSON.parse(text);
   }
 

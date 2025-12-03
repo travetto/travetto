@@ -30,20 +30,20 @@ export class PackOperation {
       return;
     }
 
-    yield* PackOperation.title(config, cliTpl`${{ title: 'Cleaning Output' }} ${{ path: config.buildDir }}`);
+    yield* PackOperation.title(config, cliTpl`${{ title: 'Cleaning Output' }} ${{ path: config.buildDirectory }}`);
 
     if (config.ejectFile) {
-      yield ActiveShellCommand.rmRecursive(config.buildDir);
+      yield ActiveShellCommand.rmRecursive(config.buildDirectory);
       if (config.output) {
         yield ActiveShellCommand.rmRecursive(config.output);
       }
-      yield ActiveShellCommand.mkdir(config.buildDir);
+      yield ActiveShellCommand.mkdir(config.buildDirectory);
     } else {
-      await fs.rm(config.buildDir, { recursive: true, force: true });
+      await fs.rm(config.buildDirectory, { recursive: true, force: true });
       if (config.output) {
         await fs.rm(config.output, { recursive: true, force: true });
       }
-      await fs.mkdir(config.buildDir, { recursive: true });
+      await fs.mkdir(config.buildDirectory, { recursive: true });
     }
   }
 
@@ -65,7 +65,7 @@ export class PackOperation {
         ['BUNDLE_COMPRESS', config.minify],
         ['BUNDLE_SOURCEMAP', config.sourcemap],
         ['BUNDLE_SOURCES', config.includeSources],
-        ['BUNDLE_OUTPUT', config.buildDir],
+        ['BUNDLE_OUTPUT', config.buildDirectory],
         ['BUNDLE_FORMAT', Runtime.workspace.type],
         ['BUNDLE_ENV_FILE', config.envFile],
         ['BUNDLE_EXTERNAL', config.externalDependencies.map(mod => mod.split(':')[0]).join(',')]
@@ -91,7 +91,7 @@ export class PackOperation {
       yield ActiveShellCommand.chdir(path.resolve());
     } else {
       await PackUtil.runCommand(bundleCommand, { cwd, env: { ...process.env, ...env }, stdio: [0, 'pipe', 2] });
-      const stat = await fs.stat(path.resolve(config.buildDir, config.mainFile));
+      const stat = await fs.stat(path.resolve(config.buildDirectory, config.mainFile));
       yield [cliTpl`${{ title: 'Bundled Output ' }} ${{ identifier: 'sizeKb' }}=${{ param: Math.trunc(stat.size / 2 ** 10) }}`];
     }
   }
@@ -107,12 +107,12 @@ export class PackOperation {
 
     if (config.ejectFile) {
       yield* ActiveShellCommand.createFile(
-        path.resolve(config.buildDir, file),
+        path.resolve(config.buildDirectory, file),
         [JSON.stringify(pkg)]
       );
     } else {
       await PackUtil.writeRawFile(
-        path.resolve(config.buildDir, file),
+        path.resolve(config.buildDirectory, file),
         [JSON.stringify(pkg, null, 2)]
       );
     }
@@ -122,7 +122,7 @@ export class PackOperation {
    * Define .env.js file to control manifest location
    */
   static async * writeEnv(config: CommonPackConfig): AsyncIterable<string[]> {
-    const file = path.resolve(config.buildDir, config.envFile);
+    const file = path.resolve(config.buildDirectory, config.envFile);
     const env = {
       ...Env.NODE_ENV.export('production'),
       ...Env.TRV_MANIFEST.export(config.manifestFile),
@@ -140,12 +140,12 @@ export class PackOperation {
 
     if (config.ejectFile) {
       yield* ActiveShellCommand.createFile(
-        path.resolve(config.buildDir, file),
+        path.resolve(config.buildDirectory, file),
         PackUtil.buildEnvFile(env)
       );
     } else {
       await PackUtil.writeRawFile(
-        path.resolve(config.buildDir, file),
+        path.resolve(config.buildDirectory, file),
         PackUtil.buildEnvFile(env)
       );
     }
@@ -170,10 +170,10 @@ export class PackOperation {
       yield* PackOperation.title(config, cliTpl`${{ title }} ${{ path: file }} args=(${{ param: args }})`);
 
       if (config.ejectFile) {
-        yield* ActiveShellCommand.createFile(path.resolve(config.buildDir, file), contents, '755');
+        yield* ActiveShellCommand.createFile(path.resolve(config.buildDirectory, file), contents, '755');
 
       } else {
-        await PackUtil.writeRawFile(path.resolve(config.buildDir, file), contents, '755');
+        await PackUtil.writeRawFile(path.resolve(config.buildDirectory, file), contents, '755');
       }
     }
   }
@@ -188,7 +188,7 @@ export class PackOperation {
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Copying over workspace resources' }}`);
 
-    const destinationFolder = path.resolve(config.buildDir, config.workspaceResourceFolder);
+    const destinationFolder = path.resolve(config.buildDirectory, config.workspaceResourceFolder);
     const sourceFolder = Runtime.workspaceRelative('resources');
 
     if (config.ejectFile) {
@@ -205,14 +205,14 @@ export class PackOperation {
     const resources = {
       count: RuntimeIndex.mainModule.files.resources?.length ?? 0,
       sourceFolder: path.resolve(Runtime.mainSourcePath, 'resources'),
-      destinationFolder: path.resolve(config.buildDir, 'resources')
+      destinationFolder: path.resolve(config.buildDirectory, 'resources')
     };
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Copying over module resources' }}`);
 
     if (config.ejectFile) {
       if (resources.count) {
-        yield ActiveShellCommand.copyRecursive(resources.sourceFolder, path.resolve(config.buildDir, 'resources'), true);
+        yield ActiveShellCommand.copyRecursive(resources.sourceFolder, path.resolve(config.buildDirectory, 'resources'), true);
       }
     } else {
       if (resources.count) {
@@ -225,7 +225,7 @@ export class PackOperation {
    * Produce the output manifest, only including prod dependencies
    */
   static async * writeManifest(config: CommonPackConfig): AsyncIterable<string[]> {
-    const out = path.resolve(config.buildDir, config.manifestFile);
+    const out = path.resolve(config.buildDirectory, config.manifestFile);
     const cmd = ['npx', 'trvc', 'manifest', '--prod', out];
     const env = { ...Env.TRV_MODULE.export(config.module) };
 
@@ -247,12 +247,12 @@ export class PackOperation {
 
     if (config.ejectFile) {
       await ActiveShellCommand.mkdir(path.dirname(config.output));
-      yield ActiveShellCommand.chdir(config.buildDir);
+      yield ActiveShellCommand.chdir(config.buildDirectory);
       yield ActiveShellCommand.zip(config.output);
       yield ActiveShellCommand.chdir(path.resolve());
     } else {
       await fs.mkdir(path.dirname(config.output), { recursive: true });
-      await PackUtil.runCommand(ActiveShellCommand.zip(config.output), { cwd: config.buildDir });
+      await PackUtil.runCommand(ActiveShellCommand.zip(config.output), { cwd: config.buildDirectory });
     }
   }
 }
