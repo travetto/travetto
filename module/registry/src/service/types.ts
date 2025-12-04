@@ -29,12 +29,16 @@ export interface RegistrySimpleStore {
   getClasses(): Class[];
 };
 
+export type RegistryProcessEvent = { cls: Class, replaced?: boolean };
+
 /**
  * Registry index definition
  * @concrete
  */
 export interface RegistryIndex {
   store: RegistrySimpleStore;
-  process(events: ChangeEvent<Class>[]): void;
+  onRemove?(events: RegistryProcessEvent[]): void;
+  onChange?(events: ChangeEvent<Class>[]): void;
+  onAdd?(events: RegistryProcessEvent[]): void;
   finalize?(cls: Class): void;
 }

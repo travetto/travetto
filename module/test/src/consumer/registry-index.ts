@@ -50,8 +50,6 @@ export class TestConsumerRegistryIndex implements RegistryIndex {
     }
   }
 
-  process(): void { }
-
   /**
    * Get types
    */

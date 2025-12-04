@@ -1,5 +1,5 @@
 import { AppError, Class, Runtime, describeFunction } from '@travetto/runtime';
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite.ts';
 import { TestConfig, TestRun } from '../model/test.ts';
@@ -42,10 +42,6 @@ export class SuiteRegistryIndex implements RegistryIndex {
   }
 
   store = new RegistryIndexStore(SuiteRegistryAdapter);
-
-  process(_events: ChangeEvent<Class>[]): void {
-    // No-op for now
-  }
 
   /**
    * Find all valid tests (ignoring abstract)

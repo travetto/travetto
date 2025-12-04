@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { ChangeEvent, RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 interface Group {
   class: Class;
@@ -61,8 +61,4 @@ export class SampleRegistryIndex implements RegistryIndex {
   }
 
   store = new RegistryIndexStore(SampleRegistryAdapter);
-
-  process(events: ChangeEvent<Class>[]): void {
-    // Nothing to do
-  }
 }

@@ -1,18 +1,14 @@
-import { Class, ClassInstance, getClass, RetainPrimitiveFields, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { Class, ClassInstance, getClass, isClass, RetainPrimitiveFields, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
-function isClass(target: unknown, property: unknown,): target is Class<unknown> {
-  return !property;
-}
-
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(instanceOrCls: ClassInstance | Class<T>, property?: string, _?: EndpointFunctionDescriptor) {
     const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
-    if (isClass(instanceOrCls, property)) {
+    if (isClass(instanceOrCls)) {
       adapter.register(config);
     } else {
       adapter.registerEndpoint(property!, config);

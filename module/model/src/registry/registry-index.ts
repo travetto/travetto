@@ -1,4 +1,4 @@
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry, RegistryProcessEvent } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -86,14 +86,15 @@ export class ModelRegistryIndex implements RegistryIndex {
     this.#modelNameMapping.get(store)?.delete(cls.Ⲑid);
   }
 
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if ('previous' in event) {
-        this.#removeClass(event.previous);
-      }
-      if ('current' in event) {
-        this.#addClass(event.current);
-      }
+  onRemove(events: RegistryProcessEvent[]): void {
+    for (const { cls } of events) {
+      this.#removeClass(cls);
+    }
+  }
+
+  onAdd(events: RegistryProcessEvent[]): void {
+    for (const { cls } of events) {
+      this.#addClass(cls);
     }
   }
 

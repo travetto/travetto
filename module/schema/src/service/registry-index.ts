@@ -84,37 +84,38 @@ export class SchemaRegistryIndex implements RegistryIndex {
     this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType, cls);
   }
 
-  #onChanged(event: ChangeEvent<Class> & { type: 'changed' }): void {
+  #onChanged(cls: Class, previous: Class): void {
+    const previousConfig = this.getClassConfig(previous);
     Util.queueMacroTask().then(() => {
       SchemaChangeListener.emitFieldChanges({
         type: 'changed',
-        current: this.getClassConfig(event.current),
-        previous: this.getClassConfig(event.previous)
+        current: this.getClassConfig(cls),
+        previous: previousConfig,
       });
     });
   }
 
-  #onRemoving(event: ChangeEvent<Class> & { type: 'removing' }): void {
-    SchemaChangeListener.clearSchemaDependency(event.previous);
+  #onRemoving(cls: Class): void {
+    SchemaChangeListener.clearSchemaDependency(cls);
   }
 
-  #onAdded(event: ChangeEvent<Class> & { type: 'added' }): void {
+  #onAdded(cls: Class): void {
     Util.queueMacroTask().then(() => {
       SchemaChangeListener.emitFieldChanges({
         type: 'added',
-        current: this.getClassConfig(event.current)
+        current: this.getClassConfig(cls)
       });
     });
   }
 
-  process(events: ChangeEvent<Class>[]): void {
+  onChange(events: ChangeEvent<Class>[]): void {
     for (const event of events) {
       if (event.type === 'changed') {
-        this.#onChanged(event);
+        this.#onChanged(event.current, event.previous!);
       } else if (event.type === 'removing') {
-        this.#onRemoving(event);
+        this.#onRemoving(event.previous);
       } else if (event.type === 'added') {
-        this.#onAdded(event);
+        this.#onAdded(event.current);
       }
     }
 

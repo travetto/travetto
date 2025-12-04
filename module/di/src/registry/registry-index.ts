@@ -1,4 +1,4 @@
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy, RegistryProcessEvent } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -116,7 +116,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
     }
   }
 
-
   async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
       const target = dependency.target ?? input.type;
@@ -139,14 +138,15 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.store.get(cls).get();
   }
 
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if ('previous' in event) {
-        this.#removeClass(event.previous);
-      }
-      if ('current' in event) {
-        this.#addClass(event.current, 'previous' in event);
-      }
+  onRemove(events: RegistryProcessEvent[]): void {
+    for (const { cls } of events) {
+      this.#removeClass(cls);
+    }
+  }
+
+  onAdd(events: RegistryProcessEvent[]): void {
+    for (const { cls } of events) {
+      this.#addClass(cls);
     }
   }
 

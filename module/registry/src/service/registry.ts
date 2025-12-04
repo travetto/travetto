@@ -55,16 +55,33 @@ class $Registry {
   process(events: ChangeEvent<Class>[]): void {
     this.#finalizeItems(events.filter(event => 'current' in event).map(event => event.current));
 
-    for (const indexCls of this.#indexOrder) { // Visit every index, in order
-      const inst = this.instance(indexCls);
-      const matched = events.filter(event => inst.store.has('current' in event ? event.current : event.previous!));
-      if (matched.length) {
-        inst.process(matched);
+    const indexes = this.#indexOrder.map(cls => this.instance(cls));
+
+    for (const index of indexes) {
+      const changed = events.filter(event => index.store.has('current' in event ? event.current : event.previous!));
+      if (changed.length && index.onChange) {
+        index.onChange(changed);
+      }
+      const previous = events
+        .filter((event): event is ChangeEvent<Class> & { previous: Class } => 'previous' in event && index.store.has(event.previous!))
+        .map(event => ({ cls: event.previous!, replaced: 'current' in event }));
+
+      if (previous.length && index.onRemove) {
+        index.onRemove(previous);
       }
     }
 
     Util.queueMacroTask().then(() => {
       this.#removeItems(events.filter(event => 'previous' in event).map(event => event.previous!));
+      for (const index of indexes) {
+        const current = events
+          .filter((event): event is ChangeEvent<Class> & { current: Class } => 'current' in event && index.store.has(event.current))
+          .map(event => ({ cls: event.current, replaced: 'previous' in event }));
+
+        if (current.length && index.onAdd) {
+          index.onAdd(current);
+        }
+      }
     });
 
     for (const event of events) {
