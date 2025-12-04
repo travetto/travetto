@@ -1,32 +1,32 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { CommonRegExp } from '@travetto/schema';
+import { CommonRegex } from '@travetto/schema';
 
 @Suite()
 export class RegExpTest {
 
   @Test()
   telephone() {
-    assert(CommonRegExp.telephone.test('555-555-5545'));
-    assert(CommonRegExp.telephone.test('5555555555'));
+    assert(CommonRegex.telephone.test('555-555-5545'));
+    assert(CommonRegex.telephone.test('5555555555'));
 
-    assert(!CommonRegExp.telephone.test('555-535-522d4'), 'Should not be a valid telephone number');
+    assert(!CommonRegex.telephone.test('555-535-522d4'), 'Should not be a valid telephone number');
   }
 
   @Test()
   email() {
-    assert(CommonRegExp.email.test('a@b.com'));
-    assert(CommonRegExp.email.test('c@d.com'));
+    assert(CommonRegex.email.test('a@b.com'));
+    assert(CommonRegex.email.test('c@d.com'));
 
-    assert(!CommonRegExp.email.test('d@'));
+    assert(!CommonRegex.email.test('d@'));
   }
 
   @Test()
   simpleName() {
-    assert(CommonRegExp.simpleName.test('Billy Bob'));
-    assert(CommonRegExp.simpleName.test('Samuel Sammy'));
+    assert(CommonRegex.simpleName.test('Billy Bob'));
+    assert(CommonRegex.simpleName.test('Samuel Sammy'));
 
-    assert(!CommonRegExp.simpleName.test('5ro'));
+    assert(!CommonRegex.simpleName.test('5ro'));
   }
 }

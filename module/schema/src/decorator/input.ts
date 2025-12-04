@@ -1,6 +1,6 @@
 import { Any, Class, ClassInstance, getClass } from '@travetto/runtime';
 
-import { CommonRegExp } from '../validate/regexp.ts';
+import { CommonRegex } from '../validate/regex.ts';
 import { CONSTRUCTOR_PROPERTY, SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
@@ -76,53 +76,53 @@ export function LongText(): PropType<string | string[]> { return input({ specifi
 
 /**
  * Require the input to match a specific RegExp
- * @param re The regular expression to match against
+ * @param regex The regular expression to match against
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Match(re: RegExp, message?: string): PropType<string | string[]> { return input({ match: { re, message } }); }
+export function Match(regex: RegExp, message?: string): PropType<string | string[]> { return input({ match: { regex, message } }); }
 
 /**
  * The minimum length for the string or array
- * @param n The minimum length
+ * @param limit The minimum length
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MinLength(n: number, message?: string): PropType<string | unknown[]> {
-  return input({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) });
+export function MinLength(limit: number, message?: string): PropType<string | unknown[]> {
+  return input({ minlength: { limit, message }, ...(limit === 0 ? { required: { active: false } } : {}) });
 }
 
 /**
  * The maximum length for the string or array
- * @param n The maximum length
+ * @param limit The maximum length
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MaxLength(n: number, message?: string): PropType<string | unknown[]> { return input({ maxlength: { n, message } }); }
+export function MaxLength(limit: number, message?: string): PropType<string | unknown[]> { return input({ maxlength: { limit, message } }); }
 
 /**
  * The minimum value
- * @param n The minimum value
+ * @param limit The minimum value
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Min<T extends number | Date>(n: T, message?: string): PropType<Date | number> {
-  return input({ min: { n, message } });
+export function Min<T extends number | Date>(limit: T, message?: string): PropType<Date | number> {
+  return input({ min: { limit, message } });
 }
 
 /**
  * The maximum value
- * @param n The maximum value
+ * @param limit The maximum value
  * @param message The message to show when the constraint fails
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Max<T extends number | Date>(n: T, message?: string): PropType<Date | number> {
-  return input({ max: { n, message } });
+export function Max<T extends number | Date>(limit: T, message?: string): PropType<Date | number> {
+  return input({ max: { limit, message } });
 }
 
 /**
@@ -131,7 +131,7 @@ export function Max<T extends number | Date>(n: T, message?: string): PropType<D
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Email(message?: string): PropType<string | string[]> { return Match(CommonRegExp.email, message); }
+export function Email(message?: string): PropType<string | string[]> { return Match(CommonRegex.email, message); }
 
 /**
  * Mark an input as an telephone number
@@ -139,7 +139,7 @@ export function Email(message?: string): PropType<string | string[]> { return Ma
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Telephone(message?: string): PropType<string | string[]> { return Match(CommonRegExp.telephone, message); }
+export function Telephone(message?: string): PropType<string | string[]> { return Match(CommonRegex.telephone, message); }
 
 /**
  * Mark an input as a url
@@ -147,7 +147,7 @@ export function Telephone(message?: string): PropType<string | string[]> { retur
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Url(message?: string): PropType<string | string[]> { return Match(CommonRegExp.url, message); }
+export function Url(message?: string): PropType<string | string[]> { return Match(CommonRegex.url, message); }
 
 /**
  * Determine the numeric precision of the value

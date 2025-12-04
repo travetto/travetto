@@ -1,7 +1,7 @@
 import { TimeUnit } from '@travetto/runtime';
 import {
   Schema, Float, MinLength, Match, Max, Min,
-  CommonRegExp, View, Url, Required, Validator,
+  CommonRegex, View, Url, Required, Validator,
   Discriminated
 } from '@travetto/schema';
 
@@ -97,7 +97,7 @@ export class Address {
   city?: string;
   zip: 200 | 500;
 
-  @Match(CommonRegExp.postalCode)
+  @Match(CommonRegex.postalCode)
   postal: string;
 }
 

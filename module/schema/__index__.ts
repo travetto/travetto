@@ -7,7 +7,7 @@ export * from './src/decorator/common.ts';
 export * from './src/service/changes.ts';
 export * from './src/service/types.ts';
 export * from './src/validate/messages.ts';
-export * from './src/validate/regexp.ts';
+export * from './src/validate/regex.ts';
 export * from './src/validate/validator.ts';
 export * from './src/validate/error.ts';
 export * from './src/validate/types.ts';

@@ -105,8 +105,8 @@ export abstract class SQLDialect implements DialectState {
    * Generate an id field
    */
   idField = makeField('id', String, true, {
-    maxlength: { n: this.ID_LENGTH },
-    minlength: { n: this.ID_LENGTH }
+    maxlength: { limit: this.ID_LENGTH },
+    minlength: { limit: this.ID_LENGTH }
   });
 
   /**
@@ -118,8 +118,8 @@ export abstract class SQLDialect implements DialectState {
    * Parent path reference
    */
   parentPathField = makeField('__parent_path', String, true, {
-    maxlength: { n: this.HASH_LENGTH },
-    minlength: { n: this.HASH_LENGTH },
+    maxlength: { limit: this.HASH_LENGTH },
+    minlength: { limit: this.HASH_LENGTH },
     required: { active: true }
   });
 
@@ -127,8 +127,8 @@ export abstract class SQLDialect implements DialectState {
    * Path reference
    */
   pathField = makeField('__path', String, true, {
-    maxlength: { n: this.HASH_LENGTH },
-    minlength: { n: this.HASH_LENGTH },
+    maxlength: { limit: this.HASH_LENGTH },
+    minlength: { limit: this.HASH_LENGTH },
     required: { active: true }
   });
 
@@ -253,7 +253,7 @@ export abstract class SQLDialect implements DialectState {
       if (config.specifiers?.includes('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.n : this.DEFAULT_STRING_LENGTH);
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.limit : this.DEFAULT_STRING_LENGTH);
       }
     } else if (config.type === PointConcrete) {
       type = this.COLUMN_TYPES.POINT;
@@ -653,7 +653,7 @@ ${this.getLimitSQL(cls, query)}`;
       if (!idField) {
         fields.push(idField = this.idField);
       } else {
-        idField.maxlength = { n: this.ID_LENGTH };
+        idField.maxlength = { limit: this.ID_LENGTH };
       }
     }
 

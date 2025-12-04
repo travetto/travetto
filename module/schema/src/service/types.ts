@@ -167,23 +167,23 @@ export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
   /**
    * Does the field expect a match
    */
-  match?: { re: RegExp, message?: string, template?: TemplateLiteral };
+  match?: { regex: RegExp, message?: string, template?: TemplateLiteral };
   /**
    * Minimum value configuration
    */
-  min?: { n: number | Date, message?: string };
+  min?: { limit: number | Date, message?: string };
   /**
    * Maximum value configuration
    */
-  max?: { n: number | Date, message?: string };
+  max?: { limit: number | Date, message?: string };
   /**
    * Minimum length configuration
    */
-  minlength?: { n: number, message?: string };
+  minlength?: { limit: number, message?: string };
   /**
    * Maximum length configuration
    */
-  maxlength?: { n: number, message?: string };
+  maxlength?: { limit: number, message?: string };
   /**
    * Enumerated values
    */

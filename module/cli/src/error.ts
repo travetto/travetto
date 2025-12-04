@@ -21,7 +21,7 @@ const COMMAND_PACKAGE = [
 export class CliUnknownCommandError extends Error {
 
   #getMissingCommandHelp(cmd: string): string | undefined {
-    const matchedConfig = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
+    const matchedConfig = COMMAND_PACKAGE.find(([regex]) => regex.test(cmd));
     if (matchedConfig) {
       const [, pkg, prod] = matchedConfig;
       const install = PackageUtil.getInstallCommand(Runtime, `@travetto/${pkg}`, prod);

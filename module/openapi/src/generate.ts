@@ -138,19 +138,19 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     }
     config.description = input.description;
     if (input.match) {
-      config.pattern = input.match.re!.source;
+      config.pattern = input.match.regex!.source;
     }
     if (input.maxlength) {
-      config.maxLength = input.maxlength.n;
+      config.maxLength = input.maxlength.limit;
     }
     if (input.minlength) {
-      config.minLength = input.minlength.n;
+      config.minLength = input.minlength.limit;
     }
     if (input.min) {
-      config.minimum = typeof input.min.n === 'number' ? input.min.n : input.min.n.getTime();
+      config.minimum = typeof input.min.limit === 'number' ? input.min.limit : input.min.limit.getTime();
     }
     if (input.max) {
-      config.maximum = typeof input.max.n === 'number' ? input.max.n : input.max.n.getTime();
+      config.maximum = typeof input.max.limit === 'number' ? input.max.limit : input.max.limit.getTime();
     }
     if (input.enum) {
       config.enum = input.enum.values;

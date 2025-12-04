@@ -293,11 +293,11 @@ export interface ValidationError {
   /**
    * Regular expression to match
    */
-  re?: string;
+  regex?: string;
   /**
    * Number to compare against
    */
-  n?: number | Date;
+  limit?: number | Date;
   /**
    * The type of the field
    */
@@ -322,7 +322,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
 /**
  * Geometric Point as [number,number] with validation and binding support
  *
- * @concrete ./internal/types.ts#PointImplementation
+ * @concrete ./internal/types.ts#PointContract
  */
 export type Point = [number, number];
 ```
@@ -334,9 +334,9 @@ import { DataUtil } from '../data.ts';
 const InvalidSymbol = Symbol();
 
 /**
- * Point Implementation
+ * Point Contract
  */
-export class PointImplementation {
+export class PointContract {
 
   /**
    * Validate we have an actual point
@@ -359,7 +359,7 @@ export class PointImplementation {
   }
 }
 
-Object.defineProperty(PointImplementation, 'name', { value: 'Point' });
+Object.defineProperty(PointContract, 'name', { value: 'Point' });
 ```
 
 What you can see here is that the `Point` type is now backed by a class that supports:

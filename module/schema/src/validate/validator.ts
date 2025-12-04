@@ -5,7 +5,7 @@ import { ValidationError, ValidationKindCore, ValidationResult } from './types.t
 import { Messages } from './messages.ts';
 import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
 import { DataUtil } from '../data.ts';
-import { CommonRegExpToName } from './regexp.ts';
+import { CommonRegexToName } from './regex.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 /**
@@ -111,7 +111,7 @@ export class SchemaValidator {
       (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
       (value instanceof Date ? value.getTime() : value);
 
-    const boundary = (typeof config.n === 'number' ? config.n : config.n.getTime());
+    const boundary = (typeof config.limit === 'number' ? config.limit : config.limit.getTime());
     return key === 'min' ? parsed < boundary : parsed > boundary;
   }
 
@@ -144,15 +144,15 @@ export class SchemaValidator {
       }
     }
 
-    if (input.match && !input.match.re.test(`${value}`)) {
+    if (input.match && !input.match.regex.test(`${value}`)) {
       criteria.push(['match', input.match]);
     }
 
-    if (input.minlength && `${value}`.length < input.minlength.n) {
+    if (input.minlength && `${value}`.length < input.minlength.limit) {
       criteria.push(['minlength', input.minlength]);
     }
 
-    if (input.maxlength && `${value}`.length > input.maxlength.n) {
+    if (input.maxlength && `${value}`.length > input.maxlength.limit) {
       criteria.push(['maxlength', input.maxlength]);
     }
 
@@ -189,17 +189,17 @@ export class SchemaValidator {
         kind: result.kind,
         value: result.value,
         message: '',
-        re: CommonRegExpToName.get(result.re!) ?? result.re?.source ?? '',
+        regex: CommonRegexToName.get(result.regex!) ?? result.regex?.source ?? '',
         path,
         type: (typeof result.type === 'function' ? result.type.name : result.type)
       };
 
-      if (!error.re) {
-        delete error.re;
+      if (!error.regex) {
+        delete error.regex;
       }
 
       const msg = result.message ?? (
-        Messages.get(error.re ?? '') ??
+        Messages.get(error.regex ?? '') ??
         Messages.get(error.kind) ??
         Messages.get('default')!
       );

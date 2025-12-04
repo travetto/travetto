@@ -3,9 +3,9 @@ import { DataUtil } from '../data.ts';
 const InvalidSymbol = Symbol();
 
 /**
- * Point Implementation
+ * Point Contract
  */
-export class PointImplementation {
+export class PointContract {
 
   /**
    * Validate we have an actual point
@@ -28,4 +28,4 @@ export class PointImplementation {
   }
 }
 
-Object.defineProperty(PointImplementation, 'name', { value: 'Point' });
+Object.defineProperty(PointContract, 'name', { value: 'Point' });

@@ -171,11 +171,11 @@ class ${uniqueId} extends ${type.mappedClassName} {
         };
       }
     } else if (primaryExpr.key === 'template' && primaryExpr.template) {
-      const re = LiteralUtil.templateLiteralToRegex(primaryExpr.template);
+      const regex = LiteralUtil.templateLiteralToRegex(primaryExpr.template);
       attrs.match = {
-        re: new RegExp(re),
+        regex: new RegExp(regex),
         template: primaryExpr.template,
-        message: `{path} must match "${re}"`
+        message: `{path} must match "${regex}"`
       };
     }
 

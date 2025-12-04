@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 import { Class, TimeUtil } from '@travetto/runtime';
-import { BindUtil, SchemaFieldConfig, CommonRegExp, SchemaRegistryIndex } from '@travetto/schema';
+import { BindUtil, SchemaFieldConfig, CommonRegex, SchemaRegistryIndex } from '@travetto/schema';
 
 
 /**
@@ -10,10 +10,10 @@ import { BindUtil, SchemaFieldConfig, CommonRegExp, SchemaRegistryIndex } from '
 export class SchemaFaker {
 
   static #stringToReType = new Map<RegExp, () => string>([
-    [CommonRegExp.email, faker.internet.email],
-    [CommonRegExp.url, faker.internet.url],
-    [CommonRegExp.telephone, faker.phone.number],
-    [CommonRegExp.postalCode, faker.location.zipCode]
+    [CommonRegex.email, faker.internet.email],
+    [CommonRegex.url, faker.internet.url],
+    [CommonRegex.telephone, faker.phone.number],
+    [CommonRegex.postalCode, faker.location.zipCode]
   ]);
 
   /**
@@ -64,8 +64,8 @@ export class SchemaFaker {
    * @param config Field configuration
    */
   static #array(config: SchemaFieldConfig): unknown[] {
-    const min = config.minlength ? config.minlength.n : 0;
-    const max = config.maxlength ? config.maxlength.n : 10;
+    const min = config.minlength ? config.minlength.limit : 0;
+    const max = config.maxlength ? config.maxlength.limit : 10;
     const size = faker.number.int({ min, max });
     const out: unknown[] = [];
     for (let i = 0; i < size; i++) {
@@ -79,8 +79,8 @@ export class SchemaFaker {
    * @param config Number config
    */
   static #number(config: SchemaFieldConfig): number {
-    let min = config.min && typeof config.min.n === 'number' ? config.min.n : undefined;
-    let max = config.max && typeof config.max.n === 'number' ? config.max.n : undefined;
+    let min = config.min && typeof config.min.limit === 'number' ? config.min.limit : undefined;
+    let max = config.max && typeof config.max.limit === 'number' ? config.max.limit : undefined;
     let precision = config.precision;
 
     if (/(price|amt|amount)$/i.test(config.name)) {
@@ -113,14 +113,14 @@ export class SchemaFaker {
    */
   static #date(config: SchemaFieldConfig): Date {
     const name = config.name.toLowerCase();
-    const min = config.min && typeof config.min.n !== 'number' ? config.min.n : undefined;
-    const max = config.max && typeof config.max.n !== 'number' ? config.max.n : undefined;
+    const min = config.min && typeof config.min.limit !== 'number' ? config.min.limit : undefined;
+    const max = config.max && typeof config.max.limit !== 'number' ? config.max.limit : undefined;
 
     if (min !== undefined || max !== undefined) {
       return faker.date.between({ from: min || TimeUtil.fromNow(-50, 'd'), to: max || new Date() });
     } else {
-      for (const [re, fn] of this.#namesToType.date) {
-        if (re.test(name)) {
+      for (const [regex, fn] of this.#namesToType.date) {
+        if (regex.test(name)) {
           return fn();
         }
       }
@@ -136,16 +136,16 @@ export class SchemaFaker {
     const name = config.name.toLowerCase();
 
     if (config.match) {
-      const mre = config.match && config.match.re;
-      for (const [re, fn] of this.#stringToReType) {
-        if (mre === re) {
+      const mre = config.match && config.match.regex;
+      for (const [regex, fn] of this.#stringToReType) {
+        if (mre === regex) {
           return fn();
         }
       }
     }
 
-    for (const [re, fn] of this.#namesToType.string) {
-      if (re.test(name)) {
+    for (const [regex, fn] of this.#namesToType.string) {
+      if (regex.test(name)) {
         return fn();
       }
     }

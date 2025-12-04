@@ -25,11 +25,11 @@ export interface ValidationError {
   /**
    * Regular expression to match
    */
-  re?: string;
+  regex?: string;
   /**
    * Number to compare against
    */
-  n?: number | Date;
+  limit?: number | Date;
   /**
    * The type of the field
    */
@@ -63,11 +63,11 @@ export interface ValidationResult {
   /**
    * Potential regular expression for the result
    */
-  re?: RegExp;
+  regex?: RegExp;
   /**
    * Number to compare against
    */
-  n?: number | Date;
+  limit?: number | Date;
 }
 
 type OrPromise<T> = T | Promise<T>;
