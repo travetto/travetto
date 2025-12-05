@@ -1,4 +1,4 @@
-import { RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -113,12 +113,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
       const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
       const baseParent = hasParentBase ? parentClass : undefined;
       this.#resolver.registerClass(config, baseParent);
-      if (config.autoInject) {
-        // Don't wait
-        Util.queueMacroTask().then(() => {
-          this.getInstance(config.candidateType, config.qualifier);
-        });
-      }
     }
   }
 
@@ -128,6 +122,20 @@ export class DependencyRegistryIndex implements RegistryIndex {
         try {
           this.destroyInstance(config.candidateType, qualifier);
         } catch { }
+      }
+    }
+  }
+
+  // Setup instances after change set complete
+  onChangeSetComplete(events: ChangeEvent<Class>[]): void {
+    for (const event of events) {
+      if (event.type === 'changed') {
+        const adapter = this.store.get(event.current);
+        for (const config of adapter.getCandidateConfigs()) {
+          if (config.autoInject) {
+            this.getInstance(config.candidateType, config.qualifier);
+          }
+        }
       }
     }
   }
