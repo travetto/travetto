@@ -21,10 +21,6 @@ export class SuiteRegistryIndex implements RegistryIndex {
     return this.#instance.store.getForRegister(cls);
   }
 
-  static has(cls: Class): boolean {
-    return this.#instance.store.has(cls);
-  }
-
   static getTestConfig(cls: Class, method: Function): TestConfig | undefined {
     return this.#instance.getTestConfig(cls, method);
   }

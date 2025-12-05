@@ -28,10 +28,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.has(cls);
   }
 
-  static getClassById(classId: string): Class {
-    return this.#instance.store.getClassById(classId);
-  }
-
   static getDiscriminatedTypes(cls: Class): string[] | undefined {
     return this.#instance.getDiscriminatedTypes(cls);
   }

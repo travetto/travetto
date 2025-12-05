@@ -32,20 +32,12 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.#instance.getCandidates<T>(candidateType);
   }
 
-  static getCandidateTypes<T>(candidateType: Class<T>): Class<T>[] {
-    return this.#instance.getCandidates(candidateType).map(candidate => candidate.candidateType);
-  }
-
   static getInstances<T>(candidateType: Class<T>, predicate?: (config: InjectableCandidate<T>) => boolean): Promise<T[]> {
     return this.#instance.getInstances<T>(candidateType, predicate);
   }
 
   static injectFields<T extends { constructor: Class<T> }>(item: T, cls = item.constructor): Promise<T> {
     return this.#instance.injectFields(cls, item, cls);
-  }
-
-  static getOptional(cls: Class): InjectableConfig | undefined {
-    return this.#instance.store.getOptional(cls)?.get();
   }
 
   static registerClassMetadata(cls: Class, metadata: InjectableClassMetadata): void {
