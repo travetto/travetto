@@ -1,31 +1,31 @@
-import { EventEmitter } from 'node:events';
 import { AppError, castTo, Class, Util } from '@travetto/runtime';
 
 import { ClassSource } from '../source/class-source';
 import { ChangeEvent } from '../types';
 import { MethodSource } from '../source/method-source';
-import { RegistryIndex, RegistryIndexClass, EXPIRED_CLASS } from './types';
+import { RegistryIndex, RegistryIndexClass, EXPIRED_CLASS, RegistryChangeListener } from './types';
+
+type EventHandler = { index: RegistryIndex, handler: RegistryChangeListener<Class> };
 
 class $Registry {
 
   #resolved = false;
   #initialized?: Promise<unknown>;
-  trace = false;
   #uniqueId = Util.uuid();
 
   // Lookups
-  #indexes = new Map<RegistryIndexClass, RegistryIndex>();
-  #indexOrder: RegistryIndexClass[] = [];
+  #indexByClass = new Map<RegistryIndexClass, RegistryIndex>();
 
   // Eventing
   #classSource = new ClassSource();
   #methodSource?: MethodSource;
-  #emitter = new EventEmitter<{ event: [ChangeEvent<Class>] }>();
+  #indexHandlers: EventHandler[] = [];
+  #listeners: EventHandler[] = [];
 
   #removeItems(classes: Class[]): void {
     for (const cls of classes) {
-      for (const idx of this.#indexOrder) {
-        this.instance(idx).store.remove(cls);
+      for (const { index } of this.#indexHandlers) {
+        index.store.remove(cls);
       }
       // Tag expired classes
       Object.assign(cls, { [EXPIRED_CLASS]: true });
@@ -33,19 +33,20 @@ class $Registry {
   }
 
   #finalizeItems(classes: Class[]): void {
-    for (const idx of this.#indexOrder) {
-      const inst = this.instance(idx);
+    for (const { index } of this.#indexHandlers) {
       for (const cls of classes) {
-        if (inst.store.has(cls) && !inst.store.finalized(cls)) {
-          if (inst.finalize) {
-            inst.finalize(cls);
+        if (index.store.has(cls) && !index.store.finalized(cls)) {
+          if (index.finalize) {
+            index.finalize(cls);
           } else {
-            inst.store.finalize(cls);
+            index.store.finalize(cls);
           }
         }
       }
     }
   }
+
+  trace = false;
 
   validateConstructor(source: unknown): void {
     if (source !== this) {
@@ -61,24 +62,29 @@ class $Registry {
   process(events: ChangeEvent<Class>[]): void {
     this.#finalizeItems(events.filter(event => 'current' in event).map(event => event.current));
 
-    for (const index of this.#indexOrder.map(cls => this.instance(cls))) {
-      for (const event of events) {
-        if ('previous' in event && index.store.has(event.previous)) {
-          index.onRemoved?.(event.previous, 'current' in event ? event.current : undefined);
-        }
-        if ('current' in event && index.store.has(event.current)) {
-          index.onAdded?.(event.current, 'previous' in event ? event.previous : undefined);
-        }
-      }
-
-      index.onChangeSetComplete?.();
+    const byIndex = new Map<RegistryIndex, ChangeEvent<Class>[]>();
+    for (const { index } of this.#indexHandlers) {
+      byIndex.set(index, events.filter(event => index.store.has('current' in event ? event.current : event.previous)));
     }
 
-    for (const event of events) {
-      this.#emitter.emit('event', event);
+    for (const { index, handler } of [...this.#indexHandlers, ...this.#listeners]) {
+      for (const event of byIndex.get(index)!) {
+        if ('previous' in event) {
+          handler.onRemoved?.(event.previous, 'current' in event ? event.current : undefined);
+        }
+        if ('current' in event) {
+          handler.onAdded?.(event.current, 'previous' in event ? event.previous : undefined);
+        }
+      }
+      handler.beforeChangeSetComplete?.(byIndex.get(index)!);
     }
 
     this.#removeItems(events.filter(event => 'previous' in event).map(event => event.previous!));
+
+    // Call after everything is done
+    for (const { index, handler } of [...this.#indexHandlers, ...this.#listeners]) {
+      handler.onChangeSetComplete?.(byIndex.get(index)!);
+    }
   }
 
   /**
@@ -113,11 +119,12 @@ class $Registry {
    * Register a new index
    */
   registerIndex<T extends RegistryIndexClass>(indexCls: T): InstanceType<T> {
-    if (!this.#indexes.has(indexCls)) {
-      this.#indexes.set(indexCls, new indexCls(this));
-      this.#indexOrder.push(indexCls);
+    if (!this.#indexByClass.has(indexCls)) {
+      const instance = new indexCls(this);
+      this.#indexByClass.set(indexCls, instance);
+      this.#indexHandlers.push({ index: instance, handler: instance });
     }
-    return castTo(this.#indexes.get(indexCls));
+    return castTo(this.#indexByClass.get(indexCls));
   }
 
   /**
@@ -131,23 +138,14 @@ class $Registry {
   }
 
   instance<T extends RegistryIndexClass>(indexCls: T): InstanceType<T> {
-    return castTo(this.#indexes.get(indexCls));
+    return castTo(this.#indexByClass.get(indexCls));
   }
 
   /**
    * Listen for changes
    */
-  onClassChange(handler: (event: ChangeEvent<Class>) => void, matches?: RegistryIndexClass): void {
-    if (!matches) {
-      this.#emitter.on('event', handler);
-    } else {
-      const inst = this.instance(matches);
-      this.#emitter.on('event', (event) => {
-        if (inst.store.has('current' in event ? event.current : event.previous!)) {
-          handler(event);
-        }
-      });
-    }
+  onClassChange(indexCls: RegistryIndexClass, listener: RegistryChangeListener<Class>): void {
+    this.#listeners.push({ index: this.instance(indexCls), handler: listener });
   }
 
   onNonClassChanges(handler: (file: string) => void): void {

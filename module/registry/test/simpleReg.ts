@@ -9,7 +9,7 @@ export class RegistryTest {
   @Test()
   async reloadTest() {
     Registry.onMethodChange(e => {
-      console.log('Method changed', { type: e.type, target: ('curr' in e ? e.curr : e.prev) });
+      console.log('Method changed', { type: e.type, target: ('current' in e ? e.current : e.previous) });
     });
 
     console.log('hi');

@@ -33,13 +33,18 @@ export class ModelStorageUtil {
 
     // If listening for model add/removes/updates
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
-      Registry.onClassChange(event => {
-        switch (event.type) {
-          case 'added': checkType(event.current) ? storage.createModel?.(event.current) : undefined; break;
-          case 'changed': checkType(event.current, false) ? storage.changeModel?.(event.current) : undefined; break;
-          case 'removing': checkType(event.previous) ? storage.deleteModel?.(event.previous) : undefined; break;
-        }
-      }, ModelRegistryIndex);
+      Registry.onClassChange(ModelRegistryIndex, {
+        async onAdded(cls, previous) {
+          if (previous) {
+            checkType(cls, true) && storage.changeModel?.(cls);
+          } else {
+            checkType(cls) && storage.createModel?.(cls);
+          }
+        },
+        async onRemoved(cls, replacedBy) {
+          checkType(cls) && !replacedBy && storage.deleteModel?.(cls);
+        },
+      });
     }
 
     // Initialize on startup (test manages)

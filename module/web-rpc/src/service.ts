@@ -23,11 +23,9 @@ export class WebRpcClientGeneratorService {
     if (!this.config.clients.length || !Runtime.dynamic) {
       return;
     }
-    Registry.onClassChange((event) => {
-      if (event.type !== 'changed') { // Capture only add and remove
-        this.render();
-      }
-    }, ControllerRegistryIndex);
+    Registry.onClassChange(ControllerRegistryIndex, {
+      onChangeSetComplete: events => events.some(event => event.type !== 'changed') && this.render()
+    });
   }
 
   async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {

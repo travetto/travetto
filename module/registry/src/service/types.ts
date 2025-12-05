@@ -1,4 +1,5 @@
 import { Class } from '@travetto/runtime';
+import { ChangeEvent } from '../types';
 
 export type RegistrationMethods = `register${string}` | `finalize${string}`;
 
@@ -29,13 +30,20 @@ export interface RegistrySimpleStore {
 };
 
 /**
+ * Listens for registry changes
+ */
+export interface RegistryChangeListener<T> {
+  beforeChangeSetComplete?(events: ChangeEvent<T>[]): void;
+  onRemoved?(cls: T, replacedBy?: T): void;
+  onAdded?(cls: T, previous?: T): void;
+  onChangeSetComplete?(events: ChangeEvent<T>[]): void;
+}
+
+/**
  * Registry index definition
  * @concrete
  */
-export interface RegistryIndex {
+export interface RegistryIndex extends RegistryChangeListener<Class> {
   store: RegistrySimpleStore;
-  onChangeSetComplete?(): void;
-  onRemoved?(cls: Class, replacedBy?: Class): void;
-  onAdded?(cls: Class, previous?: Class): void;
   finalize?(cls: Class): void;
 }

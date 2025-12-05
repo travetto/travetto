@@ -44,8 +44,8 @@ export class OpenApiService {
    * Initialize after schemas are readied
    */
   async postConstruct(): Promise<void> {
-    Registry.onClassChange(() => this.resetSpec(), ControllerRegistryIndex);
-    Registry.onClassChange(() => this.resetSpec(), SchemaRegistryIndex);
+    Registry.onClassChange(SchemaRegistryIndex, { onChangeSetComplete: () => this.resetSpec() });
+    Registry.onClassChange(ControllerRegistryIndex, { onChangeSetComplete: () => this.resetSpec() });
 
     if (!this.apiHostConfig.servers && this.webConfig.baseUrl) {
       this.apiHostConfig.servers = [{ url: this.webConfig.baseUrl }];

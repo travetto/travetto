@@ -11,7 +11,7 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
 
   @BeforeAll()
   async init() {
-    Registry.process([{ type: 'added', curr: TestController }]);
+    Registry.process([{ type: 'added', current: TestController }]);
   }
 
   @Test()

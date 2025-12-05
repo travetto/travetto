@@ -96,7 +96,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
     });
   }
 
-  onChangeSetComplete(): void {
+  beforeChangeSetComplete(): void {
     // Rebuild indices after every "process" batch
     this.#byDiscriminatedTypes.clear();
     for (const cls of this.store.getClasses()) {
