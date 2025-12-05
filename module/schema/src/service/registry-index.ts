@@ -89,13 +89,12 @@ export class SchemaRegistryIndex implements RegistryIndex {
   }
 
   onAdded(cls: Class, replaced?: Class): void {
-    const previousConfig = replaced ? this.getClassConfig(replaced) : undefined;
+    const previous = replaced ? this.getClassConfig(replaced) : undefined;
     Util.queueMacroTask().then(() => {
-      SchemaChangeListener.emitFieldChanges({
-        type: replaced ? 'changed' : 'added',
-        current: this.getClassConfig(cls),
-        previous: previousConfig!,
-      });
+      const current = this.getClassConfig(cls);
+      SchemaChangeListener.emitFieldChanges(previous ?
+        { type: 'changed', current, previous } :
+        { type: 'added', current });
     });
   }
 
