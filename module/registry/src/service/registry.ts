@@ -55,9 +55,7 @@ class $Registry {
   process(events: ChangeEvent<Class>[]): void {
     this.#finalizeItems(events.filter(event => 'current' in event).map(event => event.current));
 
-    const indexes = this.#indexOrder.map(cls => this.instance(cls));
-
-    for (const index of indexes) {
+    for (const index of this.#indexOrder.map(cls => this.instance(cls))) {
       for (const event of events) {
         if ('previous' in event && index.store.has(event.previous)) {
           index.onRemoved?.(event.previous, 'current' in event ? event.current : undefined);
