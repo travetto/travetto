@@ -1,4 +1,4 @@
-import { ChangeEvent, RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
@@ -84,41 +84,22 @@ export class SchemaRegistryIndex implements RegistryIndex {
     this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType, cls);
   }
 
-  #onChanged(cls: Class, previous: Class): void {
-    const previousConfig = this.getClassConfig(previous);
-    Util.queueMacroTask().then(() => {
-      SchemaChangeListener.emitFieldChanges({
-        type: 'changed',
-        current: this.getClassConfig(cls),
-        previous: previousConfig,
-      });
-    });
-  }
-
-  #onRemoving(cls: Class): void {
+  onRemoved(cls: Class): void {
     SchemaChangeListener.clearSchemaDependency(cls);
   }
 
-  #onAdded(cls: Class): void {
+  onAdded(cls: Class, replaced?: Class): void {
+    const previousConfig = replaced ? this.getClassConfig(replaced) : undefined;
     Util.queueMacroTask().then(() => {
       SchemaChangeListener.emitFieldChanges({
-        type: 'added',
-        current: this.getClassConfig(cls)
+        type: replaced ? 'changed' : 'added',
+        current: this.getClassConfig(cls),
+        previous: previousConfig!,
       });
     });
   }
 
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if (event.type === 'changed') {
-        this.#onChanged(event.current, event.previous!);
-      } else if (event.type === 'removing') {
-        this.#onRemoving(event.previous);
-      } else if (event.type === 'added') {
-        this.#onAdded(event.current);
-      }
-    }
-
+  onChangeSet(): void {
     // Rebuild indices after every "process" batch
     this.#byDiscriminatedTypes.clear();
     for (const cls of this.store.getClasses()) {

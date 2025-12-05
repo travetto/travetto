@@ -35,8 +35,8 @@ export interface RegistrySimpleStore {
  */
 export interface RegistryIndex {
   store: RegistrySimpleStore;
-  process?(events: ChangeEvent<Class>[]): void;
-  onRemoved?(cls: Class, replaced?: boolean): void;
-  onAdded?(cls: Class, replaced?: boolean): void;
+  onChangeSet?(events: ChangeEvent<Class>[]): void;
+  onRemoved?(cls: Class, replacedBy?: Class): void;
+  onAdded?(cls: Class, previous?: Class): void;
   finalize?(cls: Class): void;
 }

@@ -63,16 +63,16 @@ class $Registry {
         continue;
       }
 
-      index.process?.(matchedEvents);
-
       for (const event of matchedEvents) {
         if ('previous' in event) {
-          index.onRemoved?.(event.previous, 'current' in event);
+          index.onRemoved?.(event.previous, 'current' in event ? event.current : undefined);
         }
         if ('current' in event) {
-          index.onAdded?.(event.current, 'previous' in event);
+          index.onAdded?.(event.current, 'previous' in event ? event.previous : undefined);
         }
       }
+
+      index.onChangeSet?.(matchedEvents);
     }
 
     for (const event of events) {
