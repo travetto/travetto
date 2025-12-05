@@ -108,7 +108,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
     });
   }
 
-  onChange(events: ChangeEvent<Class>[]): void {
+  process(events: ChangeEvent<Class>[]): void {
     for (const event of events) {
       if (event.type === 'changed') {
         this.#onChanged(event.current, event.previous!);

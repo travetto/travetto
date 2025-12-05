@@ -1,4 +1,4 @@
-import { RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy, RegistryProcessEvent } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -88,34 +88,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return proxy.get();
   }
 
-  #addClass(cls: Class, forceCreate: boolean = false): void {
-    const adapter = this.store.get(cls);
-
-    for (const config of adapter.getCandidateConfigs()) {
-      const parentClass = getParentClass(config.candidateType);
-      const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
-      const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
-      const baseParent = hasParentBase ? parentClass : undefined;
-      this.#resolver.registerClass(config, baseParent);
-      if (config.autoInject || forceCreate) {
-        // Don't wait
-        Util.queueMacroTask().then(() => {
-          this.getInstance(config.candidateType, config.qualifier);
-        });
-      }
-    }
-  }
-
-  #removeClass(cls: Class): void {
-    if (this.#instances.has(cls)) {
-      for (const [qualifier, config] of this.#resolver.getContainerEntries(cls)) {
-        try {
-          this.destroyInstance(config.candidateType, qualifier);
-        } catch { }
-      }
-    }
-  }
-
   async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
       const target = dependency.target ?? input.type;
@@ -138,15 +110,31 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.store.get(cls).get();
   }
 
-  onRemove(events: RegistryProcessEvent[]): void {
-    for (const { cls } of events) {
-      this.#removeClass(cls);
+  onRemoved(cls: Class): void {
+    if (this.#instances.has(cls)) {
+      for (const [qualifier, config] of this.#resolver.getContainerEntries(cls)) {
+        try {
+          this.destroyInstance(config.candidateType, qualifier);
+        } catch { }
+      }
     }
   }
 
-  onAdd(events: RegistryProcessEvent[]): void {
-    for (const { cls } of events) {
-      this.#addClass(cls);
+  onAdded(cls: Class): void {
+    const adapter = this.store.get(cls);
+
+    for (const config of adapter.getCandidateConfigs()) {
+      const parentClass = getParentClass(config.candidateType);
+      const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
+      const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
+      const baseParent = hasParentBase ? parentClass : undefined;
+      this.#resolver.registerClass(config, baseParent);
+      if (config.autoInject) {
+        // Don't wait
+        Util.queueMacroTask().then(() => {
+          this.getInstance(config.candidateType, config.qualifier);
+        });
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-import { RegistryIndex, RegistryIndexStore, Registry, RegistryProcessEvent } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -58,7 +58,7 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(ModelRegistryAdapter);
 
-  #addClass(cls: Class): void {
+  onAdded(cls: Class): void {
     const schema = SchemaRegistryIndex.getConfig(cls);
 
     // Don't index on discriminated schemas
@@ -81,21 +81,9 @@ export class ModelRegistryIndex implements RegistryIndex {
     }
   }
 
-  #removeClass(cls: Class): void {
+  onRemoved(cls: Class): void {
     const { store } = this.store.get(cls).get();
     this.#modelNameMapping.get(store)?.delete(cls.Ⲑid);
-  }
-
-  onRemove(events: RegistryProcessEvent[]): void {
-    for (const { cls } of events) {
-      this.#removeClass(cls);
-    }
-  }
-
-  onAdd(events: RegistryProcessEvent[]): void {
-    for (const { cls } of events) {
-      this.#addClass(cls);
-    }
   }
 
   getConfig(cls: Class): ModelConfig<ModelType> {

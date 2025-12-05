@@ -1,4 +1,4 @@
-import { RegistryIndex, RegistryIndexStore, Registry, RegistryProcessEvent } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { Class, ClassInstance, getClass, isClass, RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
@@ -91,19 +91,15 @@ export class ControllerRegistryIndex implements RegistryIndex {
     return this.#endpointsById.get(id.replace(':', '#'));
   }
 
-  onRemove(events: RegistryProcessEvent[]): void {
-    for (const { cls } of events) {
-      for (const endpoint of this.getController(cls).endpoints) {
-        this.#endpointsById.delete(endpoint.id);
-      }
+  onRemoved(cls: Class): void {
+    for (const endpoint of this.getController(cls).endpoints) {
+      this.#endpointsById.delete(endpoint.id);
     }
   }
 
-  onAdd(events: RegistryProcessEvent[]): void {
-    for (const { cls } of events) {
-      for (const endpoint of this.getController(cls).endpoints) {
-        this.#endpointsById.set(endpoint.id, endpoint);
-      }
+  onAdded(cls: Class): void {
+    for (const endpoint of this.getController(cls).endpoints) {
+      this.#endpointsById.set(endpoint.id, endpoint);
     }
   }
 }

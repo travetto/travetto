@@ -59,15 +59,17 @@ class $Registry {
 
     for (const index of indexes) {
       const changed = events.filter(event => index.store.has('current' in event ? event.current : event.previous!));
-      if (changed.length && index.onChange) {
-        index.onChange(changed);
+      if (changed.length && index.process) {
+        index.process(changed);
       }
       const previous = events
         .filter((event): event is ChangeEvent<Class> & { previous: Class } => 'previous' in event && index.store.has(event.previous!))
         .map(event => ({ cls: event.previous!, replaced: 'current' in event }));
 
-      if (previous.length && index.onRemove) {
-        index.onRemove(previous);
+      if (previous.length && index.onRemoved) {
+        for (const cls of previous) {
+          index.onRemoved(cls.cls, cls.replaced);
+        }
       }
     }
 
@@ -78,8 +80,10 @@ class $Registry {
           .filter((event): event is ChangeEvent<Class> & { current: Class } => 'current' in event && index.store.has(event.current))
           .map(event => ({ cls: event.current, replaced: 'previous' in event }));
 
-        if (current.length && index.onAdd) {
-          index.onAdd(current);
+        if (current.length && index.onAdded) {
+          for (const cls of current) {
+            index.onAdded(cls.cls, cls.replaced);
+          }
         }
       }
     });
