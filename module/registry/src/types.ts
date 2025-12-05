@@ -18,5 +18,3 @@ export interface ChangeSource<T> {
   init(): Promise<unknown>;
   on(callback: ChangeHandler<T>): void;
 }
-
-export const REGISTRY_INDEX_SYMBOL = Symbol();
