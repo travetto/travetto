@@ -58,21 +58,16 @@ class $Registry {
     const indexes = this.#indexOrder.map(cls => this.instance(cls));
 
     for (const index of indexes) {
-      const matchedEvents = events.filter(event => index.store.has('current' in event ? event.current : event.previous!));
-      if (matchedEvents.length === 0) {
-        continue;
-      }
-
-      for (const event of matchedEvents) {
-        if ('previous' in event) {
+      for (const event of events) {
+        if ('previous' in event && index.store.has(event.previous)) {
           index.onRemoved?.(event.previous, 'current' in event ? event.current : undefined);
         }
-        if ('current' in event) {
+        if ('current' in event && index.store.has(event.current)) {
           index.onAdded?.(event.current, 'previous' in event ? event.previous : undefined);
         }
       }
 
-      index.onChangeSet?.(matchedEvents);
+      index.onChangeSetComplete?.();
     }
 
     for (const event of events) {
