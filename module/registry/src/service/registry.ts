@@ -58,39 +58,28 @@ class $Registry {
     const indexes = this.#indexOrder.map(cls => this.instance(cls));
 
     for (const index of indexes) {
-      const changed = events.filter(event => index.store.has('current' in event ? event.current : event.previous!));
-      if (changed.length && index.process) {
-        index.process(changed);
+      const matchedEvents = events.filter(event => index.store.has('current' in event ? event.current : event.previous!));
+      if (matchedEvents.length === 0) {
+        continue;
       }
-      const previous = events
-        .filter((event): event is ChangeEvent<Class> & { previous: Class } => 'previous' in event && index.store.has(event.previous!))
-        .map(event => ({ cls: event.previous!, replaced: 'current' in event }));
 
-      if (previous.length && index.onRemoved) {
-        for (const cls of previous) {
-          index.onRemoved(cls.cls, cls.replaced);
+      index.process?.(matchedEvents);
+
+      for (const event of matchedEvents) {
+        if ('previous' in event) {
+          index.onRemoved?.(event.previous, 'current' in event);
+        }
+        if ('current' in event) {
+          index.onAdded?.(event.current, 'previous' in event);
         }
       }
     }
-
-    Util.queueMacroTask().then(() => {
-      this.#removeItems(events.filter(event => 'previous' in event).map(event => event.previous!));
-      for (const index of indexes) {
-        const current = events
-          .filter((event): event is ChangeEvent<Class> & { current: Class } => 'current' in event && index.store.has(event.current))
-          .map(event => ({ cls: event.current, replaced: 'previous' in event }));
-
-        if (current.length && index.onAdded) {
-          for (const cls of current) {
-            index.onAdded(cls.cls, cls.replaced);
-          }
-        }
-      }
-    });
 
     for (const event of events) {
       this.#emitter.emit('event', event);
     }
+
+    this.#removeItems(events.filter(event => 'previous' in event).map(event => event.previous!));
   }
 
   /**
