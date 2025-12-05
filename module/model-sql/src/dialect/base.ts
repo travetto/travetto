@@ -869,8 +869,8 @@ ${this.getWhereSQL(type, where)};`;
   }
 
   /**
-  * Get elements by ids
-  */
+   * Get elements by ids
+   */
   getSelectRowsByIdsSQL(stack: VisitStack[], ids: string[], select: SchemaFieldConfig[] = []): string {
     const config = stack.at(-1)!;
     const orderBy = !config.array ?
