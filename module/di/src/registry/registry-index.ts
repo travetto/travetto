@@ -110,16 +110,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.store.get(cls).get();
   }
 
-  onRemoved(cls: Class): void {
-    if (this.#instances.has(cls)) {
-      for (const [qualifier, config] of this.#resolver.getContainerEntries(cls)) {
-        try {
-          this.destroyInstance(config.candidateType, qualifier);
-        } catch { }
-      }
-    }
-  }
-
   onAdded(cls: Class): void {
     const adapter = this.store.get(cls);
 
@@ -134,6 +124,16 @@ export class DependencyRegistryIndex implements RegistryIndex {
         Util.queueMacroTask().then(() => {
           this.getInstance(config.candidateType, config.qualifier);
         });
+      }
+    }
+  }
+
+  onRemoved(cls: Class): void {
+    if (this.#instances.has(cls)) {
+      for (const [qualifier, config] of this.#resolver.getContainerEntries(cls)) {
+        try {
+          this.destroyInstance(config.candidateType, qualifier);
+        } catch { }
       }
     }
   }
