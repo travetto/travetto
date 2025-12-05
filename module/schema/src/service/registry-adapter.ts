@@ -133,6 +133,8 @@ function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T
   return base;
 }
 
+export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
+
 export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig> {
 
   #cls: Class;
@@ -330,7 +332,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return value;
   }
 
-  getDiscriminatedConfig(): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
+  getDiscriminatedConfig(): SchemaDiscriminatedInfo | undefined {
     const { discriminatedField, discriminatedType, discriminatedBase } = this.#config;
     if (discriminatedType && discriminatedField) {
       return { discriminatedType, discriminatedField, discriminatedBase: !!discriminatedBase };

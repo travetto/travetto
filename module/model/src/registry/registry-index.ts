@@ -58,6 +58,8 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(ModelRegistryAdapter);
 
+  constructor(source: unknown) { Registry.validateConstructor(source); }
+
   onAdded(cls: Class): void {
     const schema = SchemaRegistryIndex.getConfig(cls);
 

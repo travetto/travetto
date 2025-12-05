@@ -2,7 +2,7 @@ import { RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
-import { SchemaRegistryAdapter } from './registry-adapter.ts';
+import { SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
 /**
@@ -20,7 +20,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls).get();
   }
 
-  static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
+  static getDiscriminatedConfig<T>(cls: Class<T>): SchemaDiscriminatedInfo | undefined {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
@@ -79,6 +79,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
     }
     this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType, cls);
   }
+
+  constructor(source: unknown) { Registry.validateConstructor(source); }
 
   onRemoved(cls: Class): void {
     SchemaChangeListener.clearSchemaDependency(cls);

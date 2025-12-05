@@ -14,7 +14,7 @@ export interface RegistryAdapter<C extends {} = {}> {
 }
 
 export type RegistryIndexClass = {
-  new(): RegistryIndex;
+  new(source: unknown): RegistryIndex;
 };
 
 /**

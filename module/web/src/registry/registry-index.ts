@@ -56,6 +56,8 @@ export class ControllerRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(ControllerRegistryAdapter);
 
+  constructor(source: unknown) { Registry.validateConstructor(source); }
+
   async #bindContextParams<T>(instance: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
     const cls = getClass(instance);

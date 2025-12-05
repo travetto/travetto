@@ -34,6 +34,8 @@ export class TestConsumerRegistryIndex implements RegistryIndex {
   #initialized: Promise<void>;
   store = new RegistryIndexStore(TestConsumerRegistryAdapter);
 
+  constructor(source: unknown) { Registry.validateConstructor(source); }
+
   /**
    * Manual initialization when running outside of the bootstrap process
    */

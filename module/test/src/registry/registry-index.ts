@@ -39,6 +39,8 @@ export class SuiteRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(SuiteRegistryAdapter);
 
+  constructor(source: unknown) { Registry.validateConstructor(source); }
+
   /**
    * Find all valid tests (ignoring abstract)
    */

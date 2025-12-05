@@ -98,6 +98,8 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(DependencyRegistryAdapter);
 
+  constructor(source: unknown) { Registry.validateConstructor(source); }
+
   getConfig(cls: Class): InjectableConfig {
     return this.store.get(cls).get();
   }

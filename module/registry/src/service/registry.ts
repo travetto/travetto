@@ -47,6 +47,12 @@ class $Registry {
     }
   }
 
+  validateConstructor(source: unknown): void {
+    if (source !== this) {
+      throw new AppError('constructor is private');
+    }
+  }
+
   finalizeForIndex(indexCls: RegistryIndexClass): void {
     const inst = this.instance(indexCls);
     this.#finalizeItems(inst.store.getClasses());
@@ -108,7 +114,7 @@ class $Registry {
    */
   registerIndex<T extends RegistryIndexClass>(indexCls: T): InstanceType<T> {
     if (!this.#indexes.has(indexCls)) {
-      this.#indexes.set(indexCls, new indexCls());
+      this.#indexes.set(indexCls, new indexCls(this));
       this.#indexOrder.push(indexCls);
     }
     return castTo(this.#indexes.get(indexCls));

@@ -32,6 +32,8 @@ export class CliCommandRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(CliCommandRegistryAdapter);
 
+  constructor(source: unknown) { Registry.validateConstructor(source); }
+
   /**
    * Get list of all commands available
    */
