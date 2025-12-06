@@ -29,7 +29,7 @@ This flow ensures all files are loaded and processed before application starts. 
 **Code: Sample Registry**
 ```typescript
 import { Class } from '@travetto/runtime';
-import { ChangeEvent, RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 interface Group {
   class: Class;
@@ -91,14 +91,10 @@ export class SampleRegistryIndex implements RegistryIndex {
   }
 
   store = new RegistryIndexStore(SampleRegistryAdapter);
-
-  process(events: ChangeEvent<Class>[]): void {
-    // Nothing to do
-  }
 }
 ```
 
-The registry index is a [RegistryIndex](https://github.com/travetto/travetto/tree/main/module/registry/src/service/types.ts#L36) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
+The registry index is a [RegistryIndex](https://github.com/travetto/travetto/tree/main/module/registry/src/service/types.ts#L46) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
 
 ### Live Flow
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. 
@@ -132,19 +128,19 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
     for (const key of keys) {
       if (!next.has(key)) {
         changes += 1;
-        this.emit({ type: 'removing', previous: previous.get(key)! });
+        this.emit({ type: 'delete', previous: previous.get(key)! });
         this.#classes.get(sourceFile)!.delete(key);
       } else {
         this.#classes.get(sourceFile)!.set(key, next.get(key)!);
         if (!previous.has(key)) {
           changes += 1;
-          this.emit({ type: 'added', current: next.get(key)! });
+          this.emit({ type: 'create', current: next.get(key)! });
         } else {
           const prevHash = describeFunction(previous.get(key)!)?.hash;
           const nextHash = describeFunction(next.get(key)!)?.hash;
           if (prevHash !== nextHash) {
             changes += 1;
-            this.emit({ type: 'changed', current: next.get(key)!, previous: previous.get(key)! });
+            this.emit({ type: 'update', current: next.get(key)!, previous: previous.get(key)! });
           }
         }
       }

@@ -129,10 +129,10 @@ export class DependencyRegistryIndex implements RegistryIndex {
   // Setup instances after change set complete
   onChangeSetComplete(events: ChangeEvent<Class>[]): void {
     for (const event of events) {
-      if (event.type === 'update') {
+      if (event.type !== 'delete') {
         const adapter = this.store.get(event.current);
         for (const config of adapter.getCandidateConfigs()) {
-          if (config.autoInject) {
+          if (config.autoInject || event.type === 'update') {
             this.getInstance(config.candidateType, config.qualifier);
           }
         }

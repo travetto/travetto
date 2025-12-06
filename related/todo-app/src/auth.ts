@@ -19,6 +19,7 @@ export class AuthController {
     return WebResponse.redirect('/auth/self');
   }
 
+
   @Get('/self')
   @Authenticated()
   async getSelf(): Promise<Principal> {
