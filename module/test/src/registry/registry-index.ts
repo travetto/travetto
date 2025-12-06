@@ -21,10 +21,6 @@ export class SuiteRegistryIndex implements RegistryIndex {
     return this.#instance.store.getForRegister(cls);
   }
 
-  static has(cls: Class, method?: Function): boolean {
-    return this.#instance.has(cls, method);
-  }
-
   static getTestConfig(cls: Class, method: Function | string): TestConfig | undefined {
     return this.#instance.getTestConfig(cls, method);
   }
@@ -113,12 +109,5 @@ export class SuiteRegistryIndex implements RegistryIndex {
       const config = this.getConfig(cls);
       return Object.values(config.tests).find(item => item.methodName === methodName);
     }
-  }
-
-  /**
-   * Is the given class and optionally method registered?
-   */
-  has(cls: Class, method?: Function): boolean {
-    return this.store.has(cls) && !!this.getTestConfig(cls, method!);
   }
 }
