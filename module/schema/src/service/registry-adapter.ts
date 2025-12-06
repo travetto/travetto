@@ -70,6 +70,7 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
   const baseCons = base.methods?.[CONSTRUCTOR_PROPERTY];
   return {
     name: CONSTRUCTOR_PROPERTY,
+    hash: 0,
     parameters: [],
     validators: [],
     ...parentCons,
@@ -200,7 +201,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerMethod(method: string, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const classConfig = this.register();
-    const config = classConfig.methods[method] ??= { name: method, parameters: [], validators: [] };
+    const config = classConfig.methods[method] ??= { name: method, parameters: [], validators: [], hash: 0 };
     return combineMethods(config, data);
   }
 
@@ -237,7 +238,9 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       combineClassWithParent(config, parent);
     }
 
-    if (config.discriminatedField && !config.discriminatedType && !describeFunction(this.#cls).abstract) {
+    const describedCls = describeFunction(this.#cls);
+
+    if (config.discriminatedField && !config.discriminatedType && !describedCls.abstract) {
       config.discriminatedType = classToDiscriminatedType(this.#cls);
     }
 
@@ -274,6 +277,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
+      method.hash = describedCls.methods![method.name].hash;
     }
   }
 

@@ -1,9 +1,11 @@
-import { RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { EventEmitter } from 'node:events';
+
+import { RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry, ChangeEvent } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
-import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaMethodConfig } from './types.ts';
 import { SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
-import { SchemaChangeListener } from './changes.ts';
+import { FieldMapping, SchemaChange, SchemaChangeEvent, SubSchemaChangeEvent } from './change-types.ts';
 
 /**
  * Schema registry index for managing schema configurations across classes
@@ -60,9 +62,15 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.getClasses();
   }
 
+  static onSchemaChange(handler: (event: SchemaChangeEvent) => void): void {
+    this.#instance.onSchemaChange(handler);
+  }
+
   store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
+  #schemaMapping = new Map<string, Map<string, FieldMapping>>();
+  #changeEmitter = new EventEmitter();
 
   /**
    * Register discriminated types for a class
@@ -83,14 +91,14 @@ export class SchemaRegistryIndex implements RegistryIndex {
   constructor(source: unknown) { Registry.validateConstructor(source); }
 
   onRemoved(cls: Class): void {
-    SchemaChangeListener.clearSchemaDependency(cls);
+    this.#schemaMapping.delete(cls.Ⲑid);
   }
 
   onAdded(cls: Class, replaced?: Class): void {
     const previous = replaced ? this.getClassConfig(replaced) : undefined;
     Util.queueMacroTask().then(() => {
       const current = this.getClassConfig(cls);
-      SchemaChangeListener.emitFieldChanges(previous ?
+      this.emitFieldChanges(previous ?
         { type: 'update', current, previous } :
         { type: 'create', current });
     });
@@ -162,7 +170,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
   trackSchemaDependencies(cls: Class, current: Class = cls, path: SchemaFieldConfig[] = []): void {
     const config = this.getClassConfig(current);
 
-    SchemaChangeListener.trackSchemaDependency(current, cls, path, this.getClassConfig(cls));
+    this.trackSchemaDependency(current, cls, path, this.getClassConfig(cls));
 
     // Read children
     for (const field of Object.values(config.fields)) {
@@ -205,5 +213,131 @@ export class SchemaRegistryIndex implements RegistryIndex {
       return [...map.keys()];
     }
     return undefined;
+  }
+
+
+  /**
+   * On schema change, emit the change event for the whole schema
+   * @param handler The function to call on schema change
+   */
+  onSchemaChange(handler: (event: SchemaChangeEvent) => void): void {
+    this.#changeEmitter.on('schema', handler);
+  }
+
+  /**
+   * On schema field change, emit the change event for the whole schema
+   * @param handler The function to call on schema field change
+   */
+  onSubSchemaChange(handler: (event: SubSchemaChangeEvent) => void): void {
+    this.#changeEmitter.on('subSchema', handler);
+  }
+
+  /**
+   * Track a specific class for dependencies
+   * @param cls The target class
+   * @param parent The parent class
+   * @param path The path within the object hierarchy to arrive at the class
+   * @param config The configuration or the class
+   */
+  trackSchemaDependency(cls: Class, parent: Class, path: SchemaFieldConfig[], config: SchemaClassConfig): void {
+    const idValue = cls.Ⲑid;
+    if (!this.#schemaMapping.has(idValue)) {
+      this.#schemaMapping.set(idValue, new Map());
+    }
+    this.#schemaMapping.get(idValue)!.set(parent.Ⲑid, { path, config });
+  }
+
+  /**
+   * Emit changes to the schema
+   * @param cls The class of the event
+   * @param changes The changes to send
+   */
+  emitSchemaChanges({ cls, fieldChanges, methodChanges }: SubSchemaChangeEvent): void {
+    const updates = new Map<string, SchemaChange>();
+    const clsId = cls.Ⲑid;
+
+    if (this.#schemaMapping.has(clsId)) {
+      const dependencies = this.#schemaMapping.get(clsId)!;
+      for (const dependencyClsId of dependencies.keys()) {
+        if (!updates.has(dependencyClsId)) {
+          updates.set(dependencyClsId, { config: dependencies.get(dependencyClsId)!.config, subs: [] });
+        }
+        const childDependency = dependencies.get(dependencyClsId)!;
+        updates.get(dependencyClsId)!.subs.push({ path: [...childDependency.path], fields: fieldChanges, methods: methodChanges });
+      }
+    }
+
+    for (const key of updates.keys()) {
+      this.#changeEmitter.emit('schema', { cls: updates.get(key)!.config.class, change: updates.get(key)! });
+    }
+  }
+
+  /**
+   * Emit field level changes in the schema
+   * @param previous The previous class config
+   * @param current The current class config
+   */
+  emitFieldChanges(event: ChangeEvent<SchemaClassConfig>): void {
+    const previous = 'previous' in event ? event.previous : undefined;
+    const current = 'current' in event ? event.current : undefined;
+
+    const previousFields = new Set(Object.keys(previous?.fields ?? {}));
+    const currentFields = new Set(Object.keys(current?.fields ?? {}));
+
+    const previousMethods = new Set(Object.keys(previous?.methods ?? {}));
+    const currentMethods = new Set(Object.keys(current?.methods ?? {}));
+
+    const fieldChanges: ChangeEvent<SchemaFieldConfig>[] = [];
+    const methodChanges: ChangeEvent<SchemaMethodConfig>[] = [];
+
+    for (const field of currentFields) {
+      if (!previousFields.has(field) && current) {
+        fieldChanges.push({ current: current.fields[field], type: 'create' });
+      }
+    }
+
+    for (const method of currentMethods) {
+      if (!previousMethods.has(method) && current) {
+        methodChanges.push({ current: current.methods[method], type: 'create' });
+      }
+    }
+
+    for (const field of previousFields) {
+      if (!currentFields.has(field) && previous) {
+        fieldChanges.push({ previous: previous.fields[field], type: 'delete' });
+      }
+    }
+
+    for (const method of previousMethods) {
+      if (!currentMethods.has(method) && previous) {
+        methodChanges.push({ previous: previous.methods[method], type: 'delete' });
+      }
+    }
+
+    // Handle class references changing, but keeping same id
+    const compareTypes = (a: Class, b: Class): boolean => a.Ⲑid ? a.Ⲑid === b.Ⲑid : a === b;
+
+    for (const field of currentFields) {
+      if (previousFields.has(field) && previous && current) {
+        const prevSchema = previous.fields[field];
+        const currSchema = current.fields[field];
+        if (
+          JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
+          !compareTypes(prevSchema.type, currSchema.type)
+        ) {
+          fieldChanges.push({ previous: previous.fields[field], current: current.fields[field], type: 'update' });
+        }
+      }
+    }
+
+    for (const method of currentMethods) {
+      if (previous && previous.methods[method] && current && current.methods[method] && current.methods[method].hash !== previous.methods[method].hash) {
+        methodChanges.push({ previous: previous!.methods[method], current: current!.methods[method], type: 'update' });
+      }
+    }
+
+    // Send field changes
+    this.#changeEmitter.emit('subSchema', { cls: current!.class, fieldChanges, methodChanges });
+    this.emitSchemaChanges({ cls: current!.class, fieldChanges, methodChanges });
   }
 }

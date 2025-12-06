@@ -63,6 +63,10 @@ export interface SchemaMethodConfig extends SchemaCoreConfig {
    */
   name: string;
   /**
+   * Hash of the method signature
+   */
+  hash: number;
+  /**
    * Is the method static
    */
   isStatic?: boolean;
