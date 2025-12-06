@@ -1,5 +1,5 @@
 import { RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy, ChangeEvent } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types';
@@ -129,7 +129,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
   // Setup instances after change set complete
   onChangeSetComplete(events: ChangeEvent<Class>[]): void {
     for (const event of events) {
-      if (event.type === 'changed') {
+      if (event.type === 'update') {
         const adapter = this.store.get(event.current);
         for (const config of adapter.getCandidateConfigs()) {
           if (config.autoInject) {

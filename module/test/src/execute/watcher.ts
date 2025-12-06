@@ -1,6 +1,6 @@
-import { Registry } from '@travetto/registry';
+import { ClassChangeSource, Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
-import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
+import { AsyncQueue, RuntimeIndex, castTo } from '@travetto/runtime';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
@@ -38,41 +38,36 @@ export class TestWatcher {
     )
       .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
 
-    Registry.onMethodChange((event) => {
-      const [cls, method] = 'previous' in event ? event.previous : event.current;
+    SuiteRegistryIndex.onChange((event) => {
+      const classId = event.class.Ⲑid;
 
-      if (!cls || describeFunction(cls).abstract) {
-        return;
-      }
-
-      const classId = cls.Ⲑid;
-      if (!method) {
-        consumer.removeClass(classId);
-        return;
-      }
-
-      const config = SuiteRegistryIndex.getTestConfig(cls, method)!;
-      if (event.type !== 'removing') {
-        if (config) {
+      switch (event.type) {
+        case 'suite-deleted': consumer.removeClass(classId); break;
+        case 'test-deleted': {
+          const { test } = event;
+          process.send?.({
+            type: 'removeTest',
+            methodNames: [test.methodName],
+            method: test.methodName,
+            classId,
+            import: test!.import,
+          } satisfies TestRemovedEvent);
+          break;
+        }
+        case 'test-changed': {
+          const { test } = event;
           const run: TestRun = {
-            import: config.import, classId: config.classId, methodNames: [config.methodName], metadata: { partial: true }
+            import: test.import, classId: test.classId, methodNames: [test.methodName], metadata: { partial: true }
           };
           console.log('Triggering', run);
           queue.add(run, true); // Shift to front
+          break;
         }
-      } else {
-        process.send?.({
-          type: 'removeTest',
-          methodNames: method?.name ? [method.name!] : undefined!,
-          method: method?.name,
-          classId,
-          import: Runtime.getImport(cls)
-        } satisfies TestRemovedEvent);
       }
-    }, SuiteRegistryIndex);
+    });
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    Registry.onNonClassChanges(imp => queue.add({ import: imp }));
+    ClassChangeSource.onNonClassChanges(imp => queue.add({ import: imp }));
 
     process.on('message', event => {
       if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {

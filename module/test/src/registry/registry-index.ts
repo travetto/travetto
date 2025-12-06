@@ -10,6 +10,9 @@ const sortedTests = (config: SuiteConfig): TestConfig[] =>
 
 type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
 
+type SuiteChangeEvent = { type: 'suite-deleted', class: Class } | { type: 'test-deleted' | 'test-changed', class: Class, test: TestConfig };
+type SuiteChangeListener = (event: SuiteChangeEvent) => void;
+
 /**
  * Test Suite registry
  */
@@ -19,6 +22,10 @@ export class SuiteRegistryIndex implements RegistryIndex {
 
   static getForRegister(cls: Class): SuiteRegistryAdapter {
     return this.#instance.store.getForRegister(cls);
+  }
+
+  static has(cls: Class, method?: Function): boolean {
+    return this.#instance.has(cls, method);
   }
 
   static getTestConfig(cls: Class, method: Function): TestConfig | undefined {
@@ -37,9 +44,63 @@ export class SuiteRegistryIndex implements RegistryIndex {
     return this.#instance.store.getClasses();
   }
 
+  static onChange(listener: SuiteChangeListener): void {
+    this.#instance.onChange(listener);
+  }
+
+  #listeners: SuiteChangeListener[] = [];
   store = new RegistryIndexStore(SuiteRegistryAdapter);
 
   constructor(source: unknown) { Registry.validateConstructor(source); }
+
+  onRemoved(cls: Class, replacedBy?: Class | undefined): void {
+    if (replacedBy || !this.#listeners.length) { return; }
+    for (const listener of this.#listeners) {
+      if (!describeFunction(cls).abstract) {
+        listener({ type: 'suite-deleted', class: cls });
+      }
+    }
+  }
+
+  onAdded(cls: Class, replacedFrom?: Class | undefined): void {
+    if (!this.#listeners.length) { return; }
+
+    const config = this.store.get(cls).get();
+    const previousConfig = replacedFrom ? this.store.get(replacedFrom).get() : undefined;
+
+    const currentMeta = describeFunction(cls);
+    const previousMeta = replacedFrom ? describeFunction(replacedFrom) : undefined;
+
+    const current = [...Object.values(config.tests)].map(x => ({
+      name: x.methodName,
+      config: x,
+      hash: currentMeta?.methods?.[x.methodName]?.hash!
+    }));
+    const currentMap = new Map(current.map(x => [x.name, x]));
+    const previous = [...Object.values(previousConfig?.tests ?? {})].map(x => ({
+      name: x.methodName,
+      config: x,
+      hash: previousMeta?.methods?.[x.methodName]?.hash!
+    }));
+    const previousMap = new Map(previous.map(x => [x.name, x]));
+
+    for (const value of current) {
+      const previousValue = previousMap.get(value.name);
+      if (!previousValue || previousValue.hash !== value.hash) {
+        for (const listener of this.#listeners) {
+          listener({ type: 'test-changed', class: cls, test: value.config });
+        }
+      }
+    }
+
+    for (const value of previous) {
+      if (!currentMap.has(value.name)) {
+        for (const listener of this.#listeners) {
+          listener({ type: 'test-deleted', class: cls, test: value.config });
+        }
+      }
+    }
+  }
 
   /**
    * Find all valid tests (ignoring abstract)
@@ -108,5 +169,19 @@ export class SuiteRegistryIndex implements RegistryIndex {
       const config = this.getConfig(cls);
       return Object.values(config.tests).find(item => item.methodName === method.name);
     }
+  }
+
+  /**
+   * Is the given class and optionally method registered?
+   */
+  has(cls: Class, method?: Function): boolean {
+    return this.store.has(cls) && !!this.getTestConfig(cls, method!);
+  }
+
+  /**
+   * Listen for suite/test changes
+   */
+  onChange(listener: SuiteChangeListener): void {
+    this.#listeners.push(listener);
   }
 }

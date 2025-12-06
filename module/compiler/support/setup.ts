@@ -208,7 +208,7 @@ export class CompilerSetup {
     const delta = await Log.wrap('delta', async log => {
       if (changes) {
         log.debug('Skipping, everything changed');
-        return [{ type: 'changed', file: '*', module: ctx.workspace.name, sourceFile: '' } as const];
+        return [{ type: 'update', file: '*', module: ctx.workspace.name, sourceFile: '' } as const];
       } else {
         return ManifestDeltaUtil.produceDelta(manifest);
       }
@@ -241,6 +241,6 @@ export class CompilerSetup {
       }
     });
 
-    return delta.filter(event => event.type === 'added' || event.type === 'changed');
+    return delta.filter(event => event.type === 'create' || event.type === 'update');
   }
 }

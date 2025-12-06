@@ -69,6 +69,7 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
   const parentCons = parent?.methods?.[CONSTRUCTOR_PROPERTY];
   const baseCons = base.methods?.[CONSTRUCTOR_PROPERTY];
   return {
+    name: CONSTRUCTOR_PROPERTY,
     parameters: [],
     validators: [],
     ...parentCons,
@@ -199,7 +200,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerMethod(method: string, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const classConfig = this.register();
-    const config = classConfig.methods[method] ??= { parameters: [], validators: [] };
+    const config = classConfig.methods[method] ??= { name: method, parameters: [], validators: [] };
     return combineMethods(config, data);
   }
 

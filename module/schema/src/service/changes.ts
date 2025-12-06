@@ -1,23 +1,25 @@
 import { EventEmitter } from 'node:events';
 
-import { Class } from '@travetto/runtime';
+import { Class, describeFunction } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 
-import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaMethodConfig } from './types.ts';
 
 interface FieldMapping {
   path: SchemaFieldConfig[];
   config: SchemaClassConfig;
 }
 
-export interface FieldChangeEvent {
+export interface SubSchemaChangeEvent {
   cls: Class;
-  changes: ChangeEvent<SchemaFieldConfig>[];
+  fieldChanges: ChangeEvent<SchemaFieldConfig>[];
+  methodChanges: ChangeEvent<SchemaMethodConfig>[];
 }
 
 interface SubSchemaChange {
   path: SchemaFieldConfig[];
   fields: ChangeEvent<SchemaFieldConfig>[];
+  methods: ChangeEvent<SchemaMethodConfig>[];
 }
 
 export interface SchemaChange {
@@ -50,8 +52,8 @@ class $SchemaChangeListener {
    * On schema field change, emit the change event for the whole schema
    * @param handler The function to call on schema field change
    */
-  onFieldChange(handler: (event: FieldChangeEvent) => void): void {
-    this.#emitter.on('field', handler);
+  onSubSchemaChange(handler: (event: SubSchemaChangeEvent) => void): void {
+    this.#emitter.on('subSchema', handler);
   }
 
   /**
@@ -81,7 +83,7 @@ class $SchemaChangeListener {
    * @param cls The class of the event
    * @param changes The changes to send
    */
-  emitSchemaChanges({ cls, changes }: FieldChangeEvent): void {
+  emitSchemaChanges({ cls, fieldChanges, methodChanges }: SubSchemaChangeEvent): void {
     const updates = new Map<string, SchemaChange>();
     const clsId = cls.Ⲑid;
 
@@ -92,7 +94,7 @@ class $SchemaChangeListener {
           updates.set(dependencyClsId, { config: dependencies.get(dependencyClsId)!.config, subs: [] });
         }
         const childDependency = dependencies.get(dependencyClsId)!;
-        updates.get(dependencyClsId)!.subs.push({ path: [...childDependency.path], fields: changes });
+        updates.get(dependencyClsId)!.subs.push({ path: [...childDependency.path], fields: fieldChanges, methods: methodChanges });
       }
     }
 
@@ -113,17 +115,33 @@ class $SchemaChangeListener {
     const previousFields = new Set(Object.keys(previous?.fields ?? {}));
     const currentFields = new Set(Object.keys(current?.fields ?? {}));
 
-    const changes: ChangeEvent<SchemaFieldConfig>[] = [];
+    const previousMethods = new Set(Object.keys(previous?.methods ?? {}));
+    const currentMethods = new Set(Object.keys(current?.methods ?? {}));
+
+    const fieldChanges: ChangeEvent<SchemaFieldConfig>[] = [];
+    const methodChanges: ChangeEvent<SchemaMethodConfig>[] = [];
 
     for (const field of currentFields) {
       if (!previousFields.has(field) && current) {
-        changes.push({ current: current.fields[field], type: 'added' });
+        fieldChanges.push({ current: current.fields[field], type: 'create' });
+      }
+    }
+
+    for (const method of currentMethods) {
+      if (!previousMethods.has(method) && current) {
+        methodChanges.push({ current: current.methods[method], type: 'create' });
       }
     }
 
     for (const field of previousFields) {
       if (!currentFields.has(field) && previous) {
-        changes.push({ previous: previous.fields[field], type: 'removing' });
+        fieldChanges.push({ previous: previous.fields[field], type: 'delete' });
+      }
+    }
+
+    for (const method of previousMethods) {
+      if (!currentMethods.has(method) && previous) {
+        methodChanges.push({ previous: previous.methods[method], type: 'delete' });
       }
     }
 
@@ -138,14 +156,22 @@ class $SchemaChangeListener {
           JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
           !compareTypes(prevSchema.type, currSchema.type)
         ) {
-          changes.push({ previous: previous.fields[field], current: current.fields[field], type: 'changed' });
+          fieldChanges.push({ previous: previous.fields[field], current: current.fields[field], type: 'update' });
         }
       }
     }
 
+    for (const method of currentMethods) {
+      const previousMethod = previous ? describeFunction(previous.class).methods?.[method] : undefined;
+      const currentMethod = current ? describeFunction(current.class).methods?.[method] : undefined;
+      if (previousMethod && currentMethod && previousMethod.hash !== currentMethod.hash) {
+        methodChanges.push({ previous: previous!.methods[method], current: current!.methods[method], type: 'update' });
+      }
+    }
+
     // Send field changes
-    this.#emitter.emit('field', { cls: current!.class, changes });
-    this.emitSchemaChanges({ cls: current!.class, changes });
+    this.#emitter.emit('subSchema', { cls: current!.class, fieldChanges, methodChanges });
+    this.emitSchemaChanges({ cls: current!.class, fieldChanges, methodChanges });
   }
 }
 

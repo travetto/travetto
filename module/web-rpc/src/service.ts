@@ -24,7 +24,7 @@ export class WebRpcClientGeneratorService {
       return;
     }
     Registry.onClassChange(ControllerRegistryIndex, {
-      onChangeSetComplete: events => events.some(event => event.type !== 'changed') && this.render()
+      onChangeSetComplete: events => events.some(event => event.type !== 'update') && this.render()
     });
   }
 

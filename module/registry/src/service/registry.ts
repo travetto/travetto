@@ -1,8 +1,7 @@
 import { AppError, castTo, Class, Util } from '@travetto/runtime';
 
-import { ClassSource } from '../source/class-source';
+import { ClassChangeSource } from './class-source';
 import { ChangeEvent } from '../types';
-import { MethodSource } from '../source/method-source';
 import { RegistryIndex, RegistryIndexClass, EXPIRED_CLASS, RegistryChangeListener } from './types';
 
 type EventHandler = { index: RegistryIndex, handler: RegistryChangeListener<Class> };
@@ -17,8 +16,6 @@ class $Registry {
   #indexByClass = new Map<RegistryIndexClass, RegistryIndex>();
 
   // Eventing
-  #classSource = new ClassSource();
-  #methodSource?: MethodSource;
   #indexHandlers: EventHandler[] = [];
   #listeners: EventHandler[] = [];
 
@@ -59,6 +56,9 @@ class $Registry {
     this.#finalizeItems(inst.store.getClasses());
   }
 
+  /**
+   * Process change events
+   */
   process(events: ChangeEvent<Class>[]): void {
     this.#finalizeItems(events.filter(event => 'current' in event).map(event => event.current));
 
@@ -98,9 +98,9 @@ class $Registry {
         console.debug('Initializing', { uniqueId: this.#uniqueId });
       }
 
-      const added = await this.#classSource.init();
-      this.process(added.map(cls => ({ type: 'added', current: cls })));
-      this.#classSource.on(event => this.process([event]));
+      const added = await ClassChangeSource.init();
+      this.process(added.map(cls => ({ type: 'create', current: cls })));
+      ClassChangeSource.on(event => this.process([event]));
     } finally {
       this.#resolved = true;
     }
@@ -146,27 +146,6 @@ class $Registry {
    */
   onClassChange(indexCls: RegistryIndexClass, listener: RegistryChangeListener<Class>): void {
     this.#listeners.push({ index: this.instance(indexCls), handler: listener });
-  }
-
-  onNonClassChanges(handler: (file: string) => void): void {
-    this.#classSource.onNonClassChanges(handler);
-  }
-
-  onMethodChange(
-    handler: (event: ChangeEvent<[Class, Function]>) => void,
-    matches?: RegistryIndexClass,
-  ): void {
-    const emitter = this.#methodSource ??= new MethodSource(this.#classSource);
-    if (!matches) {
-      emitter.on(handler);
-    } else {
-      const inst = this.instance(matches);
-      emitter.on((event) => {
-        if (inst.store.has('current' in event ? event.current[0] : event.previous[0])) {
-          handler(event);
-        }
-      });
-    }
   }
 }
 

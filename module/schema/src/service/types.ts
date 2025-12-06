@@ -59,6 +59,10 @@ export interface SchemaCoreConfig {
  */
 export interface SchemaMethodConfig extends SchemaCoreConfig {
   /**
+   * The name of the method
+   */
+  name: string;
+  /**
    * Is the method static
    */
   isStatic?: boolean;

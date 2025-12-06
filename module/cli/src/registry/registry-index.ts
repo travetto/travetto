@@ -84,7 +84,7 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     // Initialize any uninitialized commands
     if (uninitialized.length) {
       // Ensure processed
-      Registry.process(uninitialized.map(cls => ({ type: 'added', current: cls })));
+      Registry.process(uninitialized.map(cls => ({ type: 'create', current: cls })));
     }
 
     for (const cls of values) {
