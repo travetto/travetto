@@ -48,7 +48,7 @@ export class TestWatcher {
       for (const event of changeEvents.filter(item => item.type !== 'delete').flatMap(item => item.methodChanges)) {
         switch (event.type) {
           case 'delete': {
-            const test = SuiteRegistryIndex.getTestConfig(event.previous.owner, event.previous.name)!;
+            const test = SuiteRegistryIndex.getTestConfig(event.previous.owner, event.previous.name);
             if (test) {
               process.send?.({
                 type: 'removeTest',
@@ -60,8 +60,9 @@ export class TestWatcher {
             }
             break;
           }
+          case 'create':
           case 'update': {
-            const test = SuiteRegistryIndex.getTestConfig(event.current.owner, event.current.name)!;
+            const test = SuiteRegistryIndex.getTestConfig(event.current.owner, event.current.name);
             if (test) {
               const run: TestRun = {
                 import: test.import,
