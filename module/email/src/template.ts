@@ -10,8 +10,8 @@ import { RuntimeResources } from '@travetto/runtime';
  */
 export interface MailInterpolator {
   /**
-  * Resolved nested templates
-  */
+   * Resolved nested templates
+   */
   resolveNested(template: string): Promise<string>;
 
   /**

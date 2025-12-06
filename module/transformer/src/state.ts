@@ -409,7 +409,7 @@ export class TransformerState implements State {
       file.identifier,
       this.factory.createIdentifier('foreignType'),
     ), [], [
-      this.fromLiteral(`${type.source.split('node_modules/')[1]}+${type.name}`)
+      this.fromLiteral(type.classId)
     ]);
   }
 

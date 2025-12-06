@@ -69,6 +69,9 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
   const parentCons = parent?.methods?.[CONSTRUCTOR_PROPERTY];
   const baseCons = base.methods?.[CONSTRUCTOR_PROPERTY];
   return {
+    name: CONSTRUCTOR_PROPERTY,
+    hash: 0,
+    owner: base.class!,
     parameters: [],
     validators: [],
     ...parentCons,
@@ -132,6 +135,8 @@ function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T
   }
   return base;
 }
+
+export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
 
 export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig> {
 
@@ -197,7 +202,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerMethod(method: string, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const classConfig = this.register();
-    const config = classConfig.methods[method] ??= { parameters: [], validators: [] };
+    const config = classConfig.methods[method] ??= { owner: classConfig.class, name: method, parameters: [], validators: [], hash: 0 };
     return combineMethods(config, data);
   }
 
@@ -234,7 +239,9 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       combineClassWithParent(config, parent);
     }
 
-    if (config.discriminatedField && !config.discriminatedType && !describeFunction(this.#cls).abstract) {
+    const describedCls = describeFunction(this.#cls);
+
+    if (config.discriminatedField && !config.discriminatedType && !describedCls.abstract) {
       config.discriminatedType = classToDiscriminatedType(this.#cls);
     }
 
@@ -271,6 +278,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
+      method.hash = describedCls.methods![method.name].hash;
     }
   }
 
@@ -305,8 +313,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   /**
-  * Provides the prototype-derived descriptor for a property
-  */
+   * Provides the prototype-derived descriptor for a property
+   */
   getAccessorDescriptor(field: string): PropertyDescriptor {
     if (!this.#accessorDescriptors.has(field)) {
       let proto = this.#cls.prototype;
@@ -330,7 +338,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return value;
   }
 
-  getDiscriminatedConfig(): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
+  getDiscriminatedConfig(): SchemaDiscriminatedInfo | undefined {
     const { discriminatedField, discriminatedType, discriminatedBase } = this.#config;
     if (discriminatedType && discriminatedField) {
       return { discriminatedType, discriminatedField, discriminatedBase: !!discriminatedBase };

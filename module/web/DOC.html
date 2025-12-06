@@ -91,10 +91,10 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebResponse<span class="token operator">&lt;</span><span class="token constant">B</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token keyword">extends</span> <span class="token class-name">BaseWebMessage<span class="token operator">&lt;</span><span class="token constant">B</span><span class="token punctuation">,</span> WebResponseContext<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token comment">/**
-    * Build the redirect
-    * @param location Location to redirect to
-    * @param statusCode Status code
-    */</span>
+   * Build the redirect
+   * @param location Location to redirect to
+   * @param statusCode Status code
+   */</span>
   <span class="token keyword">static</span> <span class="token function">redirect</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> statusCode <span class="token operator">=</span> <span class="token number">302</span><span class="token punctuation">)</span><span class="token operator">:</span> WebResponse<span class="token operator">&lt;</span><span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">WebResponse</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> context<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> httpStatusCode<span class="token operator">:</span> statusCode <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> headers<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> Location<span class="token operator">:</span> location <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -277,7 +277,7 @@ In addition to endpoint parameters (i.e. user-provided inputs), there may also b
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<p class="note"><strong>Note</strong> When referencing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64">@ContextParam</a> values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L45">@CacheControl</a> decorator is used to ensure that the response is not cached.</p>
+<p class="note"><strong>Note</strong> When referencing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64">@ContextParam</a> values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L41">@CacheControl</a> decorator is used to ensure that the response is not cached.</p>
 
 <h3 id="validating-inputs">Validating Inputs</h3>
 
@@ -696,7 +696,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h4 id="cachecontrolinterceptor">CacheControlInterceptor</h4>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23">CacheControlInterceptor</a> by default, enforces whatever caching policy is established on a given endpoint using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L45">@CacheControl</a> decorator.   Additionally, the interceptor retains knowledge if it is running on a private endpoint, or not.  If the endpoint is deemed private it affects the caching header accordingly. If the endpoint directly returns a <code class="item input">Cache-Control</code> header, that takes precedence and all other logic is ignored. <br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23">CacheControlInterceptor</a> by default, enforces whatever caching policy is established on a given endpoint using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L41">@CacheControl</a> decorator.   Additionally, the interceptor retains knowledge if it is running on a private endpoint, or not.  If the endpoint is deemed private it affects the caching header accordingly. If the endpoint directly returns a <code class="item input">Cache-Control</code> header, that takes precedence and all other logic is ignored. <br><br>
 This can be managed by setting <code class="item input">web.cache.applies: &lt;boolean&gt;</code> in your config. <br><br>
 <strong>Note</strong>: The <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> module will mark endpoints as private if they require authentication.
 

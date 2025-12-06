@@ -6,7 +6,7 @@ import {
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
 import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
-import { SchemaChange, BindUtil } from '@travetto/schema';
+import { BindUtil, SchemaChangeEvent } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
@@ -125,7 +125,7 @@ export class ElasticsearchModelService implements
   createModel(cls: Class): Promise<void> { return this.manager.createModel(cls); }
   exportModel(cls: Class): Promise<string> { return this.manager.exportModel(cls); }
   deleteModel(cls: Class): Promise<void> { return this.manager.deleteModel(cls); }
-  changeSchema(cls: Class, change: SchemaChange): Promise<void> { return this.manager.changeSchema(cls, change); }
+  updateSchema(events: SchemaChangeEvent[]): Promise<void> { return this.manager.updateSchema(events); }
   truncateModel(cls: Class): Promise<void> { return this.deleteByQuery(cls, {}).then(() => { }); }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

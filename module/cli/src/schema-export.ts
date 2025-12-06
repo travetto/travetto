@@ -35,8 +35,8 @@ export interface CliCommandSchema<K extends string = string> {
 export class CliSchemaExportUtil {
 
   /**
-    * Get the base type for a CLI command input
-    */
+   * Get the base type for a CLI command input
+   */
   static baseInputType(config: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
     switch (config.type) {
       case Date: return { type: 'date' };

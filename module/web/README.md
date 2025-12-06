@@ -78,10 +78,10 @@ export interface WebResponseContext {
 export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseContext> {
 
   /**
-    * Build the redirect
-    * @param location Location to redirect to
-    * @param statusCode Status code
-    */
+   * Build the redirect
+   * @param location Location to redirect to
+   * @param statusCode Status code
+   */
   static redirect(location: string, statusCode = 302): WebResponse<undefined> {
     return new WebResponse({ context: { httpStatusCode: statusCode }, headers: { Location: location } });
   }
@@ -251,7 +251,7 @@ class ContextController {
 }
 ```
 
-**Note**: When referencing the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64) values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the [@CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L45) decorator is used to ensure that the response is not cached.
+**Note**: When referencing the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64) values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the [@CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L41) decorator is used to ensure that the response is not cached.
 
 ### Validating Inputs
 The module provides high level access for [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") support, via decorators, for validating and typing request inputs. 
@@ -617,7 +617,7 @@ export class CorsConfig {
 ```
 
 #### CacheControlInterceptor
-[CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) by default, enforces whatever caching policy is established on a given endpoint using the [@CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L45) decorator.   Additionally, the interceptor retains knowledge if it is running on a private endpoint, or not.  If the endpoint is deemed private it affects the caching header accordingly. If the endpoint directly returns a `Cache-Control` header, that takes precedence and all other logic is ignored. 
+[CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) by default, enforces whatever caching policy is established on a given endpoint using the [@CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L41) decorator.   Additionally, the interceptor retains knowledge if it is running on a private endpoint, or not.  If the endpoint is deemed private it affects the caching header accordingly. If the endpoint directly returns a `Cache-Control` header, that takes precedence and all other logic is ignored. 
 
 This can be managed by setting `web.cache.applies: <boolean>` in your config. 
 

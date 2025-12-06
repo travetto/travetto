@@ -239,7 +239,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * When the model changes
    * @param cls
    */
-  async changeModel(cls: Class<ModelType>): Promise<void> {
+  async updateModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
     const idx = this.#computeIndexConfig(cls);
     // const existing = await this.cl.describeTable({ TableName: table });

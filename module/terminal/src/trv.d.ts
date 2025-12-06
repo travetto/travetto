@@ -25,8 +25,8 @@ declare module '@travetto/runtime' {
      */
     COLORTERM: string;
     /**
-      * Terminal operation mode, false means simple output
-      */
+     * Terminal operation mode, false means simple output
+     */
     TRV_QUIET: boolean;
   }
 }

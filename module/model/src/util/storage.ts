@@ -1,5 +1,5 @@
 import { Class, hasFunction, Runtime } from '@travetto/runtime';
-import { SchemaChangeListener, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
 
 import { ModelStorageSupport } from '../types/storage.ts';
@@ -32,14 +32,19 @@ export class ModelStorageUtil {
     };
 
     // If listening for model add/removes/updates
-    if (storage.createModel || storage.deleteModel || storage.changeModel) {
-      Registry.onClassChange(event => {
-        switch (event.type) {
-          case 'added': checkType(event.current) ? storage.createModel?.(event.current) : undefined; break;
-          case 'changed': checkType(event.current, false) ? storage.changeModel?.(event.current) : undefined; break;
-          case 'removing': checkType(event.previous) ? storage.deleteModel?.(event.previous) : undefined; break;
-        }
-      }, ModelRegistryIndex);
+    if (storage.createModel || storage.deleteModel || storage.updateModel) {
+      Registry.onClassChange(ModelRegistryIndex, {
+        async onAdded(cls, previous) {
+          if (previous) {
+            checkType(cls, true) && storage.updateModel?.(cls);
+          } else {
+            checkType(cls) && storage.createModel?.(cls);
+          }
+        },
+        async onRemoved(cls, replacedBy) {
+          checkType(cls) && !replacedBy && storage.deleteModel?.(cls);
+        },
+      });
     }
 
     // Initialize on startup (test manages)
@@ -54,11 +59,9 @@ export class ModelStorageUtil {
     }
 
     // If listening for model add/removes/updates
-    if (storage.changeSchema) {
-      SchemaChangeListener.onSchemaChange(event => {
-        if (checkType(event.cls)) {
-          storage.changeSchema!(event.cls, event.change);
-        }
+    if (storage.updateSchema) {
+      SchemaRegistryIndex.onSchemaChange(events => {
+        storage.updateSchema!(events.filter(event => checkType(event.cls)));
       });
     }
   }
