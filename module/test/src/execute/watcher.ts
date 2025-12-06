@@ -1,6 +1,7 @@
 import { ClassChangeSource, Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, RuntimeIndex, castTo } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
@@ -38,30 +39,41 @@ export class TestWatcher {
     )
       .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
 
-    SuiteRegistryIndex.onChange((event) => {
-      const classId = event.class.Ⲑid;
-
-      switch (event.type) {
-        case 'suite-deleted': consumer.removeClass(classId); break;
-        case 'test-deleted': {
-          const { test } = event;
-          process.send?.({
-            type: 'removeTest',
-            methodNames: [test.methodName],
-            method: test.methodName,
-            classId,
-            import: test!.import,
-          } satisfies TestRemovedEvent);
-          break;
+    SchemaRegistryIndex.onSchemaChange((changeEvents) => {
+      for (const event of changeEvents) {
+        if (event.type === 'delete') {
+          consumer.removeClass(event.cls.Ⲑid);
         }
-        case 'test-changed': {
-          const { test } = event;
-          const run: TestRun = {
-            import: test.import, classId: test.classId, methodNames: [test.methodName], metadata: { partial: true }
-          };
-          console.log('Triggering', run);
-          queue.add(run, true); // Shift to front
-          break;
+      }
+      for (const event of changeEvents.flatMap(e => e.methodChanges)) {
+        switch (event.type) {
+          case 'delete': {
+            const test = SuiteRegistryIndex.getTestConfig(event.previous.owner, event.previous.name)!;
+            if (test) {
+              process.send?.({
+                type: 'removeTest',
+                methodNames: [test.methodName],
+                method: test.methodName,
+                classId: test.classId,
+                import: test.import,
+              } satisfies TestRemovedEvent);
+            }
+            break;
+          }
+          case 'update': {
+            const test = SuiteRegistryIndex.getTestConfig(event.current.owner, event.current.name)!;
+            if (test) {
+              const run: TestRun = {
+                import: test.import,
+                classId: test.classId,
+                methodNames: [test.methodName],
+                metadata: { partial: true }
+              };
+              console.log('Triggering', run);
+              queue.add(run, true); // Shift to front
+              break;
+            }
+          }
         }
       }
     });

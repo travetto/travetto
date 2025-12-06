@@ -6,7 +6,6 @@ export * from './src/decorator/method.ts';
 export * from './src/decorator/common.ts';
 export * from './src/service/types.ts';
 export * from './src/service/registry-index.ts';
-export * from './src/service/change-types.ts';
 export * from './src/service/registry-adapter.ts';
 export * from './src/validate/messages.ts';
 export * from './src/validate/regex.ts';

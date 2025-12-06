@@ -63,6 +63,10 @@ export interface SchemaMethodConfig extends SchemaCoreConfig {
    */
   name: string;
   /**
+   * Owner class
+   */
+  owner: Class;
+  /**
    * Hash of the method signature
    */
   hash: number;

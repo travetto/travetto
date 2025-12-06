@@ -5,7 +5,13 @@ import { AppError, castKey, castTo, Class, classConstruct, getParentClass } from
 
 import { SchemaFieldConfig, SchemaClassConfig, SchemaMethodConfig } from './types.ts';
 import { SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
-import { FieldMapping, SchemaChangeEvent } from './change-types.ts';
+
+export interface SchemaChangeEvent {
+  cls: Class;
+  type: ChangeEvent<unknown>['type'];
+  fieldChanges: ChangeEvent<SchemaFieldConfig>[];
+  methodChanges: ChangeEvent<SchemaMethodConfig>[];
+}
 
 /**
  * Schema registry index for managing schema configurations across classes
@@ -69,7 +75,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
   store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
-  #schemaMapping = new Map<string, Map<string, FieldMapping>>();
   #changeEmitter = new EventEmitter<{ schema: [SchemaChangeEvent[]] }>();
   #queuedChanges: SchemaChangeEvent[] = [];
 
@@ -91,8 +96,18 @@ export class SchemaRegistryIndex implements RegistryIndex {
 
   constructor(source: unknown) { Registry.validateConstructor(source); }
 
-  onRemoved(cls: Class): void {
-    this.#schemaMapping.delete(cls.Ⲑid);
+  /**
+   * On schema change, emit the change event for the whole schema
+   * @param handler The function to call on schema change
+   */
+  onSchemaChange(handler: (event: SchemaChangeEvent[]) => void): void {
+    this.#changeEmitter.on('schema', handler);
+  }
+
+  onRemoved(cls: Class, replacedBy?: Class | undefined): void {
+    if (!replacedBy) {
+      this.#queuedChanges.push({ type: 'delete', cls, fieldChanges: [], methodChanges: [] });
+    }
   }
 
   onAdded(cls: Class, replaced?: Class): void {
@@ -151,7 +166,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
     }
 
     // Send field changes
-    this.#queuedChanges.push({ cls: current!.class, fieldChanges, methodChanges });
+    this.#queuedChanges.push({ type: 'update', cls: current!.class, fieldChanges, methodChanges });
   }
 
   beforeChangeSetComplete(): void {
@@ -250,14 +265,5 @@ export class SchemaRegistryIndex implements RegistryIndex {
       return [...map.keys()];
     }
     return undefined;
-  }
-
-
-  /**
-   * On schema change, emit the change event for the whole schema
-   * @param handler The function to call on schema change
-   */
-  onSchemaChange(handler: (event: SchemaChangeEvent[]) => void): void {
-    this.#changeEmitter.on('schema', handler);
   }
 }
