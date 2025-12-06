@@ -45,7 +45,7 @@ export class TestWatcher {
           consumer.removeClass(event.cls.Ⲑid);
         }
       }
-      for (const event of changeEvents.flatMap(e => e.methodChanges)) {
+      for (const event of changeEvents.filter(item => item.type !== 'delete').flatMap(item => item.methodChanges)) {
         switch (event.type) {
           case 'delete': {
             const test = SuiteRegistryIndex.getTestConfig(event.previous.owner, event.previous.name)!;
