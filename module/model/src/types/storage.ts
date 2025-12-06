@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { SchemaChange } from '@travetto/schema';
+import { SchemaChangeEvent } from '@travetto/schema';
 
 import { ModelType } from '../types/model.ts';
 
@@ -48,11 +48,11 @@ export interface ModelStorageSupport {
   /**
    * Deals with model internals changing
    */
-  changeModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
+  updateModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
    * An event listener for whenever a model schema is changed
    */
-  changeSchema?(cls: Class, changes: SchemaChange): Promise<void>;
+  updateSchema?(events: SchemaChangeEvent[]): Promise<void>;
   /**
    * Truncate blob storage data
    */

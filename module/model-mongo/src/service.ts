@@ -141,7 +141,7 @@ export class MongoModelService implements
     await this.establishIndices(cls);
   }
 
-  async changeModel(cls: Class): Promise<void> {
+  async updateModel(cls: Class): Promise<void> {
     await this.establishIndices(cls);
   }
 
