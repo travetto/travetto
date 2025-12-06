@@ -105,12 +105,15 @@ export class SchemaRegistryIndex implements RegistryIndex {
   }
 
   onRemoved(cls: Class, replacedBy?: Class | undefined): void {
-    if (!replacedBy) {
+    if (this.#changeEmitter.listenerCount('schema') && !replacedBy) {
       this.#queuedChanges.push({ type: 'delete', cls, fieldChanges: [], methodChanges: [] });
     }
   }
 
   onAdded(cls: Class, replaced?: Class): void {
+    if (!this.#changeEmitter.listenerCount('schema')) {
+      return;
+    }
     const current = this.getClassConfig(cls);
     const previous = replaced ? this.getClassConfig(replaced) : undefined;
 
