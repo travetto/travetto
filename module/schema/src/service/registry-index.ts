@@ -4,7 +4,7 @@ import { AppError, castKey, castTo, Class, classConstruct, getParentClass } from
 import { SchemaFieldConfig, SchemaClassConfig, SchemaMethodConfig } from './types.ts';
 import { SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
 
-export interface SchemaChangeEvent {
+export interface SchemaClassChange {
   cls: Class;
   type: ChangeEvent<unknown>['type'];
   fieldChanges: ChangeEvent<SchemaFieldConfig>[];
@@ -66,7 +66,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.getClasses();
   }
 
-  static computeClassChange(current: SchemaClassConfig, previous?: SchemaClassConfig): SchemaChangeEvent {
+  static computeClassChange(current: SchemaClassConfig, previous?: SchemaClassConfig): SchemaClassChange {
     return this.#instance.computeClassChange(current, previous);
   }
 
@@ -91,6 +91,12 @@ export class SchemaRegistryIndex implements RegistryIndex {
   }
 
   constructor(source: unknown) { Registry.validateConstructor(source); }
+
+  onAdded(cls: Class, previous?: Class | undefined): void {
+    if (!previous) { return; }
+    // TODO: Handle inherited changes properly, we need to rebuild subclasses when fields are changed
+    // We also need to emit events for those changes, when possible
+  }
 
   beforeChangeSetComplete(): void {
     // Rebuild indices after every "process" batch
@@ -187,7 +193,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
   /**
    * Compute change between two versions of a class
    */
-  computeClassChange(current: SchemaClassConfig, previous?: SchemaClassConfig): SchemaChangeEvent {
+  computeClassChange(current: SchemaClassConfig, previous?: SchemaClassConfig): SchemaClassChange {
     const previousFields = new Set(Object.keys(previous?.fields ?? {}));
     const previousMethods = new Set(Object.keys(previous?.methods ?? {}));
 

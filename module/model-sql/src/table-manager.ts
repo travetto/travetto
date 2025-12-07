@@ -1,5 +1,5 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
-import { ModelFieldChange, ModelRegistryIndex } from '@travetto/model';
+import { ModelChangeSet, ModelRegistryIndex } from '@travetto/model';
 import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 import { SchemaFieldConfig } from '@travetto/schema';
@@ -108,20 +108,20 @@ export class TableManager {
   @WithAsyncContext()
   @Transactional()
   @Connected()
-  async updateSchema(cls: Class, events: ModelFieldChange[]): Promise<void> {
+  async updateSchema(cls: Class, changeSets: ModelChangeSet[]): Promise<void> {
     try {
       const rootStack = SQLModelUtil.classToStack(cls);
-      const changes = events.reduce<Record<ChangeEvent<SchemaFieldConfig>['type'], VisitStack[][]>>((result, value) => {
-        const path = value.path.map(field => ({ ...field }));
-        for (const event of value.changes) {
+      const changes = changeSets.reduce<Record<ChangeEvent<SchemaFieldConfig>['type'], VisitStack[][]>>((result, changeSet) => {
+        const path = changeSet.path.map(field => ({ ...field }));
+        for (const event of changeSet.changes) {
           result[event.type].push([...rootStack, ...path, { ...(event.type === 'delete' ? event.previous : event.current)! }]);
         }
         return result;
       }, { create: [], update: [], delete: [] });
 
-      await Promise.all(changes.create.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));
-      await Promise.all(changes.update.map(value => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(value))));
-      await Promise.all(changes.delete.map(value => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(value))));
+      await Promise.all(changes.create.map(item => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(item))));
+      await Promise.all(changes.update.map(item => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(item))));
+      await Promise.all(changes.delete.map(item => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(item))));
     } catch (error) {
       // Failed to change
       console.error('Unable to change field', { error });

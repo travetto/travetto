@@ -3,7 +3,7 @@ import { Client, errors, estypes } from '@elastic/elasticsearch';
 import {
   ModelCrudSupport, BulkOperation, BulkResponse, ModelBulkSupport, ModelExpirySupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistryIndex, OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelFieldChange,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelChangeSet,
 } from '@travetto/model';
 import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
@@ -125,7 +125,7 @@ export class ElasticsearchModelService implements
   createModel(cls: Class): Promise<void> { return this.manager.createModel(cls); }
   exportModel(cls: Class): Promise<string> { return this.manager.exportModel(cls); }
   deleteModel(cls: Class): Promise<void> { return this.manager.deleteModel(cls); }
-  updateSchema(cls: Class, events: ModelFieldChange[]): Promise<void> { return this.manager.updateSchema(cls, events); }
+  updateSchema(cls: Class, changeSets: ModelChangeSet[]): Promise<void> { return this.manager.updateSchema(cls, changeSets); }
   truncateModel(cls: Class): Promise<void> { return this.deleteByQuery(cls, {}).then(() => { }); }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

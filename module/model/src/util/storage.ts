@@ -3,7 +3,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
 
 import { ModelStorageSupport } from '../types/storage.ts';
-import { ModelFieldChange, ModelRegistryIndex } from '../registry/registry-index.ts';
+import { ModelChangeSet, ModelRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * Model storage util
@@ -62,20 +62,20 @@ export class ModelStorageUtil {
     if (storage.updateSchema) {
       Registry.onClassChange(SchemaRegistryIndex, {
         beforeChangeSetComplete(events) {
-          const allLocations = new Map<Class, ModelFieldChange[]>();
+          const allChangeSets = new Map<Class, ModelChangeSet[]>();
           for (const event of events) {
             if (event.type === 'update') {
-              const locations = ModelRegistryIndex.getModelSubChanges(event.current, event.previous);
-              for (const found of locations) {
-                if (!allLocations.has(found.modelCls)) {
-                  allLocations.set(found.modelCls, []);
+              const changeSets = ModelRegistryIndex.getModelChangeSets(event.current, event.previous);
+              for (const changeSet of changeSets) {
+                if (!allChangeSets.has(changeSet.modelCls)) {
+                  allChangeSets.set(changeSet.modelCls, []);
                 }
-                allLocations.get(found.modelCls)!.push(found);
+                allChangeSets.get(changeSet.modelCls)!.push(changeSet);
               }
             }
           }
-          for (const [cls, changes] of allLocations) {
-            storage.updateSchema!(cls, changes);
+          for (const [cls, changeSets] of allChangeSets) {
+            storage.updateSchema!(cls, changeSets);
           }
         },
       });

@@ -1,7 +1,7 @@
 import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
-import { ModelRegistryIndex, ModelType, ModelStorageSupport, ModelFieldChange } from '@travetto/model';
+import { ModelRegistryIndex, ModelType, ModelStorageSupport, ModelChangeSet } from '@travetto/model';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config.ts';
@@ -134,21 +134,21 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * When the schema changes
    */
-  async updateSchema(cls: Class, events: ModelFieldChange[]): Promise<void> {
+  async updateSchema(cls: Class, changeSets: ModelChangeSet[]): Promise<void> {
     // Find which fields are gone
-    const removes = events.reduce<string[]>((toRemove, schemaEvent) => {
-      toRemove.push(...schemaEvent.changes
+    const removes = changeSets.reduce<string[]>((toRemove, changSet) => {
+      toRemove.push(...changSet.changes
         .filter(event => event.type === 'delete')
-        .map(event => [...schemaEvent.path.map(field => field.name), event.previous!.name].join('.')));
+        .map(event => [...changSet.path.map(field => field.name), event.previous!.name].join('.')));
       return toRemove;
     }, []);
 
     // Find which types have changed
-    const fieldChanges = events.reduce<string[]>((toChange, schemaEvent) => {
-      toChange.push(...schemaEvent.changes
+    const fieldChanges = changeSets.reduce<string[]>((toChange, changSet) => {
+      toChange.push(...changSet.changes
         .filter(event => event.type === 'update')
         .filter(event => event.previous?.type !== event.current?.type)
-        .map(event => [...schemaEvent.path.map(field => field.name), event.previous!.name].join('.')));
+        .map(event => [...changSet.path.map(field => field.name), event.previous!.name].join('.')));
       return toChange;
     }, []);
 

@@ -3,7 +3,7 @@ import {
   BulkOperation, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
   NotFoundError, ModelRegistryIndex, ExistsError, OptionalId, ModelIdSource,
   ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
-  ModelFieldChange,
+  ModelChangeSet,
 } from '@travetto/model';
 import { castTo, Class } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
@@ -119,8 +119,8 @@ export class SQLModelService implements
     return (await this.#manager.exportTables(cls)).join('\n');
   }
 
-  async updateSchema(cls: Class, events: ModelFieldChange[]): Promise<void> {
-    await this.#manager.updateSchema(cls, events);
+  async updateSchema(cls: Class, changeSets: ModelChangeSet[]): Promise<void> {
+    await this.#manager.updateSchema(cls, changeSets);
   }
 
   async createModel(cls: Class): Promise<void> {

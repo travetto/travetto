@@ -1,6 +1,6 @@
 import { RegistryIndex, RegistryIndexStore, Registry, ChangeEvent } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
-import { SchemaChangeEvent, SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaClassChange, SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
 import { ModelType } from '../types/model';
@@ -10,7 +10,7 @@ import { NotFoundError } from '../error/not-found';
 
 type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & { type: K[number] };
 
-export type ModelFieldChange = {
+export type ModelChangeSet = {
   path: SchemaFieldConfig[];
   modelCls: Class<ModelType>;
   field: SchemaFieldConfig;
@@ -56,8 +56,8 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.store.getClasses();
   }
 
-  static getModelSubChanges(schemaCls: Class, previousSchemaCls: Class): ModelFieldChange[] {
-    return this.#instance.getModelSubChanges(schemaCls, previousSchemaCls);
+  static getModelChangeSets(schemaCls: Class, previousSchemaCls: Class): ModelChangeSet[] {
+    return this.#instance.getModelChangeSets(schemaCls, previousSchemaCls);
   }
 
   /**
@@ -143,11 +143,12 @@ export class ModelRegistryIndex implements RegistryIndex {
     return castTo(expiry);
   }
 
-  getModelSubChanges(schemaCls: Class, previousSchema: Class): ModelFieldChange[] {
-    const out: ModelFieldChange[] = [];
-    let changeSet: SchemaChangeEvent;
+  getModelChangeSets(schemaCls: Class, previousSchema: Class): ModelChangeSet[] {
+    const out: ModelChangeSet[] = [];
+    let changeSet: SchemaClassChange;
 
     for (const modelCls of ModelRegistryIndex.getClasses()) {
+      // TODO: Handle polymorphic changes properly
       SchemaRegistryIndex.visitFields(modelCls, (field, path) => {
         const fieldType = SchemaRegistryIndex.resolveInstanceType(schemaCls, field.type);
         if (fieldType.Ⲑid === schemaCls.Ⲑid) {
