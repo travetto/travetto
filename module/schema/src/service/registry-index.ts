@@ -70,6 +70,10 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.computeClassChange(current, previous);
   }
 
+  static onClassChange(handler: (events: ChangeEvent<Class>[]) => void): void {
+    Registry.onClassChange(SchemaRegistryIndex, { beforeChangeSetComplete: handler });
+  }
+
   store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();

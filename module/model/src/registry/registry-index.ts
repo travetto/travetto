@@ -148,7 +148,6 @@ export class ModelRegistryIndex implements RegistryIndex {
     let changeSet: SchemaClassChange;
 
     for (const modelCls of ModelRegistryIndex.getClasses()) {
-      // TODO: Handle polymorphic changes properly
       SchemaRegistryIndex.visitFields(modelCls, (field, path) => {
         const fieldType = SchemaRegistryIndex.resolveInstanceType(schemaCls, field.type);
         if (fieldType.Ⲑid === schemaCls.Ⲑid) {

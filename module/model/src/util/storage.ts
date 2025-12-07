@@ -60,24 +60,22 @@ export class ModelStorageUtil {
 
     // If listening for model add/removes/updates
     if (storage.updateSchema) {
-      Registry.onClassChange(SchemaRegistryIndex, {
-        beforeChangeSetComplete(events) {
-          const allChangeSets = new Map<Class, ModelChangeSet[]>();
-          for (const event of events) {
-            if (event.type === 'update') {
-              const changeSets = ModelRegistryIndex.getModelChangeSets(event.current, event.previous);
-              for (const changeSet of changeSets) {
-                if (!allChangeSets.has(changeSet.modelCls)) {
-                  allChangeSets.set(changeSet.modelCls, []);
-                }
-                allChangeSets.get(changeSet.modelCls)!.push(changeSet);
+      SchemaRegistryIndex.onClassChange((events) => {
+        const allChangeSets = new Map<Class, ModelChangeSet[]>();
+        for (const event of events) {
+          if (event.type === 'update') {
+            const changeSets = ModelRegistryIndex.getModelChangeSets(event.current, event.previous);
+            for (const changeSet of changeSets) {
+              if (!allChangeSets.has(changeSet.modelCls)) {
+                allChangeSets.set(changeSet.modelCls, []);
               }
+              allChangeSets.get(changeSet.modelCls)!.push(changeSet);
             }
           }
-          for (const [cls, changeSets] of allChangeSets) {
-            storage.updateSchema!(cls, changeSets);
-          }
-        },
+        }
+        for (const [cls, changeSets] of allChangeSets) {
+          storage.updateSchema!(cls, changeSets);
+        }
       });
     }
   }
