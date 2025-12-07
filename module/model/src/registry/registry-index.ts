@@ -1,6 +1,6 @@
-import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry, ChangeEvent } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaChangeEvent, SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
 import { ModelType } from '../types/model';
@@ -9,6 +9,13 @@ import { IndexNotSupported } from '../error/invalid-index';
 import { NotFoundError } from '../error/not-found';
 
 type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & { type: K[number] };
+
+export type ModelFieldChange = {
+  path: SchemaFieldConfig[];
+  modelCls: Class<ModelType>;
+  field: SchemaFieldConfig;
+  changes: ChangeEvent<SchemaFieldConfig>[];
+};
 
 /**
  * Model registry index for managing model configurations across classes
@@ -47,6 +54,10 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   static getClasses(): Class[] {
     return this.#instance.store.getClasses();
+  }
+
+  static getModelSubChanges(schemaCls: Class, previousSchemaCls: Class): ModelFieldChange[] {
+    return this.#instance.getModelSubChanges(schemaCls, previousSchemaCls);
   }
 
   /**
@@ -130,5 +141,24 @@ export class ModelRegistryIndex implements RegistryIndex {
       throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`);
     }
     return castTo(expiry);
+  }
+
+  getModelSubChanges(schemaCls: Class, previousSchema: Class): ModelFieldChange[] {
+    const out: ModelFieldChange[] = [];
+    let changeSet: SchemaChangeEvent;
+
+    for (const modelCls of ModelRegistryIndex.getClasses()) {
+      SchemaRegistryIndex.visitFields(modelCls, (field, path) => {
+        const fieldType = SchemaRegistryIndex.resolveInstanceType(schemaCls, field.type);
+        if (fieldType.Ⲑid === schemaCls.Ⲑid) {
+          changeSet ??= SchemaRegistryIndex.computeClassChange(
+            SchemaRegistryIndex.getConfig(schemaCls),
+            SchemaRegistryIndex.getConfig(previousSchema)
+          );
+          out.push({ path, modelCls, field, changes: changeSet.fieldChanges });
+        }
+      });
+    }
+    return out;
   }
 }

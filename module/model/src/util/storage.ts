@@ -3,7 +3,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
 
 import { ModelStorageSupport } from '../types/storage.ts';
-import { ModelRegistryIndex } from '../registry/registry-index.ts';
+import { ModelFieldChange, ModelRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * Model storage util
@@ -60,8 +60,24 @@ export class ModelStorageUtil {
 
     // If listening for model add/removes/updates
     if (storage.updateSchema) {
-      SchemaRegistryIndex.onSchemaChange(events => {
-        storage.updateSchema!(events.filter(event => checkType(event.cls)));
+      Registry.onClassChange(SchemaRegistryIndex, {
+        beforeChangeSetComplete(events) {
+          const allLocations = new Map<Class, ModelFieldChange[]>();
+          for (const event of events) {
+            if (event.type === 'update') {
+              const locations = ModelRegistryIndex.getModelSubChanges(event.current, event.previous);
+              for (const found of locations) {
+                if (!allLocations.has(found.modelCls)) {
+                  allLocations.set(found.modelCls, []);
+                }
+                allLocations.get(found.modelCls)!.push(found);
+              }
+            }
+          }
+          for (const [cls, changes] of allLocations) {
+            storage.updateSchema!(cls, changes);
+          }
+        },
       });
     }
   }

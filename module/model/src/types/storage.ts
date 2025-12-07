@@ -1,7 +1,7 @@
 import { Class } from '@travetto/runtime';
-import { SchemaChangeEvent } from '@travetto/schema';
 
 import { ModelType } from '../types/model.ts';
+import { ModelFieldChange } from '../registry/registry-index.ts';
 
 /**
  * This interface defines the behavior for dealing with the
@@ -52,7 +52,7 @@ export interface ModelStorageSupport {
   /**
    * An event listener for whenever a model schema is changed
    */
-  updateSchema?(events: SchemaChangeEvent[]): Promise<void>;
+  updateSchema?(cls: Class, events: ModelFieldChange[]): Promise<void>;
   /**
    * Truncate blob storage data
    */

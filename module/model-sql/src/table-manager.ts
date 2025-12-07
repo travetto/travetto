@@ -1,8 +1,8 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
-import { ModelRegistryIndex } from '@travetto/model';
+import { ModelFieldChange, ModelRegistryIndex } from '@travetto/model';
 import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
-import { SchemaChangeEvent, SchemaFieldConfig } from '@travetto/schema';
+import { SchemaFieldConfig } from '@travetto/schema';
 
 import { Connected, Transactional } from './connection/decorator.ts';
 import { SQLDialect } from './dialect/base.ts';
@@ -108,26 +108,23 @@ export class TableManager {
   @WithAsyncContext()
   @Transactional()
   @Connected()
-  async updateSchema(events: SchemaChangeEvent[]): Promise<void> {
-    for (const { cls, fieldChanges } of events) {
-      try {
-        const rootStack = SQLModelUtil.classToStack(cls);
+  async updateSchema(cls: Class, events: ModelFieldChange[]): Promise<void> {
+    try {
+      const rootStack = SQLModelUtil.classToStack(cls);
+      const changes = events.reduce<Record<ChangeEvent<SchemaFieldConfig>['type'], VisitStack[][]>>((result, value) => {
+        const path = value.path.map(field => ({ ...field }));
+        for (const event of value.changes) {
+          result[event.type].push([...rootStack, ...path, { ...(event.type === 'delete' ? event.previous : event.current)! }]);
+        }
+        return result;
+      }, { create: [], update: [], delete: [] });
 
-        const changes = fieldChanges.reduce<Record<ChangeEvent<SchemaFieldConfig>['type'], VisitStack[][]>>((result, value) => {
-          const path = value.path.map(field => ({ ...field }));
-          for (const event of value.fields) {
-            result[event.type].push([...rootStack, ...path, { ...(event.type === 'delete' ? event.previous : event.current)! }]);
-          }
-          return result;
-        }, { create: [], update: [], delete: [] });
-
-        await Promise.all(changes.create.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));
-        await Promise.all(changes.update.map(value => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(value))));
-        await Promise.all(changes.delete.map(value => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(value))));
-      } catch (error) {
-        // Failed to change
-        console.error('Unable to change field', { error });
-      }
+      await Promise.all(changes.create.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));
+      await Promise.all(changes.update.map(value => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(value))));
+      await Promise.all(changes.delete.map(value => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(value))));
+    } catch (error) {
+      // Failed to change
+      console.error('Unable to change field', { error });
     }
   }
 }

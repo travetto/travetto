@@ -1,8 +1,8 @@
 import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
-import { ModelRegistryIndex, ModelType, ModelStorageSupport } from '@travetto/model';
-import { SchemaChangeEvent, SchemaRegistryIndex } from '@travetto/schema';
+import { ModelRegistryIndex, ModelType, ModelStorageSupport, ModelFieldChange } from '@travetto/model';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -134,21 +134,21 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * When the schema changes
    */
-  async updateSchema(events: SchemaChangeEvent[]): Promise<void> {
+  async updateSchema(cls: Class, events: ModelFieldChange[]): Promise<void> {
     // Find which fields are gone
-    const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
-      toRemove.push(...subChange.fields
+    const removes = events.reduce<string[]>((toRemove, schemaEvent) => {
+      toRemove.push(...schemaEvent.changes
         .filter(event => event.type === 'delete')
-        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
+        .map(event => [...schemaEvent.path.map(field => field.name), event.previous!.name].join('.')));
       return toRemove;
     }, []);
 
     // Find which types have changed
-    const fieldChanges = change.subs.reduce<string[]>((toChange, subChange) => {
-      toChange.push(...subChange.fields
+    const fieldChanges = events.reduce<string[]>((toChange, schemaEvent) => {
+      toChange.push(...schemaEvent.changes
         .filter(event => event.type === 'update')
         .filter(event => event.previous?.type !== event.current?.type)
-        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
+        .map(event => [...schemaEvent.path.map(field => field.name), event.previous!.name].join('.')));
       return toChange;
     }, []);
 
