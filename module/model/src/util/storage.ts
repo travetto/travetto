@@ -34,14 +34,14 @@ export class ModelStorageUtil {
     // If listening for model add/removes/updates
     if (storage.createModel || storage.deleteModel || storage.updateModel) {
       Registry.onClassChange(ModelRegistryIndex, {
-        async onAdded(cls, previous) {
+        async onCreate(cls, previous) {
           if (previous) {
             checkType(cls, true) && storage.updateModel?.(cls);
           } else {
             checkType(cls) && storage.createModel?.(cls);
           }
         },
-        async onRemoved(cls, replacedBy) {
+        async onDelete(cls, replacedBy) {
           checkType(cls) && !replacedBy && storage.deleteModel?.(cls);
         },
       });

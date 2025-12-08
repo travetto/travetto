@@ -96,7 +96,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
 
   constructor(source: unknown) { Registry.validateConstructor(source); }
 
-  onAdded(cls: Class, previous?: Class | undefined): void {
+  onCreate(cls: Class, previous?: Class | undefined): void {
     if (!previous) { return; }
     // TODO: Handle inherited changes properly, we need to rebuild subclasses when fields are changed
     // We also need to emit events for those changes, when possible

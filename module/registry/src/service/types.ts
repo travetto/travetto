@@ -34,8 +34,8 @@ export interface RegistrySimpleStore {
  */
 export interface RegistryChangeListener<T> {
   beforeChangeSetComplete?(events: ChangeEvent<T>[]): void;
-  onRemoved?(cls: T, replacedBy?: T): void;
-  onAdded?(cls: T, previous?: T): void;
+  onDelete?(cls: T, replacedBy?: T): void;
+  onCreate?(cls: T, previous?: T): void;
   onChangeSetComplete?(events: ChangeEvent<T>[]): void;
 }
 

@@ -93,13 +93,13 @@ export class ControllerRegistryIndex implements RegistryIndex {
     return this.#endpointsById.get(id.replace(':', '#'));
   }
 
-  onRemoved(cls: Class): void {
+  onDelete(cls: Class): void {
     for (const endpoint of this.getController(cls).endpoints) {
       this.#endpointsById.delete(endpoint.id);
     }
   }
 
-  onAdded(cls: Class): void {
+  onCreate(cls: Class): void {
     for (const endpoint of this.getController(cls).endpoints) {
       this.#endpointsById.set(endpoint.id, endpoint);
     }

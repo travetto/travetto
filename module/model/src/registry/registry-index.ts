@@ -71,7 +71,7 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   constructor(source: unknown) { Registry.validateConstructor(source); }
 
-  onAdded(cls: Class): void {
+  onCreate(cls: Class): void {
     const schema = SchemaRegistryIndex.getConfig(cls);
 
     // Don't index on discriminated schemas
@@ -94,7 +94,7 @@ export class ModelRegistryIndex implements RegistryIndex {
     }
   }
 
-  onRemoved(cls: Class): void {
+  onDelete(cls: Class): void {
     const { store } = this.store.get(cls).get();
     this.#modelNameMapping.get(store)?.delete(cls.Ⲑid);
   }

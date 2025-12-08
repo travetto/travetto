@@ -51,8 +51,8 @@ export abstract class BaseWebRouter implements WebRouter {
 
     // Listen for updates
     Registry.onClassChange(ControllerRegistryIndex, {
-      onAdded: cls => this.#register(cls),
-      onRemoved: cls => {
+      onCreate: cls => this.#register(cls),
+      onDelete: cls => {
         this.#cleanup.get(cls)?.();
         this.#cleanup.delete(cls);
       }

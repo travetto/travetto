@@ -70,10 +70,10 @@ class $Registry {
     for (const { index, handler } of [...this.#indexHandlers, ...this.#listeners]) {
       for (const event of byIndex.get(index)!) {
         if ('previous' in event) {
-          handler.onRemoved?.(event.previous, 'current' in event ? event.current : undefined);
+          handler.onDelete?.(event.previous, 'current' in event ? event.current : undefined);
         }
         if ('current' in event) {
-          handler.onAdded?.(event.current, 'previous' in event ? event.previous : undefined);
+          handler.onCreate?.(event.current, 'previous' in event ? event.previous : undefined);
         }
       }
       handler.beforeChangeSetComplete?.(byIndex.get(index)!);
