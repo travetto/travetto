@@ -37,6 +37,10 @@ export type SchemaBasicType = {
  */
 export interface SchemaCoreConfig {
   /**
+   * Schema class
+   */
+  class: Class;
+  /**
    * Description
    */
   description?: string;
@@ -62,10 +66,6 @@ export interface SchemaMethodConfig extends SchemaCoreConfig {
    * The name of the method
    */
   name: string;
-  /**
-   * Owner class
-   */
-  owner: Class;
   /**
    * Hash of the method signature
    */
@@ -102,10 +102,6 @@ export interface SchemaFieldMap {
  * Class configuration
  */
 export interface SchemaClassConfig extends SchemaCoreConfig {
-  /**
-   * Target class
-   */
-  class: Class;
   /**
    * List of all views
    */
@@ -156,10 +152,6 @@ export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
    * Key name for validation when dealing with complex types
    */
   view?: string;
-  /**
-   * Owner class
-   */
-  owner: Class;
   /**
    * List of aliases
    */

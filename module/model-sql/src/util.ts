@@ -121,7 +121,7 @@ export class SQLModelUtil {
       }
     };
 
-    if ('class' in config) {
+    if ('methods' in config) {
       return handler.onRoot({ config, fields, descend, path });
     } else {
       return handler.onSub({ config, fields, descend, path });
@@ -132,7 +132,7 @@ export class SQLModelUtil {
    * Visit a Schema structure
    */
   static async visitSchema(config: SchemaClassConfig | SchemaFieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }): Promise<void> {
-    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
+    const path = 'methods' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = async (): Promise<void> => {
@@ -149,7 +149,7 @@ export class SQLModelUtil {
       }
     };
 
-    if ('class' in config) {
+    if ('methods' in config) {
       return handler.onRoot({ config, fields, descend, path });
     } else {
       return handler.onSub({ config, fields, descend, path });
@@ -210,7 +210,7 @@ export class SQLModelUtil {
    */
   static select<T>(cls: Class<T>, select?: SelectClause<T>): SchemaFieldConfig[] {
     if (!select || Object.keys(select).length === 0) {
-      return [{ type: cls, name: '*', owner: cls, array: false }];
+      return [{ type: cls, name: '*', class: cls, array: false }];
     }
 
     const { localMap } = this.getFieldsByLocation(this.classToStack(cls));

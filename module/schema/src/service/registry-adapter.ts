@@ -71,7 +71,7 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
   return {
     name: CONSTRUCTOR_PROPERTY,
     hash: 0,
-    owner: base.class!,
+    class: base.class!,
     parameters: [],
     validators: [],
     ...parentCons,
@@ -173,7 +173,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerField(field: string, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
     const classConfig = this.register({});
-    const config = classConfig.fields[field] ??= { name: field, owner: this.#cls, type: null! };
+    const config = classConfig.fields[field] ??= { name: field, class: this.#cls, type: null! };
     const combined = combineInputs(config, data);
     return combined;
   }
@@ -202,7 +202,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerMethod(method: string, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const classConfig = this.register();
-    const config = classConfig.methods[method] ??= { owner: classConfig.class, name: method, parameters: [], validators: [], hash: 0 };
+    const config = classConfig.methods[method] ??= { class: classConfig.class, name: method, parameters: [], validators: [], hash: 0 };
     return combineMethods(config, data);
   }
 
@@ -218,7 +218,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerParameter(method: string, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
-    const config = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
+    const config = params[idx] ??= { method, index: idx, class: this.#cls, array: false, type: null! };
     return combineInputs(config, data);
   }
 

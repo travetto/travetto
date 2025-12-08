@@ -24,7 +24,7 @@ class Total {
 function makeField(name: string, type: Class, required: boolean, extra: Partial<SchemaFieldConfig>): SchemaFieldConfig {
   return {
     name,
-    owner: null!,
+    class: null!,
     type,
     array: false,
     ...(required ? { required: { active: true } } : {}),
@@ -420,7 +420,7 @@ export abstract class SQLDialect implements DialectState {
         // If dealing with simple external
         sStack.push({
           name: field.name,
-          owner: null!,
+          class: null!,
           type: field.type
         });
       }
