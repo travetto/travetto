@@ -1,8 +1,8 @@
 import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
-import { ModelRegistryIndex, ModelType, ModelStorageSupport } from '@travetto/model';
-import { SchemaChange, SchemaRegistryIndex } from '@travetto/schema';
+import { ModelRegistryIndex, ModelType, ModelStorageSupport, ModelChangeSet } from '@travetto/model';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -134,21 +134,21 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * When the schema changes
    */
-  async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
+  async updateSchema(cls: Class, changeSets: ModelChangeSet[]): Promise<void> {
     // Find which fields are gone
-    const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
-      toRemove.push(...subChange.fields
-        .filter(event => event.type === 'removing')
-        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
+    const removes = changeSets.reduce<string[]>((toRemove, changSet) => {
+      toRemove.push(...changSet.changes
+        .filter(event => event.type === 'delete')
+        .map(event => [...changSet.path.map(field => field.name), event.previous!.name].join('.')));
       return toRemove;
     }, []);
 
     // Find which types have changed
-    const fieldChanges = change.subs.reduce<string[]>((toChange, subChange) => {
-      toChange.push(...subChange.fields
-        .filter(event => event.type === 'changed')
+    const fieldChanges = changeSets.reduce<string[]>((toChange, changSet) => {
+      toChange.push(...changSet.changes
+        .filter(event => event.type === 'update')
         .filter(event => event.previous?.type !== event.current?.type)
-        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
+        .map(event => [...changSet.path.map(field => field.name), event.previous!.name].join('.')));
       return toChange;
     }, []);
 

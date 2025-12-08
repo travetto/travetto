@@ -43,9 +43,9 @@ export class CliRunUtil {
   }
 
   /**
-  * Build quick pick item
-  * @param choice
-  */
+   * Build quick pick item
+   * @param choice
+   */
   static #buildQuickPickItem(choice: RunChoice): PickItem | undefined {
     const params = this.#buildChoiceParams(choice);
     const detail = choice.key ? undefined : this.#buildChoiceDetail(choice);

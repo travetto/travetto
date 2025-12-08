@@ -17,7 +17,7 @@ import { EndpointUtil } from '../util/endpoint.ts';
 @Injectable()
 export abstract class BaseWebRouter implements WebRouter {
 
-  #cleanup = new Map<string, Function>();
+  #cleanup = new Map<Class, Function>();
   #interceptors: WebInterceptor[];
 
   async #register(cls: Class): Promise<void> {
@@ -31,7 +31,7 @@ export abstract class BaseWebRouter implements WebRouter {
     }
 
     const fn = await this.register(endpoints, config);
-    this.#cleanup.set(cls.Ⲑid, fn);
+    this.#cleanup.set(cls, fn);
   };
 
   /**
@@ -50,18 +50,13 @@ export abstract class BaseWebRouter implements WebRouter {
     }
 
     // Listen for updates
-    Registry.onClassChange(async event => {
-      const targetCls = 'current' in event ? event.current : event.previous;
-      console.debug('Registry event', { type: event.type, target: targetCls.Ⲑid });
-
-      if ('previous' in event) {
-        this.#cleanup.get(event.previous.Ⲑid)?.();
-        this.#cleanup.delete(event.previous.Ⲑid);
+    Registry.onClassChange(ControllerRegistryIndex, {
+      onCreate: cls => this.#register(cls),
+      onDelete: cls => {
+        this.#cleanup.get(cls)?.();
+        this.#cleanup.delete(cls);
       }
-      if ('current' in event) {
-        await this.#register(event.current);
-      }
-    }, ControllerRegistryIndex);
+    });
   }
 
   abstract register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<() => void>;

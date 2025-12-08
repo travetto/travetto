@@ -27,7 +27,6 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    * state
    */
   summarizeSuite(test: TestResult): SuiteResult {
-    // Was only loading to verify existence (TODO: double-check)
     if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
       (this.#state[test.classId] ??= {})[test.methodName] = test.status;
       const SuiteCls = SuiteRegistryIndex.getClasses().find(cls => cls.Ⲑid === test.classId);

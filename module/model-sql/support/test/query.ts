@@ -69,7 +69,7 @@ export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
     dct.resolveName = (stack: VisitStack[]) => {
       const field: SchemaFieldConfig = castTo(stack.at(-1));
       const parent: SchemaFieldConfig = castTo(stack.at(-2));
-      return `${field.owner ? field.owner.name.toString() : parent.name.toString()}.${field.name.toString()}`;
+      return `${field.class ? field.class.name.toString() : parent.name.toString()}.${field.name.toString()}`;
     };
 
     const qryStr = dct.getWhereGroupingSQL(WhereType, qry);
@@ -81,7 +81,7 @@ export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
     const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
       const field: SchemaFieldConfig = castTo(stack.at(-1));
-      return `${field.owner?.name}.${field.name.toString()}`;
+      return `${field.class?.name}.${field.name.toString()}`;
     };
 
     const out = dct.getWhereGroupingSQL(User, {

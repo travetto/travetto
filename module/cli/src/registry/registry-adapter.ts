@@ -27,7 +27,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     (schema.fields ??= {}).help = {
       type: Boolean,
       name: 'help',
-      owner: this.#cls,
+      class: this.#cls,
       description: 'display help for command',
       required: { active: false },
       default: false,

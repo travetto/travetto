@@ -1,6 +1,6 @@
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry, ChangeEvent } from '@travetto/registry';
 import { AppError, castTo, Class } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaClassChange, SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { IndexConfig, IndexType, ModelConfig } from './types';
 import { ModelType } from '../types/model';
@@ -9,6 +9,13 @@ import { IndexNotSupported } from '../error/invalid-index';
 import { NotFoundError } from '../error/not-found';
 
 type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & { type: K[number] };
+
+export type ModelChangeSet = {
+  path: SchemaFieldConfig[];
+  modelCls: Class<ModelType>;
+  field: SchemaFieldConfig;
+  changes: ChangeEvent<SchemaFieldConfig>[];
+};
 
 /**
  * Model registry index for managing model configurations across classes
@@ -49,6 +56,10 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.store.getClasses();
   }
 
+  static getModelChangeSets(schemaCls: Class, previousSchemaCls: Class): ModelChangeSet[] {
+    return this.#instance.getModelChangeSets(schemaCls, previousSchemaCls);
+  }
+
   /**
    * Default mapping of classes by class name or
    * by requested store name.  This is the state at the
@@ -58,7 +69,9 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(ModelRegistryAdapter);
 
-  #addClass(cls: Class): void {
+  constructor(source: unknown) { Registry.validateConstructor(source); }
+
+  onCreate(cls: Class): void {
     const schema = SchemaRegistryIndex.getConfig(cls);
 
     // Don't index on discriminated schemas
@@ -81,20 +94,9 @@ export class ModelRegistryIndex implements RegistryIndex {
     }
   }
 
-  #removeClass(cls: Class): void {
+  onDelete(cls: Class): void {
     const { store } = this.store.get(cls).get();
     this.#modelNameMapping.get(store)?.delete(cls.Ⲑid);
-  }
-
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if ('previous' in event) {
-        this.#removeClass(event.previous);
-      }
-      if ('current' in event) {
-        this.#addClass(event.current);
-      }
-    }
   }
 
   getConfig(cls: Class): ModelConfig<ModelType> {
@@ -139,5 +141,24 @@ export class ModelRegistryIndex implements RegistryIndex {
       throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`);
     }
     return castTo(expiry);
+  }
+
+  getModelChangeSets(schemaCls: Class, previousSchema: Class): ModelChangeSet[] {
+    const out: ModelChangeSet[] = [];
+    let changeSet: SchemaClassChange;
+
+    for (const modelCls of ModelRegistryIndex.getClasses()) {
+      SchemaRegistryIndex.visitFields(modelCls, (field, path) => {
+        const fieldType = SchemaRegistryIndex.resolveInstanceType(schemaCls, field.type);
+        if (fieldType.Ⲑid === schemaCls.Ⲑid) {
+          changeSet ??= SchemaRegistryIndex.computeClassChange(
+            SchemaRegistryIndex.getConfig(schemaCls),
+            SchemaRegistryIndex.getConfig(previousSchema)
+          );
+          out.push({ path, modelCls, field, changes: changeSet.fieldChanges });
+        }
+      });
+    }
+    return out;
   }
 }

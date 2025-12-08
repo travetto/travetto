@@ -1,9 +1,15 @@
-import { ChangeEvent, RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
+import { RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry, ChangeEvent } from '@travetto/registry';
+import { AppError, castKey, castTo, Class, classConstruct, getParentClass } from '@travetto/runtime';
 
-import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
-import { SchemaRegistryAdapter } from './registry-adapter.ts';
-import { SchemaChangeListener } from './changes.ts';
+import { SchemaFieldConfig, SchemaClassConfig, SchemaMethodConfig } from './types.ts';
+import { SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
+
+export interface SchemaClassChange {
+  cls: Class;
+  type: ChangeEvent<unknown>['type'];
+  fieldChanges: ChangeEvent<SchemaFieldConfig>[];
+  methodChanges: ChangeEvent<SchemaMethodConfig>[];
+}
 
 /**
  * Schema registry index for managing schema configurations across classes
@@ -20,16 +26,12 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls).get();
   }
 
-  static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
+  static getDiscriminatedConfig<T>(cls: Class<T>): SchemaDiscriminatedInfo | undefined {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
   static has(cls: Class): boolean {
     return this.#instance.store.has(cls);
-  }
-
-  static getClassById(classId: string): Class {
-    return this.#instance.store.getClassById(classId);
   }
 
   static getDiscriminatedTypes(cls: Class): string[] | undefined {
@@ -64,6 +66,14 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.getClasses();
   }
 
+  static computeClassChange(current: SchemaClassConfig, previous?: SchemaClassConfig): SchemaClassChange {
+    return this.#instance.computeClassChange(current, previous);
+  }
+
+  static onClassChange(handler: (events: ChangeEvent<Class>[]) => void): void {
+    Registry.onClassChange(SchemaRegistryIndex, { beforeChangeSetComplete: handler });
+  }
+
   store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
@@ -84,40 +94,15 @@ export class SchemaRegistryIndex implements RegistryIndex {
     this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType, cls);
   }
 
-  #onChanged(event: ChangeEvent<Class> & { type: 'changed' }): void {
-    Util.queueMacroTask().then(() => {
-      SchemaChangeListener.emitFieldChanges({
-        type: 'changed',
-        current: this.getClassConfig(event.current),
-        previous: this.getClassConfig(event.previous)
-      });
-    });
+  constructor(source: unknown) { Registry.validateConstructor(source); }
+
+  onCreate(cls: Class, previous?: Class | undefined): void {
+    if (!previous) { return; }
+    // TODO: Handle inherited changes properly, we need to rebuild subclasses when fields are changed
+    // We also need to emit events for those changes, when possible
   }
 
-  #onRemoving(event: ChangeEvent<Class> & { type: 'removing' }): void {
-    SchemaChangeListener.clearSchemaDependency(event.previous);
-  }
-
-  #onAdded(event: ChangeEvent<Class> & { type: 'added' }): void {
-    Util.queueMacroTask().then(() => {
-      SchemaChangeListener.emitFieldChanges({
-        type: 'added',
-        current: this.getClassConfig(event.current)
-      });
-    });
-  }
-
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if (event.type === 'changed') {
-        this.#onChanged(event);
-      } else if (event.type === 'removing') {
-        this.#onRemoving(event);
-      } else if (event.type === 'added') {
-        this.#onAdded(event);
-      }
-    }
-
+  beforeChangeSetComplete(): void {
     // Rebuild indices after every "process" batch
     this.#byDiscriminatedTypes.clear();
     for (const cls of this.store.getClasses()) {
@@ -175,25 +160,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
   }
 
   /**
-   * Track changes to schemas, and track the dependent changes
-   * @param cls The root class of the hierarchy
-   * @param current The new class
-   * @param path The path within the object hierarchy
-   */
-  trackSchemaDependencies(cls: Class, current: Class = cls, path: SchemaFieldConfig[] = []): void {
-    const config = this.getClassConfig(current);
-
-    SchemaChangeListener.trackSchemaDependency(current, cls, path, this.getClassConfig(cls));
-
-    // Read children
-    for (const field of Object.values(config.fields)) {
-      if (SchemaRegistryIndex.has(field.type) && field.type !== cls) {
-        this.trackSchemaDependencies(cls, field.type, [...path, field]);
-      }
-    }
-  }
-
-  /**
    * Visit fields recursively
    */
   visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void, _path: SchemaFieldConfig[] = [], root = cls): void {
@@ -226,5 +192,62 @@ export class SchemaRegistryIndex implements RegistryIndex {
       return [...map.keys()];
     }
     return undefined;
+  }
+
+  /**
+   * Compute change between two versions of a class
+   */
+  computeClassChange(current: SchemaClassConfig, previous?: SchemaClassConfig): SchemaClassChange {
+    const previousFields = new Set(Object.keys(previous?.fields ?? {}));
+    const previousMethods = new Set(Object.keys(previous?.methods ?? {}));
+
+    const currentFields = new Set(Object.keys(current?.fields ?? {}));
+    const currentMethods = new Set(Object.keys(current?.methods ?? {}));
+
+    const fieldChanges: ChangeEvent<SchemaFieldConfig>[] = [];
+    const methodChanges: ChangeEvent<SchemaMethodConfig>[] = [];
+
+    if (current) {
+      for (const field of [...currentFields].filter(item => !previousFields.has(item))) {
+        fieldChanges.push({ current: current.fields[field], type: 'create' });
+      }
+      for (const method of [...currentMethods].filter(item => !previousMethods.has(item))) {
+        methodChanges.push({ current: current.methods[method], type: 'create' });
+      }
+    }
+
+    if (previous) {
+      for (const field of [...previousFields].filter(item => !currentFields.has(item))) {
+        fieldChanges.push({ previous: previous.fields[field], type: 'delete' });
+      }
+      for (const method of [...previousMethods].filter(item => !currentMethods.has(item))) {
+        methodChanges.push({ previous: previous.methods[method], type: 'delete' });
+      }
+    }
+
+    if (previous && current) {
+      // Handle class references changing, but keeping same id
+      const compareTypes = (a: Class, b: Class): boolean => a.Ⲑid ? a.Ⲑid === b.Ⲑid : a === b;
+
+      for (const field of currentFields) {
+        if (previousFields.has(field)) {
+          const prevSchema = previous.fields[field];
+          const currSchema = current.fields[field];
+          if (
+            JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
+            !compareTypes(prevSchema.type, currSchema.type)
+          ) {
+            fieldChanges.push({ previous: previous.fields[field], current: current.fields[field], type: 'update' });
+          }
+        }
+      }
+
+      for (const method of currentMethods) {
+        if (current.methods[method]?.hash !== previous.methods[method]?.hash) {
+          methodChanges.push({ previous: previous.methods[method], current: current.methods[method], type: 'update' });
+        }
+      }
+    }
+    return { cls: current.class, type: 'update', fieldChanges, methodChanges };
   }
 }

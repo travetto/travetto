@@ -1,6 +1,6 @@
 import { Any, AppError, castTo, Class, getParentClass, Runtime } from '@travetto/runtime';
 
-import { EXPIRED_CLASS, RegistrationMethods, RegistryAdapter } from './types';
+import { EXPIRED_CLASS, RegistrationMethods, RegistryAdapter, RegistrySimpleStore } from './types';
 
 function ExchangeExpired<R = unknown>() {
   return function (
@@ -21,7 +21,7 @@ function ExchangeExpired<R = unknown>() {
 /**
  * Base registry index implementation
  */
-export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<{}>> {
+export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<{}>> implements RegistrySimpleStore {
 
   // Core data
   #adapters = new Map<Class, A>();

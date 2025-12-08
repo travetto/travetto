@@ -191,6 +191,10 @@ export interface ForeignType extends Type<'foreign'> {
    * Primary source file
    */
   source: string;
+  /**
+   * Unique class identifier
+   */
+  classId: string;
 }
 
 /**
