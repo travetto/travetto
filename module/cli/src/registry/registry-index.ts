@@ -1,4 +1,4 @@
-import { Class, getClass, getParentClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Class, getClass, getParentClass, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -32,6 +32,8 @@ export class CliCommandRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(CliCommandRegistryAdapter);
 
+  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+
   /**
    * Get list of all commands available
    */
@@ -50,11 +52,6 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     return this.#fileMapping;
   }
 
-
-  process(): void {
-    // Do nothing for now?
-  }
-
   /**
    * Import command into an instance
    */
@@ -70,7 +67,7 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     const found = this.#commandMapping.get(name)!;
     const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
     const filtered = values
-      .filter((value): value is Class => typeof value === 'function')
+      .filter(isClass)
       .reduce<Class[]>((classes, cls) => {
         const parent = getParentClass(cls);
         if (parent && !classes.includes(parent)) {
@@ -87,7 +84,7 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     // Initialize any uninitialized commands
     if (uninitialized.length) {
       // Ensure processed
-      Registry.process(uninitialized.map(cls => ({ type: 'added', current: cls })));
+      Registry.process(uninitialized);
     }
 
     for (const cls of values) {

@@ -1,5 +1,5 @@
 import { Class, hasFunction, Runtime } from '@travetto/runtime';
-import { SchemaChangeListener, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
 
 import { ModelStorageSupport } from '../types/storage.ts';
@@ -14,6 +14,13 @@ export class ModelStorageUtil {
    * Type guard for determining if service supports storage operation
    */
   static isSupported = hasFunction<ModelStorageSupport>('createStorage');
+
+  /**
+   * Should we auto create models on startup
+   */
+  static shouldAutoCreate(storage: unknown): storage is ModelStorageSupport {
+    return this.isSupported(storage) && (Runtime.dynamic || storage.config?.autoCreate === true);
+  }
 
   /**
    * Register change listener on startup
@@ -35,9 +42,9 @@ export class ModelStorageUtil {
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
       Registry.onClassChange(event => {
         switch (event.type) {
-          case 'added': checkType(event.current) ? storage.createModel?.(event.current) : undefined; break;
-          case 'changed': checkType(event.current, false) ? storage.changeModel?.(event.current) : undefined; break;
-          case 'removing': checkType(event.previous) ? storage.deleteModel?.(event.previous) : undefined; break;
+          case 'create': checkType(event.current) ? storage.createModel?.(event.current) : undefined; break;
+          case 'update': checkType(event.current, false) ? storage.changeModel?.(event.current) : undefined; break;
+          case 'delete': checkType(event.previous) ? storage.deleteModel?.(event.previous) : undefined; break;
         }
       }, ModelRegistryIndex);
     }
@@ -51,15 +58,6 @@ export class ModelStorageUtil {
           await storage.createModel(cls);
         }
       }
-    }
-
-    // If listening for model add/removes/updates
-    if (storage.changeSchema) {
-      SchemaChangeListener.onSchemaChange(event => {
-        if (checkType(event.cls)) {
-          storage.changeSchema!(event.cls, event.change);
-        }
-      });
     }
   }
 }

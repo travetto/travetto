@@ -47,6 +47,7 @@ export function castTo<T>(input: unknown): T {
   return input as T;
 }
 
+export const isClass = (input: unknown): input is Class => typeof input === 'function' && 'Ⲑid' in input;
 export const castKey = <T>(input: string | number | symbol): keyof T => castTo(input);
 export const asFull = <T>(input: Partial<T>): T => castTo(input);
 export const asConstructable = <Z = unknown>(input: Class | unknown): { constructor: Class<Z> } => castTo(input);
@@ -60,6 +61,11 @@ export const hasFunction = <T>(key: keyof T) => (value: unknown): value is T =>
   typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
+
+/**
+ * A type representing unknown type
+ */
+export class UnknownType { }
 
 export function toConcrete<T extends unknown>(): Class<T> {
   return arguments[0];

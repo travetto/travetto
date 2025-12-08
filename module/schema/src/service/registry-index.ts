@@ -1,8 +1,8 @@
-import { ChangeEvent, RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
-import { SchemaRegistryAdapter } from './registry-adapter.ts';
+import { SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
 import { SchemaChangeListener } from './changes.ts';
 
 /**
@@ -20,16 +20,12 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls).get();
   }
 
-  static getDiscriminatedConfig<T>(cls: Class<T>): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
+  static getDiscriminatedConfig<T>(cls: Class<T>): SchemaDiscriminatedInfo | undefined {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
   static has(cls: Class): boolean {
     return this.#instance.store.has(cls);
-  }
-
-  static getClassById(classId: string): Class {
-    return this.#instance.store.getClassById(classId);
   }
 
   static getDiscriminatedTypes(cls: Class): string[] | undefined {
@@ -68,6 +64,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
   #baseSchema = new Map<Class, Class>();
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
 
+  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+
   /**
    * Register discriminated types for a class
    */
@@ -84,40 +82,18 @@ export class SchemaRegistryIndex implements RegistryIndex {
     this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType, cls);
   }
 
-  #onChanged(event: ChangeEvent<Class> & { type: 'changed' }): void {
+  onCreate(cls: Class, replacedBy?: Class): void {
+    const previous = replacedBy ? this.getClassConfig(replacedBy) : undefined;
     Util.queueMacroTask().then(() => {
-      SchemaChangeListener.emitFieldChanges({
-        type: 'changed',
-        current: this.getClassConfig(event.current),
-        previous: this.getClassConfig(event.previous)
-      });
+      const current = this.getClassConfig(cls);
+      SchemaChangeListener.emitFieldChanges(
+        previous ?
+          { type: 'update', current, previous } :
+          { type: 'create', current, });
     });
   }
 
-  #onRemoving(event: ChangeEvent<Class> & { type: 'removing' }): void {
-    SchemaChangeListener.clearSchemaDependency(event.previous);
-  }
-
-  #onAdded(event: ChangeEvent<Class> & { type: 'added' }): void {
-    Util.queueMacroTask().then(() => {
-      SchemaChangeListener.emitFieldChanges({
-        type: 'added',
-        current: this.getClassConfig(event.current)
-      });
-    });
-  }
-
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if (event.type === 'changed') {
-        this.#onChanged(event);
-      } else if (event.type === 'removing') {
-        this.#onRemoving(event);
-      } else if (event.type === 'added') {
-        this.#onAdded(event);
-      }
-    }
-
+  beforeChangeSetComplete(): void {
     // Rebuild indices after every "process" batch
     this.#byDiscriminatedTypes.clear();
     for (const cls of this.store.getClasses()) {
@@ -171,25 +147,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
         throw new AppError(`Resolved discriminated type '${type}' for class ${base.name} is not an instance of requested type ${targetClass.name}`);
       }
       return requested;
-    }
-  }
-
-  /**
-   * Track changes to schemas, and track the dependent changes
-   * @param cls The root class of the hierarchy
-   * @param current The new class
-   * @param path The path within the object hierarchy
-   */
-  trackSchemaDependencies(cls: Class, current: Class = cls, path: SchemaFieldConfig[] = []): void {
-    const config = this.getClassConfig(current);
-
-    SchemaChangeListener.trackSchemaDependency(current, cls, path, this.getClassConfig(cls));
-
-    // Read children
-    for (const field of Object.values(config.fields)) {
-      if (SchemaRegistryIndex.has(field.type) && field.type !== cls) {
-        this.trackSchemaDependencies(cls, field.type, [...path, field]);
-      }
     }
   }
 

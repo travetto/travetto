@@ -1,5 +1,5 @@
 import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types';
@@ -32,20 +32,12 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.#instance.getCandidates<T>(candidateType);
   }
 
-  static getCandidateTypes<T>(candidateType: Class<T>): Class<T>[] {
-    return this.#instance.getCandidates(candidateType).map(candidate => candidate.candidateType);
-  }
-
   static getInstances<T>(candidateType: Class<T>, predicate?: (config: InjectableCandidate<T>) => boolean): Promise<T[]> {
     return this.#instance.getInstances<T>(candidateType, predicate);
   }
 
   static injectFields<T extends { constructor: Class<T> }>(item: T, cls = item.constructor): Promise<T> {
     return this.#instance.injectFields(cls, item, cls);
-  }
-
-  static getOptional(cls: Class): InjectableConfig | undefined {
-    return this.#instance.store.getOptional(cls)?.get();
   }
 
   static registerClassMetadata(cls: Class, metadata: InjectableClassMetadata): void {
@@ -88,35 +80,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return proxy.get();
   }
 
-  #addClass(cls: Class, forceCreate: boolean = false): void {
-    const adapter = this.store.get(cls);
-
-    for (const config of adapter.getCandidateConfigs()) {
-      const parentClass = getParentClass(config.candidateType);
-      const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
-      const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
-      const baseParent = hasParentBase ? parentClass : undefined;
-      this.#resolver.registerClass(config, baseParent);
-      if (config.autoInject || forceCreate) {
-        // Don't wait
-        Util.queueMacroTask().then(() => {
-          this.getInstance(config.candidateType, config.qualifier);
-        });
-      }
-    }
-  }
-
-  #removeClass(cls: Class): void {
-    if (this.#instances.has(cls)) {
-      for (const [qualifier, config] of this.#resolver.getContainerEntries(cls)) {
-        try {
-          this.destroyInstance(config.candidateType, qualifier);
-        } catch { }
-      }
-    }
-  }
-
-
   async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
       const target = dependency.target ?? input.type;
@@ -135,17 +98,44 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(DependencyRegistryAdapter);
 
+  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+
   getConfig(cls: Class): InjectableConfig {
     return this.store.get(cls).get();
   }
 
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if ('previous' in event) {
-        this.#removeClass(event.previous);
+  onCreate(cls: Class): void {
+    const adapter = this.store.get(cls);
+
+    for (const config of adapter.getCandidateConfigs()) {
+      const parentClass = getParentClass(config.candidateType);
+      const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
+      const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
+      const baseParent = hasParentBase ? parentClass : undefined;
+      this.#resolver.registerClass(config, baseParent);
+    }
+  }
+
+  onDelete(cls: Class): void {
+    if (this.#instances.has(cls)) {
+      for (const [qualifier, config] of this.#resolver.getContainerEntries(cls)) {
+        try {
+          this.destroyInstance(config.candidateType, qualifier);
+        } catch { }
       }
-      if ('current' in event) {
-        this.#addClass(event.current, 'previous' in event);
+    }
+  }
+
+  // Setup instances after change set complete
+  onChangeSetComplete(events: ChangeEvent<Class>[]): void {
+    for (const event of events) {
+      if (event.type !== 'delete') {
+        const adapter = this.store.get(event.current);
+        for (const config of adapter.getCandidateConfigs()) {
+          if (config.autoInject || event.type === 'update') {
+            this.getInstance(config.candidateType, config.qualifier);
+          }
+        }
       }
     }
   }

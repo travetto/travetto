@@ -7,7 +7,7 @@ import type { ManifestModule, ManifestModuleCore, ManifestModuleFile, ManifestRo
 import type { ManifestModuleFileType, ManifestModuleFolderType } from './types/common.ts';
 import type { ManifestContext } from './types/context.ts';
 
-type DeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
+type DeltaEventType = 'create' | 'update' | 'delete' | 'missing' | 'dirty';
 type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
 export type DeltaEvent = { file: string, type: DeltaEventType, module: string, sourceFile: string };
 
@@ -52,17 +52,17 @@ export class ManifestDeltaUtil {
       right.delete(ManifestModuleUtil.withoutSourceExtension(file));
 
       if (!stat) {
-        add(file, 'added');
+        add(file, 'create');
       } else {
         const rightTimestamp = this.#getNewest(stat);
         if (leftTimestamp > rightTimestamp) {
-          add(file, 'changed');
+          add(file, 'update');
         }
       }
     }
     // Deleted
     for (const file of right) {
-      add(file, 'removed');
+      add(file, 'delete');
     }
     return out;
   }

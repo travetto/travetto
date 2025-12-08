@@ -138,7 +138,7 @@ export class IndexManager implements ModelStorageSupport {
     // Find which fields are gone
     const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
       toRemove.push(...subChange.fields
-        .filter(event => event.type === 'removing')
+        .filter(event => event.type === 'delete')
         .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
       return toRemove;
     }, []);
@@ -146,7 +146,7 @@ export class IndexManager implements ModelStorageSupport {
     // Find which types have changed
     const fieldChanges = change.subs.reduce<string[]>((toChange, subChange) => {
       toChange.push(...subChange.fields
-        .filter(event => event.type === 'changed')
+        .filter(event => event.type === 'update')
         .filter(event => event.previous?.type !== event.current?.type)
         .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
       return toChange;

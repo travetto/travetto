@@ -115,14 +115,14 @@ export class TableManager {
       const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((result, value) => {
         const path = value.path.map(field => ({ ...field }));
         for (const event of value.fields) {
-          result[event.type].push([...rootStack, ...path, { ...(event.type === 'removing' ? event.previous : event.current)! }]);
+          result[event.type].push([...rootStack, ...path, { ...(event.type === 'delete' ? event.previous : event.current)! }]);
         }
         return result;
-      }, { added: [], changed: [], removing: [] });
+      }, { create: [], update: [], delete: [] });
 
-      await Promise.all(changes.added.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));
-      await Promise.all(changes.changed.map(value => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(value))));
-      await Promise.all(changes.removing.map(value => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(value))));
+      await Promise.all(changes.create.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));
+      await Promise.all(changes.update.map(value => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(value))));
+      await Promise.all(changes.delete.map(value => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(value))));
     } catch (error) {
       // Failed to change
       console.error('Unable to change field', { error });

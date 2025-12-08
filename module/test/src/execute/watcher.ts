@@ -1,4 +1,4 @@
-import { Registry } from '@travetto/registry';
+import { MethodChangeSource, ClassChangeSource, Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
 
@@ -38,7 +38,8 @@ export class TestWatcher {
     )
       .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
 
-    Registry.onMethodChange((event) => {
+    const emitter = new MethodChangeSource(ClassChangeSource);
+    emitter.on((event) => {
       const [cls, method] = 'previous' in event ? event.previous : event.current;
 
       if (!cls || describeFunction(cls).abstract) {
@@ -52,7 +53,7 @@ export class TestWatcher {
       }
 
       const config = SuiteRegistryIndex.getTestConfig(cls, method)!;
-      if (event.type !== 'removing') {
+      if (event.type !== 'delete') {
         if (config) {
           const run: TestRun = {
             import: config.import, classId: config.classId, methodNames: [config.methodName], metadata: { partial: true }
@@ -69,10 +70,10 @@ export class TestWatcher {
           import: Runtime.getImport(cls)
         } satisfies TestRemovedEvent);
       }
-    }, SuiteRegistryIndex);
+    });
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    Registry.onNonClassChanges(imp => queue.add({ import: imp }));
+    ClassChangeSource.onNonClassChanges(imp => queue.add({ import: imp }));
 
     process.on('message', event => {
       if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {

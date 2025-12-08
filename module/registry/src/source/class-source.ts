@@ -1,20 +1,34 @@
 import { EventEmitter } from 'node:events';
 
-import { Class, Env, Runtime, RuntimeIndex, describeFunction, flushPendingFunctions } from '@travetto/runtime';
+import { Class, Env, Runtime, RuntimeIndex, describeFunction, flushPendingFunctions, isClass } from '@travetto/runtime';
 
 import { DynamicFileLoader } from '../internal/file-loader.ts';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types.ts';
-
-function isClass(cls: Function): cls is Class {
-  return !!describeFunction(cls).class;
-}
 
 /**
  * A class change source. Meant to be hooked into the
  * compiler as a way to listen to changes via the compiler
  * watching.
  */
-export class ClassSource implements ChangeSource<Class> {
+export class ClassChangeSource implements ChangeSource<Class> {
+
+  static #instance = new ClassChangeSource();
+
+  static init(): Promise<Class[]> {
+    return this.#instance.init();
+  }
+
+  static on(callback: ChangeHandler<Class>): void {
+    this.#instance.on(callback);
+  }
+
+  static off(callback: ChangeHandler<Class>): void {
+    this.#instance.off(callback);
+  }
+
+  static onNonClassChanges(callback: (imp: string) => void): void {
+    this.#instance.onNonClassChanges(callback);
+  }
 
   #classes = new Map<string, Map<string, Class>>();
   #emitter = new EventEmitter<{
@@ -40,7 +54,7 @@ export class ClassSource implements ChangeSource<Class> {
         this.#classes.set(source, new Map());
       }
       this.#classes.get(source)!.set(cls.Ⲑid, cls);
-      this.emit({ type: 'added', current: cls });
+      this.emit({ type: 'create', current: cls });
     }
     return flushed;
   }
@@ -50,7 +64,7 @@ export class ClassSource implements ChangeSource<Class> {
     if (data) {
       this.#classes.delete(file);
       for (const cls of data) {
-        this.emit({ type: 'removing', previous: cls[1] });
+        this.emit({ type: 'delete', previous: cls[1] });
       }
     }
   }
@@ -79,19 +93,19 @@ export class ClassSource implements ChangeSource<Class> {
     for (const key of keys) {
       if (!next.has(key)) {
         changes += 1;
-        this.emit({ type: 'removing', previous: previous.get(key)! });
+        this.emit({ type: 'delete', previous: previous.get(key)! });
         this.#classes.get(sourceFile)!.delete(key);
       } else {
         this.#classes.get(sourceFile)!.set(key, next.get(key)!);
         if (!previous.has(key)) {
           changes += 1;
-          this.emit({ type: 'added', current: next.get(key)! });
+          this.emit({ type: 'create', current: next.get(key)! });
         } else {
           const prevHash = describeFunction(previous.get(key)!)?.hash;
           const nextHash = describeFunction(next.get(key)!)?.hash;
           if (prevHash !== nextHash) {
             changes += 1;
-            this.emit({ type: 'changed', current: next.get(key)!, previous: previous.get(key)! });
+            this.emit({ type: 'update', current: next.get(key)!, previous: previous.get(key)! });
           }
         }
       }
@@ -126,8 +140,8 @@ export class ClassSource implements ChangeSource<Class> {
     if (this.trace) {
       console.debug('Emitting change', {
         type: event.type,
-        current: (event.type !== 'removing' ? event.current?.Ⲑid : undefined),
-        previous: (event.type !== 'added' ? event.previous?.Ⲑid : undefined)
+        current: (event.type !== 'delete' ? event.current?.Ⲑid : undefined),
+        previous: (event.type !== 'create' ? event.previous?.Ⲑid : undefined)
       });
     }
     this.#emitter.emit('change', event);

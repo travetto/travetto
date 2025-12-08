@@ -7,6 +7,8 @@ import {
   CONSTRUCTOR_PROPERTY
 } from './types';
 
+export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
+
 const classToDiscriminatedType = (cls: Class): string => cls.name
   .replace(/([A-Z])([A-Z][a-z])/g, (all, left, right) => `${left}_${right.toLowerCase()}`)
   .replace(/([a-z]|\b)([A-Z])/g, (all, left, right) => left ? `${left}_${right.toLowerCase()}` : right.toLowerCase())
@@ -69,6 +71,7 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
   const parentCons = parent?.methods?.[CONSTRUCTOR_PROPERTY];
   const baseCons = base.methods?.[CONSTRUCTOR_PROPERTY];
   return {
+    class: base.class!,
     parameters: [],
     validators: [],
     ...parentCons,
@@ -168,7 +171,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerField(field: string, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
     const classConfig = this.register({});
-    const config = classConfig.fields[field] ??= { name: field, owner: this.#cls, type: null! };
+    const config = classConfig.fields[field] ??= { name: field, class: this.#cls, type: null! };
     const combined = combineInputs(config, data);
     return combined;
   }
@@ -197,7 +200,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerMethod(method: string, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const classConfig = this.register();
-    const config = classConfig.methods[method] ??= { parameters: [], validators: [] };
+    const config = classConfig.methods[method] ??= { class: this.#cls, parameters: [], validators: [] };
     return combineMethods(config, data);
   }
 
@@ -213,7 +216,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerParameter(method: string, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
-    const config = params[idx] ??= { method, index: idx, owner: this.#cls, array: false, type: null! };
+    const config = params[idx] ??= { method, index: idx, class: this.#cls, array: false, type: null! };
     return combineInputs(config, data);
   }
 
@@ -305,8 +308,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   /**
-  * Provides the prototype-derived descriptor for a property
-  */
+   * Provides the prototype-derived descriptor for a property
+   */
   getAccessorDescriptor(field: string): PropertyDescriptor {
     if (!this.#accessorDescriptors.has(field)) {
       let proto = this.#cls.prototype;
@@ -330,7 +333,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return value;
   }
 
-  getDiscriminatedConfig(): Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>> | undefined {
+  getDiscriminatedConfig(): SchemaDiscriminatedInfo | undefined {
     const { discriminatedField, discriminatedType, discriminatedBase } = this.#config;
     if (discriminatedType && discriminatedField) {
       return { discriminatedType, discriminatedField, discriminatedBase: !!discriminatedBase };

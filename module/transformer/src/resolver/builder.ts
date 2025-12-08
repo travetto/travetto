@@ -207,7 +207,7 @@ export const TypeBuilder: {
     build: (resolver, type) => {
       const name = CoreUtil.getSymbol(type)?.getName();
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
-      return { key: 'foreign', name, source: source.fileName };
+      return { key: 'foreign', name, source: source.fileName, classId: `${source.fileName.split('node_modules/')[1]}+${name}` };
     }
   },
   managed: {

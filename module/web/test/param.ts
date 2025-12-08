@@ -63,8 +63,8 @@ class ParamController {
   async alias2(@QueryParam() nm: string = 'green') { }
 
   /**
-  * @param nm User's name
-  */
+   * @param nm User's name
+   */
   @Post('/alias3')
   async alias3(@QueryParam() nm: string | number = 'green') { }
 

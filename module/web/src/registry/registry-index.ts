@@ -1,5 +1,5 @@
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { Class, ClassInstance, getClass, RetainPrimitiveFields } from '@travetto/runtime';
+import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { Class, ClassInstance, getClass, isClass, RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -7,8 +7,6 @@ import { ControllerRegistryAdapter } from './registry-adapter';
 import { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
 import { WebAsyncContext } from '../context';
 import type { WebInterceptor } from '../types/interceptor.ts';
-
-const isClass = (property: unknown, target: unknown): target is Class => !property;
 
 export class ControllerRegistryIndex implements RegistryIndex {
 
@@ -46,7 +44,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
   ): EndpointDecorator {
     return (instanceOrCls: Class | ClassInstance, property?: string): void => {
       const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
-      if (isClass(property, instanceOrCls)) {
+      if (isClass(instanceOrCls)) {
         adapter.registerInterceptorConfig(cls, config, extra);
       } else {
         adapter.registerEndpointInterceptorConfig(property!, cls, config, extra);
@@ -57,6 +55,8 @@ export class ControllerRegistryIndex implements RegistryIndex {
   #endpointsById = new Map<string, EndpointConfig>();
 
   store = new RegistryIndexStore(ControllerRegistryAdapter);
+
+  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
 
   async #bindContextParams<T>(instance: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
@@ -93,18 +93,15 @@ export class ControllerRegistryIndex implements RegistryIndex {
     return this.#endpointsById.get(id.replace(':', '#'));
   }
 
-  process(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if ('previous' in event) {
-        for (const endpoint of this.getController(event.previous).endpoints) {
-          this.#endpointsById.delete(endpoint.id);
-        }
-      }
-      if ('current' in event) {
-        for (const endpoint of this.getController(event.current).endpoints) {
-          this.#endpointsById.set(endpoint.id, endpoint);
-        }
-      }
+  onDelete(cls: Class): void {
+    for (const endpoint of this.getController(cls).endpoints) {
+      this.#endpointsById.delete(endpoint.id);
+    }
+  }
+
+  onCreate(cls: Class): void {
+    for (const endpoint of this.getController(cls).endpoints) {
+      this.#endpointsById.set(endpoint.id, endpoint);
     }
   }
 }

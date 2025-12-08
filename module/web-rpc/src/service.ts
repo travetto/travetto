@@ -24,7 +24,7 @@ export class WebRpcClientGeneratorService {
       return;
     }
     Registry.onClassChange((event) => {
-      if (event.type !== 'changed') { // Capture only add and remove
+      if (event.type !== 'update') { // Capture only add and remove
         this.render();
       }
     }, ControllerRegistryIndex);

@@ -15,7 +15,7 @@ export interface RegistryAdapter<C extends {} = {}> {
 }
 
 export type RegistryIndexClass = {
-  new(): RegistryIndex;
+  new(source: unknown): RegistryIndex;
 };
 
 /**
@@ -30,11 +30,20 @@ export interface RegistrySimpleStore {
 };
 
 /**
+ * Listens for registry changes
+ */
+export interface RegistryChangeListener {
+  beforeChangeSetComplete?(events: ChangeEvent<Class>[]): void;
+  onDelete?(cls: Class, replacedBy?: Class): void;
+  onCreate?(cls: Class, previous?: Class): void;
+  onChangeSetComplete?(events: ChangeEvent<Class>[]): void;
+}
+
+/**
  * Registry index definition
  * @concrete
  */
-export interface RegistryIndex {
+export interface RegistryIndex extends RegistryChangeListener {
   store: RegistrySimpleStore;
-  process(events: ChangeEvent<Class>[]): void;
   finalize?(cls: Class): void;
 }

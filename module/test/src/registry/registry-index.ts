@@ -1,5 +1,5 @@
 import { AppError, Class, Runtime, describeFunction } from '@travetto/runtime';
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite.ts';
 import { TestConfig, TestRun } from '../model/test.ts';
@@ -21,11 +21,7 @@ export class SuiteRegistryIndex implements RegistryIndex {
     return this.#instance.store.getForRegister(cls);
   }
 
-  static has(cls: Class): boolean {
-    return this.#instance.store.has(cls);
-  }
-
-  static getTestConfig(cls: Class, method: Function): TestConfig | undefined {
+  static getTestConfig(cls: Class, method: Function | string): TestConfig | undefined {
     return this.#instance.getTestConfig(cls, method);
   }
 
@@ -43,9 +39,7 @@ export class SuiteRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(SuiteRegistryAdapter);
 
-  process(_events: ChangeEvent<Class>[]): void {
-    // No-op for now
-  }
+  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
 
   /**
    * Find all valid tests (ignoring abstract)
@@ -109,10 +103,11 @@ export class SuiteRegistryIndex implements RegistryIndex {
   /**
    * Find a test configuration given class and optionally a method
    */
-  getTestConfig(cls: Class, method: Function): TestConfig | undefined {
+  getTestConfig(cls: Class, method: Function | string): TestConfig | undefined {
     if (this.store.has(cls)) {
       const config = this.getConfig(cls);
-      return Object.values(config.tests).find(item => item.methodName === method.name);
+      const methodName = typeof method === 'string' ? method : method.name;
+      return Object.values(config.tests).find(item => item.methodName === methodName);
     }
   }
 }
