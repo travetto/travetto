@@ -16,6 +16,13 @@ export class ModelStorageUtil {
   static isSupported = hasFunction<ModelStorageSupport>('createStorage');
 
   /**
+   * Should we auto create models on startup
+   */
+  static shouldAutoCreate(storage: unknown): storage is ModelStorageSupport {
+    return this.isSupported(storage) && (Runtime.dynamic || storage.config?.autoCreate === true);
+  }
+
+  /**
    * Register change listener on startup
    */
   static async registerModelChangeListener(storage: ModelStorageSupport): Promise<void> {

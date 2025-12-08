@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Runtime, Util } from '@travetto/runtime';
+import { Util } from '@travetto/runtime';
 import { ModelExpirySupport, NotFoundError, ModelStorageUtil } from '@travetto/model';
 import { AuthContext, AuthService } from '@travetto/auth';
 
@@ -32,7 +32,7 @@ export class SessionService {
    * Initialize service if none defined
    */
   async postConstruct(): Promise<void> {
-    if (ModelStorageUtil.isSupported(this.#modelService) && Runtime.dynamic) {
+    if (ModelStorageUtil.shouldAutoCreate(this.#modelService)) {
       await this.#modelService.createModel?.(SessionEntry);
     }
   }
