@@ -1,4 +1,4 @@
-import { AppError, castTo, Class, Util } from '@travetto/runtime';
+import { AppError, castTo, Class, isClass, Util } from '@travetto/runtime';
 
 import { ClassChangeSource } from './class-source';
 import { ChangeEvent } from '../types';
@@ -59,7 +59,9 @@ class $Registry {
   /**
    * Process change events
    */
-  process(events: ChangeEvent<Class>[]): void {
+  process(input: (Class | ChangeEvent<Class>)[]): void {
+    const events: ChangeEvent<Class>[] = input.map(item => isClass(item) ? { type: 'create', current: item } : item);
+
     this.#finalizeItems(events.filter(event => 'current' in event).map(event => event.current));
 
     const byIndex = new Map<RegistryIndex, ChangeEvent<Class>[]>();
@@ -99,7 +101,7 @@ class $Registry {
       }
 
       const added = await ClassChangeSource.init();
-      this.process(added.map(cls => ({ type: 'create', current: cls })));
+      this.process(added);
       ClassChangeSource.on(event => this.process([event]));
     } finally {
       this.#resolved = true;

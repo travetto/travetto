@@ -33,7 +33,7 @@ export class EditorSendService {
             }
           }
         });
-        Registry.process([{ type: 'create', current: cls }]);
+        Registry.process([cls]);
 
         this.ethereal = !!senderConfig.host?.includes('ethereal.email');
       } catch {

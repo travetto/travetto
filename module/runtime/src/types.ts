@@ -47,7 +47,7 @@ export function castTo<T>(input: unknown): T {
   return input as T;
 }
 
-export const isClass = (target: unknown): target is Class<unknown> => typeof target === 'function' && 'Ⲑid' in target;
+export const isClass = (target: unknown): target is Class => typeof target === 'function' && 'Ⲑid' in target;
 export const castKey = <T>(input: string | number | symbol): keyof T => castTo(input);
 export const asFull = <T>(input: Partial<T>): T => castTo(input);
 export const asConstructable = <Z = unknown>(input: Class | unknown): { constructor: Class<Z> } => castTo(input);
