@@ -1,9 +1,6 @@
 import { Class } from '@travetto/runtime';
-import { ChangeEvent } from '../types';
 
 export type RegistrationMethods = `register${string}` | `finalize${string}`;
-
-export const EXPIRED_CLASS = Symbol();
 
 /**
  * Interface for registry adapters to implement
@@ -25,7 +22,6 @@ export interface RegistrySimpleStore {
   has(cls: Class): boolean;
   finalize(cls: Class): void;
   finalized(cls: Class): boolean;
-  remove(cls: Class): void;
   getClasses(): Class[];
 };
 
