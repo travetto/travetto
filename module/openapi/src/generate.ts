@@ -314,9 +314,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const code = Object.keys(bodyConfig.content).length ? 200 : 201;
     apiConfig.responses![code] = bodyConfig;
 
-    const methodSchema = SchemaRegistryIndex.get(endpoint.class).getMethod(endpoint.methodName);
-
-    for (const param of methodSchema.parameters) {
+    for (const param of schema.parameters) {
       const result = this.#processEndpointParam(endpoint, endpoint.parameters[param.index] ?? {}, param);
       if (result) {
         if ('parameters' in result) {

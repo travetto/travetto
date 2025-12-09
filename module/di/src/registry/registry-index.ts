@@ -1,5 +1,5 @@
-import { ChangeEvent, RegistryIndex, RegistryIndexStore, Registry, RetargettingProxy } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, Runtime, TypedObject } from '@travetto/runtime';
+import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, TypedObject } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types';
@@ -52,33 +52,9 @@ export class DependencyRegistryIndex implements RegistryIndex {
     SchemaRegistryIndex.getForRegister(cls).registerFieldMetadata(field, MetadataSymbol, metadata);
   }
 
-  #proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
   #instances = new Map<Class, Map<symbol, unknown>>();
   #instancePromises = new Map<Class, Map<symbol, Promise<unknown>>>();
   #resolver = new DependencyRegistryResolver();
-
-  #proxyInstance<T>(target: Class<unknown>, qualifier: symbol, instance: T): T {
-    let proxy: RetargettingProxy<unknown>;
-    const targetId = target.Ⲑid;
-
-    if (!this.#proxies.has(targetId)) {
-      this.#proxies.set(targetId, new Map());
-    }
-
-    if (!this.#proxies.get(targetId)!.has(qualifier)) {
-      proxy = new RetargettingProxy(instance);
-      this.#proxies.get(targetId)!.set(qualifier, proxy);
-      console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
-    } else {
-      proxy = this.#proxies.get(targetId)!.get(qualifier)!;
-      proxy.setTarget(instance);
-      console.debug('Updating target', {
-        id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: target.name
-      });
-    }
-
-    return proxy.get();
-  }
 
   async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
@@ -116,25 +92,13 @@ export class DependencyRegistryIndex implements RegistryIndex {
     }
   }
 
-  onDelete(cls: Class): void {
-    if (this.#instances.has(cls)) {
-      for (const [qualifier, config] of this.#resolver.getContainerEntries(cls)) {
-        try {
-          this.destroyInstance(config.candidateType, qualifier);
-        } catch { }
-      }
-    }
-  }
-
   // Setup instances after change set complete
-  onChangeSetComplete(events: ChangeEvent<Class>[]): void {
-    for (const event of events) {
-      if (event.type !== 'delete') {
-        const adapter = this.store.get(event.current);
-        for (const config of adapter.getCandidateConfigs()) {
-          if (config.autoInject || event.type === 'update') {
-            this.getInstance(config.candidateType, config.qualifier);
-          }
+  onChangeSetComplete(classes: Class[]): void {
+    for (const cls of classes) {
+      const adapter = this.store.get(cls);
+      for (const config of adapter.getCandidateConfigs()) {
+        if (config.autoInject) {
+          this.getInstance(config.candidateType, config.qualifier);
         }
       }
     }
@@ -212,7 +176,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
     }
 
     // Proxy if necessary
-    return Runtime.dynamic ? this.#proxyInstance(targetType, qualifier, inst) : inst;
+    return inst;
   }
 
   /**
@@ -263,7 +227,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
     this.#instancePromises.get(target)?.delete(qualifier);
 
     // May not exist
-    this.#proxies.get(target.Ⲑid)?.get(qualifier)?.setTarget(null);
     console.debug('On uninstall', { id: target, qualifier: qualifier.toString(), classId: target });
   }
 }

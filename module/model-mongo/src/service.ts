@@ -106,7 +106,7 @@ export class MongoModelService implements
       bucketName: ModelBlobNamespace,
       writeConcern: { w: 1 }
     });
-    await ModelStorageUtil.registerModelChangeListener(this);
+    await ModelStorageUtil.storageInitialization(this);
     ShutdownManager.onGracefulShutdown(() => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }

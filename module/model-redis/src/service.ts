@@ -170,7 +170,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async postConstruct(): Promise<void> {
     this.client = createClient(this.config.client);
     await this.client.connect();
-    await ModelStorageUtil.registerModelChangeListener(this);
+    await ModelStorageUtil.storageInitialization(this);
     ShutdownManager.onGracefulShutdown(() => this.client.destroy());
     for (const cls of ModelRegistryIndex.getClasses()) {
       for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {

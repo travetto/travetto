@@ -1,6 +1,5 @@
 import { Class, hasFunction, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { Registry } from '@travetto/registry';
 
 import { ModelStorageSupport } from '../types/storage.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -23,9 +22,9 @@ export class ModelStorageUtil {
   }
 
   /**
-   * Register change listener on startup
+   * Storage Initialization
    */
-  static async registerModelChangeListener(storage: ModelStorageSupport): Promise<void> {
+  static async storageInitialization(storage: ModelStorageSupport): Promise<void> {
     if (!Runtime.dynamic || !(storage?.config?.autoCreate ?? !Runtime.production)) {
       return;
     }
@@ -37,17 +36,6 @@ export class ModelStorageUtil {
       const { autoCreate } = ModelRegistryIndex.getConfig(cls) ?? {};
       return autoCreate ?? false;
     };
-
-    // If listening for model add/removes/updates
-    if (storage.createModel || storage.deleteModel || storage.changeModel) {
-      Registry.onClassChange(event => {
-        switch (event.type) {
-          case 'create': checkType(event.current) ? storage.createModel?.(event.current) : undefined; break;
-          case 'update': checkType(event.current, false) ? storage.changeModel?.(event.current) : undefined; break;
-          case 'delete': checkType(event.previous) ? storage.deleteModel?.(event.previous) : undefined; break;
-        }
-      }, ModelRegistryIndex);
-    }
 
     // Initialize on startup (test manages)
     await storage.createStorage();

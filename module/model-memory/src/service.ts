@@ -146,7 +146,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async postConstruct(): Promise<void> {
-    await ModelStorageUtil.registerModelChangeListener(this);
+    await ModelStorageUtil.storageInitialization(this);
     ModelExpiryUtil.registerCull(this);
 
     for (const cls of ModelRegistryIndex.getClasses()) {
