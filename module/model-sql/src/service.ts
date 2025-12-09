@@ -5,7 +5,7 @@ import {
   ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
 import { castTo, Class } from '@travetto/runtime';
-import { DataUtil, SchemaChange } from '@travetto/schema';
+import { DataUtil } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
@@ -118,16 +118,16 @@ export class SQLModelService implements
     return (await this.#manager.exportTables(cls)).join('\n');
   }
 
-  async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
-    await this.#manager.changeSchema(cls, change);
-  }
-
   async createModel(cls: Class): Promise<void> {
     await this.#manager.createTables(cls);
   }
 
   async deleteModel(cls: Class): Promise<void> {
     await this.#manager.dropTables(cls);
+  }
+
+  async changeModel(cls: Class): Promise<void> {
+    await this.#manager.updateTables(cls);
   }
 
   async truncateModel(cls: Class): Promise<void> {

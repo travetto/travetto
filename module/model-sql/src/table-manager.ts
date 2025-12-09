@@ -2,7 +2,6 @@ import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ModelRegistryIndex } from '@travetto/model';
 import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
-import { SchemaChange } from '@travetto/schema';
 
 import { Connected, Transactional } from './connection/decorator.ts';
 import { SQLDialect } from './dialect/base.ts';
@@ -108,7 +107,8 @@ export class TableManager {
   @WithAsyncContext()
   @Transactional()
   @Connected()
-  async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
+  async updateTables(cls: Class): Promise<void> {
+    // TODO: Need to properly diff and update tables
     try {
       const rootStack = SQLModelUtil.classToStack(cls);
 

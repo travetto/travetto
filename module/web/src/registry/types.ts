@@ -182,11 +182,5 @@ export interface ControllerVisitor<T = unknown> {
 
   onSchema?(schema: SchemaClassConfig): Promise<unknown> | unknown;
 
-  onControllerAdd?(cls: Class): Promise<unknown> | unknown;
-  onControllerRemove?(cls: Class): Promise<unknown> | unknown;
-
-  onSchemaAdd?(cls: Class): Promise<boolean> | boolean;
-  onSchemaRemove?(cls: Class): Promise<boolean> | boolean;
-
   onComplete?(): T | Promise<T>;
 }

@@ -2,7 +2,7 @@ import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
 import { ModelRegistryIndex, ModelType, ModelStorageSupport } from '@travetto/model';
-import { SchemaChange, SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -134,7 +134,9 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * When the schema changes
    */
-  async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
+  async changeModel(cls: Class): Promise<void> {
+    // TODO: Need to properly diff and update indexes
+
     // Find which fields are gone
     const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
       toRemove.push(...subChange.fields
