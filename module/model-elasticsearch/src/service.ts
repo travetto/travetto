@@ -115,7 +115,7 @@ export class ElasticsearchModelService implements
     await this.client.cluster.health({});
     this.manager = new IndexManager(this.config, this.client);
 
-    await ModelStorageUtil.registerModelChangeListener(this.manager);
+    await ModelStorageUtil.storageInitialization(this.manager);
     ShutdownManager.onGracefulShutdown(() => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }

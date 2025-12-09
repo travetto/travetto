@@ -105,7 +105,7 @@ export class SQLModelService implements
       }
       this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LENGTH);
       this.#manager = new TableManager(this.#context, this.#dialect);
-      await ModelStorageUtil.registerModelChangeListener(this);
+      await ModelStorageUtil.storageInitialization(this);
       ModelExpiryUtil.registerCull(this);
     }
   }

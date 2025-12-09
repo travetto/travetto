@@ -190,7 +190,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         }),
       } : {})
     });
-    ModelStorageUtil.registerModelChangeListener(this);
+    ModelStorageUtil.storageInitialization(this);
   }
 
   async head<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {
