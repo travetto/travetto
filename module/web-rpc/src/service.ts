@@ -18,10 +18,6 @@ export class WebRpcClientGeneratorService {
 
   async postConstruct(): Promise<void> {
     this.render();
-
-    if (!this.config.clients.length || !Runtime.dynamic) {
-      return;
-    }
   }
 
   async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {
