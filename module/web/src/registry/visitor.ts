@@ -33,15 +33,14 @@ export class ControllerVisitUtil {
         continue;
       }
 
-      const { parameters: params, returnType } = endpointSchema;
-      await visitor.onEndpointStart?.(endpoint, controller, params);
-      if (returnType) {
-        await this.#onSchemaEvent(visitor, returnType.type);
+      await visitor.onEndpointStart?.(endpoint, controller);
+      if (endpointSchema.returnType) {
+        await this.#onSchemaEvent(visitor, endpointSchema.returnType.type);
       }
-      for (const param of params) {
+      for (const param of endpointSchema.parameters) {
         await this.#onSchemaEvent(visitor, param.type);
       }
-      await visitor.onEndpointEnd?.(endpoint, controller, params);
+      await visitor.onEndpointEnd?.(endpoint, controller);
     }
     await visitor.onControllerEnd?.(controller);
   }
