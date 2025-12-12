@@ -3,19 +3,20 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { TestConsumerRegistryIndex } from '../../src/consumer/registry-index.ts';
 import type { RunState } from '../../src/execute/types.ts';
+import type { TestRun } from '../../src/model/test.ts';
 
 /**
  * Run tests given the input state
  * @param state
  */
-export async function runTests(state: RunState): Promise<void> {
+export async function runTests(state: RunState, run: TestRun | string[]): Promise<void> {
   const { RunnerUtil } = await import('../../src/execute/util.ts');
   const { Runner } = await import('../../src/execute/runner.ts');
 
   RunnerUtil.registerCleanup('runner');
 
   try {
-    const result = await new Runner(state).run();
+    const result = await new Runner(state).run(run);
     process.exitCode = result ? 0 : 1;
   } catch (error) {
     console.error('Test Worker Failed', { error });

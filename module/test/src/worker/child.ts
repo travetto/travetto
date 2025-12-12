@@ -80,7 +80,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     console.debug('Running', { import: run.import });
 
     try {
-      await new Runner({ consumer: 'exec', target: run }).run();
+      await new Runner({ consumer: 'exec' }).run(run);
     } finally {
       this.#done.resolve();
     }

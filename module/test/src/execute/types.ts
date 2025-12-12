@@ -1,5 +1,3 @@
-import { TestRun } from '../model/test.ts';
-
 /**
  * Run state
  */
@@ -20,13 +18,4 @@ export interface RunState {
    * The tags to include or exclude from testing
    */
   tags?: string[];
-  /**
-   * target
-   */
-  target: TestRun | {
-    /**
-     * Globs to run
-     */
-    globs?: string[];
-  };
 }

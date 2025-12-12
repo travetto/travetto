@@ -72,18 +72,18 @@ export class TestCommand implements CliCommandShape {
     const isSingle = this.mode === 'single' || (isFirst && globs.length === 0);
     const options = Object.fromEntries((this.formatOptions ?? [])?.map(option => [...option.split(':'), true]));
 
-    return runTests({
-      concurrency: this.concurrency,
-      consumer: this.format,
-      consumerOptions: options,
-      tags: this.tags,
-      target: isSingle ?
-        {
-          import: first,
-          classId: globs[0],
-          methodNames: globs.slice(1),
-        } :
-        { globs: [first, ...globs], }
-    });
+    return runTests(
+      {
+        concurrency: this.concurrency,
+        consumer: this.format,
+        consumerOptions: options,
+        tags: this.tags,
+      },
+      isSingle ? {
+        import: first,
+        classId: globs[0],
+        methodNames: globs.slice(1),
+      } : [first, ...globs]
+    );
   }
 }

@@ -1,5 +1,4 @@
 import { TestEvent } from '../model/event.ts';
-import { TestRun } from '../model/test.ts';
 
 /**
  * Test Run Event Keys
@@ -12,7 +11,7 @@ export const Events = {
   READY: 'ready'
 };
 
-export type TestRemovedEvent = { type: 'removeTest', method?: string } & TestRun;
+export type TestRemovedEvent = { type: 'removeTest', method?: string, methodNames?: string[], classId?: string, import: string };
 export type TestReadyEvent = { type: 'ready' };
 export type TestLogEvent = { type: 'log', message: string };
 

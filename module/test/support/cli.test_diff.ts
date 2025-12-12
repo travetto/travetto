@@ -1,13 +1,16 @@
+import * as fs from 'node:fs/promises';
+
 import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
 import { runTests, selectConsumer } from './bin/run.ts';
+import type { TestDiffSource } from '../src/model/test.ts';
 
 /**  Direct test invocation */
 @CliCommand()
 @IsPrivate()
-export class TestDirectCommand {
+export class TestDiffCommand {
 
   format: string = 'tap';
 
@@ -26,12 +29,11 @@ export class TestDirectCommand {
     Env.TRV_ENV.set('test');
     Env.TRV_LOG_PLAIN.set(true);
     Env.TRV_LOG_TIME.clear();
-    Env.TRV_CAN_RESTART.clear();
   }
 
-  main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
-
+  async main(importOrFile: string, diff: string): Promise<void> {
     const options = Object.fromEntries((this.formatOptions ?? [])?.map(option => [...option.split(':'), true]));
+    const diffSource: TestDiffSource = await fs.readFile(diff, 'utf8').then(JSON.parse);
 
     return runTests(
       {
@@ -40,8 +42,7 @@ export class TestDirectCommand {
       },
       {
         import: importOrFile,
-        classId: clsId,
-        methodNames: methodsNames,
+        diffSource
       }
     );
   }

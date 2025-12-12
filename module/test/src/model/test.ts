@@ -5,6 +5,11 @@ import { Skip, TestCore } from './common.ts';
 export type ThrowableError = string | RegExp | Class<Error> | ((error: Error | string) => boolean | void | undefined);
 export type TestLog = Omit<ConsoleEvent, 'args' | 'scope'> & { message: string };
 
+export type TestDiffSource = Record<string, {
+  sourceHash: number;
+  methods: Record<string, number>;
+}>;
+
 /**
  * Specific configuration for a test
  */
@@ -135,4 +140,8 @@ export type TestRun = {
    * unique id for the run
    */
   runId?: string;
+  /**
+   * Diff Source
+   */
+  diffSource?: TestDiffSource;
 };

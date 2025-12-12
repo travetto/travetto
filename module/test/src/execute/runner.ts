@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { TimeUtil, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
@@ -23,17 +23,49 @@ export class Runner {
     this.#state = state;
   }
 
+  async resolveRuns(run: TestRun | string[]): Promise<TestRun[]> {
+    if (Array.isArray(run)) {
+      const tests = await RunnerUtil.getTestDigest(run, this.#state.tags);
+      return RunnerUtil.getTestRuns(tests)
+        .toSorted((a, b) => a.runId!.localeCompare(b.runId!));
+    } else if ('diffSource' in run) {
+      const diff = run.diffSource!;
+      const fileToImport = RuntimeIndex.getFromImport(run.import)!.outputFile;
+      const imported = await import(fileToImport);
+      const classes = Object.fromEntries(
+        Object.values(imported).filter(x => typeof x === 'function' && 'Ⲑid' in x)
+          .map((cls: Function) => [cls.Ⲑid, describeFunction(cls)])
+      );
+      const outRuns: TestRun[] = [];
+
+      // TODO: Support inheritance?
+      for (const [clsId, config] of Object.entries(diff)) {
+        const local = classes[clsId];
+        // Class changed
+        if (local && local.hash !== config.sourceHash) {
+          const diffMethods = Object.entries(config.methods).filter(([_, m]) => local.methods?.[m].hash !== m);
+          const methodNames = diffMethods.length ? diffMethods.map(([m]) => m) : undefined;
+          outRuns.push({ import: run.import, classId: clsId, methodNames });
+        }
+      }
+      if (outRuns.length === 0) { // Re-run entire file
+        outRuns.push({ import: run.import });
+      }
+      return outRuns;
+    } else {
+      return [run];
+    }
+  }
+
   /**
-   * Run all files
+   * Run multiple tests
    */
-  async runFiles(globs?: string[]): Promise<boolean> {
+  async runMultiple(testRuns: TestRun[]): Promise<boolean> {
     const target = await TestConsumerRegistryIndex.getInstance(this.#state);
     const consumer = new RunnableTestConsumer(target);
-    const tests = await RunnerUtil.getTestDigest(globs, this.#state.tags);
-    const testRuns = RunnerUtil.getTestRuns(tests)
-      .toSorted((a, b) => a.runId!.localeCompare(b.runId!));
+    const testCount = testRuns.reduce((acc, cur) => acc + (cur.methodNames ? cur.methodNames.length : 0), 0);
 
-    await consumer.onStart({ testCount: tests.length });
+    await consumer.onStart({ testCount });
     await WorkPool.run(
       run => buildStandardTestManager(consumer, run),
       testRuns,
@@ -47,7 +79,7 @@ export class Runner {
   }
 
   /**
-   * Run a single file
+   * Run a single test
    */
   async runSingle(run: TestRun): Promise<boolean> {
     run.import =
@@ -77,11 +109,13 @@ export class Runner {
   /**
    * Run the runner, based on the inputs passed to the constructor
    */
-  async run(): Promise<boolean | undefined> {
-    if ('import' in this.#state.target) {
-      return await this.runSingle(this.#state.target);
+  async run(run: TestRun | string[]): Promise<boolean | undefined> {
+    const runs = await this.resolveRuns(run);
+
+    if (runs.length === 1) {
+      return await this.runSingle(runs[0]);
     } else {
-      return await this.runFiles(this.#state.target.globs);
+      return await this.runMultiple(runs);
     }
   }
 }
