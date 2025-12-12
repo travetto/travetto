@@ -54,23 +54,7 @@ export interface Counts {
 /**
  * Results of a suite run
  */
-export interface SuiteResult extends Counts {
-  /**
-   * Class identifier
-   */
-  classId: string;
-  /**
-   * Import for the suite
-   */
-  import: string;
-  /**
-   * Start of the suite
-   */
-  lineStart: number;
-  /**
-   * End of the suite
-   */
-  lineEnd: number;
+export interface SuiteResult extends Counts, SuiteCore {
   /**
    * ALl test results
    */

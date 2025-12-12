@@ -99,6 +99,7 @@ export class TestExecutor {
       lineEnd: suite.lineEnd,
       import: suite.import,
       classId: suite.classId,
+      sourceHash: suite.sourceHash,
       duration: 0,
       tests: []
     };
@@ -123,6 +124,7 @@ export class TestExecutor {
       lineBodyStart: test.lineBodyStart,
       import: test.import,
       sourceImport: test.sourceImport,
+      sourceHash: test.sourceHash,
       status: 'skipped',
       assertions: [],
       duration: 0,

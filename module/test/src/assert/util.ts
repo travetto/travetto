@@ -96,7 +96,7 @@ export class AssertUtil {
 
     const msg = error.message.split(/\n/)[0];
 
-    const core = { import: imp, classId: suite.classId, methodName };
+    const core = { import: imp, classId: suite.classId, methodName, sourceHash: suite.sourceHash };
     const coreAll = { ...core, description: msg, lineStart: line, lineEnd: line, lineBodyStart: line };
 
     const assert: Assertion = {

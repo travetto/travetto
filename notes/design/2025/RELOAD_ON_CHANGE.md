@@ -13,34 +13,36 @@ Replacing inline is proving to be extremely complicated:
 * ESM 
 
 ## What Needs To Change
-* Need a way to restart any application when running in dynamic mode
+* [ ] Need a way to restart any application when running in dynamic mode
   * Already support, just need make it the standard mode
   * Compiler is unchanged
   * Verify debugging isn't broken (connection should remain, or restart)
-* Remove all proxying
-* Remove all concept of "update/delete/create" from registries
+* [ ] Remove all proxying
+* [X] Remove all concept of "update/delete/create" from registries
   * Reload is now the goal
-* Test watcher
+* [ ] Test watcher
   * Will not listen to restarts      
   * Will still need to listen for method changes to dispatch tests
     * Inheritance is still a valid need here
     * Can be isolated to tests
   * Revive method source being based on class source
-* Model-sql, Model-elasticsearch
+* [ ] Model changes
   * Will need to evaluate on startup the proposed schema vs the current
   * Changes will be between model schema and db schema
-* Models
-  * No longer capturing deletes
+  * [ ] SQL
+  * [ ] Elasticsearch
+* Model Deletes
+  * No longer capturing
   * Could provide a mode that helps cleanup after the fact
   * Minor compared to everything else
-* Could default to ESM only
+* [ ] Could default to ESM only
   * Allows removing of all CommonJS code
     * Compiler Bootstrap
     * Compiler Host
     * ESlint
     * Manifest init
     * Pack, can target a single runtime
-* Documentation
+* [ ] Documentation
   * No longer "realtime" in the same sense, probably just update on Homepage GIFs
   * Update docs about realtime
 

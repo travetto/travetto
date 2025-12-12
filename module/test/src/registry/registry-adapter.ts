@@ -61,7 +61,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
 
   register(...data: Partial<SuiteConfig>[]): SuiteConfig {
     if (!this.#config) {
-      const lines = describeFunction(this.#cls)?.lines;
+      const { lines, hash } = describeFunction(this.#cls) ?? {};
       this.#config = asFull<SuiteConfig>({
         class: this.#cls,
         classId: this.#cls.Ⲑid,
@@ -69,6 +69,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
+        sourceHash: hash,
         tests: {},
         beforeAll: [],
         beforeEach: [],
@@ -84,7 +85,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
     const suite = this.register();
 
     if (!(method in this.#config.tests)) {
-      const lines = describeFunction(this.#cls)?.methods?.[method]?.lines;
+      const { lines, hash } = describeFunction(this.#cls)?.methods?.[method] ?? {};
       const config = asFull<TestConfig>({
         class: this.#cls,
         tags: [],
@@ -93,6 +94,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         lineEnd: lines?.[1],
         lineBodyStart: lines?.[2],
         methodName: method,
+        sourceHash: hash,
       });
       this.#config.tests[method] = config;
     }
