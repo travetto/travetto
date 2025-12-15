@@ -46,8 +46,11 @@ export class TestWatcher {
         switch (event.action) {
           case 'create':
           case 'update': {
-            const diffSource = consumer.produceDiffSource(event.file);
-            const run: TestRun = { import: RuntimeIndex.getFromSource(event.file)?.import!, diffSource, metadata: { partial: true } };
+            const run: TestRun = {
+              import: event.import,
+              diffSource: consumer.produceDiffSource(event.import),
+              metadata: { partial: true }
+            };
             console.log('Triggering', event.file);
             queue.add(run, true); // Shift to front
             break;

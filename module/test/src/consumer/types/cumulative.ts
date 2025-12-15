@@ -112,8 +112,21 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     }
   }
 
-  produceDiffSource(file: string): TestDiffSource {
-    // TODO: Fill this in later
-    return {};
+  /**
+   * Produce diff source for import file
+   */
+  produceDiffSource(importName: string): TestDiffSource {
+    const output: TestDiffSource = {};
+    for (const [clsId, suite] of Object.entries(this.#state[importName] || {})) {
+      const methods: TestDiffSource[string]['methods'] = {};
+      output[clsId] = {
+        sourceHash: suite.sourceHash!,
+        methods
+      };
+      for (const [methodName, test] of Object.entries(suite.tests)) {
+        methods[methodName] = test.sourceHash!;
+      }
+    }
+    return output;
   }
 }

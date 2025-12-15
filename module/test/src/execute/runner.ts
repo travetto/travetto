@@ -39,6 +39,7 @@ export class Runner {
       const outRuns: TestRun[] = [];
 
       // TODO: Support inheritance?
+      // Emit removes when class is removed or method is missing
       for (const [clsId, config] of Object.entries(diff)) {
         const local = classes[clsId];
         // Class changed
