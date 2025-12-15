@@ -22,4 +22,5 @@ export type TestEvent =
   EventTpl<'test', 'before', { test: TestConfig }> |
   EventTpl<'test', 'after', { test: TestResult }> |
   EventTpl<'suite', 'before', { suite: SuiteConfig }> |
-  EventTpl<'suite', 'after', { suite: SuiteResult }>;
+  EventTpl<'suite', 'after', { suite: SuiteResult }> |
+  { type: 'removeTest', methodName?: string, classId?: string, import: string, metadata?: Record<string, unknown> };

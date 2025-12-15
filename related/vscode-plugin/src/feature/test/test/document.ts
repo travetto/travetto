@@ -256,12 +256,8 @@ export class DocumentResultsManager {
     if (event.type === 'ready' || event.type === 'log') {
       // Ignore
     } else if (event.type === 'removeTest') {
-      if ('method' in event && typeof event.method === 'string') {
-        this.reset('test', `${event.classId}#${event.method}`);
-      } else {
-        for (const method of event.methodNames ?? []) {
-          this.reset('test', `${event.classId}#${method}`);
-        }
+      if ('methodName' in event && typeof event.methodName === 'string') {
+        this.reset('test', `${event.classId}#${event.methodName}`);
       }
     } else if (event.phase === 'before') {
       switch (event.type) {

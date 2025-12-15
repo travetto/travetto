@@ -11,12 +11,10 @@ export const Events = {
   READY: 'ready'
 };
 
-export type TestRemovedEvent = { type: 'removeTest', method?: string, methodNames?: string[], classId?: string, import: string };
 export type TestReadyEvent = { type: 'ready' };
 export type TestLogEvent = { type: 'log', message: string };
 
 export type TestWatchEvent =
   TestEvent |
-  TestRemovedEvent |
   TestReadyEvent |
   TestLogEvent;

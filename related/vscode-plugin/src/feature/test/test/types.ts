@@ -3,7 +3,7 @@ import type vscode from 'vscode';
 import type { Assertion, SuiteConfig, SuiteResult, TestConfig, TestEvent, TestResult } from '@travetto/test';
 
 export type StatusUnknown = TestResult['status'] | 'unknown';
-export type TestLevel = TestEvent['type'];
+export type TestLevel = Exclude<TestEvent['type'], 'removeTest'>;
 
 type ResultStyles = Record<string, vscode.TextEditorDecorationType>;
 

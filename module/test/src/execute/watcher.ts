@@ -54,14 +54,6 @@ export class TestWatcher {
           }
           case 'delete': {
             consumer.removeImport(event.import);
-            // TODO, we can't handle method deletions anymore, but we can handle class level
-            // process.send?.({
-            //   type: 'removeTest',
-            //   methodNames: method?.name ? [method.name!] : undefined!,
-            //   method: method?.name,
-            //   classId,
-            //   import: Runtime.getImport(cls)
-            // } satisfies TestRemovedEvent);
             break;
           }
         }

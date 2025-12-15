@@ -52,6 +52,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    */
   removeImport(importName: string): void {
     delete this.#state[importName];
+    this.onEvent({ type: 'removeTest', import: importName });
   }
 
   /**
@@ -99,6 +100,8 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
           this.onTestResult(event.test);
           this.triggerSummary(event.test);
         }
+      } else if (event.type === 'removeTest') {
+        this.onEvent(event); // Forward remove events
       }
     } catch (error) {
       console.warn('Summarization Error', { error });
