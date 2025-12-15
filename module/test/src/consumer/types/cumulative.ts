@@ -1,5 +1,5 @@
 import type { TestConsumerShape } from '../types.ts';
-import type { TestEvent } from '../../model/event.ts';
+import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestDiffSource, TestResult } from '../../model/test.ts';
 import type { SuiteConfig, SuiteResult } from '../../model/suite.ts';
 import { DelegatingConsumer } from './delegating.ts';
@@ -21,7 +21,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     super([target]);
   }
 
-  getSuite(core: SuiteCore): SuiteResult {
+  getSuite(core: Pick<SuiteCore, 'import' | 'classId'>): SuiteResult {
     return this.#state[core.import][core.classId];
   }
 
@@ -47,12 +47,14 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     tests[test.methodName] = { ...tests[test.methodName], ...test };
   }
 
-  /**
-   * Remove a class
-   */
-  removeImport(importName: string): void {
-    delete this.#state[importName];
-    this.onEvent({ type: 'removeTest', import: importName });
+  removeTest(importName: string, classId?: string, methodName?: string): void {
+    if (methodName && classId && importName) {
+      delete this.getSuite({ import: importName, classId }).tests[methodName];
+    } else if (classId && importName) {
+      delete this.#state[importName][classId];
+    } else if (importName) {
+      delete this.#state[importName];
+    }
   }
 
   /**
@@ -82,6 +84,10 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     });
   }
 
+  onRemoveEvent(event: TestRemoveEvent): void {
+    this.removeTest(event.import, event.classId, event.methodName);
+  }
+
   /**
    * Listen for event, process the full event, and if the event is an after test,
    * send a full suite summary
@@ -100,8 +106,6 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
           this.onTestResult(event.test);
           this.triggerSummary(event.test);
         }
-      } else if (event.type === 'removeTest') {
-        this.onEvent(event); // Forward remove events
       }
     } catch (error) {
       console.warn('Summarization Error', { error });

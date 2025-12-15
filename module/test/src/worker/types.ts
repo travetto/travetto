@@ -1,4 +1,4 @@
-import { TestEvent } from '../model/event.ts';
+import { TestEvent, TestRemoveEvent } from '../model/event.ts';
 
 /**
  * Test Run Event Keys
@@ -16,5 +16,6 @@ export type TestLogEvent = { type: 'log', message: string };
 
 export type TestWatchEvent =
   TestEvent |
+  TestRemoveEvent |
   TestReadyEvent |
   TestLogEvent;

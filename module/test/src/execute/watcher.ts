@@ -53,7 +53,7 @@ export class TestWatcher {
             break;
           }
           case 'delete': {
-            consumer.removeImport(event.import);
+            consumer.removeTest(event.import);
             break;
           }
         }

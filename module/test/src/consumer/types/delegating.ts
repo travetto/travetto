@@ -1,5 +1,7 @@
 import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
-import type { TestEvent } from '../../model/event.ts';
+import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
+
+const isRemoveEvent = (event: TestEvent | TestRemoveEvent): event is TestRemoveEvent => event.type === 'removeTest';
 
 /**
  * Delegating event consumer
@@ -36,6 +38,9 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     if (this.#transformer) {
       event = this.#transformer(event);
     }
+    if (isRemoveEvent(event)) {
+      this.onRemoveEvent?.(event);
+    }
     if (this.#filter?.(event) === false) {
       return;
     }
@@ -55,4 +60,5 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
   }
 
   onEventDone?(event: TestEvent): void;
+  onRemoveEvent?(event: TestRemoveEvent): void;
 }
