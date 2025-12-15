@@ -101,7 +101,7 @@ export class TestExecutor {
       classId: suite.classId,
       sourceHash: suite.sourceHash,
       duration: 0,
-      tests: []
+      tests: {}
     };
   }
 
@@ -219,7 +219,7 @@ export class TestExecutor {
         // Run test
         const testResult = await this.executeTest(test);
         result[testResult.status]++;
-        result.tests.push(testResult);
+        result.tests[testResult.methodName] = testResult;
 
         // Handle after each
         await mgr.endPhase('each');

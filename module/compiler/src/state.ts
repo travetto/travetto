@@ -172,7 +172,7 @@ export class CompilerState implements ts.CompilerHost {
     const tscOutputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeSource));
     const outputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeOutput));
 
-    const entry: CompileStateEntry = { sourceFile, outputFile, module, tscOutputFile };
+    const entry: CompileStateEntry = { sourceFile, outputFile, module, tscOutputFile, import: `${module.name}/${moduleFile}` };
 
     this.#outputToEntry.set(outputFile, entry);
     this.#sourceFiles.add(sourceFile);

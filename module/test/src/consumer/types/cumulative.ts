@@ -1,13 +1,12 @@
-import { existsSync } from 'node:fs';
-
-import { type Class, RuntimeIndex } from '@travetto/runtime';
-
 import type { TestConsumerShape } from '../types.ts';
 import type { TestEvent } from '../../model/event.ts';
-import type { TestResult } from '../../model/test.ts';
-import type { SuiteResult } from '../../model/suite.ts';
+import type { TestDiffSource, TestResult } from '../../model/test.ts';
+import type { SuiteConfig, SuiteResult } from '../../model/suite.ts';
 import { DelegatingConsumer } from './delegating.ts';
-import { SuiteRegistryIndex } from '../../registry/registry-index.ts';
+import { SuiteCore } from '../../model/common.ts';
+
+type ClassId = string;
+type ImportName = string;
 
 /**
  * Cumulative Summary consumer
@@ -16,59 +15,70 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   /**
    * Total state of all tests run so far
    */
-  #state: Record<string, Record<string, TestResult['status']>> = {};
+  #state: Record<ImportName, Record<ClassId, SuiteResult>> = {};
 
   constructor(target: TestConsumerShape) {
     super([target]);
   }
 
-  /**
-   * Summarize a given test suite using the new result and the historical
-   * state
-   */
-  summarizeSuite(test: TestResult): SuiteResult {
-    if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
-      (this.#state[test.classId] ??= {})[test.methodName] = test.status;
-      const SuiteCls = SuiteRegistryIndex.getClasses().find(cls => cls.Ⲑid === test.classId);
-      return SuiteCls ? this.computeTotal(SuiteCls) : this.removeClass(test.classId);
-    } else {
-      return this.removeClass(test.classId);
-    }
+  getSuite(core: SuiteCore): SuiteResult {
+    return this.#state[core.import][core.classId];
+  }
+
+  onSuiteStart(config: SuiteConfig): void {
+    this.#state[config.import] ??= {};
+    this.#state[config.import][config.classId] = {
+      ...config,
+      duration: -1,
+      failed: 0,
+      passed: 0,
+      skipped: 0,
+      total: 0,
+      tests: {}
+    };
+  }
+
+  onSuiteAfter({ tests: _, ...suite }: SuiteResult): void {
+    Object.assign(this.getSuite(suite), suite);
+  }
+
+  onTestResult(test: TestResult): void {
+    const tests = this.getSuite(test).tests;
+    tests[test.methodName] = { ...tests[test.methodName], ...test };
   }
 
   /**
    * Remove a class
    */
-  removeClass(clsId: string): SuiteResult {
-    this.#state[clsId] = {};
-    return {
-      classId: clsId, passed: 0, failed: 0, skipped: 0, total: 0, tests: [], duration: 0, import: '', lineStart: 0, lineEnd: 0
-    };
+  removeImport(importName: string): void {
+    delete this.#state[importName];
   }
 
   /**
    * Compute totals
    */
-  computeTotal(cls: Class): SuiteResult {
-    const suite = SuiteRegistryIndex.getConfig(cls);
-    const total = Object.values(suite.tests).reduce((map, config) => {
-      const status = this.#state[config.classId][config.methodName] ?? 'unknown';
-      map[status] += 1;
-      return map;
-    }, { skipped: 0, passed: 0, failed: 0, unknown: 0 });
-
+  computeTotal(importName: string, classId: ClassId): SuiteResult {
+    const suite = this.#state[importName][classId];
     return {
       classId: suite.classId,
-      passed: total.passed,
-      failed: total.failed,
-      skipped: total.skipped,
+      passed: suite.passed,
+      failed: suite.failed,
+      skipped: suite.skipped,
       import: suite.import,
       lineStart: suite.lineStart,
       lineEnd: suite.lineEnd,
-      total: total.failed + total.passed,
-      tests: [],
+      total: suite.total,
+      tests: {},
       duration: 0
     };
+  }
+
+  triggerSummary(core: SuiteCore): void {
+    this.onEvent({
+      type: 'suite',
+      phase: 'after',
+      suite: this.getSuite(core)
+    });
   }
 
   /**
@@ -77,15 +87,26 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    */
   onEventDone(event: TestEvent): void {
     try {
-      if (event.type === 'test' && event.phase === 'after') {
-        this.onEvent({
-          type: 'suite',
-          phase: 'after',
-          suite: this.summarizeSuite(event.test),
-        });
+      if (event.type === 'suite') {
+        if (event.phase === 'before') {
+          this.onSuiteStart(event.suite);
+        } else if (event.phase === 'after') {
+          this.onSuiteAfter(event.suite);
+          this.triggerSummary(event.suite);
+        }
+      } else if (event.type === 'test') {
+        if (event.phase === 'after') {
+          this.onTestResult(event.test);
+          this.triggerSummary(event.test);
+        }
       }
     } catch (error) {
       console.warn('Summarization Error', { error });
     }
+  }
+
+  produceDiffSource(file: string): TestDiffSource {
+    // TODO: Fill this in later
+    return {};
   }
 }

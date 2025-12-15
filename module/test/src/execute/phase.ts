@@ -87,7 +87,7 @@ export class TestPhaseManager {
     );
 
     this.#onSuiteFailure(failure);
-    this.#result.tests.push(failure.testResult);
+    this.#result.tests[failure.testResult.methodName] = failure.testResult;
     this.#result.failed++;
   }
 }

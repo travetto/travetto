@@ -1,14 +1,16 @@
-import { MethodChangeSource, ClassChangeSource, Registry } from '@travetto/registry';
+import { Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
-import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
+import { AsyncQueue, RuntimeIndex, castTo, watchCompiler } from '@travetto/runtime';
+import { ManifestModuleUtil } from '@travetto/manifest';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { TestRun } from '../model/test.ts';
 import { RunnerUtil } from './util.ts';
-import { TestReadyEvent, TestRemovedEvent } from '../worker/types.ts';
-import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { TestReadyEvent } from '../worker/types.ts';
+
+const VALID_FILE_TYPES = new Set(['js', 'ts']);
 
 /**
  * Test Watcher.
@@ -38,42 +40,33 @@ export class TestWatcher {
     )
       .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
 
-    const emitter = new MethodChangeSource(ClassChangeSource);
-    emitter.on((event) => {
-      const [cls, method] = 'previous' in event ? event.previous : event.current;
-
-      if (!cls || describeFunction(cls).abstract) {
-        return;
-      }
-
-      const classId = cls.Ⲑid;
-      if (!method) {
-        consumer.removeClass(classId);
-        return;
-      }
-
-      const config = SuiteRegistryIndex.getTestConfig(cls, method)!;
-      if (event.type !== 'delete') {
-        if (config) {
-          const run: TestRun = {
-            import: config.import, classId: config.classId, methodNames: [config.methodName], metadata: { partial: true }
-          };
-          console.log('Triggering', run);
-          queue.add(run, true); // Shift to front
+    // Fire off, and let it run in the bg. Restart on exit
+    for await (const event of watchCompiler({ restartOnExit: true })) {
+      if (event.file && RuntimeIndex.hasModule(event.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
+        switch (event.action) {
+          case 'create':
+          case 'update': {
+            const diffSource = consumer.produceDiffSource(event.file);
+            const run: TestRun = { import: RuntimeIndex.getFromSource(event.file)?.import!, diffSource, metadata: { partial: true } };
+            console.log('Triggering', event.file);
+            queue.add(run, true); // Shift to front
+            break;
+          }
+          case 'delete': {
+            consumer.removeImport(event.import);
+            // TODO, we can't handle method deletions anymore, but we can handle class level
+            // process.send?.({
+            //   type: 'removeTest',
+            //   methodNames: method?.name ? [method.name!] : undefined!,
+            //   method: method?.name,
+            //   classId,
+            //   import: Runtime.getImport(cls)
+            // } satisfies TestRemovedEvent);
+            break;
+          }
         }
-      } else {
-        process.send?.({
-          type: 'removeTest',
-          methodNames: method?.name ? [method.name!] : undefined!,
-          method: method?.name,
-          classId,
-          import: Runtime.getImport(cls)
-        } satisfies TestRemovedEvent);
       }
-    });
-
-    // If a file is changed, but doesn't emit classes, re-run whole file
-    ClassChangeSource.onNonClassChanges(imp => queue.add({ import: imp }));
+    }
 
     process.on('message', event => {
       if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {

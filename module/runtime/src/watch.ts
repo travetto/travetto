@@ -3,7 +3,7 @@ import { ExecUtil } from './exec.ts';
 import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
 
-export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, time: number };
+export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, import: string, time: number };
 
 export async function* watchCompiler(config?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<WatchEvent> {
   // Load at runtime

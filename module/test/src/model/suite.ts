@@ -58,7 +58,7 @@ export interface SuiteResult extends Counts, SuiteCore {
   /**
    * ALl test results
    */
-  tests: TestResult[];
+  tests: Record<string, TestResult>;
   /**
    * Suite duration
    */
