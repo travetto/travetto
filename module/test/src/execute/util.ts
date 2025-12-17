@@ -7,7 +7,7 @@ import path from 'node:path';
 import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, describeFunction, TimeUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
-import type { TestConfig, TestDiffSource, TestRunInput, TestRun, TestGlobInput } from '../model/test.ts';
+import type { TestConfig, TestRunInput, TestRun, TestGlobInput, TestDiffInput } from '../model/test.ts';
 import type { TestRemoveEvent } from '../model/event.ts';
 import { TestConsumerShape } from '../consumer/types.ts';
 import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
@@ -111,7 +111,7 @@ export class RunnerUtil {
   /**
    * Resolve a test diff source to ensure we are only running changed tests
    */
-  static async resolveDiffSource(importPath: string, diff: TestDiffSource): Promise<{ runs: TestRun[], removes?: TestRemoveEvent[] }> {
+  static async resolveDiffSource({ import: importPath, diffSource: diff }: TestDiffInput): Promise<{ runs: TestRun[], removes?: TestRemoveEvent[] }> {
     const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
     const imported = await import(fileToImport);
     const classes = Object.fromEntries(
@@ -176,11 +176,11 @@ export class RunnerUtil {
   static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
     let runs: TestRun[];
     let removes: TestRemoveEvent[] | undefined;
-    // Globs
-    if ('globs' in input) {
+    if ('diffSource' in input) {
+      ({ runs, removes } = await this.resolveDiffSource(input));
+      console.log(removes);
+    } else if ('globs' in input) {
       runs = await this.resolveGlobTestRuns(input);
-    } else if ('diffSource' in input) {
-      ({ runs, removes } = await this.resolveDiffSource(input.import, input.diffSource));
     } else {
       runs = [input];
     }
