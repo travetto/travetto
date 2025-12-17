@@ -111,16 +111,16 @@ export class RunnerUtil {
   /**
    * Resolve a test diff source to ensure we are only running changed tests
    */
-  static async resolveDiffSource(importPath: string, diff: TestDiffSource): Promise<TestRun[]> {
+  static async resolveDiffSource(importPath: string, diff: TestDiffSource): Promise<{ runs: TestRun[], removes?: TestRemoveEvent[] }> {
     const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
     const imported = await import(fileToImport);
     const classes = Object.fromEntries(
       Object.values(imported).filter(x => typeof x === 'function' && 'Ⲑid' in x)
         .map((cls: Function) => [cls.Ⲑid, describeFunction(cls)])
     );
+
     const outRuns: TestRun[] = [];
 
-    // TODO: Support inheritance?
     // Emit removes when class is removed or method is missing
     for (const [clsId, config] of Object.entries(diff)) {
       const local = classes[clsId];
@@ -134,21 +134,7 @@ export class RunnerUtil {
     if (outRuns.length === 0) { // Re-run entire file
       outRuns.push({ import: importPath });
     }
-    return outRuns;
-  }
-
-  /**
-   * Given the input of a run or globs, resolve to the full list of test runs
-   */
-  static async resolveRuns(input: TestRunInput): Promise<(TestRun | TestRemoveEvent)[]> {
-    // Globs
-    if ('globs' in input) {
-      return await this.resolveGlobTestRuns(input);
-    } else if ('diffSource' in input) {
-      return await this.resolveDiffSource(input.import, input.diffSource);
-    } else {
-      return [input];
-    }
+    return { runs: outRuns };
   }
 
   /**
@@ -188,7 +174,17 @@ export class RunnerUtil {
    * Run tests
    */
   static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
-    const runs = await RunnerUtil.resolveRuns(input);
+    let runs: TestRun[];
+    let removes: TestRemoveEvent[] | undefined;
+    // Globs
+    if ('globs' in input) {
+      runs = await this.resolveGlobTestRuns(input);
+    } else if ('diffSource' in input) {
+      ({ runs, removes } = await this.resolveDiffSource(input.import, input.diffSource));
+    } else {
+      runs = [input];
+    }
+
     await RunnerUtil.reinitManifestIfNeeded(runs);
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);

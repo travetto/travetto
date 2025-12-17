@@ -65,11 +65,6 @@ export class TestWatcher {
     process.on('message', event => {
       if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {
         console.log('Received message', event);
-        // Legacy
-        if ('file' in event && typeof event.file === 'string') {
-          event = { import: RuntimeIndex.getFromSource(event.file)?.import! };
-        }
-        console.debug('Manually triggered', event);
         queue.add(castTo(event), true);
       }
     });
