@@ -143,7 +143,7 @@ export type TestRun = {
 };
 
 /**
- * Test Diff Run
+ * Test Diff Input
  */
 export type TestDiffInput = {
   /**
@@ -161,7 +161,7 @@ export type TestDiffInput = {
 };
 
 /**
- * Test Glob Run
+ * Test Glob Input
  */
 export type TestGlobInput = {
   /**

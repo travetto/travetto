@@ -7,7 +7,7 @@ import path from 'node:path';
 import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, describeFunction, TimeUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
-import type { TestConfig, TestDiffSource, TestRunInput, TestRun } from '../model/test.ts';
+import type { TestConfig, TestDiffSource, TestRunInput, TestRun, TestGlobInput } from '../model/test.ts';
 import type { TestRemoveEvent } from '../model/event.ts';
 import { TestConsumerShape } from '../consumer/types.ts';
 import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
@@ -75,10 +75,9 @@ export class RunnerUtil {
 
   /**
    * Get count of tests for a given set of globs
-   * @param globs
-   * @returns
+   * @param input
    */
-  static async getTestDigest(globs: string[] = ['**/*.ts'], tags?: string[]): Promise<TestConfig[]> {
+  static async resolveGlobTestRuns({ globs, tags, metadata }: TestGlobInput): Promise<TestRun[]> {
     const countRes = await ExecUtil.getResult(
       spawn('npx', ['trv', 'test:digest', '-o', 'json', ...globs], {
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
@@ -98,21 +97,15 @@ export class RunnerUtil {
       ((): boolean => true);
 
     const parsed: TestConfig[] = countRes.valid ? JSON.parse(countRes.stdout) : [];
-    return parsed.filter(testFilter);
-  }
-
-  /**
-   * Get run events
-   */
-  static getTestRuns(tests: TestConfig[]): TestRun[] {
-    const events = tests.reduce((runs, test) => {
+    const events = parsed.filter(testFilter).reduce((runs, test) => {
       if (!runs.has(test.classId)) {
-        runs.set(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid() });
+        runs.set(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid(), metadata });
       }
       runs.get(test.classId)!.methodNames!.push(test.methodName);
       return runs;
     }, new Map<string, TestRun>());
-    return [...events.values()].sort((a, b) => a.runId!.localeCompare(b.runId!));
+
+    return [...events.values()].sort((a, b) => a.runId!.localeCompare(b.runId!));;
   }
 
   /**
@@ -150,8 +143,7 @@ export class RunnerUtil {
   static async resolveRuns(input: TestRunInput): Promise<(TestRun | TestRemoveEvent)[]> {
     // Globs
     if ('globs' in input) {
-      const tests = await this.getTestDigest(input.globs, input.tags);
-      return this.getTestRuns(tests);
+      return await this.resolveGlobTestRuns(input);
     } else if ('diffSource' in input) {
       return await this.resolveDiffSource(input.import, input.diffSource);
     } else {
