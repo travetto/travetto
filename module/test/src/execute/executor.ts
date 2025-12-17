@@ -3,7 +3,7 @@ import { AssertionError } from 'node:assert';
 import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 
-import { TestConfig, TestResult, TestRun } from '../model/test.ts';
+import { TestConfig, TestResult, TestRunInput } from '../model/test.ts';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
 import { TestConsumerShape } from '../consumer/types.ts';
 import { AssertCheck } from '../assert/check.ts';
@@ -245,7 +245,7 @@ export class TestExecutor {
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  async execute(run: TestRun): Promise<void> {
+  async execute(run: TestRunInput): Promise<void> {
     try {
       await Runtime.importFrom(run.import);
     } catch (error) {

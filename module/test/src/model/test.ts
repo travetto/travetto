@@ -140,8 +140,43 @@ export type TestRun = {
    * unique id for the run
    */
   runId?: string;
+};
+
+/**
+ * Test Diff Run
+ */
+export type TestDiffInput = {
+  /**
+   * Import for run
+   */
+  import: string;
   /**
    * Diff Source
    */
-  diffSource?: TestDiffSource;
+  diffSource: TestDiffSource;
+  /**
+   * Test run metadata
+   */
+  metadata?: Record<string, unknown>;
 };
+
+/**
+ * Test Glob Run
+ */
+export type TestGlobInput = {
+  /**
+   * Globs to run
+   */
+  globs: string[];
+  /**
+   * Tags to filter by
+   */
+  tags?: string[];
+  /**
+   * Test run metadata
+   */
+  metadata?: Record<string, unknown>;
+};
+
+
+export type TestRunInput = TestRun | TestDiffInput | TestGlobInput;

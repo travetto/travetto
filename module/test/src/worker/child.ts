@@ -4,7 +4,6 @@ import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
 import { RunnerUtil } from '../execute/util.ts';
-import { Runner } from '../execute/runner.ts';
 import { Events } from './types.ts';
 import { TestRun } from '../model/test.ts';
 
@@ -80,7 +79,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     console.debug('Running', { import: run.import });
 
     try {
-      await new Runner({ consumer: 'exec' }).run(run);
+      await RunnerUtil.runTests({ consumer: 'exec' }, run);
     } finally {
       this.#done.resolve();
     }

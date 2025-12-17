@@ -1,7 +1,7 @@
 /**
- * Run state
+ * Test Consumer Configuration
  */
-export interface RunState {
+export interface TestConsumerConfig {
   /**
    * Test result consumer
    */
@@ -14,8 +14,4 @@ export interface RunState {
    * Number of test suites to run concurrently, when mode is not single
    */
   concurrency?: number;
-  /**
-   * The tags to include or exclude from testing
-   */
-  tags?: string[];
 }

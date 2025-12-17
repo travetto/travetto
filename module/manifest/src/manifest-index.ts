@@ -193,6 +193,14 @@ export class ManifestIndex {
   }
 
   /**
+   * Get from import path or source file
+   * @param importOrSource
+   */
+  getFromImportOrSource(importOrSource: string): IndexedFile | undefined {
+    return this.getFromImport(importOrSource) ?? this.getFromSource(path.resolve(importOrSource));
+  }
+
+  /**
    * Get module from source file
    * @param source
    */

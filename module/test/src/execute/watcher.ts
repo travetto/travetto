@@ -6,7 +6,7 @@ import { ManifestModuleUtil } from '@travetto/manifest';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
-import { TestRun } from '../model/test.ts';
+import { TestDiffInput, TestRun } from '../model/test.ts';
 import { RunnerUtil } from './util.ts';
 import { TestReadyEvent } from '../worker/types.ts';
 
@@ -27,7 +27,7 @@ export class TestWatcher {
 
     await Registry.init();
 
-    const events: TestRun[] = [];
+    const events: (TestRun | TestDiffInput)[] = [];
 
     if (runAllOnStart) {
       const tests = await RunnerUtil.getTestDigest();
@@ -46,7 +46,7 @@ export class TestWatcher {
         switch (event.action) {
           case 'create':
           case 'update': {
-            const run: TestRun = {
+            const run: TestDiffInput = {
               import: event.import,
               diffSource: consumer.produceDiffSource(event.import),
               metadata: { partial: true }

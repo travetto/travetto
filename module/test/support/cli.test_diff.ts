@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 
-import { Env } from '@travetto/runtime';
-import { CliCommand } from '@travetto/cli';
+import { Env, RuntimeIndex } from '@travetto/runtime';
+import { CliCommand, CliUtil } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
 import { runTests, selectConsumer } from './bin/run.ts';
@@ -32,16 +32,16 @@ export class TestDiffCommand {
   }
 
   async main(importOrFile: string, diff: string): Promise<void> {
-    const options = Object.fromEntries((this.formatOptions ?? [])?.map(option => [...option.split(':'), true]));
     const diffSource: TestDiffSource = await fs.readFile(diff, 'utf8').then(JSON.parse);
+    const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)?.import!;
 
     return runTests(
       {
         consumer: this.format,
-        consumerOptions: options
+        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions),
       },
       {
-        import: importOrFile,
+        import: importPath,
         diffSource
       }
     );

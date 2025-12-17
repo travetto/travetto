@@ -3,10 +3,10 @@ import { fork } from 'node:child_process';
 import { Env, RuntimeIndex, Util } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { Events, TestLogEvent } from './types.ts';
+import { Events, type TestLogEvent } from './types.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
 import type { TestEvent } from '../model/event.ts';
-import { TestRun } from '../model/test.ts';
+import type { TestDiffInput, TestRun } from '../model/test.ts';
 
 const log = (message: string): void => {
   process.send?.({ type: 'log', message } satisfies TestLogEvent);
@@ -15,7 +15,7 @@ const log = (message: string): void => {
 /**
  *  Produce a handler for the child worker
  */
-export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun): Promise<void> {
+export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun | TestDiffInput): Promise<void> {
   log(`Worker Input ${JSON.stringify(run)}`);
   log(`Worker Executing ${run.import}`);
 

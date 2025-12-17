@@ -91,4 +91,11 @@ export class CliUtil {
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
     return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data : JSON.stringify(data, null, 2), () => resolve()));
   }
+
+  /**
+   * Read extended options from cli inputs, in the form of -o key:value or -o key
+   */
+  static readExtendedOptions(options?: string[]): Record<string, string | boolean> {
+    return Object.fromEntries((options ?? [])?.map(option => [...option.split(':'), true]));
+  }
 }

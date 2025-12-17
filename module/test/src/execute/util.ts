@@ -4,11 +4,20 @@ import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import path from 'node:path';
 
-import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime } from '@travetto/runtime';
-import { TestConfig, TestRun } from '../model/test.ts';
+import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, describeFunction, TimeUtil } from '@travetto/runtime';
+import { WorkPool } from '@travetto/worker';
+
+import type { TestConfig, TestDiffSource, TestRunInput, TestRun } from '../model/test.ts';
+import type { TestRemoveEvent } from '../model/event.ts';
+import { TestConsumerShape } from '../consumer/types.ts';
+import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
+import { TestConsumerConfig } from './types.ts';
+import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
+import { TestExecutor } from './executor.ts';
+import { buildStandardTestManager } from '../worker/standard.ts';
 
 /**
- * Simple Test Utilities
+ * Test Utilities for Running
  */
 export class RunnerUtil {
   /**
@@ -103,6 +112,110 @@ export class RunnerUtil {
       runs.get(test.classId)!.methodNames!.push(test.methodName);
       return runs;
     }, new Map<string, TestRun>());
-    return [...events.values()];
+    return [...events.values()].sort((a, b) => a.runId!.localeCompare(b.runId!));
+  }
+
+  /**
+   * Resolve a test diff source to ensure we are only running changed tests
+   */
+  static async resolveDiffSource(importPath: string, diff: TestDiffSource): Promise<TestRun[]> {
+    const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
+    const imported = await import(fileToImport);
+    const classes = Object.fromEntries(
+      Object.values(imported).filter(x => typeof x === 'function' && 'Ⲑid' in x)
+        .map((cls: Function) => [cls.Ⲑid, describeFunction(cls)])
+    );
+    const outRuns: TestRun[] = [];
+
+    // TODO: Support inheritance?
+    // Emit removes when class is removed or method is missing
+    for (const [clsId, config] of Object.entries(diff)) {
+      const local = classes[clsId];
+      // Class changed
+      if (local && local.hash !== config.sourceHash) {
+        const diffMethods = Object.entries(config.methods).filter(([_, m]) => local.methods?.[m].hash !== m);
+        const methodNames = diffMethods.length ? diffMethods.map(([m]) => m) : undefined;
+        outRuns.push({ import: importPath, classId: clsId, methodNames });
+      }
+    }
+    if (outRuns.length === 0) { // Re-run entire file
+      outRuns.push({ import: importPath });
+    }
+    return outRuns;
+  }
+
+  /**
+   * Given the input of a run or globs, resolve to the full list of test runs
+   */
+  static async resolveRuns(input: TestRunInput): Promise<(TestRun | TestRemoveEvent)[]> {
+    // Globs
+    if ('globs' in input) {
+      const tests = await this.getTestDigest(input.globs, input.tags);
+      return this.getTestRuns(tests);
+    } else if ('diffSource' in input) {
+      return await this.resolveDiffSource(input.import, input.diffSource);
+    } else {
+      return [input];
+    }
+  }
+
+  /**
+   * Reinitialize the manifest if needed, mainly for single test runs
+   */
+  static async reinitManifestIfNeeded(runs: TestRun[]): Promise<void> {
+    if (runs.length === 1) {
+      const [run] = runs;
+      const entry = RuntimeIndex.getFromImport(run.import)!;
+
+      if (entry.module !== Runtime.main.name) {
+        RuntimeIndex.reinitForModule(entry.module);
+      }
+    }
+  }
+
+  /**
+   * Build test consumer that wraps a given targeted consumer, and the tests to be run
+   */
+  static async getRunnableConsumer(target: TestConsumerShape, testRuns: TestRun[]): Promise<RunnableTestConsumer> {
+    const byClassId = new Map(testRuns.filter(run => run.classId).map(run => [run.classId, run]));
+    const consumer = new RunnableTestConsumer(target)
+      .withTransformer((event) => {
+        // Copy run metadata to event
+        const classId = event.type === 'test' ? event.test.classId : (event.type === 'suite' ? event.suite.classId : undefined);
+        const matching = byClassId.get(classId);
+        event.metadata = matching?.metadata ?? event.metadata;
+        return event;
+      });
+    const testCount = testRuns.reduce((acc, cur) => acc + (cur.methodNames ? cur.methodNames.length : 0), 0);
+
+    await consumer.onStart({ testCount });
+    return consumer;
+  }
+
+  /**
+   * Run tests
+   */
+  static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
+    const runs = await RunnerUtil.resolveRuns(input);
+    await RunnerUtil.reinitManifestIfNeeded(runs);
+
+    const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
+    const consumer = await this.getRunnableConsumer(targetConsumer, runs);
+
+    if (runs.length === 1) {
+      await new TestExecutor(consumer).execute(runs[0]);
+    } else {
+      await WorkPool.run(
+        run => buildStandardTestManager(consumer, run),
+        runs,
+        {
+          idleTimeoutMillis: TimeUtil.asMillis(10, 's'),
+          min: 1,
+          max: consumerConfig.concurrency
+        }
+      );
+    }
+
+    return consumer.summarizeAsBoolean();
   }
 }

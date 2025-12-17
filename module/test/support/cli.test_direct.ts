@@ -1,5 +1,5 @@
-import { Env } from '@travetto/runtime';
-import { CliCommand } from '@travetto/cli';
+import { Env, RuntimeIndex } from '@travetto/runtime';
+import { CliCommand, CliUtil } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
 import { runTests, selectConsumer } from './bin/run.ts';
@@ -30,16 +30,16 @@ export class TestDirectCommand {
   }
 
   main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
-
-    const options = Object.fromEntries((this.formatOptions ?? [])?.map(option => [...option.split(':'), true]));
+    // Resolve to import
+    const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)?.import!;
 
     return runTests(
       {
         consumer: this.format,
-        consumerOptions: options
+        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions),
       },
       {
-        import: importOrFile,
+        import: importPath,
         classId: clsId,
         methodNames: methodsNames,
       }
