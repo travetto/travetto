@@ -1,6 +1,6 @@
 import { Class } from '@travetto/runtime';
 
-import type { TestEvent } from '../model/event.ts';
+import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 import type { Counts, SuiteResult } from '../model/suite.ts';
 
 /**
@@ -52,6 +52,10 @@ export interface TestConsumerShape {
    * Handle individual tests events
    */
   onEvent(event: TestEvent): void;
+  /**
+   * Handle when a remove event is fired
+   */
+  onRemoveEvent?(event: TestRemoveEvent): void;
   /**
    * Summarize all results
    */

@@ -5,7 +5,7 @@ import { IpcChannel } from '@travetto/worker';
 
 import { Events, type TestLogEvent } from './types.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
-import type { TestEvent } from '../model/event.ts';
+import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
 
 const log = (message: string): void => {
@@ -43,7 +43,12 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async event => {
     try {
-      await consumer.onEvent(Util.deserializeFromJson(JSON.stringify(event)));  // Connect the consumer with the event stream from the child
+      const parsed: TestEvent | TestRemoveEvent = Util.deserializeFromJson(JSON.stringify(event));
+      if (parsed.type === 'removeTest') {
+        await consumer.onRemoveEvent?.(parsed); // Forward remove events
+      } else {
+        await consumer.onEvent(parsed);  // Forward standard events
+      }
     } catch {
       // Do nothing
     }

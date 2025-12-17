@@ -77,7 +77,7 @@ export class RunnerUtil {
    * Get count of tests for a given set of globs
    * @param input
    */
-  static async resolveGlobTestRuns({ globs, tags, metadata }: TestGlobInput): Promise<TestRun[]> {
+  static async resolveGlobInput({ globs, tags, metadata }: TestGlobInput): Promise<TestRun[]> {
     const countRes = await ExecUtil.getResult(
       spawn('npx', ['trv', 'test:digest', '-o', 'json', ...globs], {
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
@@ -111,7 +111,7 @@ export class RunnerUtil {
   /**
    * Resolve a test diff source to ensure we are only running changed tests
    */
-  static async resolveDiffSource({ import: importPath, diffSource: diff }: TestDiffInput): Promise<{ runs: TestRun[], removes?: TestRemoveEvent[] }> {
+  static async resolveDiffInput({ import: importPath, diffSource: diff }: TestDiffInput): Promise<{ runs: TestRun[], removes?: TestRemoveEvent[] }> {
     const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
     const imported = await import(fileToImport);
     const classes = Object.fromEntries(
@@ -177,10 +177,10 @@ export class RunnerUtil {
     let runs: TestRun[];
     let removes: TestRemoveEvent[] | undefined;
     if ('diffSource' in input) {
-      ({ runs, removes } = await this.resolveDiffSource(input));
+      ({ runs, removes } = await this.resolveDiffInput(input));
       console.log(removes);
     } else if ('globs' in input) {
-      runs = await this.resolveGlobTestRuns(input);
+      runs = await this.resolveGlobInput(input);
     } else {
       runs = [input];
     }
@@ -189,6 +189,12 @@ export class RunnerUtil {
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
     const consumer = await this.getRunnableConsumer(targetConsumer, runs);
+
+    if (removes) {
+      for (const item of removes) {
+        consumer.onRemoveEvent(item);
+      }
+    }
 
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0]);
