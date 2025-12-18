@@ -1,5 +1,5 @@
 import { CliCommand } from '@travetto/cli';
-import { Env, Runtime, describeFunction } from '@travetto/runtime';
+import { Env, Runtime, Util, describeFunction } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { IsPrivate } from '@travetto/schema';
 
@@ -15,6 +15,8 @@ export class TestDigestCommand {
   preMain(): void {
     Env.TRV_ROLE.set('test');
     Env.DEBUG.set(false);
+    Env.TRV_CAN_RESTART.set(false);
+    Env.TRV_DYNAMIC.set(false);
   }
 
   async main(globs: string[] = ['**/*']) {

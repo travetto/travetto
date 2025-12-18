@@ -83,14 +83,15 @@ export class RunUtil {
    * @param input
    */
   static async resolveGlobInput({ globs, tags, metadata }: TestGlobInput): Promise<TestRun[]> {
-    const countRes = await ExecUtil.getResult(
+    const digestProcess = await ExecUtil.getResult(
       spawn('npx', ['trv', 'test:digest', '-o', 'json', ...globs], {
-        env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
+        env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) },
       }),
       { catch: true }
     );
-    if (!countRes.valid) {
-      throw new Error(countRes.stderr);
+
+    if (!digestProcess.valid) {
+      throw new Error(digestProcess.stderr);
     }
 
     const testFilter = tags?.length ?
@@ -101,7 +102,8 @@ export class RunUtil {
       ) :
       ((): boolean => true);
 
-    const parsed: TestConfig[] = countRes.valid ? JSON.parse(countRes.stdout) : [];
+    const parsed: TestConfig[] = JSON.parse(digestProcess.stdout);
+
     const events = parsed.filter(testFilter).reduce((runs, test) => {
       if (!runs.has(test.classId)) {
         runs.set(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid(), metadata });

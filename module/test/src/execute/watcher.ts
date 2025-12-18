@@ -39,8 +39,27 @@ export class TestWatcher {
     )
       .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
 
-    // Fire off, and let it run in the bg. Restart on exit
+    process.on('message', event => {
+      if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {
+        console.log('Received message', event);
+        queue.add(castTo(event), true);
+      }
+    });
+
+    process.send?.({ type: 'ready' } satisfies TestReadyEvent);
+
+    const finished = WorkPool.run(
+      buildStandardTestManager.bind(null, consumer),
+      queue,
+      {
+        idleTimeoutMillis: 120000,
+        min: 2,
+        max: WorkPool.DEFAULT_SIZE
+      }
+    );
+
     for await (const event of watchCompiler({ restartOnExit: true })) {
+      console.debug('Received event:', event);
       if (event.file && RuntimeIndex.hasModule(event.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
         switch (event.action) {
           case 'create':
@@ -62,23 +81,7 @@ export class TestWatcher {
       }
     }
 
-    process.on('message', event => {
-      if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {
-        console.log('Received message', event);
-        queue.add(castTo(event), true);
-      }
-    });
-
-    process.send?.({ type: 'ready' } satisfies TestReadyEvent);
-
-    await WorkPool.run(
-      buildStandardTestManager.bind(null, consumer),
-      queue,
-      {
-        idleTimeoutMillis: 120000,
-        min: 2,
-        max: WorkPool.DEFAULT_SIZE
-      }
-    );
+    // Cleanup
+    await finished;
   }
 }

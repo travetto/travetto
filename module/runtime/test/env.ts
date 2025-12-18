@@ -14,7 +14,7 @@ export class EnvTest {
 
     assert(new EnvProp('name').value === 'bob');
     assert(new EnvProp('NAME').value === 'BOB');
-    assert(new EnvProp('nAmE').value === 'bOb');
+    assert(new EnvProp('nAmE').value === 'bOz');
     assert(new EnvProp('NaMe').value === undefined);
 
     assert(new EnvProp('Random').value === undefined);
