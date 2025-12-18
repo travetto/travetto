@@ -1,11 +1,24 @@
+import type { ChangeEventType } from '@travetto/manifest';
+
 import { RuntimeIndex } from './manifest-index.ts';
 import { ExecUtil } from './exec.ts';
 import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
 
-export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, import: string, time: number };
+export type WatchEvent = { file: string, action: ChangeEventType, output: string, module: string, import: string, time: number };
 
-export async function* watchCompiler(config?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<WatchEvent> {
+type WatchCompilerOptions = {
+  /**
+   * Restart the watch loop on compiler exit
+   */
+  restartOnExit?: boolean;
+  /**
+   * Signal to cancel the watch
+   */
+  signal?: AbortSignal;
+};
+
+export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterable<WatchEvent> {
   // Load at runtime
   const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
 
