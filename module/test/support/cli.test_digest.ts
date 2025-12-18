@@ -4,7 +4,7 @@ import { Registry } from '@travetto/registry';
 import { IsPrivate } from '@travetto/schema';
 
 import { SuiteRegistryIndex } from '../src/registry/registry-index.ts';
-import { RunnerUtil } from '../src/execute/util.ts';
+import { RunUtil } from '../src/execute/run.ts';
 
 @CliCommand()
 @IsPrivate()
@@ -19,7 +19,7 @@ export class TestDigestCommand {
 
   async main(globs: string[] = ['**/*']) {
     // Load all tests
-    for await (const imp of await RunnerUtil.getTestImports(globs)) {
+    for await (const imp of await RunUtil.getTestImports(globs)) {
       try {
         await Runtime.importFrom(imp);
       } catch (error) {

@@ -16,10 +16,15 @@ import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { TestExecutor } from './executor.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 
+type RunState = {
+  runs: TestRun[];
+  removes?: TestRemoveEvent[];
+};
+
 /**
  * Test Utilities for Running
  */
-export class RunnerUtil {
+export class RunUtil {
   /**
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
@@ -105,13 +110,13 @@ export class RunnerUtil {
       return runs;
     }, new Map<string, TestRun>());
 
-    return [...events.values()].sort((a, b) => a.runId!.localeCompare(b.runId!));;
+    return [...events.values()].sort((a, b) => a.runId!.localeCompare(b.runId!));
   }
 
   /**
    * Resolve a test diff source to ensure we are only running changed tests
    */
-  static async resolveDiffInput({ import: importPath, diffSource: diff }: TestDiffInput): Promise<{ runs: TestRun[], removes?: TestRemoveEvent[] }> {
+  static async resolveDiffInput({ import: importPath, diffSource: diff }: TestDiffInput): Promise<RunState> {
     const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
     const imported = await import(fileToImport);
     const classes = Object.fromEntries(
@@ -119,22 +124,37 @@ export class RunnerUtil {
         .map((cls: Function) => [cls.Ⲑid, describeFunction(cls)])
     );
 
-    const outRuns: TestRun[] = [];
+    // Runs, defaults to new classes
+    const state: RunState = {
+      runs: Object.keys(classes).filter(clsId => !diff[clsId]).map(clsId => ({ import: importPath, classId: clsId })),
+      removes: [],
+    };
 
-    // Emit removes when class is removed or method is missing
+    // Classes overlap
     for (const [clsId, config] of Object.entries(diff)) {
       const local = classes[clsId];
-      // Class changed
-      if (local && local.hash !== config.sourceHash) {
-        const diffMethods = Object.entries(config.methods).filter(([_, m]) => local.methods?.[m].hash !== m);
-        const methodNames = diffMethods.length ? diffMethods.map(([m]) => m) : undefined;
-        outRuns.push({ import: importPath, classId: clsId, methodNames });
+      if (!local) { // Removed classes
+        state.removes!.push({ type: 'removeTest', import: importPath, classId: clsId });
+      } else if (local.hash !== config.sourceHash) { // Class changed or added
+        // Methods to run, defaults to newly added
+        const methods: string[] = Object.keys(local.methods ?? {}).filter(key => !config.methods[key]);
+        for (const key of Object.keys(config.methods)) {
+          const localMethod = local.methods?.[key];
+          if (!localMethod) { // Test is removed
+            state.removes!.push({ type: 'removeTest', import: importPath, classId: clsId, methodName: key });
+          } else if (localMethod.hash !== config.methods[key]) { // Method changed or added
+            methods.push(key);
+          }
+        }
+
+        state.runs.push({ import: importPath, classId: clsId, methodNames: methods.length ? methods : undefined });
       }
     }
-    if (outRuns.length === 0) { // Re-run entire file
-      outRuns.push({ import: importPath });
+
+    if (state.runs.length === 0) { // Re-run entire file
+      state.runs.push({ import: importPath });
     }
-    return { runs: outRuns };
+    return state;
   }
 
   /**
@@ -171,29 +191,31 @@ export class RunnerUtil {
   }
 
   /**
+   * Resolve input into run state
+   */
+  static async resolveInput(input: TestRunInput): Promise<RunState> {
+    if ('diffSource' in input) {
+      return await this.resolveDiffInput(input);
+    } else if ('globs' in input) {
+      return { runs: await this.resolveGlobInput(input) };
+    } else {
+      return { runs: [input], removes: [] };
+    }
+  }
+
+  /**
    * Run tests
    */
   static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
-    let runs: TestRun[];
-    let removes: TestRemoveEvent[] | undefined;
-    if ('diffSource' in input) {
-      ({ runs, removes } = await this.resolveDiffInput(input));
-      console.log(removes);
-    } else if ('globs' in input) {
-      runs = await this.resolveGlobInput(input);
-    } else {
-      runs = [input];
-    }
+    const { runs, removes } = await this.resolveInput(input);
 
-    await RunnerUtil.reinitManifestIfNeeded(runs);
+    await this.reinitManifestIfNeeded(runs);
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
     const consumer = await this.getRunnableConsumer(targetConsumer, runs);
 
-    if (removes) {
-      for (const item of removes) {
-        consumer.onRemoveEvent(item);
-      }
+    for (const item of removes ?? []) {
+      consumer.onRemoveEvent(item);
     }
 
     if (runs.length === 1) {

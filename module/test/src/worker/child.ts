@@ -3,7 +3,7 @@ import { createWriteStream } from 'node:fs';
 import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { RunnerUtil } from '../execute/util.ts';
+import { RunUtil } from '../execute/run.ts';
 import { Events } from './types.ts';
 import { TestRun } from '../model/test.ts';
 
@@ -41,7 +41,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
       ConsoleManager.set({ log: () => { } });
     }
 
-    RunnerUtil.registerCleanup('worker');
+    RunUtil.registerCleanup('worker');
 
     // Listen for inbound requests
     this.on('*', event => this.onCommand(event));
@@ -79,7 +79,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     console.debug('Running', { import: run.import });
 
     try {
-      await RunnerUtil.runTests({ consumer: 'exec' }, run);
+      await RunUtil.runTests({ consumer: 'exec' }, run);
     } finally {
       this.#done.resolve();
     }

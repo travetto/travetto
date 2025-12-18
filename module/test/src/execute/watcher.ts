@@ -7,7 +7,7 @@ import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { TestDiffInput, TestRun } from '../model/test.ts';
-import { RunnerUtil } from './util.ts';
+import { RunUtil } from './run.ts';
 import { TestReadyEvent } from '../worker/types.ts';
 
 const VALID_FILE_TYPES = new Set(['js', 'ts']);
@@ -30,7 +30,7 @@ export class TestWatcher {
     const events: (TestRun | TestDiffInput)[] = [];
 
     if (runAllOnStart) {
-      events.push(...await RunnerUtil.resolveGlobInput({ globs: [] }));
+      events.push(...await RunUtil.resolveGlobInput({ globs: [] }));
     }
 
     const queue = new AsyncQueue(events);

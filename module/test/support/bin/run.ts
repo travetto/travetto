@@ -10,12 +10,12 @@ import type { TestRunInput } from '../../src/model/test.ts';
  * @param state
  */
 export async function runTests(state: TestConsumerConfig, input: TestRunInput): Promise<void> {
-  const { RunnerUtil } = await import('../../src/execute/util.ts');
+  const { RunUtil } = await import('../../src/execute/run.ts');
 
-  RunnerUtil.registerCleanup('runner');
+  RunUtil.registerCleanup('runner');
 
   try {
-    const result = await RunnerUtil.runTests(state, input);
+    const result = await RunUtil.runTests(state, input);
     process.exitCode = result ? 0 : 1;
   } catch (error) {
     console.error('Test Worker Failed', { error });
