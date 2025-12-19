@@ -59,7 +59,6 @@ export class TestWatcher {
     );
 
     for await (const event of watchCompiler({ restartOnExit: true })) {
-      console.debug('Received event:', event);
       if (event.file && RuntimeIndex.hasModule(event.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
         switch (event.action) {
           case 'create':
@@ -69,7 +68,6 @@ export class TestWatcher {
               diffSource: consumer.produceDiffSource(event.import),
               metadata: { partial: true }
             };
-            console.log('Triggering', event.file);
             queue.add(run, true); // Shift to front
             break;
           }

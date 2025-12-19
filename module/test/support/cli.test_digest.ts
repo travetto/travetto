@@ -1,5 +1,5 @@
 import { CliCommand } from '@travetto/cli';
-import { Env, Runtime, Util, describeFunction } from '@travetto/runtime';
+import { Env, Runtime, describeFunction } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { IsPrivate } from '@travetto/schema';
 

@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import path from 'node:path';
 
-import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, describeFunction, TimeUtil } from '@travetto/runtime';
+import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, TimeUtil, isClass } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import type { TestConfig, TestRunInput, TestRun, TestGlobInput, TestDiffInput } from '../model/test.ts';
@@ -15,6 +15,7 @@ import { TestConsumerConfig } from './types.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { TestExecutor } from './executor.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
+import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 type RunState = {
   runs: TestRun[];
@@ -122,8 +123,8 @@ export class RunUtil {
     const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
     const imported = await import(fileToImport);
     const classes = Object.fromEntries(
-      Object.values(imported).filter(x => typeof x === 'function' && 'Ⲑid' in x)
-        .map((cls: Function) => [cls.Ⲑid, describeFunction(cls)])
+      Object.values(imported).filter(isClass)
+        .map(cls => [cls.Ⲑid, SuiteRegistryIndex.getConfig(cls)])
     );
 
     // Runs, defaults to new classes
@@ -137,14 +138,14 @@ export class RunUtil {
       const local = classes[clsId];
       if (!local) { // Removed classes
         state.removes!.push({ type: 'removeTest', import: importPath, classId: clsId });
-      } else if (local.hash !== config.sourceHash) { // Class changed or added
+      } else if (local.sourceHash !== config.sourceHash) { // Class changed or added
         // Methods to run, defaults to newly added
-        const methods: string[] = Object.keys(local.methods ?? {}).filter(key => !config.methods[key]);
+        const methods: string[] = Object.keys(local.tests ?? {}).filter(key => !config.methods[key]);
         for (const key of Object.keys(config.methods)) {
-          const localMethod = local.methods?.[key];
+          const localMethod = local.tests?.[key];
           if (!localMethod) { // Test is removed
             state.removes!.push({ type: 'removeTest', import: importPath, classId: clsId, methodName: key });
-          } else if (localMethod.hash !== config.methods[key]) { // Method changed or added
+          } else if (localMethod.sourceHash !== config.methods[key]) { // Method changed or added
             methods.push(key);
           }
         }
@@ -153,9 +154,18 @@ export class RunUtil {
       }
     }
 
+    if (state.runs.length === 0) {
+      for (const clsId of Object.keys(classes)) {
+        if (diff[clsId].sourceHash !== classes[clsId].sourceHash) {
+          state.runs.push({ import: importPath, classId: clsId }); // Run whole class if no tests changed, but class did
+        }
+      }
+    }
+
     if (state.runs.length === 0) { // Re-run entire file
       state.runs.push({ import: importPath });
     }
+
     return state;
   }
 

@@ -8,8 +8,9 @@ import type { TestConsumerShape } from '../consumer/types.ts';
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
 
-const log = (message: string): void => {
-  process.send?.({ type: 'log', message } satisfies TestLogEvent);
+const log = (message: string | TestLogEvent): void => {
+  const event: TestLogEvent = typeof message === 'string' ? { type: 'log', message } : message;
+  process.send ? process.send?.(event) : console.log(event.message);
 };
 
 /**
@@ -43,8 +44,10 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async event => {
     try {
-      const parsed: TestEvent | TestRemoveEvent = Util.deserializeFromJson(JSON.stringify(event));
-      if (parsed.type === 'removeTest') {
+      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = Util.deserializeFromJson(JSON.stringify(event));
+      if (parsed.type === 'log') {
+        log(parsed);
+      } else if (parsed.type === 'removeTest') {
         await consumer.onRemoveEvent?.(parsed); // Forward remove events
       } else {
         await consumer.onEvent(parsed);  // Forward standard events
