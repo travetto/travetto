@@ -74,8 +74,9 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     }
   }
 
-  onRemoveEvent(event: TestRemoveEvent): void {
+  transformRemove(event: TestRemoveEvent): TestRemoveEvent {
     this.removeTest(event.import, event.classId, event.methodName);
+    return event;
   }
 
   /**
@@ -96,6 +97,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
           return { ...event, test: this.onTestAfter(event.test) };
         }
       }
+      return event;
     } catch (error) {
       console.warn('Summarization Error', { error });
     }

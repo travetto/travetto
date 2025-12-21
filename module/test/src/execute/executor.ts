@@ -244,7 +244,7 @@ export class TestExecutor {
     process.env = { ...originalEnv };
 
     result.duration = Date.now() - startTime;
-    result.total = result.passed + result.failed;
+    result.total = result.passed + result.failed + result.skipped;
     result.status = TestModelUtil.countsToTestStatus(result);
 
     // Mark suite complete

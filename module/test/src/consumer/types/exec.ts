@@ -18,6 +18,7 @@ export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsu
   onEvent(event: TestEvent): void {
     this.sendPayload(event);
   }
+
   onRemoveEvent(event: TestRemoveEvent): void {
     this.sendPayload(event);
   }

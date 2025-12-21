@@ -21,8 +21,14 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
   }
 
   onRemoveEvent(event: TestRemoveEvent): void {
-    for (const consumer of this.#consumers) {
-      consumer.onRemoveEvent?.(event);
+    let result = event;
+    if (this.transformRemove) {
+      result = this.transformRemove(event) ?? event;
+    }
+    if (result) {
+      for (const consumer of this.#consumers) {
+        consumer.onRemoveEvent?.(result);
+      }
     }
   }
 
@@ -51,4 +57,5 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
   }
 
   transform?(event: TestEvent): TestEvent | undefined;
+  transformRemove?(event: TestRemoveEvent): TestRemoveEvent | undefined;
 }

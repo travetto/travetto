@@ -25,7 +25,7 @@ export class TestResultsSummarizer implements TestConsumerShape {
     this.summary.unknown += result.unknown;
     this.summary.skipped += result.skipped;
     this.summary.duration += result.duration;
-    this.summary.total += (result.failed + result.passed + result.skipped);
+    this.summary.total += result.total;
   }
 
   /**

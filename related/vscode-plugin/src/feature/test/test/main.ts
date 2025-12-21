@@ -57,8 +57,9 @@ class TestRunnerFeature extends BaseFeature {
     this.#server = spawn('node', [RunUtil.cliFile, 'test:watch', '--format', 'exec', '--mode', 'change'], config)
       .on('message', (event: TestWatchEvent) => {
         switch (event.type) {
-          case 'log': this.log.info('[Log  ]', event.message); return;
+          case 'log': return this.log.info('[Log  ]', event.message);
           case 'test': this.log.info('[Event]', event.type, event.phase, event.test.classId, event.test.methodName); break;
+          case 'removeTest': this.log.info('[Remove]', event.type, event.import, event.classId, event.methodName); break;
         }
         this.#consumer.onEvent(event);
         this.#codeLensUpdated?.();

@@ -152,19 +152,23 @@ export class RunUtil {
       } else if (local.sourceHash !== config.sourceHash) { // Class changed or added
         // Methods to run, defaults to newly added
         const methods: string[] = Object.keys(local.tests ?? {}).filter(key => !config.methods[key]);
+        let didRemove = false;
         for (const key of Object.keys(config.methods)) {
           const localMethod = local.tests?.[key];
           if (!localMethod) { // Test is removed
             removeTest(clsId, key);
+            didRemove = true;
           } else if (localMethod.sourceHash !== config.methods[key]) { // Method changed or added
             methods.push(key);
           }
         }
-        addRun(clsId, methods);
+        if (!didRemove || methods.length > 0) {
+          addRun(clsId, methods);
+        }
       }
     }
 
-    if (runs.length === 0) { // Re-run entire file, classes unchanged
+    if (runs.length === 0 && removes.length === 0) { // Re-run entire file, classes unchanged
       addRun(undefined);
     }
 

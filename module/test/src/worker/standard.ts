@@ -48,6 +48,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
       if (parsed.type === 'log') {
         log(parsed);
       } else if (parsed.type === 'removeTest') {
+        log(`Received remove event ${JSON.stringify(event)}@${consumer.constructor.name}`);
         await consumer.onRemoveEvent?.(parsed); // Forward remove events
       } else {
         await consumer.onEvent(parsed);  // Forward standard events

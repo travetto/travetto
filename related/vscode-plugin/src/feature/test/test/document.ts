@@ -9,6 +9,7 @@ import { AllState, TestState, ResultState, SuiteState, TestLevel, Result } from 
 import { Workspace } from '../../../core/workspace.ts';
 
 type TestItem = Assertion | TestResult | TestConfig | SuiteResult | SuiteConfig;
+type KeyInput = string | [string, string] | readonly [string, string];
 
 const isTestState = (level: string, state: ResultState<unknown>): state is TestState => level === 'test';
 const isSuiteState = (level: string, state: ResultState<unknown>): state is SuiteState => level === 'suite';
@@ -126,7 +127,10 @@ export class DocumentResultsManager {
    * @param key The test key
    * @param result The result
    */
-  store(level: TestLevel, key: string, result: Result<TestItem>): void {
+  store(level: TestLevel, key: KeyInput, result: Result<TestItem>): void {
+    if (typeof key !== 'string') {
+      key = `${key[0]}#${key[1]}`;
+    }
     if (isAssertion(level, result)) {
       const state = this.#results.test[key];
       const groups: Record<TestStatus, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
@@ -155,6 +159,24 @@ export class DocumentResultsManager {
   }
 
   /**
+   * Remove test results
+   */
+  remove(level: Exclude<TestLevel, 'assertion'>, key: KeyInput): void {
+    if (typeof key !== 'string') {
+      key = `${key[0]}#${key[1]}`;
+    }
+    const existing = this.#results[level][key];
+    if (existing) {
+      Object.values(existing.styles).forEach(style => style.dispose());
+      if (isTestState(level, existing)) {
+        existing.logStyle.dispose();
+        Object.values(existing.assertStyles).forEach(style => style.dispose());
+      }
+      delete this.#results[level][key];
+    }
+  }
+
+  /**
    * Create all level styles
    * @param level
    */
@@ -172,7 +194,10 @@ export class DocumentResultsManager {
    * @param level Level to reset
    * @param key The file to reset
    */
-  reset(level: Exclude<TestLevel, 'assertion'>, key: string): void {
+  reset(level: Exclude<TestLevel, 'assertion'>, key: KeyInput): void {
+    if (typeof key !== 'string') {
+      key = `${key[0]}#${key[1]}`;
+    }
     const existing = this.#results[level][key];
     const base: ResultState<unknown> = {
       status: 'unknown',
@@ -187,6 +212,7 @@ export class DocumentResultsManager {
         Object.values(existing.assertStyles).forEach(style => style.dispose());
       }
     }
+
     if (isTestState(level, base)) {
       base.assertions = [];
       base.logStyle = Decorations.buildAssertStyle('unknown');
@@ -242,22 +268,24 @@ export class DocumentResultsManager {
     if (event.type === 'ready' || event.type === 'log') {
       // Ignore
     } else if (event.type === 'removeTest') {
-      if ('methodName' in event && typeof event.methodName === 'string') {
-        this.reset('test', `${event.classId}#${event.methodName}`);
+      if (event.classId && event.methodName) {
+        this.remove('test', [event.classId, event.methodName]);
+      } else if (event.classId) {
+        this.remove('suite', event.classId);
       }
     } else if (event.phase === 'before') {
       switch (event.type) {
         case 'suite': {
           this.reset('suite', event.suite.classId);
           for (const test of Object.values(event.suite.tests)) {
-            this.reset('test', `${test.classId}#${test.methodName}`);
+            this.reset('test', [test.classId, test.methodName]);
           }
           this.store('suite', event.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(event.suite), source: event.suite });
           break;
         }
         // Clear diags
         case 'test': {
-          const key = `${event.test.classId}#${event.test.methodName}`;
+          const key = [event.test.classId, event.test.methodName] as const;
           this.reset('test', key);
           this.store('test', key, { status: 'unknown', decoration: Decorations.buildTest(event.test), source: event.test });
           break;
