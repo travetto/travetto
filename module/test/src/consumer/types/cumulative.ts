@@ -4,13 +4,13 @@ import type { TestConfig, TestDiffSource, TestResult } from '../../model/test.ts
 import type { Counts, SuiteConfig, SuiteResult } from '../../model/suite.ts';
 import { DelegatingConsumer } from './delegating.ts';
 import { SuiteCore } from '../../model/common.ts';
+import { TestModelUtil } from '../../model/util.ts';
 
 type ClassId = string;
 type ImportName = string;
 
-type CumulativeTestResult = Pick<TestResult, 'methodName' | 'status' | 'duration' | 'sourceHash'>;
-type CumulativeSuiteResult = Counts & Pick<SuiteCore, 'import' | 'classId' | 'sourceHash' | 'tags'> & {
-  duration: number;
+type CumulativeTestResult = Pick<TestResult, 'sourceHash' | 'status' | 'duration'>;
+type CumulativeSuiteResult = Pick<SuiteCore, 'import' | 'classId' | 'sourceHash'> & {
   tests: Record<string, CumulativeTestResult>;
 };
 
@@ -32,67 +32,36 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   }
 
   getOrCreateSuite({ tests: _, ...core }: SuiteConfig | SuiteResult): CumulativeSuiteResult {
-    return (this.#state[core.import] ??= {})[core.classId] ??= {
-      failed: 0,
-      passed: 0,
-      skipped: 0,
-      unknown: 0,
-      total: 0,
-      duration: 0,
-      ...core,
-      tests: {},
-    };
+    return (this.#state[core.import] ??= {})[core.classId] ??= { ...core, tests: {} };
   }
 
   onTestBefore(config: TestConfig): TestConfig {
     const suite = this.getSuite(config);
-    suite.tests[config.methodName] = {
-      duration: 0,
-      methodName: config.methodName,
-      status: 'unknown',
-      sourceHash: config.sourceHash,
-    };
+    suite.tests[config.methodName] = { sourceHash: config.sourceHash, status: 'unknown', duration: 0 };
     return config;
   }
 
   onTestAfter(result: TestResult): TestResult {
     const test = this.getSuite(result).tests[result.methodName];
-    test.status = result.status;
-    test.duration = result.duration;
+    Object.assign(test, { status: result.status, duration: result.duration });
     return result;
   }
 
-  // Receive updated suite data
   onSuiteBefore(config: SuiteConfig): SuiteConfig {
     const suite = this.getOrCreateSuite(config);
     suite.sourceHash = config.sourceHash;
-    suite.tags = config.tags;
     return config;
   }
 
   onSuiteAfter(suite: SuiteResult): SuiteResult {
-    const state = this.getSuite(suite);
     // Reset counts
-    state.duration = state.failed = state.passed = state.skipped = state.unknown = state.total = 0;
+    const totals: Counts & { duration: number } = { passed: 0, failed: 0, skipped: 0, unknown: 0, total: 0, duration: 0 };
     for (const test of Object.values(suite.tests)) {
-      switch (test.status) {
-        case 'passed':
-        case 'failed':
-        case 'unknown':
-        case 'skipped': state[test.status] += 1; break;
-      }
-      state.total += 1;
-      state.duration += test.duration ?? 0;
+      totals[test.status] += 1;
+      totals.total += 1;
+      totals.duration += test.duration ?? 0;
     }
-    return {
-      ...suite,
-      failed: state.failed,
-      passed: state.passed,
-      skipped: state.skipped,
-      unknown: state.unknown,
-      total: state.total,
-      duration: state.duration
-    };
+    return { ...suite, ...totals, status: TestModelUtil.countsToTestStatus(totals) };
   }
 
   removeTest(importName: string, classId?: string, methodName?: string): void {

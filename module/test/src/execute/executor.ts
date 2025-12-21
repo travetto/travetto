@@ -14,6 +14,7 @@ import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
 import { ExecutionError } from './error.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { TestModelUtil } from '../model/util.ts';
 
 const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.value) ?? 5000;
 
@@ -189,11 +190,15 @@ export class TestExecutor {
     }
 
     const result: SuiteResult = this.createSuiteResult(suite);
+    const validTestMethodNames = new Set(tests.map(t => t.methodName));
+    const testConfigs = Object.fromEntries(
+      Object.entries(suite.tests).filter(([key]) => validTestMethodNames.has(key))
+    );
 
     const startTime = Date.now();
 
     // Mark suite start
-    this.#consumer.onEvent({ phase: 'before', type: 'suite', suite });
+    this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
     const manager = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
 
@@ -240,7 +245,7 @@ export class TestExecutor {
 
     result.duration = Date.now() - startTime;
     result.total = result.passed + result.failed;
-    result.status = result.failed ? 'failed' : result.passed ? 'passed' : result.unknown ? 'unknown' : 'skipped';
+    result.status = TestModelUtil.countsToTestStatus(result);
 
     // Mark suite complete
     this.#consumer.onEvent({ phase: 'after', type: 'suite', suite: result });

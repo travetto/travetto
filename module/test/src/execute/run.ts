@@ -224,6 +224,11 @@ export class RunUtil {
       consumer.onRemoveEvent(item);
     }
 
+    process.send?.({
+      type: 'log',
+      message: `Executing ${runs.length} test run(s) for consumer ${runs.map(r => `${r.classId}#${r.methodNames?.join(',') ?? '<all>'}`).join(', ')}`
+    });
+
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0]);
     } else {

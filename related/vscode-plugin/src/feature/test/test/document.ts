@@ -136,7 +136,7 @@ export class DocumentResultsManager {
         groups[a.status].push(a.decoration);
       }
 
-      for (const style of ['passed', 'failed', 'unknown'] as const) {
+      for (const style of ['passed', 'failed', 'unknown', 'skipped'] as const) {
         this.setStyle(state.assertStyles[style], groups[style]);
       }
     } else if (isSuiteResult(level, result)) {
@@ -249,9 +249,8 @@ export class DocumentResultsManager {
       switch (event.type) {
         case 'suite': {
           this.reset('suite', event.suite.classId);
-          const tests = Object.values(this.#results.test).filter(test => test.source.classId === event.suite.classId);
-          for (const test of tests) {
-            this.reset('test', `${test.source.classId}#${test.source.methodName}`);
+          for (const test of Object.values(event.suite.tests)) {
+            this.reset('test', `${test.classId}#${test.methodName}`);
           }
           this.store('suite', event.suite.classId, { status: 'unknown', decoration: Decorations.buildSuite(event.suite), source: event.suite });
           break;
