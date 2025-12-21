@@ -1,17 +1,12 @@
-import { AppError, castTo, Class, Env, flushPendingFunctions, isClass, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
+import { AppError, castTo, type Class, Env, flushPendingFunctions, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { RegistryIndex, RegistryIndexClass } from './types';
+import type { RegistryIndex, RegistryIndexClass } from './types';
 
 class $Registry {
 
   #resolved = false;
   #initialized?: Promise<unknown>;
-  #uniqueId = Util.uuid();
-
-  // Lookups
   #indexByClass = new Map<RegistryIndexClass, RegistryIndex>();
-
-  // Eventing
   #indexes: RegistryIndex[] = [];
 
   #finalizeItems(classes: Class[]): void {
@@ -73,7 +68,7 @@ class $Registry {
       this.#resolved = false;
 
       if (this.trace) {
-        console.debug('Initializing', { uniqueId: this.#uniqueId });
+        console.debug('Initializing');
       }
 
       // Ensure everything is loaded
@@ -126,7 +121,7 @@ class $Registry {
    */
   async init(): Promise<unknown> {
     if (this.trace && this.#initialized) {
-      console.trace('Trying to re-initialize', { uniqueId: this.#uniqueId, initialized: !!this.#initialized });
+      console.trace('Trying to re-initialize', { initialized: !!this.#initialized });
     }
     return this.#initialized ??= this.#init();
   }
