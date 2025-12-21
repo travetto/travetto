@@ -120,6 +120,7 @@ export class TestExecutor {
       methodName: test.methodName,
       description: test.description,
       classId: test.classId,
+      tags: test.tags,
       lineStart: test.lineStart,
       lineEnd: test.lineEnd,
       lineBodyStart: test.lineBodyStart,
@@ -193,13 +194,13 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
-    const mgr = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
+    const manager = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
 
     const originalEnv = { ...process.env };
 
     try {
       // Handle the BeforeAll calls
-      await mgr.startPhase('all');
+      await manager.startPhase('all');
 
       const suiteEnv = { ...process.env };
 
@@ -215,7 +216,7 @@ export class TestExecutor {
         const testStart = Date.now();
 
         // Handle BeforeEach
-        await mgr.startPhase('each');
+        await manager.startPhase('each');
 
         // Run test
         const testResult = await this.executeTest(test);
@@ -223,14 +224,14 @@ export class TestExecutor {
         result.tests[testResult.methodName] = testResult;
 
         // Handle after each
-        await mgr.endPhase('each');
+        await manager.endPhase('each');
         testResult.durationTotal = Date.now() - testStart;
       }
 
       // Handle after all
-      await mgr.endPhase('all');
+      await manager.endPhase('all');
     } catch (error) {
-      await mgr.onError(error);
+      await manager.onError(error);
     }
 
     // Restore env
