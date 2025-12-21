@@ -3,14 +3,14 @@ import path from 'node:path';
 
 import { d, c, COMMON_DATE } from '@travetto/doc';
 import { ManifestDeltaUtil, type ManifestRoot } from '@travetto/manifest';
-import { RuntimeIndex, Util } from '@travetto/runtime';
+import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 
 const DeltaRef = d.codeLink(ManifestDeltaUtil.name, 'src/delta.ts', new RegExp(`class ${ManifestDeltaUtil.name}`));
 
 
 const manifest = () => {
   const manifestFile = path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json');
-  const result: Partial<Pick<ManifestRoot, 'modules'>> & Omit<ManifestRoot, 'modules'> = Util.readJSONFileSync(manifestFile);
+  const result: Partial<Pick<ManifestRoot, 'modules'>> & Omit<ManifestRoot, 'modules'> = JSONUtil.readFileSync(manifestFile);
   const modules = Object.fromEntries(Object.entries(result.modules!).filter(([key]) => key === '@travetto/manifest'));
   delete result.modules;
   result.workspace.path = '<generated>';
