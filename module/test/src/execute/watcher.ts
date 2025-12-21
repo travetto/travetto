@@ -37,7 +37,6 @@ export class TestWatcher {
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
-        console.log('Received message', event);
         queue.add(event, true);
       }
     });
