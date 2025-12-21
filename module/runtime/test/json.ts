@@ -8,21 +8,21 @@ export class JSONUtilTest {
 
   @Test()
   async parseSafeString() {
-    const obj = JSONUtil.parseSafe<{ name: string }>('{"name":"test"}');
+    const obj: { name: string } = JSONUtil.parseSafe('{"name":"test"}');
     assert.deepStrictEqual(obj, { name: 'test' });
   }
 
   @Test()
   async parseSafeBuffer() {
     const buffer = Buffer.from('{"count":42}', 'utf8');
-    const obj = JSONUtil.parseSafe<{ count: number }>(buffer);
+    const obj: { count: number } = JSONUtil.parseSafe(buffer);
     assert.deepStrictEqual(obj, { count: 42 });
   }
 
   @Test()
   async parseSafeWithReviver() {
     const json = '{"date":"2025-12-21"}';
-    const obj = JSONUtil.parseSafe<{ date: Date }>(json, (key, value) => {
+    const obj: { date: Date } = JSONUtil.parseSafe(json, (key, value) => {
       if (key === 'date') {
         return new Date(value);
       }
@@ -44,7 +44,7 @@ export class JSONUtilTest {
     const encoded = JSONUtil.encodeBase64(data);
     assert.strictEqual(typeof encoded, 'string');
     // Verify it can be decoded back
-    const decoded = JSONUtil.decodeBase64<typeof data>(encoded!);
+    const decoded: typeof data = JSONUtil.decodeBase64(encoded!);
     assert.deepStrictEqual(decoded, data);
   }
 
@@ -58,7 +58,7 @@ export class JSONUtilTest {
   async decodeBase64Simple() {
     const original = { test: 'data' };
     const encoded = Buffer.from(JSON.stringify(original)).toString('base64');
-    const decoded = JSONUtil.decodeBase64<typeof original>(encoded);
+    const decoded: typeof original = JSONUtil.decodeBase64(encoded);
     assert.deepStrictEqual(decoded, original);
   }
 
@@ -66,7 +66,7 @@ export class JSONUtilTest {
   async decodeBase64WithURIEncoding() {
     const original = { special: 'chars' };
     const encoded = Buffer.from(encodeURIComponent(JSON.stringify(original))).toString('base64');
-    const decoded = JSONUtil.decodeBase64<typeof original>(encoded);
+    const decoded: typeof original = JSONUtil.decodeBase64(encoded);
     assert.deepStrictEqual(decoded, original);
   }
 
@@ -131,7 +131,7 @@ export class JSONUtilTest {
     };
 
     const encoded = JSONUtil.encodeBase64(original);
-    const decoded = JSONUtil.decodeBase64<typeof original>(encoded!);
+    const decoded: typeof original = JSONUtil.decodeBase64(encoded!);
 
     assert.deepStrictEqual(decoded, original);
   }
