@@ -1,8 +1,6 @@
 import assert from 'node:assert';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 
-import { Test, Suite } from '@travetto/test';
+import { Test, Suite, TestFixtures } from '@travetto/test';
 import { JSONUtil } from '../src/json';
 
 @Suite()
@@ -67,7 +65,7 @@ export class JSONUtilTest {
   @Test()
   async decodeBase64WithURIEncoding() {
     const original = { special: 'chars' };
-    const encoded = encodeURIComponent(Buffer.from(JSON.stringify(original)).toString('base64'));
+    const encoded = Buffer.from(encodeURIComponent(JSON.stringify(original))).toString('base64');
     const decoded = JSONUtil.decodeBase64<typeof original>(encoded);
     assert.deepStrictEqual(decoded, original);
   }
@@ -86,45 +84,31 @@ export class JSONUtilTest {
 
   @Test()
   async readFileAsync() {
-    const tmpFile = path.join(__dirname, 'temp-test.json');
-    const data = { async: true, values: [1, 2, 3] };
-    await fs.writeFile(tmpFile, JSON.stringify(data), 'utf8');
+    const fixtures = new TestFixtures();
 
-    try {
-      const result = await JSONUtil.readFile<typeof data>(tmpFile);
-      assert.deepStrictEqual(result, data);
-    } finally {
-      await fs.unlink(tmpFile);
-    }
+    const result = await JSONUtil.readFile(await fixtures.resolve('basic.json'));
+    assert.deepStrictEqual(result, { async: true, values: [1, 2, 3] });
   }
 
   @Test()
   async readFileSyncExists() {
-    const tmpFile = path.join(__dirname, 'temp-test-sync.json');
-    const data = { sync: true, count: 99 };
-    await fs.writeFile(tmpFile, JSON.stringify(data), 'utf8');
+    const fixtures = new TestFixtures();
 
-    try {
-      const result = JSONUtil.readFileSync<typeof data>(tmpFile);
-      assert.deepStrictEqual(result, data);
-    } finally {
-      await fs.unlink(tmpFile);
-    }
+    const result = JSONUtil.readFileSync(await fixtures.resolve('basic.json'));
+    assert.deepStrictEqual(result, { async: true, values: [1, 2, 3] });
   }
 
   @Test()
   async readFileSyncMissingWithDefault() {
-    const nonExistent = path.join(__dirname, 'does-not-exist.json');
     const defaultValue = { default: true };
-    const result = JSONUtil.readFileSync(nonExistent, defaultValue);
+    const result = JSONUtil.readFileSync('-', defaultValue);
     assert.deepStrictEqual(result, defaultValue);
   }
 
   @Test()
   async readFileSyncMissingNoDefault() {
-    const nonExistent = path.join(__dirname, 'does-not-exist.json');
     assert.throws(() => {
-      JSONUtil.readFileSync(nonExistent);
+      JSONUtil.readFileSync('-');
     });
   }
 
