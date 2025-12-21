@@ -1,6 +1,6 @@
 import { AppError, castTo, Class, Util } from '@travetto/runtime';
 
-import { ClassChangeSource } from '../source/class-source';
+import { ClassSource } from './class-source';
 import { RegistryIndex, RegistryIndexClass } from './types';
 
 class $Registry {
@@ -77,7 +77,7 @@ class $Registry {
         console.debug('Initializing', { uniqueId: this.#uniqueId });
       }
 
-      const added = await ClassChangeSource.init();
+      const added = await ClassSource.init();
       this.process(added);
     } finally {
       this.#resolved = true;

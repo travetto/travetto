@@ -1,19 +1,38 @@
-/**
- * A change event
- */
-export type ChangeEvent<T> =
-  { type: 'update', previous: T, current: T } |
-  { type: 'create', current: T } |
-  { type: 'delete', previous: T };
+import { Class } from '@travetto/runtime';
+
+export type RegistrationMethods = `register${string}` | `finalize${string}`;
 
 /**
- * Change handler
+ * Interface for registry adapters to implement
  */
-export type ChangeHandler<T> = (event: ChangeEvent<T>) => unknown;
+export interface RegistryAdapter<C extends {} = {}> {
+  register(...data: Partial<C>[]): C;
+  finalize?(parent?: C): void;
+  get(): C;
+}
+
+export type RegistryIndexClass = {
+  new(source: unknown): RegistryIndex;
+};
 
 /**
- * Change source
+ * Simple store interface for registry indexes
  */
-export interface ChangeSource<T> {
-  on(callback: ChangeHandler<T>): void;
+export interface RegistrySimpleStore {
+  has(cls: Class): boolean;
+  finalize(cls: Class): void;
+  finalized(cls: Class): boolean;
+  getClasses(): Class[];
+};
+
+/**
+ * Registry index definition
+ * @concrete
+ */
+export interface RegistryIndex {
+  store: RegistrySimpleStore;
+  finalize?(cls: Class): void;
+  onCreate?(cls: Class): void;
+  onChangeSetComplete?(events: Class[]): void;
+  beforeChangeSetComplete?(events: Class[]): void;
 }
