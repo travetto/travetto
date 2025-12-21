@@ -119,7 +119,7 @@ export class RunUtil {
   /**
    * Resolve a test diff source to ensure we are only running changed tests
    */
-  static async resolveDiffInput({ import: importPath, diffSource: diff }: TestDiffInput): Promise<RunState> {
+  static async resolveDiffInput({ import: importPath, diffSource: diff, metadata }: TestDiffInput): Promise<RunState> {
     const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
     const imported = await import(fileToImport);
     const classes = Object.fromEntries(
@@ -150,20 +150,20 @@ export class RunUtil {
           }
         }
 
-        state.runs.push({ import: importPath, classId: clsId, methodNames: methods.length ? methods : undefined });
+        state.runs.push({ import: importPath, classId: clsId, methodNames: methods.length ? methods : undefined, metadata });
       }
     }
 
     if (state.runs.length === 0) {
       for (const clsId of Object.keys(classes)) {
         if (diff[clsId].sourceHash !== classes[clsId].sourceHash) {
-          state.runs.push({ import: importPath, classId: clsId }); // Run whole class if no tests changed, but class did
+          state.runs.push({ import: importPath, classId: clsId, metadata }); // Run whole class if no tests changed, but class did
         }
       }
     }
 
     if (state.runs.length === 0) { // Re-run entire file
-      state.runs.push({ import: importPath });
+      state.runs.push({ import: importPath, metadata });
     }
 
     return state;

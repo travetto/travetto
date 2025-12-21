@@ -1,6 +1,6 @@
 import { Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
-import { AsyncQueue, RuntimeIndex, castTo, watchCompiler } from '@travetto/runtime';
+import { AsyncQueue, RuntimeIndex, TimeUtil, castTo, watchCompiler } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
@@ -52,7 +52,7 @@ export class TestWatcher {
       buildStandardTestManager.bind(null, consumer),
       queue,
       {
-        idleTimeoutMillis: 120000,
+        idleTimeoutMillis: TimeUtil.asMillis('2m'),
         min: 2,
         max: WorkPool.DEFAULT_SIZE
       }

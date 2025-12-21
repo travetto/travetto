@@ -25,8 +25,8 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     return this.#state[core.import][core.classId];
   }
 
-  onSuiteStart(config: SuiteConfig): void {
-    const tests = this.#state[config.import]?.[config.classId]?.tests ?? {};
+  onSuiteStart({ tests, ...config }: SuiteConfig): void {
+    const previousTests = this.#state[config.import]?.[config.classId]?.tests;
     this.#state[config.import] ??= {};
     this.#state[config.import][config.classId] = {
       ...config,
@@ -35,7 +35,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
       passed: 0,
       skipped: 0,
       total: 0,
-      tests,
+      tests: previousTests ?? tests ?? {},
     };
   }
 
