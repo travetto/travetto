@@ -1,4 +1,4 @@
-import * as fs from 'node:fs/promises';
+import fs from 'node:fs/promises';
 
 import { Env, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';

@@ -1,16 +1,16 @@
 /** @jsxImportSource @travetto/doc */
-import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { d, c, COMMON_DATE } from '@travetto/doc';
 import { ManifestDeltaUtil, type ManifestRoot } from '@travetto/manifest';
-import { RuntimeIndex } from '@travetto/runtime';
+import { RuntimeIndex, Util } from '@travetto/runtime';
 
 const DeltaRef = d.codeLink(ManifestDeltaUtil.name, 'src/delta.ts', new RegExp(`class ${ManifestDeltaUtil.name}`));
 
 
 const manifest = () => {
-  const result: Partial<Pick<ManifestRoot, 'modules'>> & Omit<ManifestRoot, 'modules'> = JSON.parse(readFileSync(path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
+  const manifestFile = path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json');
+  const result: Partial<Pick<ManifestRoot, 'modules'>> & Omit<ManifestRoot, 'modules'> = Util.readJSONFileSync(manifestFile);
   const modules = Object.fromEntries(Object.entries(result.modules!).filter(([key]) => key === '@travetto/manifest'));
   delete result.modules;
   result.workspace.path = '<generated>';

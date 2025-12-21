@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import { FunctionMetadataTag } from '@travetto/runtime';
 import { CoreUtil, Import, SystemUtil, TransformerState } from '@travetto/transformer';

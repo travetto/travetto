@@ -1,5 +1,7 @@
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
+import fs from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
 
 import { castTo, hasToJSON } from './types.ts';
 import { AppError } from './error.ts';
@@ -218,5 +220,27 @@ export class Util {
     }
 
     throw new AppError(`Operation failed after ${maxTries} attempts`);
+  }
+
+  /**
+   * Read JSON file asynchronously
+   * @param file
+   * @returns
+   */
+  static async readJSONFile<T>(file: string): Promise<T> {
+    const content = await fs.readFile(file, 'utf8');
+    return JSON.parse(content);
+  }
+
+  /**
+   * Read JSON file synchronously
+   * @param file
+   */
+  static readJSONFileSync<T>(file: string, onMissing?: T): T {
+    if (!existsSync(file) && onMissing !== undefined) {
+      return onMissing;
+    }
+    const content = readFileSync(file, 'utf8');
+    return JSON.parse(content);
   }
 }

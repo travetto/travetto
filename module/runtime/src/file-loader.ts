@@ -64,4 +64,12 @@ export class FileLoader {
   async readFile(relativePath: string): Promise<File> {
     return new File([await this.read(relativePath, true)], path.basename(relativePath));
   }
+
+  /**
+   * Read relative file as JSON
+   */
+  async readJSON<T>(relativePath: string): Promise<T> {
+    const content = await this.read(relativePath, false);
+    return JSON.parse(content);
+  }
 }
