@@ -9,9 +9,9 @@ import { WorkPool } from '@travetto/worker';
 
 import type { TestConfig, TestRunInput, TestRun, TestGlobInput, TestDiffInput } from '../model/test.ts';
 import type { TestRemoveEvent } from '../model/event.ts';
-import { TestConsumerShape } from '../consumer/types.ts';
+import type { TestConsumerShape } from '../consumer/types.ts';
 import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
-import { TestConsumerConfig } from './types.ts';
+import type { TestConsumerConfig } from './types.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { TestExecutor } from './executor.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
@@ -227,11 +227,6 @@ export class RunUtil {
     for (const item of removes ?? []) {
       consumer.onRemoveEvent(item);
     }
-
-    process.send?.({
-      type: 'log',
-      message: `Executing ${runs.length} test run(s) for consumer ${runs.map(r => `${r.classId}#${r.methodNames?.join(',') ?? '<all>'}`).join(', ')}`
-    });
 
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0]);
