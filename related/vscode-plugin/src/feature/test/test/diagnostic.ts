@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 
-import type { TestResult, TestWatchEvent, TestStatus } from '@travetto/test';
+import type { TestResult, TestWatchEvent } from '@travetto/test';
 
 import { Workspace } from '../../../core/workspace';
 import { Decorations } from './decoration';
@@ -69,7 +69,7 @@ export class DiagnosticManager {
       this.#tracked.set(file, new Map());
       this.#buildDiagnostics(file);
     }
-    this.updateTotals();
+    this.setStatus('');
   }
 
   rename(oldFile: string, newFile: string): void {
@@ -78,7 +78,13 @@ export class DiagnosticManager {
 
   onEvent(event: TestWatchEvent): void {
     if (event.type === 'suite' && event.phase === 'after') {
-      this.updateTotals();
+      const { suite } = event;
+      this.setStatus(
+        suite.failed === 0 ?
+          `Passed ${suite.passed}` :
+          `suite.Failed ${suite.failed}/${suite.failed + suite.passed}`,
+        suite.failed ? '#f33' : '#8f8'
+      );
     } else if (event.type === 'test' && event.phase === 'after') {
       const file = Workspace.resolveImport(event.test.import);
       if (!this.#tracked.has(file)) {
@@ -112,42 +118,6 @@ export class DiagnosticManager {
     testDiagnostics.clear();
     this.setStatus('');
     this.#tracked.clear();
-  }
-
-  /**
-   * Update totals
-   */
-  updateTotals(): void {
-    const totals = this.getTotals();
-    this.setStatus(
-      totals.failed === 0 ?
-        `Passed ${totals.passed}` :
-        `Failed ${totals.failed}/${totals.failed + totals.passed}`,
-      totals.failed ? '#f33' : '#8f8'
-    );
-  }
-
-  /**
-   * Get totals from the runner
-   */
-  getTotals(): Record<TestStatus, number> {
-    const totals: Record<TestStatus, number> = {
-      skipped: 0,
-      failed: 0,
-      passed: 0,
-      unknown: 0
-    };
-    for (const file of this.#tracked.values()) {
-      for (const test of file.values()) {
-        switch (test.status) {
-          case 'skipped':
-          case 'failed':
-          case 'unknown':
-          case 'passed': totals[test.status] += 1; break;
-        }
-      }
-    }
-    return totals;
   }
 
   /**

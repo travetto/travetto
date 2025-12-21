@@ -46,7 +46,7 @@ const Style: {
     skipped: rgba(255, 255, 255, 0.5),
     failed: rgba(255, 0, 0, 0.5),
     passed: rgba(0, 255, 0, .5),
-    unknown: rgba(255, 255, 255, .5)
+    unknown: rgba(128, 128, 128, 0.5)
   },
   IMAGE: {
     isWholeLine: false,

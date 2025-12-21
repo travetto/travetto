@@ -1,12 +1,18 @@
 import type { TestConsumerShape } from '../types.ts';
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConfig, TestDiffSource, TestResult } from '../../model/test.ts';
-import type { SuiteConfig, SuiteResult } from '../../model/suite.ts';
+import type { Counts, SuiteConfig, SuiteResult } from '../../model/suite.ts';
 import { DelegatingConsumer } from './delegating.ts';
 import { SuiteCore } from '../../model/common.ts';
 
 type ClassId = string;
 type ImportName = string;
+
+type CumulativeTestResult = Pick<TestResult, 'methodName' | 'status' | 'duration' | 'sourceHash'>;
+type CumulativeSuiteResult = Counts & Pick<SuiteCore, 'import' | 'classId' | 'sourceHash' | 'tags'> & {
+  duration: number;
+  tests: Record<string, CumulativeTestResult>;
+};
 
 /**
  * Cumulative Summary consumer
@@ -15,24 +21,24 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   /**
    * Total state of all tests run so far
    */
-  #state: Record<ImportName, Record<ClassId, SuiteResult>> = {};
+  #state: Record<ImportName, Record<ClassId, CumulativeSuiteResult>> = {};
 
   constructor(target: TestConsumerShape) {
     super([target]);
   }
 
-  getSuite(core: Pick<SuiteCore, 'import' | 'classId'>): SuiteResult {
+  getSuite(core: Pick<SuiteCore, 'import' | 'classId'>): CumulativeSuiteResult {
     return this.#state[core.import]?.[core.classId];
   }
 
-  getOrCreateSuite({ tests: _, ...core }: SuiteConfig | SuiteResult): SuiteResult {
+  getOrCreateSuite({ tests: _, ...core }: SuiteConfig | SuiteResult): CumulativeSuiteResult {
     return (this.#state[core.import] ??= {})[core.classId] ??= {
       failed: 0,
       passed: 0,
       skipped: 0,
       unknown: 0,
       total: 0,
-      duration: -1,
+      duration: 0,
       ...core,
       tests: {},
     };
@@ -41,25 +47,24 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   onTestBefore(config: TestConfig): TestConfig {
     const suite = this.getSuite(config);
     suite.tests[config.methodName] = {
-      ...suite.tests[config.methodName],
-      ...config,
-      error: undefined,
-      sourceImport: config.sourceImport,
-      tags: config.tags,
-      duration: -1,
-      assertions: [],
-      output: [],
-      durationTotal: -1,
-      status: 'unknown'
+      duration: 0,
+      methodName: config.methodName,
+      status: 'unknown',
+      sourceHash: config.sourceHash,
     };
     return config;
+  }
+
+  onTestAfter(result: TestResult): TestResult {
+    const test = this.getSuite(result).tests[result.methodName];
+    test.status = result.status;
+    test.duration = result.duration;
+    return result;
   }
 
   // Receive updated suite data
   onSuiteBefore(config: SuiteConfig): SuiteConfig {
     const suite = this.getOrCreateSuite(config);
-    suite.lineEnd = config.lineEnd;
-    suite.lineStart = config.lineStart;
     suite.sourceHash = config.sourceHash;
     suite.tags = config.tags;
     return config;
@@ -67,29 +72,27 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
 
   onSuiteAfter(suite: SuiteResult): SuiteResult {
     const state = this.getSuite(suite);
-
-    const computeTotals = Object.entries(state.tests).reduce((acc, [, test]) => {
+    // Reset counts
+    state.duration = state.failed = state.passed = state.skipped = state.unknown = state.total = 0;
+    for (const test of Object.values(suite.tests)) {
       switch (test.status) {
         case 'passed':
         case 'failed':
         case 'unknown':
-        case 'skipped': acc[test.status] += 1; break;
+        case 'skipped': state[test.status] += 1; break;
       }
-      acc.total += 1;
-      acc.duration += test.duration ?? 0;
-      return acc;
-    }, { passed: 0, failed: 0, skipped: 0, total: 0, duration: 0, unknown: 0 });
-
-    Object.assign(state, computeTotals, {
-      sourceHash: suite.sourceHash,
-    });
-
-    return state;
-  }
-
-  onTestAfter(test: TestResult): TestResult {
-    const tests = this.getSuite(test).tests;
-    return Object.assign(tests[test.methodName], test);
+      state.total += 1;
+      state.duration += test.duration ?? 0;
+    }
+    return {
+      ...suite,
+      failed: state.failed,
+      passed: state.passed,
+      skipped: state.skipped,
+      unknown: state.unknown,
+      total: state.total,
+      duration: state.duration
+    };
   }
 
   removeTest(importName: string, classId?: string, methodName?: string): void {

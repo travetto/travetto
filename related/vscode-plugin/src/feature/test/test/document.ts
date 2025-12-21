@@ -10,25 +10,11 @@ import { Workspace } from '../../../core/workspace.ts';
 
 type TestItem = Assertion | TestResult | TestConfig | SuiteResult | SuiteConfig;
 
-function isTestState(level: string, state: ResultState<unknown>): state is TestState {
-  return level === 'test';
-}
-
-function isSuiteState(level: string, state: ResultState<unknown>): state is SuiteState {
-  return level === 'suite';
-}
-
-function isAssertion(level: string, result?: Result<TestItem>): result is Result<Assertion> {
-  return level === 'assertion';
-}
-
-function isTestResult(level: string, result?: Result<TestItem>): result is Result<TestResult> {
-  return level === 'test';
-}
-
-function isSuiteResult(level: string, result?: Result<TestItem>): result is Result<SuiteResult> {
-  return level === 'suite';
-}
+const isTestState = (level: string, state: ResultState<unknown>): state is TestState => level === 'test';
+const isSuiteState = (level: string, state: ResultState<unknown>): state is SuiteState => level === 'suite';
+const isAssertion = (level: string, result?: Result<TestItem>): result is Result<Assertion> => level === 'assertion';
+const isTestResult = (level: string, result?: Result<TestItem>): result is Result<TestResult> => level === 'test';
+const isSuiteResult = (level: string, result?: Result<TestItem>): result is Result<SuiteResult> => level === 'suite';
 
 /**
  * Test results manager
@@ -172,11 +158,12 @@ export class DocumentResultsManager {
    * Create all level styles
    * @param level
    */
-  genStyles(level: TestLevel): Record<'failed' | 'passed' | 'unknown', vscode.TextEditorDecorationType> {
+  genStyles(level: TestLevel): Record<TestStatus, vscode.TextEditorDecorationType> {
     return {
       failed: Decorations.buildStyle(level, 'failed'),
       passed: Decorations.buildStyle(level, 'passed'),
       unknown: Decorations.buildStyle(level, 'unknown'),
+      skipped: Decorations.buildStyle(level, 'skipped'),
     };
   }
 
@@ -215,9 +202,8 @@ export class DocumentResultsManager {
    * @param suite
    */
   onSuite(suite: SuiteResult): void {
-    const status = (suite.failed ? 'failed' : suite.passed ? 'passed' : 'skipped');
     this.reset('suite', suite.classId);
-    this.store('suite', suite.classId, { status, decoration: Decorations.buildSuite(suite), source: suite });
+    this.store('suite', suite.classId, { status: suite.status, decoration: Decorations.buildSuite(suite), source: suite });
   }
 
   /**
@@ -226,7 +212,7 @@ export class DocumentResultsManager {
    */
   onTest(test: TestResult): void {
     this.store('test', `${test.classId}#${test.methodName}`, {
-      status: test.status === 'skipped' ? 'unknown' : test.status,
+      status: test.status,
       decoration: Decorations.buildTest(test),
       logDecorations: test.output
         .filter(log => Workspace.resolveImport(`${log.module}/${log.modulePath}`) === this.#document.fileName)
@@ -285,28 +271,5 @@ export class DocumentResultsManager {
         case 'assertion': this.onAssertion(event.assertion); break;
       }
     }
-  }
-
-  /**
-   * Get full totals
-   */
-  getTotals(): { skipped: number, failed: number, passed: number, unknown: number, total: number } {
-    const values = Object.values(this.#results.test);
-    const total = values.length;
-    let passed = 0;
-    let unknown = 0;
-    let failed = 0;
-    let skipped = 0;
-
-    for (const value of values) {
-      switch (value.status) {
-        case 'skipped': skipped += 1; break;
-        case 'failed': failed++; break;
-        case 'passed': passed++; break;
-        default: unknown++; break;
-      }
-    }
-
-    return { passed, unknown, skipped, failed, total };
   }
 }

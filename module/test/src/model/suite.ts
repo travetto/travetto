@@ -1,6 +1,6 @@
 import type { Class } from '@travetto/runtime';
 
-import { Assertion, TestConfig, TestResult } from './test.ts';
+import { Assertion, TestConfig, TestResult, type TestStatus } from './test.ts';
 import { Skip, SuiteCore } from './common.ts';
 
 /**
@@ -57,13 +57,17 @@ export interface Counts {
  */
 export interface SuiteResult extends Counts, SuiteCore {
   /**
-   * ALl test results
+   * All test results
    */
   tests: Record<string, TestResult>;
   /**
    * Suite duration
    */
   duration: number;
+  /**
+   * Overall status
+   */
+  status: TestStatus;
 }
 
 /**

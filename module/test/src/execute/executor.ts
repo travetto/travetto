@@ -96,6 +96,7 @@ export class TestExecutor {
       skipped: 0,
       unknown: 0,
       total: 0,
+      status: 'unknown',
       lineStart: suite.lineStart,
       lineEnd: suite.lineEnd,
       import: suite.import,
@@ -239,6 +240,7 @@ export class TestExecutor {
 
     result.duration = Date.now() - startTime;
     result.total = result.passed + result.failed;
+    result.status = result.failed ? 'failed' : result.passed ? 'passed' : result.unknown ? 'unknown' : 'skipped';
 
     // Mark suite complete
     this.#consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
