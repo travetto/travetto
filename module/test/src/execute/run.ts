@@ -120,6 +120,16 @@ export class RunUtil {
    * Resolve a test diff source to ensure we are only running changed tests
    */
   static async resolveDiffInput({ import: importPath, diffSource: diff, metadata }: TestDiffInput): Promise<RunState> {
+    // Runs, defaults to new classes
+    const runs: TestRun[] = [];
+    const addRun = (clsId: string | undefined, methods?: string[]): void => {
+      runs.push({ import: importPath, classId: clsId, methodNames: methods?.length ? methods : undefined, metadata });
+    };
+    const removes: TestRemoveEvent[] = [];
+    const removeTest = (clsId: string, methodName?: string): void => {
+      removes.push({ type: 'removeTest', import: importPath, classId: clsId, methodName });
+    };
+
     const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
     const imported = await import(fileToImport);
     const classes = Object.fromEntries(
@@ -127,46 +137,38 @@ export class RunUtil {
         .map(cls => [cls.Ⲑid, SuiteRegistryIndex.getConfig(cls)])
     );
 
-    // Runs, defaults to new classes
-    const state: RunState = {
-      runs: Object.keys(classes).filter(clsId => !diff[clsId]).map(clsId => ({ import: importPath, classId: clsId })),
-      removes: [],
-    };
+    // New classes
+    for (const clsId of Object.keys(classes)) {
+      if (!diff[clsId]) {
+        addRun(clsId);
+      }
+    }
 
-    // Classes overlap
+    // Looking at Diff
     for (const [clsId, config] of Object.entries(diff)) {
       const local = classes[clsId];
       if (!local) { // Removed classes
-        state.removes!.push({ type: 'removeTest', import: importPath, classId: clsId });
+        removeTest(clsId);
       } else if (local.sourceHash !== config.sourceHash) { // Class changed or added
         // Methods to run, defaults to newly added
         const methods: string[] = Object.keys(local.tests ?? {}).filter(key => !config.methods[key]);
         for (const key of Object.keys(config.methods)) {
           const localMethod = local.tests?.[key];
           if (!localMethod) { // Test is removed
-            state.removes!.push({ type: 'removeTest', import: importPath, classId: clsId, methodName: key });
+            removeTest(clsId, key);
           } else if (localMethod.sourceHash !== config.methods[key]) { // Method changed or added
             methods.push(key);
           }
         }
-
-        state.runs.push({ import: importPath, classId: clsId, methodNames: methods.length ? methods : undefined, metadata });
+        addRun(clsId, methods);
       }
     }
 
-    if (state.runs.length === 0) {
-      for (const clsId of Object.keys(classes)) {
-        if (diff[clsId].sourceHash !== classes[clsId].sourceHash) {
-          state.runs.push({ import: importPath, classId: clsId, metadata }); // Run whole class if no tests changed, but class did
-        }
-      }
+    if (runs.length === 0) { // Re-run entire file, classes unchanged
+      addRun(undefined);
     }
 
-    if (state.runs.length === 0) { // Re-run entire file
-      state.runs.push({ import: importPath, metadata });
-    }
-
-    return state;
+    return { runs, removes };
   }
 
   /**
