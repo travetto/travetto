@@ -1,5 +1,5 @@
 import { Inject } from '@travetto/di';
-import { Any, AppError, Util } from '@travetto/runtime';
+import { Any, AppError, JSONUtil } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 import {
   HeaderParam, Controller, ExcludeInterceptors, ControllerRegistryIndex,
@@ -45,7 +45,7 @@ export class WebRpcController {
 
     // Allow request to read inputs from header
     if (paramInput) {
-      params = Util.decodeBase64JSON(paramInput)!;
+      params = JSONUtil.decodeBase64(paramInput)!;
     } else if (Array.isArray(body)) { // Params passed via body
       params = body;
 

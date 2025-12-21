@@ -1,9 +1,9 @@
 import { IpcChannel } from '@travetto/worker';
-import { Util } from '@travetto/runtime';
 
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
+import { CommunicationUtil } from '../../communication.ts';
 
 /**
  * Triggers each event as an IPC command to a parent process
@@ -12,7 +12,7 @@ import { TestConsumer } from '../decorator.ts';
 export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsumerShape {
 
   sendPayload(payload: unknown & { type: string }): void {
-    this.send(payload.type, Util.parseJSONSafe(Util.serializeToJSON(payload)));
+    this.send(payload.type, CommunicationUtil.serializeToObject(payload));
   }
 
   onEvent(event: TestEvent): void {

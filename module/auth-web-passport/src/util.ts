@@ -1,5 +1,5 @@
 import { WebFilterContext, WebRequest } from '@travetto/web';
-import { castTo, Util } from '@travetto/runtime';
+import { castTo, JSONUtil } from '@travetto/runtime';
 
 /**
  * Passport utilities
@@ -16,7 +16,7 @@ export class PassportUtil {
         input?.context.httpQuery?.state : ''));
     if (state) {
       try {
-        return Util.decodeBase64JSON(state);
+        return JSONUtil.decodeBase64(state);
       } catch { }
     }
   }
@@ -28,7 +28,7 @@ export class PassportUtil {
    */
   static writeState(state?: Record<string, unknown>): string | undefined {
     if (state) {
-      return Util.encodeBase64JSON(state);
+      return JSONUtil.encodeBase64(state);
     }
   }
 
@@ -41,7 +41,7 @@ export class PassportUtil {
    */
   static addToState(state: string | Record<string, unknown>, current?: string | WebRequest, key?: string): string {
     const original = this.readState(current) ?? {};
-    const toAdd: Record<string, unknown> = typeof state === 'string' ? Util.parseJSONSafe(state) : state;
+    const toAdd: Record<string, unknown> = typeof state === 'string' ? JSONUtil.parseSafe(state) : state;
     const base: Record<string, unknown> = key ? castTo(original[key] ??= {}) : original;
     for (const property of Object.keys(toAdd)) {
       if (property === '__proto__' || property === 'constructor' || property === 'prototype') {

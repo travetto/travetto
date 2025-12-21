@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import mustache from 'mustache';
 
-import { castKey, castTo, ExecUtil, RuntimeIndex, Util } from '@travetto/runtime';
+import { castKey, castTo, ExecUtil, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 import { NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
@@ -81,7 +81,7 @@ export class Context {
   }
 
   get sourceListing(): Promise<Listing> {
-    return fs.readFile(this.source('listing.json'), 'utf8').then(Util.parseJSONSafe<Listing>);
+    return JSONUtil.readFile<Listing>(this.source('listing.json'));
   }
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {

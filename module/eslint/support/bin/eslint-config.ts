@@ -3,7 +3,7 @@ import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import stylisticPlugin from '@stylistic/eslint-plugin';
 import unusedImports from 'eslint-plugin-unused-imports';
 
-import { Runtime, Util } from '@travetto/runtime';
+import { JSONUtil, Runtime } from '@travetto/runtime';
 
 import { IGNORES, GLOBALS, TS_OPTIONS } from './eslint-common.ts';
 import { STD_RULES } from './eslint-std-rules.ts';
@@ -20,7 +20,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
 
   const overrides = Runtime.workspaceRelative('eslint-overrides.json');
 
-  const extra: (typeof STD_RULES)[] = Util.readJSONFileSync(overrides, []);
+  const extra: (typeof STD_RULES)[] = JSONUtil.readFileSync(overrides, []);
 
   const result = [
     configs.recommended,

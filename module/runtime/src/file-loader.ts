@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { AppError } from './error.ts';
-import { Util } from './util.ts';
+import { JSONUtil } from './json.ts';
 
 /**
  * File loader that will search for files across the provided search paths
@@ -70,7 +70,7 @@ export class FileLoader {
    * Read relative file as JSON
    */
   async readJSON<T>(relativePath: string): Promise<T> {
-    const content = await this.read(relativePath, false);
-    return Util.parseJSONSafe(content);
+    const location = await this.resolve(relativePath);
+    return JSONUtil.readFile<T>(location);
   }
 }

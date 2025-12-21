@@ -1,4 +1,4 @@
-import { castTo, Class, Util, AppError, hasFunction } from '@travetto/runtime';
+import { castTo, Class, Util, AppError, hasFunction, JSONUtil } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -40,7 +40,7 @@ export class ModelCrudUtil {
   static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
     let resolvedInput: object;
     if (typeof input === 'string' || input instanceof Buffer) {
-      resolvedInput = Util.parseJSONSafe(input);
+      resolvedInput = JSONUtil.parseSafe(input);
     } else {
       resolvedInput = input;
     }

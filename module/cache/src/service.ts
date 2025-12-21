@@ -1,7 +1,7 @@
 import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError, ModelStorageUtil, ModelIndexedUtil } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
-import { AppError, TimeUtil, Util } from '@travetto/runtime';
+import { AppError, JSONUtil, TimeUtil } from '@travetto/runtime';
 
 import { CacheError } from './error.ts';
 import { CacheUtil } from './util.ts';
@@ -72,7 +72,7 @@ export class CacheService {
       }
     }
 
-    return Util.decodeBase64JSON(entry);
+    return JSONUtil.decodeBase64(entry);
   }
 
   /**
@@ -81,7 +81,7 @@ export class CacheService {
    * @returns
    */
   async set(id: string, keySpace: string, entry: unknown, maxAge?: number): Promise<unknown> {
-    const entryText = Util.encodeBase64JSON(entry);
+    const entryText = JSONUtil.encodeBase64(entry);
 
     const store = await this.#modelService.upsert(CacheRecord,
       CacheRecord.from({
@@ -93,7 +93,7 @@ export class CacheService {
       }),
     );
 
-    return Util.decodeBase64JSON(store.entry);
+    return JSONUtil.decodeBase64(store.entry);
   }
 
   /**

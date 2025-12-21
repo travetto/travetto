@@ -1,11 +1,12 @@
 import { createWriteStream } from 'node:fs';
 
-import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
+import { ConsoleManager, Env, Runtime } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
 import { RunUtil } from '../execute/run.ts';
 import { TestWorkerEvents } from './types.ts';
 import { TestRun } from '../model/test.ts';
+import { CommunicationUtil } from '../communication.ts';
 
 /**
  * Child Worker for the Test Runner.  Receives events as commands
@@ -24,7 +25,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
         throw error;
       }
       // Mark as errored out
-      this.send(type, Util.parseJSONSafe(Util.serializeToJSON({ error })));
+      this.send(type, CommunicationUtil.serializeToObject({ error }));
     }
   }
 

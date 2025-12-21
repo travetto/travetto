@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BinaryUtil, Util } from '@travetto/runtime';
+import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BinaryUtil, JSONUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
@@ -255,7 +255,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async getBlobMeta(location: string): Promise<BlobMeta> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
-    const meta: BlobMeta = Util.parseJSONSafe(metaContent.get(location)!);
+    const meta: BlobMeta = JSONUtil.parseSafe(metaContent.get(location)!);
     return meta;
   }
 

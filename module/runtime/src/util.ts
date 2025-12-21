@@ -1,9 +1,7 @@
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
-import fs from 'node:fs/promises';
-import { existsSync, readFileSync } from 'node:fs';
 
-import { castTo, hasToJSON, type Any } from './types.ts';
+import { castTo } from './types.ts';
 import { AppError } from './error.ts';
 
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
@@ -123,93 +121,6 @@ export class Util {
   }
 
   /**
-   * Parse JSON safely
-   */
-  static parseJSONSafe<T>(input: string | Buffer, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
-    if (typeof input !== 'string') {
-      input = input.toString('utf8');
-    }
-    // TODO: Ensure we aren't vulnerable to prototype pollution
-    return JSON.parse(input, reviver);
-  }
-
-  /**
-   * Encode JSON value as base64 encoded string
-   */
-  static encodeBase64JSON<T>(value: T | undefined): string | undefined {
-    if (value === undefined) {
-      return;
-    }
-    const text = JSON.stringify(value);
-    return Buffer.from(text, 'utf8').toString('base64');
-  }
-
-  /**
-   * Decode JSON value from base64 encoded string
-   */
-  static decodeBase64JSON<T>(input: string): T;
-  static decodeBase64JSON<T>(input?: string | undefined): T | undefined;
-  static decodeBase64JSON<T>(input?: string | undefined): T | undefined {
-    if (!input) {
-      return undefined;
-    }
-
-    let decoded = Buffer.from(input, 'base64').toString('utf8');
-
-    // Read from encoded if it happens
-    if (decoded.startsWith('%')) {
-      decoded = decodeURIComponent(decoded);
-    }
-
-    return this.parseJSONSafe(decoded);
-  }
-
-  /**
-   * Serialize to JSON
-   */
-  static serializeToJSON<T>(out: T): string {
-    return JSON.stringify(out, function (key, value) {
-      const objectValue = this[key];
-      if (objectValue && objectValue instanceof Error) {
-        return {
-          $: true,
-          ...hasToJSON(objectValue) ? objectValue.toJSON() : objectValue,
-          name: objectValue.name,
-          message: objectValue.message,
-          stack: objectValue.stack,
-        };
-      } else if (typeof value === 'bigint') {
-        return `${value.toString()}$n`;
-      } else {
-        return value;
-      }
-    });
-  }
-
-  /**
-   * Deserialize from JSON
-   */
-  static deserializeFromJson<T = unknown>(input: string): T {
-    return this.parseJSONSafe(input, function (key, value) {
-      if (value && typeof value === 'object' && '$' in value) {
-        const error = AppError.fromJSON(value) ?? new Error();
-        if (!(error instanceof AppError)) {
-          const { $: _, ...rest } = value;
-          Object.assign(error, rest);
-        }
-        error.message = value.message;
-        error.stack = value.stack;
-        error.name = value.name;
-        return error;
-      } else if (typeof value === 'string' && /^\d+[$]n$/.test(value)) {
-        return BigInt(value.split('$')[0]);
-      } else {
-        return value;
-      }
-    });
-  }
-
-  /**
    * Retry an operation, with a custom conflict handler
    * @param operation The operation to retry
    * @param isHandledConflict Function to determine if the error is a handled conflict
@@ -231,27 +142,5 @@ export class Util {
     }
 
     throw new AppError(`Operation failed after ${maxTries} attempts`);
-  }
-
-  /**
-   * Read JSON file asynchronously
-   * @param file
-   * @returns
-   */
-  static async readJSONFile<T>(file: string): Promise<T> {
-    const content = await fs.readFile(file, 'utf8');
-    return this.parseJSONSafe(content);
-  }
-
-  /**
-   * Read JSON file synchronously
-   * @param file
-   */
-  static readJSONFileSync<T>(file: string, onMissing?: T): T {
-    if (!existsSync(file) && onMissing !== undefined) {
-      return onMissing;
-    }
-    const content = readFileSync(file, 'utf8');
-    return this.parseJSONSafe(content);
   }
 }

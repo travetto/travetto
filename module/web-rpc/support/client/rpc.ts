@@ -1,5 +1,3 @@
-import { Util } from '@travetto/runtime';
-
 type MethodKeys<C extends {}> = {
   [METHOD in keyof C]: C[METHOD] extends Function ? METHOD : never
 }[keyof C];
@@ -129,7 +127,7 @@ export function consumeJSON<T>(text: string | unknown): T {
     return undefined!;
   }
   try {
-    return Util.parseJSONSafe(text, (key, value): unknown => {
+    return JSON.parse(text, (key, value): unknown => {
       if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/.test(value)) {
         return new Date(value);
       } else {

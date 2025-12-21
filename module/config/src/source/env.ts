@@ -1,4 +1,4 @@
-import { Util } from '@travetto/runtime';
+import { JSONUtil } from '@travetto/runtime';
 import { ConfigSource, ConfigPayload } from './types.ts';
 
 /**
@@ -15,7 +15,7 @@ export class EnvConfigSource implements ConfigSource {
 
   get(): ConfigPayload | undefined {
     try {
-      const data: Record<string, unknown> = Util.parseJSONSafe(process.env[this.#envKey] || '{}');
+      const data: Record<string, unknown> = JSONUtil.parseSafe(process.env[this.#envKey] || '{}');
       return { data, priority: this.#priority, source: `env://${this.#envKey}` };
     } catch {
       console.error(`env.${this.#envKey} is an invalid format`, { text: process.env[this.#envKey] });
