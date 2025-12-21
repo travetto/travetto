@@ -71,6 +71,8 @@ export class WorkspaceResultsManager {
    * @param event
    */
   onEvent(event: TestWatchEvent): void {
+    this.#diagnostics.onEvent(event);
+
     const file = this.getLocation(event);
     if (file) {
       const document = this.#filenameMap.get(file);
@@ -78,7 +80,6 @@ export class WorkspaceResultsManager {
         this.#results.get(document)?.onEvent(event);
       }
     }
-    this.#diagnostics.onEvent(event);
   }
 
   /**

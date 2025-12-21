@@ -1,4 +1,4 @@
-import parser from '@typescript-eslint/parser';
+import * as parser from '@typescript-eslint/parser';
 
 export const GLOBALS = {
   AbortController: false,
