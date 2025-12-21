@@ -10,7 +10,7 @@ import type { TestDiffInput, TestRun } from '../model/test.ts';
 
 const log = (message: string | TestLogEvent): void => {
   const event: TestLogEvent = typeof message === 'string' ? { type: 'log', message } : message;
-  process.send ? process.send?.(event) : console.log(event.message);
+  process.send ? process.send?.(event) : console.debug(event.message);
 };
 
 /**
