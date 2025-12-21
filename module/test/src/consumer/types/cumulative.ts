@@ -26,6 +26,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   }
 
   onSuiteStart(config: SuiteConfig): void {
+    const tests = this.#state[config.import]?.[config.classId]?.tests ?? {};
     this.#state[config.import] ??= {};
     this.#state[config.import][config.classId] = {
       ...config,
@@ -34,7 +35,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
       passed: 0,
       skipped: 0,
       total: 0,
-      tests: {}
+      tests,
     };
   }
 
@@ -55,25 +56,6 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     } else if (importName) {
       delete this.#state[importName];
     }
-  }
-
-  /**
-   * Compute totals
-   */
-  computeTotal(importName: string, classId: ClassId): SuiteResult {
-    const suite = this.#state[importName][classId];
-    return {
-      classId: suite.classId,
-      passed: suite.passed,
-      failed: suite.failed,
-      skipped: suite.skipped,
-      import: suite.import,
-      lineStart: suite.lineStart,
-      lineEnd: suite.lineEnd,
-      total: suite.total,
-      tests: {},
-      duration: 0
-    };
   }
 
   triggerSummary(core: SuiteCore): void {
@@ -99,13 +81,10 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
           this.onSuiteStart(event.suite);
         } else if (event.phase === 'after') {
           this.onSuiteAfter(event.suite);
-          this.triggerSummary(event.suite);
         }
-      } else if (event.type === 'test') {
-        if (event.phase === 'after') {
-          this.onTestResult(event.test);
-          this.triggerSummary(event.test);
-        }
+      } else if (event.type === 'test' && event.phase === 'after') {
+        this.onTestResult(event.test);
+        this.triggerSummary(event.test);
       }
     } catch (error) {
       console.warn('Summarization Error', { error });
