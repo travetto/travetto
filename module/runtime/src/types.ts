@@ -37,6 +37,7 @@ export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
+  assign<T extends {}, U extends T>(target: T, ...sources: U[]): U;
 } & ObjectConstructor = Object;
 
 export const safeAssign = <T extends {}, U extends {}>(target: T, ...sources: U[]): T & U =>

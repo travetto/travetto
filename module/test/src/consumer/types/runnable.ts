@@ -15,8 +15,9 @@ export class RunnableTestConsumer extends DelegatingConsumer {
     this.#results = consumers.find(consumer => !!consumer.onSummary) ? new TestResultsSummarizer() : undefined;
   }
 
-  onEventDone(event: TestEvent): void {
+  transform(event: TestEvent): TestEvent | undefined {
     this.#results?.onEvent(event);
+    return event;
   }
 
   async summarizeAsBoolean(): Promise<boolean> {

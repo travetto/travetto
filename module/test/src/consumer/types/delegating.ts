@@ -6,24 +6,12 @@ import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
  */
 export abstract class DelegatingConsumer implements TestConsumerShape {
   #consumers: TestConsumerShape[];
-  #transformer?: (event: TestEvent) => typeof event;
-  #filter?: (event: TestEvent) => boolean;
 
   constructor(consumers: TestConsumerShape[]) {
     this.#consumers = consumers;
     for (const consumer of consumers) {
       consumer.onEvent = consumer.onEvent.bind(consumer);
     }
-  }
-
-  withTransformer(transformer: (event: TestEvent) => typeof event): this {
-    this.#transformer = transformer;
-    return this;
-  }
-
-  withFilter(filter: (event: TestEvent) => boolean): this {
-    this.#filter = filter;
-    return this;
   }
 
   async onStart(state: TestRunState): Promise<void> {
@@ -45,14 +33,13 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
   }
 
   onEvent(event: TestEvent): void {
-    if (this.#transformer) {
-      event = this.#transformer(event);
+    let result = event;
+    if (this.transform) {
+      result = this.transform(event) ?? event;
     }
-    if (this.#filter?.(event) === false) {
-      return;
+    if (result) {
+      this.delegateEvent(result);
     }
-    this.delegateEvent(event);
-    this.onEventDone?.(event);
   }
 
   async summarize(summary?: SuitesSummary): Promise<void> {
@@ -63,5 +50,5 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     }
   }
 
-  onEventDone?(event: TestEvent): void;
+  transform?(event: TestEvent): TestEvent | undefined;
 }

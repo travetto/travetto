@@ -189,15 +189,7 @@ export class RunUtil {
    * Build test consumer that wraps a given targeted consumer, and the tests to be run
    */
   static async getRunnableConsumer(target: TestConsumerShape, testRuns: TestRun[]): Promise<RunnableTestConsumer> {
-    const byClassId = new Map(testRuns.filter(run => run.classId).map(run => [run.classId, run]));
-    const consumer = new RunnableTestConsumer(target)
-      .withTransformer((event) => {
-        // Copy run metadata to event
-        const classId = event.type === 'test' ? event.test.classId : (event.type === 'suite' ? event.suite.classId : undefined);
-        const matching = byClassId.get(classId);
-        event.metadata = matching?.metadata ?? event.metadata;
-        return event;
-      });
+    const consumer = new RunnableTestConsumer(target);
     const testCount = testRuns.reduce((acc, cur) => acc + (cur.methodNames ? cur.methodNames.length : 0), 0);
 
     await consumer.onStart({ testCount });

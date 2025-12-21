@@ -22,32 +22,26 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   }
 
   getSuite(core: Pick<SuiteCore, 'import' | 'classId'>): SuiteResult {
-    return this.#state[core.import]?.[core.classId]!;
+    return this.#state[core.import]?.[core.classId];
   }
 
   getOrCreateSuite({ tests: _, ...core }: SuiteConfig | SuiteResult): SuiteResult {
-    const suite = this.getSuite(core);
-    if (!suite) {
-      const forImport = this.#state[core.import] ??= {};
-      forImport[core.classId] = {
-        failed: 0,
-        passed: 0,
-        skipped: 0,
-        unknown: 0,
-        total: 0,
-        duration: -1,
-        ...core,
-        tests: {},
-      };
-    }
-    return this.#state[core.import][core.classId];
+    return (this.#state[core.import] ??= {})[core.classId] ??= {
+      failed: 0,
+      passed: 0,
+      skipped: 0,
+      unknown: 0,
+      total: 0,
+      duration: -1,
+      ...core,
+      tests: {},
+    };
   }
 
-  onTestBefore(config: TestConfig): void {
+  onTestBefore(config: TestConfig): TestConfig {
     const suite = this.getSuite(config);
-    const tests = suite.tests;
     suite.tests[config.methodName] = {
-      ...tests[config.methodName],
+      ...suite.tests[config.methodName],
       ...config,
       error: undefined,
       sourceImport: config.sourceImport,
@@ -58,17 +52,20 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
       durationTotal: -1,
       status: 'unknown'
     };
+    return config;
   }
 
   // Receive updated suite data
-  onSuiteBefore(config: SuiteConfig): void {
+  onSuiteBefore(config: SuiteConfig): SuiteConfig {
     const suite = this.getOrCreateSuite(config);
     suite.lineEnd = config.lineEnd;
     suite.lineStart = config.lineStart;
     suite.sourceHash = config.sourceHash;
+    suite.tags = config.tags;
+    return config;
   }
 
-  onSuiteAfter(suite: SuiteResult): void {
+  onSuiteAfter(suite: SuiteResult): SuiteResult {
     const state = this.getSuite(suite);
 
     const computeTotals = Object.entries(state.tests).reduce((acc, [, test]) => {
@@ -83,24 +80,16 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
       return acc;
     }, { passed: 0, failed: 0, skipped: 0, total: 0, duration: 0, unknown: 0 });
 
-    Object.assign(state, computeTotals);
+    Object.assign(state, computeTotals, {
+      sourceHash: suite.sourceHash,
+    });
 
-    for (const [methodName, testResult] of Object.entries(suite.tests)) {
-      Object.assign(state.tests[methodName], {
-        assertions: testResult.assertions,
-        status: testResult.status,
-        output: testResult.output,
-        duration: testResult.duration,
-        durationTotal: testResult.durationTotal,
-      });
-    }
-
-    this.delegateEvent({ type: 'suite', phase: 'after', suite: state });
+    return state;
   }
 
-  onTestAfter(test: TestResult): void {
+  onTestAfter(test: TestResult): TestResult {
     const tests = this.getSuite(test).tests;
-    tests[test.methodName] = { ...tests[test.methodName], ...test };
+    return Object.assign(tests[test.methodName], test);
   }
 
   removeTest(importName: string, classId?: string, methodName?: string): void {
@@ -120,19 +109,19 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   /**
    * Handle cumulative events, and emit a summarized summary
    */
-  onEventDone(event: TestEvent): void {
+  transform(event: TestEvent): TestEvent | undefined {
     try {
       if (event.type === 'suite') {
         if (event.phase === 'before') {
-          this.onSuiteBefore(event.suite);
+          return { ...event, suite: this.onSuiteBefore(event.suite) };
         } else if (event.phase === 'after') {
-          this.onSuiteAfter(event.suite);
+          return { ...event, suite: this.onSuiteAfter(event.suite) };
         }
       } else if (event.type === 'test') {
         if (event.phase === 'before') {
-          this.onTestBefore(event.test);
+          return { ...event, test: this.onTestBefore(event.test) };
         } else if (event.phase === 'after') {
-          this.onTestAfter(event.test);
+          return { ...event, test: this.onTestAfter(event.test) };
         }
       }
     } catch (error) {
@@ -147,13 +136,10 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     const output: TestDiffSource = {};
     for (const [clsId, suite] of Object.entries(this.#state[importName] || {})) {
       const methods: TestDiffSource[string]['methods'] = {};
-      output[clsId] = {
-        sourceHash: suite.sourceHash!,
-        methods
-      };
       for (const [methodName, test] of Object.entries(suite.tests)) {
         methods[methodName] = test.sourceHash!;
       }
+      output[clsId] = { sourceHash: suite.sourceHash!, methods };
     }
     return output;
   }
