@@ -1,6 +1,5 @@
-import { AppError, castTo, Class, Util } from '@travetto/runtime';
+import { AppError, castTo, Class, Env, flushPendingFunctions, isClass, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
 
-import { ClassSource } from './class-source';
 import { RegistryIndex, RegistryIndexClass } from './types';
 
 class $Registry {
@@ -77,7 +76,24 @@ class $Registry {
         console.debug('Initializing', { uniqueId: this.#uniqueId });
       }
 
-      const added = await ClassSource.init();
+      // Ensure everything is loaded
+      for (const entry of RuntimeIndex.find({
+        module: (mod) => {
+          const role = Env.TRV_ROLE.value;
+          return role !== 'test' && // Skip all modules when in test
+            mod.roles.includes('std') &&
+            (
+              !Runtime.production || mod.prod ||
+              (role === 'doc' && mod.roles.includes(role))
+            );
+        },
+        folder: folder => folder === 'src' || folder === '$index'
+      })) {
+        await Runtime.importFrom(entry.import);
+      }
+
+      // Flush all load events
+      const added = flushPendingFunctions().filter(isClass);
       this.process(added);
     } finally {
       this.#resolved = true;
