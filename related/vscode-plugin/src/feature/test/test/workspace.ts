@@ -133,13 +133,15 @@ export class WorkspaceResultsManager {
   /**
    * Stop tracking
    */
-  reset(document: vscode.TextDocument): void {
+  reset(document: vscode.TextDocument, full = false): void {
     if (this.#results.has(document)) {
       this.#log.debug('File is freed', { file: document.fileName });
       this.#results.get(document)?.dispose();
       this.#results.delete(document);
       this.#filenameMap.delete(document.fileName);
     }
-    this.#diagnostics.clear(document.fileName);
+    if (full) {
+      this.#diagnostics.resetFile(document.fileName);
+    }
   }
 }

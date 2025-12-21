@@ -66,23 +66,11 @@ export class DiagnosticManager {
     testDiagnostics.set(vscode.Uri.file(file), diagnostics);
   }
 
-  clear(file: string): void {
-    if (this.#tracked.has(file)) {
-      this.#tracked.set(file, new Map());
-      this.#setDiagnostics(file);
-    }
-    this.setStatus('');
-  }
-
-  rename(oldFile: string, newFile: string): void {
-    this.clear(oldFile);
-  }
-
   afterSuite(suite: SuiteResult): void {
     switch (suite.status) {
       case 'passed': this.setStatus(`Passed ${suite.passed}/${suite.total}`, '#8f8'); break;
       case 'failed': this.setStatus(`Failed ${suite.failed}/${suite.total}`, '#f33'); break;
-      default: this.setStatus('');
+      default: this.setStatus(`${suite.status}`);
     }
   }
 
@@ -118,6 +106,11 @@ export class DiagnosticManager {
     } else if (event.type === 'removeTest') {
       this.onTestRemove(event);
     }
+  }
+
+  resetFile(file: string): void {
+    this.#tracked.delete(file);
+    this.#setDiagnostics(file);
   }
 
   reset(): void {

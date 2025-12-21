@@ -111,7 +111,7 @@ class TestRunnerFeature extends BaseFeature {
     if (this.#isTestDocument(editor)) {
       this.#startServer();
       const doc = editor.document;
-      this.#consumer.reset(doc);
+      this.#consumer.reset(doc, true);
       this.#consumer.getResults(doc);
       this.#runFile(doc.fileName);
     }
