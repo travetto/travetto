@@ -37,7 +37,7 @@ export class TestWatcher {
     const consumer = new CumulativeSummaryConsumer(
       await TestConsumerRegistryIndex.getInstance({ consumer: format })
     )
-      .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
+      .withFilter(event => !(event.metadata?.partial === true && event.type === 'suite'));
 
     process.on('message', event => {
       if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {

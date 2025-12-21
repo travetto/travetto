@@ -1,9 +1,9 @@
 import vscode, { ThemeColor } from 'vscode';
 import util from 'node:util';
 
-import type { TestResult, Assertion, TestConfig, TestLog } from '@travetto/test';
+import type { TestResult, Assertion, TestConfig, TestLog, TestStatus } from '@travetto/test';
 
-import type { ErrorHoverAssertion, StatusUnknown, TestLevel } from './types.ts';
+import type { ErrorHoverAssertion, TestLevel } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
 const MAX_LOG_LENGTH = 60;
@@ -36,7 +36,7 @@ type DecorationConfig = {
 const Style: {
   SMALL_IMAGE: string;
   FULL_IMAGE: string;
-  COLORS: Record<TestResult['status'] | 'unknown', string>;
+  COLORS: Record<TestStatus, string>;
   IMAGE: Partial<vscode.DecorationRenderOptions>;
   ASSERT: Partial<vscode.DecorationRenderOptions>;
 } = {
@@ -148,7 +148,7 @@ export class Decorations {
    * Build assertion
    * @param state
    */
-  static buildAssertStyle(state: StatusUnknown): vscode.TextEditorDecorationType {
+  static buildAssertStyle(state: TestStatus): vscode.TextEditorDecorationType {
     const color = Style.COLORS[state];
     return vscode.window.createTextEditorDecorationType({
       ...Style.ASSERT,
@@ -162,7 +162,7 @@ export class Decorations {
    * @param state
    * @param size
    */
-  static buildImage(state: StatusUnknown, size: string = Style.FULL_IMAGE): vscode.TextEditorDecorationType {
+  static buildImage(state: TestStatus, size: string = Style.FULL_IMAGE): vscode.TextEditorDecorationType {
     const img = Workspace.getAbsoluteResource(`images/${state}.png`);
     return vscode.window.createTextEditorDecorationType({
       ...Style.IMAGE,
@@ -257,7 +257,7 @@ export class Decorations {
    * @param entity
    * @param state
    */
-  static buildStyle(entity: TestLevel, state: StatusUnknown): vscode.TextEditorDecorationType {
+  static buildStyle(entity: TestLevel, state: TestStatus): vscode.TextEditorDecorationType {
     return (entity === 'assertion') ?
       this.buildAssertStyle(state) :
       this.buildImage(state, entity === 'test' ? Style.SMALL_IMAGE : Style.FULL_IMAGE);

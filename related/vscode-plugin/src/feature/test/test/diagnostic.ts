@@ -1,8 +1,7 @@
 import vscode from 'vscode';
 
-import type { TestResult, TestWatchEvent } from '@travetto/test';
+import type { TestResult, TestWatchEvent, TestStatus } from '@travetto/test';
 
-import { StatusUnknown } from './types.ts';
 import { Workspace } from '../../../core/workspace';
 import { Decorations } from './decoration';
 
@@ -131,8 +130,8 @@ export class DiagnosticManager {
   /**
    * Get totals from the runner
    */
-  getTotals(): Record<StatusUnknown, number> {
-    const totals: Record<StatusUnknown, number> = {
+  getTotals(): Record<TestStatus, number> {
+    const totals: Record<TestStatus, number> = {
       skipped: 0,
       failed: 0,
       passed: 0,
@@ -143,8 +142,8 @@ export class DiagnosticManager {
         switch (test.status) {
           case 'skipped':
           case 'failed':
+          case 'unknown':
           case 'passed': totals[test.status] += 1; break;
-          default: totals.unknown += 1;
         }
       }
     }

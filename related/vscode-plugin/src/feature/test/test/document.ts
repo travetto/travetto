@@ -2,10 +2,10 @@ import vscode from 'vscode';
 
 import { TypedObject } from '@travetto/runtime';
 
-import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestWatchEvent } from '@travetto/test';
+import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestWatchEvent, TestStatus } from '@travetto/test';
 
 import { Decorations } from './decoration.ts';
-import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown, Result } from './types.ts';
+import { AllState, TestState, ResultState, SuiteState, TestLevel, Result } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
 type TestItem = Assertion | TestResult | TestConfig | SuiteResult | SuiteConfig;
@@ -107,11 +107,11 @@ export class DocumentResultsManager {
       this.setStyle(test.styles[test.status], [test.decoration]);
       this.setStyle(test.logStyle, test.logDecorations);
 
-      const out: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
+      const out: Record<TestStatus, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
       for (const assertion of test.assertions) {
         out[assertion.status].push(assertion.decoration);
       }
-      for (const key of TypedObject.keys<Record<StatusUnknown, unknown>>(out)) {
+      for (const key of TypedObject.keys<Record<TestStatus, unknown>>(out)) {
         this.setStyle(test.assertStyles[key], out[key]);
       }
     }
@@ -143,7 +143,7 @@ export class DocumentResultsManager {
   store(level: TestLevel, key: string, result: Result<TestItem>): void {
     if (isAssertion(level, result)) {
       const state = this.#results.test[key];
-      const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
+      const groups: Record<TestStatus, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
       state.assertions.push(result);
 
       for (const a of state.assertions) {

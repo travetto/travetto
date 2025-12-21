@@ -10,6 +10,8 @@ export type TestDiffSource = Record<string, {
   methods: Record<string, number>;
 }>;
 
+export type TestStatus = 'passed' | 'skipped' | 'failed' | 'unknown';
+
 /**
  * Specific configuration for a test
  */
@@ -93,7 +95,7 @@ export interface TestResult extends TestCore {
   /**
    * status
    */
-  status: 'passed' | 'skipped' | 'failed';
+  status: TestStatus;
   /**
    * Error if failed
    */

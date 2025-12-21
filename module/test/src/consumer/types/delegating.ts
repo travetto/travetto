@@ -38,6 +38,12 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     }
   }
 
+  delegateEvent(event: TestEvent): void {
+    for (const consumer of this.#consumers) {
+      consumer.onEvent(event);
+    }
+  }
+
   onEvent(event: TestEvent): void {
     if (this.#transformer) {
       event = this.#transformer(event);
@@ -45,10 +51,7 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     if (this.#filter?.(event) === false) {
       return;
     }
-    for (const consumer of this.#consumers) {
-      consumer.onEvent(event);
-    }
-
+    this.delegateEvent(event);
     this.onEventDone?.(event);
   }
 
