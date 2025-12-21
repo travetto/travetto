@@ -103,7 +103,7 @@ class TestRunnerFeature extends BaseFeature {
 
     const imp = `${mod.name}${file.split(mod.sourceFolder)[1]}`;
     this.log.info('Requesting test run ', imp);
-    this.#server.send({ type: 'run-test', import: imp });
+    this.#server.send({ type: 'runTest', import: imp });
   }
 
   #rerunActive(): void {

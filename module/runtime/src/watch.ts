@@ -1,4 +1,4 @@
-import type { ChangeEventType } from '@travetto/manifest';
+import { ManifestModuleUtil, type ChangeEventType } from '@travetto/manifest';
 
 import { RuntimeIndex } from './manifest-index.ts';
 import { ExecUtil } from './exec.ts';
@@ -16,7 +16,14 @@ type WatchCompilerOptions = {
    * Signal to cancel the watch
    */
   signal?: AbortSignal;
+  /**
+   * Only emit events for valid source files
+   */
+  validSourceOnly?: boolean;
 };
+
+const isValidSourceFile = (file: string, module: string): boolean =>
+  !file || !RuntimeIndex.hasModule(module) || !['ts', 'js'].includes(ManifestModuleUtil.getFileType(file));
 
 export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterable<WatchEvent> {
   // Load at runtime
@@ -39,7 +46,11 @@ export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterab
       await Util.nonBlockingTimeout(1000 * 60);
     }
   } else {
-    yield* client.fetchEvents('change', { signal: controller.signal, enforceIteration: true });
+    for await (const event of client.fetchEvents('change', { signal: controller.signal, enforceIteration: true })) {
+      if (!config?.validSourceOnly || isValidSourceFile(event.file, event.module)) {
+        yield event;
+      }
+    }
   }
 
   remove();

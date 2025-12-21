@@ -1,16 +1,13 @@
 import { Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
-import { AsyncQueue, RuntimeIndex, TimeUtil, castTo, watchCompiler } from '@travetto/runtime';
-import { ManifestModuleUtil } from '@travetto/manifest';
+import { AsyncQueue, TimeUtil, watchCompiler } from '@travetto/runtime';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
-import { TestDiffInput, TestRun } from '../model/test.ts';
+import type { TestDiffInput, TestRun } from '../model/test.ts';
 import { RunUtil } from './run.ts';
-import { TestReadyEvent } from '../worker/types.ts';
-
-const VALID_FILE_TYPES = new Set(['js', 'ts']);
+import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
 
 /**
  * Test Watcher.
@@ -39,9 +36,9 @@ export class TestWatcher {
     );
 
     process.on('message', event => {
-      if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {
+      if (isTestRunEvent(event)) {
         console.log('Received message', event);
-        queue.add(castTo(event), true);
+        queue.add(event, true);
       }
     });
 
@@ -57,24 +54,12 @@ export class TestWatcher {
       }
     );
 
-    for await (const event of watchCompiler({ restartOnExit: true })) {
-      if (event.file && RuntimeIndex.hasModule(event.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
-        switch (event.action) {
-          case 'create':
-          case 'update': {
-            const run: TestDiffInput = {
-              import: event.import,
-              diffSource: consumer.produceDiffSource(event.import),
-              metadata: { partial: true }
-            };
-            queue.add(run, true); // Shift to front
-            break;
-          }
-          case 'delete': {
-            consumer.removeTest(event.import);
-            break;
-          }
-        }
+    for await (const event of watchCompiler({ restartOnExit: true, validSourceOnly: true })) {
+      if (event.action === 'delete') {
+        consumer.removeTest(event.import);
+      } else {
+        const diffSource = consumer.produceDiffSource(event.import);
+        queue.add({ import: event.import, diffSource }, true);
       }
     }
 

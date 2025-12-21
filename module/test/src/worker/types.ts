@@ -11,6 +11,12 @@ export const Events = {
   READY: 'ready'
 };
 
+export type TestRunEvent = { type: 'runTest', import: string };
+
+export const isTestRunEvent = (event: unknown): event is TestRunEvent =>
+  typeof event === 'object' && !!event && 'type' in event && event.type === 'runTest';
+
+
 export type TestReadyEvent = { type: 'ready' };
 export type TestLogEvent = { type: 'log', message: string };
 
