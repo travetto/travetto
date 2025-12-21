@@ -136,5 +136,4 @@ export class EnvTest {
       assert(new EnvProp('BOOL2').bool === true);
     }
   }
-
 }
