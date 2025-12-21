@@ -9,31 +9,31 @@ import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphis
 
 
 @Suite()
-export class RedisBasicSuite extends ModelBasicSuite {
+class RedisBasicSuite extends ModelBasicSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }
 
 @Suite()
-export class RedisCrudSuite extends ModelCrudSuite {
+class RedisCrudSuite extends ModelCrudSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }
 
 @Suite()
-export class RedisExpirySuite extends ModelExpirySuite {
+class RedisExpirySuite extends ModelExpirySuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }
 
 @Suite()
-export class RedisIndexedSuite extends ModelIndexedSuite {
+class RedisIndexedSuite extends ModelIndexedSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }
 
 @Suite()
-export class RedisPolymorphismSuite extends ModelPolymorphismSuite {
+class RedisPolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

@@ -22,7 +22,7 @@ class MyClass {
 }
 
 @Suite()
-export class DecoratorOrderSuite {
+class DecoratorOrderSuite {
   @Test()
   async testAlias() {
     await Registry.init();

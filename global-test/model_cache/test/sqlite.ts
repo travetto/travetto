@@ -26,7 +26,7 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class SqliteCacheSuite extends CacheServiceSuite {
+class SqliteCacheSuite extends CacheServiceSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

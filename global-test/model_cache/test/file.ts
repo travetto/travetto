@@ -13,7 +13,7 @@ class Config {
 }
 
 @Suite()
-export class FileCacheSuite extends CacheServiceSuite {
+class FileCacheSuite extends CacheServiceSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }

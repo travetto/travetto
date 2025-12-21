@@ -20,35 +20,35 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLBasicSuite extends ModelBasicSuite {
+class PostgreSQLBasicSuite extends ModelBasicSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLCrudSuite extends ModelCrudSuite {
+class PostgreSQLCrudSuite extends ModelCrudSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLBulkSuite extends ModelBulkSuite {
+class PostgreSQLBulkSuite extends ModelBulkSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLExpirySuite extends ModelExpirySuite {
+class PostgreSQLExpirySuite extends ModelExpirySuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQueryPolymorphismSuite extends ModelPolymorphismSuite {
+class PostgreSQLQueryPolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

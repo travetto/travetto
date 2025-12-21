@@ -4,7 +4,7 @@ import { Suite } from '@travetto/test';
 
 import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
 
-class Init {
+class Config {
   @InjectableFactory(TestModelSvcSymbol)
   static modelProvider(config: FileModelConfig) {
     return new FileModelService(config);
@@ -12,7 +12,7 @@ class Init {
 }
 
 @Suite()
-export class FileAuthModelServiceSuite extends AuthModelServiceSuite {
+class FileAuthModelServiceSuite extends AuthModelServiceSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }

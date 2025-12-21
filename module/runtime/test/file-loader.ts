@@ -20,4 +20,11 @@ class FileLoaderSuite {
     const stat = await fs.stat(loc);
     assert((await loader.read('logo.png', true)).length === stat.size);
   }
+
+  @Test()
+  async testJSON() {
+    const loader = new FileLoader([Runtime.modulePath('@#test/fixtures')]);
+    const content = await loader.readJSON<{ asset: string }>('asset.json');
+    assert(content.asset === 'This is a test asset file.');
+  }
 }

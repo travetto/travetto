@@ -7,7 +7,7 @@ import { FetchWebDispatcher } from '../support/test/dispatcher.ts';
 import { NodeWebHttpServer } from '../src/node.ts';
 
 @Suite()
-export class NodeWebStandardTest extends StandardWebServerSuite {
+class NodeWebStandardTest extends StandardWebServerSuite {
   dispatcherType = FetchWebDispatcher;
 
   serve() {

@@ -20,35 +20,35 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class SqliteBasicSuite extends ModelBasicSuite {
+class SqliteBasicSuite extends ModelBasicSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class SqliteCrudSuite extends ModelCrudSuite {
+class SqliteCrudSuite extends ModelCrudSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class SqliteBulkSuite extends ModelBulkSuite {
+class SqliteBulkSuite extends ModelBulkSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class SqliteExpirySuite extends ModelExpirySuite {
+class SqliteExpirySuite extends ModelExpirySuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class SqliteQueryPolymorphismSuite extends ModelPolymorphismSuite {
+class SqliteQueryPolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

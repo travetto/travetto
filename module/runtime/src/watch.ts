@@ -23,7 +23,7 @@ type WatchCompilerOptions = {
 };
 
 const isValidSourceFile = (file: string, module: string): boolean =>
-  !file || !RuntimeIndex.hasModule(module) || !['ts', 'js'].includes(ManifestModuleUtil.getFileType(file));
+  !!file && RuntimeIndex.hasModule(module) && ['ts', 'js'].includes(ManifestModuleUtil.getFileType(file));
 
 export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterable<WatchEvent> {
   // Load at runtime

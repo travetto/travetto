@@ -7,7 +7,7 @@ import { Service2 } from '../src/tree2.ts';
 import { Service3 } from '../src/tree3.ts';
 
 @Suite()
-export class TransformSuite {
+class TransformSuite {
   @Test()
   async verify() {
     const res = new Service().getTree();

@@ -4,8 +4,9 @@ import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import path from 'node:path';
 
-import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, TimeUtil, isClass } from '@travetto/runtime';
+import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, TimeUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
+import { Registry } from '@travetto/registry';
 
 import type { TestConfig, TestRunInput, TestRun, TestGlobInput, TestDiffInput } from '../model/test.ts';
 import type { TestRemoveEvent } from '../model/event.ts';
@@ -130,10 +131,10 @@ export class RunUtil {
       removes.push({ type: 'removeTest', import: importPath, classId: clsId, methodName });
     };
 
-    const fileToImport = RuntimeIndex.getFromImport(importPath)!.outputFile;
-    const imported = await import(fileToImport);
+    const imported = await Registry.manualInit([importPath]);
     const classes = Object.fromEntries(
-      Object.values(imported).filter(isClass)
+      imported
+        .filter(cls => SuiteRegistryIndex.hasConfig(cls))
         .map(cls => [cls.Ⲑid, SuiteRegistryIndex.getConfig(cls)])
     );
 

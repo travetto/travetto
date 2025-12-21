@@ -5,7 +5,7 @@ import { ExecUtil, Env, Runtime } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
-export class PackAppSuite {
+class PackAppSuite {
 
   @Test({ timeout: 60000 })
   async testPack() {

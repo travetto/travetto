@@ -3,7 +3,7 @@ import { fork } from 'node:child_process';
 import { Env, RuntimeIndex, Util } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { Events, type TestLogEvent } from './types.ts';
+import { TestWorkerEvents, type TestLogEvent } from './types.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
@@ -38,9 +38,9 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
     )
   );
 
-  await channel.once(Events.READY); // Wait for the child to be ready
-  await channel.send(Events.INIT); // Initialize
-  await channel.once(Events.INIT_COMPLETE); // Wait for complete
+  await channel.once(TestWorkerEvents.READY); // Wait for the child to be ready
+  await channel.send(TestWorkerEvents.INIT); // Initialize
+  await channel.once(TestWorkerEvents.INIT_COMPLETE); // Wait for complete
 
   channel.on('*', async event => {
     try {
@@ -59,9 +59,9 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
   });
 
   // Listen for child to complete
-  const complete = channel.once(Events.RUN_COMPLETE);
+  const complete = channel.once(TestWorkerEvents.RUN_COMPLETE);
   // Start test
-  channel.send(Events.RUN, run);
+  channel.send(TestWorkerEvents.RUN, run);
 
   // Wait for complete
   const result = await complete.then(event => Util.deserializeFromJson<typeof event>(JSON.stringify(event)));

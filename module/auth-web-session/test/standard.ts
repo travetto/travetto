@@ -14,6 +14,6 @@ class Config {
 }
 
 @Suite()
-export class StandardAuthWebSessionTest extends AuthWebSessionServerSuite {
+class StandardAuthWebSessionTest extends AuthWebSessionServerSuite {
   dispatcherType = LocalRequestDispatcher;
 }

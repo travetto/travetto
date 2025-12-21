@@ -21,7 +21,7 @@ const expand = async (args: string[]): Promise<string[]> => CliParseUtil.expandA
 );
 
 @Suite()
-export class ParseSuite {
+class ParseSuite {
 
   @BeforeAll()
   async setup() {

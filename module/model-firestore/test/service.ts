@@ -7,25 +7,25 @@ import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
 @Suite()
-export class FirestoreBasicSuite extends ModelBasicSuite {
+class FirestoreBasicSuite extends ModelBasicSuite {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
 }
 
 @Suite()
-export class FirestoreCrudSuite extends ModelCrudSuite {
+class FirestoreCrudSuite extends ModelCrudSuite {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
 }
 
 @Suite()
-export class FirestoreIndexedSuite extends ModelIndexedSuite {
+class FirestoreIndexedSuite extends ModelIndexedSuite {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
 }
 
 @Suite()
-export class FirestorePolymorphismSuite extends ModelPolymorphismSuite {
+class FirestorePolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
 }

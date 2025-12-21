@@ -20,35 +20,35 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class MySQLBasicSuite extends ModelBasicSuite {
+class MySQLBasicSuite extends ModelBasicSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class MySQLCrudSuite extends ModelCrudSuite {
+class MySQLCrudSuite extends ModelCrudSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class MySQLBulkSuite extends ModelBulkSuite {
+class MySQLBulkSuite extends ModelBulkSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class MySQLExpirySuite extends ModelExpirySuite {
+class MySQLExpirySuite extends ModelExpirySuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class MySQLPolymorphismSuite extends ModelPolymorphismSuite {
+class MySQLPolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

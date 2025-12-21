@@ -4,7 +4,7 @@ import { RedisModelConfig, RedisModelService } from '@travetto/model-redis';
 
 import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
 
-class Init {
+class Config {
   @InjectableFactory(TestModelSvcSymbol)
   static modelProvider(config: RedisModelConfig) {
     return new RedisModelService(config);
@@ -12,7 +12,7 @@ class Init {
 }
 
 @Suite()
-export class RedisAuthModelServiceSuite extends AuthModelServiceSuite {
+class RedisAuthModelServiceSuite extends AuthModelServiceSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

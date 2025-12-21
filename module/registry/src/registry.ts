@@ -126,6 +126,19 @@ class $Registry {
     return this.#initialized ??= this.#init();
   }
 
+  /**
+   * Manual init, not meant to be used directly
+   * @private
+   */
+  async manualInit(files: string[]): Promise<Class[]> {
+    for (const file of files) {
+      await Runtime.importFrom(file);
+    }
+    const imported = flushPendingFunctions().filter(isClass);
+    this.process(imported);
+    return imported;
+  }
+
   instance<T extends RegistryIndexClass>(indexCls: T): InstanceType<T> {
     return castTo(this.#indexByClass.get(indexCls));
   }

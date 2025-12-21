@@ -4,7 +4,7 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/m
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
 
 @Suite()
-export class ElasticsearchQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+class ElasticsearchQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

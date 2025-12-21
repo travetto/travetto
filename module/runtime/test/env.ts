@@ -4,7 +4,7 @@ import { Test, Suite } from '@travetto/test';
 import { EnvProp } from '@travetto/runtime';
 
 @Suite()
-export class EnvTest {
+class EnvTest {
 
   @Test()
   verifyGet() {

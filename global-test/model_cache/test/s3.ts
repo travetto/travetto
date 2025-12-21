@@ -14,7 +14,7 @@ class Config {
 }
 
 @Suite()
-export class S3CacheSuite extends CacheServiceSuite {
+class S3CacheSuite extends CacheServiceSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
   baseLatency = 150;

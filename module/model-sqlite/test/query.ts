@@ -21,7 +21,7 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class SqliteQuerySuite extends ModelQuerySuite {
+class SqliteQuerySuite extends ModelQuerySuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
   supportsGeo = false;
@@ -29,28 +29,28 @@ export class SqliteQuerySuite extends ModelQuerySuite {
 
 @WithSuiteContext()
 @Suite()
-export class SqliteQueryCrudSuite extends ModelQueryCrudSuite {
+class SqliteQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class SqliteQueryFacetSuite extends ModelQueryFacetSuite {
+class SqliteQueryFacetSuite extends ModelQueryFacetSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class SqliteQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+class SqliteQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class SqliteQuerySuggestSuite extends ModelQuerySuggestSuite {
+class SqliteQuerySuggestSuite extends ModelQuerySuggestSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

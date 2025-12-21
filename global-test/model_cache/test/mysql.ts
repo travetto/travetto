@@ -27,7 +27,7 @@ class Config {
 
 @Suite()
 @WithSuiteContext()
-export class MysqlCacheSuite extends CacheServiceSuite {
+class MysqlCacheSuite extends CacheServiceSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

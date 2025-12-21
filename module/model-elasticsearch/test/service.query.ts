@@ -7,25 +7,25 @@ import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.t
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
 @Suite()
-export class ElasticsearchQuerySuite extends ModelQuerySuite {
+class ElasticsearchQuerySuite extends ModelQuerySuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }
 
 @Suite()
-export class ElasticsearchQueryCrudSuite extends ModelQueryCrudSuite {
+class ElasticsearchQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }
 
 @Suite()
-export class ElasticsearchQueryFacetSuite extends ModelQueryFacetSuite {
+class ElasticsearchQueryFacetSuite extends ModelQueryFacetSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }
 
 @Suite()
-export class ElasticsearchQuerySuggestSuite extends ModelQuerySuggestSuite {
+class ElasticsearchQuerySuggestSuite extends ModelQuerySuggestSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

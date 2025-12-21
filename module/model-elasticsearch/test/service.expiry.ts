@@ -4,7 +4,7 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/m
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 
 @Suite()
-export class ElasticsearchExpirySuite extends ModelExpirySuite {
+class ElasticsearchExpirySuite extends ModelExpirySuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

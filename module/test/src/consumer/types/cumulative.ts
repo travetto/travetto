@@ -53,15 +53,16 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     return config;
   }
 
-  onSuiteAfter(suite: SuiteResult): SuiteResult {
+  onSuiteAfter(result: SuiteResult): SuiteResult {
     // Reset counts
+    const suite = this.getSuite(result);
     const totals: Counts & { duration: number } = { passed: 0, failed: 0, skipped: 0, unknown: 0, total: 0, duration: 0 };
     for (const test of Object.values(suite.tests)) {
       totals[test.status] += 1;
       totals.total += 1;
       totals.duration += test.duration ?? 0;
     }
-    return { ...suite, ...totals, status: TestModelUtil.countsToTestStatus(totals) };
+    return { ...result, ...totals, status: TestModelUtil.countsToTestStatus(totals) };
   }
 
   removeTest(importName: string, classId?: string, methodName?: string): void {

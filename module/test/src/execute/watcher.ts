@@ -43,7 +43,7 @@ export class TestWatcher {
 
     process.send?.({ type: 'ready' } satisfies TestReadyEvent);
 
-    const finished = WorkPool.run(
+    const queueProcessor = WorkPool.run(
       buildStandardTestManager.bind(null, consumer),
       queue,
       {
@@ -63,6 +63,6 @@ export class TestWatcher {
     }
 
     // Cleanup
-    await finished;
+    await queueProcessor;
   }
 }

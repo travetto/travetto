@@ -23,7 +23,7 @@ class TestConfig {
 }
 
 @Suite()
-export class DiConfigSuite {
+class DiConfigSuite {
 
   @Test('factory with autowire after')
   async simpleConfig() {

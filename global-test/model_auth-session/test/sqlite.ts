@@ -22,7 +22,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class SqliteAuthSessionServerSuite extends AuthSessionServerSuite {
+class SqliteAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

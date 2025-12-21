@@ -4,7 +4,7 @@ import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
 import { RunUtil } from '../execute/run.ts';
-import { Events } from './types.ts';
+import { TestWorkerEvents } from './types.ts';
 import { TestRun } from '../model/test.ts';
 
 /**
@@ -47,7 +47,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     this.on('*', event => this.onCommand(event));
 
     // Let parent know the child is ready for handling commands
-    this.send(Events.READY);
+    this.send(TestWorkerEvents.READY);
 
     await this.#done.promise;
   }
@@ -58,10 +58,10 @@ export class TestChildWorker extends IpcChannel<TestRun> {
   async onCommand(event: TestRun & { type: string }): Promise<boolean> {
     console.debug('on message', { ...event });
 
-    if (event.type === Events.INIT) { // On request to init, start initialization
-      await this.#exec(() => this.onInitCommand(), Events.INIT_COMPLETE);
-    } else if (event.type === Events.RUN) { // On request to run, start running
-      await this.#exec(() => this.onRunCommand(event), Events.RUN_COMPLETE);
+    if (event.type === TestWorkerEvents.INIT) { // On request to init, start initialization
+      await this.#exec(() => this.onInitCommand(), TestWorkerEvents.INIT_COMPLETE);
+    } else if (event.type === TestWorkerEvents.RUN) { // On request to run, start running
+      await this.#exec(() => this.onRunCommand(event), TestWorkerEvents.RUN_COMPLETE);
     }
 
     return false;

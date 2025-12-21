@@ -16,7 +16,7 @@ class TextAble {
 }
 
 @Suite()
-export class TextTestSuite {
+class TextTestSuite {
 
   @BeforeAll()
   async init() {

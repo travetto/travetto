@@ -3,7 +3,7 @@ import { TestEvent, TestRemoveEvent } from '../model/event.ts';
 /**
  * Test Run Event Keys
  */
-export const Events = {
+export const TestWorkerEvents = {
   RUN: 'run',
   RUN_COMPLETE: 'runComplete',
   INIT: 'init',

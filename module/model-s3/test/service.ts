@@ -12,31 +12,31 @@ import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 
 
 @Suite()
-export class S3BasicSuite extends ModelBasicSuite {
+class S3BasicSuite extends ModelBasicSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }
 
 @Suite()
-export class S3CrudSuite extends ModelCrudSuite {
+class S3CrudSuite extends ModelCrudSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }
 
 @Suite()
-export class S3ExpirySuite extends ModelExpirySuite {
+class S3ExpirySuite extends ModelExpirySuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }
 
 @Suite()
-export class S3PolymorphismSuite extends ModelPolymorphismSuite {
+class S3PolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }
 
 @Suite()
-export class S3BlobSuite extends ModelBlobSuite {
+class S3BlobSuite extends ModelBlobSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 
