@@ -24,7 +24,7 @@ class IssueAtSuite {
       {},
       { foo: 'bar' },
     ]) {
-      const token = `${noneAlgorithmHeader}.${Util.encodeSafeJSON({ iat: val })}.`;
+      const token = `${noneAlgorithmHeader}.${Util.encodeBase64JSON({ iat: val })}.`;
       await assert.rejects(async () => JWTUtil.verify(token), 'invalid');
     }
   }

@@ -2,6 +2,7 @@ import vscode, { ThemeColor } from 'vscode';
 import util from 'node:util';
 
 import type { TestResult, Assertion, TestConfig, TestLog, TestStatus } from '@travetto/test';
+import { Util } from '@travetto/runtime';
 
 import type { ErrorHoverAssertion, TestLevel } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
@@ -108,7 +109,7 @@ export class Decorations {
 
       const getValue = (value: unknown): string => {
         try {
-          return util.inspect(JSON.parse(`${value}`), false, 10).replace(/\n/g, '  \n\t');
+          return util.inspect(Util.parseJSONSafe(`${value}`), false, 10).replace(/\n/g, '  \n\t');
         } catch {
           return `${value}`;
         }

@@ -1,9 +1,10 @@
 import { Schema } from '@travetto/schema';
 import { PageableModelQuery } from '@travetto/model-query';
+import { Util } from '@travetto/runtime';
 
 import { QueryLanguageParser } from './parser.ts';
 
-const parse = <T>(key: string): T | undefined => !key || typeof key !== 'string' || !/^[\{\[]/.test(key) ? undefined : JSON.parse(key);
+const parse = <T>(key: string): T | undefined => !key || typeof key !== 'string' || !/^[\{\[]/.test(key) ? undefined : Util.parseJSONSafe(key);
 
 @Schema()
 export class QueryLanguageModelQuery {

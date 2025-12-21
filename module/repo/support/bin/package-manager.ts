@@ -2,7 +2,7 @@ import path from 'node:path';
 import { spawn, ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { ExecUtil, ExecutionResult } from '@travetto/runtime';
+import { ExecUtil, ExecutionResult, Util } from '@travetto/runtime';
 import { type IndexedModule, type ManifestContext, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -40,12 +40,12 @@ export class PackageManager {
         if (!result.valid && !result.stderr.includes('E404')) {
           throw new Error(result.stderr);
         }
-        const item: (string[] | string) = result.stdout ? JSON.parse(result.stdout) : [];
+        const item: (string[] | string) = result.stdout ? Util.parseJSONSafe(result.stdout) : [];
         const found = Array.isArray(item) ? item.pop() : item;
         return !!found && found === mod.version;
       }
       case 'yarn': {
-        const parsed = JSON.parse(result.stdout);
+        const parsed = Util.parseJSONSafe<{ data?: unknown }>(result.stdout);
         return parsed.data !== undefined;
       }
     }

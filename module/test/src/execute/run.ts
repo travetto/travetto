@@ -104,7 +104,7 @@ export class RunUtil {
       ) :
       ((): boolean => true);
 
-    const parsed: TestConfig[] = JSON.parse(digestProcess.stdout);
+    const parsed: TestConfig[] = Util.parseJSONSafe(digestProcess.stdout);
 
     const events = parsed.filter(testFilter).reduce((runs, test) => {
       if (!runs.has(test.classId)) {

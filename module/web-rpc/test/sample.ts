@@ -153,7 +153,7 @@ class WebRpcSuite extends BaseWebSuite {
       },
       headers: {
         'content-type': 'application/octet-stream',
-        'X-TRV-RPC-INPUTS': Util.encodeSafeJSON([null, 11])
+        'X-TRV-RPC-INPUTS': Util.encodeBase64JSON([null, 11])
       },
       body: Buffer.alloc(100)
     });

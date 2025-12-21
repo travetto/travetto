@@ -12,7 +12,7 @@ import { TestConsumer } from '../decorator.ts';
 export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsumerShape {
 
   sendPayload(payload: unknown & { type: string }): void {
-    this.send(payload.type, JSON.parse(Util.serializeToJSON(payload)));
+    this.send(payload.type, Util.parseJSONSafe(Util.serializeToJSON(payload)));
   }
 
   onEvent(event: TestEvent): void {

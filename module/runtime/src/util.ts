@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 
-import { castTo, hasToJSON } from './types.ts';
+import { castTo, hasToJSON, type Any } from './types.ts';
 import { AppError } from './error.ts';
 
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
@@ -123,9 +123,20 @@ export class Util {
   }
 
   /**
+   * Parse JSON safely
+   */
+  static parseJSONSafe<T>(input: string | Buffer, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
+    if (typeof input !== 'string') {
+      input = input.toString('utf8');
+    }
+    // TODO: Ensure we aren't vulnerable to prototype pollution
+    return JSON.parse(input, reviver);
+  }
+
+  /**
    * Encode JSON value as base64 encoded string
    */
-  static encodeSafeJSON<T>(value: T | undefined): string | undefined {
+  static encodeBase64JSON<T>(value: T | undefined): string | undefined {
     if (value === undefined) {
       return;
     }
@@ -136,9 +147,9 @@ export class Util {
   /**
    * Decode JSON value from base64 encoded string
    */
-  static decodeSafeJSON<T>(input: string): T;
-  static decodeSafeJSON<T>(input?: string | undefined): T | undefined;
-  static decodeSafeJSON<T>(input?: string | undefined): T | undefined {
+  static decodeBase64JSON<T>(input: string): T;
+  static decodeBase64JSON<T>(input?: string | undefined): T | undefined;
+  static decodeBase64JSON<T>(input?: string | undefined): T | undefined {
     if (!input) {
       return undefined;
     }
@@ -150,7 +161,7 @@ export class Util {
       decoded = decodeURIComponent(decoded);
     }
 
-    return JSON.parse(decoded, undefined);
+    return this.parseJSONSafe(decoded);
   }
 
   /**
@@ -179,7 +190,7 @@ export class Util {
    * Deserialize from JSON
    */
   static deserializeFromJson<T = unknown>(input: string): T {
-    return JSON.parse(input, function (key, value) {
+    return this.parseJSONSafe(input, function (key, value) {
       if (value && typeof value === 'object' && '$' in value) {
         const error = AppError.fromJSON(value) ?? new Error();
         if (!(error instanceof AppError)) {
@@ -229,7 +240,7 @@ export class Util {
    */
   static async readJSONFile<T>(file: string): Promise<T> {
     const content = await fs.readFile(file, 'utf8');
-    return JSON.parse(content);
+    return this.parseJSONSafe(content);
   }
 
   /**
@@ -241,6 +252,6 @@ export class Util {
       return onMissing;
     }
     const content = readFileSync(file, 'utf8');
-    return JSON.parse(content);
+    return this.parseJSONSafe(content);
   }
 }

@@ -24,7 +24,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
         throw error;
       }
       // Mark as errored out
-      this.send(type, JSON.parse(Util.serializeToJSON({ error })));
+      this.send(type, Util.parseJSONSafe(Util.serializeToJSON({ error })));
     }
   }
 

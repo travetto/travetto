@@ -45,7 +45,7 @@ export class WebRpcController {
 
     // Allow request to read inputs from header
     if (paramInput) {
-      params = Util.decodeSafeJSON(paramInput)!;
+      params = Util.decodeBase64JSON(paramInput)!;
     } else if (Array.isArray(body)) { // Params passed via body
       params = body;
 

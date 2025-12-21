@@ -22,7 +22,7 @@ export interface CoreCacheConfig {
   keySpace?: string;
 
   /**
-   * How to reconstitute the cached value after JSON.parse
+   * How to reconstitute the cached value after JSON parsing
    */
   reinstate?: (input: unknown) => unknown;
 }

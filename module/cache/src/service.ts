@@ -72,7 +72,7 @@ export class CacheService {
       }
     }
 
-    return Util.decodeSafeJSON(entry);
+    return Util.decodeBase64JSON(entry);
   }
 
   /**
@@ -81,7 +81,7 @@ export class CacheService {
    * @returns
    */
   async set(id: string, keySpace: string, entry: unknown, maxAge?: number): Promise<unknown> {
-    const entryText = Util.encodeSafeJSON(entry);
+    const entryText = Util.encodeBase64JSON(entry);
 
     const store = await this.#modelService.upsert(CacheRecord,
       CacheRecord.from({
@@ -93,7 +93,7 @@ export class CacheService {
       }),
     );
 
-    return Util.decodeSafeJSON(store.entry);
+    return Util.decodeBase64JSON(store.entry);
   }
 
   /**

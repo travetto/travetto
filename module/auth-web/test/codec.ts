@@ -6,6 +6,7 @@ import { WebResponse } from '@travetto/web';
 import { AuthContextInterceptor, CommonPrincipalCodecSymbol, JWTPrincipalCodec, WebAuthConfig } from '@travetto/auth-web';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { Util } from '@travetto/runtime';
 
 
 @Suite()
@@ -81,8 +82,8 @@ export class CodecTest {
       details: {}
     });
 
-    const sig1 = JSON.parse(Buffer.from(token1.split('.')[0], 'base64').toString('utf8'));
-    const sig2 = JSON.parse(Buffer.from(token2.split('.')[0], 'base64').toString('utf8'));
+    const sig1: { kid: string } = Util.decodeBase64JSON(token1.split('.')[0]);
+    const sig2: { kid: string } = Util.decodeBase64JSON(token2.split('.')[0]);
     assert(sig1.kid !== sig2.kid);
     assert(sig1.kid === 'orange');
   }

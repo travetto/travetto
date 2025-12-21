@@ -1,7 +1,7 @@
 import { buffer } from 'node:stream/consumers';
 import { Readable } from 'node:stream';
 
-import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
+import { AppError, BinaryUtil, castTo, Util } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import { WebResponse } from '../../src/types/response.ts';
@@ -51,7 +51,7 @@ export class WebTestDispatchUtil {
 
     if (text) {
       switch (response.headers.get('Content-Type')) {
-        case 'application/json': result = JSON.parse(castTo(text)); break;
+        case 'application/json': result = Util.parseJSONSafe(castTo(text)); break;
         case 'text/plain': result = text; break;
       }
     }

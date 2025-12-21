@@ -4,7 +4,7 @@ import os from 'node:os';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { Class, TimeSpan, Runtime, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
+import { Class, TimeSpan, Runtime, BlobMeta, ByteRange, BinaryInput, BinaryUtil, Util } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -193,7 +193,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async getBlobMeta(location: string): Promise<BlobMeta> {
     const file = await this.#find(ModelBlobNamespace, META, location);
     const content = await fs.readFile(file);
-    const text: BlobMeta = JSON.parse(content.toString('utf8'));
+    const text: BlobMeta = Util.parseJSONSafe(content.toString('utf8'));
     return text;
   }
 

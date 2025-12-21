@@ -7,6 +7,7 @@ import { Env } from './env.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { describeFunction } from './function.ts';
 import { castTo } from './types.ts';
+import { Util } from './util.ts';
 
 /** Constrained version of {@type ManifestContext} */
 class $Runtime {
@@ -118,7 +119,7 @@ class $Runtime {
       throw new Error(`Unable to find ${imp}, not in the manifest`);
     } else if (imp.endsWith('.json')) {
       imp = this.#idx.getFromImport(imp)?.sourceFile ?? imp;
-      return fs.readFile(imp, 'utf8').then(JSON.parse);
+      return fs.readFile(imp, 'utf8').then(Util.parseJSONSafe<T>);
     }
 
     if (!ManifestModuleUtil.SOURCE_EXT_REGEX.test(imp)) {

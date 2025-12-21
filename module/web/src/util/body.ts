@@ -160,7 +160,7 @@ export class WebBodyUtil {
   static parseBody(type: string, body: string): unknown {
     switch (type) {
       case 'text': return body;
-      case 'json': return JSON.parse(body);
+      case 'json': return Util.parseJSONSafe(body);
       case 'form': return Object.fromEntries(new URLSearchParams(body));
     }
   }
