@@ -16,7 +16,7 @@ export class PassportUtil {
         input?.context.httpQuery?.state : ''));
     if (state) {
       try {
-        return JSONUtil.decodeBase64(state);
+        return JSONUtil.parseBase64(state);
       } catch { }
     }
   }
@@ -28,7 +28,7 @@ export class PassportUtil {
    */
   static writeState(state?: Record<string, unknown>): string | undefined {
     if (state) {
-      return JSONUtil.encodeBase64(state);
+      return JSONUtil.stringifyBase64(state);
     }
   }
 

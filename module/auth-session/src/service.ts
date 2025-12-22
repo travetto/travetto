@@ -47,7 +47,7 @@ export class SessionService {
 
       const session = new Session({
         ...record,
-        data: JSONUtil.decodeBase64(record.data)
+        data: JSONUtil.parseBase64(record.data)
       });
 
       // Validate session
@@ -89,7 +89,7 @@ export class SessionService {
       if (session.action === 'create' || session.isChanged()) {
         await this.#modelService.upsert(SessionEntry, SessionEntry.from({
           ...session,
-          data: JSONUtil.encodeBase64(session.data)
+          data: JSONUtil.stringifyBase64(session.data)
         }));
       }
       // If destroying

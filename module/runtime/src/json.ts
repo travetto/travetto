@@ -22,7 +22,7 @@ export class JSONUtil {
   /**
    * Encode JSON value as base64 encoded string
    */
-  static encodeBase64<T>(value: T | undefined): string | undefined {
+  static stringifyBase64<T>(value: T | undefined): string | undefined {
     if (value === undefined) {
       return;
     }
@@ -33,9 +33,9 @@ export class JSONUtil {
   /**
    * Decode JSON value from base64 encoded string
    */
-  static decodeBase64<T>(input: string): T;
-  static decodeBase64<T>(input?: string | undefined): T | undefined;
-  static decodeBase64<T>(input?: string | undefined): T | undefined {
+  static parseBase64<T>(input: string): T;
+  static parseBase64<T>(input?: string | undefined): T | undefined;
+  static parseBase64<T>(input?: string | undefined): T | undefined {
     if (!input) {
       return undefined;
     }

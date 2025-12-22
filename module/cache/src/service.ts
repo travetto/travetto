@@ -72,7 +72,7 @@ export class CacheService {
       }
     }
 
-    return JSONUtil.decodeBase64(entry);
+    return JSONUtil.parseBase64(entry);
   }
 
   /**
@@ -81,7 +81,7 @@ export class CacheService {
    * @returns
    */
   async set(id: string, keySpace: string, entry: unknown, maxAge?: number): Promise<unknown> {
-    const entryText = JSONUtil.encodeBase64(entry);
+    const entryText = JSONUtil.stringifyBase64(entry);
 
     const store = await this.#modelService.upsert(CacheRecord,
       CacheRecord.from({
@@ -93,7 +93,7 @@ export class CacheService {
       }),
     );
 
-    return JSONUtil.decodeBase64(store.entry);
+    return JSONUtil.parseBase64(store.entry);
   }
 
   /**

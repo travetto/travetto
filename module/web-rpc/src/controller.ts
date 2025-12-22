@@ -45,7 +45,7 @@ export class WebRpcController {
 
     // Allow request to read inputs from header
     if (paramInput) {
-      params = JSONUtil.decodeBase64(paramInput)!;
+      params = JSONUtil.parseBase64(paramInput)!;
     } else if (Array.isArray(body)) { // Params passed via body
       params = body;
 

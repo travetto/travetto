@@ -82,8 +82,8 @@ export class CodecTest {
       details: {}
     });
 
-    const sig1: { kid: string } = JSONUtil.decodeBase64(token1.split('.')[0]);
-    const sig2: { kid: string } = JSONUtil.decodeBase64(token2.split('.')[0]);
+    const sig1: { kid: string } = JSONUtil.parseBase64(token1.split('.')[0]);
+    const sig2: { kid: string } = JSONUtil.parseBase64(token2.split('.')[0]);
     assert(sig1.kid !== sig2.kid);
     assert(sig1.kid === 'orange');
   }
