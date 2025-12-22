@@ -89,7 +89,7 @@ export class EmailCompiler {
    */
   static async * watchCompile(signal?: AbortSignal): AsyncIterable<string> {
     // Watch template files
-    for await (const { file, action } of watchCompiler({ signal })) {
+    for await (const { file, action } of watchCompiler({ signal, validSourceOnly: true })) {
       if (!EmailCompileUtil.isTemplateFile(file) || action === 'delete') {
         continue;
       }
