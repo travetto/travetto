@@ -1,12 +1,12 @@
 import { Env } from '@travetto/runtime';
-import { CliCommand, CliUtil } from '@travetto/cli';
+import { CliCommand } from '@travetto/cli';
 
 import { selectConsumer } from './bin/run.ts';
 
 /**
  * Invoke the test watcher
  */
-@CliCommand()
+@CliCommand({ with: { canRestart: 'ipc' } })
 export class TestWatcherCommand {
 
   format: string = 'tap';
@@ -21,10 +21,6 @@ export class TestWatcherCommand {
   }
 
   async main(): Promise<void> {
-    if (await CliUtil.runWithRestart(this, true)) {
-      return;
-    }
-
     try {
       const { TestWatcher } = await import('../src/execute/watcher.ts');
       await TestWatcher.watch(this.format, this.mode === 'all');

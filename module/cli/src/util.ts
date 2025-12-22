@@ -28,14 +28,18 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, ipc?: boolean): Promise<unknown> | undefined {
+  static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<unknown> | undefined {
+    const ipc = !!cmd.canRestartIpc;
+    const canRestart = Env.TRV_CAN_RESTART.isFalse || (cmd.canRestartIpc ?? cmd.canRestart ?? !Runtime.production);
+
     if (ipc && process.connected) {
       process.once('disconnect', () => process.exit());
     }
-    if (Env.TRV_CAN_RESTART.isFalse || !(cmd.canRestart ?? !Runtime.production)) {
+    if (canRestart) {
       Env.TRV_CAN_RESTART.clear();
       return;
     }
+
     return ExecUtil.withRestart(() => spawn(process.argv0, process.argv.slice(1), {
       env: {
         ...process.env,

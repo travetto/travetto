@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@travetto/di';
 import { MailUtil, EmailCompiled, MailInterpolator } from '@travetto/email';
-import { AppError, TypedObject } from '@travetto/runtime';
+import { AppError, TypedObject, watchCompiler } from '@travetto/runtime';
 
 import { EditorSendService } from './send.ts';
 import { EditorConfig } from './config.ts';
@@ -87,11 +87,14 @@ export class EditorService {
 
     process.send({ type: 'init' });
 
-    for await (const file of EmailCompiler.watchCompile()) {
-      await this.#response(this.#renderFile(file),
-        result => ({ type: 'compiled', ...result }),
-        error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
-      );
+    // Watch template files
+    for await (const { file } of watchCompiler({ restartOnCompilerExit: true })) {
+      if (await EmailCompiler.spawnCompile(file)) {
+        await this.#response(this.#renderFile(file),
+          result => ({ type: 'compiled', ...result }),
+          error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
+        );
+      }
     }
   }
 }

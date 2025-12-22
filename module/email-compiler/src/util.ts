@@ -4,6 +4,7 @@ import type { CompileResult, Options } from 'sass';
 
 import { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageUtil } from '@travetto/image';
+import { RuntimeIndex } from '@travetto/runtime';
 
 type Tokenized = {
   text: string;
@@ -29,7 +30,7 @@ export class EmailCompileUtil {
    * Is file a template?
    */
   static isTemplateFile(file: string): boolean {
-    return EXT.test(file);
+    return EXT.test(file) && RuntimeIndex.findModuleForArbitraryFile(file) !== undefined;
   }
 
   /**

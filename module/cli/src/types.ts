@@ -92,6 +92,10 @@ export type CliCommandShapeFields = {
    */
   canRestart?: boolean;
   /**
+   * Should the invocation run with auto-restart and ipc
+   */
+  canRestartIpc?: boolean;
+  /**
    * The module to run the command from
    */
   module?: string;

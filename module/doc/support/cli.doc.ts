@@ -28,6 +28,7 @@ export class DocCommand implements CliCommandShape {
     Env.TRV_CLI_IPC.clear();
     Env.TRV_LOG_PLAIN.set(true);
     Env.FORCE_COLOR.set(false);
+    Env.TRV_CAN_RESTART.set(false); // Prevent restarting
   }
 
   preBind(): void {
@@ -52,8 +53,8 @@ export class DocCommand implements CliCommandShape {
     }
 
     const [first, ...args] = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
-    for await (const { action, file } of watchCompiler()) {
-      if (action === 'update' && file === this.input) {
+    for await (const { file } of watchCompiler({ restartOnCompilerExit: true })) {
+      if (file === this.input) {
         const subProcess = ExecUtil.spawnTrv(first, args, {
           cwd: Runtime.mainSourcePath,
           env: { ...process.env, ...Env.TRV_QUIET.export(true) },

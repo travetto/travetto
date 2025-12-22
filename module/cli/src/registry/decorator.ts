@@ -20,7 +20,7 @@ type CliCommandConfigOptions = {
     /** Should debug invocation trigger via ipc */
     debugIpc?: boolean;
     /** Should the invocation automatically restart on exit */
-    canRestart?: boolean;
+    canRestart?: boolean | 'ipc';
   };
 };
 

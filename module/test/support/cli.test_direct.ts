@@ -26,7 +26,6 @@ export class TestDirectCommand {
     Env.TRV_ENV.set('test');
     Env.TRV_LOG_PLAIN.set(true);
     Env.TRV_LOG_TIME.clear();
-    Env.TRV_CAN_RESTART.clear();
   }
 
   main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {

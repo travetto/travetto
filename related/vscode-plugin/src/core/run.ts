@@ -72,7 +72,6 @@ export class RunUtil {
       cwd: WORKSPACE,
       args: (config.args ?? []).map(arg => `${arg}`),
       env: {
-        ...Env.TRV_CAN_RESTART.export(false),
         ...this.buildEnv(config.cliModule),
         ...config.env ?? {},
       },

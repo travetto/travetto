@@ -1,7 +1,6 @@
 import type { ChangeEventType } from '@travetto/manifest';
 
 import { RuntimeIndex } from './manifest-index.ts';
-import { ExecUtil } from './exec.ts';
 import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
 
@@ -11,12 +10,10 @@ type WatchCompilerOptions = {
   /**
    * Restart the watch loop on compiler exit
    */
-  restartOnExit?: boolean;
-  /**
-   * Signal to cancel the watch
-   */
-  signal?: AbortSignal;
+  restartOnCompilerExit?: boolean;
 };
+
+const isOlderThanOneMinute = (x: number) => (Date.now() - x) > (60 * 1000);
 
 export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterable<WatchEvent> {
   // Load at runtime
@@ -32,21 +29,33 @@ export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterab
   const controller = new AbortController();
   const remove = ShutdownManager.onGracefulShutdown(async () => controller.abort());
 
-  await client.waitForState(['compile-end', 'watch-start'], undefined, controller.signal);
+  let iterations: number[] = [];
 
-  if (!await client.isWatching()) { // If we get here, without a watch
-    while (!await client.isWatching()) { // Wait until watch starts
-      await Util.nonBlockingTimeout(1000 * 60);
+  while (
+    !controller.signal.aborted &&
+    iterations.length < 5 &&
+    (
+      config?.restartOnCompilerExit || iterations.length === 0
+    )
+  ) {
+    await client.waitForState(['compile-end', 'watch-start'], undefined, controller.signal);
+
+    if (!await client.isWatching()) { // If we get here, without a watch
+      while (!await client.isWatching()) { // Wait until watch starts
+        await Util.nonBlockingTimeout(1000 * 60);
+      }
+    } else {
+      yield* client.fetchEvents('change', { signal: controller.signal, enforceIteration: true });
     }
-  } else {
-    yield* client.fetchEvents('change', { signal: controller.signal, enforceIteration: true });
+
+    while (iterations.length && isOlderThanOneMinute(iterations[0])) {
+      iterations.shift();
+    }
+
+    iterations.push(Date.now());
+
+    await Util.nonBlockingTimeout(10 ** iterations.length);
   }
 
   remove();
-
-  if (config?.restartOnExit) {
-    // We are done, request restart
-    await ShutdownManager.gracefulShutdown('@travetto/runtime:watchCompiler');
-    process.exit(ExecUtil.RESTART_EXIT_CODE);
-  }
 }
