@@ -78,10 +78,10 @@ export interface WebResponseContext {
 export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseContext> {
 
   /**
-    * Build the redirect
-    * @param location Location to redirect to
-    * @param statusCode Status code
-    */
+   * Build the redirect
+   * @param location Location to redirect to
+   * @param statusCode Status code
+   */
   static redirect(location: string, statusCode = 302): WebResponse<undefined> {
     return new WebResponse({ context: { httpStatusCode: statusCode }, headers: { Location: location } });
   }

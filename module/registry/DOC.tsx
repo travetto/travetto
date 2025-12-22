@@ -33,10 +33,4 @@ export const text = <>
       At runtime, the framework is designed to listen for changes and restart any running processes as needed.
     </c.SubSection>
   </c.Section>
-
-  <c.Section title='Supporting Metadata'>
-    As mentioned in {d.mod('Manifest')}'s readme, the framework produces hashes of methods, classes, and functions, to allow for detecting changes to individual parts of the codebase. During the live flow, various registries will inspect this information to determine if action should be taken.
-
-    <c.Code title='Sample Class Diffing' src='src/source/class-source.ts' startRe={/^\s{2}#handleFileChanges/} endRe={/^\s{2}[}]/} />
-  </c.Section>
 </>;
