@@ -90,7 +90,7 @@ export class EmailCompiler {
   static async * watchCompile(signal?: AbortSignal): AsyncIterable<string> {
     // Watch template files
     for await (const { file, action } of watchCompiler({ signal })) {
-      if (!EmailCompileUtil.isTemplateFile(file) || action === 'delete' || RuntimeIndex.findModuleForArbitraryImport(file) === undefined) {
+      if (!EmailCompileUtil.isTemplateFile(file) || action === 'delete' || RuntimeIndex.findModuleForArbitraryFile(file) === undefined) {
         continue;
       }
 
@@ -99,7 +99,7 @@ export class EmailCompiler {
         env: { ...process.env },
       });
 
-      const result = await ExecUtil.getResult(child);
+      const result = await ExecUtil.getResult(child, { catch: true });
 
       if (!result.valid) {
         console.error('Error compiling template', { file, stderr: result.stderr });
