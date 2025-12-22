@@ -39,8 +39,6 @@ class $Runtime {
   get env(): string | undefined;
   /** Are we in development mode */
   get production(): boolean;
-  /** Is the app in dynamic mode? */
-  get dynamic(): boolean;
   /** Get debug value */
   get debug(): false | string;
   /** Manifest main */
@@ -96,10 +94,6 @@ interface EnvData {
      * Special role to run as, used to access additional files from the manifest during runtime.  
      */
     TRV_ROLE: Role;
-    /** 
-     * Whether or not to run the program in dynamic mode, allowing for real-time updates  
-     */
-    TRV_DYNAMIC: boolean;
     /** 
      * The folders to use for resource lookup
      */

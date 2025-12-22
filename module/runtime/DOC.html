@@ -47,8 +47,6 @@ While running any code within the framework, there are common patterns/goals for
   <span class="token keyword">get</span> <span class="token function">env</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/** Are we in development mode */</span>
   <span class="token keyword">get</span> <span class="token function">production</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token comment">/** Is the app in dynamic mode? */</span>
-  <span class="token keyword">get</span> <span class="token function">dynamic</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/** Get debug value */</span>
   <span class="token keyword">get</span> <span class="token function">debug</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token boolean">false</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token comment">/** Manifest main */</span>
@@ -109,10 +107,6 @@ The functionality we support for testing and retrieving environment information 
    * Special role to run as, used to access additional files from the manifest during runtime.
    */</span>
   <span class="token constant">TRV_ROLE</span><span class="token operator">:</span> Role<span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Whether or not to run the program in dynamic mode, allowing for real-time updates
-   */</span>
-  <span class="token constant">TRV_DYNAMIC</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * The folders to use for resource lookup
    */</span>

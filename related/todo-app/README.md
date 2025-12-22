@@ -329,7 +329,6 @@ npx trv web:http
     env: 'local',
     debug: false,
     production: false,
-    dynamic: false,
     resourcePaths: [
       './resources',
       '<workspace-root>/resources'
@@ -373,7 +372,7 @@ npx trv web:http
       },
       ApiSpecConfig: {
         output: './openapi.yml',
-        persist: false,
+        persist: true,
         skipEndpoints: false,
         exposeAllSchemas: false
       },
@@ -413,7 +412,7 @@ npx trv web:http
           replyTo: 'Travetto Mailer <mailer@travetto.dev>'
         }
       },
-      MemoryModelConfig: { autoCreate: true },
+      MemoryModelConfig: { modifyStorage: true },
       MongoModelConfig: {
         hosts: [ 'localhost' ],
         namespace: 'app',

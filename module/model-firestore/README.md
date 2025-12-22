@@ -47,7 +47,7 @@ export class FirestoreModelConfig {
   emulator?: string;
   projectId: string;
   namespace?: string;
-  autoCreate?: boolean;
+  modifyStorage?: boolean;
   credentials?: FirestoreModelConfigCredentials;
 
   async postConstruct(): Promise<void> {
