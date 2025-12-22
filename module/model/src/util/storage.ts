@@ -27,7 +27,7 @@ export class ModelStorageUtil {
         return false;
       }
 
-      const { autoCreate = 'development' } = ModelRegistryIndex.getConfig(cls) ?? {};
+      const { autoCreate } = ModelRegistryIndex.getConfig(cls) ?? {};
 
       if (autoCreate === 'off') {
         return false;
