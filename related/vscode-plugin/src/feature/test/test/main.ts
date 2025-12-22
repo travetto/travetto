@@ -190,6 +190,20 @@ class TestRunnerFeature extends BaseFeature {
     this.#consumer.reset(document);
   }
 
+  async renameFiles(files: vscode.FileRenameEvent['files']): Promise<void> {
+    for (const file of files) {
+      const doc = this.#consumer.getDocumentByFileName(file.oldUri.fsPath);
+      this.log.info('Renaming file', `${file.oldUri.fsPath} -> ${file.newUri.fsPath}`, !!doc);
+      if (doc) {
+        this.#consumer.reset(doc);
+        if (vscode.window.activeTextEditor?.document === doc) {
+          this.log.info('Re-running renamed file', `${file.oldUri.fsPath} -> ${file.newUri.fsPath}`);
+          this.#runFile(file.newUri.fsPath);
+        }
+      }
+    }
+  }
+
   /**
    * On feature activate
    */
@@ -207,6 +221,7 @@ class TestRunnerFeature extends BaseFeature {
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
+    vscode.workspace.onDidRenameFiles(event => { this.renameFiles(event.files); }, null, context.subscriptions);
 
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({
       pattern: {

@@ -310,7 +310,7 @@ class DataBinding {
       area: 'green'
     });
 
-    const cloned = JSON.parse(JSON.stringify(acc));
+    const cloned = structuredClone(acc);
     assert(cloned.age === undefined);
     assert(cloned.area === 'green');
   }

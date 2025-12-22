@@ -28,6 +28,10 @@ export class WorkspaceResultsManager {
     this.getResults(document)?.refresh();
   }
 
+  getDocumentByFileName(file: string): vscode.TextDocument | undefined {
+    return this.#filenameMap.get(file);
+  }
+
   /**
    * Get test results
    * @param target
@@ -71,8 +75,6 @@ export class WorkspaceResultsManager {
    * @param event
    */
   onEvent(event: TestWatchEvent): void {
-    this.#diagnostics.onEvent(event);
-
     const file = this.getLocation(event);
     if (file) {
       const document = this.#filenameMap.get(file);
@@ -80,6 +82,7 @@ export class WorkspaceResultsManager {
         this.#results.get(document)?.onEvent(event);
       }
     }
+    this.#diagnostics.onEvent(event);
   }
 
   /**
@@ -134,11 +137,14 @@ export class WorkspaceResultsManager {
    * Stop tracking
    */
   reset(document: vscode.TextDocument, forRerun = false): void {
-    if (this.#results.has(document)) {
-      this.#results.get(document)?.dispose();
-      this.#results.delete(document);
-      this.#filenameMap.delete(document.fileName);
+    if (!this.#results.has(document)) {
+      return;
     }
+
+    this.#results.get(document)?.dispose();
+    this.#results.delete(document);
+    this.#filenameMap.delete(document.fileName);
+
     if (forRerun) {
       this.#diagnostics.resetFile(document.fileName);
     } else {

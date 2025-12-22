@@ -99,20 +99,21 @@ export class PackageUtil {
   static async resolveWorkspaces(ctx: ManifestContext): Promise<PackageWorkspaceEntry[]> {
     const rootPath = ctx.workspace.path;
     const cache = path.resolve(rootPath, ctx.build.outputFolder, 'workspaces.json');
-    return this.#workspaces[rootPath] ??= await ManifestFileUtil.readAsJson<PackageWorkspaceEntry[]>(cache)
-      .catch(async () => {
-        let out: PackageWorkspaceEntry[];
-        switch (ctx.workspace.manager) {
-          case 'yarn':
-          case 'npm': {
-            const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
-            out = workspaces.map(mod => ({ path: path.resolve(ctx.workspace.path, mod.location), name: mod.name }));
-            break;
-          }
+    try {
+      return this.#workspaces[rootPath] ??= ManifestFileUtil.readAsJsonSync<PackageWorkspaceEntry[]>(cache);
+    } catch {
+      let out: PackageWorkspaceEntry[];
+      switch (ctx.workspace.manager) {
+        case 'yarn':
+        case 'npm': {
+          const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
+          out = workspaces.map(mod => ({ path: path.resolve(ctx.workspace.path, mod.location), name: mod.name }));
+          break;
         }
-        await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(out));
-        return out;
-      });
+      }
+      await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(out));
+      return out;
+    }
   }
 
   /**

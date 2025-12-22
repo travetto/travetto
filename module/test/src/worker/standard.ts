@@ -19,10 +19,8 @@ const log = (message: string | TestLogEvent): void => {
  */
 export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun | TestDiffInput): Promise<void> {
   log(`Worker Input ${JSON.stringify(run)}`);
-  log(`Worker Executing ${run.import}`);
 
-  const { module } = RuntimeIndex.getFromImport(run.import)!;
-  const suiteMod = RuntimeIndex.getModule(module)!;
+  const suiteMod = RuntimeIndex.findModuleForArbitraryImport(run.import)!;
 
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(

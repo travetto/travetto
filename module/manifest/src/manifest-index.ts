@@ -265,6 +265,15 @@ export class ManifestIndex {
   }
 
   /**
+   * Find the module for an arbitrary import
+   */
+  findModuleForArbitraryImport(imp: string): IndexedModule | undefined {
+    const importParts = imp.split('/');
+    const module = imp.startsWith('@') ? importParts.slice(0, 2).join('/') : importParts[0];
+    return this.getModule(module);
+  }
+
+  /**
    * Get manifest module by name
    */
   getManifestModule(mod: string): ManifestModule {
