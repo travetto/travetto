@@ -14,10 +14,10 @@ import { ModelType } from '../types/model.ts';
 export interface ModelStorageSupport {
 
   /**
-   * Should auto-creation be allowed
+   * Should storage modification be allowed
    */
   readonly config?: {
-    autoCreate?: boolean;
+    modifyStorage?: boolean;
   };
 
   /**

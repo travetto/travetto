@@ -11,7 +11,7 @@ import { ModelAuthService, RegisteredPrincipal } from '../../src/model.ts';
 
 export const TestModelSvcSymbol = Symbol.for('@travetto/auth:test-model-svc');
 
-@Model({ autoCreate: false })
+@Model({ autoCreate: 'production' })
 class User implements RegisteredPrincipal {
   id: string;
   @Transient()

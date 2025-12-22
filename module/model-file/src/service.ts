@@ -26,7 +26,7 @@ export class FileModelConfig {
   @Required(false)
   folder: string;
   namespace: string = '.';
-  autoCreate?: boolean;
+  modifyStorage?: boolean;
   cullRate?: number | TimeSpan;
 
   async postConstruct(): Promise<void> {

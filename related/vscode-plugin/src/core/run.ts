@@ -74,7 +74,6 @@ export class RunUtil {
       env: {
         ...Env.TRV_CAN_RESTART.export(false),
         ...this.buildEnv(config.cliModule),
-        ...Env.TRV_DYNAMIC.export(true),
         ...config.env ?? {},
       },
     };

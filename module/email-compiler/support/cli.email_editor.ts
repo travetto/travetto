@@ -10,7 +10,6 @@ import { EditorService } from './bin/editor.ts';
 export class EmailEditorCommand {
 
   preMain(): void {
-    Env.TRV_DYNAMIC.set(true);
     Env.TRV_ROLE.set('build');
   }
 

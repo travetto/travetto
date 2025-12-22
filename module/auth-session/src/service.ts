@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { JSONUtil } from '@travetto/runtime';
-import { ModelExpirySupport, NotFoundError, ModelStorageUtil } from '@travetto/model';
+import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AuthContext, AuthService } from '@travetto/auth';
 
 import { Session } from './session.ts';
@@ -26,15 +26,6 @@ export class SessionService {
 
   constructor(@Inject(SessionModelSymbol) service: ModelExpirySupport) {
     this.#modelService = service;
-  }
-
-  /**
-   * Initialize service if none defined
-   */
-  async postConstruct(): Promise<void> {
-    if (ModelStorageUtil.shouldAutoCreate(this.#modelService)) {
-      await this.#modelService.createModel?.(SessionEntry);
-    }
   }
 
   /**

@@ -15,17 +15,10 @@ export class ModelStorageUtil {
   static isSupported = hasFunction<ModelStorageSupport>('createStorage');
 
   /**
-   * Should we auto create models on startup
-   */
-  static shouldAutoCreate(storage: unknown): storage is ModelStorageSupport {
-    return this.isSupported(storage) && (Runtime.dynamic || storage.config?.autoCreate === true);
-  }
-
-  /**
    * Storage Initialization
    */
   static async storageInitialization(storage: ModelStorageSupport): Promise<void> {
-    if (!Runtime.dynamic || !(storage?.config?.autoCreate ?? !Runtime.production)) {
+    if (storage.config?.modifyStorage === false) {
       return;
     }
 
@@ -33,8 +26,14 @@ export class ModelStorageUtil {
       if (enforceBase && SchemaRegistryIndex.getBaseClass(cls) !== cls) {
         return false;
       }
-      const { autoCreate } = ModelRegistryIndex.getConfig(cls) ?? {};
-      return autoCreate ?? false;
+
+      const { autoCreate = 'development' } = ModelRegistryIndex.getConfig(cls) ?? {};
+
+      if (autoCreate === 'off') {
+        return false;
+      }
+
+      return (autoCreate === 'production' || !Runtime.production);
     };
 
     // Initialize on startup (test manages)

@@ -20,7 +20,6 @@ export class CliWebRpcCommand implements CliCommandShape {
 
   preMain(): void {
     Env.DEBUG.set(false);
-    Env.TRV_DYNAMIC.set(false);
   }
 
   get #service(): Promise<WebRpcClientGeneratorService> {

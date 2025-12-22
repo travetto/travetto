@@ -17,7 +17,7 @@ type StoreType = Map<string, Buffer>;
 
 @Config('model.memory')
 export class MemoryModelConfig {
-  autoCreate?: boolean = true;
+  modifyStorage?: boolean = true;
   namespace?: string;
   cullRate?: number | TimeSpan;
 }

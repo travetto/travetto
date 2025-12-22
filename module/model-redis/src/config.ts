@@ -1,4 +1,4 @@
-import type redis from 'redis';
+import type redis from '@redis/client';
 
 import { Config } from '@travetto/config';
 
@@ -6,9 +6,5 @@ import { Config } from '@travetto/config';
 export class RedisModelConfig {
   client: redis.RedisClientOptions = {};
   namespace?: string;
-  autoCreate?: boolean;
-
-  postConstruct(): void {
-
-  }
+  modifyStorage?: boolean;
 }

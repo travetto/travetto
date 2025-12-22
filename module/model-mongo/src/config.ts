@@ -43,9 +43,9 @@ export class MongoModelConfig {
   options: mongo.MongoClientOptions = {};
 
   /**
-   * Should we auto create the db
+   * Allow storage modification at runtime
    */
-  autoCreate?: boolean;
+  modifyStorage?: boolean;
 
   /**
    * Frequency of culling for cullable content

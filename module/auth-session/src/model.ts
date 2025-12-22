@@ -6,7 +6,7 @@ import { Text } from '@travetto/schema';
  */
 export const SessionModelSymbol = Symbol.for('@travetto/auth-session:model');
 
-@Model({ autoCreate: false })
+@Model({ autoCreate: 'production' })
 export class SessionEntry {
   id: string;
   @Text()

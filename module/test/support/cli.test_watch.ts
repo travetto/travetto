@@ -18,7 +18,6 @@ export class TestWatcherCommand {
 
   preMain(): void {
     Env.TRV_ROLE.set('test');
-    Env.TRV_DYNAMIC.set(true);
   }
 
   async main(): Promise<void> {

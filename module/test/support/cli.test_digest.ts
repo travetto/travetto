@@ -16,7 +16,6 @@ export class TestDigestCommand {
     Env.TRV_ROLE.set('test');
     Env.DEBUG.set(false);
     Env.TRV_CAN_RESTART.set(false);
-    Env.TRV_DYNAMIC.set(false);
   }
 
   async main(globs: string[] = ['**/*']) {

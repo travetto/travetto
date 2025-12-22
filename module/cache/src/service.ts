@@ -14,7 +14,7 @@ const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
   type: 'unsorted',
   fields: [{ keySpace: 1 }]
 })
-@Model({ autoCreate: false })
+@Model({ autoCreate: 'production' })
 export class CacheRecord {
   id: string;
   @Text()
@@ -35,12 +35,6 @@ export class CacheService {
 
   constructor(@Inject({ qualifier: CacheModelSymbol, resolution: 'loose' }) modelService: ModelExpirySupport) {
     this.#modelService = modelService;
-  }
-
-  async postConstruct(): Promise<void> {
-    if (ModelStorageUtil.shouldAutoCreate(this.#modelService)) {
-      await this.#modelService.createModel?.(CacheRecord);
-    }
   }
 
   /**

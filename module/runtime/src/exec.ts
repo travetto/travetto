@@ -45,7 +45,7 @@ export class ExecUtil {
   static RESTART_EXIT_CODE = 200;
 
   /**
-   * Spawn wrapper that ensures performant invocation of self
+   * Spawn wrapper that ensures performant invocation of trv commands
    */
   static spawnTrv(cmd: string, args: string[], options: SpawnOptions): ChildProcess {
     const entry = (globalThis as Any).__entry_point__ ?? process.argv.at(1);
