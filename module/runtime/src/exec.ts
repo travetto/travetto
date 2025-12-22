@@ -1,8 +1,8 @@
-import { ChildProcess } from 'node:child_process';
+import { ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
 
-import { castTo } from './types.ts';
+import { castTo, type Any } from './types.ts';
 
 const MINUTE = (1000 * 60);
 
@@ -43,6 +43,14 @@ export interface ExecutionResult<T extends string | Buffer = string | Buffer> ex
 export class ExecUtil {
 
   static RESTART_EXIT_CODE = 200;
+
+  /**
+   * Spawn wrapper that ensures performant invocation of self
+   */
+  static spawnTrv(cmd: string, args: string[], options: SpawnOptions): ChildProcess {
+    const entry = (globalThis as Any).__entry_point__ ?? process.argv.at(1);
+    return spawn(process.argv0, [entry, cmd, ...args], options);
+  }
 
   /**
    * Run with automatic restart support

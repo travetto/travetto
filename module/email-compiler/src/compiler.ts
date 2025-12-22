@@ -1,4 +1,3 @@
-import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -94,7 +93,7 @@ export class EmailCompiler {
         continue;
       }
 
-      const child = spawn('npx', ['trv', 'email:compile', file], {
+      const child = ExecUtil.spawnTrv('email:compile', [file], {
         cwd: Runtime.mainSourcePath,
         env: { ...process.env },
       });

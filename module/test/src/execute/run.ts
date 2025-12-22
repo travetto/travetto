@@ -1,4 +1,3 @@
-import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
@@ -86,7 +85,7 @@ export class RunUtil {
    */
   static async resolveGlobInput({ globs, tags, metadata }: TestGlobInput): Promise<TestRun[]> {
     const digestProcess = await ExecUtil.getResult(
-      spawn('npx', ['trv', 'test:digest', '-o', 'json', ...globs], {
+      ExecUtil.spawnTrv('test:digest', ['-o', 'json', ...globs], {
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) },
       }),
       { catch: true }
