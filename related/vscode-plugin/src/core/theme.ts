@@ -2,8 +2,6 @@ import vscode from 'vscode';
 import path from 'node:path';
 import fs from 'node:fs';
 
-import { Log } from './log';
-
 type TokenColor = {
   scope: string | string[];
   settings: Record<string, string>;
@@ -69,10 +67,6 @@ export class ThemeUtil {
 
   static getTokenColor(token: string): string | undefined {
     this.#theme ??= this.resolveTheme(vscode.workspace.getConfiguration('workbench').get('colorTheme'));
-    const value = this.#theme.get(token);
-    if (!value) {
-      new Log('ThemeUtil').info(`Resolving theme token ${token} ${[...this.#theme.keys()].toSorted().join('\n')}`);
-    }
-    return value;
+    return this.#theme.get(token);
   }
 }
