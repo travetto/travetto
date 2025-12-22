@@ -84,7 +84,8 @@ export class EmailCompileUtil {
     const compiler = await initAsyncCompiler();
     const compilerOptions: Options<'async'> = {
       sourceMap: false,
-      loadPaths: options.loader.searchPaths.slice(0)
+      quietDeps: true,
+      loadPaths: options.loader.searchPaths.slice(0),
     };
 
     let result: CompileResult;

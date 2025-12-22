@@ -17,9 +17,9 @@ export async function prepare(node: JSXElement, location: EmailTemplateLocation)
   return {
     loader: ctx.loader,
     globalStyles: `
-  @import 'email/inky.variables';
-  @import '_global';
-  @import 'foundation-emails';
+  @use 'email/inky.variables';
+  @use '_global';
+  @use 'foundation-emails';
   `,
     html: () => InkyRenderer.render(node, Html, ctx),
     text: () => InkyRenderer.render(node, Markdown, ctx),
