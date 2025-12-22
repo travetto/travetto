@@ -1,9 +1,9 @@
-import vscode from 'vscode';
+import vscode, { ThemeColor } from 'vscode';
 
-import type { SuiteResult, TestRemoveEvent, TestResult, TestWatchEvent } from '@travetto/test';
+import type { TestRemoveEvent, TestResult, TestStatus, TestWatchEvent } from '@travetto/test';
 
 import { Workspace } from '../../../core/workspace';
-import { Decorations } from './decoration';
+import { Decorations, Style } from './decoration';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
@@ -66,12 +66,18 @@ export class DiagnosticManager {
     testDiagnostics.set(vscode.Uri.file(file), diagnostics);
   }
 
-  afterSuite(suite: SuiteResult): void {
-    switch (suite.status) {
-      case 'passed': this.setStatus(`Passed ${suite.passed}/${suite.total}`, '#8f8'); break;
-      case 'failed': this.setStatus(`Failed ${suite.failed}/${suite.total}`, '#f33'); break;
-      default: this.setStatus(`${suite.status}`);
-    }
+  refreshStatus(): void {
+    const { total, passed, failed, unknown } = [...this.#tracked.values()]
+      .flatMap(m => [...m.values()])
+      .flatMap(t => [...t.values()])
+      .reduce((acc, t) => {
+        acc.total += 1;
+        acc[t.status] += 1;
+        return acc;
+      }, { total: 0, passed: 0, failed: 0, skipped: 0, unknown: 0 });
+
+    const status = failed > 0 ? 'failed' : passed === total ? 'passed' : 'unknown';
+    this.setStatus(`Tests \$(pass-filled) ${passed} \$(alert) ${failed}`, status);
   }
 
   afterTest(test: TestResult): void {
@@ -100,7 +106,7 @@ export class DiagnosticManager {
 
   onEvent(event: TestWatchEvent): void {
     if (event.type === 'suite' && event.phase === 'after') {
-      this.afterSuite(event.suite);
+      this.refreshStatus();
     } else if (event.type === 'test' && event.phase === 'after') {
       this.afterTest(event.test);
     } else if (event.type === 'removeTest') {
@@ -111,26 +117,41 @@ export class DiagnosticManager {
   resetFile(file: string): void {
     this.#tracked.delete(file);
     this.#setDiagnostics(file);
+    this.refreshStatus();
   }
 
   reset(): void {
     testDiagnostics.clear();
-    this.setStatus('');
+    this.setStatus('', 'unknown');
     this.#tracked.clear();
   }
 
   /**
    * Set overall status
    * @param message
-   * @param color
+   * @param status
    */
-  setStatus(message: string, color?: string): void {
+  setStatus(message: string, status: TestStatus): void {
     if (!message) {
       this.#status.hide();
-    } else {
-      this.#status.color = color || '#fff';
-      this.#status.text = message;
-      this.#status.show();
+      return;
     }
+
+    switch (status) {
+      case 'passed':
+        this.#status.backgroundColor = undefined;
+        this.#status.color = Style.COLORS.passed;
+        break;
+      case 'failed':
+        this.#status.backgroundColor = new ThemeColor('statusBarItem.errorBackground');
+        this.#status.color = new ThemeColor('statusBarItem.errorForeground');
+        break;
+      default:
+        this.#status.backgroundColor = new ThemeColor('statusBarItem.warningBackground');
+        this.#status.color = new ThemeColor('statusBarItem.warningForeground');
+        break;
+    }
+    this.#status.text = message;
+    this.#status.show();
   }
 }

@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 import path from 'node:path';
@@ -106,14 +107,17 @@ class TestRunnerFeature extends BaseFeature {
     this.#server.send({ type: 'runTest', import: imp });
   }
 
+  #runDocument(document: vscode.TextDocument): void {
+    this.#consumer.reset(document, true);
+    this.#consumer.getResults(document);
+    this.#runFile(document.fileName);
+  }
+
   #rerunActive(): void {
     const editor = vscode.window.activeTextEditor;
     if (this.#isTestDocument(editor)) {
       this.#startServer();
-      const doc = editor.document;
-      this.#consumer.reset(doc, true);
-      this.#consumer.getResults(doc);
-      this.#runFile(doc.fileName);
+      this.#runDocument(editor.document);
     }
   }
 
@@ -187,19 +191,23 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onCloseTextDocument(document: vscode.TextDocument): Promise<void> {
-    this.#consumer.reset(document);
+    const stillExists = existsSync(document.fileName);
+    this.#consumer.reset(document, !stillExists);
   }
 
   async renameFiles(files: vscode.FileRenameEvent['files']): Promise<void> {
     for (const file of files) {
-      const doc = this.#consumer.getDocumentByFileName(file.oldUri.fsPath);
-      this.log.info('Renaming file', `${file.oldUri.fsPath} -> ${file.newUri.fsPath}`, !!doc);
-      if (doc) {
-        this.#consumer.reset(doc);
-        if (vscode.window.activeTextEditor?.document === doc) {
-          this.log.info('Re-running renamed file', `${file.oldUri.fsPath} -> ${file.newUri.fsPath}`);
-          this.#runFile(file.newUri.fsPath);
-        }
+      const document = this.#consumer.getDocumentByFileName(file.oldUri.fsPath);
+      if (!document) {
+        continue;
+      }
+
+      if (vscode.window.activeTextEditor?.document === document) {
+        this.#consumer.setEditor(undefined);
+        this.#runDocument(vscode.window.activeTextEditor.document);
+        this.#consumer.setEditor(vscode.window.activeTextEditor);
+      } else {
+        this.#consumer.reset(document);
       }
     }
   }
@@ -221,7 +229,7 @@ class TestRunnerFeature extends BaseFeature {
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
-    vscode.workspace.onDidRenameFiles(event => { this.renameFiles(event.files); }, null, context.subscriptions);
+    vscode.workspace.onDidRenameFiles(event => this.renameFiles(event.files), null, context.subscriptions);
 
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({
       pattern: {

@@ -136,7 +136,7 @@ export class WorkspaceResultsManager {
   /**
    * Stop tracking
    */
-  reset(document: vscode.TextDocument, forRerun = false): void {
+  reset(document: vscode.TextDocument, resetDiagnostics = false): void {
     if (!this.#results.has(document)) {
       return;
     }
@@ -144,11 +144,9 @@ export class WorkspaceResultsManager {
     this.#results.get(document)?.dispose();
     this.#results.delete(document);
     this.#filenameMap.delete(document.fileName);
-
-    if (forRerun) {
+    if (resetDiagnostics) {
       this.#diagnostics.resetFile(document.fileName);
-    } else {
-      this.#log.debug('File is freed', { file: document.fileName });
     }
+    this.#log.debug('File is freed', { file: document.fileName });
   }
 }

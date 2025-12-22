@@ -1,4 +1,4 @@
-import vscode, { ThemeColor } from 'vscode';
+import vscode from 'vscode';
 import util from 'node:util';
 
 import type { TestResult, Assertion, TestConfig, TestLog, TestStatus } from '@travetto/test';
@@ -6,17 +6,12 @@ import { JSONUtil } from '@travetto/runtime';
 
 import type { ErrorHoverAssertion, TestLevel } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
+import { ThemeUtil } from '../../../core/theme.ts';
+import { Log } from '../../../core/log.ts';
 
 const MAX_LOG_LENGTH = 60;
 
-/**
- * Make a color
- * @param r
- * @param g
- * @param b
- * @param a
- */
-const rgba = (r = 0, g = 0, b = 0, a = 1): string => `rgba(${r},${g},${b},${a})`;
+type ImageSize = 'small' | 'full';
 
 /**
  * Italicizes
@@ -34,20 +29,16 @@ type DecorationConfig = {
 /**
  * Various styles
  */
-const Style: {
-  SMALL_IMAGE: string;
-  FULL_IMAGE: string;
-  COLORS: Record<TestStatus, string>;
+export const Style: {
+  COLORS: Record<TestStatus, vscode.ThemeColor>;
   IMAGE: Partial<vscode.DecorationRenderOptions>;
   ASSERT: Partial<vscode.DecorationRenderOptions>;
 } = {
-  SMALL_IMAGE: '40%',
-  FULL_IMAGE: 'auto',
   COLORS: {
-    skipped: rgba(255, 255, 255, 0.5),
-    failed: rgba(255, 0, 0, 0.5),
-    passed: rgba(0, 255, 0, .5),
-    unknown: rgba(128, 128, 128, 0.5)
+    skipped: new vscode.ThemeColor('editorGutter.modifiedBackground'),
+    failed: new vscode.ThemeColor('editorGutter.deletedBackground'),
+    passed: new vscode.ThemeColor('editorGutter.addedBackground'),
+    unknown: new vscode.ThemeColor('editor.inactiveSelectionBackground'),
   },
   IMAGE: {
     isWholeLine: false,
@@ -59,9 +50,10 @@ const Style: {
     borderWidth: '0 0 0 4px',
     borderStyle: 'solid',
     overviewRulerLane: vscode.OverviewRulerLane.Right,
-    after: { textDecoration: `none; ${ITALIC}` },
-    light: { after: { color: 'darkgrey' } },
-    dark: { after: { color: 'grey' } }
+    after: {
+      textDecoration: `none; ${ITALIC}`,
+      color: new vscode.ThemeColor('badge.background')
+    },
   }
 };
 
@@ -73,6 +65,8 @@ function isBatchError(value?: Error): value is Error & { details: { errors: (Err
  * Decoration utils
  */
 export class Decorations {
+
+  static #imageUris: Record<string, vscode.Uri> = {};
 
   /**
    * Build an error hover tooltip
@@ -159,17 +153,39 @@ export class Decorations {
   }
 
   /**
+   * Build or get cached image uri
+   */
+  static getImageUri(state: TestStatus, size: ImageSize): vscode.Uri {
+    const key = `${state}-${size}`;
+    if (!this.#imageUris[key]) {
+      const color = ThemeUtil.getTokenColor(Style.COLORS[state].id);
+      const relativeSize = size === 'small' ? 40 : 60;
+      const offset = (100 - relativeSize) / 2;
+      const gutterWidth = 16;
+      const svg =
+        `<svg 
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 100 100"
+          width="${gutterWidth}" height="${gutterWidth}"
+        >
+          <rect x="${offset}" y="${offset}" width="${relativeSize}" height="${relativeSize}" stroke-width="0" fill="${color}" />
+        </svg>`;
+
+      new Log('test:decoration').debug(`Generated SVG for state ${state}: ${svg}`);
+
+      this.#imageUris[key] = vscode.Uri.parse(`data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`);
+    }
+    return this.#imageUris[key];
+  }
+
+  /**
    * Build guardrail image for assertion status
    * @param state
    * @param size
    */
-  static buildImage(state: TestStatus, size: string = Style.FULL_IMAGE): vscode.TextEditorDecorationType {
-    const img = Workspace.getAbsoluteResource(`images/${state}.png`);
-    return vscode.window.createTextEditorDecorationType({
-      ...Style.IMAGE,
-      gutterIconPath: img,
-      gutterIconSize: size
-    });
+  static buildImage(state: TestStatus, size: ImageSize): vscode.TextEditorDecorationType {
+    const uri = this.getImageUri(state, size);
+    return vscode.window.createTextEditorDecorationType({ ...Style.IMAGE, gutterIconPath: uri, gutterIconSize: 'auto' });
   }
 
   /**
@@ -192,7 +208,7 @@ export class Decorations {
       renderOptions: {
         after: {
           textDecoration: ITALIC,
-          color: log.level === 'error' || log.level === 'warn' ? new ThemeColor('errorForeground') : undefined,
+          color: log.level === 'error' || log.level === 'warn' ? new vscode.ThemeColor('errorForeground') : undefined,
           contentText: `  // ${log.level}: ${message}`
         }
       }
@@ -261,6 +277,6 @@ export class Decorations {
   static buildStyle(entity: TestLevel, state: TestStatus): vscode.TextEditorDecorationType {
     return (entity === 'assertion') ?
       this.buildAssertStyle(state) :
-      this.buildImage(state, entity === 'test' ? Style.SMALL_IMAGE : Style.FULL_IMAGE);
+      this.buildImage(state, entity === 'test' ? 'small' : 'full');
   }
 }
