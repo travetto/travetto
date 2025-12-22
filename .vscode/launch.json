@@ -55,7 +55,6 @@
       "env": {
         "WEB_PORT": "4000",
         "TRV_MODULE": "@travetto/todo-app",
-        "TRV_DYNAMIC": "1"
       },
       "cwd": "${workspaceFolder}/related/todo-app",
       "args": [

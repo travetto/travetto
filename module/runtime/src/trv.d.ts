@@ -22,10 +22,6 @@ declare module "@travetto/runtime" {
      */
     TRV_ROLE: Role;
     /** 
-     * Whether or not to run the program in dynamic mode, allowing for real-time updates  
-     */
-    TRV_DYNAMIC: boolean;
-    /** 
      * The folders to use for resource lookup
      */
     TRV_RESOURCES: string[];

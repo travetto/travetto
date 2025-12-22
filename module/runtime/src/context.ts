@@ -37,11 +37,6 @@ class $Runtime {
     return process.env.NODE_ENV === 'production';
   }
 
-  /** Is the app in dynamic mode? */
-  get dynamic(): boolean {
-    return Env.TRV_DYNAMIC.isTrue;
-  }
-
   /** Get debug value */
   get debug(): false | string {
     const value = Env.DEBUG.value ?? '';
