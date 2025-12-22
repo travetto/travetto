@@ -1,6 +1,7 @@
+import { ManifestModuleUtil } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
-import { AsyncQueue, TimeUtil, watchCompiler } from '@travetto/runtime';
+import { AsyncQueue, RuntimeIndex, TimeUtil, watchCompiler } from '@travetto/runtime';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
@@ -53,12 +54,17 @@ export class TestWatcher {
       }
     );
 
-    for await (const event of watchCompiler({ restartOnExit: true, validSourceOnly: true })) {
-      if (event.action === 'delete') {
-        consumer.removeTest(event.import);
-      } else {
-        const diffSource = consumer.produceDiffSource(event.import);
-        queue.add({ import: event.import, diffSource }, true);
+    for await (const event of watchCompiler()) {
+      if (
+        ManifestModuleUtil.isSourceFile(event.file) &&
+        RuntimeIndex.findModuleForArbitraryFile(event.file) !== undefined
+      ) {
+        if (event.action === 'delete') {
+          consumer.removeTest(event.import);
+        } else {
+          const diffSource = consumer.produceDiffSource(event.import);
+          queue.add({ import: event.import, diffSource }, true);
+        }
       }
     }
 
