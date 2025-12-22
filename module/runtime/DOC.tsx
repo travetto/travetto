@@ -15,6 +15,7 @@ export const text = <>
     <li>Standard Error Support</li>
     <li>Console Management</li>
     <li>Resource Access</li>
+    <li>JSON Utilities</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
     <li>Process Execution</li>
@@ -119,6 +120,21 @@ $ DEBUG=express:*,@travetto/web npx trv run web
     The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  <br />
 
     The {FileLoader} also supports tying itself to {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
+  </c.Section>
+
+  <c.Section title='JSON Utilities'>
+    The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well
+    as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal
+    is ease of use, but also a centralized location for performance and security improvements over time.
+    <br />
+
+    <ul>
+      <li>{d.method('parseSafe(input: string | Buffer)')} parses JSON safely from a string or Buffer.</li>
+      <li>{d.method('stringifyBase64(value: any)')} encodes a JSON value as a base64 encoded string.</li>
+      <li>{d.method('parseBase64(input: string)')} decodes a JSON value from a base64 encoded string.</li>
+      <li>{d.method('readFile(file: string)')} reads a JSON file asynchronously.</li>
+      <li>{d.method('readFileSync(file: string, onMissing?: any)')} reads a JSON file synchronously.</li>
+    </ul>
   </c.Section>
 
   <c.Section title='Common Utilities'>
