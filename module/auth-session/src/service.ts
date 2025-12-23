@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Util } from '@travetto/runtime';
-import { ModelExpirySupport, NotFoundError, ModelStorageUtil } from '@travetto/model';
+import { JSONUtil } from '@travetto/runtime';
+import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AuthContext, AuthService } from '@travetto/auth';
 
 import { Session } from './session.ts';
@@ -29,15 +29,6 @@ export class SessionService {
   }
 
   /**
-   * Initialize service if none defined
-   */
-  async postConstruct(): Promise<void> {
-    if (ModelStorageUtil.shouldAutoCreate(this.#modelService)) {
-      await this.#modelService.createModel?.(SessionEntry);
-    }
-  }
-
-  /**
    * Load session by id
    * @returns Session if valid
    */
@@ -47,7 +38,7 @@ export class SessionService {
 
       const session = new Session({
         ...record,
-        data: Util.decodeSafeJSON(record.data)
+        data: JSONUtil.parseBase64(record.data)
       });
 
       // Validate session
@@ -89,7 +80,7 @@ export class SessionService {
       if (session.action === 'create' || session.isChanged()) {
         await this.#modelService.upsert(SessionEntry, SessionEntry.from({
           ...session,
-          data: Util.encodeSafeJSON(session.data)
+          data: JSONUtil.stringifyBase64(session.data)
         }));
       }
       // If destroying

@@ -2,9 +2,8 @@
 import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 
-import { Registry } from './src/service/registry.ts';
-import { DynamicFileLoader } from './src/internal/file-loader.ts';
-import { type RegistryIndex } from './src/service/types.ts';
+import { Registry } from './src/registry.ts';
+import { type RegistryIndex } from './src/types.ts';
 
 const RegistryIndexContract = toConcrete<RegistryIndex>();
 
@@ -31,15 +30,7 @@ export const text = <>
       The registry index is a {RegistryIndexContract} that similar to the {d.mod('Schema')}'s Schema registry and {d.mod('Di')}'s Dependency registry.
     </c.SubSection>
     <c.SubSection title='Live Flow'>
-      At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. <br />
-
-      As the {DynamicFileLoader} notifies that a file has been changed, the {Registry} will pick it up, and process it accordingly.
+      At runtime, the framework is designed to listen for changes and restart any running processes as needed.
     </c.SubSection>
-  </c.Section>
-
-  <c.Section title='Supporting Metadata'>
-    As mentioned in {d.mod('Manifest')}'s readme, the framework produces hashes of methods, classes, and functions, to allow for detecting changes to individual parts of the codebase. During the live flow, various registries will inspect this information to determine if action should be taken.
-
-    <c.Code title='Sample Class Diffing' src='src/source/class-source.ts' startRe={/^\s{2}#handleFileChanges/} endRe={/^\s{2}[}]/} />
   </c.Section>
 </>;

@@ -7,6 +7,6 @@ export class DynamoDBModelConfig {
   client: dynamodb.DynamoDBClientConfig = {
     endpoint: undefined
   };
-  autoCreate?: boolean;
+  modifyStorage?: boolean;
   namespace?: string;
 }

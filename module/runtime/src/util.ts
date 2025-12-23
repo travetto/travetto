@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
 
-import { castTo, hasToJSON } from './types.ts';
+import { castTo } from './types.ts';
 import { AppError } from './error.ts';
 
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
@@ -118,82 +118,6 @@ export class Util {
     } else {
       return () => true;
     }
-  }
-
-  /**
-   * Encode JSON value as base64 encoded string
-   */
-  static encodeSafeJSON<T>(value: T | undefined): string | undefined {
-    if (value === undefined) {
-      return;
-    }
-    const text = JSON.stringify(value);
-    return Buffer.from(text, 'utf8').toString('base64');
-  }
-
-  /**
-   * Decode JSON value from base64 encoded string
-   */
-  static decodeSafeJSON<T>(input: string): T;
-  static decodeSafeJSON<T>(input?: string | undefined): T | undefined;
-  static decodeSafeJSON<T>(input?: string | undefined): T | undefined {
-    if (!input) {
-      return undefined;
-    }
-
-    let decoded = Buffer.from(input, 'base64').toString('utf8');
-
-    // Read from encoded if it happens
-    if (decoded.startsWith('%')) {
-      decoded = decodeURIComponent(decoded);
-    }
-
-    return JSON.parse(decoded, undefined);
-  }
-
-  /**
-   * Serialize to JSON
-   */
-  static serializeToJSON<T>(out: T): string {
-    return JSON.stringify(out, function (key, value) {
-      const objectValue = this[key];
-      if (objectValue && objectValue instanceof Error) {
-        return {
-          $: true,
-          ...hasToJSON(objectValue) ? objectValue.toJSON() : objectValue,
-          name: objectValue.name,
-          message: objectValue.message,
-          stack: objectValue.stack,
-        };
-      } else if (typeof value === 'bigint') {
-        return `${value.toString()}$n`;
-      } else {
-        return value;
-      }
-    });
-  }
-
-  /**
-   * Deserialize from JSON
-   */
-  static deserializeFromJson<T = unknown>(input: string): T {
-    return JSON.parse(input, function (key, value) {
-      if (value && typeof value === 'object' && '$' in value) {
-        const error = AppError.fromJSON(value) ?? new Error();
-        if (!(error instanceof AppError)) {
-          const { $: _, ...rest } = value;
-          Object.assign(error, rest);
-        }
-        error.message = value.message;
-        error.stack = value.stack;
-        error.name = value.name;
-        return error;
-      } else if (typeof value === 'string' && /^\d+[$]n$/.test(value)) {
-        return BigInt(value.split('$')[0]);
-      } else {
-        return value;
-      }
-    });
   }
 
   /**

@@ -97,12 +97,6 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
     }
   }
 
-  async postConstruct(): Promise<void> {
-    if (ModelStorageUtil.shouldAutoCreate(this.#modelService)) {
-      await this.#modelService.createModel?.(this.#cls);
-    }
-  }
-
   /**
    * Register a user
    * @param user The user to register

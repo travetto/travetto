@@ -21,7 +21,7 @@ class TextModel {
 }
 
 @Suite()
-export class MongoQuerySuite extends ModelQuerySuite {
+class MongoQuerySuite extends ModelQuerySuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 
@@ -82,25 +82,25 @@ export class MongoQuerySuite extends ModelQuerySuite {
 }
 
 @Suite()
-export class MongoQueryCrudSuite extends ModelQueryCrudSuite {
+class MongoQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
 
 @Suite()
-export class MongoQueryFacetSuite extends ModelQueryFacetSuite {
+class MongoQueryFacetSuite extends ModelQueryFacetSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
 
 @Suite()
-export class MongoQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+class MongoQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
 
 @Suite()
-export class MongoQuerySuggestSuite extends ModelQuerySuggestSuite {
+class MongoQuerySuggestSuite extends ModelQuerySuggestSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

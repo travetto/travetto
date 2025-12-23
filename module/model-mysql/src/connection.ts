@@ -1,7 +1,7 @@
 import { createPool } from 'mysql2';
 import { PoolConnection, Pool, OkPacket, ResultSetHeader } from 'mysql2/promise';
 
-import { castTo, ShutdownManager } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';
@@ -52,7 +52,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
     if (typeof result === 'string' && (field && typeof field === 'object' && 'type' in field) && (field.type === 'JSON' || field.type === 'BLOB')) {
       if (result.charAt(0) === '{' && result.charAt(result.length - 1) === '}') {
         try {
-          return JSON.parse(result);
+          return JSONUtil.parseSafe(result);
         } catch { }
       }
     }

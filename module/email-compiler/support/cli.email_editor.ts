@@ -1,5 +1,5 @@
 import { Env } from '@travetto/runtime';
-import { CliCommand, CliUtil } from '@travetto/cli';
+import { CliCommand } from '@travetto/cli';
 import { Registry } from '@travetto/registry';
 import { DependencyRegistryIndex } from '@travetto/di';
 
@@ -10,15 +10,10 @@ import { EditorService } from './bin/editor.ts';
 export class EmailEditorCommand {
 
   preMain(): void {
-    Env.TRV_DYNAMIC.set(true);
     Env.TRV_ROLE.set('build');
   }
 
   async main(): Promise<void> {
-    if (await CliUtil.runWithRestart(this, true)) {
-      return;
-    }
-
     await Registry.init();
     const service = await DependencyRegistryIndex.getInstance(EditorService);
     await service.listen();

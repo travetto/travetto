@@ -1,10 +1,9 @@
-import vscode from 'vscode';
+import vscode, { ThemeColor } from 'vscode';
 
-import type { TestResult, TestWatchEvent } from '@travetto/test';
+import type { TestRemoveEvent, TestResult, TestStatus, TestWatchEvent } from '@travetto/test';
 
-import { StatusUnknown } from './types.ts';
 import { Workspace } from '../../../core/workspace';
-import { Decorations } from './decoration';
+import { Decorations, Style } from './decoration';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
@@ -13,7 +12,7 @@ export const testDiagnostics = vscode.languages.createDiagnosticCollection('Trav
  */
 export class DiagnosticManager {
   #status: vscode.StatusBarItem;
-  #tracked = new Map<string, Map<string, TestResult>>();
+  #tracked = new Map<string, Map<string, Map<string, TestResult>>>();
   #window: typeof vscode.window;
 
   constructor(window: typeof vscode.window) {
@@ -22,147 +21,137 @@ export class DiagnosticManager {
     this.#status.command = 'workbench.action.showErrorsWarnings';
   }
 
-  #buildDiagnostics(file: string) {
-    const results = this.#tracked.get(file)!;
-    const diagnostics: vscode.Diagnostic[] = [];
-    for (const test of results.values()) {
-      if (test.status !== 'failed') {
+  #buildTestDiagnostics(file: string, test: TestResult): vscode.Diagnostic[] {
+    const clsName = test.classId.split(/[^a-z-/]+/i).pop();
+    const results: vscode.Diagnostic[] = [];
+
+    const addError = (msg: string, line: number) => {
+      const item = new vscode.Diagnostic(
+        new vscode.Range(new vscode.Position(line - 1, 0), new vscode.Position(line - 1, 1000)),
+        `${clsName}.${test.methodName} - ${msg}`,
+        vscode.DiagnosticSeverity.Error
+      );
+      item.source = '@travetto/test';
+      results.push(item);
+    };
+
+    for (const assertion of test.assertions) {
+      if (!assertion.error) {
         continue;
       }
-      const clsName = test.classId.split(/[^a-z-/]+/i).pop();
-      const addError = (msg: string, line: number) => {
-        const diag = new vscode.Diagnostic(
-          new vscode.Range(new vscode.Position(line - 1, 0), new vscode.Position(line - 1, 1000)),
-          `${clsName}.${test.methodName} - ${msg}`,
-          vscode.DiagnosticSeverity.Error
-        );
-        diag.source = '@travetto/test';
-        diagnostics.push(diag);
-      };
+      addError(Decorations.buildErrorHover(assertion).bodyFirst, assertion.line);
+    }
 
-      for (const as of test.assertions) {
-        if (!as.error) {
-          continue;
-        }
-        addError(Decorations.buildErrorHover(as).bodyFirst, as.line);
-      }
-
-      if (test.assertions.length === 0) {
-        if ('error' in test && test.error) {
-          const firstLine = test.error.message.split(/\n/).shift();
-          Workspace.resolveManifestIndexFileFromFile(file);
-          const { outputFile } = Workspace.workspaceIndex.getFromSource(file) ?? {};
-          if (!outputFile || !firstLine) {
-            continue;
-          }
-          if (!firstLine.startsWith('Cannot find module') || !firstLine.includes(outputFile)) {
-            addError(firstLine, test.lineStart);
-          }
+    if (test.assertions.length === 0) {
+      if ('error' in test && test.error) {
+        const firstLine = test.error.message.split(/\n/).shift();
+        Workspace.resolveManifestIndexFileFromFile(file);
+        const { outputFile } = Workspace.workspaceIndex.getFromSource(file) ?? {};
+        if (outputFile && firstLine && (!firstLine.startsWith('Cannot find module') || !firstLine.includes(outputFile))) {
+          addError(firstLine, test.lineStart);
         }
       }
     }
+    return results;
+  }
+
+  #setDiagnostics(file: string) {
+    const classes = this.#tracked.get(file);
+
+    const diagnostics = [...classes?.values() ?? []]
+      .flatMap(m => [...m.values()])
+      .filter(t => t.status === 'failed')
+      .flatMap(t => this.#buildTestDiagnostics(file, t));
 
     testDiagnostics.set(vscode.Uri.file(file), diagnostics);
   }
 
-  clear(file: string): void {
-    if (this.#tracked.has(file)) {
-      this.#tracked.set(file, new Map());
-      this.#buildDiagnostics(file);
-    }
-    this.updateTotals();
+  refreshStatus(): void {
+    const { total, passed, failed, unknown } = [...this.#tracked.values()]
+      .flatMap(m => [...m.values()])
+      .flatMap(t => [...t.values()])
+      .reduce((acc, t) => {
+        acc.total += 1;
+        acc[t.status] += 1;
+        return acc;
+      }, { total: 0, passed: 0, failed: 0, skipped: 0, unknown: 0 });
+
+    const status = failed > 0 ? 'failed' : passed === total ? 'passed' : 'unknown';
+    this.setStatus(`Tests \$(pass-filled) ${passed} \$(alert) ${failed}`, status);
   }
 
-  rename(oldFile: string, newFile: string): void {
-    this.clear(oldFile);
+  afterTest(test: TestResult): void {
+    const file = Workspace.resolveImport(test.import);
+    if (!this.#tracked.has(file)) {
+      this.#tracked.set(file, new Map());
+    }
+    if (!this.#tracked.get(file)!.has(test.classId)) {
+      this.#tracked.get(file)!.set(test.classId, new Map());
+    }
+    this.#tracked.get(file)!.get(test.classId)!.set(test.methodName, test);
+    this.#setDiagnostics(file);
+  }
+
+  onTestRemove(event: TestRemoveEvent): void {
+    const file = Workspace.resolveImport(event.import);
+    if (event.methodName && event.classId) {
+      this.#tracked.get(file)?.get(event.classId)?.delete(event.methodName);
+    } else if (event.classId) {
+      this.#tracked.get(file)?.delete(event.classId);
+    } else {
+      this.#tracked.delete(file);
+    }
+    this.#setDiagnostics(file);
   }
 
   onEvent(event: TestWatchEvent): void {
     if (event.type === 'suite' && event.phase === 'after') {
-      this.updateTotals();
+      this.refreshStatus();
     } else if (event.type === 'test' && event.phase === 'after') {
-      const file = Workspace.resolveImport(event.test.import);
-      if (!this.#tracked.has(file)) {
-        this.#tracked.set(file, new Map());
-      }
-      this.#tracked.get(file)!.set(`${event.test.classId}:${event.test.methodName}`, event.test);
-      this.#buildDiagnostics(file);
+      this.afterTest(event.test);
     } else if (event.type === 'removeTest') {
-      const file = Workspace.resolveImport(event.import);
-      if (!this.#tracked.has(file)) {
-        this.#tracked.set(file, new Map());
-      }
-      if (event.classId && event.method) {
-        const tests = [...this.#tracked.get(file)!.values()];
-        const idx = tests.findIndex(result => result.methodName === event.method);
-        if (idx >= 0) {
-          tests.splice(idx, 1);
-        }
-        this.#buildDiagnostics(file);
-      } else if (event.classId) {
-        this.#tracked.get(file)!.delete(event.classId);
-        this.#buildDiagnostics(file);
-      } else {
-        this.#tracked.set(file, new Map());
-        this.#buildDiagnostics(file);
-      }
+      this.onTestRemove(event);
     }
+  }
+
+  resetFile(file: string): void {
+    this.#tracked.delete(file);
+    this.#setDiagnostics(file);
+    this.refreshStatus();
   }
 
   reset(): void {
     testDiagnostics.clear();
-    this.setStatus('');
+    this.setStatus('', 'unknown');
     this.#tracked.clear();
-  }
-
-  /**
-   * Update totals
-   */
-  updateTotals(): void {
-    const totals = this.getTotals();
-    this.setStatus(
-      totals.failed === 0 ?
-        `Passed ${totals.passed}` :
-        `Failed ${totals.failed}/${totals.failed + totals.passed}`,
-      totals.failed ? '#f33' : '#8f8'
-    );
-  }
-
-  /**
-   * Get totals from the runner
-   */
-  getTotals(): Record<StatusUnknown, number> {
-    const totals: Record<StatusUnknown, number> = {
-      skipped: 0,
-      failed: 0,
-      passed: 0,
-      unknown: 0
-    };
-    for (const file of this.#tracked.values()) {
-      for (const test of file.values()) {
-        switch (test.status) {
-          case 'skipped':
-          case 'failed':
-          case 'passed': totals[test.status] += 1; break;
-          default: totals.unknown += 1;
-        }
-      }
-    }
-    return totals;
   }
 
   /**
    * Set overall status
    * @param message
-   * @param color
+   * @param status
    */
-  setStatus(message: string, color?: string): void {
+  setStatus(message: string, status: TestStatus): void {
     if (!message) {
       this.#status.hide();
-    } else {
-      this.#status.color = color || '#fff';
-      this.#status.text = message;
-      this.#status.show();
+      return;
     }
+
+    switch (status) {
+      case 'passed':
+        this.#status.backgroundColor = undefined;
+        this.#status.color = Style.COLORS.passed;
+        break;
+      case 'failed':
+        this.#status.backgroundColor = new ThemeColor('statusBarItem.errorBackground');
+        this.#status.color = new ThemeColor('statusBarItem.errorForeground');
+        break;
+      default:
+        this.#status.backgroundColor = new ThemeColor('statusBarItem.warningBackground');
+        this.#status.color = new ThemeColor('statusBarItem.warningForeground');
+        break;
+    }
+    this.#status.text = message;
+    this.#status.show();
   }
 }

@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import { ChildProcess, spawn } from 'node:child_process';
 
-import { Env, ExecUtil, Util } from '@travetto/runtime';
+import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
 import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types.ts';
 
@@ -102,7 +102,7 @@ export class CompilerWatchFeature extends BaseFeature {
   async #compilerState(): Promise<CompilerStateType | undefined> {
     const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
-      const event: CompilerStateEvent = JSON.parse(stdout);
+      const event: CompilerStateEvent = JSONUtil.parseSafe(stdout);
       return event.state;
     } catch { }
   }
@@ -119,7 +119,7 @@ export class CompilerWatchFeature extends BaseFeature {
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
           await ExecUtil.readLines(subProcess.stdout!, line => {
-            const { type, payload }: CompilerEvent = JSON.parse(line);
+            const { type, payload }: CompilerEvent = JSONUtil.parseSafe(line);
             switch (type) {
               case 'log': this.#ongLogEvent(payload); break;
               case 'state': this.#onStateEvent(payload); break;

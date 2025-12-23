@@ -1,7 +1,6 @@
 import { Class, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { ControllerRegistryIndex } from '@travetto/web';
-import { Registry } from '@travetto/registry';
 
 import { ControllerConfig, EndpointConfig } from '../registry/types.ts';
 import type { WebRouter } from '../types/dispatch.ts';
@@ -17,7 +16,6 @@ import { EndpointUtil } from '../util/endpoint.ts';
 @Injectable()
 export abstract class BaseWebRouter implements WebRouter {
 
-  #cleanup = new Map<Class, Function>();
   #interceptors: WebInterceptor[];
 
   async #register(cls: Class): Promise<void> {
@@ -30,8 +28,7 @@ export abstract class BaseWebRouter implements WebRouter {
       endpoint.filter = EndpointUtil.createEndpointHandler(this.#interceptors, endpoint, config);
     }
 
-    const fn = await this.register(endpoints, config);
-    this.#cleanup.set(cls, fn);
+    await this.register(endpoints, config);
   };
 
   /**
@@ -48,22 +45,8 @@ export abstract class BaseWebRouter implements WebRouter {
     for (const cls of ControllerRegistryIndex.getClasses()) {
       await this.#register(cls);
     }
-
-    // Listen for updates
-    Registry.onClassChange(async event => {
-      const targetCls = 'current' in event ? event.current : event.previous;
-      console.debug('Registry event', { type: event.type, target: targetCls.Ⲑid });
-
-      if ('previous' in event) {
-        this.#cleanup.get(event.previous)?.();
-        this.#cleanup.delete(event.previous);
-      }
-      if ('current' in event) {
-        await this.#register(event.current);
-      }
-    }, ControllerRegistryIndex);
   }
 
-  abstract register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<() => void>;
+  abstract register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<void>;
   abstract dispatch(ctx: WebFilterContext): Promise<WebResponse>;
 }

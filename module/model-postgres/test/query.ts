@@ -20,7 +20,7 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQuerySuite extends ModelQuerySuite {
+class PostgreSQLQuerySuite extends ModelQuerySuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
   supportsGeo = false;
@@ -28,28 +28,28 @@ export class PostgreSQLQuerySuite extends ModelQuerySuite {
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQueryCrudSuite extends ModelQueryCrudSuite {
+class PostgreSQLQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQueryFacetSuite extends ModelQueryFacetSuite {
+class PostgreSQLQueryFacetSuite extends ModelQueryFacetSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+class PostgreSQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQuerySuggestSuite extends ModelQuerySuggestSuite {
+class PostgreSQLQuerySuggestSuite extends ModelQuerySuggestSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

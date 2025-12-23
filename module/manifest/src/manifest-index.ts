@@ -193,6 +193,14 @@ export class ManifestIndex {
   }
 
   /**
+   * Get from import path or source file
+   * @param importOrSource
+   */
+  getFromImportOrSource(importOrSource: string): IndexedFile | undefined {
+    return this.getFromImport(importOrSource) ?? this.getFromSource(path.resolve(importOrSource));
+  }
+
+  /**
    * Get module from source file
    * @param source
    */
@@ -254,6 +262,15 @@ export class ManifestIndex {
         !existsSync(path.resolve(base, ...sub, '.git'))
     );
     return lookup(file.replace(`${base}/`, '').split('/'));
+  }
+
+  /**
+   * Find the module for an arbitrary import
+   */
+  findModuleForArbitraryImport(imp: string): IndexedModule | undefined {
+    const importParts = imp.split('/');
+    const module = imp.startsWith('@') ? importParts.slice(0, 2).join('/') : importParts[0];
+    return this.getModule(module);
   }
 
   /**

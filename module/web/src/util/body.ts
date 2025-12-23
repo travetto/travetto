@@ -1,7 +1,7 @@
 import { TextDecoder } from 'node:util';
 import { Readable } from 'node:stream';
 
-import { Any, BinaryUtil, castTo, hasToJSON, Util } from '@travetto/runtime';
+import { Any, BinaryUtil, castTo, hasToJSON, JSONUtil, Util } from '@travetto/runtime';
 
 import { WebBinaryBody, WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -160,7 +160,7 @@ export class WebBodyUtil {
   static parseBody(type: string, body: string): unknown {
     switch (type) {
       case 'text': return body;
-      case 'json': return JSON.parse(body);
+      case 'json': return JSONUtil.parseSafe(body);
       case 'form': return Object.fromEntries(new URLSearchParams(body));
     }
   }

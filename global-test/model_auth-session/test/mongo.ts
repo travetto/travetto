@@ -16,7 +16,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class MongoAuthSessionServerSuite extends AuthSessionServerSuite {
+class MongoAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

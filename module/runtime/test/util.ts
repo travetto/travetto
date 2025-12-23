@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-import { Util, AsyncQueue, AppError } from '@travetto/runtime';
+import { Util, AsyncQueue } from '@travetto/runtime';
 
 @Suite()
 export class UtilTest {
@@ -30,29 +30,6 @@ export class UtilTest {
 
     assert(values[0] === 'aaa = 0');
     assert(values[1] === 'bbb = 1');
-  }
-
-  @Test()
-  async verifySerialize() {
-    const payload = {
-      err: new AppError('Uh-oh'),
-      count: 2000n
-    };
-
-    const plain = JSON.parse(Util.serializeToJSON(payload));
-    assert('err' in plain);
-    assert(typeof plain.err === 'object');
-    assert('$' in plain.err);
-    assert('stack' in plain.err);
-    assert(typeof plain.err.stack === 'string');
-
-    console.error(plain);
-
-    const complex: typeof payload = Util.deserializeFromJson(JSON.stringify(plain));
-
-    assert(complex.err instanceof AppError);
-    assert(complex.err.stack === payload.err.stack);
-    assert(typeof complex.count === 'bigint');
   }
 
   @Test('should succeed on first try')

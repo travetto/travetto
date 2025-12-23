@@ -1,5 +1,5 @@
 import type { Any, Class, TypedFunction } from '@travetto/runtime';
-import type { SchemaClassConfig, SchemaParameterConfig } from '@travetto/schema';
+import type { SchemaClassConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
@@ -177,16 +177,10 @@ export interface ControllerVisitor<T = unknown> {
   onControllerStart?(controller: ControllerConfig): Promise<unknown> | unknown;
   onControllerEnd?(controller: ControllerConfig): Promise<unknown> | unknown;
 
-  onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: SchemaParameterConfig[]): Promise<unknown> | unknown;
-  onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: SchemaParameterConfig[]): Promise<unknown> | unknown;
+  onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig): Promise<unknown> | unknown;
+  onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig): Promise<unknown> | unknown;
 
   onSchema?(schema: SchemaClassConfig): Promise<unknown> | unknown;
-
-  onControllerAdd?(cls: Class): Promise<unknown> | unknown;
-  onControllerRemove?(cls: Class): Promise<unknown> | unknown;
-
-  onSchemaAdd?(cls: Class): Promise<boolean> | boolean;
-  onSchemaRemove?(cls: Class): Promise<boolean> | boolean;
 
   onComplete?(): T | Promise<T>;
 }

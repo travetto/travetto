@@ -80,7 +80,6 @@ export class DocRunUtil {
       env: {
         ...process.env,
         ...Env.DEBUG.export(false),
-        ...Env.TRV_CAN_RESTART.export(false),
         ...Env.TRV_CLI_IPC.export(undefined),
         ...Env.TRV_MANIFEST.export(''),
         ...Env.TRV_BUILD.export('none'),

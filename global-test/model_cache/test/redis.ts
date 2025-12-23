@@ -13,7 +13,7 @@ class Config {
 }
 
 @Suite()
-export class RedisCacheSuite extends CacheServiceSuite {
+class RedisCacheSuite extends CacheServiceSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

@@ -2,7 +2,7 @@ import { RuntimeIndex, type Class } from '@travetto/runtime';
 import { Registry, RegistryIndex, RegistryIndexStore } from '@travetto/registry';
 
 import type { TestConsumerShape } from './types.ts';
-import type { RunState } from '../execute/types.ts';
+import type { TestConsumerConfig } from '../execute/types.ts';
 import { TestConsumerRegistryAdapter } from './registry-adapter.ts';
 
 /**
@@ -25,10 +25,10 @@ export class TestConsumerRegistryIndex implements RegistryIndex {
 
   /**
    * Get a consumer instance that supports summarization
-   * @param consumer The consumer identifier or the actual consumer
+   * @param consumerConfig The consumer configuration
    */
-  static getInstance(state: Pick<RunState, 'consumer' | 'consumerOptions'>): Promise<TestConsumerShape> {
-    return this.#instance.getInstance(state);
+  static getInstance(consumerConfig: TestConsumerConfig): Promise<TestConsumerShape> {
+    return this.#instance.getInstance(consumerConfig);
   }
 
   #initialized: Promise<void>;
@@ -69,7 +69,7 @@ export class TestConsumerRegistryIndex implements RegistryIndex {
    * Get a consumer instance that supports summarization
    * @param consumer The consumer identifier or the actual consumer
    */
-  async getInstance(state: Pick<RunState, 'consumer' | 'consumerOptions'>): Promise<TestConsumerShape> {
+  async getInstance(state: Pick<TestConsumerConfig, 'consumer' | 'consumerOptions'>): Promise<TestConsumerShape> {
     await (this.#initialized ??= this.#init());
     for (const cls of this.store.getClasses()) {
       const adapter = this.store.get(cls);

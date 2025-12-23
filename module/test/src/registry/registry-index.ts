@@ -37,6 +37,10 @@ export class SuiteRegistryIndex implements RegistryIndex {
     return this.#instance.store.getClasses();
   }
 
+  static hasConfig(cls: Class): boolean {
+    return this.#instance.store.has(cls);
+  }
+
   store = new RegistryIndexStore(SuiteRegistryAdapter);
 
   /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }

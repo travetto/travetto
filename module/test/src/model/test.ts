@@ -5,6 +5,13 @@ import { Skip, TestCore } from './common.ts';
 export type ThrowableError = string | RegExp | Class<Error> | ((error: Error | string) => boolean | void | undefined);
 export type TestLog = Omit<ConsoleEvent, 'args' | 'scope'> & { message: string };
 
+export type TestDiffSource = Record<string, {
+  sourceHash: number;
+  methods: Record<string, number>;
+}>;
+
+export type TestStatus = 'passed' | 'skipped' | 'failed' | 'unknown';
+
 /**
  * Specific configuration for a test
  */
@@ -88,7 +95,7 @@ export interface TestResult extends TestCore {
   /**
    * status
    */
-  status: 'passed' | 'skipped' | 'failed';
+  status: TestStatus;
   /**
    * Error if failed
    */
@@ -136,3 +143,42 @@ export type TestRun = {
    */
   runId?: string;
 };
+
+/**
+ * Test Diff Input
+ */
+export type TestDiffInput = {
+  /**
+   * Import for run
+   */
+  import: string;
+  /**
+   * Diff Source
+   */
+  diffSource: TestDiffSource;
+  /**
+   * Test run metadata
+   */
+  metadata?: Record<string, unknown>;
+};
+
+/**
+ * Test Glob Input
+ */
+export type TestGlobInput = {
+  /**
+   * Globs to run
+   */
+  globs: string[];
+  /**
+   * Tags to filter by
+   */
+  tags?: string[];
+  /**
+   * Test run metadata
+   */
+  metadata?: Record<string, unknown>;
+};
+
+
+export type TestRunInput = TestRun | TestDiffInput | TestGlobInput;

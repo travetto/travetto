@@ -4,7 +4,7 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/m
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 
 @Suite()
-export class ElasticsearchCrudSuite extends ModelCrudSuite {
+class ElasticsearchCrudSuite extends ModelCrudSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

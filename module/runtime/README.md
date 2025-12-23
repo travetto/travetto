@@ -19,6 +19,7 @@ Runtime is the foundation of all [Travetto](https://travetto.dev) applications. 
    *  Standard Error Support
    *  Console Management
    *  Resource Access
+   *  JSON Utilities
    *  Common Utilities
    *  Time Utilities
    *  Process Execution
@@ -38,8 +39,6 @@ class $Runtime {
   get env(): string | undefined;
   /** Are we in development mode */
   get production(): boolean;
-  /** Is the app in dynamic mode? */
-  get dynamic(): boolean;
   /** Get debug value */
   get debug(): false | string;
   /** Manifest main */
@@ -95,10 +94,6 @@ interface EnvData {
      * Special role to run as, used to access additional files from the manifest during runtime.  
      */
     TRV_ROLE: Role;
-    /** 
-     * Whether or not to run the program in dynamic mode, allowing for real-time updates  
-     */
-    TRV_DYNAMIC: boolean;
     /** 
      * The folders to use for resource lookup
      */
@@ -258,9 +253,18 @@ $ DEBUG=express:*,@travetto/web npx trv run web
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L12) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L12) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+
+## JSON Utilities
+The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal is ease of use, but also a centralized location for performance and security improvements over time.
+
+   *  `parseSafe(input: string | Buffer)` parses JSON safely from a string or Buffer.
+   *  `stringifyBase64(value: any)` encodes a JSON value as a base64 encoded string.
+   *  `parseBase64(input: string)` decodes a JSON value from a base64 encoded string.
+   *  `readFile(file: string)` reads a JSON file asynchronously.
+   *  `readFileSync(file: string, onMissing?: any)` reads a JSON file synchronously.
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L12) includes:
@@ -323,7 +327,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L43) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L40) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 

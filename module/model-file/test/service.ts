@@ -13,25 +13,25 @@ import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 
 @Suite()
-export class FileBasicSuite extends ModelBasicSuite {
+class FileBasicSuite extends ModelBasicSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }
 
 @Suite()
-export class FileCrudSuite extends ModelCrudSuite {
+class FileCrudSuite extends ModelCrudSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }
 
 @Suite()
-export class FileBlobSuite extends ModelBlobSuite {
+class FileBlobSuite extends ModelBlobSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }
 
 @Suite()
-export class FileExpirySuite extends ModelExpirySuite {
+class FileExpirySuite extends ModelExpirySuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 

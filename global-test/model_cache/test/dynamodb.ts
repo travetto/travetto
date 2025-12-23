@@ -14,7 +14,7 @@ class Config {
 }
 
 @Suite()
-export class DynamoDBCacheSuite extends CacheServiceSuite {
+class DynamoDBCacheSuite extends CacheServiceSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
   baseLatency = 100;

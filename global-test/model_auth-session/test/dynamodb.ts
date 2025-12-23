@@ -16,7 +16,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class DynamoDBAuthSessionServerSuite extends AuthSessionServerSuite {
+class DynamoDBAuthSessionServerSuite extends AuthSessionServerSuite {
   timeScale = 1.3;
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;

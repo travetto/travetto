@@ -8,31 +8,31 @@ import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
 @Suite()
-export class DynamoDBBasicSuite extends ModelBasicSuite {
+class DynamoDBBasicSuite extends ModelBasicSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }
 
 @Suite()
-export class DynamoDBCrudSuite extends ModelCrudSuite {
+class DynamoDBCrudSuite extends ModelCrudSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }
 
 @Suite()
-export class DynamoDBExpirySuite extends ModelExpirySuite {
+class DynamoDBExpirySuite extends ModelExpirySuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }
 
 @Suite()
-export class DynamoDBIndexedSuite extends ModelIndexedSuite {
+class DynamoDBIndexedSuite extends ModelIndexedSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }
 
 @Suite()
-export class DynamoDBPolymorphismSuite extends ModelPolymorphismSuite {
+class DynamoDBPolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }

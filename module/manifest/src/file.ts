@@ -17,13 +17,6 @@ export class ManifestFileUtil {
   }
 
   /**
-   * Read as json
-   */
-  static async readAsJson<T = unknown>(file: string): Promise<T> {
-    return JSON.parse(await fs.readFile(file, 'utf8'));
-  }
-
-  /**
    * Read as json, sync
    */
   static readAsJsonSync<T = unknown>(file: string): T {

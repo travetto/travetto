@@ -12,7 +12,7 @@ class Init {
 }
 
 @Suite()
-export class DynamoDBAuthModelServiceSuite extends AuthModelServiceSuite {
+class DynamoDBAuthModelServiceSuite extends AuthModelServiceSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }

@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
+import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BinaryUtil, JSONUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
@@ -17,7 +17,7 @@ type StoreType = Map<string, Buffer>;
 
 @Config('model.memory')
 export class MemoryModelConfig {
-  autoCreate?: boolean = true;
+  modifyStorage?: boolean = true;
   namespace?: string;
   cullRate?: number | TimeSpan;
 }
@@ -146,7 +146,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async postConstruct(): Promise<void> {
-    await ModelStorageUtil.registerModelChangeListener(this);
+    await ModelStorageUtil.storageInitialization(this);
     ModelExpiryUtil.registerCull(this);
 
     for (const cls of ModelRegistryIndex.getClasses()) {
@@ -255,7 +255,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async getBlobMeta(location: string): Promise<BlobMeta> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
-    const meta: BlobMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
+    const meta: BlobMeta = JSONUtil.parseSafe(metaContent.get(location)!);
     return meta;
   }
 

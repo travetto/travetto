@@ -1,7 +1,9 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { LoadResult, Plugin, PluginContext } from 'rollup';
+import { LoadResult, Plugin, PluginContext, type SourceMapInput } from 'rollup';
+
+import { FileLoader } from '@travetto/runtime';
 
 import { CoreRollupConfig } from '../../src/types.ts';
 
@@ -27,9 +29,8 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
             this.warn({ message: `Could not find map path in file ${id}`, id });
             return null;
           }
-          const basePath = path.dirname(id);
-          const absoluteMapPath = path.join(basePath, mapPath);
-          const map = JSON.parse(await fs.readFile(absoluteMapPath, 'utf8'));
+          const loader = new FileLoader([path.dirname(id)]);
+          const map: SourceMapInput = await loader.readJSON(mapPath);
           return { code, map };
         }
         return { code, map: null };

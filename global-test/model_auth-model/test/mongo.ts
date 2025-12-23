@@ -4,7 +4,7 @@ import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 
 import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
 
-class Init {
+class Config {
   @InjectableFactory(TestModelSvcSymbol)
   static modelProvider(config: MongoModelConfig) {
     return new MongoModelService(config);
@@ -12,7 +12,7 @@ class Init {
 }
 
 @Suite()
-export class MongoAuthModelServiceSuite extends AuthModelServiceSuite {
+class MongoAuthModelServiceSuite extends AuthModelServiceSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

@@ -1,10 +1,9 @@
 import fs from 'node:fs/promises';
-import { spawn } from 'node:child_process';
 import path from 'node:path';
 
 import { PackageUtil } from '@travetto/manifest';
 import { ExecUtil, Env, watchCompiler, Runtime } from '@travetto/runtime';
-import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
 /**
@@ -28,7 +27,7 @@ export class DocCommand implements CliCommandShape {
     Env.TRV_ROLE.set('doc');
     Env.TRV_CLI_IPC.clear();
     Env.TRV_LOG_PLAIN.set(true);
-    Env.FORCE_COLOR.set(false);
+    Env.FORCE_COLOR.set(false);// Prevent restarting
   }
 
   preBind(): void {
@@ -48,14 +47,10 @@ export class DocCommand implements CliCommandShape {
   }
 
   async runWatch(): Promise<void> {
-    if (await CliUtil.runWithRestart(this)) {
-      return;
-    }
-
-    const args = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
-    for await (const { action, file } of watchCompiler({ restartOnExit: true })) {
-      if (action === 'update' && file === this.input) {
-        const subProcess = spawn('npx', ['trv', ...args], {
+    const [first, ...args] = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
+    for await (const { file } of watchCompiler({ restartOnCompilerExit: true })) {
+      if (file === this.input) {
+        const subProcess = ExecUtil.spawnTrv(first, args, {
           cwd: Runtime.mainSourcePath,
           env: { ...process.env, ...Env.TRV_QUIET.export(true) },
           stdio: 'inherit'

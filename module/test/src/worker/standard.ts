@@ -1,26 +1,26 @@
 import { fork } from 'node:child_process';
 
-import { Env, RuntimeIndex, Util } from '@travetto/runtime';
+import { Env, RuntimeIndex } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { Events, TestLogEvent } from './types.ts';
-import { TestConsumerShape } from '../consumer/types.ts';
-import { TestEvent } from '../model/event.ts';
-import { TestRun } from '../model/test.ts';
+import { TestWorkerEvents, type TestLogEvent } from './types.ts';
+import type { TestConsumerShape } from '../consumer/types.ts';
+import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
+import type { TestDiffInput, TestRun } from '../model/test.ts';
+import { CommunicationUtil } from '../communication.ts';
 
-const log = (message: string): void => {
-  process.send?.({ type: 'log', message } satisfies TestLogEvent);
+const log = (message: string | TestLogEvent): void => {
+  const event: TestLogEvent = typeof message === 'string' ? { type: 'log', message } : message;
+  process.send ? process.send?.(event) : console.debug(event.message);
 };
 
 /**
  *  Produce a handler for the child worker
  */
-export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun): Promise<void> {
+export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun | TestDiffInput): Promise<void> {
   log(`Worker Input ${JSON.stringify(run)}`);
-  log(`Worker Executing ${run.import}`);
 
-  const { module } = RuntimeIndex.getFromImport(run.import)!;
-  const suiteMod = RuntimeIndex.getModule(module)!;
+  const suiteMod = RuntimeIndex.findModuleForArbitraryImport(run.import)!;
 
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(
@@ -37,25 +37,34 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
     )
   );
 
-  await channel.once(Events.READY); // Wait for the child to be ready
-  await channel.send(Events.INIT); // Initialize
-  await channel.once(Events.INIT_COMPLETE); // Wait for complete
+  await channel.once(TestWorkerEvents.READY); // Wait for the child to be ready
+  await channel.send(TestWorkerEvents.INIT); // Initialize
+  await channel.once(TestWorkerEvents.INIT_COMPLETE); // Wait for complete
 
   channel.on('*', async event => {
     try {
-      await consumer.onEvent(Util.deserializeFromJson(JSON.stringify(event)));  // Connect the consumer with the event stream from the child
+      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = CommunicationUtil.deserializeFromObject(event);
+      if (parsed.type === 'log') {
+        log(parsed);
+      } else if (parsed.type === 'removeTest') {
+        log(`Received remove event ${JSON.stringify(event)}@${consumer.constructor.name}`);
+        await consumer.onRemoveEvent?.(parsed); // Forward remove events
+      } else {
+        await consumer.onEvent(parsed);  // Forward standard events
+      }
     } catch {
       // Do nothing
     }
   });
 
   // Listen for child to complete
-  const complete = channel.once(Events.RUN_COMPLETE);
+  const complete = channel.once(TestWorkerEvents.RUN_COMPLETE);
   // Start test
-  channel.send(Events.RUN, run);
+  channel.send(TestWorkerEvents.RUN, run);
 
   // Wait for complete
-  const result = await complete.then(event => Util.deserializeFromJson<typeof event>(JSON.stringify(event)));
+  const completedEvent = await complete;
+  const result: { error?: unknown } = await CommunicationUtil.deserializeFromObject(completedEvent);
 
   // Kill on complete
   await channel.destroy();

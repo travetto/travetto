@@ -1,14 +1,13 @@
 import type vscode from 'vscode';
 
-import type { Assertion, SuiteConfig, SuiteResult, TestConfig, TestEvent, TestResult } from '@travetto/test';
+import type { Assertion, SuiteConfig, SuiteResult, TestConfig, TestEvent, TestResult, TestStatus } from '@travetto/test';
 
-export type StatusUnknown = TestResult['status'] | 'unknown';
 export type TestLevel = TestEvent['type'];
 
 type ResultStyles = Record<string, vscode.TextEditorDecorationType>;
 
 export interface Result<T> {
-  status: StatusUnknown;
+  status: TestStatus;
   decoration: vscode.DecorationOptions;
   logDecorations?: vscode.DecorationOptions[];
   source: T;

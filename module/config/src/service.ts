@@ -152,7 +152,6 @@ export class ConfigurationService {
         env: Runtime.env,
         debug: Runtime.debug,
         production: Runtime.production,
-        dynamic: Runtime.dynamic,
         resourcePaths: RuntimeResources.searchPaths,
         profiles: Env.TRV_PROFILES.list ?? []
       },

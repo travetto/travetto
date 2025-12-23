@@ -31,7 +31,7 @@ class Decorator implements LogDecorator {
 @Suite('Suite')
 class LoggerTest {
 
-  mgr: ConsoleListener;
+  manager: ConsoleListener;
 
   @BeforeAll()
   init() {
@@ -40,12 +40,12 @@ class LoggerTest {
 
   @BeforeEach()
   async reset() {
-    this.mgr = ConsoleManager.get();
+    this.manager = ConsoleManager.get();
     (await DependencyRegistryIndex.getInstance(CustomLogger)).reset();
   }
 
   resetConsole(): void {
-    ConsoleManager.set(this.mgr);
+    ConsoleManager.set(this.manager);
   }
 
   @Test('Should Log')

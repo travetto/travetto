@@ -1,7 +1,7 @@
 import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError, ModelStorageUtil, ModelIndexedUtil } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
-import { AppError, TimeUtil, Util } from '@travetto/runtime';
+import { AppError, JSONUtil, TimeUtil } from '@travetto/runtime';
 
 import { CacheError } from './error.ts';
 import { CacheUtil } from './util.ts';
@@ -14,7 +14,7 @@ const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
   type: 'unsorted',
   fields: [{ keySpace: 1 }]
 })
-@Model({ autoCreate: false })
+@Model({ autoCreate: 'production' })
 export class CacheRecord {
   id: string;
   @Text()
@@ -35,12 +35,6 @@ export class CacheService {
 
   constructor(@Inject({ qualifier: CacheModelSymbol, resolution: 'loose' }) modelService: ModelExpirySupport) {
     this.#modelService = modelService;
-  }
-
-  async postConstruct(): Promise<void> {
-    if (ModelStorageUtil.shouldAutoCreate(this.#modelService)) {
-      await this.#modelService.createModel?.(CacheRecord);
-    }
   }
 
   /**
@@ -72,7 +66,7 @@ export class CacheService {
       }
     }
 
-    return Util.decodeSafeJSON(entry);
+    return JSONUtil.parseBase64(entry);
   }
 
   /**
@@ -81,7 +75,7 @@ export class CacheService {
    * @returns
    */
   async set(id: string, keySpace: string, entry: unknown, maxAge?: number): Promise<unknown> {
-    const entryText = Util.encodeSafeJSON(entry);
+    const entryText = JSONUtil.stringifyBase64(entry);
 
     const store = await this.#modelService.upsert(CacheRecord,
       CacheRecord.from({
@@ -93,7 +87,7 @@ export class CacheService {
       }),
     );
 
-    return Util.decodeSafeJSON(store.entry);
+    return JSONUtil.parseBase64(store.entry);
   }
 
   /**

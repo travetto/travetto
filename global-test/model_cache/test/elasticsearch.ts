@@ -14,7 +14,7 @@ class Config {
 }
 
 @Suite()
-export class ElasticsearchCacheSuite extends CacheServiceSuite {
+class ElasticsearchCacheSuite extends CacheServiceSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

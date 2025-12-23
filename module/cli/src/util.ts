@@ -1,14 +1,23 @@
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Runtime, listenForSourceChanges, type ExecutionResult } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
+const CODE_RESTART = { type: 'code_change', code: 200 };
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
 const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
   !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
 );
+
+const isCodeRestart = (input: unknown): input is typeof CODE_RESTART =>
+  typeof input === 'object' && !!input && 'type' in input && input.type === CODE_RESTART.type;
+
+type RunWithRestartOptions = {
+  maxRetriesPerMinute?: number;
+  relayInterrupt?: boolean;
+};
 
 export class CliUtil {
   /**
@@ -28,21 +37,67 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, ipc?: boolean): Promise<unknown> | undefined {
-    if (ipc && process.connected) {
-      process.once('disconnect', () => process.exit());
+  static async runWithRestartOnCodeChanges<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
+
+    if (Env.TRV_CAN_RESTART.isFalse || cmd.restartForDev !== true) {
+      process.on('message', event => isCodeRestart(event) && process.exit(event.code));
+      return false;
     }
-    if (Env.TRV_CAN_RESTART.isFalse || !(cmd.canRestart ?? !Runtime.production)) {
-      Env.TRV_CAN_RESTART.clear();
-      return;
+
+    let result: ExecutionResult | undefined;
+    let exhaustedRestarts = false;
+    let subProcess: ChildProcess | undefined;
+
+    const env = { ...process.env, ...Env.TRV_CAN_RESTART.export(false) };
+    const maxRetries = config?.maxRetriesPerMinute ?? 5;
+    const relayInterrupt = config?.relayInterrupt ?? true;
+    const restarts: number[] = [];
+    listenForSourceChanges(() => { subProcess?.send(CODE_RESTART); });
+
+    if (!relayInterrupt) {
+      process.removeAllListeners('SIGINT'); // Remove any existing listeners
+      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
     }
-    return ExecUtil.withRestart(() => spawn(process.argv0, process.argv.slice(1), {
-      env: {
-        ...process.env,
-        ...Env.TRV_CAN_RESTART.export(false)
-      },
-      stdio: [0, 1, 2, ipc ? 'ipc' : undefined]
-    }));
+
+    while (
+      (result === undefined || result.code === CODE_RESTART.code) &&
+      !exhaustedRestarts
+    ) {
+      if (restarts.length) {
+        console.error('Restarting...', { pid: process.pid, time: restarts[0] });
+      }
+
+      // Ensure restarts length is capped
+      subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] })
+        .on('message', value => process.send?.(value));
+
+      const interrupt = (): void => { subProcess?.kill('SIGINT'); };
+      const toMessage = (value: unknown): void => { subProcess?.send(value!); };
+
+      // Proxy kill requests
+      process.on('message', toMessage);
+      if (relayInterrupt) {
+        process.on('SIGINT', interrupt);
+      }
+
+      result = await ExecUtil.getResult(subProcess, { catch: true });
+      process.exitCode = subProcess.exitCode;
+      process.off('message', toMessage);
+      process.off('SIGINT', interrupt);
+
+      if (restarts.length >= maxRetries) {
+        exhaustedRestarts = (Date.now() - restarts[0]) < (10 * 1000);
+        restarts.shift();
+      }
+      restarts.push(Date.now());
+    }
+
+
+    if (exhaustedRestarts) {
+      console.error(`Bailing, due to ${maxRetries} restarts in under 10s`);
+    }
+
+    process.exit();
   }
 
   /**
@@ -90,5 +145,12 @@ export class CliUtil {
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
     return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data : JSON.stringify(data, null, 2), () => resolve()));
+  }
+
+  /**
+   * Read extended options from cli inputs, in the form of -o key:value or -o key
+   */
+  static readExtendedOptions(options?: string[]): Record<string, string | boolean> {
+    return Object.fromEntries((options ?? [])?.map(option => [...option.split(':'), true]));
   }
 }

@@ -1,10 +1,9 @@
 import { Writable } from 'node:stream';
 
-import { Util } from '@travetto/runtime';
-
-import type { TestEvent } from '../../model/event.ts';
+import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
+import { CommunicationUtil } from '../../communication.ts';
 
 /**
  * Streams all test events a JSON payload, in an nd-json format
@@ -17,7 +16,15 @@ export class EventStreamer implements TestConsumerShape {
     this.#stream = stream;
   }
 
+  sendPayload(payload: unknown): void {
+    this.#stream.write(`${CommunicationUtil.serialize(payload)}\n`);
+  }
+
   onEvent(event: TestEvent): void {
-    this.#stream.write(`${Util.serializeToJSON(event)}\n`);
+    this.sendPayload(event);
+  }
+
+  onRemoveEvent(event: TestRemoveEvent): void {
+    this.sendPayload(event);
   }
 }

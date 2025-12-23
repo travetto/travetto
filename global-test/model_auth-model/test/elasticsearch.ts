@@ -12,7 +12,7 @@ class Init {
 }
 
 @Suite()
-export class ElasticsearchAuthModelServiceSuite extends AuthModelServiceSuite {
+class ElasticsearchAuthModelServiceSuite extends AuthModelServiceSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

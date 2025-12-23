@@ -1,10 +1,9 @@
-import { TestEvent } from '../model/event.ts';
-import { TestRun } from '../model/test.ts';
+import { TestEvent, TestRemoveEvent } from '../model/event.ts';
 
 /**
  * Test Run Event Keys
  */
-export const Events = {
+export const TestWorkerEvents = {
   RUN: 'run',
   RUN_COMPLETE: 'runComplete',
   INIT: 'init',
@@ -12,12 +11,17 @@ export const Events = {
   READY: 'ready'
 };
 
-export type TestRemovedEvent = { type: 'removeTest', method?: string } & TestRun;
+export type TestRunEvent = { type: 'runTest', import: string };
+
+export const isTestRunEvent = (event: unknown): event is TestRunEvent =>
+  typeof event === 'object' && !!event && 'type' in event && event.type === 'runTest';
+
+
 export type TestReadyEvent = { type: 'ready' };
 export type TestLogEvent = { type: 'log', message: string };
 
 export type TestWatchEvent =
   TestEvent |
-  TestRemovedEvent |
+  TestRemoveEvent |
   TestReadyEvent |
   TestLogEvent;

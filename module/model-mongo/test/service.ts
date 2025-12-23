@@ -14,7 +14,7 @@ import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 
 
 @Suite()
-export class MongoBasicSuite extends ModelBasicSuite {
+class MongoBasicSuite extends ModelBasicSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 
@@ -37,25 +37,25 @@ export class MongoBasicSuite extends ModelBasicSuite {
 }
 
 @Suite()
-export class MongoCrudSuite extends ModelCrudSuite {
+class MongoCrudSuite extends ModelCrudSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
 
 @Suite()
-export class MongoExpirySuite extends ModelExpirySuite {
+class MongoExpirySuite extends ModelExpirySuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
 
 @Suite()
-export class MongoBlobSuite extends ModelBlobSuite {
+class MongoBlobSuite extends ModelBlobSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
 
 @Suite()
-export class MongoBulkSuite extends ModelBulkSuite {
+class MongoBulkSuite extends ModelBulkSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
@@ -72,7 +72,7 @@ class UniqueUser {
 }
 
 @Suite()
-export class MongoIndexedSuite extends ModelIndexedSuite {
+class MongoIndexedSuite extends ModelIndexedSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 
@@ -85,7 +85,7 @@ export class MongoIndexedSuite extends ModelIndexedSuite {
 }
 
 @Suite()
-export class MongoPolymorphismSuite extends ModelPolymorphismSuite {
+class MongoPolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

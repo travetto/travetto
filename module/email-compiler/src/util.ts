@@ -1,9 +1,10 @@
-import util from 'node:util';
 import { buffer as toBuffer } from 'node:stream/consumers';
 import path from 'node:path';
+import type { CompileResult, Options } from 'sass';
 
 import { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageUtil } from '@travetto/image';
+import { RuntimeIndex } from '@travetto/runtime';
 
 type Tokenized = {
   text: string;
@@ -29,7 +30,7 @@ export class EmailCompileUtil {
    * Is file a template?
    */
   static isTemplateFile(file: string): boolean {
-    return EXT.test(file);
+    return EXT.test(file) && RuntimeIndex.findModuleForArbitraryFile(file) !== undefined;
   }
 
   /**
@@ -80,12 +81,20 @@ export class EmailCompileUtil {
    * Compile SCSS content with roots as search paths for additional assets
    */
   static async compileSass(input: { data: string } | { file: string }, options: EmailTemplateResource): Promise<string> {
-    const sass = await import('sass');
-    const result = await util.promisify(sass.render)({
-      ...input,
+    const { initAsyncCompiler } = await import('sass');
+    const compiler = await initAsyncCompiler();
+    const compilerOptions: Options<'async'> = {
       sourceMap: false,
-      includePaths: options.loader.searchPaths.slice(0)
-    });
+      quietDeps: true,
+      loadPaths: options.loader.searchPaths.slice(0),
+    };
+
+    let result: CompileResult;
+    if ('data' in input) {
+      result = await compiler.compileStringAsync(input.data, compilerOptions);
+    } else {
+      result = await compiler.compileAsync(input.file, compilerOptions);
+    }
     return result!.css.toString();
   }
 

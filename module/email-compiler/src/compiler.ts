@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { TypedObject, RuntimeIndex, watchCompiler, Runtime, BinaryUtil } from '@travetto/runtime';
+import { TypedObject, RuntimeIndex, Runtime, BinaryUtil, ExecUtil } from '@travetto/runtime';
 import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 
 import { EmailCompileUtil } from './util.ts';
@@ -84,22 +84,26 @@ export class EmailCompiler {
   }
 
   /**
-   * Watch compilation
+   * Spawn the compiler for a given file
    */
-  static async * watchCompile(signal?: AbortSignal): AsyncIterable<string> {
-    // Watch template files
-    for await (const { file, action } of watchCompiler({ signal })) {
-      const entry = RuntimeIndex.getEntry(file);
-      if (!entry || !EmailCompileUtil.isTemplateFile(entry.sourceFile) || action === 'delete') {
-        continue;
-      }
-      try {
-        await this.compile(file);
-        console.log('Successfully compiled template', { changed: [file] });
-        yield file;
-      } catch (error) {
-        console.error(`Error in compiling ${file}`, error && error instanceof Error ? error.message : `${error}`);
-      }
+  static async spawnCompile(file: string): Promise<boolean> {
+    if (!EmailCompileUtil.isTemplateFile(file)) {
+      return false;
     }
+
+    const child = ExecUtil.spawnTrv('email:compile', [file], {
+      cwd: Runtime.mainSourcePath,
+      env: { ...process.env },
+    });
+
+    const result = await ExecUtil.getResult(child, { catch: true });
+
+    if (!result.valid) {
+      console.error('Error compiling template', { file, stderr: result.stderr });
+    } else {
+      console.log('Successfully compiled template', { changed: [file] });
+    }
+
+    return result.valid;
   }
 }

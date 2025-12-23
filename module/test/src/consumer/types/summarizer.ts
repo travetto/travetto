@@ -11,6 +11,7 @@ export class TestResultsSummarizer implements TestConsumerShape {
     passed: 0,
     failed: 0,
     skipped: 0,
+    unknown: 0,
     total: 0,
     duration: 0,
     suites: [],
@@ -21,16 +22,17 @@ export class TestResultsSummarizer implements TestConsumerShape {
     this.summary.suites.push(result);
     this.summary.failed += result.failed;
     this.summary.passed += result.passed;
+    this.summary.unknown += result.unknown;
     this.summary.skipped += result.skipped;
     this.summary.duration += result.duration;
-    this.summary.total += (result.failed + result.passed + result.skipped);
+    this.summary.total += result.total;
   }
 
   /**
    * Merge all test results into a single Suite Result
    */
   onEvent(event: TestEvent): void {
-    if (event.phase === 'after' && event.type === 'suite') {
+    if (event.type === 'suite' && event.phase === 'after') {
       this.#merge(event.suite);
     }
   }

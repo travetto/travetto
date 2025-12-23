@@ -41,9 +41,9 @@ export class ModelConfig<T extends ModelType = ModelType> {
    */
   expiresAt?: string;
   /**
-   * Auto create in development mode
+   * Allows auto creation of a model storage backing at runtime
    */
-  autoCreate?: boolean;
+  autoCreate?: 'production' | 'devevlopment' | 'off';
   /**
    * Pre-persist handlers
    */

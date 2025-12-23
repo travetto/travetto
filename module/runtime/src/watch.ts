@@ -1,11 +1,24 @@
+import { ManifestModuleUtil, type ChangeEventType, type ManifestModuleFileType } from '@travetto/manifest';
+
 import { RuntimeIndex } from './manifest-index.ts';
-import { ExecUtil } from './exec.ts';
 import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
+import { AppError } from './error.ts';
 
-export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, time: number };
+type WatchEvent = { file: string, action: ChangeEventType, output: string, module: string, import: string, time: number };
 
-export async function* watchCompiler(config?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<WatchEvent> {
+type WatchCompilerOptions = {
+  /**
+   * Restart the watch loop on compiler exit
+   */
+  restartOnCompilerExit?: boolean;
+  /**
+   * Run on restart
+   */
+  onRestart?: () => void;
+};
+
+export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterable<WatchEvent> {
   // Load at runtime
   const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
 
@@ -19,21 +32,56 @@ export async function* watchCompiler(config?: { restartOnExit?: boolean, signal?
   const controller = new AbortController();
   const remove = ShutdownManager.onGracefulShutdown(async () => controller.abort());
 
-  await client.waitForState(['compile-end', 'watch-start'], undefined, controller.signal);
+  const maxIterations = 10;
+  const maxWindow = 10 * 1000;
+  const iterations: number[] = [];
+  let iterationsExhausted = false;
 
-  if (!await client.isWatching()) { // If we get here, without a watch
-    while (!await client.isWatching()) { // Wait until watch starts
-      await Util.nonBlockingTimeout(1000 * 60);
+  while (
+    !controller.signal.aborted &&
+    !iterationsExhausted &&
+    (config?.restartOnCompilerExit || iterations.length === 0)
+  ) {
+    if (iterations.length) { // Wait on next iteration
+      await Util.nonBlockingTimeout(10);
     }
-  } else {
-    yield* client.fetchEvents('change', { signal: controller.signal, enforceIteration: true });
+
+    await client.waitForState(['compile-end', 'watch-start'], undefined, controller.signal);
+
+    if (!await client.isWatching()) { // If we get here, without a watch
+      throw new AppError('Compiler is not running');
+    } else {
+      if (iterations.length) {
+        config?.onRestart?.();
+      }
+      yield* client.fetchEvents('change', { signal: controller.signal, enforceIteration: true });
+    }
+
+    iterations.push(Date.now());
+    if (iterations.length >= maxIterations) {
+      iterationsExhausted = (Date.now() - iterations[0]) > maxWindow;
+      iterations.shift();
+    }
   }
 
   remove();
+}
 
-  if (config?.restartOnExit) {
-    // We are done, request restart
-    await ShutdownManager.gracefulShutdown('@travetto/runtime:watchCompiler');
-    process.exit(ExecUtil.RESTART_EXIT_CODE);
+export function listenForSourceChanges(onChange: () => void, debounceDelay = 10): void {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  const validFileTypes = new Set<ManifestModuleFileType>(['ts', 'js', 'package-json', 'typings']);
+
+  function send(): void {
+    clearTimeout(timeout);
+    timeout = setTimeout(onChange, debounceDelay);
   }
+
+  (async function (): Promise<void> {
+    for await (const item of watchCompiler({ restartOnCompilerExit: true, onRestart: send })) {
+      if (validFileTypes.has(ManifestModuleUtil.getFileType(item.file)) && RuntimeIndex.findModuleForArbitraryFile(item.file)) {
+        send();
+      }
+    }
+  })();
 }

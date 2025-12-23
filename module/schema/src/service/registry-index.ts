@@ -1,9 +1,8 @@
 import { RegistrationMethods, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, classConstruct, getParentClass, Util } from '@travetto/runtime';
+import { AppError, castKey, castTo, Class, classConstruct, getParentClass } from '@travetto/runtime';
 
 import { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 import { SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
-import { SchemaChangeListener } from './changes.ts';
 
 /**
  * Schema registry index for managing schema configurations across classes
@@ -80,17 +79,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
       this.#byDiscriminatedTypes.set(base, new Map());
     }
     this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType, cls);
-  }
-
-  onCreate(cls: Class, replacedBy?: Class): void {
-    const previous = replacedBy ? this.getClassConfig(replacedBy) : undefined;
-    Util.queueMacroTask().then(() => {
-      const current = this.getClassConfig(cls);
-      SchemaChangeListener.emitFieldChanges(
-        previous ?
-          { type: 'update', current, previous } :
-          { type: 'create', current, });
-    });
   }
 
   beforeChangeSetComplete(): void {

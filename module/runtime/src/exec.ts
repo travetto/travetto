@@ -1,14 +1,23 @@
-import { ChildProcess } from 'node:child_process';
-import { Readable } from 'node:stream';
+import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
+import type { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
 
-import { castTo } from './types.ts';
-
-const MINUTE = (1000 * 60);
+import { castTo, type Any } from './types.ts';
 
 const ResultSymbol = Symbol();
 
-interface ExecutionBaseResult {
+/**
+ * Result of an execution
+ */
+export interface ExecutionResult<T extends string | Buffer = string | Buffer> {
+  /**
+   * Stdout
+   */
+  stdout: T;
+  /**
+   * Stderr
+   */
+  stderr: T;
   /**
    * Exit code
    */
@@ -23,77 +32,19 @@ interface ExecutionBaseResult {
   valid: boolean;
 }
 
-/**
- * Result of an execution
- */
-export interface ExecutionResult<T extends string | Buffer = string | Buffer> extends ExecutionBaseResult {
-  /**
-   * Stdout
-   */
-  stdout: T;
-  /**
-   * Stderr
-   */
-  stderr: T;
-}
+type ExecutionBaseResult = Omit<ExecutionResult, 'stdout' | 'stderr'>;
 
 /**
  * Standard utilities for managing executions
  */
 export class ExecUtil {
 
-  static RESTART_EXIT_CODE = 200;
-
   /**
-   * Run with automatic restart support
-   * @param run The factory to produce the next running process
-   * @param maxRetriesPerMinute The number of times to allow a retry within a minute
+   * Spawn wrapper that ensures performant invocation of trv commands
    */
-  static async withRestart(
-    run: () => ChildProcess,
-    config?: { maxRetriesPerMinute?: number, relayInterrupt?: boolean }
-  ): Promise<ExecutionResult> {
-    const maxRetries = config?.maxRetriesPerMinute ?? 5;
-    const relayInterrupt = config?.relayInterrupt ?? false;
-
-    const restarts: number[] = [];
-
-    if (!relayInterrupt) {
-      process.removeAllListeners('SIGINT'); // Remove any existing listeners
-      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
-    }
-
-    for (; ;) {
-      const subProcess = run();
-      const interrupt = (): void => { subProcess.kill('SIGINT'); };
-      const toMessage = (value: unknown): void => { subProcess.send?.(value!); };
-
-      // Proxy kill requests
-      process.on('message', toMessage);
-      if (relayInterrupt) {
-        process.on('SIGINT', interrupt);
-      }
-      subProcess.on('message', value => process.send?.(value));
-
-      const result = await this.getResult(subProcess, { catch: true });
-      if (result.code !== this.RESTART_EXIT_CODE) {
-        return result;
-      } else {
-        if (relayInterrupt) {
-          process.off('SIGINT', interrupt);
-        }
-        process.off('message', toMessage);
-        restarts.unshift(Date.now());
-        if (restarts.length === maxRetries) {
-          if ((restarts[0] - restarts[maxRetries - 1]) <= MINUTE) {
-            console.error(`Bailing, due to ${maxRetries} restarts in under a minute`);
-            return result;
-          }
-          restarts.pop(); // Keep list short
-        }
-        console.error('Restarting...', { pid: process.pid });
-      }
-    }
+  static spawnTrv(cmd: string, args: string[], options: SpawnOptions): ChildProcess {
+    const entry = (globalThis as Any).__entry_point__ ?? process.argv.at(1);
+    return spawn(process.argv0, [entry, cmd, ...args], options);
   }
 
   /**

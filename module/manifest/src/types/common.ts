@@ -9,3 +9,5 @@ export type ManifestModuleFolderType =
   '$transformer';
 
 export type ManifestModuleRole = 'std' | 'test' | 'doc' | 'compile' | 'build';
+
+export type ChangeEventType = 'create' | 'update' | 'delete';

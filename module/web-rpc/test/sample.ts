@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Body, Controller, Delete, Get, Post, Put } from '@travetto/web';
 import { Specifier } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { Util } from '@travetto/runtime';
+import { JSONUtil, Util } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
@@ -153,7 +153,7 @@ class WebRpcSuite extends BaseWebSuite {
       },
       headers: {
         'content-type': 'application/octet-stream',
-        'X-TRV-RPC-INPUTS': Util.encodeSafeJSON([null, 11])
+        'X-TRV-RPC-INPUTS': JSONUtil.stringifyBase64([null, 11])
       },
       body: Buffer.alloc(100)
     });

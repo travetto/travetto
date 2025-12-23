@@ -4,6 +4,6 @@ import { StandardWebServerSuite } from '@travetto/web/support/test/suite/standar
 import { LocalAwsLambdaWebDispatcher } from '@travetto/web-aws-lambda/support/test/dispatcher.ts';
 
 @Suite()
-export class AwsLambdaWebCoreTest extends StandardWebServerSuite {
+class AwsLambdaWebCoreTest extends StandardWebServerSuite {
   dispatcherType = LocalAwsLambdaWebDispatcher;
 }

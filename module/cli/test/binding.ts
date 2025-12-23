@@ -36,7 +36,7 @@ const get = async (...args: string[]) => CliParseUtil.parse(SchemaRegistryIndex.
 const unused = (state: ParsedState) => state.unknown;
 
 @Suite()
-export class SchemaBindingSuite {
+class SchemaBindingSuite {
 
   @AssertCheck()
   async checkArgs(args: string[], expected: unknown[], raw?: unknown[]) {

@@ -22,7 +22,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class MysqlAuthSessionServerSuite extends AuthSessionServerSuite {
+class MysqlAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

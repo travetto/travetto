@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 import path from 'node:path';
@@ -50,7 +51,6 @@ class TestRunnerFeature extends BaseFeature {
         ...process.env,
         ...Env.TRV_MANIFEST.export(undefined),
         ...Env.TRV_QUIET.export(true),
-        ...Env.TRV_DYNAMIC.export(true)
       },
       stdio: ['pipe', 'pipe', 2, 'ipc']
     };
@@ -58,8 +58,9 @@ class TestRunnerFeature extends BaseFeature {
     this.#server = spawn('node', [RunUtil.cliFile, 'test:watch', '--format', 'exec', '--mode', 'change'], config)
       .on('message', (event: TestWatchEvent) => {
         switch (event.type) {
-          case 'log': this.log.info('[Log  ]', event.message); return;
+          case 'log': return this.log.info('[Log  ]', event.message);
           case 'test': this.log.info('[Event]', event.type, event.phase, event.test.classId, event.test.methodName); break;
+          case 'removeTest': this.log.info('[Remove]', event.type, event.import, event.classId, event.methodName); break;
         }
         this.#consumer.onEvent(event);
         this.#codeLensUpdated?.();
@@ -103,17 +104,20 @@ class TestRunnerFeature extends BaseFeature {
 
     const imp = `${mod.name}${file.split(mod.sourceFolder)[1]}`;
     this.log.info('Requesting test run ', imp);
-    this.#server.send({ type: 'run-test', import: imp });
+    this.#server.send({ type: 'runTest', import: imp });
+  }
+
+  #runDocument(document: vscode.TextDocument): void {
+    this.#consumer.reset(document, true);
+    this.#consumer.getResults(document);
+    this.#runFile(document.fileName);
   }
 
   #rerunActive(): void {
     const editor = vscode.window.activeTextEditor;
     if (this.#isTestDocument(editor)) {
       this.#startServer();
-      const doc = editor.document;
-      this.#consumer.reset(doc);
-      this.#consumer.getResults(doc);
-      this.#runFile(doc.fileName);
+      this.#runDocument(editor.document);
     }
   }
 
@@ -187,7 +191,25 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onCloseTextDocument(document: vscode.TextDocument): Promise<void> {
-    this.#consumer.reset(document);
+    const stillExists = existsSync(document.fileName);
+    this.#consumer.reset(document, !stillExists);
+  }
+
+  async renameFiles(files: vscode.FileRenameEvent['files']): Promise<void> {
+    for (const file of files) {
+      const document = this.#consumer.getDocumentByFileName(file.oldUri.fsPath);
+      if (!document) {
+        continue;
+      }
+
+      if (vscode.window.activeTextEditor?.document === document) {
+        this.#consumer.setEditor(undefined);
+        this.#runDocument(vscode.window.activeTextEditor.document);
+        this.#consumer.setEditor(vscode.window.activeTextEditor);
+      } else {
+        this.#consumer.reset(document);
+      }
+    }
   }
 
   /**
@@ -207,6 +229,7 @@ class TestRunnerFeature extends BaseFeature {
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
+    vscode.workspace.onDidRenameFiles(event => this.renameFiles(event.files), null, context.subscriptions);
 
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({
       pattern: {

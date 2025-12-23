@@ -28,6 +28,10 @@ export class WorkspaceResultsManager {
     this.getResults(document)?.refresh();
   }
 
+  getDocumentByFileName(file: string): vscode.TextDocument | undefined {
+    return this.#filenameMap.get(file);
+  }
+
   /**
    * Get test results
    * @param target
@@ -132,13 +136,17 @@ export class WorkspaceResultsManager {
   /**
    * Stop tracking
    */
-  reset(document: vscode.TextDocument): void {
-    if (this.#results.has(document)) {
-      this.#log.debug('File is freed', { file: document.fileName });
-      this.#results.get(document)?.dispose();
-      this.#results.delete(document);
-      this.#filenameMap.delete(document.fileName);
+  reset(document: vscode.TextDocument, resetDiagnostics = false): void {
+    if (!this.#results.has(document)) {
+      return;
     }
-    this.#diagnostics.clear(document.fileName);
+
+    this.#results.get(document)?.dispose();
+    this.#results.delete(document);
+    this.#filenameMap.delete(document.fileName);
+    if (resetDiagnostics) {
+      this.#diagnostics.resetFile(document.fileName);
+    }
+    this.#log.debug('File is freed', { file: document.fileName });
   }
 }

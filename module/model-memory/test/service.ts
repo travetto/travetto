@@ -14,25 +14,25 @@ import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 const KB = 2 ** 20;
 
 @Suite()
-export class MemoryBasicSuite extends ModelBasicSuite {
+class MemoryBasicSuite extends ModelBasicSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }
 
 @Suite()
-export class MemoryCrudSuite extends ModelCrudSuite {
+class MemoryCrudSuite extends ModelCrudSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }
 
 @Suite()
-export class MemoryBlobSuite extends ModelBlobSuite {
+class MemoryBlobSuite extends ModelBlobSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }
 
 @Suite()
-export class MemoryExpirySuite extends ModelExpirySuite {
+class MemoryExpirySuite extends ModelExpirySuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 
@@ -73,13 +73,13 @@ export class MemoryExpirySuite extends ModelExpirySuite {
 }
 
 @Suite()
-export class MemoryIndexedSuite extends ModelIndexedSuite {
+class MemoryIndexedSuite extends ModelIndexedSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }
 
 @Suite()
-export class MemoryPolymorphicSuite extends ModelPolymorphismSuite {
+class MemoryPolymorphicSuite extends ModelPolymorphismSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }

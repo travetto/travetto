@@ -29,6 +29,10 @@ export interface SuiteCore {
    * Description
    */
   description?: string;
+  /**
+   * Hash of the suite/test source code
+   */
+  sourceHash?: number;
 }
 
 /**

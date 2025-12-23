@@ -1,6 +1,5 @@
 import { Class, hasFunction, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { Registry } from '@travetto/registry';
 
 import { ModelStorageSupport } from '../types/storage.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -16,17 +15,10 @@ export class ModelStorageUtil {
   static isSupported = hasFunction<ModelStorageSupport>('createStorage');
 
   /**
-   * Should we auto create models on startup
+   * Storage Initialization
    */
-  static shouldAutoCreate(storage: unknown): storage is ModelStorageSupport {
-    return this.isSupported(storage) && (Runtime.dynamic || storage.config?.autoCreate === true);
-  }
-
-  /**
-   * Register change listener on startup
-   */
-  static async registerModelChangeListener(storage: ModelStorageSupport): Promise<void> {
-    if (!Runtime.dynamic || !(storage?.config?.autoCreate ?? !Runtime.production)) {
+  static async storageInitialization(storage: ModelStorageSupport): Promise<void> {
+    if (storage.config?.modifyStorage === false) {
       return;
     }
 
@@ -34,20 +26,15 @@ export class ModelStorageUtil {
       if (enforceBase && SchemaRegistryIndex.getBaseClass(cls) !== cls) {
         return false;
       }
-      const { autoCreate } = ModelRegistryIndex.getConfig(cls) ?? {};
-      return autoCreate ?? false;
-    };
 
-    // If listening for model add/removes/updates
-    if (storage.createModel || storage.deleteModel || storage.changeModel) {
-      Registry.onClassChange(event => {
-        switch (event.type) {
-          case 'create': checkType(event.current) ? storage.createModel?.(event.current) : undefined; break;
-          case 'update': checkType(event.current, false) ? storage.changeModel?.(event.current) : undefined; break;
-          case 'delete': checkType(event.previous) ? storage.deleteModel?.(event.previous) : undefined; break;
-        }
-      }, ModelRegistryIndex);
-    }
+      const { autoCreate } = ModelRegistryIndex.getConfig(cls) ?? {};
+
+      if (autoCreate === 'off') {
+        return false;
+      }
+
+      return (autoCreate === 'production' || !Runtime.production);
+    };
 
     // Initialize on startup (test manages)
     await storage.createStorage();

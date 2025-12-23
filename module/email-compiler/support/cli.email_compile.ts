@@ -1,6 +1,6 @@
 import { Registry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { Env, Runtime } from '@travetto/runtime';
+import { Env, Runtime, watchCompiler } from '@travetto/runtime';
 
 import { EmailCompiler } from '../src/compiler.ts';
 
@@ -16,7 +16,6 @@ export class EmailCompileCommand implements CliCommandShape {
   preMain(): void {
     Env.DEBUG.set(false);
     Env.TRV_ROLE.set('build');
-    Env.TRV_DYNAMIC.set(this.watch);
   }
 
   async main(): Promise<void> {
@@ -30,8 +29,8 @@ export class EmailCompileCommand implements CliCommandShape {
     }
 
     if (this.watch) {
-      for await (const _ of EmailCompiler.watchCompile()) {
-        // Iterate until done
+      for await (const { file } of watchCompiler({ restartOnCompilerExit: true })) {
+        await EmailCompiler.spawnCompile(file);
       }
     }
   }

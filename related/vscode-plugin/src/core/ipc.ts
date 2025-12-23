@@ -1,7 +1,7 @@
 import { ExtensionContext } from 'vscode';
 import http from 'node:http';
 
-import { Env } from '@travetto/runtime';
+import { Env, JSONUtil } from '@travetto/runtime';
 
 import { TargetEvent } from './types.ts';
 import { Log } from './log.ts';
@@ -13,7 +13,7 @@ export class IpcSupport {
     for await (const chunk of request) {
       chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
     }
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    return JSONUtil.parseSafe(Buffer.concat(chunks));
   }
 
   #controller = new AbortController();

@@ -7,6 +7,7 @@ import { Env } from './env.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { describeFunction } from './function.ts';
 import { castTo } from './types.ts';
+import { JSONUtil } from './json.ts';
 
 /** Constrained version of {@type ManifestContext} */
 class $Runtime {
@@ -34,11 +35,6 @@ class $Runtime {
   /** Are we in development mode */
   get production(): boolean {
     return process.env.NODE_ENV === 'production';
-  }
-
-  /** Is the app in dynamic mode? */
-  get dynamic(): boolean {
-    return Env.TRV_DYNAMIC.isTrue;
   }
 
   /** Get debug value */
@@ -118,7 +114,7 @@ class $Runtime {
       throw new Error(`Unable to find ${imp}, not in the manifest`);
     } else if (imp.endsWith('.json')) {
       imp = this.#idx.getFromImport(imp)?.sourceFile ?? imp;
-      return fs.readFile(imp, 'utf8').then(JSON.parse);
+      return fs.readFile(imp, 'utf8').then(JSONUtil.parseSafe<T>);
     }
 
     if (!ManifestModuleUtil.SOURCE_EXT_REGEX.test(imp)) {

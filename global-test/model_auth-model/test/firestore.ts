@@ -4,7 +4,7 @@ import { FirestoreModelConfig, FirestoreModelService } from '@travetto/model-fir
 
 import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
 
-class Init {
+class Config {
   @InjectableFactory(TestModelSvcSymbol)
   static modelProvider(config: FirestoreModelConfig) {
     return new FirestoreModelService(config);
@@ -12,7 +12,7 @@ class Init {
 }
 
 @Suite()
-export class FirestoreAuthModelServiceSuite extends AuthModelServiceSuite {
+class FirestoreAuthModelServiceSuite extends AuthModelServiceSuite {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
 }

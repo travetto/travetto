@@ -355,7 +355,6 @@ First we must start the application:
     env: <span class="token string">'local'</span>,
     debug: false,
     production: false,
-    dynamic: false,
     resourcePaths: <span class="token punctuation">[</span>
       <span class="token string">'./resources'</span>,
       <span class="token string">'&lt;workspace-root>/resources'</span>
@@ -399,7 +398,7 @@ First we must start the application:
       <span class="token punctuation">{{'}'}}</span>,
       ApiSpecConfig: <span class="token punctuation">{{'{'}}</span>
         output: <span class="token string">'./openapi.yml'</span>,
-        persist: false,
+        persist: true,
         skipEndpoints: false,
         exposeAllSchemas: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
@@ -439,7 +438,7 @@ First we must start the application:
           replyTo: <span class="token string">'Travetto Mailer &lt;mailer@travetto.dev>'</span>
         <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
-      MemoryModelConfig: <span class="token punctuation">{{'{'}}</span> autoCreate: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      MemoryModelConfig: <span class="token punctuation">{{'{'}}</span> modifyStorage: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       MongoModelConfig: <span class="token punctuation">{{'{'}}</span>
         hosts: <span class="token punctuation">[</span> <span class="token string">'localhost'</span> <span class="token punctuation">]</span>,
         namespace: <span class="token string">'app'</span>,

@@ -83,11 +83,6 @@ export class ModelRegistryIndex implements RegistryIndex {
     }
   }
 
-  onDelete(cls: Class): void {
-    const { store } = this.store.get(cls).get();
-    this.#modelNameMapping.get(store)?.delete(cls.Ⲑid);
-  }
-
   getConfig(cls: Class): ModelConfig<ModelType> {
     return this.store.get(cls).get();
   }

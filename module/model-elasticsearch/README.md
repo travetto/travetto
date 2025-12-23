@@ -65,9 +65,9 @@ export class ElasticsearchModelConfig {
    */
   namespace = 'app';
   /**
-   * Auto-create, disabled in prod by default
+   * Allow storage modifification
    */
-  autoCreate?: boolean;
+  modifyStorage?: boolean;
   /**
    * Should we store the id as a string in the document
    */

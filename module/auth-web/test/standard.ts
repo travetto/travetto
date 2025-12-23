@@ -3,6 +3,6 @@ import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts
 import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server.ts';
 
 @Suite()
-export class StandardAuthWebTest extends AuthWebServerSuite {
+class StandardAuthWebTest extends AuthWebServerSuite {
   dispatcherType = LocalRequestDispatcher;
 }

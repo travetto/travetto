@@ -1,5 +1,5 @@
 import { Env } from '@travetto/runtime';
-import { CliCommand, CliUtil } from '@travetto/cli';
+import { CliCommand } from '@travetto/cli';
 
 import { selectConsumer } from './bin/run.ts';
 
@@ -18,14 +18,9 @@ export class TestWatcherCommand {
 
   preMain(): void {
     Env.TRV_ROLE.set('test');
-    Env.TRV_DYNAMIC.set(true);
   }
 
   async main(): Promise<void> {
-    if (await CliUtil.runWithRestart(this, true)) {
-      return;
-    }
-
     try {
       const { TestWatcher } = await import('../src/execute/watcher.ts');
       await TestWatcher.watch(this.format, this.mode === 'all');

@@ -4,6 +4,6 @@ import { StandardWebServerSuite } from '@travetto/web/support/test/suite/standar
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
 
 @Suite()
-export class BasicStandardTest extends StandardWebServerSuite {
+class BasicStandardTest extends StandardWebServerSuite {
   dispatcherType = LocalRequestDispatcher;
 }

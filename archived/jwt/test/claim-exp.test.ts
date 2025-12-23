@@ -28,7 +28,7 @@ export class ExpiresSuite {
       {},
       { foo: 'bar' },
     ]) {
-      const encodedPayload = Util.encodeSafeJSON({ exp });
+      const encodedPayload = Util.encodeBase64JSON({ exp });
       const token = `${noneAlgorithmHeader}.${encodedPayload}.`;
       await assert.rejects(() => JWTUtil.verify(token, { alg: 'none' }), JWTError);
     }

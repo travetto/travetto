@@ -41,7 +41,6 @@ Initialized {
     env: 'local',
     debug: false,
     production: false,
-    dynamic: false,
     resourcePaths: [
       './doc-exec/resources'
     ],
@@ -212,7 +211,6 @@ Initialized {
     env: 'prod',
     debug: false,
     production: true,
-    dynamic: false,
     resourcePaths: [
       './doc-exec/resources'
     ],

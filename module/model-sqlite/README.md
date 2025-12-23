@@ -74,9 +74,9 @@ export class SQLModelConfig<T extends {} = {}> {
    */
   database = 'app';
   /**
-   * Auto schema creation
+   * Allow storage modification at runtime
    */
-  autoCreate?: boolean;
+  modifyStorage?: boolean;
   /**
    * Db version
    */

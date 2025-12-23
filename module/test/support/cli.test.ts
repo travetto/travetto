@@ -1,9 +1,7 @@
 import { EventEmitter } from 'node:events';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 
-import { Env } from '@travetto/runtime';
-import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
+import { Env, RuntimeIndex } from '@travetto/runtime';
+import { CliCommandShape, CliCommand, CliUtil } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
 
@@ -20,11 +18,8 @@ export class TestCommand implements CliCommandShape {
   @Min(1) @Max(WorkPool.MAX_SIZE)
   concurrency: number = WorkPool.DEFAULT_SIZE;
 
-  /** Test run mode */
-  mode: 'single' | 'standard' = 'standard';
-
   /**
-   * Tags to target or exclude
+   * Tags to target or exclude when using globs
    * @alias env.TRV_TEST_TAGS
    */
   tags?: string[];
@@ -44,46 +39,30 @@ export class TestCommand implements CliCommandShape {
     Env.TRV_LOG_TIME.clear();
   }
 
-  isFirstFile(first: string): Promise<boolean> {
-    return fs.stat(path.resolve(first ?? '')).then(stat => stat.isFile(), () => false);
-  }
-
-  async resolvedMode(first: string, rest: string[]): Promise<string> {
-    return (await this.isFirstFile(first)) && rest.length === 0 ? 'single' : this.mode;
-  }
-
   async preValidate(): Promise<void> {
     const { selectConsumer } = await import('./bin/run.ts');
     await selectConsumer(this);
   }
 
-  async validate(first: string = '**/*', rest: string[]): Promise<CliValidationError | undefined> {
-    const mode = await this.resolvedMode(first, rest);
-
-    if (mode === 'single' && !await this.isFirstFile(first)) {
-      return { message: 'You must specify a proper test file to run in single mode', source: 'arg' };
-    }
-  }
-
   async main(first: string = '**/*', globs: string[] = []): Promise<void> {
     const { runTests } = await import('./bin/run.ts');
 
-    const isFirst = await this.isFirstFile(first);
-    const isSingle = this.mode === 'single' || (isFirst && globs.length === 0);
-    const options = Object.fromEntries((this.formatOptions ?? [])?.map(option => [...option.split(':'), true]));
+    const importPath = RuntimeIndex.getFromImportOrSource(first)?.import;
 
-    return runTests({
-      concurrency: this.concurrency,
-      consumer: this.format,
-      consumerOptions: options,
-      tags: this.tags,
-      target: isSingle ?
-        {
-          import: first,
-          classId: globs[0],
-          methodNames: globs.slice(1),
-        } :
-        { globs: [first, ...globs], }
-    });
+    return runTests(
+      {
+        concurrency: this.concurrency,
+        consumer: this.format,
+        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions),
+      },
+      importPath ? {
+        import: importPath,
+        classId: globs[0],
+        methodNames: globs.slice(1),
+      } : {
+        globs: [first, ...globs],
+        tags: this.tags,
+      }
+    );
   }
 }

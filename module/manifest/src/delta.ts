@@ -4,10 +4,10 @@ import { ManifestModuleUtil } from './module.ts';
 import { path } from './path.ts';
 
 import type { ManifestModule, ManifestModuleCore, ManifestModuleFile, ManifestRoot } from './types/manifest.ts';
-import type { ManifestModuleFileType, ManifestModuleFolderType } from './types/common.ts';
+import type { ChangeEventType, ManifestModuleFileType, ManifestModuleFolderType } from './types/common.ts';
 import type { ManifestContext } from './types/context.ts';
 
-type DeltaEventType = 'create' | 'update' | 'delete' | 'missing' | 'dirty';
+type DeltaEventType = ChangeEventType | 'missing' | 'dirty';
 type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
 export type DeltaEvent = { file: string, type: DeltaEventType, module: string, sourceFile: string };
 

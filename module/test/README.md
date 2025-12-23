@@ -231,8 +231,7 @@ Usage: test [options] [first:string] [globs...:string]
 Options:
   -f, --format <string>          Output format for test results (default: "tap")
   -c, --concurrency <number>     Number of tests to run concurrently (default: 9)
-  -m, --mode <single|standard>   Test run mode (default: "standard")
-  -t, --tags <string>            Tags to target or exclude
+  -t, --tags <string>            Tags to target or exclude when using globs
   -o, --format-options <string>  Format options
   -h, --help                     display help for command
 ```

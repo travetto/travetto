@@ -7,10 +7,12 @@ import { FetchWebDispatcher } from '@travetto/web-http/support/test/dispatcher.t
 import { ModelBlobWebUploadServerSuite } from './suite.ts';
 
 @Suite()
-export class NodeWebUploadTest extends ModelBlobWebUploadServerSuite {
+class NodeWebUploadTest extends ModelBlobWebUploadServerSuite {
   dispatcherType = FetchWebDispatcher;
 
   serve() {
-    return DependencyRegistryIndex.getInstance(NodeWebHttpServer).then(server => server.serve()).then(handle => () => handle.stop());
+    return DependencyRegistryIndex.getInstance(NodeWebHttpServer)
+      .then(server => server.serve())
+      .then(handle => () => handle.stop());
   }
 }

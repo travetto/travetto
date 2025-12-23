@@ -16,7 +16,7 @@ export class FirestoreModelConfig {
   emulator?: string;
   projectId: string;
   namespace?: string;
-  autoCreate?: boolean;
+  modifyStorage?: boolean;
   credentials?: FirestoreModelConfigCredentials;
 
   async postConstruct(): Promise<void> {
@@ -25,7 +25,7 @@ export class FirestoreModelConfig {
     }
     if (this.credentialsFile && !this.credentials) {
       this.credentials = FirestoreModelConfigCredentials.from(
-        JSON.parse(await RuntimeResources.read(this.credentialsFile))
+        await RuntimeResources.readJSON(this.credentialsFile)
       );
       await SchemaValidator.validate(FirestoreModelConfigCredentials, this.credentials);
     }

@@ -9,7 +9,7 @@ import './validate-source/user-controller.ts';
 import './validate-source/relationship-controller.ts';
 
 @Suite()
-export class OpenApiSuite {
+class OpenApiSuite {
   @Test()
   async verify() {
     await Registry.init();

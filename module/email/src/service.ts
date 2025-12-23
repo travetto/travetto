@@ -17,6 +17,7 @@ export class MailService {
   #compiled = new Map<string, EmailCompiled>();
   #transport: MailTransport;
   #interpolator: MailInterpolator;
+  #cacheResults = true;
 
   constructor(
     transport: MailTransport,
@@ -26,18 +27,23 @@ export class MailService {
     this.#transport = transport;
   }
 
+  setCacheState(active: boolean): void {
+    this.#cacheResults = active;
+  }
+
   /**
    * Get compiled content by key
    */
   async getCompiled(key: string): Promise<EmailCompiled> {
-    if (Runtime.dynamic || !this.#compiled.has(key)) {
+    if (!this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         RuntimeResources.read(`${key}.compiled.html`),
         RuntimeResources.read(`${key}.compiled.text`),
         RuntimeResources.read(`${key}.compiled.subject`)
       ].map(file => file.then(MailUtil.purgeBrand)));
-
-      this.#compiled.set(key, { html, text, subject });
+      if (this.#cacheResults) {
+        this.#compiled.set(key, { html, text, subject });
+      }
     }
     return this.#compiled.get(key)!;
   }

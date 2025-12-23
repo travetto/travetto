@@ -4,7 +4,7 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/m
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 
 @Suite()
-export class ElasticsearchBasicSuite extends ModelBasicSuite {
+class ElasticsearchBasicSuite extends ModelBasicSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

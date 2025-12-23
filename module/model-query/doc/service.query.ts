@@ -19,31 +19,31 @@ class CustomModelService extends QueryModelService implements ModelQueryCrudSupp
 }
 
 @Suite()
-export class CustomQuerySuite extends ModelQuerySuite {
+class CustomQuerySuite extends ModelQuerySuite {
   serviceClass = CustomModelService;
   configClass = CustomModelConfig;
 }
 
 @Suite()
-export class CustomQueryCrudSuite extends ModelQueryCrudSuite {
+class CustomQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = CustomModelService;
   configClass = CustomModelConfig;
 }
 
 @Suite()
-export class CustomQueryFacetSuite extends ModelQueryFacetSuite {
+class CustomQueryFacetSuite extends ModelQueryFacetSuite {
   serviceClass = CustomModelService;
   configClass = CustomModelConfig;
 }
 
 @Suite()
-export class CustomQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+class CustomQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
   serviceClass = CustomModelService;
   configClass = CustomModelConfig;
 }
 
 @Suite()
-export class CustomQuerySuggestSuite extends ModelQuerySuggestSuite {
+class CustomQuerySuggestSuite extends ModelQuerySuggestSuite {
   serviceClass = CustomModelService;
   configClass = CustomModelConfig;
 }

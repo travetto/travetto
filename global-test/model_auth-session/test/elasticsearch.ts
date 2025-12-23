@@ -16,7 +16,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class ElasticsearchAuthSessionServerSuite extends AuthSessionServerSuite {
+class ElasticsearchAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

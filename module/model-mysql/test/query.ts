@@ -20,7 +20,7 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class MysqlQuerySuite extends ModelQuerySuite {
+class MysqlQuerySuite extends ModelQuerySuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
   supportsGeo = false;
@@ -28,28 +28,28 @@ export class MysqlQuerySuite extends ModelQuerySuite {
 
 @WithSuiteContext()
 @Suite()
-export class MysqlQueryCrudSuite extends ModelQueryCrudSuite {
+class MysqlQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class MysqlQueryFacetSuite extends ModelQueryFacetSuite {
+class MysqlQueryFacetSuite extends ModelQueryFacetSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class MySQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+class MySQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class MySQLQuerySuggestSuite extends ModelQuerySuggestSuite {
+class MySQLQuerySuggestSuite extends ModelQuerySuggestSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

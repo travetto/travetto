@@ -3,7 +3,7 @@ import { AssertionError } from 'node:assert';
 import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 
-import { TestConfig, TestResult, TestRun } from '../model/test.ts';
+import { TestConfig, TestResult, type TestRun } from '../model/test.ts';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
 import { TestConsumerShape } from '../consumer/types.ts';
 import { AssertCheck } from '../assert/check.ts';
@@ -14,6 +14,7 @@ import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
 import { ExecutionError } from './error.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { TestModelUtil } from '../model/util.ts';
 
 const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.value) ?? 5000;
 
@@ -94,13 +95,16 @@ export class TestExecutor {
       passed: 0,
       failed: 0,
       skipped: 0,
+      unknown: 0,
       total: 0,
+      status: 'unknown',
       lineStart: suite.lineStart,
       lineEnd: suite.lineEnd,
       import: suite.import,
       classId: suite.classId,
+      sourceHash: suite.sourceHash,
       duration: 0,
-      tests: []
+      tests: {}
     };
   }
 
@@ -118,12 +122,14 @@ export class TestExecutor {
       methodName: test.methodName,
       description: test.description,
       classId: test.classId,
+      tags: test.tags,
       lineStart: test.lineStart,
       lineEnd: test.lineEnd,
       lineBodyStart: test.lineBodyStart,
       import: test.import,
       sourceImport: test.sourceImport,
-      status: 'skipped',
+      sourceHash: test.sourceHash,
+      status: 'unknown',
       assertions: [],
       duration: 0,
       durationTotal: 0,
@@ -184,19 +190,23 @@ export class TestExecutor {
     }
 
     const result: SuiteResult = this.createSuiteResult(suite);
+    const validTestMethodNames = new Set(tests.map(t => t.methodName));
+    const testConfigs = Object.fromEntries(
+      Object.entries(suite.tests).filter(([key]) => validTestMethodNames.has(key))
+    );
 
     const startTime = Date.now();
 
     // Mark suite start
-    this.#consumer.onEvent({ phase: 'before', type: 'suite', suite });
+    this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
-    const mgr = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
+    const manager = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
 
     const originalEnv = { ...process.env };
 
     try {
       // Handle the BeforeAll calls
-      await mgr.startPhase('all');
+      await manager.startPhase('all');
 
       const suiteEnv = { ...process.env };
 
@@ -212,29 +222,30 @@ export class TestExecutor {
         const testStart = Date.now();
 
         // Handle BeforeEach
-        await mgr.startPhase('each');
+        await manager.startPhase('each');
 
         // Run test
         const testResult = await this.executeTest(test);
         result[testResult.status]++;
-        result.tests.push(testResult);
+        result.tests[testResult.methodName] = testResult;
 
         // Handle after each
-        await mgr.endPhase('each');
+        await manager.endPhase('each');
         testResult.durationTotal = Date.now() - testStart;
       }
 
       // Handle after all
-      await mgr.endPhase('all');
+      await manager.endPhase('all');
     } catch (error) {
-      await mgr.onError(error);
+      await manager.onError(error);
     }
 
     // Restore env
     process.env = { ...originalEnv };
 
     result.duration = Date.now() - startTime;
-    result.total = result.passed + result.failed;
+    result.total = result.passed + result.failed + result.skipped;
+    result.status = TestModelUtil.countsToTestStatus(result);
 
     // Mark suite complete
     this.#consumer.onEvent({ phase: 'after', type: 'suite', suite: result });

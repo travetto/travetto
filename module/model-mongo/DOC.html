@@ -91,9 +91,9 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   options<span class="token operator">:</span> mongo<span class="token punctuation">.</span>MongoClientOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
-   * Should we auto create the db
+   * Allow storage modification at runtime
    */</span>
-  autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  modifyStorage<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Frequency of culling for cullable content

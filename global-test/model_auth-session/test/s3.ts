@@ -16,7 +16,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class S3AuthSessionServerSuite extends AuthSessionServerSuite {
+class S3AuthSessionServerSuite extends AuthSessionServerSuite {
   timeScale = 10;
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;

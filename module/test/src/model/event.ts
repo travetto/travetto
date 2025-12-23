@@ -14,6 +14,8 @@ export type EventPhase = 'before' | 'after';
 type EventTpl<T extends EventEntity, P extends EventPhase, V extends {}> =
   { type: T, phase: P, metadata?: Record<string, unknown> } & V;
 
+export type TestRemoveEvent = { type: 'removeTest', import: string, classId?: string, methodName?: string, metadata?: Record<string, unknown> };
+
 /**
  * Different test event shapes
  */

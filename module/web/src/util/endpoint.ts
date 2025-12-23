@@ -1,7 +1,6 @@
-import { asConstructable, castKey, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
+import { asConstructable, castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { BindUtil, SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { RetargettingProxy } from '@travetto/registry';
 
 import { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
@@ -239,10 +238,6 @@ export class EndpointUtil {
     }
 
     config.instance = await DependencyRegistryIndex.getInstance(config.class);
-
-    if (Runtime.dynamic) {
-      config.instance = RetargettingProxy.unwrap(config.instance);
-    }
 
     // Filter out conditional endpoints
     const endpoints = (await Promise.all(

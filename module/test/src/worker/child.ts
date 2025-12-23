@@ -1,12 +1,12 @@
 import { createWriteStream } from 'node:fs';
 
-import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
+import { ConsoleManager, Env, Runtime } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { RunnerUtil } from '../execute/util.ts';
-import { Runner } from '../execute/runner.ts';
-import { Events } from './types.ts';
+import { RunUtil } from '../execute/run.ts';
+import { TestWorkerEvents } from './types.ts';
 import { TestRun } from '../model/test.ts';
+import { CommunicationUtil } from '../communication.ts';
 
 /**
  * Child Worker for the Test Runner.  Receives events as commands
@@ -25,7 +25,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
         throw error;
       }
       // Mark as errored out
-      this.send(type, JSON.parse(Util.serializeToJSON({ error })));
+      this.send(type, CommunicationUtil.serializeToObject({ error }));
     }
   }
 
@@ -42,13 +42,13 @@ export class TestChildWorker extends IpcChannel<TestRun> {
       ConsoleManager.set({ log: () => { } });
     }
 
-    RunnerUtil.registerCleanup('worker');
+    RunUtil.registerCleanup('worker');
 
     // Listen for inbound requests
     this.on('*', event => this.onCommand(event));
 
     // Let parent know the child is ready for handling commands
-    this.send(Events.READY);
+    this.send(TestWorkerEvents.READY);
 
     await this.#done.promise;
   }
@@ -59,10 +59,10 @@ export class TestChildWorker extends IpcChannel<TestRun> {
   async onCommand(event: TestRun & { type: string }): Promise<boolean> {
     console.debug('on message', { ...event });
 
-    if (event.type === Events.INIT) { // On request to init, start initialization
-      await this.#exec(() => this.onInitCommand(), Events.INIT_COMPLETE);
-    } else if (event.type === Events.RUN) { // On request to run, start running
-      await this.#exec(() => this.onRunCommand(event), Events.RUN_COMPLETE);
+    if (event.type === TestWorkerEvents.INIT) { // On request to init, start initialization
+      await this.#exec(() => this.onInitCommand(), TestWorkerEvents.INIT_COMPLETE);
+    } else if (event.type === TestWorkerEvents.RUN) { // On request to run, start running
+      await this.#exec(() => this.onRunCommand(event), TestWorkerEvents.RUN_COMPLETE);
     }
 
     return false;
@@ -80,7 +80,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     console.debug('Running', { import: run.import });
 
     try {
-      await new Runner({ consumer: 'exec', target: run }).run();
+      await RunUtil.runTests({ consumer: 'exec' }, run);
     } finally {
       this.#done.resolve();
     }

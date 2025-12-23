@@ -1,6 +1,6 @@
 import type { Class } from '@travetto/runtime';
 
-import { Assertion, TestConfig, TestResult } from './test.ts';
+import { Assertion, TestConfig, TestResult, type TestStatus } from './test.ts';
 import { Skip, SuiteCore } from './common.ts';
 
 /**
@@ -48,37 +48,26 @@ export interface Counts {
   passed: number;
   skipped: number;
   failed: number;
+  unknown: number;
   total: number;
 }
 
 /**
  * Results of a suite run
  */
-export interface SuiteResult extends Counts {
+export interface SuiteResult extends Counts, SuiteCore {
   /**
-   * Class identifier
+   * All test results
    */
-  classId: string;
-  /**
-   * Import for the suite
-   */
-  import: string;
-  /**
-   * Start of the suite
-   */
-  lineStart: number;
-  /**
-   * End of the suite
-   */
-  lineEnd: number;
-  /**
-   * ALl test results
-   */
-  tests: TestResult[];
+  tests: Record<string, TestResult>;
   /**
    * Suite duration
    */
   duration: number;
+  /**
+   * Overall status
+   */
+  status: TestStatus;
 }
 
 /**

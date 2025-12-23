@@ -45,11 +45,7 @@ where the [RedisModelConfig](https://github.com/travetto/travetto/tree/main/modu
 export class RedisModelConfig {
   client: redis.RedisClientOptions = {};
   namespace?: string;
-  autoCreate?: boolean;
-
-  postConstruct(): void {
-
-  }
+  modifyStorage?: boolean;
 }
 ```
 

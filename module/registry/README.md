@@ -20,9 +20,9 @@ Registration, within the framework flows throw two main use cases:
 
 ### Initial Flows
 The primary flow occurs on initialization of the application. At that point, the module will:
-   1. Initialize [Registry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9) and will automatically register/load all relevant files
+   1. Initialize [Registry](https://github.com/travetto/travetto/tree/main/module/registry/src/registry.ts#L5) and will automatically register/load all relevant files
    1. As files are imported, decorators within the files will record various metadata relevant to the respective registries
-   1. When all files are processed, the [Registry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9) is finished, and it will signal to anything waiting on registered data that its free to use it.
+   1. When all files are processed, the [Registry](https://github.com/travetto/travetto/tree/main/module/registry/src/registry.ts#L5) is finished, and it will signal to anything waiting on registered data that its free to use it.
 
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
@@ -98,57 +98,7 @@ export class SampleRegistryIndex implements RegistryIndex {
 }
 ```
 
-The registry index is a [RegistryIndex](https://github.com/travetto/travetto/tree/main/module/registry/src/service/types.ts#L36) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
+The registry index is a [RegistryIndex](https://github.com/travetto/travetto/tree/main/module/registry/src/types.ts#L32) that similar to the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.")'s Schema registry and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.")'s Dependency registry.
 
 ### Live Flow
-At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. 
-
-As the [DynamicFileLoader](https://github.com/travetto/travetto/tree/main/module/registry/src/internal/file-loader.ts#L17) notifies that a file has been changed, the [Registry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/registry.ts#L9) will pick it up, and process it accordingly.
-
-## Supporting Metadata
-As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s readme, the framework produces hashes of methods, classes, and functions, to allow for detecting changes to individual parts of the codebase. During the live flow, various registries will inspect this information to determine if action should be taken.
-
-**Code: Sample Class Diffing**
-```typescript
-
-#handleFileChanges(importFile: string, classes: Class[] = []): number {
-    const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
-    const sourceFile = RuntimeIndex.getSourceFile(importFile);
-
-    let previous = new Map<string, Class>();
-    if (this.#classes.has(sourceFile)) {
-      previous = new Map(this.#classes.get(sourceFile)!.entries());
-    }
-
-    const keys = new Set([...Array.from(previous.keys()), ...Array.from(next.keys())]);
-
-    if (!this.#classes.has(sourceFile)) {
-      this.#classes.set(sourceFile, new Map());
-    }
-
-    let changes = 0;
-
-    // Determine delta based on the various classes (if being added, removed or updated)
-    for (const key of keys) {
-      if (!next.has(key)) {
-        changes += 1;
-        this.emit({ type: 'removing', previous: previous.get(key)! });
-        this.#classes.get(sourceFile)!.delete(key);
-      } else {
-        this.#classes.get(sourceFile)!.set(key, next.get(key)!);
-        if (!previous.has(key)) {
-          changes += 1;
-          this.emit({ type: 'added', current: next.get(key)! });
-        } else {
-          const prevHash = describeFunction(previous.get(key)!)?.hash;
-          const nextHash = describeFunction(next.get(key)!)?.hash;
-          if (prevHash !== nextHash) {
-            changes += 1;
-            this.emit({ type: 'changed', current: next.get(key)!, previous: previous.get(key)! });
-          }
-        }
-      }
-    }
-    return changes;
-  }
-```
+At runtime, the framework is designed to listen for changes and restart any running processes as needed.

@@ -99,16 +99,18 @@ export class TapSummaryEmitter implements TestConsumerShape {
         files.set(file, { key: file, duration: 0, tests: 0 });
       }
 
+      const testCount = Object.keys(event.suite.tests).length;
+
       suites.set(event.suite.classId, {
         key: event.suite.classId,
         duration: event.suite.duration,
-        tests: event.suite.tests.length
+        tests: testCount
       });
 
       files.get(file)!.duration += event.suite.duration;
-      files.get(file)!.tests += event.suite.tests.length;
+      files.get(file)!.tests += testCount;
       modules.get(module)!.duration += event.suite.duration;
-      modules.get(module)!.tests += event.suite.tests.length;
+      modules.get(module)!.tests += testCount;
     }
   }
 

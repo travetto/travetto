@@ -1,14 +1,14 @@
-import { MethodChangeSource, ClassChangeSource, Registry } from '@travetto/registry';
+import { ManifestModuleUtil } from '@travetto/manifest';
+import { Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
-import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
+import { AsyncQueue, RuntimeIndex, TimeUtil, watchCompiler } from '@travetto/runtime';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
-import { TestRun } from '../model/test.ts';
-import { RunnerUtil } from './util.ts';
-import { TestReadyEvent, TestRemovedEvent } from '../worker/types.ts';
-import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import type { TestDiffInput, TestRun } from '../model/test.ts';
+import { RunUtil } from './run.ts';
+import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
 
 /**
  * Test Watcher.
@@ -25,78 +25,51 @@ export class TestWatcher {
 
     await Registry.init();
 
-    const events: TestRun[] = [];
+    const events: (TestRun | TestDiffInput)[] = [];
 
     if (runAllOnStart) {
-      const tests = await RunnerUtil.getTestDigest();
-      events.push(...RunnerUtil.getTestRuns(tests));
+      events.push(...await RunUtil.resolveGlobInput({ globs: [] }));
     }
 
     const queue = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(
       await TestConsumerRegistryIndex.getInstance({ consumer: format })
-    )
-      .withFilter(event => event.metadata?.partial !== true || event.type !== 'suite');
-
-    const emitter = new MethodChangeSource(ClassChangeSource);
-    emitter.on((event) => {
-      const [cls, method] = 'previous' in event ? event.previous : event.current;
-
-      if (!cls || describeFunction(cls).abstract) {
-        return;
-      }
-
-      const classId = cls.Ⲑid;
-      if (!method) {
-        consumer.removeClass(classId);
-        return;
-      }
-
-      const config = SuiteRegistryIndex.getTestConfig(cls, method)!;
-      if (event.type !== 'delete') {
-        if (config) {
-          const run: TestRun = {
-            import: config.import, classId: config.classId, methodNames: [config.methodName], metadata: { partial: true }
-          };
-          console.log('Triggering', run);
-          queue.add(run, true); // Shift to front
-        }
-      } else {
-        process.send?.({
-          type: 'removeTest',
-          methodNames: method?.name ? [method.name!] : undefined!,
-          method: method?.name,
-          classId,
-          import: Runtime.getImport(cls)
-        } satisfies TestRemovedEvent);
-      }
-    });
-
-    // If a file is changed, but doesn't emit classes, re-run whole file
-    ClassChangeSource.onNonClassChanges(imp => queue.add({ import: imp }));
+    );
 
     process.on('message', event => {
-      if (typeof event === 'object' && event && 'type' in event && event.type === 'run-test') {
-        console.log('Received message', event);
-        // Legacy
-        if ('file' in event && typeof event.file === 'string') {
-          event = { import: RuntimeIndex.getFromSource(event.file)?.import! };
-        }
-        console.debug('Manually triggered', event);
-        queue.add(castTo(event), true);
+      if (isTestRunEvent(event)) {
+        queue.add(event, true);
       }
     });
 
     process.send?.({ type: 'ready' } satisfies TestReadyEvent);
 
-    await WorkPool.run(
+    const queueProcessor = WorkPool.run(
       buildStandardTestManager.bind(null, consumer),
       queue,
       {
-        idleTimeoutMillis: 120000,
+        idleTimeoutMillis: TimeUtil.asMillis('2m'),
         min: 2,
         max: WorkPool.DEFAULT_SIZE
       }
     );
+
+    for await (const event of watchCompiler()) {
+      const fileType = ManifestModuleUtil.getFileType(event.file);
+      if (
+        (fileType === 'ts' || fileType === 'js') &&
+        RuntimeIndex.findModuleForArbitraryFile(event.file) !== undefined
+      ) {
+        if (event.action === 'delete') {
+          consumer.removeTest(event.import);
+        } else {
+          const diffSource = consumer.produceDiffSource(event.import);
+          queue.add({ import: event.import, diffSource }, true);
+        }
+      }
+    }
+
+    // Cleanup
+    await queueProcessor;
   }
 }

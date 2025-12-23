@@ -1,6 +1,6 @@
 import { DocumentData, FieldValue, Firestore, PartialWithFieldValue, Query } from '@google-cloud/firestore';
 
-import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelRegistryIndex, ModelStorageSupport,
@@ -13,7 +13,7 @@ import { FirestoreModelConfig } from './config.ts';
 const clone = structuredClone;
 
 const toSimpleObject = <T>(input: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
-  JSON.parse(JSON.stringify(input, (_, value) => value ?? null), (_, value) => value ?? missingValue);
+  JSONUtil.parseSafe(JSON.stringify(input, (_, value) => value ?? null), (_, value) => value ?? missingValue);
 
 /**
  * A model service backed by Firestore

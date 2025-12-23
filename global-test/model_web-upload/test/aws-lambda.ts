@@ -5,6 +5,6 @@ import { LocalAwsLambdaWebDispatcher } from '@travetto/web-aws-lambda/support/te
 import { ModelBlobWebUploadServerSuite } from './suite.ts';
 
 @Suite()
-export class AwsLambdaWebUploadTest extends ModelBlobWebUploadServerSuite {
+class AwsLambdaWebUploadTest extends ModelBlobWebUploadServerSuite {
   dispatcherType = LocalAwsLambdaWebDispatcher;
 }

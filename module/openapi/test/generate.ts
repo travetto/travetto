@@ -84,7 +84,8 @@ class IgnoredCont {
 }
 
 @Suite()
-export class GenerateSuite {
+class GenerateSuite {
+
   @BeforeAll()
   async init() {
     await Registry.init();

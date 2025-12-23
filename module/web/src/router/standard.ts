@@ -26,19 +26,13 @@ export class StandardWebRouter extends BaseWebRouter {
   #cache = new Map<Function, EndpointConfig>();
   raw = router();
 
-  async register(endpoints: EndpointConfig[]): Promise<() => void> {
+  async register(endpoints: EndpointConfig[]): Promise<void> {
     for (const endpoint of endpoints) {
       const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
       const handler = (): void => { };
       this.#cache.set(handler, endpoint);
       this.raw[HTTP_METHODS[endpoint.httpMethod ?? DEFAULT_HTTP_METHOD].lower](fullPath, handler);
     }
-
-    return (): void => {
-      for (const endpoint of endpoints ?? []) {
-        this.raw.off(endpoint.httpMethod ?? DEFAULT_HTTP_METHOD, endpoint.fullPath);
-      }
-    };
   }
 
   /**

@@ -41,7 +41,9 @@ export class EditorSendService {
         throw new Error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
       }
     }
-    return await DependencyRegistryIndex.getInstance(MailService);
+    const service = await DependencyRegistryIndex.getInstance(MailService);
+    service.setCacheState(false); // Ensure we don't cache locally
+    return service;
   }
 
   /**

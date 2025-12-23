@@ -4,7 +4,7 @@ import { Test, Suite } from '@travetto/test';
 import { EnvProp } from '@travetto/runtime';
 
 @Suite()
-export class EnvTest {
+class EnvTest {
 
   @Test()
   verifyGet() {
@@ -15,6 +15,7 @@ export class EnvTest {
     assert(new EnvProp('name').value === 'bob');
     assert(new EnvProp('NAME').value === 'BOB');
     assert(new EnvProp('nAmE').value === 'bOb');
+
     assert(new EnvProp('NaMe').value === undefined);
 
     assert(new EnvProp('Random').value === undefined);
@@ -135,5 +136,4 @@ export class EnvTest {
       assert(new EnvProp('BOOL2').bool === true);
     }
   }
-
 }
