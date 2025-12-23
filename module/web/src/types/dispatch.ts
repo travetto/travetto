@@ -19,5 +19,5 @@ export interface WebRouter extends WebDispatcher {
   /**
    * Register a controller with the prepared endpoints
    */
-  register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<() => void>;
+  register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<void>;
 }

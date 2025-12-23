@@ -16,7 +16,6 @@ import { EndpointUtil } from '../util/endpoint.ts';
 @Injectable()
 export abstract class BaseWebRouter implements WebRouter {
 
-  #cleanup = new Map<Class, Function>();
   #interceptors: WebInterceptor[];
 
   async #register(cls: Class): Promise<void> {
@@ -29,8 +28,7 @@ export abstract class BaseWebRouter implements WebRouter {
       endpoint.filter = EndpointUtil.createEndpointHandler(this.#interceptors, endpoint, config);
     }
 
-    const fn = await this.register(endpoints, config);
-    this.#cleanup.set(cls, fn);
+    await this.register(endpoints, config);
   };
 
   /**
@@ -49,6 +47,6 @@ export abstract class BaseWebRouter implements WebRouter {
     }
   }
 
-  abstract register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<() => void>;
+  abstract register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<void>;
   abstract dispatch(ctx: WebFilterContext): Promise<WebResponse>;
 }
