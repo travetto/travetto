@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime, listenForSourceChanges, type ExecutionResult } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Runtime, listenForSourceChanges, type ExecutionResult, ShutdownManager } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -97,6 +97,7 @@ export class CliUtil {
       console.error(`Bailing, due to ${maxRetries} restarts in under 10s`);
     }
 
+    await ShutdownManager.gracefulShutdown('cli-restart');
     process.exit();
   }
 
@@ -137,7 +138,7 @@ export class CliUtil {
    * Debug if IPC available
    */
   static async debugIfIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
-    return (cmd.debugIpc ?? !Runtime.production) && this.triggerIpc('run', cmd);
+    return cmd.debugIpc === true && this.triggerIpc('run', cmd);
   }
 
   /**
