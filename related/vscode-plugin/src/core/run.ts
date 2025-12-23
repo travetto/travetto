@@ -33,20 +33,20 @@ export class RunUtil {
   }
 
   /** Generate debug launch config */
-  static buildDebugConfig(config: LaunchConfig): vscode.DebugConfiguration {
-    if (config.useCli) {
-      config.args = [config.main, ...config.args ?? []];
-      config.main = this.cliFile;
+  static buildDebugConfig(input: LaunchConfig): vscode.DebugConfiguration {
+    if (input.useCli) {
+      input.args = [input.main, ...input.args ?? []];
+      input.main = this.cliFile;
     }
 
     const output = `${WORKSPACE}/${Workspace.outputFolder}`;
 
     const debugOverrides = vscode.workspace.getConfiguration('travetto.debugOptions');
 
-    return {
+    const config: vscode.DebugConfiguration = {
       type: 'node',
       request: 'launch',
-      name: config.name,
+      name: input.name,
       sourceMaps: true,
       pauseForSourceMap: true,
       runtimeArgs: [],
@@ -68,14 +68,16 @@ export class RunUtil {
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
       ...(typeof debugOverrides === 'object' ? debugOverrides : {}),
-      program: config.main.replace(Workspace.path, WORKSPACE),
+      program: input.main.replace(Workspace.path, WORKSPACE),
       cwd: WORKSPACE,
-      args: (config.args ?? []).map(arg => `${arg}`),
+      args: (input.args ?? []).map(arg => `${arg}`),
       env: {
-        ...this.buildEnv(config.cliModule),
-        ...config.env ?? {},
+        ...this.buildEnv(input.cliModule),
+        ...input.env ?? {},
       },
     };
+
+    return config;
   }
 
   /** Debug a given config */

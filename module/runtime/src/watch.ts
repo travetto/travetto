@@ -3,9 +3,9 @@ import { ManifestModuleUtil, type ChangeEventType, type ManifestModuleFileType }
 import { RuntimeIndex } from './manifest-index.ts';
 import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
-import { castTo } from './types.ts';
+import { AppError } from './error.ts';
 
-export type WatchEvent = { file: string, action: ChangeEventType, output: string, module: string, import: string, time: number };
+type WatchEvent = { file: string, action: ChangeEventType, output: string, module: string, import: string, time: number };
 
 type WatchCompilerOptions = {
   /**
@@ -16,9 +16,11 @@ type WatchCompilerOptions = {
    * Signal to end the flow
    */
   signal?: AbortSignal;
+  /**
+   * Run on restart
+   */
+  onRestart?: () => void;
 };
-
-const isOlderThanOneMinute = (x: number) => (Date.now() - x) > (60 * 1000);
 
 export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterable<WatchEvent> {
   // Load at runtime
@@ -34,35 +36,39 @@ export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterab
   const controller = new AbortController();
   const remove = ShutdownManager.onGracefulShutdown(async () => controller.abort());
 
-  let iterations: number[] = [];
+  const maxIterations = 10;
+  const maxWindow = 10 * 1000;
+  const iterations: number[] = [];
+  let iterationsExhausted = false;
 
   // Chain abort if provided
   config?.signal?.addEventListener('abort', controller.abort);
 
   while (
     !controller.signal.aborted &&
-    iterations.length < 5 &&
-    (
-      config?.restartOnCompilerExit || iterations.length === 0
-    )
+    !iterationsExhausted &&
+    (config?.restartOnCompilerExit || iterations.length === 0)
   ) {
+    if (iterations.length) { // Wait on next iteration
+      await Util.nonBlockingTimeout(10);
+    }
+
     await client.waitForState(['compile-end', 'watch-start'], undefined, controller.signal);
 
     if (!await client.isWatching()) { // If we get here, without a watch
-      while (!await client.isWatching()) { // Wait until watch starts
-        await Util.nonBlockingTimeout(1000 * 60);
-      }
+      throw new AppError('Compiler is not running');
     } else {
+      if (iterations.length) {
+        config?.onRestart?.();
+      }
       yield* client.fetchEvents('change', { signal: controller.signal, enforceIteration: true });
     }
 
-    while (iterations.length && isOlderThanOneMinute(iterations[0])) {
+    iterations.push(Date.now());
+    if (iterations.length >= maxIterations) {
+      iterationsExhausted = (Date.now() - iterations[0]) > maxWindow;
       iterations.shift();
     }
-
-    iterations.push(Date.now());
-
-    await Util.nonBlockingTimeout(10 ** iterations.length);
   }
 
   remove();
@@ -70,22 +76,22 @@ export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterab
 
 export function listenForSourceChanges(onChange: () => void, debounceDelay = 10): AbortController {
   let timeout: ReturnType<typeof setTimeout> | undefined;
-  let aborter: AbortController | undefined;
+  const aborter = new AbortController();
 
   const validFileTypes = new Set<ManifestModuleFileType>(['ts', 'js', 'package-json', 'typings']);
 
-  (async function () {
-    aborter = new AbortController();
-    for await (const item of watchCompiler({ restartOnCompilerExit: true, signal: aborter.signal })) {
-      const fileType = ManifestModuleUtil.getFileType(item.file);
-      if (validFileTypes.has(fileType) && RuntimeIndex.findModuleForArbitraryFile(item.file)) {
-        clearTimeout(timeout);
-        timeout = setTimeout(onChange, debounceDelay);
+  function send(): void {
+    clearTimeout(timeout);
+    timeout = setTimeout(onChange, debounceDelay);
+  }
+
+  (async function (): Promise<void> {
+    for await (const item of watchCompiler({ restartOnCompilerExit: true, signal: aborter.signal, onRestart: send })) {
+      if (validFileTypes.has(ManifestModuleUtil.getFileType(item.file)) && RuntimeIndex.findModuleForArbitraryFile(item.file)) {
+        send();
       }
     }
   })();
-  return castTo(Object.defineProperties({}, {
-    abort: { get: () => aborter?.abort },
-    signal: { get: () => aborter?.signal }
-  }));
+
+  return aborter;
 }
