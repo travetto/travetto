@@ -1,14 +1,24 @@
 import { spawn } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Runtime, listenForSourceChanges, type ExecutionResult } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
+
+const CODE_RESTART = {
+  code: 200,
+  message: 'CODE_CHANGE'
+};
 
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
 const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
   !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
 );
+
+type RunWithRestartOptions = {
+  maxRetriesPerMinute?: number;
+  relayInterrupt?: boolean;
+}
 
 export class CliUtil {
   /**
@@ -28,25 +38,76 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<unknown> | undefined {
-    const ipc = !!cmd.canRestartIpc;
-    const canRestart = Env.TRV_CAN_RESTART.isFalse || (cmd.canRestartIpc ?? cmd.canRestart ?? !Runtime.production);
+  static async runWithRestartOnCodeChanges<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
 
-    if (ipc && process.connected) {
-      process.once('disconnect', () => process.exit());
-    }
-    if (canRestart) {
-      Env.TRV_CAN_RESTART.clear();
-      return;
+    if (Env.TRV_CAN_RESTART.isFalse || cmd.restartForDev !== true) {
+      process.on('message', (event) => {
+        if (event === CODE_RESTART.message) {
+          process.exit(CODE_RESTART.code);
+        }
+      });
+      return false;
     }
 
-    return ExecUtil.withRestart(() => spawn(process.argv0, process.argv.slice(1), {
-      env: {
-        ...process.env,
-        ...Env.TRV_CAN_RESTART.export(false)
-      },
-      stdio: [0, 1, 2, ipc ? 'ipc' : undefined]
-    }));
+    let result: ExecutionResult | undefined;
+    let exhaustedRestarts = false;
+    let signalCodeChange: AbortController | undefined;
+
+    const env = { ...process.env, ...Env.TRV_CAN_RESTART.export(false) };
+    const maxRetries = config?.maxRetriesPerMinute ?? 5;
+    const relayInterrupt = config?.relayInterrupt ?? true;
+    const restarts: number[] = [];
+    const compilerShutdown = listenForSourceChanges(() => { signalCodeChange?.abort() });
+
+    if (!relayInterrupt) {
+      process.removeAllListeners('SIGINT'); // Remove any existing listeners
+      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
+    }
+
+    while (
+      !compilerShutdown.signal.aborted &&
+      (result === undefined || result.code === CODE_RESTART.code) &&
+      !exhaustedRestarts
+    ) {
+      if (restarts.length) {
+        console.error('Restarting...', { pid: process.pid, time: restarts[0] });
+      }
+
+      // Ensure restarts length is capped
+      signalCodeChange = new AbortController();
+
+      const subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] })
+        .on('message', value => process.send?.(value));
+
+      const interrupt = (): void => { subProcess.kill('SIGINT'); };
+      const toMessage = (value: unknown): void => { subProcess.send?.(value!); };
+
+      signalCodeChange.signal.addEventListener('abort', () => { subProcess.send(CODE_RESTART.message); });
+
+      // Proxy kill requests
+      process.on('message', toMessage);
+      if (relayInterrupt) {
+        process.on('SIGINT', interrupt);
+      }
+
+      result = await ExecUtil.getResult(subProcess, { catch: true });
+      process.exitCode = subProcess.exitCode;
+      process.off('message', toMessage);
+      process.off('SIGINT', interrupt);
+
+      if (restarts.length >= maxRetries) {
+        exhaustedRestarts = (Date.now() - restarts[0]) >= (10 * 1000);
+        restarts.pop();
+      }
+      restarts.unshift(Date.now());
+    }
+
+
+    if (exhaustedRestarts) {
+      console.error(`Bailing, due to ${maxRetries} restarts in under 10s`);
+    }
+
+    return true;
   }
 
   /**

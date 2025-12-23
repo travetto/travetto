@@ -19,8 +19,8 @@ type CliCommandConfigOptions = {
     module?: boolean;
     /** Should debug invocation trigger via ipc */
     debugIpc?: boolean;
-    /** Should the invocation automatically restart on exit */
-    canRestart?: boolean | 'ipc';
+    /** Should restart on code change */
+    restartForDev?: boolean;
   };
 };
 
@@ -53,7 +53,7 @@ const FIELD_CONFIG: {
     },
     {
       name: 'debugIpc',
-      run: cmd => CliUtil.debugIfIpc(cmd).then((flag) => flag && process.exit(0)),
+      run: cmd => CliUtil.debugIfIpc(cmd).then((executed) => executed && process.exit(0)),
       field: {
         type: Boolean,
         aliases: ['-di'],
@@ -63,13 +63,13 @@ const FIELD_CONFIG: {
       },
     },
     {
-      name: 'canRestart',
-      run: cmd => CliUtil.runWithRestart(cmd)?.then((flag) => flag && process.exit(0)),
+      name: 'restartForDev',
+      run: cmd => CliUtil.runWithRestartOnCodeChanges(cmd),
       field: {
         type: Boolean,
         aliases: ['-cr'],
-        description: 'Should the invocation automatically restart on exit',
-        default: false,
+        description: 'Should the invocation automatically restart on source changes',
+        default: Runtime.env === 'development',
         required: { active: false },
       },
     }

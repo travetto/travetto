@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { PackageUtil } from '@travetto/manifest';
 import { ExecUtil, Env, watchCompiler, Runtime } from '@travetto/runtime';
-import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
 /**
@@ -27,8 +27,7 @@ export class DocCommand implements CliCommandShape {
     Env.TRV_ROLE.set('doc');
     Env.TRV_CLI_IPC.clear();
     Env.TRV_LOG_PLAIN.set(true);
-    Env.FORCE_COLOR.set(false);
-    Env.TRV_CAN_RESTART.set(false); // Prevent restarting
+    Env.FORCE_COLOR.set(false);// Prevent restarting
   }
 
   preBind(): void {
@@ -48,10 +47,6 @@ export class DocCommand implements CliCommandShape {
   }
 
   async runWatch(): Promise<void> {
-    if (await CliUtil.runWithRestart(this)) {
-      return;
-    }
-
     const [first, ...args] = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
     for await (const { file } of watchCompiler({ restartOnCompilerExit: true })) {
       if (file === this.input) {

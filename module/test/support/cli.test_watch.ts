@@ -6,7 +6,7 @@ import { selectConsumer } from './bin/run.ts';
 /**
  * Invoke the test watcher
  */
-@CliCommand({ with: { canRestart: 'ipc' } })
+@CliCommand()
 export class TestWatcherCommand {
 
   format: string = 'tap';

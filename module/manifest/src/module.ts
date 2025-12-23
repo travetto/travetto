@@ -62,14 +62,6 @@ export class ManifestModuleUtil {
   }
 
   /**
-   * Is source file by extension
-   */
-  static isSourceFile(file: string): boolean {
-    const type = this.getFileType(file);
-    return type === 'ts' || type === 'js';
-  }
-
-  /**
    * Simple file scanning
    */
   static async scanFolder(ctx: ManifestContext, folder: string, full = false): Promise<string[]> {

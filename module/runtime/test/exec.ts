@@ -69,21 +69,6 @@ export class ExecUtilTest {
   }
 
   @Test()
-  async testRestart() {
-    const file = path.resolve(os.tmpdir(), `${Math.random()}.txt`);
-    await fs.writeFile(file, '');
-
-    const result = await ExecUtil.withRestart(() => spawn('/bin/bash', ['-c',
-      `(( $(grep -ch '^' '${file}') == 4)) && (exit 0) || (echo 1 >> '${file}'; exit 200)`
-    ]));
-    assert(result);
-    assert(result.code === 0);
-    const lines = await (await fs.readFile(file, 'utf8')).split('\n');
-    assert(lines.filter(x => !!x).length === 4);
-    assert(await fs.stat(file).catch(() => undefined));
-  }
-
-  @Test()
   async testImmediateFail() {
     const proc = spawn('npm', ['run', 'Cork'], { cwd: Runtime.workspace.path });
     await timers.setTimeout(600);

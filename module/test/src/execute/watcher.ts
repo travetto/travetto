@@ -55,8 +55,9 @@ export class TestWatcher {
     );
 
     for await (const event of watchCompiler()) {
+      const fileType = ManifestModuleUtil.getFileType(event.file);
       if (
-        ManifestModuleUtil.isSourceFile(event.file) &&
+        (fileType === 'ts' || fileType === 'js') &&
         RuntimeIndex.findModuleForArbitraryFile(event.file) !== undefined
       ) {
         if (event.action === 'delete') {
