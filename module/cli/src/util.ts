@@ -1,24 +1,23 @@
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 
 import { describeFunction, Env, ExecUtil, Runtime, listenForSourceChanges, type ExecutionResult } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
-const CODE_RESTART = {
-  code: 200,
-  message: 'CODE_CHANGE'
-};
-
+const CODE_RESTART = { type: 'code_change', code: 200 };
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
 const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
   !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
 );
 
+const isCodeRestart = (input: unknown): input is typeof CODE_RESTART =>
+  typeof input === 'object' && !!input && 'type' in input && input.type === CODE_RESTART.type;
+
 type RunWithRestartOptions = {
   maxRetriesPerMinute?: number;
   relayInterrupt?: boolean;
-}
+};
 
 export class CliUtil {
   /**
@@ -41,23 +40,19 @@ export class CliUtil {
   static async runWithRestartOnCodeChanges<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
 
     if (Env.TRV_CAN_RESTART.isFalse || cmd.restartForDev !== true) {
-      process.on('message', (event) => {
-        if (event === CODE_RESTART.message) {
-          process.exit(CODE_RESTART.code);
-        }
-      });
+      process.on('message', event => isCodeRestart(event) && process.exit(event.code));
       return false;
     }
 
     let result: ExecutionResult | undefined;
     let exhaustedRestarts = false;
-    let signalCodeChange: AbortController | undefined;
+    let subProcess: ChildProcess | undefined;
 
     const env = { ...process.env, ...Env.TRV_CAN_RESTART.export(false) };
     const maxRetries = config?.maxRetriesPerMinute ?? 5;
     const relayInterrupt = config?.relayInterrupt ?? true;
     const restarts: number[] = [];
-    const compilerShutdown = listenForSourceChanges(() => { signalCodeChange?.abort() });
+    listenForSourceChanges(() => { subProcess?.send(CODE_RESTART); });
 
     if (!relayInterrupt) {
       process.removeAllListeners('SIGINT'); // Remove any existing listeners
@@ -65,7 +60,6 @@ export class CliUtil {
     }
 
     while (
-      !compilerShutdown.signal.aborted &&
       (result === undefined || result.code === CODE_RESTART.code) &&
       !exhaustedRestarts
     ) {
@@ -74,15 +68,11 @@ export class CliUtil {
       }
 
       // Ensure restarts length is capped
-      signalCodeChange = new AbortController();
-
-      const subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] })
+      subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] })
         .on('message', value => process.send?.(value));
 
-      const interrupt = (): void => { subProcess.kill('SIGINT'); };
-      const toMessage = (value: unknown): void => { subProcess.send?.(value!); };
-
-      signalCodeChange.signal.addEventListener('abort', () => { subProcess.send(CODE_RESTART.message); });
+      const interrupt = (): void => { subProcess?.kill('SIGINT'); };
+      const toMessage = (value: unknown): void => { subProcess?.send(value!); };
 
       // Proxy kill requests
       process.on('message', toMessage);
@@ -96,10 +86,10 @@ export class CliUtil {
       process.off('SIGINT', interrupt);
 
       if (restarts.length >= maxRetries) {
-        exhaustedRestarts = (Date.now() - restarts[0]) >= (10 * 1000);
-        restarts.pop();
+        exhaustedRestarts = (Date.now() - restarts[0]) < (10 * 1000);
+        restarts.shift();
       }
-      restarts.unshift(Date.now());
+      restarts.push(Date.now());
     }
 
 
@@ -107,7 +97,7 @@ export class CliUtil {
       console.error(`Bailing, due to ${maxRetries} restarts in under 10s`);
     }
 
-    return true;
+    process.exit();
   }
 
   /**

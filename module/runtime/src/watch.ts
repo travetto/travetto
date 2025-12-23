@@ -13,10 +13,6 @@ type WatchCompilerOptions = {
    */
   restartOnCompilerExit?: boolean;
   /**
-   * Signal to end the flow
-   */
-  signal?: AbortSignal;
-  /**
    * Run on restart
    */
   onRestart?: () => void;
@@ -40,9 +36,6 @@ export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterab
   const maxWindow = 10 * 1000;
   const iterations: number[] = [];
   let iterationsExhausted = false;
-
-  // Chain abort if provided
-  config?.signal?.addEventListener('abort', controller.abort);
 
   while (
     !controller.signal.aborted &&
@@ -74,9 +67,8 @@ export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterab
   remove();
 }
 
-export function listenForSourceChanges(onChange: () => void, debounceDelay = 10): AbortController {
+export function listenForSourceChanges(onChange: () => void, debounceDelay = 10): void {
   let timeout: ReturnType<typeof setTimeout> | undefined;
-  const aborter = new AbortController();
 
   const validFileTypes = new Set<ManifestModuleFileType>(['ts', 'js', 'package-json', 'typings']);
 
@@ -86,12 +78,10 @@ export function listenForSourceChanges(onChange: () => void, debounceDelay = 10)
   }
 
   (async function (): Promise<void> {
-    for await (const item of watchCompiler({ restartOnCompilerExit: true, signal: aborter.signal, onRestart: send })) {
+    for await (const item of watchCompiler({ restartOnCompilerExit: true, onRestart: send })) {
       if (validFileTypes.has(ManifestModuleUtil.getFileType(item.file)) && RuntimeIndex.findModuleForArbitraryFile(item.file)) {
         send();
       }
     }
   })();
-
-  return aborter;
 }
