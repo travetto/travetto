@@ -43,7 +43,7 @@ export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Allows auto creation of a model storage backing at runtime
    */
-  autoCreate?: 'production' | 'devevlopment' | 'off';
+  autoCreate?: 'production' | 'development' | 'off';
   /**
    * Pre-persist handlers
    */

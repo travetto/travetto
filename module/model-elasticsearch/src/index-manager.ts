@@ -24,7 +24,7 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   getStore(cls: Class): string {
-    return ModelRegistryIndex.getStoreName(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
+    return ModelRegistryIndex.getStoreName(cls);
   }
 
   /**

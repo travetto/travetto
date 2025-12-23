@@ -23,7 +23,7 @@ export class DockerPackOperation {
     config.dockerRuntime.os = await PackUtil.runCommand(
       ['docker', 'run', '--rm', '--entrypoint', '/bin/sh', config.dockerImage, '-c', 'cat /etc/*release*']
     ).then(out => {
-      const found = out.match(/\b(?:debian|alpine|centos)\b/i)?.[0].toLowerCase();
+      const found = out.toLowerCase().match(/\b(?:debian|alpine|centos)\b/)?.[0];
       switch (found) {
         case 'debian': case 'alpine': case 'centos': return found;
         default: return 'unknown';

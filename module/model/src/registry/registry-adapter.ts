@@ -27,8 +27,8 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
     const config = this.#config ??= {
       class: this.#cls,
       indices: [],
-      autoCreate: 'devevlopment',
-      store: this.#cls.name.toLowerCase(),
+      autoCreate: 'development',
+      store: this.#cls.name.toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'),
       postLoad: [],
       prePersist: []
     };
