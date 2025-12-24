@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 import {
   type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
   type ObjectId, type Binary, type RootFilterOperators, type Filter,
-  type WithId as MongoWithId
+  type WithId as MongoWithId,
 } from 'mongodb';
 
 import {
@@ -128,12 +128,30 @@ export class MongoModelService implements
 
   async upsertModel(cls: Class): Promise<void> {
     const col = await this.getStore(cls);
-    const creating = MongoUtil.getIndices(cls, ModelRegistryIndex.getConfig(cls).indices);
-    if (creating.length) {
-      // TODO: Ensure we don't recreate existing indexes
-      console.debug('Creating indexes', { indices: creating });
-      for (const toCreate of creating) {
-        await col.createIndex(...toCreate);
+    const indices = MongoUtil.getIndices(cls, ModelRegistryIndex.getConfig(cls).indices);
+    const existingIndices = (await col.indexes().catch(() => [])).filter(idx => idx.name !== '_id_');
+
+    const pendingMap = Object.fromEntries(indices.map(pair => [pair[1].name!, pair]));
+    const existingMap = Object.fromEntries(existingIndices.map(idx => [idx.name!, idx.key]));
+
+    for (const idx of existingIndices) {
+      if (!idx.name) {
+        continue;
+      }
+      const pending = pendingMap[idx.name];
+      if (!pending) {
+        console.debug('Deleting index', { indices: idx.name });
+        await col.dropIndex(idx.name);
+      } else if (MongoUtil.isIndexChanged(idx, pending)) {
+        console.debug('Updating index', { indices: idx.name });
+        await col.dropIndex(idx.name);
+        await col.createIndex(...pending);
+      }
+    }
+    for (const [name, idx] of Object.entries(pendingMap)) {
+      if (!existingMap[name]) {
+        console.debug('Creating index', { indices: name });
+        await col.createIndex(...idx);
       }
     }
   }

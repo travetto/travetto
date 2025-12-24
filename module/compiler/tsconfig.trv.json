@@ -5,7 +5,8 @@
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "lib": [
-      "ES2024"
+      "ES2024",
+      "ESNext.Collection"
     ],
     "jsx": "react-jsx",
     "strict": true,

@@ -10,7 +10,7 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 @CliCommand({ with: { env: true, module: true } })
 export class ModelInstallCommand extends BaseModelCommand {
 
-  getOperation(): 'createModel' { return 'createModel'; }
+  getOperation(): 'upsertModel' { return 'upsertModel'; }
 
   async main(provider: string, models: string[]): Promise<void> {
     const resolved = await ModelCandidateUtil.resolve(provider, models);
