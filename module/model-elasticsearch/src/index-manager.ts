@@ -140,42 +140,24 @@ export class IndexManager implements ModelStorageSupport {
    * When the schema changes
    */
   async changeModel(cls: Class<ModelType>): Promise<void> {
-    const modifications: string[] = [];
-    // TODO: Need to properly diff and update indexes
-
-    // Find which fields are gone
-    // const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
-    //   toRemove.push(...subChange.fields
-    //     .filter(event => event.type === 'delete')
-    //     .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
-    //   return toRemove;
-    // }, []);
-
-    // // Find which types have changed
-    // const fieldChanges = change.subs.reduce<string[]>((toChange, subChange) => {
-    //   toChange.push(...subChange.fields
-    //     .filter(event => event.type === 'update')
-    //     .filter(event => event.previous?.type !== event.current?.type)
-    //     .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
-    //   return toChange;
-    // }, []);
-
-    const { index } = this.getIdentity(cls);
     const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
+    const { index } = this.getIdentity(cls);
+    const currentMapping = await this.#client.indices.getMapping({ index });
+    const changedFields = ElasticsearchSchemaUtil.getChangedFields(currentMapping, schema);
 
     // If removing fields or changing types, run as script to update data
-    if (modifications.length) { // Removing and adding
+    if (changedFields.length) { // Removing and adding or changing
       const next = await this.createIndex(cls, false);
 
-      const aliases = (await this.#client.indices.getAlias({ index })).body;
-      const current = Object.keys(aliases)[0];
+      const { body: aliases } = await this.#client.indices.getAlias({ index });
+      const [current] = Object.keys(aliases);
 
       const reindexBody: estypes.ReindexRequest = {
         source: { index: current },
         dest: { index: next },
         script: {
           lang: 'painless',
-          source: modifications.map(change => `ctx._source.remove("${change}");`).join(' ') // Removing
+          source: changedFields.map(change => `ctx._source.remove("${change}");`).join(' ') // Removing
         },
         wait_for_completion: true
       };
@@ -186,7 +168,6 @@ export class IndexManager implements ModelStorageSupport {
       await Promise.all(Object.keys(aliases)
         .map(alias => this.#client.indices.delete({ index: alias })));
 
-      await this.#client.indices.putMapping({ index: next, ...schema });
       await this.#client.indices.putAlias({ index: next, name: index });
     } else { // Only update the schema
       await this.#client.indices.putMapping({ index, ...schema });

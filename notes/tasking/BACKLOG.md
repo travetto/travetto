@@ -25,5 +25,6 @@ Transactions
 ----------------------
 * Mongo Supports Transactions
 * Dynamodb supports transactions
+* Firestore Supports transactions
 * Expand some form of transactionality as a primitive for use within service methods (separate from sql transactions)
 * Might require some rework of the sql naming conventions

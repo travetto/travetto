@@ -132,7 +132,7 @@ export class TableManager {
       await Promise.all(changes.delete.map(value => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(value))));
     } catch (error) {
       // Failed to change
-      console.error('Unable to change field', { error });
+      // console.error('Unable to change field', { error });
     }
   }
 }

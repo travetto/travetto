@@ -7,6 +7,9 @@ import { EsSchemaConfig } from './types.ts';
 
 const PointConcrete = toConcrete<Point>();
 
+const isMappingType = (input: estypes.MappingProperty): input is estypes.MappingTypeMapping =>
+  (input.type === 'object' || input.type === 'nested') && 'properties' in input && !!input.properties;
+
 /**
  * Utils for ES Schema management
  */
@@ -142,5 +145,32 @@ export class ElasticsearchSchemaUtil {
     }
 
     return { properties, dynamic: false };
+  }
+
+  /**
+   * Gets list of all changed fields between two mappings
+   */
+  static getChangedFields(current: estypes.MappingTypeMapping, needed: estypes.MappingTypeMapping, prefix = ''): string[] {
+    const currentProperties = (current.properties ?? {});
+    const neededProperties = (needed.properties ?? {});
+    const allKeys = new Set([...Object.keys(currentProperties), ...Object.keys(neededProperties)]);
+    const changed: string[] = [];
+
+    for (const key of allKeys) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      const currentProperty = currentProperties[key];
+      const neededProperty = neededProperties[key];
+
+      if (!currentProperty || !neededProperty || currentProperty.type !== neededProperty.type) {
+        changed.push(path);
+      } else if (isMappingType(currentProperty) || isMappingType(neededProperty)) {
+        changed.push(...this.getChangedFields(
+          'properties' in currentProperty ? currentProperty : { properties: {} },
+          'properties' in neededProperty ? neededProperty : { properties: {} },
+          path
+        ));
+      }
+    }
+    return changed;
   }
 }
