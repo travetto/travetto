@@ -1,5 +1,6 @@
 import {
   type AttributeDefinition, type AttributeValue, DynamoDB, type GlobalSecondaryIndex,
+  type GlobalSecondaryIndexUpdate,
   type KeySchemaElement, type PutItemCommandInput, type PutItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
@@ -212,14 +213,27 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         GlobalSecondaryIndexes: idx.indices
       });
     } else {
+      const existingIndices = (await this.client.describeTable({ TableName: table })).Table?.GlobalSecondaryIndexes;
+      const existingMap = Object.fromEntries((existingIndices ?? []).map(index => [index.IndexName, index]));
+      const pendingMap = Object.fromEntries((idx.indices ?? []).map(index => [index.IndexName, index]));
+
       await this.client.updateTable({
         TableName: table,
         AttributeDefinitions: [
           { AttributeName: 'id', AttributeType: 'S' },
           ...idx.attributes
         ],
-        // TODO: Fille out GSI updates
-        GlobalSecondaryIndexUpdates: []
+        GlobalSecondaryIndexUpdates: idx.indices?.flatMap(index => {
+          const out: GlobalSecondaryIndexUpdate[] = [];
+          if (index.IndexName) {
+            if (!existingMap[index.IndexName]) {
+              out.push({ Create: index });
+            } else if (!pendingMap[index.IndexName]) {
+              out.push({ Delete: index });
+            }
+          }
+          return out;
+        })
       });
     }
 
