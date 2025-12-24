@@ -97,18 +97,23 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * Build an index if missing
    */
-  async createIndexIfMissing(cls: Class): Promise<void> {
+  async createIndexIfMissing(cls: Class): Promise<boolean> {
     const baseCls = SchemaRegistryIndex.getBaseClass(cls);
     const identity = this.getIdentity(baseCls);
     try {
       await this.#client.search(identity);
+      return false;
     } catch {
       await this.createIndex(baseCls);
+      return true;
     }
   }
 
-  async createModel(cls: Class<ModelType>): Promise<void> {
-    await this.createIndexIfMissing(cls);
+  async upsertModel(cls: Class<ModelType>): Promise<void> {
+    if (!await this.createIndexIfMissing(cls)) {
+      // Update model if needed
+      await this.changeModel(cls);
+    }
     await this.computeAliasMappings(true);
   }
 
@@ -134,43 +139,43 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * When the schema changes
    */
-  async changeModel(cls: Class): Promise<void> {
+  async changeModel(cls: Class<ModelType>): Promise<void> {
+    const modifications: string[] = [];
     // TODO: Need to properly diff and update indexes
 
     // Find which fields are gone
-    const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
-      toRemove.push(...subChange.fields
-        .filter(event => event.type === 'delete')
-        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
-      return toRemove;
-    }, []);
+    // const removes = change.subs.reduce<string[]>((toRemove, subChange) => {
+    //   toRemove.push(...subChange.fields
+    //     .filter(event => event.type === 'delete')
+    //     .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
+    //   return toRemove;
+    // }, []);
 
-    // Find which types have changed
-    const fieldChanges = change.subs.reduce<string[]>((toChange, subChange) => {
-      toChange.push(...subChange.fields
-        .filter(event => event.type === 'update')
-        .filter(event => event.previous?.type !== event.current?.type)
-        .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
-      return toChange;
-    }, []);
+    // // Find which types have changed
+    // const fieldChanges = change.subs.reduce<string[]>((toChange, subChange) => {
+    //   toChange.push(...subChange.fields
+    //     .filter(event => event.type === 'update')
+    //     .filter(event => event.previous?.type !== event.current?.type)
+    //     .map(event => [...subChange.path.map(field => field.name), event.previous!.name].join('.')));
+    //   return toChange;
+    // }, []);
 
     const { index } = this.getIdentity(cls);
+    const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
 
     // If removing fields or changing types, run as script to update data
-    if (removes.length || fieldChanges.length) { // Removing and adding
+    if (modifications.length) { // Removing and adding
       const next = await this.createIndex(cls, false);
 
       const aliases = (await this.#client.indices.getAlias({ index })).body;
       const current = Object.keys(aliases)[0];
-
-      const allChange = removes.concat(fieldChanges);
 
       const reindexBody: estypes.ReindexRequest = {
         source: { index: current },
         dest: { index: next },
         script: {
           lang: 'painless',
-          source: allChange.map(part => `ctx._source.remove("${part}");`).join(' ') // Removing
+          source: modifications.map(change => `ctx._source.remove("${change}");`).join(' ') // Removing
         },
         wait_for_completion: true
       };
@@ -181,14 +186,10 @@ export class IndexManager implements ModelStorageSupport {
       await Promise.all(Object.keys(aliases)
         .map(alias => this.#client.indices.delete({ index: alias })));
 
+      await this.#client.indices.putMapping({ index: next, ...schema });
       await this.#client.indices.putAlias({ index: next, name: index });
     } else { // Only update the schema
-      const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
-
-      await this.#client.indices.putMapping({
-        index,
-        ...schema,
-      });
+      await this.#client.indices.putMapping({ index, ...schema });
     }
   }
 
