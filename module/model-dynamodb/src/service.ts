@@ -194,26 +194,34 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * Add a new model
    * @param cls
    */
-  async createModel(cls: Class<ModelType>): Promise<void> {
+  async upsertModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
     const idx = this.#computeIndexConfig(cls);
 
     const existing = await this.client.describeTable({ TableName: table }).then(() => true, () => false);
 
-    if (existing) {
-      return;
+    if (!existing) {
+      await this.client.createTable({
+        TableName: table,
+        KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
+        BillingMode: 'PAY_PER_REQUEST',
+        AttributeDefinitions: [
+          { AttributeName: 'id', AttributeType: 'S' },
+          ...idx.attributes
+        ],
+        GlobalSecondaryIndexes: idx.indices
+      });
+    } else {
+      await this.client.updateTable({
+        TableName: table,
+        AttributeDefinitions: [
+          { AttributeName: 'id', AttributeType: 'S' },
+          ...idx.attributes
+        ],
+        // TODO: Fille out GSI updates
+        GlobalSecondaryIndexUpdates: []
+      });
     }
-
-    await this.client.createTable({
-      TableName: table,
-      KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
-      BillingMode: 'PAY_PER_REQUEST',
-      AttributeDefinitions: [
-        { AttributeName: 'id', AttributeType: 'S' },
-        ...idx.attributes
-      ],
-      GlobalSecondaryIndexes: idx.indices
-    });
 
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.client.updateTimeToLive({
@@ -233,25 +241,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (verify) {
       await this.client.deleteTable({ TableName: table });
     }
-  }
-
-  /**
-   * When the model changes
-   * @param cls
-   */
-  async changeModel(cls: Class<ModelType>): Promise<void> {
-    const table = this.#resolveTable(cls);
-    const idx = this.#computeIndexConfig(cls);
-    // const existing = await this.cl.describeTable({ TableName: table });
-
-    await this.client.updateTable({
-      TableName: table,
-      AttributeDefinitions: [
-        { AttributeName: 'id', AttributeType: 'S' },
-        ...idx.attributes
-      ],
-      // TODO: Fill out index computation
-    });
   }
 
   async createStorage(): Promise<void> {

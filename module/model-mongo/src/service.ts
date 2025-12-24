@@ -126,23 +126,16 @@ export class MongoModelService implements
     await this.#db.dropDatabase();
   }
 
-  async establishIndices<T extends ModelType>(cls: Class<T>): Promise<void> {
+  async upsertModel(cls: Class): Promise<void> {
     const col = await this.getStore(cls);
     const creating = MongoUtil.getIndices(cls, ModelRegistryIndex.getConfig(cls).indices);
     if (creating.length) {
+      // TODO: Ensure we don't recreate existing indexes
       console.debug('Creating indexes', { indices: creating });
       for (const toCreate of creating) {
         await col.createIndex(...toCreate);
       }
     }
-  }
-
-  async createModel(cls: Class): Promise<void> {
-    await this.establishIndices(cls);
-  }
-
-  async changeModel(cls: Class): Promise<void> {
-    await this.establishIndices(cls);
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {

@@ -118,16 +118,12 @@ export class SQLModelService implements
     return (await this.#manager.exportTables(cls)).join('\n');
   }
 
-  async createModel(cls: Class): Promise<void> {
-    await this.#manager.createTables(cls);
+  async upsertModel(cls: Class): Promise<void> {
+    await this.#manager.upsertTables(cls);
   }
 
   async deleteModel(cls: Class): Promise<void> {
     await this.#manager.dropTables(cls);
-  }
-
-  async changeModel(cls: Class): Promise<void> {
-    await this.#manager.updateTables(cls);
   }
 
   async truncateModel(cls: Class): Promise<void> {

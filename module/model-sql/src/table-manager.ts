@@ -1,7 +1,6 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ModelRegistryIndex } from '@travetto/model';
 import { Class } from '@travetto/runtime';
-import { ChangeEvent } from '@travetto/registry';
 
 import { Connected, Transactional } from './connection/decorator.ts';
 import { SQLDialect } from './dialect/base.ts';
@@ -27,6 +26,13 @@ export class TableManager {
   }
 
   /**
+   * Get a valid connection
+   */
+  get connection(): Connection {
+    return this.#dialect.connection;
+  }
+
+  /**
    * Create all needed tables for a given class
    */
   async exportTables(cls: Class): Promise<string[]> {
@@ -41,6 +47,15 @@ export class TableManager {
       }
     }
     return out;
+  }
+
+  @WithAsyncContext()
+  @Connected()
+  @Transactional()
+  async upsertTables(cls: Class): Promise<void> {
+    // TODO: Check if table already exists
+    this.createTables(cls);
+    this.updateTables(cls);
   }
 
   /**
@@ -95,13 +110,6 @@ export class TableManager {
   }
 
   /**
-   * Get a valid connection
-   */
-  get connection(): Connection {
-    return this.#dialect.connection;
-  }
-
-  /**
    * When the schema changes, update SQL
    */
   @WithAsyncContext()
@@ -111,14 +119,13 @@ export class TableManager {
     // TODO: Need to properly diff and update tables
     try {
       const rootStack = SQLModelUtil.classToStack(cls);
-
-      const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((result, value) => {
-        const path = value.path.map(field => ({ ...field }));
-        for (const event of value.fields) {
-          result[event.type].push([...rootStack, ...path, { ...(event.type === 'delete' ? event.previous : event.current)! }]);
-        }
-        return result;
-      }, { create: [], update: [], delete: [] });
+      // const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((result, value) => {
+      //   const path = value.path.map(field => ({ ...field }));
+      //   for (const event of value.fields) {
+      //     result[event.type].push([...rootStack, ...path, { ...(event.type === 'delete' ? event.previous : event.current)! }]);
+      //   }
+      // return result;
+      // }, { create: [], update: [], delete: [] });
 
       await Promise.all(changes.create.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));
       await Promise.all(changes.update.map(value => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(value))));
