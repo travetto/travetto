@@ -2,7 +2,6 @@ import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
 import { ModelRegistryIndex, ModelType, ModelStorageSupport } from '@travetto/model';
-import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -12,8 +11,6 @@ import { ElasticsearchSchemaUtil } from './internal/schema.ts';
  */
 export class IndexManager implements ModelStorageSupport {
 
-  #indexToAlias = new Map<string, string>();
-  #aliasToIndex = new Map<string, string>();
   #identities = new Map<Class, { index: string }>();
   #client: Client;
   config: ElasticsearchModelConfig;
@@ -52,22 +49,6 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   /**
-   * Build alias mappings from the current state in the database
-   */
-  async computeAliasMappings(force = false): Promise<void> {
-    if (force || !this.#indexToAlias.size) {
-      const aliases = await this.#client.cat.aliases({ format: 'json' });
-
-      this.#indexToAlias = new Map();
-      this.#aliasToIndex = new Map();
-      for (const al of aliases) {
-        this.#indexToAlias.set(al.index!, al.alias!);
-        this.#aliasToIndex.set(al.alias!, al.index!);
-      }
-    }
-  }
-
-  /**
    * Create index for type
    * @param cls
    * @param alias
@@ -94,29 +75,6 @@ export class IndexManager implements ModelStorageSupport {
     return concreteIndex;
   }
 
-  /**
-   * Build an index if missing
-   */
-  async createIndexIfMissing(cls: Class): Promise<boolean> {
-    const baseCls = SchemaRegistryIndex.getBaseClass(cls);
-    const identity = this.getIdentity(baseCls);
-    try {
-      await this.#client.search(identity);
-      return false;
-    } catch {
-      await this.createIndex(baseCls);
-      return true;
-    }
-  }
-
-  async upsertModel(cls: Class<ModelType>): Promise<void> {
-    if (!await this.createIndexIfMissing(cls)) {
-      // Update model if needed
-      await this.changeModel(cls);
-    }
-    await this.computeAliasMappings(true);
-  }
-
   async exportModel(cls: Class<ModelType>): Promise<string> {
     const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
     const { index } = this.getIdentity(cls); // Already namespaced
@@ -128,56 +86,60 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const alias = this.getNamespacedIndex(this.getStore(cls));
-    if (this.#aliasToIndex.get(alias)) {
-      await this.#client.indices.delete({
-        index: this.#aliasToIndex.get(alias)!
-      });
-      await this.computeAliasMappings(true);
-    }
+    const aliasedIndices = await this.#client.indices.getAlias();
+
+    const toDelete = Object.keys(aliasedIndices[alias]?.aliases ?? {})
+      .filter(item => alias in (aliasedIndices[item]?.aliases ?? {}));
+
+    console.debug('Deleting Model', { alias, toDelete });
+    await Promise.all(toDelete.map(index => this.#client.indices.delete({ index })));
   }
 
   /**
-   * When the schema changes
+   * Create or update schema as necessary
    */
-  async changeModel(cls: Class<ModelType>): Promise<void> {
-    const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
+  async upsertModel(cls: Class<ModelType>): Promise<void> {
     const { index } = this.getIdentity(cls);
-    const currentMapping = await this.#client.indices.getMapping({ index });
-    const changedFields = ElasticsearchSchemaUtil.getChangedFields(currentMapping, schema);
+    const globalAliases = await this.#client.indices.getAlias();
+    const currentIndex = Object.keys(globalAliases).find(item => index in (globalAliases[item]?.aliases ?? {}));
 
-    // If removing fields or changing types, run as script to update data
-    if (changedFields.length) { // Removing and adding or changing
-      const next = await this.createIndex(cls, false);
+    console.debug('Upsert Model', { index, currentIndex });
 
-      const { body: aliases } = await this.#client.indices.getAlias({ index });
-      const [current] = Object.keys(aliases);
+    if (currentIndex) {
+      const currentMapping = await this.#client.indices.getMapping({ index });
+      const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
+      const changedFields = ElasticsearchSchemaUtil.getChangedFields(currentMapping!, pendingMapping);
 
-      const reindexBody: estypes.ReindexRequest = {
-        source: { index: current },
-        dest: { index: next },
-        script: {
-          lang: 'painless',
-          source: changedFields.map(change => `ctx._source.remove("${change}");`).join(' ') // Removing
-        },
-        wait_for_completion: true
-      };
+      if (changedFields.length) { // If any fields changed, reindex
+        console.debug('Updated Model', { index, currentIndex });
+        const pendingIndex = await this.createIndex(cls, false);
 
-      // Reindex
-      await this.#client.reindex(reindexBody);
+        const reindexBody: estypes.ReindexRequest = {
+          source: { index: currentIndex },
+          dest: { index: pendingIndex },
+          script: {
+            lang: 'painless',
+            source: changedFields.map(change => `ctx._source.remove("${change}");`).join(' ') // Removing
+          },
+          wait_for_completion: true
+        };
 
-      await Promise.all(Object.keys(aliases)
-        .map(alias => this.#client.indices.delete({ index: alias })));
-
-      await this.#client.indices.putAlias({ index: next, name: index });
-    } else { // Only update the schema
-      await this.#client.indices.putMapping({ index, ...schema });
+        // Reindex
+        await this.#client.reindex(reindexBody);
+        await this.#client.indices.putAlias({ index: pendingIndex, name: index });
+        const toDelete = Object.keys(globalAliases).filter(item =>
+          item !== pendingIndex && index in (globalAliases[item]?.aliases ?? {})
+        );
+        await Promise.all(toDelete.map(alias => this.#client.indices.delete({ index: alias })));
+      }
+    } else { // Create if non-existent
+      await this.createIndex(cls);
     }
   }
 
   async createStorage(): Promise<void> {
     // Pre-create indexes if missing
     console.debug('Create Storage', { idx: this.getNamespacedIndex('*') });
-    await this.computeAliasMappings(true);
   }
 
   async deleteStorage(): Promise<void> {
@@ -185,6 +147,5 @@ export class IndexManager implements ModelStorageSupport {
     await this.#client.indices.delete({
       index: this.getNamespacedIndex('*')
     });
-    await this.computeAliasMappings(true);
   }
 }
