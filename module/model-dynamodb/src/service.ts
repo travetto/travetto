@@ -67,7 +67,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           },
           ReturnValues: 'NONE'
         };
-        console.debug('Querying', { query });
         return await this.client.putItem(query);
       } else {
         const indices: Record<string, unknown> = {};
@@ -134,6 +133,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     ]);
 
     if (!currentTable) {
+      console.debug('Creating Table', { table, idx });
       await this.client.createTable({
         TableName: table,
         KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
@@ -147,6 +147,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     } else {
       const indexUpdates = DynamoDBUtil.findChangedGlobalIndexes(currentTable.Table?.GlobalSecondaryIndexes, idx.indices);
       const changedAttributes = DynamoDBUtil.findChangedAttributes(currentTable.Table?.AttributeDefinitions, idx.attributes);
+
+      console.debug('Updating Table', { table, idx, current: currentTable.Table, indexUpdates, changedAttributes });
 
       if (changedAttributes.length || indexUpdates?.length) {
         await this.client.updateTable({

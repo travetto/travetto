@@ -123,18 +123,21 @@ export class DynamoDBUtil {
     const existingMap = Object.fromEntries((current ?? []).map(index => [index.IndexName, index]));
     const pendingMap = Object.fromEntries((requested ?? []).map(index => [index.IndexName, index]));
 
-    const indexUpdates = requested?.flatMap(index => {
-      const out: GlobalSecondaryIndexUpdate[] = [];
-      if (index.IndexName) {
-        if (!existingMap[index.IndexName]) {
-          out.push({ Create: index });
-        } else if (!pendingMap[index.IndexName]) {
-          out.push({ Delete: index });
-        }
+    const out: GlobalSecondaryIndexUpdate[] = [];
+
+    for (const index of requested ?? []) {
+      if (!existingMap[index.IndexName!]) {
+        out.push({ Create: index });
       }
-      return out;
-    });
-    return indexUpdates ?? [];
+    }
+
+    for (const index of current ?? []) {
+      if (!pendingMap[index.IndexName!]) {
+        out.push({ Delete: { IndexName: index.IndexName! } });
+      }
+    }
+
+    return out;
   }
 
   /**
