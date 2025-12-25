@@ -14,13 +14,14 @@ export class FirestoreModelConfig {
   databaseURL?: string;
   credentialsFile?: string;
   emulator?: string;
-  projectId: string;
+  projectId?: string;
   namespace?: string;
   modifyStorage?: boolean;
   credentials?: FirestoreModelConfigCredentials;
 
   async postConstruct(): Promise<void> {
-    if (!this.databaseURL && !this.projectId && !Runtime.production) {
+    if (!this.databaseURL && !Runtime.production) {
+      this.projectId ??= 'trv-local-dev';
       this.emulator ??= 'localhost:7000'; // From docker
     }
     if (this.emulator) {
