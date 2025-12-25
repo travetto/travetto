@@ -100,18 +100,15 @@ export class IndexManager implements ModelStorageSupport {
    */
   async upsertModel(cls: Class<ModelType>): Promise<void> {
     const { index } = this.getIdentity(cls);
-    const globalAliases = await this.#client.indices.getAlias();
-    const currentIndex = Object.keys(globalAliases).find(item => index in (globalAliases[item]?.aliases ?? {}));
+    const resolvedAlias = await this.#client.indices.getMapping({ index }).catch(() => undefined);
 
-    console.debug('Upsert Model', { index, currentIndex });
-
-    if (currentIndex) {
-      const currentMapping = await this.#client.indices.getMapping({ index });
+    if (resolvedAlias) {
+      const [currentIndex] = Object.keys(resolvedAlias ?? {});
       const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
-      const changedFields = ElasticsearchSchemaUtil.getChangedFields(currentMapping!, pendingMapping);
+      const changedFields = ElasticsearchSchemaUtil.getChangedFields(resolvedAlias[currentIndex].mappings, pendingMapping);
 
       if (changedFields.length) { // If any fields changed, reindex
-        console.debug('Updated Model', { index, currentIndex });
+        console.debug('Updated Model', { index, currentIndex, changedFields });
         const pendingIndex = await this.createIndex(cls, false);
 
         const reindexBody: estypes.ReindexRequest = {
@@ -128,18 +125,16 @@ export class IndexManager implements ModelStorageSupport {
 
         // Update aliases
         await this.#client.indices.putAlias({ index: pendingIndex, name: index });
-        const toDelete = Object.keys(globalAliases).filter(item =>
-          item !== pendingIndex && index in (globalAliases[item]?.aliases ?? {})
-        );
+        const toDelete = Object.keys(resolvedAlias).filter(item => item !== pendingIndex);
         await Promise.all(toDelete.map(alias => this.#client.indices.delete({ index: alias })));
       }
     } else { // Create if non-existent
+      console.debug('Creating Model', { index });
       await this.createIndex(cls);
     }
   }
 
   async createStorage(): Promise<void> {
-    // Pre-create indexes if missing
     console.debug('Create Storage', { idx: this.getNamespacedIndex('*') });
   }
 
