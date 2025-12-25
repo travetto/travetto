@@ -1,4 +1,4 @@
-import { RuntimeResources } from '@travetto/runtime';
+import { Runtime, RuntimeResources } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Schema, SchemaValidator } from '@travetto/schema';
 
@@ -20,6 +20,9 @@ export class FirestoreModelConfig {
   credentials?: FirestoreModelConfigCredentials;
 
   async postConstruct(): Promise<void> {
+    if (!this.databaseURL && !this.projectId && !Runtime.production) {
+      this.emulator ??= 'localhost:7000'; // From docker
+    }
     if (this.emulator) {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
