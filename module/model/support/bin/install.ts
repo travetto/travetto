@@ -3,12 +3,12 @@ import type { ModelStorageSupport, ModelType } from '@travetto/model';
 
 export class ModelInstallUtil {
   static async run(provider: ModelStorageSupport, models: Class<ModelType>[]): Promise<void> {
-    if (!provider.createModel) {
+    if (!provider.upsertModel) {
       throw new Error(`${provider} does not support model installation`);
     }
     for (const cls of models) {
       console.log('Installing', { name: cls.Ⲑid });
-      await provider.createModel(cls);
+      await provider.upsertModel(cls);
     }
   }
 }

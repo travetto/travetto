@@ -40,6 +40,10 @@ export class S3ModelConfig {
    * Produces the s3 config from the provide details, post construction
    */
   async postConstruct(): Promise<void> {
+    if (!Runtime.production) {
+      this.endpoint ??= 'http://localhost:4566'; // From docker
+    }
+
     if (!this.accessKeyId && !this.secretAccessKey) {
       const creds = await fromIni({ profile: this.profile })();
       this.accessKeyId = creds.accessKeyId;

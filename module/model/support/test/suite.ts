@@ -39,10 +39,10 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
           const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
             await service.createStorage();
-            if (service.createModel) {
+            if (service.upsertModel) {
               await Promise.all(ModelRegistryIndex.getClasses()
                 .filter(x => x === SchemaRegistryIndex.getBaseClass(x))
-                .map(m => service.createModel!(m)));
+                .map(m => service.upsertModel!(m)));
             }
           }
         }

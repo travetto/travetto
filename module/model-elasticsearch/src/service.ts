@@ -122,10 +122,9 @@ export class ElasticsearchModelService implements
 
   createStorage(): Promise<void> { return this.manager.createStorage(); }
   deleteStorage(): Promise<void> { return this.manager.deleteStorage(); }
-  createModel(cls: Class): Promise<void> { return this.manager.createModel(cls); }
+  upsertModel(cls: Class): Promise<void> { return this.manager.upsertModel(cls); }
   exportModel(cls: Class): Promise<string> { return this.manager.exportModel(cls); }
   deleteModel(cls: Class): Promise<void> { return this.manager.deleteModel(cls); }
-  changeModel(cls: Class): Promise<void> { return this.manager.changeModel(cls); }
   truncateModel(cls: Class): Promise<void> { return this.deleteByQuery(cls, {}).then(() => { }); }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

@@ -1,5 +1,6 @@
 import {
-  Binary, type CreateIndexesOptions, type Filter, type FindCursor, type IndexDirection, ObjectId, type WithId as MongoWithId
+  Binary, type CreateIndexesOptions, type Filter, type FindCursor, type IndexDirection, ObjectId, type WithId as MongoWithId,
+  type IndexDescriptionInfo
 } from 'mongodb';
 
 import { AppError, castTo, Class, toConcrete, TypedObject } from '@travetto/runtime';
@@ -211,5 +212,34 @@ export class MongoUtil {
     }
 
     return castTo(cursor);
+  }
+
+  static isIndexChanged(existing: IndexDescriptionInfo, [pendingKey, pendingOptions]: [BasicIdx, CreateIndexesOptions]): boolean {
+    // Config changed
+    if (
+      !!existing.unique !== !!pendingOptions.unique ||
+      !!existing.sparse !== !!pendingOptions.sparse ||
+      existing.expireAfterSeconds !== pendingOptions.expireAfterSeconds ||
+      existing.bucketSize !== pendingOptions.bucketSize
+    ) {
+      return true;
+    }
+    const pendingKeySet = new Set(Object.keys(pendingKey));
+    const existingKeySet = new Set(Object.keys(existing.key));
+
+    if (pendingKeySet.size !== existingKeySet.size) {
+      return true;
+    }
+
+    const overlap = pendingKeySet.intersection(existingKeySet);
+    if (overlap.size !== pendingKeySet.size) {
+      return true;
+    }
+    for (const key of overlap) {
+      if (existing.key[key] !== pendingKey[key]) {
+        return false;
+      }
+    }
+    return false;
   }
 }

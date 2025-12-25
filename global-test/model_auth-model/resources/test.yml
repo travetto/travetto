@@ -5,12 +5,6 @@ model.sql:
 
 model.s3:
   bucket: travetto-test
-  endpoint: http://localhost:4566
-
-model.dynamodb:
-  client:
-    endpoint: http://localhost:8000
 
 model.firestore:
-  emulator: localhost:7000
   projectId: trv-local-dev
