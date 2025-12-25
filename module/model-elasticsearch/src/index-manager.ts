@@ -85,14 +85,14 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   async deleteModel(cls: Class<ModelType>): Promise<void> {
-    const alias = this.getNamespacedIndex(this.getStore(cls));
+    const { index } = this.getIdentity(cls);
     const aliasedIndices = await this.#client.indices.getAlias();
 
-    const toDelete = Object.keys(aliasedIndices[alias]?.aliases ?? {})
-      .filter(item => alias in (aliasedIndices[item]?.aliases ?? {}));
+    const toDelete = Object.keys(aliasedIndices[index]?.aliases ?? {})
+      .filter(item => index in (aliasedIndices[item]?.aliases ?? {}));
 
-    console.debug('Deleting Model', { alias, toDelete });
-    await Promise.all(toDelete.map(index => this.#client.indices.delete({ index })));
+    console.debug('Deleting Model', { index, toDelete });
+    await Promise.all(toDelete.map(target => this.#client.indices.delete({ index: target })));
   }
 
   /**
@@ -124,8 +124,9 @@ export class IndexManager implements ModelStorageSupport {
           wait_for_completion: true
         };
 
-        // Reindex
         await this.#client.reindex(reindexBody);
+
+        // Update aliases
         await this.#client.indices.putAlias({ index: pendingIndex, name: index });
         const toDelete = Object.keys(globalAliases).filter(item =>
           item !== pendingIndex && index in (globalAliases[item]?.aliases ?? {})
