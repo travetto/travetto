@@ -116,6 +116,7 @@ export class TableManager {
   @Transactional()
   @Connected()
   async updateTables(cls: Class): Promise<void> {
+
     // TODO: Need to properly diff and update tables
     try {
       const rootStack = SQLModelUtil.classToStack(cls);

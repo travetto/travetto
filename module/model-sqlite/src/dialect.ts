@@ -4,7 +4,7 @@ import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
 import { castTo } from '@travetto/runtime';
 
-import { SQLModelConfig, SQLDialect, VisitStack } from '@travetto/model-sql';
+import { SQLModelConfig, SQLDialect, VisitStack, type SQLTableDescription } from '@travetto/model-sql';
 
 import { SqliteConnection } from './connection.ts';
 
@@ -44,6 +44,55 @@ export class SqliteDialect extends SQLDialect {
    */
   hash(value: string): string {
     return `hex('${value}')`;
+  }
+
+  async listAllTables(): Promise<string[]> {
+    const results = await this.executeSQL<{ name: string }>(`
+      SELECT name 
+      FROM sqlite_master 
+      WHERE 
+        type='table' 
+        AND name NOT LIKE 'sqlite_%';
+    `);
+    return results.records.map(result => result.name);
+  }
+
+  async describeTable(table: string): Promise<SQLTableDescription> {
+    const [columns, foreignKeys, indices] = await Promise.all([
+      this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
+      SELECT 
+        name, 
+        type, 
+        ${this.identifier('notnull')} = 0 AS is_nullable
+      FROM PRAGMA_TABLE_INFO('${this.identifier(table)}')
+    `),
+      this.executeSQL<{ name: string, to_table: string, from_column: string, to_column: string }>(`
+      SELECT 
+        'fk_' || ${this.identifier(table)} || '_' || from AS name, 
+        ${this.identifier('from')} as from_column, 
+        ${this.identifier('to')} as to_column, 
+        ${this.identifier('table')} as to_table
+      FROM PRAGMA_FOREIGN_KEY_LIST('${this.identifier(table)}')
+    `),
+      this.executeSQL<{ name: string, is_unique: boolean, columns: string }>(`
+      SELECT 
+        il.name as name, 
+        il.${this.identifier('unique')} = 1 as is_unique,  
+        GROUP_CONCAT(ii.col_name) AS columns
+      FROM PRAGMA_INDEX_LIST(${this.identifier(table)}) il
+      JOIN PRAGMA_INDEX_INFO(il.name) ii
+      GROUP BY 1, 2
+    `)
+    ]);
+    return {
+      columns: columns.records,
+      foreignKeys: foreignKeys.records,
+      indices: indices.records.map(idx => ({
+        name: idx.name,
+        is_unique: idx.is_unique,
+        columns: idx.columns.split(',')
+      }))
+    };
   }
 
   /**

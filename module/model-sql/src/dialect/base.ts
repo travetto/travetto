@@ -16,6 +16,12 @@ interface Alias {
   path: VisitStack[];
 }
 
+export type SQLTableDescription = {
+  columns: { name: string, type: string, is_nullable: boolean }[];
+  foreignKeys: { name: string, from_column: string, to_column: string, to_table: string }[];
+  indices: { name: string, columns: string[], is_unique: boolean }[];
+};
+
 @Schema()
 class Total {
   total: number;
@@ -155,6 +161,16 @@ export abstract class SQLDialect implements DialectState {
    * Hash a value
    */
   abstract hash(input: string): string;
+
+  /**
+   * List all tables in the database
+   */
+  abstract listAllTables(): Promise<string[]>;
+
+  /**
+   * Describe a table structure
+   */
+  abstract describeTable(table: string): Promise<SQLTableDescription>;
 
   executeSQL<T>(sql: string): Promise<{ records: T[], count: number }> {
     return this.connection.execute<T>(this.connection.active, sql);

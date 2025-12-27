@@ -4,7 +4,7 @@ import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
 import { castTo, Class } from '@travetto/runtime';
 import { ModelType } from '@travetto/model';
-import { SQLModelConfig, SQLDialect, VisitStack } from '@travetto/model-sql';
+import { SQLModelConfig, SQLDialect, VisitStack, type SQLTableDescription } from '@travetto/model-sql';
 
 import { MySQLConnection } from './connection.ts';
 
@@ -59,6 +59,68 @@ export class MySQLDialect extends SQLDialect {
    */
   hash(value: string): string {
     return `SHA2('${value}', '256')`;
+  }
+
+  async listAllTables(): Promise<string[]> {
+    const results = await this.executeSQL<{ name: string }>(`
+    SELECT table_name AS name
+    FROM information_schema.tables
+    WHERE table_schema = DATABASE()
+      AND table_type = 'BASE TABLE'
+    ORDER BY table_name;
+  `);
+    return results.records.map(result => result.name);
+  }
+
+  async describeTable(table: string): Promise<SQLTableDescription> {
+    const [columns, foreignKeys, indices] = await Promise.all([
+      // 1. Columns
+      this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
+      SELECT 
+        COLUMN_NAME AS name, 
+        COLUMN_TYPE AS type, 
+        IS_NULLABLE = 'YES' AS is_nullable
+      FROM information_schema.COLUMNS 
+      WHERE TABLE_NAME = '${this.identifier(table)}' 
+      AND TABLE_SCHEMA = DATABASE()
+      ORDER BY ORDINAL_POSITION
+    `),
+
+      // 2. Foreign Keys
+      this.executeSQL<{ name: string, from_column: string, to_column: string, to_table: string }>(`
+      SELECT 
+        CONSTRAINT_NAME AS name, 
+        COLUMN_NAME AS from_column, 
+        REFERENCED_COLUMN_NAME AS to_column, 
+        REFERENCED_TABLE_NAME AS to_table
+      FROM information_schema.KEY_COLUMN_USAGE 
+      WHERE TABLE_NAME = '${this.identifier(table)}' 
+      AND TABLE_SCHEMA = DATABASE()
+      AND REFERENCED_TABLE_NAME IS NOT NULL
+    `),
+
+      // 3. Indices
+      this.executeSQL<{ name: string, is_unique: boolean, columns: string }>(`
+      SELECT 
+        INDEX_NAME AS name, 
+        NON_UNIQUE = 0 AS is_unique, 
+        GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS columns
+      FROM information_schema.STATISTICS
+      WHERE TABLE_NAME = '${this.identifier(table)}' 
+      AND TABLE_SCHEMA = DATABASE()
+      GROUP BY INDEX_NAME, NON_UNIQUE
+    `)
+    ]);
+
+    return {
+      columns: columns.records,
+      foreignKeys: foreignKeys.records,
+      indices: indices.records.map(idx => ({
+        name: idx.name,
+        is_unique: Boolean(idx.is_unique),
+        columns: idx.columns.split(',')
+      }))
+    };
   }
 
   /**
