@@ -163,14 +163,9 @@ export abstract class SQLDialect implements DialectState {
   abstract hash(input: string): string;
 
   /**
-   * List all tables in the database
-   */
-  abstract listAllTables(): Promise<string[]>;
-
-  /**
    * Describe a table structure
    */
-  abstract describeTable(table: string): Promise<SQLTableDescription>;
+  abstract describeTable(table: string): Promise<SQLTableDescription | undefined>;
 
   executeSQL<T>(sql: string): Promise<{ records: T[], count: number }> {
     return this.connection.execute<T>(this.connection.active, sql);
@@ -731,6 +726,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   }
 
   /**
+   * Get index name
+   */
+  getIndexName<T extends ModelType>(cls: Class<T>, fields: string[]): string {
+    const table = this.namespace(SQLModelUtil.classToStack(cls));
+    return `idx_${table}_${fields.join('_')}`;
+  }
+
+  /**
    * Get CREATE INDEX sql
    */
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
@@ -743,10 +746,20 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       }
       return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
     });
-    const constraint = `idx_${table}_${fields.map(([field]) => field).join('_')}`;
+    const constraint = this.getIndexName(cls, fields.map(([name]) => name));
     return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
       .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')});`;
+  }
+
+  /**
+   * Get DROP INDEX sql
+   */
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string[]): string {
+    const table = this.namespace(SQLModelUtil.classToStack(cls));
+    const fields = Array.isArray(idx) ? idx : idx.fields.map(field => Object.keys(field)[0]);
+    const constraint = this.getIndexName(cls, fields);
+    return `DROP INDEX IF EXISTS ${constraint} ON ${this.identifier(table)};`;
   }
 
   /**

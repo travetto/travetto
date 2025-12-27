@@ -46,17 +46,6 @@ export class SqliteDialect extends SQLDialect {
     return `hex('${value}')`;
   }
 
-  async listAllTables(): Promise<string[]> {
-    const results = await this.executeSQL<{ name: string }>(`
-      SELECT name 
-      FROM sqlite_master 
-      WHERE 
-        type='table' 
-        AND name NOT LIKE 'sqlite_%';
-    `);
-    return results.records.map(result => result.name);
-  }
-
   async describeTable(table: string): Promise<SQLTableDescription> {
     const [columns, foreignKeys, indices] = await Promise.all([
       this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
@@ -77,8 +66,8 @@ export class SqliteDialect extends SQLDialect {
       this.executeSQL<{ name: string, is_unique: boolean, columns: string }>(`
       SELECT 
         il.name as name, 
-        il.${this.identifier('unique')} = 1 as is_unique,  
-        GROUP_CONCAT(ii.col_name) AS columns
+        il.${this.identifier('unique')} = 1 as is_unique, 
+        GROUP_CONCAT(ii.seqno || ' ' || ii.col_name) AS columns
       FROM PRAGMA_INDEX_LIST(${this.identifier(table)}) il
       JOIN PRAGMA_INDEX_INFO(il.name) ii
       GROUP BY 1, 2
@@ -90,7 +79,11 @@ export class SqliteDialect extends SQLDialect {
       indices: indices.records.map(idx => ({
         name: idx.name,
         is_unique: idx.is_unique,
-        columns: idx.columns.split(',')
+        columns: idx.columns.split(', ')
+          .map(col => col.split(' '))
+          .map(([order, name]) => [+order, name] as const)
+          .sort((a, b) => a[0] - b[0])
+          .map(([, name]) => name)
       }))
     };
   }

@@ -44,18 +44,6 @@ export class PostgreSQLDialect extends SQLDialect {
     return `encode(digest('${value}', 'sha1'), 'hex')`;
   }
 
-
-  async listAllTables(): Promise<string[]> {
-    const results = await this.executeSQL<{ name: string }>(`
-    SELECT table_name AS name
-    FROM information_schema.tables
-    WHERE table_schema = 'public'
-      AND table_type = 'BASE TABLE'
-    ORDER BY table_name;
-  `);
-    return results.records.map(result => result.name);
-  }
-
   async describeTable(table: string): Promise<SQLTableDescription> {
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns

@@ -1,12 +1,35 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
-import { ModelRegistryIndex } from '@travetto/model';
+import { ModelRegistryIndex, type IndexConfig, type ModelType } from '@travetto/model';
 import { Class } from '@travetto/runtime';
+import { SchemaRegistryIndex, type SchemaClassConfig, type SchemaFieldConfig } from '@travetto/schema';
 
 import { Connected, Transactional } from './connection/decorator.ts';
-import { SQLDialect } from './dialect/base.ts';
+import { SQLDialect, type SQLTableDescription } from './dialect/base.ts';
 import { SQLModelUtil } from './util.ts';
 import { Connection } from './connection/base.ts';
 import { VisitStack } from './types.ts';
+
+function isIndexChanged(requested: IndexConfig<ModelType>, existing: SQLTableDescription['indices'][number]): boolean {
+  if (requested.type === 'unique' !== existing.is_unique) {
+    return true;
+  }
+  if (requested.fields.length !== existing.columns.length) {
+    return true;
+  }
+  for (let i = 0; i < requested.fields.length; i++) {
+    if (Object.keys(requested.fields[i])[0] !== existing.columns[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number]): boolean {
+  if (requested.nullable !== existing.nullable) {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Manage creation/updating of all tables
@@ -53,9 +76,62 @@ export class TableManager {
   @Connected()
   @Transactional()
   async upsertTables(cls: Class): Promise<void> {
-    // TODO: Check if table already exists
-    this.createTables(cls);
-    this.updateTables(cls);
+
+    const sqlCommands: string[] = [];
+
+    const describeTable = (stack: VisitStack[]): Promise<SQLTableDescription | undefined> => this.#dialect.describeTable(this.#dialect.table(stack));
+
+    const onVisit = async (config: SchemaClassConfig, path: VisitStack[]): Promise<void> => {
+      const found = await describeTable(path);
+      if (!found) {
+        sqlCommands.push(...this.#dialect.getCreateTableSQL(path));
+      } else { // Existing
+        // Fields
+        const existingFields = new Map(found.columns.map(column => [column.name, column]));
+        const existingIndices = new Map(found.indices.map(index => [index.name, index]));
+
+        const requestedFields = new Map(Object.entries(config.fields));
+        const requestedIndices = new Map((ModelRegistryIndex.getConfig(config.class).indices ?? []).map(index => [index.name, index]));
+
+        for (const column of requestedFields.keys()) {
+          if (!existingFields.has(column)) {
+            sqlCommands.push(...this.#dialect.getAddColumnSQL(path));
+          } else if (isColumnChanged(requestedFields.get(column)!, existingFields.get(column)!)) {
+            sqlCommands.push(...this.#dialect.getModifyColumnSQL(path));
+          }
+        }
+
+        for (const index of requestedIndices.keys()) {
+          if (!existingIndices.has(index)) {
+            sqlCommands.push(...this.#dialect.getCreateIndexSQL(config.class, requestedIndices.get(index)!));
+          } else if (isIndexChanged(requestedIndices.get(index)!, existingIndices.get(index)!)) {
+            sqlCommands.push(
+              ...this.#dialect.getDropIndexSQL(config.class, existingIndices.get(index)!.columns),
+              ...this.#dialect.getCreateIndexSQL(config.class, requestedIndices.get(index)!)
+            );
+          }
+        }
+
+        for (const column of existingFields.keys()) {
+          if (!requestedFields.has(column)) {
+            sqlCommands.push(...this.#dialect.getDropColumnSQL(path));
+          }
+        }
+
+        for (const index of existingIndices.keys()) {
+          if (!requestedIndices.has(index)) {
+            sqlCommands.push(...this.#dialect.getDropIndexSQL(config.class, existingIndices.get(index)!.columns));
+          }
+        }
+      }
+    };
+
+    const schema = SchemaRegistryIndex.getConfig(cls);
+    await SQLModelUtil.visitSchema(schema, {
+      onRoot: ({ config, path }) => onVisit(config, path),
+      onSub: ({ config, path }) => onVisit(SchemaRegistryIndex.getConfig(config.type), path),
+      async onSimple() { },
+    });
   }
 
   /**
@@ -106,34 +182,6 @@ export class TableManager {
   async truncateTables(cls: Class): Promise<void> {
     for (const command of this.#dialect.getTruncateAllTablesSQL(cls)) {
       await this.#exec(command);
-    }
-  }
-
-  /**
-   * When the schema changes, update SQL
-   */
-  @WithAsyncContext()
-  @Transactional()
-  @Connected()
-  async updateTables(cls: Class): Promise<void> {
-
-    // TODO: Need to properly diff and update tables
-    try {
-      const rootStack = SQLModelUtil.classToStack(cls);
-      // const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((result, value) => {
-      //   const path = value.path.map(field => ({ ...field }));
-      //   for (const event of value.fields) {
-      //     result[event.type].push([...rootStack, ...path, { ...(event.type === 'delete' ? event.previous : event.current)! }]);
-      //   }
-      // return result;
-      // }, { create: [], update: [], delete: [] });
-
-      await Promise.all(changes.create.map(value => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(value))));
-      await Promise.all(changes.update.map(value => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(value))));
-      await Promise.all(changes.delete.map(value => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(value))));
-    } catch (error) {
-      // Failed to change
-      // console.error('Unable to change field', { error });
     }
   }
 }
