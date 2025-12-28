@@ -10,6 +10,8 @@ import { Connection } from './connection/base.ts';
 import { VisitStack } from './types.ts';
 
 type UpsertStructure = { dropIndex: string[], createIndex: string[], dropTable: string[], createTable: string[], modifyTable: string[] };
+const isSimpleField = (input: VisitStack | undefined): input is SchemaFieldConfig =>
+  !!input && (!('type' in input) || (input.type && !SchemaRegistryIndex.has(input.type)));
 
 /**
  * Manage creation/updating of all tables
@@ -64,12 +66,18 @@ export class TableManager {
       const model = path.length === 1 ? ModelRegistryIndex.getConfig(type) : undefined;
       const requestedIndices = new Map((model?.indices ?? []).map(index => [this.#dialect.getIndexName(type, index), index]) ?? []);
 
+
       // Manage fields
       if (!existingFields.size) {
         sqlCommands.createTable.push(this.#dialect.getCreateTableSQL(path));
       } else { // Existing
         // Fields
         const requestedFields = new Map(fields.map(field => [field.name, field]));
+        const top = path.at(-1);
+
+        if (isSimpleField(top)) {
+          requestedFields.set(top.name, top);
+        }
 
         for (const [column, field] of requestedFields.entries()) {
           if (!existingFields.has(column)) {

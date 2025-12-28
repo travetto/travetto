@@ -1066,14 +1066,6 @@ ${this.getWhereSQL(cls, where!)}`;
       (requested.name !== this.idField.name && !!requested.required?.active !== !!existing.is_notnull)
       || (requestedColumnType.toUpperCase() !== existing.type.toUpperCase());
 
-    if (result) {
-      console.error!('Column change detected', {
-        field: requested.name,
-        requested: { type: requestedColumnType, notnull: !!requested.required?.active },
-        existing: { type: existing.type, notnull: !!existing.is_notnull }
-      });
-    }
-
     return result;
   }
 
@@ -1086,10 +1078,6 @@ ${this.getWhereSQL(cls, where!)}`;
       const [[key, value]] = Object.entries(requested.fields[i]);
       const desc = value === -1;
       result ||= key !== existing.columns[i].name && desc !== existing.columns[i].desc;
-    }
-
-    if (result) {
-      console.error!('Altering index:', { requested, existing });
     }
 
     return result;
