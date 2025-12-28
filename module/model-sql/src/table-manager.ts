@@ -87,6 +87,8 @@ export class TableManager {
           }
         }
 
+        // TODO: Handle dropping tables that are FK'd when no longer in use
+
         for (const column of existingFields.keys()) {
           if (column === this.#dialect.pathField.name || column === this.#dialect.parentPathField.name || column === this.#dialect.idxField.name) {
             continue;
