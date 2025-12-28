@@ -3,8 +3,8 @@ import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
 import { castTo, Class } from '@travetto/runtime';
-import { ModelType } from '@travetto/model';
-import { SQLModelConfig, SQLDialect, VisitStack } from '@travetto/model-sql';
+import { ModelType, type IndexConfig } from '@travetto/model';
+import { SQLModelConfig, SQLDialect, VisitStack, type SQLTableDescription, SQLModelUtil } from '@travetto/model-sql';
 
 import { MySQLConnection } from './connection.ts';
 
@@ -59,6 +59,85 @@ export class MySQLDialect extends SQLDialect {
    */
   hash(value: string): string {
     return `SHA2('${value}', '256')`;
+  }
+
+  /**
+   * Get DROP INDEX sql
+   */
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string): string {
+    const constraint = typeof idx === 'string' ? idx : this.getIndexName(cls, idx);
+    return `DROP INDEX ${this.identifier(constraint)} ON ${this.table(SQLModelUtil.classToStack(cls))};`;
+  }
+
+  async describeTable(table: string): Promise<SQLTableDescription | undefined> {
+    const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
+    const [columns, foreignKeys, indices] = await Promise.all([
+      // 1. Columns
+      this.executeSQL<{ name: string, type: string, is_notnull: boolean }>(`
+      SELECT 
+        COLUMN_NAME AS name, 
+        COLUMN_TYPE AS type, 
+        IS_NULLABLE <> 'YES' AS is_notnull
+      FROM information_schema.COLUMNS 
+      WHERE TABLE_NAME = '${table}' 
+      AND TABLE_SCHEMA = DATABASE()
+      AND COLUMN_NAME NOT IN (${IGNORE_FIELDS.join(',')})
+      ORDER BY ORDINAL_POSITION
+    `),
+
+      // 2. Foreign Keys
+      this.executeSQL<{ name: string, from_column: string, to_column: string, to_table: string }>(`
+      SELECT 
+        CONSTRAINT_NAME AS name, 
+        COLUMN_NAME AS from_column, 
+        REFERENCED_COLUMN_NAME AS to_column, 
+        REFERENCED_TABLE_NAME AS to_table
+      FROM information_schema.KEY_COLUMN_USAGE 
+      WHERE TABLE_NAME = '${table}' 
+      AND TABLE_SCHEMA = DATABASE()
+      AND REFERENCED_TABLE_NAME IS NOT NULL
+    `),
+
+      // 3. Indices
+      this.executeSQL<{ name: string, is_unique: number, columns: string }>(`
+      SELECT 
+        stat.INDEX_NAME AS name, 
+        stat.NON_UNIQUE = 0 AS is_unique, 
+        GROUP_CONCAT(CONCAT(stat.COLUMN_NAME, ' ', stat.COLLATION, ' ') ORDER BY stat.SEQ_IN_INDEX) AS columns
+      FROM information_schema.STATISTICS stat
+      LEFT OUTER JOIN information_schema.TABLE_CONSTRAINTS AS tc
+        ON tc.CONSTRAINT_NAME = stat.INDEX_NAME
+        AND tc.TABLE_NAME = stat.TABLE_NAME
+        AND tc.TABLE_SCHEMA = stat.TABLE_SCHEMA
+      WHERE 
+        stat.TABLE_NAME = '${table}' 
+        AND stat.TABLE_SCHEMA = DATABASE()
+        AND tc.CONSTRAINT_TYPE IS NULL
+        AND stat.COLUMN_NAME NOT IN (${IGNORE_FIELDS.join(',')})
+      GROUP BY stat.INDEX_NAME, stat.NON_UNIQUE
+    `)
+    ]);
+
+    if (!columns.count) {
+      return undefined;
+    }
+
+    return {
+      columns: columns.records.map(col => ({
+        ...col,
+        type: col.type.toUpperCase(),
+        is_notnull: !!col.is_notnull
+      })),
+      foreignKeys: foreignKeys.records,
+      indices: indices.records.map(idx => ({
+        name: idx.name,
+        is_unique: !!idx.is_unique,
+        columns: idx.columns
+          .split(',')
+          .map(column => column.split(' '))
+          .map(([name, desc]) => ({ name, desc: desc === 'D' }))
+      }))
+    };
   }
 
   /**

@@ -4,10 +4,15 @@ import path from 'node:path';
 import sqlDb, { type Database, Options } from 'better-sqlite3';
 import { Pool, createPool } from 'generic-pool';
 
-import { ShutdownManager, Util, Runtime } from '@travetto/runtime';
+import { ShutdownManager, Util, Runtime, AppError, castTo } from '@travetto/runtime';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
+
+const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
+
+const isRecoverableError = (error: unknown): error is Error =>
+  error instanceof Error && RECOVERABLE_MESSAGE.test(error.message);
 
 /**
  * Connection support for Sqlite
@@ -28,19 +33,19 @@ export class SqliteConnection extends Connection<Database> {
   }
 
   async #withRetries<T>(operation: () => Promise<T>, retries = 10, delay = 250): Promise<T> {
-    for (; ;) {
+    for (; retries > 1; retries -= 1) {
       try {
         return await operation();
       } catch (error) {
-        if (error instanceof Error && retries > 1 && error.message.includes('database is locked')) {
+        if (isRecoverableError(error)) {
           console.error('Failed, and waiting', retries);
           await Util.blockingTimeout(delay);
-          retries -= 1;
         } else {
           throw error;
         }
       }
     }
+    throw new AppError('Max retries exceeded');
   }
 
   async #create(): Promise<Database> {
@@ -84,11 +89,17 @@ export class SqliteConnection extends Connection<Database> {
           return { count: out.changes, records: [] };
         }
       } catch (error) {
-        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
-          throw new ExistsError('query', query);
-        } else {
-          throw error;
+        const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+        switch (code) {
+          case 'SQLITE_CONSTRAINT_PRIMARYKEY':
+          case 'SQLITE_CONSTRAINT_UNIQUE':
+          case 'SQLITE_CONSTRAINT_INDEX': throw new ExistsError('query', query);
+        };
+        const message = error instanceof Error ? error.message : '';
+        if (/index.*?already exists/.test(message)) {
+          throw new ExistsError('index', query);
         }
+        throw error;
       }
     });
   }
@@ -99,5 +110,15 @@ export class SqliteConnection extends Connection<Database> {
 
   async release(db: Database): Promise<void> {
     return this.#pool.release(db);
+  }
+
+  async pragma<T>(query: string): Promise<T> {
+    const db = await this.acquire();
+    try {
+      const result = db.pragma(query, { simple: false });
+      return castTo<T>(result);
+    } finally {
+      await this.release(db);
+    }
   }
 }

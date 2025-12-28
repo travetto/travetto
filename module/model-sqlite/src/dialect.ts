@@ -4,7 +4,7 @@ import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
 import { castTo } from '@travetto/runtime';
 
-import { SQLModelConfig, SQLDialect, VisitStack } from '@travetto/model-sql';
+import { SQLModelConfig, SQLDialect, VisitStack, type SQLTableDescription } from '@travetto/model-sql';
 
 import { SqliteConnection } from './connection.ts';
 
@@ -44,6 +44,56 @@ export class SqliteDialect extends SQLDialect {
    */
   hash(value: string): string {
     return `hex('${value}')`;
+  }
+
+  async describeTable(table: string): Promise<SQLTableDescription | undefined> {
+    const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
+
+    const [columns, foreignKeys, indices] = await Promise.all([
+      this.executeSQL<{ name: string, type: string, is_notnull: 1 | 0 }>(`
+      SELECT 
+        name, 
+        type, 
+        ${this.identifier('notnull')} <> 0 AS is_notnull
+      FROM PRAGMA_TABLE_INFO('${table}')
+      WHERE name NOT IN (${IGNORE_FIELDS.join(',')})
+    `),
+      this.executeSQL<{ name: string, to_table: string, from_column: string, to_column: string }>(`
+      SELECT 
+        'fk_' || '${table}' || '_' || ${this.identifier('from')} AS name, 
+        ${this.identifier('from')} as from_column, 
+        ${this.identifier('to')} as to_column, 
+        ${this.identifier('table')} as to_table
+      FROM PRAGMA_FOREIGN_KEY_LIST('${table}')
+    `),
+      this.executeSQL<{ name: string, is_unique: boolean, columns: string }>(`
+      SELECT 
+        il.name as name, 
+        il.${this.identifier('unique')} = 1 as is_unique, 
+        GROUP_CONCAT(ii.seqno || ' ' || ii.name || ' ' || ii.desc) AS columns
+      FROM PRAGMA_INDEX_LIST('${table}') il
+      JOIN PRAGMA_INDEX_XINFO(il.name) ii
+      WHERE il.name NOT LIKE 'sqlite_%'
+      GROUP BY 1, 2
+    `)
+    ]);
+
+    return {
+      columns: columns.records.map(col => ({
+        ...col,
+        is_notnull: !!col.is_notnull
+      })),
+      foreignKeys: foreignKeys.records,
+      indices: indices.records.map(idx => ({
+        name: idx.name,
+        is_unique: idx.is_unique,
+        columns: idx.columns.split(',')
+          .map(col => col.split(' '))
+          .map(([order, name, desc]) => [+order, { name, desc: desc === '1' }] as const)
+          .sort((a, b) => a[0] - b[0])
+          .map(([, item]) => item)
+      }))
+    };
   }
 
   /**

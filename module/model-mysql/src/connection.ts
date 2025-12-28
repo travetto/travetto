@@ -76,10 +76,11 @@ export class MySQLConnection extends Connection<PoolConnection> {
       }
     } catch (error) {
       console.debug('Failed query', { error, query });
-      if (error instanceof Error && error.message.startsWith('Duplicate entry')) {
-        throw new ExistsError('query', query);
-      } else {
-        throw error;
+      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+      switch (code) {
+        case 'ER_DUP_ENTRY': throw new ExistsError('query', query);
+        case 'ER_DUP_KEYNAME': throw new ExistsError('index', query);
+        default: throw error;
       }
     } finally {
       try {

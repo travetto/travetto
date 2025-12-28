@@ -1,7 +1,4 @@
-import {
-  type AttributeDefinition, type AttributeValue, DynamoDB, type GlobalSecondaryIndex,
-  type KeySchemaElement, type PutItemCommandInput, type PutItemCommandOutput
-} from '@aws-sdk/client-dynamodb';
+import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 
 import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
@@ -13,40 +10,9 @@ import {
 } from '@travetto/model';
 
 import { DynamoDBModelConfig } from './config.ts';
+import { DynamoDBUtil } from './util.ts';
 
 const EXP_ATTR = 'expires_at__';
-
-function simpleName(idx: string): string {
-  return idx.replace(/[^A-Za-z0-9]/g, '');
-}
-
-function toValue(value: string | number | boolean | Date | undefined | null): AttributeValue;
-function toValue(value: unknown): AttributeValue | undefined {
-  if (value === undefined || value === null || value === '') {
-    return { NULL: true };
-  } else if (typeof value === 'string') {
-    return { S: value };
-  } else if (typeof value === 'number') {
-    return { N: `${value}` };
-  } else if (typeof value === 'boolean') {
-    return { BOOL: value };
-  } else if (value instanceof Date) {
-    return { N: `${value.getTime()}` };
-  }
-}
-
-async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: string): Promise<T> {
-  const item = await ModelCrudUtil.load(cls, doc);
-  if (ModelRegistryIndex.getConfig(cls).expiresAt) {
-    const expiry = ModelExpiryUtil.getExpiryState(cls, item);
-    if (!expiry.expired) {
-      return item;
-    }
-  } else {
-    return item;
-  }
-  throw new NotFoundError(cls, item.id);
-}
 
 /**
  * A model service backed by DynamoDB
@@ -84,35 +50,34 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const property = simpleName(idx.name);
-          indices[`${property}__`] = toValue(key);
+          const property = DynamoDBUtil.simpleName(idx.name);
+          indices[`${property}__`] = DynamoDBUtil.toValue(key);
           if (sort) {
-            indices[`${property}_sort__`] = toValue(+sort);
+            indices[`${property}_sort__`] = DynamoDBUtil.toValue(+sort);
           }
         }
         const query: PutItemCommandInput = {
           TableName: this.#resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
-            id: toValue(item.id),
-            body: toValue(JSON.stringify(item)),
-            ...(expiry !== undefined ? { [EXP_ATTR]: toValue(expiry) } : {}),
+            id: DynamoDBUtil.toValue(item.id),
+            body: DynamoDBUtil.toValue(JSON.stringify(item)),
+            ...(expiry !== undefined ? { [EXP_ATTR]: DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
           },
           ReturnValues: 'NONE'
         };
-        console.debug('Querying', { query });
         return await this.client.putItem(query);
       } else {
         const indices: Record<string, unknown> = {};
         const expr: string[] = [];
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const property = simpleName(idx.name);
-          indices[`:${property}`] = toValue(key);
+          const property = DynamoDBUtil.simpleName(idx.name);
+          indices[`:${property}`] = DynamoDBUtil.toValue(key);
           expr.push(`${property}__ = :${property}`);
           if (sort) {
-            indices[`:${property}_sort`] = toValue(+sort);
+            indices[`:${property}_sort`] = DynamoDBUtil.toValue(+sort);
             expr.push(`${property}_sort__ = :${property}_sort`);
           }
         }
@@ -127,8 +92,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             ...expr
           ].filter(part => !!part).join(', ')}`,
           ExpressionAttributeValues: {
-            ':body': toValue(JSON.stringify(item)),
-            ...(expiry !== undefined ? { ':expr': toValue(expiry) } : {}),
+            ':body': DynamoDBUtil.toValue(JSON.stringify(item)),
+            ...(expiry !== undefined ? { ':expr': DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
           },
           ReturnValues: 'ALL_NEW'
@@ -146,42 +111,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
-  #computeIndexConfig<T extends ModelType>(cls: Class<T>): { indices?: GlobalSecondaryIndex[], attributes: AttributeDefinition[] } {
-    const config = ModelRegistryIndex.getConfig(cls);
-    const attributes: AttributeDefinition[] = [];
-    const indices: GlobalSecondaryIndex[] = [];
-
-    for (const idx of config.indices ?? []) {
-      const idxName = simpleName(idx.name);
-      attributes.push({ AttributeName: `${idxName}__`, AttributeType: 'S' });
-
-      const keys: KeySchemaElement[] = [{
-        AttributeName: `${idxName}__`,
-        KeyType: 'HASH'
-      }];
-
-      if (idx.type === 'sorted') {
-        keys.push({
-          AttributeName: `${idxName}_sort__`,
-          KeyType: 'RANGE'
-        });
-        attributes.push({ AttributeName: `${idxName}_sort__`, AttributeType: 'N' });
-      }
-
-      indices.push({
-        IndexName: idxName,
-        // ProvisionedThroughput: '',
-        Projection: {
-          ProjectionType: 'INCLUDE',
-          NonKeyAttributes: ['body', 'id']
-        },
-        KeySchema: keys
-      });
-    }
-
-    return { indices: indices.length ? indices : undefined, attributes };
-  }
-
   async postConstruct(): Promise<void> {
     this.client = new DynamoDB({ ...this.config.client });
     await ModelStorageUtil.storageInitialization(this);
@@ -194,31 +123,51 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * Add a new model
    * @param cls
    */
-  async createModel(cls: Class<ModelType>): Promise<void> {
+  async upsertModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
-    const idx = this.#computeIndexConfig(cls);
+    const idx = DynamoDBUtil.computeIndexConfig(cls);
 
-    const existing = await this.client.describeTable({ TableName: table }).then(() => true, () => false);
+    const [currentTable, currentTTL] = await Promise.all([
+      this.client.describeTable({ TableName: table }).catch(() => undefined),
+      this.client.describeTimeToLive({ TableName: table }).catch(() => ({ TimeToLiveDescription: undefined }))
+    ]);
 
-    if (existing) {
-      return;
+    if (!currentTable) {
+      console.debug('Creating Table', { table, idx });
+      await this.client.createTable({
+        TableName: table,
+        KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
+        BillingMode: 'PAY_PER_REQUEST',
+        AttributeDefinitions: [
+          { AttributeName: 'id', AttributeType: 'S' },
+          ...idx.attributes
+        ],
+        GlobalSecondaryIndexes: idx.indices
+      });
+    } else {
+      const indexUpdates = DynamoDBUtil.findChangedGlobalIndexes(currentTable.Table?.GlobalSecondaryIndexes, idx.indices);
+      const changedAttributes = DynamoDBUtil.findChangedAttributes(currentTable.Table?.AttributeDefinitions, idx.attributes);
+
+      console.debug('Updating Table', { table, idx, current: currentTable.Table, indexUpdates, changedAttributes });
+
+      if (changedAttributes.length || indexUpdates?.length) {
+        await this.client.updateTable({
+          TableName: table,
+          AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            ...idx.attributes
+          ],
+          GlobalSecondaryIndexUpdates: indexUpdates
+        });
+      }
     }
 
-    await this.client.createTable({
-      TableName: table,
-      KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
-      BillingMode: 'PAY_PER_REQUEST',
-      AttributeDefinitions: [
-        { AttributeName: 'id', AttributeType: 'S' },
-        ...idx.attributes
-      ],
-      GlobalSecondaryIndexes: idx.indices
-    });
-
-    if (ModelRegistryIndex.getConfig(cls).expiresAt) {
+    const ttlRequired = ModelRegistryIndex.getConfig(cls).expiresAt !== undefined;
+    const ttlEnabled = currentTTL.TimeToLiveDescription?.TimeToLiveStatus === 'ENABLED';
+    if (ttlEnabled !== ttlRequired) {
       await this.client.updateTimeToLive({
         TableName: table,
-        TimeToLiveSpecification: { AttributeName: EXP_ATTR, Enabled: true }
+        TimeToLiveSpecification: { AttributeName: ttlRequired ? EXP_ATTR : undefined, Enabled: ttlRequired }
       });
     }
   }
@@ -233,25 +182,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (verify) {
       await this.client.deleteTable({ TableName: table });
     }
-  }
-
-  /**
-   * When the model changes
-   * @param cls
-   */
-  async changeModel(cls: Class<ModelType>): Promise<void> {
-    const table = this.#resolveTable(cls);
-    const idx = this.#computeIndexConfig(cls);
-    // const existing = await this.cl.describeTable({ TableName: table });
-
-    await this.client.updateTable({
-      TableName: table,
-      AttributeDefinitions: [
-        { AttributeName: 'id', AttributeType: 'S' },
-        ...idx.attributes
-      ],
-      // TODO: Fill out index computation
-    });
   }
 
   async createStorage(): Promise<void> {
@@ -270,11 +200,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const result = await this.client.getItem({
       TableName: this.#resolveTable(cls),
-      Key: { id: toValue(id) }
+      Key: { id: DynamoDBUtil.toValue(id) }
     });
 
     if (result && result.Item && result.Item.body) {
-      return loadAndCheckExpiry(cls, result.Item.body.S!);
+      return DynamoDBUtil.loadAndCheckExpiry(cls, result.Item.body.S!);
     }
     throw new NotFoundError(cls, id);
   }
@@ -334,7 +264,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       if (batch.Count && batch.Items) {
         for (const item of batch.Items) {
           try {
-            yield await loadAndCheckExpiry(cls, item.body.S!);
+            yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
           } catch (error) {
             if (!(error instanceof NotFoundError)) {
               throw error;
@@ -368,7 +298,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       throw new IndexNotSupported(cls, idxConfig, 'Sorted indices require the sort field');
     }
 
-    const idxName = simpleName(idx);
+    const idxName = DynamoDBUtil.simpleName(idx);
 
     const query = {
       TableName: this.#resolveTable(cls),
@@ -378,8 +308,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         .filter(expr => !!expr)
         .join(' and '),
       ExpressionAttributeValues: {
-        [`:${idxName}`]: toValue(key),
-        ...(sort ? { [`:${idxName}_sort`]: toValue(+sort) } : {})
+        [`:${idxName}`]: DynamoDBUtil.toValue(key),
+        ...(sort ? { [`:${idxName}_sort`]: DynamoDBUtil.toValue(+sort) } : {})
       }
     };
 
@@ -410,7 +340,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, config, body, { emptySortValue: null });
 
-    const idxName = simpleName(idx);
+    const idxName = DynamoDBUtil.simpleName(idx);
 
     let done = false;
     let token: Record<string, AttributeValue> | undefined;
@@ -421,7 +351,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         ProjectionExpression: 'body',
         KeyConditionExpression: `${idxName}__ = :${idxName}`,
         ExpressionAttributeValues: {
-          [`:${idxName}`]: toValue(key)
+          [`:${idxName}`]: DynamoDBUtil.toValue(key)
         },
         ExclusiveStartKey: token
       });
@@ -429,7 +359,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       if (batch.Count && batch.Items) {
         for (const item of batch.Items) {
           try {
-            yield await loadAndCheckExpiry(cls, item.body.S!);
+            yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
           } catch (error) {
             if (!(error instanceof NotFoundError)) {
               throw error;

@@ -16,6 +16,12 @@ interface Alias {
   path: VisitStack[];
 }
 
+export type SQLTableDescription = {
+  columns: { name: string, type: string, is_notnull: boolean }[];
+  foreignKeys: { name: string, from_column: string, to_column: string, to_table: string }[];
+  indices: { name: string, columns: { name: string, desc: boolean }[], is_unique: boolean }[];
+};
+
 @Schema()
 class Total {
   total: number;
@@ -156,6 +162,11 @@ export abstract class SQLDialect implements DialectState {
    */
   abstract hash(input: string): string;
 
+  /**
+   * Describe a table structure
+   */
+  abstract describeTable(table: string): Promise<SQLTableDescription | undefined>;
+
   executeSQL<T>(sql: string): Promise<{ records: T[], count: number }> {
     return this.connection.execute<T>(this.connection.active, sql);
   }
@@ -253,7 +264,7 @@ export abstract class SQLDialect implements DialectState {
       if (config.specifiers?.includes('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.limit : this.DEFAULT_STRING_LENGTH);
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength?.limit ?? this.DEFAULT_STRING_LENGTH);
       }
     } else if (config.type === PointConcrete) {
       type = this.COLUMN_TYPES.POINT;
@@ -267,12 +278,13 @@ export abstract class SQLDialect implements DialectState {
   /**
    * FieldConfig to Column definition
    */
-  getColumnDefinition(config: SchemaFieldConfig): string | undefined {
+  getColumnDefinition(config: SchemaFieldConfig, overrideRequired?: boolean): string | undefined {
     const type = this.getColumnType(config);
     if (!type) {
       return;
     }
-    return `${this.identifier(config)} ${type} ${(config.required?.active !== false) ? 'NOT NULL' : 'DEFAULT NULL'}`;
+    const required = overrideRequired ? true : (config.required?.active ?? false);
+    return `${this.identifier(config)} ${type} ${required ? 'NOT NULL' : ''}`;
   }
 
   /**
@@ -652,17 +664,11 @@ ${this.getLimitSQL(cls, query)}`;
       let idField = fields.find(field => field.name === this.idField.name);
       if (!idField) {
         fields.push(idField = this.idField);
-      } else {
-        idField.maxlength = { limit: this.ID_LENGTH };
       }
     }
 
     const fieldSql = fields
-      .map(field => {
-        const def = this.getColumnDefinition(field) || '';
-        return field.name === this.idField.name && !parent ?
-          def.replace('DEFAULT NULL', 'NOT NULL') : def;
-      })
+      .map(field => this.getColumnDefinition(field, field.name === this.idField.name && !parent) || '')
       .filter(line => !!line.trim())
       .join(',\n  ');
 
@@ -715,6 +721,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   }
 
   /**
+   * Get index name
+   */
+  getIndexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<ModelType>): string {
+    const table = this.namespace(SQLModelUtil.classToStack(cls));
+    return ['idx', table, idx.name.toLowerCase().replaceAll('-', '_')].join('_');
+  }
+
+  /**
    * Get CREATE INDEX sql
    */
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
@@ -727,10 +741,18 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       }
       return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
     });
-    const constraint = `idx_${table}_${fields.map(([field]) => field).join('_')}`;
+    const constraint = this.getIndexName(cls, idx);
     return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
       .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')});`;
+  }
+
+  /**
+   * Get DROP INDEX sql
+   */
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string): string {
+    const constraint = typeof idx === 'string' ? idx : this.getIndexName(cls, idx);
+    return `DROP INDEX ${this.identifier(constraint)} ;`;
   }
 
   /**
@@ -1034,5 +1056,46 @@ ${this.getWhereSQL(cls, where!)}`;
     }
 
     return out;
+  }
+
+  /**
+   * Determine if a column has changed
+   */
+  isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number],): boolean {
+    const requestedColumnType = this.getColumnType(requested);
+    const result =
+      (requested.name !== this.idField.name && !!requested.required?.active !== !!existing.is_notnull)
+      || (requestedColumnType.toUpperCase() !== existing.type.toUpperCase());
+
+    return result;
+  }
+
+  /**
+   * Determine if an index has changed
+   */
+  isIndexChanged(requested: IndexConfig<ModelType>, existing: SQLTableDescription['indices'][number]): boolean {
+    let result =
+      (existing.is_unique && requested.type !== 'unique')
+      || requested.fields.length !== existing.columns.length;
+
+    for (let i = 0; i < requested.fields.length && !result; i++) {
+      const [[key, value]] = Object.entries(requested.fields[i]);
+      const desc = value === -1;
+      result ||= key !== existing.columns[i].name && desc !== existing.columns[i].desc;
+    }
+
+    return result;
+  }
+
+  /**
+   * Enforce the dialect specific id length
+   */
+  enforceIdLength(cls: Class<ModelType>): void {
+    const config = SchemaRegistryIndex.getConfig(cls);
+    const idField = config.fields[this.idField.name];
+    if (idField) {
+      idField.maxlength = { limit: this.ID_LENGTH };
+      idField.minlength = { limit: this.ID_LENGTH };
+    }
   }
 }

@@ -29,25 +29,21 @@ export interface ModelStorageSupport {
    */
   deleteStorage(): Promise<void>;
   /**
-   * Installs model
+   * Creates model
    */
-  createModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
+  upsertModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
-   * Installs model
+   * Exports model
    */
   exportModel?<T extends ModelType>(cls: Class<T>): Promise<string>;
   /**
-   * Installs model
+   * Deletes model
    */
   deleteModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
    * Removes all data from a model, but leaving the structure in place
    */
   truncateModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
-  /**
-   * Deals with model internals changing
-   */
-  changeModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
    * Truncate blob storage data
    */

@@ -59,10 +59,13 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
       const records: T[] = [...out.rows].map(value => ({ ...value }));
       return { count: out.rowCount!, records };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('duplicate key value')) {
-        throw new ExistsError('query', query);
-      } else {
-        throw error;
+      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+      switch (code) {
+        // Index already exists
+        case '42P07': throw new ExistsError('index', query);
+        // Unique violation
+        case '23505': throw new ExistsError('query', query);
+        default: throw error;
       }
     }
   }

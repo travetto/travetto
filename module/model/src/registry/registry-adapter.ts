@@ -12,6 +12,9 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
       prePersist: [...(target.prePersist || []), ...(source.prePersist || [])],
     });
   }
+  if (target.store) {
+    target.store = target.store.toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
+  }
   return target;
 }
 
@@ -28,7 +31,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       class: this.#cls,
       indices: [],
       autoCreate: 'development',
-      store: this.#cls.name.toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'),
+      store: this.#cls.name,
       postLoad: [],
       prePersist: []
     };

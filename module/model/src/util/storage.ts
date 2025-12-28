@@ -39,10 +39,10 @@ export class ModelStorageUtil {
     // Initialize on startup (test manages)
     await storage.createStorage();
 
-    if (storage.createModel) {
+    if (storage.upsertModel) {
       for (const cls of ModelRegistryIndex.getClasses()) {
         if (checkType(cls)) {
-          await storage.createModel(cls);
+          await storage.upsertModel(cls);
         }
       }
     }

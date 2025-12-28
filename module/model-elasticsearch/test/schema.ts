@@ -1,4 +1,6 @@
 import assert from 'node:assert';
+import { estypes } from '@elastic/elasticsearch';
+
 
 import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
@@ -111,5 +113,260 @@ class SchemaSuite {
     assert(schema3.properties.whole.type === 'integer');
     assert(schema3.properties.big.type === 'double');
     assert(schema3.properties.floater.type === 'float');
+  }
+
+  @Test('should detect type changes in root fields')
+  async testRootTypeChange() {
+    const current: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        age: { type: 'integer' },
+        name: { type: 'keyword' }
+      },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        age: { type: 'long' }, // Changed from integer to long
+        name: { type: 'keyword' }
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.deepStrictEqual(changed, ['age']);
+  }
+
+  @Test('should detect added fields')
+  async testAddedFields() {
+    const current: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' }
+      },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' },
+        age: { type: 'integer' }, // New field
+        email: { type: 'keyword' } // New field
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.strictEqual(changed.length, 2);
+    assert(changed.includes('age'));
+    assert(changed.includes('email'));
+  }
+
+  @Test('should detect removed fields')
+  async testRemovedFields() {
+    const current: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' },
+        age: { type: 'integer' },
+        email: { type: 'keyword' }
+      },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' }
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.strictEqual(changed.length, 2);
+    assert(changed.includes('age'));
+    assert(changed.includes('email'));
+  }
+
+  @Test('should return empty array when schemas match')
+  async testNoChanges() {
+    const current: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' },
+        age: { type: 'integer' }
+      },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' },
+        age: { type: 'integer' }
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.deepStrictEqual(changed, []);
+  }
+
+  @Test('should detect nested object type changes')
+  async testNestedTypeChange() {
+    const current: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        address: {
+          type: 'object',
+          properties: {
+            street: { type: 'keyword' }
+          }
+        }
+      },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        address: {
+          type: 'nested', // Changed from object to nested
+          properties: { street: { type: 'keyword' } }
+        }
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.deepStrictEqual(changed, ['address']);
+  }
+
+  @Test('should detect changes in nested object properties with correct path')
+  async testNestedPropertyChanges() {
+    const current: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        address: {
+          type: 'object',
+          properties: {
+            street: { type: 'keyword' },
+            city: { type: 'keyword' },
+            zip: { type: 'keyword' }
+          }
+        }
+      },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        address: {
+          type: 'object',
+          properties: {
+            street: { type: 'text' }, // Type changed
+            city: { type: 'keyword' },
+            country: { type: 'keyword' } // Added field, zip removed
+          }
+        }
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.deepStrictEqual(changed, ['address.street', 'address.zip', 'address.country']);
+  }
+
+  @Test('should handle mixed root and nested changes')
+  async testMixedChanges() {
+    const current: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' },
+        address: {
+          type: 'object',
+          properties: {
+            street: { type: 'keyword' }
+          }
+        }
+      },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'text' }, // Root change
+        name: { type: 'keyword' },
+        address: {
+          type: 'object',
+          properties: {
+            street: { type: 'text' } // Nested change
+          }
+        }
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.deepStrictEqual(changed, ['id', 'address.street']);
+  }
+
+  @Test('should handle missing properties in current')
+  async testMissingCurrentProperties() {
+    const current: estypes.MappingTypeMapping = { dynamic: false };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' }
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.deepStrictEqual(changed, ['id', 'name']);
+  }
+
+  @Test('should handle missing properties in needed')
+  async testMissingNeededProperties() {
+    const current: estypes.MappingTypeMapping = {
+      properties: {
+        id: { type: 'keyword' },
+        name: { type: 'keyword' }
+      },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = { dynamic: false };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.deepStrictEqual(changed, ['id', 'name']);
+  }
+
+  @Test('should handle nested object without properties in current')
+  async testNestedWithoutPropertiesInCurrent() {
+    const current: estypes.MappingTypeMapping = {
+      properties: { address: { type: 'object' } },
+      dynamic: false
+    };
+
+    const needed: estypes.MappingTypeMapping = {
+      properties: {
+        address: {
+          type: 'object',
+          properties: {
+            street: { type: 'keyword' }
+          }
+        }
+      },
+      dynamic: false
+    };
+
+    const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
+    assert.deepStrictEqual(changed, ['address.street']);
   }
 }
