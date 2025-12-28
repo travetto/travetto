@@ -64,13 +64,13 @@ export class MySQLDialect extends SQLDialect {
   async describeTable(table: string): Promise<SQLTableDescription | undefined> {
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
-      this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
+      this.executeSQL<{ name: string, type: string, is_notnull: boolean }>(`
       SELECT 
         COLUMN_NAME AS name, 
         COLUMN_TYPE AS type, 
-        IS_NULLABLE = 'YES' AS is_nullable
+        IS_NULLABLE <> 'YES' AS is_notnull
       FROM information_schema.COLUMNS 
-      WHERE TABLE_NAME = '${this.identifier(table)}' 
+      WHERE TABLE_NAME = '${table}' 
       AND TABLE_SCHEMA = DATABASE()
       ORDER BY ORDINAL_POSITION
     `),
@@ -83,7 +83,7 @@ export class MySQLDialect extends SQLDialect {
         REFERENCED_COLUMN_NAME AS to_column, 
         REFERENCED_TABLE_NAME AS to_table
       FROM information_schema.KEY_COLUMN_USAGE 
-      WHERE TABLE_NAME = '${this.identifier(table)}' 
+      WHERE TABLE_NAME = '${table}' 
       AND TABLE_SCHEMA = DATABASE()
       AND REFERENCED_TABLE_NAME IS NOT NULL
     `),
@@ -95,7 +95,7 @@ export class MySQLDialect extends SQLDialect {
         NON_UNIQUE = 0 AS is_unique, 
         GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS columns
       FROM information_schema.STATISTICS
-      WHERE TABLE_NAME = '${this.identifier(table)}' 
+      WHERE TABLE_NAME = '${table}' 
       AND TABLE_SCHEMA = DATABASE()
       GROUP BY INDEX_NAME, NON_UNIQUE
     `)
@@ -106,7 +106,10 @@ export class MySQLDialect extends SQLDialect {
     }
 
     return {
-      columns: columns.records,
+      columns: columns.records.map(col => ({
+        ...col,
+        is_notnull: !!col.is_notnull
+      })),
       foreignKeys: foreignKeys.records,
       indices: indices.records.map(idx => ({
         name: idx.name,

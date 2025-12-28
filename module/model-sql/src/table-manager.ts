@@ -1,5 +1,5 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
-import { ExistsError, ModelRegistryIndex } from '@travetto/model';
+import { ModelRegistryIndex } from '@travetto/model';
 import { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
 
@@ -59,10 +59,6 @@ export class TableManager {
 
     const onVisit = async (type: Class, fields: SchemaFieldConfig[], path: VisitStack[]): Promise<void> => {
       const found = await this.#dialect.describeTable(this.#dialect.namespace(path));
-      if (type.name.includes('IndexedWorker')) {
-        console.error!('Found table for', this.#dialect.table(path), found);
-      }
-
       const existingFields = new Map(found?.columns.map(column => [column.name, column]) ?? []);
       const existingIndices = new Map(found?.indices.map(index => [index.name, index]) ?? []);
       const requestedIndices = new Map(path.length === 1 ?
@@ -72,6 +68,9 @@ export class TableManager {
 
       // Manage fields
       if (!existingFields.size) {
+        if (type.name.includes('IndexedWorker')) {
+          console.error!('Creating table for', { type: type.name, table: this.#dialect.namespace(path), sql: this.#dialect.getCreateTableSQL(path) });
+        }
         sqlCommands.createTable.push(this.#dialect.getCreateTableSQL(path));
       } else { // Existing
         // Fields
@@ -128,13 +127,7 @@ export class TableManager {
   async upsertTables(cls: Class): Promise<void> {
     const sqlCommands = await this.getUpsertTablesSQL(cls);
     for (const key of ['dropIndex', 'dropTable', 'createTable', 'modifyTable', 'createIndex'] as const) {
-      await Promise.all(sqlCommands[key].map(command => this.#exec(command).catch(err => {
-        // if (err instanceof ExistsError && err.details?.type === 'index') {
-        //   // Swallow
-        // } else {
-        throw err;
-        // }
-      })));
+      await Promise.all(sqlCommands[key].map(command => this.#exec(command)));
     }
   }
 

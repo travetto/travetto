@@ -348,7 +348,7 @@ export class SQLModelUtil {
   }
 
   static isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number], requestedColumnType: string): boolean {
-    if (!!requested.required?.active === !!existing.is_nullable) {
+    if (!!requested.required?.active !== !!existing.is_notnull) {
       return true;
     }
     if (requestedColumnType.toUpperCase() !== existing.type.toUpperCase()) {

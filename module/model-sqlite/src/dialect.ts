@@ -49,11 +49,11 @@ export class SqliteDialect extends SQLDialect {
   async describeTable(table: string): Promise<SQLTableDescription | undefined> {
 
     const [columns, foreignKeys, indices] = await Promise.all([
-      this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
+      this.executeSQL<{ name: string, type: string, is_notnull: 1 | 0 }>(`
       SELECT 
         name, 
         type, 
-        ${this.identifier('notnull')} = 0 AS is_nullable
+        ${this.identifier('notnull')} <> 0 AS is_notnull
       FROM PRAGMA_TABLE_INFO('${table}')
     `),
       this.executeSQL<{ name: string, to_table: string, from_column: string, to_column: string }>(`
@@ -77,12 +77,15 @@ export class SqliteDialect extends SQLDialect {
     ]);
 
     return {
-      columns: columns.records,
+      columns: columns.records.map(col => ({
+        ...col,
+        is_notnull: !!col.is_notnull
+      })),
       foreignKeys: foreignKeys.records,
       indices: indices.records.map(idx => ({
         name: idx.name,
         is_unique: idx.is_unique,
-        columns: idx.columns.split(', ')
+        columns: idx.columns.split(',')
           .map(col => col.split(' '))
           .map(([order, name]) => [+order, name] as const)
           .sort((a, b) => a[0] - b[0])

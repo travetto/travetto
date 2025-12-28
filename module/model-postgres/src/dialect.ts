@@ -47,13 +47,13 @@ export class PostgreSQLDialect extends SQLDialect {
   async describeTable(table: string): Promise<SQLTableDescription | undefined> {
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
-      this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
+      this.executeSQL<{ name: string, type: string, is_notnull: boolean }>(`
       SELECT 
         column_name AS name, 
         data_type AS type, 
-        (is_nullable = 'YES') AS is_nullable
+        (is_nullable <> 'YES') AS is_notnull
       FROM information_schema.columns
-      WHERE table_name = '${this.identifier(table)}'
+      WHERE table_name = '${table}'
       ORDER BY ordinal_position
     `),
 
@@ -70,7 +70,7 @@ export class PostgreSQLDialect extends SQLDialect {
       JOIN information_schema.constraint_column_usage AS ccu
         ON ccu.constraint_name = tc.constraint_name
       WHERE tc.constraint_type = 'FOREIGN KEY' 
-        AND tc.table_name = '${this.identifier(table)}'
+        AND tc.table_name = '${table}'
     `),
 
       // 3. Indices
@@ -83,17 +83,24 @@ export class PostgreSQLDialect extends SQLDialect {
       JOIN pg_index ix ON t.oid = ix.indrelid
       JOIN pg_class i ON i.oid = ix.indexrelid
       JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(ix.indkey)
-      WHERE t.relname = '${this.identifier(table)}'
+      WHERE t.relname = '${table}'
       GROUP BY i.relname, ix.indisunique
     `)
     ]);
+
+    if (table.includes('indexedworker')) {
+      console.error!('HERE', columns, foreignKeys, indices);
+    }
 
     if (!columns.count) {
       return undefined;
     }
 
     return {
-      columns: columns.records,
+      columns: columns.records.map(col => ({
+        ...col,
+        is_notnull: !!col.is_notnull
+      })),
       foreignKeys: foreignKeys.records,
       indices: indices.records.map(idx => ({
         name: idx.name,

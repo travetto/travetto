@@ -17,7 +17,7 @@ interface Alias {
 }
 
 export type SQLTableDescription = {
-  columns: { name: string, type: string, is_nullable: boolean }[];
+  columns: { name: string, type: string, is_notnull: boolean }[];
   foreignKeys: { name: string, from_column: string, to_column: string, to_table: string }[];
   indices: { name: string, columns: string[], is_unique: boolean }[];
 };
@@ -278,12 +278,13 @@ export abstract class SQLDialect implements DialectState {
   /**
    * FieldConfig to Column definition
    */
-  getColumnDefinition(config: SchemaFieldConfig): string | undefined {
+  getColumnDefinition(config: SchemaFieldConfig, overrideRequired?: boolean): string | undefined {
     const type = this.getColumnType(config);
     if (!type) {
       return;
     }
-    return `${this.identifier(config)} ${type} ${(config.required?.active !== false) ? 'NOT NULL' : 'DEFAULT NULL'}`;
+    const required = overrideRequired ? true : (config.required?.active ?? false);
+    return `${this.identifier(config)} ${type} ${required ? 'NOT NULL' : ''}`;
   }
 
   /**
@@ -669,11 +670,7 @@ ${this.getLimitSQL(cls, query)}`;
     }
 
     const fieldSql = fields
-      .map(field => {
-        const def = this.getColumnDefinition(field) || '';
-        return field.name === this.idField.name && !parent ?
-          def.replace('DEFAULT NULL', 'NOT NULL') : def;
-      })
+      .map(field => this.getColumnDefinition(field, field.name === this.idField.name && !parent) || '')
       .filter(line => !!line.trim())
       .join(',\n  ');
 
