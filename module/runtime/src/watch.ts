@@ -3,7 +3,6 @@ import { ManifestModuleUtil, type ChangeEventType, type ManifestModuleFileType }
 import { RuntimeIndex } from './manifest-index.ts';
 import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
-import { AppError } from './error.ts';
 
 type WatchEvent = { file: string, action: ChangeEventType, output: string, module: string, import: string, time: number };
 
@@ -49,7 +48,7 @@ export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterab
     await client.waitForState(['compile-end', 'watch-start'], undefined, controller.signal);
 
     if (!await client.isWatching()) { // If we get here, without a watch
-      throw new AppError('Compiler is not running');
+      await Util.nonBlockingTimeout(maxWindow / (maxIterations * 2));
     } else {
       if (iterations.length) {
         config?.onRestart?.();

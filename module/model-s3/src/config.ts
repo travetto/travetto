@@ -42,6 +42,9 @@ export class S3ModelConfig {
   async postConstruct(): Promise<void> {
     if (!Runtime.production) {
       this.endpoint ??= 'http://localhost:4566'; // From docker
+      if (this.endpoint.includes('localhost')) {
+        this.config.forcePathStyle ??= true;
+      }
     }
 
     if (!this.accessKeyId && !this.secretAccessKey) {
@@ -59,10 +62,5 @@ export class S3ModelConfig {
         secretAccessKey: this.secretAccessKey
       }
     };
-
-    // We are in localhost and not in prod, turn on forcePathStyle
-    if (!Runtime.production && this.endpoint.includes('localhost')) {
-      this.config.forcePathStyle ??= true;
-    }
   }
 }

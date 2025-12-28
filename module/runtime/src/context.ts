@@ -32,9 +32,18 @@ class $Runtime {
     return Env.TRV_ENV.value || (!this.production ? this.#idx.manifest.workspace.defaultEnv : undefined);
   }
 
-  /** Are we in development mode */
+  /** Are we in production mode */
   get production(): boolean {
     return process.env.NODE_ENV === 'production';
+  }
+
+  /** Get environment type mode */
+  get envType(): 'production' | 'development' | 'test' {
+    switch (process.env.NODE_ENV) {
+      case 'production': return 'production';
+      case 'test': return 'test';
+      default: return 'development';
+    }
   }
 
   /** Get debug value */
