@@ -264,7 +264,7 @@ export abstract class SQLDialect implements DialectState {
       if (config.specifiers?.includes('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength ? config.maxlength.limit : this.DEFAULT_STRING_LENGTH);
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(config.maxlength?.limit ?? this.DEFAULT_STRING_LENGTH);
       }
     } else if (config.type === PointConcrete) {
       type = this.COLUMN_TYPES.POINT;
@@ -664,8 +664,6 @@ ${this.getLimitSQL(cls, query)}`;
       let idField = fields.find(field => field.name === this.idField.name);
       if (!idField) {
         fields.push(idField = this.idField);
-      } else {
-        idField.maxlength = { limit: this.ID_LENGTH };
       }
     }
 
@@ -1060,6 +1058,9 @@ ${this.getWhereSQL(cls, where!)}`;
     return out;
   }
 
+  /**
+   * Determine if a column has changed
+   */
   isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number],): boolean {
     const requestedColumnType = this.getColumnType(requested);
     const result =
@@ -1069,6 +1070,9 @@ ${this.getWhereSQL(cls, where!)}`;
     return result;
   }
 
+  /**
+   * Determine if an index has changed
+   */
   isIndexChanged(requested: IndexConfig<ModelType>, existing: SQLTableDescription['indices'][number]): boolean {
     let result =
       (existing.is_unique && requested.type !== 'unique')
@@ -1081,5 +1085,17 @@ ${this.getWhereSQL(cls, where!)}`;
     }
 
     return result;
+  }
+
+  /**
+   * Enforce the dialect specific id length
+   */
+  enforceIdLength(cls: Class<ModelType>): void {
+    const config = SchemaRegistryIndex.getConfig(cls);
+    const idField = config.fields[this.idField.name];
+    if (idField) {
+      idField.maxlength = { limit: this.ID_LENGTH };
+      idField.minlength = { limit: this.ID_LENGTH };
+    }
   }
 }

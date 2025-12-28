@@ -90,10 +90,6 @@ export class TableManager {
         // TODO: Handle dropping tables that are FK'd when no longer in use
 
         for (const column of existingFields.keys()) {
-          if (column === this.#dialect.pathField.name || column === this.#dialect.parentPathField.name || column === this.#dialect.idxField.name) {
-            continue;
-          }
-
           if (!requestedFields.has(column)) {
             sqlCommands.table.push(this.#dialect.getDropColumnSQL([...path, { name: column, type: undefined!, array: false }]));
           }
@@ -130,6 +126,9 @@ export class TableManager {
   @Connected()
   @Transactional()
   async upsertTables(cls: Class): Promise<void> {
+    // Enforce id length
+    this.#dialect.enforceIdLength(cls);
+
     const sqlCommands = await this.getUpsertTablesSQL(cls);
     for (const key of ['dropIndex', 'table', 'createIndex'] as const) {
       await Promise.all(sqlCommands[key].map(command => this.#exec(command)));
