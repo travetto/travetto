@@ -50,14 +50,22 @@ export class PostgreSQLDialect extends SQLDialect {
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
       this.executeSQL<{ name: string, type: string, is_notnull: boolean }>(`
-      SELECT 
-        column_name AS name, 
-        data_type AS type, 
-        (is_nullable <> 'YES') AS is_notnull
-      FROM information_schema.columns
-      WHERE table_name = '${table}'
-      AND column_name NOT IN (${IGNORE_FIELDS.join(',')})
-      ORDER BY ordinal_position
+      SELECT
+        a.attname AS name,
+        pg_catalog.format_type(a.atttypid, a.atttypmod) AS type,
+        a.attnotnull AS is_notnull
+      FROM pg_catalog.pg_attribute a
+      JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+      JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+      LEFT JOIN
+        pg_catalog.pg_attrdef ad ON ad.adrelid = c.oid AND ad.adnum = a.attnum
+      WHERE
+        c.relname = '${table}'
+        AND a.attnum > 0
+        AND NOT a.attisdropped
+        AND a.attname NOT IN (${IGNORE_FIELDS.join(',')})
+      ORDER BY
+        a.attnum;
     `),
 
       // 2. Foreign Keys
@@ -77,16 +85,21 @@ export class PostgreSQLDialect extends SQLDialect {
     `),
 
       // 3. Indices
-      this.executeSQL<{ name: string, is_unique: boolean, columns: string }>(`
+      this.executeSQL<{ name: string, is_unique: boolean, columns: string[] }>(`
       SELECT
         i.relname AS name,
         ix.indisunique AS is_unique,
-        ARRAY_AGG(a.attname ORDER BY array_position(ix.indkey, a.attnum)) AS columns
+        ARRAY_AGG(a.attname || ' '|| CAST((o.OPTION & 1) AS VARCHAR) ORDER BY array_position(ix.indkey, a.attnum)) AS columns
       FROM pg_class t
       JOIN pg_index ix ON t.oid = ix.indrelid
       JOIN pg_class i ON i.oid = ix.indexrelid
-      JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(ix.indkey)
+      CROSS JOIN LATERAL UNNEST(ix.indkey)    WITH ordinality AS c (colnum, ordinality)
+      LEFT  JOIN LATERAL UNNEST(ix.indoption) WITH ordinality AS o (OPTION, ordinality) ON c.ordinality = o.ordinality 
+      LEFT JOIN pg_catalog.pg_constraint co ON co.conindid = ix.indexrelid
+      JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = c.colnum 
       WHERE t.relname = '${table}'
+        AND NOT ix.indisprimary
+        AND co.conindid IS NULL
       GROUP BY i.relname, ix.indisunique
     `)
     ]);
@@ -98,14 +111,20 @@ export class PostgreSQLDialect extends SQLDialect {
     return {
       columns: columns.records.map(col => ({
         ...col,
+        type: col.type.toUpperCase()
+          .replace('CHARACTER VARYING', 'VARCHAR')
+          .replace('INTEGER', 'INT'),
         is_notnull: !!col.is_notnull
       })),
       foreignKeys: foreignKeys.records,
-      indices: indices.records.map(idx => ({
-        name: idx.name,
-        is_unique: idx.is_unique,
-        columns: idx.columns.split(',')
-      }))
+      indices: indices.records
+        .map(idx => ({
+          name: idx.name,
+          is_unique: idx.is_unique,
+          columns: idx.columns
+            .map(column => column.split(' '))
+            .map(([name, desc]) => ({ name, desc: desc === '1' }))
+        }))
     };
   }
 

@@ -62,7 +62,7 @@ export class TableManager {
       const existingFields = new Map(found?.columns.map(column => [column.name, column]) ?? []);
       const existingIndices = new Map(found?.indices.map(index => [index.name, index]) ?? []);
       const model = path.length === 1 ? ModelRegistryIndex.getConfig(type) : undefined;
-      const requestedIndices = new Map((model?.indices ?? []).map(index => [index.name, index]) ?? []);
+      const requestedIndices = new Map((model?.indices ?? []).map(index => [this.#dialect.getIndexName(type, index), index]) ?? []);
 
       // Manage fields
       if (!existingFields.size) {
@@ -95,14 +95,15 @@ export class TableManager {
         if (!existingIndices.has(index)) {
           sqlCommands.createIndex.push(this.#dialect.getCreateIndexSQL(type, requestedIndices.get(index)!));
         } else if (this.#dialect.isIndexChanged(requestedIndices.get(index)!, existingIndices.get(index)!)) {
-          sqlCommands.dropIndex.push(...this.#dialect.getDropIndexSQL(type, existingIndices.get(index)!.columns));
+          sqlCommands.dropIndex.push(this.#dialect.getDropIndexSQL(type, existingIndices.get(index)!.name));
           sqlCommands.createIndex.push(this.#dialect.getCreateIndexSQL(type, requestedIndices.get(index)!));
         }
       }
 
       for (const index of existingIndices.keys()) {
         if (!requestedIndices.has(index)) {
-          sqlCommands.dropIndex.push(this.#dialect.getDropIndexSQL(type, existingIndices.get(index)!.columns));
+          console.error!('Dropping index:', { index, existing: existingIndices.keys(), requested: requestedIndices.keys() });
+          sqlCommands.dropIndex.push(this.#dialect.getDropIndexSQL(type, existingIndices.get(index)!.name));
         }
       }
     };

@@ -64,9 +64,8 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Get DROP INDEX sql
    */
-  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string[]): string {
-    const fields = Array.isArray(idx) ? idx : idx.fields.map(field => Object.keys(field)[0]);
-    const constraint = this.getIndexName(cls, fields);
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string): string {
+    const constraint = typeof idx === 'string' ? idx : this.getIndexName(cls, idx);
     return `DROP INDEX ${this.identifier(constraint)} ON ${this.table(SQLModelUtil.classToStack(cls))};`;
   }
 
@@ -100,15 +99,22 @@ export class MySQLDialect extends SQLDialect {
     `),
 
       // 3. Indices
-      this.executeSQL<{ name: string, is_unique: boolean, columns: string }>(`
+      this.executeSQL<{ name: string, is_unique: number, columns: string }>(`
       SELECT 
-        INDEX_NAME AS name, 
-        NON_UNIQUE = 0 AS is_unique, 
-        GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS columns
-      FROM information_schema.STATISTICS
-      WHERE TABLE_NAME = '${table}' 
-      AND TABLE_SCHEMA = DATABASE()
-      GROUP BY INDEX_NAME, NON_UNIQUE
+        stat.INDEX_NAME AS name, 
+        stat.NON_UNIQUE = 0 AS is_unique, 
+        GROUP_CONCAT(CONCAT(stat.COLUMN_NAME, ' ', stat.COLLATION, ' ') ORDER BY stat.SEQ_IN_INDEX) AS columns
+      FROM information_schema.STATISTICS stat
+      LEFT OUTER JOIN information_schema.TABLE_CONSTRAINTS AS tc
+        ON tc.CONSTRAINT_NAME = stat.INDEX_NAME
+        AND tc.TABLE_NAME = stat.TABLE_NAME
+        AND tc.TABLE_SCHEMA = stat.TABLE_SCHEMA
+      WHERE 
+        stat.TABLE_NAME = '${table}' 
+        AND stat.TABLE_SCHEMA = DATABASE()
+        AND tc.CONSTRAINT_TYPE IS NULL
+        AND stat.COLUMN_NAME NOT IN (${IGNORE_FIELDS.join(',')})
+      GROUP BY stat.INDEX_NAME, stat.NON_UNIQUE
     `)
     ]);
 
@@ -119,13 +125,17 @@ export class MySQLDialect extends SQLDialect {
     return {
       columns: columns.records.map(col => ({
         ...col,
+        type: col.type.toUpperCase(),
         is_notnull: !!col.is_notnull
       })),
       foreignKeys: foreignKeys.records,
       indices: indices.records.map(idx => ({
         name: idx.name,
-        is_unique: Boolean(idx.is_unique),
-        columns: idx.columns.split(',')
+        is_unique: !!idx.is_unique,
+        columns: idx.columns
+          .split(',')
+          .map(column => column.split(' '))
+          .map(([name, desc]) => ({ name, desc: desc === 'D' }))
       }))
     };
   }

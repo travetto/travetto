@@ -19,7 +19,7 @@ interface Alias {
 export type SQLTableDescription = {
   columns: { name: string, type: string, is_notnull: boolean }[];
   foreignKeys: { name: string, from_column: string, to_column: string, to_table: string }[];
-  indices: { name: string, columns: string[], is_unique: boolean }[];
+  indices: { name: string, columns: { name: string, desc: boolean }[], is_unique: boolean }[];
 };
 
 @Schema()
@@ -725,9 +725,9 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get index name
    */
-  getIndexName<T extends ModelType>(cls: Class<T>, fields: string[]): string {
+  getIndexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<ModelType>): string {
     const table = this.namespace(SQLModelUtil.classToStack(cls));
-    return ['idx', table, ...fields].join('_');
+    return ['idx', table, idx.name.toLowerCase().replaceAll('-', '_')].join('_');
   }
 
   /**
@@ -743,7 +743,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       }
       return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
     });
-    const constraint = this.getIndexName(cls, fields.map(([name]) => name));
+    const constraint = this.getIndexName(cls, idx);
     return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
       .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')});`;
@@ -752,9 +752,8 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get DROP INDEX sql
    */
-  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string[]): string {
-    const fields = Array.isArray(idx) ? idx : idx.fields.map(field => Object.keys(field)[0]);
-    const constraint = this.getIndexName(cls, fields);
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string): string {
+    const constraint = typeof idx === 'string' ? idx : this.getIndexName(cls, idx);
     return `DROP INDEX ${this.identifier(constraint)} ;`;
   }
 
@@ -1080,12 +1079,19 @@ ${this.getWhereSQL(cls, where!)}`;
 
   isIndexChanged(requested: IndexConfig<ModelType>, existing: SQLTableDescription['indices'][number]): boolean {
     let result =
-      (requested.type === 'unique' !== existing.is_unique)
+      (existing.is_unique && requested.type !== 'unique')
       || requested.fields.length !== existing.columns.length;
 
     for (let i = 0; i < requested.fields.length && !result; i++) {
-      result ||= (Object.keys(requested.fields[i])[0] !== existing.columns[i]);
+      const [[key, value]] = Object.entries(requested.fields[i]);
+      const desc = value === -1;
+      result ||= key !== existing.columns[i].name && desc !== existing.columns[i].desc;
     }
+
+    if (result) {
+      console.error!('Altering index:', { requested, existing });
+    }
+
     return result;
   }
 }

@@ -70,9 +70,9 @@ export class SqliteDialect extends SQLDialect {
       SELECT 
         il.name as name, 
         il.${this.identifier('unique')} = 1 as is_unique, 
-        GROUP_CONCAT(ii.seqno || ' ' || ii.name) AS columns
+        GROUP_CONCAT(ii.seqno || ' ' || ii.name || ' ' || ii.desc) AS columns
       FROM PRAGMA_INDEX_LIST('${table}') il
-      JOIN PRAGMA_INDEX_INFO(il.name) ii
+      JOIN PRAGMA_INDEX_XINFO(il.name) ii
       WHERE il.name NOT LIKE 'sqlite_%'
       GROUP BY 1, 2
     `)
@@ -89,9 +89,9 @@ export class SqliteDialect extends SQLDialect {
         is_unique: idx.is_unique,
         columns: idx.columns.split(',')
           .map(col => col.split(' '))
-          .map(([order, name]) => [+order, name] as const)
+          .map(([order, name, desc]) => [+order, { name, desc: desc === '1' }] as const)
           .sort((a, b) => a[0] - b[0])
-          .map(([, name]) => name)
+          .map(([, item]) => item)
       }))
     };
   }
