@@ -1,5 +1,5 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
-import { ModelRegistryIndex } from '@travetto/model';
+import { ExistsError, ModelRegistryIndex } from '@travetto/model';
 import { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
 
@@ -124,7 +124,13 @@ export class TableManager {
   async upsertTables(cls: Class): Promise<void> {
     const sqlCommands = await this.getUpsertTablesSQL(cls);
     for (const key of ['dropIndex', 'dropTable', 'createTable', 'modifyTable', 'createIndex'] as const) {
-      await Promise.all(sqlCommands[key].map(command => this.#exec(command)));
+      await Promise.all(sqlCommands[key].map(command => this.#exec(command).catch(err => {
+        if (err instanceof ExistsError && key.includes('Index')) {
+          // Swallow
+        } else {
+          throw err;
+        }
+      })));
     }
   }
 

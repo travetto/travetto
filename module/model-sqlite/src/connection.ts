@@ -89,11 +89,17 @@ export class SqliteConnection extends Connection<Database> {
           return { count: out.changes, records: [] };
         }
       } catch (error) {
-        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
-          throw new ExistsError('query', query);
-        } else {
-          throw error;
+        const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+        switch (code) {
+          case 'SQLITE_CONSTRAINT_PRIMARYKEY':
+          case 'SQLITE_CONSTRAINT_UNIQUE':
+          case 'SQLITE_CONSTRAINT_INDEX': throw new ExistsError('query', query);
+        };
+        const message = error instanceof Error ? error.message : '';
+        if (/index.*?already exists/.test(message)) {
+          throw new ExistsError('index', query);
         }
+        throw error;
       }
     });
   }

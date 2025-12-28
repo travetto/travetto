@@ -747,7 +747,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
     });
     const constraint = this.getIndexName(cls, fields.map(([name]) => name));
-    return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX IF NOT EXISTS ${constraint} ON ${this.identifier(table)} (${fields
+    return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
       .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')});`;
   }
@@ -759,7 +759,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const table = this.namespace(SQLModelUtil.classToStack(cls));
     const fields = Array.isArray(idx) ? idx : idx.fields.map(field => Object.keys(field)[0]);
     const constraint = this.getIndexName(cls, fields);
-    return `DROP INDEX IF EXISTS ${constraint} ON ${this.identifier(table)};`;
+    return `DROP INDEX ${constraint} ON ${this.identifier(table)};`;
   }
 
   /**
