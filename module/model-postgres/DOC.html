@@ -66,11 +66,11 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   <span class="token comment">/**
    * Username
    */</span>
-  user <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+  user <span class="token operator">=</span> Runtime<span class="token punctuation">.</span>production <span class="token operator">?</span> <span class="token string">''</span> <span class="token operator">:</span> <span class="token string">'travetto'</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Password
    */</span>
-  password <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+  password <span class="token operator">=</span> Runtime<span class="token punctuation">.</span>production <span class="token operator">?</span> <span class="token string">''</span> <span class="token operator">:</span> <span class="token string">'travetto'</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Table prefix
    */</span>

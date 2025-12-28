@@ -39,8 +39,8 @@ Initialized {
   },
   runtime: {
     env: 'local',
+    envType: 'development',
     debug: false,
-    production: false,
     resourcePaths: [
       './doc-exec/resources'
     ],
@@ -209,8 +209,8 @@ Initialized {
   },
   runtime: {
     env: 'prod',
+    envType: 'production',
     debug: false,
-    production: true,
     resourcePaths: [
       './doc-exec/resources'
     ],

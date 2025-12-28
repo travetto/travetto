@@ -479,7 +479,7 @@ export class WebHttpCommand implements CliCommandShape {
   port?: number;
 
   /** Kill conflicting port owner */
-  killConflict?: boolean;
+  killConflict?: boolean = Runtime.envType === 'development';
 
   preMain(): void {
     if (this.port) {
@@ -491,13 +491,13 @@ export class WebHttpCommand implements CliCommandShape {
     await Registry.init();
     const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
 
-    const handle = await Util.acquireWithRetry(
-      () => instance.serve(),
-      NetUtil.freePortOnConflict,
-      this.killConflict && !Runtime.production ? 5 : 1
-    );
-
-    return handle.complete;
+    if (this.killConflict) {
+      const handle = await Util.acquireWithRetry(() => instance.serve(), NetUtil.freePortOnConflict, 5);
+      return handle.complete;
+    } else {
+      const handle = await instance.serve();
+      return handle.complete;
+    }
   }
 }
 ```

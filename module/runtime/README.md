@@ -37,8 +37,10 @@ class $Runtime {
   constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>);
   /** Get env name, with support for the default env */
   get env(): string | undefined;
-  /** Are we in development mode */
+  /** Are we in production mode */
   get production(): boolean;
+  /** Get environment type mode */
+  get envType(): 'production' | 'development' | 'test';
   /** Get debug value */
   get debug(): false | string;
   /** Manifest main */

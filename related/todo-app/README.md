@@ -327,8 +327,8 @@ npx trv web:http
   },
   runtime: {
     env: 'local',
+    envType: 'development',
     debug: false,
-    production: false,
     resourcePaths: [
       './resources',
       '<workspace-root>/resources'
