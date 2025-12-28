@@ -47,6 +47,7 @@ export class SqliteDialect extends SQLDialect {
   }
 
   async describeTable(table: string): Promise<SQLTableDescription | undefined> {
+    const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
 
     const [columns, foreignKeys, indices] = await Promise.all([
       this.executeSQL<{ name: string, type: string, is_notnull: 1 | 0 }>(`
@@ -55,6 +56,7 @@ export class SqliteDialect extends SQLDialect {
         type, 
         ${this.identifier('notnull')} <> 0 AS is_notnull
       FROM PRAGMA_TABLE_INFO('${table}')
+      WHERE name NOT IN (${IGNORE_FIELDS.join(',')})
     `),
       this.executeSQL<{ name: string, to_table: string, from_column: string, to_column: string }>(`
       SELECT 

@@ -45,6 +45,8 @@ export class PostgreSQLDialect extends SQLDialect {
   }
 
   async describeTable(table: string): Promise<SQLTableDescription | undefined> {
+    const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
+
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
       this.executeSQL<{ name: string, type: string, is_notnull: boolean }>(`
@@ -54,6 +56,7 @@ export class PostgreSQLDialect extends SQLDialect {
         (is_nullable <> 'YES') AS is_notnull
       FROM information_schema.columns
       WHERE table_name = '${table}'
+      AND column_name NOT IN (${IGNORE_FIELDS.join(',')})
       ORDER BY ordinal_position
     `),
 
@@ -87,10 +90,6 @@ export class PostgreSQLDialect extends SQLDialect {
       GROUP BY i.relname, ix.indisunique
     `)
     ]);
-
-    if (table.includes('indexedworker')) {
-      console.error!('HERE', columns, foreignKeys, indices);
-    }
 
     if (!columns.count) {
       return undefined;

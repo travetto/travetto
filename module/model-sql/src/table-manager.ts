@@ -61,16 +61,11 @@ export class TableManager {
       const found = await this.#dialect.describeTable(this.#dialect.namespace(path));
       const existingFields = new Map(found?.columns.map(column => [column.name, column]) ?? []);
       const existingIndices = new Map(found?.indices.map(index => [index.name, index]) ?? []);
-      const requestedIndices = new Map(path.length === 1 ?
-        (ModelRegistryIndex.getConfig(type).indices ?? []).map(index => [index.name, index]) :
-        []
-      );
+      const model = path.length === 1 ? ModelRegistryIndex.getConfig(type) : undefined;
+      const requestedIndices = new Map((model?.indices ?? []).map(index => [index.name, index]) ?? []);
 
       // Manage fields
       if (!existingFields.size) {
-        if (type.name.includes('IndexedWorker')) {
-          console.error!('Creating table for', { type: type.name, table: this.#dialect.namespace(path), sql: this.#dialect.getCreateTableSQL(path) });
-        }
         sqlCommands.createTable.push(this.#dialect.getCreateTableSQL(path));
       } else { // Existing
         // Fields
@@ -79,16 +74,16 @@ export class TableManager {
         for (const [column, field] of requestedFields.entries()) {
           if (!existingFields.has(column)) {
             sqlCommands.modifyTable.push(this.#dialect.getAddColumnSQL([...path, field]));
-          } else if (SQLModelUtil.isColumnChanged(
-            field,
-            existingFields.get(column)!,
-            this.#dialect.getColumnType(field)
-          )) {
+          } else if (this.#dialect.isColumnChanged(field, existingFields.get(column)!)) {
             sqlCommands.modifyTable.push(this.#dialect.getModifyColumnSQL([...path, field]));
           }
         }
 
         for (const column of existingFields.keys()) {
+          if (column === this.#dialect.pathField.name || column === this.#dialect.parentPathField.name || column === this.#dialect.idxField.name) {
+            continue;
+          }
+
           if (!requestedFields.has(column)) {
             sqlCommands.modifyTable.push(this.#dialect.getDropColumnSQL([...path, { name: column, type: undefined!, array: false }]));
           }
@@ -99,7 +94,7 @@ export class TableManager {
       for (const index of requestedIndices.keys()) {
         if (!existingIndices.has(index)) {
           sqlCommands.createIndex.push(this.#dialect.getCreateIndexSQL(type, requestedIndices.get(index)!));
-        } else if (SQLModelUtil.isIndexChanged(requestedIndices.get(index)!, existingIndices.get(index)!)) {
+        } else if (this.#dialect.isIndexChanged(requestedIndices.get(index)!, existingIndices.get(index)!)) {
           sqlCommands.dropIndex.push(...this.#dialect.getDropIndexSQL(type, existingIndices.get(index)!.columns));
           sqlCommands.createIndex.push(this.#dialect.getCreateIndexSQL(type, requestedIndices.get(index)!));
         }
@@ -127,7 +122,10 @@ export class TableManager {
   async upsertTables(cls: Class): Promise<void> {
     const sqlCommands = await this.getUpsertTablesSQL(cls);
     for (const key of ['dropIndex', 'dropTable', 'createTable', 'modifyTable', 'createIndex'] as const) {
-      await Promise.all(sqlCommands[key].map(command => this.#exec(command)));
+      await Promise.all(sqlCommands[key].map(command => this.#exec(command).catch(err => {
+        console.error!(`Error executing ${key} command:`, command, err);
+        throw err;
+      })));
     }
   }
 

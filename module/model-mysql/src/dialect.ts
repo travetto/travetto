@@ -3,8 +3,8 @@ import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
 import { castTo, Class } from '@travetto/runtime';
-import { ModelType } from '@travetto/model';
-import { SQLModelConfig, SQLDialect, VisitStack, type SQLTableDescription } from '@travetto/model-sql';
+import { ModelType, type IndexConfig } from '@travetto/model';
+import { SQLModelConfig, SQLDialect, VisitStack, type SQLTableDescription, SQLModelUtil } from '@travetto/model-sql';
 
 import { MySQLConnection } from './connection.ts';
 
@@ -61,7 +61,17 @@ export class MySQLDialect extends SQLDialect {
     return `SHA2('${value}', '256')`;
   }
 
+  /**
+   * Get DROP INDEX sql
+   */
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string[]): string {
+    const fields = Array.isArray(idx) ? idx : idx.fields.map(field => Object.keys(field)[0]);
+    const constraint = this.getIndexName(cls, fields);
+    return `DROP INDEX ${this.identifier(constraint)} ON ${this.table(SQLModelUtil.classToStack(cls))};`;
+  }
+
   async describeTable(table: string): Promise<SQLTableDescription | undefined> {
+    const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
       this.executeSQL<{ name: string, type: string, is_notnull: boolean }>(`
@@ -72,6 +82,7 @@ export class MySQLDialect extends SQLDialect {
       FROM information_schema.COLUMNS 
       WHERE TABLE_NAME = '${table}' 
       AND TABLE_SCHEMA = DATABASE()
+      AND COLUMN_NAME NOT IN (${IGNORE_FIELDS.join(',')})
       ORDER BY ORDINAL_POSITION
     `),
 

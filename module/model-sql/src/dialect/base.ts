@@ -753,10 +753,9 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    * Get DROP INDEX sql
    */
   getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string[]): string {
-    const table = this.namespace(SQLModelUtil.classToStack(cls));
     const fields = Array.isArray(idx) ? idx : idx.fields.map(field => Object.keys(field)[0]);
     const constraint = this.getIndexName(cls, fields);
-    return `DROP INDEX ${constraint} ON ${this.identifier(table)};`;
+    return `DROP INDEX ${this.identifier(constraint)} ;`;
   }
 
   /**
@@ -1060,5 +1059,33 @@ ${this.getWhereSQL(cls, where!)}`;
     }
 
     return out;
+  }
+
+  isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number],): boolean {
+    const requestedColumnType = this.getColumnType(requested);
+    const result =
+      (requested.name !== this.idField.name && !!requested.required?.active !== !!existing.is_notnull)
+      || (requestedColumnType.toUpperCase() !== existing.type.toUpperCase());
+
+    if (result) {
+      console.error!('Column change detected', {
+        field: requested.name,
+        requested: { type: requestedColumnType, notnull: !!requested.required?.active },
+        existing: { type: existing.type, notnull: !!existing.is_notnull }
+      });
+    }
+
+    return result;
+  }
+
+  isIndexChanged(requested: IndexConfig<ModelType>, existing: SQLTableDescription['indices'][number]): boolean {
+    let result =
+      (requested.type === 'unique' !== existing.is_unique)
+      || requested.fields.length !== existing.columns.length;
+
+    for (let i = 0; i < requested.fields.length && !result; i++) {
+      result ||= (Object.keys(requested.fields[i])[0] !== existing.columns[i]);
+    }
+    return result;
   }
 }

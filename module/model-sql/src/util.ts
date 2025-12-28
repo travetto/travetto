@@ -1,11 +1,10 @@
 import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
-import { ModelRegistryIndex, ModelType, OptionalId, type IndexConfig } from '@travetto/model';
+import { ModelRegistryIndex, ModelType, OptionalId } from '@travetto/model';
 import { SchemaClassConfig, SchemaFieldConfig, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types.ts';
 import { TableSymbol, VisitStack } from './types.ts';
-import type { SQLTableDescription } from './dialect/base.ts';
 
 type FieldCacheEntry = {
   local: SchemaFieldConfig[];
@@ -330,30 +329,5 @@ export class SQLModelUtil {
 
     const result = [...Object.values(wrappers)].toSorted((a, b) => a.stack.length - b.stack.length);
     return result;
-  }
-
-  static isIndexChanged(requested: IndexConfig<ModelType>, existing: SQLTableDescription['indices'][number]): boolean {
-    if (requested.type === 'unique' !== existing.is_unique) {
-      return true;
-    }
-    if (requested.fields.length !== existing.columns.length) {
-      return true;
-    }
-    for (let i = 0; i < requested.fields.length; i++) {
-      if (Object.keys(requested.fields[i])[0] !== existing.columns[i]) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number], requestedColumnType: string): boolean {
-    if (!!requested.required?.active !== !!existing.is_notnull) {
-      return true;
-    }
-    if (requestedColumnType.toUpperCase() !== existing.type.toUpperCase()) {
-      return true;
-    }
-    return false;
   }
 }
