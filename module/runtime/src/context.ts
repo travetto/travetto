@@ -34,8 +34,9 @@ class $Runtime {
 
   /** Are we in production mode */
   get production(): boolean {
-    return this.envType === 'production';
+    return process.env.NODE_ENV === 'production';
   }
+
   /** Get environment type mode */
   get envType(): 'production' | 'development' | 'test' {
     switch (process.env.NODE_ENV) {
