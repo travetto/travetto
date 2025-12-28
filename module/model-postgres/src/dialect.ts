@@ -44,7 +44,7 @@ export class PostgreSQLDialect extends SQLDialect {
     return `encode(digest('${value}', 'sha1'), 'hex')`;
   }
 
-  async describeTable(table: string): Promise<SQLTableDescription> {
+  async describeTable(table: string): Promise<SQLTableDescription | undefined> {
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
       this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
@@ -87,6 +87,10 @@ export class PostgreSQLDialect extends SQLDialect {
       GROUP BY i.relname, ix.indisunique
     `)
     ]);
+
+    if (!columns.count) {
+      return undefined;
+    }
 
     return {
       columns: columns.records,

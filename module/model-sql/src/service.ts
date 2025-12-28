@@ -99,15 +99,11 @@ export class SQLModelService implements
   }
 
   async postConstruct(): Promise<void> {
-    if (this.#dialect) {
-      if (this.#dialect.connection.init) {
-        await this.#dialect.connection.init();
-      }
-      this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LENGTH);
-      this.#manager = new TableManager(this.#context, this.#dialect);
-      await ModelStorageUtil.storageInitialization(this);
-      ModelExpiryUtil.registerCull(this);
-    }
+    await this.#dialect.connection.init?.();
+    this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LENGTH);
+    this.#manager = new TableManager(this.#context, this.#dialect);
+    await ModelStorageUtil.storageInitialization(this);
+    ModelExpiryUtil.registerCull(this);
   }
 
   get connection(): Connection {

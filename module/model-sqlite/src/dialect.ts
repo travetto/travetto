@@ -46,33 +46,38 @@ export class SqliteDialect extends SQLDialect {
     return `hex('${value}')`;
   }
 
-  async describeTable(table: string): Promise<SQLTableDescription> {
+  async describeTable(table: string): Promise<SQLTableDescription | undefined> {
     const [columns, foreignKeys, indices] = await Promise.all([
       this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
       SELECT 
         name, 
         type, 
         ${this.identifier('notnull')} = 0 AS is_nullable
-      FROM PRAGMA_TABLE_INFO('${this.identifier(table)}')
+      FROM PRAGMA_TABLE_INFO('${table}')
     `),
       this.executeSQL<{ name: string, to_table: string, from_column: string, to_column: string }>(`
       SELECT 
-        'fk_' || ${this.identifier(table)} || '_' || from AS name, 
+        'fk_' || '${table}' || '_' || ${this.identifier('from')} AS name, 
         ${this.identifier('from')} as from_column, 
         ${this.identifier('to')} as to_column, 
         ${this.identifier('table')} as to_table
-      FROM PRAGMA_FOREIGN_KEY_LIST('${this.identifier(table)}')
+      FROM PRAGMA_FOREIGN_KEY_LIST('${table}')
     `),
       this.executeSQL<{ name: string, is_unique: boolean, columns: string }>(`
       SELECT 
         il.name as name, 
         il.${this.identifier('unique')} = 1 as is_unique, 
-        GROUP_CONCAT(ii.seqno || ' ' || ii.col_name) AS columns
-      FROM PRAGMA_INDEX_LIST(${this.identifier(table)}) il
+        GROUP_CONCAT(ii.seqno || ' ' || ii.name) AS columns
+      FROM PRAGMA_INDEX_LIST('${table}') il
       JOIN PRAGMA_INDEX_INFO(il.name) ii
       GROUP BY 1, 2
     `)
     ]);
+
+    if (!columns.count) {
+      return undefined;
+    }
+
     return {
       columns: columns.records,
       foreignKeys: foreignKeys.records,

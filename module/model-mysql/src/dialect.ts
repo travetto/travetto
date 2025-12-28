@@ -61,7 +61,7 @@ export class MySQLDialect extends SQLDialect {
     return `SHA2('${value}', '256')`;
   }
 
-  async describeTable(table: string): Promise<SQLTableDescription> {
+  async describeTable(table: string): Promise<SQLTableDescription | undefined> {
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
       this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
@@ -100,6 +100,10 @@ export class MySQLDialect extends SQLDialect {
       GROUP BY INDEX_NAME, NON_UNIQUE
     `)
     ]);
+
+    if (!columns.count) {
+      return undefined;
+    }
 
     return {
       columns: columns.records,
