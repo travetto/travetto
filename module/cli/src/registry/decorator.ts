@@ -69,7 +69,7 @@ const FIELD_CONFIG: {
         type: Boolean,
         aliases: ['-cr'],
         description: 'Should the invocation automatically restart on source changes',
-        default: Runtime.development,
+        default: Runtime.envType === 'development',
         required: { active: false },
       },
     }

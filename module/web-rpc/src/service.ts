@@ -10,7 +10,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { clientFactory } from '../support/client/rpc.ts';
 import { WebRpcClient, WebRpcConfig } from './config.ts';
 
-@Injectable({ autoInject: Runtime.development })
+@Injectable({ autoInject: Runtime.envType === 'development' })
 export class WebRpcClientGeneratorService {
 
   @Inject()
