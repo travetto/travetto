@@ -47,6 +47,7 @@ export class SqliteDialect extends SQLDialect {
   }
 
   async describeTable(table: string): Promise<SQLTableDescription | undefined> {
+
     const [columns, foreignKeys, indices] = await Promise.all([
       this.executeSQL<{ name: string, type: string, is_nullable: boolean }>(`
       SELECT 
@@ -70,13 +71,10 @@ export class SqliteDialect extends SQLDialect {
         GROUP_CONCAT(ii.seqno || ' ' || ii.name) AS columns
       FROM PRAGMA_INDEX_LIST('${table}') il
       JOIN PRAGMA_INDEX_INFO(il.name) ii
+      WHERE il.name NOT LIKE 'sqlite_%'
       GROUP BY 1, 2
     `)
     ]);
-
-    if (!columns.count) {
-      return undefined;
-    }
 
     return {
       columns: columns.records,

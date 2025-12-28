@@ -730,7 +730,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getIndexName<T extends ModelType>(cls: Class<T>, fields: string[]): string {
     const table = this.namespace(SQLModelUtil.classToStack(cls));
-    return `idx_${table}_${fields.join('_')}`;
+    return ['idx', table, ...fields].join('_');
   }
 
   /**

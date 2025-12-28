@@ -58,7 +58,11 @@ export class TableManager {
     const sqlCommands: UpsertStructure = { dropIndex: [], createIndex: [], dropTable: [], createTable: [], modifyTable: [] };
 
     const onVisit = async (type: Class, fields: SchemaFieldConfig[], path: VisitStack[]): Promise<void> => {
-      const found = await this.#dialect.describeTable(this.#dialect.table(path));
+      const found = await this.#dialect.describeTable(this.#dialect.namespace(path));
+      if (type.name.includes('IndexedWorker')) {
+        console.error!('Found table for', this.#dialect.table(path), found);
+      }
+
       const existingFields = new Map(found?.columns.map(column => [column.name, column]) ?? []);
       const existingIndices = new Map(found?.indices.map(index => [index.name, index]) ?? []);
       const requestedIndices = new Map(path.length === 1 ?
@@ -125,11 +129,11 @@ export class TableManager {
     const sqlCommands = await this.getUpsertTablesSQL(cls);
     for (const key of ['dropIndex', 'dropTable', 'createTable', 'modifyTable', 'createIndex'] as const) {
       await Promise.all(sqlCommands[key].map(command => this.#exec(command).catch(err => {
-        if (err instanceof ExistsError && key.includes('Index')) {
-          // Swallow
-        } else {
-          throw err;
-        }
+        // if (err instanceof ExistsError && err.details?.type === 'index') {
+        //   // Swallow
+        // } else {
+        throw err;
+        // }
       })));
     }
   }
