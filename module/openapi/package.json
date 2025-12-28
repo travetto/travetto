@@ -1,6 +1,6 @@
 {
   "name": "@travetto/openapi",
-  "version": "7.0.0-rc.4",
+  "version": "7.0.0-rc.5",
   "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
     "web",
@@ -26,14 +26,14 @@
     "directory": "module/openapi"
   },
   "dependencies": {
-    "@travetto/config": "^7.0.0-rc.3",
-    "@travetto/schema": "^7.0.0-rc.3",
-    "@travetto/web": "^7.0.0-rc.4",
+    "@travetto/config": "^7.0.0-rc.4",
+    "@travetto/schema": "^7.0.0-rc.4",
+    "@travetto/web": "^7.0.0-rc.5",
     "openapi3-ts": "^4.5.0",
     "yaml": "^2.8.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.0-rc.3"
+    "@travetto/cli": "^7.0.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
