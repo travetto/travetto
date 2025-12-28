@@ -37,6 +37,13 @@ class $Runtime {
     return process.env.NODE_ENV === 'production';
   }
 
+  /**
+   * Are we in development mode
+   */
+  get development(): boolean {
+    return !this.production && this.env !== 'test';
+  }
+
   /** Get debug value */
   get debug(): false | string {
     const value = Env.DEBUG.value ?? '';
