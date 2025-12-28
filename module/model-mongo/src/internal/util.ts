@@ -32,6 +32,10 @@ export type PlainIdx = Record<string, -1 | 0 | 1>;
  */
 export class MongoUtil {
 
+  static namespaceIndex(cls: Class, name: string): string {
+    return `${cls.Ⲑid}__${name}`.replace(/[^a-zA-Z0-9_]+/g, '_');
+  }
+
   static toIndex<T extends ModelType>(field: IndexField<T>): PlainIdx {
     const keys = [];
     while (typeof field !== 'number' && typeof field !== 'boolean' && Object.keys(field)) {
@@ -150,24 +154,21 @@ export class MongoUtil {
     return out;
   }
 
-  static getExtraIndices<T extends ModelType>(cls: Class<T>): BasicIdx[] {
-    const out: BasicIdx[] = [];
+  static getExtraIndices<T extends ModelType>(cls: Class<T>): [BasicIdx, IdxConfig][] {
+    const out: [BasicIdx, IdxConfig][] = [];
     const textFields: string[] = [];
     SchemaRegistryIndex.visitFields(cls, (field, path) => {
       if (field.type === PointConcrete) {
         const name = [...path, field].map(schema => schema.name).join('.');
-        out.push({ [name]: '2d' });
+        out.push([{ [name]: '2d' }, { name: this.namespaceIndex(cls, name) }]);
       } else if (field.specifiers?.includes('text') && (field.specifiers?.includes('long') || field.specifiers.includes('search'))) {
         const name = [...path, field].map(schema => schema.name).join('.');
         textFields.push(name);
       }
     });
     if (textFields.length) {
-      const text: BasicIdx = {};
-      for (const field of textFields) {
-        text[field] = 'text';
-      }
-      out.push(text);
+      const text: BasicIdx = Object.fromEntries(textFields.map(field => [field, 'text']));
+      out.push([text, { name: this.namespaceIndex(cls, 'text_search') }]);
     }
     return out;
   }
@@ -182,8 +183,8 @@ export class MongoUtil {
 
   static getIndices<T extends ModelType>(cls: Class<T>, indices: IndexConfig<ModelType>[] = []): [BasicIdx, IdxConfig][] {
     return [
-      ...indices.map(idx => [this.getPlainIndex(idx), (idx.type === 'unique' ? { unique: true } : {})] as const),
-      ...this.getExtraIndices(cls).map((idx) => [idx, {}] as const)
+      ...indices.map(idx => [this.getPlainIndex(idx), { ...(idx.type === 'unique' ? { unique: true } : {}), name: this.namespaceIndex(cls, idx.name) }] as const),
+      ...this.getExtraIndices(cls)
     ].map(idx => [...idx]);
   }
 
@@ -215,31 +216,30 @@ export class MongoUtil {
   }
 
   static isIndexChanged(existing: IndexDescriptionInfo, [pendingKey, pendingOptions]: [BasicIdx, CreateIndexesOptions]): boolean {
+    let changed = false;
     // Config changed
-    if (
+    changed ||=
       !!existing.unique !== !!pendingOptions.unique ||
       !!existing.sparse !== !!pendingOptions.sparse ||
       existing.expireAfterSeconds !== pendingOptions.expireAfterSeconds ||
-      existing.bucketSize !== pendingOptions.bucketSize
-    ) {
-      return true;
-    }
+      existing.bucketSize !== pendingOptions.bucketSize;
+
+    const existingFields = existing.textIndexVersion ?
+      Object.fromEntries(Object.entries(existing.weights ?? {}).map(([key]) => [key, 'text'])) :
+      existing.key;
+
     const pendingKeySet = new Set(Object.keys(pendingKey));
-    const existingKeySet = new Set(Object.keys(existing.key));
+    const existingKeySet = new Set(Object.keys(existingFields));
 
-    if (pendingKeySet.size !== existingKeySet.size) {
-      return true;
+    changed ||= pendingKeySet.size !== existingKeySet.size;
+
+    const overlap = [...pendingKeySet.intersection(existingKeySet)];
+    changed ||= overlap.length !== pendingKeySet.size;
+
+    for (let i = 0; i < overlap.length && !changed; i++) {
+      changed ||= existingFields[overlap[i]] !== pendingKey[overlap[i]];
     }
 
-    const overlap = pendingKeySet.intersection(existingKeySet);
-    if (overlap.size !== pendingKeySet.size) {
-      return true;
-    }
-    for (const key of overlap) {
-      if (existing.key[key] !== pendingKey[key]) {
-        return false;
-      }
-    }
-    return false;
+    return changed;
   }
 }
