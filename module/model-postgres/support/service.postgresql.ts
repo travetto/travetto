@@ -8,8 +8,8 @@ export const service: ServiceDescriptor = {
   port: 5432,
   image: `postgres:${version}-alpine`,
   env: {
-    POSTGRES_USER: 'root',
-    POSTGRES_PASSWORD: 'password',
+    POSTGRES_USER: 'travetto',
+    POSTGRES_PASSWORD: 'travetto',
     POSTGRES_DB: 'app'
   }
 };

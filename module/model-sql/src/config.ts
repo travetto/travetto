@@ -1,5 +1,5 @@
 import { Config } from '@travetto/config';
-import { asFull } from '@travetto/runtime';
+import { asFull, Runtime } from '@travetto/runtime';
 
 /**
  * SQL Model Config
@@ -17,11 +17,11 @@ export class SQLModelConfig<T extends {} = {}> {
   /**
    * Username
    */
-  user = '';
+  user = Runtime.production ? '' : 'travetto';
   /**
    * Password
    */
-  password = '';
+  password = Runtime.production ? '' : 'travetto';
   /**
    * Table prefix
    */

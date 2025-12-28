@@ -9,7 +9,7 @@ import { SQLModelUtil } from './util.ts';
 import { Connection } from './connection/base.ts';
 import { VisitStack } from './types.ts';
 
-type UpsertStructure = { dropIndex: string[], createIndex: string[], dropTable: string[], createTable: string[], modifyTable: string[] };
+type UpsertStructure = { dropIndex: string[], createIndex: string[], table: string[] };
 const isSimpleField = (input: VisitStack | undefined): input is SchemaFieldConfig =>
   !!input && (!('type' in input) || (input.type && !SchemaRegistryIndex.has(input.type)));
 
@@ -57,7 +57,7 @@ export class TableManager {
   @WithAsyncContext()
   @Connected()
   async getUpsertTablesSQL(cls: Class): Promise<UpsertStructure> {
-    const sqlCommands: UpsertStructure = { dropIndex: [], createIndex: [], dropTable: [], createTable: [], modifyTable: [] };
+    const sqlCommands: UpsertStructure = { dropIndex: [], createIndex: [], table: [] };
 
     const onVisit = async (type: Class, fields: SchemaFieldConfig[], path: VisitStack[]): Promise<void> => {
       const found = await this.#dialect.describeTable(this.#dialect.namespace(path));
@@ -69,7 +69,7 @@ export class TableManager {
 
       // Manage fields
       if (!existingFields.size) {
-        sqlCommands.createTable.push(this.#dialect.getCreateTableSQL(path));
+        sqlCommands.table.push(this.#dialect.getCreateTableSQL(path));
       } else { // Existing
         // Fields
         const requestedFields = new Map(fields.map(field => [field.name, field]));
@@ -81,9 +81,9 @@ export class TableManager {
 
         for (const [column, field] of requestedFields.entries()) {
           if (!existingFields.has(column)) {
-            sqlCommands.modifyTable.push(this.#dialect.getAddColumnSQL([...path, field]));
+            sqlCommands.table.push(this.#dialect.getAddColumnSQL([...path, field]));
           } else if (this.#dialect.isColumnChanged(field, existingFields.get(column)!)) {
-            sqlCommands.modifyTable.push(this.#dialect.getModifyColumnSQL([...path, field]));
+            sqlCommands.table.push(this.#dialect.getModifyColumnSQL([...path, field]));
           }
         }
 
@@ -95,7 +95,7 @@ export class TableManager {
           }
 
           if (!requestedFields.has(column)) {
-            sqlCommands.modifyTable.push(this.#dialect.getDropColumnSQL([...path, { name: column, type: undefined!, array: false }]));
+            sqlCommands.table.push(this.#dialect.getDropColumnSQL([...path, { name: column, type: undefined!, array: false }]));
           }
         }
       }
@@ -112,7 +112,6 @@ export class TableManager {
 
       for (const index of existingIndices.keys()) {
         if (!requestedIndices.has(index)) {
-          console.error!('Dropping index:', { index, existing: existingIndices.keys(), requested: requestedIndices.keys() });
           sqlCommands.dropIndex.push(this.#dialect.getDropIndexSQL(type, existingIndices.get(index)!.name));
         }
       }
@@ -132,11 +131,8 @@ export class TableManager {
   @Transactional()
   async upsertTables(cls: Class): Promise<void> {
     const sqlCommands = await this.getUpsertTablesSQL(cls);
-    for (const key of ['dropIndex', 'dropTable', 'createTable', 'modifyTable', 'createIndex'] as const) {
-      await Promise.all(sqlCommands[key].map(command => this.#exec(command).catch(err => {
-        console.error!(`Error executing ${key} command:`, command, err);
-        throw err;
-      })));
+    for (const key of ['dropIndex', 'table', 'createIndex'] as const) {
+      await Promise.all(sqlCommands[key].map(command => this.#exec(command)));
     }
   }
 
