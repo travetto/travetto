@@ -1,4 +1,4 @@
-import { Runtime, RuntimeResources } from '@travetto/runtime';
+import { RuntimeResources } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
 import { EmailCompiled, EmailOptions, SentEmail } from './types.ts';

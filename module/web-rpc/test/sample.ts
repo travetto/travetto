@@ -125,7 +125,6 @@ class WebRpcSuite extends BaseWebSuite {
     assert(list[0].id);
     assert(list[0].text === 'A new item');
 
-
     const { context: { httpStatusCode: removedStatusCode }, body: removed } = await this.request<Todo[]>({
       context: {
         path: '/rpc/TodoController:deleteTodo',

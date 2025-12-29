@@ -8,7 +8,6 @@ import { JSONUtil } from '@travetto/runtime';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
-
 @Suite()
 @InjectableSuite()
 export class CodecTest {

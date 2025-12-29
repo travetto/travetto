@@ -9,6 +9,5 @@ export const text = <>
     The in process operations leverage {d.library('Sharp')} and will perform within expectations, and will execute substantially faster than invoking a subprocess.
   </c.Section>
 
-
   <c.Code title='Simple Image Resize' src='doc/resize.ts' />
 </>;

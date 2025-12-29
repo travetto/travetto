@@ -44,7 +44,6 @@ export class WebCommonUtilTest {
     assert.deepStrictEqual(ordered2.map(x => x.key), ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
   }
 
-
   @Test()
   validateMimesAllowDeny() {
     const validator = WebCommonUtil.mimeTypeMatcher(['!image/tiff', 'image/*']);

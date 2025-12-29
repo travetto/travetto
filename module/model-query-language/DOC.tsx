@@ -5,7 +5,6 @@ export const text = <>
   <c.StdHeader />
   This module provides a textual query language for the {d.mod('ModelQuery')} interface. The language itself is fairly simple, boolean logic, with parenthetical support.The operators supported are:
 
-
   <c.Section title='Query Language'>
     <ul>
       <li>{d.input('<')}, {d.input('<=')} - Less than, and less than or equal to</li>

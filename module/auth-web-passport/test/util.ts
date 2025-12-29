@@ -4,7 +4,6 @@ import { Suite, Test } from '@travetto/test';
 import { JSONUtil } from '@travetto/runtime';
 import { PassportUtil } from '@travetto/auth-web-passport';
 
-
 @Suite()
 class PassportUtilSuite {
   @Test()

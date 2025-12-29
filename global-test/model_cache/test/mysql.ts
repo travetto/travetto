@@ -9,7 +9,6 @@ import { MySQLDialect } from '@travetto/model-mysql';
 import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 
-
 class Config {
   @InjectableFactory({ primary: true })
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {

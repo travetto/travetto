@@ -35,7 +35,6 @@ class VerifyContext {
     assert(prop.get() === 'bob');
   }
 
-
   @Test()
   @WithAsyncContext()
   async nextContext() {

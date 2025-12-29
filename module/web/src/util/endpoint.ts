@@ -11,7 +11,6 @@ import { EndpointConfig, ControllerConfig, EndpointParameterConfig, EndpointFunc
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { WebCommonUtil } from './common.ts';
 
-
 const WebQueryExpandedSymbol = Symbol();
 
 /**
@@ -80,7 +79,6 @@ export class EndpointUtil {
     ]);
   }
 
-
   /**
    * Extract parameter value from request
    * @param request The request
@@ -111,7 +109,7 @@ export class EndpointUtil {
     if (param.extract) {
       return param.extract(request, param);
     } else if (param.location === 'query') {
-      // TODO: Revisit this logic?
+      // TODO: Revisit the prefix logic/structure in general
       const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
       const query = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
       if (param.prefix) { // Has a prefix provided
@@ -225,7 +223,6 @@ export class EndpointUtil {
     return castTo(result);
   }
 
-
   /**
    * Get bound endpoints, honoring the conditional status
    */
@@ -267,7 +264,6 @@ export class EndpointUtil {
       .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
       .map(([endpoint,]) => endpoint);
   }
-
 
   /**
    * Order interceptors

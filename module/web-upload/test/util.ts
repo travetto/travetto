@@ -67,7 +67,6 @@ export class BytesUtilTest {
     assert(result.mime === 'image/png');
   }
 
-
   @Test({ shouldThrow: 'size' })
   async testMaxBlobWrite() {
     await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(1), new PassThrough());

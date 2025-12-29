@@ -49,7 +49,6 @@ class SchemaBindingSuite {
     }
   };
 
-
   @BeforeAll()
   async init() {
     await Registry.init();

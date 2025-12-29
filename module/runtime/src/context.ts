@@ -72,6 +72,11 @@ class $Runtime {
     return this.#idx.mainModule.sourcePath;
   }
 
+  /** Get trv entrypoint */
+  get trvEntryPoint(): string {
+    return this.workspaceRelative('node_modules', '.bin', 'trv');
+  }
+
   /** Produce a workspace relative path */
   workspaceRelative(...parts: string[]): string {
     return path.resolve(this.workspace.path, ...parts);

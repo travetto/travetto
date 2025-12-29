@@ -635,7 +635,6 @@ LEFT OUTER JOIN ${from} ON
         .map(item => this.resolveName(item.stack))
         .join(', ');
 
-    // TODO: Really confused on this
     return `GROUP BY ${this.alias(this.idField)}${sortFields ? `, ${sortFields}` : ''}`;
   }
 

@@ -51,7 +51,6 @@ export const text = <>
     <c.Code title='Custom Logger' src='doc/custom-logger.ts' />
   </c.Section>
 
-
   <c.Section title='Creating a Decorator'>
     In addition to being able to control the entire logging experience, there are also scenarios in which the caller may want to only add information to the log event, without affecting control of the formatting or appending. The {LogDecoratorContract} is an interface that provides a contract that allows transforming the {LogEventContract} data. A common scenario for this would be to add additional metadata data (e.g. server name, ip, code revision, CPU usage, memory usage, etc) into the log messages.
 

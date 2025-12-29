@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { spawn } from 'node:child_process';
 
 import { TypedObject, RuntimeIndex, Runtime, BinaryUtil, ExecUtil } from '@travetto/runtime';
 import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
@@ -91,7 +92,7 @@ export class EmailCompiler {
       return false;
     }
 
-    const child = ExecUtil.spawnTrv('email:compile', [file], {
+    const child = spawn(process.argv0, [Runtime.trvEntryPoint, 'email:compile', file], {
       cwd: Runtime.mainSourcePath,
       env: { ...process.env },
     });

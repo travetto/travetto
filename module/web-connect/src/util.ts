@@ -4,7 +4,6 @@ import { WebFilterContext } from '@travetto/web';
 
 import { ConnectRequest, ConnectResponse } from './connect';
 
-
 type Middleware = (request: IncomingMessage, response: ServerResponse, next: (error?: unknown) => void) => void;
 
 /**

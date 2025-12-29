@@ -3,7 +3,6 @@ import path from 'node:path';
 import { classConstruct, describeFunction, type Class } from '@travetto/runtime';
 import { RegistryAdapter } from '@travetto/registry';
 
-
 import type { TestConsumerShape, TestConsumerConfig } from './types.ts';
 
 /**

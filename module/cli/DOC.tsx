@@ -20,7 +20,6 @@ export const text = <>
 
   This module also has a tight integration with the {d.library('TravettoPlugin')}, allowing the editing experience to benefit from the commands defined. The most commonly used commands will be the ones packaged with the framework, but its also very easy to create new commands.  With the correct configuration, these commands will also be exposed within VSCode.<br />
 
-
   At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
   <ul>
     <li>The file must be located in the {d.path('support/')} folder, and have a name that matches {d.path('cli.*.ts')}</li>

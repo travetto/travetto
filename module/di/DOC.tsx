@@ -21,7 +21,6 @@ export const text = <>
 
     In this scenario, {d.input('SpecificService')} is a valid candidate for {d.input('BaseService')} due to the abstract inheritance. Sometimes, you may want to provide a slight variation to  a dependency without extending a class.  To this end, the {InjectableFactory} decorator denotes a {d.input('static')} class method that produces an {Injectable}.
 
-
     <c.Code title='Example InjectableFactory' src='doc/injectable-factory.ts' />
 
     Given the {d.input('static')} method {d.input('initService')}, the function will be provided as a valid candidate for {d.input('CoolService')}.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
@@ -42,7 +41,6 @@ export const text = <>
     The {Inject} decorator, which denotes a desire to inject a value directly.  These will be set post construction. <br />
 
     <c.Code title='Example Injectable with dependencies as Inject fields' src='doc/injectable-fields.ts' />
-
 
     The {Injectable} constructor params, which will be provided as the instance is being constructed.
 

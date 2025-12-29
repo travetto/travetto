@@ -7,7 +7,6 @@ import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
-
 @Suite()
 class RedisBasicSuite extends ModelBasicSuite {
   serviceClass = RedisModelService;

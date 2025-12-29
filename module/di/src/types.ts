@@ -81,7 +81,6 @@ export function getDefaultQualifier(cls: Class): symbol {
   return Symbol.for(cls.Ⲑid);
 }
 
-
 export const PrimaryCandidateSymbol = Symbol();
 
 export type InjectableClassMetadata = {

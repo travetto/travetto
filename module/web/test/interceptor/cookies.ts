@@ -57,7 +57,6 @@ class CookiesInterceptorSuite {
     assert(cookies[0].value === 'true');
   }
 
-
   @Test()
   async testSigned() {
     const grip = new KeyGrip(['billy']);

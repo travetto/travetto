@@ -7,6 +7,5 @@ db:
       - b
       - c
 
-
 name:
   active: true

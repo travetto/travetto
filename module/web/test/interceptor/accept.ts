@@ -19,7 +19,6 @@ class AcceptInterceptorSuite {
     await Registry.init();
   }
 
-
   @Test()
   async basicTest() {
 

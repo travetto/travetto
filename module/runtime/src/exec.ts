@@ -1,8 +1,8 @@
-import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
+import { type ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
 
-import { castTo, type Any } from './types.ts';
+import { castTo } from './types.ts';
 
 const ResultSymbol = Symbol();
 
@@ -38,14 +38,6 @@ type ExecutionBaseResult = Omit<ExecutionResult, 'stdout' | 'stderr'>;
  * Standard utilities for managing executions
  */
 export class ExecUtil {
-
-  /**
-   * Spawn wrapper that ensures performant invocation of trv commands
-   */
-  static spawnTrv(cmd: string, args: string[], options: SpawnOptions): ChildProcess {
-    const entry = (globalThis as Any).__entry_point__ ?? process.argv.at(1);
-    return spawn(process.argv0, [entry, cmd, ...args], options);
-  }
 
   /**
    * Take a child process, and some additional options, and produce a promise that

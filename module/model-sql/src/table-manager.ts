@@ -66,7 +66,6 @@ export class TableManager {
       const model = path.length === 1 ? ModelRegistryIndex.getConfig(type) : undefined;
       const requestedIndices = new Map((model?.indices ?? []).map(index => [this.#dialect.getIndexName(type, index), index]) ?? []);
 
-
       // Manage fields
       if (!existingFields.size) {
         sqlCommands.table.push(this.#dialect.getCreateTableSQL(path));

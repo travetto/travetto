@@ -12,10 +12,10 @@ class PackAppSuite {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');
     const imageName = 'travetto-test_pack_app';
     assert(Runtime.mainSourcePath.endsWith('pack_app'));
-    const proc = ExecUtil.spawnTrv('pack:docker', ['-dt', tag, 'run:double'], { cwd: Runtime.mainSourcePath });
+    const proc = spawn(process.argv0, [Runtime.trvEntryPoint, 'pack:docker', '-dt', tag, 'run:double'], { cwd: Runtime.mainSourcePath });
 
     const state = await ExecUtil.getResult(proc, { catch: true });
-    console.log(state.stderr)
+    console.log(state.stderr);
     assert(state.valid);
 
     const proc2 = spawn('docker', ['run', '--rm', `${imageName}:${tag}`, '30']);

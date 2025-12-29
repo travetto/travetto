@@ -92,7 +92,6 @@ export class CliUtil {
       restarts.push(Date.now());
     }
 
-
     if (exhaustedRestarts) {
       console.error(`Bailing, due to ${maxRetries} restarts in under 10s`);
     }

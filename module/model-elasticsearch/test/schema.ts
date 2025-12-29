@@ -1,7 +1,6 @@
 import assert from 'node:assert';
 import { estypes } from '@elastic/elasticsearch';
 
-
 import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Model } from '@travetto/model';

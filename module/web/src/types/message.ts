@@ -10,7 +10,6 @@ export interface WebMessageInit<B = unknown, C = unknown> {
   body?: B;
 }
 
-
 export interface WebMessage<B = unknown, C = unknown> {
   readonly context: C;
   readonly headers: WebHeaders;
