@@ -148,6 +148,14 @@ class $Runtime {
     }
     return imported;
   }
+
+  /**
+   * Get Trv entrypoint for spawn
+   */
+  getTrvEntrypoint(cmd: string, args: string[]): [string, string[]] {
+    const entry = this.workspaceRelative('node_modules', '.bin', 'trv');
+    return [process.argv0, [entry, cmd, ...args]];
+  }
 }
 
 export const Runtime = new $Runtime(RuntimeIndex, Env.TRV_RESOURCE_OVERRIDES.object);
