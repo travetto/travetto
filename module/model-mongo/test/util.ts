@@ -4,7 +4,6 @@ import type { IndexDescriptionInfo } from 'mongodb';
 import { Suite, Test } from '@travetto/test';
 
 import { MongoUtil, type BasicIdx } from '../src/internal/util.ts';
-import { off } from 'node:process';
 
 @Suite()
 export class MongoUtilTests {
