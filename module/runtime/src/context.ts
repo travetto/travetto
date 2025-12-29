@@ -72,6 +72,11 @@ class $Runtime {
     return this.#idx.mainModule.sourcePath;
   }
 
+  /** Get trv entrypoint */
+  get trvEntryPoint(): string {
+    return this.workspaceRelative('node_modules', '.bin', 'trv');
+  }
+
   /** Produce a workspace relative path */
   workspaceRelative(...parts: string[]): string {
     return path.resolve(this.workspace.path, ...parts);
@@ -147,14 +152,6 @@ class $Runtime {
       });
     }
     return imported;
-  }
-
-  /**
-   * Get Trv entrypoint for spawn
-   */
-  getTrvEntrypoint(cmd: string, args: string[]): [string, string[]] {
-    const entry = this.workspaceRelative('node_modules', '.bin', 'trv');
-    return [process.argv0, [entry, cmd, ...args]];
   }
 }
 

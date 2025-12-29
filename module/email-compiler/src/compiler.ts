@@ -92,7 +92,7 @@ export class EmailCompiler {
       return false;
     }
 
-    const child = spawn(...Runtime.getTrvEntrypoint('email:compile', [file]), {
+    const child = spawn(process.argv0, [Runtime.trvEntryPoint, 'email:compile', file], {
       cwd: Runtime.mainSourcePath,
       env: { ...process.env },
     });

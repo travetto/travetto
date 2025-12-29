@@ -51,6 +51,8 @@ class $Runtime {
   get monoRoot(): boolean;
   /** Main source path */
   get mainSourcePath(): string;
+  /** Get trv entrypoint */
+  get trvEntryPoint(): string;
   /** Produce a workspace relative path */
   workspaceRelative(...parts: string[]): string;
   /** Strip off the workspace path from a file */
