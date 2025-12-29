@@ -111,7 +111,7 @@ export class EndpointUtil {
     if (param.extract) {
       return param.extract(request, param);
     } else if (param.location === 'query') {
-      // TODO: Revisit this logic?
+      // TODO: Revisit the prefix logic/structure in general
       const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
       const query = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
       if (param.prefix) { // Has a prefix provided
