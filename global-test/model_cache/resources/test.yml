@@ -1,7 +1,2 @@
-model.sql:
-  database: app
-  user: root
-  password: password
-
 model.s3:
   bucket: travetto-test
