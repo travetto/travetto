@@ -1,6 +1,6 @@
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = '4.10.0';
+const version = '4.11.0';
 
 export const service: ServiceDescriptor = {
   name: 's3',
