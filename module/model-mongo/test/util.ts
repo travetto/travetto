@@ -4,6 +4,7 @@ import type { IndexDescriptionInfo } from 'mongodb';
 import { Suite, Test } from '@travetto/test';
 
 import { MongoUtil, type BasicIdx } from '../src/internal/util.ts';
+import { off } from 'node:process';
 
 @Suite()
 export class MongoUtilTests {
@@ -139,7 +140,7 @@ export class MongoUtilTests {
     ];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
-    assert.strictEqual(result, false, 'Should return false when key direction changes (bug in original)');
+    assert.strictEqual(result, true, 'Should return true when key direction changes');
   }
 
   @Test()
@@ -239,5 +240,41 @@ export class MongoUtilTests {
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect partial key overlap');
+  }
+
+  @Test()
+  async shouldDetectTextIndexChange() {
+    const existing: IndexDescriptionInfo = {
+      key: { description: 'text' },
+      name: 'description_text',
+      weights: { description: 1, oregano: 1 },
+      textIndexVersion: 1,
+      default_language: 'english',
+      language_override: 'lang',
+    };
+
+    // Change in weights
+    let pending: [BasicIdx, { weights?: Record<string, number>, default_language?: string, language_override?: string }] = [
+      { description: 'text' },
+      { weights: { description: 2 }, default_language: 'english', language_override: 'lang' }
+    ];
+    let result = MongoUtil.isIndexChanged(existing, pending);
+    assert.strictEqual(result, true, 'Should detect change in text index weights');
+
+    // Change in default_language
+    pending = [
+      { description: 'text' },
+      { weights: { description: 1 }, default_language: 'french', language_override: 'lang' }
+    ];
+    result = MongoUtil.isIndexChanged(existing, pending);
+    assert.strictEqual(result, true, 'Should detect change in text index default_language');
+
+    // No change
+    pending = [
+      { description: 'text', oregano: 'text' },
+      { default_language: 'english', language_override: 'lang' }
+    ];
+    result = MongoUtil.isIndexChanged(existing, pending);
+    assert.strictEqual(result, false, 'Should not detect change when text index matches');
   }
 }
