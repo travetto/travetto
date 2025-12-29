@@ -12,7 +12,6 @@ import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 
-
 @Suite()
 class MongoBasicSuite extends ModelBasicSuite {
   serviceClass = MongoModelService;

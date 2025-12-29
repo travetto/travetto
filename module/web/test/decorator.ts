@@ -5,7 +5,6 @@ import { Registry } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
 import { CacheControl, Controller, ControllerRegistryIndex, Patch, SetHeaders } from '@travetto/web';
 
-
 @Controller('/test')
 class TestController {
   @CacheControl('1s')

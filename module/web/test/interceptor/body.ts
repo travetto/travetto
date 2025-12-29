@@ -95,7 +95,6 @@ class BodyInterceptorSuite {
     assert(!responseBuffer.some(x => x !== 0));
   }
 
-
   @Test()
   async basicTextEncoding() {
     const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);

@@ -32,7 +32,6 @@ export class TapEmitter implements TestConsumerShape {
     this.#options = options;
   }
 
-
   log(message: string): void {
     this.#terminal.writer.writeLine(message).commit();
   }

@@ -84,7 +84,6 @@ export class DocUtil {
     return tags.some(tag => tag.name === name);
   }
 
-
   /**
    * Read augments information
    * @param type

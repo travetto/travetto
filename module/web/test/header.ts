@@ -104,7 +104,6 @@ class WebHeaderUtilSuite {
     assert(WebHeaderUtil.negotiateHeader('json;q=0,html;q=0', ['json', 'html']) === undefined);
   }
 
-
   @Test('getRange - valid and invalid')
   testGetRange() {
     const headers = new WebHeaders({ Range: 'bytes=100-200' });

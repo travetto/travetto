@@ -52,7 +52,6 @@ export class DecompressConfig {
 @Injectable()
 export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
 
-
   static async decompress(headers: WebHeaders, input: Buffer | Readable, config: DecompressConfig): Promise<typeof input> {
     const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 

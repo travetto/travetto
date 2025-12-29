@@ -250,7 +250,6 @@ export function AfterClass(...target: string[]) {
   ): void => storeHandler(inst, descriptor.value!, 'after', 'class', target);
 }
 
-
 /**
  * Listens for a `ts.TypeAliasDeclaration` on ascent
  */

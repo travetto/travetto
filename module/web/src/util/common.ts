@@ -55,7 +55,6 @@ export class WebCommonUtil {
     return edgeMap;
   }
 
-
   /**
    * Build matcher
    */

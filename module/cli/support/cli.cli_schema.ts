@@ -7,7 +7,6 @@ import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
 import { CliUtil } from '../src/util.ts';
 import { CliSchemaExportUtil } from '../src/schema-export.ts';
 
-
 /**
  * Generates the schema for all CLI operations
  */

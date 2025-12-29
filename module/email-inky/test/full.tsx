@@ -26,7 +26,6 @@ class ContainerTest {
 
     assert(input);
 
-
     assert((await module.subject()).trim() === 'My Title');
 
     assert((await module.html()).includes('My Summary'));

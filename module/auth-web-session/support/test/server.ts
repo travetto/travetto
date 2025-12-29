@@ -45,7 +45,6 @@ class AutoLogin implements WebInterceptor {
   }
 }
 
-
 @Controller('/test/session')
 class TestController {
 
@@ -139,7 +138,6 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
   async headerPersistence() {
     const key = this.config({ mode: 'header', rollingRenew: true, maxAgeMs: 3000 });
 
-
     let response = await this.request({ context: { httpMethod: 'GET', path: '/test/session' } });
     let header = response.headers.get(key);
     assert.deepStrictEqual(response.body, { age: 1 });
@@ -206,7 +204,6 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
 
     response = await this.request({ context: { httpMethod: 'GET', path: '/test/session' }, headers: { [key]: header } }, false);
     assert(response.context.httpStatusCode === 403);
-
 
     response = await this.request({ context: { httpMethod: 'GET', path: '/test/session' } });
     assert(response.context.httpStatusCode === 200);

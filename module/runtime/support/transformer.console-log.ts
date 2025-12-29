@@ -42,7 +42,6 @@ export class ConsoleLogTransformer {
     return node;
   }
 
-
   @OnStaticMethod()
   @OnMethod()
   static startMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {

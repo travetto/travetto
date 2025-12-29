@@ -26,7 +26,6 @@ import { DecompressConfig, DecompressInterceptor } from './src/interceptor/decom
 import { EtagConfig, EtagInterceptor } from './src/interceptor/etag.ts';
 import { TrustProxyConfig, TrustProxyInterceptor } from './src/interceptor/trust-proxy.ts';
 
-
 const WebInterceptorContract = toConcrete<WebInterceptor>();
 
 export const text = <>

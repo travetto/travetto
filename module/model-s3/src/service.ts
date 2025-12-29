@@ -82,7 +82,6 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return { Key: key, Bucket: this.config.bucket, ...extra };
   }
 
-
   #getExpiryConfig<T extends ModelType>(cls: Class<T>, item: T): { Expires?: Date } {
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item);

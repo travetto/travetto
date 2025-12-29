@@ -62,7 +62,6 @@ class TestAuthController {
     return this.authContext.authToken?.value;
   }
 
-
   @Get('/logout')
   @Logout()
   async logout() {
@@ -202,7 +201,6 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     }, false);
     assert(authStatus === 201);
 
-
     const { context: { httpStatusCode: lastStatus } } = await this.request({
       context: { httpMethod: 'GET', path: '/test/auth-all/self' },
       headers: {
@@ -211,7 +209,6 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     }, false);
     assert(lastStatus === 200);
   }
-
 
   @Test()
   async testTokenRetrieval() {

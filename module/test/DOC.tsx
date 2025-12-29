@@ -59,7 +59,6 @@ AssertionError(
       <li>{d.method('assert(/a/.test(b))')} as {d.method('assert.ok(/a/.test(b))')}</li>
     </ul>
 
-
     In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse).  This is useful for testing error states or ensuring errors do not occur.
     <c.SubSection title='Throws'>
       {d.method('throws')}/{d.method('doesNotThrow')} is for catching synchronous rejections

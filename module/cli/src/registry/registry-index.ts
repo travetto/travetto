@@ -80,7 +80,6 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     const uninitialized = filtered
       .filter(cls => !this.store.finalized(cls));
 
-
     // Initialize any uninitialized commands
     if (uninitialized.length) {
       // Ensure processed

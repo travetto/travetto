@@ -11,7 +11,6 @@ import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.t
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
-
 class Config {
   @InjectableFactory({ primary: true })
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
