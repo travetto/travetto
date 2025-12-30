@@ -8,6 +8,7 @@ const COMP_MOD = '@travetto/compiler';
 const SOURCE_EXT_REGEX = /[.][cm]?[tj]sx?$/;
 const BARE_IMPORT_REGEX = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
+const REQUIRE = createRequire(import.meta.filename);
 
 async function writeIfStale(sourceFile = '', destinationFile = '', transform = async (text = '') => text) {
   const [srcStat, destStat] = await Promise.all([sourceFile, destinationFile].map(file => stat(`${file}`).then(stats => stats.mtimeMs, () => 0)));
@@ -33,8 +34,7 @@ async function transpile(content = '', full = true) {
 }
 
 async function getContext() {
-  const require = createRequire(import.meta.filename);
-  const ctxFile = require.resolve('@travetto/manifest/src/context.ts');
+  const ctxFile = REQUIRE.resolve('@travetto/manifest/src/context.ts');
   const ctxDest = path.resolve(import.meta.dirname, 'gen.context.js');
   await writeIfStale(ctxFile, ctxDest, content => transpile(content, false));
   const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest')} */ value) => value.getManifestContext());
