@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@travetto/di';
-import { Field } from '@travetto/schema';
 import {
   BodyInterceptor, WebInterceptor, WebInterceptorCategory, WebChainedContext,
   WebResponse, DecompressInterceptor, WebInterceptorContext
