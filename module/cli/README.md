@@ -213,9 +213,9 @@ export class BasicCommand {
 
 **Terminal: Basic Command**
 ```bash
-$ trv basic:arglist -h
+$ trv basic:arg-list -h
 
-Usage: basic:arglist [options] <volumes...:number>
+Usage: basic:arg-list [options] <volumes...:number>
 
 Options:
   -r, --reverse
@@ -224,19 +224,19 @@ Options:
 
 **Terminal: Basic Arg List**
 ```bash
-$ trv basic:arglist 10 5 3 9 8 1
+$ trv basic:arg-list 10 5 3 9 8 1
 
 1 3 5 8 9 10
 ```
 
 **Terminal: Basic Arg List with Invalid Number**
 ```bash
-$ trv basic:arglist 10 5 3 9 20 1
+$ trv basic:arg-list 10 5 3 9 20 1
 
 Execution failed:
  * Argument volumes[4] is greater than (10)
 
-Usage: basic:arglist [options] <volumes...:number>
+Usage: basic:arg-list [options] <volumes...:number>
 
 Options:
   -r, --reverse
@@ -245,7 +245,7 @@ Options:
 
 **Terminal: Basic Arg List with Reverse**
 ```bash
-$ trv basic:arglist -r 10 5 3 9 8 1
+$ trv basic:arg-list -r 10 5 3 9 8 1
 
 10 9 8 5 3 1
 ```
@@ -502,7 +502,7 @@ export class WebHttpCommand implements CliCommandShape {
 }
 ```
 
-As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L13) `name` defined in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module. 
+As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L12) `name` defined in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module. 
 
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 

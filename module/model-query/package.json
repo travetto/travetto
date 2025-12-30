@@ -1,6 +1,7 @@
 {
   "name": "@travetto/model-query",
   "version": "7.0.0-rc.4",
+  "type": "module",
   "description": "Datastore abstraction for advanced query support.",
   "keywords": [
     "datastore",

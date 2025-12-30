@@ -1,5 +1,6 @@
 {
   "name": "@travetto-test/model_web-upload",
+  "type": "module",
   "version": "0.0.0",
   "dependencies": {
     "@travetto/model": "^7.0.0-rc.4",

@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
-import { type ManifestModule, ManifestModuleUtil, type NodeModuleType } from '@travetto/manifest';
+import { type ManifestModule, ManifestModuleUtil } from '@travetto/manifest';
 import { EnvProp, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CoreRollupConfig } from '../../src/types.ts';
@@ -21,21 +21,11 @@ function getFilesFromModule(mod: ManifestModule): string[] {
     .map(([file]) => ManifestModuleUtil.withOutputExtension(path.resolve(mod.outputFolder, file)));
 }
 
-function getFormat(value: string = 'commonjs'): NodeModuleType {
-  switch (value) {
-    case 'module':
-    case 'commonjs': return value;
-    default: return 'commonjs';
-  }
-}
-
 export function getOutput(): OutputOptions {
-  const format = getFormat(process.env.BUNDLE_FORMAT);
   const output = process.env.BUNDLE_OUTPUT!;
   const mainFile = process.env.BUNDLE_MAIN_FILE!;
   return {
-    format,
-    interop: format === 'commonjs' ? 'auto' : undefined,
+    format: 'module',
     sourcemapPathTransform: (source, map): string =>
       Runtime.stripWorkspacePath(path.resolve(path.dirname(map), source)),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,

@@ -29,29 +29,29 @@ In a new project, the first thing that will need to be done, post installation, 
 </figcaption>
     <pre><code class="language-bash">$ trv eslint:register
 
-Wrote eslint config to <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/eslint.config.cjs</code></pre>
+Wrote eslint config to <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/eslint.config.js</code></pre>
   </figure>
 
 This is the file the linter will use, and any other tooling (e.g. IDEs).
 
   <figure class="code">
     <figcaption class="code">Sample configuration
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/eslint.config.cjs">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/eslint.config.js">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-javascript">process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_MANIFEST</span> <span class="token operator">=</span> <span class="token string">'./.trv/output/node_modules/&#64;travetto/mono-repo'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> buildConfig <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./.trv/output/node_modules/&#64;travetto/eslint/support/bin/eslint-config.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> RuntimeIndex <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./.trv/output/node_modules/&#64;travetto/runtime/__index__.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> buildConfig <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'./.trv/output/node_modules/&#64;travetto/eslint/support/bin/eslint-config.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> RuntimeIndex <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'./.trv/output/node_modules/&#64;travetto/runtime/__index__.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> pluginFiles <span class="token operator">=</span> RuntimeIndex<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
   <span class="token function-variable function">folder</span><span class="token operator">:</span> <span class="token parameter">folder</span> <span class="token operator">=></span> folder <span class="token operator">===</span> <span class="token string">'support'</span><span class="token punctuation">,</span>
   <span class="token function-variable function">file</span><span class="token operator">:</span> <span class="token parameter">file</span> <span class="token operator">=></span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">support\/eslint[.]</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span>file<span class="token punctuation">.</span>relativeFile<span class="token punctuation">)</span>
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">const</span> plugins <span class="token operator">=</span> pluginFiles<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">plugin</span> <span class="token operator">=></span> <span class="token function">require</span><span class="token punctuation">(</span>plugin<span class="token punctuation">.</span>outputFile<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> plugins <span class="token operator">=</span> <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>pluginFiles<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">plugin</span> <span class="token operator">=></span> <span class="token keyword">import</span><span class="token punctuation">(</span>plugin<span class="token punctuation">.</span>outputFile<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 <span class="token keyword">const</span> config <span class="token operator">=</span> <span class="token function">buildConfig</span><span class="token punctuation">(</span>plugins<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-module<span class="token punctuation">.</span>exports <span class="token operator">=</span> config<span class="token punctuation">;</span></code></pre>
+<span class="token keyword">export</span> <span class="token keyword">default</span> config<span class="token punctuation">;</span></code></pre>
   </figure>
 
 The output is tied to whether or not you are using the <a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">CommonJS</a> or <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> format.
@@ -147,15 +147,6 @@ An example plugin is used in the <a target="_blank" class="external-link" href="
                 call <span class="token operator">=</span> declaration<span class="token punctuation">.</span>init<span class="token punctuation">;</span>
               <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>initType <span class="token operator">===</span> <span class="token string">'TSAsExpression'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token comment">// tslint support</span>
                 call <span class="token operator">=</span> declaration<span class="token punctuation">.</span>init<span class="token punctuation">.</span>expression<span class="token punctuation">;</span>
-              <span class="token punctuation">{{'}'}}</span>
-              <span class="token keyword">if</span> <span class="token punctuation">(</span>
-                call<span class="token operator">?.</span>type <span class="token operator">===</span> <span class="token string">'CallExpression'</span> <span class="token operator">&amp;&amp;</span> call<span class="token punctuation">.</span>callee<span class="token punctuation">.</span>type <span class="token operator">===</span> <span class="token string">'Identifier'</span> <span class="token operator">&amp;&amp;</span>
-                call<span class="token punctuation">.</span>callee<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'require'</span> <span class="token operator">&amp;&amp;</span> call<span class="token punctuation">.</span>arguments<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>type <span class="token operator">===</span> <span class="token string">'Literal'</span>
-              <span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-                <span class="token keyword">const</span> arg1 <span class="token operator">=</span> call<span class="token punctuation">.</span>arguments<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span>arg1<span class="token punctuation">.</span>value <span class="token operator">&amp;&amp;</span> <span class="token keyword">typeof</span> arg1<span class="token punctuation">.</span>value <span class="token operator">===</span> <span class="token string">'string'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-                  from <span class="token operator">=</span> arg1<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
-                <span class="token punctuation">{{'}'}}</span>
               <span class="token punctuation">{{'}'}}</span>
             <span class="token punctuation">{{'}'}}</span>
 

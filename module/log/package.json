@@ -1,6 +1,7 @@
 {
   "name": "@travetto/log",
   "version": "7.0.0-rc.4",
+  "type": "module",
   "description": "Logging framework that integrates at the console.log level.",
   "keywords": [
     "typescript",

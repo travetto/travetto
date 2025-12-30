@@ -1,6 +1,7 @@
 {
   "name": "@travetto/worker",
   "version": "7.0.0-rc.4",
+  "type": "module",
   "description": "Process management utilities, with a focus on inter-process communication",
   "keywords": [
     "exec",

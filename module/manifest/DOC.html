@@ -52,7 +52,7 @@ Once the manifest is created, the application runtime can now read this manifest
 
 <h2 id="path-normalization">Path Normalization</h2>
 
-By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L9">path</a> as an equivalent to <a target="_blank" class="external-link" href="https://nodejs.org">Node</a>'s <a target="_blank" class="external-link" href="https://nodejs.org/api/path.html">path</a> library.  This allows for consistent behavior across all file-interactions.
+By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L46">path</a> as an equivalent to <a target="_blank" class="external-link" href="https://nodejs.org">Node</a>'s <a target="_blank" class="external-link" href="https://nodejs.org/api/path.html">path</a> library.  This allows for consistent behavior across all file-interactions.
 
 <h2 id="anatomy-of-a-manifest">Anatomy of a Manifest</h2>
 
@@ -67,7 +67,6 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
     <span class="token string-property property">"path"</span><span class="token operator">:</span> <span class="token string">"&lt;generated>"</span><span class="token punctuation">,</span>
     <span class="token string-property property">"mono"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
     <span class="token string-property property">"manager"</span><span class="token operator">:</span> <span class="token string">"npm"</span><span class="token punctuation">,</span>
-    <span class="token string-property property">"type"</span><span class="token operator">:</span> <span class="token string">"commonjs"</span><span class="token punctuation">,</span>
     <span class="token string-property property">"defaultEnv"</span><span class="token operator">:</span> <span class="token string">"local"</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
   <span class="token string-property property">"build"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
@@ -143,7 +142,6 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
 The general context describes the project-space and any important information for how to build/execute the code. <br><br>
 The context contains:
 <ul> <li>A generated timestamp</li>
-<li>Module Type: <code class="item input">commonjs</code>(<a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">CommonJS</a>) or <code class="item input">module</code>(<a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a>)</li>
 <li>The main module to execute. (<em>This primarily pertains to mono-repo support when there are multiple modules in the project</em>)</li>
 <li>The root path of the project/workspace</li>
 <li>Whether or not the project is a mono-repo. (<em>This is determined by using the 'workspaces' field in your <a target="_blank" class="external-link" href="https://docs.npmjs.com/cli/v9/configuring-npm/package-json">Package JSON</a></em>)</li>

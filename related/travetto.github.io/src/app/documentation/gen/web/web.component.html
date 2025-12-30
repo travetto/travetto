@@ -15,9 +15,9 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web</code></pre>
   </figure>
 
-The module provides a declarative API for creating and describing a Web application.  Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L11">&#64;Controller</a> s that employ some combination of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> s to help manage which functionality is executed before the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> code, within the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L11">&#64;Controller</a>. This module will look at:
+The module provides a declarative API for creating and describing a Web application.  Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">&#64;Controller</a> s that employ some combination of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> s to help manage which functionality is executed before the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> code, within the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">&#64;Controller</a>. This module will look at:
 <ul> <li>Request/Response Pattern</li>
-<li>Defining a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L11">&#64;Controller</a></li>
+<li>Defining a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">&#64;Controller</a></li>
 <li>Defining an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a></li>
 <li>Using a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a></li>
 <li>Creating a Custom <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a></li>
@@ -105,7 +105,7 @@ These objects do not represent the underlying sockets provided by various http s
 
 <h2 id="defining-a-controller">Defining a Controller</h2>
 
-To start, we must define a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L11">&#64;Controller</a>, which is only allowed on classes. Controllers can be configured with:
+To start, we must define a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">&#64;Controller</a>, which is only allowed on classes. Controllers can be configured with:
 <ul> <li><code class="item input">path</code> - The required context path the controller will operate atop</li>
 <li><code class="item input">title</code> - The definition of the controller</li>
 <li><code class="item input">description</code> - High level description fo the controller</li>
@@ -762,13 +762,13 @@ This applies only to interceptors that have opted in, to exposing a config, and 
   </figure>
 
 The resolution logic is as follows:
-<ul> <li>Check the resolved <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L11">&#64;Controller</a> overrides to see if an interceptor is explicitly allowed or disallowed</li>
+<ul> <li>Check the resolved <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">&#64;Controller</a> overrides to see if an interceptor is explicitly allowed or disallowed</li>
 <li>Default to <code class="item method">applies()</code> logic for all available interceptors</li>
 </ul>
 
 <h2 id="creating-a-custom-webinterceptor">Creating a Custom WebInterceptor</h2>
 
-Additionally it may be desirable to create a custom interceptor.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> interface and adding an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L15">&#64;Injectable</a> decorator. A simple logging interceptor:
+Additionally it may be desirable to create a custom interceptor.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> interface and adding an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16">&#64;Injectable</a> decorator. A simple logging interceptor:
 
   <figure class="code">
     <figcaption class="code">Defining a new Interceptor

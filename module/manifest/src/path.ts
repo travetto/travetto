@@ -6,8 +6,8 @@ const toPosix = (file: string): string => file.replaceAll('\\', '/');
 const toNative = (file: string): string => file.replace(/[\/]/g, native.sep);
 const cwd = (): string => toPosix(process.cwd());
 
-export const path: posix.PlatformPath & {
-  native: posix.PlatformPath;
+const path: typeof posix & {
+  native: typeof posix;
   toPosix: typeof toPosix;
   toNative: typeof toNative;
 } = {

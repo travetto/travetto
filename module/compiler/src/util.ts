@@ -29,7 +29,7 @@ export class CompilerUtil {
     if (pkg.main) {
       pkg.main = ManifestModuleUtil.withOutputExtension(pkg.main);
     }
-    pkg.type = manifest.workspace.type;
+    pkg.type = 'module';
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
       if (key in pkg) {
         for (const dependency of Object.keys(pkg[key] ?? {})) {

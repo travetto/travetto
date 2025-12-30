@@ -11,7 +11,9 @@ import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 const Loaded = Symbol();
 
 /**
+ * Model test suite decorator
  * @augments `@travetto/schema:Schema`
+ * @example opt-in
  * @kind decorator
  */
 export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {

@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { Session, SessionContext, SessionService } from '@travetto/auth-session';
 import { AuthSessionInterceptor } from '@travetto/auth-web-session';

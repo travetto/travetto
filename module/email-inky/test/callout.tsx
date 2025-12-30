@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/email-inky */
+/** @jsxImportSource @travetto/email-inky/support */
 
 import assert from 'node:assert';
 

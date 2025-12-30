@@ -49,11 +49,11 @@ export class PostgreSQLDialect extends SQLDialect {
 
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
-      this.executeSQL<{ name: string, type: string, is_notnull: boolean }>(`
+      this.executeSQL<{ name: string, type: string, is_not_null: boolean }>(`
       SELECT
         a.attname AS name,
         pg_catalog.format_type(a.atttypid, a.atttypmod) AS type,
-        a.attnotnull AS is_notnull
+        a.attnotnull AS is_not_null
       FROM pg_catalog.pg_attribute a
       JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
       JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
@@ -114,7 +114,7 @@ export class PostgreSQLDialect extends SQLDialect {
         type: col.type.toUpperCase()
           .replace('CHARACTER VARYING', 'VARCHAR')
           .replace('INTEGER', 'INT'),
-        is_notnull: !!col.is_notnull
+        is_not_null: !!col.is_not_null
       })),
       foreignKeys: foreignKeys.records,
       indices: indices.records

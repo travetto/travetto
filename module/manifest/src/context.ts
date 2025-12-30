@@ -53,13 +53,17 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
     readPackage(resolve(`${process.env.TRV_MODULE}/package.json`)) :
     findPackage(root, pkg => !!pkg) ?? workspace;
 
+  if (workspace.type !== 'module') {
+    console.error('ERROR: Only ESM modules are supported, package.json must be of type module');
+    process.exit(1);
+  }
+
   return {
     workspace: {
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
       manager: existsSync(path.resolve(workspace.path, 'yarn.lock')) ? 'yarn' : 'npm',
-      type: workspace.type ?? 'commonjs',
       defaultEnv: workspace.travetto?.defaultEnv ?? 'local'
     },
     build: {

@@ -6,7 +6,6 @@ import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@t
 import { Env } from './env.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { describeFunction } from './function.ts';
-import { castTo } from './types.ts';
 import { JSONUtil } from './json.ts';
 
 /** Constrained version of {@type ManifestContext} */
@@ -108,49 +107,41 @@ class $Runtime {
   }
 
   /** Get source for function */
-  getSourceFile(fn: Function): string {
-    return this.#idx.getFromImport(this.getImport(fn))?.sourceFile!;
+  getSourceFile(handle: Function): string {
+    return this.#idx.getFromImport(this.getImport(handle))?.sourceFile!;
   }
 
   /** Get import for function */
-  getImport(fn: Function): string {
-    return describeFunction(fn).import;
+  getImport(handle: Function): string {
+    return describeFunction(handle).import;
   }
 
   /** Import from a given path */
-  async importFrom<T = unknown>(imp?: string): Promise<T> {
-    const file = path.resolve(this.#idx.mainModule.sourcePath, imp!);
+  async importFrom<T = unknown>(location?: string): Promise<T> {
+    const file = path.resolve(this.#idx.mainModule.sourcePath, location!);
     if (await fs.stat(file).catch(() => false)) {
-      imp = this.#idx.getFromSource(file)?.import;
+      location = this.#idx.getFromSource(file)?.import;
     }
 
-    if (!imp) {
-      throw new Error(`Unable to find ${imp}, not in the manifest`);
-    } else if (imp.endsWith('.json')) {
-      imp = this.#idx.getFromImport(imp)?.sourceFile ?? imp;
-      return fs.readFile(imp, 'utf8').then(JSONUtil.parseSafe<T>);
+    if (!location) {
+      throw new Error(`Unable to find ${location}, not in the manifest`);
+    } else if (location.endsWith('.json')) {
+      location = this.#idx.getFromImport(location)?.sourceFile ?? location;
+      return fs.readFile(location, 'utf8').then(JSONUtil.parseSafe<T>);
     }
 
-    if (!ManifestModuleUtil.SOURCE_EXT_REGEX.test(imp)) {
-      if (imp.startsWith('@')) {
-        if (/[/].*?[/]/.test(imp)) {
-          imp = `${imp}.ts`;
+    if (!ManifestModuleUtil.SOURCE_EXT_REGEX.test(location)) {
+      if (location.startsWith('@')) {
+        if (/[/].*?[/]/.test(location)) {
+          location = `${location}.ts`;
         }
       } else {
-        imp = `${imp}.ts`;
+        location = `${location}.ts`;
       }
     }
 
-    imp = ManifestModuleUtil.withOutputExtension(imp);
-    const imported = await import(imp);
-    if (imported?.default?.default) {
-      // Unpack default.default, typescript does this in a way that requires recreating the whole object
-      const def = imported?.default?.default;
-      return Object.defineProperties(castTo({}), {
-        ...Object.getOwnPropertyDescriptors(imported),
-        default: { get: () => def, configurable: false }
-      });
-    }
+    location = ManifestModuleUtil.withOutputExtension(location);
+    const imported = await import(location);
     return imported;
   }
 }

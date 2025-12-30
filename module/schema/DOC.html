@@ -72,7 +72,7 @@ From this schema, the registry would have the following information:
 <h3 id="fields">Fields</h3>
 
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L23">@Field</a> defines a field that will be serialized.</li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L24">@Field</a> defines a field that will be serialized.</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L49">@Required</a> defines a that field should be required</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L58">@Enum</a> defines the allowable values that a field can have</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L84">@Match</a> defines a regular expression that the field value should match</li>
@@ -89,9 +89,9 @@ This schema provides a powerful base for data binding and validation at runtime.
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L187">@Currency</a> provides support for standard currency</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L68">@Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L75">@LongText</a> same as text, but expects longer form content</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L39">@Readonly</a> defines a that field should not be bindable external to the class</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L32">@Writeonly</a> defines a that field should not be exported in serialization, but that it can be bound to</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L47">@Secret</a> marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L40">@Readonly</a> defines a that field should not be bindable external to the class</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L33">@Writeonly</a> defines a that field should not be exported in serialization, but that it can be bound to</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L48">@Secret</a> marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L195">@Specifier</a> attributes additional specifiers to a field, allowing for more specification beyond just the field's type.</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L202">@DiscriminatorField</a> allows for promoting a given field as the owner of the sub type discriminator.</li>
 </ul>

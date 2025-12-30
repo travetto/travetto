@@ -1,6 +1,8 @@
 import path from 'node:path';
 
-import { prompt } from 'enquirer';
+import * as enquirer from 'enquirer';
+
+const { prompt } = enquirer.default;
 
 import { CliCommandShape, CliCommand, cliTpl, CliFlag } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';

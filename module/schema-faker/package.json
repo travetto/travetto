@@ -1,6 +1,7 @@
 {
   "name": "@travetto/schema-faker",
   "version": "7.0.0-rc.4",
+  "type": "module",
   "description": "Data generation for schema-registered objects.",
   "keywords": [
     "faker",

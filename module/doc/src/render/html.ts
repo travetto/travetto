@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 
-import { JSXElement } from '@travetto/doc/jsx-runtime';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
 
@@ -11,6 +10,7 @@ import { MOD_MAPPING } from '../mapping/mod-mapping.ts';
 import { LIB_MAPPING } from '../mapping/lib-mapping.ts';
 import { RenderContext } from './context.ts';
 import { DocResolveUtil } from '../util/resolve.ts';
+import type { JSXElement } from '../../support/jsx-runtime.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 const ENTITY_REGEX = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');

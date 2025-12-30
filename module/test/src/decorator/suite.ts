@@ -9,6 +9,7 @@ export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
  * Register a class to be defined as a test suite, and a candidate for testing
  * @param description The Suite description
  * @augments `@travetto/schema:Schema`
+ * @example opt-in
  * @kind decorator
  */
 export function Suite(): ClassDecorator;

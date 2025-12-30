@@ -1,6 +1,7 @@
 {
   "name": "@travetto/web-connect",
   "version": "7.0.0-rc.5",
+  "type": "module",
   "description": "Web integration for Connect-Like Resources",
   "keywords": [
     "web",

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { path } from './path.ts';
+import path from './path.ts';
 import { PackageModuleVisitor } from './dependencies.ts';
 
 import type { ManifestModuleFileType, ManifestModuleRole, ManifestModuleFolderType } from './types/common.ts';
@@ -18,7 +18,7 @@ const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
 };
 
 const INDEX_FILES = new Set(
-  ['__index__', '__index', 'index', 'jsx-runtime'].flatMap(file =>
+  ['__index__', '__index', 'index'].flatMap(file =>
     ['ts', 'tsx', 'js'].map(ext => `${file}.${ext}`)
   )
 );

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { load } from './entry.common.js';
+
 const help = `
 npx trvc [command]
 
@@ -17,7 +19,7 @@ Available Commands:
 const toJson = (/** @type {number} */ depth) => value => process.stdout.write(`${JSON.stringify(value, undefined, depth)}\n`) ||
   new Promise(resolve => process.stdout.once('drain', resolve));
 
-require('./entry.common.js').load(operations => {
+load(operations => {
   const [operation, ...all] = process.argv.slice(2);
   const args = all.filter(arg => !arg.startsWith('-'));
 

@@ -1,6 +1,7 @@
 {
   "name": "@travetto/web-rpc",
   "version": "7.0.0-rc.6",
+  "type": "module",
   "description": "RPC support for a Web Application",
   "keywords": [
     "web",

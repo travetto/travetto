@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/email-inky */
+/** @jsxImportSource @travetto/email-inky/support */
 
 import { Title, Container, Summary, Row, Column, If, Button, InkyTemplate } from '@travetto/email-inky';
 

@@ -1,7 +1,6 @@
-import { JSXElement } from '@travetto/email-inky/jsx-runtime';
-
-import { RenderProvider, RenderState } from '../types.ts';
-import { RenderContext } from './context.ts';
+import type { JSXElement } from '../../support/jsx-runtime.ts';
+import type { RenderProvider, RenderState } from '../types.ts';
+import type { RenderContext } from './context.ts';
 import { classString, combinePropsToString, getChildren, isOfType, visit } from './common.ts';
 
 export const SUMMARY_STYLE = Object.entries({

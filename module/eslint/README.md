@@ -24,7 +24,7 @@ In a new project, the first thing that will need to be done, post installation, 
 ```bash
 $ trv eslint:register
 
-Wrote eslint config to <workspace-root>/eslint.config.cjs
+Wrote eslint config to <workspace-root>/eslint.config.js
 ```
 
 This is the file the linter will use, and any other tooling (e.g. IDEs).
@@ -33,17 +33,17 @@ This is the file the linter will use, and any other tooling (e.g. IDEs).
 ```javascript
 process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/mono-repo';
 
-const { buildConfig } = require('./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js');
-const { RuntimeIndex } = require('./.trv/output/node_modules/@travetto/runtime/__index__.js');
+const { buildConfig } = await import('./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js');
+const { RuntimeIndex } = await import('./.trv/output/node_modules/@travetto/runtime/__index__.js');
 
 const pluginFiles = RuntimeIndex.find({
   folder: folder => folder === 'support',
   file: file => /support\/eslint[.]/.test(file.relativeFile)
 });
-const plugins = pluginFiles.map(plugin => require(plugin.outputFile));
+const plugins = await Promise.all(pluginFiles.map(plugin => import(plugin.outputFile)))
 const config = buildConfig(plugins);
 
-module.exports = config;
+export default config;
 ```
 
 The output is tied to whether or not you are using the [CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html) format.
@@ -130,15 +130,6 @@ export const ImportOrder: TrvEslintPlugin = {
                 call = declaration.init;
               } else if (initType === 'TSAsExpression') { // tslint support
                 call = declaration.init.expression;
-              }
-              if (
-                call?.type === 'CallExpression' && call.callee.type === 'Identifier' &&
-                call.callee.name === 'require' && call.arguments[0].type === 'Literal'
-              ) {
-                const arg1 = call.arguments[0];
-                if (arg1.value && typeof arg1.value === 'string') {
-                  from = arg1.value;
-                }
               }
             }
 

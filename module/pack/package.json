@@ -1,6 +1,7 @@
 {
   "name": "@travetto/pack",
   "version": "7.0.0-rc.4",
+  "type": "module",
   "description": "Code packing utilities",
   "keywords": [
     "travetto",

@@ -1,6 +1,7 @@
 {
   "name": "@travetto/web-http",
   "version": "7.0.0-rc.6",
+  "type": "module",
   "description": "Web HTTP Server Support",
   "keywords": [
     "web",

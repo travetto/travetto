@@ -1,8 +1,8 @@
-import { createElement } from '@travetto/email-inky/jsx-runtime';
 import { castTo, FileLoader } from '@travetto/runtime';
 import { EmailTemplateLocation, EmailResourceLoader } from '@travetto/email';
 
 import { JSXElementByFn, c } from '../components.ts';
+import { createElement } from '../../support/jsx-runtime.ts';
 
 export type RenderContextInit = EmailTemplateLocation & { loader?: FileLoader, columnCount?: number };
 

@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { CliCommand } from '@travetto/cli';
 import { c, d } from '@travetto/doc';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';

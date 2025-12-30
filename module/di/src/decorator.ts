@@ -10,6 +10,7 @@ const fromInput = <T extends { qualifier?: symbol }>(input?: T | symbol): T =>
 /**
  * Indicate that a class is able to be injected
  * @augments `@travetto/schema:Schema`
+ * @example opt-in
  * @kind decorator
  */
 export function Injectable(input?: Partial<InjectableCandidate> | symbol) {

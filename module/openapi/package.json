@@ -1,6 +1,7 @@
 {
   "name": "@travetto/openapi",
   "version": "7.0.0-rc.5",
+  "type": "module",
   "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
     "web",

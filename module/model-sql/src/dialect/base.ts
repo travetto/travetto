@@ -17,7 +17,7 @@ interface Alias {
 }
 
 export type SQLTableDescription = {
-  columns: { name: string, type: string, is_notnull: boolean }[];
+  columns: { name: string, type: string, is_not_null: boolean }[];
   foreignKeys: { name: string, from_column: string, to_column: string, to_table: string }[];
   indices: { name: string, columns: { name: string, desc: boolean }[], is_unique: boolean }[];
 };
@@ -1063,7 +1063,7 @@ ${this.getWhereSQL(cls, where!)}`;
   isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number],): boolean {
     const requestedColumnType = this.getColumnType(requested);
     const result =
-      (requested.name !== this.idField.name && !!requested.required?.active !== !!existing.is_notnull)
+      (requested.name !== this.idField.name && !!requested.required?.active !== !!existing.is_not_null)
       || (requestedColumnType.toUpperCase() !== existing.type.toUpperCase());
 
     return result;

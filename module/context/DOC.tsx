@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 
 import { AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';

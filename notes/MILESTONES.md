@@ -697,8 +697,19 @@ Release 7.0 - 2025-12-1
 
 ## Major/Breaking Changes
 
+## Dynamic Overhaul
+The dynamic nature of the framework was removed for a restart on change model
+  * Proxies - gone
+  * Class change source - gone
+  * Method change source - gone
+  * Model change schema - gone
+  * commonjs module hijacking - gone
+  * web route re-registering - gone
+
+This was a huge drop in complexity for the framework whilst improving the reliability of the  detect changes and respond logic.  This also represents a huge drop in mental load when making changes related to these areas, as there was a ton of subtle connectivity.
+
 ## Registry Unification
-*  The registry module was overhauled to provide a common Registry implementation.
+The registry module was overhauled to provide a common Registry implementation.
   * DI
   * Schema
   * Model

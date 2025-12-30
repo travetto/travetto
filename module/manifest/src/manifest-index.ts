@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 
 import { ManifestModuleUtil } from './module.ts';
-import { path } from './path.ts';
+import path from './path.ts';
 import { ManifestUtil } from './util.ts';
 
 import type { ManifestModule, ManifestRoot, ManifestModuleFile, IndexedModule, IndexedFile, FindConfig } from './types/manifest.ts';

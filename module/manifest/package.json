@@ -1,6 +1,7 @@
 {
   "name": "@travetto/manifest",
   "version": "7.0.0-rc.2",
+  "type": "module",
   "description": "Support for project indexing, manifesting, along with file watching",
   "keywords": [
     "path",

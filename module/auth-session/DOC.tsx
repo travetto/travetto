@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { AuthContext, Principal } from '@travetto/auth';
 import { Runtime, toConcrete } from '@travetto/runtime';

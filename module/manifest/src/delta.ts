@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { ManifestModuleUtil } from './module.ts';
-import { path } from './path.ts';
+import path from './path.ts';
 
 import type { ManifestModule, ManifestModuleCore, ManifestModuleFile, ManifestRoot } from './types/manifest.ts';
 import type { ChangeEventType, ManifestModuleFileType, ManifestModuleFolderType } from './types/common.ts';

@@ -1,6 +1,7 @@
 {
   "name": "@travetto/model-memory",
   "version": "7.0.0-rc.4",
+  "type": "module",
   "description": "Memory backing for the travetto model module.",
   "keywords": [
     "datastore",

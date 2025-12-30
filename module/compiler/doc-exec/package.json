@@ -1,5 +1,6 @@
 {
   "name": "@travetto-doc/compiler",
+  "type": "module",
   "dependencies": {
     "@travetto/cli": "^6.0.0"
   },

@@ -1,6 +1,7 @@
 {
   "name": "@travetto/compiler",
   "version": "7.0.0-rc.3",
+  "type": "module",
   "description": "The compiler infrastructure for the Travetto framework",
   "keywords": [
     "compiler",

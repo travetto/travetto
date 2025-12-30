@@ -1,5 +1,6 @@
 {
   "name": "@travetto-test/model_auth-session",
+  "type": "module",
   "version": "0.0.0",
   "dependencies": {
     "@travetto/auth-session": "^7.0.0-rc.4",

@@ -214,19 +214,19 @@ class ${uniqueId} extends ${type.mappedClassName} {
       params.push(state.fromLiteral(attrs));
     }
 
-    if (!existing) {
-      const resolved = this.toConcreteType(state, typeExpr, node, config?.root ?? node);
-      const type = typeExpr.key === 'foreign' ? state.getConcreteType(node) :
-        ts.isArrayLiteralExpression(resolved) ? resolved.elements[0] : resolved;
+    const resolved = this.toConcreteType(state, typeExpr, node, config?.root ?? node);
+    const type = typeExpr.key === 'foreign' ? state.getConcreteType(node) :
+      ts.isArrayLiteralExpression(resolved) ? resolved.elements[0] : resolved;
 
-      params.unshift(LiteralUtil.fromLiteral(state.factory, {
-        array: ts.isArrayLiteralExpression(resolved),
-        type
-      }));
-    } else {
+    params.unshift(LiteralUtil.fromLiteral(state.factory, {
+      array: ts.isArrayLiteralExpression(resolved),
+      type
+    }));
+
+    if (existing) {
       const args = DecoratorUtil.getArguments(existing) ?? [];
       if (args.length > 0) {
-        params.unshift(args[0]);
+        params[0] = args[0]; // Overwrite
       }
       if (args.length > 1) {
         params.push(...args.slice(1));

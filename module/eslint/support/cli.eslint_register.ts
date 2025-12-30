@@ -13,8 +13,7 @@ export class ESLintConfigureCommand implements CliCommandShape {
 
   async main(): Promise<void> {
     const content = await buildEslintConfig();
-    const ext = Runtime.workspace.type === 'commonjs' ? '.cjs' : '.mjs';
-    const output = Runtime.workspaceRelative(`eslint.config${ext}`);
+    const output = Runtime.workspaceRelative('eslint.config.js');
     await fs.writeFile(output, content.replaceAll(Runtime.workspace.path, '.').trim());
     console.log(`Wrote eslint config to ${output}`);
   }

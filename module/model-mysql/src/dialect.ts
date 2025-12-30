@@ -73,11 +73,11 @@ export class MySQLDialect extends SQLDialect {
     const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
-      this.executeSQL<{ name: string, type: string, is_notnull: boolean }>(`
+      this.executeSQL<{ name: string, type: string, is_not_null: boolean }>(`
       SELECT 
         COLUMN_NAME AS name, 
         COLUMN_TYPE AS type, 
-        IS_NULLABLE <> 'YES' AS is_notnull
+        IS_NULLABLE <> 'YES' AS is_not_null
       FROM information_schema.COLUMNS 
       WHERE TABLE_NAME = '${table}' 
       AND TABLE_SCHEMA = DATABASE()
@@ -126,7 +126,7 @@ export class MySQLDialect extends SQLDialect {
       columns: columns.records.map(col => ({
         ...col,
         type: col.type.toUpperCase(),
-        is_notnull: !!col.is_notnull
+        is_not_null: !!col.is_not_null
       })),
       foreignKeys: foreignKeys.records,
       indices: indices.records.map(idx => ({

@@ -1,12 +1,14 @@
 // @ts-check
 /* eslint-disable no-undef */
-const { stat, readFile, writeFile, mkdir, rm, readdir } = require('node:fs/promises');
-const path = require('node:path');
+import { stat, readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises';
+import path from 'node:path';
+import { createRequire } from 'node:module';
 
 const COMP_MOD = '@travetto/compiler';
 const SOURCE_EXT_REGEX = /[.][cm]?[tj]sx?$/;
 const BARE_IMPORT_REGEX = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
+const REQUIRE = createRequire(import.meta.filename);
 
 async function writeIfStale(sourceFile = '', destinationFile = '', transform = async (text = '') => text) {
   const [srcStat, destStat] = await Promise.all([sourceFile, destinationFile].map(file => stat(`${file}`).then(stats => stats.mtimeMs, () => 0)));
@@ -18,11 +20,11 @@ async function writeIfStale(sourceFile = '', destinationFile = '', transform = a
   }
 }
 
-async function transpile(content = '', esm = true, full = true) {
+async function transpile(content = '', full = true) {
   const ts = (await import('typescript')).default;
   return ts.transpile(content, {
     target: ts.ScriptTarget.ES2022,
-    module: esm ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS,
+    module: ts.ModuleKind.ESNext,
     importHelpers: true,
     sourceMap: false,
     inlineSourceMap: true,
@@ -32,9 +34,9 @@ async function transpile(content = '', esm = true, full = true) {
 }
 
 async function getContext() {
-  const ctxFile = require.resolve('@travetto/manifest/src/context.ts');
-  const ctxDest = path.resolve(__dirname, 'gen.context.mjs');
-  await writeIfStale(ctxFile, ctxDest, content => transpile(content, true, false));
+  const ctxFile = REQUIRE.resolve('@travetto/manifest/src/context.ts');
+  const ctxDest = path.resolve(import.meta.dirname, 'gen.context.js');
+  await writeIfStale(ctxFile, ctxDest, content => transpile(content, false));
   const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest')} */ value) => value.getManifestContext());
 
   const srcPath = path.resolve.bind(path, ctx.workspace.path, ctx.build.compilerModuleFolder);
@@ -42,7 +44,6 @@ async function getContext() {
     path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', file).replace(SOURCE_EXT_REGEX, OUTPUT_EXT);
 
   return {
-    packageType: ctx.workspace.type,
     srcPath,
     destPath,
     tsconfig: path.resolve(ctx.workspace.path, 'tsconfig.json'),
@@ -60,7 +61,7 @@ async function getContext() {
 }
 
 /** @template T */
-async function load(/** @type {(operations: import('../support/entry.main.ts').Operations) => T} */ callback) {
+export async function load(/** @type {(operations: import('../support/entry.main.ts').Operations) => T} */ callback) {
   const ctx = await getContext();
 
   try {
@@ -68,11 +69,11 @@ async function load(/** @type {(operations: import('../support/entry.main.ts').O
       async () => JSON.stringify({ extends: `${COMP_MOD}/tsconfig.trv.json` }, null, 2));
 
     await writeIfStale(ctx.srcPath('package.json'), ctx.destPath(`${COMP_MOD}/package.json`),
-      async text => JSON.stringify({ ...JSON.parse(text || '{}'), type: ctx.packageType }, null, 2));
+      async text => JSON.stringify({ ...JSON.parse(text || '{}'), type: 'module' }, null, 2));
 
     await Promise.all((await ctx.supportFiles()).map(file =>
       writeIfStale(ctx.srcPath(file), ctx.destPath(`${COMP_MOD}/${file}`),
-        text => transpile(ctx.cleanImports(text), ctx.packageType === 'module'))));
+        text => transpile(ctx.cleanImports(text)))));
 
     process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
     process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
@@ -85,5 +86,3 @@ async function load(/** @type {(operations: import('../support/entry.main.ts').O
     throw error;
   }
 }
-
-module.exports = { load };

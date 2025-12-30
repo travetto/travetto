@@ -64,7 +64,7 @@ User:
 
 ### Fields
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
-   *  [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L23) defines a field that will be serialized.
+   *  [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L24) defines a field that will be serialized.
    *  [@Required](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L49) defines a that field should be required
    *  [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L58) defines the allowable values that a field can have
    *  [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L84) defines a regular expression that the field value should match
@@ -81,9 +81,9 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L187) provides support for standard currency
    *  [@Text](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L68) indicates that a field is expecting natural language input, not just discrete values
    *  [@LongText](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L75) same as text, but expects longer form content
-   *  [@Readonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L39) defines a that field should not be bindable external to the class
-   *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L32) defines a that field should not be exported in serialization, but that it can be bound to
-   *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L47) marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.
+   *  [@Readonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L40) defines a that field should not be bindable external to the class
+   *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L33) defines a that field should not be exported in serialization, but that it can be bound to
+   *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L48) marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.
    *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L195) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
    *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L202) allows for promoting a given field as the owner of the sub type discriminator.
 

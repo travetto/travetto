@@ -1,6 +1,7 @@
 {
   "name": "@travetto/auth-web",
   "version": "7.0.0-rc.5",
+  "type": "module",
   "description": "Web authentication integration support for the Travetto framework",
   "keywords": [
     "authentication",

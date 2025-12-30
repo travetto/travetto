@@ -1,6 +1,7 @@
 {
   "name": "@travetto-test/model_cache",
   "version": "0.0.0",
+  "type": "module",
   "dependencies": {
     "@travetto/cache": "^7.0.0-rc.5",
     "@travetto/model-dynamodb": "^7.0.0-rc.4",

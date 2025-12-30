@@ -17,7 +17,7 @@ This module provides [inky](https://github.com/zurb/inky) support via [JSX](http
 
 **Code: Sample Inky Template**
 ```typescript
-/** @jsxImportSource @travetto/email-inky */
+/** @jsxImportSource @travetto/email-inky/support */
 
 import { Title, Container, Summary, Row, Column, If, Button, Value, InkyTemplate } from '@travetto/email-inky';
 
@@ -43,7 +43,7 @@ The underlying [Email](https://github.com/travetto/travetto/tree/main/module/ema
 
 This means this module, while showing [inky](https://github.com/zurb/inky) components, will ultimately produce HTML/markdown that is [mustache](https://github.com/janl/mustache.js/) compatible. The syntax used by [mustache](https://github.com/janl/mustache.js/) and the syntax used by [JSX](https://en.wikipedia.org/wiki/JSX_(JavaScript)) are in conflict due to both of the tools relying on the uniqueness of `{}` brackets.
 
-To that end, the module introduces additional components ([If Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L27), [Unless Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L29), and [For Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L30)) to assist with control flow logic.  When it comes to variable substitution, and a desire to intermingle seamlessly with component properties, `{{value}}` can be used within a string value. To leverage substitutions outside of string contexts, a more formal version can be found in the [Value Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L28) component, but this cannot be integrated into properties (e.g. an href).
+To that end, the module introduces additional components ([If Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L28), [Unless Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L30), and [For Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L31)) to assist with control flow logic.  When it comes to variable substitution, and a desire to intermingle seamlessly with component properties, `{{value}}` can be used within a string value. To leverage substitutions outside of string contexts, a more formal version can be found in the [Value Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L29) component, but this cannot be integrated into properties (e.g. an href).
 
 ## Template Extension Points
 The template extension points are defined at:

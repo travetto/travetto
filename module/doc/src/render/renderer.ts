@@ -1,7 +1,6 @@
 import path from 'node:path';
 
 import { type ManifestContext, PackageUtil } from '@travetto/manifest';
-import { isJSXElement, JSXElement, JSXFragmentType } from '@travetto/doc/jsx-runtime';
 import { castTo, Class, Runtime } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../jsx.ts';
@@ -11,6 +10,8 @@ import { DocFileUtil } from '../util/file.ts';
 import { RenderContext } from './context.ts';
 import { Html } from './html.ts';
 import { Markdown } from './markdown.ts';
+
+import { isJSXElement, JSXElement, JSXFragmentType } from '../../support/jsx-runtime.ts';
 
 const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
 

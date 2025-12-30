@@ -107,7 +107,7 @@ export class AppConfig {
 }
 ```
 
-The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L47) method.
+The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L48) method.
 
 ## Maintaining Auth Context
 The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-web/src/interceptors/context.ts#L20) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") modules.  It serves to take an authenticated principal (via the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)/[WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3)) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14). Leveraging [WebAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-web/src/config.ts#L8)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between using a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
@@ -118,7 +118,7 @@ The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-
 
 **Code: JWTPrincipalCodec**
 ```typescript
-import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt';
+import type { Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
 import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
@@ -146,7 +146,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   #verifier: Verifier;
   #algorithm: SupportedAlgorithms = 'HS256';
 
-  postConstruct(): void {
+  async postConstruct(): Promise<void> {
+    // Weird issue with their ES module support
+    const { default: { createVerifier } } = await import('njwt');
     this.#verifier = createVerifier()
       .setSigningAlgorithm(this.#algorithm)
       .withKeyResolver((keyId, callback) => {
@@ -186,6 +188,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     if (!entry) {
       throw new AppError('Requested unknown key for signing');
     }
+    // Weird issue with their ES module support
+    const { default: { create } } = await import('njwt');
     const jwt = create({}, '-')
       .setExpiration(value.expiresAt!)
       .setIssuedAt(TimeUtil.asSeconds(value.issuedAt!))
@@ -287,7 +291,7 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L29) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L45) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) is accessible as a resource that can be exposed as a [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64) on an [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L15) class.
+[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L29) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L45) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) is accessible as a resource that can be exposed as a [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64) on an [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) class.
 
 ## Multi-Step Login
 When authenticating, with a multi-step process, it is useful to share information between steps.  The `authenticatorState` of [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14) field is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins. This information can also be injected into a web endpoint method, using the [AuthenticatorState](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9) type;
