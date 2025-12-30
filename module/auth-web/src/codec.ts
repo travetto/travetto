@@ -1,4 +1,4 @@
-import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt';
+import type { Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
 import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
@@ -26,7 +26,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   #verifier: Verifier;
   #algorithm: SupportedAlgorithms = 'HS256';
 
-  postConstruct(): void {
+  async postConstruct(): Promise<void> {
+    // Weird issue with their ES module support
+    const { default: { createVerifier } } = await import('njwt');
     this.#verifier = createVerifier()
       .setSigningAlgorithm(this.#algorithm)
       .withKeyResolver((keyId, callback) => {
@@ -66,6 +68,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     if (!entry) {
       throw new AppError('Requested unknown key for signing');
     }
+    // Weird issue with their ES module support
+    const { default: { create } } = await import('njwt');
     const jwt = create({}, '-')
       .setExpiration(value.expiresAt!)
       .setIssuedAt(TimeUtil.asSeconds(value.issuedAt!))
