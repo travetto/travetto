@@ -102,8 +102,8 @@ export class CliUtil {
   /**
    * Dispatch IPC payload
    */
-  static async triggerIpc<T extends CliCommandShape>(action: 'run', cmd: T): Promise<boolean> {
-    if (!Env.TRV_CLI_IPC.isSet) {
+  static async runWithDebugIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
+    if (cmd.debugIpc !== true || !Env.TRV_CLI_IPC.isSet) {
       return false;
     }
 
@@ -115,7 +115,7 @@ export class CliUtil {
 
     const env: Record<string, string> = {};
     const request = {
-      type: `@travetto/cli:${action}`,
+      type: `@travetto/cli:run`,
       data: {
         name: cmd._cfg!.name,
         env,
@@ -130,13 +130,6 @@ export class CliUtil {
     Object.entries(process.env).forEach(([key, value]) => validEnv(key) && (env[key] = value!));
     const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSON.stringify(request) });
     return sent.ok;
-  }
-
-  /**
-   * Debug if IPC available
-   */
-  static async debugIfIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
-    return cmd.debugIpc === true && this.triggerIpc('run', cmd);
   }
 
   /**

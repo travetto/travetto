@@ -11,5 +11,9 @@ declare module '@travetto/runtime' {
      * Overrides behavior for allowing restart on changes 
      */
     TRV_RESTART_ON_CHANGE: boolean;
+    /** 
+     * Overrides behavior for allowing debug session start via IPC
+     */
+    TRV_DEBUG_IPC: boolean;
   }
 }

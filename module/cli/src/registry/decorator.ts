@@ -62,10 +62,10 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
     if (!config) return;
     return {
       name: 'debugIpc',
-      run: cmd => CliUtil.debugIfIpc(cmd).then((executed) => executed && process.exit(0)),
+      run: cmd => CliUtil.runWithDebugIpc(cmd).then((executed) => executed && process.exit(0)),
       field: {
         type: Boolean,
-        aliases: ['-di'],
+        aliases: ['-di', CliParseUtil.toEnvField(Env.TRV_DEBUG_IPC.key)],
         description: 'Should debug invocation trigger via ipc',
         default: config !== 'optional',
         required: { active: false },
