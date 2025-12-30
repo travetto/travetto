@@ -1,4 +1,4 @@
-import { isJSXElement, JSXElement, createFragment, JSXFragmentType, JSXChild } from '@travetto/email-inky/jsx-runtime';
+import { isJSXElement, JSXElement, createFragment, JSXFragmentType, JSXChild } from '@travetto/email-inky/support/jsx-runtime';
 import { castTo } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../components.ts';
@@ -67,7 +67,6 @@ export class InkyRenderer {
     state: RenderState<JSXElement, RenderContext>,
     key: K,
     props: JSXElementByFn<K>['props'],
-    // @ts-expect-error
   ): RenderState<JSXElementByFn<K>, RenderContext> {
     const node = ctx.createElement(key, props);
     const newStack: JSXElement[] = castTo([...state.stack, node]);

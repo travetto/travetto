@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { c } from '@travetto/doc';
 
 export const text = <>

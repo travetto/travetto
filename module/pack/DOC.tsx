@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import path from 'node:path';
 
 import { d, c } from '@travetto/doc';

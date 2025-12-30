@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
 import { Config } from '@travetto/config';
 import { Runtime, toConcrete } from '@travetto/runtime';

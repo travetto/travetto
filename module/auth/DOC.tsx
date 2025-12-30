@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 
 import { AuthContext, AuthService, Principal, Authenticator, Authorizer } from '@travetto/auth';

@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c, DocRunUtil } from '@travetto/doc';
 import { Runtime } from '@travetto/runtime';
 

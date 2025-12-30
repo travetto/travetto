@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 

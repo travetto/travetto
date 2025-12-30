@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import fs from 'node:fs/promises';
 
 import { d, c } from '@travetto/doc';

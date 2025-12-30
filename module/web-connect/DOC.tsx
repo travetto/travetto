@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 import { WebRequest, WebResponse } from '@travetto/web';
 

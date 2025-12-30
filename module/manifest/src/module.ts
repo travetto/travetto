@@ -18,7 +18,7 @@ const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
 };
 
 const INDEX_FILES = new Set(
-  ['__index__', '__index', 'index', 'jsx-runtime'].flatMap(file =>
+  ['__index__', '__index', 'index'].flatMap(file =>
     ['ts', 'tsx', 'js'].map(ext => `${file}.${ext}`)
   )
 );

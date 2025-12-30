@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement, DocRunUtil } from '@travetto/doc';
 import { Model, ModelType } from '@travetto/model';
 import { Env, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';

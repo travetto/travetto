@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c, mod } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import { AuthModelUtil, RegisteredPrincipal } from '@travetto/auth-model';

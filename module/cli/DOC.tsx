@@ -1,4 +1,4 @@
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { Runtime, toConcrete } from '@travetto/runtime';
 import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, MaxLength } from '@travetto/schema';

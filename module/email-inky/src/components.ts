@@ -43,7 +43,6 @@ for (const key of TypedObject.keys(c)) {
 
 type C = typeof c;
 
-// @ts-expect-error
 export type JSXElementByFn<K extends keyof C> = JSXElement<C[K], Parameters<C[K]>[0]>;
 export type JSXElements = { [K in keyof C]: JSXElementByFn<K>; };
 
