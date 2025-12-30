@@ -18,10 +18,11 @@ function field<V>(...configs: Partial<SchemaFieldConfig>[]): PropType<V> {
  * @param type The type for the field
  * @param configs The field configuration
  * @augments `@travetto/schema:Input`
+ * @augments `@travetto/schema:Field`
  * @kind decorator
  */
-export function Field(type: Pick<SchemaFieldConfig, 'type' | 'array'>, ...configs: Partial<SchemaFieldConfig>[]): PropType<unknown> {
-  return field(type, ...configs);
+export function Field(type?: Pick<SchemaFieldConfig, 'type' | 'array'>, ...configs: Partial<SchemaFieldConfig>[]): PropType<unknown> {
+  return field(type!, ...configs);
 }
 
 /**

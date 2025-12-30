@@ -34,17 +34,19 @@ function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): T
 
 function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
-    safeAssign(base, {
-      ...config,
-      ...config.aliases ? { aliases: [...base.aliases ?? [], ...config.aliases ?? []] } : {},
-      ...config.specifiers ? { specifiers: [...base.specifiers ?? [], ...config.specifiers ?? []] } : {},
-      ...config.enum ? {
-        enum: {
-          message: config.enum?.message ?? base.enum?.message,
-          values: (config.enum?.values ?? base.enum?.values ?? []).toSorted()
-        }
-      } : {},
-    });
+    if (config) {
+      safeAssign(base, {
+        ...config,
+        ...config.aliases ? { aliases: [...base.aliases ?? [], ...config.aliases ?? []] } : {},
+        ...config.specifiers ? { specifiers: [...base.specifiers ?? [], ...config.specifiers ?? []] } : {},
+        ...config.enum ? {
+          enum: {
+            message: config.enum?.message ?? base.enum?.message,
+            values: (config.enum?.values ?? base.enum?.values ?? []).toSorted()
+          }
+        } : {},
+      });
+    }
     combineCore(base, config);
   }
   return base;

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
+import { Field } from '@travetto/schema';
 import {
   BodyInterceptor, WebInterceptor, WebInterceptorCategory, WebChainedContext,
   WebResponse, DecompressInterceptor, WebInterceptorContext
@@ -13,6 +14,7 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
 
   category: WebInterceptorCategory = 'request';
   runsBefore = [BodyInterceptor];
+  @Field()
   dependsOn = [DecompressInterceptor];
 
   @Inject()
