@@ -2,18 +2,18 @@ import ts from 'typescript';
 
 import {
   TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil,
-  OnGetter, OnSetter, OnMethod, DecoratorUtil, OnStaticMethod
+  OnGetter, OnSetter, OnMethod, DecoratorUtil, OnStaticMethod, type DecoratorMeta
 } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
 
 const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
-const InSchemaSymbol = Symbol();
+const IsOptIn = Symbol();
 const AccessorsSymbol = Symbol();
 const AutoEnrollMethods = Symbol();
 
 interface AutoState {
-  [InSchemaSymbol]?: boolean;
+  [IsOptIn]?: boolean;
   [AutoEnrollMethods]?: Set<string>;
   [AccessorsSymbol]?: Set<string>;
 }
@@ -31,6 +31,7 @@ export class SchemaTransformer {
 
     const manuallyOpted = !!(
       state.findDecorator(this, node, 'Input') ??
+      state.findDecorator(this, node, 'Field') ??
       state.findDecorator(this, node, 'Method')
     );
     if (manuallyOpted) {
@@ -41,7 +42,7 @@ export class SchemaTransformer {
         return true;
       }
     }
-    if (!state[InSchemaSymbol] || !DeclarationUtil.isPublic(node)) {
+    if (state[IsOptIn] || !DeclarationUtil.isPublic(node)) {
       return true;
     }
     return false;
@@ -51,8 +52,8 @@ export class SchemaTransformer {
    * Track schema on start
    */
   @OnClass('Schema')
-  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    state[InSchemaSymbol] = true;
+  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, meta?: DecoratorMeta): ts.ClassDeclaration {
+    state[IsOptIn] = meta?.targets?.includes('@travetto/schema:OptIn') ?? false;
     state[AccessorsSymbol] = new Set();
     state[AutoEnrollMethods] = new Set();
 
@@ -117,8 +118,9 @@ export class SchemaTransformer {
       params = [...params, state.fromLiteral(attrs)];
     }
 
-    delete state[InSchemaSymbol];
+    delete state[IsOptIn];
     delete state[AccessorsSymbol];
+    delete state[AutoEnrollMethods];
 
     return state.factory.updateClassDeclaration(
       node,

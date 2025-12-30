@@ -79,6 +79,7 @@ const FIELD_CONFIG: {
  * Decorator to register a CLI command
  *
  * @augments `@travetto/schema:Schema`
+ * @augments `@travetto/schema:OptIn`
  * @example main
  * @kind decorator
  */
