@@ -708,6 +708,9 @@ The dynamic nature of the framework was removed for a restart on change model
 
 This was a huge drop in complexity for the framework whilst improving the reliability of the  detect changes and respond logic.  This also represents a huge drop in mental load when making changes related to these areas, as there was a ton of subtle connectivity.
 
+## ESM Migration
+Given the work on removing dynamic behavior, ESM was inevitable.  This major revision bump moves the framework to the future, and leaves commonjs behind.
+
 ## Registry Unification
 The registry module was overhauled to provide a common Registry implementation.
   * DI
@@ -727,7 +730,7 @@ The registry module was overhauled to provide a common Registry implementation.
 ### Web Http/Node Unification
 The HTTP server and Node.js specific web implementations have been consolidated. `web-http-server` has been renamed to `web-http` and `web-node` specific logic was integrated directly into it.  `web-node` has been removed.
 
-### ESLint Cleanup
+## ESLint Cleanup
 The `lint:*` commands have been renamed to `eslint:*` to make it clear what is actually happening when calling register and linting.
 
 
