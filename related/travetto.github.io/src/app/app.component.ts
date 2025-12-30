@@ -12,6 +12,8 @@ export class AppComponent {
 
   href = '';
 
+  year = new Date().getFullYear();
+
   constructor(router: Router) {
     router.events.subscribe(() => {
       this.href = router.url.split('/')[1];
