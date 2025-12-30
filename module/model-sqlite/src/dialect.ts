@@ -50,11 +50,11 @@ export class SqliteDialect extends SQLDialect {
     const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
 
     const [columns, foreignKeys, indices] = await Promise.all([
-      this.executeSQL<{ name: string, type: string, is_notnull: 1 | 0 }>(`
+      this.executeSQL<{ name: string, type: string, is_not_null: 1 | 0 }>(`
       SELECT 
         name, 
         type, 
-        ${this.identifier('notnull')} <> 0 AS is_notnull
+        ${this.identifier('notnull')} <> 0 AS is_not_null
       FROM PRAGMA_TABLE_INFO('${table}')
       WHERE name NOT IN (${IGNORE_FIELDS.join(',')})
     `),
@@ -81,7 +81,7 @@ export class SqliteDialect extends SQLDialect {
     return {
       columns: columns.records.map(col => ({
         ...col,
-        is_notnull: !!col.is_notnull
+        is_not_null: !!col.is_not_null
       })),
       foreignKeys: foreignKeys.records,
       indices: indices.records.map(idx => ({

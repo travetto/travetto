@@ -75,11 +75,11 @@ export const text = <>
 
     Additionally, if you provide a field as an array, it will collect all valid values (excludes flags, and any arguments past a {d.input('--')}).
 
-    <c.Code title='Basic Command with Arg List' src='doc/cli.basic_arglist.ts' />
-    <c.Execution title='Basic Command' cmd='trv' args={['basic:arglist', '-h']} config={config} />
-    <c.Execution title='Basic Arg List' cmd='trv' args={['basic:arglist', '10', '5', '3', '9', '8', '1']} config={config} />
-    <c.Execution title='Basic Arg List with Invalid Number' cmd='trv' args={['basic:arglist', '10', '5', '3', '9', '20', '1']} config={config} />
-    <c.Execution title='Basic Arg List with Reverse' cmd='trv' args={['basic:arglist', '-r', '10', '5', '3', '9', '8', '1']} config={config} />
+    <c.Code title='Basic Command with Arg List' src='doc/cli.basic_arg-list.ts' />
+    <c.Execution title='Basic Command' cmd='trv' args={['basic:arg-list', '-h']} config={config} />
+    <c.Execution title='Basic Arg List' cmd='trv' args={['basic:arg-list', '10', '5', '3', '9', '8', '1']} config={config} />
+    <c.Execution title='Basic Arg List with Invalid Number' cmd='trv' args={['basic:arg-list', '10', '5', '3', '9', '20', '1']} config={config} />
+    <c.Execution title='Basic Arg List with Reverse' cmd='trv' args={['basic:arg-list', '-r', '10', '5', '3', '9', '8', '1']} config={config} />
   </c.Section>
 
   <c.Section title='Customization'>
