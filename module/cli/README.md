@@ -213,9 +213,9 @@ export class BasicCommand {
 
 **Terminal: Basic Command**
 ```bash
-$ trv basic:arglist -h
+$ trv basic:arg-list -h
 
-Usage: basic:arglist [options] <volumes...:number>
+Usage: basic:arg-list [options] <volumes...:number>
 
 Options:
   -r, --reverse
@@ -224,19 +224,19 @@ Options:
 
 **Terminal: Basic Arg List**
 ```bash
-$ trv basic:arglist 10 5 3 9 8 1
+$ trv basic:arg-list 10 5 3 9 8 1
 
 1 3 5 8 9 10
 ```
 
 **Terminal: Basic Arg List with Invalid Number**
 ```bash
-$ trv basic:arglist 10 5 3 9 20 1
+$ trv basic:arg-list 10 5 3 9 20 1
 
 Execution failed:
  * Argument volumes[4] is greater than (10)
 
-Usage: basic:arglist [options] <volumes...:number>
+Usage: basic:arg-list [options] <volumes...:number>
 
 Options:
   -r, --reverse
@@ -245,7 +245,7 @@ Options:
 
 **Terminal: Basic Arg List with Reverse**
 ```bash
-$ trv basic:arglist -r 10 5 3 9 8 1
+$ trv basic:arg-list -r 10 5 3 9 8 1
 
 10 9 8 5 3 1
 ```

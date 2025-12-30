@@ -17,7 +17,7 @@ This module provides the ability to generate documentation in [HTML](https://en.
 
 **Code: Document Sample**
 ```typescript
-/** @jsxImportSource @travetto/doc */
+/** @jsxImportSource @travetto/doc/support */
 import { c } from '@travetto/doc';
 
 export const text = <>

@@ -212,14 +212,10 @@ export function work() {
 
 **Code: Sample After Transpilation**
 ```javascript
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.work = work;
-const tslib_1 = require("tslib");
-const Δfunction = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
-const Δconsole = tslib_1.__importStar(require("@travetto/runtime/src/console.js"));
+import * as Δfunction from "@travetto/runtime/src/function.js";
+import * as Δconsole from "@travetto/runtime/src/console.js";
 var mod_1 = ["@travetto/runtime", "doc/transpile.ts"];
-function work() {
+export function work() {
     Δconsole.log({ level: "debug", import: mod_1, line: 2, scope: "work", args: ['Start Work'] });
     try {
         1 / 0;

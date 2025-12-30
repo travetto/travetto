@@ -226,7 +226,7 @@ Additionally, if you provide a field as an array, it will collect all valid valu
 
   <figure class="code">
     <figcaption class="code">Basic Command with Arg List
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.basic_arglist.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.basic_arg-list.ts">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cli'</span><span class="token punctuation">;</span>
@@ -247,9 +247,9 @@ Additionally, if you provide a field as an array, it will collect all valid valu
     <figcaption class="terminal">Basic Command
 
 </figcaption>
-    <pre><code class="language-bash">$ trv basic:arglist <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv basic:arg-list <span class="token parameter variable">-h</span>
 
-Usage: basic:arglist <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
+Usage: basic:arg-list <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
 
 Options:
   -r, <span class="token parameter variable">--reverse</span>
@@ -260,7 +260,7 @@ Options:
     <figcaption class="terminal">Basic Arg List
 
 </figcaption>
-    <pre><code class="language-bash">$ trv basic:arglist <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">8</span> <span class="token number">1</span>
+    <pre><code class="language-bash">$ trv basic:arg-list <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">8</span> <span class="token number">1</span>
 
 <span class="token number">1</span> <span class="token number">3</span> <span class="token number">5</span> <span class="token number">8</span> <span class="token number">9</span> <span class="token number">10</span></code></pre>
   </figure>
@@ -269,12 +269,12 @@ Options:
     <figcaption class="terminal">Basic Arg List with Invalid Number
 
 </figcaption>
-    <pre><code class="language-bash">$ trv basic:arglist <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">20</span> <span class="token number">1</span>
+    <pre><code class="language-bash">$ trv basic:arg-list <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">20</span> <span class="token number">1</span>
 
 Execution failed:
  * Argument volumes<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span> is greater than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
 
-Usage: basic:arglist <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
+Usage: basic:arg-list <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
 
 Options:
   -r, <span class="token parameter variable">--reverse</span>
@@ -285,7 +285,7 @@ Options:
     <figcaption class="terminal">Basic Arg List with Reverse
 
 </figcaption>
-    <pre><code class="language-bash">$ trv basic:arglist <span class="token parameter variable">-r</span> <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">8</span> <span class="token number">1</span>
+    <pre><code class="language-bash">$ trv basic:arg-list <span class="token parameter variable">-r</span> <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">8</span> <span class="token number">1</span>
 
 <span class="token number">10</span> <span class="token number">9</span> <span class="token number">8</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">1</span></code></pre>
   </figure>

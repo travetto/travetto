@@ -43,7 +43,7 @@ Once the manifest is created, the application runtime can now read this manifest
    *  Providing contextual information when provided a filename, import name, etc (e.g. logging, testing output)
 
 ## Path Normalization
-By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L9) as an equivalent to [Node](https://nodejs.org)'s [path](https://nodejs.org/api/path.html) library.  This allows for consistent behavior across all file-interactions.
+By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L46) as an equivalent to [Node](https://nodejs.org)'s [path](https://nodejs.org/api/path.html) library.  This allows for consistent behavior across all file-interactions.
 
 ## Anatomy of a Manifest
 
@@ -56,7 +56,6 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
     "path": "<generated>",
     "mono": true,
     "manager": "npm",
-    "type": "commonjs",
     "defaultEnv": "local"
   },
   "build": {
@@ -132,7 +131,6 @@ The general context describes the project-space and any important information fo
 
 The context contains:
    *  A generated timestamp
-   *  Module Type: `commonjs`([CommonJS](https://nodejs.org/api/modules.html)) or `module`([Ecmascript Module](https://nodejs.org/api/esm.html))
    *  The main module to execute. (*This primarily pertains to mono-repo support when there are multiple modules in the project*)
    *  The root path of the project/workspace
    *  Whether or not the project is a mono-repo. (*This is determined by using the 'workspaces' field in your [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json)*)

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
+import { Ignore } from '@travetto/schema';
 import {
   BodyInterceptor, WebInterceptor, WebInterceptorCategory, WebChainedContext,
   WebResponse, DecompressInterceptor, WebInterceptorContext
@@ -17,6 +18,10 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
 
   @Inject()
   config: WebUploadConfig;
+
+  postConstruct(): void {
+    this.config.uploads ??= {};
+  }
 
   /**
    * Produces final config object

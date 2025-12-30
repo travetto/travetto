@@ -196,7 +196,7 @@ echo "TRV_RESOURCE_OVERRIDES=@#resources=@@#resources" >> $DIST/.env
 
 echo "Writing package.json"
 
-echo "{\"type\":\"commonjs\",\"main\":\"todo-app.js\"}" > $DIST/package.json
+echo "{\"type\":\"module\",\"main\":\"todo-app.js\"}" > $DIST/package.json
 
 # Writing entry scripts todo-app.sh args=(web:http) 
 
@@ -237,7 +237,6 @@ export BUNDLE_COMPRESS=true
 export BUNDLE_SOURCEMAP=false
 export BUNDLE_SOURCES=false
 export BUNDLE_OUTPUT=$DIST
-export BUNDLE_FORMAT=commonjs
 export BUNDLE_ENV_FILE=.env
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MOD
 cd $TRV_OUT

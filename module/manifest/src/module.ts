@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { path } from './path.ts';
+import path from './path.ts';
 import { PackageModuleVisitor } from './dependencies.ts';
 
 import type { ManifestModuleFileType, ManifestModuleRole, ManifestModuleFolderType } from './types/common.ts';

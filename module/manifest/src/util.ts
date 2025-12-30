@@ -1,4 +1,4 @@
-import { path } from './path.ts';
+import path from './path.ts';
 import { ManifestModuleUtil } from './module.ts';
 import { ManifestFileUtil } from './file.ts';
 import { PackageUtil } from './package.ts';

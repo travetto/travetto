@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 
-import { path } from './path.ts';
+import path from './path.ts';
 import { ManifestFileUtil } from './file.ts';
 
 import { PackagePathSymbol, type Package, type PackageWorkspaceEntry } from './types/package.ts';

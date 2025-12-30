@@ -9,4 +9,4 @@ export * from './src/types/context.ts';
 export * from './src/types/package.ts';
 export * from './src/types/manifest.ts';
 export * from './src/types/common.ts';
-export { path } from './src/path.ts';
+export { default as path } from './src/path.ts';
