@@ -64,11 +64,11 @@ class $Runtime {
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[];
   /** Get source for function */
-  getSourceFile(fn: Function): string;
+  getSourceFile(handle: Function): string;
   /** Get import for function */
-  getImport(fn: Function): string;
+  getImport(handle: Function): string;
   /** Import from a given path */
-  async importFrom<T = unknown>(imp?: string): Promise<T>;
+  async importFrom<T = unknown>(location?: string): Promise<T>;
 }
 ```
 

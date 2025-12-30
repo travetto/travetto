@@ -13,7 +13,7 @@ const Loaded = Symbol();
 /**
  * Model test suite decorator
  * @augments `@travetto/schema:Schema`
- * @augments `@travetto/schema:OptIn`
+ * @example opt-in
  * @kind decorator
  */
 export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {

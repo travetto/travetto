@@ -141,13 +141,8 @@ class $Runtime {
     }
 
     location = ManifestModuleUtil.withOutputExtension(location);
-    try {
-      const imported = await import(location);
-      return imported;
-    } catch (err) {
-      console.error(`Error importing ${location}`);
-      throw err;
-    }
+    const imported = await import(location);
+    return imported;
   }
 }
 

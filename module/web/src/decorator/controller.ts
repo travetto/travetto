@@ -6,7 +6,7 @@ import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 /**
  * Decorator to register a new web controller
  * @augments `@travetto/schema:Schema`
- * @augments `@travetto/schema:OptIn`
+ * @example opt-in
  * @kind decorator
  */
 export function Controller(path: string) {

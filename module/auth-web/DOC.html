@@ -119,7 +119,7 @@ The provider must be registered with a custom symbol to be used within the frame
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The symbol <code class="item input">FB_AUTH</code> is what will be used to reference providers at runtime.  This was chosen, over <code class="item input">class</code> references due to the fact that most providers will not be defined via a new class, but via an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L47">@InjectableFactory</a> method.
+The symbol <code class="item input">FB_AUTH</code> is what will be used to reference providers at runtime.  This was chosen, over <code class="item input">class</code> references due to the fact that most providers will not be defined via a new class, but via an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L48">@InjectableFactory</a> method.
 
 <h2 id="maintaining-auth-context">Maintaining Auth Context</h2>
 
@@ -310,7 +310,7 @@ This implementation is not suitable for production, but shows the general patter
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L29">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L45">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a> is accessible as a resource that can be exposed as a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64">@ContextParam</a> on an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L15">@Injectable</a> class.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L29">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L45">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a> is accessible as a resource that can be exposed as a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64">@ContextParam</a> on an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16">@Injectable</a> class.
 
 <h2 id="multi-step-login">Multi-Step Login</h2>
 

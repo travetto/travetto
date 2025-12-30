@@ -8,11 +8,13 @@ import {
 import { SchemaTransformUtil } from './transformer/util.ts';
 
 const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
+const InSchema = Symbol();
 const IsOptIn = Symbol();
 const AccessorsSymbol = Symbol();
 const AutoEnrollMethods = Symbol();
 
 interface AutoState {
+  [InSchema]?: boolean;
   [IsOptIn]?: boolean;
   [AutoEnrollMethods]?: Set<string>;
   [AccessorsSymbol]?: Set<string>;
@@ -23,7 +25,11 @@ interface AutoState {
  */
 export class SchemaTransformer {
 
-  static isInvisible(state: AutoState & TransformerState, node: ts.Declaration): boolean {
+  static isInvisible(state: AutoState & TransformerState, node: ts.Declaration, isStatic?: boolean): boolean {
+    if (!state[InSchema] && !isStatic) {
+      return true;
+    }
+
     const ignore = state.findDecorator(this, node, 'Ignore');
     if (ignore) {
       return true;
@@ -52,16 +58,18 @@ export class SchemaTransformer {
    * Track schema on start
    */
   @OnClass('Schema')
-  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, meta?: DecoratorMeta): ts.ClassDeclaration {
-    state[IsOptIn] = meta?.targets?.includes('@travetto/schema:OptIn') ?? false;
+  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     state[AccessorsSymbol] = new Set();
     state[AutoEnrollMethods] = new Set();
+    state[InSchema] = true;
 
     // Determine auto enrol methods
     for (const item of state.getDecoratorList(node)) {
       if (item.targets?.includes('@travetto/schema:Schema')) {
-        for (const option of item.options ?? []) {
-          state[AutoEnrollMethods].add(option);
+        state[IsOptIn] ||= item.options?.includes('opt-in') ?? false;
+        const methodEnrolls = item.options?.filter(item => item.startsWith('method:'))?.map(item => item.replace('method:', '')) ?? [];
+        for (const method of methodEnrolls) {
+          state[AutoEnrollMethods].add(method);
         }
       }
     }
@@ -118,6 +126,7 @@ export class SchemaTransformer {
       params = [...params, state.fromLiteral(attrs)];
     }
 
+    delete state[InSchema];
     delete state[IsOptIn];
     delete state[AccessorsSymbol];
     delete state[AutoEnrollMethods];
@@ -140,7 +149,9 @@ export class SchemaTransformer {
   @OnMethod()
   @OnStaticMethod()
   static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (this.isInvisible(state, node) && !state[AutoEnrollMethods]?.has(node.name.getText())) {
+    if (
+      this.isInvisible(state, node, node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)) &&
+      !state[AutoEnrollMethods]?.has(node.name.getText())) {
       return node;
     }
 
