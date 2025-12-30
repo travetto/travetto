@@ -14,7 +14,6 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
 
   category: WebInterceptorCategory = 'request';
   runsBefore = [BodyInterceptor];
-  @Field()
   dependsOn = [DecompressInterceptor];
 
   @Inject()
