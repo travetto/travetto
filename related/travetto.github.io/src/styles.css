@@ -2,7 +2,6 @@
 
 @property --icon-size {
   syntax: "<number>";
-  initial-value: 0;
   inherits: false;
 }
 
