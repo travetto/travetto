@@ -1,5 +1,4 @@
-import { JSXElement } from '@travetto/email-inky/jsx-runtime';
-
+import type { JSXElement } from '../../support/jsx-runtime.ts';
 import { RenderProvider, RenderState } from '../types.ts';
 import { RenderContext } from './context.ts';
 

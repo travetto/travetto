@@ -256,6 +256,10 @@ export class CompilerState implements ts.CompilerHost {
     if (outputFile.endsWith('package.json')) {
       text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
     }
+
+    // JSX runtime shenanigans
+    text = text.replace(/support\/jsx-runtime"/g, 'support/jsx-runtime.js"');
+
     const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
 
     if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(outputFile) || outputFile.endsWith('package.json')) {

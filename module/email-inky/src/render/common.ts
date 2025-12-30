@@ -1,4 +1,4 @@
-import { JSXElement, isJSXElement } from '@travetto/email-inky/jsx-runtime';
+import { type JSXElement, isJSXElement } from '../../support/jsx-runtime.ts';
 
 export const getChildren = (node: JSXElement): JSXElement[] => {
   const kids = node?.props?.children;
