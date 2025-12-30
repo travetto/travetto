@@ -49,15 +49,6 @@ export const ImportOrder: TrvEslintPlugin = {
               } else if (initType === 'TSAsExpression') { // tslint support
                 call = declaration.init.expression;
               }
-              if (
-                call?.type === 'CallExpression' && call.callee.type === 'Identifier' &&
-                call.callee.name === 'require' && call.arguments[0].type === 'Literal'
-              ) {
-                const arg1 = call.arguments[0];
-                if (arg1.value && typeof arg1.value === 'string') {
-                  from = arg1.value;
-                }
-              }
             }
 
             if (!from) {

@@ -1,4 +1,6 @@
 {
+  "name": "@travetto/mono-repo",
+  "type": "module",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
@@ -6,9 +8,7 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "type": "module",
   "private": true,
-  "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
     "prestart": "npm ci",
