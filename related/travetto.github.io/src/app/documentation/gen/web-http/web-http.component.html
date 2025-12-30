@@ -18,7 +18,7 @@
 This module provides basic for running <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a>. <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a>  and <a target="_blank" class="external-link" href="https://nodejs.org/api/http2.html">http2</a> servers, along with support for tls key generation during development.
 <h2 id="running-a-server">Running a Server</h2>
 
-By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19">WebHttpServer</a> that will follow default behaviors, and spin up the server.
+By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19">WebHttpServer</a> that will follow default behaviors, and spin up the server.
 
   <figure class="terminal">
     <figcaption class="terminal">Standard application
@@ -158,7 +158,7 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
 
 <h3 id="creating-a-custom-cli-entry-point">Creating a Custom CLI Entry Point</h3>
 
-To customize a Web server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85">&#64;CliCommand</a> decorator. This could look like:
+To customize a Web server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98">&#64;CliCommand</a> decorator. This could look like:
 
   <figure class="code">
     <figcaption class="code">Application entry point for Web Applications

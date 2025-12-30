@@ -8,8 +8,8 @@ declare module '@travetto/runtime' {
      */
     TRV_CLI_IPC: string;
     /** 
-     * Determines (assuming the operation supports it), that restart behavior can trigger  
+     * Overrides behavior for allowing restart on changes 
      */
-    TRV_CAN_RESTART: boolean;
+    TRV_RESTART_ON_CHANGE: boolean;
   }
 }
