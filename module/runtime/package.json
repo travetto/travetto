@@ -1,6 +1,7 @@
 {
   "name": "@travetto/runtime",
   "version": "7.0.0-rc.4",
+  "type": "module",
   "description": "Runtime for travetto applications.",
   "keywords": [
     "console-manager",

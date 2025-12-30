@@ -2,6 +2,7 @@
   "name": "@travetto/todo-app",
   "version": "0.0.0",
   "description": "",
+  "type": "module",
   "keywords": [
     "travetto",
     "typescript"

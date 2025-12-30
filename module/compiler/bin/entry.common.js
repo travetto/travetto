@@ -1,7 +1,8 @@
 // @ts-check
 /* eslint-disable no-undef */
-const { stat, readFile, writeFile, mkdir, rm, readdir } = require('node:fs/promises');
-const path = require('node:path');
+import { stat, readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises';
+import path from 'node:path';
+import { createRequire } from 'node:module';
 
 const COMP_MOD = '@travetto/compiler';
 const SOURCE_EXT_REGEX = /[.][cm]?[tj]sx?$/;
@@ -32,8 +33,9 @@ async function transpile(content = '', full = true) {
 }
 
 async function getContext() {
+  const require = createRequire(import.meta.filename);
   const ctxFile = require.resolve('@travetto/manifest/src/context.ts');
-  const ctxDest = path.resolve(__dirname, 'gen.context.mjs');
+  const ctxDest = path.resolve(import.meta.dirname, 'gen.context.js');
   await writeIfStale(ctxFile, ctxDest, content => transpile(content, false));
   const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest')} */ value) => value.getManifestContext());
 
@@ -59,7 +61,7 @@ async function getContext() {
 }
 
 /** @template T */
-async function load(/** @type {(operations: import('../support/entry.main.ts').Operations) => T} */ callback) {
+export async function load(/** @type {(operations: import('../support/entry.main.ts').Operations) => T} */ callback) {
   const ctx = await getContext();
 
   try {
@@ -84,5 +86,3 @@ async function load(/** @type {(operations: import('../support/entry.main.ts').O
     throw error;
   }
 }
-
-module.exports = { load };

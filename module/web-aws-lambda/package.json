@@ -1,6 +1,7 @@
 {
   "name": "@travetto/web-aws-lambda",
   "version": "7.0.0-rc.5",
+  "type": "module",
   "description": "Web APIs entry point support for AWS Lambdas.",
   "keywords": [
     "web",

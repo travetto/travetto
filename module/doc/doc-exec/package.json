@@ -1,5 +1,6 @@
 {
   "name": "@travetto-doc/doc",
+  "type": "module",
   "dependencies": {
     "@travetto/cli": "^6.0.0"
   },

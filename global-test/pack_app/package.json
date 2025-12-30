@@ -1,6 +1,7 @@
 {
   "name": "@travetto-test/pack_app",
   "version": "0.0.0",
+  "type": "module",
   "dependencies": {
     "@travetto/cli": "^7.0.0-rc.4"
   },

@@ -1,6 +1,7 @@
 {
   "name": "@travetto/context",
   "version": "7.0.0-rc.4",
+  "type": "module",
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "keywords": [
     "async-hooks",

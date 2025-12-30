@@ -1,5 +1,6 @@
 {
   "name": "@travetto-doc/model",
+  "type": "module",
   "dependencies": {
     "@travetto/model": "^6.0.0",
     "@travetto/model-mysql": "^6.0.0",

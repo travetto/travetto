@@ -5,7 +5,7 @@ import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 export async function buildEslintConfig(): Promise<string> {
   const root = RuntimeIndex.getModule('@travetto/eslint')!.sourcePath;
-  const tpl = await fs.readFile(path.resolve(root, 'resources', 'eslint-config-file.mjs'), 'utf8');
+  const tpl = await fs.readFile(path.resolve(root, 'resources', 'eslint-config-file.js'), 'utf8');
 
   // Get path to repo-root output
   const outputPath = path.join(
