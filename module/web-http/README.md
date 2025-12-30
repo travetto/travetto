@@ -16,7 +16,7 @@ yarn add @travetto/web-http
 This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html)  and [http2](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.
 
 ## Running a Server
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) that will follow default behaviors, and spin up the server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) that will follow default behaviors, and spin up the server.
 
 **Terminal: Standard application**
 ```bash
@@ -150,7 +150,7 @@ export class WebHttpConfig {
 ```
 
 ### Creating a Custom CLI Entry Point
-To customize a Web server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L85) decorator. This could look like:
+To customize a Web server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98) decorator. This could look like:
 
 **Code: Application entry point for Web Applications**
 ```typescript

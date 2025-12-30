@@ -19,8 +19,8 @@ type CliCommandConfigOptions = {
     module?: boolean;
     /** Should debug invocation trigger via ipc */
     debugIpc?: boolean | 'optional';
-    /** Should restart on code change */
-    restartDev?: boolean | 'optional';
+    /** Should restart on source change */
+    restartOnChange?: boolean | 'optional';
   };
 };
 
@@ -62,24 +62,24 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
     if (!config) return;
     return {
       name: 'debugIpc',
-      run: cmd => CliUtil.debugIfIpc(cmd).then((executed) => executed && process.exit(0)),
+      run: cmd => CliUtil.runWithDebugIpc(cmd).then((executed) => executed && process.exit(0)),
       field: {
         type: Boolean,
-        aliases: ['-di'],
+        aliases: ['-di', CliParseUtil.toEnvField(Env.TRV_DEBUG_IPC.key)],
         description: 'Should debug invocation trigger via ipc',
         default: config !== 'optional',
         required: { active: false },
       },
     };
   },
-  restartDev: (config) => {
+  restartOnChange: (config) => {
     if (!config) return;
     return {
-      name: 'restartDev',
-      run: cmd => CliUtil.runWithRestartOnCodeChanges(cmd),
+      name: 'restartOnChange',
+      run: cmd => CliUtil.runWithRestartOnChange(cmd),
       field: {
         type: Boolean,
-        aliases: ['-rd'],
+        aliases: ['-rc', CliParseUtil.toEnvField(Env.TRV_RESTART_ON_CHANGE.key)],
         description: 'Should the invocation automatically restart on source changes',
         default: config !== 'optional' && Runtime.envType === 'development',
         required: { active: false },

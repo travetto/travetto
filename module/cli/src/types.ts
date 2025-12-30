@@ -90,7 +90,7 @@ export type CliCommandShapeFields = {
   /**
    * Should the invocation run with auto-restart on source changes
    */
-  restartDev?: boolean;
+  restartOnChange?: boolean;
   /**
    * The module to run the command from
    */

@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { CliCommand } from '@travetto/cli';
 import { c, d } from '@travetto/doc';
-import { RuntimeResources, toConcrete } from '@travetto/runtime';
+import { Env, RuntimeResources, toConcrete } from '@travetto/runtime';
 import { WebRequest, WebResponse } from '@travetto/web';
 
 import type { WebHttpServer } from './src/types.ts';
@@ -19,7 +19,8 @@ export const text = <>
     By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
 
     <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{
-      workingDirectory: './doc-exec'
+      workingDirectory: './doc-exec',
+      env: Env.TRV_RESTART_ON_CHANGE.export(false)
     }} />
 
     <c.SubSection title="Configuration">

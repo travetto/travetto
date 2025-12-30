@@ -37,9 +37,8 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static async runWithRestartOnCodeChanges<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
-
-    if (Env.TRV_CAN_RESTART.isFalse || cmd.restartDev !== true) {
+  static async runWithRestartOnChange<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
+    if (cmd.restartOnChange !== true) {
       process.on('message', event => isCodeRestart(event) && process.exit(event.code));
       return false;
     }
@@ -48,7 +47,7 @@ export class CliUtil {
     let exhaustedRestarts = false;
     let subProcess: ChildProcess | undefined;
 
-    const env = { ...process.env, ...Env.TRV_CAN_RESTART.export(false) };
+    const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
     const maxRetries = config?.maxRetriesPerMinute ?? 5;
     const relayInterrupt = config?.relayInterrupt ?? true;
     const restarts: number[] = [];
@@ -103,8 +102,8 @@ export class CliUtil {
   /**
    * Dispatch IPC payload
    */
-  static async triggerIpc<T extends CliCommandShape>(action: 'run', cmd: T): Promise<boolean> {
-    if (!Env.TRV_CLI_IPC.isSet) {
+  static async runWithDebugIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
+    if (cmd.debugIpc !== true || !Env.TRV_CLI_IPC.isSet) {
       return false;
     }
 
@@ -116,7 +115,7 @@ export class CliUtil {
 
     const env: Record<string, string> = {};
     const request = {
-      type: `@travetto/cli:${action}`,
+      type: `@travetto/cli:run`,
       data: {
         name: cmd._cfg!.name,
         env,
@@ -131,13 +130,6 @@ export class CliUtil {
     Object.entries(process.env).forEach(([key, value]) => validEnv(key) && (env[key] = value!));
     const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSON.stringify(request) });
     return sent.ok;
-  }
-
-  /**
-   * Debug if IPC available
-   */
-  static async debugIfIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
-    return cmd.debugIpc === true && this.triggerIpc('run', cmd);
   }
 
   /**
