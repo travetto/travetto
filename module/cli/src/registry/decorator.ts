@@ -1,4 +1,4 @@
-import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction, getClass } from '@travetto/runtime';
+import { Class, ClassInstance, Env, Runtime, RuntimeIndex, TypedObject, castTo, describeFunction, getClass } from '@travetto/runtime';
 import { SchemaFieldConfig, SchemaRegistryIndex, ValidationError } from '@travetto/schema';
 
 import { CliCommandShape } from '../types.ts';
@@ -18,19 +18,23 @@ type CliCommandConfigOptions = {
     /** Module to run for */
     module?: boolean;
     /** Should debug invocation trigger via ipc */
-    debugIpc?: boolean;
+    debugIpc?: boolean | 'optional';
     /** Should restart on code change */
-    restartForDev?: boolean;
+    restartDev?: boolean | 'optional';
   };
 };
 
-const FIELD_CONFIG: {
-  name: keyof Exclude<CliCommandConfigOptions['with'], undefined>;
+type WithConfig = Required<Exclude<CliCommandConfigOptions['with'], undefined>>;
+type WithHandler<K extends keyof WithConfig> = (config?: WithConfig[K]) => ({
+  name: K;
   field: Partial<SchemaFieldConfig>;
-  run: (cmd: Cmd) => (Promise<unknown> | unknown);
-}[] =
-  [
-    {
+  run?: (cmd: Cmd) => (Promise<unknown> | unknown);
+} | undefined)
+
+const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
+  env: (config) => {
+    if (!config) return;
+    return {
       name: 'env',
       run: cmd => Env.TRV_ENV.set(cmd.env || Runtime.env),
       field: {
@@ -39,10 +43,12 @@ const FIELD_CONFIG: {
         description: 'Application environment',
         required: { active: false },
       },
-    },
-    {
+    }
+  },
+  module: (config) => {
+    if (!config) return;
+    return {
       name: 'module',
-      run: (): void => { },
       field: {
         type: String,
         aliases: ['-m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
@@ -50,30 +56,37 @@ const FIELD_CONFIG: {
         specifiers: ['module'],
         required: { active: Runtime.monoRoot },
       },
-    },
-    {
+    }
+  },
+  debugIpc: (config) => {
+    if (!config) return;
+    return {
       name: 'debugIpc',
       run: cmd => CliUtil.debugIfIpc(cmd).then((executed) => executed && process.exit(0)),
       field: {
         type: Boolean,
         aliases: ['-di'],
         description: 'Should debug invocation trigger via ipc',
-        default: true,
+        default: config !== 'optional',
         required: { active: false },
       },
-    },
-    {
-      name: 'restartForDev',
+    };
+  },
+  restartDev: (config) => {
+    if (!config) return;
+    return {
+      name: 'restartDev',
       run: cmd => CliUtil.runWithRestartOnCodeChanges(cmd),
       field: {
         type: Boolean,
-        aliases: ['-cr'],
+        aliases: ['-rd'],
         description: 'Should the invocation automatically restart on source changes',
-        default: Runtime.envType === 'development',
+        default: config !== 'optional' && Runtime.envType === 'development',
         required: { active: false },
       },
-    }
-  ];
+    };
+  }
+};
 
 /**
  * Decorator to register a CLI command
@@ -91,13 +104,13 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
       return;
     }
 
-    const VALID_FIELDS = FIELD_CONFIG.filter(field => !!config.with?.[field.name]);
+    const VALID_FIELDS = TypedObject.keys(FIELD_CONFIG).map((name) => FIELD_CONFIG[name](castTo(config.with?.[name]))).filter(x => !!x);
 
     CliCommandRegistryIndex.getForRegister(target).register({
       runTarget: config.runTarget,
       preMain: async (cmd: Cmd) => {
         for (const field of VALID_FIELDS) {
-          await field.run(cmd);
+          await field.run?.(cmd);
         }
       }
     });
@@ -105,7 +118,8 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
     const commandModule = description.module;
 
     for (const { name, field: { type, ...field } } of VALID_FIELDS) {
-      adapter.registerField(name, field, { type });
+      adapter.registerField(name, { type }, field);
+      Object.defineProperty(target.prototype, name, { value: field.default, writable: true });
     }
 
     const runtimeModule = config.runtimeModule ?? (config.with?.module ? 'current' : undefined);

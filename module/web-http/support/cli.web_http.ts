@@ -9,7 +9,7 @@ import type { WebHttpServer } from '../src/types.ts';
 /**
  * Run a web server
  */
-@CliCommand({ runTarget: true, with: { debugIpc: true, restartForDev: true, module: true, env: true } })
+@CliCommand({ runTarget: true, with: { debugIpc: 'optional', restartDev: true, module: true, env: true } })
 export class WebHttpCommand implements CliCommandShape {
 
   /** Port to run on */

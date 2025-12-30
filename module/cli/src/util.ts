@@ -39,7 +39,7 @@ export class CliUtil {
    */
   static async runWithRestartOnCodeChanges<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
 
-    if (Env.TRV_CAN_RESTART.isFalse || cmd.restartForDev !== true) {
+    if (Env.TRV_CAN_RESTART.isFalse || cmd.restartDev !== true) {
       process.on('message', event => isCodeRestart(event) && process.exit(event.code));
       return false;
     }
