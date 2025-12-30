@@ -12,7 +12,7 @@ declare module '@travetto/runtime' {
      */
     TRV_RESTART_ON_CHANGE: boolean;
     /** 
-     * Overrides behavior for allowing debug session start via IPC
+     * Overrides behavior for triggering debug session via IPC
      */
     TRV_DEBUG_IPC: boolean;
   }
