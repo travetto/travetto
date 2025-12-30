@@ -16,7 +16,7 @@ export const text = <>
 
     This is the file the linter will use, and any other tooling (e.g. IDEs).
 
-    <c.Code title='Sample configuration' src='../../eslint.config.cjs' />
+    <c.Code title='Sample configuration' src='../../eslint.config.mjs' />
 
     The output is tied to whether or not you are using the {d.library('CommonJS')} or {d.library('EcmascriptModule')} format.
   </c.Section>

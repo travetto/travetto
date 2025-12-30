@@ -1,4 +1,4 @@
-import type { NodeModuleType, NodePackageManager } from './common.ts';
+import type { NodePackageManager } from './common.ts';
 
 export type ManifestContext = {
   workspace: {
@@ -8,8 +8,6 @@ export type ManifestContext = {
     name: string;
     /** Is the workspace a monorepo? */
     mono?: boolean;
-    /** The module type of the workspace */
-    type: NodeModuleType;
     /** The package manager of the workspace */
     manager: NodePackageManager;
     /** The default env name */

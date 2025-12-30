@@ -77,7 +77,7 @@ export class CompilerSetup {
       const main = pkg.main ? this.#sourceToOutputExt(pkg.main) : undefined;
       const files = pkg.files?.map(file => this.#sourceToOutputExt(file));
 
-      const content = JSON.stringify({ ...pkg, main, type: ctx.workspace.type, files }, null, 2);
+      const content = JSON.stringify({ ...pkg, main, type: 'module', files }, null, 2);
       await CommonUtil.writeTextFile(outputFile, content);
     }
   }

@@ -66,7 +66,6 @@ export class PackOperation {
         ['BUNDLE_SOURCEMAP', config.sourcemap],
         ['BUNDLE_SOURCES', config.includeSources],
         ['BUNDLE_OUTPUT', config.buildDirectory],
-        ['BUNDLE_FORMAT', Runtime.workspace.type],
         ['BUNDLE_ENV_FILE', config.envFile],
         ['BUNDLE_EXTERNAL', config.externalDependencies.map(mod => mod.split(':')[0]).join(',')]
       ] as const)
@@ -101,7 +100,7 @@ export class PackOperation {
    */
   static async * writePackageJson(config: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
-    const pkg = { type: Runtime.workspace.type, main: config.mainFile };
+    const pkg = { type: 'module', main: config.mainFile };
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 

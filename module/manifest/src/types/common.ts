@@ -1,4 +1,3 @@
-export type NodeModuleType = 'module' | 'commonjs';
 export type NodePackageManager = 'yarn' | 'npm';
 
 export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture' | 'md';

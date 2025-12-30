@@ -50,7 +50,6 @@ export BUNDLE_ENTRY=node_modules/@travetto/cli/support/cli.js
 export BUNDLE_ENTRY_NAME=cli
 export BUNDLE_COMPRESS=true
 export BUNDLE_OUTPUT=$DIST
-export BUNDLE_FORMAT=commonjs
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MOD
 cd $TRV_OUT
 npx rollup -c node_modules/@travetto/pack/support/bin/rollup.js

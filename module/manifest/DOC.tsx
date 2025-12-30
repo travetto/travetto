@@ -79,7 +79,6 @@ export const text = <>
       The context contains:
       <ul>
         <li>A generated timestamp</li>
-        <li>Module Type: {d.input('commonjs')}({d.library('CommonJS')}) or {d.input('module')}({d.library('EcmascriptModule')})</li>
         <li>The main module to execute. (<em>This primarily pertains to mono-repo support when there are multiple modules in the project</em>)</li>
         <li>The root path of the project/workspace</li>
         <li>
