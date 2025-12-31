@@ -16,8 +16,8 @@ The following tutorial wil walk you through setting up a [Travetto](https://trav
 
 ## Prerequisites
 Install
-   *  [Node](https://nodejs.org/en/download/current/) v22.x+ (required)
-   *  [Mongodb](https://docs.mongodb.com/manual/administration/install-community/) 6.0+ (required)
+   *  [Node](https://nodejs.org/en/download/current/) v24.x+ (required)
+   *  [Mongodb](https://docs.mongodb.com/manual/administration/install-community/) 8.0+ (required)
    *  [VSCode](https://code.visualstudio.com/download) (recommended)
    *  [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) (recommended)
 
