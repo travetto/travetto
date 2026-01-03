@@ -1,10 +1,19 @@
 import { type ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
+import { setTimeout } from 'node:timers/promises';
 
 import { castTo } from './types.ts';
 
 const ResultSymbol = Symbol();
+
+type RunWithResultOptions = {
+  run: (signal: AbortSignal) => Promise<void>;
+  timeout?: number;
+  restartDelay?: number;
+  onRestart?: () => (void | Promise<void>),
+  onInit?: (controller: AbortController) => Function;
+}
 
 /**
  * Result of an execution
@@ -66,6 +75,34 @@ export class ExecUtil {
     if (child?.connected) {
       child.send({ type: 'EXEC_RESTART' });
     }
+  }
+
+  /**
+   * Run with restart capability
+   */
+  static async runWithRestart(config: RunWithResultOptions): Promise<void> {
+    const timeout = config?.timeout ?? 10 * 1000;
+    const iterations = new Array(10).fill(Date.now());
+    const controller = new AbortController();
+    const { signal } = controller;
+    const cleanup = config.onInit?.(controller) ?? undefined;
+    let restarted = false;
+
+    while (!signal.aborted && (Date.now() - iterations[0]) < timeout) {
+
+      if (restarted) {
+        await setTimeout(config.restartDelay ?? 10);
+        await config?.onRestart?.();
+      }
+
+      await config.run(signal);
+
+      iterations.push(Date.now());
+      iterations.shift();
+      restarted = true;
+    }
+
+    cleanup?.();
   }
 
   /**
