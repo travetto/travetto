@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime, type ExecutionResult, ShutdownManager, watchFiles } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Runtime, ShutdownManager, Util, watchFiles } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -13,6 +13,7 @@ const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
 type RunWithRestartOptions = {
   maxRetriesPerMinute?: number;
   relayInterrupt?: boolean;
+  debounceTime?: number;
 };
 
 export class CliUtil {
@@ -39,63 +40,20 @@ export class CliUtil {
       return false;
     }
 
-    let result: ExecutionResult | undefined;
-    let exhaustedRestarts = false;
     let subProcess: ChildProcess | undefined;
+    const restart = Util.debounce(() => ExecUtil.sendRestartSignal(subProcess));
+    void watchFiles(restart);
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
-    const maxRetries = config?.maxRetriesPerMinute ?? 5;
-    const relayInterrupt = config?.relayInterrupt ?? true;
-    const restarts: number[] = [];
-    const debounceTime = 10;
-    let timeout: ReturnType<typeof setTimeout> | undefined;
 
-    watchFiles(async () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(ExecUtil.sendRestartSignal.bind(null, subProcess), debounceTime);
+    await ExecUtil.runWithRestart({
+      onRestart: () => console.error('Restarting...', { pid: process.pid }),
+      onFailure: () => console.error('Max restarts exceeded, exiting...', { pid: process.pid }),
+      run: () => ExecUtil.proxySubprocess(
+        subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
+        config?.relayInterrupt ?? true
+      )
     });
-
-    if (!relayInterrupt) {
-      process.removeAllListeners('SIGINT'); // Remove any existing listeners
-      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
-    }
-
-    while (
-      (result === undefined || result.code === ExecUtil.RESTART_CODE) &&
-      !exhaustedRestarts
-    ) {
-      if (restarts.length) {
-        console.error('Restarting...', { pid: process.pid, time: restarts[0] });
-      }
-
-      // Ensure restarts length is capped
-      subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] })
-        .on('message', value => process.send?.(value));
-
-      const interrupt = (): void => { subProcess?.kill('SIGINT'); };
-      const toMessage = (value: unknown): void => { subProcess?.send(value!); };
-
-      // Proxy kill requests
-      process.on('message', toMessage);
-      if (relayInterrupt) {
-        process.on('SIGINT', interrupt);
-      }
-
-      result = await ExecUtil.getResult(subProcess, { catch: true });
-      process.exitCode = subProcess.exitCode;
-      process.off('message', toMessage);
-      process.off('SIGINT', interrupt);
-
-      if (restarts.length >= maxRetries) {
-        exhaustedRestarts = (Date.now() - restarts[0]) < (10 * 1000);
-        restarts.shift();
-      }
-      restarts.push(Date.now());
-    }
-
-    if (exhaustedRestarts) {
-      console.error(`Bailing, due to ${maxRetries} restarts in under 10s`);
-    }
 
     await ShutdownManager.gracefulShutdown('cli-restart');
     process.exit();

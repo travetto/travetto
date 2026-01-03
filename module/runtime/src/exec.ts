@@ -8,10 +8,12 @@ import { castTo } from './types.ts';
 const ResultSymbol = Symbol();
 
 type RunWithResultOptions = {
-  run: (signal: AbortSignal) => Promise<void>;
+  run: (signal: AbortSignal) => Promise<unknown>;
   timeout?: number;
+  maxRetries?: number
   restartDelay?: number;
-  onRestart?: () => (void | Promise<void>),
+  onRestart?: () => (unknown | Promise<unknown>);
+  onFailure?: () => (unknown | Promise<unknown>);
   onInit?: (controller: AbortController) => Function;
 }
 
@@ -71,10 +73,38 @@ export class ExecUtil {
   /**
    * Send restart signal
    */
-  static sendRestartSignal(child: ChildProcess | undefined): void {
+  static sendRestartSignal(child?: ChildProcess): void {
     if (child?.connected) {
       child.send({ type: 'EXEC_RESTART' });
     }
+  }
+
+  /**
+   * Proxy subprocess execution bridging IPC
+   */
+  static async proxySubprocess(child: ChildProcess, relayInterrupt: boolean = false): Promise<ExecutionResult> {
+    if (!relayInterrupt) {
+      process.removeAllListeners('SIGINT'); // Remove any existing listeners
+      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
+    }
+
+    child.on('message', value => process.send?.(value));
+
+    const interrupt = (): void => { child?.kill('SIGINT'); };
+    const toMessage = (value: unknown): void => { child?.send(value!); };
+
+    // Proxy kill requests
+    process.on('message', toMessage);
+
+    if (relayInterrupt) {
+      process.on('SIGINT', interrupt);
+    }
+
+    const result = await ExecUtil.getResult(child, { catch: true });
+    process.exitCode = child.exitCode;
+    process.off('message', toMessage);
+    process.off('SIGINT', interrupt);
+    return result;
   }
 
   /**
@@ -82,13 +112,14 @@ export class ExecUtil {
    */
   static async runWithRestart(config: RunWithResultOptions): Promise<void> {
     const timeout = config?.timeout ?? 10 * 1000;
-    const iterations = new Array(10).fill(Date.now());
+    const iterations = new Array(config?.maxRetries ?? 10).fill(Date.now());
     const controller = new AbortController();
     const { signal } = controller;
     const cleanup = config.onInit?.(controller) ?? undefined;
     let restarted = false;
+    let timeoutExceeded = false;
 
-    while (!signal.aborted && (Date.now() - iterations[0]) < timeout) {
+    while (!signal.aborted && !timeoutExceeded) {
 
       if (restarted) {
         await setTimeout(config.restartDelay ?? 10);
@@ -100,6 +131,11 @@ export class ExecUtil {
       iterations.push(Date.now());
       iterations.shift();
       restarted = true;
+      timeoutExceeded = (Date.now() - iterations[0]) > timeout;
+    }
+
+    if (timeoutExceeded) {
+      await config?.onFailure?.();
     }
 
     cleanup?.();
