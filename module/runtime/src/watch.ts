@@ -67,7 +67,7 @@ async function runWithRestart<T>(config: WatchListener<T> & RestartableListener<
   cleanup?.();
 }
 
-export function compilerWatcher(listener?: WatchListener<CompilerChangeEvent>): Promise<void> {
+export function watchCompiler(listener?: WatchListener<CompilerChangeEvent>): Promise<void> {
   return runWithRestart<CompilerChangeEvent>({
     ...listener,
     async init(signal) {

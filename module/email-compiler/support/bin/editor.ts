@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@travetto/di';
 import { MailUtil, EmailCompiled, MailInterpolator } from '@travetto/email';
-import { AppError, TypedObject, compilerWatcher } from '@travetto/runtime';
+import { AppError, TypedObject, watchCompiler } from '@travetto/runtime';
 
 import { EditorSendService } from './send.ts';
 import { EditorConfig } from './config.ts';
@@ -87,7 +87,7 @@ export class EditorService {
 
     process.send({ type: 'init' });
 
-    await compilerWatcher({
+    await watchCompiler({
       onChange: async ({ file }) => {
         if (await EmailCompiler.spawnCompile(file)) {
           await this.#response(this.#renderFile(file),

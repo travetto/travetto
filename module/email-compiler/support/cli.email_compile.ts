@@ -1,6 +1,6 @@
 import { Registry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { Env, Runtime, compilerWatcher } from '@travetto/runtime';
+import { Env, Runtime, watchCompiler } from '@travetto/runtime';
 
 import { EmailCompiler } from '../src/compiler.ts';
 
@@ -29,7 +29,7 @@ export class EmailCompileCommand implements CliCommandShape {
     }
 
     if (this.watch) {
-      await compilerWatcher({
+      await watchCompiler({
         onChange: async ({ file }) => {
           await EmailCompiler.spawnCompile(file);
         }
