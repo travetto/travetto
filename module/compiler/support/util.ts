@@ -38,12 +38,12 @@ export class CommonUtil {
       const kill = (): void => controller.abort();
       parent.addEventListener('abort', kill);
 
-      const comp = input(controller.signal);
+      const stream = input(controller.signal);
 
       log.debug('Started event stream');
 
       // Wait for all events, close at the end
-      for await (const event of comp) {
+      for await (const event of stream) {
         yield event;
         if (shouldRestart(event)) {
           log.debug('Restarting stream');

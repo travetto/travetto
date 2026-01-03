@@ -1,18 +1,14 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime, listenForSourceChanges, type ExecutionResult, ShutdownManager } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Runtime, type ExecutionResult, ShutdownManager, compilerWatcher } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
-const CODE_RESTART = { type: 'code_change', code: 200 };
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
 const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
   !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
 );
-
-const isCodeRestart = (input: unknown): input is typeof CODE_RESTART =>
-  typeof input === 'object' && !!input && 'type' in input && input.type === CODE_RESTART.type;
 
 type RunWithRestartOptions = {
   maxRetriesPerMinute?: number;
@@ -39,7 +35,7 @@ export class CliUtil {
    */
   static async runWithRestartOnChange<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
     if (cmd.restartOnChange !== true) {
-      process.on('message', event => isCodeRestart(event) && process.exit(event.code));
+      ExecUtil.listenForRestartSignal();
       return false;
     }
 
@@ -51,7 +47,15 @@ export class CliUtil {
     const maxRetries = config?.maxRetriesPerMinute ?? 5;
     const relayInterrupt = config?.relayInterrupt ?? true;
     const restarts: number[] = [];
-    listenForSourceChanges(() => { subProcess?.send(CODE_RESTART); });
+    const debounceTime = 10;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
+    compilerWatcher({
+      onChange: async (event) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(ExecUtil.sendRestartSignal.bind(null, subProcess), debounceTime);
+      }
+    });
 
     if (!relayInterrupt) {
       process.removeAllListeners('SIGINT'); // Remove any existing listeners
@@ -59,7 +63,7 @@ export class CliUtil {
     }
 
     while (
-      (result === undefined || result.code === CODE_RESTART.code) &&
+      (result === undefined || result.code === ExecUtil.RESTART_CODE) &&
       !exhaustedRestarts
     ) {
       if (restarts.length) {

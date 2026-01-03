@@ -1,86 +1,84 @@
-import { ManifestModuleUtil, type ChangeEventType, type ManifestModuleFileType } from '@travetto/manifest';
+import type { CompilerClient } from '@travetto/compiler/support/server/client.ts';
+import type { CompilerChangeEvent } from '@travetto/compiler/support/types.ts';
 
 import { RuntimeIndex } from './manifest-index.ts';
 import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
 
-type WatchEvent = { file: string, action: ChangeEventType, output: string, module: string, import: string, time: number };
-
-type WatchCompilerOptions = {
-  /**
-   * Restart the watch loop on compiler exit
-   */
-  restartOnCompilerExit?: boolean;
-  /**
-   * Run on restart
-   */
-  onRestart?: () => void;
+type RestartHandler = () => (void | Promise<void>);
+type ChangeHandler<T> = (event: T) => (void | Promise<void>);
+type WatchListener<T> = {
+  onRestart?: RestartHandler,
+  onChange?: ChangeHandler<T>,
+  timeout?: number;
 };
 
-export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterable<WatchEvent> {
-  // Load at runtime
-  const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
+type RestartableListener<T> = {
+  listen: (signal: AbortSignal) => AsyncIterable<T>;
+  init?: (signal: AbortSignal) => Promise<void>;
+}
 
-  const client = new CompilerClient(RuntimeIndex.manifest, {
-    warn(message, ...args): void { console.error('warn', message, ...args); },
-    debug(message, ...args): void { console.error('debug', message, ...args); },
-    error(message, ...args): void { console.error('error', message, ...args); },
-    info(message, ...args): void { console.error('info', message, ...args); },
+let cachedClient: Promise<CompilerClient> | undefined = undefined;
+function getClient(): Promise<CompilerClient> {
+  return cachedClient ??= import('@travetto/compiler/support/server/client.ts').then(async module => {
+    return new module.CompilerClient(RuntimeIndex.manifest, {
+      warn(message, ...args): void { console.error('warn', message, ...args); },
+      debug(message, ...args): void { console.error('debug', message, ...args); },
+      error(message, ...args): void { console.error('error', message, ...args); },
+      info(message, ...args): void { console.error('info', message, ...args); }
+    });
   });
+}
 
-  const controller = new AbortController();
-  const remove = ShutdownManager.onGracefulShutdown(async () => controller.abort());
-
+async function runWithRestart<T>(config: WatchListener<T> & RestartableListener<T>): Promise<void> {
+  const client = await getClient();
   const maxIterations = 10;
-  const maxWindow = 10 * 1000;
-  const iterations: number[] = [];
-  let iterationsExhausted = false;
+  const timeout = config.timeout ?? 10 * 1000;
+  const iterations = new Array(10).fill(Date.now());
+  const controller = new AbortController();
+  const { signal } = controller;
+  const cleanup = ShutdownManager.onGracefulShutdown(async () => controller.abort());
+  let restarted = false;
 
-  while (
-    !controller.signal.aborted &&
-    !iterationsExhausted &&
-    (config?.restartOnCompilerExit || iterations.length === 0)
-  ) {
-    if (iterations.length) { // Wait on next iteration
+  while (!signal.aborted && (Date.now() - iterations[0]) < timeout) {
+
+    if (restarted) {
       await Util.nonBlockingTimeout(10);
+      await config.onRestart?.();
     }
 
-    await client.waitForState(['compile-end', 'watch-start'], undefined, controller.signal);
+    await config.init?.(signal);
 
     if (!await client.isWatching()) { // If we get here, without a watch
-      await Util.nonBlockingTimeout(maxWindow / (maxIterations * 2));
+      await Util.nonBlockingTimeout(timeout / (maxIterations * 2));
     } else {
-      if (iterations.length) {
-        config?.onRestart?.();
+      for await (const event of config.listen(signal)) {
+        await config.onChange?.(event);
       }
-      yield* client.fetchEvents('change', { signal: controller.signal, enforceIteration: true });
     }
 
     iterations.push(Date.now());
-    if (iterations.length >= maxIterations) {
-      iterationsExhausted = (Date.now() - iterations[0]) > maxWindow;
-      iterations.shift();
-    }
+    iterations.shift();
+    restarted = true;
   }
 
-  remove();
+  cleanup?.();
 }
 
-export function listenForSourceChanges(onChange: () => void, debounceDelay = 10): void {
-  let timeout: ReturnType<typeof setTimeout> | undefined;
-
-  const validFileTypes = new Set<ManifestModuleFileType>(['ts', 'js', 'package-json', 'typings']);
-
-  function send(): void {
-    clearTimeout(timeout);
-    timeout = setTimeout(onChange, debounceDelay);
-  }
-
-  (async function (): Promise<void> {
-    for await (const item of watchCompiler({ restartOnCompilerExit: true, onRestart: send })) {
-      if (validFileTypes.has(ManifestModuleUtil.getFileType(item.file)) && RuntimeIndex.findModuleForArbitraryFile(item.file)) {
-        send();
+export function compilerWatcher(listener?: WatchListener<CompilerChangeEvent>): Promise<void> {
+  return runWithRestart<CompilerChangeEvent>({
+    ...listener,
+    async init(signal) {
+      const client = await getClient();
+      await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
+    },
+    async * listen(signal) {
+      const client = await getClient();
+      for await (const event of client.fetchEvents('change', { signal, enforceIteration: true })) {
+        if (RuntimeIndex.findModuleForArbitraryFile(event.file)) {
+          yield event;
+        }
       }
     }
-  })();
+  });
 }

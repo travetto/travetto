@@ -39,6 +39,35 @@ type ExecutionBaseResult = Omit<ExecutionResult, 'stdout' | 'stderr'>;
  */
 export class ExecUtil {
 
+  static RESTART_CODE = 200;
+
+  /**
+   * Listen for restart signal
+   */
+  static listenForRestartSignal(): void {
+    process.on('message', (event) => {
+      if (typeof event === 'object' && event !== null && 'type' in event && event.type === 'EXEC_RESTART') {
+        this.exitForRestart();
+      }
+    });
+  }
+
+  /**
+   * Exit process for restart
+   */
+  static exitForRestart(): void {
+    process.exit(this.RESTART_CODE);
+  }
+
+  /**
+   * Send restart signal
+   */
+  static sendRestartSignal(child: ChildProcess | undefined): void {
+    if (child?.connected) {
+      child.send({ type: 'EXEC_RESTART' });
+    }
+  }
+
   /**
    * Take a child process, and some additional options, and produce a promise that
    * represents the entire execution.  On successful completion the promise will resolve, and
