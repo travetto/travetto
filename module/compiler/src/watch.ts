@@ -70,19 +70,25 @@ export class CompilerWatcher {
     return { entry, file: entry?.sourceFile ?? file, action };
   }
 
-  #isValidEvent(event: CompilerWatchEventCandidate): event is CompilerWatchEvent {
-    const relativeFile = event.file.replace(`${this.#root}/`, '');
+  #isValidFile(file: string): boolean {
+    const relativeFile = file.replace(`${this.#root}/`, '');
     if (relativeFile === this.#watchCanary) {
       return false;
     } else if (relativeFile.startsWith('.')) {
       return false;
-    } else if (!event.entry) {
-      log.debug(`Skipping unknown file ${relativeFile}`);
+    }
+    return true;
+  }
+
+  #isValidEvent(event: CompilerWatchEventCandidate): event is CompilerWatchEvent {
+    if (!event.entry) {
+      log.debug(`Skipping unknown file ${event.file}`);
       return false;
     } else if (event.action === 'update' && !this.#state.checkIfSourceChanged(event.entry.sourceFile)) {
+      const relativeFile = event.file.replace(`${this.#root}/`, '');
       log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
       return false;
-    } else if (!CompilerUtil.validFile(ManifestModuleUtil.getFileType(relativeFile))) {
+    } else if (!CompilerUtil.validFile(ManifestModuleUtil.getFileType(event.file))) {
       return false;
     }
     return true;
@@ -170,11 +176,18 @@ export class CompilerWatcher {
         }
 
         // One event per file set
-        EventUtil.sendEvent('file', { time: Date.now(), files: events.map(e => ({ file: path.toPosix(e.path), action: e.type })) });
+        const filesChanged = events.map(e => ({ file: path.toPosix(e.path), action: e.type })).filter(e => this.#isValidFile(e.file));
+        if (filesChanged.length) {
+          EventUtil.sendEvent('file', { time: Date.now(), files: filesChanged });
+        }
 
-        const items = events
-          .map(event => this.#toCandidateEvent(event.type, path.toPosix(event.path)))
+        const items = filesChanged
+          .map(event => this.#toCandidateEvent(event.action, event.file))
           .filter(event => this.#isValidEvent(event));
+
+        if (items.length === 0) {
+          return;
+        }
 
         try {
           await this.#reconcileManifestUpdates(items);

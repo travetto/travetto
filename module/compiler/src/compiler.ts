@@ -225,8 +225,7 @@ export class Compiler {
             action: event.action,
             time: Date.now(),
             file: event.file,
-            import: event.entry.import,
-            fileType: ManifestModuleUtil.getFileType(event.file)
+            import: event.entry.import
           });
         }
         EventUtil.sendEvent('state', { state: 'watch-end' });

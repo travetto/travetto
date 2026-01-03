@@ -54,19 +54,17 @@ export class TestWatcher {
       }
     );
 
-    await watchCompiler({
-      onChange: event => {
-        const fileType = ManifestModuleUtil.getFileType(event.file);
-        if ((fileType === 'ts' || fileType === 'js') && event.import) {
-          if (event.action === 'delete') {
-            consumer.removeTest(event.import);
-          } else {
-            const diffSource = consumer.produceDiffSource(event.import);
-            queue.add({ import: event.import, diffSource }, true);
-          }
+    await watchCompiler(event => {
+      const fileType = ManifestModuleUtil.getFileType(event.file);
+      if ((fileType === 'ts' || fileType === 'js')) {
+        if (event.action === 'delete') {
+          consumer.removeTest(event.import);
+        } else {
+          const diffSource = consumer.produceDiffSource(event.import);
+          queue.add({ import: event.import, diffSource }, true);
         }
       }
-    })
+    });
 
     // Cleanup
     await queueProcessor;

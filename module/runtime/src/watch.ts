@@ -8,17 +8,12 @@ import { ShutdownManager } from './shutdown.ts';
 import { Util } from './util.ts';
 
 type RestartHandler = () => (void | Promise<void>);
-type ChangeHandler<T> = (event: T) => (void | Promise<void>);
-type WatchListener<T> = {
-  onRestart?: RestartHandler,
-  onChange?: ChangeHandler<T>,
+type ChangeHandler<T> = (event: T) => (unknown | Promise<unknown>);
+type WatchSource<T> = (signal: AbortSignal) => AsyncIterable<T>;
+type WatchOptions = {
+  onRestart?: RestartHandler;
   timeout?: number;
 };
-
-type RestartableListener<T> = {
-  listen: (signal: AbortSignal) => AsyncIterable<T>;
-  init?: (signal: AbortSignal) => Promise<void>;
-}
 
 let cachedClient: Promise<CompilerClient> | undefined = undefined;
 function getClient(): Promise<CompilerClient> {
@@ -32,10 +27,10 @@ function getClient(): Promise<CompilerClient> {
   });
 }
 
-async function runWithRestart<T>(config: WatchListener<T> & RestartableListener<T>): Promise<void> {
+async function runWithRestart<T>(source: WatchSource<T>, onChange: ChangeHandler<T>, config?: WatchOptions): Promise<void> {
   const client = await getClient();
   const maxIterations = 10;
-  const timeout = config.timeout ?? 10 * 1000;
+  const timeout = config?.timeout ?? 10 * 1000;
   const iterations = new Array(10).fill(Date.now());
   const controller = new AbortController();
   const { signal } = controller;
@@ -46,16 +41,16 @@ async function runWithRestart<T>(config: WatchListener<T> & RestartableListener<
 
     if (restarted) {
       await Util.nonBlockingTimeout(10);
-      await config.onRestart?.();
+      await config?.onRestart?.();
     }
 
-    await config.init?.(signal);
+    await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
 
     if (!await client.isWatching()) { // If we get here, without a watch
       await Util.nonBlockingTimeout(timeout / (maxIterations * 2));
     } else {
-      for await (const event of config.listen(signal)) {
-        await config.onChange?.(event);
+      for await (const event of source(signal)) {
+        await onChange(event);
       }
     }
 
@@ -67,38 +62,30 @@ async function runWithRestart<T>(config: WatchListener<T> & RestartableListener<
   cleanup?.();
 }
 
-export function watchCompiler(listener?: WatchListener<CompilerChangeEvent>): Promise<void> {
-  return runWithRestart<CompilerChangeEvent>({
-    ...listener,
-    async init(signal) {
-      const client = await getClient();
-      await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
-    },
-    async * listen(signal) {
+export function watchCompiler(onChange: ChangeHandler<CompilerChangeEvent>, options?: WatchOptions): Promise<void> {
+  return runWithRestart(
+    async function* listen(signal) {
       const client = await getClient();
       for await (const event of client.fetchEvents('change', { signal, enforceIteration: true })) {
         if (event.import || RuntimeIndex.findModuleForArbitraryFile(event.file)) {
           yield event;
         }
       }
-    }
-  });
+    },
+    onChange,
+    options
+  );
 }
 
-export function fileWatcher(listener?: WatchListener<{ file: string, action: ChangeEventType }>): Promise<void> {
-  return runWithRestart<{ file: string, action: ChangeEventType }>({
-    ...listener,
-    async init(signal) {
-      const client = await getClient();
-      await client.waitForState(['watch-start'], undefined, signal);
-    },
-    async * listen(signal) {
+export function watchFiles(onChange: ChangeHandler<{ file: string, action: ChangeEventType }>, options?: WatchOptions): Promise<void> {
+  return runWithRestart(
+    async function* listen(signal) {
       const client = await getClient();
       for await (const event of client.fetchEvents('file', { signal, enforceIteration: true })) {
-        for (const item of event.files) {
-          yield item;
-        }
+        yield* event.files;
       }
-    }
-  });
+    },
+    onChange,
+    options
+  );
 }

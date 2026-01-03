@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime, type ExecutionResult, ShutdownManager, watchCompiler } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Runtime, type ExecutionResult, ShutdownManager, watchFiles } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -50,11 +50,9 @@ export class CliUtil {
     const debounceTime = 10;
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
-    watchCompiler({
-      onChange: async (event) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(ExecUtil.sendRestartSignal.bind(null, subProcess), debounceTime);
-      }
+    watchFiles(async () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(ExecUtil.sendRestartSignal.bind(null, subProcess), debounceTime);
     });
 
     if (!relayInterrupt) {

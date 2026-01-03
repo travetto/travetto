@@ -49,16 +49,14 @@ export class DocCommand implements CliCommandShape {
 
   async runWatch(): Promise<void> {
     const [first, ...args] = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
-    await watchCompiler({
-      onChange: async ({ file }) => {
-        if (file === this.input) {
-          const subProcess = spawn(process.argv0, [Runtime.trvEntryPoint, first, ...args], {
-            cwd: Runtime.mainSourcePath,
-            env: { ...process.env, ...Env.TRV_QUIET.export(true) },
-            stdio: 'inherit'
-          });
-          await ExecUtil.getResult(subProcess, { catch: true });
-        }
+    await watchCompiler(async ({ file }) => {
+      if (file === this.input) {
+        const subProcess = spawn(process.argv0, [Runtime.trvEntryPoint, first, ...args], {
+          cwd: Runtime.mainSourcePath,
+          env: { ...process.env, ...Env.TRV_QUIET.export(true) },
+          stdio: 'inherit'
+        });
+        await ExecUtil.getResult(subProcess, { catch: true });
       }
     });
   }

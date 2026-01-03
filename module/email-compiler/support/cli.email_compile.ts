@@ -29,11 +29,9 @@ export class EmailCompileCommand implements CliCommandShape {
     }
 
     if (this.watch) {
-      await watchCompiler({
-        onChange: async ({ file }) => {
-          await EmailCompiler.spawnCompile(file);
-        }
-      });
+      await watchCompiler(({ file }) =>
+        EmailCompiler.spawnCompile(file)
+      );
     }
   }
 }

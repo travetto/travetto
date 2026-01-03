@@ -87,14 +87,12 @@ export class EditorService {
 
     process.send({ type: 'init' });
 
-    await watchCompiler({
-      onChange: async ({ file }) => {
-        if (await EmailCompiler.spawnCompile(file)) {
-          await this.#response(this.#renderFile(file),
-            result => ({ type: 'compiled', ...result }),
-            error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
-          );
-        }
+    await watchCompiler(async ({ file }) => {
+      if (await EmailCompiler.spawnCompile(file)) {
+        await this.#response(this.#renderFile(file),
+          result => ({ type: 'compiled', ...result }),
+          error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
+        );
       }
     });
   }
