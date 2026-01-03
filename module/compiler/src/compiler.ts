@@ -225,7 +225,9 @@ export class Compiler {
             action: event.action,
             time: Date.now(),
             file: event.file,
-            import: event.entry.import
+            import: event.entry.import,
+            output: event.entry.outputFile!,
+            module: event.entry.module.name
           });
         }
         EventUtil.sendEvent('state', { state: 'watch-end' });
