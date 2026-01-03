@@ -77,7 +77,7 @@ export function watchCompiler(listener?: WatchListener<CompilerChangeEvent>): Pr
     async * listen(signal) {
       const client = await getClient();
       for await (const event of client.fetchEvents('change', { signal, enforceIteration: true })) {
-        if (RuntimeIndex.findModuleForArbitraryFile(event.file)) {
+        if (event.import || RuntimeIndex.findModuleForArbitraryFile(event.file)) {
           yield event;
         }
       }
