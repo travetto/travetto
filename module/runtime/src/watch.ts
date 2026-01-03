@@ -1,3 +1,5 @@
+import type { ChangeEventType } from '@travetto/manifest';
+
 import type { CompilerClient } from '@travetto/compiler/support/server/client.ts';
 import type { CompilerChangeEvent } from '@travetto/compiler/support/types.ts';
 
@@ -77,6 +79,24 @@ export function compilerWatcher(listener?: WatchListener<CompilerChangeEvent>): 
       for await (const event of client.fetchEvents('change', { signal, enforceIteration: true })) {
         if (RuntimeIndex.findModuleForArbitraryFile(event.file)) {
           yield event;
+        }
+      }
+    }
+  });
+}
+
+export function fileWatcher(listener?: WatchListener<{ file: string, action: ChangeEventType }>): Promise<void> {
+  return runWithRestart<{ file: string, action: ChangeEventType }>({
+    ...listener,
+    async init(signal) {
+      const client = await getClient();
+      await client.waitForState(['watch-start'], undefined, signal);
+    },
+    async * listen(signal) {
+      const client = await getClient();
+      for await (const event of client.fetchEvents('file', { signal, enforceIteration: true })) {
+        for (const item of event.files) {
+          yield item;
         }
       }
     }

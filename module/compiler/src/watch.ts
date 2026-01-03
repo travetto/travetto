@@ -9,6 +9,7 @@ import { CompilerUtil } from './util.ts';
 
 import { AsyncQueue } from '../support/queue.ts';
 import { IpcLogger } from '../support/log.ts';
+import { EventUtil } from './event.ts';
 
 const log = new IpcLogger({ level: 'debug' });
 
@@ -167,6 +168,9 @@ export class CompilerWatcher {
         } else if (events.some(event => packageFiles.has(path.toPosix(event.path)))) {
           throw new CompilerReset('Package information changed');
         }
+
+        // One event per file set
+        EventUtil.sendEvent('file', { time: Date.now(), files: events.map(e => ({ file: path.toPosix(e.path), action: e.type })) });
 
         const items = events
           .map(event => this.#toCandidateEvent(event.type, path.toPosix(event.path)))

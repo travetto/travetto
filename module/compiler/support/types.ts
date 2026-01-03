@@ -8,7 +8,7 @@ export type CompilerLogLevel = 'info' | 'debug' | 'warn' | 'error';
 export type CompilerLogEvent = { level: CompilerLogLevel, message: string, time?: number, args?: unknown[], scope?: string };
 export type CompilerProgressEvent = { idx: number, total: number, message: string, operation: 'compile', complete?: boolean };
 export type CompilerStateEvent = { state: CompilerStateType, extra?: Record<string, unknown> };
-export type FileChangeEvent = { file: string, action: ChangeEventType, time: number };
+export type FileChangeEvent = { files: { file: string, action: ChangeEventType }[], time: number };
 
 export type CompilerEvent =
   { type: 'file', payload: FileChangeEvent } |
