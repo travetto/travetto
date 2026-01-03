@@ -41,18 +41,21 @@ export class CliUtil {
     }
 
     let subProcess: ChildProcess | undefined;
-    const restart = Util.debounce(() => ExecUtil.sendRestartSignal(subProcess));
-    void watchFiles(restart);
+    void watchFiles(Util.debounce(() => ExecUtil.sendRestartSignal(subProcess)));
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
     await ExecUtil.runWithRestart({
       onRestart: () => console.error('Restarting...', { pid: process.pid }),
       onFailure: () => console.error('Max restarts exceeded, exiting...', { pid: process.pid }),
-      run: () => ExecUtil.proxySubprocess(
-        subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
-        config?.relayInterrupt ?? true
-      )
+      run: async () => {
+        const result = await ExecUtil.proxySubprocess(
+          subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
+          config?.relayInterrupt ?? true
+        );
+        // Did we exit due to restart request?
+        return result.code === ExecUtil.RESTART_CODE;
+      }
     });
 
     await ShutdownManager.gracefulShutdown('cli-restart');

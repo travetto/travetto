@@ -118,15 +118,16 @@ export class ExecUtil {
     const cleanup = config.onInit?.(controller) ?? undefined;
     let restarted = false;
     let timeoutExceeded = false;
+    let result;
 
-    while (!signal.aborted && !timeoutExceeded) {
+    while (!signal.aborted && !timeoutExceeded && result !== false) {
 
       if (restarted) {
         await setTimeout(config.restartDelay ?? 10);
         await config?.onRestart?.();
       }
 
-      await config.run(signal);
+      result = await config.run(signal);
 
       iterations.push(Date.now());
       iterations.shift();
