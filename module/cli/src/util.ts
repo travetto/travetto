@@ -30,9 +30,7 @@ export class CliUtil {
    */
   static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<boolean> {
     if (cmd.restartOnChange !== true) {
-      process.on('message', event => {
-        if (event === 'CLI_RESTART') { process.exit(ShutdownManager.RESTART_CODE); }
-      });
+      WatchUtil.listenForRestartSignals();
       return false;
     }
 
@@ -46,7 +44,7 @@ export class CliUtil {
         const { code } = await ExecUtil.deferToSubprocess(
           subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
         );
-        return code === ShutdownManager.RESTART_CODE ? 'restart' : code > 0 ? 'error' : 'stop'
+        return WatchUtil.exitCodeToResult(code);
       }, {
       onRetry: ({ signal: _, startTime: __, ...state }) => console.error('Restarting...', { pid: process.pid, ...state }),
       onRetryExhausted: ({ signal: _, startTime: __, ...state }) => console.error('Max restarts exceeded, exiting...', { pid: process.pid, ...state }),

@@ -11,8 +11,6 @@ export class ShutdownManager {
   static #handlers: { scope?: string, handler: () => (void | Promise<void>) }[] = [];
   static #pending: (PromiseWithResolvers<void> & { time: number }) | undefined;
 
-  static RESTART_CODE = 200;
-
   static #ensureExitListeners(): void {
     if (this.#registered) {
       return;

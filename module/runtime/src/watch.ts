@@ -27,6 +27,24 @@ type RetryRunConfig = {
  */
 export class WatchUtil {
 
+  static #RESTART_EXIT_CODE = 200;
+
+  /** Convert exit code to a result type  */
+  static exitCodeToResult(code: number): RetryRunState['result'] {
+    return code === this.#RESTART_EXIT_CODE ? 'restart' : code > 0 ? 'error' : 'stop';
+  }
+
+  /** Trigger a restart by exiting with the restart exit code */
+  static triggerRestart(): void {
+    process.exit(this.#RESTART_EXIT_CODE);
+  }
+
+  /** Listen for restart signals */
+  static listenForRestartSignals(): void {
+    process.on('message', event => {
+      if (event === 'WATCH_RESTART') { this.triggerRestart(); }
+    });
+  }
   /**
    * Retry an operation, with a custom conflict handler
    * @param operation The operation to retry
