@@ -30,12 +30,14 @@ export class CliUtil {
    */
   static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<boolean> {
     if (cmd.restartOnChange !== true) {
-      ExecUtil.listenForRestartSignal();
+      process.on('message', event => {
+        if (event === 'CLI_RESTART') { ExecUtil.exitForRestart(); }
+      });
       return false;
     }
 
     let subProcess: ChildProcess | undefined;
-    void WatchUtil.watchFiles(() => ExecUtil.sendRestartSignal(subProcess));
+    void WatchUtil.watchFiles(() => subProcess?.send('CLI_RESTART'));
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
