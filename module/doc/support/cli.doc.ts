@@ -49,7 +49,7 @@ export class DocCommand implements CliCommandShape {
 
   async runWatch(): Promise<void> {
     const [first, ...args] = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
-    await WatchUtil.watchCompiler(async ({ file }) => {
+    await WatchUtil.watchCompilerEvents('change', async ({ file }) => {
       if (file === this.input) {
         const subProcess = spawn(process.argv0, [Runtime.trvEntryPoint, first, ...args], {
           cwd: Runtime.mainSourcePath,

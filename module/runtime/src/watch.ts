@@ -1,5 +1,5 @@
 import type { CompilerClient } from '@travetto/compiler/support/server/client.ts';
-import type { CompilerChangeEvent, CompilerEventPayload, CompilerEventType, FileChangeEvent } from '@travetto/compiler/support/types.ts';
+import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler/support/types.ts';
 
 import { AppError } from './error';
 import { Util } from './util';
@@ -24,8 +24,6 @@ type RetryRunConfig = {
   onFailure: (config: RetryRunState) => (unknown | Promise<unknown>);
 }
 
-const validSourceFile = (event: CompilerChangeEvent) => !!(event.import || RuntimeIndex.findModuleForArbitraryFile(event.file))
-
 /**
  * Utilities for watching resources
  */
@@ -41,28 +39,6 @@ export class WatchUtil {
         info(message, ...args): void { console.error('info', message, ...args); }
       });
     });
-  }
-
-  static async #compiler<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
-    type: K,
-    onChange: (input: T) => unknown,
-    signal: AbortSignal,
-    filter?: (input: T) => boolean
-  ): Promise<RetryRunState['result']> {
-    const client = await this.#getClient();
-    await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
-
-    if (!await client.isWatching()) { // If we get here, without a watch
-      return 'error';
-    } else {
-      for await (const event of client.fetchEvents(type, { signal: signal, enforceIteration: true })) {
-        const typed = castTo<T>(event);
-        if (filter === undefined || filter(typed)) {
-          await onChange(typed);
-        }
-      }
-      return 'restart';
-    }
   }
 
   /**
@@ -139,13 +115,24 @@ export class WatchUtil {
     cleanup?.();
   }
 
-  /**  Watch compiler for source code changes */
-  static async watchCompiler(onChange: (input: CompilerChangeEvent) => unknown, options?: Partial<RetryRunConfig>): Promise<void> {
-    return this.runWithRetry(({ signal }) => this.#compiler('change', onChange, signal, validSourceFile), options);
-  }
+  /**  Watch compiler events  */
+  static watchCompilerEvents<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
+    type: K,
+    onChange: (input: T) => unknown,
+    options?: Partial<RetryRunConfig>,
+  ): Promise<void> {
+    return this.runWithRetry(async ({ signal }) => {
+      const client = await this.#getClient();
+      await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
 
-  /** Watch for any file changes */
-  static async watchFiles(onChange: (input: FileChangeEvent) => unknown, options?: Partial<RetryRunConfig>): Promise<void> {
-    return this.runWithRetry(({ signal }) => this.#compiler('file', onChange, signal), options);
+      if (!await client.isWatching()) { // If we get here, without a watch
+        return 'error';
+      } else {
+        for await (const event of client.fetchEvents(type, { signal: signal, enforceIteration: true })) {
+          await onChange(castTo(event));
+        }
+        return 'restart';
+      }
+    }, options);
   }
 }

@@ -37,7 +37,7 @@ export class CliUtil {
     }
 
     let subProcess: ChildProcess | undefined;
-    void WatchUtil.watchFiles(() => subProcess?.send('CLI_RESTART'));
+    void WatchUtil.watchCompilerEvents('file', () => subProcess?.send('CLI_RESTART'));
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 

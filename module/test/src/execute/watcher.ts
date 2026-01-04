@@ -54,7 +54,7 @@ export class TestWatcher {
       }
     );
 
-    await WatchUtil.watchCompiler(event => {
+    await WatchUtil.watchCompilerEvents('change', event => {
       const fileType = ManifestModuleUtil.getFileType(event.file);
       if ((fileType === 'ts' || fileType === 'js')) {
         if (event.action === 'delete') {

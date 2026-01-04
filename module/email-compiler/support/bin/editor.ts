@@ -88,7 +88,7 @@ export class EditorService {
 
     process.send({ type: 'init' });
 
-    await WatchUtil.watchCompiler(async ({ file }) => {
+    await WatchUtil.watchCompilerEvents('change', async ({ file }) => {
       if (EmailCompileUtil.isTemplateFile(file) && await EmailCompiler.spawnCompile(file)) {
         await this.#response(this.#renderFile(file),
           result => ({ type: 'compiled', ...result }),
