@@ -71,7 +71,7 @@ export class ExecUtil {
   /**
    * Defer control to subprocess execution, mainly used for nested execution
    */
-  static async deferToSubprocess(child: ChildProcess, relayInterrupt: boolean = false): Promise<ExecutionResult> {
+  static async deferToSubprocess(child: ChildProcess, relayInterrupt: boolean = true): Promise<ExecutionResult> {
     if (!relayInterrupt) {
       process.removeAllListeners('SIGINT'); // Remove any existing listeners
       process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle

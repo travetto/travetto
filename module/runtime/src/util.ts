@@ -2,19 +2,8 @@ import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
 
 import { castTo } from './types.ts';
-import { AppError } from './error.ts';
 
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
-
-export type RunWithResultOptions = {
-  run: (config: { signal: AbortSignal, iteration: number }) => Promise<unknown>;
-  timeout?: number;
-  maxRetries?: number
-  restartDelay?: number;
-  onRestart?: (config: { iteration: number }) => (unknown | Promise<unknown>);
-  onFailure?: (config: { iteration: number }) => (unknown | Promise<unknown>);
-  onInit?: (stop: () => void) => Function;
-}
 
 /**
  * Grab bag of common utilities
@@ -140,70 +129,5 @@ export class Util {
     } else {
       return () => true;
     }
-  }
-
-  /**
-   * Retry an operation, with a custom conflict handler
-   * @param operation The operation to retry
-   * @param isHandledConflict Function to determine if the error is a handled conflict
-   * @param maxTries Maximum number of retries
-   */
-  static async acquireWithRetry<T>(
-    operation: () => T | Promise<T>,
-    prepareRetry: (error: unknown, count: number) => (void | undefined | boolean | Promise<(void | undefined | boolean)>),
-    maxTries = 5,
-  ): Promise<T> {
-    for (let i = 0; i < maxTries; i++) {
-      try {
-        return await operation();
-      } catch (error) {
-        if (i === maxTries - 1 || await prepareRetry(error, i) === false) {
-          throw error; // Stop retrying if we reached max tries or prepareRetry returns false
-        }
-      }
-    }
-
-    throw new AppError(`Operation failed after ${maxTries} attempts`);
-  }
-
-
-  /**
-   * Run with restart capability
-   */
-  static async runWithRestart(config: RunWithResultOptions): Promise<void> {
-    const timeout = config?.timeout ?? 10 * 1000;
-    const restartDelay = config.restartDelay ?? 100;
-    const iterations = new Array(config?.maxRetries ?? 10).fill(Date.now());
-    const controller = new AbortController();
-    const { signal } = controller;
-    const cleanup = config.onInit?.(() => controller.abort()) ?? undefined;
-    let timeoutExceeded = false;
-    let result;
-    let iteration = 0;
-
-    while (!signal.aborted && !timeoutExceeded && result !== false) {
-
-      if (iteration > 0) {
-        await this.nonBlockingTimeout(restartDelay);
-        await config?.onRestart?.({ iteration });
-      }
-
-      iteration += 1;
-      try {
-        result = await config.run({ signal, iteration });
-      } catch {
-        // Error happened
-      }
-
-      iterations.push(Date.now());
-      iterations.shift();
-      timeoutExceeded = (Date.now() - iterations[0]) > timeout;
-    }
-
-    if (timeoutExceeded) {
-      await config?.onFailure?.({ iteration });
-    }
-
-    cleanup?.();
   }
 }

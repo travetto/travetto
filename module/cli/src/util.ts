@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Util, Runtime, ShutdownManager, watchFiles } from '@travetto/runtime';
+import { Env, ExecUtil, Runtime, ShutdownManager, type RunResult, WatchUtil } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -9,11 +9,6 @@ const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFIL
 const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
   !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
 );
-
-type RunWithRestartOptions = {
-  maxRetriesPerMinute?: number;
-  relayInterrupt?: boolean;
-};
 
 export class CliUtil {
   /**
@@ -33,28 +28,33 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
+  static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<boolean> {
     if (cmd.restartOnChange !== true) {
       ExecUtil.listenForRestartSignal();
       return false;
     }
 
     let subProcess: ChildProcess | undefined;
-    void watchFiles(() => ExecUtil.sendRestartSignal(subProcess));
+    void WatchUtil.watchFiles(() => ExecUtil.sendRestartSignal(subProcess));
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
-    await Util.runWithRestart({
-      onInit: stop => ShutdownManager.onGracefulShutdown(stop),
+    await WatchUtil.runWithRestart({
+      registerShutdown: stop => ShutdownManager.onGracefulShutdown(stop),
       onRestart: ({ iteration }) => console.error('Restarting...', { pid: process.pid, iteration }),
       onFailure: ({ iteration }) => console.error('Max restarts exceeded, exiting...', { pid: process.pid, iteration }),
-      run: async () => {
+      run: async (): Promise<RunResult> => {
         const result = await ExecUtil.deferToSubprocess(
           subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
-          config?.relayInterrupt ?? true
         );
-        // Did we exit due to restart request?
-        return result.code === ExecUtil.RESTART_CODE;
+
+        if (result.code > 0) {
+          return 'error';
+        } else if (result.code === ExecUtil.RESTART_CODE) {
+          return 'restart';
+        } else {
+          return 'stop';
+        }
       }
     });
 

@@ -1,4 +1,4 @@
-import { Runtime, toConcrete, Util } from '@travetto/runtime';
+import { Runtime, WatchUtil, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
@@ -29,7 +29,7 @@ export class WebHttpCommand implements CliCommandShape {
     const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
 
     if (this.killConflict) {
-      const handle = await Util.acquireWithRetry(() => instance.serve(), NetUtil.freePortOnConflict, 5);
+      const handle = await WatchUtil.acquireWithRetry(() => instance.serve(), NetUtil.freePortOnConflict, 5);
       return handle.complete;
     } else {
       const handle = await instance.serve();

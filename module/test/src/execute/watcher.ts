@@ -1,7 +1,7 @@
 import { ManifestModuleUtil } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
-import { AsyncQueue, TimeUtil, watchCompiler } from '@travetto/runtime';
+import { AsyncQueue, TimeUtil, WatchUtil } from '@travetto/runtime';
 
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
@@ -54,7 +54,7 @@ export class TestWatcher {
       }
     );
 
-    await watchCompiler(event => {
+    await WatchUtil.watchCompiler(event => {
       const fileType = ManifestModuleUtil.getFileType(event.file);
       if ((fileType === 'ts' || fileType === 'js')) {
         if (event.action === 'delete') {
