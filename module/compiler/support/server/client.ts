@@ -91,12 +91,10 @@ export class CompilerClient {
   }
 
   /** Fetch compiler events */
-  fetchEvents<
+  async * fetchEvents<
     V extends CompilerEventType,
     T extends (CompilerEvent & { type: V })['payload']
-  >(type: V, config?: FetchEventsConfig<T>): AsyncIterable<T>;
-  fetchEvents(type: 'all', config?: FetchEventsConfig<CompilerEvent>): AsyncIterable<CompilerEvent>;
-  async * fetchEvents<T = unknown>(type: string, config: FetchEventsConfig<T> = {}): AsyncIterable<T> {
+  >(type: V, config: FetchEventsConfig<T> = {}): AsyncIterable<T> {
     let info = await this.info();
     if (!info) {
       return;

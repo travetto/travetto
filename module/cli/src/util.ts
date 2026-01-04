@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime, ShutdownManager, watchFiles } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Util, Runtime, ShutdownManager, watchFiles } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -44,7 +44,7 @@ export class CliUtil {
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
-    await ExecUtil.runWithRestart({
+    await Util.runWithRestart({
       onRestart: () => console.error('Restarting...', { pid: process.pid }),
       onFailure: () => console.error('Max restarts exceeded, exiting...', { pid: process.pid }),
       run: async () => {

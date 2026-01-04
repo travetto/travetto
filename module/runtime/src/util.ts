@@ -6,6 +6,16 @@ import { AppError } from './error.ts';
 
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
 
+type RunWithResultOptions = {
+  run: (config: { signal: AbortSignal, iteration: number }) => Promise<unknown>;
+  timeout?: number;
+  maxRetries?: number
+  restartDelay?: number;
+  onRestart?: () => (unknown | Promise<unknown>);
+  onFailure?: () => (unknown | Promise<unknown>);
+  onInit?: (controller: AbortController) => Function;
+}
+
 /**
  * Grab bag of common utilities
  */
@@ -67,6 +77,18 @@ export class Util {
           result = castTo(await fn(result, idx));
         }
         yield result;
+      }
+    }
+  }
+
+  /**
+   * Map an async iterable with various mapping functions
+   */
+  static async * filterAsyncIterable<T>(input: AsyncIterable<T>, predicate: (input: T, index: number) => boolean): AsyncIterable<T> {
+    let idx = -1;
+    for await (const item of input) {
+      if (predicate(item, idx += 1)) {
+        yield item;
       }
     }
   }
@@ -142,5 +164,46 @@ export class Util {
     }
 
     throw new AppError(`Operation failed after ${maxTries} attempts`);
+  }
+
+
+  /**
+   * Run with restart capability
+   */
+  static async runWithRestart(config: RunWithResultOptions): Promise<void> {
+    const timeout = config?.timeout ?? 10 * 1000;
+    const restartDelay = config.restartDelay ?? 100;
+    const iterations = new Array(config?.maxRetries ?? 10).fill(Date.now());
+    const controller = new AbortController();
+    const { signal } = controller;
+    const cleanup = config.onInit?.(controller) ?? undefined;
+    let timeoutExceeded = false;
+    let result;
+    let iteration = 0;
+
+    while (!signal.aborted && !timeoutExceeded && result !== false) {
+
+      if (iteration > 0) {
+        await this.nonBlockingTimeout(restartDelay);
+        await config?.onRestart?.();
+      }
+
+      iteration += 1;
+      try {
+        result = await config.run({ signal, iteration });
+      } catch {
+        // Error happened
+      }
+
+      iterations.push(Date.now());
+      iterations.shift();
+      timeoutExceeded = (Date.now() - iterations[0]) > timeout;
+    }
+
+    if (timeoutExceeded) {
+      await config?.onFailure?.();
+    }
+
+    cleanup?.();
   }
 }

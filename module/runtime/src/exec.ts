@@ -1,21 +1,10 @@
 import { type ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
-import { setTimeout } from 'node:timers/promises';
 
 import { castTo } from './types.ts';
 
 const ResultSymbol = Symbol();
-
-type RunWithResultOptions = {
-  run: (config: { signal: AbortSignal, iteration: number }) => Promise<unknown>;
-  timeout?: number;
-  maxRetries?: number
-  restartDelay?: number;
-  onRestart?: () => (unknown | Promise<unknown>);
-  onFailure?: () => (unknown | Promise<unknown>);
-  onInit?: (controller: AbortController) => Function;
-}
 
 /**
  * Result of an execution
@@ -105,46 +94,6 @@ export class ExecUtil {
     process.off('message', toMessage);
     process.off('SIGINT', interrupt);
     return result;
-  }
-
-  /**
-   * Run with restart capability
-   */
-  static async runWithRestart(config: RunWithResultOptions): Promise<void> {
-    const timeout = config?.timeout ?? 10 * 1000;
-    const restartDelay = config.restartDelay ?? 100;
-    const iterations = new Array(config?.maxRetries ?? 10).fill(Date.now());
-    const controller = new AbortController();
-    const { signal } = controller;
-    const cleanup = config.onInit?.(controller) ?? undefined;
-    let timeoutExceeded = false;
-    let result;
-    let iteration = 0;
-
-    while (!signal.aborted && !timeoutExceeded && result !== false) {
-
-      if (iteration > 0) {
-        await setTimeout(restartDelay);
-        await config?.onRestart?.();
-      }
-
-      iteration += 1;
-      try {
-        result = await config.run({ signal, iteration });
-      } catch {
-        // Error happened
-      }
-
-      iterations.push(Date.now());
-      iterations.shift();
-      timeoutExceeded = (Date.now() - iterations[0]) > timeout;
-    }
-
-    if (timeoutExceeded) {
-      await config?.onFailure?.();
-    }
-
-    cleanup?.();
   }
 
   /**
