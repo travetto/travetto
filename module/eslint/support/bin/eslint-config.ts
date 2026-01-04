@@ -1,4 +1,4 @@
-import { configs } from '@eslint/js';
+import eslintJs from '@eslint/js';
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import stylisticPlugin from '@stylistic/eslint-plugin';
 import unusedImports from 'eslint-plugin-unused-imports';
@@ -23,7 +23,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
   const extra: (typeof STD_RULES)[] = JSONUtil.readFileSync(overrides, []);
 
   const result = [
-    configs.recommended,
+    eslintJs.configs.recommended,
     { ignores: IGNORES, },
     {
       ...TS_OPTIONS,

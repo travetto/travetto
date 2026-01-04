@@ -32,7 +32,7 @@ export class EmailCompileCommand implements CliCommandShape {
     if (this.watch) {
       await WatchUtil.watchCompilerEvents('change', ({ file }) => {
         if (EmailCompileUtil.isTemplateFile(file)) {
-          return EmailCompiler.spawnCompile(file)
+          return EmailCompiler.spawnCompile(file);
         }
       });
     }

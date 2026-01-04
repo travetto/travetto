@@ -91,7 +91,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     if (flags & (ts.SymbolFlags.TypeAlias | ts.SymbolFlags.ExportValue)
       && text?.startsWith('typeof')
     ) {
-      return { category: 'managed', type }
+      return { category: 'managed', type };
     }
     return { category: 'shape', type };
   } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
@@ -110,7 +110,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
       return { category: 'literal', type };
     } else if (sourceFile && ManifestModuleUtil.TYPINGS_EXT_REGEX.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
       return { category: 'foreign', type: resolvedType };
-    } else if (!resolvedType.isClass()) { // Not a real type    
+    } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
     } else {
       return { category: 'managed', type: resolvedType };

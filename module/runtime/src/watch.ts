@@ -7,20 +7,18 @@ import { ShutdownManager } from './shutdown';
 import { castTo } from './types';
 
 type RetryRunState = {
-  signal: AbortSignal;
   iteration: number;
   startTime: number;
-  failureIterations: number;
+  errorIterations: number;
   result?: 'error' | 'restart' | 'stop';
-  retryExhausted?: boolean;
 };
 
 type RetryRunConfig = {
   maxRetries: number;
   maxRetryWindow: number;
-  onRetry: (config: RetryRunState) => (unknown | Promise<unknown>);
-  onRetryExhausted: (config: RetryRunState) => (unknown | Promise<unknown>);
-}
+  signal?: AbortSignal;
+  onRetry: (state: RetryRunState, config: RetryRunConfig) => (unknown | Promise<unknown>);
+};
 
 /**
  * Utilities for watching resources
@@ -45,6 +43,14 @@ export class WatchUtil {
       if (event === 'WATCH_RESTART') { this.triggerRestart(); }
     });
   }
+
+  /** Compute the delay before restarting */
+  static computeRestartDelay(state: RetryRunState, config: RetryRunConfig): number {
+    return state.result === 'error'
+      ? config.maxRetryWindow / (config.maxRetries + 1)
+      : 10;
+  }
+
   /**
    * Retry an operation, with a custom conflict handler
    * @param operation The operation to retry
@@ -72,46 +78,46 @@ export class WatchUtil {
   /**
    * Run with restart capability
    */
-  static async runWithRetry(run: (config: RetryRunState) => Promise<RetryRunState['result']>, options?: Partial<RetryRunConfig>): Promise<void> {
+  static async runWithRetry(run: (state: RetryRunState & { signal: AbortSignal }) => Promise<RetryRunState['result']>, options?: Partial<RetryRunConfig>): Promise<void> {
     const controller = new AbortController();
     const cleanup = ShutdownManager.onGracefulShutdown(() => controller.abort());
+    let retryExhausted = false;
+
+    const state: RetryRunState = {
+      iteration: 0,
+      errorIterations: 0,
+      startTime: Date.now()
+    };
 
     const config: RetryRunConfig = {
       maxRetryWindow: 10 * 1000,
       maxRetries: 10,
-      onRetry: async (state) => Util.nonBlockingTimeout(state.failureIterations ? config.maxRetryWindow / (config.maxRetries * 10) : 10),
-      onRetryExhausted: async (state) => { throw new AppError(`Operation failed after ${state.failureIterations} attempts`); },
+      onRetry: () => Util.nonBlockingTimeout(this.computeRestartDelay(state, config)),
       ...options,
     };
 
-    const state: RetryRunState = {
-      signal: controller.signal,
-      iteration: 0,
-      failureIterations: 0,
-      startTime: Date.now()
-    };
 
-    while (!state.signal.aborted && !state.retryExhausted) {
+    while (!controller.signal.aborted && !retryExhausted) {
       if (state.iteration > 0) {
-        await config.onRetry(state);
+        await config.onRetry(state, config);
       }
 
-      state.result = await run(state).catch(() => 'error' as 'error');
+      state.result = await run({ ...state, signal: controller.signal }).catch(() => 'error' as const);
       switch (state.result) {
         case 'stop': controller.abort(); break;
-        case 'error': state.failureIterations += 1; break;
+        case 'error': state.errorIterations += 1; break;
         case 'restart': {
           state.startTime = Date.now();
-          state.failureIterations = 0;
+          state.errorIterations = 0;
         }
       }
 
-      state.retryExhausted = (state.failureIterations >= config.maxRetries) || (Date.now() - state.startTime >= config.maxRetryWindow);
+      retryExhausted = (state.errorIterations >= config.maxRetries) || (Date.now() - state.startTime >= config.maxRetryWindow);
       state.iteration += 1;
     }
 
-    if (state.retryExhausted) {
-      await config.onRetryExhausted(state);
+    if (retryExhausted) {
+      throw new AppError(`Operation failed after ${state.errorIterations} attempts`);
     }
 
     cleanup?.();
@@ -132,7 +138,7 @@ export class WatchUtil {
       if (!await client.isWatching()) { // If we get here, without a watch
         return 'error';
       } else {
-        for await (const event of client.fetchEvents(type, { signal: signal, enforceIteration: true })) {
+        for await (const event of client.fetchEvents(type, { signal, enforceIteration: true })) {
           await onChange(castTo(event));
         }
         return 'restart';

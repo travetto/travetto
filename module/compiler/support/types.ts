@@ -33,4 +33,5 @@ export type CompilerServerInfo = {
 };
 
 const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all', 'file']);
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const isComplilerEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);

@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { Env, ExecUtil, Runtime, ShutdownManager, WatchUtil } from '@travetto/runtime';
+import { Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -39,16 +39,25 @@ export class CliUtil {
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
+    const log = (msg: string, extra?: Record<string, unknown>): void => {
+      console.error(`[cli-restart] ${msg}`, { pid: process.pid, ...extra });
+    };
+
     await WatchUtil.runWithRetry(
       async () => {
         const { code } = await ExecUtil.deferToSubprocess(
           subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
         );
         return WatchUtil.exitCodeToResult(code);
-      }, {
-      onRetry: ({ signal: _, startTime: __, ...state }) => console.error('Restarting...', { pid: process.pid, ...state }),
-      onRetryExhausted: ({ signal: _, startTime: __, ...state }) => console.error('Max restarts exceeded, exiting...', { pid: process.pid, ...state }),
-    });
+      },
+      {
+        maxRetries: 5,
+        onRetry: async (state, config) => {
+          const duration = WatchUtil.computeRestartDelay(state, config);
+          log('Restarting subprocess due to change...', { waiting: duration, iteration: state.iteration, errorIterations: state.errorIterations || undefined });
+          await Util.nonBlockingTimeout(duration);
+        },
+      });
 
     await ShutdownManager.gracefulShutdown('cli-restart');
     process.exit();
@@ -70,7 +79,7 @@ export class CliUtil {
 
     const env: Record<string, string> = {};
     const request = {
-      type: `@travetto/cli:run`,
+      type: '@travetto/cli:run',
       data: {
         name: cmd._cfg!.name,
         env,

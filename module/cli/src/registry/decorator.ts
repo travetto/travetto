@@ -29,11 +29,11 @@ type WithHandler<K extends keyof WithConfig> = (config?: WithConfig[K]) => ({
   name: K;
   field: Partial<SchemaFieldConfig>;
   run?: (cmd: Cmd) => (Promise<unknown> | unknown);
-} | undefined)
+} | undefined);
 
 const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
   env: (config) => {
-    if (!config) return;
+    if (!config) { return; }
     return {
       name: 'env',
       run: cmd => Env.TRV_ENV.set(cmd.env || Runtime.env),
@@ -43,10 +43,10 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
         description: 'Application environment',
         required: { active: false },
       },
-    }
+    };
   },
   module: (config) => {
-    if (!config) return;
+    if (!config) { return; }
     return {
       name: 'module',
       field: {
@@ -56,10 +56,10 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
         specifiers: ['module'],
         required: { active: Runtime.monoRoot },
       },
-    }
+    };
   },
   debugIpc: (config) => {
-    if (!config) return;
+    if (!config) { return; }
     return {
       name: 'debugIpc',
       run: cmd => CliUtil.runWithDebugIpc(cmd).then((executed) => executed && process.exit(0)),
@@ -73,7 +73,7 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
     };
   },
   restartOnChange: (config) => {
-    if (!config) return;
+    if (!config) { return; }
     return {
       name: 'restartOnChange',
       run: cmd => CliUtil.runWithRestartOnChange(cmd),
