@@ -134,6 +134,7 @@ export class WatchUtil {
   static async watchCompilerEvents<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
     type: K,
     onChange: (input: T) => unknown,
+    filter?: (input: T) => boolean,
     options?: Partial<RetryRunConfig>,
   ): Promise<void> {
     const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
@@ -146,7 +147,9 @@ export class WatchUtil {
         return 'error';
       } else {
         for await (const event of client.fetchEvents(type, { signal, enforceIteration: true })) {
-          await onChange(castTo(event));
+          if (!filter || filter(castTo(event))) {
+            await onChange(castTo(event));
+          }
         }
         return 'restart';
       }

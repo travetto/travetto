@@ -88,13 +88,13 @@ export class EditorService {
 
     process.send({ type: 'init' });
 
-    await WatchUtil.watchCompilerEvents('change', async ({ file }) => {
-      if (EmailCompileUtil.isTemplateFile(file) && await EmailCompiler.spawnCompile(file)) {
-        await this.#response(this.#renderFile(file),
+    await WatchUtil.watchCompilerEvents('change',
+      ({ file }) => EmailCompiler.spawnCompile(file).then(success =>
+        success ? this.#response(this.#renderFile(file),
           result => ({ type: 'compiled', ...result }),
           error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
-        );
-      }
-    });
+        ) : undefined
+      ),
+      ({ file }) => EmailCompileUtil.isTemplateFile(file));
   }
 }

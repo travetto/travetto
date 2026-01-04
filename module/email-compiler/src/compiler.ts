@@ -100,7 +100,6 @@ export class EmailCompiler {
     } else {
       console.log('Successfully compiled template', { changed: [file] });
     }
-
     return result.valid;
   }
 }
