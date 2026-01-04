@@ -22,14 +22,6 @@ export class NetUtil {
     }
   }
 
-  /** Free port if in use */
-  static async freePort(port: number): Promise<void> {
-    const processId = await this.getPortProcessId(port);
-    if (processId) {
-      process.kill(processId);
-    }
-  }
-
   /** Find free port */
   static async getFreePort(): Promise<number> {
     return new Promise<number>((resolve, reject) => {
@@ -64,12 +56,15 @@ export class NetUtil {
    * @param error The error that may indicate a port conflict
    * @returns Returns true if the port was freed, false if not handled
    */
-  static async freePortOnConflict(error: unknown): Promise<boolean> {
-    if (NetUtil.isPortUsedError(error) && typeof error.port === 'number') {
-      await NetUtil.freePort(error.port);
-      return true;
-    } else {
-      return false;
+  static async freePortOnConflict(error: unknown): Promise<{ processId?: number, port: number } | undefined> {
+    if (this.isPortUsedError(error)) {
+      const processId = await this.getPortProcessId(error.port);
+      if (processId) {
+        process.kill(processId);
+        return { processId, port: error.port };
+      } else {
+        return { port: error.port };
+      }
     }
   }
 }

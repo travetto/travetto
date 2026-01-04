@@ -461,7 +461,7 @@ If the goal is to run a more complex application, which may include depending on
 
 **Code: Simple Run Target**
 ```typescript
-import { Runtime, WatchUtil, toConcrete } from '@travetto/runtime';
+import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
@@ -491,12 +491,16 @@ export class WebHttpCommand implements CliCommandShape {
     await Registry.init();
     const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
 
-    if (this.killConflict) {
-      const handle = await WatchUtil.acquireWithRetry(() => instance.serve(), NetUtil.freePortOnConflict, 5);
-      return handle.complete;
-    } else {
+    try {
       const handle = await instance.serve();
       return handle.complete;
+    } catch (err) {
+      const result = this.killConflict ? await NetUtil.freePortOnConflict(err) : undefined;
+      if (result?.processId) {
+        console.warn('Killed process owning port', result);
+        process.exit(1);
+      }
+      throw err;
     }
   }
 }
