@@ -41,8 +41,7 @@ export class CliUtil {
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
-    await WatchUtil.runWithRestart({
-      registerShutdown: stop => ShutdownManager.onGracefulShutdown(stop),
+    await WatchUtil.runWithRetry({
       onRestart: ({ iteration }) => console.error('Restarting...', { pid: process.pid, iteration }),
       onFailure: ({ iteration }) => console.error('Max restarts exceeded, exiting...', { pid: process.pid, iteration }),
       run: async (): Promise<RunResult> => {

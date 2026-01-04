@@ -1,9 +1,11 @@
 import type { CompilerClient } from '@travetto/compiler/support/server/client.ts';
+import type { CompilerChangeEvent, CompilerEventPayload, CompilerEventType, FileChangeEvent } from '@travetto/compiler/support/types.ts';
+
 import { AppError } from './error';
 import { Util } from './util';
 import { RuntimeIndex } from './manifest-index';
-import type { CompilerChangeEvent, FileChangeEvent } from 'module/compiler/support/types';
 import { ShutdownManager } from './shutdown';
+import { castTo } from './types';
 
 export type RunResult = 'error' | 'restart' | 'stop';
 
@@ -16,17 +18,18 @@ type RunState = {
   retryExhausted?: boolean;
 };
 
-export type RunWithResultOptions = {
+type RunWithResultOptions = {
   maxRetries?: number;
   maxRetryWindow?: number;
   run: (config: RunState) => Promise<RunResult>;
-  restartDelay?: number | ((config: RunState) => number);
+  restartDelay?: (config: RunState) => number;
   onRestart?: (config: RunState) => (unknown | Promise<unknown>);
   onFailure?: (config: RunState) => (unknown | Promise<unknown>);
-  registerShutdown?: (stop: () => void) => Function;
 }
 
 type WatchOptions = Pick<RunWithResultOptions, 'onRestart' | 'maxRetryWindow' | 'maxRetries'>;
+
+const validSourceFile = (event: CompilerChangeEvent) => !!(event.import || RuntimeIndex.findModuleForArbitraryFile(event.file))
 
 /**
  * Utilities for watching resources
@@ -45,16 +48,21 @@ export class WatchUtil {
     });
   }
 
-  static async #streamSource<T>(config: { source: AsyncIterable<T>, onChange: (input: T) => unknown, signal: AbortSignal, filter?: (input: T) => boolean }): Promise<RunResult> {
+  static async #streamCompiler<K extends CompilerEventType, T extends CompilerEventPayload<K>>(config: {
+    type: K,
+    onChange: (input: T) => unknown,
+    signal: AbortSignal,
+    filter?: (input: T) => boolean
+  }): Promise<RunResult> {
     const client = await this.#getClient();
     await client.waitForState(['compile-end', 'watch-start'], undefined, config.signal);
 
     if (!await client.isWatching()) { // If we get here, without a watch
       return 'error';
     } else {
-      for await (const event of config.source) {
-        if (config.filter === undefined || config.filter(event)) {
-          await config.onChange(event);
+      for await (const event of client.fetchEvents(config.type, { signal: config.signal, enforceIteration: true })) {
+        if (config.filter === undefined || config.filter(castTo(event))) {
+          await config.onChange(castTo(event));
         }
       }
       return 'restart';
@@ -88,12 +96,12 @@ export class WatchUtil {
   /**
    * Run with restart capability
    */
-  static async runWithRestart(config: RunWithResultOptions): Promise<void> {
+  static async runWithRetry(config: RunWithResultOptions): Promise<void> {
     const controller = new AbortController();
     const maxRetryWindow = config?.maxRetryWindow ?? (10 * 1000) // 10 seconds default;
     const maxRetries = config?.maxRetries ?? 10; // 10 retries default;
-    const restartDelay = typeof config.restartDelay === 'function' ? config.restartDelay : () => (config.restartDelay as number) ?? 100;
-    const cleanup = config.registerShutdown?.(() => controller.abort()) ?? undefined;
+    const restartDelay = config.restartDelay ?? (({ failureIterations }) => 100 * failureIterations + 10);
+    const cleanup = ShutdownManager.onGracefulShutdown(controller.abort);
     const state: RunState = { signal: controller.signal, iteration: 0, failureIterations: 0, startTime: Date.now() };
 
     while (!state.signal.aborted && !state.retryExhausted) {
@@ -119,7 +127,11 @@ export class WatchUtil {
     }
 
     if (state.retryExhausted) {
-      await config?.onFailure?.(state);
+      if (config.onFailure) {
+        await config?.onFailure?.(state);
+      } else {
+        throw new AppError(`Operation failed after ${maxRetries + 1} attempts`);
+      }
     }
 
     cleanup?.();
@@ -127,32 +139,17 @@ export class WatchUtil {
 
   /**  Watch compiler for source code changes */
   static async watchCompiler(onChange: (input: CompilerChangeEvent) => unknown, options?: WatchOptions): Promise<void> {
-    const client = await this.#getClient();
-    return WatchUtil.runWithRestart({
+    return WatchUtil.runWithRetry({
       ...options,
-      registerShutdown: stop => ShutdownManager.onGracefulShutdown(stop),
-      restartDelay: ({ failureIterations }) => 100 * failureIterations + 10,
-      run: ({ signal }) => this.#streamSource({
-        source: client.fetchEvents('change', { signal, enforceIteration: true }),
-        onChange,
-        signal,
-        filter: event => !!(event.import || RuntimeIndex.findModuleForArbitraryFile(event.file))
-      })
+      run: ({ signal }) => this.#streamCompiler({ type: 'change', onChange, signal, filter: validSourceFile })
     });
   }
 
   /** Watch for any file changes */
   static async watchFiles(onChange: (input: FileChangeEvent) => unknown, options?: WatchOptions): Promise<void> {
-    const client = await this.#getClient();
-    return WatchUtil.runWithRestart({
+    return WatchUtil.runWithRetry({
       ...options,
-      registerShutdown: stop => ShutdownManager.onGracefulShutdown(stop),
-      restartDelay: ({ failureIterations }) => 100 * failureIterations + 10,
-      run: ({ signal }) => this.#streamSource({
-        source: client.fetchEvents('file', { signal, enforceIteration: true }),
-        onChange,
-        signal
-      }),
+      run: ({ signal }) => this.#streamCompiler({ type: 'file', onChange, signal }),
     });
   }
 }
