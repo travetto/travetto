@@ -57,7 +57,7 @@ export class CompilerWatcher {
     return [...ignores].toSorted().map(ignore => ignore.endsWith('/') ? ignore : `${ignore}/`);
   }
 
-  #toCandidateEvent(action: CompilerWatchEvent['action'], file: string): CompilerWatchEventCandidate {
+  #toCandidateEvent({ action, file }: Pick<CompilerWatchEvent, 'action' | 'file'>): CompilerWatchEventCandidate {
     let entry = this.#state.getBySource(file);
     const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
     if (mod && action === 'create' && !entry) {
@@ -182,7 +182,7 @@ export class CompilerWatcher {
         }
 
         const items = filesChanged
-          .map(event => this.#toCandidateEvent(event.action, event.file))
+          .map(event => this.#toCandidateEvent(event))
           .filter(event => this.#isValidEvent(event));
 
         if (items.length === 0) {
