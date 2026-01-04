@@ -7,27 +7,23 @@ import { RuntimeIndex } from './manifest-index';
 import { ShutdownManager } from './shutdown';
 import { castTo } from './types';
 
-type RunResult = 'error' | 'restart' | 'stop';
-
 type RunState = {
   signal: AbortSignal;
   iteration: number;
   startTime: number;
   failureIterations: number;
-  result?: RunResult;
+  result?: 'error' | 'restart' | 'stop';
   retryExhausted?: boolean;
 };
 
 type RunWithResultOptions = {
   maxRetries?: number;
   maxRetryWindow?: number;
-  run: (config: RunState) => Promise<RunResult>;
+  run: (config: RunState) => Promise<RunState['result']>;
   restartDelay?: (config: RunState) => number;
   onRestart?: (config: RunState) => (unknown | Promise<unknown>);
   onFailure?: (config: RunState) => (unknown | Promise<unknown>);
 }
-
-type WatchOptions = Pick<RunWithResultOptions, 'onRestart' | 'maxRetryWindow' | 'maxRetries'>;
 
 const validSourceFile = (event: CompilerChangeEvent) => !!(event.import || RuntimeIndex.findModuleForArbitraryFile(event.file))
 
@@ -53,7 +49,7 @@ export class WatchUtil {
     onChange: (input: T) => unknown,
     signal: AbortSignal,
     filter?: (input: T) => boolean
-  }): Promise<RunResult> {
+  }): Promise<RunState['result']> {
     const client = await this.#getClient();
     await client.waitForState(['compile-end', 'watch-start'], undefined, config.signal);
 
@@ -137,7 +133,7 @@ export class WatchUtil {
   }
 
   /**  Watch compiler for source code changes */
-  static async watchCompiler(onChange: (input: CompilerChangeEvent) => unknown, options?: WatchOptions): Promise<void> {
+  static async watchCompiler(onChange: (input: CompilerChangeEvent) => unknown, options?: Omit<RunWithResultOptions, 'run'>): Promise<void> {
     return WatchUtil.runWithRetry({
       ...options,
       run: ({ signal }) => this.#streamCompiler({ type: 'change', onChange, signal, filter: validSourceFile })
@@ -145,7 +141,7 @@ export class WatchUtil {
   }
 
   /** Watch for any file changes */
-  static async watchFiles(onChange: (input: FileChangeEvent) => unknown, options?: WatchOptions): Promise<void> {
+  static async watchFiles(onChange: (input: FileChangeEvent) => unknown, options?: Omit<RunWithResultOptions, 'run'>): Promise<void> {
     return WatchUtil.runWithRetry({
       ...options,
       run: ({ signal }) => this.#streamCompiler({ type: 'file', onChange, signal }),
