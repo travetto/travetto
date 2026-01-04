@@ -31,3 +31,6 @@ export type CompilerServerInfo = {
   url: string;
   env?: Record<string, string>;
 };
+
+const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all', 'file']);
+export const isComplilerEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);

@@ -4,16 +4,16 @@ import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types.ts';
+import {
+  type CompilerMode, type CompilerProgressEvent, type CompilerEvent,
+  type CompilerEventType, type CompilerServerInfo, isComplilerEventType
+} from '../types.ts';
 import { Log } from '../log.ts';
 import { CommonUtil } from '../util.ts';
 import { CompilerClient } from './client.ts';
 import { ProcessHandle } from './process-handle.ts';
 
 const log = Log.scoped('server');
-
-const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all', 'file']);
-export const isValidEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);
 
 /**
  * Compiler Server Class
@@ -171,7 +171,7 @@ export class CompilerServer {
     let close = false;
     switch (action) {
       case 'event': {
-        if (isValidEventType(subAction)) {
+        if (isComplilerEventType(subAction)) {
           this.#addListener(subAction, response);
         }
         return;
