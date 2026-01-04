@@ -33,7 +33,7 @@ async function runWithRestart<T>(source: WatchSource<T>, onChange: ChangeHandler
   return ExecUtil.runWithRestart({
     ...config,
     onInit: (controller) => ShutdownManager.onGracefulShutdown(async () => controller.abort()),
-    run: async (signal: AbortSignal) => {
+    run: async ({ signal }) => {
       await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
 
       if (!await client.isWatching()) { // If we get here, without a watch

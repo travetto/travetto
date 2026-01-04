@@ -8,7 +8,7 @@ import { castTo } from './types.ts';
 const ResultSymbol = Symbol();
 
 type RunWithResultOptions = {
-  run: (signal: AbortSignal) => Promise<unknown>;
+  run: (config: { signal: AbortSignal, iteration: number }) => Promise<unknown>;
   timeout?: number;
   maxRetries?: number
   restartDelay?: number;
@@ -119,15 +119,17 @@ export class ExecUtil {
     let restarted = false;
     let timeoutExceeded = false;
     let result;
+    let iteration = 0;
 
     while (!signal.aborted && !timeoutExceeded && result !== false) {
 
       if (restarted) {
-        await setTimeout(config.restartDelay ?? 10);
+        await setTimeout(config.restartDelay ?? 100);
         await config?.onRestart?.();
       }
 
-      result = await config.run(signal);
+      iteration += 1;
+      result = await config.run({ signal, iteration });
 
       iterations.push(Date.now());
       iterations.shift();
