@@ -45,8 +45,9 @@ export class CliUtil {
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
     await Util.runWithRestart({
-      onRestart: () => console.error('Restarting...', { pid: process.pid }),
-      onFailure: () => console.error('Max restarts exceeded, exiting...', { pid: process.pid }),
+      onInit: stop => ShutdownManager.onGracefulShutdown(stop),
+      onRestart: ({ iteration }) => console.error('Restarting...', { pid: process.pid, iteration }),
+      onFailure: ({ iteration }) => console.error('Max restarts exceeded, exiting...', { pid: process.pid, iteration }),
       run: async () => {
         const result = await ExecUtil.deferToSubprocess(
           subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),

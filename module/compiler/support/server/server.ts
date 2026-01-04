@@ -112,7 +112,6 @@ export class CompilerServer {
       response.write('\n'); // Send at least one byte on listen
     }
 
-    // Do not wait on it
     response.on('close', () => {
       delete this.#listeners[type]?.[id];
       this.#listenersAll.delete(response);

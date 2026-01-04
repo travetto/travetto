@@ -11,8 +11,8 @@ export type RunWithResultOptions = {
   timeout?: number;
   maxRetries?: number
   restartDelay?: number;
-  onRestart?: () => (unknown | Promise<unknown>);
-  onFailure?: () => (unknown | Promise<unknown>);
+  onRestart?: (config: { iteration: number }) => (unknown | Promise<unknown>);
+  onFailure?: (config: { iteration: number }) => (unknown | Promise<unknown>);
   onInit?: (stop: () => void) => Function;
 }
 
@@ -185,7 +185,7 @@ export class Util {
 
       if (iteration > 0) {
         await this.nonBlockingTimeout(restartDelay);
-        await config?.onRestart?.();
+        await config?.onRestart?.({ iteration });
       }
 
       iteration += 1;
@@ -201,7 +201,7 @@ export class Util {
     }
 
     if (timeoutExceeded) {
-      await config?.onFailure?.();
+      await config?.onFailure?.({ iteration });
     }
 
     cleanup?.();

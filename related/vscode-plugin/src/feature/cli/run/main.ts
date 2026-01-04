@@ -67,7 +67,7 @@ export class CliRunFeature extends BaseFeature {
       const choice = await CliRunUtil.makeChoice(title, choices);
 
       if (choice) {
-        this.#storage.set(choice.key!, choice);
+        void this.#storage.set(choice.key!, choice);
         return this.debugTarget(choice, choice.inputs);
       }
     } catch (error) {
