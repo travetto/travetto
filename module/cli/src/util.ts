@@ -33,7 +33,7 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static async runWithRestartOnChange<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
+  static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
     if (cmd.restartOnChange !== true) {
       ExecUtil.listenForRestartSignal();
       return false;
@@ -82,9 +82,7 @@ export class CliUtil {
       data: {
         name: cmd._cfg!.name,
         env,
-        // TODO: Is this needed?
-        commandModule: describeFunction(cmd.constructor).module,
-        module: Runtime.main.name,
+        module: cmd.module ?? Runtime.main.name,
         args: process.argv.slice(3),
       }
     };
