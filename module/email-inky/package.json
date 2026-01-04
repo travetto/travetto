@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-inky",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "type": "module",
   "description": "Email Inky templating module",
   "keywords": [
@@ -28,14 +28,14 @@
     "directory": "module/email-inky"
   },
   "dependencies": {
-    "@travetto/config": "^7.0.0",
-    "@travetto/di": "^7.0.0",
-    "@travetto/email": "^7.0.0",
-    "@travetto/runtime": "^7.0.0",
+    "@travetto/config": "^7.0.1",
+    "@travetto/di": "^7.0.1",
+    "@travetto/email": "^7.0.1",
+    "@travetto/runtime": "^7.0.1",
     "foundation-emails": "^2.4.0"
   },
   "devDependencies": {
-    "@travetto/email-compiler": "^7.0.0"
+    "@travetto/email-compiler": "^7.0.1"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
