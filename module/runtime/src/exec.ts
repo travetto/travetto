@@ -80,9 +80,9 @@ export class ExecUtil {
   }
 
   /**
-   * Proxy subprocess execution bridging IPC
+   * Defer control to subprocess execution, mainly used for nested execution
    */
-  static async proxySubprocess(child: ChildProcess, relayInterrupt: boolean = false): Promise<ExecutionResult> {
+  static async deferToSubprocess(child: ChildProcess, relayInterrupt: boolean = false): Promise<ExecutionResult> {
     if (!relayInterrupt) {
       process.removeAllListeners('SIGINT'); // Remove any existing listeners
       process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
@@ -129,7 +129,11 @@ export class ExecUtil {
       }
 
       iteration += 1;
-      result = await config.run({ signal, iteration });
+      try {
+        result = await config.run({ signal, iteration });
+      } catch {
+        // Error happened
+      }
 
       iterations.push(Date.now());
       iterations.shift();

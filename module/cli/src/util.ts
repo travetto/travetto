@@ -49,7 +49,7 @@ export class CliUtil {
       onRestart: () => console.error('Restarting...', { pid: process.pid }),
       onFailure: () => console.error('Max restarts exceeded, exiting...', { pid: process.pid }),
       run: async () => {
-        const result = await ExecUtil.proxySubprocess(
+        const result = await ExecUtil.deferToSubprocess(
           subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
           config?.relayInterrupt ?? true
         );
