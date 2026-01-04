@@ -443,7 +443,7 @@ First we must start the application:
         namespace: <span class="token string">'app'</span>,
         port: <span class="token number">27017</span>,
         connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-        options: <span class="token punctuation">{{'{'}}</span> waitQueueTimeoutMS: <span class="token number">86400000</span> <span class="token punctuation">{{'}'}}</span>
+        options: <span class="token punctuation">{{'{'}}</span> waitQueueTimeoutMS: <span class="token number">0</span>, serverSelectionTimeoutMS: <span class="token number">1000</span> <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
       TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthConfig: <span class="token punctuation">{{'{'}}</span>

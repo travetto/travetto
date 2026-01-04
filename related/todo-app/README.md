@@ -417,7 +417,7 @@ npx trv web:http
         namespace: 'app',
         port: 27017,
         connectionOptions: {},
-        options: { waitQueueTimeoutMS: 86400000 }
+        options: { waitQueueTimeoutMS: 0, serverSelectionTimeoutMS: 1000 }
       },
       TrustProxyConfig: { applies: true, ips: [] },
       WebAuthConfig: {

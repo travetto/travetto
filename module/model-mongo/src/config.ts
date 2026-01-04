@@ -119,12 +119,12 @@ export class MongoModelConfig {
     const hosts = this.hosts!
       .map(host => (this.srvRecord || host.includes(':')) ? host : `${host}:${this.port ?? 27017}`)
       .join(',');
-    const options = new URLSearchParams(Object.entries(this.options));
+    const optionString = new URLSearchParams(Object.entries(this.options)).toString();
     let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(part => !!part).join(':')}@`;
     }
-    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${options.toString()}`;
+    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${optionString}`;
     return url;
   }
 }
