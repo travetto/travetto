@@ -112,19 +112,19 @@ export class ExecUtil {
    */
   static async runWithRestart(config: RunWithResultOptions): Promise<void> {
     const timeout = config?.timeout ?? 10 * 1000;
+    const restartDelay = config.restartDelay ?? 100;
     const iterations = new Array(config?.maxRetries ?? 10).fill(Date.now());
     const controller = new AbortController();
     const { signal } = controller;
     const cleanup = config.onInit?.(controller) ?? undefined;
-    let restarted = false;
     let timeoutExceeded = false;
     let result;
     let iteration = 0;
 
     while (!signal.aborted && !timeoutExceeded && result !== false) {
 
-      if (restarted) {
-        await setTimeout(config.restartDelay ?? 100);
+      if (iteration > 0) {
+        await setTimeout(restartDelay);
         await config?.onRestart?.();
       }
 
@@ -137,7 +137,6 @@ export class ExecUtil {
 
       iterations.push(Date.now());
       iterations.shift();
-      restarted = true;
       timeoutExceeded = (Date.now() - iterations[0]) > timeout;
     }
 

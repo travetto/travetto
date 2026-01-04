@@ -1,7 +1,7 @@
 import type { ChangeEventType } from '@travetto/manifest';
 
 import type { CompilerClient } from '@travetto/compiler/support/server/client.ts';
-import type { CompilerChangeEvent } from '@travetto/compiler/support/types.ts';
+import type { CompilerChangeEvent, FileChangeEvent } from '@travetto/compiler/support/types.ts';
 
 import { RuntimeIndex } from './manifest-index.ts';
 import { Util } from './util.ts';
@@ -62,12 +62,12 @@ export function watchCompiler(onChange: ChangeHandler<CompilerChangeEvent>, opti
   );
 }
 
-export function watchFiles(onChange: ChangeHandler<{ file: string, action: ChangeEventType }>, options?: WatchOptions): Promise<void> {
+export function watchFiles(onChange: ChangeHandler<FileChangeEvent>, options?: WatchOptions): Promise<void> {
   return runWithRestart(
     async function* (signal) {
       const client = await getClient();
       for await (const event of client.fetchEvents('file', { signal, enforceIteration: true })) {
-        yield* event.files;
+        yield event;
       }
     },
     onChange,

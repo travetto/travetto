@@ -143,15 +143,4 @@ export class Util {
 
     throw new AppError(`Operation failed after ${maxTries} attempts`);
   }
-
-  /**
-   * Simple Debounce operation
-   */
-  static debounce<T extends Function>(operation: T, window: number = 10): () => void {
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    return () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => operation(), window);
-    };
-  }
 }

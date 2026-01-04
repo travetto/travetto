@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime, ShutdownManager, Util, watchFiles } from '@travetto/runtime';
+import { describeFunction, Env, ExecUtil, Runtime, ShutdownManager, watchFiles } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -41,7 +41,7 @@ export class CliUtil {
     }
 
     let subProcess: ChildProcess | undefined;
-    void watchFiles(Util.debounce(() => ExecUtil.sendRestartSignal(subProcess)));
+    void watchFiles(() => ExecUtil.sendRestartSignal(subProcess));
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
