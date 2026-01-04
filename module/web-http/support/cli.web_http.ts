@@ -1,4 +1,4 @@
-import { Runtime, WatchUtil, toConcrete } from '@travetto/runtime';
+import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
@@ -25,15 +25,19 @@ export class WebHttpCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
-    await Registry.init();
-    const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
+    try {
+      await Registry.init();
+      const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
 
-    if (this.killConflict) {
-      const handle = await WatchUtil.acquireWithRetry(() => instance.serve(), NetUtil.freePortOnConflict, 5);
-      return handle.complete;
-    } else {
       const handle = await instance.serve();
       return handle.complete;
+    } catch (err) {
+      if (NetUtil.isPortUsedError(err) && this.killConflict) {
+        await NetUtil.freePort(err.port);
+        console.log(`Killed process on port ${err.port}`);
+        process.exit(1);
+      }
+      throw err;
     }
   }
 }
