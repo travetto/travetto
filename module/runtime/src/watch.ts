@@ -29,17 +29,7 @@ type RetryRunConfig = {
  */
 export class WatchUtil {
 
-  static #cachedClient: Promise<CompilerClient> | undefined = undefined;
-  static #getClient(): Promise<CompilerClient> {
-    return this.#cachedClient ??= import('@travetto/compiler/support/server/client.ts').then(async module => {
-      return new module.CompilerClient(RuntimeIndex.manifest, {
-        warn(message, ...args): void { console.error('warn', message, ...args); },
-        debug(message, ...args): void { console.error('debug', message, ...args); },
-        error(message, ...args): void { console.error('error', message, ...args); },
-        info(message, ...args): void { console.error('info', message, ...args); }
-      });
-    });
-  }
+  static #cachedClient: CompilerClient | undefined = undefined;
 
   /**
    * Retry an operation, with a custom conflict handler
@@ -116,13 +106,20 @@ export class WatchUtil {
   }
 
   /**  Watch compiler events  */
-  static watchCompilerEvents<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
+  static async watchCompilerEvents<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
     type: K,
     onChange: (input: T) => unknown,
     options?: Partial<RetryRunConfig>,
   ): Promise<void> {
+    const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
+    const client = this.#cachedClient ??= new CompilerClient(RuntimeIndex.manifest, {
+      warn(message, ...args): void { console.error('warn', message, ...args); },
+      debug(message, ...args): void { console.error('debug', message, ...args); },
+      error(message, ...args): void { console.error('error', message, ...args); },
+      info(message, ...args): void { console.error('info', message, ...args); }
+    });
+
     return this.runWithRetry(async ({ signal }) => {
-      const client = await this.#getClient();
       await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
 
       if (!await client.isWatching()) { // If we get here, without a watch
