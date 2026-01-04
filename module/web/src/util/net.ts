@@ -9,7 +9,7 @@ export class NetUtil {
 
   /** Is an error an address in use error */
   static isPortUsedError(error: unknown): error is Error & { port: number } {
-    return !!error && error instanceof Error && error.message.includes('EADDRINUSE');
+    return !!error && error instanceof Error && error.message.includes('EADDRINUSE') && 'port' in error && typeof error.port === 'number';
   }
 
   /** Get the port process id */
@@ -61,10 +61,8 @@ export class NetUtil {
       const processId = await this.getPortProcessId(error.port);
       if (processId) {
         process.kill(processId);
-        return { processId, port: error.port };
-      } else {
-        return { port: error.port };
       }
+      return { port: error.port, processId };
     }
   }
 }
