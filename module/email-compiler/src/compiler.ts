@@ -88,10 +88,6 @@ export class EmailCompiler {
    * Spawn the compiler for a given file
    */
   static async spawnCompile(file: string): Promise<boolean> {
-    if (!EmailCompileUtil.isTemplateFile(file)) {
-      return false;
-    }
-
     const child = spawn(process.argv0, [Runtime.trvEntryPoint, 'email:compile', file], {
       cwd: Runtime.mainSourcePath,
       env: { ...process.env },

@@ -7,6 +7,7 @@ import { EditorConfig } from './config.ts';
 import { EditorRequest, EditorResponse } from './types.ts';
 
 import { EmailCompiler } from '../../src/compiler.ts';
+import { EmailCompileUtil } from '../../src/util.ts';
 
 /**
  * Utils for interacting with editors
@@ -88,7 +89,7 @@ export class EditorService {
     process.send({ type: 'init' });
 
     await watchCompiler(async ({ file }) => {
-      if (await EmailCompiler.spawnCompile(file)) {
+      if (EmailCompileUtil.isTemplateFile(file) && await EmailCompiler.spawnCompile(file)) {
         await this.#response(this.#renderFile(file),
           result => ({ type: 'compiled', ...result }),
           error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
