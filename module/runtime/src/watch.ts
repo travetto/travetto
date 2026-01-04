@@ -7,7 +7,7 @@ import { RuntimeIndex } from './manifest-index';
 import { ShutdownManager } from './shutdown';
 import { castTo } from './types';
 
-type RunState = {
+type RetryRunState = {
   signal: AbortSignal;
   iteration: number;
   startTime: number;
@@ -16,13 +16,12 @@ type RunState = {
   retryExhausted?: boolean;
 };
 
-type RunWithResultOptions = {
-  maxRetries?: number;
-  maxRetryWindow?: number;
-  run: (config: RunState) => Promise<RunState['result']>;
-  restartDelay?: (config: RunState) => number;
-  onRestart?: (config: RunState) => (unknown | Promise<unknown>);
-  onFailure?: (config: RunState) => (unknown | Promise<unknown>);
+type RetryRunConfig = {
+  maxRetries: number;
+  maxRetryWindow: number;
+  restartDelay: (config: RetryRunState) => number;
+  onRestart: (config: RetryRunState) => (unknown | Promise<unknown>);
+  onFailure: (config: RetryRunState) => (unknown | Promise<unknown>);
 }
 
 const validSourceFile = (event: CompilerChangeEvent) => !!(event.import || RuntimeIndex.findModuleForArbitraryFile(event.file))
@@ -44,21 +43,22 @@ export class WatchUtil {
     });
   }
 
-  static async #streamCompiler<K extends CompilerEventType, T extends CompilerEventPayload<K>>(config: {
+  static async #compiler<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
     type: K,
     onChange: (input: T) => unknown,
     signal: AbortSignal,
     filter?: (input: T) => boolean
-  }): Promise<RunState['result']> {
+  ): Promise<RetryRunState['result']> {
     const client = await this.#getClient();
-    await client.waitForState(['compile-end', 'watch-start'], undefined, config.signal);
+    await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
 
     if (!await client.isWatching()) { // If we get here, without a watch
       return 'error';
     } else {
-      for await (const event of client.fetchEvents(config.type, { signal: config.signal, enforceIteration: true })) {
-        if (config.filter === undefined || config.filter(castTo(event))) {
-          await config.onChange(castTo(event));
+      for await (const event of client.fetchEvents(type, { signal: signal, enforceIteration: true })) {
+        const typed = castTo<T>(event);
+        if (filter === undefined || filter(typed)) {
+          await onChange(typed);
         }
       }
       return 'restart';
@@ -92,22 +92,33 @@ export class WatchUtil {
   /**
    * Run with restart capability
    */
-  static async runWithRetry(config: RunWithResultOptions): Promise<void> {
+  static async runWithRetry(run: (config: RetryRunState) => Promise<RetryRunState['result']>, options?: Partial<RetryRunConfig>): Promise<void> {
     const controller = new AbortController();
-    const maxRetryWindow = config?.maxRetryWindow ?? (10 * 1000) // 10 seconds default;
-    const maxRetries = config?.maxRetries ?? 10; // 10 retries default;
-    const restartDelay = config.restartDelay ?? (({ failureIterations }) => failureIterations ? 100 : 10);
     const cleanup = ShutdownManager.onGracefulShutdown(controller.abort);
-    const state: RunState = { signal: controller.signal, iteration: 0, failureIterations: 0, startTime: Date.now() };
+
+    const config: RetryRunConfig = {
+      maxRetryWindow: 10 * 1000,
+      maxRetries: 10,
+      restartDelay: ({ failureIterations }) => failureIterations ? 100 : 10,
+      onRestart: async () => { },
+      onFailure: async (state) => { throw new AppError(`Operation failed after ${state.failureIterations} attempts`); },
+      ...options,
+    };
+
+    const state: RetryRunState = {
+      signal: controller.signal,
+      iteration: 0,
+      failureIterations: 0,
+      startTime: Date.now()
+    };
 
     while (!state.signal.aborted && !state.retryExhausted) {
-
       if (state.iteration > 0) {
-        await Util.nonBlockingTimeout(restartDelay(state));
-        await config?.onRestart?.(state);
+        await Util.nonBlockingTimeout(config.restartDelay(state));
+        await config.onRestart(state);
       }
 
-      state.result = await config.run(state).catch(() => 'error' as 'error');
+      state.result = await run(state).catch(() => 'error' as 'error');
       switch (state.result) {
         case 'stop': controller.abort(); break;
         case 'error': state.failureIterations += 1; break;
@@ -117,34 +128,24 @@ export class WatchUtil {
         }
       }
 
-      state.retryExhausted = (state.failureIterations >= maxRetries) && (Date.now() - state.startTime >= maxRetryWindow);
+      state.retryExhausted = (state.failureIterations >= config.maxRetries) && (Date.now() - state.startTime >= config.maxRetryWindow);
       state.iteration += 1;
     }
 
     if (state.retryExhausted) {
-      if (config.onFailure) {
-        await config?.onFailure?.(state);
-      } else {
-        throw new AppError(`Operation failed after ${maxRetries + 1} attempts`);
-      }
+      await config.onFailure(state);
     }
 
     cleanup?.();
   }
 
   /**  Watch compiler for source code changes */
-  static async watchCompiler(onChange: (input: CompilerChangeEvent) => unknown, options?: Omit<RunWithResultOptions, 'run'>): Promise<void> {
-    return WatchUtil.runWithRetry({
-      ...options,
-      run: ({ signal }) => this.#streamCompiler({ type: 'change', onChange, signal, filter: validSourceFile })
-    });
+  static async watchCompiler(onChange: (input: CompilerChangeEvent) => unknown, options?: Partial<RetryRunConfig>): Promise<void> {
+    return this.runWithRetry(({ signal }) => this.#compiler('change', onChange, signal, validSourceFile), options);
   }
 
   /** Watch for any file changes */
-  static async watchFiles(onChange: (input: FileChangeEvent) => unknown, options?: Omit<RunWithResultOptions, 'run'>): Promise<void> {
-    return WatchUtil.runWithRetry({
-      ...options,
-      run: ({ signal }) => this.#streamCompiler({ type: 'file', onChange, signal }),
-    });
+  static async watchFiles(onChange: (input: FileChangeEvent) => unknown, options?: Partial<RetryRunConfig>): Promise<void> {
+    return this.runWithRetry(({ signal }) => this.#compiler('file', onChange, signal), options);
   }
 }

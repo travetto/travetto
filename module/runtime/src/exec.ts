@@ -42,13 +42,6 @@ export class ExecUtil {
   static RESTART_CODE = 200;
 
   /**
-   * Exit process for restart
-   */
-  static exitForRestart(): void {
-    process.exit(this.RESTART_CODE);
-  }
-
-  /**
    * Defer control to subprocess execution, mainly used for nested execution
    */
   static async deferToSubprocess(child: ChildProcess, relayInterrupt: boolean = true): Promise<ExecutionResult> {

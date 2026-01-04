@@ -31,7 +31,7 @@ export class CliUtil {
   static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<boolean> {
     if (cmd.restartOnChange !== true) {
       process.on('message', event => {
-        if (event === 'CLI_RESTART') { ExecUtil.exitForRestart(); }
+        if (event === 'CLI_RESTART') { process.exit(ExecUtil.RESTART_CODE); }
       });
       return false;
     }
@@ -41,22 +41,15 @@ export class CliUtil {
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
 
-    await WatchUtil.runWithRetry({
-      onRestart: ({ iteration }) => console.error('Restarting...', { pid: process.pid, iteration }),
-      onFailure: ({ iteration }) => console.error('Max restarts exceeded, exiting...', { pid: process.pid, iteration }),
-      run: async () => {
-        const result = await ExecUtil.deferToSubprocess(
+    await WatchUtil.runWithRetry(
+      async () => {
+        const { code } = await ExecUtil.deferToSubprocess(
           subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
         );
-
-        if (result.code > 0) {
-          return 'error';
-        } else if (result.code === ExecUtil.RESTART_CODE) {
-          return 'restart';
-        } else {
-          return 'stop';
-        }
-      }
+        return code === ExecUtil.RESTART_CODE ? 'restart' : code > 0 ? 'error' : 'stop'
+      }, {
+      onRestart: ({ iteration }) => console.error('Restarting...', { pid: process.pid, iteration }),
+      onFailure: ({ iteration }) => console.error('Max restarts exceeded, exiting...', { pid: process.pid, iteration }),
     });
 
     await ShutdownManager.gracefulShutdown('cli-restart');
