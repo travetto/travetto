@@ -19,6 +19,7 @@ export type CompilerEvent =
   { type: 'all', payload: unknown };
 
 export type CompilerEventType = CompilerEvent['type'];
+export type CompilerEventPayload<V> = (CompilerEvent & { type: V })['payload'];
 
 export type CompilerServerInfo = {
   path: string;

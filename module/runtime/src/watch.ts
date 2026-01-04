@@ -2,15 +2,10 @@ import type { CompilerClient } from '@travetto/compiler/support/server/client.ts
 import type { CompilerChangeEvent, FileChangeEvent } from '@travetto/compiler/support/types.ts';
 
 import { RuntimeIndex } from './manifest-index.ts';
-import { Util } from './util.ts';
+import { Util, type RunWithResultOptions } from './util.ts';
 import { ShutdownManager } from './shutdown.ts';
 
-type RestartHandler = () => (void | Promise<void>);
-type ChangeHandler<T> = (event: T) => (unknown | Promise<unknown>);
-type WatchOptions = {
-  onRestart?: RestartHandler;
-  timeout?: number;
-};
+type WatchOptions = Pick<RunWithResultOptions, 'onRestart' | 'timeout'>;
 
 let cachedClient: Promise<CompilerClient> | undefined = undefined;
 function getClient(): Promise<CompilerClient> {
@@ -24,7 +19,7 @@ function getClient(): Promise<CompilerClient> {
   });
 }
 
-async function streamSource<T>(source: AsyncIterable<T>, onChange: ChangeHandler<T>, signal: AbortSignal, timeout: number = 100): Promise<void> {
+async function streamSource<T>(source: AsyncIterable<T>, onChange: (input: T) => unknown, signal: AbortSignal, timeout: number = 100): Promise<void> {
   const client = await getClient();
   await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
 
@@ -38,11 +33,11 @@ async function streamSource<T>(source: AsyncIterable<T>, onChange: ChangeHandler
 }
 
 /**  Watch compiler for source code changes */
-export async function watchCompiler(onChange: ChangeHandler<CompilerChangeEvent>, options?: WatchOptions): Promise<void> {
+export async function watchCompiler(onChange: (input: CompilerChangeEvent) => unknown, options?: WatchOptions): Promise<void> {
   const client = await getClient();
   return Util.runWithRestart({
     ...options,
-    onInit: (controller) => ShutdownManager.onGracefulShutdown(async () => controller.abort()),
+    onInit: stop => ShutdownManager.onGracefulShutdown(stop),
     run: ({ signal }) => streamSource(
       Util.filterAsyncIterable<CompilerChangeEvent>(
         client.fetchEvents('change', { signal, enforceIteration: true }),
@@ -55,11 +50,11 @@ export async function watchCompiler(onChange: ChangeHandler<CompilerChangeEvent>
 }
 
 /** Watch for any file changes */
-export async function watchFiles(onChange: ChangeHandler<FileChangeEvent>, options?: WatchOptions): Promise<void> {
+export async function watchFiles(onChange: (input: FileChangeEvent) => unknown, options?: WatchOptions): Promise<void> {
   const client = await getClient();
   return Util.runWithRestart({
     ...options,
-    onInit: (controller) => ShutdownManager.onGracefulShutdown(async () => controller.abort()),
+    onInit: stop => ShutdownManager.onGracefulShutdown(stop),
     run: ({ signal }) => streamSource(
       client.fetchEvents('file', { signal, enforceIteration: true }),
       onChange,

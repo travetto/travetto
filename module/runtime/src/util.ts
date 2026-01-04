@@ -6,14 +6,14 @@ import { AppError } from './error.ts';
 
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
 
-type RunWithResultOptions = {
+export type RunWithResultOptions = {
   run: (config: { signal: AbortSignal, iteration: number }) => Promise<unknown>;
   timeout?: number;
   maxRetries?: number
   restartDelay?: number;
   onRestart?: () => (unknown | Promise<unknown>);
   onFailure?: () => (unknown | Promise<unknown>);
-  onInit?: (controller: AbortController) => Function;
+  onInit?: (stop: () => void) => Function;
 }
 
 /**
@@ -176,7 +176,7 @@ export class Util {
     const iterations = new Array(config?.maxRetries ?? 10).fill(Date.now());
     const controller = new AbortController();
     const { signal } = controller;
-    const cleanup = config.onInit?.(controller) ?? undefined;
+    const cleanup = config.onInit?.(() => controller.abort()) ?? undefined;
     let timeoutExceeded = false;
     let result;
     let iteration = 0;

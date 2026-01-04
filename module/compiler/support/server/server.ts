@@ -101,7 +101,7 @@ export class CompilerServer {
     return output;
   }
 
-  #addListener(type: CompilerEventType | 'all', response: http.ServerResponse): void {
+  #addListener(type: CompilerEventType, response: http.ServerResponse): void {
     response.writeHead(200);
     const id = `id_${Date.now()}_${Math.random()}`.replace('.', '1');
     (this.#listeners[type] ??= {})[id] = response;
