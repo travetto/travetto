@@ -1,4 +1,3 @@
-import type { CompilerClient } from '@travetto/compiler/support/server/client.ts';
 import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler/support/types.ts';
 
 import { AppError } from './error';
@@ -19,17 +18,14 @@ type RetryRunState = {
 type RetryRunConfig = {
   maxRetries: number;
   maxRetryWindow: number;
-  restartDelay: (config: RetryRunState) => number;
-  onRestart: (config: RetryRunState) => (unknown | Promise<unknown>);
-  onFailure: (config: RetryRunState) => (unknown | Promise<unknown>);
+  onRetry: (config: RetryRunState) => (unknown | Promise<unknown>);
+  onRetryExhausted: (config: RetryRunState) => (unknown | Promise<unknown>);
 }
 
 /**
  * Utilities for watching resources
  */
 export class WatchUtil {
-
-  static #cachedClient: CompilerClient | undefined = undefined;
 
   /**
    * Retry an operation, with a custom conflict handler
@@ -60,14 +56,13 @@ export class WatchUtil {
    */
   static async runWithRetry(run: (config: RetryRunState) => Promise<RetryRunState['result']>, options?: Partial<RetryRunConfig>): Promise<void> {
     const controller = new AbortController();
-    const cleanup = ShutdownManager.onGracefulShutdown(controller.abort);
+    const cleanup = ShutdownManager.onGracefulShutdown(() => controller.abort());
 
     const config: RetryRunConfig = {
       maxRetryWindow: 10 * 1000,
       maxRetries: 10,
-      restartDelay: ({ failureIterations }) => failureIterations ? 100 : 10,
-      onRestart: async () => { },
-      onFailure: async (state) => { throw new AppError(`Operation failed after ${state.failureIterations} attempts`); },
+      onRetry: async (state) => Util.nonBlockingTimeout(state.failureIterations ? config.maxRetryWindow / (config.maxRetries * 10) : 10),
+      onRetryExhausted: async (state) => { throw new AppError(`Operation failed after ${state.failureIterations} attempts`); },
       ...options,
     };
 
@@ -80,8 +75,7 @@ export class WatchUtil {
 
     while (!state.signal.aborted && !state.retryExhausted) {
       if (state.iteration > 0) {
-        await Util.nonBlockingTimeout(config.restartDelay(state));
-        await config.onRestart(state);
+        await config.onRetry(state);
       }
 
       state.result = await run(state).catch(() => 'error' as 'error');
@@ -94,12 +88,12 @@ export class WatchUtil {
         }
       }
 
-      state.retryExhausted = (state.failureIterations >= config.maxRetries) && (Date.now() - state.startTime >= config.maxRetryWindow);
+      state.retryExhausted = (state.failureIterations >= config.maxRetries) || (Date.now() - state.startTime >= config.maxRetryWindow);
       state.iteration += 1;
     }
 
     if (state.retryExhausted) {
-      await config.onFailure(state);
+      await config.onRetryExhausted(state);
     }
 
     cleanup?.();
@@ -112,12 +106,7 @@ export class WatchUtil {
     options?: Partial<RetryRunConfig>,
   ): Promise<void> {
     const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
-    const client = this.#cachedClient ??= new CompilerClient(RuntimeIndex.manifest, {
-      warn(message, ...args): void { console.error('warn', message, ...args); },
-      debug(message, ...args): void { console.error('debug', message, ...args); },
-      error(message, ...args): void { console.error('error', message, ...args); },
-      info(message, ...args): void { console.error('info', message, ...args); }
-    });
+    const client = new CompilerClient(RuntimeIndex.manifest, console);
 
     return this.runWithRetry(async ({ signal }) => {
       await client.waitForState(['compile-end', 'watch-start'], undefined, signal);

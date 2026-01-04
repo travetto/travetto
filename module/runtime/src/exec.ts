@@ -39,8 +39,6 @@ type ExecutionBaseResult = Omit<ExecutionResult, 'stdout' | 'stderr'>;
  */
 export class ExecUtil {
 
-  static RESTART_CODE = 200;
-
   /**
    * Defer control to subprocess execution, mainly used for nested execution
    */
