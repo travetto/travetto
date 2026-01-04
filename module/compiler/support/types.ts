@@ -15,7 +15,8 @@ export type CompilerEvent =
   { type: 'change', payload: CompilerChangeEvent } |
   { type: 'log', payload: CompilerLogEvent } |
   { type: 'progress', payload: CompilerProgressEvent } |
-  { type: 'state', payload: CompilerStateEvent };
+  { type: 'state', payload: CompilerStateEvent } |
+  { type: 'all', payload: unknown };
 
 export type CompilerEventType = CompilerEvent['type'];
 

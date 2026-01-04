@@ -12,6 +12,9 @@ import { ProcessHandle } from './process-handle.ts';
 
 const log = Log.scoped('server');
 
+const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all', 'file']);
+export const isValidEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);
+
 /**
  * Compiler Server Class
  */
@@ -20,7 +23,7 @@ export class CompilerServer {
   #ctx: ManifestContext;
   #server: http.Server;
   #listenersAll = new Set<http.ServerResponse>();
-  #listeners: Partial<Record<CompilerEventType | 'all', Record<string, http.ServerResponse>>> = {};
+  #listeners: Partial<Record<CompilerEventType, Record<string, http.ServerResponse>>> = {};
   #shutdown = new AbortController();
   info: CompilerServerInfo;
   #client: CompilerClient;
@@ -168,11 +171,10 @@ export class CompilerServer {
     let close = false;
     switch (action) {
       case 'event': {
-        switch (subAction) {
-          case 'change': case 'log': case 'progress': case 'state': case 'all':
-            return this.#addListener(subAction, response);
-          default: return;
+        if (isValidEventType(subAction)) {
+          this.#addListener(subAction, response);
         }
+        return;
       }
       case 'clean': out = await this.#clean(); break;
       case 'stop': out = JSON.stringify({ closing: true }); close = true; break;
