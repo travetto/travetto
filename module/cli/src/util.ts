@@ -13,7 +13,6 @@ const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
 type RunWithRestartOptions = {
   maxRetriesPerMinute?: number;
   relayInterrupt?: boolean;
-  debounceTime?: number;
 };
 
 export class CliUtil {
