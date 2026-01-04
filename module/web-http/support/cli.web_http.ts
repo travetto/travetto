@@ -25,10 +25,10 @@ export class WebHttpCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
-    try {
-      await Registry.init();
-      const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
+    await Registry.init();
+    const instance = await DependencyRegistryIndex.getInstance(toConcrete<WebHttpServer>());
 
+    try {
       const handle = await instance.serve();
       return handle.complete;
     } catch (err) {
