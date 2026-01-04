@@ -45,15 +45,17 @@ export class WatchUtil {
     });
   }
 
-  static async #streamSource<T>(source: AsyncIterable<T>, onChange: (input: T) => unknown, signal: AbortSignal): Promise<RunResult> {
+  static async #streamSource<T>(config: { source: AsyncIterable<T>, onChange: (input: T) => unknown, signal: AbortSignal, filter?: (input: T) => boolean }): Promise<RunResult> {
     const client = await this.#getClient();
-    await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
+    await client.waitForState(['compile-end', 'watch-start'], undefined, config.signal);
 
     if (!await client.isWatching()) { // If we get here, without a watch
       return 'error';
     } else {
-      for await (const event of source) {
-        await onChange(event);
+      for await (const event of config.source) {
+        if (config.filter === undefined || config.filter(event)) {
+          await config.onChange(event);
+        }
       }
       return 'restart';
     }
@@ -130,14 +132,12 @@ export class WatchUtil {
       ...options,
       registerShutdown: stop => ShutdownManager.onGracefulShutdown(stop),
       restartDelay: ({ failureIterations }) => 100 * failureIterations + 10,
-      run: ({ signal }) => this.#streamSource(
-        Util.filterAsyncIterable<CompilerChangeEvent>(
-          client.fetchEvents('change', { signal, enforceIteration: true }),
-          event => !!(event.import || RuntimeIndex.findModuleForArbitraryFile(event.file))
-        ),
+      run: ({ signal }) => this.#streamSource({
+        source: client.fetchEvents('change', { signal, enforceIteration: true }),
         onChange,
-        signal
-      )
+        signal,
+        filter: event => !!(event.import || RuntimeIndex.findModuleForArbitraryFile(event.file))
+      })
     });
   }
 
@@ -148,11 +148,11 @@ export class WatchUtil {
       ...options,
       registerShutdown: stop => ShutdownManager.onGracefulShutdown(stop),
       restartDelay: ({ failureIterations }) => 100 * failureIterations + 10,
-      run: ({ signal }) => this.#streamSource(
-        client.fetchEvents('file', { signal, enforceIteration: true }),
+      run: ({ signal }) => this.#streamSource({
+        source: client.fetchEvents('file', { signal, enforceIteration: true }),
         onChange,
         signal
-      ),
+      }),
     });
   }
 }

@@ -71,18 +71,6 @@ export class Util {
   }
 
   /**
-   * Map an async iterable with various mapping functions
-   */
-  static async * filterAsyncIterable<T>(input: AsyncIterable<T>, predicate: (input: T, index: number) => boolean): AsyncIterable<T> {
-    let idx = -1;
-    for await (const item of input) {
-      if (predicate(item, idx += 1)) {
-        yield item;
-      }
-    }
-  }
-
-  /**
    * Non-blocking timeout
    */
   static nonBlockingTimeout(time: number): Promise<void> {
