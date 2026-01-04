@@ -21,7 +21,7 @@ export type EnvDict = Record<string, string | undefined>;
 
 export type LaunchConfig = {
   useCli?: boolean;
-  cliModule?: string;
+  module?: string;
   name: string;
   main: string;
   args?: string[];

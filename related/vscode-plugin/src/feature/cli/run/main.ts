@@ -120,7 +120,7 @@ export class CliRunFeature extends BaseFeature {
       useCli: true,
       main: event.data.name,
       args,
-      cliModule: event.data.module,
+      module: event.data.module,
       env: event.data.env
     });
   }
