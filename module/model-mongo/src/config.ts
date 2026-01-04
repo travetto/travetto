@@ -107,7 +107,8 @@ export class MongoModelConfig {
     }
 
     if (!Runtime.production) {
-      options.waitQueueTimeoutMS ??= TimeUtil.asMillis(1, 'd'); // Wait a day in dev mode
+      options.waitQueueTimeoutMS = 0;
+      options.serverSelectionTimeoutMS = TimeUtil.asMillis(1, 's');
     }
   }
 
@@ -118,12 +119,12 @@ export class MongoModelConfig {
     const hosts = this.hosts!
       .map(host => (this.srvRecord || host.includes(':')) ? host : `${host}:${this.port ?? 27017}`)
       .join(',');
-    const optionString = Object.entries(this.options).map(([key, value]) => `${key}=${value}`).join('&');
+    const options = new URLSearchParams(Object.entries(this.options));
     let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(part => !!part).join(':')}@`;
     }
-    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${optionString}`;
+    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${options.toString()}`;
     return url;
   }
 }

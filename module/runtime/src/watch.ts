@@ -41,9 +41,11 @@ export class WatchUtil {
 
   /** Listen for restart signals */
   static listenForRestartSignal(): void {
-    process.on('message', event => {
+    const listener = (event: unknown): void => {
       if (event === 'WATCH_RESTART') { this.exitWithRestart(); }
-    });
+    };
+    process.on('message', listener);
+    ShutdownManager.onGracefulShutdown(() => { process.removeListener('message', listener); });
   }
 
   /** Trigger a restart signal to a subprocess */
