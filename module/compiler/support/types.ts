@@ -8,14 +8,18 @@ export type CompilerLogLevel = 'info' | 'debug' | 'warn' | 'error';
 export type CompilerLogEvent = { level: CompilerLogLevel, message: string, time?: number, args?: unknown[], scope?: string };
 export type CompilerProgressEvent = { idx: number, total: number, message: string, operation: 'compile', complete?: boolean };
 export type CompilerStateEvent = { state: CompilerStateType, extra?: Record<string, unknown> };
+export type FileChangeEvent = { files: { file: string, action: ChangeEventType }[], time: number };
 
 export type CompilerEvent =
+  { type: 'file', payload: FileChangeEvent } |
   { type: 'change', payload: CompilerChangeEvent } |
   { type: 'log', payload: CompilerLogEvent } |
   { type: 'progress', payload: CompilerProgressEvent } |
-  { type: 'state', payload: CompilerStateEvent };
+  { type: 'state', payload: CompilerStateEvent } |
+  { type: 'all', payload: unknown };
 
 export type CompilerEventType = CompilerEvent['type'];
+export type CompilerEventPayload<V> = (CompilerEvent & { type: V })['payload'];
 
 export type CompilerServerInfo = {
   path: string;
@@ -27,3 +31,7 @@ export type CompilerServerInfo = {
   url: string;
   env?: Record<string, string>;
 };
+
+const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all', 'file']);
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+export const isComplilerEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);

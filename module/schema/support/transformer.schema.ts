@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import {
   TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil,
-  OnGetter, OnSetter, OnMethod, DecoratorUtil, OnStaticMethod, type DecoratorMeta
+  OnGetter, OnSetter, OnMethod, DecoratorUtil, OnStaticMethod
 } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
@@ -67,7 +67,7 @@ export class SchemaTransformer {
     for (const item of state.getDecoratorList(node)) {
       if (item.targets?.includes('@travetto/schema:Schema')) {
         state[IsOptIn] ||= item.options?.includes('opt-in') ?? false;
-        const methodEnrolls = item.options?.filter(item => item.startsWith('method:'))?.map(item => item.replace('method:', '')) ?? [];
+        const methodEnrolls = item.options?.filter(option => option.startsWith('method:'))?.map(option => option.replace('method:', '')) ?? [];
         for (const method of methodEnrolls) {
           state[AutoEnrollMethods].add(method);
         }

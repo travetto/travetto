@@ -9,7 +9,7 @@ export class NetUtil {
 
   /** Is an error an address in use error */
   static isPortUsedError(error: unknown): error is Error & { port: number } {
-    return !!error && error instanceof Error && error.message.includes('EADDRINUSE');
+    return !!error && error instanceof Error && error.message.includes('EADDRINUSE') && 'port' in error && typeof error.port === 'number';
   }
 
   /** Get the port process id */
@@ -19,14 +19,6 @@ export class NetUtil {
     const [processId] = result.stdout.trim().split(/\n/g);
     if (processId && +processId > 0) {
       return +processId;
-    }
-  }
-
-  /** Free port if in use */
-  static async freePort(port: number): Promise<void> {
-    const processId = await this.getPortProcessId(port);
-    if (processId) {
-      process.kill(processId);
     }
   }
 
@@ -64,12 +56,13 @@ export class NetUtil {
    * @param error The error that may indicate a port conflict
    * @returns Returns true if the port was freed, false if not handled
    */
-  static async freePortOnConflict(error: unknown): Promise<boolean> {
-    if (NetUtil.isPortUsedError(error) && typeof error.port === 'number') {
-      await NetUtil.freePort(error.port);
-      return true;
-    } else {
-      return false;
+  static async freePortOnConflict(error: unknown): Promise<{ processId?: number, port: number } | undefined> {
+    if (this.isPortUsedError(error)) {
+      const processId = await this.getPortProcessId(error.port);
+      if (processId) {
+        process.kill(processId);
+      }
+      return { port: error.port, processId };
     }
   }
 }

@@ -17,11 +17,11 @@ export class RunUtil {
     return this.#cliFile ??= Workspace.resolveImport('@travetto/cli/bin/trv.js');
   }
 
-  static buildEnv(cliModule?: string): EnvDict {
+  static buildEnv(module?: string): EnvDict {
     return {
       ...this.#baseEnv,
       ...Env.TRV_MANIFEST.export(undefined),
-      ...Env.TRV_MODULE.export(cliModule ?? Workspace.moduleName)
+      ...Env.TRV_MODULE.export(module ?? Workspace.moduleName)
     };
   }
 
@@ -72,7 +72,7 @@ export class RunUtil {
       cwd: WORKSPACE,
       args: (input.args ?? []).map(arg => `${arg}`),
       env: {
-        ...this.buildEnv(input.cliModule),
+        ...this.buildEnv(input.module),
         ...input.env ?? {},
       },
     };

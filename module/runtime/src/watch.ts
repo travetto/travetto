@@ -1,86 +1,136 @@
-import { ManifestModuleUtil, type ChangeEventType, type ManifestModuleFileType } from '@travetto/manifest';
+import { ChildProcess } from 'node:child_process';
 
-import { RuntimeIndex } from './manifest-index.ts';
-import { ShutdownManager } from './shutdown.ts';
-import { Util } from './util.ts';
+import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler/support/types.ts';
 
-type WatchEvent = { file: string, action: ChangeEventType, output: string, module: string, import: string, time: number };
+import { AppError } from './error';
+import { Util } from './util';
+import { RuntimeIndex } from './manifest-index';
+import { ShutdownManager } from './shutdown';
+import { castTo } from './types';
 
-type WatchCompilerOptions = {
-  /**
-   * Restart the watch loop on compiler exit
-   */
-  restartOnCompilerExit?: boolean;
-  /**
-   * Run on restart
-   */
-  onRestart?: () => void;
+type RetryRunState = {
+  iteration: number;
+  startTime: number;
+  errorIterations: number;
+  result?: 'error' | 'restart' | 'stop';
 };
 
-export async function* watchCompiler(config?: WatchCompilerOptions): AsyncIterable<WatchEvent> {
-  // Load at runtime
-  const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
+type RetryRunConfig = {
+  maxRetries: number;
+  maxRetryWindow: number;
+  signal?: AbortSignal;
+  onRetry: (state: RetryRunState, config: RetryRunConfig) => (unknown | Promise<unknown>);
+};
 
-  const client = new CompilerClient(RuntimeIndex.manifest, {
-    warn(message, ...args): void { console.error('warn', message, ...args); },
-    debug(message, ...args): void { console.error('debug', message, ...args); },
-    error(message, ...args): void { console.error('error', message, ...args); },
-    info(message, ...args): void { console.error('info', message, ...args); },
-  });
+/**
+ * Utilities for watching resources
+ */
+export class WatchUtil {
 
-  const controller = new AbortController();
-  const remove = ShutdownManager.onGracefulShutdown(async () => controller.abort());
+  static #RESTART_EXIT_CODE = 200;
 
-  const maxIterations = 10;
-  const maxWindow = 10 * 1000;
-  const iterations: number[] = [];
-  let iterationsExhausted = false;
-
-  while (
-    !controller.signal.aborted &&
-    !iterationsExhausted &&
-    (config?.restartOnCompilerExit || iterations.length === 0)
-  ) {
-    if (iterations.length) { // Wait on next iteration
-      await Util.nonBlockingTimeout(10);
-    }
-
-    await client.waitForState(['compile-end', 'watch-start'], undefined, controller.signal);
-
-    if (!await client.isWatching()) { // If we get here, without a watch
-      await Util.nonBlockingTimeout(maxWindow / (maxIterations * 2));
-    } else {
-      if (iterations.length) {
-        config?.onRestart?.();
-      }
-      yield* client.fetchEvents('change', { signal: controller.signal, enforceIteration: true });
-    }
-
-    iterations.push(Date.now());
-    if (iterations.length >= maxIterations) {
-      iterationsExhausted = (Date.now() - iterations[0]) > maxWindow;
-      iterations.shift();
-    }
+  /** Convert exit code to a result type  */
+  static exitCodeToResult(code: number): RetryRunState['result'] {
+    return code === this.#RESTART_EXIT_CODE ? 'restart' : code > 0 ? 'error' : 'stop';
   }
 
-  remove();
-}
-
-export function listenForSourceChanges(onChange: () => void, debounceDelay = 10): void {
-  let timeout: ReturnType<typeof setTimeout> | undefined;
-
-  const validFileTypes = new Set<ManifestModuleFileType>(['ts', 'js', 'package-json', 'typings']);
-
-  function send(): void {
-    clearTimeout(timeout);
-    timeout = setTimeout(onChange, debounceDelay);
+  /** Exit with a restart exit code */
+  static exitWithRestart(): void {
+    process.exit(this.#RESTART_EXIT_CODE);
   }
 
-  (async function (): Promise<void> {
-    for await (const item of watchCompiler({ restartOnCompilerExit: true, onRestart: send })) {
-      if (validFileTypes.has(ManifestModuleUtil.getFileType(item.file)) && RuntimeIndex.findModuleForArbitraryFile(item.file)) {
-        send();
+  /** Listen for restart signals */
+  static listenForRestartSignal(): void {
+    const listener = (event: unknown): void => {
+      if (event === 'WATCH_RESTART') { this.exitWithRestart(); }
+    };
+    process.on('message', listener);
+    ShutdownManager.onGracefulShutdown(() => { process.removeListener('message', listener); });
+  }
+
+  /** Trigger a restart signal to a subprocess */
+  static triggerRestartSignal(subprocess?: ChildProcess): void {
+    subprocess?.connected && subprocess.send?.('WATCH_RESTART');
+  }
+
+  /** Compute the delay before restarting */
+  static computeRestartDelay(state: RetryRunState, config: RetryRunConfig): number {
+    return state.result === 'error'
+      ? config.maxRetryWindow / (config.maxRetries + 1)
+      : 10;
+  }
+
+  /**
+   * Run with restart capability
+   */
+  static async runWithRetry(run: (state: RetryRunState & { signal: AbortSignal }) => Promise<RetryRunState['result']>, options?: Partial<RetryRunConfig>): Promise<void> {
+    const controller = new AbortController();
+    const cleanup = ShutdownManager.onGracefulShutdown(() => controller.abort());
+    let retryExhausted = false;
+
+    const state: RetryRunState = {
+      iteration: 0,
+      errorIterations: 0,
+      startTime: Date.now()
+    };
+
+    const config: RetryRunConfig = {
+      maxRetryWindow: 10 * 1000,
+      maxRetries: 10,
+      onRetry: () => Util.nonBlockingTimeout(this.computeRestartDelay(state, config)),
+      ...options,
+    };
+
+
+    while (!controller.signal.aborted && !retryExhausted) {
+      if (state.iteration > 0) {
+        await config.onRetry(state, config);
       }
+
+      state.result = await run({ ...state, signal: controller.signal }).catch(() => 'error' as const);
+      switch (state.result) {
+        case 'stop': controller.abort(); break;
+        case 'error': state.errorIterations += 1; break;
+        case 'restart': {
+          state.startTime = Date.now();
+          state.errorIterations = 0;
+        }
+      }
+
+      retryExhausted = (state.errorIterations >= config.maxRetries) || (Date.now() - state.startTime >= config.maxRetryWindow);
+      state.iteration += 1;
     }
-  })();
+
+    if (retryExhausted) {
+      throw new AppError(`Operation failed after ${state.errorIterations} attempts`);
+    }
+
+    cleanup?.();
+  }
+
+  /**  Watch compiler events  */
+  static async watchCompilerEvents<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
+    type: K,
+    onChange: (input: T) => unknown,
+    filter?: (input: T) => boolean,
+    options?: Partial<RetryRunConfig>,
+  ): Promise<void> {
+    const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
+    const client = new CompilerClient(RuntimeIndex.manifest, console);
+
+    return this.runWithRetry(async ({ signal }) => {
+      await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
+
+      if (!await client.isWatching()) { // If we get here, without a watch
+        return 'error';
+      } else {
+        for await (const event of client.fetchEvents(type, { signal, enforceIteration: true })) {
+          if (!filter || filter(castTo(event))) {
+            await onChange(castTo(event));
+          }
+        }
+        return 'restart';
+      }
+    }, options);
+  }
 }

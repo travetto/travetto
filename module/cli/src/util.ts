@@ -1,23 +1,14 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { describeFunction, Env, ExecUtil, Runtime, listenForSourceChanges, type ExecutionResult, ShutdownManager } from '@travetto/runtime';
+import { Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
-const CODE_RESTART = { type: 'code_change', code: 200 };
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
 const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
   !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
 );
-
-const isCodeRestart = (input: unknown): input is typeof CODE_RESTART =>
-  typeof input === 'object' && !!input && 'type' in input && input.type === CODE_RESTART.type;
-
-type RunWithRestartOptions = {
-  maxRetriesPerMinute?: number;
-  relayInterrupt?: boolean;
-};
 
 export class CliUtil {
   /**
@@ -37,63 +28,36 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static async runWithRestartOnChange<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, config?: RunWithRestartOptions): Promise<boolean> {
+  static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<boolean> {
     if (cmd.restartOnChange !== true) {
-      process.on('message', event => isCodeRestart(event) && process.exit(event.code));
+      WatchUtil.listenForRestartSignal();
       return false;
     }
 
-    let result: ExecutionResult | undefined;
-    let exhaustedRestarts = false;
     let subProcess: ChildProcess | undefined;
+    void WatchUtil.watchCompilerEvents('file', () => WatchUtil.triggerRestartSignal(subProcess));
 
     const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
-    const maxRetries = config?.maxRetriesPerMinute ?? 5;
-    const relayInterrupt = config?.relayInterrupt ?? true;
-    const restarts: number[] = [];
-    listenForSourceChanges(() => { subProcess?.send(CODE_RESTART); });
 
-    if (!relayInterrupt) {
-      process.removeAllListeners('SIGINT'); // Remove any existing listeners
-      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
-    }
+    const log = (msg: string, extra?: Record<string, unknown>): void => {
+      console.error(`[cli-restart] ${msg}`, { pid: process.pid, ...extra });
+    };
 
-    while (
-      (result === undefined || result.code === CODE_RESTART.code) &&
-      !exhaustedRestarts
-    ) {
-      if (restarts.length) {
-        console.error('Restarting...', { pid: process.pid, time: restarts[0] });
-      }
-
-      // Ensure restarts length is capped
-      subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] })
-        .on('message', value => process.send?.(value));
-
-      const interrupt = (): void => { subProcess?.kill('SIGINT'); };
-      const toMessage = (value: unknown): void => { subProcess?.send(value!); };
-
-      // Proxy kill requests
-      process.on('message', toMessage);
-      if (relayInterrupt) {
-        process.on('SIGINT', interrupt);
-      }
-
-      result = await ExecUtil.getResult(subProcess, { catch: true });
-      process.exitCode = subProcess.exitCode;
-      process.off('message', toMessage);
-      process.off('SIGINT', interrupt);
-
-      if (restarts.length >= maxRetries) {
-        exhaustedRestarts = (Date.now() - restarts[0]) < (10 * 1000);
-        restarts.shift();
-      }
-      restarts.push(Date.now());
-    }
-
-    if (exhaustedRestarts) {
-      console.error(`Bailing, due to ${maxRetries} restarts in under 10s`);
-    }
+    await WatchUtil.runWithRetry(
+      async () => {
+        const { code } = await ExecUtil.deferToSubprocess(
+          subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
+        );
+        return WatchUtil.exitCodeToResult(code);
+      },
+      {
+        maxRetries: 5,
+        onRetry: async (state, config) => {
+          const duration = WatchUtil.computeRestartDelay(state, config);
+          log('Restarting subprocess due to change...', { waiting: duration, iteration: state.iteration, errorIterations: state.errorIterations || undefined });
+          await Util.nonBlockingTimeout(duration);
+        },
+      });
 
     await ShutdownManager.gracefulShutdown('cli-restart');
     process.exit();
@@ -115,13 +79,11 @@ export class CliUtil {
 
     const env: Record<string, string> = {};
     const request = {
-      type: `@travetto/cli:run`,
+      type: '@travetto/cli:run',
       data: {
         name: cmd._cfg!.name,
         env,
-        // TODO: Is this needed?
-        commandModule: describeFunction(cmd.constructor).module,
-        module: Runtime.main.name,
+        module: cmd.module ?? Runtime.main.name,
         args: process.argv.slice(3),
       }
     };

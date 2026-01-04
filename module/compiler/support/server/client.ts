@@ -4,7 +4,7 @@ import http, { Agent } from 'node:http';
 
 import { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types.ts';
+import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types.ts';
 import type { LogShape } from '../log.ts';
 import { CommonUtil } from '../util.ts';
 import { ProcessHandle } from './process-handle.ts';
@@ -91,12 +91,7 @@ export class CompilerClient {
   }
 
   /** Fetch compiler events */
-  fetchEvents<
-    V extends CompilerEventType,
-    T extends (CompilerEvent & { type: V })['payload']
-  >(type: V, config?: FetchEventsConfig<T>): AsyncIterable<T>;
-  fetchEvents(type: 'all', config?: FetchEventsConfig<CompilerEvent>): AsyncIterable<CompilerEvent>;
-  async * fetchEvents<T = unknown>(type: string, config: FetchEventsConfig<T> = {}): AsyncIterable<T> {
+  async * fetchEvents<V extends CompilerEventType, T extends CompilerEventPayload<V>>(type: V, config: FetchEventsConfig<T> = {}): AsyncIterable<T> {
     let info = await this.info();
     if (!info) {
       return;

@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerMode, CompilerServerInfo } from './types.ts';
+import { isComplilerEventType, type CompilerMode, type CompilerServerInfo } from './types.ts';
 import { Log } from './log.ts';
 import { CompilerSetup } from './setup.ts';
 import { CompilerServer } from './server/server.ts';
@@ -72,9 +72,8 @@ export const main = (ctx: ManifestContext) => {
 
     /** Stream events */
     events: async (type: string, handler: (event: unknown) => unknown): Promise<void> => {
-      if (type === 'change' || type === 'log' || type === 'progress' || type === 'state' || type === 'all') {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        for await (const event of client.fetchEvents(type as 'change')) { await handler(event); }
+      if (isComplilerEventType(type)) {
+        for await (const event of client.fetchEvents(type)) { await handler(event); }
       } else {
         throw new Error(`Unknown event type: ${type}`);
       }

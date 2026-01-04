@@ -3,7 +3,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 
 import { PackageUtil } from '@travetto/manifest';
-import { ExecUtil, Env, watchCompiler, Runtime } from '@travetto/runtime';
+import { ExecUtil, Env, Runtime, WatchUtil } from '@travetto/runtime';
 import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
@@ -49,7 +49,7 @@ export class DocCommand implements CliCommandShape {
 
   async runWatch(): Promise<void> {
     const [first, ...args] = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
-    for await (const { file } of watchCompiler({ restartOnCompilerExit: true })) {
+    await WatchUtil.watchCompilerEvents('change', async ({ file }) => {
       if (file === this.input) {
         const subProcess = spawn(process.argv0, [Runtime.trvEntryPoint, first, ...args], {
           cwd: Runtime.mainSourcePath,
@@ -58,7 +58,7 @@ export class DocCommand implements CliCommandShape {
         });
         await ExecUtil.getResult(subProcess, { catch: true });
       }
-    }
+    });
   }
 
   async render(): Promise<void> {

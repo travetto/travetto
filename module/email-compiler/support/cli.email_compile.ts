@@ -1,8 +1,9 @@
 import { Registry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { Env, Runtime, watchCompiler } from '@travetto/runtime';
+import { Env, Runtime, WatchUtil } from '@travetto/runtime';
 
 import { EmailCompiler } from '../src/compiler.ts';
+import { EmailCompileUtil } from '../src/util.ts';
 
 /**
  * CLI Entry point for running the email server
@@ -29,9 +30,9 @@ export class EmailCompileCommand implements CliCommandShape {
     }
 
     if (this.watch) {
-      for await (const { file } of watchCompiler({ restartOnCompilerExit: true })) {
-        await EmailCompiler.spawnCompile(file);
-      }
+      await WatchUtil.watchCompilerEvents('change',
+        ({ file }) => EmailCompiler.spawnCompile(file),
+        ({ file }) => EmailCompileUtil.isTemplateFile(file));
     }
   }
 }

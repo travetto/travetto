@@ -4,7 +4,10 @@ import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types.ts';
+import {
+  type CompilerMode, type CompilerProgressEvent, type CompilerEvent,
+  type CompilerEventType, type CompilerServerInfo, isComplilerEventType
+} from '../types.ts';
 import { Log } from '../log.ts';
 import { CommonUtil } from '../util.ts';
 import { CompilerClient } from './client.ts';
@@ -20,7 +23,7 @@ export class CompilerServer {
   #ctx: ManifestContext;
   #server: http.Server;
   #listenersAll = new Set<http.ServerResponse>();
-  #listeners: Partial<Record<CompilerEventType | 'all', Record<string, http.ServerResponse>>> = {};
+  #listeners: Partial<Record<CompilerEventType, Record<string, http.ServerResponse>>> = {};
   #shutdown = new AbortController();
   info: CompilerServerInfo;
   #client: CompilerClient;
@@ -98,7 +101,7 @@ export class CompilerServer {
     return output;
   }
 
-  #addListener(type: CompilerEventType | 'all', response: http.ServerResponse): void {
+  #addListener(type: CompilerEventType, response: http.ServerResponse): void {
     response.writeHead(200);
     const id = `id_${Date.now()}_${Math.random()}`.replace('.', '1');
     (this.#listeners[type] ??= {})[id] = response;
@@ -109,7 +112,6 @@ export class CompilerServer {
       response.write('\n'); // Send at least one byte on listen
     }
 
-    // Do not wait on it
     response.on('close', () => {
       delete this.#listeners[type]?.[id];
       this.#listenersAll.delete(response);
@@ -168,11 +170,10 @@ export class CompilerServer {
     let close = false;
     switch (action) {
       case 'event': {
-        switch (subAction) {
-          case 'change': case 'log': case 'progress': case 'state': case 'all':
-            return this.#addListener(subAction, response);
-          default: return;
+        if (isComplilerEventType(subAction)) {
+          this.#addListener(subAction, response);
         }
+        return;
       }
       case 'clean': out = await this.#clean(); break;
       case 'stop': out = JSON.stringify({ closing: true }); close = true; break;

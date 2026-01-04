@@ -40,6 +40,34 @@ type ExecutionBaseResult = Omit<ExecutionResult, 'stdout' | 'stderr'>;
 export class ExecUtil {
 
   /**
+   * Defer control to subprocess execution, mainly used for nested execution
+   */
+  static async deferToSubprocess(child: ChildProcess, relayInterrupt: boolean = true): Promise<ExecutionResult> {
+    if (!relayInterrupt) {
+      process.removeAllListeners('SIGINT'); // Remove any existing listeners
+      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
+    }
+
+    child.on('message', value => process.send?.(value));
+
+    const interrupt = (): void => { child?.kill('SIGINT'); };
+    const toMessage = (value: unknown): void => { child?.send(value!); };
+
+    // Proxy kill requests
+    process.on('message', toMessage);
+
+    if (relayInterrupt) {
+      process.on('SIGINT', interrupt);
+    }
+
+    const result = await ExecUtil.getResult(child, { catch: true });
+    process.exitCode = child.exitCode;
+    process.off('message', toMessage);
+    process.off('SIGINT', interrupt);
+    return result;
+  }
+
+  /**
    * Take a child process, and some additional options, and produce a promise that
    * represents the entire execution.  On successful completion the promise will resolve, and
    * on failed completion the promise will reject.

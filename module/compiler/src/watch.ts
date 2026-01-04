@@ -9,6 +9,7 @@ import { CompilerUtil } from './util.ts';
 
 import { AsyncQueue } from '../support/queue.ts';
 import { IpcLogger } from '../support/log.ts';
+import { EventUtil } from './event.ts';
 
 const log = new IpcLogger({ level: 'debug' });
 
@@ -56,7 +57,7 @@ export class CompilerWatcher {
     return [...ignores].toSorted().map(ignore => ignore.endsWith('/') ? ignore : `${ignore}/`);
   }
 
-  #toCandidateEvent(action: CompilerWatchEvent['action'], file: string): CompilerWatchEventCandidate {
+  #toCandidateEvent({ action, file }: Pick<CompilerWatchEvent, 'action' | 'file'>): CompilerWatchEventCandidate {
     let entry = this.#state.getBySource(file);
     const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
     if (mod && action === 'create' && !entry) {
@@ -69,19 +70,25 @@ export class CompilerWatcher {
     return { entry, file: entry?.sourceFile ?? file, action };
   }
 
-  #isValidEvent(event: CompilerWatchEventCandidate): event is CompilerWatchEvent {
-    const relativeFile = event.file.replace(`${this.#root}/`, '');
+  #isValidFile(file: string): boolean {
+    const relativeFile = file.replace(`${this.#root}/`, '');
     if (relativeFile === this.#watchCanary) {
       return false;
     } else if (relativeFile.startsWith('.')) {
       return false;
-    } else if (!event.entry) {
-      log.debug(`Skipping unknown file ${relativeFile}`);
+    }
+    return true;
+  }
+
+  #isValidEvent(event: CompilerWatchEventCandidate): event is CompilerWatchEvent {
+    if (!event.entry) {
+      log.debug(`Skipping unknown file ${event.file}`);
       return false;
     } else if (event.action === 'update' && !this.#state.checkIfSourceChanged(event.entry.sourceFile)) {
+      const relativeFile = event.file.replace(`${this.#root}/`, '');
       log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
       return false;
-    } else if (!CompilerUtil.validFile(ManifestModuleUtil.getFileType(relativeFile))) {
+    } else if (!CompilerUtil.validFile(ManifestModuleUtil.getFileType(event.file))) {
       return false;
     }
     return true;
@@ -168,9 +175,19 @@ export class CompilerWatcher {
           throw new CompilerReset('Package information changed');
         }
 
-        const items = events
-          .map(event => this.#toCandidateEvent(event.type, path.toPosix(event.path)))
+        // One event per file set
+        const filesChanged = events.map(e => ({ file: path.toPosix(e.path), action: e.type })).filter(e => this.#isValidFile(e.file));
+        if (filesChanged.length) {
+          EventUtil.sendEvent('file', { time: Date.now(), files: filesChanged });
+        }
+
+        const items = filesChanged
+          .map(event => this.#toCandidateEvent(event))
           .filter(event => this.#isValidEvent(event));
+
+        if (items.length === 0) {
+          return;
+        }
 
         try {
           await this.#reconcileManifestUpdates(items);

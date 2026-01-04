@@ -145,7 +145,7 @@ class TestRunnerFeature extends BaseFeature {
       name: `Debug Travetto Test - ${prettyFile}`,
       main: 'test:direct',
       args: [prettyFile, `${line}`],
-      cliModule: mod.name,
+      module: mod.name,
       env: {
         ...Env.TRV_TEST_PHASE_TIMEOUT.export('5m'),
         ...Env.TRV_TEST_TIMEOUT.export('1h'),
