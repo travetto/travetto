@@ -7,7 +7,7 @@ import { RuntimeIndex } from './manifest-index';
 import { ShutdownManager } from './shutdown';
 import { castTo } from './types';
 
-export type RunResult = 'error' | 'restart' | 'stop';
+type RunResult = 'error' | 'restart' | 'stop';
 
 type RunState = {
   signal: AbortSignal;
@@ -100,7 +100,7 @@ export class WatchUtil {
     const controller = new AbortController();
     const maxRetryWindow = config?.maxRetryWindow ?? (10 * 1000) // 10 seconds default;
     const maxRetries = config?.maxRetries ?? 10; // 10 retries default;
-    const restartDelay = config.restartDelay ?? (({ failureIterations }) => 100 * failureIterations + 10);
+    const restartDelay = config.restartDelay ?? (({ failureIterations }) => failureIterations ? 100 : 10);
     const cleanup = ShutdownManager.onGracefulShutdown(controller.abort);
     const state: RunState = { signal: controller.signal, iteration: 0, failureIterations: 0, startTime: Date.now() };
 
@@ -121,8 +121,7 @@ export class WatchUtil {
         }
       }
 
-      state.retryExhausted = (state.failureIterations >= maxRetries) &&
-        (Date.now() - state.startTime >= maxRetryWindow);
+      state.retryExhausted = (state.failureIterations >= maxRetries) && (Date.now() - state.startTime >= maxRetryWindow);
       state.iteration += 1;
     }
 

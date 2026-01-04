@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { Env, ExecUtil, Runtime, ShutdownManager, type RunResult, WatchUtil } from '@travetto/runtime';
+import { Env, ExecUtil, Runtime, ShutdownManager, WatchUtil } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -44,7 +44,7 @@ export class CliUtil {
     await WatchUtil.runWithRetry({
       onRestart: ({ iteration }) => console.error('Restarting...', { pid: process.pid, iteration }),
       onFailure: ({ iteration }) => console.error('Max restarts exceeded, exiting...', { pid: process.pid, iteration }),
-      run: async (): Promise<RunResult> => {
+      run: async () => {
         const result = await ExecUtil.deferToSubprocess(
           subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
         );
