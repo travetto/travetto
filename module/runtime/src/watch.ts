@@ -1,3 +1,5 @@
+import { ChildProcess } from 'node:child_process';
+
 import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler/support/types.ts';
 
 import { AppError } from './error';
@@ -32,16 +34,21 @@ export class WatchUtil {
     return code === this.#RESTART_EXIT_CODE ? 'restart' : code > 0 ? 'error' : 'stop';
   }
 
-  /** Trigger a restart by exiting with the restart exit code */
-  static triggerRestart(): void {
+  /** Exit with a restart exit code */
+  static exitWithRestart(): void {
     process.exit(this.#RESTART_EXIT_CODE);
   }
 
   /** Listen for restart signals */
-  static listenForRestartSignals(): void {
+  static listenForRestartSignal(): void {
     process.on('message', event => {
-      if (event === 'WATCH_RESTART') { this.triggerRestart(); }
+      if (event === 'WATCH_RESTART') { this.exitWithRestart(); }
     });
+  }
+
+  /** Trigger a restart signal to a subprocess */
+  static triggerRestartSignal(subprocess?: ChildProcess): void {
+    subprocess?.connected && subprocess.send?.('WATCH_RESTART');
   }
 
   /** Compute the delay before restarting */
