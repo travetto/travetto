@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-dynamodb",
-  "version": "7.0.4",
+  "version": "7.0.5",
   "type": "module",
   "description": "DynamoDB backing for the travetto model module.",
   "keywords": [
@@ -31,7 +31,7 @@
     "@travetto/model": "^7.0.4"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.4"
+    "@travetto/cli": "^7.0.5"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

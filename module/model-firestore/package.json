@@ -31,7 +31,7 @@
     "@travetto/runtime": "^7.0.3"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.4"
+    "@travetto/cli": "^7.0.5"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

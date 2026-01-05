@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "dependencies": {
     "@travetto/auth-session": "^7.0.4",
-    "@travetto/model-dynamodb": "^7.0.4",
-    "@travetto/model-elasticsearch": "^7.0.4",
+    "@travetto/model-dynamodb": "^7.0.5",
+    "@travetto/model-elasticsearch": "^7.0.5",
     "@travetto/model-firestore": "^7.0.4",
     "@travetto/model-mongo": "^7.0.4",
     "@travetto/model-mysql": "^7.0.4",

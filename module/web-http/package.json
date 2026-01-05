@@ -30,7 +30,7 @@
     "@travetto/web": "^7.0.4"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.4",
+    "@travetto/cli": "^7.0.5",
     "@travetto/test": "^7.0.4"
   },
   "peerDependenciesMeta": {
