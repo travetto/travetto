@@ -1,6 +1,6 @@
 {
   "name": "@travetto/scaffold",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "type": "module",
   "description": "App Scaffold for the Travetto framework",
   "keywords": [
@@ -28,13 +28,13 @@
     "trv-scaffold": "bin/trv-scaffold.js"
   },
   "dependencies": {
-    "@travetto/cli": "^7.0.3",
+    "@travetto/cli": "^7.0.4",
     "@travetto/runtime": "^7.0.3",
     "enquirer": "^2.4.1",
     "mustache": "^4.2.0"
   },
   "devDependencies": {
-    "@travetto/model": "^7.0.3",
+    "@travetto/model": "^7.0.4",
     "@types/mustache": "^4.2.6"
   },
   "travetto": {

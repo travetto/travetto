@@ -1,6 +1,6 @@
 {
   "name": "@travetto/test",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "type": "module",
   "description": "Declarative test framework",
   "keywords": [
@@ -28,14 +28,14 @@
     "directory": "module/test"
   },
   "dependencies": {
-    "@travetto/registry": "^7.0.3",
+    "@travetto/registry": "^7.0.4",
     "@travetto/runtime": "^7.0.3",
     "@travetto/terminal": "^7.0.3",
     "@travetto/worker": "^7.0.3",
     "yaml": "^2.8.2"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.3",
+    "@travetto/cli": "^7.0.4",
     "@travetto/transformer": "^7.0.3"
   },
   "peerDependenciesMeta": {

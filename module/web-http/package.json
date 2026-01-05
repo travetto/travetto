@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-http",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "type": "module",
   "description": "Web HTTP Server Support",
   "keywords": [
@@ -27,11 +27,11 @@
     "directory": "module/web-http"
   },
   "dependencies": {
-    "@travetto/web": "^7.0.3"
+    "@travetto/web": "^7.0.4"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.3",
-    "@travetto/test": "^7.0.3"
+    "@travetto/cli": "^7.0.4",
+    "@travetto/test": "^7.0.4"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

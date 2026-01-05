@@ -29,7 +29,7 @@
     "prismjs": "^1.30.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.3"
+    "@travetto/cli": "^7.0.4"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
