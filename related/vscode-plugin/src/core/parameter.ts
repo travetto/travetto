@@ -149,7 +149,7 @@ export class ParameterSelector {
 
             quickPick.busy = true;
             const items: { label: string, description: string }[] = [];
-            const subProcess = spawn(ripGrepPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd: workingDirectory, });
+            const subProcess = spawn(ripGrepPath.replaceAll(' ', '\\ '), args, { stdio: [0, 'pipe', 2], shell: true, cwd: workingDirectory, });
 
             if (subProcess.stdout) {
               ExecUtil.readLines(subProcess.stdout,
