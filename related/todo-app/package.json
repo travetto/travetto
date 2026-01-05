@@ -24,7 +24,6 @@
   "dependencies": {
     "@travetto/auth-web": "^7.0.4",
     "@travetto/auth-web-session": "^7.0.4",
-    "@travetto/cli": "^7.0.4",
     "@travetto/email-inky": "^7.0.4",
     "@travetto/log": "^7.0.4",
     "@travetto/model-mongo": "^7.0.4",
@@ -37,6 +36,14 @@
     "@travetto/compiler": "^7.0.3",
     "@travetto/email-compiler": "^7.0.4",
     "@travetto/pack": "^7.0.3"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^7.0.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "travetto": {
     "displayName": "Todo Application"

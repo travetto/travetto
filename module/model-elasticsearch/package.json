@@ -29,10 +29,17 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^9.2.0",
-    "@travetto/cli": "^7.0.4",
     "@travetto/config": "^7.0.4",
     "@travetto/model": "^7.0.4",
     "@travetto/model-query": "^7.0.4"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^7.0.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "travetto": {
     "displayName": "Elasticsearch Model Source"
