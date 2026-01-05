@@ -11,7 +11,7 @@
     "@travetto/model-mysql": "^7.0.4",
     "@travetto/model-postgres": "^7.0.4",
     "@travetto/model-redis": "^7.0.4",
-    "@travetto/model-s3": "^7.0.4",
+    "@travetto/model-s3": "^7.0.5",
     "@travetto/model-sqlite": "^7.0.4"
   },
   "travetto": {},
