@@ -1,28 +1,15 @@
-Backlogged Requests
-===============   
-Model
-----------------------
-- [?] Look for SQL query optimization opportunities
+# Backlogged Requests
 
-New Text Search Module, build upon Model
------------------------
-- [ ] Elasticsearch Support
-  - [ ] Extended query language
+## Native Typescript Execution
+Rework compiler setup to no longer need the pre-compilation process and leverage type stripping, now that we are fully ESM
+* Decorators will need to be rethought if this is the goal
 
-Documentation
------------------------
-- [ ] How to develop, markdown for how to contribute
+## Migrate Away from Buffer
+- UInt8Array, and ArrayBuffer exist as cross-platform components that should suffice 
+- This will help cleanup general noise around node specific implementations
+- Should we do the same for Readable Streams?
 
-Decorators
-----------------------
-* ES Decorators
-  - Wait for parameter decorators
-  - Wait for function decorators
-      - Injectable Factories
-      - One-off routes
-
-Transactions
-----------------------
+## Model Transaction Support
 * Mongo Supports Transactions
 * Dynamodb supports transactions
 * Firestore Supports transactions
@@ -30,6 +17,22 @@ Transactions
 * Might require some rework of the sql naming conventions
 * Should be user controlled, and will not work cross model stores
 
-Native Typescript Execution
-----------------------
-Rework compiler to no longer need the pre-compilation process and leverage type stripping, now that we are fully ESM
+## Refine Development Restart
+* Filter out files that should probably not trigger a full restart (maybe)
+
+## Model
+- [?] Look for SQL query optimization opportunities
+
+## New Text Search Module, build upon Model
+- [ ] Elasticsearch Support
+  - [ ] Extended query language
+
+## Documentation
+- [ ] How to develop, markdown for how to contribute
+
+## Decorators
+* ES Decorators
+  - Wait for parameter decorators
+  - Wait for function decorators
+      - Injectable Factories
+      - One-off routes
