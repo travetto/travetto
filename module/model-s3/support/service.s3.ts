@@ -7,5 +7,8 @@ export const service: ServiceDescriptor = {
   version,
   privileged: true,
   port: '4566:9090',
-  image: `adobe/s3mock:${version}`
+  image: `adobe/s3mock:${version}`,
+  env: {
+    COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: 'app'
+  }
 };

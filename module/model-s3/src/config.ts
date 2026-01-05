@@ -12,8 +12,10 @@ import { Runtime } from '@travetto/runtime';
 export class S3ModelConfig {
   region = 'us-east-1'; // AWS Region
   namespace = ''; // S3 Bucket folder
-  bucket = ''; // S3 bucket
-  endpoint = ''; // Endpoint url
+  @Required(false)
+  bucket: string; // S3 bucket
+  @Required(false)
+  endpoint: string; // Endpoint url
 
   @EnvVar('AWS_ACCESS_KEY_ID')
   accessKeyId: string = '';
@@ -42,9 +44,7 @@ export class S3ModelConfig {
   async postConstruct(): Promise<void> {
     if (!Runtime.production) {
       this.endpoint ??= 'http://localhost:4566'; // From docker
-      if (this.endpoint.includes('localhost')) {
-        this.config.forcePathStyle ??= true;
-      }
+      this.bucket ??= 'app';
     }
 
     if (!this.accessKeyId && !this.secretAccessKey) {
@@ -62,5 +62,9 @@ export class S3ModelConfig {
         secretAccessKey: this.secretAccessKey
       }
     };
+
+    if (!Runtime.production && this.endpoint.includes('localhost')) {
+      this.config.forcePathStyle ??= true;
+    }
   }
 }
