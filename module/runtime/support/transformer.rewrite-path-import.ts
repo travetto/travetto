@@ -2,20 +2,21 @@ import ts from 'typescript';
 
 import { TransformerState, OnFile } from '@travetto/transformer';
 
-const PATH_REGEX = /^['"](node:)?path['"]$/;
 const PATH_IMPORT = '@travetto/manifest/src/path.ts';
 
 const isImport = (node: ts.Node): node is ts.ImportDeclaration =>
-  ts.isImportDeclaration(node) && PATH_REGEX.test(node.moduleSpecifier?.getText() ?? '');
+  ts.isImportDeclaration(node)
+  && ts.isStringLiteral(node.moduleSpecifier)
+  && (
+    node.moduleSpecifier.text === 'node:path'
+    || node.moduleSpecifier.text === 'path'
+  );
 
 /**
  * Rewriting path imports to use manifest's path
  */
 export class PathImportTransformer {
 
-  /**
-   * Hash each class
-   */
   @OnFile()
   static rewritePathImport(state: TransformerState, node: ts.SourceFile): ts.SourceFile {
     const statement = node.statements.find(isImport);

@@ -27,7 +27,7 @@ export class ManifestIndex {
   #importToEntry = new Map<string, IndexedFile>();
 
   constructor(manifest: string = process.env.TRV_MANIFEST!) {
-    this.init(manifest);
+    this.init(manifest || path.resolve(import.meta.dirname, './manifest.json'));
   }
 
   #resolveOutput(...parts: string[]): string {

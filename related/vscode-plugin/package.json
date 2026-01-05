@@ -1,6 +1,7 @@
 {
   "name": "travetto-plugin",
   "version": "7.0.0",
+  "type": "module",
   "displayName": "Travetto Plugin",
   "description": "VS Code plugin for interacting with the Travetto framework ",
   "keywords": [
@@ -30,7 +31,8 @@
   "scripts": {
     "vscode:prepublish": "npx trv pack -sm -e travetto-plugin/support/entry.launch -b dist",
     "package": "vsce package --no-dependencies",
-    "start": "npx trvc start"
+    "start": "npx trvc start",
+    "postinstall": "rm -rf node_modules/@travetto"
   },
   "devDependencies": {
     "@travetto/cli": "~7.0.0-rc.0",
