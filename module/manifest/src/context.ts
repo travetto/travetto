@@ -49,8 +49,9 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
   const build = workspace.travetto?.build ?? {};
   const resolve = createRequire(path.resolve(workspace.path, 'node_modules')).resolve.bind(null);
   const wsPrefix = `${workspace.path}/`;
-  const modPkg = (!!workspace.workspaces && process.env.TRV_MODULE) ?
-    readPackage(resolve(`${process.env.TRV_MODULE}/package.json`)) :
+  const moduleName = process.env.TRV_MODULE === workspace.name ? workspace.path : process.env.TRV_MODULE;
+  const modPkg = (!!workspace.workspaces && moduleName) ?
+    readPackage(resolve(`${moduleName}/package.json`)) :
     findPackage(root, pkg => !!pkg) ?? workspace;
 
   if (workspace.type !== 'module') {

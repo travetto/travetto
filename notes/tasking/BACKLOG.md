@@ -29,3 +29,7 @@ Transactions
 * Expand some form of transactionality as a primitive for use within service methods (separate from sql transactions)
 * Might require some rework of the sql naming conventions
 * Should be user controlled, and will not work cross model stores
+
+Native Typescript Execution
+----------------------
+Rework compiler to no longer need the pre-compilation process and leverage type stripping, now that we are fully ESM
