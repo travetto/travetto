@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 import path from 'node:path';
 

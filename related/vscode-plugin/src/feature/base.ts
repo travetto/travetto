@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 
 import { Log } from '../core/log.ts';
 import { ActivationTarget } from '../core/types.ts';

@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 import timers from 'node:timers/promises';
 import path from 'node:path';
 import fs from 'node:fs';

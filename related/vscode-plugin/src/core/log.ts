@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 
 export class Log {
   static #log: vscode.LogOutputChannel = vscode.window.createOutputChannel('Travetto Plugin', { log: true });

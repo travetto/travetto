@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 
 import { IpcSupport } from './ipc.ts';
 import { ActivationTarget, TargetEvent } from './types.ts';

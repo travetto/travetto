@@ -1,5 +1,5 @@
 import { ChildProcess, spawn } from 'node:child_process';
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 
 import { ExecUtil } from '@travetto/runtime';
 import type { EmailCompiled } from '@travetto/email';

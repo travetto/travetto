@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 import { ChildProcess, spawn } from 'node:child_process';
 
 import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';

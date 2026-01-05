@@ -1,4 +1,4 @@
-import vscode, { ThemeColor } from 'vscode';
+import * as vscode from 'vscode';
 
 import type { TestRemoveEvent, TestResult, TestStatus, TestWatchEvent } from '@travetto/test';
 
@@ -143,12 +143,12 @@ export class DiagnosticManager {
         this.#status.color = Style.COLORS.passed;
         break;
       case 'failed':
-        this.#status.backgroundColor = new ThemeColor('statusBarItem.errorBackground');
-        this.#status.color = new ThemeColor('statusBarItem.errorForeground');
+        this.#status.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+        this.#status.color = new vscode.ThemeColor('statusBarItem.errorForeground');
         break;
       default:
-        this.#status.backgroundColor = new ThemeColor('statusBarItem.warningBackground');
-        this.#status.color = new ThemeColor('statusBarItem.warningForeground');
+        this.#status.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.#status.color = new vscode.ThemeColor('statusBarItem.warningForeground');
         break;
     }
     this.#status.text = message;

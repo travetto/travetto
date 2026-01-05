@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 import util from 'node:util';
 
 import type { TestResult, Assertion, TestConfig, TestLog, TestStatus } from '@travetto/test';

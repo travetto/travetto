@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 
 import { Activatible } from '../../../core/activation.ts';
 import { ActionStorage } from '../../../core/storage.ts';
