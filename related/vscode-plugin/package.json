@@ -1,6 +1,6 @@
 {
   "name": "travetto-plugin",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "type": "module",
   "displayName": "Travetto Plugin",
   "description": "VS Code plugin for interacting with the Travetto framework ",

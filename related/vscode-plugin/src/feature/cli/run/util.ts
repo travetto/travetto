@@ -35,7 +35,10 @@ export class CliRunUtil {
   static #buildChoiceParams(choice: RunChoice): string {
     const out = (choice.args ?? [])
       .map((input, i) => {
-        const value = choice.inputs[i] !== undefined ? choice.inputs[i] : (input.choices?.join(',') ?? input.default);
+        let value = choice.inputs[i] !== undefined ? choice.inputs[i] : (input.choices?.join(',') ?? input.default);
+        if (input.type === 'file' && value && typeof value === 'string') {
+          value = value.replace(Workspace.path, '').replace(/^[\\/]/, '');
+        }
         return `${input.description || input.name}${value !== undefined ? `=${value}` : ''}`;
       })
       .join(', ');

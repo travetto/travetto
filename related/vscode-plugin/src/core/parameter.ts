@@ -153,7 +153,7 @@ export class ParameterSelector {
 
             if (subProcess.stdout) {
               ExecUtil.readLines(subProcess.stdout,
-                item => items.push({ label: item, description: path.resolve(workingDirectory, item.trim()) }));
+                item => items.push({ label: item, description: item.trim().replace(/^[\\/]/, '') }));
             }
             await ExecUtil.getResult(subProcess, { catch: true });
             quickPick.items = items;
@@ -161,7 +161,7 @@ export class ParameterSelector {
           }),
           quickPick.onDidChangeSelection(items => {
             if (items[0]) {
-              resolve(items[0].description);
+              resolve(path.resolve(workingDirectory, items[0].description));
             }
             quickPick.hide();
           }),
