@@ -26,11 +26,18 @@
     "directory": "module/model-mongo"
   },
   "dependencies": {
-    "@travetto/cli": "^7.0.3",
     "@travetto/config": "^7.0.3",
     "@travetto/model": "^7.0.3",
     "@travetto/model-query": "^7.0.3",
     "mongodb": "^7.0.0"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^7.0.3"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "travetto": {
     "displayName": "MongoDB Model Support"

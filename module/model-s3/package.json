@@ -29,9 +29,16 @@
     "@aws-sdk/client-s3": "^3.962.0",
     "@aws-sdk/credential-provider-ini": "^3.962.0",
     "@aws-sdk/s3-request-presigner": "^3.962.0",
-    "@travetto/cli": "^7.0.3",
     "@travetto/config": "^7.0.3",
     "@travetto/model": "^7.0.3"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^7.0.3"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "travetto": {
     "displayName": "S3 Model Support"

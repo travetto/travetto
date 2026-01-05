@@ -26,10 +26,17 @@
   },
   "dependencies": {
     "@google-cloud/firestore": "^8.0.0",
-    "@travetto/cli": "^7.0.3",
     "@travetto/config": "^7.0.3",
     "@travetto/model": "^7.0.3",
     "@travetto/runtime": "^7.0.3"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^7.0.3"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "travetto": {
     "displayName": "Firestore Model Support"
