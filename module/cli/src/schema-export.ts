@@ -75,13 +75,14 @@ export class CliSchemaExportUtil {
   static exportSchema(cls: Class): CliCommandSchema {
     const schema = SchemaRegistryIndex.getConfig(cls);
     const config = CliCommandRegistryIndex.get(cls);
-    const processed = Object.values(schema.fields).map(value => this.processInput(value));
+    const flags = Object.values(schema.fields).map(value => this.processInput(value));
+    const args = (schema.methods.main?.parameters ?? []).map(value => this.processInput(value));
     return {
       name: config.name,
       module: describeFunction(config.cls).module,
       description: schema.description,
-      flags: processed.filter(value => value.flagNames && value.flagNames.length > 0),
-      args: processed.filter(value => !value.flagNames || value.flagNames.length === 0),
+      flags: flags.filter(value => value.flagNames && value.flagNames.length > 0),
+      args,
       runTarget: config.runTarget ?? false
     };
   }
