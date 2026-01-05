@@ -25,7 +25,12 @@
             "inlineStyleLanguage": "css",
             "polyfills": [],
             "assets": [
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "../vscode-plugin/images/",
+                "output": "assets/images/vscode-plugin"
+              }
             ],
             "styles": [
               "src/styles.css"
