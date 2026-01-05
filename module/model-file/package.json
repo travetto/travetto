@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-file",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "type": "module",
   "description": "File system backing for the travetto model module.",
   "keywords": [
@@ -26,14 +26,14 @@
     "directory": "module/model-file"
   },
   "dependencies": {
-    "@travetto/config": "^7.0.2",
-    "@travetto/di": "^7.0.2",
-    "@travetto/model": "^7.0.2",
-    "@travetto/schema": "^7.0.2"
+    "@travetto/config": "^7.0.3",
+    "@travetto/di": "^7.0.3",
+    "@travetto/model": "^7.0.3",
+    "@travetto/schema": "^7.0.3"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.2",
-    "@travetto/test": "^7.0.2"
+    "@travetto/cli": "^7.0.3",
+    "@travetto/test": "^7.0.3"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
