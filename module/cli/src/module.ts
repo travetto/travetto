@@ -60,7 +60,8 @@ export class CliModuleUtil {
       childMap.has(name) ? childMap.get(name)! : childMap.set(name, { children: new Set(), name, active: new Set() }).get(name)!;
 
     for (const mod of modules) {
-      get(mod.name).parents = mod.parents;
+      get(mod.name).parents = [...mod.parents];
+      get(mod.name).children = new Set(mod.children);
       for (const parentModule of mod.parents) {
         const parent = get(parentModule);
         parent.children.add(mod.name); // Store child into parent
