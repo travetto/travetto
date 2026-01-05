@@ -11,7 +11,7 @@ import { RunUtil } from '../../../core/run.ts';
 
 type PickItem = vscode.QuickPickItem & { target: RunChoice };
 
-type ModuleGraphItem<T> = { name: string, children: T, local?: boolean };
+type ModuleGraphItem<T> = { name: string, children: T, workspace?: boolean };
 
 /**
  * Utils for handling cli running
@@ -114,7 +114,7 @@ export class CliRunUtil {
     const data = await this.#startCli('repo:list', ['-f', 'json'], 'collect module list');
     try {
       const result: ModuleGraphItem<string[]>[] = JSONUtil.parseSafe(data.stdout);
-      return result.map(item => ({ name: item.name, children: new Set(item.children), local: !!item.local }));
+      return result.map(item => ({ name: item.name, children: new Set(item.children), workspace: !!item.workspace }));
     } catch {
       throw new Error(`Unable to collect module list: ${data.stderr || data.stdout}`);
     }
@@ -137,14 +137,14 @@ export class CliRunUtil {
       const moduleFlag = choice.flags.find(flag => flag.type === 'module');
       if (moduleFlag?.required) {
         modules ??= await this.getModules();
-        for (const module of modules.filter(mod => mod.local && mod.children.has(choice.module))) {
+        for (const module of modules.filter(mod => mod.workspace && mod.children.has(choice.module))) {
           output.push({
             ...choice,
             prettyName: `${choice.name} [${module.name}]`,
             inputFlags: ['--module', module.name]
           });
         }
-        if (modules.find(mod => mod.local && mod.name === choice.module)) {
+        if (modules.find(mod => mod.workspace && mod.name === choice.module)) {
           output.push({
             ...choice,
             prettyName: `${choice.name} [${choice.module}]`,
