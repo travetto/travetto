@@ -1,7 +1,7 @@
 import path from 'node:path';
 import cp from 'node:child_process';
 
-import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
 import { ExecUtil } from '@travetto/runtime';
 
 import { OpenApiClientHelp } from './bin/help.ts';

@@ -1,6 +1,6 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 
-import { path, ManifestIndex, ManifestModuleUtil, IndexedFile } from '@travetto/manifest';
+import { path, type ManifestIndex, ManifestModuleUtil, type IndexedFile } from '@travetto/manifest';
 
 import type { AnyType, TransformResolver } from './types.ts';
 import { TypeCategorize, TypeBuilder } from './builder.ts';

@@ -8,7 +8,7 @@ import { ManifestModuleUtil } from '@travetto/manifest';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { clientFactory } from '../support/client/rpc.ts';
-import { WebRpcClient, WebRpcConfig } from './config.ts';
+import type { WebRpcClient, WebRpcConfig } from './config.ts';
 
 @Injectable({ autoInject: Runtime.envType === 'development' })
 export class WebRpcClientGeneratorService {

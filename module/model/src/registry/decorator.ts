@@ -1,8 +1,8 @@
-import { AppError, castTo, Class, getClass } from '@travetto/runtime';
+import { AppError, castTo, type Class, getClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { ModelType } from '../types/model.ts';
-import { DataHandler, IndexConfig, ModelConfig, PrePersistScope } from './types.ts';
+import type { ModelType } from '../types/model.ts';
+import type { DataHandler, IndexConfig, ModelConfig, PrePersistScope } from './types.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
 
 /**

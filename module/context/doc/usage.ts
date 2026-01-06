@@ -1,4 +1,4 @@
-import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Inject } from '@travetto/di';
 
 const NameSymbol = Symbol();

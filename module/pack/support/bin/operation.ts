@@ -4,7 +4,7 @@ import path from 'node:path';
 import { cliTpl } from '@travetto/cli';
 import { Env, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { CommonPackConfig } from '../../src/types.ts';
+import type { CommonPackConfig } from '../../src/types.ts';
 import { PackUtil } from './util.ts';
 import { ActiveShellCommand, ShellCommands } from './shell.ts';
 

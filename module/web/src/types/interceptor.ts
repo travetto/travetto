@@ -2,8 +2,8 @@ import type { Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
 import type { WebChainedContext } from './filter.ts';
-import { WebResponse } from './response.ts';
-import { WebInterceptorCategory } from './core.ts';
+import type { WebResponse } from './response.ts';
+import type { WebInterceptorCategory } from './core.ts';
 
 export type WebInterceptorContext<C = unknown> = { endpoint: EndpointConfig, config: C };
 

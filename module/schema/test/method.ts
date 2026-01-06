@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { MaxLength, Method, MethodValidator, Schema, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
+import { MaxLength, Method, MethodValidator, Schema, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 const nameValidator = (name: string): ValidationError | undefined => {
   if (name === 'bob') {

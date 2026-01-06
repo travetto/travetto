@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 
 import { Env, RuntimeIndex } from '@travetto/runtime';
-import { CliCommandShape, CliCommand, CliUtil } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, CliUtil } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
 

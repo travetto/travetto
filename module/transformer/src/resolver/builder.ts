@@ -7,9 +7,9 @@ import { DocUtil } from '../util/doc.ts';
 import { CoreUtil } from '../util/core.ts';
 import { DeclarationUtil } from '../util/declaration.ts';
 import { LiteralUtil } from '../util/literal.ts';
-import { transformCast, TemplateLiteralPart } from '../types/shared.ts';
+import { transformCast, type TemplateLiteralPart } from '../types/shared.ts';
 
-import { Type, AnyType, CompositionType, TransformResolver, TemplateType, MappedType } from './types.ts';
+import type { Type, AnyType, CompositionType, TransformResolver, TemplateType, MappedType } from './types.ts';
 import { CoerceUtil } from './coerce.ts';
 
 const UNDEFINED = Symbol();

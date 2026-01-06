@@ -5,13 +5,13 @@ import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { BinaryUtil } from '@travetto/runtime';
 
-import { WebChainedContext } from '../types/filter.ts';
+import type { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
 import { CompressInterceptor } from './compress.ts';
 import { WebBodyUtil } from '../util/body.ts';
-import { ByteSizeInput, WebCommonUtil } from '../util/common.ts';
+import { type ByteSizeInput, WebCommonUtil } from '../util/common.ts';
 import { WebHeaderUtil } from '../util/header.ts';
 
 @Config('web.etag')

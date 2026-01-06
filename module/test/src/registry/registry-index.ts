@@ -1,8 +1,8 @@
-import { AppError, Class, Runtime, describeFunction } from '@travetto/runtime';
-import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { AppError, type Class, Runtime, describeFunction } from '@travetto/runtime';
+import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
-import { SuiteConfig } from '../model/suite.ts';
-import { TestConfig, TestRun } from '../model/test.ts';
+import type { SuiteConfig } from '../model/suite.ts';
+import type { TestConfig, TestRun } from '../model/test.ts';
 import { SuiteRegistryAdapter } from './registry-adapter.ts';
 
 const sortedTests = (config: SuiteConfig): TestConfig[] =>

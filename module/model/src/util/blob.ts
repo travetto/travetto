@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
-import { AppError, BinaryInput, BinaryUtil, BlobMeta, ByteRange, hasFunction } from '@travetto/runtime';
-import { ModelBlobSupport } from '../types/blob.ts';
+import { AppError, type BinaryInput, BinaryUtil, type BlobMeta, type ByteRange, hasFunction } from '@travetto/runtime';
+import type { ModelBlobSupport } from '../types/blob.ts';
 
 /**
  * Utilities for processing blobs

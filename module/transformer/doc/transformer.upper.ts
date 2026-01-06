@@ -1,6 +1,6 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 
-import { OnProperty, TransformerState, OnMethod, OnClass } from '@travetto/transformer';
+import { OnProperty, type TransformerState, OnMethod, OnClass } from '@travetto/transformer';
 
 export class MakeUpper {
 

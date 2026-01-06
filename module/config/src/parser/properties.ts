@@ -1,6 +1,6 @@
 import { Injectable } from '@travetto/di';
 
-import { ConfigData, ConfigParser } from './types.ts';
+import type { ConfigData, ConfigParser } from './types.ts';
 
 const BACKSLASH = '\\'.charCodeAt(0);
 const EQUALS = '='.charCodeAt(0);

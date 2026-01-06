@@ -1,9 +1,9 @@
 import { TextDecoder } from 'node:util';
 import { Readable } from 'node:stream';
 
-import { Any, BinaryUtil, castTo, hasToJSON, JSONUtil, Util } from '@travetto/runtime';
+import { type Any, BinaryUtil, castTo, hasToJSON, JSONUtil, Util } from '@travetto/runtime';
 
-import { WebBinaryBody, WebMessage } from '../types/message.ts';
+import type { WebBinaryBody, WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
 import { WebError } from '../types/error.ts';
 

@@ -1,5 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-import { MongoModelService, MongoModelConfig } from '@travetto/model-mongo';
+import { MongoModelService, type MongoModelConfig } from '@travetto/model-mongo';
 
 export class Init {
   @InjectableFactory({

@@ -6,7 +6,7 @@ import { ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
 import { CompilerUtil } from './util.ts';
 import { CompilerState } from './state.ts';
 import { CompilerWatcher } from './watch.ts';
-import { CompileEmitEvent, CompileEmitter, CompilerReset } from './types.ts';
+import { type CompileEmitEvent, type CompileEmitter, CompilerReset } from './types.ts';
 import { EventUtil } from './event.ts';
 
 import { IpcLogger } from '../support/log.ts';

@@ -4,11 +4,11 @@ import { Ignore } from '@travetto/schema';
 
 import { WebCommonUtil } from '../util/common.ts';
 
-import { WebChainedContext } from '../types/filter.ts';
-import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
-import { WebResponse } from '../types/response.ts';
-import { WebRequest } from '../types/request.ts';
+import type { WebChainedContext } from '../types/filter.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
+import type { WebResponse } from '../types/response.ts';
+import type { WebRequest } from '../types/request.ts';
 import { WebError } from '../types/error.ts';
 
 @Config('web.accept')

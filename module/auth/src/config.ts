@@ -1,5 +1,5 @@
 import { Config } from '@travetto/config';
-import { TimeSpan, TimeUtil } from '@travetto/runtime';
+import { type TimeSpan, TimeUtil } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
 @Config('auth')

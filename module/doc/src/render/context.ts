@@ -3,8 +3,8 @@ import path from 'node:path';
 import { PackageUtil } from '@travetto/manifest';
 import { castTo, RuntimeIndex } from '@travetto/runtime';
 
-import { JSXElementByFn, c } from '../jsx.ts';
-import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve.ts';
+import type { JSXElementByFn, c } from '../jsx.ts';
+import { DocResolveUtil, type ResolvedCode, type ResolvedRef, type ResolvedSnippetLink } from '../util/resolve.ts';
 import { DocRunUtil } from '../util/run.ts';
 import { createElement, JSXRuntimeTag } from '../../support/jsx-runtime.ts';
 

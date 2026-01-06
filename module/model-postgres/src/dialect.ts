@@ -1,10 +1,10 @@
-import { SchemaFieldConfig } from '@travetto/schema';
+import type { SchemaFieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { AsyncContext } from '@travetto/context';
-import { ModelType } from '@travetto/model';
-import { castTo, Class } from '@travetto/runtime';
+import type { AsyncContext } from '@travetto/context';
+import type { ModelType } from '@travetto/model';
+import { castTo, type Class } from '@travetto/runtime';
 
-import { SQLDialect, SQLModelConfig, SQLModelUtil, VisitStack, type SQLTableDescription } from '@travetto/model-sql';
+import { SQLDialect, type SQLModelConfig, SQLModelUtil, type VisitStack, type SQLTableDescription } from '@travetto/model-sql';
 
 import { PostgreSQLConnection } from './connection.ts';
 

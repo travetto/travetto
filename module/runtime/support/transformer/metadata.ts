@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
-import { FunctionMetadataTag } from '@travetto/runtime';
-import { CoreUtil, Import, SystemUtil, TransformerState } from '@travetto/transformer';
+import { type FunctionMetadataTag } from '@travetto/runtime';
+import { CoreUtil, type Import, SystemUtil, type TransformerState } from '@travetto/transformer';
 
 const RegisterImportSymbol = Symbol();
 

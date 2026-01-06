@@ -6,7 +6,7 @@ import type terser from '@rollup/plugin-terser';
 import { type ManifestModule, ManifestModuleUtil } from '@travetto/manifest';
 import { EnvProp, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { CoreRollupConfig } from '../../src/types.ts';
+import type { CoreRollupConfig } from '../../src/types.ts';
 
 function getFilesFromModule(mod: ManifestModule): string[] {
   return [

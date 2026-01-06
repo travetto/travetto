@@ -1,5 +1,5 @@
 import { Injectable } from '@travetto/di';
-import { LogFormatter, LogCommonSymbol, LogEvent } from '@travetto/log';
+import { type LogFormatter, LogCommonSymbol, type LogEvent } from '@travetto/log';
 
 @Injectable(LogCommonSymbol)
 export class SampleFormatter implements LogFormatter {

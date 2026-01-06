@@ -1,5 +1,5 @@
 import { Suite } from '@travetto/test';
-import { AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { SqliteDialect } from '@travetto/model-sqlite';

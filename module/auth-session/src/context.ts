@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
-import { AsyncContext, AsyncContextValue } from '@travetto/context';
-import { AuthContext, AuthenticationError } from '@travetto/auth';
+import { type AsyncContext, AsyncContextValue } from '@travetto/context';
+import { type AuthContext, AuthenticationError } from '@travetto/auth';
 
 import { Session } from './session.ts';
 

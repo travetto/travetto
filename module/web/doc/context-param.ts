@@ -1,4 +1,4 @@
-import { CacheControl, ContextParam, Controller, Get, WebRequest, WebResponse } from '@travetto/web';
+import { CacheControl, ContextParam, Controller, Get, type WebRequest, WebResponse } from '@travetto/web';
 
 @Controller('/context')
 class ContextController {

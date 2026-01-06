@@ -1,10 +1,10 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { asFull, Class, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asFull, type Class, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { TestConfig, Assertion, TestResult } from '../model/test.ts';
-import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
+import type { TestConfig, Assertion, TestResult } from '../model/test.ts';
+import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
 
 const isCleanable = hasFunction<{ toClean(): unknown }>('toClean');
 

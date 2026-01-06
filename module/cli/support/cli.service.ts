@@ -1,8 +1,8 @@
-import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, cliTpl, type CliValidationError } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
 import { AsyncQueue, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
 
-import { ServiceRunner, ServiceDescriptor, ServiceAction } from '../src/service.ts';
+import { ServiceRunner, type ServiceDescriptor, type ServiceAction } from '../src/service.ts';
 
 /**
  * Allows for running services

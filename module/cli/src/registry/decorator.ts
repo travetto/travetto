@@ -1,7 +1,7 @@
-import { Class, ClassInstance, Env, Runtime, RuntimeIndex, TypedObject, castTo, describeFunction, getClass } from '@travetto/runtime';
-import { SchemaFieldConfig, SchemaRegistryIndex, ValidationError } from '@travetto/schema';
+import { type Class, type ClassInstance, Env, Runtime, RuntimeIndex, TypedObject, castTo, describeFunction, getClass } from '@travetto/runtime';
+import { type SchemaFieldConfig, SchemaRegistryIndex, type ValidationError } from '@travetto/schema';
 
-import { CliCommandShape } from '../types.ts';
+import type { CliCommandShape } from '../types.ts';
 import { CliCommandRegistryIndex } from './registry-index.ts';
 import { CliModuleUtil } from '../module.ts';
 import { CliParseUtil } from '../parse.ts';

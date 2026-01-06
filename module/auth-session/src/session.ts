@@ -1,4 +1,4 @@
-import { AnyMap, castKey, castTo } from '@travetto/runtime';
+import { type AnyMap, castKey, castTo } from '@travetto/runtime';
 
 /**
  * @concrete

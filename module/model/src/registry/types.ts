@@ -1,6 +1,6 @@
 import type { Class, RetainPrimitiveFields } from '@travetto/runtime';
 
-import { ModelType } from '../types/model.ts';
+import type { ModelType } from '../types/model.ts';
 
 export type SortClauseRaw<T> = {
   [P in keyof T]?:

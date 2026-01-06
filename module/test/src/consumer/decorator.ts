@@ -1,6 +1,6 @@
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 
-import { TestConsumerShape } from './types';
+import type { TestConsumerShape } from './types';
 import { TestConsumerRegistryIndex } from './registry-index';
 
 /**

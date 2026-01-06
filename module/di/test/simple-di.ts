@@ -8,7 +8,7 @@ import { DependencyRegistryIndex, InjectionError } from '@travetto/di';
 import {
   ServiceInherit, ServiceInheritSymbol2, CustomServiceInheritSymbol,
   CustomDatabaseSymbol, Database, CustomEmptySymbol, BasePattern,
-  SpecificPattern, InterfaceType, BaseType, CustomInterfaceSymbol, UsableMainClass, UsableSubClass,
+  SpecificPattern, InterfaceType, type BaseType, CustomInterfaceSymbol, UsableMainClass, UsableSubClass,
   UsableSubSubClass, LooseResolutionClass, LooseSymbol, SetterInject
 } from './dependencies.ts';
 

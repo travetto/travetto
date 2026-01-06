@@ -1,7 +1,7 @@
-import { Any, Class, ClassInstance, getClass } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, getClass } from '@travetto/runtime';
 
 import { CommonRegex } from '../validate/regex.ts';
-import { CONSTRUCTOR_PROPERTY, SchemaInputConfig } from '../service/types.ts';
+import { CONSTRUCTOR_PROPERTY, type SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(

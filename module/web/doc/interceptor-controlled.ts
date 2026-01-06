@@ -1,4 +1,4 @@
-import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebError } from '@travetto/web';
+import { type WebInterceptor, type WebInterceptorCategory, type WebChainedContext, WebError } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()

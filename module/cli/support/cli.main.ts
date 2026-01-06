@@ -1,5 +1,5 @@
 import { Runtime } from '@travetto/runtime';
-import { CliCommandShape, CliCommand, CliValidationError, ParsedState } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, type CliValidationError, type ParsedState } from '@travetto/cli';
 import { Ignore, IsPrivate } from '@travetto/schema';
 
 /**

@@ -5,7 +5,7 @@ import { Schema } from '@travetto/schema';
 import { TimeUtil } from '@travetto/runtime';
 
 import { Index, Model } from '../../src/registry/decorator.ts';
-import { ModelIndexedSupport } from '../../src/types/indexed.ts';
+import type { ModelIndexedSupport } from '../../src/types/indexed.ts';
 import { NotFoundError } from '../../src/error/not-found.ts';
 import { IndexNotSupported } from '../../src/error/invalid-index.ts';
 

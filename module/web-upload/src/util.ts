@@ -7,11 +7,11 @@ import { Readable, Transform } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
-import { WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
+import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
-import { WebUploadConfig } from './config.ts';
-import { FileMap } from './types.ts';
+import type { WebUploadConfig } from './config.ts';
+import type { FileMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 

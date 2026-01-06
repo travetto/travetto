@@ -1,6 +1,9 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 
-import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer, ModuleNameSymbol } from './types/visitor.ts';
+import {
+  type DecoratorMeta, type NodeTransformer, type State,
+  type TransformPhase, type TransformerType, type Transformer, ModuleNameSymbol
+} from './types/visitor.ts';
 
 const HandlersSymbol = Symbol();
 

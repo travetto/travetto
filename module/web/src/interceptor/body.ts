@@ -3,13 +3,13 @@ import { Config } from '@travetto/config';
 import { toConcrete } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
-import { WebChainedContext } from '../types/filter.ts';
-import { WebResponse } from '../types/response.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
-import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebChainedContext } from '../types/filter.ts';
+import type { WebResponse } from '../types/response.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
-import { ByteSizeInput, WebCommonUtil } from '../util/common.ts';
+import { type ByteSizeInput, WebCommonUtil } from '../util/common.ts';
 
 import { AcceptInterceptor } from './accept.ts';
 import { DecompressInterceptor } from './decompress.ts';

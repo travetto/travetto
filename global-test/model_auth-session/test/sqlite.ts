@@ -1,8 +1,8 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { SessionModelSymbol } from '@travetto/auth-session';
-import { AsyncContext } from '@travetto/context';
-import { ModelExpirySupport } from '@travetto/model';
+import type { AsyncContext } from '@travetto/context';
+import type { ModelExpirySupport } from '@travetto/model';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { SqliteDialect } from '@travetto/model-sqlite';
 

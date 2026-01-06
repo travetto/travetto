@@ -1,7 +1,7 @@
-import { TimeSpan } from '@travetto/runtime';
+import type { TimeSpan } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 
-import { EsSchemaConfig } from './internal/types.ts';
+import type { EsSchemaConfig } from './internal/types.ts';
 
 /**
  * Elasticsearch model config

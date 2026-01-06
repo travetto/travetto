@@ -1,6 +1,6 @@
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 
-import { ModelType } from '../types/model.ts';
+import type { ModelType } from '../types/model.ts';
 
 /**
  * This interface defines the behavior for dealing with the

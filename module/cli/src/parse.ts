@@ -2,9 +2,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { Runtime } from '@travetto/runtime';
-import { SchemaClassConfig, SchemaFieldConfig, SchemaInputConfig } from '@travetto/schema';
+import type { SchemaClassConfig, SchemaFieldConfig, SchemaInputConfig } from '@travetto/schema';
 
-import { ParsedState } from './types.ts';
+import type { ParsedState } from './types.ts';
 
 type ParsedInput = ParsedState['all'][number];
 

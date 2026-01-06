@@ -1,4 +1,4 @@
-import { AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
+import { type AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
 import { Inject } from '@travetto/di';
 
 export class ContextValueService {

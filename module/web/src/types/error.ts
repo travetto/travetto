@@ -1,4 +1,4 @@
-import { AnyMap, AppError, ErrorCategory } from '@travetto/runtime';
+import { type AnyMap, AppError, type ErrorCategory } from '@travetto/runtime';
 
 /**
  * Web Error

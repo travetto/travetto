@@ -1,4 +1,4 @@
-import { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from './types.ts';
+import type { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from './types.ts';
 
 const LEVEL_TO_PRIORITY: Record<CompilerLogLevel | 'none', number> = { debug: 1, info: 2, warn: 3, error: 4, none: 5 };
 const SCOPE_MAX = 15;

@@ -3,7 +3,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 
 import { TypedObject, RuntimeIndex, Runtime, BinaryUtil, ExecUtil } from '@travetto/runtime';
-import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
+import type { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 
 import { EmailCompileUtil } from './util.ts';
 

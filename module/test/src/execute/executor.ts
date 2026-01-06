@@ -3,9 +3,9 @@ import { AssertionError } from 'node:assert';
 import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 
-import { TestConfig, TestResult, type TestRun } from '../model/test.ts';
-import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
-import { TestConsumerShape } from '../consumer/types.ts';
+import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
+import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
+import type { TestConsumerShape } from '../consumer/types.ts';
 import { AssertCheck } from '../assert/check.ts';
 import { AssertCapture } from '../assert/capture.ts';
 import { ConsoleCapture } from './console.ts';

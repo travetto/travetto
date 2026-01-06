@@ -1,13 +1,13 @@
-import { asConstructable, castKey, castTo, Class, TypedObject } from '@travetto/runtime';
-import { BindUtil, SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { asConstructable, castKey, castTo, type Class, TypedObject } from '@travetto/runtime';
+import { BindUtil, type SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { DependencyRegistryIndex } from '@travetto/di';
 
-import { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
+import type { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
-import { WebRequest } from '../types/request.ts';
+import type { WebInterceptor } from '../types/interceptor.ts';
+import type { WebRequest } from '../types/request.ts';
 import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import { EndpointConfig, ControllerConfig, EndpointParameterConfig, EndpointFunction } from '../registry/types.ts';
+import type { EndpointConfig, ControllerConfig, EndpointParameterConfig, EndpointFunction } from '../registry/types.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import { WebCommonUtil } from './common.ts';
 

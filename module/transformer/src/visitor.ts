@@ -1,8 +1,8 @@
 import ts from 'typescript';
 
-import { ManifestModuleFolderType, ManifestModuleUtil } from '@travetto/manifest';
+import { type ManifestModuleFolderType, ManifestModuleUtil } from '@travetto/manifest';
 
-import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor.ts';
+import type { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor.ts';
 import { CoreUtil } from './util/core.ts';
 
 const COMPILER_SOURCE = new Set<ManifestModuleFolderType>(['support', 'src', '$index']);

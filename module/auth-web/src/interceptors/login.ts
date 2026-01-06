@@ -1,8 +1,8 @@
-import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse, WebInterceptorContext } from '@travetto/web';
+import type { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse, WebInterceptorContext } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
-import { AuthService } from '@travetto/auth';
+import type { AuthService } from '@travetto/auth';
 
 import { AuthContextInterceptor } from './context.ts';
 

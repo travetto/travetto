@@ -1,4 +1,4 @@
-import { Writable } from 'node:stream';
+import type { Writable } from 'node:stream';
 
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';

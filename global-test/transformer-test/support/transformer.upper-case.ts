@@ -1,6 +1,6 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 
-import { TransformerState, AfterMethod } from '@travetto/transformer';
+import { type TransformerState, AfterMethod } from '@travetto/transformer';
 
 export class MakeUpper {
 

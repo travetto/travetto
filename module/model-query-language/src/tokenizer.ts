@@ -1,5 +1,5 @@
 import { TimeUtil } from '@travetto/runtime';
-import { Token, TokenizeState, TokenType } from './types.ts';
+import type { Token, TokenizeState, TokenType } from './types.ts';
 
 const OPEN_PARENS = 0x28, CLOSE_PARENS = 0x29, OPEN_BRACKET = 0x5b, CLOSE_BRACKET = 0x5d, COMMA = 0x2c;
 const GREATER_THAN = 0x3e, LESS_THAN = 0x3c, EQUAL = 0x3d, NOT = 0x21, MODULO = 0x25, TILDE = 0x7e, AND = 0x26, OR = 0x7c;

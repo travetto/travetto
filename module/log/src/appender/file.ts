@@ -1,11 +1,11 @@
-import { createWriteStream, WriteStream, mkdirSync, openSync, appendFileSync } from 'node:fs';
+import { createWriteStream, type WriteStream, mkdirSync, openSync, appendFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { Env, Runtime } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 
-import { LogAppender, LogEvent } from '../types.ts';
+import type { LogAppender, LogEvent } from '../types.ts';
 
 @Config('log')
 export class FileLogAppenderConfig {

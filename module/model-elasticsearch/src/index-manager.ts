@@ -1,9 +1,9 @@
-import { Client, estypes } from '@elastic/elasticsearch';
+import type { Client, estypes } from '@elastic/elasticsearch';
 
-import { Class } from '@travetto/runtime';
-import { ModelRegistryIndex, ModelType, ModelStorageSupport } from '@travetto/model';
+import type { Class } from '@travetto/runtime';
+import { ModelRegistryIndex, type ModelType, type ModelStorageSupport } from '@travetto/model';
 
-import { ElasticsearchModelConfig } from './config.ts';
+import type { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 
 /**

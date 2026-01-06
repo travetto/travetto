@@ -1,13 +1,13 @@
 /* eslint-disable @stylistic/indent */
-import { DataUtil, SchemaFieldConfig, Schema, SchemaRegistryIndex, type Point } from '@travetto/schema';
-import { Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } from '@travetto/runtime';
-import { SelectClause, Query, SortClause, WhereClause, RetainQueryPrimitiveFields, ModelQueryUtil } from '@travetto/model-query';
-import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
+import { DataUtil, type SchemaFieldConfig, Schema, SchemaRegistryIndex, type Point } from '@travetto/schema';
+import { type Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } from '@travetto/runtime';
+import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil } from '@travetto/model-query';
+import type { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
 
 import { SQLModelUtil } from '../util.ts';
-import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
-import { Connection } from '../connection/base.ts';
-import { VisitStack } from '../types.ts';
+import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
+import type { Connection } from '../connection/base.ts';
+import type { VisitStack } from '../types.ts';
 
 const PointConcrete = toConcrete<Point>();
 

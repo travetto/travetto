@@ -1,7 +1,7 @@
 import { Inject } from '@travetto/di';
 
 import { Controller, Post, Body } from '@travetto/web';
-import { AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 
 type Preferences = {
   language: string;

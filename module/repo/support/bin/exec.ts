@@ -1,6 +1,6 @@
-import { ChildProcess } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 
-import { ExecutionResult, Env, Util, ExecUtil, castTo } from '@travetto/runtime';
+import { type ExecutionResult, Env, Util, ExecUtil, castTo } from '@travetto/runtime';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';

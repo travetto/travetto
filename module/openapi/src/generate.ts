@@ -4,11 +4,14 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParameterConfig, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
-import { AppError, Class, describeFunction } from '@travetto/runtime';
-import { SchemaFieldConfig, SchemaClassConfig, SchemaNameResolver, SchemaInputConfig, SchemaRegistryIndex, SchemaBasicType, SchemaParameterConfig } from '@travetto/schema';
+import { type EndpointConfig, type ControllerConfig, type EndpointParameterConfig, type ControllerVisitor, HTTP_METHODS } from '@travetto/web';
+import { AppError, type Class, describeFunction } from '@travetto/runtime';
+import {
+  type SchemaFieldConfig, type SchemaClassConfig, SchemaNameResolver,
+  type SchemaInputConfig, SchemaRegistryIndex, type SchemaBasicType, type SchemaParameterConfig
+} from '@travetto/schema';
 
-import { ApiSpecConfig } from './config.ts';
+import type { ApiSpecConfig } from './config.ts';
 
 const DEFINITION = '#/components/schemas';
 

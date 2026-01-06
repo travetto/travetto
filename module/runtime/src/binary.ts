@@ -8,7 +8,7 @@ import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toArrayBuffer } from 'node:stream/consumers';
 import { isArrayBuffer } from 'node:util/types';
 
-import { BinaryInput, BlobMeta, hasFunction } from './types.ts';
+import { type BinaryInput, type BlobMeta, hasFunction } from './types.ts';
 import { Util } from './util.ts';
 
 const BlobMetaSymbol = Symbol();

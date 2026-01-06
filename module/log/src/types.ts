@@ -1,4 +1,4 @@
-import { ConsoleEvent } from '@travetto/runtime';
+import type { ConsoleEvent } from '@travetto/runtime';
 
 export const LogCommonSymbol = Symbol.for('@travetto/log:common');
 

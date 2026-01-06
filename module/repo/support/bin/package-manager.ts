@@ -1,8 +1,8 @@
 import path from 'node:path';
-import { spawn, ChildProcess } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { ExecUtil, ExecutionResult, JSONUtil } from '@travetto/runtime';
+import { ExecUtil, type ExecutionResult, JSONUtil } from '@travetto/runtime';
 import { type IndexedModule, type ManifestContext, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 

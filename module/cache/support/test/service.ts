@@ -2,16 +2,16 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
-import { ModelExpirySupport, ModelIndexedUtil } from '@travetto/model';
+import { type ModelExpirySupport, ModelIndexedUtil } from '@travetto/model';
 import { Inject, Injectable } from '@travetto/di';
-import { castTo, Class } from '@travetto/runtime';
+import { castTo, type Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
 import { Cache, EvictCache } from '../../src/decorator.ts';
-import { CacheService } from '../../src/service.ts';
+import type { CacheService } from '../../src/service.ts';
 import { CacheModelSymbol } from '../../src/types.ts';
 
 @Schema()

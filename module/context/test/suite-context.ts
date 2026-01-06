@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
+import { type AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context';

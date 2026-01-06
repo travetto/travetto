@@ -1,7 +1,7 @@
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
+import type { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
 import { ControllerRegistryIndex } from './registry-index.ts';
 
 /**

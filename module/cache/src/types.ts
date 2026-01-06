@@ -1,4 +1,4 @@
-import { TypedFunction } from '@travetto/runtime';
+import type { TypedFunction } from '@travetto/runtime';
 
 export const CacheConfigSymbol: unique symbol = Symbol.for('@travetto/cache:cache');
 export const EvictConfigSymbol: unique symbol = Symbol.for('@travetto/cache:evict');

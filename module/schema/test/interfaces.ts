@@ -1,11 +1,11 @@
 import assert from 'node:assert';
-import { Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { Schema, SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
+import { Schema, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
-import { Address2 } from './models/address.ts';
+import type { Address2 } from './models/address.ts';
 
 function findError(errors: ValidationError[] | undefined, path: string, message: string) {
   return errors?.find(x => x.path === path && x.message.includes(message));

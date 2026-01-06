@@ -1,5 +1,5 @@
 import { Env } from './env.ts';
-import { ClassInstance } from './types.ts';
+import type { ClassInstance } from './types.ts';
 
 /**
  * The `@DebugBreak` indicates that a function inserts an optional debugger keyword to stop on entry

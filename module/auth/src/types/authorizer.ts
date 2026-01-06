@@ -1,4 +1,4 @@
-import { Principal } from './principal.ts';
+import type { Principal } from './principal.ts';
 
 /**
  * Definition of an authorization source, which validates a principal into an authorized principal

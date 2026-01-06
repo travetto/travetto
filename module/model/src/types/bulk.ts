@@ -1,8 +1,8 @@
-import { Class, AppError } from '@travetto/runtime';
-import { ValidationError, ValidationResultError } from '@travetto/schema';
+import { type Class, AppError } from '@travetto/runtime';
+import type { ValidationError, ValidationResultError } from '@travetto/schema';
 
-import { ModelCrudSupport } from './crud.ts';
-import { ModelType, OptionalId } from '../types/model.ts';
+import type { ModelCrudSupport } from './crud.ts';
+import type { ModelType, OptionalId } from '../types/model.ts';
 
 /**
  * Bulk operation. Each operation has a single action and payload

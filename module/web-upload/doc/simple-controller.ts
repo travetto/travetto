@@ -1,5 +1,5 @@
 import { Controller, Post, Get } from '@travetto/web';
-import { FileMap, Upload } from '@travetto/web-upload';
+import { type FileMap, Upload } from '@travetto/web-upload';
 
 @Controller('/simple')
 export class Simple {

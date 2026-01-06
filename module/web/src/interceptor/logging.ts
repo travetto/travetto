@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
-import { WebChainedContext } from '../types/filter.ts';
-import { WebResponse } from '../types/response.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
+import type { WebChainedContext } from '../types/filter.ts';
+import type { WebResponse } from '../types/response.ts';
 
 /**
  * Web logging configuration

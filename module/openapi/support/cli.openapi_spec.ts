@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { CliCommandShape, CliCommand } from '@travetto/cli';
+import { type CliCommandShape, CliCommand } from '@travetto/cli';
 import { Env } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { DependencyRegistryIndex } from '@travetto/di';

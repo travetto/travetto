@@ -4,13 +4,13 @@ import os from 'node:os';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { Class, TimeSpan, Runtime, BlobMeta, ByteRange, BinaryInput, BinaryUtil, JSONUtil } from '@travetto/runtime';
+import { type Class, type TimeSpan, Runtime, type BlobMeta, type ByteRange, type BinaryInput, BinaryUtil, JSONUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
-  ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistryIndex,
-  NotFoundError, OptionalId, ExistsError, ModelBlobSupport,
+  type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex,
+  NotFoundError, type OptionalId, ExistsError, type ModelBlobSupport,
   ModelCrudUtil, ModelExpiryUtil, ModelBlobUtil
 } from '@travetto/model';
 

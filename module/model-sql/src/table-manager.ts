@@ -1,13 +1,13 @@
-import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ModelRegistryIndex } from '@travetto/model';
-import { Class } from '@travetto/runtime';
+import { type Class } from '@travetto/runtime';
 import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
 
 import { Connected, Transactional } from './connection/decorator.ts';
-import { SQLDialect } from './dialect/base.ts';
+import type { SQLDialect } from './dialect/base.ts';
 import { SQLModelUtil } from './util.ts';
-import { Connection } from './connection/base.ts';
-import { VisitStack } from './types.ts';
+import type { Connection } from './connection/base.ts';
+import type { VisitStack } from './types.ts';
 
 type UpsertStructure = { dropIndex: string[], createIndex: string[], table: string[] };
 const isSimpleField = (input: VisitStack | undefined): input is SchemaFieldConfig =>

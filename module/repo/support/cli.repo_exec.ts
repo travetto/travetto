@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-import { CliCommand, CliCommandShape, ParsedState } from '@travetto/cli';
+import { CliCommand, type CliCommandShape, type ParsedState } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Env } from '@travetto/runtime';
 import { Ignore, Max, Min } from '@travetto/schema';

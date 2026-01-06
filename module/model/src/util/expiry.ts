@@ -1,7 +1,7 @@
-import { ShutdownManager, Class, TimeSpan, TimeUtil, Util, castTo, hasFunction } from '@travetto/runtime';
+import { ShutdownManager, type Class, type TimeSpan, TimeUtil, Util, castTo, hasFunction } from '@travetto/runtime';
 
-import { ModelExpirySupport } from '../types/expiry.ts';
-import { ModelType } from '../types/model.ts';
+import type { ModelExpirySupport } from '../types/expiry.ts';
+import type { ModelType } from '../types/model.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 
 /**

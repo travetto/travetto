@@ -3,7 +3,7 @@ import { Ignore, Secret } from '@travetto/schema';
 import { AppError, Runtime, RuntimeResources } from '@travetto/runtime';
 import { NetUtil } from '@travetto/web';
 
-import { WebSecureKeyPair } from './types.ts';
+import type { WebSecureKeyPair } from './types.ts';
 import { WebTlsUtil } from './tls.ts';
 
 /**

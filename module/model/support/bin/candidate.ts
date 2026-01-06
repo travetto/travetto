@@ -1,5 +1,5 @@
-import { toConcrete, Class } from '@travetto/runtime';
-import { InjectableCandidate, DependencyRegistryIndex } from '@travetto/di';
+import { toConcrete, type Class } from '@travetto/runtime';
+import { type InjectableCandidate, DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelStorageSupport } from '../../src/types/storage.ts';

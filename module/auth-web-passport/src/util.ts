@@ -1,4 +1,4 @@
-import { WebFilterContext, WebRequest } from '@travetto/web';
+import type { WebFilterContext, WebRequest } from '@travetto/web';
 import { castTo, JSONUtil } from '@travetto/runtime';
 
 /**

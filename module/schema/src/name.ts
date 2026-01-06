@@ -1,4 +1,4 @@
-import { SchemaClassConfig } from './service/types.ts';
+import type { SchemaClassConfig } from './service/types.ts';
 
 const ID_REGEX = /(\d{1,100})Δ$/;
 

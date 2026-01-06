@@ -1,11 +1,11 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { LoadResult, Plugin, PluginContext, type SourceMapInput } from 'rollup';
+import type { LoadResult, Plugin, PluginContext, SourceMapInput } from 'rollup';
 
 import { FileLoader } from '@travetto/runtime';
 
-import { CoreRollupConfig } from '../../src/types.ts';
+import type { CoreRollupConfig } from '../../src/types.ts';
 
 function toString(error: unknown): string {
   return error instanceof Error ? error.stack ?? error.toString() : JSON.stringify(error);

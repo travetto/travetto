@@ -1,7 +1,7 @@
 import os from 'node:os';
 
 import { Injectable } from '@travetto/di';
-import { LogDecorator, LogEvent } from '@travetto/log';
+import type { LogDecorator, LogEvent } from '@travetto/log';
 
 @Injectable()
 export class CustomDecorator implements LogDecorator {

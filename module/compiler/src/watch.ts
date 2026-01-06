@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import { ManifestFileUtil, ManifestModuleUtil, ManifestRoot, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestFileUtil, ManifestModuleUtil, type ManifestRoot, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
-import { CompilerState } from './state.ts';
+import type { CompilerState } from './state.ts';
 import { CompilerUtil } from './util.ts';
 
 import { AsyncQueue } from '../support/queue.ts';

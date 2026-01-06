@@ -1,9 +1,9 @@
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { Class, toConcrete } from '@travetto/runtime';
-import { Point, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, toConcrete } from '@travetto/runtime';
+import { type Point, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
-import { EsSchemaConfig } from './types.ts';
+import type { EsSchemaConfig } from './types.ts';
 
 const PointConcrete = toConcrete<Point>();
 

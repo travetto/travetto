@@ -1,4 +1,4 @@
-import { Any } from '@travetto/runtime';
+import type { Any } from '@travetto/runtime';
 
 export type WebSecureKeyPair = { cert: string, key: string };
 

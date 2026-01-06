@@ -1,5 +1,5 @@
 import { RuntimeIndex, type Class } from '@travetto/runtime';
-import { Registry, RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
 
 import type { TestConsumerShape } from './types.ts';
 import type { TestConsumerConfig } from '../execute/types.ts';

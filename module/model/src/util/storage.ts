@@ -1,7 +1,7 @@
-import { Class, hasFunction, Runtime } from '@travetto/runtime';
+import { type Class, hasFunction, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { ModelStorageSupport } from '../types/storage.ts';
+import type { ModelStorageSupport } from '../types/storage.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 
 /**

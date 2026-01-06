@@ -1,7 +1,7 @@
-import { ConsoleListener, ConsoleManager, ConsoleEvent, toConcrete } from '@travetto/runtime';
+import { type ConsoleListener, ConsoleManager, type ConsoleEvent, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 
-import { LogDecorator, LogEvent, Logger } from './types.ts';
+import type { LogDecorator, LogEvent, Logger } from './types.ts';
 import { CommonLogger } from './common.ts';
 
 /**

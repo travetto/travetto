@@ -4,7 +4,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Schema, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { SpecialType } from './models/pointer.ts';
+import type { SpecialType } from './models/pointer.ts';
 
 @Schema()
 class Custom {

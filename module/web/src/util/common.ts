@@ -1,8 +1,8 @@
-import { AppError, ErrorCategory, Util } from '@travetto/runtime';
+import { AppError, type ErrorCategory, Util } from '@travetto/runtime';
 
 import { WebResponse } from '../types/response.ts';
-import { WebRequest } from '../types/request.ts';
-import { WebError } from '../types/error.ts';
+import type { WebRequest } from '../types/request.ts';
+import type { WebError } from '../types/error.ts';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };

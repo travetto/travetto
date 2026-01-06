@@ -1,6 +1,6 @@
 import { BinaryUtil, JSONUtil } from '@travetto/runtime';
 
-import { CoreCacheConfig } from './types.ts';
+import type { CoreCacheConfig } from './types.ts';
 
 /**
  * Standard cache utilities

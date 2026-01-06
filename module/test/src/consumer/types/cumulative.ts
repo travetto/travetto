@@ -3,7 +3,7 @@ import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConfig, TestDiffSource, TestResult } from '../../model/test.ts';
 import type { Counts, SuiteConfig, SuiteResult } from '../../model/suite.ts';
 import { DelegatingConsumer } from './delegating.ts';
-import { SuiteCore } from '../../model/common.ts';
+import type { SuiteCore } from '../../model/common.ts';
 import { TestModelUtil } from '../../model/util.ts';
 
 type ClassId = string;

@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { path, ManifestModuleUtil, PackageUtil } from '@travetto/manifest';
 
-import { Import } from '../types/shared.ts';
+import type { Import } from '../types/shared.ts';
 
 /**
  * Import utilities

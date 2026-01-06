@@ -1,13 +1,13 @@
-import { Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebFilterContext, WebResponse, WebDispatcher, WebBodyUtil } from '@travetto/web';
+import { type WebFilterContext, WebResponse, type WebDispatcher, WebBodyUtil } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
-import { WebHttpConfig } from '../../src/config.ts';
+import type { WebHttpConfig } from '../../src/config.ts';
 
 const toBuffer = (src: Buffer | Readable) => Buffer.isBuffer(src) ? src : buffer(src);
 

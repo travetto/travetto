@@ -4,11 +4,11 @@ import * as enquirer from 'enquirer';
 
 const { prompt } = enquirer.default;
 
-import { CliCommandShape, CliCommand, cliTpl, CliFlag } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, cliTpl, CliFlag } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
 
 import { Context } from './bin/context.ts';
-import { Feature, FEATURES } from './bin/features.ts';
+import { type Feature, FEATURES } from './bin/features.ts';
 
 /**
  * Command to run scaffolding

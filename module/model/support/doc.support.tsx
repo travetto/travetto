@@ -1,14 +1,14 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
+import { d, c, type DocJSXElementByFn, type DocJSXElement, DocFileUtil } from '@travetto/doc';
 import { Config } from '@travetto/config';
 import { Runtime, toConcrete } from '@travetto/runtime';
 
-import { ModelBasicSupport } from '../src/types/basic.ts';
-import { ModelBlobSupport } from '../src/types/blob.ts';
-import { ModelBulkSupport } from '../src/types/bulk.ts';
-import { ModelCrudSupport } from '../src/types/crud.ts';
-import { ModelExpirySupport } from '../src/types/expiry.ts';
-import { ModelIndexedSupport } from '../src/types/indexed.ts';
+import type { ModelBasicSupport } from '../src/types/basic.ts';
+import type { ModelBlobSupport } from '../src/types/blob.ts';
+import type { ModelBulkSupport } from '../src/types/bulk.ts';
+import type { ModelCrudSupport } from '../src/types/crud.ts';
+import type { ModelExpirySupport } from '../src/types/expiry.ts';
+import type { ModelIndexedSupport } from '../src/types/indexed.ts';
 
 const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>
   d.codeLink(title, Runtime.getSourceFile(target), new RegExp(`\\binterface\\s+${target.name}`));

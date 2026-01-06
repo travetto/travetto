@@ -1,4 +1,4 @@
-import { AuthenticationError, Authenticator } from '@travetto/auth';
+import { AuthenticationError, type Authenticator } from '@travetto/auth';
 
 type User = { username: string, password: string };
 

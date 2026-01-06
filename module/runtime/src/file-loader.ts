@@ -1,5 +1,5 @@
 import { createReadStream } from 'node:fs';
-import { Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 

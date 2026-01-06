@@ -1,4 +1,4 @@
-import { castTo, Class } from '@travetto/runtime';
+import { castTo, type Class } from '@travetto/runtime';
 
 type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null };

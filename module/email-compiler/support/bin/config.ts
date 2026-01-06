@@ -3,7 +3,7 @@ import { parse, stringify } from 'yaml';
 
 import { Runtime, BinaryUtil } from '@travetto/runtime';
 
-import { EditorConfigType } from './types.ts';
+import type { EditorConfigType } from './types.ts';
 
 export const CONFIG_FILE = 'resources/email/local.yml';
 

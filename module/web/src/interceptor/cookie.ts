@@ -1,17 +1,17 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
-import { AsyncContext, AsyncContextValue } from '@travetto/context';
+import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 
-import { WebChainedContext } from '../types/filter.ts';
-import { WebResponse } from '../types/response.ts';
-import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
+import type { WebChainedContext } from '../types/filter.ts';
+import type { WebResponse } from '../types/response.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
 
-import { WebConfig } from '../config.ts';
-import { Cookie, CookieSetOptions } from '../types/cookie.ts';
+import type { WebConfig } from '../config.ts';
+import type { Cookie, CookieSetOptions } from '../types/cookie.ts';
 import { CookieJar } from '../util/cookie.ts';
-import { WebAsyncContext } from '../context.ts';
+import type { WebAsyncContext } from '../context.ts';
 
 /**
  * Web cookie configuration

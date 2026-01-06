@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { AuthenticationError, Authorizer, Principal } from '@travetto/auth';
+import { AuthenticationError, type Authorizer, type Principal } from '@travetto/auth';
 
 const USERS: Record<string, Principal> = {
   a: {

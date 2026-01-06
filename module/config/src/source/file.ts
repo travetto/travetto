@@ -3,8 +3,8 @@ import path from 'node:path';
 
 import { Env, Runtime, RuntimeResources } from '@travetto/runtime';
 
-import { ConfigSource, ConfigPayload } from './types.ts';
-import { ParserManager } from '../parser/parser.ts';
+import type { ConfigSource, ConfigPayload } from './types.ts';
+import type { ParserManager } from '../parser/parser.ts';
 
 type Profile = [string, number] | readonly [string, number];
 

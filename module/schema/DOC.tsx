@@ -12,7 +12,7 @@ import { Readonly, Writeonly, Secret, Field } from './src/decorator/field.ts';
 import { Schema } from './src/decorator/schema.ts';
 import { Ignore, Describe } from './src/decorator/common.ts';
 import { DataUtil } from './src/data.ts';
-import { ValidationError } from './src/validate/types.ts';
+import type { ValidationError } from './src/validate/types.ts';
 
 export const text = <>
   <c.StdHeader />

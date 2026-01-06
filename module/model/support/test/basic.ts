@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { ModelCrudSupport, Model, NotFoundError } from '@travetto/model';
+import { type ModelCrudSupport, Model, NotFoundError } from '@travetto/model';
 
 import { BaseModelSuite } from './base.ts';
 

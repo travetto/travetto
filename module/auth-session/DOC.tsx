@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
-import { AuthContext, Principal } from '@travetto/auth';
+import { AuthContext, type Principal } from '@travetto/auth';
 import { Runtime, toConcrete } from '@travetto/runtime';
-import { ModelExpirySupport } from '@travetto/model';
+import type { ModelExpirySupport } from '@travetto/model';
 
 import { SessionService } from './src/service.ts';
 

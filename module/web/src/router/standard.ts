@@ -3,12 +3,12 @@ import router from 'find-my-way';
 import { AppError } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
 
-import { EndpointConfig } from '../registry/types.ts';
+import type { EndpointConfig } from '../registry/types.ts';
 
 import { WebResponse } from '../types/response.ts';
 import { HTTP_METHODS } from '../types/core.ts';
 import type { WebFilterContext } from '../types/filter.ts';
-import { WebConfig } from '../config.ts';
+import type { WebConfig } from '../config.ts';
 
 import { BaseWebRouter } from './base.ts';
 

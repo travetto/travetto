@@ -1,5 +1,5 @@
-import { AuthToken, Principal } from '@travetto/auth';
-import { WebRequest, WebResponse } from '@travetto/web';
+import type { AuthToken, Principal } from '@travetto/auth';
+import type { WebRequest, WebResponse } from '@travetto/web';
 
 export const CommonPrincipalCodecSymbol = Symbol.for('@travetto/auth-web:common-codec');
 

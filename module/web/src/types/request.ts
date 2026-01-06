@@ -1,4 +1,4 @@
-import { HttpMethod, HttpProtocol } from './core.ts';
+import type { HttpMethod, HttpProtocol } from './core.ts';
 import { BaseWebMessage } from './message.ts';
 
 export interface WebConnection {

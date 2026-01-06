@@ -1,7 +1,7 @@
 import { Login } from '@travetto/auth-web';
 import { InjectableFactory } from '@travetto/di';
 import { Controller, Post } from '@travetto/web';
-import { Authenticator } from '@travetto/auth';
+import type { Authenticator } from '@travetto/auth';
 import { castTo } from '@travetto/runtime';
 import { PassportAuthenticator } from '@travetto/auth-web-passport';
 

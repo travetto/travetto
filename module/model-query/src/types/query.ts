@@ -1,7 +1,7 @@
-import { Class } from '@travetto/runtime';
-import { ModelType } from '@travetto/model';
+import type { Class } from '@travetto/runtime';
+import type { ModelType } from '@travetto/model';
 
-import { ModelQuery, PageableModelQuery } from '../model/query.ts';
+import type { ModelQuery, PageableModelQuery } from '../model/query.ts';
 
 /**
  * The contract for a model service with query support

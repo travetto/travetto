@@ -1,7 +1,7 @@
-import { AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 
-import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
+import { SQLModelService, type SQLModelConfig } from '@travetto/model-sql';
 import { SqliteDialect } from '@travetto/model-sqlite';
 
 export class Init {

@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement, DocRunUtil } from '@travetto/doc';
-import { Model, ModelType } from '@travetto/model';
+import { d, c, type DocJSXElementByFn, type DocJSXElement, isDocJSXElement, DocRunUtil } from '@travetto/doc';
+import { Model, type ModelType } from '@travetto/model';
 import { Env, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
 
 const TodoRoot = d.ref('Todo App', RuntimeIndex.getModule('@travetto/todo-app')!.sourcePath);

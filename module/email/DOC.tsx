@@ -4,7 +4,7 @@ import { toConcrete } from '@travetto/runtime';
 
 import { NullTransport } from './src/transport.ts';
 import { MailConfig } from './src/config.ts';
-import { EmailOptions } from './src/types.ts';
+import type { EmailOptions } from './src/types.ts';
 
 export const text = <>
   <c.StdHeader />

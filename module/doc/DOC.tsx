@@ -3,9 +3,9 @@
 import fs from 'node:fs/promises';
 
 import { RuntimeIndex, toConcrete } from '@travetto/runtime';
-import { c, d, DocJSXElement } from '@travetto/doc';
+import { c, d, type DocJSXElement } from '@travetto/doc';
 
-import { DocumentShape } from './src/types.ts';
+import type { DocumentShape } from './src/types.ts';
 
 function NodeList({ src }: { src: string }): DocJSXElement {
   const lines = src.split(/\n/g);

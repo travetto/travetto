@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { castTo, Class } from '@travetto/runtime';
+import { castTo, type Class } from '@travetto/runtime';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema } from '@travetto/schema';
-import { Model, ModelType } from '@travetto/model';
-import { QueryVerifier, Query, ModelQuery } from '@travetto/model-query';
+import { Model, type ModelType } from '@travetto/model';
+import { QueryVerifier, type Query, type ModelQuery } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query-language';
 
 @Schema()

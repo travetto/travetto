@@ -1,6 +1,6 @@
-import { Any, Class, Primitive } from '@travetto/runtime';
+import type { Any, Class, Primitive } from '@travetto/runtime';
 
-import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
+import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { operation: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };

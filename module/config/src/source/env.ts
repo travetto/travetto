@@ -1,5 +1,5 @@
 import { JSONUtil } from '@travetto/runtime';
-import { ConfigSource, ConfigPayload } from './types.ts';
+import type { ConfigSource, ConfigPayload } from './types.ts';
 
 /**
  * Represents the environment mapped data as a JSON blob

@@ -1,6 +1,6 @@
-import { Class, ClassInstance, getClass } from '@travetto/runtime';
+import { type Class, type ClassInstance, getClass } from '@travetto/runtime';
 
-import { SchemaCoreConfig } from '../service/types.ts';
+import type { SchemaCoreConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 /**

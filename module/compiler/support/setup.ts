@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import type { DeltaEvent, ManifestContext, Package } from '@travetto/manifest';
+import type { DeltaEvent, ManifestContext, Package, ManifestDeltaUtil, ManifestUtil } from '@travetto/manifest';
 
 import { Log } from './log.ts';
 import { CommonUtil } from './util.ts';
@@ -27,9 +27,7 @@ export class CompilerSetup {
   /**
    * Import compiled manifest utilities
    */
-  static #importManifest = (ctx: ManifestContext): Promise<
-    Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil'>
-  > => {
+  static #importManifest = (ctx: ManifestContext): Promise<{ ManifestUtil: typeof ManifestUtil, ManifestDeltaUtil: typeof ManifestDeltaUtil }> => {
     const all = ['util', 'delta'].map(file =>
       import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${file}${OUTPUT_EXT}`))
     );

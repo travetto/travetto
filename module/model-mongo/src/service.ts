@@ -7,26 +7,26 @@ import {
 } from 'mongodb';
 
 import {
-  ModelRegistryIndex, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
-  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOperation, BulkResponse,
-  NotFoundError, ExistsError, ModelBlobSupport,
+  ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport,
+  type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
+  NotFoundError, ExistsError, type ModelBlobSupport,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil,
 } from '@travetto/model';
 import {
-  ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
+  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
+  type PageableModelQuery, type ValidStringFields, type WhereClause, type ModelQuerySuggestSupport,
   QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  ModelQueryFacet,
+  type ModelQueryFacet,
 } from '@travetto/model-query';
 
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
-  castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil
+  castTo, asFull, type BlobMeta, type ByteRange, type BinaryInput, BinaryUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
-import { MongoUtil, PlainIdx, WithId } from './internal/util.ts';
-import { MongoModelConfig } from './config.ts';
+import { MongoUtil, type PlainIdx, type WithId } from './internal/util.ts';
+import type { MongoModelConfig } from './config.ts';
 
 const ListIndexSymbol = Symbol();
 

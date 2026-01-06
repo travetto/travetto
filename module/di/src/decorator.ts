@@ -1,7 +1,7 @@
-import { Any, castTo, ClassInstance, getClass, type Class } from '@travetto/runtime';
+import { type Any, castTo, type ClassInstance, getClass, type Class } from '@travetto/runtime';
 import { CONSTRUCTOR_PROPERTY } from '@travetto/schema';
 
-import { InjectableCandidate, ResolutionType } from './types.ts';
+import type { InjectableCandidate, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
 
 const fromInput = <T extends { qualifier?: symbol }>(input?: T | symbol): T =>

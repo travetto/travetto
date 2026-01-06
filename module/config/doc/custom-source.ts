@@ -1,4 +1,4 @@
-import { ConfigSource, ConfigPayload } from '@travetto/config';
+import type { ConfigSource, ConfigPayload } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 
 @Injectable()

@@ -1,12 +1,12 @@
 import ts from 'typescript';
 
-import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex, ManifestModuleFolderType } from '@travetto/manifest';
+import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, type ManifestIndex, type ManifestModuleFolderType } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
 import { TypescriptUtil } from '../support/ts-util.ts';
 
 import { CompilerUtil } from './util.ts';
-import { CompileEmitError, CompileStateEntry } from './types.ts';
+import type { CompileEmitError, CompileStateEntry } from './types.ts';
 import { CommonUtil } from '../support/util.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);

@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import { Endpoint } from '@travetto/web';
 
-import { FileMap } from './src/types.ts';
+import type { FileMap } from './src/types.ts';
 import { Upload } from './src/decorator.ts';
 
 const FileMapContract = toConcrete<FileMap>();

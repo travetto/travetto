@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, OnCall, DeclarationUtil, CoreUtil, OnMethod, AfterMethod } from '@travetto/transformer';
+import { type TransformerState, OnCall, DeclarationUtil, CoreUtil, OnMethod, AfterMethod } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking

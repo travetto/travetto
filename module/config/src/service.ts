@@ -1,12 +1,12 @@
 import util from 'node:util';
 
-import { AppError, toConcrete, castTo, Class, Env, Runtime, RuntimeResources, getClass } from '@travetto/runtime';
+import { AppError, toConcrete, castTo, type Class, Env, Runtime, RuntimeResources, getClass } from '@travetto/runtime';
 import { DependencyRegistryIndex, getDefaultQualifier, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
-import { ConfigData } from './parser/types.ts';
-import { ConfigSource, ConfigPayload } from './source/types.ts';
+import type { ConfigData } from './parser/types.ts';
+import type { ConfigSource, ConfigPayload } from './source/types.ts';
 import { FileConfigSource } from './source/file.ts';
 import { OverrideConfigSource } from './source/override.ts';
 

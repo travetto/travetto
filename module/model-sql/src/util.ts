@@ -1,10 +1,10 @@
-import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
-import { SelectClause, SortClause } from '@travetto/model-query';
-import { ModelRegistryIndex, ModelType, OptionalId } from '@travetto/model';
-import { SchemaClassConfig, SchemaFieldConfig, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import { castKey, castTo, type Class, TypedObject } from '@travetto/runtime';
+import type { SelectClause, SortClause } from '@travetto/model-query';
+import { ModelRegistryIndex, type ModelType, type OptionalId } from '@travetto/model';
+import { type SchemaClassConfig, type SchemaFieldConfig, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
-import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types.ts';
-import { TableSymbol, VisitStack } from './types.ts';
+import type { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types.ts';
+import { TableSymbol, type VisitStack } from './types.ts';
 
 type FieldCacheEntry = {
   local: SchemaFieldConfig[];

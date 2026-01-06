@@ -1,10 +1,10 @@
 import { castTo, TypedObject } from '@travetto/runtime';
 
-import { LIB_MAPPING } from './mapping/lib-mapping.ts';
-import { MOD_MAPPING } from './mapping/mod-mapping.ts';
-import { CodeProps, RunConfig } from './util/types.ts';
+import type { LIB_MAPPING } from './mapping/lib-mapping.ts';
+import type { MOD_MAPPING } from './mapping/mod-mapping.ts';
+import type { CodeProps, RunConfig } from './util/types.ts';
 
-import { createElement, JSXElement, JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
+import { createElement, type JSXElement, type JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
 
 type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };

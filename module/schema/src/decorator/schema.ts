@@ -1,8 +1,8 @@
-import { castTo, Class, DeepPartial } from '@travetto/runtime';
+import { castTo, type Class, type DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util.ts';
-import { SchemaClassConfig, ViewFieldsConfig } from '../service/types.ts';
-import { ValidatorFn } from '../validate/types.ts';
+import type { SchemaClassConfig, ViewFieldsConfig } from '../service/types.ts';
+import type { ValidatorFn } from '../validate/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 /**

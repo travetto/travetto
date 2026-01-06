@@ -1,8 +1,8 @@
-import ts from 'typescript';
+import type ts from 'typescript';
 
-import { ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
+import { type ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
 
-import { NodeTransformer } from './types/visitor.ts';
+import type { NodeTransformer } from './types/visitor.ts';
 import { VisitorFactory } from './visitor.ts';
 import { TransformerState } from './state.ts';
 import { getAllTransformers } from './register.ts';
