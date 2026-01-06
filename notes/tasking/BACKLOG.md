@@ -1,5 +1,18 @@
 # Backlogged Requests
 
+## Use tsconfig to overwrite `node:path` vs transformer
+* Remove the transformer
+* Leverage tsconfig's paths feature to control where 'node:path' points to
+* If not possible, leverage 'trv:path' as a means to isolate
+
+## Use Proxy to replace use of `ts`. 
+* Maybe use tsconfig paths to map `trv:ts` to proxy that defers loading of typescript
+* Add explicit initialization in compiler
+
+## Transformer simplification
+* Drop decorators for explicit registration
+* This is the last of the non-compatible syntax for loading with type erasure
+
 ## Native Typescript Execution
 Rework compiler setup to no longer need the pre-compilation process and leverage type stripping, now that we are fully ESM
 * Decorators will need to be rethought if this is the goal
