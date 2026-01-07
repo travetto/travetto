@@ -1,9 +1,8 @@
-import path from 'node:path';
-
 import { Registry } from '@travetto/registry';
 import { type CliCommandShape, CliCommand } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Env } from '@travetto/runtime';
+import { path } from '@travetto/manifest';
 
 import { EditorService } from './bin/editor.ts';
 

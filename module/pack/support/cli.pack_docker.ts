@@ -1,8 +1,7 @@
-import path from 'node:path';
-
 import { RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliFlag, CliUtil, type CliValidationError } from '@travetto/cli';
 import { Ignore, Required } from '@travetto/schema';
+import { path } from '@travetto/manifest';
 
 import { DockerPackOperation } from './bin/docker-operation.ts';
 import { BasePackCommand, type PackOperationShape } from './pack.base';

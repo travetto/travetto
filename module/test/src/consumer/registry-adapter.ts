@@ -1,5 +1,4 @@
-import path from 'node:path';
-
+import { path } from '@travetto/manifest';
 import { classConstruct, describeFunction, type Class } from '@travetto/runtime';
 import type { RegistryAdapter } from '@travetto/registry';
 

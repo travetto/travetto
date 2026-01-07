@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import { Env, Runtime, RuntimeResources } from '@travetto/runtime';
+import { path } from '@travetto/manifest';
 
 import type { ConfigSource, ConfigPayload } from './types.ts';
 import type { ParserManager } from '../parser/parser.ts';

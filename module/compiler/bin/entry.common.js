@@ -1,6 +1,7 @@
 // @ts-check
 /* eslint-disable no-undef */
 import { stat, readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises';
+// eslint-disable-next-line no-restricted-imports
 import path from 'node:path';
 import { createRequire } from 'node:module';
 

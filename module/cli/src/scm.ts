@@ -1,9 +1,8 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import { AppError, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
-import type { IndexedModule } from '@travetto/manifest';
+import { path, type IndexedModule } from '@travetto/manifest';
 
 export class CliScmUtil {
   /**

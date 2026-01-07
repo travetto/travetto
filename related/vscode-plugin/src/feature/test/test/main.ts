@@ -1,9 +1,8 @@
 import { existsSync } from 'node:fs';
 import * as vscode from 'vscode';
-import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
-import path from 'node:path';
+import { type ChildProcess, type SpawnOptions, spawn } from 'node:child_process';
 
-import type { IndexedModule, ManifestModule } from '@travetto/manifest';
+import { type IndexedModule, type ManifestModule, path } from '@travetto/manifest';
 import type { TestWatchEvent } from '@travetto/test';
 import { Env, ExecUtil } from '@travetto/runtime';
 

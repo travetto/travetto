@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { AppError, toConcrete } from '@travetto/runtime';
+import { path } from '@travetto/manifest';
 
 import type { ConfigData, ConfigParser } from './types.ts';
 

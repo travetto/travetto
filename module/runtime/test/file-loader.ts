@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import assert from 'node:assert';
-import path from 'node:path';
 
+import { path } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 import { FileLoader, Runtime } from '@travetto/runtime';
 

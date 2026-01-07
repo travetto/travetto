@@ -2,8 +2,8 @@ import fs from 'node:fs/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
 import { pipeline } from 'node:stream/promises';
-import path from 'node:path';
 
+import { path } from '@travetto/manifest';
 import { type Class, type TimeSpan, Runtime, type BlobMeta, type ByteRange, type BinaryInput, BinaryUtil, JSONUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';

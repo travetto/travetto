@@ -1,10 +1,9 @@
-import path from 'node:path';
 import fs from 'node:fs/promises';
 
 import { Inject, Injectable } from '@travetto/di';
 import { ControllerRegistryIndex } from '@travetto/web';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
-import { ManifestModuleUtil } from '@travetto/manifest';
+import { ManifestModuleUtil, path } from '@travetto/manifest';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { clientFactory } from '../support/client/rpc.ts';

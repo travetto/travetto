@@ -5,8 +5,8 @@ import { fork, spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import timers from 'node:timers/promises';
-import path from 'node:path';
 
+import { path } from '@travetto/manifest';
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { ExecUtil, Runtime } from '@travetto/runtime';
 

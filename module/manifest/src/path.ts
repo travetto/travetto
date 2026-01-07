@@ -1,5 +1,6 @@
 import posix from 'node:path/posix';
 import win32 from 'node:path/win32';
+// eslint-disable-next-line no-restricted-imports
 import native from 'node:path';
 
 const toPosix = (file: string): string => file.replaceAll('\\', '/');

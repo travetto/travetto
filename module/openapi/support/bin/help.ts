@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import path from 'node:path';
 
+import { path } from '@travetto/manifest';
 import { ExecUtil, JSONUtil, Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 

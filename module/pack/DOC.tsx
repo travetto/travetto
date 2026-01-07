@@ -1,6 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import path from 'node:path';
-
+import { path } from '@travetto/manifest';
 import { d, c } from '@travetto/doc';
 import { Runtime } from '@travetto/runtime';
 

@@ -1,6 +1,4 @@
-import path from 'node:path';
-
-import { PackageUtil } from '@travetto/manifest';
+import { path, PackageUtil } from '@travetto/manifest';
 import { castTo, RuntimeIndex } from '@travetto/runtime';
 
 import type { JSXElementByFn, c } from '../jsx.ts';

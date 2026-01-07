@@ -27,7 +27,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     { ignores: IGNORES, },
     {
       ...TS_OPTIONS,
-      files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
+      files: ['**/*.ts', '**/*.tsx'],
       plugins: {
         '@stylistic': {
           rules: stylisticPlugin.rules
@@ -48,7 +48,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
         globals: GLOBALS,
         ecmaVersion: 'latest',
       },
-      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+      files: ['**/*.js'],
       plugins: {
         '@stylistic': {
           rules: stylisticPlugin.rules

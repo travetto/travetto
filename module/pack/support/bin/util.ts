@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { spawn, type SpawnOptions } from 'node:child_process';
-import path from 'node:path';
 
+import { path } from '@travetto/manifest';
 import { AppError, ExecUtil, RuntimeIndex } from '@travetto/runtime';
 
 import { ActiveShellCommand } from './shell.ts';

@@ -31,7 +31,6 @@ export const STD_RULES = {
       singleline: { delimiter: 'comma', requireLast: false }
     }
   ],
-  'no-restricted-imports': ['error', { paths: ['typescript'] }],
   '@typescript-eslint/no-use-before-define': ['error', { classes: false }],
   '@typescript-eslint/member-ordering': [
     'error',
@@ -197,6 +196,26 @@ export const STD_RULES = {
   'no-multiple-empty-lines': 'error',
   'no-new-wrappers': 'error',
   'no-redeclare': 0,
+  'no-restricted-imports': [
+    'error', {
+      patterns: [
+        {
+          regex: '^(assert|async_hooks|child_process|crypto|dns|events|fs|http(2s)?|module|net|os|path|readline|stream|timers|tls|tty|url|util|worker_threads|zlib)(/+)?$',
+          message: 'Please import with node: prefix for future compatibility.'
+        },
+      ],
+      paths: [
+        {
+          name: 'typescript',
+          message: 'Importing of typescript is discouraged'
+        },
+        {
+          name: 'node:path',
+          message: 'Use @travetto/manifest path utilities instead of the node:path module for better cross-platform compatibility.'
+        }
+      ],
+    }
+  ],
   '@typescript-eslint/no-redeclare': ['error', { builtinGlobals: false, }],
   'no-shadow': ['error', { hoist: 'all' }],
   'no-sparse-arrays': 'error',

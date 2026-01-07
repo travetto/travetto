@@ -1,11 +1,11 @@
 /** @jsxImportSource @travetto/doc/support */
-import path from 'node:path';
-
 import { d, c, COMMON_DATE } from '@travetto/doc';
-import { ManifestDeltaUtil, type ManifestRoot } from '@travetto/manifest';
+import { ManifestDeltaUtil, type ManifestRoot, path } from '@travetto/manifest';
 import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 
 const DeltaRef = d.codeLink(ManifestDeltaUtil.name, 'src/delta.ts', new RegExp(`class ${ManifestDeltaUtil.name}`));
+
+p2.basename;
 
 const manifest = () => {
   const manifestFile = path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json');

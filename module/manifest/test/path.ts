@@ -1,9 +1,8 @@
 import assert from 'node:assert';
 import winPath from 'node:path/win32';
-import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
-import { path as path2 } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
 
 @Suite()
 class PathTests {
@@ -25,16 +24,14 @@ class PathTests {
       assert(path.basename(file) === 'sample.2.docx');
       assert(path.extname(file) === '.docx');
       assert(path.basename(file, path.extname(file)) === 'sample.2');
-      assert(path.basename(file) === path2.basename(file));
-      assert(path.extname(file) === path2.extname(file));
-      assert(path.basename(file, path.extname(file)) === path2.basename(file, path2.extname(file)));
+      assert(!path.dirname(file).includes('\\'));
     }
   }
 
   @Test()
   verifyWin32Paths() {
-    const winResolve = (...args: string[]): string => path2.toPosix(winPath.resolve(path.resolve(), ...args.map(path2.toPosix)));
-    const winJoin = (root: string, ...args: string[]): string => path2.toPosix(winPath.join(path2.toPosix(root), ...args.map(path2.toPosix)));
+    const winResolve = (...args: string[]): string => path.toPosix(winPath.resolve(path.resolve(), ...args.map(path.toPosix)));
+    const winJoin = (root: string, ...args: string[]): string => path.toPosix(winPath.join(path.toPosix(root), ...args.map(path.toPosix)));
 
     assert(winResolve('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winResolve('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');

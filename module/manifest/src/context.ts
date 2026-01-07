@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
+// eslint-disable-next-line no-restricted-imports
 import path from 'node:path';
 import { createRequire } from 'node:module';
 

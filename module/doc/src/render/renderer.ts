@@ -1,6 +1,4 @@
-import path from 'node:path';
-
-import { type ManifestContext, PackageUtil } from '@travetto/manifest';
+import { type ManifestContext, PackageUtil, path } from '@travetto/manifest';
 import { castTo, type Class, Runtime } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, type JSXElementByFn, type c } from '../jsx.ts';

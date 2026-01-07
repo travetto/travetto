@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
-import { CliCommandInput } from '@travetto/cli';
+import type { CliCommandInput } from '@travetto/cli';
 import { ExecUtil } from '@travetto/runtime';
+import { path } from '@travetto/manifest';
 
 import { Workspace } from './workspace.ts';
 

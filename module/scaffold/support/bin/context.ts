@@ -1,12 +1,11 @@
 import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import path from 'node:path';
 
 import mustache from 'mustache';
 
 import { castKey, castTo, ExecUtil, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
-import { type NodePackageManager, PackageUtil } from '@travetto/manifest';
+import { type NodePackageManager, PackageUtil, path } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
 
 import type { Feature } from './features.ts';

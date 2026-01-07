@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
+import { path } from '@travetto/manifest';
 import { Runtime } from '@travetto/runtime';
 import type { SchemaClassConfig, SchemaFieldConfig, SchemaInputConfig } from '@travetto/schema';
 

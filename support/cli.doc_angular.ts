@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import path from 'node:path';
 
 import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
+import { path } from '@travetto/manifest';
 
 const page = (file: string): string => path.resolve('related/travetto.github.io/src', file);
 

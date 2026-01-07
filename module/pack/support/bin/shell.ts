@@ -1,6 +1,5 @@
 import util from 'node:util';
-import path from 'node:path';
-
+import { path } from '@travetto/manifest';
 import type { ShellCommandProvider } from '../../src/types.ts';
 
 const escape = (text: string): string =>

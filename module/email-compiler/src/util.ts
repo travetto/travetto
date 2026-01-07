@@ -1,10 +1,10 @@
 import { buffer as toBuffer } from 'node:stream/consumers';
-import path from 'node:path';
 import type { CompileResult, Options } from 'sass';
 
 import type { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageUtil } from '@travetto/image';
 import { RuntimeIndex } from '@travetto/runtime';
+import { path } from '@travetto/manifest';
 
 type Tokenized = {
   text: string;

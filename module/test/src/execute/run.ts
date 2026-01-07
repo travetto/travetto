@@ -1,9 +1,9 @@
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
-import path from 'node:path';
 import { spawn } from 'node:child_process';
 
+import { path } from '@travetto/manifest';
 import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 import { Registry } from '@travetto/registry';

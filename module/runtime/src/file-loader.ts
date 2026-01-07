@@ -1,7 +1,8 @@
 import { createReadStream } from 'node:fs';
 import type { Readable } from 'node:stream';
 import fs from 'node:fs/promises';
-import path from 'node:path';
+
+import { path } from '@travetto/manifest';
 
 import { AppError } from './error.ts';
 import { JSONUtil } from './json.ts';

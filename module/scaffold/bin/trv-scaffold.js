@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // @ts-check
+// eslint-disable-next-line no-restricted-imports
+import { delimiter } from 'node:path';
 
 async function getModuleDirectory() {
   if (process.env.npm_lifecycle_script?.includes('trv-scaffold')) { // Is npx  run
-    const { delimiter } = await import('node:path');
     const parts = process.env.PATH?.split(delimiter) ?? [];
     const loc = parts.find(part => part.includes('npx') && part.includes('.bin'));
     if (loc) {

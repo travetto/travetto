@@ -1,9 +1,7 @@
-import path from 'node:path';
-
 import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
-import { type ManifestModule, ManifestModuleUtil } from '@travetto/manifest';
+import { type ManifestModule, ManifestModuleUtil, path } from '@travetto/manifest';
 import { EnvProp, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { CoreRollupConfig } from '../../src/types.ts';

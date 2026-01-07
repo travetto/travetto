@@ -1,10 +1,9 @@
-import path from 'node:path';
-
 import { Env } from '@travetto/runtime';
 import { CliCommand, type CliCommandShape, CliValidationResultError } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { Ignore } from '@travetto/schema';
+import { path } from '@travetto/manifest';
 
 import type { WebRpcClient } from '../src/config.ts';
 import { WebRpcClientGeneratorService } from '../src/service.ts';

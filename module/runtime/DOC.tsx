@@ -178,8 +178,4 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
     As a registered shutdown handler, you can do.
     <c.Code title='Registering a shutdown handler' src='doc/shutdown.ts' />
   </c.Section>
-
-  <c.Section title='Path Behavior'>
-    To ensure consistency in path usage throughout the framework, imports pointing at {d.input('node:path')} and {d.input('path')} are rewritten at compile time.  These imports are pointing towards {d.mod('Manifest')}'s {d.input('path')}  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
-  </c.Section>
 </>;

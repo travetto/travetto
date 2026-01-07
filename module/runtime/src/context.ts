@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
-import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
+import { type ManifestIndex, type ManifestContext, ManifestModuleUtil, path } from '@travetto/manifest';
 
 import { Env } from './env.ts';
 import { RuntimeIndex } from './manifest-index.ts';

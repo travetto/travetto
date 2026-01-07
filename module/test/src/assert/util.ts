@@ -1,6 +1,6 @@
 import util from 'node:util';
-import path from 'node:path';
 
+import { path } from '@travetto/manifest';
 import { asFull, type Class, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { TestConfig, Assertion, TestResult } from '../model/test.ts';

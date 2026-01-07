@@ -1,8 +1,8 @@
-import path from 'node:path';
 import { stringify } from 'yaml';
 
 import { Terminal } from '@travetto/terminal';
 import { TimeUtil, RuntimeIndex, hasToJSON } from '@travetto/runtime';
+import { path } from '@travetto/manifest';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';

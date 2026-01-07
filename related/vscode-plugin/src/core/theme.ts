@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
-import path from 'node:path';
 import fs from 'node:fs';
+
+import { path } from '@travetto/manifest';
 
 type TokenColor = {
   scope: string | string[];

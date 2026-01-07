@@ -1,5 +1,4 @@
 import { createReadStream, createWriteStream } from 'node:fs';
-import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
@@ -9,6 +8,7 @@ import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
+import { path } from '@travetto/manifest';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';

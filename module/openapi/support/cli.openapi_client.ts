@@ -1,6 +1,6 @@
-import path from 'node:path';
 import cp from 'node:child_process';
 
+import { path } from '@travetto/manifest';
 import { type CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
 import { ExecUtil } from '@travetto/runtime';
 

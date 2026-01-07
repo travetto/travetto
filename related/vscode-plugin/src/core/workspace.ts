@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import timers from 'node:timers/promises';
-import path from 'node:path';
 import fs from 'node:fs';
 
-import { IndexedFile, IndexedModule, type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import {
+  IndexedFile, IndexedModule, type ManifestContext, ManifestIndex,
+  ManifestModuleUtil, ManifestUtil, PackageUtil, path
+} from '@travetto/manifest';
 import type { CompilerStateType } from '@travetto/compiler/support/types.ts';
 
 const SUFFIXES = ['.ts', '.js', '.tsx', '.jsx', '.d.ts'];

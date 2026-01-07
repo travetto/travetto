@@ -1,4 +1,3 @@
-import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
@@ -7,6 +6,8 @@ import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toArrayBuffer } from 'node:stream/consumers';
 import { isArrayBuffer } from 'node:util/types';
+
+import { path } from '@travetto/manifest';
 
 import { type BinaryInput, type BlobMeta, hasFunction } from './types.ts';
 import { Util } from './util.ts';

@@ -1,7 +1,5 @@
-import path from 'node:path';
-
 import { type EmailTemplateModule, type EmailTemplateLocation, EmailResourceLoader } from '@travetto/email';
-import { PackageUtil } from '@travetto/manifest';
+import { PackageUtil, path } from '@travetto/manifest';
 
 import { InkyRenderer } from './render/renderer.ts';
 import { Html } from './render/html.ts';

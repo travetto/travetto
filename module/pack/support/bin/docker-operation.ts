@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import { JSONUtil, Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
+import { path } from '@travetto/manifest';
 
 import { ActiveShellCommand } from './shell.ts';
 import type { DockerPackConfig, DockerPackFactoryModule } from '../../src/types.ts';

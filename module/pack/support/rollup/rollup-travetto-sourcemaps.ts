@@ -1,9 +1,9 @@
-import path from 'node:path';
 import fs from 'node:fs/promises';
 
 import type { LoadResult, Plugin, PluginContext, SourceMapInput } from 'rollup';
 
 import { FileLoader } from '@travetto/runtime';
+import { path } from '@travetto/manifest';
 
 import type { CoreRollupConfig } from '../../src/types.ts';
 
