@@ -1,4 +1,4 @@
-import { TimeUnit } from '@travetto/runtime';
+import type { TimeUnit } from '@travetto/runtime';
 import {
   Schema, Float, MinLength, Match, Max, Min,
   CommonRegex, View, Url, Required, Validator,

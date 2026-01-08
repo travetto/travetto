@@ -1,6 +1,6 @@
 import { parse as parseYaml } from 'yaml';
 import { Injectable } from '@travetto/di';
-import { ConfigData, ConfigParser } from './types.ts';
+import type { ConfigData, ConfigParser } from './types.ts';
 
 @Injectable()
 export class YAMLConfigParser implements ConfigParser {

@@ -1,6 +1,6 @@
 import { Injectable } from '@travetto/di';
 
-import { LogFormatter, LogEvent } from '../types.ts';
+import type { LogFormatter, LogEvent } from '../types.ts';
 import { LogFormatUtil } from './util.ts';
 
 /**

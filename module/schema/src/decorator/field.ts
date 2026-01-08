@@ -1,6 +1,6 @@
-import { Any, ClassInstance, getClass } from '@travetto/runtime';
+import { type Any, type ClassInstance, getClass } from '@travetto/runtime';
 
-import { SchemaFieldConfig } from '../service/types.ts';
+import type { SchemaFieldConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(

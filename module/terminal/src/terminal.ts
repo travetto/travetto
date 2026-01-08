@@ -1,4 +1,4 @@
-import tty from 'node:tty';
+import type tty from 'node:tty';
 
 import { Env, Util } from '@travetto/runtime';
 

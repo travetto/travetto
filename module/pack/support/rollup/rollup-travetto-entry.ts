@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
-import { Plugin } from 'rollup';
+import type { Plugin } from 'rollup';
 
 import { RuntimeIndex } from '@travetto/runtime';
 
-import { CoreRollupConfig } from '../../src/types.ts';
+import type { CoreRollupConfig } from '../../src/types.ts';
 
 export const GLOBAL_IMPORT = '__trv_imp';
 

@@ -1,9 +1,9 @@
-import { RegistryAdapter } from '@travetto/registry';
-import { AppError, asFull, Class, describeFunction, Runtime, safeAssign } from '@travetto/runtime';
+import type { RegistryAdapter } from '@travetto/registry';
+import { AppError, asFull, type Class, describeFunction, Runtime, safeAssign } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { SuiteConfig } from '../model/suite';
-import { TestConfig } from '../model/test';
+import type { SuiteConfig } from '../model/suite';
+import type { TestConfig } from '../model/test';
 
 function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConfig>[]): SuiteConfig {
   for (const config of subConfig) {

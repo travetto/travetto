@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 
-import { Controller, Get, Post, WebRequest, ContextParam, WebHeaderUtil } from '@travetto/web';
+import { Controller, Get, Post, type WebRequest, ContextParam, WebHeaderUtil } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
-import { MemoryModelService } from '@travetto/model-memory';
-import { Upload, FileMap } from '@travetto/web-upload';
-import { Util, BlobMeta, BinaryUtil, castTo, AppError } from '@travetto/runtime';
+import type { MemoryModelService } from '@travetto/model-memory';
+import { Upload, type FileMap } from '@travetto/web-upload';
+import { Util, type BlobMeta, BinaryUtil, castTo, type AppError } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 

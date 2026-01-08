@@ -1,12 +1,12 @@
 import path from 'node:path';
 
 import { RuntimeIndex } from '@travetto/runtime';
-import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli';
+import { CliCommand, CliFlag, CliUtil, type CliValidationError } from '@travetto/cli';
 import { Ignore, Required } from '@travetto/schema';
 
 import { DockerPackOperation } from './bin/docker-operation.ts';
-import { BasePackCommand, PackOperationShape } from './pack.base';
-import { DockerPackConfig } from '../src/types.ts';
+import { BasePackCommand, type PackOperationShape } from './pack.base';
+import type { DockerPackConfig } from '../src/types.ts';
 
 const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
 

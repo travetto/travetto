@@ -4,7 +4,7 @@ import { Runtime, toConcrete } from '@travetto/runtime';
 import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, MaxLength } from '@travetto/schema';
 
 import { CliCommand } from './src/registry/decorator.ts';
-import { CliValidationError } from './src/types.ts';
+import type { CliValidationError } from './src/types.ts';
 
 const CliValidationErrorContract = toConcrete<CliValidationError>();
 

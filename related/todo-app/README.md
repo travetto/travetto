@@ -83,10 +83,10 @@ Now we need to create `src/service.ts`
 
 **Code: Service Definition**
 ```typescript
-import { MongoModelService } from '@travetto/model-mongo';
+import type { MongoModelService } from '@travetto/model-mongo';
 import { Injectable, Inject } from '@travetto/di';
 
-import { Todo, TodoSearch } from './model.ts';
+import { Todo, type TodoSearch } from './model.ts';
 
 @Injectable()
 export class TodoService {
@@ -147,7 +147,7 @@ import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
-import { TodoService } from '../src/service.ts';
+import type { TodoService } from '../src/service.ts';
 import { Todo } from '../src/model.ts';
 
 @Suite()
@@ -215,8 +215,8 @@ Finally, we establish the controller at `src/web.ts`
 import { Controller, Get, Post, Put, Delete } from '@travetto/web';
 import { Inject } from '@travetto/di';
 
-import { TodoService } from './service.ts';
-import { Todo, TodoSearch } from './model.ts';
+import type { TodoService } from './service.ts';
+import type { Todo, TodoSearch } from './model.ts';
 
 /**
  * Todo request

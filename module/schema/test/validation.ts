@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { asFull, castTo } from '@travetto/runtime';
-import { SchemaRegistryIndex, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
+import { SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,

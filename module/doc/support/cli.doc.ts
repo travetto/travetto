@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 
 import { PackageUtil } from '@travetto/manifest';
 import { ExecUtil, Env, Runtime, WatchUtil } from '@travetto/runtime';
-import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, type CliValidationError } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
 /**

@@ -1,6 +1,6 @@
 import {
-  Controller, Get, QueryParam, WebRequest, ContextParam,
-  WebResponse, CookieJar, CookieGetOptions, CookieSetOptions
+  Controller, Get, QueryParam, type WebRequest, ContextParam,
+  WebResponse, type CookieJar, type CookieGetOptions, type CookieSetOptions
 } from '@travetto/web';
 
 @Controller('/simple')

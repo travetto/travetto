@@ -1,11 +1,11 @@
-import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError, ModelStorageUtil, ModelIndexedUtil } from '@travetto/model';
+import { ExpiresAt, Index, Model, type ModelExpirySupport, NotFoundError, ModelStorageUtil, ModelIndexedUtil } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, JSONUtil, TimeUtil } from '@travetto/runtime';
 
 import { CacheError } from './error.ts';
 import { CacheUtil } from './util.ts';
-import { CacheAware, CacheConfigSymbol, CacheModelSymbol, EvictConfigSymbol } from './types.ts';
+import { type CacheAware, CacheConfigSymbol, CacheModelSymbol, EvictConfigSymbol } from './types.ts';
 
 const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
 

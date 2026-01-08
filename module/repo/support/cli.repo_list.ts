@@ -1,4 +1,4 @@
-import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 const write = (line: string): Promise<void> => new Promise(resolve => process.stdout.write(`${line}\n`, () => resolve()));

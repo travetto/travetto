@@ -1,6 +1,6 @@
 import { AppError } from '@travetto/runtime';
 
-import { Cookie, CookieGetOptions, CookieSetOptions } from '../types/cookie.ts';
+import type { Cookie, CookieGetOptions, CookieSetOptions } from '../types/cookie.ts';
 import { KeyGrip } from './keygrip.ts';
 import { WebHeaderUtil } from './header.ts';
 

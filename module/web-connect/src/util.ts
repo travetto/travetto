@@ -1,6 +1,6 @@
-import { IncomingMessage, ServerResponse } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { WebFilterContext } from '@travetto/web';
+import type { WebFilterContext } from '@travetto/web';
 
 import { ConnectRequest, ConnectResponse } from './connect';
 

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, OnInterface, OnCall, OnTypeAlias } from '@travetto/transformer';
+import { type TransformerState, OnInterface, OnCall, OnTypeAlias } from '@travetto/transformer';
 
 import { MetadataRegistrationUtil } from './transformer/metadata.ts';
 

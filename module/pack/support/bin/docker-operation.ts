@@ -5,7 +5,7 @@ import { JSONUtil, Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell.ts';
-import { DockerPackConfig, DockerPackFactoryModule } from '../../src/types.ts';
+import type { DockerPackConfig, DockerPackFactoryModule } from '../../src/types.ts';
 import { PackOperation } from './operation.ts';
 import { PackUtil } from './util.ts';
 

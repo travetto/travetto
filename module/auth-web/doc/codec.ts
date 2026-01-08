@@ -1,8 +1,8 @@
-import { Principal } from '@travetto/auth';
-import { PrincipalCodec } from '@travetto/auth-web';
+import type { Principal } from '@travetto/auth';
+import type { PrincipalCodec } from '@travetto/auth-web';
 import { Injectable } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
-import { WebResponse, WebRequest } from '@travetto/web';
+import type { WebResponse, WebRequest } from '@travetto/web';
 
 @Injectable()
 export class CustomCodec implements PrincipalCodec {

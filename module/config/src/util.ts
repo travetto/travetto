@@ -1,4 +1,4 @@
-import { Any, asFull, Class } from '@travetto/runtime';
+import { type Any, asFull, type Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 export const OverrideConfigSymbol = Symbol.for('@travetto/config:overrides');

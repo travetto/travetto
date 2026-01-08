@@ -1,4 +1,4 @@
-import { CliCommandShape, CliCommand } from '@travetto/cli';
+import { type CliCommandShape, CliCommand } from '@travetto/cli';
 
 /**
  * Allows for cleaning of the cache dire

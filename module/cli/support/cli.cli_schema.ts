@@ -2,7 +2,7 @@ import { Env } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 
 import { CliCommand } from '../src/registry/decorator.ts';
-import { CliCommandShape, CliValidationError } from '../src/types.ts';
+import type { CliCommandShape, CliValidationError } from '../src/types.ts';
 import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
 import { CliUtil } from '../src/util.ts';
 import { CliSchemaExportUtil } from '../src/schema-export.ts';

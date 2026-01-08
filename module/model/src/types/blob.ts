@@ -1,4 +1,4 @@
-import { BinaryInput, BlobMeta, ByteRange, TimeSpan } from '@travetto/runtime';
+import type { BinaryInput, BlobMeta, ByteRange, TimeSpan } from '@travetto/runtime';
 
 /**
  * Support for Blobs CRUD.

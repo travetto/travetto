@@ -5,5 +5,5 @@ import { BCD } from './b.ts';
 @Injectable()
 export class ABC {
   @Inject()
-  b: BCD;
+  b: BCD = new BCD();
 }

@@ -1,5 +1,5 @@
-import { ConfigData } from '../parser/types.ts';
-import { ConfigSource, ConfigPayload } from './types.ts';
+import type { ConfigData } from '../parser/types.ts';
+import type { ConfigSource, ConfigPayload } from './types.ts';
 import { ConfigOverrideUtil } from '../util.ts';
 
 /**

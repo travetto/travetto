@@ -1,10 +1,10 @@
-import { ModelRegistryIndex, ModelType } from '@travetto/model';
-import { castTo, Class, hasFunction } from '@travetto/runtime';
+import { ModelRegistryIndex, type ModelType } from '@travetto/model';
+import { castTo, type Class, hasFunction } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { PageableModelQuery, Query } from '../model/query.ts';
-import { ValidStringFields, WhereClauseRaw } from '../model/where-clause.ts';
-import { ModelQuerySuggestSupport } from '../types/suggest.ts';
+import type { PageableModelQuery, Query } from '../model/query.ts';
+import type { ValidStringFields, WhereClauseRaw } from '../model/where-clause.ts';
+import type { ModelQuerySuggestSupport } from '../types/suggest.ts';
 
 /**
  * Tools for building suggestion queries

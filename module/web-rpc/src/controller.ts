@@ -1,9 +1,9 @@
 import { Inject } from '@travetto/di';
-import { Any, AppError, JSONUtil } from '@travetto/runtime';
+import { type Any, AppError, JSONUtil } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 import {
   HeaderParam, Controller, ExcludeInterceptors, ControllerRegistryIndex,
-  WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
+  type WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
   RespondInterceptor, DecompressInterceptor, Get
 } from '@travetto/web';
 

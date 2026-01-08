@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 import { isPromise } from 'node:util/types';
 
-import { AppError, Class, castTo, castKey, asConstructable } from '@travetto/runtime';
+import { AppError, type Class, castTo, castKey, asConstructable } from '@travetto/runtime';
 
-import { ThrowableError, TestConfig, Assertion } from '../model/test.ts';
-import { AssertCapture, CaptureAssert } from './capture.ts';
+import type { ThrowableError, TestConfig, Assertion } from '../model/test.ts';
+import { AssertCapture, type CapturedAssertion } from './capture.ts';
 import { AssertUtil } from './util.ts';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types.ts';
 
@@ -25,7 +25,7 @@ export class AssertCheck {
    * @param positive Is the check positive or negative
    * @param args The arguments passed in
    */
-  static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]): void {
+  static check(assertion: CapturedAssertion, positive: boolean, ...args: unknown[]): void {
     let fn = assertion.operator;
     assertion.operator = ASSERT_FN_OPERATOR[fn];
 
@@ -180,7 +180,7 @@ export class AssertCheck {
     error: unknown,
     missed: Error | undefined,
     shouldThrow: ThrowableError | undefined,
-    assertion: CaptureAssert
+    assertion: CapturedAssertion
   ): void {
     if (!(error instanceof Error)) {
       error = new Error(`${error}`);
@@ -209,7 +209,7 @@ export class AssertCheck {
    * @param message Message to share on failure
    */
   static checkThrow(
-    assertion: CaptureAssert,
+    assertion: CapturedAssertion,
     positive: boolean,
     action: Function,
     shouldThrow?: ThrowableError,
@@ -241,7 +241,7 @@ export class AssertCheck {
    * @param message Message to share on failure
    */
   static async checkThrowAsync(
-    assertion: CaptureAssert,
+    assertion: CapturedAssertion,
     positive: boolean,
     action: Function | Promise<unknown>,
     shouldThrow?: ThrowableError,

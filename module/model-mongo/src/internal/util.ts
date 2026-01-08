@@ -3,7 +3,7 @@ import {
   type IndexDescriptionInfo
 } from 'mongodb';
 
-import { AppError, castTo, Class, toConcrete, TypedObject } from '@travetto/runtime';
+import { AppError, castTo, type Class, toConcrete, TypedObject } from '@travetto/runtime';
 import { type DistanceUnit, type PageableModelQuery, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';

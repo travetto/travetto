@@ -13,7 +13,7 @@ import { LoggingInterceptor, WebLogConfig } from './src/interceptor/logging.ts';
 import { CookieInterceptor, CookieConfig } from './src/interceptor/cookie.ts';
 import { CookieJar } from './src/util/cookie.ts';
 import { WebRequest } from './src/types/request.ts';
-import { WebInterceptor } from './src/types/interceptor.ts';
+import type { WebInterceptor } from './src/types/interceptor.ts';
 import { AsyncContextInterceptor } from './src/interceptor/context.ts';
 import { CacheControl } from './src/decorator/common.ts';
 import { WebAsyncContext } from './src/context.ts';

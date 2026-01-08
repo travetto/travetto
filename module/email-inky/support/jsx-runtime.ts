@@ -1,5 +1,5 @@
-import { castTo, Class } from '@travetto/runtime';
-import { EmailTemplateModule, EmailTemplateLocation } from '@travetto/email';
+import { castTo, type Class } from '@travetto/runtime';
+import type { EmailTemplateModule, EmailTemplateLocation } from '@travetto/email';
 
 export type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null, className?: string, id?: string, name?: string, dir?: string };

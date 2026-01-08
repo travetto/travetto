@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestModuleFileType, ManifestModuleUtil, ManifestRoot, Package } from '@travetto/manifest';
+import { type ManifestModuleFileType, ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/manifest';
 
 const nativeCwd = process.cwd();
 

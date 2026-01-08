@@ -221,5 +221,11 @@ export const STD_RULES = {
     { line: { markers: ['/'] } }
   ],
   '@typescript-eslint/no-namespace': ['error'],
-  '@typescript-eslint/consistent-type-assertions': ['warn', { assertionStyle: 'never' }]
+  '@typescript-eslint/consistent-type-assertions': ['warn', { assertionStyle: 'never' }],
+  '@typescript-eslint/consistent-type-imports': [
+    'error',
+    {
+      fixStyle: 'inline-type-imports',
+    },
+  ],
 };

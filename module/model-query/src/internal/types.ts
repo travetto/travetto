@@ -1,5 +1,5 @@
-import { SchemaFieldConfig, Point } from '@travetto/schema';
-import { Class, toConcrete } from '@travetto/runtime';
+import type { SchemaFieldConfig, Point } from '@travetto/schema';
+import { type Class, toConcrete } from '@travetto/runtime';
 
 const st = (value: string | string[], isArray: boolean = false): Set<string> =>
   new Set((Array.isArray(value) ? value : [value]).map(item => isArray ? `${item}[]` : item));

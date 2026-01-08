@@ -1,9 +1,9 @@
-import { Class, ClassInstance, getClass, RetainPrimitiveFields, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { type Class, type ClassInstance, getClass, type RetainPrimitiveFields, type TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
-import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
+import type { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import type { WebInterceptor } from '../types/interceptor.ts';
 
 function isClass(target: unknown, property: unknown,): target is Class<unknown> {
   return !property;

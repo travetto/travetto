@@ -26,8 +26,8 @@ Every external framework integration relies upon the [Authenticator](https://git
 
 **Code: Structure for the Identity Source**
 ```typescript
-import { AnyMap } from '@travetto/runtime';
-import { Principal } from './principal.ts';
+import type { AnyMap } from '@travetto/runtime';
+import type { Principal } from './principal.ts';
 
 /**
  * Represents the general shape of additional login context, usually across multiple calls
@@ -67,7 +67,7 @@ A sample auth provider would look like:
 
 **Code: Sample Identity Source**
 ```typescript
-import { AuthenticationError, Authenticator } from '@travetto/auth';
+import { AuthenticationError, type Authenticator } from '@travetto/auth';
 
 type User = { username: string, password: string };
 
@@ -120,13 +120,13 @@ The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-
 ```typescript
 import type { Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
-import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
+import { type AuthContext, AuthenticationError, type AuthToken, type Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
-import { WebResponse, WebRequest, WebAsyncContext, CookieJar } from '@travetto/web';
+import { type WebResponse, type WebRequest, type WebAsyncContext, CookieJar } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
-import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
-import { WebAuthConfig } from './config.ts';
+import { CommonPrincipalCodecSymbol, type PrincipalCodec } from './types.ts';
+import type { WebAuthConfig } from './config.ts';
 
 /**
  * JWT Principal codec
@@ -222,11 +222,11 @@ A trivial/sample custom [PrincipalCodec](https://github.com/travetto/travetto/tr
 
 **Code: Custom Principal Codec**
 ```typescript
-import { Principal } from '@travetto/auth';
-import { PrincipalCodec } from '@travetto/auth-web';
+import type { Principal } from '@travetto/auth';
+import type { PrincipalCodec } from '@travetto/auth-web';
 import { Injectable } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
-import { WebResponse, WebRequest } from '@travetto/web';
+import type { WebResponse, WebRequest } from '@travetto/web';
 
 @Injectable()
 export class CustomCodec implements PrincipalCodec {
@@ -261,7 +261,7 @@ This implementation is not suitable for production, but shows the general patter
 ```typescript
 import { Controller, Get, ContextParam, WebResponse } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
-import { Principal } from '@travetto/auth';
+import type { Principal } from '@travetto/auth';
 
 import { FbAuthSymbol } from './facebook.ts';
 

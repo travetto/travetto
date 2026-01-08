@@ -33,8 +33,8 @@ This flow ensures all files are loaded and processed before application starts. 
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/registry/doc/registry.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Class <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ChangeEvent<span class="token punctuation">,</span> RegistryAdapter<span class="token punctuation">,</span> RegistryIndex<span class="token punctuation">,</span> RegistryIndexStore<span class="token punctuation">,</span> Registry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> Class <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">type</span> <span class="token class-name">RegistryAdapter</span><span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">RegistryIndex</span><span class="token punctuation">,</span> RegistryIndexStore<span class="token punctuation">,</span> Registry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">interface</span> <span class="token class-name">Group</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">class</span><span class="token operator">:</span> Class<span class="token punctuation">;</span>
@@ -97,7 +97,7 @@ This flow ensures all files are loaded and processed before application starts. 
 
   store <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RegistryIndexStore</span><span class="token punctuation">(</span>SampleRegistryAdapter<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-  <span class="token function">process</span><span class="token punctuation">(</span>events<span class="token operator">:</span> ChangeEvent<span class="token operator">&lt;</span>Class<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">onCreate</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Nothing to do</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

@@ -1,6 +1,6 @@
-import { AsyncContextValue, AsyncContext } from '@travetto/context';
+import { AsyncContextValue, type AsyncContext } from '@travetto/context';
 import { Inject, Injectable } from '@travetto/di';
-import { AppError, castTo, Class } from '@travetto/runtime';
+import { AppError, castTo, type Class } from '@travetto/runtime';
 
 import { WebRequest } from './types/request.ts';
 

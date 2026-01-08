@@ -1,8 +1,8 @@
 import { AppError } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { ModelAuthService } from '@travetto/auth-model';
+import type { ModelAuthService } from '@travetto/auth-model';
 
-import { User } from './model.ts';
+import type { User } from './model.ts';
 
 @Injectable()
 class UserService {

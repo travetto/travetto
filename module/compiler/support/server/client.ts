@@ -2,7 +2,7 @@ import rl from 'node:readline/promises';
 import timers from 'node:timers/promises';
 import http, { Agent } from 'node:http';
 
-import { ManifestContext } from '@travetto/manifest';
+import type { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types.ts';
 import type { LogShape } from '../log.ts';

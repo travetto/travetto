@@ -1,5 +1,5 @@
-import { Class } from '@travetto/runtime';
-import { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
+import type { Class } from '@travetto/runtime';
+import type { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
 
 /**
  * Interface for basic data interface

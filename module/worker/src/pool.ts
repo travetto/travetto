@@ -1,5 +1,5 @@
 import os from 'node:os';
-import { Options, Pool, createPool } from 'generic-pool';
+import { type Options, type Pool, createPool } from 'generic-pool';
 
 import { Env, Util, AsyncQueue } from '@travetto/runtime';
 

@@ -31,7 +31,7 @@ Out of the box, by installing the module, everything should be wired up by defau
 **Code: Wiring up a custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { MongoModelService, MongoModelConfig } from '@travetto/model-mongo';
+import { MongoModelService, type MongoModelConfig } from '@travetto/model-mongo';
 
 export class Init {
   @InjectableFactory({

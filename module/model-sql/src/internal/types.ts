@@ -1,6 +1,6 @@
 import type { SchemaFieldConfig, SchemaClassConfig } from '@travetto/schema';
 
-import { VisitStack } from '../types.ts';
+import type { VisitStack } from '../types.ts';
 
 /**
  * Insertion wrapper

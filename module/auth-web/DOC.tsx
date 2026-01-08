@@ -2,9 +2,12 @@
 import { d, c } from '@travetto/doc';
 import { InjectableFactory, Injectable } from '@travetto/di';
 import { ContextParam, WebRequest, WebResponse } from '@travetto/web';
-import { Login, Unauthenticated, Authenticated, Logout, WebAuthConfig, JWTPrincipalCodec, AuthContextInterceptor, PrincipalCodec } from '@travetto/auth-web';
+import {
+  Login, Unauthenticated, Authenticated, Logout, WebAuthConfig,
+  JWTPrincipalCodec, AuthContextInterceptor, type PrincipalCodec
+} from '@travetto/auth-web';
 import { toConcrete } from '@travetto/runtime';
-import { AuthContext, Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
+import { AuthContext, type Authenticator, type AuthenticatorState, type Principal } from '@travetto/auth';
 
 const PrincipalContract = toConcrete<Principal>();
 const PrincipalCodecContract = toConcrete<PrincipalCodec>();

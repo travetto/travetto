@@ -2,9 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { SessionContext, SessionService } from '@travetto/auth-session';
-import { AuthContext, AuthenticationError } from '@travetto/auth';
-import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import type { SessionContext, SessionService } from '@travetto/auth-session';
+import { type AuthContext, AuthenticationError } from '@travetto/auth';
+import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Util } from '@travetto/runtime';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';

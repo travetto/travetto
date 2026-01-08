@@ -71,7 +71,7 @@ export interface RegisteredPrincipal extends Principal {
 **Code: A valid user model**
 ```typescript
 import { Model } from '@travetto/model';
-import { RegisteredPrincipal } from '@travetto/auth-model';
+import type { RegisteredPrincipal } from '@travetto/auth-model';
 
 @Model()
 export class User implements RegisteredPrincipal {
@@ -94,7 +94,7 @@ Additionally, there exists a common practice of mapping various external securit
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 import { ModelAuthService } from '@travetto/auth-model';
-import { ModelCrudSupport } from '@travetto/model';
+import type { ModelCrudSupport } from '@travetto/model';
 
 import { User } from './model.ts';
 
@@ -134,9 +134,9 @@ class AuthConfig {
 ```typescript
 import { AppError } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { ModelAuthService } from '@travetto/auth-model';
+import type { ModelAuthService } from '@travetto/auth-model';
 
-import { User } from './model.ts';
+import type { User } from './model.ts';
 
 @Injectable()
 class UserService {

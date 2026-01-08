@@ -1,9 +1,9 @@
-import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { AppError, castTo, Class } from '@travetto/runtime';
+import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { AppError, castTo, type Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { IndexConfig, IndexType, ModelConfig } from './types';
-import { ModelType } from '../types/model';
+import type { IndexConfig, IndexType, ModelConfig } from './types';
+import type { ModelType } from '../types/model';
 import { ModelRegistryAdapter } from './registry-adapter';
 import { IndexNotSupported } from '../error/invalid-index';
 import { NotFoundError } from '../error/not-found';

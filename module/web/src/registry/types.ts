@@ -3,10 +3,10 @@ import type { SchemaClassConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
-import { HttpMethod } from '../types/core.ts';
-import { WebHeaders } from '../types/headers.ts';
-import { WebResponse, WebResponseContext } from '../types/response.ts';
-import { WebRequest } from '../types/request.ts';
+import type { HttpMethod } from '../types/core.ts';
+import type { WebHeaders } from '../types/headers.ts';
+import type { WebResponse, WebResponseContext } from '../types/response.ts';
+import type { WebRequest } from '../types/request.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;

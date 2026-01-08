@@ -1,5 +1,5 @@
 import type { Primitive, RetainPrimitiveFields, TimeSpan } from '@travetto/runtime';
-import { Point } from '@travetto/schema';
+import type { Point } from '@travetto/schema';
 
 export type QueryPrimitive = Primitive | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];

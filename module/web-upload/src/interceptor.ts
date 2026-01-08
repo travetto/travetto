@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@travetto/di';
 import {
-  BodyInterceptor, WebInterceptor, WebInterceptorCategory, WebChainedContext,
-  WebResponse, DecompressInterceptor, WebInterceptorContext
+  BodyInterceptor, type WebInterceptor, type WebInterceptorCategory, type WebChainedContext,
+  type WebResponse, DecompressInterceptor, type WebInterceptorContext
 } from '@travetto/web';
 
-import { WebUploadConfig } from './config.ts';
+import type { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
-import { FileMap } from './types.ts';
+import type { FileMap } from './types.ts';
 
 @Injectable()
 export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {

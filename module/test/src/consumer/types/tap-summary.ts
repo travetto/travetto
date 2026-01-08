@@ -8,7 +8,7 @@ import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts
 import { TestConsumer } from '../decorator.ts';
 
 import { TapEmitter } from './tap.ts';
-import { CONSOLE_ENHANCER, TestResultsEnhancer } from '../enhancer.ts';
+import { CONSOLE_ENHANCER, type TestResultsEnhancer } from '../enhancer.ts';
 
 type Result = {
   key: string;

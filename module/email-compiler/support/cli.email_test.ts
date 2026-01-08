@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { Registry } from '@travetto/registry';
-import { CliCommandShape, CliCommand } from '@travetto/cli';
+import { type CliCommandShape, CliCommand } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Env } from '@travetto/runtime';
 

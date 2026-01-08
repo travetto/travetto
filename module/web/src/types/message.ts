@@ -1,6 +1,6 @@
-import { Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 import { castTo } from '@travetto/runtime';
-import { WebHeaders, WebHeadersInit } from './headers';
+import { WebHeaders, type WebHeadersInit } from './headers';
 
 export type WebBinaryBody = Readable | Buffer;
 

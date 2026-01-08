@@ -4,5 +4,5 @@ import { ABC } from './a.ts';
 @Injectable()
 export class BCD {
   @Inject()
-  a: ABC;
+  a: ABC = new ABC();
 }

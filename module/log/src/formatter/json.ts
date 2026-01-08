@@ -1,7 +1,7 @@
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { LogEvent, LogFormatter } from '../types.ts';
+import type { LogEvent, LogFormatter } from '../types.ts';
 import { LogFormatUtil } from './util.ts';
 
 @Config('log')

@@ -4,7 +4,7 @@ import { Runtime, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistryIndex, Inject, Injectable } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
-import { StandardWebRouter } from '@travetto/web';
+import type { StandardWebRouter } from '@travetto/web';
 
 import { AwsLambdaWebUtil } from './util.ts';
 

@@ -4,8 +4,8 @@ import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Alias, Min, Required, SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 import {
-  ContextParam, Controller, ControllerRegistryIndex, EndpointConfig, EndpointUtil,
-  Get, HeaderParam, HttpMethod, PathParam, Post, QueryParam, WebHeaders, WebRequest
+  ContextParam, Controller, ControllerRegistryIndex, type EndpointConfig, EndpointUtil,
+  Get, HeaderParam, type HttpMethod, PathParam, Post, QueryParam, WebHeaders, WebRequest
 } from '@travetto/web';
 
 class User {

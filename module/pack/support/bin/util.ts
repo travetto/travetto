@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { spawn, SpawnOptions } from 'node:child_process';
+import { spawn, type SpawnOptions } from 'node:child_process';
 import path from 'node:path';
 
 import { AppError, ExecUtil, RuntimeIndex } from '@travetto/runtime';

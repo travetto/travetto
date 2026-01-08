@@ -1,10 +1,10 @@
 import { Injectable } from '@travetto/di';
 
-import { WebInterceptor } from '../types/interceptor.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
-import { WebResponse } from '../types/response.ts';
+import type { WebInterceptor } from '../types/interceptor.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
+import type { WebResponse } from '../types/response.ts';
 
-import { WebChainedContext } from '../types/filter.ts';
+import type { WebChainedContext } from '../types/filter.ts';
 import { LoggingInterceptor } from './logging.ts';
 import { WebCommonUtil } from '../util/common.ts';
 

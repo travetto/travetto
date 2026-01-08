@@ -3,13 +3,13 @@ import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCo
 import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
-  ModelCrudSupport, ModelExpirySupport, ModelRegistryIndex, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError, ExistsError,
-  IndexNotSupported, OptionalId,
+  type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
+  type ModelIndexedSupport, type ModelType, NotFoundError, ExistsError,
+  IndexNotSupported, type OptionalId,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
 } from '@travetto/model';
 
-import { DynamoDBModelConfig } from './config.ts';
+import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
 
 const EXP_ATTR = 'expires_at__';

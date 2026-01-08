@@ -1,5 +1,5 @@
 import { castTo, Util } from '@travetto/runtime';
-import { AsyncContext, AsyncContextValue } from '@travetto/context';
+import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 

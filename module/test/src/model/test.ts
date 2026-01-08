@@ -1,6 +1,6 @@
 import type { Class, ConsoleEvent, TimeSpan } from '@travetto/runtime';
 
-import { Skip, TestCore } from './common.ts';
+import type { Skip, TestCore } from './common.ts';
 
 export type ThrowableError = string | RegExp | Class<Error> | ((error: Error | string) => boolean | void | undefined);
 export type TestLog = Omit<ConsoleEvent, 'args' | 'scope'> & { message: string };

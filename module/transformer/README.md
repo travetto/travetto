@@ -27,9 +27,9 @@ Below is an example of a transformer that upper cases all `class`, `method` and 
 
 **Code: Sample Transformer - Upper case all declarations**
 ```typescript
-import ts from 'typescript';
+import type ts from 'typescript';
 
-import { OnProperty, TransformerState, OnMethod, OnClass } from '@travetto/transformer';
+import { OnProperty, type TransformerState, OnMethod, OnClass } from '@travetto/transformer';
 
 export class MakeUpper {
 

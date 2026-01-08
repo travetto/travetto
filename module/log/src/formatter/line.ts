@@ -6,7 +6,7 @@ import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { StyleUtil } from '@travetto/terminal';
 
-import { LogEvent, LogFormatter } from '../types.ts';
+import type { LogEvent, LogFormatter } from '../types.ts';
 import { LogFormatUtil } from './util.ts';
 
 /**

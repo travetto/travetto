@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import { CacheControl, Controller, ControllerRegistryIndex, Patch, SetHeaders } from '@travetto/web';
 
 @Controller('/test')

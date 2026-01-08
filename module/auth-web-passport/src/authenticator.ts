@@ -1,7 +1,7 @@
 import passport from 'passport';
 
-import { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
-import { WebFilterContext } from '@travetto/web';
+import type { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
+import type { WebFilterContext } from '@travetto/web';
 import { WebConnectUtil } from '@travetto/web-connect';
 
 import { PassportUtil } from './util.ts';

@@ -1,7 +1,7 @@
 import { castKey, castTo, getClass } from '@travetto/runtime';
 import { BindUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { ParsedState, CliCommandShape, CliValidationError } from './types.ts';
+import type { ParsedState, CliCommandShape, CliValidationError } from './types.ts';
 import { CliValidationResultError } from './error.ts';
 
 const getSource = (source: string | undefined, def: CliValidationError['source']): CliValidationError['source'] => {

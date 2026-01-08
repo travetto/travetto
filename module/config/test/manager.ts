@@ -5,7 +5,7 @@ import { ValidationResultError } from '@travetto/schema';
 import { DependencyRegistryIndex, InjectableFactory } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
-import { Config, ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
+import { Config, type ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
 
 @Config('ignore')
 class TestConfig {

@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 
-import { Class, toConcrete } from '@travetto/runtime';
+import { type Class, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { Registry } from '@travetto/registry';
 import {
   ConfigureInterceptor, Controller, ControllerRegistryIndex, CorsInterceptor, Get,
-  CacheControlInterceptor, StandardWebRouter, WebChainedContext, WebInterceptor,
-  WebInterceptorCategory, WebInterceptorContext, WebRequest
+  CacheControlInterceptor, type StandardWebRouter, type WebChainedContext, type WebInterceptor,
+  type WebInterceptorCategory, type WebInterceptorContext, WebRequest
 } from '@travetto/web';
 
 @Injectable()

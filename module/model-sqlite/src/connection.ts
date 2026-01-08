@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import sqlDb, { type Database, Options } from 'better-sqlite3';
-import { Pool, createPool } from 'generic-pool';
+import sqlDb, { type Database, type Options } from 'better-sqlite3';
+import { type Pool, createPool } from 'generic-pool';
 
 import { ShutdownManager, Util, Runtime, AppError, castTo } from '@travetto/runtime';
-import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-import { SQLModelConfig, Connection } from '@travetto/model-sql';
+import { type SQLModelConfig, Connection } from '@travetto/model-sql';
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
 

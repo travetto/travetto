@@ -5,7 +5,7 @@ import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 import { CliCommandSchemaUtil } from './schema.ts';
 import { CliUnknownCommandError, CliValidationResultError } from './error.ts';
 import { CliParseUtil } from './parse.ts';
-import { CliCommandShape } from './types.ts';
+import type { CliCommandShape } from './types.ts';
 
 /**
  * Execution manager

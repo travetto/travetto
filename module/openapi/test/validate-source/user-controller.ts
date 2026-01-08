@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Put, Delete, PathParam } from '@travetto/web';
 
-import { User, UserSearch } from './model.ts';
+import type { User, UserSearch } from './model.ts';
 
 /**
  * User oriented operations.

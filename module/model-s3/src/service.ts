@@ -2,19 +2,22 @@ import { Readable } from 'node:stream';
 import { text as toText, buffer as toBuffer } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
-import { S3, CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3, type CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import type { MetadataBearer } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
-  ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistryIndex, ExistsError, NotFoundError, OptionalId,
-  ModelBlobSupport, ModelExpirySupport, ModelBlobUtil, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
+  type ModelCrudSupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex, ExistsError, NotFoundError, type OptionalId,
+  type ModelBlobSupport, type ModelExpirySupport, ModelBlobUtil, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil, TimeSpan, TimeUtil } from '@travetto/runtime';
+import {
+  type Class, AppError, castTo, asFull, type BlobMeta,
+  type ByteRange, type BinaryInput, BinaryUtil, type TimeSpan, TimeUtil
+} from '@travetto/runtime';
 
-import { S3ModelConfig } from './config.ts';
+import type { S3ModelConfig } from './config.ts';
 
 function isMetadataBearer(value: unknown): value is MetadataBearer {
   return !!value && typeof value === 'object' && '$metadata' in value;

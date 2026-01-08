@@ -1,6 +1,6 @@
 import { Env, TimeUtil } from '@travetto/runtime';
 
-import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
+import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
 import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
 

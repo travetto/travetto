@@ -1,6 +1,6 @@
 import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { CliCommand, CliCommandShape } from '@travetto/cli';
+import { CliCommand, type CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
 import { Registry } from '@travetto/registry';
 

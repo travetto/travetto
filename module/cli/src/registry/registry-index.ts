@@ -1,8 +1,8 @@
-import { Class, getClass, getParentClass, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, getClass, getParentClass, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { type RegistryAdapter, type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { type SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { CliCommandConfig, CliCommandShape } from '../types.ts';
+import type { CliCommandConfig, CliCommandShape } from '../types.ts';
 import { CliUnknownCommandError } from '../error.ts';
 import { CliCommandRegistryAdapter } from './registry-adapter.ts';
 

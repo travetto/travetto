@@ -1,8 +1,8 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 import { CacheModelSymbol } from '@travetto/cache';
-import { ModelExpirySupport } from '@travetto/model';
+import type { ModelExpirySupport } from '@travetto/model';
 import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
 import { PostgreSQLDialect } from '@travetto/model-postgres';
 

@@ -57,7 +57,7 @@ A default model is constructed, a [Todo](https://github.com/travetto/travetto/tr
 
 **Code: Todo Model**
 ```typescript
-import { Model, ModelType } from '@travetto/model';
+import { Model, type ModelType } from '@travetto/model';
 
 @Model()
 export class Todo implements ModelType {
@@ -78,7 +78,7 @@ In the case both `web` and `model` features are enabled, the code will produce a
 import { Controller, Get, Put, Post, Delete } from '@travetto/web';
 import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
-import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
+import type { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
 
 import { Todo } from './model.ts';

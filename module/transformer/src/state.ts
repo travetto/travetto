@@ -1,12 +1,12 @@
 import ts from 'typescript';
 
-import { path, ManifestIndex } from '@travetto/manifest';
+import { path, type ManifestIndex } from '@travetto/manifest';
 
-import { ManagedType, AnyType, ForeignType, MappedType } from './resolver/types.ts';
-import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor.ts';
+import type { ManagedType, AnyType, ForeignType, MappedType } from './resolver/types.ts';
+import { type State, type DecoratorMeta, type Transformer, ModuleNameSymbol } from './types/visitor.ts';
 import { SimpleResolver } from './resolver/service.ts';
 import { ImportManager } from './importer.ts';
-import { Import } from './types/shared.ts';
+import type { Import } from './types/shared.ts';
 
 import { DocUtil } from './util/doc.ts';
 import { DecoratorUtil } from './util/decorator.ts';

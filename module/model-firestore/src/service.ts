@@ -1,14 +1,14 @@
-import { DocumentData, FieldValue, Firestore, PartialWithFieldValue, Query } from '@google-cloud/firestore';
+import { type DocumentData, FieldValue, Firestore, type PartialWithFieldValue, type Query } from '@google-cloud/firestore';
 
 import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
-  ModelCrudSupport, ModelRegistryIndex, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError, OptionalId,
+  type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
+  type ModelIndexedSupport, type ModelType, NotFoundError, type OptionalId,
   ModelCrudUtil, ModelIndexedUtil,
 } from '@travetto/model';
 
-import { FirestoreModelConfig } from './config.ts';
+import type { FirestoreModelConfig } from './config.ts';
 
 const clone = structuredClone;
 

@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import {
   type AnyType, DeclarationUtil, LiteralUtil,
-  DecoratorUtil, DocUtil, ParamDocumentation, TransformerState, transformCast,
+  DecoratorUtil, DocUtil, type ParamDocumentation, type TransformerState, transformCast,
 } from '@travetto/transformer';
 
 export type ComputeConfig = { type?: AnyType, root?: ts.Node, name?: string, index?: number };

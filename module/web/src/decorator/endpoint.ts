@@ -1,7 +1,7 @@
-import { ClassInstance, getClass } from '@travetto/runtime';
+import { type ClassInstance, getClass } from '@travetto/runtime';
 
-import { EndpointConfig, EndpointFunctionDescriptor } from '../registry/types.ts';
-import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
+import type { EndpointConfig, EndpointFunctionDescriptor } from '../registry/types.ts';
+import { HTTP_METHODS, type HttpMethod } from '../types/core.ts';
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 
 type EndpointFunctionDecorator = <T>(instance: T, property: string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;

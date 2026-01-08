@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { SuiteRegistryIndex } from '@travetto/test';
 

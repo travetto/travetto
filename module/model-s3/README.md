@@ -25,7 +25,7 @@ Out of the box, by installing the module, everything should be wired up by defau
 **Code: Wiring up a custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
+import { type S3ModelConfig, S3ModelService } from '@travetto/model-s3';
 
 export class Init {
   @InjectableFactory({
@@ -45,8 +45,10 @@ where the [S3ModelConfig](https://github.com/travetto/travetto/tree/main/module/
 export class S3ModelConfig {
   region = 'us-east-1'; // AWS Region
   namespace = ''; // S3 Bucket folder
-  bucket = ''; // S3 bucket
-  endpoint = ''; // Endpoint url
+  @Required(false)
+  bucket: string; // S3 bucket
+  @Required(false)
+  endpoint: string; // Endpoint url
 
   @EnvVar('AWS_ACCESS_KEY_ID')
   accessKeyId: string = '';
@@ -75,9 +77,7 @@ export class S3ModelConfig {
   async postConstruct(): Promise<void> {
     if (!Runtime.production) {
       this.endpoint ??= 'http://localhost:4566'; // From docker
-      if (this.endpoint.includes('localhost')) {
-        this.config.forcePathStyle ??= true;
-      }
+      this.bucket ??= 'app';
     }
 
     if (!this.accessKeyId && !this.secretAccessKey) {
@@ -95,6 +95,10 @@ export class S3ModelConfig {
         secretAccessKey: this.secretAccessKey
       }
     };
+
+    if (!Runtime.production && this.endpoint.includes('localhost')) {
+      this.config.forcePathStyle ??= true;
+    }
   }
 }
 ```

@@ -135,7 +135,7 @@ The [@Inject](https://github.com/travetto/travetto/tree/main/module/di/src/decor
 **Code: Example Injectable with dependencies as Inject fields**
 ```typescript
 import { Injectable, Inject } from '@travetto/di';
-import { DependentService } from './dependency.ts';
+import type { DependentService } from './dependency.ts';
 
 @Injectable()
 class CustomService {
@@ -153,7 +153,7 @@ The [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/d
 **Code: Example Injectable with dependencies in constructor**
 ```typescript
 import { Injectable } from '@travetto/di';
-import { DependentService } from './dependency.ts';
+import type { DependentService } from './dependency.ts';
 
 @Injectable()
 class CustomService {
@@ -176,7 +176,7 @@ Via [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/d
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 
-import { DependentService, CustomService } from './dependency.ts';
+import { type DependentService, CustomService } from './dependency.ts';
 
 class Config {
   @InjectableFactory()
@@ -216,7 +216,7 @@ By default, if there is only one candidate without qualification, then that cand
 **Code: Example Multiple Candidate Types**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { Contract, ComplexContract } from './injectable-multiple-default.ts';
+import type { Contract, ComplexContract } from './injectable-multiple-default.ts';
 
 class Config {
   // Complex will be marked as the available Contract
@@ -235,7 +235,7 @@ It is also possible to directly reference external types, and they will be conve
 **Code: Example External Dependencies**
 ```typescript
 import { EventEmitter } from 'node:events';
-import { Writable } from 'node:stream';
+import type { Writable } from 'node:stream';
 
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { asFull } from '@travetto/runtime';

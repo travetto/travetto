@@ -1,8 +1,8 @@
 import { EventEmitter } from 'node:events';
 
-import { Assertion, TestConfig } from '../model/test.ts';
+import type { Assertion, TestConfig } from '../model/test.ts';
 
-export interface CaptureAssert extends Partial<Assertion> {
+export interface CapturedAssertion extends Partial<Assertion> {
   module?: [string, string];
   line: number;
   text: string;
@@ -25,7 +25,7 @@ class $AssertCapture {
     const assertions: Assertion[] = [];
 
     // Emit and collect, every assertion as it occurs
-    const handler = (a: CaptureAssert): void => {
+    const handler = (a: CapturedAssertion): void => {
       const asrt: Assertion = {
         ...a,
         import: a.import ?? a.module!.join('/'),
@@ -46,7 +46,7 @@ class $AssertCapture {
     };
   }
 
-  add(a: CaptureAssert): void {
+  add(a: CapturedAssertion): void {
     this.#emitter.emit('assert', a);
   }
 }

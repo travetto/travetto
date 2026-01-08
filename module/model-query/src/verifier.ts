@@ -1,8 +1,8 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
-import { DataUtil, ValidationResultError, ValidationError, SchemaRegistryIndex } from '@travetto/schema';
-import { Class } from '@travetto/runtime';
+import { DataUtil, ValidationResultError, type ValidationError, SchemaRegistryIndex } from '@travetto/schema';
+import type { Class } from '@travetto/runtime';
 
-import { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
+import type { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
 
 import { TypeUtil } from './internal/types.ts';
 

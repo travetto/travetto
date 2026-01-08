@@ -4,9 +4,9 @@ import { castKey, getClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
-import { CliCommandShape } from './types.ts';
+import type { CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
-import { CliValidationResultError } from './error.ts';
+import type { CliValidationResultError } from './error.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
 
 const validationSourceMap: Record<string, string> = {

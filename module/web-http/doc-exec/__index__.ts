@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
-import { WebHttpConfig, WebHttpServer, WebServerHandle } from '@travetto/web-http';
-import { ConfigurationService } from '@travetto/config';
+import type { WebHttpConfig, WebHttpServer, WebServerHandle } from '@travetto/web-http';
+import type { ConfigurationService } from '@travetto/config';
 
 class Config {
   @InjectableFactory({ primary: true })

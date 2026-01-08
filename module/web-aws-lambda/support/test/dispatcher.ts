@@ -1,12 +1,12 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebDispatcher, WebFilterContext, WebRequest, WebResponse } from '@travetto/web';
+import { type WebDispatcher, type WebFilterContext, type WebRequest, WebResponse } from '@travetto/web';
 import { AppError, asFull, castTo } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
-import { AwsLambdaWebHandler } from '../../src/handler.ts';
+import type { AwsLambdaWebHandler } from '../../src/handler.ts';
 
 /**
  * Create an api gateway event given a web request

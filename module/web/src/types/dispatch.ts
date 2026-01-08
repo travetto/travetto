@@ -1,5 +1,5 @@
-import { ControllerConfig, EndpointConfig } from '../registry/types.ts';
-import { WebFilter } from './filter.ts';
+import type { ControllerConfig, EndpointConfig } from '../registry/types.ts';
+import type { WebFilter } from './filter.ts';
 
 /**
  * Defines the shape for a web dispatcher

@@ -1,5 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-import { RedisModelConfig, RedisModelService } from '@travetto/model-redis';
+import { type RedisModelConfig, RedisModelService } from '@travetto/model-redis';
 
 export class Init {
   @InjectableFactory({

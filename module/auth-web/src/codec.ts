@@ -1,12 +1,12 @@
 import type { Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
-import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
+import { type AuthContext, AuthenticationError, type AuthToken, type Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
-import { WebResponse, WebRequest, WebAsyncContext, CookieJar } from '@travetto/web';
+import { type WebResponse, type WebRequest, type WebAsyncContext, CookieJar } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
-import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
-import { WebAuthConfig } from './config.ts';
+import { CommonPrincipalCodecSymbol, type PrincipalCodec } from './types.ts';
+import type { WebAuthConfig } from './config.ts';
 
 /**
  * JWT Principal codec

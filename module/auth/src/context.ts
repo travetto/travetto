@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@travetto/di';
-import { AsyncContext, AsyncContextValue } from '@travetto/context';
+import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 
-import { AuthToken } from './types/token.ts';
-import { Principal } from './types/principal.ts';
-import { AuthenticatorState } from './types/authenticator.ts';
+import type { AuthToken } from './types/token.ts';
+import type { Principal } from './types/principal.ts';
+import type { AuthenticatorState } from './types/authenticator.ts';
 
 /**
  * Provides the primary context for the authenticated state

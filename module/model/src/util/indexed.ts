@@ -1,4 +1,4 @@
-import { castTo, Class, DeepPartial, hasFunction, TypedObject } from '@travetto/runtime';
+import { castTo, type Class, type DeepPartial, hasFunction, TypedObject } from '@travetto/runtime';
 
 import { IndexNotSupported } from '../error/invalid-index.ts';
 import { NotFoundError } from '../error/not-found.ts';

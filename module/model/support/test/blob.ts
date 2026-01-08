@@ -5,7 +5,7 @@ import { BinaryUtil, Util } from '@travetto/runtime';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import { ModelBlobSupport } from '../../src/types/blob.ts';
+import type { ModelBlobSupport } from '../../src/types/blob.ts';
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 
 const meta = BinaryUtil.getBlobMeta;

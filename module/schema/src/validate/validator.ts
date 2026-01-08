@@ -1,7 +1,7 @@
-import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
+import { castKey, castTo, type Class, type ClassInstance, TypedObject } from '@travetto/runtime';
 
-import { SchemaInputConfig, SchemaFieldMap } from '../service/types.ts';
-import { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
+import type { SchemaInputConfig, SchemaFieldMap } from '../service/types.ts';
+import type { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 import { Messages } from './messages.ts';
 import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
 import { DataUtil } from '../data.ts';

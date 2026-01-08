@@ -5,7 +5,7 @@ import { IpcChannel } from '@travetto/worker';
 
 import { RunUtil } from '../execute/run.ts';
 import { TestWorkerEvents } from './types.ts';
-import { TestRun } from '../model/test.ts';
+import type { TestRun } from '../model/test.ts';
 import { CommunicationUtil } from '../communication.ts';
 
 /**

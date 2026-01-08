@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 
-import { AuthContext, AuthService, Principal, Authenticator, Authorizer } from '@travetto/auth';
+import { AuthContext, AuthService, type Principal, type Authenticator, type Authorizer } from '@travetto/auth';
 import { toConcrete } from '@travetto/runtime';
 
 const PrincipalContract = toConcrete<Principal>();

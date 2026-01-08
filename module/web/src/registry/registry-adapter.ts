@@ -1,9 +1,9 @@
-import { RegistryAdapter } from '@travetto/registry';
-import { AppError, asFull, castTo, Class, RetainPrimitiveFields, safeAssign } from '@travetto/runtime';
+import type { RegistryAdapter } from '@travetto/registry';
+import { AppError, asFull, castTo, type Class, type RetainPrimitiveFields, safeAssign } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
-import { SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types';
+import type { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
 function combineCommon<T extends ControllerConfig | EndpointConfig>(base: T, override: Partial<T>): T {

@@ -1,6 +1,6 @@
 import { Schema, SchemaRegistryIndex } from '@travetto/schema';
-import { toConcrete, AnyMap } from '@travetto/runtime';
-import { Principal } from '@travetto/auth';
+import { toConcrete, type AnyMap } from '@travetto/runtime';
+import type { Principal } from '@travetto/auth';
 
 @Schema()
 export class PrincipalSchema implements Principal {

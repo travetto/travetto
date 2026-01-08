@@ -1,6 +1,6 @@
-import { castTo, Class, ClassInstance, describeFunction, getClass } from '@travetto/runtime';
+import { castTo, type Class, type ClassInstance, describeFunction, getClass } from '@travetto/runtime';
 
-import { SuiteConfig } from '../model/suite.ts';
+import type { SuiteConfig } from '../model/suite.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';

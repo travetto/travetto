@@ -24,7 +24,7 @@ Within the node ecosystem, the most prevalent auth framework is [passport](http:
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
 import { InjectableFactory } from '@travetto/di';
-import { Authenticator, Authorizer, Principal } from '@travetto/auth';
+import type { Authenticator, Authorizer, Principal } from '@travetto/auth';
 import { PassportAuthenticator } from '@travetto/auth-web-passport';
 
 export class FbUser {
@@ -77,9 +77,9 @@ After that, the provider is no different than any other, and can be used accordi
 
 **Code: Sample endpoints using Facebook/passport provider**
 ```typescript
-import { Controller, Get, Post, WebRequest, ContextParam, WebResponse } from '@travetto/web';
+import { Controller, Get, Post, type WebRequest, ContextParam, WebResponse } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
-import { Principal } from '@travetto/auth';
+import type { Principal } from '@travetto/auth';
 
 import { FbAuthSymbol } from './config.ts';
 

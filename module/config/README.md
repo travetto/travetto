@@ -103,8 +103,8 @@ The framework provides two simple base classes that assist with existing pattern
 
 **Code: Memory Provider**
 ```typescript
-import { ConfigData } from '../parser/types.ts';
-import { ConfigSource, ConfigPayload } from './types.ts';
+import type { ConfigData } from '../parser/types.ts';
+import type { ConfigSource, ConfigPayload } from './types.ts';
 
 /**
  * Meant to be instantiated and provided as a unique config source
@@ -125,7 +125,7 @@ export class MemoryConfigSource implements ConfigSource {
 **Code: Environment JSON Provider**
 ```typescript
 import { JSONUtil } from '@travetto/runtime';
-import { ConfigSource, ConfigPayload } from './types.ts';
+import type { ConfigSource, ConfigPayload } from './types.ts';
 
 /**
  * Represents the environment mapped data as a JSON blob
@@ -155,7 +155,7 @@ In addition to files and environment variables, configuration sources can also b
 
 **Code: Custom Configuration Source**
 ```typescript
-import { ConfigSource, ConfigPayload } from '@travetto/config';
+import type { ConfigSource, ConfigPayload } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 
 @Injectable()

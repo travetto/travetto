@@ -1,5 +1,5 @@
 import { Injectable } from '@travetto/di';
-import { LogEvent, Logger } from '@travetto/log';
+import type { LogEvent, Logger } from '@travetto/log';
 
 @Injectable()
 export class CustomLogger implements Logger {

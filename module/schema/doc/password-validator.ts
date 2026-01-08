@@ -1,4 +1,4 @@
-import { Schema, Validator, ValidationError } from '@travetto/schema';
+import { Schema, Validator, type ValidationError } from '@travetto/schema';
 
 const passwordValidator = (user: User): ValidationError | undefined => {
   const password = user.password;

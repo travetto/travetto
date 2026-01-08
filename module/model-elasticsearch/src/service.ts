@@ -1,23 +1,23 @@
-import { Client, errors, estypes } from '@elastic/elasticsearch';
+import { Client, errors, type estypes } from '@elastic/elasticsearch';
 
 import {
-  ModelCrudSupport, BulkOperation, BulkResponse, ModelBulkSupport, ModelExpirySupport,
-  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistryIndex, OptionalId,
+  type ModelCrudSupport, type BulkOperation, type BulkResponse, type ModelBulkSupport, type ModelExpirySupport,
+  type ModelIndexedSupport, type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
 import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
-  ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
-  ModelQuerySupport, PageableModelQuery, Query, ValidStringFields,
-  QueryVerifier, ModelQuerySuggestSupport,
+  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport,
+  type ModelQuerySupport, type PageableModelQuery, type Query, type ValidStringFields,
+  QueryVerifier, type ModelQuerySuggestSupport,
   ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  ModelQueryFacet,
+  type ModelQueryFacet,
 } from '@travetto/model-query';
 
-import { ElasticsearchModelConfig } from './config.ts';
-import { EsBulkError } from './internal/types.ts';
+import type { ElasticsearchModelConfig } from './config.ts';
+import type { EsBulkError } from './internal/types.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import { IndexManager } from './index-manager.ts';

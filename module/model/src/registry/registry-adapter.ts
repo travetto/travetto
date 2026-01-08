@@ -1,8 +1,8 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { ModelConfig } from './types';
+import type { ModelConfig } from './types';
 
 function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): ModelConfig {
   for (const source of sources) {

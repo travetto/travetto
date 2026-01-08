@@ -1,10 +1,10 @@
-import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { Class, ClassInstance, getClass, isClass, RetainPrimitiveFields } from '@travetto/runtime';
+import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { type Class, type ClassInstance, getClass, isClass, type RetainPrimitiveFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerRegistryAdapter } from './registry-adapter';
-import { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
+import type { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
 import { WebAsyncContext } from '../context';
 import type { WebInterceptor } from '../types/interceptor.ts';
 

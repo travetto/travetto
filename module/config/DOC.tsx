@@ -2,7 +2,7 @@
 import { d, c } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { Config as ConfigDec, EnvVar, ConfigurationService, OverrideConfigSource, ConfigSource } from '@travetto/config';
+import { Config as ConfigDec, EnvVar, ConfigurationService, OverrideConfigSource, type ConfigSource } from '@travetto/config';
 import { toConcrete } from '@travetto/runtime';
 
 export const text = <>

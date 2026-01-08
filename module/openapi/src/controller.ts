@@ -4,7 +4,7 @@ import { ConfigureInterceptor, Controller, CorsInterceptor, Get, SetHeaders } fr
 import { Inject } from '@travetto/di';
 import { IsPrivate } from '@travetto/schema';
 
-import { OpenApiService } from './service.ts';
+import type { OpenApiService } from './service.ts';
 
 /**
  * Basic controller for surfacing the api spec

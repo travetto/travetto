@@ -3,7 +3,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { WebHeaderUtil } from '../src/util/header.ts';
 import { WebHeaders } from '../src/types/headers.ts';
-import { Cookie } from '../src/types/cookie.ts';
+import type { Cookie } from '../src/types/cookie.ts';
 
 @Suite('WebHeaderUtil')
 class WebHeaderUtilSuite {

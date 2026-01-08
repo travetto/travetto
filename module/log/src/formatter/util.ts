@@ -3,7 +3,7 @@ import { inspect, type InspectOptions } from 'node:util';
 import { DataUtil } from '@travetto/schema';
 import { safeAssign } from '@travetto/runtime';
 
-import { LogEvent } from '../types.ts';
+import type { LogEvent } from '../types.ts';
 
 const INSPECT_OPTIONS = { colors: false, showHidden: false, depth: 5, breakLength: 200 };
 

@@ -1,6 +1,6 @@
 import type mongo from 'mongodb';
 
-import { TimeSpan, TimeUtil, RuntimeResources, Runtime } from '@travetto/runtime';
+import { type TimeSpan, TimeUtil, RuntimeResources, Runtime } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 
 /**

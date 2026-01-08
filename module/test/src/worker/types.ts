@@ -1,4 +1,4 @@
-import { TestEvent, TestRemoveEvent } from '../model/event.ts';
+import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 
 /**
  * Test Run Event Keys

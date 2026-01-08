@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 
 type OrProm<T> = T | Promise<T>;
 type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };

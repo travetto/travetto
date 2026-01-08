@@ -2,13 +2,13 @@ import { createClient } from '@redis/client';
 
 import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
-  ModelCrudSupport, ModelExpirySupport, ModelRegistryIndex, ModelType, ModelStorageSupport,
-  NotFoundError, ExistsError, ModelIndexedSupport, OptionalId,
+  type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport,
+  NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
-import { RedisModelConfig } from './config.ts';
+import type { RedisModelConfig } from './config.ts';
 
 type RedisScan = { key: string } | { match: string };
 type RedisClient = ReturnType<typeof createClient>;

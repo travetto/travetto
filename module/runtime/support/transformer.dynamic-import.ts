@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { OnCall, TransformerState } from '@travetto/transformer';
+import { OnCall, type TransformerState } from '@travetto/transformer';
 
 /**
  * Dynamic Import Transformer

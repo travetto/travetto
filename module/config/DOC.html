@@ -122,8 +122,8 @@ The framework provides two simple base classes that assist with existing pattern
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/config/src/source/memory.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigData <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../parser/types.ts'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigPayload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types.ts'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ConfigData <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../parser/types.ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigPayload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types.ts'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * Meant to be instantiated and provided as a unique config source
@@ -147,7 +147,7 @@ The framework provides two simple base classes that assist with existing pattern
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> JSONUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigPayload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types.ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigPayload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types.ts'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * Represents the environment mapped data as a JSON blob
@@ -181,7 +181,7 @@ In addition to files and environment variables, configuration sources can also b
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/config/doc/custom-source.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigPayload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigPayload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>

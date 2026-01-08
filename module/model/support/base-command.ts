@@ -1,5 +1,5 @@
 import { Env } from '@travetto/runtime';
-import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
+import { type CliValidationError, type CliCommandShape, cliTpl } from '@travetto/cli';
 import { Registry } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
 

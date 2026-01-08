@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision, Required, } from '@travetto/schema';
-import { ModelCrudSupport, Model, NotFoundError, PersistValue } from '@travetto/model';
+import { type ModelCrudSupport, Model, NotFoundError, PersistValue } from '@travetto/model';
 
 import { BaseModelSuite } from './base.ts';
 

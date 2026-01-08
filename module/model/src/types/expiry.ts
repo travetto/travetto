@@ -1,7 +1,7 @@
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 
-import { ModelType } from '../types/model.ts';
-import { ModelCrudSupport } from './crud.ts';
+import type { ModelType } from '../types/model.ts';
+import type { ModelCrudSupport } from './crud.ts';
 
 /**
  * Support for managing expiration of data

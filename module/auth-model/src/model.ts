@@ -1,6 +1,6 @@
-import { Util, Class, TimeUtil, castTo } from '@travetto/runtime';
-import { ModelCrudSupport, ModelType, NotFoundError, OptionalId } from '@travetto/model';
-import { Principal, Authenticator, Authorizer, AuthenticationError } from '@travetto/auth';
+import { Util, type Class, TimeUtil, castTo } from '@travetto/runtime';
+import { type ModelCrudSupport, type ModelType, NotFoundError, type OptionalId } from '@travetto/model';
+import { type Principal, type Authenticator, type Authorizer, AuthenticationError } from '@travetto/auth';
 
 import { AuthModelUtil } from './util.ts';
 

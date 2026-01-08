@@ -1,4 +1,4 @@
-import { WebChainedContext, WebInterceptor, WebInterceptorCategory } from '@travetto/web';
+import type { WebChainedContext, WebInterceptor, WebInterceptorCategory } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 class Appender {

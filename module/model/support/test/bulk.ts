@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
 import { Model } from '../../src/registry/decorator.ts';
-import { ModelBulkSupport } from '../../src/types/bulk.ts';
+import type { ModelBulkSupport } from '../../src/types/bulk.ts';
 import { BaseModelSuite } from './base.ts';
 
 @Model('bulk-user')

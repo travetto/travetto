@@ -3,9 +3,9 @@ import { stringify } from 'yaml';
 
 import { BinaryUtil } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { ControllerVisitUtil, WebConfig } from '@travetto/web';
+import { ControllerVisitUtil, type WebConfig } from '@travetto/web';
 
-import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config.ts';
+import type { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config.ts';
 import { OpenapiVisitor } from './generate.ts';
 
 /**

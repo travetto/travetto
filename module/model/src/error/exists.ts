@@ -1,4 +1,4 @@
-import { Class, AppError } from '@travetto/runtime';
+import { type Class, AppError } from '@travetto/runtime';
 
 /**
  * Represents when a data item already exists

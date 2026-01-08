@@ -1,27 +1,27 @@
 import {
-  ModelType,
-  BulkOperation, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
-  NotFoundError, ModelRegistryIndex, ExistsError, OptionalId, ModelIdSource,
+  type ModelType,
+  type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport,
+  NotFoundError, ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource,
   ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
-import { castTo, Class } from '@travetto/runtime';
+import { castTo, type Class } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
-import { AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
-  ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier, ModelQuerySuggestSupport,
+  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
+  type PageableModelQuery, type ValidStringFields, type WhereClauseRaw, QueryVerifier, type ModelQuerySuggestSupport,
   ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  ModelQueryFacet,
+  type ModelQueryFacet,
 } from '@travetto/model-query';
 
-import { SQLModelConfig } from './config.ts';
+import type { SQLModelConfig } from './config.ts';
 import { Connected, ConnectedIterator, Transactional } from './connection/decorator.ts';
 import { SQLModelUtil } from './util.ts';
-import { SQLDialect } from './dialect/base.ts';
+import type { SQLDialect } from './dialect/base.ts';
 import { TableManager } from './table-manager.ts';
-import { Connection } from './connection/base.ts';
-import { InsertWrapper } from './internal/types.ts';
+import type { Connection } from './connection/base.ts';
+import type { InsertWrapper } from './internal/types.ts';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,

@@ -1,5 +1,5 @@
 import { DocFileUtil } from './file.ts';
-import { CodeProps } from './types.ts';
+import type { CodeProps } from './types.ts';
 
 export type ResolvedRef = { title: string, file: string, line: number };
 export type ResolvedCode = { text: string, language: string, file?: string };

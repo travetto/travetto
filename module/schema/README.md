@@ -246,7 +246,7 @@ Within the schema framework, it is possible to add custom validators class level
 
 **Code: Password Validator**
 ```typescript
-import { Schema, Validator, ValidationError } from '@travetto/schema';
+import { Schema, Validator, type ValidationError } from '@travetto/schema';
 
 const passwordValidator = (user: User): ValidationError | undefined => {
   const password = user.password;
@@ -368,7 +368,7 @@ What you can see here is that the `Point` type is now backed by a class that sup
 
 **Code: Simple Custom Type Usage**
 ```typescript
-import { Schema, Point } from '@travetto/schema';
+import { Schema, type Point } from '@travetto/schema';
 
 @Schema()
 export class LocationAware {

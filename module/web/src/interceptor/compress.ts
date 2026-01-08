@@ -1,12 +1,12 @@
 import { buffer } from 'node:stream/consumers';
-import { BrotliOptions, constants, createBrotliCompress, createDeflate, createGzip, ZlibOptions } from 'node:zlib';
+import { type BrotliOptions, constants, createBrotliCompress, createDeflate, createGzip, type ZlibOptions } from 'node:zlib';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
-import { WebChainedContext } from '../types/filter.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
+import type { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebError } from '../types/error.ts';
 

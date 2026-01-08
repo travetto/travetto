@@ -1,5 +1,5 @@
-import { Class, AppError } from '@travetto/runtime';
-import { ValidationError } from './types.ts';
+import { type Class, AppError } from '@travetto/runtime';
+import type { ValidationError } from './types.ts';
 
 /**
  * Validation results error.

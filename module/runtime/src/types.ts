@@ -1,5 +1,5 @@
-import { Readable } from 'node:stream';
-import { ReadableStream } from 'node:stream/web';
+import type { Readable } from 'node:stream';
+import type { ReadableStream } from 'node:stream/web';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Any = any;

@@ -1,4 +1,4 @@
-import { AuthenticationError, Authenticator, Principal } from '@travetto/auth';
+import { AuthenticationError, type Authenticator, type Principal } from '@travetto/auth';
 import { InjectableFactory } from '@travetto/di';
 import { SessionModelSymbol } from '@travetto/auth-session';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';

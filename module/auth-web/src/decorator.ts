@@ -1,4 +1,4 @@
-import { ControllerRegistryIndex, EndpointDecorator } from '@travetto/web';
+import { ControllerRegistryIndex, type EndpointDecorator } from '@travetto/web';
 
 import { AuthVerifyInterceptor } from './interceptors/verify.ts';
 import { AuthLoginInterceptor } from './interceptors/login.ts';

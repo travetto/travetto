@@ -8,7 +8,7 @@ import { Registry } from '@travetto/registry';
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 import { Upload } from '../../src/decorator.ts';
-import { FileMap } from '../../src/types.ts';
+import type { FileMap } from '../../src/types.ts';
 
 const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 

@@ -6,7 +6,7 @@ import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
-import { TodoService } from '../src/service.ts';
+import type { TodoService } from '../src/service.ts';
 import { Todo } from '../src/model.ts';
 
 @Suite()

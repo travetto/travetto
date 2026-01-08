@@ -1,4 +1,4 @@
-import { Any, castTo } from '@travetto/runtime';
+import { type Any, castTo } from '@travetto/runtime';
 
 type Prim = number | boolean | string;
 type HeaderValue = Prim | Prim[] | readonly Prim[];

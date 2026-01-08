@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
-import { Writable } from 'node:stream';
-import { HttpError } from 'http-errors';
+import type { Writable } from 'node:stream';
+import type { HttpError } from 'http-errors';
 import type debug from 'debug';
 
 import { Suite, Test } from '@travetto/test';

@@ -5,7 +5,7 @@ import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 import { Schema, DiscriminatorField, Text, TypeMismatchError, Discriminated } from '@travetto/schema';
 import {
-  ModelIndexedSupport, Index, ModelCrudSupport, Model,
+  type ModelIndexedSupport, Index, type ModelCrudSupport, Model,
   NotFoundError, SubTypeNotSupportedError, PersistValue
 } from '@travetto/model';
 

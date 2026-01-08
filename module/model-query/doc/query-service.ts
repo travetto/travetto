@@ -1,6 +1,6 @@
-import { asFull, Class } from '@travetto/runtime';
-import { ModelType, OptionalId, ModelCrudUtil } from '@travetto/model';
-import {
+import { asFull, type Class } from '@travetto/runtime';
+import { type ModelType, type OptionalId, ModelCrudUtil } from '@travetto/model';
+import type {
   ModelQueryCrudSupport, ModelQuerySuggestSupport, ModelQueryFacetSupport,
   ValidStringFields, ModelQuery, PageableModelQuery
 } from '@travetto/model-query';

@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 
 import { Env, ExecUtil, Runtime } from '@travetto/runtime';
-import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 
 /**
  * Command line support for eslint

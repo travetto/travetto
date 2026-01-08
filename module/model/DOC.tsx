@@ -2,8 +2,8 @@
 import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import {
-  ModelBasicSupport, ModelBlobSupport, ModelBulkSupport, ModelCrudSupport,
-  ModelExpirySupport, ModelIndexedSupport, ModelRegistryIndex, ModelType
+  type ModelBasicSupport, type ModelBlobSupport, type ModelBulkSupport, type ModelCrudSupport,
+  type ModelExpirySupport, type ModelIndexedSupport, ModelRegistryIndex, type ModelType
 } from '@travetto/model';
 
 import { Model } from './src/registry/decorator.ts';

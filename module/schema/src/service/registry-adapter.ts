@@ -1,9 +1,9 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, describeFunction, safeAssign } from '@travetto/runtime';
+import { AppError, castKey, castTo, type Class, describeFunction, safeAssign } from '@travetto/runtime';
 
 import {
-  SchemaClassConfig, SchemaMethodConfig, SchemaFieldConfig,
-  SchemaParameterConfig, SchemaInputConfig, SchemaFieldMap, SchemaCoreConfig,
+  type SchemaClassConfig, type SchemaMethodConfig, type SchemaFieldConfig,
+  type SchemaParameterConfig, type SchemaInputConfig, type SchemaFieldMap, type SchemaCoreConfig,
   CONSTRUCTOR_PROPERTY
 } from './types';
 

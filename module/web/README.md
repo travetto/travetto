@@ -36,7 +36,7 @@ export class BaseWebMessage<B = unknown, C = unknown> implements WebMessage<B, C
 
 **Code: Request Shape**
 ```typescript
-import { HttpMethod, HttpProtocol } from './core.ts';
+import type { HttpMethod, HttpProtocol } from './core.ts';
 import { BaseWebMessage } from './message.ts';
 
 export interface WebConnection {
@@ -170,10 +170,10 @@ Each [@Param](https://github.com/travetto/travetto/tree/main/module/web/src/deco
 
 **Code: Full-fledged Controller with Endpoints**
 ```typescript
-import { Get, Controller, Post, QueryParam, WebRequest, ContextParam } from '@travetto/web';
+import { Get, Controller, Post, QueryParam, type WebRequest, ContextParam } from '@travetto/web';
 import { Integer, Min } from '@travetto/schema';
 
-import { MockService } from './mock.ts';
+import type { MockService } from './mock.ts';
 
 @Controller('/simple')
 export class Simple {
@@ -227,7 +227,7 @@ In addition to endpoint parameters (i.e. user-provided inputs), there may also b
 
 **Code: Example ContextParam usage**
 ```typescript
-import { CacheControl, ContextParam, Controller, Get, WebRequest, WebResponse } from '@travetto/web';
+import { CacheControl, ContextParam, Controller, Get, type WebRequest, WebResponse } from '@travetto/web';
 
 @Controller('/context')
 class ContextController {
@@ -341,7 +341,7 @@ class UserController {
 
 **Code: A Simple Interceptor**
 ```typescript
-import { WebChainedContext, WebInterceptor, WebInterceptorCategory, WebInterceptorContext } from '@travetto/web';
+import type { WebChainedContext, WebInterceptor, WebInterceptorCategory, WebInterceptorContext } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
@@ -683,7 +683,7 @@ Additionally it may be desirable to create a custom interceptor.  Interceptors c
 
 **Code: Defining a new Interceptor**
 ```typescript
-import { WebChainedContext, WebInterceptor, WebInterceptorCategory } from '@travetto/web';
+import type { WebChainedContext, WebInterceptor, WebInterceptorCategory } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 class Appender {
@@ -716,7 +716,7 @@ When running an interceptor, if you chose to skip calling `ctx.next()`, you will
 
 **Code: Defining a fully controlled Interceptor**
 ```typescript
-import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebError } from '@travetto/web';
+import { type WebInterceptor, type WebInterceptorCategory, type WebChainedContext, WebError } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
@@ -758,8 +758,8 @@ export class CookieJar {
 **Code: Sample Cookie Usage**
 ```typescript
 import {
-  Controller, Get, QueryParam, WebRequest, ContextParam,
-  WebResponse, CookieJar, CookieGetOptions, CookieSetOptions
+  Controller, Get, QueryParam, type WebRequest, ContextParam,
+  WebResponse, type CookieJar, type CookieGetOptions, type CookieSetOptions
 } from '@travetto/web';
 
 @Controller('/simple')

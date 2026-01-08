@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, OnFile } from '@travetto/transformer';
+import { type TransformerState, OnFile } from '@travetto/transformer';
 
 const PATH_IMPORT = '@travetto/manifest/src/path.ts';
 

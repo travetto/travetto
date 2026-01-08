@@ -7,7 +7,7 @@ import { JSONUtil, Runtime } from '@travetto/runtime';
 
 import { IGNORES, GLOBALS, TS_OPTIONS } from './eslint-common.ts';
 import { STD_RULES } from './eslint-std-rules.ts';
-import { TrvEslintPlugin } from './types.ts';
+import type { TrvEslintPlugin } from './types.ts';
 
 export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): readonly unknown[] {
   const plugins: TrvEslintPlugin[] = pluginMaps.map(Object.values).flat();

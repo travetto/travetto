@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 
 export type ResolutionType = 'strict' | 'loose' | 'any';
 

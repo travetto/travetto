@@ -1,16 +1,16 @@
 import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
-import { Controller, Get, WebHeaders, WebResponse, Post, Cookie, CookieJar } from '@travetto/web';
+import { Controller, Get, type WebHeaders, WebResponse, Post, type Cookie, CookieJar } from '@travetto/web';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex, Inject, InjectableFactory } from '@travetto/di';
-import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
+import { AuthenticationError, type Authenticator, type AuthContext, type AuthConfig } from '@travetto/auth';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 import { Login, Authenticated, Logout } from '../../src/decorator.ts';
-import { WebAuthConfig } from '../../src/config.ts';
+import type { WebAuthConfig } from '../../src/config.ts';
 import { CommonPrincipalCodecSymbol } from '../../src/types.ts';
 import { JWTPrincipalCodec } from '../../src/codec.ts';
 

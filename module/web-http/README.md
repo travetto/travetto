@@ -158,7 +158,7 @@ import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { WebHttpServer, WebHttpConfig } from '@travetto/web-http';
+import { type WebHttpServer, WebHttpConfig } from '@travetto/web-http';
 
 import './config-override.ts';
 

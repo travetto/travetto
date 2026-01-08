@@ -1,6 +1,6 @@
-import { Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 
-import { Controller, Get, Produces, WebRequest, ContextParam } from '@travetto/web';
+import { Controller, Get, Produces, type WebRequest, ContextParam } from '@travetto/web';
 import { RuntimeResources } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 

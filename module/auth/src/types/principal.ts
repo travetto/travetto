@@ -1,4 +1,4 @@
-import { AnyMap } from '@travetto/runtime';
+import type { AnyMap } from '@travetto/runtime';
 
 /**
  * A user principal, including permissions and details

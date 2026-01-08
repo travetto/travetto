@@ -1,13 +1,13 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { AuthConfig, AuthContext } from '@travetto/auth';
-import { AuthContextInterceptor, WebAuthConfig } from '@travetto/auth-web';
-import { SessionService, SessionData } from '@travetto/auth-session';
+import type { AuthConfig, AuthContext } from '@travetto/auth';
+import { AuthContextInterceptor, type WebAuthConfig } from '@travetto/auth-web';
+import type { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import {
-  Controller, Get, Body, Post, Put, WebRequest, WebInterceptor,
-  ContextParam, WebInterceptorCategory, WebChainedContext, WebInterceptorContext
+  Controller, Get, Body, Post, Put, type WebRequest, type WebInterceptor,
+  ContextParam, type WebInterceptorCategory, type WebChainedContext, type WebInterceptorContext
 } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';

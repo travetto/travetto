@@ -1,8 +1,8 @@
-import { ClassInstance, getClass } from '@travetto/runtime';
+import { type ClassInstance, getClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
-import { EndpointParameterConfig, EndpointParamLocation } from '../registry/types.ts';
+import type { EndpointParameterConfig, EndpointParamLocation } from '../registry/types.ts';
 
 type ParamDecorator = (instance: ClassInstance, property: string, idx: number) => void;
 

@@ -7,9 +7,9 @@ import { Get, Post, Put, Delete, Patch } from '../../../src/decorator/endpoint.t
 import { ContextParam, PathParam, QueryParam } from '../../../src/decorator/param.ts';
 import { Produces, SetHeaders } from '../../../src/decorator/common.ts';
 
-import { WebRequest } from '../../../src/types/request.ts';
+import type { WebRequest } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
-import { CookieJar } from '../../../src/util/cookie.ts';
+import type { CookieJar } from '../../../src/util/cookie.ts';
 
 @Controller('/test')
 export class TestController {

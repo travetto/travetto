@@ -1,5 +1,5 @@
-import { AnyMap } from '@travetto/runtime';
-import { Principal } from './principal.ts';
+import type { AnyMap } from '@travetto/runtime';
+import type { Principal } from './principal.ts';
 
 /**
  * Represents the general shape of additional login context, usually across multiple calls

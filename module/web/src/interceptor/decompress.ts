@@ -1,4 +1,4 @@
-import { Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 import zlib from 'node:zlib';
 import util from 'node:util';
 
@@ -6,11 +6,11 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { castTo } from '@travetto/runtime';
 
-import { WebChainedContext } from '../types/filter.ts';
-import { WebResponse } from '../types/response.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
-import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import { WebHeaders } from '../types/headers.ts';
+import type { WebChainedContext } from '../types/filter.ts';
+import type { WebResponse } from '../types/response.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebHeaders } from '../types/headers.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
 import { WebError } from '../types/error.ts';

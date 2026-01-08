@@ -1,8 +1,8 @@
-import { RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { AppError, castKey, castTo, Class, describeFunction, getParentClass, hasFunction, TypedObject } from '@travetto/runtime';
-import { SchemaFieldConfig, SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { AppError, castKey, castTo, type Class, describeFunction, getParentClass, hasFunction, TypedObject } from '@travetto/runtime';
+import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types';
+import type { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types';
 import { DependencyRegistryAdapter } from './registry-adapter';
 import { InjectionError } from '../error';
 import { DependencyRegistryResolver } from './registry-resolver';

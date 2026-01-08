@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-import { Class, TimeUtil } from '@travetto/runtime';
-import { BindUtil, SchemaFieldConfig, CommonRegex, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, TimeUtil } from '@travetto/runtime';
+import { BindUtil, type SchemaFieldConfig, CommonRegex, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
  * Provide a faker utility for generating content

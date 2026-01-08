@@ -1,6 +1,6 @@
-import { ClassInstance, getClass } from '@travetto/runtime';
+import { type ClassInstance, getClass } from '@travetto/runtime';
 
-import { TestConfig, ThrowableError } from '../model/test.ts';
+import type { TestConfig, ThrowableError } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
 type MethodDecorator = (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => PropertyDescriptor | void;
