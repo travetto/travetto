@@ -3,7 +3,7 @@ import { type Pool, type PoolClient, default as pg } from 'pg';
 import { castTo, ShutdownManager } from '@travetto/runtime';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-import type { SQLModelConfig, Connection } from '@travetto/model-sql';
+import { type SQLModelConfig, Connection } from '@travetto/model-sql';
 
 /**
  * Connection support for postgresql

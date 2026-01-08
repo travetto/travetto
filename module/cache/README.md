@@ -124,7 +124,7 @@ By design, the [CacheService](https://github.com/travetto/travetto/tree/main/mod
 **Code: Registering a Custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { ModelExpirySupport } from '@travetto/model';
+import type { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
 import { CacheModelSymbol } from '@travetto/cache';
 

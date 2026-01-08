@@ -34,7 +34,7 @@ In addition to these simple overrides, the [CommonLogger](https://github.com/tra
 **Code: Sample Common Formatter**
 ```typescript
 import { Injectable } from '@travetto/di';
-import { LogFormatter, LogCommonSymbol, LogEvent } from '@travetto/log';
+import { type LogFormatter, LogCommonSymbol, type LogEvent } from '@travetto/log';
 
 @Injectable(LogCommonSymbol)
 export class SampleFormatter implements LogFormatter {
@@ -94,7 +94,7 @@ The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/typ
 **Code: Custom Logger**
 ```typescript
 import { Injectable } from '@travetto/di';
-import { LogEvent, Logger } from '@travetto/log';
+import type { LogEvent, Logger } from '@travetto/log';
 
 @Injectable()
 export class CustomLogger implements Logger {
@@ -122,7 +122,7 @@ export interface LogDecorator {
 import os from 'node:os';
 
 import { Injectable } from '@travetto/di';
-import { LogDecorator, LogEvent } from '@travetto/log';
+import type { LogDecorator, LogEvent } from '@travetto/log';
 
 @Injectable()
 export class CustomDecorator implements LogDecorator {

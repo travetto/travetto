@@ -29,7 +29,7 @@ Out of the box, by installing the module, everything should be wired up by defau
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> S3ModelConfig<span class="token punctuation">,</span> S3ModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-s3'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">type</span> <span class="token class-name">S3ModelConfig</span><span class="token punctuation">,</span> S3ModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-s3'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Init</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
@@ -52,8 +52,10 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">S3ModelConfig</span> <span class="token punctuation">{{'{'}}</span>
   region <span class="token operator">=</span> <span class="token string">'us-east-1'</span><span class="token punctuation">;</span> <span class="token comment">// AWS Region</span>
   namespace <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span> <span class="token comment">// S3 Bucket folder</span>
-  bucket <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span> <span class="token comment">// S3 bucket</span>
-  endpoint <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span> <span class="token comment">// Endpoint url</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Required</span></span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span>
+  bucket<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span> <span class="token comment">// S3 bucket</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Required</span></span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span>
+  endpoint<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span> <span class="token comment">// Endpoint url</span>
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'AWS_ACCESS_KEY_ID'</span><span class="token punctuation">)</span>
   accessKeyId<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
@@ -82,9 +84,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>endpoint <span class="token operator">??=</span> <span class="token string">'http://localhost:4566'</span><span class="token punctuation">;</span> <span class="token comment">// From docker</span>
-      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>endpoint<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'localhost'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>forcePathStyle <span class="token operator">??=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-      <span class="token punctuation">{{'}'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>bucket <span class="token operator">??=</span> <span class="token string">'app'</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>accessKeyId <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>secretAccessKey<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -102,6 +102,10 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
         secretAccessKey<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>secretAccessKey
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>endpoint<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'localhost'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>forcePathStyle <span class="token operator">??=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

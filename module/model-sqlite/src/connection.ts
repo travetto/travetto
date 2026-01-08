@@ -7,7 +7,7 @@ import { type Pool, createPool } from 'generic-pool';
 import { ShutdownManager, Util, Runtime, AppError, castTo } from '@travetto/runtime';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-import type { SQLModelConfig, Connection } from '@travetto/model-sql';
+import { type SQLModelConfig, Connection } from '@travetto/model-sql';
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
 

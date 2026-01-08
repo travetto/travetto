@@ -178,7 +178,7 @@ A sample query for `User`'s might be:
 
 **Code: Using the query structure for specific queries**
 ```typescript
-import { ModelQuerySupport } from '@travetto/model-query';
+import type { ModelQuerySupport } from '@travetto/model-query';
 import { User } from './user.ts';
 
 export class UserSearch {
@@ -217,7 +217,7 @@ In addition to the provided contracts, the module also provides common utilities
 import { Suite } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
-import { ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQueryCrudSupport } from '@travetto/model-query';
+import type { ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQueryCrudSupport } from '@travetto/model-query';
 
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';

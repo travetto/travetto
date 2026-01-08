@@ -4,6 +4,11 @@
     "rootDir": ".",
     "baseUrl": "./"
   },
+  "exclude": [
+    "related/travetto*/**",
+    "related/vscode*/**",
+    "archived/**"
+  ],
   "watchOptions": {
     "excludeDirectories": [
       "**/.angular",

@@ -29,10 +29,10 @@ Out of the box, by installing the module, everything should be wired up by defau
 
 **Code: Wiring up a custom Model Source**
 ```typescript
-import { AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 
-import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
+import { SQLModelService, type SQLModelConfig } from '@travetto/model-sql';
 import { MySQLDialect } from '@travetto/model-mysql';
 
 export class Init {

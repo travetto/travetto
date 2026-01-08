@@ -46,7 +46,7 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> HttpMethod<span class="token punctuation">,</span> HttpProtocol <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./core.ts'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> HttpMethod<span class="token punctuation">,</span> HttpProtocol <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./core.ts'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BaseWebMessage <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./message.ts'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">WebConnection</span> <span class="token punctuation">{{'{'}}</span>
@@ -192,10 +192,10 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/simple-full.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Get<span class="token punctuation">,</span> Controller<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> WebRequest<span class="token punctuation">,</span> ContextParam <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Get<span class="token punctuation">,</span> Controller<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">WebRequest</span><span class="token punctuation">,</span> ContextParam <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Integer<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MockService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./mock.ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> MockService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./mock.ts'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Simple</span> <span class="token punctuation">{{'{'}}</span>
@@ -253,7 +253,7 @@ In addition to endpoint parameters (i.e. user-provided inputs), there may also b
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/context-param.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CacheControl<span class="token punctuation">,</span> ContextParam<span class="token punctuation">,</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> WebRequest<span class="token punctuation">,</span> WebResponse <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CacheControl<span class="token punctuation">,</span> ContextParam<span class="token punctuation">,</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">WebRequest</span><span class="token punctuation">,</span> WebResponse <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/context'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">ContextController</span> <span class="token punctuation">{{'{'}}</span>
@@ -379,7 +379,7 @@ Additionally, schema related inputs can also be used with <code class="item inpu
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/interceptor-hello-world.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebChainedContext<span class="token punctuation">,</span> WebInterceptor<span class="token punctuation">,</span> WebInterceptorCategory<span class="token punctuation">,</span> WebInterceptorContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> WebChainedContext<span class="token punctuation">,</span> WebInterceptor<span class="token punctuation">,</span> WebInterceptorCategory<span class="token punctuation">,</span> WebInterceptorContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -775,7 +775,7 @@ Additionally it may be desirable to create a custom interceptor.  Interceptors c
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/interceptor-logging.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebChainedContext<span class="token punctuation">,</span> WebInterceptor<span class="token punctuation">,</span> WebInterceptorCategory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> WebChainedContext<span class="token punctuation">,</span> WebInterceptor<span class="token punctuation">,</span> WebInterceptorCategory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Appender</span> <span class="token punctuation">{{'{'}}</span>
@@ -811,7 +811,7 @@ When running an interceptor, if you chose to skip calling <code class="item meth
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/interceptor-controlled.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebInterceptor<span class="token punctuation">,</span> WebInterceptorCategory<span class="token punctuation">,</span> WebChainedContext<span class="token punctuation">,</span> WebError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">type</span> <span class="token class-name">WebInterceptor</span><span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">WebInterceptorCategory</span><span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">WebChainedContext</span><span class="token punctuation">,</span> WebError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -860,8 +860,8 @@ Cookies are a unique element, within the framework, as they sit on the request a
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span>
-  Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> WebRequest<span class="token punctuation">,</span> ContextParam<span class="token punctuation">,</span>
-  WebResponse<span class="token punctuation">,</span> CookieJar<span class="token punctuation">,</span> CookieGetOptions<span class="token punctuation">,</span> CookieSetOptions
+  Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">WebRequest</span><span class="token punctuation">,</span> ContextParam<span class="token punctuation">,</span>
+  WebResponse<span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">CookieJar</span><span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">CookieGetOptions</span><span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">CookieSetOptions</span>
 <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>

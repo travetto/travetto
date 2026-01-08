@@ -23,7 +23,7 @@ The decorator will load the context on invocation, and will keep the context act
 
 **Code: Usage of context within a service**
 ```typescript
-import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Inject } from '@travetto/di';
 
 const NameSymbol = Symbol();
@@ -73,7 +73,7 @@ export class AsyncContextValue<T = unknown> {
 
 **Code: Usage of context value within a service**
 ```typescript
-import { AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
+import { type AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
 import { Inject } from '@travetto/di';
 
 export class ContextValueService {

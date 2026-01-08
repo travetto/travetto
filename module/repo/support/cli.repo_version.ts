@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { CliModuleUtil, type CliCommandShape, CliCommand, CliScmUtil, type CliValidationError } from '@travetto/cli';
 import { Runtime } from '@travetto/runtime';
 
-import type { PackageManager, SemverLevel } from './bin/package-manager.ts';
+import { PackageManager, type SemverLevel } from './bin/package-manager.ts';
 
 const CHANGE_LEVELS = new Set<SemverLevel>(['prerelease', 'patch', 'prepatch']);
 

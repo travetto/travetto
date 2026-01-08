@@ -28,8 +28,8 @@ This flow ensures all files are loaded and processed before application starts. 
 
 **Code: Sample Registry**
 ```typescript
-import { Class } from '@travetto/runtime';
-import { ChangeEvent, RegistryAdapter, RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import type { Class } from '@travetto/runtime';
+import { type RegistryAdapter, type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 interface Group {
   class: Class;
@@ -92,7 +92,7 @@ export class SampleRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(SampleRegistryAdapter);
 
-  process(events: ChangeEvent<Class>[]): void {
+  onCreate(cls: Class): void {
     // Nothing to do
   }
 }

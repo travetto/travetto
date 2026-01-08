@@ -26,7 +26,7 @@ Out of the box, by installing the module, everything should be wired up by defau
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 
-import { DynamoDBModelService, DynamoDBModelConfig } from '@travetto/model-dynamodb';
+import { DynamoDBModelService, type DynamoDBModelConfig } from '@travetto/model-dynamodb';
 
 export class Init {
   @InjectableFactory({ primary: true })

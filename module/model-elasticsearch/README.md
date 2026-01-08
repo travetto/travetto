@@ -30,7 +30,7 @@ Out of the box, by installing the module, everything should be wired up by defau
 **Code: Wiring up a custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
+import { type ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
 
 export class Init {
   @InjectableFactory({
