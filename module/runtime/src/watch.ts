@@ -2,11 +2,11 @@ import type { ChildProcess } from 'node:child_process';
 
 import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler/support/types.ts';
 
-import { AppError } from './error';
-import { Util } from './util';
-import { RuntimeIndex } from './manifest-index';
-import { ShutdownManager } from './shutdown';
-import { castTo } from './types';
+import { AppError } from './error.ts';
+import { Util } from './util.ts';
+import { RuntimeIndex } from './manifest-index.ts';
+import { ShutdownManager } from './shutdown.ts';
+import { castTo } from './types.ts';
 
 type RetryRunState = {
   iteration: number;

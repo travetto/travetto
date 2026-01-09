@@ -1,5 +1,7 @@
 import cp from 'node:child_process';
+import path from 'node:path';
 import { rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 
 import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
@@ -35,8 +37,9 @@ export class CompilerRunner {
       log.debug(`Started watch=${watch} changed=${changedList}`);
     }
 
-    const main = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
-    const deltaFile = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, `manifest-delta-${Date.now()}.json`);
+    const deltaFile = CommonUtil.resolveWorkspace(ctx, ctx.build.toolFolder, `manifest-delta-${Date.now()}.json`);
+    const REQUIRE = createRequire(path.resolve(ctx.workspace.path, 'node_modules'));
+    const target = REQUIRE.resolve('@travetto/compiler/bin/trvc-target.js');
 
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(event => event.sourceFile);
 
@@ -46,7 +49,7 @@ export class CompilerRunner {
       await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
 
       log.info('Launching compiler');
-      const subProcess = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+      const subProcess = cp.spawn(process.argv0, [target, deltaFile, `${watch}`], {
         env: {
           ...process.env,
           TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),

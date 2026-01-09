@@ -12,9 +12,9 @@ import { CompilerClient } from './server/client.ts';
 import { CommonUtil } from './util.ts';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const main = (ctx: ManifestContext) => {
+export function main(ctx: ManifestContext) {
   const client = new CompilerClient(ctx, Log.scoped('client'));
-  const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder, ctx.build.typesFolder];
+  const buildFolders = [ctx.build.outputFolder, ctx.build.typesFolder];
   Log.root = ctx.workspace.path;
   Log.initLevel('error');
 
@@ -113,6 +113,6 @@ export const main = (ctx: ManifestContext) => {
     }
   };
   return operations;
-};
+}
 
 export type Operations = ReturnType<typeof main>;

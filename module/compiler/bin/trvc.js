@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-import { load } from './entry.common.js';
+import '@travetto/manifest/bin/hook.js';
+import { getManifestContext } from '@travetto/manifest/src/context.ts';
+import { main } from '@travetto/compiler/support/entry.main.ts';
 
 const help = `
 npx trvc [command]
@@ -19,23 +21,23 @@ Available Commands:
 const toJson = (/** @type {number} */ depth) => value => process.stdout.write(`${JSON.stringify(value, undefined, depth)}\n`) ||
   new Promise(resolve => process.stdout.once('drain', resolve));
 
-load(operations => {
-  const [operation, ...all] = process.argv.slice(2);
-  const args = all.filter(arg => !arg.startsWith('-'));
+const [operation, ...all] = process.argv.slice(2);
+const args = all.filter(arg => !arg.startsWith('-'));
 
-  switch (operation) {
-    case undefined:
-    case 'help': return console.log(help);
-    case 'info': return operations.info().then(toJson(2));
-    case 'event': return operations.events(args[0], toJson(0));
-    case 'manifest': return operations.manifest(args[0], all.some(arg => arg === '--prod'));
-    case 'exec': return operations.exec(args[0], all.slice(1));
-    case 'build': return operations.build();
-    case 'clean': return operations.clean();
-    case 'start':
-    case 'watch': return operations.watch();
-    case 'stop': return operations.stop();
-    case 'restart': return operations.restart();
-    default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
-  }
-});
+const operations = await main(getManifestContext());
+
+switch (operation) {
+  case undefined:
+  case 'help': console.log(help); break;
+  case 'info': operations.info().then(toJson(2)); break;
+  case 'event': operations.events(args[0], toJson(0)); break;
+  case 'manifest': operations.manifest(args[0], all.some(arg => arg === '--prod')); break;
+  case 'exec': operations.exec(args[0], all.slice(1)); break;
+  case 'build': operations.build(); break;
+  case 'clean': operations.clean(); break;
+  case 'start':
+  case 'watch': operations.watch(); break;
+  case 'stop': operations.stop(); break;
+  case 'restart': operations.restart(); break;
+  default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
+}

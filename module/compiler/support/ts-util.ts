@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import type { CompilerOptions } from 'typescript';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -13,10 +12,6 @@ export class TypescriptUtil {
   static async getCompilerOptions(ctx: ManifestContext): Promise<{}> {
     if (!(ctx.workspace.path in OPT_CACHE)) {
       let tsconfig = CommonUtil.resolveWorkspace(ctx, 'tsconfig.json');
-
-      if (!await fs.stat(tsconfig).then(() => true, () => false)) {
-        tsconfig = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerModuleFolder, 'tsconfig.trv.json');
-      }
 
       const ts = (await import('typescript')).default;
 

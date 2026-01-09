@@ -14,10 +14,6 @@ export type ManifestContext = {
     defaultEnv: string;
   };
   build: {
-    /** Compiler folder, relative to workspace */
-    compilerFolder: string;
-    /** Compiler module folder */
-    compilerModuleFolder: string;
     /** URL for the compiler server */
     compilerUrl: string;
     /** Code output folder, relative to workspace */

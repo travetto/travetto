@@ -212,10 +212,9 @@ export class CompilerWatcher {
 
   async #listenToolFolder(): Promise<void> {
     const build = this.#state.manifest.build;
-    const toolRootFolder = path.dirname(path.resolve(this.#root, build.compilerFolder));
-    const toolFolders = new Set([
-      toolRootFolder, build.compilerFolder, build.typesFolder, build.outputFolder
-    ].map(folder => path.resolve(this.#root, folder)));
+    const toolRootFolder = path.dirname(path.resolve(this.#root, build.outputFolder));
+    const toolFolders = new Set([toolRootFolder, build.typesFolder, build.outputFolder]
+      .map(folder => path.resolve(this.#root, folder)));
 
     log.debug('Tooling Folders', [...toolFolders].map(folder => folder.replace(`${this.#root}/`, '')));
 
