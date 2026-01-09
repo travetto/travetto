@@ -1,7 +1,7 @@
 #!/usr/bin/env node
+// @ts-check
 import '@travetto/manifest/bin/hook.js';
-import { getManifestContext } from '@travetto/manifest/src/context.ts';
-import { main } from '@travetto/compiler/support/entry.main.ts';
+import operations from '@travetto/compiler/support/entry.main.ts';
 
 const help = `
 npx trvc [command]
@@ -18,19 +18,14 @@ Available Commands:
  * manifest --prod [output]   - Generate the project manifest
 `;
 
-const toJson = (/** @type {number} */ depth) => value => process.stdout.write(`${JSON.stringify(value, undefined, depth)}\n`) ||
-  new Promise(resolve => process.stdout.once('drain', resolve));
-
 const [operation, ...all] = process.argv.slice(2);
 const args = all.filter(arg => !arg.startsWith('-'));
-
-const operations = await main(getManifestContext());
 
 switch (operation) {
   case undefined:
   case 'help': console.log(help); break;
-  case 'info': operations.info().then(toJson(2)); break;
-  case 'event': operations.events(args[0], toJson(0)); break;
+  case 'info': operations.infoStdout(); break;
+  case 'event': operations.eventsStdout(args[0]); break;
   case 'manifest': operations.manifest(args[0], all.some(arg => arg === '--prod')); break;
   case 'exec': operations.exec(args[0], all.slice(1)); break;
   case 'build': operations.build(); break;

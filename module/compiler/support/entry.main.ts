@@ -1,7 +1,7 @@
 // @trv-no-transform
 import fs from 'node:fs/promises';
 
-import type { ManifestContext } from '@travetto/manifest';
+import { getManifestContext, type ManifestContext } from '@travetto/manifest';
 
 import { isComplilerEventType, type CompilerMode, type CompilerServerInfo } from './types.ts';
 import { Log } from './log.ts';
@@ -11,21 +11,34 @@ import { CompilerRunner } from './server/runner.ts';
 import { CompilerClient } from './server/client.ts';
 import { CommonUtil } from './util.ts';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function main(ctx: ManifestContext) {
-  const client = new CompilerClient(ctx, Log.scoped('client'));
-  const buildFolders = [ctx.build.outputFolder, ctx.build.typesFolder];
-  Log.root = ctx.workspace.path;
-  Log.initLevel('error');
+class Operations {
+
+  client: CompilerClient;
+  buildFolders: string[];
+  ctx: ManifestContext;
+
+  constructor(ctx?: ManifestContext) {
+    this.setContext(ctx);
+  }
+
+  setContext(ctx?: ManifestContext): void {
+    this.ctx = ctx ?? getManifestContext();
+    this.client = new CompilerClient(this.ctx, Log.scoped('client'));
+    this.buildFolders = [this.ctx.build.outputFolder, this.ctx.build.typesFolder];
+    Log.root = this.ctx.workspace.path;
+    Log.initLevel('error');
+  }
+
 
   /** Main entry point for compilation */
-  const compile = async (operation: CompilerMode, setupOnly = false): Promise<void> => {
-    const server = await new CompilerServer(ctx, operation).listen();
+  async compile(operation: CompilerMode, setupOnly = false): Promise<void> {
+    const server = await new CompilerServer(this.ctx, operation).listen();
     const log = Log.scoped('main');
 
     // Wait for build to be ready
     if (server) {
       log.debug('Start Server');
+      const ctx = this.ctx;
       await server.processEvents(async function* (signal) {
         const changed = await CompilerSetup.setup(ctx);
         if (!setupOnly) {
@@ -36,83 +49,99 @@ export function main(ctx: ManifestContext) {
     } else {
       log.info('Server already running, waiting for initial compile to complete');
       const controller = new AbortController();
-      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: controller.signal }));
-      await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
+      Log.consumeProgressEvents(() => this.client.fetchEvents('progress', { until: event => !!event.complete, signal: controller.signal }));
+      await this.client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
       controller.abort();
     }
-  };
+  }
 
-  const operations = {
-    /** Stop the server */
-    async stop(): Promise<void> {
-      if (await client.stop()) {
-        console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
-      } else {
-        console.log(`Server not running ${ctx.workspace.path}: ${client}`);
-      }
-    },
-
-    /** Restart the server */
-    async restart(): Promise<void> { await client.stop().then(() => operations.watch()); },
-
-    /** Get server info */
-    info: (): Promise<CompilerServerInfo | undefined> => client.info(),
-
-    /** Clean the server */
-    async clean(): Promise<void> {
-      if (await client.clean()) {
-        return console.log(`Clean triggered ${ctx.workspace.path}:`, buildFolders);
-      } else {
-        try {
-          await Promise.all(buildFolders.map(file => fs.rm(CommonUtil.resolveWorkspace(ctx, file), { force: true, recursive: true })));
-        } catch { }
-        return console.log(`Cleaned ${ctx.workspace.path}:`, buildFolders);
-      }
-    },
-
-    /** Stream events */
-    events: async (type: string, handler: (event: unknown) => unknown): Promise<void> => {
-      if (isComplilerEventType(type)) {
-        for await (const event of client.fetchEvents(type)) { await handler(event); }
-      } else {
-        throw new Error(`Unknown event type: ${type}`);
-      }
-    },
-
-    /** Build the project */
-    async build(): Promise<void> {
-      Log.initLevel('info');
-      await compile('build');
-    },
-
-    /** Build and watch the project */
-    async watch(): Promise<void> {
-      Log.initLevel('info');
-      await compile('watch');
-    },
-
-    /** Set arguments and import module */
-    async exec(mod: string, args?: string[]): Promise<unknown> {
-      Log.initLevel('none');
-      if (!(await client.isWatching())) { // Short circuit if we can
-        Log.initLevel('error');
-        await compile('build');
-      }
-
-      process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
-      if (args) {
-        process.argv = [process.argv0, mod, ...args];
-      }
-      return import(CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', mod)); // Return function to run import on a module
-    },
-
-    /** Manifest entry point */
-    async manifest(output?: string, prod?: boolean): Promise<void> {
-      await compile('build', true);
-      await CompilerSetup.exportManifest(ctx, output, prod); return;
+  /** Stop the server */
+  async stop(): Promise<void> {
+    if (await this.client.stop()) {
+      console.log(`Stopped server ${this.ctx.workspace.path}: ${this.client}`);
+    } else {
+      console.log(`Server not running ${this.ctx.workspace.path}: ${this.client}`);
     }
-  };
-  return operations;
+  }
+
+  /** Restart the server */
+  async restart(): Promise<void> {
+    await this.client.stop();
+    await this.watch();
+  }
+
+  /** Get server info */
+  info(): Promise<CompilerServerInfo | undefined> {
+    return this.client.info();
+  }
+
+  async infoStdout(): Promise<void> {
+    const info = await this.info();
+    process.stdout.write(`${JSON.stringify(info, undefined, 2)}\n`) ||
+      await new Promise(resolve => process.stdout.once('drain', resolve));
+  }
+
+  /** Clean the server */
+  async clean(): Promise<void> {
+    if (await this.client.clean()) {
+      return console.log(`Clean triggered ${this.ctx.workspace.path}:`, this.buildFolders);
+    } else {
+      try {
+        await Promise.all(this.buildFolders.map(file => fs.rm(CommonUtil.resolveWorkspace(this.ctx, file), { force: true, recursive: true })));
+      } catch { }
+      return console.log(`Cleaned ${this.ctx.workspace.path}:`, this.buildFolders);
+    }
+  }
+
+  /** Stream events */
+  async events(type: string, handler: (event: unknown) => unknown): Promise<void> {
+    if (isComplilerEventType(type)) {
+      for await (const event of this.client.fetchEvents(type)) { await handler(event); }
+    } else {
+      throw new Error(`Unknown event type: ${type}`);
+    }
+  }
+
+  async eventsStdout(type: string): Promise<void> {
+    await this.events(type, async event => {
+      process.stdout.write(`${JSON.stringify(event)}\n`) ||
+        await new Promise(resolve => process.stdout.once('drain', resolve));
+    });
+  }
+
+  /** Build the project */
+  async build(): Promise<void> {
+    Log.initLevel('info');
+    await this.compile('build');
+  }
+
+  /** Build and watch the project */
+  async watch(): Promise<void> {
+    Log.initLevel('info');
+    await this.compile('watch');
+  }
+
+  /** Set arguments and import module */
+  async exec(mod: string, args?: string[]): Promise<unknown> {
+    Log.initLevel('none');
+    if (!(await this.client.isWatching())) { // Short circuit if we can
+      Log.initLevel('error');
+      await this.compile('build');
+    }
+
+    process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(this.ctx, this.ctx.build.outputFolder, 'node_modules', this.ctx.main.name); // Setup for running
+    if (args) {
+      process.argv = [process.argv0, mod, ...args];
+    }
+    // Return function to run import on a module
+    return import(CommonUtil.resolveWorkspace(this.ctx, this.ctx.build.outputFolder, 'node_modules', mod));
+  }
+
+  /** Manifest entry point */
+  async manifest(output?: string, prod?: boolean): Promise<void> {
+    await this.compile('build', true);
+    await CompilerSetup.exportManifest(this.ctx, output, prod); return;
+  }
 }
 
-export type Operations = ReturnType<typeof main>;
+export default new Operations();
