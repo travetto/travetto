@@ -35,8 +35,8 @@ export class CompilerRunner {
       log.debug(`Started watch=${watch} changed=${changedList}`);
     }
 
+    const main = CommonUtil.resolveWorkspace(ctx, 'node_modules', '@travetto/compiler/bin/trvc-target.js');
     const deltaFile = CommonUtil.resolveWorkspace(ctx, ctx.build.toolFolder, `manifest-delta-${Date.now()}.json`);
-    const target = CommonUtil.resolveWorkspace(ctx, 'node_modules', '@travetto/compiler/bin/trvc-target.js');
 
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(event => event.sourceFile);
 
@@ -46,7 +46,7 @@ export class CompilerRunner {
       await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
 
       log.info('Launching compiler');
-      const subProcess = cp.spawn(process.argv0, [target, deltaFile, `${watch}`], {
+      const subProcess = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
         env: {
           ...process.env,
           TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
