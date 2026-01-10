@@ -176,7 +176,10 @@ export class CompilerWatcher {
         }
 
         // One event per file set
-        const filesChanged = events.map(e => ({ file: path.toPosix(e.path), action: e.type })).filter(e => this.#isValidFile(e.file));
+        const filesChanged = events
+          .map(event => ({ file: path.toPosix(event.path), action: event.type }))
+          .filter(event => this.#isValidFile(event.file));
+
         if (filesChanged.length) {
           EventUtil.sendEvent('file', { time: Date.now(), files: filesChanged });
         }
@@ -189,11 +192,15 @@ export class CompilerWatcher {
           return;
         }
 
+        if (items.some(item => ManifestModuleUtil.getFileRole(item.entry?.moduleFile) === 'compile' || item.entry?.module.roles.includes('compile'))) {
+          throw new CompilerReset('Compiler has changed, restarting');
+        }
+
         try {
           await this.#reconcileManifestUpdates(items);
         } catch (manifestError) {
           log.info('Restarting due to manifest rebuild failure', manifestError);
-          throw new CompilerReset(`Manifest rebuild failure: ${manifestError}`);
+          throw new CompilerReset(`Manifest rebuild failure: ${manifestError} `);
         }
 
         for (const item of items) {
@@ -203,7 +210,7 @@ export class CompilerWatcher {
         if (out instanceof Error && out.message.includes('Events were dropped by the FSEvents client.')) {
           out = new CompilerReset('FSEvents failure, requires restart');
         }
-        return this.#queue.throw(out instanceof Error ? out : new Error(`${out}`));
+        return this.#queue.throw(out instanceof Error ? out : new Error(`${out} `));
       }
     }, { ignore });
 

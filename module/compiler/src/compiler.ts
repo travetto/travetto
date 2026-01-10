@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
 
-import { ManifestIndex } from '@travetto/manifest';
+import { ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
 
 import { CompilerUtil } from './util.ts';
 import { CompilerState } from './state.ts';
@@ -42,8 +42,13 @@ export class Compiler {
 
   constructor(state: CompilerState, dirtyFiles: string[], watch?: boolean) {
     this.#state = state;
-    this.#dirtyFiles = dirtyFiles[0] === '*' ?
-      this.#state.getAllFiles() :
+    const isCompilerChanged = dirtyFiles.some(
+      file => {
+        const entry = state.getBySource(file);
+        return entry && (entry?.module.roles.includes('compile') ?? ManifestModuleUtil.getFileRole(entry?.moduleFile || '') === 'compile');
+      }
+    );
+    this.#dirtyFiles = isCompilerChanged ? this.#state.getAllFiles() :
       dirtyFiles.map(file => this.#state.getBySource(file)!.sourceFile);
     this.#watch = watch;
 

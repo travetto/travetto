@@ -100,6 +100,7 @@ export class CompilerState implements ts.CompilerHost {
         ...base.support ?? [],
         ...base.doc ?? [],
         ...base.test ?? [],
+        ...base.$transformer ?? [],
         ...base.$index ?? [],
         ...base.$package ?? []
       ];
@@ -192,7 +193,7 @@ export class CompilerState implements ts.CompilerHost {
     const tscOutputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeSource));
     const outputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeOutput));
 
-    const entry: CompileStateEntry = { sourceFile, outputFile, module, tscOutputFile, import: `${module.name}/${moduleFile}` };
+    const entry: CompileStateEntry = { sourceFile, outputFile, module, tscOutputFile, import: `${module.name}/${moduleFile}`, moduleFile };
 
     this.#outputToEntry.set(outputFile, entry);
     this.#sourceFiles.add(sourceFile);

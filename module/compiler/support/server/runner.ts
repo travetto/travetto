@@ -33,8 +33,6 @@ export class CompilerRunner {
       log.debug(`Started mode=${mode} changed=${changedList}`);
     }
 
-    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(event => event.sourceFile);
-
     const queue = new AsyncQueue<CompilerEvent>();
 
     log.info('Launching compiler');
@@ -51,7 +49,7 @@ export class CompilerRunner {
       .on('message', message => isEvent(message) && queue.add(message))
       .on('exit', () => queue.close());
 
-    subProcess.stdin!.write(changedFiles.join('\n'));
+    subProcess.stdin!.write(changed.map(event => event.sourceFile).join('\n'));
     subProcess.stdin!.end();
 
     const kill = (): unknown => {
