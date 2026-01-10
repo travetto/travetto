@@ -158,7 +158,7 @@ class Operations {
 /**
  * Invoke the compiler
  */
-export async function invokeCompiler(operation: string, args: string[]): Promise<unknown> {
+export async function invoke(operation: string, args: string[]): Promise<unknown> {
   const ops = new Operations();
 
   const help = `
@@ -193,11 +193,4 @@ Available Commands:
     case 'restart': return ops.restart();
     default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
   }
-}
-
-/**
- * Invoke a module, ensuring compilation first
- */
-export async function invokeModule(entryModule: string): Promise<unknown> {
-  return new Operations().exec(entryModule);
 }
