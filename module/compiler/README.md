@@ -22,7 +22,7 @@ This module expands upon the [Typescript](https://typescriptlang.org) compiler, 
 Beyond the [Typescript](https://typescriptlang.org) compiler functionality, the module provides the primary entry point into the development process.
 
 ## CLI
-The compiler cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L2) is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
+The compiler cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js) is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
 
 The compiler cli supports the following operations:
    *  `start|watch` - Run the compiler in watch mode
@@ -44,30 +44,21 @@ $ TRV_BUILD=debug trvc build
 2029-03-14T04:00:00.618Z info  [server         ] Starting server http://127.0.0.1:25539
 2029-03-14T04:00:00.837Z debug [main           ] Start Server
 2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
-2029-03-14T04:00:02.450Z debug [precompile     ] Started
-2029-03-14T04:00:02.762Z debug [precompile     ] Skipped @travetto/manifest
-2029-03-14T04:00:02.947Z debug [precompile     ] Skipped @travetto/transformer
-2029-03-14T04:00:03.093Z debug [precompile     ] Skipped @travetto/compiler
-2029-03-14T04:00:04.003Z debug [precompile     ] Completed
-2029-03-14T04:00:04.495Z debug [manifest       ] Started
+2029-03-14T04:00:02.450Z debug [manifest       ] Started
+2029-03-14T04:00:02.762Z debug [manifest       ] Completed
+2029-03-14T04:00:02.947Z debug [delta          ] Started
+2029-03-14T04:00:03.093Z debug [delta          ] Completed
+2029-03-14T04:00:04.003Z debug [manifest       ] Started
+2029-03-14T04:00:04.495Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
 2029-03-14T04:00:05.066Z debug [manifest       ] Completed
-2029-03-14T04:00:05.307Z debug [transformers   ] Started
-2029-03-14T04:00:05.952Z debug [transformers   ] Skipped @travetto/runtime
-2029-03-14T04:00:06.859Z debug [transformers   ] Skipped @travetto/schema
-2029-03-14T04:00:07.720Z debug [transformers   ] Completed
-2029-03-14T04:00:08.179Z debug [delta          ] Started
-2029-03-14T04:00:08.588Z debug [delta          ] Completed
-2029-03-14T04:00:09.493Z debug [manifest       ] Started
-2029-03-14T04:00:10.395Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
-2029-03-14T04:00:10.407Z debug [manifest       ] Completed
-2029-03-14T04:00:10.799Z info  [server         ] State changed: compile-end
-2029-03-14T04:00:11.013Z debug [compiler-exec  ] Skipped
-2029-03-14T04:00:11.827Z debug [event-stream   ] Finished event stream
-2029-03-14T04:00:11.894Z info  [server         ] Closing down server
-2029-03-14T04:00:12.133Z debug [server         ] Server close event
-2029-03-14T04:00:13.123Z info  [server         ] Closed down server
-2029-03-14T04:00:14.014Z debug [server         ] Finished processing events
-2029-03-14T04:00:14.924Z debug [main           ] End Server
+2029-03-14T04:00:05.307Z info  [server         ] State changed: compile-end
+2029-03-14T04:00:05.952Z debug [compiler-exec  ] Skipped
+2029-03-14T04:00:06.859Z debug [event-stream   ] Finished event stream
+2029-03-14T04:00:07.720Z info  [server         ] Closing down server
+2029-03-14T04:00:08.179Z debug [server         ] Server close event
+2029-03-14T04:00:08.588Z info  [server         ] Closed down server
+2029-03-14T04:00:09.493Z debug [server         ] Finished processing events
+2029-03-14T04:00:10.395Z debug [main           ] End Server
 ```
 
 **Terminal: Sample trv output with default log level**
@@ -77,7 +68,6 @@ $ trvc build
 
 ## Compilation Architecture
 The compiler will move through the following phases on a given compilation execution:
-   *  `Bootstrapping` - Initial compilation of [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s `support/*.ts` files
    *  `Compiler Server` - Provides a simple HTTP interface to watching compiler file and state changes, and synchronizing multiple processes
    *  `Build Compiler` - Leverages [Typescript](https://typescriptlang.org) to build files needed to execute compiler
    *  `Build Manifest` - Produces the manifest for the given execution
@@ -86,6 +76,3 @@ The compiler will move through the following phases on a given compilation execu
    *  `Clear all output if needed` - When the compiler source or transformers change, invalidate the entire output
    *  `Persist Manifest(s)` - Ensure the manifest is available for the compiler to leverage. Multiple will be written if in a monorepo
    *  `Invoke Compiler` - Run [Typescript](https://typescriptlang.org) compiler with the aforementioned enhancements
-
-### Bootstrapping
-Given that the framework is distributed as [Typescript](https://typescriptlang.org) only files, there is a bootstrapping problem that needs to be mitigated.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L2) entrypoint, along with a small context utility in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching") are the only [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) files needed to run the project.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L2) entry point will compile `@travetto/compiler/support/*` files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.

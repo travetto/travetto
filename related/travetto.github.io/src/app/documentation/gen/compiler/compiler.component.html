@@ -24,7 +24,7 @@ This module expands upon the <a target="_blank" class="external-link" href="http
 Beyond the <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> compiler functionality, the module provides the primary entry point into the development process.
 <h2 id="cli">CLI</h2>
 
-The compiler cli, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L2">trvc</a> is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br><br>
+The compiler cli, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js">trvc</a> is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br><br>
 The compiler cli supports the following operations:
 <ul> <li><code class="item method">start|watch</code> - Run the compiler in watch mode</li>
 <li><code class="item method">stop</code> - Stop the compiler if running</li>
@@ -47,30 +47,21 @@ In addition to the normal output, the compiler supports an environment variable 
 <span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Starting server http://127.0.0.1:25539
 <span class="token number">2029</span>-03-14T04:00:00.837Z debug <span class="token punctuation">[</span>main           <span class="token punctuation">]</span> Start Server
 <span class="token number">2029</span>-03-14T04:00:01.510Z debug <span class="token punctuation">[</span>event-stream   <span class="token punctuation">]</span> Started event stream
-<span class="token number">2029</span>-03-14T04:00:02.450Z debug <span class="token punctuation">[</span>precompile     <span class="token punctuation">]</span> Started
-<span class="token number">2029</span>-03-14T04:00:02.762Z debug <span class="token punctuation">[</span>precompile     <span class="token punctuation">]</span> Skipped &#64;travetto/manifest
-<span class="token number">2029</span>-03-14T04:00:02.947Z debug <span class="token punctuation">[</span>precompile     <span class="token punctuation">]</span> Skipped &#64;travetto/transformer
-<span class="token number">2029</span>-03-14T04:00:03.093Z debug <span class="token punctuation">[</span>precompile     <span class="token punctuation">]</span> Skipped &#64;travetto/compiler
-<span class="token number">2029</span>-03-14T04:00:04.003Z debug <span class="token punctuation">[</span>precompile     <span class="token punctuation">]</span> Completed
-<span class="token number">2029</span>-03-14T04:00:04.495Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Started
+<span class="token number">2029</span>-03-14T04:00:02.450Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Started
+<span class="token number">2029</span>-03-14T04:00:02.762Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Completed
+<span class="token number">2029</span>-03-14T04:00:02.947Z debug <span class="token punctuation">[</span>delta          <span class="token punctuation">]</span> Started
+<span class="token number">2029</span>-03-14T04:00:03.093Z debug <span class="token punctuation">[</span>delta          <span class="token punctuation">]</span> Completed
+<span class="token number">2029</span>-03-14T04:00:04.003Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Started
+<span class="token number">2029</span>-03-14T04:00:04.495Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Wrote manifest &#64;travetto-doc/compiler
 <span class="token number">2029</span>-03-14T04:00:05.066Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Completed
-<span class="token number">2029</span>-03-14T04:00:05.307Z debug <span class="token punctuation">[</span>transformers   <span class="token punctuation">]</span> Started
-<span class="token number">2029</span>-03-14T04:00:05.952Z debug <span class="token punctuation">[</span>transformers   <span class="token punctuation">]</span> Skipped &#64;travetto/runtime
-<span class="token number">2029</span>-03-14T04:00:06.859Z debug <span class="token punctuation">[</span>transformers   <span class="token punctuation">]</span> Skipped &#64;travetto/schema
-<span class="token number">2029</span>-03-14T04:00:07.720Z debug <span class="token punctuation">[</span>transformers   <span class="token punctuation">]</span> Completed
-<span class="token number">2029</span>-03-14T04:00:08.179Z debug <span class="token punctuation">[</span>delta          <span class="token punctuation">]</span> Started
-<span class="token number">2029</span>-03-14T04:00:08.588Z debug <span class="token punctuation">[</span>delta          <span class="token punctuation">]</span> Completed
-<span class="token number">2029</span>-03-14T04:00:09.493Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Started
-<span class="token number">2029</span>-03-14T04:00:10.395Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Wrote manifest &#64;travetto-doc/compiler
-<span class="token number">2029</span>-03-14T04:00:10.407Z debug <span class="token punctuation">[</span>manifest       <span class="token punctuation">]</span> Completed
-<span class="token number">2029</span>-03-14T04:00:10.799Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> State changed: compile-end
-<span class="token number">2029</span>-03-14T04:00:11.013Z debug <span class="token punctuation">[</span>compiler-exec  <span class="token punctuation">]</span> Skipped
-<span class="token number">2029</span>-03-14T04:00:11.827Z debug <span class="token punctuation">[</span>event-stream   <span class="token punctuation">]</span> Finished event stream
-<span class="token number">2029</span>-03-14T04:00:11.894Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Closing down server
-<span class="token number">2029</span>-03-14T04:00:12.133Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Server close event
-<span class="token number">2029</span>-03-14T04:00:13.123Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Closed down server
-<span class="token number">2029</span>-03-14T04:00:14.014Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Finished processing events
-<span class="token number">2029</span>-03-14T04:00:14.924Z debug <span class="token punctuation">[</span>main           <span class="token punctuation">]</span> End Server</code></pre>
+<span class="token number">2029</span>-03-14T04:00:05.307Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> State changed: compile-end
+<span class="token number">2029</span>-03-14T04:00:05.952Z debug <span class="token punctuation">[</span>compiler-exec  <span class="token punctuation">]</span> Skipped
+<span class="token number">2029</span>-03-14T04:00:06.859Z debug <span class="token punctuation">[</span>event-stream   <span class="token punctuation">]</span> Finished event stream
+<span class="token number">2029</span>-03-14T04:00:07.720Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Closing down server
+<span class="token number">2029</span>-03-14T04:00:08.179Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Server close event
+<span class="token number">2029</span>-03-14T04:00:08.588Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Closed down server
+<span class="token number">2029</span>-03-14T04:00:09.493Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Finished processing events
+<span class="token number">2029</span>-03-14T04:00:10.395Z debug <span class="token punctuation">[</span>main           <span class="token punctuation">]</span> End Server</code></pre>
   </figure>
 
   <figure class="terminal">
@@ -83,8 +74,7 @@ In addition to the normal output, the compiler supports an environment variable 
 <h2 id="compilation-architecture">Compilation Architecture</h2>
 
 The compiler will move through the following phases on a given compilation execution:
-<ul> <li><code class="item method">Bootstrapping</code> - Initial compilation of <a class="module-link" routerLink="/docs/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s <code class="item path">support/*.ts</code> files</li>
-<li><code class="item method">Compiler Server</code> - Provides a simple HTTP interface to watching compiler file and state changes, and synchronizing multiple processes</li>
+<ul> <li><code class="item method">Compiler Server</code> - Provides a simple HTTP interface to watching compiler file and state changes, and synchronizing multiple processes</li>
 <li><code class="item method">Build Compiler</code> - Leverages <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> to build files needed to execute compiler</li>
 <li><code class="item method">Build Manifest</code> - Produces the manifest for the given execution</li>
 <li><code class="item method">Build Transformers</code> - Leverages <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> to compile all transformers defined in the manifest</li>
@@ -93,7 +83,3 @@ The compiler will move through the following phases on a given compilation execu
 <li><code class="item method">Persist Manifest(s)</code> - Ensure the manifest is available for the compiler to leverage. Multiple will be written if in a monorepo</li>
 <li><code class="item method">Invoke Compiler</code> - Run <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> compiler with the aforementioned enhancements</li>
 </ul>
-
-<h3 id="bootstrapping">Bootstrapping</h3>
-
-Given that the framework is distributed as <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> only files, there is a bootstrapping problem that needs to be mitigated.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L2">trvc</a> entrypoint, along with a small context utility in <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a> are the only <a target="_blank" class="external-link" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">Javascript</a> files needed to run the project.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L2">trvc</a> entry point will compile <code class="item path">&#64;travetto/compiler/support/*</code> files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
