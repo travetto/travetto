@@ -11,7 +11,7 @@ type DeltaEventType = ChangeEventType | 'missing' | 'dirty';
 type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
 export type DeltaEvent = { file: string, type: DeltaEventType, module: string, sourceFile: string };
 
-const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package', 'doc']);
+const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$transformer', '$package', 'doc']);
 const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
 const VALID_OUTPUT_TYPE = new Set<ManifestModuleFileType>([...VALID_SOURCE_TYPE, 'typings']);
 

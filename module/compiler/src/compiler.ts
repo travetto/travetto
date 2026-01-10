@@ -45,7 +45,7 @@ export class Compiler {
     const isCompilerChanged = dirtyFiles.some(
       file => {
         const entry = state.getBySource(file);
-        return entry && (entry?.module.roles.includes('compile') ?? ManifestModuleUtil.getFileRole(entry?.moduleFile || '') === 'compile');
+        return entry && (entry?.module.roles.includes('compile') || ManifestModuleUtil.getFileRole(entry?.moduleFile || '') === 'compile');
       }
     );
     this.#dirtyFiles = isCompilerChanged ? this.#state.getAllFiles() :
