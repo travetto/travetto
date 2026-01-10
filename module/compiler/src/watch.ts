@@ -60,8 +60,7 @@ export class CompilerWatcher {
   #toCandidateEvent({ action, file }: Pick<CompilerWatchEvent, 'action' | 'file'>): CompilerWatchEventCandidate {
     let entry = this.#state.getBySource(file);
     const module = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
-    const moduleRoot = entry?.module.sourceFolder || this.#root;
-    const moduleFile = file.includes(moduleRoot) ? file.split(`${moduleRoot}/`)[1] : file;
+    const moduleFile = entry?.moduleFile ?? file;
 
     if (module && action === 'create' && !entry) {
       entry = this.#state.registerInput(module, moduleFile);
