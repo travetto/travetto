@@ -17,7 +17,7 @@ type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?:
 
 export class CompilerWatcher {
   #state: CompilerState;
-  #cleanup: Partial<Record<'tool' | 'workspace' | 'canary', () => (void | Promise<void>)>> = {};
+  #cleanup: Partial<Record<'tool' | 'workspace' | 'canary' | 'git', () => (void | Promise<void>)>> = {};
   #watchCanary: string = '.trv/canary.id';
   #lastWorkspaceModified = Date.now();
   #watchCanaryFrequency = 5;
@@ -38,7 +38,7 @@ export class CompilerWatcher {
       '**/node_modules',
       '.*/**/node_modules'
     ];
-    const ignores = new Set(['node_modules', '.git']);
+    const ignores = new Set(['node_modules', '.git', this.#state.resolveOutputFile('.')]);
     for (const item of patterns) {
       if (item.includes('*')) {
         for await (const sub of fs.glob(item, { cwd: this.#root })) {
@@ -257,11 +257,25 @@ export class CompilerWatcher {
     this.#cleanup.canary = (): void => clearInterval(canaryId);
   }
 
+  async #listenGitChanges(): Promise<void> {
+    log.debug('Starting git canary');
+    const listener = watch('.git', { encoding: 'utf8' }, async (event, file) => {
+      if (!file) {
+        return;
+      }
+      if (file === 'HEAD') {
+        this.#queue.throw(new CompilerReset('Git branch change detected'));
+      }
+    });
+    this.#cleanup.git = (): void => listener.close();
+  }
+
   [Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent> {
     if (!this.#cleanup.workspace) {
       this.#listenWorkspace();
       this.#listenToolFolder();
       this.#listenCanary();
+      this.#listenGitChanges();
     }
     return this.#queue[Symbol.asyncIterator]();
   }
