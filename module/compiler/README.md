@@ -44,21 +44,14 @@ $ TRV_BUILD=debug trvc build
 2029-03-14T04:00:00.618Z info  [server         ] Starting server http://127.0.0.1:25539
 2029-03-14T04:00:00.837Z debug [main           ] Start Server
 2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
-2029-03-14T04:00:02.450Z debug [manifest       ] Started
-2029-03-14T04:00:02.762Z debug [manifest       ] Completed
-2029-03-14T04:00:02.947Z debug [delta          ] Started
-2029-03-14T04:00:03.093Z debug [delta          ] Completed
-2029-03-14T04:00:04.003Z debug [manifest       ] Started
-2029-03-14T04:00:04.495Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
-2029-03-14T04:00:05.066Z debug [manifest       ] Completed
-2029-03-14T04:00:05.307Z info  [server         ] State changed: compile-end
-2029-03-14T04:00:05.952Z debug [compiler-exec  ] Skipped
-2029-03-14T04:00:06.859Z debug [event-stream   ] Finished event stream
-2029-03-14T04:00:07.720Z info  [server         ] Closing down server
-2029-03-14T04:00:08.179Z debug [server         ] Server close event
-2029-03-14T04:00:08.588Z info  [server         ] Closed down server
-2029-03-14T04:00:09.493Z debug [server         ] Finished processing events
-2029-03-14T04:00:10.395Z debug [main           ] End Server
+2029-03-14T04:00:02.450Z info  [server         ] State changed: compile-end
+2029-03-14T04:00:02.762Z debug [compiler-exec  ] Skipped
+2029-03-14T04:00:02.947Z debug [event-stream   ] Finished event stream
+2029-03-14T04:00:03.093Z info  [server         ] Closing down server
+2029-03-14T04:00:04.003Z debug [server         ] Server close event
+2029-03-14T04:00:04.495Z info  [server         ] Closed down server
+2029-03-14T04:00:05.066Z debug [server         ] Finished processing events
+2029-03-14T04:00:05.307Z debug [main           ] End Server
 ```
 
 **Terminal: Sample trv output with default log level**
