@@ -11,59 +11,7 @@ import { CompilerRunner } from './server/runner.ts';
 import { CompilerClient } from './server/client.ts';
 import { CommonUtil } from './util.ts';
 
-export class Operations {
-
-  static #instance: Operations = new Operations();
-
-  static getInstance(): Operations {
-    return Operations.#instance;
-  }
-
-  /**
-   * Invoke the compiler
-   */
-  static async invokeCompiler(operation: string, args: string[]): Promise<void> {
-
-    const filtered = args.filter(arg => !arg.startsWith('-'));
-
-    const help = `
-npx trvc [command]
-
-Available Commands:
- * start|watch                - Run the compiler in watch mode
- * stop                       - Stop the compiler if running
- * restart                    - Restart the compiler in watch mode
- * build                      - Ensure the project is built and upto date
- * clean                      - Clean out the output and compiler caches
- * info                       - Retrieve the compiler information, if running
- * event <log|progress|state> - Watch events in realtime as newline delimited JSON
- * exec <file> [...args]      - Allow for compiling and executing an entrypoint file
- * manifest --prod [output]   - Generate the project manifest
-`;
-
-    switch (operation) {
-      case undefined:
-      case 'help': console.log(help); break;
-      case 'info': this.#instance.info(); break;
-      case 'event': this.#instance.events(filtered[0]); break;
-      case 'manifest': this.#instance.manifest(filtered[0], args.some(arg => arg === '--prod')); break;
-      case 'exec': this.#instance.exec(filtered[0], args.slice(1)); break;
-      case 'build': this.#instance.build(); break;
-      case 'clean': this.#instance.clean(); break;
-      case 'start':
-      case 'watch': this.#instance.watch(); break;
-      case 'stop': this.#instance.stop(); break;
-      case 'restart': this.#instance.restart(); break;
-      default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
-    }
-  }
-
-  /**
-   * Invoke a module, ensuring compilation first
-   */
-  static invokeModule(entryModule: string): void {
-    this.#instance.exec(entryModule);
-  }
+class Operations {
 
   client: CompilerClient;
   buildFolders: string[];
@@ -118,14 +66,8 @@ Available Commands:
   }
 
   /** Get server info */
-  infoJSON(): Promise<CompilerServerInfo | undefined> {
+  info(): Promise<CompilerServerInfo | undefined> {
     return this.client.info();
-  }
-
-  async info(): Promise<void> {
-    const info = await this.infoJSON();
-    process.stdout.write(`${JSON.stringify(info, undefined, 2)}\n`) ||
-      await new Promise(resolve => process.stdout.once('drain', resolve));
   }
 
   /** Clean the server */
@@ -141,19 +83,12 @@ Available Commands:
   }
 
   /** Stream events */
-  async eventsJSON(type: string, handler: (event: unknown) => unknown): Promise<void> {
+  async events(type: string, handler: (event: unknown) => unknown): Promise<void> {
     if (isComplilerEventType(type)) {
       for await (const event of this.client.fetchEvents(type)) { await handler(event); }
     } else {
       throw new Error(`Unknown event type: ${type}`);
     }
-  }
-
-  async events(type: string): Promise<void> {
-    await this.eventsJSON(type, async event => {
-      process.stdout.write(`${JSON.stringify(event)}\n`) ||
-        await new Promise(resolve => process.stdout.once('drain', resolve));
-    });
   }
 
   /** Build the project */
@@ -189,4 +124,57 @@ Available Commands:
     await this.compile('build', true);
     await CompilerSetup.exportManifest(this.ctx, output, prod); return;
   }
+}
+
+const ops = new Operations();
+
+/**
+ * Invoke the compiler
+ */
+export async function invokeCompiler(operation: string, args: string[]): Promise<unknown> {
+
+  const filtered = args.filter(arg => !arg.startsWith('-'));
+
+  const help = `
+npx trvc [command]
+
+Available Commands:
+ * start|watch                - Run the compiler in watch mode
+ * stop                       - Stop the compiler if running
+ * restart                    - Restart the compiler in watch mode
+ * build                      - Ensure the project is built and upto date
+ * clean                      - Clean out the output and compiler caches
+ * info                       - Retrieve the compiler information, if running
+ * event <log|progress|state> - Watch events in realtime as newline delimited JSON
+ * exec <file> [...args]      - Allow for compiling and executing an entrypoint file
+ * manifest --prod [output]   - Generate the project manifest
+`;
+  const output = async (level: number, data: unknown): Promise<void> => {
+    if (data === undefined) { return; }
+    process.stdout.write(`${JSON.stringify(data, undefined, level)}\n`) ||
+      await new Promise(resolve => process.stdout.once('drain', resolve));
+  };
+
+  switch (operation) {
+    case undefined:
+    case 'help': console.log(help); break;
+    case 'info': return ops.info().then(output.bind(null, 2));
+    case 'event': return ops.events(filtered[0], output.bind(null, 0));
+    case 'manifest': return ops.manifest(filtered[0], args.some(arg => arg === '--prod'));
+    case 'exec': return ops.exec(filtered[0], args.slice(1));
+    case 'build': return ops.build();
+    case 'clean': return ops.clean();
+    case 'start':
+    case 'watch': return ops.watch();
+    case 'stop': return ops.stop();
+    case 'restart': return ops.restart();
+    default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
+  }
+}
+
+/**
+ * Invoke a module, ensuring compilation first
+ */
+export async function invokeModule(entryModule: string): Promise<unknown> {
+  return ops.exec(entryModule);
 }
