@@ -1,6 +1,3 @@
-import { stat, writeFile } from 'node:fs/promises';
-import path from 'node:path';
-
 import { type DeltaEvent, type ManifestContext, ManifestDeltaUtil, ManifestUtil } from '@travetto/manifest';
 
 import { Log } from './log.ts';
@@ -37,12 +34,6 @@ export class CompilerSetup {
     const delta = await Log.wrap('delta', async () =>
       ManifestDeltaUtil.produceDelta(manifest)
     );
-
-    const tsconfig = path.join(ctx.workspace.path, 'tsconfig.json');
-
-    if (!await stat(tsconfig).catch(() => false)) {
-      await writeFile(tsconfig, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2), 'utf-8');
-    }
 
     // Write manifest
     await Log.wrap('manifest', async log => {
