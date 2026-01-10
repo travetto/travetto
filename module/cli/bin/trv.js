@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 // @ts-check
-import '@travetto/manifest/bin/hook.js';
-import operations from '@travetto/compiler/support/entry.main.ts';
-
-operations.exec('@travetto/cli/support/entry.trv.js');
+import '@travetto/compiler/bin/hook.js';
+import { Operations } from '@travetto/compiler/support/operations.ts';
+Operations.invokeModule('@travetto/cli/support/entry.trv.js');

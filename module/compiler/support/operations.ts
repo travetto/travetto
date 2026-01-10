@@ -11,24 +11,71 @@ import { CompilerRunner } from './server/runner.ts';
 import { CompilerClient } from './server/client.ts';
 import { CommonUtil } from './util.ts';
 
-class Operations {
+export class Operations {
+
+  static #instance: Operations = new Operations();
+
+  static getInstance(): Operations {
+    return Operations.#instance;
+  }
+
+  /**
+   * Invoke the compiler
+   */
+  static async invokeCompiler(operation: string, args: string[]): Promise<void> {
+
+    const filtered = args.filter(arg => !arg.startsWith('-'));
+
+    const help = `
+npx trvc [command]
+
+Available Commands:
+ * start|watch                - Run the compiler in watch mode
+ * stop                       - Stop the compiler if running
+ * restart                    - Restart the compiler in watch mode
+ * build                      - Ensure the project is built and upto date
+ * clean                      - Clean out the output and compiler caches
+ * info                       - Retrieve the compiler information, if running
+ * event <log|progress|state> - Watch events in realtime as newline delimited JSON
+ * exec <file> [...args]      - Allow for compiling and executing an entrypoint file
+ * manifest --prod [output]   - Generate the project manifest
+`;
+
+    switch (operation) {
+      case undefined:
+      case 'help': console.log(help); break;
+      case 'info': this.#instance.info(); break;
+      case 'event': this.#instance.events(filtered[0]); break;
+      case 'manifest': this.#instance.manifest(filtered[0], args.some(arg => arg === '--prod')); break;
+      case 'exec': this.#instance.exec(filtered[0], args.slice(1)); break;
+      case 'build': this.#instance.build(); break;
+      case 'clean': this.#instance.clean(); break;
+      case 'start':
+      case 'watch': this.#instance.watch(); break;
+      case 'stop': this.#instance.stop(); break;
+      case 'restart': this.#instance.restart(); break;
+      default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
+    }
+  }
+
+  /**
+   * Invoke a module, ensuring compilation first
+   */
+  static invokeModule(entryModule: string): void {
+    this.#instance.exec(entryModule);
+  }
 
   client: CompilerClient;
   buildFolders: string[];
   ctx: ManifestContext;
 
   constructor(ctx?: ManifestContext) {
-    this.setContext(ctx);
-  }
-
-  setContext(ctx?: ManifestContext): void {
     this.ctx = ctx ?? getManifestContext();
     this.client = new CompilerClient(this.ctx, Log.scoped('client'));
     this.buildFolders = [this.ctx.build.outputFolder, this.ctx.build.typesFolder];
     Log.root = this.ctx.workspace.path;
     Log.initLevel('error');
   }
-
 
   /** Main entry point for compilation */
   async compile(operation: CompilerMode, setupOnly = false): Promise<void> {
@@ -71,12 +118,12 @@ class Operations {
   }
 
   /** Get server info */
-  info(): Promise<CompilerServerInfo | undefined> {
+  infoJSON(): Promise<CompilerServerInfo | undefined> {
     return this.client.info();
   }
 
-  async infoStdout(): Promise<void> {
-    const info = await this.info();
+  async info(): Promise<void> {
+    const info = await this.infoJSON();
     process.stdout.write(`${JSON.stringify(info, undefined, 2)}\n`) ||
       await new Promise(resolve => process.stdout.once('drain', resolve));
   }
@@ -94,7 +141,7 @@ class Operations {
   }
 
   /** Stream events */
-  async events(type: string, handler: (event: unknown) => unknown): Promise<void> {
+  async eventsJSON(type: string, handler: (event: unknown) => unknown): Promise<void> {
     if (isComplilerEventType(type)) {
       for await (const event of this.client.fetchEvents(type)) { await handler(event); }
     } else {
@@ -102,8 +149,8 @@ class Operations {
     }
   }
 
-  async eventsStdout(type: string): Promise<void> {
-    await this.events(type, async event => {
+  async events(type: string): Promise<void> {
+    await this.eventsJSON(type, async event => {
       process.stdout.write(`${JSON.stringify(event)}\n`) ||
         await new Promise(resolve => process.stdout.once('drain', resolve));
     });
@@ -143,5 +190,3 @@ class Operations {
     await CompilerSetup.exportManifest(this.ctx, output, prod); return;
   }
 }
-
-export default new Operations();

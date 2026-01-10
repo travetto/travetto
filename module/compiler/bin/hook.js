@@ -1,7 +1,7 @@
 import { registerHooks, stripTypeScriptTypes } from 'node:module';
 
 process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
-process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
+process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps --disable-warning=ExperimentalWarning`; // Ensure it passes to children
 
 registerHooks({
   load: (url, context, nextLoad) => {

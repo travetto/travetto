@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, DocRunUtil } from '@travetto/doc';
 
-const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /entry.common/);
+const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /#/);
 
 export const text = async () => {
   await DocRunUtil.run('npx', ['trvc', 'build'], { workingDirectory: './doc-exec' });

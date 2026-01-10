@@ -38,7 +38,7 @@ export class CompilerRunner {
     const queue = new AsyncQueue<CompilerEvent>();
 
     log.info('Launching compiler');
-    const subProcess = spawn(process.argv0, ['-e', "import('@travetto/compiler/bin/trvc-target.js')"], {
+    const subProcess = spawn(process.argv0, ['-e', 'import("@travetto/compiler/bin/trvc-target.js")'], {
       env: {
         ...process.env,
         TRV_COMPILER_MODE: mode,
