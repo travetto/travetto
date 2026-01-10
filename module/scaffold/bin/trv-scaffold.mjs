@@ -8,9 +8,9 @@ let workingDirectory = process.cwd();
 
 if (process.env.npm_lifecycle_script?.includes('trv-scaffold')) { // Is npx  run
   const parts = process.env.PATH?.split(delimiter) ?? [];
-  const loc = parts.find(part => part.includes('npx') && part.includes('.bin'));
-  if (loc) {
-    workingDirectory = loc.split('/node_modules')[0];
+  const item = parts.find(part => part.includes('npx') && part.includes('.bin'));
+  if (item) {
+    workingDirectory = item.split('/node_modules')[0];
   }
 }
 
