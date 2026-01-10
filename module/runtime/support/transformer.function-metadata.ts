@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, OnFunction } from '@travetto/transformer';
+import { type TransformerState, CoreUtil, RegisterHandler } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function.ts';
 import { MetadataRegistrationUtil } from './transformer/metadata.ts';
@@ -18,10 +18,16 @@ interface MetadataInfo {
  */
 export class RegisterTransformer {
 
+  static {
+    RegisterHandler(this, this.collectClassMetadata, 'before', 'class');
+    RegisterHandler(this, this.collectMethodMetadata, 'before', 'method');
+    RegisterHandler(this, this.registerClassMetadata, 'after', 'class');
+    RegisterHandler(this, this.registerFunctionMetadata, 'before', 'function');
+  }
+
   /**
    * Hash each class
    */
-  @OnClass()
   static collectClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
     if (!MetadataRegistrationUtil.isValid(state)) {
       return node; // Exclude self
@@ -35,7 +41,6 @@ export class RegisterTransformer {
   /**
    * Hash each method
    */
-  @OnMethod()
   static collectMethodMetadata(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (state[ClassSymbol] && ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
       state[MethodsSymbol]![node.name.escapedText.toString()] = MetadataRegistrationUtil.tag(state, node);
@@ -46,7 +51,6 @@ export class RegisterTransformer {
   /**
    * After visiting each class, register all the collected metadata
    */
-  @AfterClass()
   static registerClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
     if (!state[ClassSymbol]) {
       return node;
@@ -60,7 +64,6 @@ export class RegisterTransformer {
   /**
    * Register proper functions
    */
-  @OnFunction()
   static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     if (!MetadataRegistrationUtil.isValid(state) || !ts.isFunctionDeclaration(node)) {
       return node;

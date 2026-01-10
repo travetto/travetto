@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import { ManifestFileUtil, ManifestModuleUtil, type ManifestRoot, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 import type { CompilerState } from './state.ts';
@@ -17,7 +17,7 @@ type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?:
 
 export class CompilerWatcher {
   #state: CompilerState;
-  #cleanup: Partial<Record<'tool' | 'workspace' | 'canary', () => (void | Promise<void>)>> = {};
+  #cleanup: Partial<Record<'tool' | 'workspace' | 'canary' | 'git', () => (void | Promise<void>)>> = {};
   #watchCanary: string = '.trv/canary.id';
   #lastWorkspaceModified = Date.now();
   #watchCanaryFrequency = 5;
@@ -38,7 +38,7 @@ export class CompilerWatcher {
       '**/node_modules',
       '.*/**/node_modules'
     ];
-    const ignores = new Set(['node_modules', '.git']);
+    const ignores = new Set(['node_modules', '.git', this.#state.resolveOutputFile('.')]);
     for (const item of patterns) {
       if (item.includes('*')) {
         for await (const sub of fs.glob(item, { cwd: this.#root })) {
@@ -59,15 +59,17 @@ export class CompilerWatcher {
 
   #toCandidateEvent({ action, file }: Pick<CompilerWatchEvent, 'action' | 'file'>): CompilerWatchEventCandidate {
     let entry = this.#state.getBySource(file);
-    const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
-    if (mod && action === 'create' && !entry) {
-      const modRoot = mod.sourceFolder || this.#root;
+    const module = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
+
+    if (module && action === 'create' && !entry) {
+      const modRoot = module.sourceFolder || this.#root;
       const moduleFile = file.includes(`${modRoot}/`) ? file.split(`${modRoot}/`)[1] : file;
-      entry = this.#state.registerInput(mod, moduleFile);
+      entry = this.#state.registerInput(module, moduleFile);
     } else if (action === 'delete' && entry) {
       this.#state.removeSource(entry.sourceFile); // Ensure we remove it
     }
-    return { entry, file: entry?.sourceFile ?? file, action };
+
+    return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile! };
   }
 
   #isValidFile(file: string): boolean {
@@ -94,59 +96,18 @@ export class CompilerWatcher {
     return true;
   }
 
-  #getManifestUpdateEventsByParents(events: CompilerWatchEvent[]): Map<string, CompilerWatchEvent[]> {
-    const eventsByMod = new Map<string, CompilerWatchEvent[]>();
-    for (const event of events) {
-      if (event.action === 'update') {
-        continue;
+  async #updateManifestWithEvents(compilerEvents: CompilerWatchEvent[]): Promise<void> {
+    const eventsByModule = this.#state.manifestIndex.groupByLineage(
+      compilerEvents.map(event => ({ item: event, module: event.entry!.module.name }))
+        .filter(x => x.item.action !== 'update')
+    );
+
+    for (const [moduleName, events] of eventsByModule.entries()) {
+      const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
+      for (const { moduleFile, action, entry } of events) {
+        ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
       }
-
-      const mod = event.entry.module;
-      const moduleSet = new Set(this.#state.manifestIndex.getDependentModules(mod.name, 'parents').map(indexedMod => indexedMod.name));
-      moduleSet.add(this.#state.manifest.workspace.name);
-      for (const moduleName of moduleSet) {
-        if (!eventsByMod.has(moduleName)) {
-          eventsByMod.set(moduleName, []);
-        }
-        eventsByMod.get(moduleName)!.push(event);
-      }
-    }
-    return eventsByMod;
-  }
-
-  #updateManifestForEvent({ action, file, entry }: CompilerWatchEvent, manifest: ManifestRoot): void {
-    if (action === 'update') {
-      return;
-    }
-
-    const moduleName = entry.module.name;
-    const moduleRoot = entry.module.sourceFolder || this.#root;
-    const relativeFile = file.includes(moduleRoot) ? file.split(`${moduleRoot}/`)[1] : file;
-    const folderKey = ManifestModuleUtil.getFolderKey(relativeFile);
-    const fileType = ManifestModuleUtil.getFileType(relativeFile);
-    const roleType = ManifestModuleUtil.getFileRole(relativeFile)!;
-
-    const manifestModuleFiles = manifest.modules[moduleName].files[folderKey] ??= [];
-    const idx = manifestModuleFiles.findIndex(indexedFile => indexedFile[0] === relativeFile);
-    const wrappedIdx = idx < 0 ? manifestModuleFiles.length : idx;
-
-    switch (action) {
-      case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now(), roleType]; break;
-      case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
-    }
-  }
-
-  async #reconcileManifestUpdates(compilerEvents: CompilerWatchEvent[]): Promise<void> {
-    for (const [mod, events] of this.#getManifestUpdateEventsByParents(compilerEvents).entries()) {
-      const moduleRoot = this.#state.manifestIndex.getManifestModule(mod)!.sourceFolder;
-      const moduleContext = ManifestUtil.getModuleContext(this.#state.manifest, moduleRoot);
-      const manifestLocation = ManifestUtil.getManifestLocation(moduleContext, mod);
-      const moduleManifest = ManifestUtil.readManifestSync(manifestLocation);
-
-      log.debug('Updating manifest', { module: mod, events: events.length });
-      for (const event of events) {
-        this.#updateManifestForEvent(event, moduleManifest);
-      }
+      log.debug('Updating manifest', { module: moduleName, events: events.length });
       await ManifestUtil.writeManifest(moduleManifest);
     }
 
@@ -176,9 +137,16 @@ export class CompilerWatcher {
         }
 
         // One event per file set
-        const filesChanged = events.map(e => ({ file: path.toPosix(e.path), action: e.type })).filter(e => this.#isValidFile(e.file));
+        const filesChanged = events
+          .map(event => ({ file: path.toPosix(event.path), action: event.type }))
+          .filter(event => this.#isValidFile(event.file));
+
         if (filesChanged.length) {
           EventUtil.sendEvent('file', { time: Date.now(), files: filesChanged });
+        }
+
+        if (filesChanged.some(item => this.#state.isCompilerFile(item.file))) {
+          throw new CompilerReset('Compiler has changed, restarting');
         }
 
         const items = filesChanged
@@ -190,10 +158,10 @@ export class CompilerWatcher {
         }
 
         try {
-          await this.#reconcileManifestUpdates(items);
+          await this.#updateManifestWithEvents(items);
         } catch (manifestError) {
           log.info('Restarting due to manifest rebuild failure', manifestError);
-          throw new CompilerReset(`Manifest rebuild failure: ${manifestError}`);
+          throw new CompilerReset(`Manifest rebuild failure: ${manifestError} `);
         }
 
         for (const item of items) {
@@ -203,7 +171,7 @@ export class CompilerWatcher {
         if (out instanceof Error && out.message.includes('Events were dropped by the FSEvents client.')) {
           out = new CompilerReset('FSEvents failure, requires restart');
         }
-        return this.#queue.throw(out instanceof Error ? out : new Error(`${out}`));
+        return this.#queue.throw(out instanceof Error ? out : new Error(`${out} `));
       }
     }, { ignore });
 
@@ -212,10 +180,9 @@ export class CompilerWatcher {
 
   async #listenToolFolder(): Promise<void> {
     const build = this.#state.manifest.build;
-    const toolRootFolder = path.dirname(path.resolve(this.#root, build.compilerFolder));
-    const toolFolders = new Set([
-      toolRootFolder, build.compilerFolder, build.typesFolder, build.outputFolder
-    ].map(folder => path.resolve(this.#root, folder)));
+    const toolRootFolder = path.dirname(path.resolve(this.#root, build.outputFolder));
+    const toolFolders = new Set([toolRootFolder, build.typesFolder, build.outputFolder]
+      .map(folder => path.resolve(this.#root, folder)));
 
     log.debug('Tooling Folders', [...toolFolders].map(folder => folder.replace(`${this.#root}/`, '')));
 
@@ -258,11 +225,25 @@ export class CompilerWatcher {
     this.#cleanup.canary = (): void => clearInterval(canaryId);
   }
 
+  async #listenGitChanges(): Promise<void> {
+    log.debug('Starting git canary');
+    const listener = watch('.git', { encoding: 'utf8' }, async (event, file) => {
+      if (!file) {
+        return;
+      }
+      if (file === 'HEAD') {
+        this.#queue.throw(new CompilerReset('Git branch change detected'));
+      }
+    });
+    this.#cleanup.git = (): void => listener.close();
+  }
+
   [Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent> {
     if (!this.#cleanup.workspace) {
       this.#listenWorkspace();
       this.#listenToolFolder();
       this.#listenCanary();
+      this.#listenGitChanges();
     }
     return this.#queue[Symbol.asyncIterator]();
   }

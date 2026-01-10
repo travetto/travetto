@@ -302,4 +302,32 @@ export class ManifestIndex {
     importFile = Array.isArray(importFile) ? importFile.join('/') : importFile;
     return this.getFromImport(importFile)?.sourceFile ?? importFile;
   }
+
+  /**
+   * Group by lineage, data can be duplicated
+   */
+  groupByLineage<T extends { action: string }>(items: { item: T, module: string }[]): Map<string, T[]> {
+    const itemsByMod = new Map<string, T[]>();
+    for (const event of items) {
+      const moduleSet = new Set(this.getDependentModules(event.module, 'parents').map(indexedMod => indexedMod.name));
+      moduleSet.add(this.manifest.workspace.name);
+      for (const moduleName of moduleSet) {
+        if (!itemsByMod.has(moduleName)) {
+          itemsByMod.set(moduleName, []);
+        }
+        itemsByMod.get(moduleName)!.push(event.item);
+      }
+    }
+    return itemsByMod;
+  }
+
+  /**
+   * Resolve child manifest relative to current manifest
+   */
+  resolveDependentManifest(moduleName: string): ManifestRoot {
+    const moduleRoot = this.getManifestModule(moduleName)!.sourceFolder;
+    const moduleContext = ManifestUtil.getModuleContext(this.manifest, moduleRoot);
+    const manifestLocation = ManifestUtil.getManifestLocation(moduleContext, moduleName);
+    return ManifestUtil.readManifestSync(manifestLocation);
+  }
 }

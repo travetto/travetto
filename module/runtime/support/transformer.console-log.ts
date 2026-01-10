@@ -1,9 +1,6 @@
 import ts from 'typescript';
 
-import {
-  type TransformerState, OnCall, LiteralUtil, OnClass, AfterClass, OnMethod, AfterMethod,
-  AfterFunction, OnFunction, OnStaticMethod, AfterStaticMethod
-} from '@travetto/transformer';
+import { type TransformerState, LiteralUtil, RegisterHandler } from '@travetto/transformer';
 
 const CONSOLE_IMPORT = '@travetto/runtime/src/console.ts';
 
@@ -25,25 +22,33 @@ const VALID_LEVELS: Record<string, string> = {
  */
 export class ConsoleLogTransformer {
 
+  static {
+    RegisterHandler(this, this.startClassForLog, 'before', 'class');
+    RegisterHandler(this, this.leaveClassForLog, 'after', 'class');
+    RegisterHandler(this, this.startMethodForLog, 'before', 'method');
+    RegisterHandler(this, this.startMethodForLog, 'before', 'static-method');
+    RegisterHandler(this, this.leaveMethodForLog, 'after', 'method');
+    RegisterHandler(this, this.leaveMethodForLog, 'after', 'static-method');
+    RegisterHandler(this, this.startFunctionForLog, 'before', 'function');
+    RegisterHandler(this, this.leaveFunctionForLog, 'after', 'function');
+    RegisterHandler(this, this.onLogCall, 'before', 'call');
+  }
+
   static initState(state: CustomState): void {
     state.scope = state.scope ?? [];
   }
 
-  @OnClass()
   static startClassForLog(state: CustomState, node: ts.ClassDeclaration): typeof node {
     this.initState(state);
     state.scope.push({ type: 'class', name: node.name?.text ?? 'unknown' });
     return node;
   }
 
-  @AfterClass()
   static leaveClassForLog(state: CustomState, node: ts.ClassDeclaration): typeof node {
     state.scope.pop();
     return node;
   }
 
-  @OnStaticMethod()
-  @OnMethod()
   static startMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {
     this.initState(state);
     let name = 'unknown';
@@ -54,27 +59,22 @@ export class ConsoleLogTransformer {
     return node;
   }
 
-  @AfterStaticMethod()
-  @AfterMethod()
   static leaveMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {
     state.scope.pop();
     return node;
   }
 
-  @OnFunction()
   static startFunctionForLog(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     this.initState(state);
     state.scope.push({ type: 'function', name: node.name?.text ?? 'unknown' });
     return node;
   }
 
-  @AfterFunction()
   static leaveFunctionForLog(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     state.scope.pop();
     return node;
   }
 
-  @OnCall()
   static onLogCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
     if (!ts.isPropertyAccessExpression(node.expression)) {
       return node;

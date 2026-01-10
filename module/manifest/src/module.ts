@@ -77,7 +77,6 @@ export class ManifestModuleUtil {
     const out: string[] = [];
 
     const exclude = new Set([
-      path.resolve(ctx.workspace.path, ctx.build.compilerFolder),
       path.resolve(ctx.workspace.path, ctx.build.outputFolder),
       path.resolve(ctx.workspace.path, ctx.build.toolFolder),
     ]);

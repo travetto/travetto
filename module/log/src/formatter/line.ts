@@ -4,22 +4,24 @@ import { Env } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
-import { StyleUtil } from '@travetto/terminal';
+import { StyleUtil, type TermStyleFn } from '@travetto/terminal';
 
 import type { LogEvent, LogFormatter } from '../types.ts';
 import { LogFormatUtil } from './util.ts';
 
-/**
- * Level coloring
- */
-export const STYLES = StyleUtil.getPalette({
+const styleInput = {
   info: ['#ffff00', '#ff5733'], // Yellow / goldenrod
   debug: ['#d3d3d3', '#555555'], // Light gray / dark gray
   warn: ['#ff8c00', '#ff00ff'], // Dark orange / bright magenta
   error: ['#8b0000', { text: '#00ffff', inverse: true }], // Dark red / bright cyan inverted
   timestamp: ['#e5e5e5', '#000000'], // White /black
   location: ['#add8e6', '#800080'] // Light blue / purple
-});
+} as const;
+
+/**
+ * Level coloring
+ */
+export const STYLES: Record<keyof typeof styleInput, TermStyleFn> = StyleUtil.getPalette(styleInput);
 
 /**
  * Line formatting options

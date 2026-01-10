@@ -18,9 +18,7 @@
   },
   "files": [
     "__index__.ts",
-    "bin",
-    "src",
-    "support"
+    "src"
   ],
   "main": "__index__.ts",
   "engines": {

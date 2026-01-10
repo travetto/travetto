@@ -1,10 +1,5 @@
 import ts from 'typescript';
-
-import {
-  type TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil,
-  OnGetter, OnSetter, OnMethod, DecoratorUtil, OnStaticMethod
-} from '@travetto/transformer';
-
+import { type TransformerState, DocUtil, DeclarationUtil, DecoratorUtil, RegisterHandler } from '@travetto/transformer';
 import { SchemaTransformUtil } from './transformer/util.ts';
 
 const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
@@ -24,6 +19,16 @@ interface AutoState {
  * Processes `@Schema` to register class as a valid Schema
  */
 export class SchemaTransformer {
+
+  static {
+    RegisterHandler(this, this.startSchema, 'before', 'class', ['Schema']);
+    RegisterHandler(this, this.finalizeSchema, 'after', 'class', ['Schema']);
+    RegisterHandler(this, this.processSchemaMethod, 'before', 'method');
+    RegisterHandler(this, this.processSchemaMethod, 'before', 'static-method');
+    RegisterHandler(this, this.processSchemaField, 'before', 'property');
+    RegisterHandler(this, this.processSchemaGetter, 'before', 'getter');
+    RegisterHandler(this, this.processSchemaSetter, 'before', 'setter');
+  }
 
   static isInvisible(state: AutoState & TransformerState, node: ts.Declaration, isStatic?: boolean): boolean {
     if (!state[InSchema] && !isStatic) {
@@ -57,7 +62,6 @@ export class SchemaTransformer {
   /**
    * Track schema on start
    */
-  @OnClass('Schema')
   static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     state[AccessorsSymbol] = new Set();
     state[AutoEnrollMethods] = new Set();
@@ -80,7 +84,6 @@ export class SchemaTransformer {
   /**
    * Mark the end of the schema, document
    */
-  @AfterClass('Schema')
   static finalizeSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     const comments = DocUtil.describeDocs(node);
 
@@ -146,8 +149,6 @@ export class SchemaTransformer {
   /**
    * Handle explicitly registered methods
    */
-  @OnMethod()
-  @OnStaticMethod()
   static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (
       this.isInvisible(state, node, node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)) &&
@@ -185,7 +186,6 @@ export class SchemaTransformer {
   /**
    * Handle all properties, while in schema
    */
-  @OnProperty()
   static processSchemaField(state: TransformerState & AutoState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
     if (this.isInvisible(state, node)) {
       return node;
@@ -196,7 +196,6 @@ export class SchemaTransformer {
   /**
    * Handle getters
    */
-  @OnGetter()
   static processSchemaGetter(state: TransformerState & AutoState, node: ts.GetAccessorDeclaration): ts.GetAccessorDeclaration {
     if (this.isInvisible(state, node) || DeclarationUtil.isStatic(node)) {
       return node;
@@ -212,7 +211,6 @@ export class SchemaTransformer {
   /**
    * Handle setters
    */
-  @OnSetter()
   static processSchemaSetter(state: TransformerState & AutoState, node: ts.SetAccessorDeclaration): ts.SetAccessorDeclaration {
     if (this.isInvisible(state, node) || DeclarationUtil.isStatic(node)) {
       return node;

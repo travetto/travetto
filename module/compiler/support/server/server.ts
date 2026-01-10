@@ -153,7 +153,7 @@ export class CompilerServer {
   }
 
   async #clean(): Promise<{ clean: boolean }> {
-    await Promise.all([this.#ctx.build.compilerFolder, this.#ctx.build.outputFolder]
+    await Promise.all([this.#ctx.build.outputFolder, this.#ctx.build.typesFolder]
       .map(folder => fs.rm(CommonUtil.resolveWorkspace(this.#ctx, folder), { recursive: true, force: true })));
     return { clean: true };
   }
