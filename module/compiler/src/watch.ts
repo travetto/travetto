@@ -60,15 +60,16 @@ export class CompilerWatcher {
   #toCandidateEvent({ action, file }: Pick<CompilerWatchEvent, 'action' | 'file'>): CompilerWatchEventCandidate {
     let entry = this.#state.getBySource(file);
     const module = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
-    const moduleFile = entry?.moduleFile ?? file;
 
     if (module && action === 'create' && !entry) {
+      const modRoot = module.sourceFolder || this.#root;
+      const moduleFile = file.includes(`${modRoot}/`) ? file.split(`${modRoot}/`)[1] : file;
       entry = this.#state.registerInput(module, moduleFile);
     } else if (action === 'delete' && entry) {
       this.#state.removeSource(entry.sourceFile); // Ensure we remove it
     }
 
-    return { entry, file: entry?.sourceFile ?? file, action, moduleFile };
+    return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile! };
   }
 
   #isValidFile(file: string): boolean {
