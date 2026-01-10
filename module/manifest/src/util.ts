@@ -89,12 +89,14 @@ export class ManifestUtil {
   /**
    * Write mono repo manifests, return names written
    */
-  static async writeMonoRepoManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
-    const modules = Object.values(manifest.modules).filter(mod => mod.workspace && mod.name !== ctx.workspace.name);
-    for (const mod of modules) {
-      const modCtx = this.getModuleContext(ctx, mod.sourceFolder, true);
-      const modManifest = await this.buildManifest(modCtx);
-      await this.writeManifest(modManifest);
+  static async writeDependentManifests(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
+    if (manifest.workspace.mono) {
+      const modules = Object.values(manifest.modules).filter(mod => mod.workspace && mod.name !== ctx.workspace.name);
+      for (const mod of modules) {
+        const modCtx = this.getModuleContext(ctx, mod.sourceFolder, true);
+        const modManifest = await this.buildManifest(modCtx);
+        await this.writeManifest(modManifest);
+      }
     }
   }
 

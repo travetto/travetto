@@ -39,9 +39,8 @@ class Operations {
     // Write manifest
     await ManifestUtil.writeManifest(manifest);
 
-    // Update all manifests when in mono repo
-    if (delta.length && this.ctx.workspace.mono) {
-      await ManifestUtil.writeMonoRepoManifest(this.ctx, manifest);
+    if (delta.length) { // On change, update dependent manifests
+      await ManifestUtil.writeDependentManifests(this.ctx, manifest);
     }
 
     return delta.filter(event => event.type === 'create' || event.type === 'update');
