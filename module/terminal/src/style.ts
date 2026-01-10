@@ -5,9 +5,9 @@ import { Env, TypedObject } from '@travetto/runtime';
 type TemplatePrim = number | string | bigint | boolean | RegExp;
 type Color = `#${string}`;
 export type TermStyleInput = Color | { text: Color, background?: Color, inverse?: boolean, bold?: boolean, italic?: boolean, underline?: boolean };
-type TermStylePairInput = TermStyleInput | [dark: TermStyleInput, light: TermStyleInput];
+type TermStylePairInput = [dark: TermStyleInput, light?: TermStyleInput] | readonly [dark: TermStyleInput, light?: TermStyleInput];
 export type TermStyleFn = (input: TemplatePrim) => string;
-type TermStyledTemplate<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
+export type TermStyledTemplate<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
 export type ColorLevel = 0 | 1 | 2 | 3;
 
 const ANSI_16_RGB: [number, number, number][] = [
@@ -88,7 +88,7 @@ export class StyleUtil {
    * Create renderer from input source
    */
   static getThemedStyle(input: TermStylePairInput): TermStyleFn {
-    const [dark, light] = (Array.isArray(input) ? input : [input]);
+    const [dark, light] = input;
     const isDark = this.isBackgroundDark();
     return isDark ? this.getStyle(dark) : this.getStyle(light ?? dark);
   }
