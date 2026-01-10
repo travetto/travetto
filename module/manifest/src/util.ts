@@ -191,6 +191,9 @@ export class ManifestUtil {
    * Update manifest for a given module and relative file, with a specified action
    */
   static updateManifest(manifest: ManifestRoot, moduleName: string, relativeFile: string, action: ChangeEventType): void {
+    if (action === 'update') {
+      return; // Do nothing
+    }
     const folderKey = ManifestModuleUtil.getFolderKey(relativeFile);
     const fileType = ManifestModuleUtil.getFileType(relativeFile);
     const roleType = ManifestModuleUtil.getFileRole(relativeFile)!;
@@ -202,7 +205,6 @@ export class ManifestUtil {
     switch (action) {
       case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now(), roleType]; break;
       case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
-      case 'update': manifestModuleFiles[wrappedIdx][2] = Date.now(); break;
     }
   }
 
