@@ -25,7 +25,7 @@
     "directory": "related/scaffold"
   },
   "bin": {
-    "trv-scaffold": "bin/trv-scaffold.js"
+    "trv-scaffold": "bin/trv-scaffold.mjs"
   },
   "dependencies": {
     "@travetto/cli": "^7.0.5",
