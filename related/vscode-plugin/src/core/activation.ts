@@ -16,8 +16,8 @@ type ActivationConfig = { module: string, command?: string | true, cls: Activati
  */
 class $ActivationManager {
 
-  static #isInstalled(mod: string): boolean | undefined {
-    try { Workspace.resolveImport(mod); return true; } catch { }
+  static #isInstalled(module: string): boolean | undefined {
+    try { Workspace.resolveImport(module); return true; } catch { }
   }
 
   #registry = new Set<ActivationConfig>();

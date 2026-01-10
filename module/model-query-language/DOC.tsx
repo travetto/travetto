@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 
 export const text = <>
   <c.StdHeader />
-  This module provides a textual query language for the {d.mod('ModelQuery')} interface. The language itself is fairly simple, boolean logic, with parenthetical support.The operators supported are:
+  This module provides a textual query language for the {d.module('ModelQuery')} interface. The language itself is fairly simple, boolean logic, with parenthetical support.The operators supported are:
 
   <c.Section title='Query Language'>
     <ul>

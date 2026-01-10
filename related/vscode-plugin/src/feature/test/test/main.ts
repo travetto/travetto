@@ -78,9 +78,9 @@ class TestRunnerFeature extends BaseFeature {
     if (!file) {
       return;
     }
-    const [mod, entry] = Workspace.resolveManifestIndexFileFromFile(file) ?? [];
+    const [module, entry] = Workspace.resolveManifestIndexFileFromFile(file) ?? [];
     if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
-      return mod;
+      return module;
     }
   }
 
@@ -90,9 +90,9 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   #runFile(file: string): void {
-    const mod = this.#getTestModule(file);
+    const module = this.#getTestModule(file);
 
-    if (!mod) {
+    if (!module) {
       this.log.error('Unknown file', file, 'skipping');
       return;
     }
@@ -102,7 +102,7 @@ class TestRunnerFeature extends BaseFeature {
       return;
     }
 
-    const imp = `${mod.name}${file.split(mod.sourceFolder)[1]}`;
+    const imp = `${module.name}${file.split(module.sourceFolder)[1]}`;
     this.log.info('Requesting test run ', imp);
     this.#server.send({ type: 'runTest', import: imp });
   }
@@ -138,14 +138,14 @@ class TestRunnerFeature extends BaseFeature {
     line ??= (editor.selection.start.line + 1);
     const file = path.resolve(editor.document.fileName ?? '');
     const prettyFile = file.replace(`${Workspace.path}/`, '');
-    const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file)!;
+    const module = Workspace.workspaceIndex.findModuleForArbitraryFile(file)!;
 
     await RunUtil.debug({
       useCli: true,
       name: `Debug Travetto Test - ${prettyFile}`,
       main: 'test:direct',
       args: [prettyFile, `${line}`],
-      module: mod.name,
+      module: module.name,
       env: {
         ...Env.TRV_TEST_PHASE_TIMEOUT.export('5m'),
         ...Env.TRV_TEST_TIMEOUT.export('1h'),

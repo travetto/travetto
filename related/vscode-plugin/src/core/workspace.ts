@@ -122,16 +122,16 @@ export class Workspace {
    * Get a manifest index file, by file name
    */
   static resolveManifestIndexFileFromFile(file: string): [IndexedModule, IndexedFile] | undefined {
-    let mod = this.workspaceIndex.getModuleFromSource(file);
-    if (!mod) {
+    let module = this.workspaceIndex.getModuleFromSource(file);
+    if (!module) {
       this.reloadManifest();
-      mod = this.workspaceIndex.getModuleFromSource(file);
+      module = this.workspaceIndex.getModuleFromSource(file);
     }
 
     const entry = this.workspaceIndex.getEntry(file);
 
-    if (mod && entry) {
-      return [mod, entry];
+    if (module && entry) {
+      return [module, entry];
     }
   }
 

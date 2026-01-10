@@ -51,7 +51,7 @@ export const text = <>
 
   <c.Section title='Standard Error Support'>
 
-    While the framework is 100 % compatible with standard {d.input('Error')} instances, there are cases in which additional functionality is desired. Within the framework we use {AppError} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the {d.mod('Web')} module and HTTP status codes). <br />
+    While the framework is 100 % compatible with standard {d.input('Error')} instances, there are cases in which additional functionality is desired. Within the framework we use {AppError} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the {d.module('Web')} module and HTTP status codes). <br />
 
     The {AppError} takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
     <ul>
@@ -115,7 +115,7 @@ $ DEBUG=express:*,@travetto/web npx trv run web
   </c.Section>
 
   <c.Section title='Resource Access'>
-    The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the {d.mod('Manifest')}'s data for what resources were found at manifesting time.<br />
+    The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the {d.module('Manifest')}'s data for what resources were found at manifesting time.<br />
 
     The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  <br />
 
@@ -180,6 +180,6 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
   </c.Section>
 
   <c.Section title='Path Behavior'>
-    To ensure consistency in path usage throughout the framework, imports pointing at {d.input('node:path')} and {d.input('path')} are rewritten at compile time.  These imports are pointing towards {d.mod('Manifest')}'s {d.input('path')}  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
+    To ensure consistency in path usage throughout the framework, imports pointing at {d.input('node:path')} and {d.input('path')} are rewritten at compile time.  These imports are pointing towards {d.module('Manifest')}'s {d.input('path')}  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
   </c.Section>
 </>;

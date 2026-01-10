@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c, mod } from '@travetto/doc';
+import { d, c, module } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import { AuthModelUtil, type RegisteredPrincipal } from '@travetto/auth-model';
 
@@ -9,7 +9,7 @@ const RegisteredPrincipalContract = toConcrete<RegisteredPrincipal>();
 
 export const text = <>
   <c.StdHeader />
-  This module supports the integration between the {d.mod('Auth')} module and the {d.mod('Model')}. <br />
+  This module supports the integration between the {d.module('Auth')} module and the {d.module('Model')}. <br />
 
   The asset module requires a {Links.Crud}-model to provide functionality for reading and storing user information. You can use any existing providers to serve as your {Links.Crud}, or you can roll your own.
 
@@ -17,17 +17,17 @@ export const text = <>
 
   Currently, the following are packages that provide {Links.Crud}:
   <ul>
-    <li>{d.mod('ModelDynamodb')} - {mod.ModelDynamodb.name}</li>
-    <li>{d.mod('ModelElasticsearch')} - {mod.ModelElasticsearch.name}</li>
-    <li>{d.mod('ModelFirestore')} - {mod.ModelFirestore.name}</li>
-    <li>{d.mod('ModelMongo')} - {mod.ModelMongo.name}</li>
-    <li>{d.mod('ModelRedis')} - {mod.ModelRedis.name}</li>
-    <li>{d.mod('ModelS3')} - {mod.ModelS3.name}</li>
-    <li>{d.mod('ModelMysql')} - {mod.ModelMysql.name}</li>
-    <li>{d.mod('ModelPostgres')} - {mod.ModelPostgres.name}</li>
-    <li>{d.mod('ModelSqlite')} - {mod.ModelSqlite.name}</li>
-    <li>{d.mod('ModelMemory')} - {mod.ModelMemory.name}</li>
-    <li>{d.mod('ModelFile')} - {mod.ModelFile.name}</li>
+    <li>{d.module('ModelDynamodb')} - {module.ModelDynamodb.name}</li>
+    <li>{d.module('ModelElasticsearch')} - {module.ModelElasticsearch.name}</li>
+    <li>{d.module('ModelFirestore')} - {module.ModelFirestore.name}</li>
+    <li>{d.module('ModelMongo')} - {module.ModelMongo.name}</li>
+    <li>{d.module('ModelRedis')} - {module.ModelRedis.name}</li>
+    <li>{d.module('ModelS3')} - {module.ModelS3.name}</li>
+    <li>{d.module('ModelMysql')} - {module.ModelMysql.name}</li>
+    <li>{d.module('ModelPostgres')} - {module.ModelPostgres.name}</li>
+    <li>{d.module('ModelSqlite')} - {module.ModelSqlite.name}</li>
+    <li>{d.module('ModelMemory')} - {module.ModelMemory.name}</li>
+    <li>{d.module('ModelFile')} - {module.ModelFile.name}</li>
   </ul>
 
   The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a {RegisteredPrincipalContract}. <br />

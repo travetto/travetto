@@ -206,8 +206,8 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async describeModule(ctx: ManifestContext, mod: PackageModule): Promise<ManifestModule> {
-    const { state, ...rest } = mod;
+  static async describeModule(ctx: ManifestContext, module: PackageModule): Promise<ManifestModule> {
+    const { state, ...rest } = module;
     const sourcePath = path.resolve(ctx.workspace.path, rest.sourceFolder);
 
     const files: ManifestModule['files'] = {};
@@ -233,8 +233,8 @@ export class ManifestModuleUtil {
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
     const pkgs = await PackageModuleVisitor.visit(ctx);
-    const modules = await Promise.all([...pkgs].map(mod => this.describeModule(ctx, mod)));
-    return Object.fromEntries(modules.map(mod => [mod.name, mod]));
+    const modules = await Promise.all([...pkgs].map(module => this.describeModule(ctx, module)));
+    return Object.fromEntries(modules.map(module => [module.name, module]));
   }
 
   /**

@@ -1,4 +1,4 @@
-export const LIB_MAPPING = {
+export const LIBRARIES = {
   Travetto: { title: 'Travetto', href: 'https://travetto.dev' },
   Typescript: { title: 'Typescript', href: 'https://typescriptlang.org' },
   Javascript: { title: 'Javascript', href: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },

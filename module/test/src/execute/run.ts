@@ -56,7 +56,7 @@ export class RunUtil {
    */
   static async* getTestImports(globs?: string[]): AsyncIterable<string> {
     const all = RuntimeIndex.find({
-      module: mod => mod.roles.includes('test') || mod.roles.includes('std'),
+      module: module => module.roles.includes('test') || module.roles.includes('std'),
       folder: folder => folder === 'test',
       file: file => file.role === 'test'
     });

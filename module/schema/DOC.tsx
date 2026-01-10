@@ -18,7 +18,7 @@ export const text = <>
   <c.StdHeader />
 
   This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is
-  leveraged in the {d.mod('Config')}, {d.mod('Cli')}, {d.mod('Web')}, {d.mod('Openapi')} and {d.mod('Model')} modules.  The schema is the backbone of all data transfer, as it helps to
+  leveraged in the {d.module('Config')}, {d.module('Cli')}, {d.module('Web')}, {d.module('Openapi')} and {d.module('Model')} modules.  The schema is the backbone of all data transfer, as it helps to
   provide validation on correctness of input, whether it is a web request, command line inputs, or a configuration file. <br />
 
   This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
@@ -84,7 +84,7 @@ export const text = <>
       And similarly, the {d.input('description')} will be picked up from the {d.library('JSDoc')} comments, and additionally all fields can be set using the {Describe} decorator.
     </c.SubSection>
     <c.SubSection title='Parameters'>
-      Parameters are available in certain scenarios (e.g. {d.mod('Web')} endpoints and {d.mod('Cli')} main methods).  In these scenarios, all of the field decorators are valid, but need to be called slightly differently to pass the typechecker. The simple solution is to use the {d.field('Arg')} field of the decorator to convince Typescript its the correct type.
+      Parameters are available in certain scenarios (e.g. {d.module('Web')} endpoints and {d.module('Cli')} main methods).  In these scenarios, all of the field decorators are valid, but need to be called slightly differently to pass the typechecker. The simple solution is to use the {d.field('Arg')} field of the decorator to convince Typescript its the correct type.
 
       <c.Code title='Sample Parameter Usage' src='doc/param-usage.ts'></c.Code>
     </c.SubSection>
@@ -140,7 +140,7 @@ export const text = <>
     To that end, the module supports two concepts:
 
     <c.SubSection title='Type Adapters'>
-      This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the {d.mod('ModelQuery')} module handles geo data.
+      This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the {d.module('ModelQuery')} module handles geo data.
 
       <c.Code title='Point Contract' src='src/types.ts' startRe={/[/][*]/} />
       <c.Code title='Point Implementation' src='src/internal/types.ts' />

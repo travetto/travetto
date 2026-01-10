@@ -33,7 +33,7 @@ export const text = <>
 
       <c.Code title='Application entry point for Web Applications' src='doc/cli.web_custom.ts' />
 
-      And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv web:custom')}.
+      And using the pattern established in the {d.module('Cli')} module, you would run your program using {d.command('npx trv web:custom')}.
 
       <c.Execution title='Custom application' cmd='trv' args={['web:custom']} config={{ workingDirectory: './doc-exec' }} />
     </c.SubSection>
@@ -54,7 +54,7 @@ export const text = <>
 
     <c.Code title='Web Http Utilities' src='src/http.ts' startRe={/^\s+static buildHandler/} endRe={/^\s{2}[}]/} />
 
-    we can see the structure for integrating the server behavior with the {d.mod('Web')} module dispatcher:
+    we can see the structure for integrating the server behavior with the {d.module('Web')} module dispatcher:
     <ul>
       <li>Converting the node primitive request to a  {WebRequest}</li>
       <li>Dispatching the request through the framework</li>

@@ -1,4 +1,4 @@
-const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
+const REGEX_PATTERN = /[\/](.*)[\/](i|g|m|s)?/;
 
 export class CoerceUtil {
   /**
@@ -18,9 +18,9 @@ export class CoerceUtil {
   static #toRegex(input: string | RegExp): RegExp {
     if (input instanceof RegExp) {
       return input;
-    } else if (REGEX_PAT.test(input)) {
-      const [, pat, mod] = input.match(REGEX_PAT) ?? [];
-      return new RegExp(pat, mod);
+    } else if (REGEX_PATTERN.test(input)) {
+      const [, pattern, module] = input.match(REGEX_PATTERN) ?? [];
+      return new RegExp(pattern, module);
     } else {
       return new RegExp(input);
     }

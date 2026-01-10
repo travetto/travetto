@@ -23,7 +23,7 @@ import { c } from '@travetto/doc';
 export const text = <>
   <c.StdHeader />
 
-  Sample documentation for fictional module.  This module fictitiously relies upon <c.Mod name='Cache' /> functionality.
+  Sample documentation for fictional module.  This module fictitiously relies upon <c.Module name='Cache' /> functionality.
 
   <ol>
     <li>First</li>
@@ -70,7 +70,7 @@ As you can see, you need to export a field named `text` as the body of the help 
    *  `Install` - Installing a package or a program
    *  `Library` - Library reference
    *  `Method` - Method declaration
-   *  `Mod` - Node Module Reference
+   *  `Module` - Node Module Reference
    *  `Note` - A note
    *  `Path` - Path reference
    *  `Ref` - File reference
@@ -84,7 +84,7 @@ As you can see, you need to export a field named `text` as the body of the help 
 Some of the more common libraries are provided as the `d.library` method.  The purpose of this is to have consistent references to common utilities to help keep external linking simple.
 
 ## Modules
-You can also link to other [Travetto](https://travetto.dev) based modules as needed.  The `d.mod` object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
+You can also link to other [Travetto](https://travetto.dev) based modules as needed.  The `d.module` object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
 
 ## CLI - doc
 The run command allows for generating documentation output.

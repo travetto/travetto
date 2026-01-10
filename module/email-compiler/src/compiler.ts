@@ -27,7 +27,7 @@ export class EmailCompiler {
   static findAllTemplates(moduleName?: string): string[] {
     return RuntimeIndex
       .find({
-        module: mod => !moduleName ? mod.roles.includes('std') : moduleName === mod.name,
+        module: module => !moduleName ? module.roles.includes('std') : moduleName === module.name,
         folder: folder => folder === 'support',
         file: file => EmailCompileUtil.isTemplateFile(file.sourceFile)
       })
@@ -39,8 +39,8 @@ export class EmailCompiler {
    */
   static getOutputFiles(file: string): EmailCompiled {
     const entry = RuntimeIndex.getEntry(file)!;
-    const mod = RuntimeIndex.getModule(entry.module)!;
-    return EmailCompileUtil.getOutputs(file, path.join(mod.sourcePath, 'resources'));
+    const module = RuntimeIndex.getModule(entry.module)!;
+    return EmailCompileUtil.getOutputs(file, path.join(module.sourcePath, 'resources'));
   }
 
   /**
@@ -78,8 +78,8 @@ export class EmailCompiler {
   /**
    * Compile all
    */
-  static async compileAll(mod?: string): Promise<string[]> {
-    const keys = this.findAllTemplates(mod);
+  static async compileAll(module?: string): Promise<string[]> {
+    const keys = this.findAllTemplates(module);
     await Promise.all(keys.map(key => this.compile(key)));
     return keys;
   }

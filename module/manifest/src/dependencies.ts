@@ -100,11 +100,11 @@ export class PackageModuleVisitor {
   /**
    * Propagate prod, role information through graph
    */
-  async #complete(mods: Iterable<PackageModule>): Promise<PackageModule[]> {
-    const mapping = new Map([...mods].map(item => [item.name, { parent: new Set(item.state.parentSet), item }]));
+  async #complete(modules: Iterable<PackageModule>): Promise<PackageModule[]> {
+    const mapping = new Map([...modules].map(item => [item.name, { parent: new Set(item.state.parentSet), item }]));
 
     // All first-level dependencies should have role filled in (for propagation)
-    for (const dependency of [...mods].filter(mod => mod.state.roleRoot)) {
+    for (const dependency of [...modules].filter(module => module.state.roleRoot)) {
       dependency.state.roleSet.clear(); // Ensure the roleRoot is empty
       for (const child of dependency.state.childSet) { // Visit children
         const childDependency = mapping.get(child)!.item;
@@ -143,11 +143,11 @@ export class PackageModuleVisitor {
     }
 
     // Mark as standard at the end
-    for (const dependency of [...mods].filter(mod => mod.state.roleRoot)) {
+    for (const dependency of [...modules].filter(module => module.state.roleRoot)) {
       dependency.state.roleSet = new Set(['std', ...dependency.state.travetto?.roles ?? []]);
     }
 
-    return [...mods].toSorted((a, b) => a.name.localeCompare(b.name));
+    return [...modules].toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   /**

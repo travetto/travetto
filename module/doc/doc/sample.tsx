@@ -4,7 +4,7 @@ import { c } from '@travetto/doc';
 export const text = <>
   <c.StdHeader />
 
-  Sample documentation for fictional module.  This module fictitiously relies upon <c.Mod name='Cache' /> functionality.
+  Sample documentation for fictional module.  This module fictitiously relies upon <c.Module name='Cache' /> functionality.
 
   <ol>
     <li>First</li>

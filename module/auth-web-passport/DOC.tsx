@@ -4,11 +4,11 @@ import { PassportAuthenticator } from './src/authenticator.ts';
 
 export const text = <>
   <c.StdHeader />
-  This is a primary integration for the {d.mod('AuthWeb')} module. <br />
+  This is a primary integration for the {d.module('AuthWeb')} module. <br />
 
   Within the node ecosystem, the most prevalent auth framework is {d.library('Passport')}.  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for {d.library('Passport')} baked in. Registering and configuring a {d.library('Passport')} strategy is fairly straightforward.<br />
 
-  <strong>NOTE:</strong> Given that {d.library('Passport')} is oriented around {d.library('Express')}, this module relies on {d.mod('WebConnect')} as an adapter for the request/response handoff.  There are some limitations listed in the module, and those would translate to any {d.library('Passport')} strategies that are being used.
+  <strong>NOTE:</strong> Given that {d.library('Passport')} is oriented around {d.library('Express')}, this module relies on {d.module('WebConnect')} as an adapter for the request/response handoff.  There are some limitations listed in the module, and those would translate to any {d.library('Passport')} strategies that are being used.
 
   <c.Code title='Sample Facebook/passport config' src='doc/config.ts' />
 

@@ -23,7 +23,7 @@ export const text = async () => {
     This module expands upon the {d.library('Typescript')} compiler, with the additional features:
 
     <ul>
-      <li>Integration with the {d.mod('Transformer')} module, allowing for rich, type-aware transformations</li>
+      <li>Integration with the {d.module('Transformer')} module, allowing for rich, type-aware transformations</li>
       <li>Automatic conversion to either {d.library('EcmascriptModule')} or {d.library('CommonJS')} based on the {d.library('PackageJson')} {d.field('type')} value</li>
       <li>Removal of type only imports which can break {d.library('EcmascriptModule')}-style output</li>
       <li>Automatic addition of {d.path('.js')} extension to imports to also support  {d.library('EcmascriptModule')}-style output</li>

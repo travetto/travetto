@@ -8,11 +8,11 @@ import type { ParsedState } from './types.ts';
 
 type ParsedInput = ParsedState['all'][number];
 
-const RAW_SEP = '--';
+const RAW_SEPARATOR = '--';
 const VALID_FLAG = /^-{1,2}[a-z]/i;
 const HELP_FLAG = /^-h|--help$/;
 const LONG_FLAG_WITH_EQ = /^--[a-z][^= ]+=\S+/i;
-const CONFIG_PRE = '+=';
+const CONFIG_PREFIX = '+=';
 const SPACE = new Set([32, 7, 13, 10]);
 
 export const ENV_PREFIX = 'env.';
@@ -68,7 +68,7 @@ export class CliParseUtil {
    * Get a user-specified module if present
    */
   static getSpecifiedModule(schema: SchemaClassConfig, args: string[]): string | undefined {
-    const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
+    const SEP = args.includes(RAW_SEPARATOR) ? args.indexOf(RAW_SEPARATOR) : args.length;
     const input = Object.values(schema.fields).find(config => config.specifiers?.includes('module'));
     const ENV_KEY = input?.aliases?.filter(alias => alias.startsWith(ENV_PREFIX)).map(alias => alias.replace(ENV_PREFIX, ''))[0] ?? '';
     const flags = new Set(input?.aliases ?? []);
@@ -83,9 +83,9 @@ export class CliParseUtil {
   /**
    * Read configuration file given flag
    */
-  static async readFlagFile(flag: string, mod?: string): Promise<string[]> {
-    const key = flag.replace(CONFIG_PRE, '');
-    const overrides = { '@': mod ?? Runtime.main.name };
+  static async readFlagFile(flag: string, module?: string): Promise<string[]> {
+    const key = flag.replace(CONFIG_PREFIX, '');
+    const overrides = { '@': module ?? Runtime.main.name };
 
     // We have a file
     const relativePath = (key.includes('/') ? key : `@#support/pack.${key}.flags`)
@@ -119,7 +119,7 @@ export class CliParseUtil {
       offset = 2;
     }
     const out = argv.slice(offset);
-    const max = out.includes(RAW_SEP) ? out.indexOf(RAW_SEP) : out.length;
+    const max = out.includes(RAW_SEPARATOR) ? out.indexOf(RAW_SEPARATOR) : out.length;
     const valid = out.slice(0, max);
     const cmd = valid.length > 0 && !valid[0].startsWith('-') ? valid[0] : undefined;
     const helpIdx = valid.findIndex(flag => HELP_FLAG.test(flag));
@@ -132,10 +132,10 @@ export class CliParseUtil {
    * Expand flag arguments into full argument list
    */
   static async expandArgs(schema: SchemaClassConfig, args: string[]): Promise<string[]> {
-    const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
-    const mod = this.getSpecifiedModule(schema, args);
+    const separatorIndex = args.includes(RAW_SEPARATOR) ? args.indexOf(RAW_SEPARATOR) : args.length;
+    const module = this.getSpecifiedModule(schema, args);
     return (await Promise.all(args.map((arg, i) =>
-      arg.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(arg, mod) : arg))).flat();
+      arg.startsWith(CONFIG_PREFIX) && (i < separatorIndex || separatorIndex < 0) ? this.readFlagFile(arg, module) : arg))).flat();
   }
 
   /**
@@ -168,7 +168,7 @@ export class CliParseUtil {
     for (let i = 0; i < inputs.length; i += 1) {
       const input = inputs[i];
 
-      if (input === RAW_SEP) { // Raw separator
+      if (input === RAW_SEPARATOR) { // Raw separator
         out.push(...inputs.slice(i + 1).map((arg, idx) => ({ type: 'unknown', input: arg, index: argIdx + idx }) as const));
         break;
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
@@ -186,7 +186,7 @@ export class CliParseUtil {
         } else {
           const next = inputs[i + 1];
           const base = { type: 'flag', fieldName: field.name, input, array: field.array } as const;
-          if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
+          if ((next && (VALID_FLAG.test(next) || next === RAW_SEPARATOR)) || isBoolFlag(field)) {
             if (isBoolFlag(field)) {
               out.push({ ...base, value: !input.startsWith('--no-') });
             } else {

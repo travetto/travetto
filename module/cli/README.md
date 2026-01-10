@@ -378,8 +378,8 @@ npx trv call:db +=base --password <custom>
 ```
 
 The flag files can be included in one of a few ways:
-   *  `+=<name>` - This translates into `<mod>/support/<name>.flags`, which is a convenient shorthand.
-   *  `+=<mod>/path/file.flags` - This is a path-related file that will be resolved from the module's location.
+   *  `+=<name>` - This translates into `<module>/support/<name>.flags`, which is a convenient shorthand.
+   *  `+=<module>/path/file.flags` - This is a path-related file that will be resolved from the module's location.
    *  `+=/path/file.flags` - This is an absolute path that will be read from the root of the file system.
 
 Ultimately, after resolution, the content of these files will be injected inline within the location.

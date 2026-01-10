@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c, mod } from '@travetto/doc';
+import { d, c, module } from '@travetto/doc';
 
 import { Links } from '@travetto/model/support/doc.support.ts';
 
@@ -10,7 +10,7 @@ import { CacheModelSymbol } from './src/types.ts';
 export const text = <>
   <c.StdHeader />
 
-  Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without {d.mod('Di')}.  The code aims to handle use cases surrounding common/basic usage.<br />
+  Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without {d.module('Di')}.  The code aims to handle use cases surrounding common/basic usage.<br />
 
   The cache module requires an {Links.Expiry} to provide functionality for reading and writing streams. You can use any existing providers to serve as your {Links.Expiry}, or you can roll your own.
 
@@ -18,16 +18,16 @@ export const text = <>
 
   Currently, the following are packages that provide {Links.Expiry}:
   <ul>
-    <li>{d.mod('ModelDynamodb')} - {mod.ModelDynamodb.name}</li>
-    <li>{d.mod('ModelElasticsearch')} - {mod.ModelElasticsearch.name}</li>
-    <li>{d.mod('ModelMongo')} - {mod.ModelMongo.name}</li>
-    <li>{d.mod('ModelRedis')} - {mod.ModelRedis.name}</li>
-    <li>{d.mod('ModelS3')} - {mod.ModelS3.name}</li>
-    <li>{d.mod('ModelPostgres')} - {mod.ModelPostgres.name}</li>
-    <li>{d.mod('ModelMysql')} - {mod.ModelMysql.name}</li>
-    <li>{d.mod('ModelSqlite')} - {mod.ModelSqlite.name}</li>
-    <li>{d.mod('ModelMemory')} - {mod.ModelMemory.name}</li>
-    <li>{d.mod('ModelFile')} - {mod.ModelFile.name}</li>
+    <li>{d.module('ModelDynamodb')} - {module.ModelDynamodb.name}</li>
+    <li>{d.module('ModelElasticsearch')} - {module.ModelElasticsearch.name}</li>
+    <li>{d.module('ModelMongo')} - {module.ModelMongo.name}</li>
+    <li>{d.module('ModelRedis')} - {module.ModelRedis.name}</li>
+    <li>{d.module('ModelS3')} - {module.ModelS3.name}</li>
+    <li>{d.module('ModelPostgres')} - {module.ModelPostgres.name}</li>
+    <li>{d.module('ModelMysql')} - {module.ModelMysql.name}</li>
+    <li>{d.module('ModelSqlite')} - {module.ModelSqlite.name}</li>
+    <li>{d.module('ModelMemory')} - {module.ModelMemory.name}</li>
+    <li>{d.module('ModelFile')} - {module.ModelFile.name}</li>
   </ul>
 
   <c.Section title='Decorators'>
@@ -66,7 +66,7 @@ export const text = <>
 
   <c.Section title='Extending the Cache Service'>
 
-    By design, the {CacheService} relies solely on the {d.mod('Model')} module.  Specifically on the {Links.Expiry}.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the {CacheService}.  The {CacheService} is expecting the model service to be registered using the {CacheModelSymbol.description!}:
+    By design, the {CacheService} relies solely on the {d.module('Model')} module.  Specifically on the {Links.Expiry}.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the {CacheService}.  The {CacheService} is expecting the model service to be registered using the {CacheModelSymbol.description!}:
 
     <c.Code title='Registering a Custom Model Source' src='doc/custom.ts' />
   </c.Section>

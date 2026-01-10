@@ -1,4 +1,4 @@
-export const MOD_MAPPING = {
+export const MODULES = {
   Auth: {
     name: '@travetto/auth', folder: '@travetto/auth', displayName: 'Authentication',
     description: 'Authentication scaffolding for the Travetto framework'

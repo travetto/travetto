@@ -39,7 +39,7 @@ export class RepoVersionCommand implements CliCommandShape {
 
     const allModules = await CliModuleUtil.findModules(mode);
 
-    const modules = allModules.filter(mod => !mod.internal && (this.mode !== 'direct' || this.modules?.includes(mod.name)));
+    const modules = allModules.filter(module => !module.internal && (this.mode !== 'direct' || this.modules?.includes(module.name)));
 
     // Do we have valid changes?
     if (!modules.length) {
@@ -50,7 +50,7 @@ export class RepoVersionCommand implements CliCommandShape {
 
     const versions = await PackageManager.synchronizeVersions();
     if (this.commit) {
-      const commitMessage = `Publish ${modules.map(mod => `${mod.name}#${versions[mod.name]?.replace('^', '') ?? mod.version}`).join(',')}`;
+      const commitMessage = `Publish ${modules.map(module => `${module.name}#${versions[module.name]?.replace('^', '') ?? module.version}`).join(',')}`;
       console.log!(await CliScmUtil.createCommit(commitMessage));
       if (this.tag) {
         await CliScmUtil.createTag(versions['@travetto/manifest']);

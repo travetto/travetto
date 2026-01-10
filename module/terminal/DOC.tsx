@@ -27,7 +27,7 @@ export const text = <>
 
     <c.Code title='CLI Color Palette' src='@travetto/cli/src/color.ts' />
 
-    When the color palette is combined with {d.mod('Runtime')}'s Util.makeTemplate, you produce a string template function that will automatically colorize:
+    When the color palette is combined with {d.module('Runtime')}'s Util.makeTemplate, you produce a string template function that will automatically colorize:
 
     <c.Code title='Sample Template Usage'
       // eslint-disable-next-line no-template-curly-in-string
@@ -52,7 +52,7 @@ export const text = <>
       <li>Streaming Content</li>
     </ul>
 
-    This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios.  You can see this pattern play out in the {d.mod('Compiler')} progress output, or in {d.mod('Pack')}'s output. <br />
+    This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios.  You can see this pattern play out in the {d.module('Compiler')} progress output, or in {d.module('Pack')}'s output. <br />
 
     In these scenarios, the dynamic behaviors are dependent on having an interactive TTY.  When running without access to a proper stdin, the output will default to basic line printing.    This dynamic behavior can also be disabled using the environment variable {d.field('TRV_QUIET')}.  When set to {d.input('1')} will provide a minimal text-based experience.
   </c.Section>

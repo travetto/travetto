@@ -13,7 +13,7 @@ type DocModMapping = { simpleName: string, name: string, displayName: string, fo
 export class DocModuleMapping {
 
   /** Output file for mapping */
-  output = 'module/doc/src/mapping/mod-mapping.ts';
+  output = 'module/doc/src/mapping/module.ts';
 
   async main(): Promise<void> {
     const out: DocModMapping[] = [];
@@ -37,15 +37,15 @@ export class DocModuleMapping {
     }
     const text: string[] = [];
 
-    for (const mod of out.toSorted((a, b) => a.name.localeCompare(b.name))) {
+    for (const module of out.toSorted((a, b) => a.name.localeCompare(b.name))) {
       text.push(`
-  ${mod.simpleName}: {
-    name: '${mod.name}', folder: '${mod.name}', displayName: '${mod.displayName}',
-    description: '${mod.description?.replaceAll("'", '\\\'')}'
+  ${module.simpleName}: {
+    name: '${module.name}', folder: '${module.folder}', displayName: '${module.displayName}',
+    description: '${module.description?.replaceAll("'", '\\\'')}'
   }`);
     }
 
-    await fs.writeFile(this.output, `export const MOD_MAPPING = {${text.join(',')}\n};\n`, 'utf8');
+    await fs.writeFile(this.output, `export const MODULE_MAPPING = {${text.join(',')}\n};\n`, 'utf8');
 
     console.log(`Successfully wrote ${this.output}`);
   }

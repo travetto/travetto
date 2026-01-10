@@ -6,9 +6,9 @@ import { ContextParam } from '@travetto/web';
 
 export const text = <>
   <c.StdHeader />
-  One of {d.mod('AuthWeb')}'s main responsibility is being able to send, validate and receive authentication/authorization information from the client. <br />
+  One of {d.module('AuthWeb')}'s main responsibility is being able to send, validate and receive authentication/authorization information from the client. <br />
 
-  This module's main responsibilities is to expose {d.mod('AuthSession')}'s data within the scope of an authenticated request flow.
+  This module's main responsibilities is to expose {d.module('AuthSession')}'s data within the scope of an authenticated request flow.
 
   <c.Code src={AuthSessionInterceptor} title='Anatomy of the Session Interceptor' />
 

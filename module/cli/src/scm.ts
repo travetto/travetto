@@ -71,13 +71,13 @@ export class CliScmUtil {
    */
   static async findChangedModules(fromHash: string, toHash?: string): Promise<IndexedModule[]> {
     const files = await this.findChangedFiles(fromHash, toHash);
-    const mods = files
+    const modules = files
       .map(file => RuntimeIndex.getFromSource(file))
       .filter(file => !!file)
       .map(file => RuntimeIndex.getModule(file.module))
-      .filter(mod => !!mod);
+      .filter(module => !!module);
 
-    return [...new Set(mods)]
+    return [...new Set(modules)]
       .toSorted((a, b) => a.name.localeCompare(b.name));
   }
 

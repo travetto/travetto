@@ -18,23 +18,23 @@ export class PackageManager {
   /**
    * Is a module already published
    */
-  static isPublished(ctx: Ctx, mod: IndexedModule): ChildProcess {
+  static isPublished(ctx: Ctx, module: IndexedModule): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
-        args = ['show', `${mod.name}@${mod.version}`, 'version', '--json'];
+        args = ['show', `${module.name}@${module.version}`, 'version', '--json'];
         break;
       case 'yarn':
-        args = ['info', `${mod.name}@${mod.version}`, 'dist.integrity', '--json'];
+        args = ['info', `${module.name}@${module.version}`, 'dist.integrity', '--json'];
         break;
     }
-    return spawn(ctx.workspace.manager, args, { cwd: mod.sourceFolder });
+    return spawn(ctx.workspace.manager, args, { cwd: module.sourceFolder });
   }
 
   /**
    * Validate published result
    */
-  static validatePublishedResult(ctx: Ctx, mod: IndexedModule, result: ExecutionResult<string>): boolean {
+  static validatePublishedResult(ctx: Ctx, module: IndexedModule, result: ExecutionResult<string>): boolean {
     switch (ctx.workspace.manager) {
       case 'npm': {
         if (!result.valid && !result.stderr.includes('E404')) {
@@ -42,7 +42,7 @@ export class PackageManager {
         }
         const item: (string[] | string) = result.stdout ? JSONUtil.parseSafe(result.stdout) : [];
         const found = Array.isArray(item) ? item.pop() : item;
-        return !!found && found === mod.version;
+        return !!found && found === module.version;
       }
       case 'yarn': {
         const parsed = JSONUtil.parseSafe<{ data?: unknown }>(result.stdout);
@@ -55,12 +55,12 @@ export class PackageManager {
    * Setting the version
    */
   static async version(ctx: Ctx, modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
-    const mods = modules.flatMap(mod => ['-w', mod.sourceFolder]);
+    const moduleArgs = modules.flatMap(module => ['-w', module.sourceFolder]);
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
       case 'yarn':
-        args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...mods];
+        args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...moduleArgs];
         break;
     }
     await ExecUtil.getResult(spawn(ctx.workspace.manager, args, { cwd: ctx.workspace.path, stdio: 'inherit' }));
@@ -69,7 +69,7 @@ export class PackageManager {
   /**
    * Dry-run packaging
    */
-  static dryRunPackaging(ctx: Ctx, mod: IndexedModule): ChildProcess {
+  static dryRunPackaging(ctx: Ctx, module: IndexedModule): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -77,18 +77,18 @@ export class PackageManager {
         args = ['pack', '--dry-run'];
         break;
     }
-    return spawn(ctx.workspace.manager, args, { cwd: mod.sourcePath });
+    return spawn(ctx.workspace.manager, args, { cwd: module.sourcePath });
   }
 
   /**
    * Publish a module
    */
-  static publish(ctx: Ctx, mod: IndexedModule, dryRun: boolean | undefined): ChildProcess {
+  static publish(ctx: Ctx, module: IndexedModule, dryRun: boolean | undefined): ChildProcess {
     if (dryRun) {
-      return this.dryRunPackaging(ctx, mod);
+      return this.dryRunPackaging(ctx, module);
     }
 
-    const versionTag = mod.version.match(/^.*-(rc|alpha|beta|next)[.]\d+/)?.[1] ?? 'latest';
+    const versionTag = module.version.match(/^.*-(rc|alpha|beta|next)[.]\d+/)?.[1] ?? 'latest';
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -96,7 +96,7 @@ export class PackageManager {
         args = ['publish', '--tag', versionTag, '--access', 'public'];
         break;
     }
-    return spawn(ctx.workspace.manager, args, { cwd: mod.sourcePath });
+    return spawn(ctx.workspace.manager, args, { cwd: module.sourcePath });
   }
 
   /**
@@ -116,7 +116,7 @@ export class PackageManager {
    */
   static async synchronizeVersions(): Promise<Record<string, string>> {
     const versions: Record<string, string> = {};
-    const folders = (await CliModuleUtil.findModules('workspace')).map(mod => mod.sourcePath);
+    const folders = (await CliModuleUtil.findModules('workspace')).map(module => module.sourcePath);
     const packages = folders.map(folder => {
       const pkg = PackageUtil.readPackage(folder, true);
       versions[pkg.name] = `^${pkg.version}`;
@@ -130,9 +130,9 @@ export class PackageManager {
         pkg.optionalDependencies ?? {},
         pkg.peerDependencies ?? {}
       ]) {
-        for (const [mod, ver] of Object.entries(versions)) {
-          if (mod in group && !/^[*]|(file:.*)$/.test(group[mod])) {
-            group[mod] = ver;
+        for (const [module, ver] of Object.entries(versions)) {
+          if (module in group && !/^[*]|(file:.*)$/.test(group[module])) {
+            group[module] = ver;
           }
         }
       }

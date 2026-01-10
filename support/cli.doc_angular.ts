@@ -20,48 +20,48 @@ export class DocAngularCommand {
       target = target.replace(root, '').split('/').pop()!;
     }
 
-    const mods = new Set((await CliModuleUtil.findModules('workspace'))
-      .filter(mod => !target || mod.sourcePath === path.resolve(root, target))
-      .filter(mod => (mod.files.doc ?? []).some(file => /DOC[.]tsx?$/.test(file.sourceFile))));
+    const modules = new Set((await CliModuleUtil.findModules('workspace'))
+      .filter(module => !target || module.sourcePath === path.resolve(root, target))
+      .filter(module => (module.files.doc ?? []).some(file => /DOC[.]tsx?$/.test(file.sourceFile))));
 
-    if (mods.size > 1) {
+    if (modules.size > 1) {
       // Build out docs
       await RepoExecUtil.execOnModules('workspace',
-        mod => {
+        module => {
           const subProcess = spawn('trv', ['doc'], {
             timeout: 20000,
-            cwd: mod.sourceFolder,
+            cwd: module.sourceFolder,
             env: {
               ...process.env,
-              ...Env.TRV_MODULE.export(mod.name),
+              ...Env.TRV_MODULE.export(module.name),
               ...Env.TRV_MANIFEST.export(undefined),
               ...Env.TRV_BUILD.export('none')
             }
           });
 
-          ExecUtil.getResult(subProcess).catch(() => console.error(`${mod.name} - failed`));
+          ExecUtil.getResult(subProcess).catch(() => console.error(`${module.name} - failed`));
 
           return subProcess;
         },
         {
           showStdout: false,
-          progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
-          filter: mod => mods.has(mod)
+          progressMessage: module => `Running 'trv doc' [%idx/%total] ${module?.sourceFolder ?? ''}`,
+          filter: module => modules.has(module)
         });
       await ExecUtil.getResult(spawn('trv', ['doc'], { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: Runtime.mainSourcePath }));
-      mods.add(RuntimeIndex.mainModule);
+      modules.add(RuntimeIndex.mainModule);
     } else {
       await ExecUtil.getResult(spawn('trv', ['doc'], {
         env: { ...process.env, ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
-        cwd: [...mods][0].sourcePath,
+        cwd: [...modules][0].sourcePath,
         stdio: 'inherit'
       }));
     }
 
-    for (const mod of mods) {
-      const modName = mod.name.endsWith('mono-repo') ? 'overview' : mod.name.split('/')[1];
+    for (const module of modules) {
+      const modName = module.name.endsWith('mono-repo') ? 'overview' : module.name.split('/')[1];
       try {
-        let html = await fs.readFile(path.resolve(mod.sourcePath, 'DOC.html'), 'utf8');
+        let html = await fs.readFile(path.resolve(module.sourcePath, 'DOC.html'), 'utf8');
 
         html = html
           .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
@@ -82,7 +82,7 @@ export class DocAngularCommand {
         await fs.writeFile(page(`app/documentation/gen/${modName}/${modName}.component.html`), html, 'utf8');
       } catch (error) {
         if (error instanceof Error) {
-          console.error(`${mod.name}: ${error.message}`);
+          console.error(`${module.name}: ${error.message}`);
         }
       }
     }

@@ -25,7 +25,7 @@ $ npx @travetto/scaffold@<version-or-tag>
   The generator will ask about enabling the following features:
 
   <c.Section title='Web Application'>
-    The {d.mod('Web')} provides the necessary integration for exposing web apis.  When selecting the {d.input('web')} feature, you will need to specify which backend you want to include with your application, the default being {d.library('Express')}.  Currently you can select from:
+    The {d.module('Web')} provides the necessary integration for exposing web apis.  When selecting the {d.input('web')} feature, you will need to specify which backend you want to include with your application, the default being {d.library('Express')}.  Currently you can select from:
 
     <ul>
       <li>{d.library('Express')}</li>
@@ -38,23 +38,23 @@ $ npx @travetto/scaffold@<version-or-tag>
     <c.SubSection title='Additional Web Features'>
       In addition to the core functionality, the {d.input('web')} feature has some useful sub-features.  Specifically:<br />
 
-      {d.mod('Openapi')} support for the web api.  This will automatically expose a {d.path('openapi.yml')} endpoint, and provide the necessary plumbing to support client generation. <br />
+      {d.module('Openapi')} support for the web api.  This will automatically expose a {d.path('openapi.yml')} endpoint, and provide the necessary plumbing to support client generation. <br />
 
-      {d.mod('Log')} support for better formatting, {d.library('Debug')} like support, and colorized output.  This is generally useful for server logs, especially during development.
+      {d.module('Log')} support for better formatting, {d.library('Debug')} like support, and colorized output.  This is generally useful for server logs, especially during development.
     </c.SubSection>
   </c.Section>
 
   <c.Section title='Authentication'>
-    Authentication is also supported on the Web endpoints by selecting {d.mod('AuthWeb')} during setup.  This will support basic authentication running out of local memory.
+    Authentication is also supported on the Web endpoints by selecting {d.module('AuthWeb')} during setup.  This will support basic authentication running out of local memory.
   </c.Section>
 
   <c.Section title='Testing'>
-    {d.mod('Test')} can also be configured out of the box to provide simple test cases for the data model.
+    {d.module('Test')} can also be configured out of the box to provide simple test cases for the data model.
   </c.Section>
 
   <c.Section title='Data Modelling and Storage'>
 
-    The {d.mod('Model')} allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
+    The {d.module('Model')} allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
 
     <ul>
       <li>{d.library('Elasticsearch')}</li>

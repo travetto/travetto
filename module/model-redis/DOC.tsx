@@ -7,7 +7,7 @@ import { RedisModelService } from './src/service.ts';
 
 export const text = <>
   <c.StdHeader />
-  This module provides an {d.library('Redis')}-based implementation for the {d.mod('Model')}.  This source allows the {d.mod('Model')} module to read, write and query against {d.library('Redis')}. <br />
+  This module provides an {d.library('Redis')}-based implementation for the {d.module('Model')}.  This source allows the {d.module('Model')} module to read, write and query against {d.library('Redis')}. <br />
 
   Supported features:
   <ul>

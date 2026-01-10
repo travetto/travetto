@@ -73,13 +73,13 @@ class $Registry {
 
       // Ensure everything is loaded
       for (const entry of RuntimeIndex.find({
-        module: (mod) => {
+        module: (module) => {
           const role = Env.TRV_ROLE.value;
           return role !== 'test' && // Skip all modules when in test
-            mod.roles.includes('std') &&
+            module.roles.includes('std') &&
             (
-              !Runtime.production || mod.prod ||
-              (role === 'doc' && mod.roles.includes(role))
+              !Runtime.production || module.prod ||
+              (role === 'doc' && module.roles.includes(role))
             );
         },
         folder: folder => folder === 'src' || folder === '$index'

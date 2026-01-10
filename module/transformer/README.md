@@ -96,9 +96,9 @@ export class Test {
 **Code: Sample Output**
 ```javascript
 import * as Δfunction from "@travetto/runtime/src/function.js";
-var mod_1 = ["@travetto/transformer", "doc/upper.ts"];
+var Δm_1 = ["@travetto/transformer", "doc/upper.ts"];
 export class TEST {
-    static { Δfunction.registerFunction(TEST, mod_1, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8, 7] } }, false); }
+    static { Δfunction.registerFunction(TEST, Δm_1, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8, 7] } }, false); }
     NAME;
     AGE;
     DOB;

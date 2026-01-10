@@ -128,7 +128,7 @@ class Operations {
   }
 
   /** Set arguments and import module */
-  async exec(mod: string, args?: string[]): Promise<unknown> {
+  async exec(module: string, args?: string[]): Promise<unknown> {
     Log.initLevel('none');
     if (!(await this.client.isWatching())) { // Short circuit if we can
       Log.initLevel('error');
@@ -137,10 +137,10 @@ class Operations {
 
     process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(this.ctx, this.ctx.build.outputFolder, 'node_modules', this.ctx.main.name); // Setup for running
     if (args) {
-      process.argv = [process.argv0, mod, ...args];
+      process.argv = [process.argv0, module, ...args];
     }
     // Return function to run import on a module
-    return import(CommonUtil.resolveWorkspace(this.ctx, this.ctx.build.outputFolder, 'node_modules', mod));
+    return import(CommonUtil.resolveWorkspace(this.ctx, this.ctx.build.outputFolder, 'node_modules', module));
   }
 
   /** Manifest entry point */

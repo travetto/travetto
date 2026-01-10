@@ -15,15 +15,15 @@ const ModelImplementations = () => {
   const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Blob', 'Bulk'].map(name => <td>{name}</td>);
 
   const modelImplRows = ([
-    [d.mod('ModelDynamodb'), 'X', 'X', 'X', 'X', ' ', ' '],
-    [d.mod('ModelElasticsearch'), 'X', 'X', 'X', 'X', ' ', 'X'],
-    [d.mod('ModelFirestore'), 'X', 'X', 'X', ' ', ' ', ' '],
-    [d.mod('ModelMongo'), 'X', 'X', 'X', 'X', 'X', 'X'],
-    [d.mod('ModelRedis'), 'X', 'X', 'X', 'X', ' ', ''],
-    [d.mod('ModelS3'), 'X', 'X', ' ', 'X', 'X', ' '],
-    [d.mod('ModelSql'), 'X', 'X', 'X', 'X', ' ', 'X'],
-    [d.mod('ModelMemory'), 'X', 'X', 'X', 'X', 'X', 'X'],
-    [d.mod('ModelFile'), 'X', 'X', ' ', 'X', 'X', 'X']
+    [d.module('ModelDynamodb'), 'X', 'X', 'X', 'X', ' ', ' '],
+    [d.module('ModelElasticsearch'), 'X', 'X', 'X', 'X', ' ', 'X'],
+    [d.module('ModelFirestore'), 'X', 'X', 'X', ' ', ' ', ' '],
+    [d.module('ModelMongo'), 'X', 'X', 'X', 'X', 'X', 'X'],
+    [d.module('ModelRedis'), 'X', 'X', 'X', 'X', ' ', ''],
+    [d.module('ModelS3'), 'X', 'X', ' ', 'X', 'X', ' '],
+    [d.module('ModelSql'), 'X', 'X', 'X', 'X', ' ', 'X'],
+    [d.module('ModelMemory'), 'X', 'X', 'X', 'X', 'X', 'X'],
+    [d.module('ModelFile'), 'X', 'X', ' ', 'X', 'X', 'X']
   ] as const)
     .map(node => <tr>{...node.map(cell => <td>{cell}</td>)}</tr>);
 
@@ -35,10 +35,10 @@ const ModelImplementations = () => {
 
 export const text = <>
   <c.StdHeader />
-  This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the {d.mod('Schema')}, which is used for data model validation.
+  This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the {d.module('Schema')}, which is used for data model validation.
 
   <c.Section title='A Simple Model'>
-    A model can be simply defined by usage of the {Model} decorator, which opts it into the {d.mod('Schema')} contracts, as well as making it available to the {ModelRegistryIndex}.
+    A model can be simply defined by usage of the {Model} decorator, which opts it into the {d.module('Schema')} contracts, as well as making it available to the {ModelRegistryIndex}.
 
     <c.Code src='./doc-exec/src/sample.ts' title='Basic Structure' />
 
@@ -50,25 +50,25 @@ export const text = <>
     The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Indexed}, {Links.Expiry}, {Links.Blob} and {Links.Bulk}.
 
     <c.SubSection title='Basic'>
-      All {d.mod('Model')} implementations, must honor the {Links.Basic} contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
+      All {d.module('Model')} implementations, must honor the {Links.Basic} contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
       <c.Code src={toConcrete<ModelBasicSupport>()} title='Basic Contract' />
     </c.SubSection>
 
     <c.SubSection title='CRUD'>
-      The {Links.Crud} contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in {d.mod('Auth')}, is an example of a module that only needs create, read and delete, and so any implementation of {d.mod('Model')} that honors this contract, can be used with the {d.mod('Auth')} model extension.
+      The {Links.Crud} contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in {d.module('Auth')}, is an example of a module that only needs create, read and delete, and so any implementation of {d.module('Model')} that honors this contract, can be used with the {d.module('Auth')} model extension.
 
       <c.Code src={toConcrete<ModelCrudSupport>()} title='Crud Contract' />
     </c.SubSection>
 
     <c.SubSection title='Indexed' >
-      Additionally, an implementation may support the ability for basic {Links.Indexed} queries. This is not the full featured query support of {d.mod('ModelQuery')}, but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
+      Additionally, an implementation may support the ability for basic {Links.Indexed} queries. This is not the full featured query support of {d.module('ModelQuery')}, but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
 
       <c.Code src={toConcrete<ModelIndexedSupport>()} title='Indexed Contract' />
     </c.SubSection>
 
     <c.SubSection title='Expiry'>
-      Certain implementations will also provide support for automatic {Links.Expiry} of data at runtime.  This is extremely useful for temporary data as, and is used in the {d.mod('Cache')} module for expiring data accordingly.
+      Certain implementations will also provide support for automatic {Links.Expiry} of data at runtime.  This is extremely useful for temporary data as, and is used in the {d.module('Cache')} module for expiring data accordingly.
 
       <c.Code src={toConcrete<ModelExpirySupport>()} title='Expiry Contract' />
     </c.SubSection>
@@ -90,7 +90,7 @@ export const text = <>
 
     <c.Code src={ModelTypeContract} />
 
-    The {d.field('id')} is the only required field for a model, as this is a hard requirement on naming and type.  This may make using existing data models impossible if types other than strings are required.  Additionally, the {d.field('type')} field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in {d.mod('Model')}, but also in {d.mod('Schema')}.
+    The {d.field('id')} is the only required field for a model, as this is a hard requirement on naming and type.  This may make using existing data models impossible if types other than strings are required.  Additionally, the {d.field('type')} field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in {d.module('Model')}, but also in {d.module('Schema')}.
   </c.Section>
 
   <c.Section title='Implementations'>
@@ -98,7 +98,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Custom Model Service'>
-    In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the {d.mod('Model')} implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface. {d.mod('ModelMemory')} serves as a great example of what a full featured implementation can look like.
+    In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the {d.module('Model')} implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface. {d.module('ModelMemory')} serves as a great example of what a full featured implementation can look like.
 
     <br />
 

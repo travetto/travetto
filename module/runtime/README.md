@@ -214,18 +214,18 @@ export function work() {
 ```javascript
 import * as Δfunction from "@travetto/runtime/src/function.js";
 import * as Δconsole from "@travetto/runtime/src/console.js";
-var mod_1 = ["@travetto/runtime", "doc/transpile.ts"];
+var Δm_1 = ["@travetto/runtime", "doc/transpile.ts"];
 export function work() {
-    Δconsole.log({ level: "debug", import: mod_1, line: 2, scope: "work", args: ['Start Work'] });
+    Δconsole.log({ level: "debug", import: Δm_1, line: 2, scope: "work", args: ['Start Work'] });
     try {
         1 / 0;
     }
     catch (error) {
-        Δconsole.log({ level: "error", import: mod_1, line: 7, scope: "work", args: ['Divide by zero', { error }] });
+        Δconsole.log({ level: "error", import: Δm_1, line: 7, scope: "work", args: ['Divide by zero', { error }] });
     }
-    Δconsole.log({ level: "debug", import: mod_1, line: 9, scope: "work", args: ['End Work'] });
+    Δconsole.log({ level: "debug", import: Δm_1, line: 9, scope: "work", args: ['End Work'] });
 }
-Δfunction.registerFunction(work, mod_1, { hash: 159357293, lines: [1, 10, 2] });
+Δfunction.registerFunction(work, Δm_1, { hash: 159357293, lines: [1, 10, 2] });
 ```
 
 #### Filtering Debug

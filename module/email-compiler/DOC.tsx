@@ -4,7 +4,7 @@ import { d, c } from '@travetto/doc';
 export const text = <>
   <c.StdHeader />
 
-  This is primarily a set of command line tools for compiling and developing templates.  The inputs are compiled files, generally under the {d.path('support/')} folder, that represents the necessary input for the email compilation.  {d.mod('EmailInky')} shows this pattern by leveraging {d.library('JSX')} bindings for the {d.library('Inky')} framework, allowing for compile-time checked templates.
+  This is primarily a set of command line tools for compiling and developing templates.  The inputs are compiled files, generally under the {d.path('support/')} folder, that represents the necessary input for the email compilation.  {d.module('EmailInky')} shows this pattern by leveraging {d.library('JSX')} bindings for the {d.library('Inky')} framework, allowing for compile-time checked templates.
 
   <c.Section title='Asset Management'>
 
@@ -57,11 +57,11 @@ export const text = <>
 
   <c.Section title='Template Development'>
 
-    The module provides {d.mod('Cli')} and {d.library('TravettoPlugin')} support for email template development.
+    The module provides {d.module('Cli')} and {d.library('TravettoPlugin')} support for email template development.
   </c.Section>
   <c.Section title='CLI Compilation'>
 
-    The module provides {d.mod('Cli')} support for email template compilation also. Running
+    The module provides {d.module('Cli')} support for email template compilation also. Running
 
     <c.Execution title='Running template compilation' cmd='trv' args={['email:compile', '-h']} />
 

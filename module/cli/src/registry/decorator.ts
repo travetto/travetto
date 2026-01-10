@@ -126,8 +126,8 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
 
     if (runtimeModule) { // Validate module
       adapter.register({
-        validators: [async ({ module: mod }): Promise<ValidationError | undefined> => {
-          const runModule = (runtimeModule === 'command' ? commandModule : mod) || Runtime.main.name;
+        validators: [async ({ module }): Promise<ValidationError | undefined> => {
+          const runModule = (runtimeModule === 'command' ? commandModule : module) || Runtime.main.name;
 
           // If we need to run as a specific module
           if (runModule !== Runtime.main.name) {

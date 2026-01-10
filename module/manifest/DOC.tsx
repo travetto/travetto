@@ -51,7 +51,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Manifest Delta'>
-    During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The {DeltaRef} provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the {d.mod('Compiler')}'s incremental behavior to know when a file has changed and needs to be recompiled.
+    During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The {DeltaRef} provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the {d.module('Compiler')}'s incremental behavior to know when a file has changed and needs to be recompiled.
   </c.Section>
 
   <c.Section title='Module Indexing'>

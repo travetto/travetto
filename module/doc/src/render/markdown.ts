@@ -5,8 +5,8 @@ import { PackageUtil } from '@travetto/manifest';
 
 import type { RenderProvider } from '../types.ts';
 import { c, getComponentName } from '../jsx.ts';
-import { MOD_MAPPING } from '../mapping/mod-mapping.ts';
-import { LIB_MAPPING } from '../mapping/lib-mapping.ts';
+import { MODULES } from '../mapping/module.ts';
+import { LIBRARIES } from '../mapping/library.ts';
 import type { RenderContext } from './context.ts';
 import { DocResolveUtil } from '../util/resolve.ts';
 
@@ -113,8 +113,8 @@ ${context.cleanText(content.text)}
   Header: async ({ props }) => `# ${props.title}\n${props.description ? `## ${props.description}\n` : ''}\n`,
 
   StdHeader: async state => {
-    const mod = state.node.props.mod ?? Runtime.main.name;
-    const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(mod)!.sourcePath);
+    const module = state.node.props.module ?? Runtime.main.name;
+    const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(module)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;
     let install = '';
@@ -124,12 +124,12 @@ ${context.cleanText(content.text)}
     }
     return `# ${title}\n${desc ? `## ${desc}\n` : ''}${install}\n`;
   },
-  Mod: async ({ props, context }) => {
-    const config = MOD_MAPPING[props.name];
+  Module: async ({ props, context }) => {
+    const config = MODULES[props.name];
     return `[${config.displayName}](${context.link(config.folder, config)}#readme "${config.description}")`;
   },
   Library: async ({ props }) => {
-    const config = LIB_MAPPING[props.name];
+    const config = LIBRARIES[props.name];
     return `[${config.title}](${config.href})`;
   }
 };
