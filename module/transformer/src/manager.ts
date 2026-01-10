@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 
-import { type ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
+import type { ManifestIndex } from '@travetto/manifest';
 
 import type { NodeTransformer } from './types/visitor.ts';
 import { VisitorFactory } from './visitor.ts';
@@ -25,7 +25,7 @@ export class TransformerManager {
 
     for (const file of transformerFiles) { // Exclude based on blacklist
       const entry = manifestIndex.getEntry(file)!;
-      transformers.push(...getAllTransformers(await import(ManifestModuleUtil.withOutputExtension(entry.import)), entry.module));
+      transformers.push(...getAllTransformers(await import(entry.import), entry.module));
     }
 
     for (const transformer of transformers) {

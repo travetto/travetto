@@ -1,10 +1,13 @@
 import type ts from 'typescript';
 
-import { type TransformerState, AfterMethod } from '@travetto/transformer';
+import { type TransformerState, RegisterHandler } from '@travetto/transformer';
 
 export class MakeUpper {
 
-  @AfterMethod()
+  static {
+    RegisterHandler(this, this.handleMethod, 'after', 'method');
+  }
+
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): typeof node {
     if (!/@travetto-test[/]transformer[/]src[/]tree\d*.ts/.test(state.importName)) { // Only apply to my source code
       return node;

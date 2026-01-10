@@ -69,8 +69,6 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,
-      compilerModuleFolder: toPosix(path.dirname(resolve('@travetto/compiler/package.json'))).replace(wsPrefix, ''),
-      compilerFolder: toPosix(build.compilerFolder ?? '.trv/compiler'),
       outputFolder: toPosix(build.outputFolder ?? '.trv/output'),
       toolFolder: toPosix(build.toolFolder ?? '.trv/tool'),
       typesFolder: toPosix(build.typesFolder ?? '.trv/types')

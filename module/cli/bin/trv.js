@@ -1,4 +1,5 @@
 #!/usr/bin/env node
 // @ts-check
-import { load } from '@travetto/compiler/bin/entry.common.js';
-load(operations => operations.exec('@travetto/cli/support/entry.trv.js'));
+import '@travetto/compiler/bin/hook.js';
+import { invoke } from '@travetto/compiler/support/operations.ts';
+invoke('exec', ['@travetto/cli/support/entry.trv.js', ...process.argv.slice(2)]);

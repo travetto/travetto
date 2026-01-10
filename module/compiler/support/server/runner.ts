@@ -1,5 +1,4 @@
-import cp from 'node:child_process';
-import { rmSync } from 'node:fs';
+import { spawn } from 'node:child_process';
 
 import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
@@ -25,56 +24,49 @@ export class CompilerRunner {
       return;
     }
 
-    const watch = mode === 'watch';
-    if (!changed.length && !watch) {
+    if (!changed.length && mode !== 'watch') {
       yield { type: 'state', payload: { state: 'compile-end' } };
       log.debug('Skipped');
       return;
     } else {
       const changedList = changed.slice(0, 10).map(event => `${event.module}/${event.file}`);
-      log.debug(`Started watch=${watch} changed=${changedList}`);
+      log.debug(`Started mode=${mode} changed=${changedList}`);
     }
-
-    const main = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
-    const deltaFile = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, `manifest-delta-${Date.now()}.json`);
-
-    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(event => event.sourceFile);
 
     const queue = new AsyncQueue<CompilerEvent>();
 
-    try {
-      await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
+    log.info('Launching compiler');
+    const subProcess = spawn(process.argv0, ['-e', 'import("@travetto/compiler/bin/trvc-target.js")'], {
+      env: {
+        ...process.env,
+        TRV_COMPILER_MODE: mode,
+        TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
+      },
 
-      log.info('Launching compiler');
-      const subProcess = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
-        env: {
-          ...process.env,
-          TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
-        },
-        detached: true,
-        stdio: ['pipe', 1, 2, 'ipc'],
-      })
-        .on('message', message => isEvent(message) && queue.add(message))
-        .on('exit', () => queue.close());
+      detached: true,
+      stdio: ['pipe', 'pipe', 2, 'ipc'],
+    })
+      .on('message', message => isEvent(message) && queue.add(message))
+      .on('exit', () => queue.close());
 
-      const kill = (): unknown => {
-        log.debug('Shutting down process');
-        return (subProcess.connected ? subProcess.send('shutdown', () => subProcess.kill()) : subProcess.kill());
-      };
+    subProcess.stdin!.write(changed.map(event => event.sourceFile).join('\n'));
+    subProcess.stdin!.end();
 
-      process.once('SIGINT', kill);
-      signal.addEventListener('abort', kill);
+    const kill = (): unknown => {
+      log.debug('Shutting down process');
+      return (subProcess.connected ? subProcess.send('shutdown', () => subProcess.kill()) : subProcess.kill());
+    };
 
-      yield* queue;
+    process.once('SIGINT', kill);
+    signal.addEventListener('abort', kill);
 
-      if (subProcess.exitCode !== 0) {
-        log.error(`Terminated during compilation, code=${subProcess.exitCode}, killed=${subProcess.killed}`);
-      }
-      process.off('SIGINT', kill);
+    yield* queue;
 
-      log.debug('Finished');
-    } finally {
-      rmSync(deltaFile, { force: true });
+    if (subProcess.exitCode !== 0) {
+      log.error(`Terminated during compilation, code=${subProcess.exitCode}, killed=${subProcess.killed}`);
     }
+    process.off('SIGINT', kill);
+
+    log.debug('Finished');
   }
 }

@@ -144,7 +144,7 @@ export class PackageModuleVisitor {
 
     // Mark as standard at the end
     for (const dependency of [...mods].filter(mod => mod.state.roleRoot)) {
-      dependency.state.roleSet = new Set(['std']);
+      dependency.state.roleSet = new Set(['std', ...dependency.state.travetto?.roles ?? []]);
     }
 
     return [...mods].toSorted((a, b) => a.name.localeCompare(b.name));

@@ -3,8 +3,6 @@ import ts from 'typescript';
 import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, type ManifestIndex, type ManifestModuleFolderType } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
-import { TypescriptUtil } from '../support/ts-util.ts';
-
 import { CompilerUtil } from './util.ts';
 import type { CompileEmitError, CompileStateEntry } from './types.ts';
 import { CommonUtil } from '../support/util.ts';
@@ -57,17 +55,39 @@ export class CompilerState implements ts.CompilerHost {
     }
   }
 
+  async #initCompilerOptions(): Promise<ts.CompilerOptions> {
+    const tsconfigFile = CommonUtil.resolveWorkspace(this.#manifest, 'tsconfig.json');
+    if (!ts.sys.fileExists(tsconfigFile)) {
+      ts.sys.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2));
+    }
+
+    const { options } = ts.parseJsonSourceFileConfigFileContent(
+      ts.readJsonConfigFile(tsconfigFile, ts.sys.readFile),
+      ts.sys,
+      this.#manifest.workspace.path
+    );
+
+    return {
+      ...options,
+      noEmit: false,
+      emitDeclarationOnly: false,
+      allowJs: true,
+      resolveJsonModule: true,
+      sourceRoot: this.#manifest.workspace.path,
+      rootDir: this.#manifest.workspace.path,
+      moduleResolution: ts.ModuleResolutionKind.Bundler,
+      module: ts.ModuleKind.ESNext,
+      outDir: this.#outputPath
+    };
+  }
+
   async init(idx: ManifestIndex): Promise<this> {
     this.#manifestIndex = idx;
     this.#manifest = idx.manifest;
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#typingsPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.typesFolder);
 
-    this.#compilerOptions = {
-      ...await TypescriptUtil.getCompilerOptions(this.#manifest),
-      rootDir: this.#manifest.workspace.path,
-      outDir: this.#outputPath
-    };
+    this.#compilerOptions = await this.#initCompilerOptions();
 
     this.#modules = Object.values(this.#manifest.modules);
 
@@ -80,6 +100,7 @@ export class CompilerState implements ts.CompilerHost {
         ...base.support ?? [],
         ...base.doc ?? [],
         ...base.test ?? [],
+        ...base.$transformer ?? [],
         ...base.$index ?? [],
         ...base.$package ?? []
       ];
@@ -162,6 +183,11 @@ export class CompilerState implements ts.CompilerHost {
     return this.#sourceToEntry.get(sourceFile);
   }
 
+  isCompilerFile(file: string): boolean {
+    const entry = this.getBySource(file);
+    return (entry?.moduleFile && ManifestModuleUtil.getFileRole(entry.moduleFile) === 'compile') || entry?.module.roles.includes('compile') || false;
+  }
+
   registerInput(module: ManifestModule, moduleFile: string): CompileStateEntry {
     const relativeSource = `${module.sourceFolder || '.'}/${moduleFile}`;
     const relativeOutput = `${module.outputFolder}/${moduleFile}`;
@@ -172,7 +198,7 @@ export class CompilerState implements ts.CompilerHost {
     const tscOutputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeSource));
     const outputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeOutput));
 
-    const entry: CompileStateEntry = { sourceFile, outputFile, module, tscOutputFile, import: `${module.name}/${moduleFile}` };
+    const entry: CompileStateEntry = { sourceFile, outputFile, module, tscOutputFile, import: `${module.name}/${moduleFile}`, moduleFile };
 
     this.#outputToEntry.set(outputFile, entry);
     this.#sourceFiles.add(sourceFile);

@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 
-import { type TransformerState, OnMethod, CoreUtil } from '@travetto/transformer';
+import { type TransformerState, CoreUtil, RegisterHandler } from '@travetto/transformer';
 
 const DebugSymbol = Symbol();
 
@@ -16,7 +16,10 @@ interface DebugState {
  */
 export class DebugEntryTransformer {
 
-  @OnMethod('DebugBreak')
+  static {
+    RegisterHandler(this, this.debugOnEntry, 'before', 'method', ['DebugBreak']);
+  }
+
   static debugOnEntry(state: TransformerState & DebugState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (!state[DebugSymbol]) {
       const imp = state.importFile('@travetto/runtime/src/debug.ts').identifier;

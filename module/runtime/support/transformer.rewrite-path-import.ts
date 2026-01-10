@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, OnFile } from '@travetto/transformer';
+import { type TransformerState, RegisterHandler } from '@travetto/transformer';
 
 const PATH_IMPORT = '@travetto/manifest/src/path.ts';
 
@@ -17,7 +17,10 @@ const isImport = (node: ts.Node): node is ts.ImportDeclaration =>
  */
 export class PathImportTransformer {
 
-  @OnFile()
+  static {
+    RegisterHandler(this, this.rewritePathImport, 'before', 'file');
+  }
+
   static rewritePathImport(state: TransformerState, node: ts.SourceFile): ts.SourceFile {
     const statement = node.statements.find(isImport);
     if (statement) {

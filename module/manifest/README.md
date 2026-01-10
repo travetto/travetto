@@ -60,8 +60,6 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
   },
   "build": {
     "compilerUrl": "http://127.0.0.1:26803",
-    "compilerModuleFolder": "module/compiler",
-    "compilerFolder": ".trv/compiler",
     "outputFolder": ".trv/output",
     "toolFolder": ".trv/tool",
     "typesFolder": ".trv/types"

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, OnInterface, OnCall, OnTypeAlias } from '@travetto/transformer';
+import { type TransformerState, RegisterHandler } from '@travetto/transformer';
 
 import { MetadataRegistrationUtil } from './transformer/metadata.ts';
 
@@ -10,6 +10,12 @@ const SRC = '@travetto/runtime/src/types.ts';
  * Providing support for concrete types
  */
 export class ConcreteTransformer {
+
+  static {
+    RegisterHandler(this, this.onInterface, 'before', 'interface');
+    RegisterHandler(this, this.onTypeAlias, 'before', 'type');
+    RegisterHandler(this, this.onToConcreteCall, 'before', 'call');
+  }
 
   static #isConcreteSimple(node: ts.InterfaceDeclaration | ts.TypeAliasDeclaration): boolean {
     return /^\s*[*]\s+@concrete\s*$/gm.test(node.getFullText());
@@ -46,7 +52,6 @@ export class ConcreteTransformer {
   /**
    * Handle concrete interface
    */
-  @OnInterface()
   static onInterface(state: TransformerState, node: ts.InterfaceDeclaration): typeof node {
     if (this.#isConcreteSimple(node)) {
       const func = this.#createConcreteFunction(state, node.name);
@@ -58,7 +63,6 @@ export class ConcreteTransformer {
   /**
    * Handle type alias
    */
-  @OnTypeAlias()
   static onTypeAlias(state: TransformerState, node: ts.TypeAliasDeclaration): typeof node {
     if (this.#isConcreteSimple(node)) {
       const func = this.#createConcreteFunction(state, node.name);
@@ -67,7 +71,6 @@ export class ConcreteTransformer {
     return node;
   }
 
-  @OnCall()
   static onToConcreteCall(state: TransformerState, node: ts.CallExpression): typeof node {
     if (ts.isIdentifier(node.expression) && node.expression.text === 'toConcrete' && node.typeArguments?.length && node.arguments.length === 0) {
       const type = state.resolveType(node.expression);

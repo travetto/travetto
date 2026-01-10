@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, OnCall, DeclarationUtil, CoreUtil, OnMethod, AfterMethod } from '@travetto/transformer';
+import { type TransformerState, DeclarationUtil, CoreUtil, RegisterHandler } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -89,6 +89,12 @@ interface Command {
  * and result generation
  */
 export class AssertTransformer {
+
+  static {
+    RegisterHandler(this, this.onAssertCheck, 'before', 'method', ['AssertCheck']);
+    RegisterHandler(this, this.afterAssertCheck, 'after', 'method', ['AssertCheck']);
+    RegisterHandler(this, this.onAssertCall, 'before', 'call');
+  }
 
   /**
    * Resolves optoken to syntax kind.  Relies on `ts`
@@ -266,13 +272,11 @@ export class AssertTransformer {
     }
   }
 
-  @OnMethod('AssertCheck')
   static onAssertCheck(state: TransformerState & AssertState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     state[IsTestSymbol] = true;
     return node;
   }
 
-  @AfterMethod('AssertCheck')
   static afterAssertCheck(state: TransformerState & AssertState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     state[IsTestSymbol] = false;
     return node;
@@ -281,7 +285,6 @@ export class AssertTransformer {
   /**
    * Listen for all call expression
    */
-  @OnCall()
   static onAssertCall(state: TransformerState & AssertState, node: ts.CallExpression): ts.CallExpression {
     // Only check in test mode
     if (!state[IsTestSymbol]) {

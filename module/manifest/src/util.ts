@@ -5,6 +5,7 @@ import { PackageUtil } from './package.ts';
 
 import type { ManifestContext } from './types/context.ts';
 import type { ManifestRoot } from './types/manifest.ts';
+import type { ChangeEventType } from './types/common.ts';
 
 const MANIFEST_FILE = 'manifest.json';
 
@@ -83,6 +84,20 @@ export class ManifestUtil {
       path.resolve(manifest.workspace.path, manifest.build.outputFolder, 'node_modules', manifest.main.name),
       manifest
     );
+  }
+
+  /**
+   * Write mono repo manifests, return names written
+   */
+  static async writeDependentManifests(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
+    if (manifest.workspace.mono) {
+      const modules = Object.values(manifest.modules).filter(mod => mod.workspace && mod.name !== ctx.workspace.name);
+      for (const mod of modules) {
+        const modCtx = this.getModuleContext(ctx, mod.sourceFolder, true);
+        const modManifest = await this.buildManifest(modCtx);
+        await this.writeManifest(modManifest);
+      }
+    }
   }
 
   /**
@@ -169,5 +184,43 @@ export class ManifestUtil {
 
       return value;
     };
+  }
+
+  /**
+   * Update manifest for a given module and relative file, with a specified action
+   */
+  static updateManifest(manifest: ManifestRoot, moduleName: string, relativeFile: string, action: ChangeEventType): void {
+    if (action === 'update') {
+      return; // Do nothing
+    }
+    const folderKey = ManifestModuleUtil.getFolderKey(relativeFile);
+    const fileType = ManifestModuleUtil.getFileType(relativeFile);
+    const roleType = ManifestModuleUtil.getFileRole(relativeFile)!;
+
+    const manifestModuleFiles = manifest.modules[moduleName].files[folderKey] ??= [];
+    const idx = manifestModuleFiles.findIndex(indexedFile => indexedFile[0] === relativeFile);
+    const wrappedIdx = idx < 0 ? manifestModuleFiles.length : idx;
+
+    switch (action) {
+      case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now(), roleType]; break;
+      case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
+    }
+  }
+
+  /**
+   * Export manifest
+   */
+  static async exportManifest(ctx: ManifestContext, output?: string, prod?: boolean): Promise<ManifestRoot | undefined> {
+    let manifest = await this.buildManifest(ctx);
+
+    // If in prod mode, only include std modules
+    if (prod) {
+      manifest = this.createProductionManifest(manifest);
+    }
+    if (output) {
+      await this.writeManifestToFile(output, manifest);
+    } else {
+      return manifest;
+    }
   }
 }
