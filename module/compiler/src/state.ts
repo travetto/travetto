@@ -183,6 +183,11 @@ export class CompilerState implements ts.CompilerHost {
     return this.#sourceToEntry.get(sourceFile);
   }
 
+  isCompilerFile(file: string): boolean {
+    const entry = this.getBySource(file);
+    return (entry?.moduleFile && ManifestModuleUtil.getFileRole(entry.moduleFile) === 'compile') || entry?.module.roles.includes('compile') || false;
+  }
+
   registerInput(module: ManifestModule, moduleFile: string): CompileStateEntry {
     const relativeSource = `${module.sourceFolder || '.'}/${moduleFile}`;
     const relativeOutput = `${module.outputFolder}/${moduleFile}`;

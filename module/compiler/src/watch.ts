@@ -96,13 +96,13 @@ export class CompilerWatcher {
     return true;
   }
 
-  async #reconcileManifestUpdates(compilerEvents: CompilerWatchEvent[]): Promise<void> {
-    const eventsByMod = this.#state.manifestIndex.groupByLineage(
+  async #updateManifestWithEvents(compilerEvents: CompilerWatchEvent[]): Promise<void> {
+    const eventsByModule = this.#state.manifestIndex.groupByLineage(
       compilerEvents.map(event => ({ item: event, module: event.entry!.module.name }))
         .filter(x => x.item.action !== 'update')
     );
 
-    for (const [moduleName, events] of eventsByMod.entries()) {
+    for (const [moduleName, events] of eventsByModule.entries()) {
       const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
       for (const { moduleFile, action, entry } of events) {
         ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
@@ -145,6 +145,10 @@ export class CompilerWatcher {
           EventUtil.sendEvent('file', { time: Date.now(), files: filesChanged });
         }
 
+        if (filesChanged.some(item => this.#state.isCompilerFile(item.file))) {
+          throw new CompilerReset('Compiler has changed, restarting');
+        }
+
         const items = filesChanged
           .map(event => this.#toCandidateEvent(event))
           .filter(event => this.#isValidEvent(event));
@@ -153,12 +157,8 @@ export class CompilerWatcher {
           return;
         }
 
-        if (items.some(item => ManifestModuleUtil.getFileRole(item.entry?.moduleFile) === 'compile' || item.entry?.module.roles.includes('compile'))) {
-          throw new CompilerReset('Compiler has changed, restarting');
-        }
-
         try {
-          await this.#reconcileManifestUpdates(items);
+          await this.#updateManifestWithEvents(items);
         } catch (manifestError) {
           log.info('Restarting due to manifest rebuild failure', manifestError);
           throw new CompilerReset(`Manifest rebuild failure: ${manifestError} `);
