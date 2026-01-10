@@ -1,15 +1,20 @@
 // @trv-no-transform
 import fs from 'node:fs/promises';
 
-import { getManifestContext, type ManifestContext } from '@travetto/manifest';
+import { getManifestContext, ManifestDeltaUtil, ManifestUtil, type DeltaEvent, type ManifestContext } from '@travetto/manifest';
 
 import { isComplilerEventType, type CompilerMode, type CompilerServerInfo } from './types.ts';
 import { Log } from './log.ts';
-import { CompilerSetup } from './setup.ts';
 import { CompilerServer } from './server/server.ts';
 import { CompilerRunner } from './server/runner.ts';
 import { CompilerClient } from './server/client.ts';
 import { CommonUtil } from './util.ts';
+
+const writeStdout = async (level: number, data: unknown): Promise<void> => {
+  if (data === undefined) { return; }
+  process.stdout.write(`${JSON.stringify(data, undefined, level)}\n`) ||
+    await new Promise(resolve => process.stdout.once('drain', resolve));
+};
 
 class Operations {
 
@@ -25,6 +30,23 @@ class Operations {
     Log.initLevel('error');
   }
 
+  /** Reconcile manifests and produce delta events for adds and updates */
+  async reconcileManifests(): Promise<DeltaEvent[]> {
+    const manifest = await ManifestUtil.buildManifest(ManifestUtil.getWorkspaceContext(this.ctx));
+
+    const delta = await ManifestDeltaUtil.produceDelta(manifest);
+
+    // Write manifest
+    await ManifestUtil.writeManifest(manifest);
+
+    // Update all manifests when in mono repo
+    if (delta.length && this.ctx.workspace.mono) {
+      await ManifestUtil.writeMonoRepoManifest(this.ctx, manifest);
+    }
+
+    return delta.filter(event => event.type === 'create' || event.type === 'update');
+  }
+
   /** Main entry point for compilation */
   async compile(operation: CompilerMode, setupOnly = false): Promise<void> {
     const server = await new CompilerServer(this.ctx, operation).listen();
@@ -33,13 +55,16 @@ class Operations {
     // Wait for build to be ready
     if (server) {
       log.debug('Start Server');
-      const ctx = this.ctx;
-      await server.processEvents(async function* (signal) {
-        const changed = await CompilerSetup.setup(ctx);
-        if (!setupOnly) {
-          yield* CompilerRunner.runProcess(ctx, changed, operation, signal);
-        }
-      });
+      if (setupOnly) {
+        await this.reconcileManifests();
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const self = this;
+        await server.processEvents(async function* (signal) {
+          const changed = await self.reconcileManifests();
+          yield* CompilerRunner.runProcess(self.ctx, changed, operation, signal);
+        });
+      }
       log.debug('End Server');
     } else {
       log.info('Server already running, waiting for initial compile to complete');
@@ -122,7 +147,12 @@ class Operations {
   /** Manifest entry point */
   async manifest(output?: string, prod?: boolean): Promise<void> {
     await this.compile('build', true);
-    await CompilerSetup.exportManifest(this.ctx, output, prod); return;
+    const result = await ManifestUtil.exportManifest(this.ctx, output, prod);
+    if (!result) {
+      console.log(`Wrote manifest to ${output ?? 'stdout'}`);
+    } else {
+      await writeStdout(2, result);
+    }
   }
 }
 
@@ -146,19 +176,14 @@ Available Commands:
  * exec <file> [...args]      - Allow for compiling and executing an entrypoint file
  * manifest --prod [output]   - Generate the project manifest
 `;
-  const output = async (level: number, data: unknown): Promise<void> => {
-    if (data === undefined) { return; }
-    process.stdout.write(`${JSON.stringify(data, undefined, level)}\n`) ||
-      await new Promise(resolve => process.stdout.once('drain', resolve));
-  };
 
   const filtered = args.filter(arg => !arg.startsWith('-'));
 
   switch (operation) {
     case undefined:
     case 'help': console.log(help); break;
-    case 'info': return ops.info().then(output.bind(null, 2));
-    case 'event': return ops.events(filtered[0], output.bind(null, 0));
+    case 'info': return ops.info().then(writeStdout.bind(null, 2));
+    case 'event': return ops.events(filtered[0], writeStdout.bind(null, 0));
     case 'manifest': return ops.manifest(filtered[0], args.some(arg => arg === '--prod'));
     case 'exec': return ops.exec(filtered[0], args.slice(1));
     case 'build': return ops.build();
