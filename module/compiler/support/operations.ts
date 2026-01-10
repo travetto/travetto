@@ -126,14 +126,11 @@ class Operations {
   }
 }
 
-const ops = new Operations();
-
 /**
  * Invoke the compiler
  */
 export async function invokeCompiler(operation: string, args: string[]): Promise<unknown> {
-
-  const filtered = args.filter(arg => !arg.startsWith('-'));
+  const ops = new Operations();
 
   const help = `
 npx trvc [command]
@@ -154,6 +151,8 @@ Available Commands:
     process.stdout.write(`${JSON.stringify(data, undefined, level)}\n`) ||
       await new Promise(resolve => process.stdout.once('drain', resolve));
   };
+
+  const filtered = args.filter(arg => !arg.startsWith('-'));
 
   switch (operation) {
     case undefined:
@@ -176,5 +175,5 @@ Available Commands:
  * Invoke a module, ensuring compilation first
  */
 export async function invokeModule(entryModule: string): Promise<unknown> {
-  return ops.exec(entryModule);
+  return new Operations().exec(entryModule);
 }
