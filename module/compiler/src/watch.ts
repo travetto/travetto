@@ -5,10 +5,9 @@ import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PackageUtil, path }
 
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 import type { CompilerState } from './state.ts';
-import { CompilerUtil } from './util.ts';
 
-import { AsyncQueue } from '../support/queue.ts';
-import { IpcLogger } from '../support/log.ts';
+import { AsyncQueue } from './queue.ts';
+import { IpcLogger } from './log.ts';
 import { EventUtil } from './event.ts';
 
 const log = new IpcLogger({ level: 'debug' });
@@ -28,7 +27,7 @@ export class CompilerWatcher {
     this.#state = state;
     this.#root = state.manifest.workspace.path;
     this.#queue = new AsyncQueue(signal);
-    signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(fn => fn()));
+    signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(fn => fn?.()));
   }
 
   async #getWatchIgnores(): Promise<string[]> {
@@ -90,7 +89,7 @@ export class CompilerWatcher {
       const relativeFile = event.file.replace(`${this.#root}/`, '');
       log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
       return false;
-    } else if (!CompilerUtil.validFile(ManifestModuleUtil.getFileType(event.file))) {
+    } else if (!ManifestModuleUtil.isSourceType(event.file)) {
       return false;
     }
     return true;
@@ -226,8 +225,10 @@ export class CompilerWatcher {
   }
 
   async #listenGitChanges(): Promise<void> {
+    const gitFolder = path.resolve(this.#root, '.git');
+    if (!await fs.stat(gitFolder).catch(() => false)) { return; }
     log.debug('Starting git canary');
-    const listener = watch('.git', { encoding: 'utf8' }, async (event, file) => {
+    const listener = watch(gitFolder, { encoding: 'utf8' }, async (event, file) => {
       if (!file) {
         return;
       }

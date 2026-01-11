@@ -26,7 +26,7 @@ export class ManifestIndex {
   #sourceToEntry = new Map<string, IndexedFile>();
   #importToEntry = new Map<string, IndexedFile>();
 
-  constructor(manifest: string = process.env.TRV_MANIFEST!) {
+  constructor(manifest: string | ManifestRoot = process.env.TRV_MANIFEST!) {
     this.init(manifest || path.resolve(import.meta.dirname, './manifest.json'));
   }
 
@@ -42,8 +42,8 @@ export class ManifestIndex {
     return this.#outputRoot;
   }
 
-  init(manifestInput: string): void {
-    this.#manifest = ManifestUtil.readManifestSync(manifestInput);
+  init(manifestInput: string | ManifestRoot): void {
+    this.#manifest = typeof manifestInput === 'string' ? ManifestUtil.readManifestSync(manifestInput) : manifestInput;
     this.#outputRoot = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#index();
   }

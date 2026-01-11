@@ -89,11 +89,11 @@ export class ManifestUtil {
   /**
    * Write mono repo manifests, return names written
    */
-  static async writeDependentManifests(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
+  static async writeDependentManifests(manifest: ManifestRoot): Promise<void> {
     if (manifest.workspace.mono) {
-      const modules = Object.values(manifest.modules).filter(module => module.workspace && module.name !== ctx.workspace.name);
+      const modules = Object.values(manifest.modules).filter(module => module.workspace && module.name !== manifest.workspace.name);
       for (const module of modules) {
-        const moduleCtx = this.getModuleContext(ctx, module.sourceFolder, true);
+        const moduleCtx = this.getModuleContext(manifest, module.sourceFolder, true);
         const moduleManifest = await this.buildManifest(moduleCtx);
         await this.writeManifest(moduleManifest);
       }
@@ -204,23 +204,6 @@ export class ManifestUtil {
     switch (action) {
       case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now(), roleType]; break;
       case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
-    }
-  }
-
-  /**
-   * Export manifest
-   */
-  static async exportManifest(ctx: ManifestContext, output?: string, prod?: boolean): Promise<ManifestRoot | undefined> {
-    let manifest = await this.buildManifest(ctx);
-
-    // If in prod mode, only include std modules
-    if (prod) {
-      manifest = this.createProductionManifest(manifest);
-    }
-    if (output) {
-      await this.writeManifestToFile(output, manifest);
-    } else {
-      return manifest;
     }
   }
 }

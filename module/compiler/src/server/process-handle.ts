@@ -4,7 +4,7 @@ import path from 'node:path';
 import type { ManifestContext } from '@travetto/manifest';
 
 import { Log, type Logger } from '../log.ts';
-import { CommonUtil } from '../util.ts';
+import { CommonUtil } from '../common.ts';
 
 export class ProcessHandle {
 

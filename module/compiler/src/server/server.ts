@@ -4,14 +4,12 @@ import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import {
-  type CompilerMode, type CompilerProgressEvent, type CompilerEvent,
-  type CompilerEventType, type CompilerServerInfo, isComplilerEventType
-} from '../types.ts';
+import type { CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types.ts';
 import { Log } from '../log.ts';
-import { CommonUtil } from '../util.ts';
+import { CommonUtil } from '../common.ts';
 import { CompilerClient } from './client.ts';
 import { ProcessHandle } from './process-handle.ts';
+import { EventUtil } from '../event.ts';
 
 const log = Log.scoped('server');
 
@@ -30,7 +28,7 @@ export class CompilerServer {
   #url: string;
   #handle: Record<'compiler' | 'server', ProcessHandle>;
 
-  constructor(ctx: ManifestContext, mode: CompilerMode) {
+  constructor(ctx: ManifestContext, watching: boolean) {
     this.#ctx = ctx;
     this.#client = new CompilerClient(ctx, Log.scoped('server.client'));
     this.#url = this.#client.url;
@@ -39,7 +37,7 @@ export class CompilerServer {
     this.info = {
       state: 'startup',
       iteration: Date.now(),
-      mode,
+      watching,
       serverProcessId: process.pid,
       compilerProcessId: -1,
       path: ctx.workspace.path,
@@ -59,8 +57,8 @@ export class CompilerServer {
     return this.#shutdown.signal;
   }
 
-  get mode(): CompilerMode {
-    return this.info.mode;
+  get watching(): boolean {
+    return this.info.watching;
   }
 
   isResetEvent(event: CompilerEvent): boolean {
@@ -74,7 +72,7 @@ export class CompilerServer {
         .on('error', async error => {
           if ('code' in error && error.code === 'EADDRINUSE') {
             const info = await this.#client.info();
-            resolve((info && info.mode === 'build' && this.mode === 'watch') ? 'retry' : 'running');
+            resolve((info && !info.watching && this.watching) ? 'retry' : 'running');
           } else {
             log.warn('Failed in running server', error);
             reject(error);
@@ -170,7 +168,7 @@ export class CompilerServer {
     let close = false;
     switch (action) {
       case 'event': {
-        if (isComplilerEventType(subAction)) {
+        if (EventUtil.isComplilerEventType(subAction)) {
           this.#addListener(subAction, response);
         }
         return;
@@ -200,7 +198,7 @@ export class CompilerServer {
       if (event.type === 'state') {
         this.info.state = event.payload.state;
         if (event.payload.state === 'init' && event.payload.extra && 'processId' in event.payload.extra && typeof event.payload.extra.processId === 'number') {
-          if (this.info.mode === 'watch' && !this.info.compilerProcessId) {
+          if (this.info.watching && !this.info.compilerProcessId) {
             // Ensure we are killing in watch mode on first set
             await this.#handle.compiler.kill();
           }

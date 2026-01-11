@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
 
-import { ManifestIndex } from '@travetto/manifest';
+import { getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, type DeltaEvent } from '@travetto/manifest';
 
 import { CompilerUtil } from './util.ts';
 import { CompilerState } from './state.ts';
@@ -9,8 +9,8 @@ import { CompilerWatcher } from './watch.ts';
 import { type CompileEmitEvent, type CompileEmitter, CompilerReset } from './types.ts';
 import { EventUtil } from './event.ts';
 
-import { IpcLogger } from '../support/log.ts';
-import { CommonUtil } from '../support/util.ts';
+import { IpcLogger } from './log.ts';
+import { CommonUtil } from './common.ts';
 
 const log = new IpcLogger({ level: 'debug' });
 
@@ -23,29 +23,24 @@ export class Compiler {
    * Run compiler as a main entry point
    */
   static async main(): Promise<void> {
-    const lines: Buffer[] = [];
-    for await (const item of process.stdin) {
-      lines.push(item);
-    }
-    const dirtyFiles = Buffer.concat(lines).toString().split('\n').filter(x => x);
-    const mode = process.env.TRV_COMPILER_MODE;
-    const state = await CompilerState.get(new ManifestIndex());
-    await new Compiler(state, dirtyFiles, mode === 'watch').run();
+    const ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
+    const manifest = await ManifestUtil.buildManifest(ctx);
+    const delta = await ManifestDeltaUtil.produceDelta(manifest);
+    const state = await CompilerState.get(new ManifestIndex(manifest));
+    await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
   }
 
   #state: CompilerState;
-  #dirtyFiles: string[];
   #watch?: boolean;
   #controller: AbortController;
   #signal: AbortSignal;
   #shuttingDown = false;
+  #deltaEvents: DeltaEvent[];
 
-  constructor(state: CompilerState, dirtyFiles: string[], watch?: boolean) {
+  constructor(state: CompilerState, deltaEvents: DeltaEvent[], watch?: boolean) {
     this.#state = state;
-    const isCompilerChanged = dirtyFiles.some(file => state.isCompilerFile(file));
-    this.#dirtyFiles = isCompilerChanged ? this.#state.getAllFiles() :
-      dirtyFiles.map(file => this.#state.getBySource(file)!.sourceFile);
     this.#watch = watch;
+    this.#deltaEvents = deltaEvents;
 
     this.#controller = new AbortController();
     this.#signal = this.#controller.signal;
@@ -170,9 +165,16 @@ export class Compiler {
     EventUtil.sendEvent('state', { state: 'compile-start' });
 
     const metrics: CompileEmitEvent[] = [];
+    const isCompilerChanged = this.#deltaEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
+    const changedFiles = (isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile));
 
-    if (this.#dirtyFiles.length) {
-      for await (const event of this.emit(this.#dirtyFiles, emitter)) {
+    if (this.#watch || changedFiles.length) {
+      await ManifestUtil.writeManifest(this.#state.manifestIndex.manifest);
+      await this.#state.initTransformerManager();
+    }
+
+    if (changedFiles.length) {
+      for await (const event of this.emit(changedFiles, emitter)) {
         if (event.error) {
           const compileError = CompilerUtil.buildTranspileError(event.file, event.error);
           failure ??= compileError;
@@ -188,6 +190,12 @@ export class Compiler {
       } else {
         log.debug('Compilation succeeded');
       }
+
+      // Rebuild manifests if dirty
+      const manifest = await ManifestUtil.buildManifest(this.#state.manifestIndex.manifest);
+      await ManifestUtil.writeManifest(manifest);
+      await ManifestUtil.writeDependentManifests(manifest);
+      this.#state.manifestIndex.reinitForModule(this.#state.manifest.main.name); // Reload
     } else if (this.#watch) {
       // Prime compiler before complete
       const resolved = this.#state.getArbitraryInputFile();
