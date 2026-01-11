@@ -68,15 +68,15 @@ export class CliParseUtil {
    * Get a user-specified module if present
    */
   static getSpecifiedModule(schema: SchemaClassConfig, args: string[]): string | undefined {
-    const SEP = args.includes(RAW_SEPARATOR) ? args.indexOf(RAW_SEPARATOR) : args.length;
+    const separatorIndex = args.includes(RAW_SEPARATOR) ? args.indexOf(RAW_SEPARATOR) : args.length;
     const input = Object.values(schema.fields).find(config => config.specifiers?.includes('module'));
-    const ENV_KEY = input?.aliases?.filter(alias => alias.startsWith(ENV_PREFIX)).map(alias => alias.replace(ENV_PREFIX, ''))[0] ?? '';
+    const envKey = input?.aliases?.filter(alias => alias.startsWith(ENV_PREFIX)).map(alias => alias.replace(ENV_PREFIX, ''))[0] ?? '';
     const flags = new Set(input?.aliases ?? []);
     const check = (key?: string, value?: string): string | undefined => flags.has(key!) ? value : undefined;
     return args.reduce(
       (name, value, i, values) =>
-        (i < SEP ? check(values[i - 1], value) ?? check(...value.split('=')) : undefined) ?? name,
-      process.env[ENV_KEY]
+        (i < separatorIndex ? check(values[i - 1], value) ?? check(...value.split('=')) : undefined) ?? name,
+      process.env[envKey]
     );
   }
 
