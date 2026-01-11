@@ -21,9 +21,6 @@ related/*/out
 related/*/.vscode
 !related/vscode-plugin/.vscode
 
-module/compiler/bin/gen.*.js
-module/compiler/bin/manifest-context.js
-
 # Pack
 dist/
 

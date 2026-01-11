@@ -31,19 +31,8 @@ This is the file the linter will use, and any other tooling (e.g. IDEs).
 
 **Code: Sample configuration**
 ```javascript
-process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/mono-repo';
-
-const { buildConfig } = await import('./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js');
-const { RuntimeIndex } = await import('./.trv/output/node_modules/@travetto/runtime/__index__.js');
-
-const pluginFiles = RuntimeIndex.find({
-  folder: folder => folder === 'support',
-  file: file => /support\/eslint[.]/.test(file.relativeFile)
-});
-const plugins = await Promise.all(pluginFiles.map(plugin => import(plugin.outputFile)))
-const config = buildConfig(plugins);
-
-export default config;
+process.env.TRV_MANIFEST = '@travetto/mono-repo';
+export { rules as default } from './.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js';
 ```
 
 The output is tied to whether or not you are using the [CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html) format.
@@ -70,7 +59,7 @@ import type eslint from 'eslint';
 export type TrvEslintPlugin = {
   name: string;
   rules: Record<string, {
-    defaultLevel?: string | boolean | number;
+    defaultLevel?: Exclude<eslint.Linter.Config['rules'], undefined>[string];
     create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener;
   }>;
 };

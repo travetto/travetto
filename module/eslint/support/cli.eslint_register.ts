@@ -1,9 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { type CliCommandShape, CliCommand } from '@travetto/cli';
-import { Runtime } from '@travetto/runtime';
-
-import { buildEslintConfig } from './bin/eslint-config-file.ts';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 /**
  * Writes the eslint configuration file
@@ -12,7 +10,11 @@ import { buildEslintConfig } from './bin/eslint-config-file.ts';
 export class ESLintConfigureCommand implements CliCommandShape {
 
   async main(): Promise<void> {
-    const content = await buildEslintConfig();
+    const entry = RuntimeIndex.getFromImport('@travetto/eslint/support/bin/eslint-config');
+    const content = `
+process.env.TRV_MANIFEST = '${Runtime.workspace.name}';
+export { rules as default } from '${entry?.outputFile}';
+`;
     const output = Runtime.workspaceRelative('eslint.config.js');
     await fs.writeFile(output, content.replaceAll(Runtime.workspace.path, '.').trim());
     console.log(`Wrote eslint config to ${output}`);

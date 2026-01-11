@@ -40,12 +40,12 @@ export class DocModuleMapping {
     for (const module of out.toSorted((a, b) => a.name.localeCompare(b.name))) {
       text.push(`
   ${module.simpleName}: {
-    name: '${module.name}', folder: '${module.folder}', displayName: '${module.displayName}',
+    name: '${module.name}', folder: '${module.name}', displayName: '${module.displayName}',
     description: '${module.description?.replaceAll("'", '\\\'')}'
   }`);
     }
 
-    await fs.writeFile(this.output, `export const MODULE_MAPPING = {${text.join(',')}\n};\n`, 'utf8');
+    await fs.writeFile(this.output, `export const MODULES = {${text.join(',')}\n};\n`, 'utf8');
 
     console.log(`Successfully wrote ${this.output}`);
   }
