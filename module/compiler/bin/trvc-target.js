@@ -1,4 +1,4 @@
 // @ts-check
 import './hook.js';
-import { Compiler } from '../src/compiler.ts';
+const { Compiler } = await import('../src/compiler.ts');
 Compiler.main();

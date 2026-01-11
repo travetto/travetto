@@ -10,7 +10,7 @@ import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport,
   type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
   NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil, type ModelIdSource,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -49,7 +49,7 @@ export class MongoModelService implements
 
   #db: Db;
   #bucket: GridFSBucket;
-  idSource: ModelIdSource = ModelCrudUtil.uuidSource();
+  idSource = ModelCrudUtil.uuidSource();
   client: MongoClient;
   config: MongoModelConfig;
 

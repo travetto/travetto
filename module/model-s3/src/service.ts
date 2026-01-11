@@ -9,7 +9,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   type ModelCrudSupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex, ExistsError, NotFoundError, type OptionalId,
-  type ModelBlobSupport, type ModelExpirySupport, ModelBlobUtil, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil, type ModelIdSource,
+  type ModelBlobSupport, type ModelExpirySupport, ModelBlobUtil, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import {
@@ -37,7 +37,7 @@ type MetaBase = Pick<CreateMultipartUploadRequest,
 @Injectable()
 export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, ModelExpirySupport {
 
-  idSource: ModelIdSource = ModelCrudUtil.uuidSource();
+  idSource = ModelCrudUtil.uuidSource();
   client: S3;
   config: S3ModelConfig;
 
