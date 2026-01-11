@@ -195,6 +195,7 @@ export class Compiler {
       const manifest = await ManifestUtil.buildManifest(this.#state.manifestIndex.manifest);
       await ManifestUtil.writeManifest(manifest);
       await ManifestUtil.writeDependentManifests(manifest);
+      this.#state.manifestIndex.reinitForModule(this.#state.manifest.main.name); // Reload
     } else if (this.#watch) {
       // Prime compiler before complete
       const resolved = this.#state.getArbitraryInputFile();
@@ -208,11 +209,7 @@ export class Compiler {
     }
 
     if (this.#watch && !this.#signal.aborted) {
-
       log.info('Watch is ready');
-
-      // Reload manifest index to capture any changes
-      this.#state.manifestIndex.reinitForModule(this.#state.manifest.main.name);
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {
