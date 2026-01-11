@@ -225,7 +225,7 @@ cp -r -p $ROOT/resources/* $DIST/resources
 
 echo "Writing Manifest manifest.json"
 
-TRV_MODULE=$MODULE npx trvc manifest --prod $DIST/manifest.json
+TRV_MODULE=$MODULE npx trvc manifest:production $DIST/manifest.json
 
 # Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv.ts 
 

@@ -26,7 +26,6 @@ export class Compiler {
     const ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
     const manifest = await ManifestUtil.buildManifest(ctx);
     const delta = await ManifestDeltaUtil.produceDelta(manifest);
-    await ManifestUtil.writeManifest(manifest); // So we have it for the transformer phase
     const state = await CompilerState.get(new ManifestIndex(manifest));
     await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
   }
@@ -169,6 +168,11 @@ export class Compiler {
     const isCompilerChanged = this.#deltaEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
     const changedFiles = (isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile));
 
+    if (this.#watch || changedFiles.length) {
+      await ManifestUtil.writeManifest(this.#state.manifestIndex.manifest);
+      await this.#state.initTransformerManager();
+    }
+
     if (changedFiles.length) {
       for await (const event of this.emit(changedFiles, emitter)) {
         if (event.error) {
@@ -204,6 +208,7 @@ export class Compiler {
     }
 
     if (this.#watch && !this.#signal.aborted) {
+
       log.info('Watch is ready');
 
       // Reload manifest index to capture any changes

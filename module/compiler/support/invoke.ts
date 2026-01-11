@@ -29,11 +29,8 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
   if (operation === undefined) {
     [operation, ...args] = process.argv.slice(2);
   }
-
   const ctx = getManifestContext();
   const client = new CompilerClient(ctx, Log.scoped('client'));
-  const filtered = args.filter(arg => !arg.startsWith('-'));
-  const [primaryArg] = filtered;
 
   Log.initLevel('error');
   Log.root = ctx.workspace.path;
@@ -50,21 +47,25 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
       return CommonUtil.writeStdout(2, info);
     }
     case 'event': {
-      if (!EventUtil.isComplilerEventType(primaryArg)) {
-        throw new Error(`Unknown event type: ${primaryArg}`);
+      if (!EventUtil.isComplilerEventType(args[0])) {
+        throw new Error(`Unknown event type: ${args[0]}`);
       }
-      for await (const event of client.fetchEvents(primaryArg)) {
+      for await (const event of client.fetchEvents(args[0])) {
         await CommonUtil.writeStdout(0, event);
       }
       break;
     }
+    case 'manifest:production':
     case 'manifest': {
-      const manifest = await ManifestUtil.buildManifest(ctx);
-      const result = await ManifestUtil.exportManifest(manifest, primaryArg, args.some(arg => arg === '--prod'));
-      if (!result) {
-        console.log(`Wrote manifest to ${primaryArg ?? 'stdout'}`);
+      let manifest = await ManifestUtil.buildManifest(ctx);
+      if (operation === 'manifest:production') {
+        manifest = await ManifestUtil.createProductionManifest(manifest);
+      }
+      if (args[0]) {
+        await ManifestUtil.writeManifestToFile(args[0], manifest);
+        console.log(`Wrote manifest to ${args[0]}`);
       } else {
-        await CommonUtil.writeStdout(2, result);
+        await CommonUtil.writeStdout(2, manifest);
       }
       break;
     }
@@ -86,10 +87,10 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
       Log.initLevel('none');
       process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
       if (args) {
-        process.argv = [process.argv0, primaryArg, ...args.slice(1)];
+        process.argv = [process.argv0, ...args];
       }
       // Return function to run import on a module
-      return import(CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', primaryArg));
+      return import(CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', args[0]));
     }
     default: console.error(`\nUnknown trvc operation: ${operation}\n${HELP}`);
   }

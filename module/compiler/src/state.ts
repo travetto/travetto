@@ -110,10 +110,11 @@ export class CompilerState implements ts.CompilerHost {
         }
       }
     }
-
-    this.#transformerManager = await TransformerManager.create(this.#manifestIndex);
-
     return this;
+  }
+
+  async initTransformerManager(): Promise<void> {
+    this.#transformerManager ??= await TransformerManager.create(this.#manifestIndex);
   }
 
   get manifest(): ManifestRoot {

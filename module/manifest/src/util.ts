@@ -206,21 +206,4 @@ export class ManifestUtil {
       case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
     }
   }
-
-  /**
-   * Export manifest
-   */
-  static async exportManifest(ctx: ManifestContext, output?: string, prod?: boolean): Promise<ManifestRoot | undefined> {
-    let manifest = await this.buildManifest(ctx);
-
-    // If in prod mode, only include std modules
-    if (prod) {
-      manifest = this.createProductionManifest(manifest);
-    }
-    if (output) {
-      await this.writeManifestToFile(output, manifest);
-    } else {
-      return manifest;
-    }
-  }
 }

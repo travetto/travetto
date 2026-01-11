@@ -225,16 +225,19 @@ export class CompilerWatcher {
   }
 
   async #listenGitChanges(): Promise<void> {
-    log.debug('Starting git canary');
-    const listener = watch('.git', { encoding: 'utf8' }, async (event, file) => {
-      if (!file) {
-        return;
-      }
-      if (file === 'HEAD') {
-        this.#queue.throw(new CompilerReset('Git branch change detected'));
-      }
-    });
-    this.#cleanup.git = (): void => listener.close();
+    const gitFolder = path.resolve(this.#root, '.git');
+    if (await fs.stat(gitFolder).catch(() => false)) {
+      log.debug('Starting git canary');
+      const listener = watch(gitFolder, { encoding: 'utf8' }, async (event, file) => {
+        if (!file) {
+          return;
+        }
+        if (file === 'HEAD') {
+          this.#queue.throw(new CompilerReset('Git branch change detected'));
+        }
+      });
+      this.#cleanup.git = (): void => listener.close();
+    }
   }
 
   [Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent> {
