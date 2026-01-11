@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, type ManifestIndex, type ManifestModuleFolderType } from '@travetto/manifest';
-import { TransformerManager } from '@travetto/transformer';
+import type { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util.ts';
 import type { CompileEmitError, CompileStateEntry } from './types.ts';
@@ -115,6 +115,7 @@ export class CompilerState implements ts.CompilerHost {
   async initializeTypescript(): Promise<void> {
     await tsProxyInit();
     this.#compilerOptions = await this.#initCompilerOptions();
+    const { TransformerManager } = await import('@travetto/transformer');
     this.#transformerManager ??= await TransformerManager.create(this.#manifestIndex);
   }
 
