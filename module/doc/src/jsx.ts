@@ -10,7 +10,7 @@ type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
 type StdHeaderProps = { module?: string, install?: boolean };
 type HeaderProps = { title: string, description?: string };
-type ModProps = { name: keyof typeof MODULES };
+type ModuleProps = { name: keyof typeof MODULES };
 type LibraryProps = { name: keyof typeof LIBRARIES };
 type LinkProps = { title: string, href: string, line?: number };
 type CodeLinkProps = { title: string, src: string | Function, startRe: RegExp };
@@ -46,7 +46,7 @@ const StdHeader: CompFn<StdHeaderProps> = () => EMPTY; // Standard module header
 const Header: CompFn<HeaderProps> = () => EMPTY; // Basic module header
 const Execution: CompFn<ExecProps> = () => EMPTY; // Run a command, and include the output as part of the document
 
-const Module: CompFn<ModProps> = () => EMPTY; // Node Module Reference
+const Module: CompFn<ModuleProps> = () => EMPTY; // Node Module Reference
 const Library: CompFn<LibraryProps> = () => EMPTY; // Library reference
 
 export const c = {
