@@ -14,9 +14,9 @@ const COLORS = ([...[
 ] as const]).toSorted(() => Math.random() < .5 ? -1 : 1).map(color => StyleUtil.getStyle(color));
 
 type ModuleRunConfig<T = ExecutionResult<string>> = {
-  progressMessage?: (mod: IndexedModule | undefined) => string;
-  filter?: (mod: IndexedModule) => boolean | Promise<boolean>;
-  transformResult?: (mod: IndexedModule, result: ExecutionResult<string>) => T;
+  progressMessage?: (module: IndexedModule | undefined) => string;
+  filter?: (module: IndexedModule) => boolean | Promise<boolean>;
+  transformResult?: (module: IndexedModule, result: ExecutionResult<string>) => T;
   workerCount?: number;
   prefixOutput?: boolean;
   showStdout?: boolean;
@@ -33,11 +33,11 @@ export class RepoExecUtil {
 
   /**
    * Build equal sized prefix labels for outputting
-   * @param mods
+   * @param modules
    * @returns
    */
-  static #buildPrefixes(mods: IndexedModule[]): Record<string, string> {
-    const folders = mods.map(mod => mod.sourceFolder);
+  static #buildPrefixes(modules: IndexedModule[]): Record<string, string> {
+    const folders = modules.map(module => module.sourceFolder);
     const maxWidth = Math.max(...folders.map(folder => folder.length));
     return Object.fromEntries(folders.map((folder, i) => [folder, colorize(folder.padStart(maxWidth, ' ').padEnd(maxWidth + 1), i)]));
   }
@@ -47,30 +47,30 @@ export class RepoExecUtil {
    */
   static async execOnModules<T = ExecutionResult>(
     mode: 'all' | 'workspace' | 'changed',
-    operation: (mod: IndexedModule) => ChildProcess,
+    operation: (module: IndexedModule) => ChildProcess,
     config: ModuleRunConfig<T> = {}
   ): Promise<Map<IndexedModule, T>> {
 
     config.showStdout = config.showStdout ?? (Env.DEBUG.isSet && !Env.DEBUG.isFalse);
     config.showStderr = config.showStderr ?? true;
-    const transform = config.transformResult ?? ((mod, result): T => castTo(result));
+    const transform = config.transformResult ?? ((module, result): T => castTo(result));
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
 
-    const mods = await CliModuleUtil.findModules(mode);
+    const modules = await CliModuleUtil.findModules(mode);
     const results = new Map<IndexedModule, T>();
     const processes = new Map<IndexedModule, ChildProcess>();
 
-    const prefixes = config.prefixOutput !== false ? this.#buildPrefixes(mods) : {};
+    const prefixes = config.prefixOutput !== false ? this.#buildPrefixes(modules) : {};
     const stdoutTerm = new Terminal(process.stdout);
     const stderrTerm = new Terminal(process.stderr);
 
-    const work = WorkPool.runStreamProgress(async (mod) => {
+    const work = WorkPool.runStreamProgress(async (module) => {
       try {
-        if (!(await config.filter?.(mod) === false)) {
-          const prefix = prefixes[mod.sourceFolder] ?? '';
-          const subProcess = operation(mod);
-          processes.set(mod, subProcess);
+        if (!(await config.filter?.(module) === false)) {
+          const prefix = prefixes[module.sourceFolder] ?? '';
+          const subProcess = operation(module);
+          processes.set(module, subProcess);
 
           if (config.showStdout && subProcess.stdout) {
             ExecUtil.readLines(subProcess.stdout, line =>
@@ -84,14 +84,14 @@ export class RepoExecUtil {
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
-          const output = transform(mod, result);
-          results.set(mod, output);
+          const output = transform(module, result);
+          results.set(module, output);
         }
-        return config.progressMessage?.(mod) ?? mod.name;
+        return config.progressMessage?.(module) ?? module.name;
       } finally {
-        processes.get(mod!)?.kill();
+        processes.get(module!)?.kill();
       }
-    }, mods, mods.length, { max: workerCount, min: workerCount });
+    }, modules, modules.length, { max: workerCount, min: workerCount });
 
     if (config.progressMessage && stdoutTerm.interactive) {
       await stdoutTerm.streamToBottom(Util.mapAsyncIterable(work, TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })));

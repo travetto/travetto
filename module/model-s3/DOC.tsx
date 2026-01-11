@@ -7,7 +7,7 @@ import { S3ModelService } from './src/service.ts';
 
 export const text = <>
   <c.StdHeader />
-  This module provides an {d.library('S3')}-based implementation for the {d.mod('Model')}.  This source allows the {d.mod('Model')} module to read, write and stream against {d.library('S3')}. <br />
+  This module provides an {d.library('S3')}-based implementation for the {d.module('Model')}.  This source allows the {d.module('Model')} module to read, write and stream against {d.library('S3')}. <br />
 
   Supported features:
   <ul>

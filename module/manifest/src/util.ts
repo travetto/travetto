@@ -37,8 +37,8 @@ export class ManifestUtil {
    * Produce a production manifest from a given manifest
    */
   static createProductionManifest(manifest: ManifestRoot): ManifestRoot {
-    const prodModules = Object.values(manifest.modules).filter(mod => mod.prod);
-    const prodModNames = new Set([...prodModules.map(mod => mod.name)]);
+    const prodModules = Object.values(manifest.modules).filter(module => module.prod);
+    const prodModNames = new Set([...prodModules.map(module => module.name)]);
     return {
       generated: manifest.generated,
       workspace: manifest.workspace,
@@ -49,8 +49,8 @@ export class ManifestUtil {
       },
       main: manifest.main,
       modules: Object.fromEntries(
-        prodModules.map(mod => [mod.name, Object.assign(mod, {
-          parents: mod.parents.filter(parent => prodModNames.has(parent))
+        prodModules.map(module => [module.name, Object.assign(module, {
+          parents: module.parents.filter(parent => prodModNames.has(parent))
         })])
       ),
     };
@@ -91,9 +91,9 @@ export class ManifestUtil {
    */
   static async writeDependentManifests(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
     if (manifest.workspace.mono) {
-      const modules = Object.values(manifest.modules).filter(mod => mod.workspace && mod.name !== ctx.workspace.name);
-      for (const mod of modules) {
-        const modCtx = this.getModuleContext(ctx, mod.sourceFolder, true);
+      const modules = Object.values(manifest.modules).filter(module => module.workspace && module.name !== ctx.workspace.name);
+      for (const module of modules) {
+        const modCtx = this.getModuleContext(ctx, module.sourceFolder, true);
         const modManifest = await this.buildManifest(modCtx);
         await this.writeManifest(modManifest);
       }

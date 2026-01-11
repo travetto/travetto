@@ -15,9 +15,9 @@ export const text = <>
 
   Currently, the following are packages that provide {Links.Stream} support:
   <ul>
-    <li>{d.mod('Model')} - {FileModelService}, {MemoryModelService}</li>
-    <li>{d.mod('ModelMongo')}</li>
-    <li>{d.mod('ModelS3')}</li>
+    <li>{d.module('Model')} - {FileModelService}, {MemoryModelService}</li>
+    <li>{d.module('ModelMongo')}</li>
+    <li>{d.module('ModelS3')}</li>
   </ul>
 
   If you are using more than one {Links.Stream} service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:

@@ -10,7 +10,7 @@ import { MongoModelService } from './src/service.ts';
 
 export const text = <>
   <c.StdHeader />
-  This module provides an {d.library('MongoDB')}-based implementation for the {d.mod('Model')}.  This source allows the {d.mod('Model')} module to read, write and query against {d.library('MongoDB')}.. Given the dynamic nature of {d.library('MongoDB')}, during development when models are modified, nothing needs to be done to adapt to the latest schema. <br />
+  This module provides an {d.library('MongoDB')}-based implementation for the {d.module('Model')}.  This source allows the {d.module('Model')} module to read, write and query against {d.library('MongoDB')}.. Given the dynamic nature of {d.library('MongoDB')}, during development when models are modified, nothing needs to be done to adapt to the latest schema. <br />
 
   Supported features:
   <ul>

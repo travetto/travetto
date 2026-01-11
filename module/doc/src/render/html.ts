@@ -6,8 +6,8 @@ import { PackageUtil } from '@travetto/manifest';
 import { highlight } from './code-highlight.ts';
 import type { RenderProvider, RenderState } from '../types.ts';
 import { c, getComponentName } from '../jsx.ts';
-import { MOD_MAPPING } from '../mapping/mod-mapping.ts';
-import { LIB_MAPPING } from '../mapping/lib-mapping.ts';
+import { MODULES } from '../mapping/module.ts';
+import { LIBRARIES } from '../mapping/library.ts';
 import type { RenderContext } from './context.ts';
 import { DocResolveUtil } from '../util/resolve.ts';
 import type { JSXElement } from '../../support/jsx-runtime.ts';
@@ -133,12 +133,12 @@ yarn add ${node.props.pkg}
     return `<img src="${context.link(props.href, props)}" alt="${props.title}">`;
   },
 
-  Mod: async ({ context, props }) => {
-    const config = MOD_MAPPING[props.name];
+  Module: async ({ context, props }) => {
+    const config = MODULES[props.name];
     return `<a class="module-link" href="${context.link(config.folder, config)}" title="${config.description}">${config.displayName}</a>`;
   },
   Library: async ({ context, props }) => {
-    const config = LIB_MAPPING[props.name];
+    const config = LIBRARIES[props.name];
     return `<a target="_blank" class="external-link" href="${context.link(config.href, config)}">${config.title}</a>`;
   },
 
@@ -146,8 +146,8 @@ yarn add ${node.props.pkg}
   Header: async ({ props }) => `<h1>${props.title} ${props.description ? `\n<small>${props.description}</small>\n` : ''}</h1>\n`,
 
   StdHeader: async state => {
-    const mod = state.node.props.mod ?? Runtime.main.name;
-    const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(mod)!.sourcePath);
+    const module = state.node.props.module ?? Runtime.main.name;
+    const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(module)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;
     let install = '';

@@ -29,8 +29,8 @@ export class ParameterSelector {
   static async #getRipGrepPath(): Promise<string> {
     if (!this.#ripGrepPath) {
       for (const folder of ['node_modules.asar.unpacked', 'node_modules']) {
-        for (const mod of ['vscode-ripgrep', '@vscode/ripgrep']) {
-          const file = path.resolve(vscode.env.appRoot, folder, mod, 'bin', 'rg');
+        for (const module of ['vscode-ripgrep', '@vscode/ripgrep']) {
+          const file = path.resolve(vscode.env.appRoot, folder, module, 'bin', 'rg');
           if (await fs.stat(file).catch(() => false)) {
             this.#ripGrepPath = file;
             break;

@@ -38,16 +38,16 @@ export class RepoExecCommand implements CliCommandShape {
 
     await RepoExecUtil.execOnModules(
       this.changed ? 'changed' : 'workspace',
-      mod => spawn(cmd, finalArgs, {
-        cwd: mod.sourceFolder,
+      module => spawn(cmd, finalArgs, {
+        cwd: module.sourceFolder,
         env: {
           ...process.env,
-          ...Env.TRV_MODULE.export(mod.name),
+          ...Env.TRV_MODULE.export(module.name),
           ...Env.TRV_MANIFEST.export(undefined)
         }
       }),
       {
-        progressMessage: mod => `Running '${cmd} ${finalArgs.join(' ')}' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
+        progressMessage: module => `Running '${cmd} ${finalArgs.join(' ')}' [%idx/%total] ${module?.sourceFolder ?? ''}`,
         showStdout: this.showStdout,
         prefixOutput: this.prefixOutput,
         workerCount: this.workers,

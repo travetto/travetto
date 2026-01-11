@@ -26,8 +26,8 @@ export class Context {
 
   static #meetsRequirement(modules: string[], desired: string[]): boolean {
     let valid = true;
-    for (const mod of desired) {
-      valid = valid && modules.includes(mod);
+    for (const module of desired) {
+      valid = valid && modules.includes(module);
       if (!valid) {
         break;
       }
@@ -108,7 +108,7 @@ export class Context {
 
   templateContext(): Record<string, unknown> {
     const modules = [...this.#dependencies, ...this.#devDependencies]
-      .map(mod => path.basename(mod))
+      .map(module => path.basename(module))
       .reduce((ctx, value) => ({ ...ctx, [value.replace(/[-]/g, '_')]: true }), {});
     const moduleNames = [...Object.keys(modules)];
 
@@ -127,7 +127,7 @@ export class Context {
         devDependencies: [...new Set(this.#devDependencies)].toSorted((a, b) => a.localeCompare(b)),
       },
       ...this.#featureContexts,
-      ...moduleNames.map(mod => ({ [`module_${mod}`]: true }))
+      ...moduleNames.map(module => ({ [`module_${module}`]: true }))
     );
 
     return context;

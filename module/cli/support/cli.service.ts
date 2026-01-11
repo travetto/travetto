@@ -13,7 +13,7 @@ export class CliServiceCommand implements CliCommandShape {
   async #getServices(services: string[]): Promise<ServiceDescriptor[]> {
     return (await Promise.all(
       RuntimeIndex.find({
-        module: mod => mod.roles.includes('std'),
+        module: module => module.roles.includes('std'),
         folder: folder => folder === 'support',
         file: file => /support\/service[.]/.test(file.sourceFile)
       })

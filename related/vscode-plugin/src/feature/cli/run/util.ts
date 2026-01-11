@@ -140,14 +140,14 @@ export class CliRunUtil {
       const moduleFlag = choice.flags.find(flag => flag.type === 'module');
       if (moduleFlag?.required) {
         modules ??= await this.getModules();
-        for (const module of modules.filter(mod => mod.workspace && mod.children.has(choice.module))) {
+        for (const module of modules.filter(module => module.workspace && module.children.has(choice.module))) {
           output.push({
             ...choice,
             prettyName: `${choice.name} [${module.name}]`,
             inputFlags: ['--module', module.name]
           });
         }
-        if (modules.find(mod => mod.workspace && mod.name === choice.module)) {
+        if (modules.find(module => module.workspace && module.name === choice.module)) {
           output.push({
             ...choice,
             prettyName: `${choice.name} [${choice.module}]`,

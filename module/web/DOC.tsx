@@ -61,7 +61,7 @@ export const text = <>
       <li>{d.input('description')} - High level description fo the controller</li>
     </ul>
 
-    Additionally, the module is predicated upon {d.mod('Di')}, and so all standard injection techniques (constructor, fields) work for registering dependencies. <br />
+    Additionally, the module is predicated upon {d.module('Di')}, and so all standard injection techniques (constructor, fields) work for registering dependencies. <br />
 
     {d.library('JSDoc')} comments can also be used to define the {d.input('title')} attribute.
 
@@ -130,7 +130,7 @@ export const text = <>
 
     <c.SubSection title='Validating Inputs'>
 
-      The module provides high level access for {d.mod('Schema')} support, via decorators, for validating and typing request inputs. <br />
+      The module provides high level access for {d.module('Schema')} support, via decorators, for validating and typing request inputs. <br />
 
       By default, all endpoint parameters are validated for type, and any additional constraints added (required, vs optional, minlength, etc).  Each parameter location ({PathParam}, {Body}, {QueryParam}, {HeaderParam}) primarily provides a source to bind the endpoint arguments from.  Once bound, the module will validate that the provided arguments are in fact valid. All validation will occur before the endpoint is ever executed, ensuring a strong contract.
 
@@ -175,7 +175,7 @@ export const text = <>
         <li>pre-request - Prepares the request for running - {TrustProxyInterceptor}</li>
         <li>request - Handles inbound request, validation, and body preparation - {DecompressInterceptor}, {AcceptInterceptor}, {BodyInterceptor}, {CookieInterceptor} </li>
         <li>response - Prepares outbound response - {CompressInterceptor}, {CorsInterceptor}, {EtagInterceptor}, {CacheControlInterceptor} </li>
-        <li>application - Lives outside of the general request/response behavior, {d.mod('AuthWeb')} uses this for login and logout flows.</li>
+        <li>application - Lives outside of the general request/response behavior, {d.module('AuthWeb')} uses this for login and logout flows.</li>
       </ol>
     </c.SubSection>
 
@@ -245,7 +245,7 @@ export const text = <>
       <c.SubSubSection title={CacheControlInterceptor.name}>
         {CacheControlInterceptor} by default, enforces whatever caching policy is established on a given endpoint using the {CacheControl} decorator.   Additionally, the interceptor retains knowledge if it is running on a private endpoint, or not.  If the endpoint is deemed private it affects the caching header accordingly. If the endpoint directly returns a {d.input('Cache-Control')} header, that takes precedence and all other logic is ignored. <br />
         This can be managed by setting {d.input('web.cache.applies: <boolean>')} in your config. <br />
-        <strong>Note</strong>: The {d.mod('AuthWeb')} module will mark endpoints as private if they require authentication.
+        <strong>Note</strong>: The {d.module('AuthWeb')} module will mark endpoints as private if they require authentication.
 
       </c.SubSubSection>
     </c.SubSection>
@@ -270,7 +270,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Creating a Custom WebInterceptor'>
-    Additionally it may be desirable to create a custom interceptor.  Interceptors can be registered with the {d.mod('Di')} by implementing the {WebInterceptorContract} interface and adding an {Injectable} decorator. A simple logging interceptor:
+    Additionally it may be desirable to create a custom interceptor.  Interceptors can be registered with the {d.module('Di')} by implementing the {WebInterceptorContract} interface and adding an {Injectable} decorator. A simple logging interceptor:
 
     <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
 

@@ -8,16 +8,16 @@ import { FileLoader } from './file-loader.ts';
 class $RuntimeResources extends FileLoader {
   #computed: string[];
   #env: string;
-  #mod: string;
+  #module: string;
 
   constructor() {
     super([]);
   }
 
   override get searchPaths(): readonly string[] {
-    if (!this.#computed || this.#env !== Env.TRV_RESOURCES.value || this.#mod !== Env.TRV_MODULE.value) {
+    if (!this.#computed || this.#env !== Env.TRV_RESOURCES.value || this.#module !== Env.TRV_MODULE.value) {
       this.#env = Env.TRV_RESOURCES.value!;
-      this.#mod = Env.TRV_MODULE.value!;
+      this.#module = Env.TRV_MODULE.value!;
       this.#computed = Runtime.resourcePaths();
     }
     return this.#computed;

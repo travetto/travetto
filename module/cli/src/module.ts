@@ -25,10 +25,10 @@ export class CliModuleUtil {
     }
 
     const out = new Map<string, IndexedModule>();
-    for (const mod of await CliScmUtil.findChangedModules(fromHash, toHash)) {
-      out.set(mod.name, mod);
+    for (const module of await CliScmUtil.findChangedModules(fromHash, toHash)) {
+      out.set(module.name, module);
       if (transitive) {
-        for (const sub of await RuntimeIndex.getDependentModules(mod, 'parents')) {
+        for (const sub of await RuntimeIndex.getDependentModules(module, 'parents')) {
           out.set(sub.name, sub);
         }
       }
@@ -48,7 +48,7 @@ export class CliModuleUtil {
     return (mode === 'changed' ?
       await this.findChangedModulesRecursive(fromHash, toHash, true) :
       [...RuntimeIndex.getModuleList(mode)].map(name => RuntimeIndex.getModule(name)!)
-    ).filter(mod => mod.sourcePath !== Runtime.workspace.path);
+    ).filter(module => module.sourcePath !== Runtime.workspace.path);
   }
 
   /**
@@ -59,13 +59,13 @@ export class CliModuleUtil {
     const get = (name: string): ModuleGraphEntry =>
       childMap.has(name) ? childMap.get(name)! : childMap.set(name, { children: new Set(), name, active: new Set() }).get(name)!;
 
-    for (const mod of modules) {
-      get(mod.name).parents = [...mod.parents];
-      get(mod.name).children = new Set(mod.children);
-      for (const parentModule of mod.parents) {
+    for (const module of modules) {
+      get(module.name).parents = [...module.parents];
+      get(module.name).children = new Set(module.children);
+      for (const parentModule of module.parents) {
         const parent = get(parentModule);
-        parent.children.add(mod.name); // Store child into parent
-        parent.active.add(mod.name);
+        parent.children.add(module.name); // Store child into parent
+        parent.active.add(module.name);
       }
     }
 
@@ -91,13 +91,13 @@ export class CliModuleUtil {
   /**
    * Determine if module has a given dependency
    */
-  static async moduleHasDependency(modName: string, depModName: string): Promise<boolean> {
-    if (modName === depModName) {
+  static async moduleHasDependency(moduleName: string, dependencyModuleName: string): Promise<boolean> {
+    if (moduleName === dependencyModuleName) {
       return true;
     }
-    const mods = await this.findModules('all');
-    const graph = this.getDependencyGraph(mods);
-    return graph[modName].includes(depModName);
+    const modules = await this.findModules('all');
+    const graph = this.getDependencyGraph(modules);
+    return graph[moduleName].includes(dependencyModuleName);
   }
 
   /**
@@ -115,8 +115,8 @@ export class CliModuleUtil {
         return [];
       }
     } else {
-      const mods = await this.findModules(config.changed ? 'changed' : 'workspace', undefined, 'HEAD');
-      return mods.map(mod => mod.sourcePath);
+      const modules = await this.findModules(config.changed ? 'changed' : 'workspace', undefined, 'HEAD');
+      return modules.map(module => module.sourcePath);
     }
   }
 }

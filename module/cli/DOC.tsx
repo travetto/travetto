@@ -120,8 +120,8 @@ export const text = <>
 
     The flag files can be included in one of a few ways:
     <ul>
-      <li>{d.input('+=<name>')} - This translates into {d.input('<mod>/support/<name>.flags')}, which is a convenient shorthand.</li>
-      <li>{d.input('+=<mod>/path/file.flags')} - This is a path-related file that will be resolved from the module's location.</li>
+      <li>{d.input('+=<name>')} - This translates into {d.input('<module>/support/<name>.flags')}, which is a convenient shorthand.</li>
+      <li>{d.input('+=<module>/path/file.flags')} - This is a path-related file that will be resolved from the module's location.</li>
       <li>{d.input('+=/path/file.flags')} - This is an absolute path that will be read from the root of the file system.</li>
     </ul>
 
@@ -131,7 +131,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='VSCode Integration'>
-    By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  {d.mod('Web')} does expose a cli target {d.input('web:http')} that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the {d.library('TravettoPlugin')}. This is achieved by setting the {d.input('runTarget')} field on the {CliCommand} decorator.  This means the target will be visible within the editor tooling.
+    By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  {d.module('Web')} does expose a cli target {d.input('web:http')} that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the {d.library('TravettoPlugin')}. This is achieved by setting the {d.input('runTarget')} field on the {CliCommand} decorator.  This means the target will be visible within the editor tooling.
 
     <c.Code title='Simple Run Target' src='doc/cli.run_simple.ts' />
   </c.Section>
@@ -141,11 +141,11 @@ export const text = <>
     <c.Code title='Anatomy of a Command' src='src/types.ts' startRe={/interface CliCommandShape/} endRe={/^\}/} />
 
     <c.SubSection title='Dependency Injection'>
-      If the goal is to run a more complex application, which may include depending on {d.mod('Di')}, we can take a look at {d.mod('Web')}'s target:
+      If the goal is to run a more complex application, which may include depending on {d.module('Di')}, we can take a look at {d.module('Web')}'s target:
 
       <c.Code title='Simple Run Target' src='../web-http/support/cli.web_http.ts' />
 
-      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {Runtime} {d.field('name')} defined in the {d.mod('Runtime')} module. <br />
+      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {Runtime} {d.field('name')} defined in the {d.module('Runtime')} module. <br />
 
       The {d.input('module')} field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
     </c.SubSection>

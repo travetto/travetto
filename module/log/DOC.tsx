@@ -18,7 +18,7 @@ const ConsoleEventContract = toConcrete<ConsoleEvent>();
 
 export const text = <>
   <c.StdHeader />
-  This module provides logging functionality, building upon {ConsoleManager} in the {d.mod('Runtime')} module.  This is all ultimately built upon {d.library('NodeConsole')} operations. The logging infrastructure is built upon the {d.mod('Di')} system, and so new loggers can be created that rely upon dependency injected services and sources.
+  This module provides logging functionality, building upon {ConsoleManager} in the {d.module('Runtime')} module.  This is all ultimately built upon {d.library('NodeConsole')} operations. The logging infrastructure is built upon the {d.module('Di')} system, and so new loggers can be created that rely upon dependency injected services and sources.
 
   <c.Section title='Extending the Common Logger'>
     By default, the system ships with the {CommonLogger}, and by default will leverage the {LineLogFormatter} and the {ConsoleLogAppender}. The configuration {CommonLoggerConfig} provides two configuration variables that allows for switching out {LineLogFormatter} for the {JsonLogFormatter}, depending on the value of {d.field('CommonLoggerConfig.format')}.  Additionally the {ConsoleLogAppender} can be swapped out for the {FileLogAppender} depending on the value of {d.field('CommonLoggerConfig.output')}.
@@ -72,7 +72,7 @@ export const text = <>
     <ul>
       <li>{d.input('TRV_LOG_FORMAT')} - This determines whether or not the output is standard text lines, or is it output as a single line of {d.library('JSON')}</li>
       <li>{d.input('TRV_LOG_OUTPUT')} - This determines whether or not the logging goes to the console or if it is written to a file</li>
-      <li>{d.input('TRV_LOG_PLAIN')} - Allows for an override of whether or not to log colored output, this defaults to values provided by the {d.mod('Terminal')} in response to {d.input('FORCE_COLOR')} and {d.input('NO_COLOR')}</li>
+      <li>{d.input('TRV_LOG_PLAIN')} - Allows for an override of whether or not to log colored output, this defaults to values provided by the {d.module('Terminal')} in response to {d.input('FORCE_COLOR')} and {d.input('NO_COLOR')}</li>
       <li>{d.input('TRV_LOG_TIME')} - This represents what level of time logging is desired, the default is {d.input('ms')} which is millisecond output.  A value of {d.input('s')} allows for second level logging, and {d.input('false')} will disable the output. When ingesting the content into another logging, its generally desirable to suppress the initial time output as most other loggers will append as needed.</li>
     </ul>
   </c.Section>

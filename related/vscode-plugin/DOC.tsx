@@ -6,7 +6,7 @@ import { CliCommand } from '@travetto/cli';
 export const text = <>
   <c.Header title='VS Code Plugin' />
 
-  The {d.library('TravettoPlugin')} directly integrates with {d.library('Travetto')} framework, exposing some of the {d.mod('Cli')} functionality. <br />
+  The {d.library('TravettoPlugin')} directly integrates with {d.library('Travetto')} framework, exposing some of the {d.module('Cli')} functionality. <br />
 
   The currently supported features are:
   <ul>
@@ -18,7 +18,7 @@ export const text = <>
 
   <c.Section title='Testing'>
 
-    The test related functionality relies upon the {d.mod('Test')} module being installed, and used to define tests ({Suite} and {Test}).
+    The test related functionality relies upon the {d.module('Test')} module being installed, and used to define tests ({Suite} and {Test}).
 
     <c.SubSection title='Real-time Test Evaluation'>
 
@@ -49,7 +49,7 @@ export const text = <>
 
   <c.Section title='CLI Running'>
 
-    While using the {d.mod('Cli')}, a common pattern is to use {CliCommand} annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated. <br />
+    While using the {d.module('Cli')}, a common pattern is to use {CliCommand} annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated. <br />
 
     The plugin exposes this functionality as a command, to allow you to debug these commands directly from the editor.
 
@@ -118,8 +118,8 @@ export const text = <>
     <c.SubSection title='Requirements'>
       <ul>
         <li>You should have the {d.library('Travetto')} framework installed, version 1.1.0 and higher.</li>
-        <li>Tests require the {d.mod('Test')} module to be installed.</li>
-        <li>CLI command running requires the {d.mod('Cli')} module to be installed.</li>
+        <li>Tests require the {d.module('Test')} module to be installed.</li>
+        <li>CLI command running requires the {d.module('Cli')} module to be installed.</li>
       </ul>
     </c.SubSection>
   </c.Section>

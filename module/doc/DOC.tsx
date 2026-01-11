@@ -49,7 +49,7 @@ export const text = async () => {
     </c.Section>
 
     <c.Section title='Modules'>
-      You can also link to other {d.library('Travetto')} based modules as needed.  The {d.method('d.mod')} object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
+      You can also link to other {d.library('Travetto')} based modules as needed.  The {d.method('d.module')} object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
     </c.Section>
 
     <c.Section title='CLI - doc'>

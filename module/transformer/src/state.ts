@@ -169,11 +169,11 @@ export class TransformerState implements State {
     const type = this.#resolver.getType(identifier);
     const declaration = DeclarationUtil.getOptionalPrimaryDeclarationNode(type);
     const source = declaration?.getSourceFile().fileName;
-    const mod = source ? this.#resolver.getFileImportName(source, true) : undefined;
-    const file = this.#manifestIndex.getFromImport(mod ?? '')?.outputFile;
+    const moduleImport = source ? this.#resolver.getFileImportName(source, true) : undefined;
+    const file = this.#manifestIndex.getFromImport(moduleImport ?? '')?.outputFile;
     const targets = DocUtil.readAugments(type);
     const example = DocUtil.readExample(type);
-    const module = file ? mod : undefined;
+    const module = file ? moduleImport : undefined;
     const name = identifier ?
       identifier.escapedText?.toString()! :
       undefined;
@@ -285,7 +285,7 @@ export class TransformerState implements State {
    */
   getModuleIdentifier(): ts.Expression {
     if (this.#moduleIdentifier === undefined) {
-      this.#moduleIdentifier = this.factory.createUniqueName('mod');
+      this.#moduleIdentifier = this.factory.createUniqueName('Δm');
       const entry = this.#resolver.getFileImport(this.source.fileName);
       const declaration = this.factory.createVariableDeclaration(this.#moduleIdentifier, undefined, undefined,
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
@@ -304,10 +304,10 @@ export class TransformerState implements State {
    * @param name
    * @param module
    */
-  findDecorator(mod: string | Transformer, node: ts.Node, name: string, module?: string): ts.Decorator | undefined {
+  findDecorator(input: string | Transformer, node: ts.Node, name: string, module?: string): ts.Decorator | undefined {
     module = module?.replace(/[.]ts$/, ''); // Replace extension if exists
-    mod = typeof mod === 'string' ? mod : mod[ModuleNameSymbol]!;
-    const target = `${mod}:${name}`;
+    const targetScope = typeof input === 'string' ? input : input[ModuleNameSymbol]!;
+    const target = `${targetScope}:${name}`;
     const list = this.getDecoratorList(node);
     return list.find(meta => meta.targets?.includes(target) && (!module || meta.name === name && meta.module === module))?.decorator;
   }

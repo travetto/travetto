@@ -37,8 +37,8 @@ export class DockerPackOperation {
    */
   static async* writeDockerFile(config: DockerPackConfig): AsyncIterable<string[]> {
     const dockerFile = path.resolve(config.buildDirectory, 'Dockerfile');
-    const mod = await Runtime.importFrom<DockerPackFactoryModule>(config.dockerFactory);
-    const content = (await mod.factory(config)).trim();
+    const { factory } = await Runtime.importFrom<DockerPackFactoryModule>(config.dockerFactory);
+    const content = (await factory(config)).trim();
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: config.dockerFactory }}`);
 

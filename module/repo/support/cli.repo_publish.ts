@@ -14,23 +14,23 @@ export class RepoPublishCommand implements CliCommandShape {
   dryRun = true;
 
   async main(): Promise<void> {
-    const published = await RepoExecUtil.execOnModules('workspace', mod => PackageManager.isPublished(Runtime, mod), {
-      filter: mod => !!mod.workspace && !mod.internal,
-      progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
+    const published = await RepoExecUtil.execOnModules('workspace', module => PackageManager.isPublished(Runtime, module), {
+      filter: module => !!module.workspace && !module.internal,
+      progressMessage: (module) => `Checking published [%idx/%total] -- ${module?.name}`,
       showStderr: false,
-      transformResult: (mod, result) => PackageManager.validatePublishedResult(Runtime, mod, result),
+      transformResult: (module, result) => PackageManager.validatePublishedResult(Runtime, module, result),
     });
 
     if (this.dryRun) {
-      console.log('Unpublished modules', [...published.entries()].filter(entry => !entry[1]).map(([mod]) => mod.sourceFolder));
+      console.log('Unpublished modules', [...published.entries()].filter(entry => !entry[1]).map(([module]) => module.sourceFolder));
     }
 
     await RepoExecUtil.execOnModules(
-      'workspace', mod => PackageManager.publish(Runtime, mod, this.dryRun),
+      'workspace', module => PackageManager.publish(Runtime, module, this.dryRun),
       {
-        progressMessage: (mod) => `Published [%idx/%total] -- ${mod?.name}`,
+        progressMessage: (module) => `Published [%idx/%total] -- ${module?.name}`,
         showStdout: false,
-        filter: mod => published.get(mod) === false
+        filter: module => published.get(module) === false
       }
     );
   }

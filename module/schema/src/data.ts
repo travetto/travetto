@@ -3,7 +3,7 @@ import { isNumberObject, isBooleanObject, isStringObject } from 'node:util/types
 import { asConstructable, castTo, type Class, asFull, TypedObject } from '@travetto/runtime';
 import { UnknownType } from './types.ts';
 
-const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
+const REGEX_PATTERN = /[\/](.*)[\/](i|g|m|s)?/;
 
 /**
  * Utilities for data conversion and binding
@@ -110,9 +110,9 @@ export class DataUtil {
   static toRegex(input: string | RegExp): RegExp {
     if (input instanceof RegExp) {
       return input;
-    } else if (REGEX_PAT.test(input)) {
-      const [, pat, mod] = input.match(REGEX_PAT) ?? [];
-      return new RegExp(pat, mod);
+    } else if (REGEX_PATTERN.test(input)) {
+      const [, pattern, module] = input.match(REGEX_PATTERN) ?? [];
+      return new RegExp(pattern, module);
     } else {
       return new RegExp(input);
     }

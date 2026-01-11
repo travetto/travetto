@@ -69,16 +69,16 @@ export class ManifestDeltaUtil {
 
   /**
    * Collapse all files in a module
-   * @param {ManifestModule} mod
+   * @param {ManifestModule} module
    * @returns {}
    */
-  static #flattenModuleFiles(mod: ManifestModule): Record<string, ManifestModuleFile> {
+  static #flattenModuleFiles(module: ManifestModule): Record<string, ManifestModuleFile> {
     const out: Record<string, ManifestModuleFile> = {};
-    for (const key of TypedObject.keys(mod.files)) {
+    for (const key of TypedObject.keys(module.files)) {
       if (!VALID_SOURCE_FOLDERS.has(key)) {
         continue;
       }
-      for (const [name, type, date] of mod.files?.[key] ?? []) {
+      for (const [name, type, date] of module.files?.[key] ?? []) {
         if (VALID_OUTPUT_TYPE.has(type)) {
           out[name] = [name, type, date];
         }
@@ -93,7 +93,7 @@ export class ManifestDeltaUtil {
   static async produceDelta(manifest: ManifestRoot): Promise<DeltaEvent[]> {
     const deltaLeft = Object.fromEntries(
       Object.values(manifest.modules)
-        .map(mod => [mod.name, { ...mod, files: this.#flattenModuleFiles(mod) }])
+        .map(module => [module.name, { ...module, files: this.#flattenModuleFiles(module) }])
     );
 
     const out: DeltaEvent[] = [];

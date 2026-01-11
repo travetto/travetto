@@ -24,7 +24,7 @@ export const text = <>
     Specific to this CLI command, the {d.input('output')} field determines where the final folder is written that contains all the compiled source.
 
     <c.SubSection title='Entry Point Configuration'>
-      Every application requires an entry point to determine execution flow (and in {d.library('Rollup')}'s case, tree-shaking as well.).  By default the {d.mod('Cli')} acts as the entry point.  This bypasses the {d.mod('Compiler')} intentionally, as the compiler is not available at runtime. <br />
+      Every application requires an entry point to determine execution flow (and in {d.library('Rollup')}'s case, tree-shaking as well.).  By default the {d.module('Cli')} acts as the entry point.  This bypasses the {d.module('Compiler')} intentionally, as the compiler is not available at runtime. <br />
 
       Within the command line, the {d.input('args')} are positional arguments that will be passed to the entry point on application run.
 
@@ -43,7 +43,7 @@ node cli run myapp
       And this entry point would be what is executed by {d.library('Docker')}, or whatever deployment mechanism is being used.
     </c.SubSection>
     <c.SubSection title='General Packing Operations'>
-      Every {d.mod('Pack')} operation extends from the base command, and that provides some consistent operations that run on every packing command.
+      Every {d.module('Pack')} operation extends from the base command, and that provides some consistent operations that run on every packing command.
 
       <ul>
         <li>{d.method('clean')} - Empties workspace before beginning, controlled by the {d.input('--clean')} flag, defaults to on</li>

@@ -50,7 +50,7 @@ export const text = async () => {
   return root = <>
     <c.Header title='Getting Started: A Todo App' />
 
-    The following tutorial wil walk you through setting up a {d.library('Travetto')} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at {TodoRoot}.  Additionally, you can use the {d.mod('Scaffold')}.
+    The following tutorial wil walk you through setting up a {d.library('Travetto')} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at {TodoRoot}.  Additionally, you can use the {d.module('Scaffold')}.
 
     <c.Section title='Overview'>
       <TableOfContents root={() => root} />

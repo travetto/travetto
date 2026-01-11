@@ -9,7 +9,7 @@ export const ROUTES: Route[] = [
   },
   {
     path: 'overview',
-    loadComponent: () => import('./gen/overview/overview.component').then(mod => mod.OverviewComponent)
+    loadComponent: () => import('./gen/overview/overview.component').then(item => item.OverviewComponent)
   },
   ...PAGES.map(page => [page, ...(page.subs ?? [])]).flat().filter(page => !!page.loadComponent)
 ];

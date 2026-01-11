@@ -8,17 +8,17 @@ import { EnvProp, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { CoreRollupConfig } from '../../src/types.ts';
 
-function getFilesFromModule(mod: ManifestModule): string[] {
+function getFilesFromModule(module: ManifestModule): string[] {
   return [
-    ...mod.files.$index ?? [],
-    ...mod.files.src ?? [],
-    ...(mod.files.bin ?? []).filter(file => !(/bin\/trv[.]js$/.test(file[0]) && mod.name === '@travetto/cli')),
-    ...(mod.files.support ?? [])
+    ...module.files.$index ?? [],
+    ...module.files.src ?? [],
+    ...(module.files.bin ?? []).filter(file => !(/bin\/trv[.]js$/.test(file[0]) && module.name === '@travetto/cli')),
+    ...(module.files.support ?? [])
       .filter(file => !/support\/(test|doc|pack)/.test(file[0]))
   ]
     .filter(([, type]) => type === 'ts' || type === 'js' || type === 'json')
     .filter(([, , , role]) => (role ?? 'std') === 'std') // Only include standard files
-    .map(([file]) => ManifestModuleUtil.withOutputExtension(path.resolve(mod.outputFolder, file)));
+    .map(([file]) => ManifestModuleUtil.withOutputExtension(path.resolve(module.outputFolder, file)));
 }
 
 export function getOutput(): OutputOptions {
@@ -43,7 +43,7 @@ export function getEntry(): string {
 export function getFiles(entry?: string): string[] {
   return [...RuntimeIndex.getModuleList('all')]
     .map(name => RuntimeIndex.getManifestModule(name))
-    .filter(mod => mod.prod)
+    .filter(module => module.prod)
     .flatMap(getFilesFromModule)
     .filter(file => (!entry || !file.endsWith(entry)) && !file.includes('@travetto/pack/support/'));
 }
@@ -51,7 +51,7 @@ export function getFiles(entry?: string): string[] {
 export function getIgnoredModules(): ManifestModule[] {
   return [...RuntimeIndex.getModuleList('all')]
     .map(name => RuntimeIndex.getManifestModule(name))
-    .filter(mod => !mod.prod);
+    .filter(module => !module.prod);
 }
 
 export function getMinifyConfig(): Parameters<typeof terser>[0] {
@@ -80,6 +80,6 @@ export function getCoreConfig(): CoreRollupConfig {
 
   return {
     output, entry, files, envFile, minify, external,
-    ignore: new Set([...ignoreModules.map(mod => mod.name), ...ignoreFiles]),
+    ignore: new Set([...ignoreModules.map(module => module.name), ...ignoreFiles]),
   };
 }

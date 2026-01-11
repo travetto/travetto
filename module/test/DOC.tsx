@@ -84,7 +84,7 @@ AssertionError(
 
   <c.Section title='Running Tests'>
 
-    To run the tests you can either call the {d.mod('Cli')} by invoking
+    To run the tests you can either call the {d.module('Cli')} by invoking
 
     <c.Execution title='Test Help Output' cmd='trv' args={['test', '--help']} />
 

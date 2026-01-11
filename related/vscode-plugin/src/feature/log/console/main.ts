@@ -47,15 +47,15 @@ export class LogFeature extends BaseFeature {
     const out: Link[] = [];
 
     for (const match of context.line.matchAll(FILE_CLASS_REGEX)) {
-      const [full, mod, pth, suffix = ''] = match;
-      const sourceFile = Workspace.resolveManifestFileFromImport(`${mod}/${pth}`);
+      const [full, module, relativeFile, suffix = ''] = match;
+      const sourceFile = Workspace.resolveManifestFileFromImport(`${module}/${relativeFile}`);
       if (sourceFile) {
         const suffixType = suffix.includes('#') ? 'class' : suffix.includes(':') ? 'file-numbered' : 'file';
         const type = suffixType === 'class' ? 'Class' : 'File';
         out.push({
           startIndex: match.index!,
           length: full.length,
-          tooltip: `Travetto ${type}: ${mod}/${pth}${suffix}`,
+          tooltip: `Travetto ${type}: ${module}/${relativeFile}${suffix}`,
           file: sourceFile,
           line: suffixType === 'file-numbered' ? suffix.split(':')[1] : undefined,
           cls: suffixType === 'class' ? suffix.split('#')[1] : undefined
@@ -63,10 +63,10 @@ export class LogFeature extends BaseFeature {
       }
     }
     for (const match of context.line.matchAll(MODULE_REGEX)) {
-      const [, mod] = match;
-      const file = Workspace.resolveManifestFileFromImport(`${mod}/package.json`);
+      const [, module] = match;
+      const file = Workspace.resolveManifestFileFromImport(`${module}/package.json`);
       if (file) {
-        out.push({ startIndex: match.index!, length: mod.length, file });
+        out.push({ startIndex: match.index!, length: module.length, file });
       }
     }
     return out;

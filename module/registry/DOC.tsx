@@ -27,7 +27,7 @@ export const text = <>
 
       <c.Code title='Sample Registry' src='doc/registry.ts' />
 
-      The registry index is a {RegistryIndexContract} that similar to the {d.mod('Schema')}'s Schema registry and {d.mod('Di')}'s Dependency registry.
+      The registry index is a {RegistryIndexContract} that similar to the {d.module('Schema')}'s Schema registry and {d.module('Di')}'s Dependency registry.
     </c.SubSection>
     <c.SubSection title='Live Flow'>
       At runtime, the framework is designed to listen for changes and restart any running processes as needed.

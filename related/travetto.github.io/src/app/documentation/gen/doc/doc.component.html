@@ -28,7 +28,7 @@ This module provides the ability to generate documentation in <a target="_blank"
 <span class="token keyword">export</span> <span class="token keyword">const</span> text <span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">></span>
   <span class="token operator">&lt;</span>c<span class="token punctuation">.</span>StdHeader <span class="token operator">/</span><span class="token operator">></span>
 
-  Sample documentation <span class="token keyword">for</span> fictional module<span class="token punctuation">.</span>  This <span class="token keyword">module</span> fictitiously relies upon <span class="token operator">&lt;</span>c<span class="token punctuation">.</span>Mod name<span class="token operator">=</span><span class="token string">'Cache'</span> <span class="token operator">/</span><span class="token operator">></span> functionality<span class="token punctuation">.</span>
+  Sample documentation <span class="token keyword">for</span> fictional module<span class="token punctuation">.</span>  This <span class="token keyword">module</span> fictitiously relies upon <span class="token operator">&lt;</span>c<span class="token punctuation">.</span>Module name<span class="token operator">=</span><span class="token string">'Cache'</span> <span class="token operator">/</span><span class="token operator">></span> functionality<span class="token punctuation">.</span>
 
   <span class="token operator">&lt;</span>ol<span class="token operator">></span>
     <span class="token operator">&lt;</span>li<span class="token operator">></span>First<span class="token operator">&lt;</span><span class="token operator">/</span>li<span class="token operator">></span>
@@ -78,7 +78,7 @@ As you can see, you need to export a field named <code class="item field">text</
 <li><code class="item method">Install</code> - Installing a package or a program</li>
 <li><code class="item method">Library</code> - Library reference</li>
 <li><code class="item method">Method</code> - Method declaration</li>
-<li><code class="item method">Mod</code> - Node Module Reference</li>
+<li><code class="item method">Module</code> - Node Module Reference</li>
 <li><code class="item method">Note</code> - A note</li>
 <li><code class="item method">Path</code> - Path reference</li>
 <li><code class="item method">Ref</code> - File reference</li>
@@ -95,7 +95,7 @@ Some of the more common libraries are provided as the <code class="item method">
 
 <h2 id="modules">Modules</h2>
 
-You can also link to other <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> based modules as needed.  The <code class="item method">d.mod</code> object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
+You can also link to other <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> based modules as needed.  The <code class="item method">d.module</code> object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
 
 <h2 id="cli-doc">CLI - doc</h2>
 

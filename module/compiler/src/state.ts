@@ -92,8 +92,8 @@ export class CompilerState implements ts.CompilerHost {
     this.#modules = Object.values(this.#manifest.modules);
 
     // Register all inputs
-    for (const mod of this.#modules) {
-      const base = mod?.files ?? {};
+    for (const module of this.#modules) {
+      const base = module?.files ?? {};
       const files = [
         ...base.bin ?? [],
         ...base.src ?? [],
@@ -106,7 +106,7 @@ export class CompilerState implements ts.CompilerHost {
       ];
       for (const [file, type] of files) {
         if (CompilerUtil.validFile(type)) {
-          this.registerInput(mod, file);
+          this.registerInput(module, file);
         }
       }
     }
@@ -130,7 +130,7 @@ export class CompilerState implements ts.CompilerHost {
 
   getArbitraryInputFile(): string {
     const randomSource = this.#manifestIndex.getWorkspaceModules()
-      .filter(mod => mod.files.src?.length)[0]
+      .filter(module => module.files.src?.length)[0]
       .files.src[0].sourceFile;
 
     return this.getBySource(randomSource)!.sourceFile;

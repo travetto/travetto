@@ -13,7 +13,7 @@ export const text = async () => {
     <c.StdHeader />
     This module provides support for enhanced AST transformations, and declarative transformer registration, with common patterns to support all the transformers used throughout the framework. Transformations are located by {d.path('support/transformer.<name>.ts')} as the filename. <br />
 
-    The module is primarily aimed at extremely advanced usages for things that cannot be detected at runtime.  The {d.mod('Registry')} module already has knowledge of all {d.input('class')}es and {d.input('field')}s, and is able to listen to changes there.  Many of the modules build upon work by some of the foundational transformers defined in {d.mod('Manifest')}, {d.mod('Registry')}, {d.mod('Schema')} and {d.mod('Di')}.  These all center around defining a registry of classes, and associated type information. <br />
+    The module is primarily aimed at extremely advanced usages for things that cannot be detected at runtime.  The {d.module('Registry')} module already has knowledge of all {d.input('class')}es and {d.input('field')}s, and is able to listen to changes there.  Many of the modules build upon work by some of the foundational transformers defined in {d.module('Manifest')}, {d.module('Registry')}, {d.module('Schema')} and {d.module('Di')}.  These all center around defining a registry of classes, and associated type information. <br />
 
     Because working with the {d.library('Typescript')} API can be delicate (and open to breaking changes), creating new transformers should be done cautiously.
 

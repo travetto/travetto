@@ -18,7 +18,7 @@ const routes: Routes = [
       },
       {
         path: 'guide',
-        loadComponent: () => import('./app/documentation/gen/todo-app/todo-app.component').then(mod => mod.GuideComponent),
+        loadComponent: () => import('./app/documentation/gen/todo-app/todo-app.component').then(item => item.GuideComponent),
       },
       {
         path: 'blog',
@@ -27,7 +27,7 @@ const routes: Routes = [
       {
         path: 'docs',
         component: DocumentationComponent,
-        loadChildren: () => import('./app/documentation/documentation.module').then(mod => mod.ROUTES)
+        loadChildren: () => import('./app/documentation/documentation.module').then(item => item.ROUTES)
       }
     ]
   }, {

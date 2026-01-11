@@ -7,7 +7,7 @@ import { Links } from './support/doc.support.ts';
 
 export const text = <>
   <c.StdHeader />
-  This module provides an enhanced query contract for {d.mod('Model')} implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.
+  This module provides an enhanced query contract for {d.module('Model')} implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.
 
   <c.Section title='Contracts'>
     <c.SubSection title='Query'>
@@ -40,9 +40,9 @@ export const text = <>
         </tr>
       </thead>
       <tbody>
-        <tr><td>{d.mod('ModelElasticsearch')}</td><td>X</td><td>X</td><td>X</td></tr>
-        <tr><td>{d.mod('ModelMongo')}</td><td>X'</td><td>X'</td><td>X'</td></tr>
-        <tr><td>{d.mod('ModelSql')}</td><td>X'</td><td>X'</td><td>X'</td></tr>
+        <tr><td>{d.module('ModelElasticsearch')}</td><td>X</td><td>X</td><td>X</td></tr>
+        <tr><td>{d.module('ModelMongo')}</td><td>X'</td><td>X'</td><td>X'</td></tr>
+        <tr><td>{d.module('ModelSql')}</td><td>X'</td><td>X'</td><td>X'</td></tr>
       </tbody>
     </table>
   </c.Section>
@@ -115,7 +115,7 @@ export const text = <>
 
   <c.Section title='Custom Model Query Service'>
     In addition to the provided contracts, the module also provides common utilities and shared test suites.The common utilities are useful for
-    repetitive functionality, that is unable to be shared due to not relying upon inheritance(this was an intentional design decision).This allows for all the {d.mod('ModelQuery')} implementations to completely own the functionality and also to be able to provide additional / unique functionality that goes beyond the interface.
+    repetitive functionality, that is unable to be shared due to not relying upon inheritance(this was an intentional design decision).This allows for all the {d.module('ModelQuery')} implementations to completely own the functionality and also to be able to provide additional / unique functionality that goes beyond the interface.
 
     To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 

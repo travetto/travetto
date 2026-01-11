@@ -56,19 +56,19 @@ export class ManifestIndex {
     this.init(`${this.outputRoot}/node_modules/${module}`);
   }
 
-  #moduleFiles(mod: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
+  #moduleFiles(module: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([file, type, _ts, role = 'std']) => {
       const isSource = type === 'ts' || type === 'js';
-      const sourceFile = path.resolve(this.#manifest.workspace.path, mod.sourceFolder, file);
+      const sourceFile = path.resolve(this.#manifest.workspace.path, module.sourceFolder, file);
       const js = isSource ? ManifestModuleUtil.withOutputExtension(file) : file;
-      const outputFile = this.#resolveOutput(mod.outputFolder, js);
-      const modImport = `${mod.name}/${file}`;
-      let id = `${mod.name}:${file}`;
+      const outputFile = this.#resolveOutput(module.outputFolder, js);
+      const moduleImport = `${module.name}/${file}`;
+      let id = `${module.name}:${file}`;
       if (isSource) {
         id = ManifestModuleUtil.withoutSourceExtension(id);
       }
 
-      return { id, type, sourceFile, outputFile, import: modImport, role, relativeFile: file, module: mod.name };
+      return { id, type, sourceFile, outputFile, import: moduleImport, role, relativeFile: file, module: module.name };
     });
   }
 
@@ -82,18 +82,18 @@ export class ManifestIndex {
     this.#arbitraryLookup = undefined;
 
     this.#modules = Object.values(this.#manifest.modules)
-      .map(mod => ({
-        ...mod,
-        outputPath: this.#resolveOutput(mod.outputFolder),
-        sourcePath: path.resolve(this.#manifest.workspace.path, mod.sourceFolder),
+      .map(module => ({
+        ...module,
+        outputPath: this.#resolveOutput(module.outputFolder),
+        sourcePath: path.resolve(this.#manifest.workspace.path, module.sourceFolder),
         children: new Set(),
         files: TypedObject.fromEntries(
-          TypedObject.entries(mod.files).map(([folder, files]) => [folder, this.#moduleFiles(mod, files ?? [])])
+          TypedObject.entries(module.files).map(([folder, files]) => [folder, this.#moduleFiles(module, files ?? [])])
         )
       }));
 
-    for (const mod of this.#modules) {
-      for (const files of Object.values(mod.files ?? {})) {
+    for (const module of this.#modules) {
+      for (const files of Object.values(module.files ?? {})) {
         for (const entry of files) {
           this.#outputToEntry.set(entry.outputFile, entry);
           this.#sourceToEntry.set(entry.sourceFile, entry);
@@ -103,12 +103,12 @@ export class ManifestIndex {
         }
       }
     }
-    this.#modulesByName = Object.fromEntries(this.#modules.map(mod => [mod.name, mod]));
+    this.#modulesByName = Object.fromEntries(this.#modules.map(module => [module.name, module]));
 
     // Store child information
-    for (const mod of this.#modules) {
-      for (const parent of mod.parents) {
-        this.#modulesByName[parent]?.children.add(mod.name);
+    for (const module of this.#modules) {
+      for (const parent of module.parents) {
+        this.#modulesByName[parent]?.children.add(module.name);
       }
     }
   }
@@ -125,7 +125,7 @@ export class ManifestIndex {
    * @returns
    */
   getWorkspaceModules(): IndexedModule[] {
-    return this.#modules.filter(mod => mod.workspace);
+    return this.#modules.filter(module => module.workspace);
   }
 
   /**
@@ -134,9 +134,9 @@ export class ManifestIndex {
    */
   find(config: FindConfig): IndexedFile[] {
     const searchSpace: IndexedFile[] = [];
-    for (const mod of this.#modules) {
-      if (config.module?.(mod) ?? true) {
-        for (const [folder, files] of TypedObject.entries(mod.files)) {
+    for (const module of this.#modules) {
+      if (config.module?.(module) ?? true) {
+        for (const [folder, files] of TypedObject.entries(module.files)) {
           if (config.folder?.(folder) ?? true) {
             for (const file of files) {
               if (
@@ -213,14 +213,14 @@ export class ManifestIndex {
    * Build module list from an expression list (e.g. `@travetto/web,-@travetto/log)
    */
   getModuleList(mode: 'workspace' | 'all', exprList: string = ''): Set<string> {
-    const allMods = Object.keys(this.#manifest.modules);
-    const active = new Set<string>(mode === 'workspace' ? this.getWorkspaceModules().map(item => item.name) : allMods);
+    const allModules = Object.keys(this.#manifest.modules);
+    const active = new Set<string>(mode === 'workspace' ? this.getWorkspaceModules().map(item => item.name) : allModules);
 
     for (const expr of exprList.split(/,/g)) {
-      const [, negative, mod] = expr.trim().match(/(-|[+])?([^+\- ]{1,150})$/) ?? [];
-      if (mod) {
-        const pattern = new RegExp(`^${mod.replace(/[*]/g, '.*')}$`);
-        for (const moduleName of allMods.filter(item => pattern.test(item))) {
+      const [, negative, module] = expr.trim().match(/(-|[+])?([^+\- ]{1,150})$/) ?? [];
+      if (module) {
+        const pattern = new RegExp(`^${module.replace(/[*]/g, '.*')}$`);
+        for (const moduleName of allModules.filter(item => pattern.test(item))) {
           active[negative ? 'delete' : 'add'](moduleName);
         }
       }
@@ -239,10 +239,10 @@ export class ManifestIndex {
       const next = toProcess.shift()!;
       if (!seen.has(next)) {
         seen.add(next);
-        const mod = this.getModule(next)!;
-        toProcess.push(...mod[field]);
+        const module = this.getModule(next)!;
+        toProcess.push(...module[field]);
         if (next !== this.#manifest.main.name) { // Do not include self
-          out.push(mod);
+          out.push(module);
         }
       }
     }
@@ -256,7 +256,7 @@ export class ManifestIndex {
     const base = this.#manifest.workspace.path;
     const lookup = this.#arbitraryLookup ??= ManifestUtil.lookupTrie(
       Object.values(this.#manifest.modules),
-      mod => mod.sourceFolder.split('/'),
+      module => module.sourceFolder.split('/'),
       sub =>
         !existsSync(path.resolve(base, ...sub, 'package.json')) &&
         !existsSync(path.resolve(base, ...sub, '.git'))
@@ -276,8 +276,8 @@ export class ManifestIndex {
   /**
    * Get manifest module by name
    */
-  getManifestModule(mod: string): ManifestModule {
-    return this.manifest.modules[mod];
+  getManifestModule(module: string): ManifestModule {
+    return this.manifest.modules[module];
   }
 
   /**

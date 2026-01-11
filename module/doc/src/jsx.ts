@@ -1,17 +1,17 @@
 import { castTo, TypedObject } from '@travetto/runtime';
 
-import type { LIB_MAPPING } from './mapping/lib-mapping.ts';
-import type { MOD_MAPPING } from './mapping/mod-mapping.ts';
+import type { LIBRARIES } from './mapping/library.ts';
+import type { MODULES } from './mapping/module.ts';
 import type { CodeProps, RunConfig } from './util/types.ts';
 
 import { createElement, type JSXElement, type JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
 
 type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
-type StdHeaderProps = { mod?: string, install?: boolean };
+type StdHeaderProps = { module?: string, install?: boolean };
 type HeaderProps = { title: string, description?: string };
-type ModProps = { name: keyof typeof MOD_MAPPING };
-type LibraryProps = { name: keyof typeof LIB_MAPPING };
+type ModuleProps = { name: keyof typeof MODULES };
+type LibraryProps = { name: keyof typeof LIBRARIES };
 type LinkProps = { title: string, href: string, line?: number };
 type CodeLinkProps = { title: string, src: string | Function, startRe: RegExp };
 type Named = { name: string };
@@ -46,13 +46,13 @@ const StdHeader: CompFn<StdHeaderProps> = () => EMPTY; // Standard module header
 const Header: CompFn<HeaderProps> = () => EMPTY; // Basic module header
 const Execution: CompFn<ExecProps> = () => EMPTY; // Run a command, and include the output as part of the document
 
-const Mod: CompFn<ModProps> = () => EMPTY; // Node Module Reference
+const Module: CompFn<ModuleProps> = () => EMPTY; // Node Module Reference
 const Library: CompFn<LibraryProps> = () => EMPTY; // Library reference
 
 export const c = {
   Input, Field, Method, Command, Path, Class,
   Anchor, Library, Ref, File, Image, CodeLink,
-  Mod, Note, Header, StdHeader,
+  Module, Note, Header, StdHeader,
   Section, SubSection, SubSubSection,
   Code, Execution, Terminal, Install, Config
 } as const;
@@ -103,6 +103,6 @@ export const d = {
   path: (name: string) => createElement(c.Path, { name }),
   command: (name: string) => createElement(c.Command, { name }),
   field: (name: string) => createElement(c.Field, { name }),
-  library: (name: keyof typeof LIB_MAPPING) => createElement(c.Library, { name }),
-  mod: (name: keyof typeof MOD_MAPPING) => createElement(c.Mod, { name }),
+  library: (name: keyof typeof LIBRARIES) => createElement(c.Library, { name }),
+  module: (name: keyof typeof MODULES) => createElement(c.Module, { name }),
 };

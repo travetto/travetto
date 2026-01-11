@@ -173,7 +173,7 @@ $ trv pack:docker -x /dev/stdout web:http
 export DIST=/tmp/<temp-folder>
 export TRV_OUT=<workspace-root>/.trv/output
 export ROOT=<workspace-root>/related/todo-app
-export MOD=@travetto/todo-app
+export MODULE=@travetto/todo-app
 
 # Cleaning Output $DIST 
 
@@ -188,7 +188,7 @@ echo "Writing $DIST/.env"
 
 echo "NODE_ENV=production" > $DIST/.env
 echo "TRV_MANIFEST=manifest.json" >> $DIST/.env
-echo "TRV_MODULE=$MOD" >> $DIST/.env
+echo "TRV_MODULE=$MODULE" >> $DIST/.env
 echo "TRV_CLI_IPC=" >> $DIST/.env
 echo "TRV_RESOURCE_OVERRIDES=@#resources=@@#resources" >> $DIST/.env
 
@@ -225,7 +225,7 @@ cp -r -p $ROOT/resources/* $DIST/resources
 
 echo "Writing Manifest manifest.json"
 
-TRV_MODULE=$MOD npx trvc manifest --prod $DIST/manifest.json
+TRV_MODULE=$MODULE npx trvc manifest --prod $DIST/manifest.json
 
 # Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv.ts 
 
@@ -238,7 +238,7 @@ export BUNDLE_SOURCEMAP=false
 export BUNDLE_SOURCES=false
 export BUNDLE_OUTPUT=$DIST
 export BUNDLE_ENV_FILE=.env
-export TRV_MANIFEST=$TRV_OUT/node_modules/$MOD
+export TRV_MANIFEST=$TRV_OUT/node_modules/$MODULE
 cd $TRV_OUT
 npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT

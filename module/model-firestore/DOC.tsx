@@ -7,7 +7,7 @@ import { FirestoreModelService } from './src/service.ts';
 
 export const text = <>
   <c.StdHeader />
-  This module provides an {d.library('Firestore')}-based implementation of the {d.mod('Model')}.  This source allows the {d.mod('Model')} module to read, write and query against {d.library('Firestore')}. <br />
+  This module provides an {d.library('Firestore')}-based implementation of the {d.module('Model')}.  This source allows the {d.module('Model')} module to read, write and query against {d.library('Firestore')}. <br />
 
   Supported features:
   <ul>
