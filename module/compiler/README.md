@@ -42,7 +42,7 @@ In addition to the normal output, the compiler supports an environment variable 
 $ TRV_BUILD=debug trvc build
 
 2029-03-14T04:00:00.618Z info  [server         ] Starting server http://127.0.0.1:25539
-2029-03-14T04:00:00.837Z debug [main           ] Start Server
+2029-03-14T04:00:00.837Z debug [compiler-exec  ] Start Server
 2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
 2029-03-14T04:00:02.450Z info  [compiler-exec  ] Launching compiler
 2029-03-14T04:00:02.762Z debug [server         ] Compilation started
@@ -58,7 +58,7 @@ $ TRV_BUILD=debug trvc build
 2029-03-14T04:00:08.179Z debug [server         ] Server close event
 2029-03-14T04:00:08.588Z info  [server         ] Closed down server
 2029-03-14T04:00:09.493Z debug [server         ] Finished processing events
-2029-03-14T04:00:10.395Z debug [main           ] End Server
+2029-03-14T04:00:10.395Z debug [compiler-exec  ] End Server
 ```
 
 **Terminal: Sample trv output with default log level**

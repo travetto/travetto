@@ -86,11 +86,10 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
       await CompilerManager.compileIfNecessary(ctx, client);
       Log.initLevel('none');
       process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
-      if (args) {
-        process.argv = [process.argv0, ...args];
-      }
+      const importTarget = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', args[0]);
+      process.argv = [process.argv0, importTarget, ...args.slice(1)];
       // Return function to run import on a module
-      return import(CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', args[0]));
+      return import(importTarget);
     }
     default: console.error(`\nUnknown trvc operation: ${operation}\n${HELP}`);
   }

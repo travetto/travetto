@@ -39,8 +39,9 @@ This is the file the linter will use, and any other tooling (e.g. IDEs).
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/eslint.config.js">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-javascript">process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_MANIFEST</span> <span class="token operator">=</span> <span class="token string">'@travetto/mono-repo'</span><span class="token punctuation">;</span>
-<span class="token keyword">export</span> <span class="token punctuation">{{'{'}}</span> rules <span class="token keyword">as</span> <span class="token keyword">default</span> <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js'</span><span class="token punctuation">;</span></code></pre>
+    <pre><code class="language-javascript">process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_MANIFEST</span> <span class="token operator">=</span> <span class="token string">'./.trv/output/node_modules/@travetto/mono-repo'</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> rules <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token punctuation">{{'{'}}</span> rules <span class="token keyword">as</span> <span class="token keyword">default</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>
   </figure>
 
 The output is tied to whether or not you are using the <a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">CommonJS</a> or <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> format.

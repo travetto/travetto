@@ -31,8 +31,9 @@ This is the file the linter will use, and any other tooling (e.g. IDEs).
 
 **Code: Sample configuration**
 ```javascript
-process.env.TRV_MANIFEST = '@travetto/mono-repo';
-export { rules as default } from './.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js';
+process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/mono-repo';
+const { rules } = await import('./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js');
+export { rules as default };
 ```
 
 The output is tied to whether or not you are using the [CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html) format.

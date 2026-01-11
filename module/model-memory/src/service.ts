@@ -10,7 +10,7 @@ import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, ModelBlobUtil,
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, ModelBlobUtil, type ModelIdSource,
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -51,7 +51,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     unsorted: new Map<string, Map<string, Set<string>>>()
   };
 
-  idSource = ModelCrudUtil.uuidSource();
+  idSource: ModelIdSource = ModelCrudUtil.uuidSource();
   config: MemoryModelConfig;
 
   constructor(config: MemoryModelConfig) { this.config = config; }
