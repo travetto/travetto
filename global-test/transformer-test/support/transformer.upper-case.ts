@@ -1,11 +1,11 @@
 import type ts from 'typescript';
 
-import { type TransformerState, RegisterHandler } from '@travetto/transformer';
+import { type TransformerState, TransformerHandler } from '@travetto/transformer';
 
 export class MakeUpper {
 
   static {
-    RegisterHandler(this, this.handleMethod, 'after', 'method');
+    TransformerHandler(this, this.handleMethod, 'after', 'method');
   }
 
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): typeof node {

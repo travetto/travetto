@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, CoreUtil, RegisterHandler } from '@travetto/transformer';
+import { type TransformerState, CoreUtil, TransformerHandler } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function.ts';
 import { MetadataRegistrationUtil } from './transformer/metadata.ts';
@@ -19,10 +19,10 @@ interface MetadataInfo {
 export class RegisterTransformer {
 
   static {
-    RegisterHandler(this, this.collectClassMetadata, 'before', 'class');
-    RegisterHandler(this, this.collectMethodMetadata, 'before', 'method');
-    RegisterHandler(this, this.registerClassMetadata, 'after', 'class');
-    RegisterHandler(this, this.registerFunctionMetadata, 'before', 'function');
+    TransformerHandler(this, this.collectClassMetadata, 'before', 'class');
+    TransformerHandler(this, this.collectMethodMetadata, 'before', 'method');
+    TransformerHandler(this, this.registerClassMetadata, 'after', 'class');
+    TransformerHandler(this, this.registerFunctionMetadata, 'before', 'function');
   }
 
   /**

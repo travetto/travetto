@@ -28,6 +28,6 @@ export function getAllTransformers(inputs: Record<string, { [HandlersSymbol]?: N
 }
 
 // Store handlers in class
-export function RegisterHandler(cls: TransformerWithHandlers, fn: Function, phase: TransformPhase, type: TransformerType, target?: string[]): void {
+export function TransformerHandler(cls: TransformerWithHandlers, fn: Function, phase: TransformPhase, type: TransformerType, target?: string[]): void {
   (cls[HandlersSymbol] ??= []).push({ key: fn.name, [phase]: fn.bind(cls), type, target });
 }

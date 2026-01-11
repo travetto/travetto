@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { type TransformerState, DocUtil, DeclarationUtil, DecoratorUtil, RegisterHandler } from '@travetto/transformer';
+import { type TransformerState, DocUtil, DeclarationUtil, DecoratorUtil, TransformerHandler } from '@travetto/transformer';
 import { SchemaTransformUtil } from './transformer/util.ts';
 
 const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
@@ -21,13 +21,13 @@ interface AutoState {
 export class SchemaTransformer {
 
   static {
-    RegisterHandler(this, this.startSchema, 'before', 'class', ['Schema']);
-    RegisterHandler(this, this.finalizeSchema, 'after', 'class', ['Schema']);
-    RegisterHandler(this, this.processSchemaMethod, 'before', 'method');
-    RegisterHandler(this, this.processSchemaMethod, 'before', 'static-method');
-    RegisterHandler(this, this.processSchemaField, 'before', 'property');
-    RegisterHandler(this, this.processSchemaGetter, 'before', 'getter');
-    RegisterHandler(this, this.processSchemaSetter, 'before', 'setter');
+    TransformerHandler(this, this.startSchema, 'before', 'class', ['Schema']);
+    TransformerHandler(this, this.finalizeSchema, 'after', 'class', ['Schema']);
+    TransformerHandler(this, this.processSchemaMethod, 'before', 'method');
+    TransformerHandler(this, this.processSchemaMethod, 'before', 'static-method');
+    TransformerHandler(this, this.processSchemaField, 'before', 'property');
+    TransformerHandler(this, this.processSchemaGetter, 'before', 'getter');
+    TransformerHandler(this, this.processSchemaSetter, 'before', 'setter');
   }
 
   static isInvisible(state: AutoState & TransformerState, node: ts.Declaration, isStatic?: boolean): boolean {

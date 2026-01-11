@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, LiteralUtil, RegisterHandler } from '@travetto/transformer';
+import { type TransformerState, LiteralUtil, TransformerHandler } from '@travetto/transformer';
 
 const CONSOLE_IMPORT = '@travetto/runtime/src/console.ts';
 
@@ -23,15 +23,15 @@ const VALID_LEVELS: Record<string, string> = {
 export class ConsoleLogTransformer {
 
   static {
-    RegisterHandler(this, this.startClassForLog, 'before', 'class');
-    RegisterHandler(this, this.leaveClassForLog, 'after', 'class');
-    RegisterHandler(this, this.startMethodForLog, 'before', 'method');
-    RegisterHandler(this, this.startMethodForLog, 'before', 'static-method');
-    RegisterHandler(this, this.leaveMethodForLog, 'after', 'method');
-    RegisterHandler(this, this.leaveMethodForLog, 'after', 'static-method');
-    RegisterHandler(this, this.startFunctionForLog, 'before', 'function');
-    RegisterHandler(this, this.leaveFunctionForLog, 'after', 'function');
-    RegisterHandler(this, this.onLogCall, 'before', 'call');
+    TransformerHandler(this, this.startClassForLog, 'before', 'class');
+    TransformerHandler(this, this.leaveClassForLog, 'after', 'class');
+    TransformerHandler(this, this.startMethodForLog, 'before', 'method');
+    TransformerHandler(this, this.startMethodForLog, 'before', 'static-method');
+    TransformerHandler(this, this.leaveMethodForLog, 'after', 'method');
+    TransformerHandler(this, this.leaveMethodForLog, 'after', 'static-method');
+    TransformerHandler(this, this.startFunctionForLog, 'before', 'function');
+    TransformerHandler(this, this.leaveFunctionForLog, 'after', 'function');
+    TransformerHandler(this, this.onLogCall, 'before', 'call');
   }
 
   static initState(state: CustomState): void {
