@@ -67,6 +67,10 @@ export const MODULES = {
     name: '@travetto/email-nodemailer', folder: '@travetto/email-nodemailer', displayName: 'Email Nodemailer Support',
     description: 'Email transmission module.'
   },
+  Eslint: {
+    name: '@travetto/eslint', folder: '@travetto/eslint', displayName: 'ES Linting Rules',
+    description: 'ES Linting Rules'
+  },
   Image: {
     name: '@travetto/image', folder: '@travetto/image', displayName: 'Image',
     description: 'Image support, resizing, and optimization'
