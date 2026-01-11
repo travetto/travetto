@@ -22,7 +22,7 @@ export class DiagnosticManager {
   }
 
   #buildTestDiagnostics(file: string, test: TestResult): vscode.Diagnostic[] {
-    const clsName = test.classId.split(/[^a-z-/]+/i).pop();
+    const clsName = test.classId.split(/[^a-z-/]+/i).at(-1);
     const results: vscode.Diagnostic[] = [];
 
     const addError = (msg: string, line: number) => {

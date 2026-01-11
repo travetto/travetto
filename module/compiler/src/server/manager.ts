@@ -59,7 +59,6 @@ export class CompilerManager {
   /** Main entry point for compilation */
   static async compile(ctx: ManifestContext, client: CompilerClient, config: { watch?: boolean, logLevel?: CompilerLogLevel, forceRestart?: boolean }): Promise<void> {
     Log.initLevel(config.logLevel ?? 'info');
-    const log = Log.scoped('main');
     const watch = !!config.watch;
 
     if (config.forceRestart && await client.stop()) {

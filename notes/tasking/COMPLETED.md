@@ -272,6 +272,8 @@ Platform Support
 ## Native Typescript Execution
 Rework compiler setup to no longer need the pre-compilation process and leverage type stripping, now that we are fully ESM
 * Decorators will need to be rethought if this is the goal
+* proxy typescript when possible to delay loading
+* Change manifest ownership to be the domain of the compiler
 
 ### Transformer simplification
 * Drop decorators for explicit registration

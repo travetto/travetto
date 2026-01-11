@@ -30,7 +30,7 @@ export class CompilerClient {
   #url: string;
   #log: LogShape;
   #handle: Record<'compiler' | 'server', ProcessHandle>;
-  #ctx: ManifestContext
+  #ctx: ManifestContext;
 
   constructor(ctx: ManifestContext, log: LogShape) {
     this.#ctx = ctx;

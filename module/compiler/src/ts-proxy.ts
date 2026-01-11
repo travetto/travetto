@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 import type ts from 'typescript';
 
-const state: { module: typeof ts } = { module: undefined! };
+let state: typeof ts | undefined;
+export const tsProxyInit = (): Promise<unknown> => import('typescript').then(module => { state = module.default; });
 
-export const tsProxyInit = () => import('typescript').then(module => { state.module = module.default; });
-
-export const tsProxy = new Proxy({}, {
-  get(_, prop: string) { return state.module[prop as keyof typeof ts]; }
+export const tsProxy = new Proxy({}!, {
+  get(_, prop: string): unknown {
+    return state![prop as keyof typeof ts];
+  }
 }) as typeof ts;

@@ -12,8 +12,9 @@ export class ESLintConfigureCommand implements CliCommandShape {
   async main(): Promise<void> {
     const entry = RuntimeIndex.getFromImport('@travetto/eslint/support/bin/eslint-config');
     const content = `
-process.env.TRV_MANIFEST = '${Runtime.workspace.name}';
-export { rules as default } from '${entry?.outputFile}';
+process.env.TRV_MANIFEST = '${Runtime.workspaceRelative(RuntimeIndex.outputRoot, RuntimeIndex.getModule(Runtime.main.name)!.outputFolder)}';
+const { rules } = await import('${entry?.outputFile}');
+export { rules as default };
 `;
     const output = Runtime.workspaceRelative('eslint.config.js');
     await fs.writeFile(output, content.replaceAll(Runtime.workspace.path, '.').trim());
