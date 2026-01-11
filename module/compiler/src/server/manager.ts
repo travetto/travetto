@@ -2,23 +2,22 @@ import { spawn } from 'node:child_process';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerEvent } from '../types.ts';
+import type { CompilerEvent, CompilerLogLevel } from '../types.ts';
 import { AsyncQueue } from '../queue.ts';
 import { Log } from '../log.ts';
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
+import type { CompilerClient } from './client.ts';
+import { CompilerServer } from './server.ts';
 
 const log = Log.scoped('compiler-exec');
 
 /**
  * Running the compiler
  */
-export class CompilerRunner {
-
-  /**
-   * Run compile process
-   */
-  static async * runProcess(ctx: ManifestContext, watching: boolean, signal: AbortSignal): AsyncIterable<CompilerEvent> {
+export class CompilerManager {
+  /** Run compile process */
+  static async * #runTarget(ctx: ManifestContext, watching: boolean, signal: AbortSignal): AsyncIterable<CompilerEvent> {
     if (signal.aborted) {
       log.debug('Skipping, shutting down');
       return;
@@ -55,5 +54,33 @@ export class CompilerRunner {
     process.off('SIGINT', kill);
 
     log.debug('Finished');
+  }
+
+  /** Main entry point for compilation */
+  static async compile(ctx: ManifestContext, client: CompilerClient, watch: boolean, logLevel: CompilerLogLevel = 'info'): Promise<void> {
+    Log.initLevel(logLevel);
+
+    const server = await new CompilerServer(ctx, watch).listen();
+    const log = Log.scoped('main');
+
+    // Wait for build to be ready
+    if (server) {
+      log.debug('Start Server');
+      await server.processEvents(signal => this.#runTarget(ctx, watch, signal));
+      log.debug('End Server');
+    } else {
+      log.info('Server already running, waiting for initial compile to complete');
+      const controller = new AbortController();
+      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: controller.signal }));
+      await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
+      controller.abort();
+    }
+  }
+
+  /** Compile only if necessary */
+  static async compileIfNecessary(ctx: ManifestContext, client: CompilerClient): Promise<void> {
+    if (!(await client.isWatching())) { // Short circuit if we can
+      await this.compile(ctx, client, false, 'error');
+    }
   }
 }

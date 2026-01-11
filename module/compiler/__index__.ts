@@ -8,5 +8,5 @@ export * from './src/util.ts';
 export * from './src/watch.ts';
 export * from './src/server/client.ts';
 export * from './src/server/server.ts';
-export * from './src/server/runner.ts';
+export * from './src/server/manager.ts';
 export * from './src/server/process-handle.ts';

@@ -1,5 +1,6 @@
 import rl from 'node:readline/promises';
 import timers from 'node:timers/promises';
+import fs from 'node:fs/promises';
 import http, { Agent } from 'node:http';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -29,8 +30,10 @@ export class CompilerClient {
   #url: string;
   #log: LogShape;
   #handle: Record<'compiler' | 'server', ProcessHandle>;
+  #ctx: ManifestContext
 
   constructor(ctx: ManifestContext, log: LogShape) {
+    this.#ctx = ctx;
     this.#url = ctx.build.compilerUrl.replace('localhost', '127.0.0.1');
     this.#log = log;
     this.#handle = { compiler: new ProcessHandle(ctx, 'compiler'), server: new ProcessHandle(ctx, 'server') };
@@ -71,8 +74,16 @@ export class CompilerClient {
   }
 
   /** Clean the server */
-  clean(): Promise<boolean> {
-    return this.#fetch('/clean', { timeout: 300 }).then(response => response.ok, () => false);
+  async clean(forceOnFailure?: boolean): Promise<boolean> {
+    const result = await this.#fetch('/clean', { timeout: 300 }).then(response => response.ok, () => false);
+    if (!result && forceOnFailure) {
+      this.#log.warn('Clean request failed, forcing cleanup');
+      try {
+        await Promise.all([this.#ctx.build.outputFolder, this.#ctx.build.typesFolder]
+          .map(file => fs.rm(CommonUtil.resolveWorkspace(this.#ctx, file), { force: true, recursive: true })));
+      } catch { }
+    }
+    return result;
   }
 
   /** Stop server and wait for shutdown */
