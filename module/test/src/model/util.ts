@@ -1,5 +1,5 @@
-import type { Counts } from './suite';
-import type { TestStatus } from './test';
+import type { Counts } from './suite.ts';
+import type { TestStatus } from './test.ts';
 
 export class TestModelUtil {
   static countsToTestStatus(counts: Counts): TestStatus {

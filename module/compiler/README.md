@@ -45,25 +45,40 @@ $ TRV_BUILD=debug trvc build
 2029-03-14T04:00:00.837Z debug [main           ] Start Server
 2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
 2029-03-14T04:00:02.450Z info  [compiler-exec  ] Launching compiler
-2029-03-14T04:00:02.762Z debug [server         ] Compilation started
-2029-03-14T04:00:02.947Z info  [server         ] State changed: init
-2029-03-14T04:00:03.093Z debug [server         ] Compiler loaded
-2029-03-14T04:00:04.003Z info  [server         ] State changed: compile-start
-2029-03-14T04:00:04.495Z info  [server         ] State changed: compile-end
-2029-03-14T04:00:05.066Z debug [server         ] Compiler process shutdown
-2029-03-14T04:00:05.307Z debug [compiler-exec  ] Finished
-2029-03-14T04:00:05.952Z debug [event-stream   ] Finished event stream
-2029-03-14T04:00:06.859Z debug [compiler-exec  ] Shutting down process
-2029-03-14T04:00:07.720Z info  [server         ] Closing down server
-2029-03-14T04:00:08.179Z debug [server         ] Server close event
-2029-03-14T04:00:08.588Z info  [server         ] Closed down server
-2029-03-14T04:00:09.493Z debug [server         ] Finished processing events
-2029-03-14T04:00:10.395Z debug [main           ] End Server
+2029-03-14T04:00:02.762Z debug [compiler-exec  ] Finished
+2029-03-14T04:00:02.947Z debug [event-stream   ] Finished event stream
+2029-03-14T04:00:03.093Z debug [compiler-exec  ] Shutting down process
+2029-03-14T04:00:04.003Z info  [server         ] Closing down server
+2029-03-14T04:00:04.495Z debug [server         ] Server close event
+2029-03-14T04:00:05.066Z info  [server         ] Closed down server
+2029-03-14T04:00:05.307Z debug [server         ] Finished processing events
+2029-03-14T04:00:05.952Z debug [main           ] End Server
 ```
 
 **Terminal: Sample trv output with default log level**
 ```bash
 $ trvc build
+
+node:internal/modules/esm/resolve:274
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module './src/ts-proxy' imported from ./src/util.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:712:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:729:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:758:52)
+    at #resolve (node:internal/modules/esm/loader:694:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:614:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:228:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file://./src/ts-proxy'
+}
+
+Node.js v25.2.1
 ```
 
 ## Compilation Architecture

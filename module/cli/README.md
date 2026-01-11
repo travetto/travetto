@@ -170,6 +170,26 @@ Options:
 ```bash
 $ trv basic:arg 20
 
+node:internal/modules/esm/resolve:274
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '<workspace-root>/module/compiler/src/ts-proxy' imported from <workspace-root>/module/compiler/src/util.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:712:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:729:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:758:52)
+    at #resolve (node:internal/modules/esm/loader:694:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:614:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:228:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file://<workspace-root>/module/compiler/src/ts-proxy'
+}
+
+Node.js v25.2.1
 Execution failed:
  * Argument volume is greater than (10)
 
@@ -233,6 +253,26 @@ $ trv basic:arg-list 10 5 3 9 8 1
 ```bash
 $ trv basic:arg-list 10 5 3 9 20 1
 
+node:internal/modules/esm/resolve:274
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '<workspace-root>/module/compiler/src/ts-proxy' imported from <workspace-root>/module/compiler/src/util.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:712:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:729:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:758:52)
+    at #resolve (node:internal/modules/esm/loader:694:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:614:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:228:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file://<workspace-root>/module/compiler/src/ts-proxy'
+}
+
+Node.js v25.2.1
 Execution failed:
  * Argument volumes[4] is greater than (10)
 

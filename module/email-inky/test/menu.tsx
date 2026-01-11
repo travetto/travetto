@@ -5,7 +5,7 @@ import assert from 'node:assert';
 import { Test, Suite } from '@travetto/test';
 import { Item, Menu } from '@travetto/email-inky';
 
-import { renderJSX } from './util';
+import { renderJSX } from './util.ts';
 
 @Suite('Menu')
 class MenuComponentTest {

@@ -1,8 +1,8 @@
 import { type Any, castTo, type ClassInstance, getClass } from '@travetto/runtime';
 
-import type { SchemaMethodConfig } from '../service/types';
-import { SchemaRegistryIndex } from '../service/registry-index';
-import type { MethodValidatorFn } from '../validate/types';
+import type { SchemaMethodConfig } from '../service/types.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import type { MethodValidatorFn } from '../validate/types.ts';
 
 type MethodDecorator = (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => PropertyDescriptor | void;
 

@@ -195,6 +195,26 @@ Options:
 </figcaption>
     <pre><code class="language-bash">$ trv basic:arg <span class="token number">20</span>
 
+node:internal/modules/esm/resolve:274
+    throw new ERR_MODULE_NOT_FOUND<span class="token punctuation">(</span>
+          ^
+
+Error <span class="token punctuation">[</span>ERR_MODULE_NOT_FOUND<span class="token punctuation">]</span>: Cannot <span class="token function">find</span> module <span class="token string">'&lt;workspace-root>/module/compiler/src/ts-proxy'</span> imported from <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/compiler/src/util.ts
+    at finalizeResolution <span class="token punctuation">(</span>node:internal/modules/esm/resolve:274:11<span class="token punctuation">)</span>
+    at moduleResolve <span class="token punctuation">(</span>node:internal/modules/esm/resolve:864:10<span class="token punctuation">)</span>
+    at defaultResolve <span class="token punctuation">(</span>node:internal/modules/esm/resolve:990:11<span class="token punctuation">)</span>
+    at <span class="token comment">#cachedDefaultResolve (node:internal/modules/esm/loader:712:20)</span>
+    at <span class="token comment">#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:729:38)</span>
+    at ModuleLoader.resolveSync <span class="token punctuation">(</span>node:internal/modules/esm/loader:758:52<span class="token punctuation">)</span>
+    at <span class="token comment">#resolve (node:internal/modules/esm/loader:694:17)</span>
+    at ModuleLoader.getOrCreateModuleJob <span class="token punctuation">(</span>node:internal/modules/esm/loader:614:35<span class="token punctuation">)</span>
+    at ModuleJob.syncLink <span class="token punctuation">(</span>node:internal/modules/esm/module_job:143:33<span class="token punctuation">)</span>
+    at ModuleJob.link <span class="token punctuation">(</span>node:internal/modules/esm/module_job:228:17<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  code: <span class="token string">'ERR_MODULE_NOT_FOUND'</span>,
+  url: <span class="token string">'file://&lt;workspace-root>/module/compiler/src/ts-proxy'</span>
+<span class="token punctuation">{{'}'}}</span>
+
+Node.js v25.2.1
 Execution failed:
  * Argument volume is greater than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
 
@@ -271,6 +291,26 @@ Options:
 </figcaption>
     <pre><code class="language-bash">$ trv basic:arg-list <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">20</span> <span class="token number">1</span>
 
+node:internal/modules/esm/resolve:274
+    throw new ERR_MODULE_NOT_FOUND<span class="token punctuation">(</span>
+          ^
+
+Error <span class="token punctuation">[</span>ERR_MODULE_NOT_FOUND<span class="token punctuation">]</span>: Cannot <span class="token function">find</span> module <span class="token string">'&lt;workspace-root>/module/compiler/src/ts-proxy'</span> imported from <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/compiler/src/util.ts
+    at finalizeResolution <span class="token punctuation">(</span>node:internal/modules/esm/resolve:274:11<span class="token punctuation">)</span>
+    at moduleResolve <span class="token punctuation">(</span>node:internal/modules/esm/resolve:864:10<span class="token punctuation">)</span>
+    at defaultResolve <span class="token punctuation">(</span>node:internal/modules/esm/resolve:990:11<span class="token punctuation">)</span>
+    at <span class="token comment">#cachedDefaultResolve (node:internal/modules/esm/loader:712:20)</span>
+    at <span class="token comment">#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:729:38)</span>
+    at ModuleLoader.resolveSync <span class="token punctuation">(</span>node:internal/modules/esm/loader:758:52<span class="token punctuation">)</span>
+    at <span class="token comment">#resolve (node:internal/modules/esm/loader:694:17)</span>
+    at ModuleLoader.getOrCreateModuleJob <span class="token punctuation">(</span>node:internal/modules/esm/loader:614:35<span class="token punctuation">)</span>
+    at ModuleJob.syncLink <span class="token punctuation">(</span>node:internal/modules/esm/module_job:143:33<span class="token punctuation">)</span>
+    at ModuleJob.link <span class="token punctuation">(</span>node:internal/modules/esm/module_job:228:17<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  code: <span class="token string">'ERR_MODULE_NOT_FOUND'</span>,
+  url: <span class="token string">'file://&lt;workspace-root>/module/compiler/src/ts-proxy'</span>
+<span class="token punctuation">{{'}'}}</span>
+
+Node.js v25.2.1
 Execution failed:
  * Argument volumes<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span> is greater than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
 

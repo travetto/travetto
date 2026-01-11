@@ -5,7 +5,7 @@ import { Inject } from '@travetto/di';
 import { type AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
-import { WithSuiteContext } from '@travetto/context/support/test/context';
+import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 
 @Suite()
 @InjectableSuite()

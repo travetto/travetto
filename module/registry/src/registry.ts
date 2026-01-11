@@ -1,6 +1,6 @@
 import { AppError, castTo, type Class, Env, flushPendingFunctions, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import type { RegistryIndex, RegistryIndexClass } from './types';
+import type { RegistryIndex, RegistryIndexClass } from './types.ts';
 
 class $Registry {
 

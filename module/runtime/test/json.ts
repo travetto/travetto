@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { JSONUtil } from '../src/json';
+import { JSONUtil } from '../src/json.ts';
 
 @Suite()
 export class JSONUtilTest {

@@ -176,7 +176,7 @@ export class Compiler {
     if (changedFiles.length) {
       for await (const event of this.emit(changedFiles, emitter)) {
         if (event.error) {
-          const compileError = CompilerUtil.buildTranspileError(event.file, event.error);
+          const compileError = await CompilerUtil.buildTranspileError(event.file, event.error);
           failure ??= compileError;
           EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
         }
@@ -217,7 +217,7 @@ export class Compiler {
           if (event.action !== 'delete') {
             const error = await emitter(event.entry.sourceFile, true);
             if (error) {
-              log.info('Compilation Error', CompilerUtil.buildTranspileError(event.entry.sourceFile, error));
+              log.info('Compilation Error', await CompilerUtil.buildTranspileError(event.entry.sourceFile, error));
             } else {
               log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
             }

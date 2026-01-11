@@ -2,10 +2,10 @@ import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/regi
 import { AppError, castKey, castTo, type Class, describeFunction, getParentClass, hasFunction, TypedObject } from '@travetto/runtime';
 import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types';
-import { DependencyRegistryAdapter } from './registry-adapter';
-import { InjectionError } from '../error';
-import { DependencyRegistryResolver } from './registry-resolver';
+import type { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types.ts';
+import { DependencyRegistryAdapter } from './registry-adapter.ts';
+import { InjectionError } from '../error.ts';
+import { DependencyRegistryResolver } from './registry-resolver.ts';
 
 const MetadataSymbol = Symbol();
 

@@ -1,6 +1,6 @@
 import { AppError, castTo, type Class, getParentClass } from '@travetto/runtime';
 
-import type { RegistrationMethods, RegistryAdapter, RegistrySimpleStore } from './types';
+import type { RegistrationMethods, RegistryAdapter, RegistrySimpleStore } from './types.ts';
 
 /**
  * Base registry index implementation
