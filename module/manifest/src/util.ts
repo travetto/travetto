@@ -93,9 +93,9 @@ export class ManifestUtil {
     if (manifest.workspace.mono) {
       const modules = Object.values(manifest.modules).filter(module => module.workspace && module.name !== ctx.workspace.name);
       for (const module of modules) {
-        const modCtx = this.getModuleContext(ctx, module.sourceFolder, true);
-        const modManifest = await this.buildManifest(modCtx);
-        await this.writeManifest(modManifest);
+        const moduleCtx = this.getModuleContext(ctx, module.sourceFolder, true);
+        const moduleManifest = await this.buildManifest(moduleCtx);
+        await this.writeManifest(moduleManifest);
       }
     }
   }
@@ -132,8 +132,8 @@ export class ManifestUtil {
    * Produce the manifest context for a given module module
    */
   static getModuleContext(ctx: ManifestContext, folder: string, ensureLatest = false): ManifestContext {
-    const modPath = path.resolve(ctx.workspace.path, folder);
-    const pkg = PackageUtil.readPackage(modPath, ensureLatest);
+    const modulePath = path.resolve(ctx.workspace.path, folder);
+    const pkg = PackageUtil.readPackage(modulePath, ensureLatest);
 
     return {
       workspace: ctx.workspace,

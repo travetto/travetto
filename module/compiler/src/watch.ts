@@ -62,8 +62,8 @@ export class CompilerWatcher {
     const module = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
 
     if (module && action === 'create' && !entry) {
-      const modRoot = module.sourceFolder || this.#root;
-      const moduleFile = file.includes(`${modRoot}/`) ? file.split(`${modRoot}/`)[1] : file;
+      const moduleRoot = module.sourceFolder || this.#root;
+      const moduleFile = file.includes(`${moduleRoot}/`) ? file.split(`${moduleRoot}/`)[1] : file;
       entry = this.#state.registerInput(module, moduleFile);
     } else if (action === 'delete' && entry) {
       this.#state.removeSource(entry.sourceFile); // Ensure we remove it

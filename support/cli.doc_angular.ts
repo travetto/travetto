@@ -59,18 +59,18 @@ export class DocAngularCommand {
     }
 
     for (const module of modules) {
-      const modName = module.name.endsWith('mono-repo') ? 'overview' : module.name.split('/')[1];
+      const moduleName = module.name.endsWith('mono-repo') ? 'overview' : module.name.split('/')[1];
       try {
         let html = await fs.readFile(path.resolve(module.sourcePath, 'DOC.html'), 'utf8');
 
         html = html
           .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
-          .replace(/^src="images\//g, `src="/assets/images/${modName}/`)
+          .replace(/^src="images\//g, `src="/assets/images/${moduleName}/`)
           .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
           .replaceAll('@', '&#64;')
           .replaceAll('process.env.NODE_ENV', text => text.replaceAll('.', '\u2024'));
 
-        if (modName === 'todo-app') {
+        if (moduleName === 'todo-app') {
           html = html
             .replace(
               /(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
@@ -79,7 +79,7 @@ export class DocAngularCommand {
             );
         }
 
-        await fs.writeFile(page(`app/documentation/gen/${modName}/${modName}.component.html`), html, 'utf8');
+        await fs.writeFile(page(`app/documentation/gen/${moduleName}/${moduleName}.component.html`), html, 'utf8');
       } catch (error) {
         if (error instanceof Error) {
           console.error(`${module.name}: ${error.message}`);

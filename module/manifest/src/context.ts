@@ -50,7 +50,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
   const resolve = createRequire(path.resolve(workspace.path, 'node_modules')).resolve.bind(null);
   const wsPrefix = `${workspace.path}/`;
   const moduleName = process.env.TRV_MODULE === workspace.name ? workspace.path : process.env.TRV_MODULE;
-  const modPkg = (!!workspace.workspaces && moduleName) ?
+  const modulePkg = (!!workspace.workspaces && moduleName) ?
     readPackage(resolve(`${moduleName}/package.json`)) :
     findPackage(root, pkg => !!pkg) ?? workspace;
 
@@ -74,10 +74,10 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
       typesFolder: toPosix(build.typesFolder ?? '.trv/types')
     },
     main: {
-      name: modPkg.name ?? 'untitled',
-      folder: modPkg.path.replace(wsPrefix, ''),
-      version: modPkg.version,
-      description: modPkg.description
+      name: modulePkg.name ?? 'untitled',
+      folder: modulePkg.path.replace(wsPrefix, ''),
+      version: modulePkg.version,
+      description: modulePkg.description
     }
   };
 }
