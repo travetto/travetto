@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type ManifestModuleFileType, ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/manifest';
+import { ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/manifest';
 
 const nativeCwd = process.cwd();
 
@@ -8,11 +8,6 @@ const nativeCwd = process.cwd();
  * Standard utilities for compiler
  */
 export class CompilerUtil {
-
-  /**
-   * Determine if this is a manifest file we care about
-   */
-  static validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js' || type === 'typings';
 
   /**
    * Rewrites the package.json to target output file names, and pins versions
@@ -66,5 +61,19 @@ export class CompilerUtil {
       errors.push(`${diagnostics.length - 5} more ...`);
     }
     return new Error(`Transpiling ${filename.replace(nativeCwd, '.')} failed: \n${errors.join('\n')}`);
+  }
+
+  /**
+   * Naive hashing
+   */
+  static naiveHash(text: string): number {
+    let hash = 5381;
+
+    for (let i = 0; i < text.length; i++) {
+      // eslint-disable-next-line no-bitwise
+      hash = (hash * 33) ^ text.charCodeAt(i);
+    }
+
+    return Math.abs(hash);
   }
 }

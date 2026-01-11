@@ -1,20 +1,15 @@
 // @trv-no-transform
 import fs from 'node:fs/promises';
 
-import { getManifestContext, ManifestDeltaUtil, ManifestUtil, type DeltaEvent, type ManifestContext } from '@travetto/manifest';
+import { getManifestContext, ManifestUtil, type ManifestContext } from '@travetto/manifest';
 
-import { isComplilerEventType, type CompilerMode, type CompilerServerInfo } from './types.ts';
-import { Log } from './log.ts';
-import { CompilerServer } from './server/server.ts';
-import { CompilerRunner } from './server/runner.ts';
-import { CompilerClient } from './server/client.ts';
-import { CommonUtil } from './util.ts';
-
-const writeStdout = async (level: number, data: unknown): Promise<void> => {
-  if (data === undefined) { return; }
-  process.stdout.write(`${JSON.stringify(data, undefined, level)}\n`) ||
-    await new Promise(resolve => process.stdout.once('drain', resolve));
-};
+import type { CompilerLogLevel } from '../src/types.ts';
+import { Log } from '../src/log.ts';
+import { CompilerServer } from '../src/server/server.ts';
+import { CompilerRunner } from '../src/server/runner.ts';
+import { CompilerClient } from '../src/server/client.ts';
+import { CommonUtil } from '../src/common.ts';
+import { EventUtil } from '../src/event.ts';
 
 class Operations {
 
@@ -30,40 +25,17 @@ class Operations {
     Log.initLevel('error');
   }
 
-  /** Reconcile manifests and produce delta events for adds and updates */
-  async reconcileManifests(): Promise<DeltaEvent[]> {
-    const manifest = await ManifestUtil.buildManifest(ManifestUtil.getWorkspaceContext(this.ctx));
-
-    const delta = await ManifestDeltaUtil.produceDelta(manifest);
-
-    // Write manifest
-    await ManifestUtil.writeManifest(manifest);
-
-    if (delta.length) { // On change, update dependent manifests
-      await ManifestUtil.writeDependentManifests(this.ctx, manifest);
-    }
-
-    return delta.filter(event => event.type === 'create' || event.type === 'update');
-  }
-
   /** Main entry point for compilation */
-  async compile(operation: CompilerMode, setupOnly = false): Promise<void> {
-    const server = await new CompilerServer(this.ctx, operation).listen();
+  async compile(watch: boolean, logLevel: CompilerLogLevel = 'info'): Promise<void> {
+    Log.initLevel(logLevel);
+
+    const server = await new CompilerServer(this.ctx, watch).listen();
     const log = Log.scoped('main');
 
     // Wait for build to be ready
     if (server) {
       log.debug('Start Server');
-      if (setupOnly) {
-        await this.reconcileManifests();
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const self = this;
-        await server.processEvents(async function* (signal) {
-          const changed = await self.reconcileManifests();
-          yield* CompilerRunner.runProcess(self.ctx, changed, operation, signal);
-        });
-      }
+      await server.processEvents(signal => CompilerRunner.runProcess(this.ctx, watch, signal));
       log.debug('End Server');
     } else {
       log.info('Server already running, waiting for initial compile to complete');
@@ -83,17 +55,6 @@ class Operations {
     }
   }
 
-  /** Restart the server */
-  async restart(): Promise<void> {
-    await this.client.stop();
-    await this.watch();
-  }
-
-  /** Get server info */
-  info(): Promise<CompilerServerInfo | undefined> {
-    return this.client.info();
-  }
-
   /** Clean the server */
   async clean(): Promise<void> {
     if (await this.client.clean()) {
@@ -106,35 +67,13 @@ class Operations {
     }
   }
 
-  /** Stream events */
-  async events(type: string, handler: (event: unknown) => unknown): Promise<void> {
-    if (isComplilerEventType(type)) {
-      for await (const event of this.client.fetchEvents(type)) { await handler(event); }
-    } else {
-      throw new Error(`Unknown event type: ${type}`);
-    }
-  }
-
-  /** Build the project */
-  async build(): Promise<void> {
-    Log.initLevel('info');
-    await this.compile('build');
-  }
-
-  /** Build and watch the project */
-  async watch(): Promise<void> {
-    Log.initLevel('info');
-    await this.compile('watch');
-  }
-
   /** Set arguments and import module */
   async exec(module: string, args?: string[]): Promise<unknown> {
-    Log.initLevel('none');
     if (!(await this.client.isWatching())) { // Short circuit if we can
-      Log.initLevel('error');
-      await this.compile('build');
+      await this.compile(false, 'error');
     }
 
+    Log.initLevel('none');
     process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(this.ctx, this.ctx.build.outputFolder, 'node_modules', this.ctx.main.name); // Setup for running
     if (args) {
       process.argv = [process.argv0, module, ...args];
@@ -145,12 +84,12 @@ class Operations {
 
   /** Manifest entry point */
   async manifest(output?: string, prod?: boolean): Promise<void> {
-    await this.compile('build', true);
-    const result = await ManifestUtil.exportManifest(this.ctx, output, prod);
+    const manifest = await ManifestUtil.buildManifest(this.ctx);
+    const result = await ManifestUtil.exportManifest(manifest, output, prod);
     if (!result) {
       console.log(`Wrote manifest to ${output ?? 'stdout'}`);
     } else {
-      await writeStdout(2, result);
+      await CommonUtil.writeStdout(2, result);
     }
   }
 }
@@ -181,16 +120,30 @@ Available Commands:
   switch (operation) {
     case undefined:
     case 'help': console.log(help); break;
-    case 'info': return ops.info().then(writeStdout.bind(null, 2));
-    case 'event': return ops.events(filtered[0], writeStdout.bind(null, 0));
+    case 'info': {
+      const info = await ops.client.info();
+      return CommonUtil.writeStdout(2, info);
+    }
+    case 'event': {
+      if (!EventUtil.isComplilerEventType(filtered[0])) {
+        throw new Error(`Unknown event type: ${filtered[0]}`);
+      }
+      for await (const event of ops.client.fetchEvents(filtered[0])) {
+        await CommonUtil.writeStdout(0, event);
+      }
+      return;
+    }
     case 'manifest': return ops.manifest(filtered[0], args.some(arg => arg === '--prod'));
     case 'exec': return ops.exec(filtered[0], args.slice(1));
-    case 'build': return ops.build();
+    case 'build': return ops.compile(false);
     case 'clean': return ops.clean();
     case 'start':
-    case 'watch': return ops.watch();
+    case 'watch': return ops.compile(true);
     case 'stop': return ops.stop();
-    case 'restart': return ops.restart();
+    case 'restart': {
+      await ops.stop();
+      return ops.compile(true);
+    }
     default: console.error(`\nUnknown trvc operation: ${operation}\n${help}`);
   }
 }

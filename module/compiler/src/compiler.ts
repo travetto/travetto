@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
 
-import { ManifestIndex } from '@travetto/manifest';
+import { getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, type ManifestContext, type ManifestRoot } from '@travetto/manifest';
 
 import { CompilerUtil } from './util.ts';
 import { CompilerState } from './state.ts';
@@ -9,8 +9,8 @@ import { CompilerWatcher } from './watch.ts';
 import { type CompileEmitEvent, type CompileEmitter, CompilerReset } from './types.ts';
 import { EventUtil } from './event.ts';
 
-import { IpcLogger } from '../support/log.ts';
-import { CommonUtil } from '../support/util.ts';
+import { IpcLogger } from './log.ts';
+import { CommonUtil } from './common.ts';
 
 const log = new IpcLogger({ level: 'debug' });
 
@@ -23,14 +23,13 @@ export class Compiler {
    * Run compiler as a main entry point
    */
   static async main(): Promise<void> {
-    const lines: Buffer[] = [];
-    for await (const item of process.stdin) {
-      lines.push(item);
-    }
-    const dirtyFiles = Buffer.concat(lines).toString().split('\n').filter(x => x);
-    const mode = process.env.TRV_COMPILER_MODE;
-    const state = await CompilerState.get(new ManifestIndex());
-    await new Compiler(state, dirtyFiles, mode === 'watch').run();
+    const ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
+    const manifest = await ManifestUtil.buildManifest(ctx);
+    const delta = await ManifestDeltaUtil.produceDelta(manifest);
+    await ManifestUtil.writeManifest(manifest);
+    const dirtyFiles = delta.filter(event => event.type === 'create' || event.type === 'update').map(event => event.sourceFile);
+    const state = await CompilerState.get(new ManifestIndex(manifest));
+    await new Compiler(state, dirtyFiles, process.env.TRV_COMPILER_WATCH === 'true').run();
   }
 
   #state: CompilerState;
@@ -188,6 +187,11 @@ export class Compiler {
       } else {
         log.debug('Compilation succeeded');
       }
+
+      // Rebuild manifests if dirty
+      const manifest = await ManifestUtil.buildManifest(this.#state.manifestIndex.manifest);
+      await ManifestUtil.writeManifest(manifest);
+      await ManifestUtil.writeDependentManifests(manifest);
     } else if (this.#watch) {
       // Prime compiler before complete
       const resolved = this.#state.getArbitraryInputFile();
@@ -202,6 +206,9 @@ export class Compiler {
 
     if (this.#watch && !this.#signal.aborted) {
       log.info('Watch is ready');
+
+      // Reload manifest index to capture any changes
+      this.#state.manifestIndex.reinitForModule(this.#state.manifest.main.name);
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {

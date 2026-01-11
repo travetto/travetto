@@ -6,7 +6,7 @@ import type { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types.ts';
 import type { LogShape } from '../log.ts';
-import { CommonUtil } from '../util.ts';
+import { CommonUtil } from '../common.ts';
 import { ProcessHandle } from './process-handle.ts';
 
 type FetchEventsConfig<T> = {

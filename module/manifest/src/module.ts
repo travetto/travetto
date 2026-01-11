@@ -256,4 +256,14 @@ export class ManifestModuleUtil {
     }
     return this.#pathToExtension(sourceFile, '');
   }
+
+  /**
+   * Determine if this type is considered source code
+   */
+  static isSourceType(type: ManifestModuleFileType | string): boolean {
+    if (type.includes('.')) {
+      type = this.getFileType(type);
+    }
+    return type === 'ts' || type === 'package-json' || type === 'js' || type === 'typings';
+  }
 }

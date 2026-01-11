@@ -1,30 +1,11 @@
-import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
 import timers from 'node:timers/promises';
-import posix from 'node:path/posix';
-import native from 'node:path';
 
-import type { ManifestContext } from '@travetto/manifest';
+import { type ManifestContext, path } from '@travetto/manifest';
 
 import { Log } from './log.ts';
 
-const toPosix = (file: string): string => file.replaceAll('\\', '/');
-
 export class CommonUtil {
-  /**
-   * Determine file type
-   */
-  static getFileType(file: string): 'ts' | 'js' | 'package-json' | 'typings' | undefined {
-    return file.endsWith('package.json') ? 'package-json' :
-      (file.endsWith('.js') ? 'js' :
-        (file.endsWith('.d.ts') ? 'typings' : (/[.][cm]?tsx?$/.test(file) ? 'ts' : undefined)));
-  }
-
-  /**
-   * Write text file, and ensure folder exists
-   */
-  static writeTextFile = (file: string, content: string): Promise<void> =>
-    fs.mkdir(native.dirname(file), { recursive: true }).then(() => fs.writeFile(file, content, 'utf8'));
 
   /**
    * Restartable Event Stream
@@ -64,20 +45,6 @@ export class CommonUtil {
   }
 
   /**
-   * Naive hashing
-   */
-  static naiveHash(text: string): number {
-    let hash = 5381;
-
-    for (let i = 0; i < text.length; i++) {
-      // eslint-disable-next-line no-bitwise
-      hash = (hash * 33) ^ text.charCodeAt(i);
-    }
-
-    return Math.abs(hash);
-  }
-
-  /**
    * Non-blocking timeout
    */
   static nonBlockingTimeout(time: number): Promise<void> {
@@ -102,7 +69,15 @@ export class CommonUtil {
    * Resolve path for workspace, ensuring posix compliant slashes
    */
   static resolveWorkspace(ctx: ManifestContext, ...args: string[]): string {
-    const all = [process.cwd(), ctx.workspace.path, ...args].map(toPosix);
-    return process.platform === 'win32' ? toPosix(native.resolve(...all)) : posix.resolve(...all);
+    return path.resolve(ctx.workspace.path, ...args);
   }
+
+  /**
+   * Write to stdout with backpressure handling
+   */
+  static async writeStdout(level: number, data: unknown): Promise<void> {
+    if (data === undefined) { return; }
+    process.stdout.write(`${JSON.stringify(data, undefined, level)}\n`) ||
+      await new Promise(resolve => process.stdout.once('drain', resolve));
+  };
 }

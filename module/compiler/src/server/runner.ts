@@ -1,14 +1,14 @@
 import { spawn } from 'node:child_process';
 
-import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
+import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerEvent, CompilerMode } from '../types.ts';
+import type { CompilerEvent } from '../types.ts';
 import { AsyncQueue } from '../queue.ts';
 import { Log } from '../log.ts';
-import { CommonUtil } from '../util.ts';
+import { CommonUtil } from '../common.ts';
+import { EventUtil } from '../event.ts';
 
 const log = Log.scoped('compiler-exec');
-const isEvent = (value: unknown): value is CompilerEvent => !!value && typeof value === 'object' && 'type' in value;
 
 /**
  * Running the compiler
@@ -18,19 +18,10 @@ export class CompilerRunner {
   /**
    * Run compile process
    */
-  static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], mode: CompilerMode, signal: AbortSignal): AsyncIterable<CompilerEvent> {
+  static async * runProcess(ctx: ManifestContext, watching: boolean, signal: AbortSignal): AsyncIterable<CompilerEvent> {
     if (signal.aborted) {
       log.debug('Skipping, shutting down');
       return;
-    }
-
-    if (!changed.length && mode !== 'watch') {
-      yield { type: 'state', payload: { state: 'compile-end' } };
-      log.debug('Skipped');
-      return;
-    } else {
-      const changedList = changed.slice(0, 10).map(event => `${event.module}/${event.file}`);
-      log.debug(`Started mode=${mode} changed=${changedList}`);
     }
 
     const queue = new AsyncQueue<CompilerEvent>();
@@ -39,18 +30,14 @@ export class CompilerRunner {
     const subProcess = spawn(process.argv0, ['-e', 'import("@travetto/compiler/bin/trvc-target.js")'], {
       env: {
         ...process.env,
-        TRV_COMPILER_MODE: mode,
+        TRV_COMPILER_WATCH: String(watching),
         TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
       },
-
       detached: true,
-      stdio: ['pipe', 'pipe', 2, 'ipc'],
+      stdio: ['pipe', 1, 2, 'ipc'],
     })
-      .on('message', message => isEvent(message) && queue.add(message))
+      .on('message', message => EventUtil.isCompilerEvent(message) && queue.add(message))
       .on('exit', () => queue.close());
-
-    subProcess.stdin!.write(changed.map(event => event.sourceFile).join('\n'));
-    subProcess.stdin!.end();
 
     const kill = (): unknown => {
       log.debug('Shutting down process');

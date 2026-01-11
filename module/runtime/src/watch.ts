@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 
-import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler/support/types.ts';
+import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler';
 
 import { AppError } from './error.ts';
 import { Util } from './util.ts';
@@ -115,7 +115,7 @@ export class WatchUtil {
     filter?: (input: T) => boolean,
     options?: Partial<RetryRunConfig>,
   ): Promise<void> {
-    const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
+    const { CompilerClient } = await import('@travetto/compiler/src/server/client.ts');
     const client = new CompilerClient(RuntimeIndex.manifest, console);
 
     return this.runWithRetry(async ({ signal }) => {

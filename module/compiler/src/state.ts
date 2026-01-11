@@ -5,7 +5,7 @@ import { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util.ts';
 import type { CompileEmitError, CompileStateEntry } from './types.ts';
-import { CommonUtil } from '../support/util.ts';
+import { CommonUtil } from './common.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 
@@ -105,7 +105,7 @@ export class CompilerState implements ts.CompilerHost {
         ...base.$package ?? []
       ];
       for (const [file, type] of files) {
-        if (CompilerUtil.validFile(type)) {
+        if (ManifestModuleUtil.isSourceType(type)) {
           this.registerInput(module, file);
         }
       }
@@ -225,7 +225,7 @@ export class CompilerState implements ts.CompilerHost {
     if (!contents || (contents.length === 0 && prevHash)) {
       return false; // Ignore empty file
     }
-    const currentHash = CommonUtil.naiveHash(contents);
+    const currentHash = CompilerUtil.naiveHash(contents);
     const changed = prevHash !== currentHash;
     if (changed) {
       this.#sourceHashes.set(sourceFile, currentHash);

@@ -5,10 +5,9 @@ import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PackageUtil, path }
 
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 import type { CompilerState } from './state.ts';
-import { CompilerUtil } from './util.ts';
 
-import { AsyncQueue } from '../support/queue.ts';
-import { IpcLogger } from '../support/log.ts';
+import { AsyncQueue } from './queue.ts';
+import { IpcLogger } from './log.ts';
 import { EventUtil } from './event.ts';
 
 const log = new IpcLogger({ level: 'debug' });
@@ -90,7 +89,7 @@ export class CompilerWatcher {
       const relativeFile = event.file.replace(`${this.#root}/`, '');
       log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
       return false;
-    } else if (!CompilerUtil.validFile(ManifestModuleUtil.getFileType(event.file))) {
+    } else if (!ManifestModuleUtil.isSourceType(event.file)) {
       return false;
     }
     return true;
