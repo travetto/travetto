@@ -48,42 +48,27 @@ In addition to the normal output, the compiler supports an environment variable 
 <span class="token number">2029</span>-03-14T04:00:00.837Z debug <span class="token punctuation">[</span>main           <span class="token punctuation">]</span> Start Server
 <span class="token number">2029</span>-03-14T04:00:01.510Z debug <span class="token punctuation">[</span>event-stream   <span class="token punctuation">]</span> Started event stream
 <span class="token number">2029</span>-03-14T04:00:02.450Z info  <span class="token punctuation">[</span>compiler-exec  <span class="token punctuation">]</span> Launching compiler
-<span class="token number">2029</span>-03-14T04:00:02.762Z debug <span class="token punctuation">[</span>compiler-exec  <span class="token punctuation">]</span> Finished
-<span class="token number">2029</span>-03-14T04:00:02.947Z debug <span class="token punctuation">[</span>event-stream   <span class="token punctuation">]</span> Finished event stream
-<span class="token number">2029</span>-03-14T04:00:03.093Z debug <span class="token punctuation">[</span>compiler-exec  <span class="token punctuation">]</span> Shutting down process
-<span class="token number">2029</span>-03-14T04:00:04.003Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Closing down server
-<span class="token number">2029</span>-03-14T04:00:04.495Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Server close event
-<span class="token number">2029</span>-03-14T04:00:05.066Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Closed down server
-<span class="token number">2029</span>-03-14T04:00:05.307Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Finished processing events
-<span class="token number">2029</span>-03-14T04:00:05.952Z debug <span class="token punctuation">[</span>main           <span class="token punctuation">]</span> End Server</code></pre>
+<span class="token number">2029</span>-03-14T04:00:02.762Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Compilation started
+<span class="token number">2029</span>-03-14T04:00:02.947Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> State changed: init
+<span class="token number">2029</span>-03-14T04:00:03.093Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Compiler loaded
+<span class="token number">2029</span>-03-14T04:00:04.003Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> State changed: compile-start
+<span class="token number">2029</span>-03-14T04:00:04.495Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> State changed: compile-end
+<span class="token number">2029</span>-03-14T04:00:05.066Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Compiler process <span class="token function">shutdown</span>
+<span class="token number">2029</span>-03-14T04:00:05.307Z debug <span class="token punctuation">[</span>compiler-exec  <span class="token punctuation">]</span> Finished
+<span class="token number">2029</span>-03-14T04:00:05.952Z debug <span class="token punctuation">[</span>event-stream   <span class="token punctuation">]</span> Finished event stream
+<span class="token number">2029</span>-03-14T04:00:06.859Z debug <span class="token punctuation">[</span>compiler-exec  <span class="token punctuation">]</span> Shutting down process
+<span class="token number">2029</span>-03-14T04:00:07.720Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Closing down server
+<span class="token number">2029</span>-03-14T04:00:08.179Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Server close event
+<span class="token number">2029</span>-03-14T04:00:08.588Z info  <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Closed down server
+<span class="token number">2029</span>-03-14T04:00:09.493Z debug <span class="token punctuation">[</span>server         <span class="token punctuation">]</span> Finished processing events
+<span class="token number">2029</span>-03-14T04:00:10.395Z debug <span class="token punctuation">[</span>main           <span class="token punctuation">]</span> End Server</code></pre>
   </figure>
 
   <figure class="terminal">
     <figcaption class="terminal">Sample trv output with default log level
 
 </figcaption>
-    <pre><code class="language-bash">$ trvc build
-
-node:internal/modules/esm/resolve:274
-    throw new ERR_MODULE_NOT_FOUND<span class="token punctuation">(</span>
-          ^
-
-Error <span class="token punctuation">[</span>ERR_MODULE_NOT_FOUND<span class="token punctuation">]</span>: Cannot <span class="token function">find</span> module <span class="token string">'./src/ts-proxy'</span> imported from ./src/util.ts
-    at finalizeResolution <span class="token punctuation">(</span>node:internal/modules/esm/resolve:274:11<span class="token punctuation">)</span>
-    at moduleResolve <span class="token punctuation">(</span>node:internal/modules/esm/resolve:864:10<span class="token punctuation">)</span>
-    at defaultResolve <span class="token punctuation">(</span>node:internal/modules/esm/resolve:990:11<span class="token punctuation">)</span>
-    at <span class="token comment">#cachedDefaultResolve (node:internal/modules/esm/loader:712:20)</span>
-    at <span class="token comment">#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:729:38)</span>
-    at ModuleLoader.resolveSync <span class="token punctuation">(</span>node:internal/modules/esm/loader:758:52<span class="token punctuation">)</span>
-    at <span class="token comment">#resolve (node:internal/modules/esm/loader:694:17)</span>
-    at ModuleLoader.getOrCreateModuleJob <span class="token punctuation">(</span>node:internal/modules/esm/loader:614:35<span class="token punctuation">)</span>
-    at ModuleJob.syncLink <span class="token punctuation">(</span>node:internal/modules/esm/module_job:143:33<span class="token punctuation">)</span>
-    at ModuleJob.link <span class="token punctuation">(</span>node:internal/modules/esm/module_job:228:17<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  code: <span class="token string">'ERR_MODULE_NOT_FOUND'</span>,
-  url: <span class="token string">'file://./src/ts-proxy'</span>
-<span class="token punctuation">{{'}'}}</span>
-
-Node.js v25.2.1</code></pre>
+    <pre><code class="language-bash">$ trvc build</code></pre>
   </figure>
 
 <h2 id="compilation-architecture">Compilation Architecture</h2>

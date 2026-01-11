@@ -88,8 +88,6 @@ export class CompilerState implements ts.CompilerHost {
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#typingsPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.typesFolder);
 
-    this.#compilerOptions = await this.#initCompilerOptions();
-
     this.#modules = Object.values(this.#manifest.modules);
 
     // Register all inputs
@@ -114,8 +112,9 @@ export class CompilerState implements ts.CompilerHost {
     return this;
   }
 
-  async initTransformerManager(): Promise<void> {
+  async initializeTypescript(): Promise<void> {
     await tsProxyInit();
+    this.#compilerOptions = await this.#initCompilerOptions();
     this.#transformerManager ??= await TransformerManager.create(this.#manifestIndex);
   }
 
