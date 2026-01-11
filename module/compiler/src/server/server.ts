@@ -4,10 +4,7 @@ import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import {
-  type CompilerProgressEvent, type CompilerEvent,
-  type CompilerEventType, type CompilerServerInfo
-} from '../types.ts';
+import type { CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types.ts';
 import { Log } from '../log.ts';
 import { CommonUtil } from '../common.ts';
 import { CompilerClient } from './client.ts';
