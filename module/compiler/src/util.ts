@@ -1,6 +1,6 @@
 import { ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/manifest';
 import type { CompileEmitError } from './types.ts';
-import { tsProxy } from './ts-proxy.ts';
+import { tsProxy as ts } from './ts-proxy.ts';
 
 const nativeCwd = process.cwd();
 
@@ -48,7 +48,7 @@ export class CompilerUtil {
     }
 
     const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-      const message = tsProxy.flattenDiagnosticMessageText(diag.messageText, '\n');
+      const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
       if (diag.file) {
         const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
         return ` @ ${diag.file.fileName.replace(nativeCwd, '.')}(${line + 1}, ${character + 1}): ${message}`;

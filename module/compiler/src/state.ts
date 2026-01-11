@@ -1,16 +1,16 @@
-import type ts from 'typescript';
+import type { CompilerHost, SourceFile, CompilerOptions, Program, ScriptTarget } from 'typescript';
 import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, type ManifestIndex, type ManifestModuleFolderType } from '@travetto/manifest';
 import type { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util.ts';
 import type { CompileEmitError, CompileStateEntry } from './types.ts';
 import { CommonUtil } from './common.ts';
-import { tsProxy, tsProxyInit } from './ts-proxy.ts';
+import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
 
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 
-export class CompilerState implements ts.CompilerHost {
+export class CompilerState implements CompilerHost {
 
   static async get(idx: ManifestIndex): Promise<CompilerState> {
     return new CompilerState().init(idx);
@@ -28,18 +28,18 @@ export class CompilerState implements ts.CompilerHost {
   #tscOutputFileToOuptut = new Map<string, string>();
 
   #sourceContents = new Map<string, string | undefined>();
-  #sourceFileObjects = new Map<string, ts.SourceFile>();
+  #sourceFileObjects = new Map<string, SourceFile>();
   #sourceHashes = new Map<string, number>();
 
   #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
   #modules: ManifestModule[];
   #transformerManager: TransformerManager;
-  #compilerOptions: ts.CompilerOptions;
-  #program: ts.Program;
+  #compilerOptions: CompilerOptions;
+  #program: Program;
 
   #readFile(sourceFile: string): string | undefined {
-    return tsProxy.sys.readFile(this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile);
+    return ts.sys.readFile(this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile);
   }
 
   #writeExternalTypings(location: string, text: string, bom: boolean): void {
@@ -51,20 +51,20 @@ export class CompilerState implements ts.CompilerHost {
     if (entry) {
       const relative = this.#manifestIndex.getFromSource(entry.sourceFile)?.relativeFile;
       if (relative && TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(relative))) {
-        tsProxy.sys.writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
+        ts.sys.writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
       }
     }
   }
 
-  async #initCompilerOptions(): Promise<ts.CompilerOptions> {
+  async #initCompilerOptions(): Promise<CompilerOptions> {
     const tsconfigFile = CommonUtil.resolveWorkspace(this.#manifest, 'tsconfig.json');
-    if (!tsProxy.sys.fileExists(tsconfigFile)) {
-      tsProxy.sys.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2));
+    if (!ts.sys.fileExists(tsconfigFile)) {
+      ts.sys.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2));
     }
 
-    const { options } = tsProxy.parseJsonSourceFileConfigFileContent(
-      tsProxy.readJsonConfigFile(tsconfigFile, tsProxy.sys.readFile),
-      tsProxy.sys,
+    const { options } = ts.parseJsonSourceFileConfigFileContent(
+      ts.readJsonConfigFile(tsconfigFile, ts.sys.readFile),
+      ts.sys,
       this.#manifest.workspace.path
     );
 
@@ -76,8 +76,8 @@ export class CompilerState implements ts.CompilerHost {
       resolveJsonModule: true,
       sourceRoot: this.#manifest.workspace.path,
       rootDir: this.#manifest.workspace.path,
-      moduleResolution: tsProxy.ModuleResolutionKind.Bundler,
-      module: tsProxy.ModuleKind.ESNext,
+      moduleResolution: ts.ModuleResolutionKind.Bundler,
+      module: ts.ModuleKind.ESNext,
       outDir: this.#outputPath
     };
   }
@@ -139,9 +139,9 @@ export class CompilerState implements ts.CompilerHost {
     return this.getBySource(randomSource)!.sourceFile;
   }
 
-  async createProgram(force = false): Promise<ts.Program> {
+  async createProgram(force = false): Promise<Program> {
     if (force || !this.#program) {
-      this.#program = tsProxy.createProgram({ rootNames: this.getAllFiles(), host: this, options: this.#compilerOptions, oldProgram: this.#program });
+      this.#program = ts.createProgram({ rootNames: this.getAllFiles(), host: this, options: this.#compilerOptions, oldProgram: this.#program });
       this.#transformerManager.init(this.#program.getTypeChecker());
       await CommonUtil.queueMacroTask();
     }
@@ -162,7 +162,7 @@ export class CompilerState implements ts.CompilerHost {
           this.writeFile(output, this.readFile(sourceFile)!, false), undefined;
           break;
         case 'js':
-          this.writeFile(output, tsProxy.transpile(this.readFile(sourceFile)!, this.#compilerOptions), false);
+          this.writeFile(output, ts.transpile(this.readFile(sourceFile)!, this.#compilerOptions), false);
           break;
         case 'ts': {
           const result = program.emit(
@@ -264,17 +264,17 @@ export class CompilerState implements ts.CompilerHost {
   /* Start Compiler Host */
   getCanonicalFileName(file: string): string { return file; }
   getCurrentDirectory(): string { return this.#manifest.workspace.path; }
-  getDefaultLibFileName(options: ts.CompilerOptions): string { return tsProxy.getDefaultLibFileName(options); }
-  getNewLine(): string { return tsProxy.sys.newLine; }
-  useCaseSensitiveFileNames(): boolean { return tsProxy.sys.useCaseSensitiveFileNames; }
-  getDefaultLibLocation(): string { return path.dirname(tsProxy.getDefaultLibFilePath(this.#compilerOptions)); }
+  getDefaultLibFileName(options: CompilerOptions): string { return ts.getDefaultLibFileName(options); }
+  getNewLine(): string { return ts.sys.newLine; }
+  useCaseSensitiveFileNames(): boolean { return ts.sys.useCaseSensitiveFileNames; }
+  getDefaultLibLocation(): string { return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions)); }
 
   fileExists(sourceFile: string): boolean {
-    return this.#sourceToEntry.has(sourceFile) || tsProxy.sys.fileExists(sourceFile);
+    return this.#sourceToEntry.has(sourceFile) || ts.sys.fileExists(sourceFile);
   }
 
   directoryExists(sourceDirectory: string): boolean {
-    return this.#sourceDirectory.has(sourceDirectory) || tsProxy.sys.directoryExists(sourceDirectory);
+    return this.#sourceDirectory.has(sourceDirectory) || ts.sys.directoryExists(sourceDirectory);
   }
 
   writeFile(
@@ -295,7 +295,7 @@ export class CompilerState implements ts.CompilerHost {
       this.#writeExternalTypings(location, text, bom);
     }
 
-    tsProxy.sys.writeFile(location, text, bom);
+    ts.sys.writeFile(location, text, bom);
   }
 
   readFile(sourceFile: string): string | undefined {
@@ -304,10 +304,10 @@ export class CompilerState implements ts.CompilerHost {
     return contents;
   }
 
-  getSourceFile(sourceFile: string, language: ts.ScriptTarget): ts.SourceFile {
+  getSourceFile(sourceFile: string, language: ScriptTarget): SourceFile {
     if (!this.#sourceFileObjects.has(sourceFile)) {
       const content = this.readFile(sourceFile)!;
-      this.#sourceFileObjects.set(sourceFile, tsProxy.createSourceFile(sourceFile, content ?? '', language));
+      this.#sourceFileObjects.set(sourceFile, ts.createSourceFile(sourceFile, content ?? '', language));
     }
     return this.#sourceFileObjects.get(sourceFile)!;
   }
