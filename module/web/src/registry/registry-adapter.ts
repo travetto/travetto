@@ -3,7 +3,7 @@ import { AppError, asFull, castTo, type Class, type RetainPrimitiveFields, safeA
 import { WebHeaders } from '@travetto/web';
 import { type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types';
+import type { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types.ts';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
 function combineCommon<T extends ControllerConfig | EndpointConfig>(base: T, override: Partial<T>): T {

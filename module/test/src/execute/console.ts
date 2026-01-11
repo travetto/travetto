@@ -1,7 +1,7 @@
 import util from 'node:util';
 
 import { type ConsoleEvent, type ConsoleListener, ConsoleManager } from '@travetto/runtime';
-import type { TestLog } from '../model/test';
+import type { TestLog } from '../model/test.ts';
 
 /**
  * Console capturer.  Hooks into the Console manager, and collects the

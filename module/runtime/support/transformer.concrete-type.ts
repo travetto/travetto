@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, RegisterHandler } from '@travetto/transformer';
+import { type TransformerState, TransformerHandler } from '@travetto/transformer';
 
 import { MetadataRegistrationUtil } from './transformer/metadata.ts';
 
@@ -12,9 +12,9 @@ const SRC = '@travetto/runtime/src/types.ts';
 export class ConcreteTransformer {
 
   static {
-    RegisterHandler(this, this.onInterface, 'before', 'interface');
-    RegisterHandler(this, this.onTypeAlias, 'before', 'type');
-    RegisterHandler(this, this.onToConcreteCall, 'before', 'call');
+    TransformerHandler(this, this.onInterface, 'before', 'interface');
+    TransformerHandler(this, this.onTypeAlias, 'before', 'type');
+    TransformerHandler(this, this.onToConcreteCall, 'before', 'call');
   }
 
   static #isConcreteSimple(node: ts.InterfaceDeclaration | ts.TypeAliasDeclaration): boolean {

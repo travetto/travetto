@@ -3,9 +3,9 @@ import { type Class, type ClassInstance, getClass, isClass, type RetainPrimitive
 import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { ControllerRegistryAdapter } from './registry-adapter';
-import type { ControllerConfig, EndpointConfig, EndpointDecorator } from './types';
-import { WebAsyncContext } from '../context';
+import { ControllerRegistryAdapter } from './registry-adapter.ts';
+import type { ControllerConfig, EndpointConfig, EndpointDecorator } from './types.ts';
+import { WebAsyncContext } from '../context.ts';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
 export class ControllerRegistryIndex implements RegistryIndex {

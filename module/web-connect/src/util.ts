@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 
 import type { WebFilterContext } from '@travetto/web';
 
-import { ConnectRequest, ConnectResponse } from './connect';
+import { ConnectRequest, ConnectResponse } from './connect.ts';
 
 type Middleware = (request: IncomingMessage, response: ServerResponse, next: (error?: unknown) => void) => void;
 

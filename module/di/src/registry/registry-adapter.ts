@@ -2,7 +2,7 @@ import type { RegistryAdapter } from '@travetto/registry';
 import { type Class, classConstruct, describeFunction, safeAssign } from '@travetto/runtime';
 import { CONSTRUCTOR_PROPERTY, SchemaRegistryIndex } from '@travetto/schema';
 
-import { type InjectableConfig, getDefaultQualifier, type InjectableCandidate } from '../types';
+import { type InjectableConfig, getDefaultQualifier, type InjectableCandidate } from '../types.ts';
 
 function combineInjectableCandidates<T extends InjectableCandidate>(base: T, ...overrides: Partial<T>[]): typeof base {
   for (const override of overrides) {

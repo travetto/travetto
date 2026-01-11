@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 
 import type { TestRemoveEvent, TestResult, TestStatus, TestWatchEvent } from '@travetto/test';
 
-import { Workspace } from '../../../core/workspace';
-import { Decorations, Style } from './decoration';
+import { Workspace } from '../../../core/workspace.ts';
+import { Decorations, Style } from './decoration.ts';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 

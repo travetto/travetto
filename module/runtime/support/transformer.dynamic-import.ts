@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { RegisterHandler, type TransformerState } from '@travetto/transformer';
+import { TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 /**
  * Dynamic Import Transformer
@@ -8,7 +8,7 @@ import { RegisterHandler, type TransformerState } from '@travetto/transformer';
 export class DynamicImportTransformer {
 
   static {
-    RegisterHandler(this, this.onCall, 'before', 'call');
+    TransformerHandler(this, this.onCall, 'before', 'call');
   }
 
   static onCall(state: TransformerState, node: ts.CallExpression): typeof node | ts.Identifier {

@@ -2,11 +2,11 @@ import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/regi
 import { AppError, castTo, type Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { IndexConfig, IndexType, ModelConfig } from './types';
-import type { ModelType } from '../types/model';
-import { ModelRegistryAdapter } from './registry-adapter';
-import { IndexNotSupported } from '../error/invalid-index';
-import { NotFoundError } from '../error/not-found';
+import type { IndexConfig, IndexType, ModelConfig } from './types.ts';
+import type { ModelType } from '../types/model.ts';
+import { ModelRegistryAdapter } from './registry-adapter.ts';
+import { IndexNotSupported } from '../error/invalid-index.ts';
+import { NotFoundError } from '../error/not-found.ts';
 
 type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & { type: K[number] };
 

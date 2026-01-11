@@ -1,6 +1,6 @@
-import ts from 'typescript';
-
 import { ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/manifest';
+import type { CompileEmitError } from './types.ts';
+import { tsProxy } from './ts-proxy.ts';
 
 const nativeCwd = process.cwd();
 
@@ -42,13 +42,13 @@ export class CompilerUtil {
    * @param filename The name of the file
    * @param diagnostics The diagnostic errors
    */
-  static buildTranspileError(filename: string, diagnostics: Error | readonly ts.Diagnostic[]): Error {
+  static buildTranspileError(filename: string, diagnostics: CompileEmitError): Error {
     if (diagnostics instanceof Error) {
       return diagnostics;
     }
 
     const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-      const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+      const message = tsProxy.flattenDiagnosticMessageText(diag.messageText, '\n');
       if (diag.file) {
         const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
         return ` @ ${diag.file.fileName.replace(nativeCwd, '.')}(${line + 1}, ${character + 1}): ${message}`;

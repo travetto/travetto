@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Test, Suite } from '@travetto/test';
 import { AppError } from '@travetto/runtime';
 
-import { CommunicationUtil } from '../src/communication';
+import { CommunicationUtil } from '../src/communication.ts';
 
 @Suite()
 export class CommunicationUtilTest {

@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@travetto/di';
 import type { StandardWebRouter } from '@travetto/web';
 import type { ConfigurationService } from '@travetto/config';
 
-import type { WebHttpConfig } from './config';
-import { WebHttpUtil } from './http';
-import type { WebHttpServer, WebServerHandle } from './types';
+import type { WebHttpConfig } from './config.ts';
+import { WebHttpUtil } from './http.ts';
+import type { WebHttpServer, WebServerHandle } from './types.ts';
 
 /**
  * A node http server

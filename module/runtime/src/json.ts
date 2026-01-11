@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 
-import type { Any } from './types';
+import type { Any } from './types.ts';
 
 /**
  * JSON Utility functions

@@ -29,7 +29,7 @@ Below is an example of a transformer that upper cases all `class`, `method` and 
 ```typescript
 import type ts from 'typescript';
 
-import { OnProperty, type TransformerState, OnMethod, OnClass } from '@travetto/transformer';
+import { TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 export class MakeUpper {
 
@@ -37,7 +37,12 @@ export class MakeUpper {
     return state.importName !== '@travetto/transformer/doc/upper.ts';
   }
 
-  @OnProperty()
+  static {
+    TransformerHandler(this, this.handleClass, 'before', 'class');
+    TransformerHandler(this, this.handleMethod, 'before', 'method');
+    TransformerHandler(this, this.handleProperty, 'before', 'property');
+  }
+
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
     return !this.isValid(state) ? node : state.factory.updatePropertyDeclaration(
       node,
@@ -49,7 +54,6 @@ export class MakeUpper {
     );
   }
 
-  @OnClass()
   static handleClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     return !this.isValid(state) ? node : state.factory.updateClassDeclaration(
       node,
@@ -61,7 +65,6 @@ export class MakeUpper {
     );
   }
 
-  @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     return !this.isValid(state) ? node : state.factory.updateMethodDeclaration(
       node,

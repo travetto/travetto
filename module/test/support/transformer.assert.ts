@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, DeclarationUtil, CoreUtil, RegisterHandler } from '@travetto/transformer';
+import { type TransformerState, DeclarationUtil, CoreUtil, TransformerHandler } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -91,9 +91,9 @@ interface Command {
 export class AssertTransformer {
 
   static {
-    RegisterHandler(this, this.onAssertCheck, 'before', 'method', ['AssertCheck']);
-    RegisterHandler(this, this.afterAssertCheck, 'after', 'method', ['AssertCheck']);
-    RegisterHandler(this, this.onAssertCall, 'before', 'call');
+    TransformerHandler(this, this.onAssertCheck, 'before', 'method', ['AssertCheck']);
+    TransformerHandler(this, this.afterAssertCheck, 'after', 'method', ['AssertCheck']);
+    TransformerHandler(this, this.onAssertCall, 'before', 'call');
   }
 
   /**

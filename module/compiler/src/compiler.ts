@@ -170,7 +170,7 @@ export class Compiler {
 
     if (this.#watch || changedFiles.length) {
       await ManifestUtil.writeManifest(this.#state.manifestIndex.manifest);
-      await this.#state.initTransformerManager();
+      await this.#state.initializeTypescript();
     }
 
     if (changedFiles.length) {
