@@ -268,3 +268,12 @@ Platform Support
   - [X] Need a way to pack in common resources if necessary?
   - [X] May need to combine config files potentially
 * [X] Contemplate relationship between base/registry, no longer applies
+
+## Native Typescript Execution
+Rework compiler setup to no longer need the pre-compilation process and leverage type stripping, now that we are fully ESM
+* Decorators will need to be rethought if this is the goal
+
+### Transformer simplification
+* Drop decorators for explicit registration
+* This is the last of the non-compatible syntax for loading with type erasure
+

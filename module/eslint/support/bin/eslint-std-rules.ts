@@ -1,4 +1,6 @@
-export const STD_RULES = {
+import type { Linter } from 'eslint';
+
+export const STD_RULES: Linter.Config['rules'] = {
   'no-loss-of-precision': 0,
   'no-unused-vars': 0,
   'no-dupe-class-members': 0,

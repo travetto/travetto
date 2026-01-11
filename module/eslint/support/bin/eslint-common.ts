@@ -99,7 +99,6 @@ export const IGNORES = [
   '**/.trv/**',
   '**/fixtures/**/*',
   '**/resources/**/*',
-  '**/compiler/bin/gen.*'
 ];
 
 export const TS_OPTIONS = {

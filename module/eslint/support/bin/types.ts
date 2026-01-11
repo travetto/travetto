@@ -3,7 +3,7 @@ import type eslint from 'eslint';
 export type TrvEslintPlugin = {
   name: string;
   rules: Record<string, {
-    defaultLevel?: string | boolean | number;
+    defaultLevel?: Exclude<eslint.Linter.Config['rules'], undefined>[string];
     create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener;
   }>;
 };
