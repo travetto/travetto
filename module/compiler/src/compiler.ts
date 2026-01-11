@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
 
-import { getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, type ManifestContext, type ManifestRoot } from '@travetto/manifest';
+import { getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, type DeltaEvent } from '@travetto/manifest';
 
 import { CompilerUtil } from './util.ts';
 import { CompilerState } from './state.ts';
@@ -26,25 +26,21 @@ export class Compiler {
     const ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
     const manifest = await ManifestUtil.buildManifest(ctx);
     const delta = await ManifestDeltaUtil.produceDelta(manifest);
-    await ManifestUtil.writeManifest(manifest);
-    const dirtyFiles = delta.filter(event => event.type === 'create' || event.type === 'update').map(event => event.sourceFile);
     const state = await CompilerState.get(new ManifestIndex(manifest));
-    await new Compiler(state, dirtyFiles, process.env.TRV_COMPILER_WATCH === 'true').run();
+    await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
   }
 
   #state: CompilerState;
-  #dirtyFiles: string[];
   #watch?: boolean;
   #controller: AbortController;
   #signal: AbortSignal;
   #shuttingDown = false;
+  #deltaEvents: DeltaEvent[];
 
-  constructor(state: CompilerState, dirtyFiles: string[], watch?: boolean) {
+  constructor(state: CompilerState, deltaEvents: DeltaEvent[], watch?: boolean) {
     this.#state = state;
-    const isCompilerChanged = dirtyFiles.some(file => state.isCompilerFile(file));
-    this.#dirtyFiles = isCompilerChanged ? this.#state.getAllFiles() :
-      dirtyFiles.map(file => this.#state.getBySource(file)!.sourceFile);
     this.#watch = watch;
+    this.#deltaEvents = deltaEvents;
 
     this.#controller = new AbortController();
     this.#signal = this.#controller.signal;
@@ -169,9 +165,14 @@ export class Compiler {
     EventUtil.sendEvent('state', { state: 'compile-start' });
 
     const metrics: CompileEmitEvent[] = [];
+    const isCompilerChanged = this.#deltaEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
+    const dirtyFiles = (isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile))
+      .filter(file => !this.#state.isCompilerFile(file));
 
-    if (this.#dirtyFiles.length) {
-      for await (const event of this.emit(this.#dirtyFiles, emitter)) {
+    if (dirtyFiles.length) {
+      await ManifestUtil.writeManifest(this.#state.manifest); // So we have it for the transformer phase
+
+      for await (const event of this.emit(dirtyFiles, emitter)) {
         if (event.error) {
           const compileError = CompilerUtil.buildTranspileError(event.file, event.error);
           failure ??= compileError;

@@ -57,11 +57,16 @@ export class CompilerManager {
   }
 
   /** Main entry point for compilation */
-  static async compile(ctx: ManifestContext, client: CompilerClient, watch: boolean, logLevel: CompilerLogLevel = 'info'): Promise<void> {
-    Log.initLevel(logLevel);
+  static async compile(ctx: ManifestContext, client: CompilerClient, config: { watch?: boolean, logLevel?: CompilerLogLevel, forceRestart?: boolean }): Promise<void> {
+    Log.initLevel(config.logLevel ?? 'info');
+    const log = Log.scoped('main');
+    const watch = !!config.watch;
+
+    if (config.forceRestart && await client.stop()) {
+      log.info('Stopped existing server');
+    }
 
     const server = await new CompilerServer(ctx, watch).listen();
-    const log = Log.scoped('main');
 
     // Wait for build to be ready
     if (server) {
@@ -80,7 +85,7 @@ export class CompilerManager {
   /** Compile only if necessary */
   static async compileIfNecessary(ctx: ManifestContext, client: CompilerClient): Promise<void> {
     if (!(await client.isWatching())) { // Short circuit if we can
-      await this.compile(ctx, client, false, 'error');
+      await this.compile(ctx, client, { watch: false, logLevel: 'error' });
     }
   }
 }

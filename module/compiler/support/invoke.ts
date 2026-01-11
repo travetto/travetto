@@ -42,8 +42,9 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
     case undefined:
     case 'help': console.log(HELP); break;
     case 'start':
-    case 'watch': return CompilerManager.compile(ctx, client, true);
-    case 'build': return CompilerManager.compile(ctx, client, false);
+    case 'watch': return CompilerManager.compile(ctx, client, { watch: true });
+    case 'build': return CompilerManager.compile(ctx, client, { watch: false });
+    case 'restart': return CompilerManager.compile(ctx, client, { watch: true, forceRestart: true });
     case 'info': {
       const info = await client.info();
       return CommonUtil.writeStdout(2, info);
@@ -79,10 +80,6 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
         console.log(`Server not running ${ctx.workspace.path}: ${client.url}`);
       }
       break;
-    }
-    case 'restart': {
-      await client.stop();
-      return CompilerManager.compile(ctx, client, true);
     }
     case 'exec': {
       await CompilerManager.compileIfNecessary(ctx, client);
