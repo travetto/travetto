@@ -26,6 +26,7 @@ export class Compiler {
     const ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
     const manifest = await ManifestUtil.buildManifest(ctx);
     const delta = await ManifestDeltaUtil.produceDelta(manifest);
+    await ManifestUtil.writeManifest(manifest); // So we have it for the transformer phase
     const state = await CompilerState.get(new ManifestIndex(manifest));
     await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
   }
@@ -166,13 +167,10 @@ export class Compiler {
 
     const metrics: CompileEmitEvent[] = [];
     const isCompilerChanged = this.#deltaEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
-    const dirtyFiles = (isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile))
-      .filter(file => !this.#state.isCompilerFile(file));
+    const changedFiles = (isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile));
 
-    if (dirtyFiles.length) {
-      await ManifestUtil.writeManifest(this.#state.manifest); // So we have it for the transformer phase
-
-      for await (const event of this.emit(dirtyFiles, emitter)) {
+    if (changedFiles.length) {
+      for await (const event of this.emit(changedFiles, emitter)) {
         if (event.error) {
           const compileError = CompilerUtil.buildTranspileError(event.file, event.error);
           failure ??= compileError;
