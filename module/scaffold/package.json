@@ -1,6 +1,6 @@
 {
   "name": "@travetto/scaffold",
-  "version": "7.0.9",
+  "version": "7.0.10",
   "type": "module",
   "description": "App Scaffold for the Travetto framework",
   "keywords": [
