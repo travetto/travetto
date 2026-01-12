@@ -34,14 +34,11 @@ export class ModelExpiryUtil {
   static registerCull(service: ModelExpirySupport & { readonly config?: { cullRate?: number | TimeSpan } }): void {
     const cullable = ModelRegistryIndex.getClasses().filter(cls => !!ModelRegistryIndex.getConfig(cls).expiresAt);
     if (service.deleteExpired && cullable.length) {
-      const running = new AbortController();
       const cullInterval = TimeUtil.asMillis(service.config?.cullRate ?? '10m');
-
-      ShutdownManager.onGracefulShutdown(async () => running.abort());
 
       (async (): Promise<void> => {
         await Util.nonBlockingTimeout(1000);
-        while (!running.signal.aborted) {
+        while (!ShutdownManager.signal.aborted) {
           await Util.nonBlockingTimeout(cullInterval);
           await Promise.all(cullable.map(cls => service.deleteExpired(cls)));
         }

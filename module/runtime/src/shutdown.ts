@@ -10,6 +10,8 @@ export class ShutdownManager {
   static #registered = false;
   static #handlers: { scope?: string, handler: () => (void | Promise<void>) }[] = [];
   static #pending: (PromiseWithResolvers<void> & { time: number }) | undefined;
+  static #controller = new AbortController();
+  static signal: AbortSignal = this.#controller.signal;
 
   static #ensureExitListeners(): void {
     if (this.#registered) {
@@ -64,6 +66,8 @@ export class ShutdownManager {
     const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
     const items = this.#handlers.splice(0, this.#handlers.length);
     console.debug('Graceful shutdown: started', { source, timeout, count: items.length });
+    this.#controller.abort('Graceful shutdown initiated');
+
     const handlers = Promise.all(items.map(async ({ scope, handler }) => {
       if (scope) {
         console.debug('Stopping', { scope });
