@@ -1,4 +1,4 @@
-import { Model, ModelType } from '@travetto/model';
+import { Model, type ModelType } from '@travetto/model';
 
 @Model()
 export class Todo implements ModelType {

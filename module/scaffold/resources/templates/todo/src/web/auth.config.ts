@@ -1,8 +1,8 @@
-import { Authorizer, Authenticator, AuthenticationError } from '@travetto/auth';
+import { type Authorizer, type Authenticator, AuthenticationError } from '@travetto/auth';
 import { SessionModelSymbol } from '@travetto/auth-session';
 import { InjectableFactory } from '@travetto/di';
-import { ModelExpirySupport } from '@travetto/model';
-import { MemoryModelService } from '@travetto/model-memory';
+import type { ModelExpirySupport } from '@travetto/model';
+import type { MemoryModelService } from '@travetto/model-memory';
 
 export const BasicAuthSymbol = Symbol.for('AUTH_BASIC');
 

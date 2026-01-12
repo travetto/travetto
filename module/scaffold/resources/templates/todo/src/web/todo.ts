@@ -1,16 +1,16 @@
 import { Controller, Get, Put, Post, Delete } from '@travetto/web';
 import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
-import { ModelQuery } from '@travetto/model-query';
+import type { ModelQuery } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
 // {{#modules.auth}}
-import { AuthContext } from '@travetto/auth';
+import type { AuthContext } from '@travetto/auth';
 // {{/modules.auth}}
 // {{#modules.auth_web}}
 import { Authenticated } from '@travetto/auth-web';
 // {{/modules.auth_web}}
 // @ts-expect-error
-import { $_modelService_$ } from '$_modelImport_$';
+import type { $_modelService_$ } from '$_modelImport_$';
 
 import { Todo } from '../model/todo.ts';
 

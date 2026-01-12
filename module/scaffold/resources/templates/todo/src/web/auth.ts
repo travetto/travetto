@@ -1,8 +1,8 @@
 import { Controller, Get, Post, WebResponse, ContextParam } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
-import { Principal } from '@travetto/auth';
+import type { Principal } from '@travetto/auth';
 
-import { BasicAuthSymbol } from './auth.config';
+import { BasicAuthSymbol } from './auth.config.ts';
 
 /**
  * Auth API
