@@ -99,8 +99,8 @@ export class ManifestDeltaUtil {
     const out: DeltaEvent[] = [];
     const outputFolder = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
 
-    for (const leftMod of Object.values(deltaLeft)) {
-      out.push(...await this.#deltaModules(manifest, outputFolder, leftMod));
+    for (const leftModule of Object.values(deltaLeft)) {
+      out.push(...await this.#deltaModules(manifest, outputFolder, leftModule));
     }
 
     return out;

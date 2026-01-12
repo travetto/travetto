@@ -307,18 +307,18 @@ export class ManifestIndex {
    * Group by lineage, data can be duplicated
    */
   groupByLineage<T extends { action: string }>(items: { item: T, module: string }[]): Map<string, T[]> {
-    const itemsByMod = new Map<string, T[]>();
+    const itemsByModule = new Map<string, T[]>();
     for (const event of items) {
-      const moduleSet = new Set(this.getDependentModules(event.module, 'parents').map(indexedMod => indexedMod.name));
+      const moduleSet = new Set(this.getDependentModules(event.module, 'parents').map(module => module.name));
       moduleSet.add(this.manifest.workspace.name);
       for (const moduleName of moduleSet) {
-        if (!itemsByMod.has(moduleName)) {
-          itemsByMod.set(moduleName, []);
+        if (!itemsByModule.has(moduleName)) {
+          itemsByModule.set(moduleName, []);
         }
-        itemsByMod.get(moduleName)!.push(event.item);
+        itemsByModule.get(moduleName)!.push(event.item);
       }
     }
-    return itemsByMod;
+    return itemsByModule;
   }
 
   /**

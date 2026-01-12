@@ -2,15 +2,15 @@ import { AppError, Env, FileLoader, Runtime, RuntimeIndex } from '@travetto/runt
 
 /** Build a resource loader that looks into a module and it's dependencies */
 export class EmailResourceLoader extends FileLoader {
-  constructor(module: string, globalResources?: string[]) {
-    const found = RuntimeIndex.getModule(module);
+  constructor(moduleName: string, globalResources?: string[]) {
+    const found = RuntimeIndex.getModule(moduleName);
     if (!found) {
-      throw new AppError(`Unknown module - ${module}`, { category: 'notfound', details: { module } });
+      throw new AppError(`Unknown module - ${moduleName}`, { category: 'notfound', details: { module: moduleName } });
     }
     super([
       ...Env.TRV_RESOURCES.list ?? [],
-      `${module}#resources`,
-      ...RuntimeIndex.getDependentModules(found, 'children').map(indexedMod => `${indexedMod.name}#resources`),
+      `${moduleName}#resources`,
+      ...RuntimeIndex.getDependentModules(found, 'children').map(module => `${module.name}#resources`),
       '@@#resources',
       ...globalResources ?? []
     ].map(name => Runtime.modulePath(name)));
