@@ -1,6 +1,6 @@
 {
   "name": "@travetto/cli",
-  "version": "7.0.7",
+  "version": "7.0.8",
   "type": "module",
   "description": "CLI infrastructure for Travetto framework",
   "keywords": [

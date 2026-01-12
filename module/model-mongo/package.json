@@ -32,7 +32,7 @@
     "mongodb": "^7.0.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.7"
+    "@travetto/cli": "^7.0.8"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
