@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 // @ts-check
-import { delimiter } from 'node:path';
+import { resolve } from 'node:path';
 import { writeFileSync, readFileSync } from 'node:fs';
+import '@travetto/compiler/bin/hook.js';
 
-await import('@travetto/compiler/bin/hook.js');
-
-const { invoke } = await import('@travetto/compiler/support/invoke.ts');
+const current = process.cwd();
 
 if (process.env.npm_lifecycle_script?.includes('trv-scaffold')) { // Is npx  run
-  writeFileSync('package.json', JSON.stringify({ ...JSON.parse(readFileSync('./package.json', 'utf-8')), type: 'module' }));
-  const parts = process.env.PATH?.split(delimiter) ?? [];
-  const item = parts.find(part => part.includes('npx') && part.includes('.bin'));
-  if (item) {
-    process.chdir(item.split('/node_modules')[0]);
-  }
+  const folder = import.meta.dirname.split('node_modules')[0];
+  const pkg = resolve(folder, 'package.json');
+  writeFileSync(pkg, JSON.stringify({ ...JSON.parse(readFileSync(pkg, 'utf-8')), type: 'module' }));
+  process.chdir(folder);
 }
 
-await invoke('exec', ['@travetto/cli/support/entry.trv.js', 'scaffold', '-c', process.cwd(), ...process.argv.slice(2)]);
+const { invoke } = await import('@travetto/compiler/support/invoke.ts');
+await invoke('exec', ['@travetto/cli/support/entry.trv.js', 'scaffold', '-c', current, ...process.argv.slice(2)]);
