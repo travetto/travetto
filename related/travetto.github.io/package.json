@@ -29,15 +29,15 @@
     "@angular/compiler": "^21.0.1",
     "@angular/core": "^21.0.1",
     "@angular/platform-browser": "^21.0.1",
-    "@angular/platform-browser-dynamic": "^21.0.6",
-    "@angular/router": "^21.0.6",
+    "@angular/platform-browser-dynamic": "^21.0.8",
+    "@angular/router": "^21.0.8",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "@angular/build": "^21.0.4",
-    "@angular/cli": "^21.0.4",
-    "@angular/compiler-cli": "^21.0.6",
-    "@types/node": "^22.19.3",
+    "@angular/build": "^21.0.5",
+    "@angular/cli": "^21.0.5",
+    "@angular/compiler-cli": "^21.0.8",
+    "@types/node": "^22.19.5",
     "source-map-explorer": "^2.5.3",
     "ts-node": "~10.9.1",
     "typescript": "~5.9.3"
