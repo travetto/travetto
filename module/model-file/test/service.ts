@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { TimeUtil } from '@travetto/runtime';

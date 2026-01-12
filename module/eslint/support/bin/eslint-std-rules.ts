@@ -230,4 +230,10 @@ export const STD_RULES: Linter.Config['rules'] = {
       fixStyle: 'inline-type-imports',
     },
   ],
+  'import/enforce-node-protocol-usage': ['error', 'always'],
+  'import/no-self-import': ['error'],
+  'import/extensions': ['error', 'ignorePackages'],
+  'import/order': ['error', {
+    groups: ['builtin', 'external', ['parent', 'sibling']],
+  }]
 };

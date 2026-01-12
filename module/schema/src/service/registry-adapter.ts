@@ -5,7 +5,7 @@ import {
   type SchemaClassConfig, type SchemaMethodConfig, type SchemaFieldConfig,
   type SchemaParameterConfig, type SchemaInputConfig, type SchemaFieldMap, type SchemaCoreConfig,
   CONSTRUCTOR_PROPERTY
-} from './types';
+} from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
 

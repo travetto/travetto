@@ -99,6 +99,8 @@ export const IGNORES = [
   '**/.trv/**',
   '**/fixtures/**/*',
   '**/resources/**/*',
+  '**/ui/**',
+  '**/api-client/**'
 ];
 
 export const TS_OPTIONS = {

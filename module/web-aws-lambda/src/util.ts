@@ -1,5 +1,6 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { buffer } from 'node:stream/consumers';
+
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { castTo } from '@travetto/runtime';
 import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
