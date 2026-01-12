@@ -20,16 +20,12 @@ const log = (message: string | TestLogEvent): void => {
 export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun | TestDiffInput): Promise<void> {
   log(`Worker Input ${JSON.stringify(run)}`);
 
-  const module = RuntimeIndex.findModuleForArbitraryImport(run.import)!;
-
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(
       RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv.ts'), ['test:child'],
       {
-        cwd: module.sourcePath,
         env: {
           ...process.env,
-          ...Env.TRV_MANIFEST.export(module.outputPath),
           ...Env.TRV_QUIET.export(true)
         },
         stdio: ['ignore', 'ignore', 2, 'ipc']

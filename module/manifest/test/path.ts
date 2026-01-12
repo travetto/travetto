@@ -10,7 +10,7 @@ class PathTests {
 
   @Test()
   verifyRelative() {
-    const pwd = path.resolve().replace(/[a-z\- ]+/g, '..');
+    const pwd = path.resolve().replace(/[a-z\- ]+/ig, '..');
     assert(pwd.includes('../../..'));
     assert(path.resolve(`${pwd}/test`) === '/test');
   }

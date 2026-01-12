@@ -220,10 +220,10 @@ export class RunUtil {
   static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
     const { runs, removes } = await this.resolveInput(input);
 
-    await this.reinitManifestIfNeeded(runs);
-
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
     const consumer = await this.getRunnableConsumer(targetConsumer, runs);
+
+    await this.reinitManifestIfNeeded(runs);
 
     for (const item of removes ?? []) {
       consumer.onRemoveEvent(item);
