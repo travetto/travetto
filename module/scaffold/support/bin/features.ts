@@ -31,7 +31,7 @@ export const FEATURES: Feature[] = [
       { title: 'OpenAPI', package: '@travetto/openapi', required: true },
       {
         title: 'Web Authentication',
-        package: '@travetto/auth-web',
+        package: ['@travetto/auth-web', '@travetto/auth'],
         addons: [
           { title: 'Session Support', package: ['@travetto/auth-session', '@travetto/auth-web-session', '@travetto/model-memory'] },
         ]
