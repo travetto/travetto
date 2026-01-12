@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
-    "@travetto/cli": "^7.0.5"
+    "@travetto/cli": "^7.0.6"
   },
   "devDependencies": {
-    "@travetto/compiler": "^7.0.3",
-    "@travetto/pack": "^7.0.3"
+    "@travetto/compiler": "^7.0.4",
+    "@travetto/pack": "^7.0.4"
   },
   "travetto": {},
   "private": true
