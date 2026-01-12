@@ -30,8 +30,8 @@ export class RunUtil {
   /**
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
-  static registerCleanup(scope: string): void {
-    ShutdownManager.onGracefulShutdown(() => Util.blockingTimeout(50), `test.${scope}.bufferOutput`);
+  static registerCleanup(): void {
+    ShutdownManager.signal.addEventListener('abort', () => Util.blockingTimeout(50));
   }
 
   /**

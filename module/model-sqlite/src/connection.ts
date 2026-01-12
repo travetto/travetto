@@ -74,7 +74,7 @@ export class SqliteConnection extends Connection<Database> {
     }, { max: 1 });
 
     // Close postgres
-    ShutdownManager.onGracefulShutdown(() => this.#pool.clear());
+    ShutdownManager.signal.addEventListener('abort', () => this.#pool.clear());
   }
 
   async execute<T = unknown>(connection: Database, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {

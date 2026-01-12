@@ -16,10 +16,9 @@ async function init() {
     env: {
       ...process.env, WEB_HTTP_PORT: `${port}`, WEB_HTTP_TLS: '0', WEB_BASE_URL: `http://localhost:${port}`,
       ...Env.TRV_RESTART_ON_CHANGE.export(false)
-    }
+    },
+    signal: ShutdownManager.signal
   });
-
-  ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); });
 
   cmd.stdout?.on('data', chunk =>
     startupBuffer.push(Buffer.from(chunk)));

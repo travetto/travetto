@@ -94,7 +94,7 @@ export class WebHttpUtil {
       return complete;
     }
 
-    ShutdownManager.onGracefulShutdown(() => stop(false));
+    ShutdownManager.signal.addEventListener('abort', () => stop(false));
     config.signal?.addEventListener('abort', () => stop(true));
 
     return { target, complete, stop };

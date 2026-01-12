@@ -5,6 +5,7 @@ export type RunConfig = {
   env?: Record<string, string>;
   envName?: string;
   workingDirectory?: string;
+  signal?: AbortSignal
 };
 
 export type CodeProps = { title?: string, src: string | Function, language?: string, outline?: boolean, startRe?: RegExp, endRe?: RegExp };
