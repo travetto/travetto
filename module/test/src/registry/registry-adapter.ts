@@ -22,6 +22,8 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
     if (config.tags) {
       baseConfig.tags = [...baseConfig.tags ?? [], ...config.tags];
     }
+    baseConfig.skip = config.skip ?? baseConfig.skip;
+
     if (config.tests) {
       for (const [key, test] of Object.entries(config.tests ?? {})) {
         baseConfig.tests[key] = {
@@ -66,6 +68,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         class: this.#cls,
         classId: this.#cls.Ⲑid,
         tags: [],
+        skip: false,
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
@@ -89,6 +92,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
       const config = asFull<TestConfig>({
         class: this.#cls,
         tags: [],
+        skip: false,
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
