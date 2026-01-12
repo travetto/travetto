@@ -32,4 +32,25 @@ class TimeSuite {
     assert(TimeUtil.asClock(1000 * 60 * 1.5) === '01m 30s');
     assert(TimeUtil.asClock(1000 * 60 * 1.2) === '01m 12s');
   }
+
+  @Test()
+  verifyFromValue() {
+    assert(TimeUtil.fromValue(123) === 123);
+    assert(TimeUtil.fromValue(NaN) === undefined);
+
+    const d = new Date(2020, 0, 1);
+    assert(TimeUtil.fromValue(d) === d.getTime());
+
+    assert(TimeUtil.fromValue(undefined) === undefined);
+
+    assert(TimeUtil.fromValue('1000') === 1000);
+    assert(TimeUtil.fromValue('abc') === undefined);
+
+    // time-like spans
+    assert(TimeUtil.fromValue('1s') === 1000);
+    assert(TimeUtil.fromValue('1ms') === 1);
+    assert(TimeUtil.fromValue('1.5s') === 1500);
+    // looks like a span but invalid unit
+    assert(TimeUtil.fromValue('1q') === undefined);
+  }
 }

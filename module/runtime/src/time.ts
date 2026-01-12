@@ -15,6 +15,7 @@ export type TimeSpan = `${number}${keyof typeof TIME_UNITS}`;
 export type TimeUnit = keyof typeof TIME_UNITS;
 
 const TIME_PATTERN = new RegExp(`^(?<amount>-?[0-9.]+)(?<unit>${Object.keys(TIME_UNITS).join('|')})$`);
+const TIME_LIKE_STRING = /\d{1,30}[a-z]$/i;
 
 export class TimeUtil {
 
@@ -66,14 +67,19 @@ export class TimeUtil {
    * Resolve time or span to possible time
    */
   static fromValue(value: Date | number | string | undefined): number | undefined {
-    if (value === undefined) {
-      return value;
+    switch (typeof value) {
+      case 'number': return Number.isNaN(value) ? undefined : value;
+      case 'object': return value.getTime();
+      case 'undefined': return undefined;
+      case 'string': {
+        if (TIME_LIKE_STRING.test(value)) { // Looks like span
+          return this.isTimeSpan(value) ? this.asMillis(value) : undefined;
+        } else {
+          const parsed = parseInt(value, 10);
+          return Number.isNaN(parsed) ? undefined : parsed;
+        }
+      }
     }
-    const result = (typeof value === 'string' && /\d{1,30}[a-z]$/i.test(value)) ?
-      (this.isTimeSpan(value) ? this.asMillis(value) : undefined) :
-      (typeof value === 'string' ? parseInt(value, 10) :
-        (value instanceof Date ? value.getTime() : value));
-    return Number.isNaN(result) ? undefined : result;
   }
 
   /**
@@ -90,11 +96,16 @@ export class TimeUtil {
    * @param time Time in milliseconds
    */
   static asClock(time: number): string {
-    const seconds = Math.trunc(time / 1000);
-    return [
-      seconds > 3600 ? `${Math.trunc(seconds / 3600).toString().padStart(2, '0')}h` : '',
-      seconds > 60 ? `${Math.trunc((seconds % 3600) / 60).toString().padStart(2, '0')}m` : '',
-      `${(seconds % 60).toString().padStart(2, '0')}s`
-    ].filter(part => !!part).slice(0, 2).join(' ');
+    const rawSeconds = Math.trunc(time / 1000);
+    const seconds = rawSeconds % 60;
+    const minutes = Math.trunc(rawSeconds / 60) % 60;
+    const hours = Math.trunc(rawSeconds / 3600);
+    if (hours) {
+      return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
+    } else if (minutes) {
+      return `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+    } else {
+      return `${seconds.toString().padStart(2, '0')}s`;
+    }
   }
 }

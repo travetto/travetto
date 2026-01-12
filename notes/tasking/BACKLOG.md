@@ -1,5 +1,11 @@
 # Backlogged Requests
 
+## Refine Development Restart
+* Filter out files that should probably not trigger a full restart (maybe)
+
+## VSCode Code Assist LLM
+* Coding assistant not triggering same fs events as expected
+
 ## Migrate Away from Buffer/Readable
 - UInt8Array, and ArrayBuffer exist as cross-platform components that should suffice 
 - This will help cleanup general noise around node specific implementations
@@ -12,9 +18,6 @@
 * Expand some form of transactionality as a primitive for use within service methods (separate from sql transactions)
 * Might require some rework of the sql naming conventions
 * Should be user controlled, and will not work cross model stores
-
-## Refine Development Restart
-* Filter out files that should probably not trigger a full restart (maybe)
 
 ## Model
 - [?] Look for SQL query optimization opportunities
