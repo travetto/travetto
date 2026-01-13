@@ -47,8 +47,7 @@ class $Runtime {
 
   /** Get debug value */
   get debug(): false | string {
-    const value = Env.DEBUG.value ?? '';
-    return (!value && this.production) || Env.DEBUG.isFalse ? false : value;
+    return Env.DEBUG.isFalse ? false : (Env.DEBUG.value || false);
   }
 
   /** Manifest main */
