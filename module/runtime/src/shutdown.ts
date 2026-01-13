@@ -54,12 +54,12 @@ export class ShutdownManager {
 
     const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
     const stdoutDrain = TimeUtil.fromValue(Env.TRV_SHUTDOWN_STDOUT_WAIT.value)!;
-    const context = { ...source ? { source } : {}, timeout };
+    const context = source ? [{ source }] : [];
     this.#startedAt = Date.now();
     this.#controller.abort('Shutdown started');
     await Util.queueMacroTask(); // Force the event loop to wait one cycle
 
-    console.debug('Shutdown started', context);
+    console.debug('Shutdown started', ...context);
 
     if (stdoutDrain) {
       this.#pending.push(Util.blockingTimeout(stdoutDrain));
@@ -71,9 +71,9 @@ export class ShutdownManager {
     ]);
 
     if (!timedOut) {
-      console.debug('Shutdown completed', context);
+      console.debug('Shutdown completed', ...context);
     } else {
-      console.warn('Shutdown timed out', context);
+      console.warn('Shutdown timed out', ...context);
     }
 
     process.exit(0);

@@ -219,7 +219,7 @@ export function work() {
 ```javascript
 import * as Δfunction from "@travetto/runtime/src/function.js";
 import * as Δconsole from "@travetto/runtime/src/console.js";
-var Δm_1 = ["@travetto/runtime", "doc/transpile.ts"];
+const Δm_1 = ["@travetto/runtime", "doc/transpile.ts"];
 export function work() {
     Δconsole.log({ level: "debug", import: Δm_1, line: 2, scope: "work", args: ['Start Work'] });
     try {

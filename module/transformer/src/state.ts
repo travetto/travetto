@@ -291,7 +291,7 @@ export class TransformerState implements State {
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
       );
       this.addStatements([
-        this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([declaration]))
+        this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([declaration], ts.NodeFlags.Const))
       ], -1);
     }
     return this.#moduleIdentifier;
