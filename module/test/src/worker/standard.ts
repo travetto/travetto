@@ -26,7 +26,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
       {
         env: {
           ...process.env,
-          ...Env.TRV_QUIET.export(true),
+          ...Env.TRV_QUIET.export(true)
         },
         stdio: ['ignore', 'ignore', 2, 'ipc']
       }
