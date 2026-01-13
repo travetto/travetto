@@ -17,7 +17,7 @@ export class DocAngularCommand {
     const root = Runtime.workspace.path;
 
     if (target && target.startsWith(root)) {
-      target = target.replace(root, '').split('/').pop()!;
+      target = target.replace(root, '').split('/').at(-1);
     }
 
     const modules = new Set((await CliModuleUtil.findModules('workspace'))

@@ -282,7 +282,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L19) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L20) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript
@@ -352,7 +352,7 @@ As a registered shutdown handler, you can do.
 import { ShutdownManager } from '@travetto/runtime';
 
 export function registerShutdownHandler() {
-  ShutdownManager.onGracefulShutdown(async () => {
+  ShutdownManager.signal.addEventListener('abort', async () => {
     // Do important work, the framework will wait until all async
     //   operations are completed before finishing shutdown
   });

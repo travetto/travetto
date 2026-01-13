@@ -18,8 +18,8 @@
     "directory": "related/todo-app"
   },
   "scripts": {
-    "test": "npx trv test",
-    "start": "npx trv web:http"
+    "test": "trv test",
+    "start": "trv web:http"
   },
   "dependencies": {
     "@travetto/auth-web": "^7.0.6",

@@ -59,7 +59,7 @@ export class CliUtil {
         },
       });
 
-    await ShutdownManager.gracefulShutdown('cli-restart');
+    await ShutdownManager.shutdown();
     process.exit();
   }
 
