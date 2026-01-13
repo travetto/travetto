@@ -15,14 +15,14 @@ export class ShutdownManager {
   static #addListener = this.#controller.signal.addEventListener.bind(this.#controller.signal);
 
   static {
-    this.#controller.signal.addEventListener = (type: 'abort', listener: Handler): void => this.onShutdown(listener);
+    this.#controller.signal.addEventListener = (type: 'abort', listener: Handler): void => this.onGracefulShutdown(listener);
   }
 
   static get signal(): AbortSignal {
     return this.#controller.signal;
   }
 
-  static onShutdown(listener: Handler): void {
+  static onGracefulShutdown(listener: Handler): void {
     if (!this.#registered) {
       this.#registered = true;
       process

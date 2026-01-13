@@ -116,7 +116,7 @@ export class ElasticsearchModelService implements
     this.manager = new IndexManager(this.config, this.client);
 
     await ModelStorageUtil.storageInitialization(this.manager);
-    ShutdownManager.signal.addEventListener('abort', () => this.client.close());
+    ShutdownManager.onGracefulShutdown(() => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }
 

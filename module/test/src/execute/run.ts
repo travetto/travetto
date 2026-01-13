@@ -31,7 +31,7 @@ export class RunUtil {
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
   static registerCleanup(): void {
-    ShutdownManager.signal.addEventListener('abort', () => Util.blockingTimeout(50));
+    ShutdownManager.onGracefulShutdown(() => Util.blockingTimeout(50));
   }
 
   /**

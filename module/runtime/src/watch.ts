@@ -45,7 +45,7 @@ export class WatchUtil {
       if (event === 'WATCH_RESTART') { this.exitWithRestart(); }
     };
     process.on('message', listener);
-    ShutdownManager.signal.addEventListener('abort', () => { process.removeListener('message', listener); });
+    ShutdownManager.onGracefulShutdown(() => { process.removeListener('message', listener); });
   }
 
   /** Trigger a restart signal to a subprocess */

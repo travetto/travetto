@@ -17,7 +17,7 @@ export class IpcChannel<V = unknown> {
     this.parentId = subProcess instanceof ChildProcess ? process.pid : process.ppid;
 
     // Close on shutdown
-    ShutdownManager.signal.addEventListener('abort', () => this.destroy());
+    ShutdownManager.onGracefulShutdown(() => this.destroy());
 
     this.subProcess.on('message', (event: { type: string }) => {
       console.debug('Received', { pid: this.parentId, id: this.id, type: event.type });
