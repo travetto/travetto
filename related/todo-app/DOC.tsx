@@ -21,7 +21,7 @@ async function init() {
     },
   });
 
-  ShutdownManager.onGracefulShutdown(() => cmd.kill());
+  ShutdownManager.onGracefulShutdown(async () => cmd.kill());
 
   cmd.stdout?.on('data', (chunk: Buffer) => startupBuffer.push(chunk));
 
