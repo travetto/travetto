@@ -126,6 +126,11 @@ The functionality we support for testing and retrieving environment information 
    */</span>
   <span class="token constant">TRV_SHUTDOWN_WAIT</span><span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   <span class="token comment">/**
+   * The time to wait for stdout to drain during shutdown
+   * @default 0s
+   */</span>
+  <span class="token constant">TRV_SHUTDOWN_STDOUT_WAIT</span><span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
    * The desired runtime module
    */</span>
   <span class="token constant">TRV_MODULE</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>

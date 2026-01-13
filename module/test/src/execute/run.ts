@@ -4,7 +4,7 @@ import readline from 'node:readline/promises';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 
-import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil } from '@travetto/runtime';
+import { Env, ExecUtil, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 import { Registry } from '@travetto/registry';
 
@@ -27,12 +27,6 @@ type RunState = {
  * Test Utilities for Running
  */
 export class RunUtil {
-  /**
-   * Add 50 ms to the shutdown to allow for buffers to output properly
-   */
-  static registerCleanup(): void {
-    ShutdownManager.onGracefulShutdown(() => Util.blockingTimeout(50));
-  }
 
   /**
    * Determine if a given file path is a valid test file

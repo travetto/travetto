@@ -35,6 +35,11 @@ declare module "@travetto/runtime" {
      * @default 2s
      */
     TRV_SHUTDOWN_WAIT: TimeSpan | number;
+    /** 
+     * The time to wait for stdout to drain during shutdown
+     * @default 0s
+     */
+    TRV_SHUTDOWN_STDOUT_WAIT: TimeSpan | number;
     /**
      * The desired runtime module 
      */
