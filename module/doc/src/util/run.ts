@@ -87,8 +87,7 @@ export class DocRunUtil {
         ...Env.TRV_MODULE.export(config.module ?? ''),
         ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
         ...config.env
-      },
-      signal: config.signal
+      }
     });
   }
 
