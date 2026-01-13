@@ -13,6 +13,11 @@ const page = (file: string): string => path.resolve('related/travetto.github.io/
  */
 @CliCommand()
 export class DocAngularCommand {
+
+  preMain(): void {
+    Env.DEBUG.set(false);
+  }
+
   async main(target?: string): Promise<void> {
     const root = Runtime.workspace.path;
 
