@@ -152,7 +152,6 @@ $ npx trv eslint:register
       <c.Execution
         title='Create Output' cmd='trv' args={['main', 'doc/create-todo.ts', key, `${port}`]}
         config={{
-          env: { ...Env.TRV_LOG_PLAIN.export(false) },
           rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
           formatCommand: (name, args) => [name, ...args].map(arg =>
             arg.replaceAll('doc/create', 'support/create').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')

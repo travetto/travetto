@@ -80,11 +80,11 @@ export class ShutdownManager {
       console.error('Error during shutdown task', err, ...context);
     })));
 
-    const timedOut = await Promise.race([timeoutTasks, allPendingTasks]);
+    const winner = await Promise.race([timeoutTasks, allPendingTasks]);
 
     process.exitCode = code ?? process.exitCode ?? 0;
 
-    if (timedOut !== this) {
+    if (winner !== this) {
       console.debug('Shutdown completed', ...context);
     } else {
       console.warn('Shutdown timed out', ...context);
