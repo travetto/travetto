@@ -29,7 +29,7 @@ class $Runtime {
 
   /** Are we in production mode */
   get production(): boolean {
-    return Env.NODE_ENV.value === 'production';
+    return process.env.NODE_ENV === 'production';
   }
 
   /** The role we are running as */
