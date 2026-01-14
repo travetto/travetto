@@ -324,8 +324,8 @@ npx trv web:http
     }
   },
   runtime: {
-    role: 'doc',
     production: false,
+    role: 'doc',
     debug: false,
     resourcePaths: [
       './resources',

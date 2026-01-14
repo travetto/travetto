@@ -43,10 +43,10 @@ While running any code within the framework, there are common patterns/goals for
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">$Runtime</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token function">constructor</span><span class="token punctuation">(</span>idx<span class="token operator">:</span> ManifestIndex<span class="token punctuation">,</span> resourceOverrides<span class="token operator">?</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token comment">/** Are we in production mode */</span>
-  <span class="token keyword">get</span> <span class="token function">production</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/** The role we are running as */</span>
   <span class="token keyword">get</span> <span class="token function">role</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Role<span class="token punctuation">;</span>
+  <span class="token comment">/** Are we in production mode */</span>
+  <span class="token keyword">get</span> <span class="token function">production</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/** Are we in development mode */</span>
   <span class="token keyword">get</span> <span class="token function">localDevelopment</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/** Get debug value */</span>

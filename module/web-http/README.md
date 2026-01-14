@@ -36,8 +36,8 @@ Initialized {
     }
   },
   runtime: {
-    role: 'doc',
     production: false,
+    role: 'doc',
     debug: false,
     resourcePaths: [
       './doc-exec/resources'
@@ -204,8 +204,8 @@ Initialized {
     }
   },
   runtime: {
-    role: 'std',
     production: true,
+    role: 'std',
     debug: false,
     resourcePaths: [
       './doc-exec/resources'

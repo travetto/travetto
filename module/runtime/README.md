@@ -35,10 +35,10 @@ While running any code within the framework, there are common patterns/goals for
 ```typescript
 class $Runtime {
   constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>);
-  /** Are we in production mode */
-  get production(): boolean;
   /** The role we are running as */
   get role(): Role;
+  /** Are we in production mode */
+  get production(): boolean;
   /** Are we in development mode */
   get localDevelopment(): boolean;
   /** Get debug value */
