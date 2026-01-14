@@ -39,7 +39,7 @@ class $Runtime {
   }
 
   /** Are we in development mode */
-  get development(): boolean {
+  get localDevelopment(): boolean {
     return !this.production && this.role === 'std';
   }
 

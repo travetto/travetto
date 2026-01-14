@@ -16,7 +16,7 @@ export class WebHttpCommand implements CliCommandShape {
   port?: number;
 
   /** Kill conflicting port owner */
-  killConflict?: boolean = Runtime.development;
+  killConflict?: boolean = Runtime.localDevelopment;
 
   preMain(): void {
     if (this.port) {
