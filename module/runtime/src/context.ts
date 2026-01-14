@@ -27,15 +27,15 @@ class $Runtime {
     };
   }
 
-  /** Are we in production mode */
-  get production(): boolean {
-    return process.env.NODE_ENV === 'production';
-  }
-
   /** The role we are running as */
   get role(): Role {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return Env.TRV_ROLE.value as Role ?? 'std';
+  }
+
+  /** Are we in production mode */
+  get production(): boolean {
+    return process.env.NODE_ENV === 'production';
   }
 
   /** Are we in development mode */
