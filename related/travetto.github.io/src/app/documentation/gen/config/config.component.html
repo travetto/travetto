@@ -24,7 +24,7 @@ The configuration information is comprised of:
 </ul>
 Config loading follows a defined resolution path, below is the order in increasing specificity (<code class="item field">ext</code> can be <code class="item input">yaml</code>, <code class="item input">yml</code>, <code class="item input">json</code>, <code class="item input">properties</code>):
 <ol> <li><code class="item path">resources/application.&lt;ext&gt;</code> - Priority <code class="item input">100</code> - Load the default <code class="item path">application.&lt;ext&gt;</code> if available.</li>
-<li><code class="item path">resources/{{'{'}}role{{'}'}}.&lt;ext&gt;</code> - Priority <code class="item input">150</code> - Load environment specific profile configurations as defined by the values of <code class="item field">process.env.TRV_ROLE</code>.</li>
+<li><code class="item path">resources/{{'{'}}role{{'}'}}.&lt;ext&gt;</code> - Priority <code class="item input">150</code> - Load environment specific profile configurations as defined by the values of <code class="item field">process.env.TRV_ROLE</code>. If the role is <code class="item input">std</code>, it is replaced with <code class="item input">local</code> for local development.</li>
 <li><code class="item path">resources/*.&lt;ext&gt;</code> - Priority <code class="item input">200</code> - Load profile specific configurations as defined by the values in <code class="item field">process.env.TRV_PROFILES</code></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16">&#64;Injectable</a> <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/source/types.ts#L11">ConfigSource</a> - Priority <code class="item input">???</code> - These are custom config sources provided by the module, and are able to define their own priorities</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/source/override.ts#L9">OverrideConfigSource</a> - Priority <code class="item input">999</code> - This is for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L37">&#64;EnvVar</a> overrides, and is at the top priority for all built-in config sources.</li>
@@ -99,6 +99,11 @@ Config <span class="token punctuation">{{'{'}}</span>
       priority: <span class="token number">101</span>,
       source: <span class="token string">'file://application'</span>,
       detail: <span class="token string">'module/config/doc/resources/application.yml'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    <span class="token punctuation">{{'{'}}</span>
+      priority: <span class="token number">200</span>,
+      source: <span class="token string">'file://local'</span>,
+      detail: <span class="token string">'resources/local.yml'</span>
     <span class="token punctuation">{{'}'}}</span>,
     <span class="token punctuation">{{'{'}}</span>
       priority: <span class="token number">300</span>,
@@ -277,6 +282,11 @@ Config <span class="token punctuation">{{'{'}}</span>
       priority: <span class="token number">101</span>,
       source: <span class="token string">'file://application'</span>,
       detail: <span class="token string">'module/config/doc/resources/application.yml'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    <span class="token punctuation">{{'{'}}</span>
+      priority: <span class="token number">200</span>,
+      source: <span class="token string">'file://local'</span>,
+      detail: <span class="token string">'resources/local.yml'</span>
     <span class="token punctuation">{{'}'}}</span>,
     <span class="token punctuation">{{'{'}}</span>
       priority: <span class="token number">300</span>,
