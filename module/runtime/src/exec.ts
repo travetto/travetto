@@ -42,29 +42,19 @@ export class ExecUtil {
   /**
    * Defer control to subprocess execution, mainly used for nested execution
    */
-  static async deferToSubprocess(child: ChildProcess, relayInterrupt: boolean = true): Promise<ExecutionResult> {
-    if (!relayInterrupt) {
-      process.removeAllListeners('SIGINT'); // Remove any existing listeners
-      process.on('SIGINT', () => { }); // Prevents SIGINT from killing parent process, the child will handle
+  static async deferToSubprocess(child: ChildProcess): Promise<ExecutionResult> {
+    const messageToChild = (value: unknown): void => { child.send(value!); };
+    const messageToParent = (value: unknown): void => { process.send?.(value); };
+
+    try {
+      process.on('message', messageToChild);
+      child.on('message', messageToParent);
+      const result = await this.getResult(child, { catch: true });
+      process.exitCode = child.exitCode;
+      return result;
+    } finally {
+      process.off('message', messageToChild);
     }
-
-    child.on('message', value => process.send?.(value));
-
-    const interrupt = (): void => { child?.kill('SIGINT'); };
-    const toMessage = (value: unknown): void => { child?.send(value!); };
-
-    // Proxy kill requests
-    process.on('message', toMessage);
-
-    if (relayInterrupt) {
-      process.on('SIGINT', interrupt);
-    }
-
-    const result = await ExecUtil.getResult(child, { catch: true });
-    process.exitCode = child.exitCode;
-    process.off('message', toMessage);
-    process.off('SIGINT', interrupt);
-    return result;
   }
 
   /**

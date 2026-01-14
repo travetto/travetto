@@ -17,7 +17,6 @@ async function init() {
       WEB_HTTP_TLS: '0',
       WEB_BASE_URL: `http://localhost:${port}`,
       ...Env.TRV_LOG_PLAIN.export(false),
-      ...Env.TRV_RESTART_ON_CHANGE.export(false)
     },
   });
 

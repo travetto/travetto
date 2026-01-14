@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
+import { AppError, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
 import type { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -28,53 +28,57 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<boolean> {
-    if (cmd.restartOnChange !== true) {
-      WatchUtil.listenForRestartSignal();
-      return false;
+  static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<void> {
+    if (Env.TRV_RESTART_TARGET.isTrue) {
+      Env.TRV_RESTART_TARGET.clear();
+      WatchUtil.listenForSignals();
+      return;
+    } else if (cmd.restartOnChange !== true) {
+      return; // Not restarting, run normal
     }
 
-    let subProcess: ChildProcess | undefined;
-    void WatchUtil.watchCompilerEvents('file', () => WatchUtil.triggerRestartSignal(subProcess));
+    ShutdownManager.disableInterrupt();
 
-    const env = { ...process.env, ...Env.TRV_RESTART_ON_CHANGE.export(false) };
+    let child: ChildProcess | undefined;
+    void WatchUtil.watchCompilerEvents('file', () => child && WatchUtil.triggerSignal(child, 'WATCH_RESTART'));
+    process.on('SIGINT', () => child && WatchUtil.triggerSignal(child, 'WATCH_SHUTDOWN'));
 
-    const log = (msg: string, extra?: Record<string, unknown>): void => {
-      console.error(`[cli-restart] ${msg}`, { pid: process.pid, ...extra });
-    };
+    const env = { ...process.env, ...Env.TRV_RESTART_TARGET.export(true) };
 
     await WatchUtil.runWithRetry(
       async () => {
-        const { code } = await ExecUtil.deferToSubprocess(
-          subProcess = spawn(process.argv0, process.argv.slice(1), { env, stdio: [0, 1, 2, 'ipc'] }),
-        );
+        child = spawn(process.argv0, process.argv.slice(1), { env, stdio: ['pipe', 1, 2, 'ipc'] });
+        const { code } = await ExecUtil.deferToSubprocess(child);
         return WatchUtil.exitCodeToResult(code);
       },
       {
         maxRetries: 5,
         onRetry: async (state, config) => {
           const duration = WatchUtil.computeRestartDelay(state, config);
-          log('Restarting subprocess due to change...', { waiting: duration, iteration: state.iteration, errorIterations: state.errorIterations || undefined });
+          console.error(
+            '[cli-restart] Restarting subprocess due to change...',
+            { waiting: duration, iteration: state.iteration, errorIterations: state.errorIterations || undefined }
+          );
           await Util.nonBlockingTimeout(duration);
         },
-      });
+      }
+    );
 
     await ShutdownManager.shutdown();
-    process.exit();
   }
 
   /**
    * Dispatch IPC payload
    */
-  static async runWithDebugIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
+  static async runWithDebugIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<void> {
     if (cmd.debugIpc !== true || !Env.TRV_CLI_IPC.isSet) {
-      return false;
+      return; // Not debugging, run normal
     }
 
     const info = await fetch(Env.TRV_CLI_IPC.value!).catch(() => ({ ok: false }));
 
-    if (!info.ok) { // Server not running
-      return false;
+    if (!info.ok) {
+      return; // Server not running, run normal
     }
 
     const env: Record<string, string> = {};
@@ -91,7 +95,10 @@ export class CliUtil {
 
     Object.entries(process.env).forEach(([key, value]) => validEnv(key) && (env[key] = value!));
     const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSON.stringify(request) });
-    return sent.ok;
+
+    if (!sent.ok) {
+      throw new AppError(`IPC Request failed: ${sent.status} ${await sent.text()}`);
+    }
   }
 
   /**
