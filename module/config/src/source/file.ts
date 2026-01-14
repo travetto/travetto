@@ -22,10 +22,10 @@ export class FileConfigSource implements ConfigSource {
     this.#searchPaths = RuntimeResources.searchPaths.toReversed();
     this.#profiles = ([
       ['application', 100],
-      [Runtime.env!, 200],
+      ...(Runtime.role !== 'std' ? [[Runtime.role, 200]] as const : []),
       ...(Env.TRV_PROFILES.list ?? [])
         .map((profile, i) => [profile, 300 + i * 10] as const)
-    ] as const).filter(entry => !!entry[0]);
+    ] as const);
   }
 
   async get(): Promise<ConfigPayload[]> {

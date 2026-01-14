@@ -7,14 +7,14 @@ import { CliModuleUtil } from '../module.ts';
 import { CliParseUtil } from '../parse.ts';
 import { CliUtil } from '../util.ts';
 
-type Cmd = CliCommandShape & { env?: string };
+type Cmd = CliCommandShape & { profiles?: string[] };
 
 type CliCommandConfigOptions = {
   runTarget?: boolean;
   runtimeModule?: 'current' | 'command';
   with?: {
     /** Application environment */
-    env?: boolean;
+    profiles?: boolean;
     /** Module to run for */
     module?: boolean;
     /** Should debug invocation trigger via ipc */
@@ -32,15 +32,15 @@ type WithHandler<K extends keyof WithConfig> = (config?: WithConfig[K]) => ({
 } | undefined);
 
 const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
-  env: (config) => {
+  profiles: (config) => {
     if (!config) { return; }
     return {
-      name: 'env',
-      run: cmd => Env.TRV_ENV.set(cmd.env || Runtime.env),
+      name: 'profiles',
+      run: cmd => cmd.profiles && Env.TRV_PROFILES.set([...cmd.profiles, ...(Env.TRV_PROFILES.list ?? [])]),
       field: {
         type: String,
-        aliases: ['-e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
-        description: 'Application environment',
+        aliases: ['--profile', '--profiles', CliParseUtil.toEnvField(Env.TRV_PROFILES.key)],
+        description: 'Application profiles',
         required: { active: false },
       },
     };
@@ -81,7 +81,7 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
         type: Boolean,
         aliases: ['-rc'],
         description: 'Should the invocation automatically restart on source changes',
-        default: config !== 'optional' && Runtime.env === 'local',
+        default: config !== 'optional' && Runtime.role === 'std' && !Runtime.production,
         required: { active: false },
       },
     };

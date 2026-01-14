@@ -1,6 +1,6 @@
 import { type ManifestModuleRole } from '@travetto/manifest';
 import { type TimeSpan } from './time.ts';
-type Role = Exclude<ManifestModuleRole, 'std' | 'compile'>;
+type Role = Exclude<ManifestModuleRole, 'compile'>;
 
 declare module "@travetto/runtime" {
   interface EnvData {
@@ -14,11 +14,7 @@ declare module "@travetto/runtime" {
      */
     DEBUG: boolean | string;
     /** 
-     * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.  
-     */
-    TRV_ENV: string;
-    /** 
-     * Special role to run as, used to access additional files from the manifest during runtime.  
+     * The role we are running as, allows access to additional files from the manifest during runtime.
      */
     TRV_ROLE: Role;
     /** 

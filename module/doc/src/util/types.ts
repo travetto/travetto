@@ -3,7 +3,6 @@ export type RunConfig = {
   rewrite?: (text: string) => string;
   module?: string;
   env?: Record<string, string>;
-  envName?: string;
   workingDirectory?: string;
 };
 

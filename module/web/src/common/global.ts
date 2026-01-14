@@ -1,6 +1,7 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Runtime } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
+import type { ManifestContext } from '@travetto/manifest';
 
 import { Controller } from '../decorator/controller.ts';
 import { ConditionalRegister, ConfigureInterceptor } from '../decorator/common.ts';
@@ -18,12 +19,8 @@ export class GlobalHandler {
     const config = await DependencyRegistryIndex.getInstance(WebConfig);
     return config.defaultMessage;
   })
-  message(): { module: string, version: string, env?: string } {
-    return {
-      module: Runtime.main.name,
-      version: Runtime.main.version,
-      env: Runtime.env
-    };
+  message(): ManifestContext['main'] {
+    return Runtime.main;
   }
 
   @Options('*all')

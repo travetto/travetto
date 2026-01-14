@@ -308,150 +308,11 @@ npx trv web:http
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/web-http:src/node.ts:26] Initialized {
-  manifest: {
-    main: {
-      name: '@travetto/todo-app',
-      folder: 'related/todo-app',
-      version: '0.0.0',
-      description: ''
-    },
-    workspace: {
-      name: '@travetto/mono-repo',
-      path: '<workspace-root>',
-      mono: true,
-      manager: 'npm',
-      defaultEnv: 'local'
-    }
-  },
-  runtime: {
-    env: 'local',
-    envType: 'development',
-    debug: false,
-    resourcePaths: [
-      './resources',
-      '<workspace-root>/resources'
-    ],
-    profiles: []
-  },
-  config: {
-    sources: [
-      {
-        priority: 100,
-        source: 'file://application',
-        detail: 'resources/application.yaml'
-      },
-      {
-        priority: 101,
-        source: 'file://application',
-        detail: 'related/todo-app/resources/application.yml'
-      },
-      {
-        priority: 200,
-        source: 'file://local',
-        detail: 'resources/local.yml'
-      },
-      {
-        priority: 201,
-        source: 'file://local',
-        detail: 'related/todo-app/resources/local.yml'
-      },
-      { priority: 999, source: 'memory://override' }
-    ],
-    active: {
-      AcceptConfig: { applies: false, types: [] },
-      ApiHostConfig: {
-        servers: [ { url: 'http://localhost:12555' } ],
-        openapi: '3.1.0'
-      },
-      ApiInfoConfig: {
-        description: '',
-        title: '@travetto/todo-app',
-        version: '0.0.0'
-      },
-      ApiSpecConfig: {
-        output: './openapi.yml',
-        persist: true,
-        skipEndpoints: false,
-        exposeAllSchemas: false
-      },
-      AuthConfig: { maxAge: '1h', rollingRenew: true },
-      CacheControlConfig: { applies: true },
-      CommonLoggerConfig: { format: 'line', output: 'console' },
-      CompressConfig: {
-        applies: true,
-        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
-      },
-      ConsoleLogAppenderConfig: { logToLevel: true },
-      CookieConfig: { applies: true, httponly: true, sameSite: 'lax', path: '/' },
-      CorsConfig: { applies: true },
-      DecompressConfig: {
-        applies: true,
-        supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
-      },
-      EtagConfig: { applies: true, minimumSize: '10kb' },
-      FileLogAppenderConfig: {
-        output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
-        writeSync: false
-      },
-      JSONLogFormatterConfig: {},
-      LineLogFormatterConfig: {
-        plain: false,
-        time: 'ms',
-        colorize: true,
-        align: true,
-        level: true,
-        location: true
-      },
-      MailConfig: {
-        transport: {},
-        defaults: {
-          title: 'Email Title',
-          from: 'Travetto Mailer <mailer@travetto.dev>',
-          replyTo: 'Travetto Mailer <mailer@travetto.dev>'
-        }
-      },
-      MemoryModelConfig: { modifyStorage: true },
-      MongoModelConfig: {
-        hosts: [ 'localhost' ],
-        namespace: 'app',
-        port: 27017,
-        connectionOptions: {},
-        options: { waitQueueTimeoutMS: 0, serverSelectionTimeoutMS: 1000 }
-      },
-      TrustProxyConfig: { applies: true, ips: [] },
-      WebAuthConfig: {
-        applies: false,
-        mode: 'cookie',
-        header: 'Authorization',
-        cookie: 'trv_auth',
-        headerPrefix: 'Token'
-      },
-      WebAuthLoginConfig: { applies: false },
-      WebAuthLogoutConfig: { applies: false },
-      WebAuthVerifyConfig: { applies: false, permissions: [] },
-      WebBodyConfig: {
-        applies: true,
-        limit: '1mb',
-        parsingTypes: {
-          text: 'text',
-          'application/json': 'json',
-          'application/x-www-form-urlencoded': 'form'
-        }
-      },
-      WebConfig: { defaultMessage: true, baseUrl: 'http://localhost:12555' },
-      WebHttpConfig: {
-        httpVersion: '1.1',
-        port: 12555,
-        bindAddress: '0.0.0.0',
-        tls: false
-      },
-      WebLogConfig: { applies: true, showStackTrace: true },
-      WebRpcConfig: { clients: [] }
-    }
-  }
-}
-2029-03-14T04:00:00.837Z info  [@travetto/web-http:src/node.ts:27] Listening { port: 12555 }
+Waiting for states, compile-end, watch-start
+Starting watch for events of type "state"
+Stopping watch for events of type "state"
+Found state, one of compile-end, watch-start 
+Starting watch for events of type "file"
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 
@@ -477,11 +338,13 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/create-todo.ts <key> <port>
 
-{
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
-}
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:15845:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Module.main (./doc/create-todo.ts:2:18)
+    at async MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:27:16)
+    at async ExecutionManager.#runCommand (<workspace-root>/module/cli/src/execute.ts:57:5)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:73:9)
 ```
 
 Now create `support/list-todo.ts` with the following contents:
@@ -498,11 +361,11 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:15845:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Module.main (./doc/list-todo.ts:2:18)
+    at async MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:27:16)
+    at async ExecutionManager.#runCommand (<workspace-root>/module/cli/src/execute.ts:57:5)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:73:9)
 ```

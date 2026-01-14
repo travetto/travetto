@@ -10,8 +10,6 @@ export type ManifestContext = {
     mono?: boolean;
     /** The package manager of the workspace */
     manager: NodePackageManager;
-    /** The default env name */
-    defaultEnv: string;
   };
   build: {
     /** URL for the compiler server */

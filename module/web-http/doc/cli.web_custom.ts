@@ -10,7 +10,6 @@ import './config-override.ts';
 export class SampleApp {
 
   preMain(): void {
-    Env.TRV_ENV.set('prod');
     Env.NODE_ENV.set('production');
   }
 

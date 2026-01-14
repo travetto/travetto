@@ -80,9 +80,9 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
  */
 export type CliCommandShapeFields = {
   /**
-   * Environment to run in
+   * Profiles to run the application under
    */
-  env?: string;
+  profiles?: string[];
   /**
    * Should the cli invocation trigger a debug session, via IPC
    */

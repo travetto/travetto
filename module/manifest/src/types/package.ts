@@ -40,7 +40,6 @@ export type Package = {
       baseUrl?: string;
       outputs?: string[];
     };
-    defaultEnv?: string;
     workspaceInclude?: boolean;
     build?: Partial<ManifestContext['build']> & {
       isolated?: boolean;

@@ -22,8 +22,8 @@ export const text = <>
     Config loading follows a defined resolution path, below is the order in increasing specificity ({d.field('ext')} can be {d.input('yaml')}, {d.input('yml')}, {d.input('json')}, {d.input('properties')}):
     <ol>
       <li>{d.path('resources/application.<ext>')} - Priority {d.input('100')} - Load the default {d.path('application.<ext>')} if available.</li>
-      <li>{d.path('resources/{env}.<ext>')} - Priority {d.input('200')} - Load environment specific profile configurations as defined by the values of {d.field('process.env.TRV_ENV')}.</li>
-      <li>{d.path('resources/*.<ext>')} - Priority {d.input('300')} - Load profile specific configurations as defined by the values in {d.field('process.env.TRV_PROFILES')}</li>
+      <li>{d.path('resources/{role}.<ext>')} - Priority {d.input('150')} - Load environment specific profile configurations as defined by the values of {d.field('process.env.TRV_ROLE')}.</li>
+      <li>{d.path('resources/*.<ext>')} - Priority {d.input('200')} - Load profile specific configurations as defined by the values in {d.field('process.env.TRV_PROFILES')}</li>
       <li>{Injectable} {toConcrete<ConfigSource>()} - Priority {d.input('???')} - These are custom config sources provided by the module, and are able to define their own priorities</li>
       <li>{OverrideConfigSource} - Priority {d.input('999')} - This is for {EnvVar} overrides, and is at the top priority for all built-in config sources.</li>
     </ol>
@@ -54,7 +54,6 @@ export const text = <>
       At runtime the resolved config would be:
 
       <c.Execution title='Runtime Resolution' cmd='trv' args={['main', 'doc/resolve.ts']} config={{
-        envName: 'doc',
         env: { TRV_RESOURCES: 'doc/resources', TRV_PROFILES: 'prod' }
       }} />
     </c.SubSection>
@@ -91,7 +90,6 @@ export const text = <>
       You can see that the {d.class('DBConfig')} allows for the {d.field('port')} to be overridden by the {d.input('DATABASE_PORT')} environment variable.
 
       <c.Execution title='Resolved database config' cmd='trv' args={['main', 'doc/dbconfig-run.ts']} config={{
-        envName: 'doc',
         env: { TRV_RESOURCES: 'doc/resources', TRV_PROFILES: 'prod' }
       }} />
 
@@ -101,7 +99,6 @@ export const text = <>
 
       <c.Execution title='Resolved database config' cmd='trv' args={['main', 'doc/dbconfig-run.ts']} config={{
         env: { DATABASE_PORT: '200', TRV_RESOURCES: 'doc/resources', TRV_PROFILES: 'prod' },
-        envName: 'doc',
         formatCommand: (cmd, args) => `DATABASE_PORT=200 ${cmd} ${args.join(' ')}`
       }} />
 

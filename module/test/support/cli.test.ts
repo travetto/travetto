@@ -33,7 +33,6 @@ export class TestCommand implements CliCommandShape {
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
     Env.TRV_ROLE.set('test');
-    Env.TRV_ENV.set('test');
     Env.DEBUG.set(false);
     Env.TRV_LOG_PLAIN.set(true);
     Env.TRV_LOG_TIME.clear();

@@ -7,6 +7,7 @@ import { Env } from './env.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { describeFunction } from './function.ts';
 import { JSONUtil } from './json.ts';
+import type { Role } from './trv';
 
 /** Constrained version of {@type ManifestContext} */
 class $Runtime {
@@ -26,23 +27,15 @@ class $Runtime {
     };
   }
 
-  /** Get env name, with support for the default env */
-  get env(): string | undefined {
-    return Env.TRV_ENV.value || (!this.production ? this.#idx.manifest.workspace.defaultEnv : undefined);
-  }
-
   /** Are we in production mode */
   get production(): boolean {
-    return process.env.NODE_ENV === 'production';
+    return Env.NODE_ENV.value === 'production';
   }
 
-  /** Get environment type mode */
-  get envType(): 'production' | 'development' | 'test' {
-    switch (process.env.NODE_ENV) {
-      case 'production': return 'production';
-      case 'test': return 'test';
-      default: return 'development';
-    }
+  /** The role we are running as */
+  get role(): Role {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return Env.TRV_ROLE.value as Role ?? 'std';
   }
 
   /** Get debug value */

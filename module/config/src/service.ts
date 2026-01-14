@@ -149,8 +149,7 @@ export class ConfigurationService {
         workspace: Runtime.workspace
       },
       runtime: {
-        env: Runtime.env,
-        envType: Runtime.envType,
+        role: Runtime.role,
         debug: Runtime.debug,
         resourcePaths: RuntimeResources.searchPaths,
         profiles: Env.TRV_PROFILES.list ?? []
