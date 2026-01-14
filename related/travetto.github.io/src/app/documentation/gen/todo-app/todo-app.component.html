@@ -354,7 +354,7 @@ First we must start the application:
   <span class="token punctuation">{{'}'}}</span>,
   runtime: <span class="token punctuation">{{'{'}}</span>
     production: false,
-    role: <span class="token string">'doc'</span>,
+    role: <span class="token string">'std'</span>,
     debug: false,
     resourcePaths: <span class="token punctuation">[</span>
       <span class="token string">'./resources'</span>,
@@ -374,6 +374,16 @@ First we must start the application:
         source: <span class="token string">'file://application'</span>,
         detail: <span class="token string">'related/todo-app/resources/application.yml'</span>
       <span class="token punctuation">{{'}'}}</span>,
+      <span class="token punctuation">{{'{'}}</span>
+        priority: <span class="token number">200</span>,
+        source: <span class="token string">'file://local'</span>,
+        detail: <span class="token string">'resources/local.yml'</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      <span class="token punctuation">{{'{'}}</span>
+        priority: <span class="token number">201</span>,
+        source: <span class="token string">'file://local'</span>,
+        detail: <span class="token string">'related/todo-app/resources/local.yml'</span>
+      <span class="token punctuation">{{'}'}}</span>,
       <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
@@ -389,7 +399,7 @@ First we must start the application:
       <span class="token punctuation">{{'}'}}</span>,
       ApiSpecConfig: <span class="token punctuation">{{'{'}}</span>
         output: <span class="token string">'./openapi.yml'</span>,
-        persist: false,
+        persist: true,
         skipEndpoints: false,
         exposeAllSchemas: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,

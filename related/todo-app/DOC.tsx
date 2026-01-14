@@ -10,12 +10,13 @@ const port = 12555;
 async function init() {
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.spawn('trv', ['web:http'], {
+  const cmd = DocRunUtil.spawn('trv', ['web:http', '--no-restart-on-change'], {
     env: {
       ...process.env,
       WEB_HTTP_PORT: `${port}`,
       WEB_HTTP_TLS: '0',
       WEB_BASE_URL: `http://localhost:${port}`,
+      ...Env.TRV_ROLE.export('std'),
       ...Env.TRV_LOG_PLAIN.export(false),
     },
   });
