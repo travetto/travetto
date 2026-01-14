@@ -22,8 +22,6 @@ By default, the framework provides a default [@CliCommand](https://github.com/tr
 ```bash
 $ trv web:http
 
-Waiting for states, compile-end, watch-start
-Found state, one of compile-end, watch-start 
 Initialized {
   manifest: {
     main: {
@@ -38,7 +36,7 @@ Initialized {
     }
   },
   runtime: {
-    role: 'std',
+    role: 'doc',
     production: false,
     debug: false,
     resourcePaths: [

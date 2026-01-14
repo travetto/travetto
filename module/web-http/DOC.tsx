@@ -18,7 +18,7 @@ export const text = <>
 
     By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
 
-    <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{ workingDirectory: './doc-exec' }} />
+    <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{ workingDirectory: './doc-exec', env: { TRV_ROLE: 'doc' } }} />
 
     <c.SubSection title="Configuration">
       <c.Code title="Standard Web Http Config" src={WebHttpConfig} />

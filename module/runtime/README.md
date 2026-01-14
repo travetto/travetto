@@ -40,7 +40,7 @@ class $Runtime {
   /** The role we are running as */
   get role(): Role;
   /** Are we in development mode */
-  get development(): boolean;
+  get localDevelopment(): boolean;
   /** Get debug value */
   get debug(): false | string;
   /** Manifest main */
