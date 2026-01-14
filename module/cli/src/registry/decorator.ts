@@ -81,7 +81,7 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
         type: Boolean,
         aliases: ['-rc'],
         description: 'Should the invocation automatically restart on source changes',
-        default: config !== 'optional' && Runtime.env === 'development',
+        default: config !== 'optional' && Runtime.env === 'local',
         required: { active: false },
       },
     };
