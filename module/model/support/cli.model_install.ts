@@ -7,7 +7,7 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 /**
  * Installing models
  */
-@CliCommand({ with: { env: true, module: true } })
+@CliCommand({ with: { profiles: true, module: true } })
 export class ModelInstallCommand extends BaseModelCommand {
 
   getOperation(): 'upsertModel' { return 'upsertModel'; }

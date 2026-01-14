@@ -34,13 +34,12 @@ Initialized {
       name: '@travetto-doc/web-http',
       path: './doc-exec',
       mono: false,
-      manager: 'npm',
-      defaultEnv: 'local'
+      manager: 'npm'
     }
   },
   runtime: {
-    env: 'local',
-    envType: 'development',
+    role: 'std',
+    production: false,
     debug: false,
     resourcePaths: [
       './doc-exec/resources'
@@ -168,7 +167,7 @@ import './config-override.ts';
 export class SampleApp {
 
   preMain(): void {
-    Env.TRV_ENV.set('prod');
+    Env.TRV_PROFILES.add('prod');
     Env.NODE_ENV.set('production');
   }
 
@@ -203,18 +202,17 @@ Initialized {
       name: '@travetto-doc/web-http',
       path: './doc-exec',
       mono: false,
-      manager: 'npm',
-      defaultEnv: 'local'
+      manager: 'npm'
     }
   },
   runtime: {
-    env: 'prod',
-    envType: 'production',
+    role: 'std',
+    production: true,
     debug: false,
     resourcePaths: [
       './doc-exec/resources'
     ],
-    profiles: []
+    profiles: [ 'prod' ]
   },
   config: {
     sources: [

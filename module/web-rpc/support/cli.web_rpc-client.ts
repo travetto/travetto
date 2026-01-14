@@ -12,7 +12,7 @@ import { WebRpcClientGeneratorService } from '../src/service.ts';
 /**
  * Generate the web-rpc client
  */
-@CliCommand({ with: { env: true, module: true } })
+@CliCommand({ with: { profiles: true, module: true } })
 export class CliWebRpcCommand implements CliCommandShape {
 
   @Ignore()

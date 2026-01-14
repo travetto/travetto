@@ -9,14 +9,14 @@ import type { WebHttpServer } from '../src/types.ts';
 /**
  * Run a web server
  */
-@CliCommand({ runTarget: true, with: { debugIpc: 'optional', restartOnChange: true, module: true, env: true } })
+@CliCommand({ runTarget: true, with: { debugIpc: 'optional', restartOnChange: true, module: true, profiles: true } })
 export class WebHttpCommand implements CliCommandShape {
 
   /** Port to run on */
   port?: number;
 
   /** Kill conflicting port owner */
-  killConflict?: boolean = Runtime.role === 'development';
+  killConflict?: boolean = Runtime.development;
 
   preMain(): void {
     if (this.port) {

@@ -351,9 +351,9 @@ $ trv model:export --help
 Usage: model:export [options] <provider:string> <models...:string>
 
 Options:
-  -e, --env <string>     Application environment
-  -m, --module <module>  Module to run for
-  -h, --help             display help for command
+  -p, --profile <string>  Application profiles
+  -m, --module <module>   Module to run for
+  -h, --help              display help for command
 
 Providers
 --------------------
@@ -374,9 +374,9 @@ $ trv model:install --help
 Usage: model:install [options] <provider:string> <models...:string>
 
 Options:
-  -e, --env <string>     Application environment
-  -m, --module <module>  Module to run for
-  -h, --help             display help for command
+  -p, --profile <string>  Application profiles
+  -m, --module <module>   Module to run for
+  -h, --help              display help for command
 
 Providers
 --------------------

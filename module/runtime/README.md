@@ -35,12 +35,12 @@ While running any code within the framework, there are common patterns/goals for
 ```typescript
 class $Runtime {
   constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>);
-  /** Get env name, with support for the default env */
-  get env(): string | undefined;
   /** Are we in production mode */
   get production(): boolean;
-  /** Get environment type mode */
-  get envType(): 'production' | 'development' | 'test';
+  /** The role we are running as */
+  get role(): Role;
+  /** Are we in development mode */
+  get development(): boolean;
   /** Get debug value */
   get debug(): false | string;
   /** Manifest main */
@@ -91,11 +91,7 @@ interface EnvData {
      */
     DEBUG: boolean | string;
     /** 
-     * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.  
-     */
-    TRV_ENV: string;
-    /** 
-     * Special role to run as, used to access additional files from the manifest during runtime.  
+     * The role we are running as, allows access to additional files from the manifest during runtime.
      */
     TRV_ROLE: Role;
     /** 

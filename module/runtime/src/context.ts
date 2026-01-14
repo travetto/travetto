@@ -38,6 +38,11 @@ class $Runtime {
     return Env.TRV_ROLE.value as Role ?? 'std';
   }
 
+  /** Are we in development mode */
+  get development(): boolean {
+    return !this.production && this.role === 'std';
+  }
+
   /** Get debug value */
   get debug(): false | string {
     return Env.DEBUG.isFalse ? false : (Env.DEBUG.value || false);

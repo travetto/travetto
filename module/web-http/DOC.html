@@ -38,13 +38,12 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       name: <span class="token string">'@travetto-doc/web-http'</span>,
       path: <span class="token string">'./doc-exec'</span>,
       mono: false,
-      manager: <span class="token string">'npm'</span>,
-      defaultEnv: <span class="token string">'local'</span>
+      manager: <span class="token string">'npm'</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   runtime: <span class="token punctuation">{{'{'}}</span>
-    env: <span class="token string">'local'</span>,
-    envType: <span class="token string">'development'</span>,
+    role: <span class="token string">'std'</span>,
+    production: false,
     debug: false,
     resourcePaths: <span class="token punctuation">[</span>
       <span class="token string">'./doc-exec/resources'</span>
@@ -179,7 +178,7 @@ To customize a Web server, you may need to construct an entry point using the <a
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token function">preMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    Env<span class="token punctuation">.</span><span class="token constant">TRV_ENV</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'prod'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Env<span class="token punctuation">.</span><span class="token constant">TRV_PROFILES</span><span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">'prod'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     Env<span class="token punctuation">.</span><span class="token constant">NODE_ENV</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'production'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
@@ -216,18 +215,17 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       name: <span class="token string">'@travetto-doc/web-http'</span>,
       path: <span class="token string">'./doc-exec'</span>,
       mono: false,
-      manager: <span class="token string">'npm'</span>,
-      defaultEnv: <span class="token string">'local'</span>
+      manager: <span class="token string">'npm'</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   runtime: <span class="token punctuation">{{'{'}}</span>
-    env: <span class="token string">'prod'</span>,
-    envType: <span class="token string">'production'</span>,
+    role: <span class="token string">'std'</span>,
+    production: true,
     debug: false,
     resourcePaths: <span class="token punctuation">[</span>
       <span class="token string">'./doc-exec/resources'</span>
     <span class="token punctuation">]</span>,
-    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    profiles: <span class="token punctuation">[</span> <span class="token string">'prod'</span> <span class="token punctuation">]</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span>

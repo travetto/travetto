@@ -150,6 +150,7 @@ export class ConfigurationService {
       },
       runtime: {
         role: Runtime.role,
+        production: Runtime.production,
         debug: Runtime.debug,
         resourcePaths: RuntimeResources.searchPaths,
         profiles: Env.TRV_PROFILES.list ?? []

@@ -73,7 +73,7 @@ export class ApiSpecConfig {
       this.persist = false;
     } else {
       this.output = path.resolve(Runtime.mainSourcePath, this.output);
-      this.persist ??= Runtime.role === 'development';
+      this.persist ??= Runtime.development;
     }
     if (this.persist) {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder

@@ -334,11 +334,139 @@ First we must start the application:
     <figcaption class="terminal">Application Startup
 
 </figcaption>
-    <pre><code class="language-bash">Waiting <span class="token keyword">for</span> states, compile-end, watch-start
-Starting <span class="token function">watch</span> <span class="token keyword">for</span> events of <span class="token builtin class-name">type</span> <span class="token string">"state"</span>
-Stopping <span class="token function">watch</span> <span class="token keyword">for</span> events of <span class="token builtin class-name">type</span> <span class="token string">"state"</span>
-Found state, one of compile-end, watch-start
-Starting <span class="token function">watch</span> <span class="token keyword">for</span> events of <span class="token builtin class-name">type</span> <span class="token string">"file"</span></code></pre>
+    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/web-http:src/node.ts:26<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
+  manifest: <span class="token punctuation">{{'{'}}</span>
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto/todo-app'</span>,
+      folder: <span class="token string">'related/todo-app'</span>,
+      version: <span class="token string">'0.0.0'</span>,
+      description: <span class="token string">''</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto/mono-repo'</span>,
+      path: <span class="token string">'&lt;workspace-root>'</span>,
+      mono: true,
+      manager: <span class="token string">'npm'</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  runtime: <span class="token punctuation">{{'{'}}</span>
+    role: <span class="token string">'doc'</span>,
+    production: false,
+    debug: false,
+    resourcePaths: <span class="token punctuation">[</span>
+      <span class="token string">'./resources'</span>,
+      <span class="token string">'&lt;workspace-root>/resources'</span>
+    <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  config: <span class="token punctuation">{{'{'}}</span>
+    sources: <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span>
+        priority: <span class="token number">100</span>,
+        source: <span class="token string">'file://application'</span>,
+        detail: <span class="token string">'resources/application.yaml'</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      <span class="token punctuation">{{'{'}}</span>
+        priority: <span class="token number">101</span>,
+        source: <span class="token string">'file://application'</span>,
+        detail: <span class="token string">'related/todo-app/resources/application.yml'</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span>,
+    active: <span class="token punctuation">{{'{'}}</span>
+      AcceptConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      ApiHostConfig: <span class="token punctuation">{{'{'}}</span>
+        servers: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
+        openapi: <span class="token string">'3.1.0'</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      ApiInfoConfig: <span class="token punctuation">{{'{'}}</span>
+        description: <span class="token string">''</span>,
+        title: <span class="token string">'@travetto/todo-app'</span>,
+        version: <span class="token string">'0.0.0'</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      ApiSpecConfig: <span class="token punctuation">{{'{'}}</span>
+        output: <span class="token string">'./openapi.yml'</span>,
+        persist: false,
+        skipEndpoints: false,
+        exposeAllSchemas: <span class="token boolean">false</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      AuthConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      CacheControlConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
+      CompressConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span>, <span class="token string">'deflate'</span> <span class="token punctuation">]</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      ConsoleLogAppenderConfig: <span class="token punctuation">{{'{'}}</span> logToLevel: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      CookieConfig: <span class="token punctuation">{{'{'}}</span> applies: true, httponly: true, sameSite: <span class="token string">'lax'</span>, path: <span class="token string">'/'</span> <span class="token punctuation">{{'}'}}</span>,
+      CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      DecompressConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: true, minimumSize: <span class="token string">'10kb'</span> <span class="token punctuation">{{'}'}}</span>,
+      FileLogAppenderConfig: <span class="token punctuation">{{'{'}}</span>
+        output: <span class="token string">'&lt;workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log'</span>,
+        writeSync: <span class="token boolean">false</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      JSONLogFormatterConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      LineLogFormatterConfig: <span class="token punctuation">{{'{'}}</span>
+        plain: false,
+        time: <span class="token string">'ms'</span>,
+        colorize: true,
+        align: true,
+        level: true,
+        location: <span class="token boolean">true</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      MailConfig: <span class="token punctuation">{{'{'}}</span>
+        transport: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+        defaults: <span class="token punctuation">{{'{'}}</span>
+          title: <span class="token string">'Email Title'</span>,
+          from: <span class="token string">'Travetto Mailer &lt;mailer@travetto.dev>'</span>,
+          replyTo: <span class="token string">'Travetto Mailer &lt;mailer@travetto.dev>'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      MemoryModelConfig: <span class="token punctuation">{{'{'}}</span> modifyStorage: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      MongoModelConfig: <span class="token punctuation">{{'{'}}</span>
+        hosts: <span class="token punctuation">[</span> <span class="token string">'localhost'</span> <span class="token punctuation">]</span>,
+        namespace: <span class="token string">'app'</span>,
+        port: <span class="token number">27017</span>,
+        connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+        options: <span class="token punctuation">{{'{'}}</span> waitQueueTimeoutMS: <span class="token number">0</span>, serverSelectionTimeoutMS: <span class="token number">1000</span> <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      WebAuthConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: false,
+        mode: <span class="token string">'cookie'</span>,
+        header: <span class="token string">'Authorization'</span>,
+        cookie: <span class="token string">'trv_auth'</span>,
+        headerPrefix: <span class="token string">'Token'</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      WebAuthLoginConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
+      WebAuthLogoutConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
+      WebAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> applies: false, permissions: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      WebBodyConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        limit: <span class="token string">'1mb'</span>,
+        parsingTypes: <span class="token punctuation">{{'{'}}</span>
+          text: <span class="token string">'text'</span>,
+          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
+          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      WebConfig: <span class="token punctuation">{{'{'}}</span> defaultMessage: true, baseUrl: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span>,
+      WebHttpConfig: <span class="token punctuation">{{'{'}}</span>
+        httpVersion: <span class="token string">'1.1'</span>,
+        port: <span class="token number">12555</span>,
+        bindAddress: <span class="token string">'0.0.0.0'</span>,
+        tls: <span class="token boolean">false</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@travetto/web-http:src/node.ts:27<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>
@@ -368,13 +496,11 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
 </figcaption>
     <pre><code class="language-bash">$ trv main support/create-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-TypeError: fetch failed
-    at node:internal/deps/undici/undici:15845:13
-    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:103:5<span class="token punctuation">)</span>
-    at async Module.main <span class="token punctuation">(</span>./doc/create-todo.ts:2:18<span class="token punctuation">)</span>
-    at async MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:27:16<span class="token punctuation">)</span>
-    at async ExecutionManager.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:57:5)</span>
-    at async ExecutionManager.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:73:9<span class="token punctuation">)</span></code></pre>
+<span class="token punctuation">{{'{'}}</span>
+  text: <span class="token string">'New Todo - &lt;key>'</span>,
+  created: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
+  id: <span class="token string">'&lt;uniqueId>'</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 Now create <code class="item path">support/list-todo.ts</code> with the following contents:
@@ -396,11 +522,11 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 </figcaption>
     <pre><code class="language-bash">$ trv main support/list-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-TypeError: fetch failed
-    at node:internal/deps/undici/undici:15845:13
-    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:103:5<span class="token punctuation">)</span>
-    at async Module.main <span class="token punctuation">(</span>./doc/list-todo.ts:2:18<span class="token punctuation">)</span>
-    at async MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:27:16<span class="token punctuation">)</span>
-    at async ExecutionManager.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:57:5)</span>
-    at async ExecutionManager.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:73:9<span class="token punctuation">)</span></code></pre>
+<span class="token punctuation">[</span>
+  <span class="token punctuation">{{'{'}}</span>
+    id: <span class="token string">'&lt;uniqueId>'</span>,
+    text: <span class="token string">'New Todo - &lt;key>'</span>,
+    created: <span class="token string">'2029-03-14T04:00:01.814Z'</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">]</span></code></pre>
   </figure>

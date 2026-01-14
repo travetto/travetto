@@ -55,8 +55,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
     "name": "@travetto/mono-repo",
     "path": "<generated>",
     "mono": true,
-    "manager": "npm",
-    "defaultEnv": "local"
+    "manager": "npm"
   },
   "build": {
     "compilerUrl": "http://127.0.0.1:26803",
