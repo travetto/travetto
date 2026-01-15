@@ -61,7 +61,7 @@ export class ShutdownManager {
       }
     }
 
-    if (process.stdout.isTTY) {
+    if (process.stdout.isTTY && source === 'SIGINT') {
       process.stdout.write('\n');
     }
 
