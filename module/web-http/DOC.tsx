@@ -65,7 +65,7 @@ export const text = <>
     <ul>
       <li>TLS support is configured</li>
       <li>{d.library('NodeForge')} is installed</li>
-      <li>Not running in prod</li>
+      <li>Not running in production</li>
       <li>No keys provided</li>
     </ul>
 

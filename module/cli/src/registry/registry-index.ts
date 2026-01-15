@@ -41,7 +41,7 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     if (!this.#fileMapping) {
       const all = new Map<string, string>();
       for (const entry of RuntimeIndex.find({
-        module: module => !Runtime.production || module.prod,
+        module: module => !Runtime.production || module.production,
         folder: folder => folder === 'support',
         file: file => file.role === 'std' && CLI_FILE_REGEX.test(file.sourceFile)
       })) {

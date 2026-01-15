@@ -43,7 +43,7 @@ export function getEntry(): string {
 export function getFiles(entry?: string): string[] {
   return [...RuntimeIndex.getModuleList('all')]
     .map(name => RuntimeIndex.getManifestModule(name))
-    .filter(module => module.prod)
+    .filter(module => module.production)
     .flatMap(getFilesFromModule)
     .filter(file => (!entry || !file.endsWith(entry)) && !file.includes('@travetto/pack/support/'));
 }
@@ -51,7 +51,7 @@ export function getFiles(entry?: string): string[] {
 export function getIgnoredModules(): ManifestModule[] {
   return [...RuntimeIndex.getModuleList('all')]
     .map(name => RuntimeIndex.getManifestModule(name))
-    .filter(module => !module.prod);
+    .filter(module => !module.production);
 }
 
 export function getMinifyConfig(): Parameters<typeof terser>[0] {

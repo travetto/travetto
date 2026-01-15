@@ -119,11 +119,11 @@ export class PackageUtil {
   /**
    * Get an install command for a given npm module
    */
-  static getInstallCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, prod = false): string {
+  static getInstallCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, production = false): string {
     let install: string;
     switch (ctx.workspace.manager) {
-      case 'npm': install = `npm i ${prod ? '' : '--save-dev '}${pkg}`; break;
-      case 'yarn': install = `yarn add ${prod ? '' : '--dev '}${pkg}`; break;
+      case 'npm': install = `npm i ${production ? '' : '--save-dev '}${pkg}`; break;
+      case 'yarn': install = `yarn add ${production ? '' : '--dev '}${pkg}`; break;
     }
     return install;
   }

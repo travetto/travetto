@@ -78,7 +78,7 @@ class $Registry {
           return role !== 'test' && // Skip all modules when in test
             module.roles.includes('std') &&
             (
-              !Runtime.production || module.prod ||
+              !Runtime.production || module.production ||
               (role === 'doc' && module.roles.includes(role))
             );
         },

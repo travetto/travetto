@@ -23,8 +23,8 @@ export class CliUnknownCommandError extends Error {
   #getMissingCommandHelp(cmd: string): string | undefined {
     const matchedConfig = COMMAND_PACKAGE.find(([regex]) => regex.test(cmd));
     if (matchedConfig) {
-      const [, pkg, prod] = matchedConfig;
-      const install = PackageUtil.getInstallCommand(Runtime, `@travetto/${pkg}`, prod);
+      const [, pkg, production] = matchedConfig;
+      const install = PackageUtil.getInstallCommand(Runtime, `@travetto/${pkg}`, production);
       return cliTpl`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
 ${{ identifier: install }}

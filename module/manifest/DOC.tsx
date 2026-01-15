@@ -95,7 +95,7 @@ export const text = <>
       </ul>
     </c.SubSection>
     <c.SubSection title='Modules'>
-      The modules represent all of the {d.library('Travetto')}-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A prod-only version is produced when packaging the final output.
+      The modules represent all of the {d.library('Travetto')}-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A production-only version is produced when packaging the final output.
 
       Each module contains:
       <ul>

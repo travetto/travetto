@@ -10,7 +10,7 @@ declare module "@travetto/runtime" {
      */
     NODE_ENV: 'development' | 'production';
     /** 
-     * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
+     * Outputs all console.debug messages, defaults to off
      */
     DEBUG: boolean | string;
     /** 

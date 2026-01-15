@@ -11,15 +11,16 @@ const HELP = `
 npx trvc [command]
 
 Available Commands:
- * start|watch                - Run the compiler in watch mode
- * stop                       - Stop the compiler if running
- * restart                    - Restart the compiler in watch mode
- * build                      - Ensure the project is built and upto date
- * clean                      - Clean out the output and compiler caches
- * info                       - Retrieve the compiler information, if running
- * event <log|progress|state> - Watch events in realtime as newline delimited JSON
- * exec <file> [...args]      - Allow for compiling and executing an entrypoint file
- * manifest --prod [output]   - Generate the project manifest
+ * start|watch                  - Run the compiler in watch mode
+ * stop                         - Stop the compiler if running
+ * restart                      - Restart the compiler in watch mode
+ * build                        - Ensure the project is built and upto date
+ * clean                        - Clean out the output and compiler caches
+ * info                         - Retrieve the compiler information, if running
+ * event <log|progress|state>.  - Watch events in realtime as newline delimited JSON
+ * exec <file> [...args]        - Allow for compiling and executing an entrypoint file
+ * manifest [output]            - Generate the project manifest
+ * manifest:production [output] - Generate the production project manifest
 `;
 
 /**
