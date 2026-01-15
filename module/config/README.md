@@ -48,7 +48,7 @@ database:
     password: test
 ```
 
-**Config: resources/prod.json**
+**Config: resources/production.json**
 ```json
 {
   "database": {
@@ -64,7 +64,7 @@ with environment variables
 
 **Config: Environment variables**
 ```properties
-TRV_PROFILES = prod
+TRV_PROFILES=production
 ```
 
 At runtime the resolved config would be:
@@ -92,8 +92,8 @@ Config {
     },
     {
       priority: 300,
-      source: 'file://prod',
-      detail: 'module/config/doc/resources/prod.json'
+      source: 'file://production',
+      detail: 'module/config/doc/resources/production.json'
     },
     { priority: 999, source: 'memory://override' }
   ],
@@ -257,8 +257,8 @@ Config {
     },
     {
       priority: 300,
-      source: 'file://prod',
-      detail: 'module/config/doc/resources/prod.json'
+      source: 'file://production',
+      detail: 'module/config/doc/resources/production.json'
     },
     { priority: 999, source: 'memory://override' }
   ],

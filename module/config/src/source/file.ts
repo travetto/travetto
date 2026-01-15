@@ -17,9 +17,11 @@ export class FileConfigSource implements ConfigSource {
     const profiles: Profile[] = [
       ['application', 100]
     ];
-    if (Runtime.localDevelopment) {
-      profiles.push(['local', 200]);
-    } else if (!Runtime.production) {
+    if (Runtime.role === 'std') {
+      if (Runtime.localDevelopment) {
+        profiles.push(['local', 200]);
+      }
+    } else {
       profiles.push([Runtime.role, 200]);
     }
     profiles.push(...(Env.TRV_PROFILES.list ?? [])

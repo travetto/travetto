@@ -82,7 +82,7 @@ Every [Pack](https://github.com/travetto/travetto/tree/main/module/pack#readme "
    *  `writeEntryScript` - Create the entry script based on the `--entry-command`, `args`
    *  `copyResources` - Will pull in local `resources/**` files into the final output
    *  `primeAppCache` - Runs `trv run` to ensure the appropriate files are generated to allow for running the application.  This only applies if the entry point is equivalent to `trv run`
-   *  `writeManifest` - Produces the `prod`-ready manifest that is used at runtime.  Removes all devDependencies from the manifest.json
+   *  `writeManifest` - Produces the `production`-ready manifest that is used at runtime.  Removes all devDependencies from the manifest.json
    *  `bundle` - Invokes [Rollup](https://rollupjs.org/) with the appropriate file set to produce a single output .js file.  Depending on the module type ([CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html)) the build process differs to handle the dynamic loading that application does at runtime.
 
 ## CLI - pack:zip

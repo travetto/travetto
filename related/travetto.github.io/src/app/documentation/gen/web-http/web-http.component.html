@@ -176,7 +176,6 @@ To customize a Web server, you may need to construct an entry point using the <a
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token function">preMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    Env<span class="token punctuation">.</span><span class="token constant">TRV_PROFILES</span><span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">'prod'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     Env<span class="token punctuation">.</span><span class="token constant">NODE_ENV</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'production'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
@@ -223,7 +222,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     resourcePaths: <span class="token punctuation">[</span>
       <span class="token string">'./doc-exec/resources'</span>
     <span class="token punctuation">]</span>,
-    profiles: <span class="token punctuation">[</span> <span class="token string">'prod'</span> <span class="token punctuation">]</span>
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span>
@@ -354,7 +353,7 @@ we can see the structure for integrating the server behavior with the <a class="
 Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
 <ul> <li>TLS support is configured</li>
 <li><a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-forge">node-forge</a> is installed</li>
-<li>Not running in prod</li>
+<li>Not running in production</li>
 <li>No keys provided</li>
 </ul>
 This is useful for local development where you implicitly trust the cert. <br><br>

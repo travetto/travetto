@@ -83,7 +83,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
   <span class="token string-property property">"modules"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token string-property property">"@travetto/manifest"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token string-property property">"main"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-      <span class="token string-property property">"prod"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"production"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
       <span class="token string-property property">"name"</span><span class="token operator">:</span> <span class="token string">"@travetto/manifest"</span><span class="token punctuation">,</span>
       <span class="token string-property property">"version"</span><span class="token operator">:</span> <span class="token string">"x.x.x"</span><span class="token punctuation">,</span>
       <span class="token string-property property">"workspace"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
@@ -153,7 +153,7 @@ The context contains:
 
 <h3 id="modules">Modules</h3>
 
-The modules represent all of the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A prod-only version is produced when packaging the final output. Each module contains:
+The modules represent all of the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A production-only version is produced when packaging the final output. Each module contains:
 <ul> <li>The dependency npm name</li>
 <li>The dependency version</li>
 <li>A flag to determine if its a local module</li>

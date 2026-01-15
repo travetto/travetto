@@ -17,7 +17,7 @@ Available Commands:
  * build                        - Ensure the project is built and upto date
  * clean                        - Clean out the output and compiler caches
  * info                         - Retrieve the compiler information, if running
- * event <log|progress|state>.  - Watch events in realtime as newline delimited JSON
+ * event <log|progress|state>   - Watch events in realtime as newline delimited JSON
  * exec <file> [...args]        - Allow for compiling and executing an entrypoint file
  * manifest [output]            - Generate the project manifest
  * manifest:production [output] - Generate the production project manifest

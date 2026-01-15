@@ -116,7 +116,7 @@ class RuntimeService {
   logger?: ProductionLogger;
 
   action(): void {
-    // Only injected when available, in prod
+    // Only injected when available, in production
     this.logger?.log();
     // Do work
   }

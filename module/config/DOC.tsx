@@ -55,7 +55,7 @@ export const text = <>
       At runtime the resolved config would be:
 
       <c.Execution title='Runtime Resolution' cmd='trv' args={['main', 'doc/resolve.ts']} config={{
-        env: { TRV_RESOURCES: 'doc/resources', NODE_ENV: 'production' }
+        env: { TRV_RESOURCES: 'doc/resources', TRV_PROFILES: 'production' },
       }} />
     </c.SubSection>
 
@@ -91,7 +91,7 @@ export const text = <>
       You can see that the {d.class('DBConfig')} allows for the {d.field('port')} to be overridden by the {d.input('DATABASE_PORT')} environment variable.
 
       <c.Execution title='Resolved database config' cmd='trv' args={['main', 'doc/dbconfig-run.ts']} config={{
-        env: { TRV_RESOURCES: 'doc/resources', NODE_ENV: 'production' }
+        env: { TRV_RESOURCES: 'doc/resources', TRV_PROFILES: 'production' },
       }} />
 
       What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true.  This helps to ensure that the configuration, as input to the system, is verified and correct. <br />
@@ -99,7 +99,7 @@ export const text = <>
       By passing in the port via the environment variable, the config will construct properly, and the application will startup correctly:
 
       <c.Execution title='Resolved database config' cmd='trv' args={['main', 'doc/dbconfig-run.ts']} config={{
-        env: { DATABASE_PORT: '200', TRV_RESOURCES: 'doc/resources', NODE_ENV: 'production' },
+        env: { DATABASE_PORT: '200', TRV_RESOURCES: 'doc/resources', TRV_PROFILES: 'production' },
         formatCommand: (cmd, args) => `DATABASE_PORT=200 ${cmd} ${args.join(' ')}`
       }} />
 

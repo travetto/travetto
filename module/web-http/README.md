@@ -165,7 +165,6 @@ import './config-override.ts';
 export class SampleApp {
 
   preMain(): void {
-    Env.TRV_PROFILES.add('prod');
     Env.NODE_ENV.set('production');
   }
 
@@ -210,7 +209,7 @@ Initialized {
     resourcePaths: [
       './doc-exec/resources'
     ],
-    profiles: [ 'prod' ]
+    profiles: []
   },
   config: {
     sources: [
@@ -329,7 +328,7 @@ we can see the structure for integrating the server behavior with the [Web API](
 Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
    *  TLS support is configured
    *  [node-forge](https://www.npmjs.com/package/node-forge) is installed
-   *  Not running in prod
+   *  Not running in production
    *  No keys provided
 
 This is useful for local development where you implicitly trust the cert. 

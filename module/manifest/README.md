@@ -72,7 +72,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
   "modules": {
     "@travetto/manifest": {
       "main": true,
-      "prod": true,
+      "production": true,
       "name": "@travetto/manifest",
       "version": "x.x.x",
       "workspace": true,
@@ -140,7 +140,7 @@ The context contains:
    *  The framework version (based on @travetto/manifest)
 
 ### Modules
-The modules represent all of the [Travetto](https://travetto.dev)-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A prod-only version is produced when packaging the final output. Each module contains:
+The modules represent all of the [Travetto](https://travetto.dev)-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A production-only version is produced when packaging the final output. Each module contains:
    *  The dependency npm name
    *  The dependency version
    *  A flag to determine if its a local module
