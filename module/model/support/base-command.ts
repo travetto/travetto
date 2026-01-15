@@ -13,9 +13,6 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 @Schema()
 export abstract class BaseModelCommand implements CliCommandShape {
 
-  /** Application Environment */
-  env?: string;
-
   abstract getOperation(): keyof ModelStorageSupport;
 
   preMain(): void {

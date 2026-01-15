@@ -31,26 +31,28 @@ export class WatchUtil {
 
   /** Convert exit code to a result type  */
   static exitCodeToResult(code: number): RetryRunState['result'] {
-    return code === this.#RESTART_EXIT_CODE ? 'restart' : code > 0 ? 'error' : 'stop';
+    return code === this.#RESTART_EXIT_CODE ? 'restart' : (code !== null && code > 0) ? 'error' : 'stop';
   }
 
   /** Exit with a restart exit code */
   static exitWithRestart(): void {
-    process.exit(this.#RESTART_EXIT_CODE);
+    ShutdownManager.shutdown('SIGTERM', this.#RESTART_EXIT_CODE);
   }
 
   /** Listen for restart signals */
-  static listenForRestartSignal(): void {
-    const listener = (event: unknown): void => {
-      if (event === 'WATCH_RESTART') { this.exitWithRestart(); }
-    };
-    process.on('message', listener);
-    ShutdownManager.onGracefulShutdown(() => { process.removeListener('message', listener); });
+  static listenForSignals(): void {
+    ShutdownManager.disableInterrupt();
+    process.on('message', event => {
+      switch (event) {
+        case 'WATCH_RESTART': this.exitWithRestart(); break;
+        case 'WATCH_SHUTDOWN': ShutdownManager.shutdown('SIGTERM', 0); break;
+      }
+    });
   }
 
-  /** Trigger a restart signal to a subprocess */
-  static triggerRestartSignal(subprocess?: ChildProcess): void {
-    subprocess?.connected && subprocess.send?.('WATCH_RESTART');
+  /** Trigger a watch signal signal to a subprocess */
+  static triggerSignal(subprocess: ChildProcess, signal: 'WATCH_RESTART' | 'WATCH_SHUTDOWN'): void {
+    subprocess.connected && subprocess.send?.(signal);
   }
 
   /** Compute the delay before restarting */
@@ -64,8 +66,6 @@ export class WatchUtil {
    * Run with restart capability
    */
   static async runWithRetry(run: (state: RetryRunState & { signal: AbortSignal }) => Promise<RetryRunState['result']>, options?: Partial<RetryRunConfig>): Promise<void> {
-    const controller = new AbortController();
-    const cleanup = ShutdownManager.onGracefulShutdown(() => controller.abort());
     let retryExhausted = false;
 
     const state: RetryRunState = {
@@ -82,14 +82,14 @@ export class WatchUtil {
     };
 
 
-    while (!controller.signal.aborted && !retryExhausted) {
+    outer: while (!ShutdownManager.signal.aborted && !retryExhausted) {
       if (state.iteration > 0) {
         await config.onRetry(state, config);
       }
 
-      state.result = await run({ ...state, signal: controller.signal }).catch(() => 'error' as const);
+      state.result = await run({ ...state, signal: ShutdownManager.signal }).catch(() => 'error' as const);
       switch (state.result) {
-        case 'stop': controller.abort(); break;
+        case 'stop': break outer;
         case 'error': state.errorIterations += 1; break;
         case 'restart': {
           state.startTime = Date.now();
@@ -104,8 +104,6 @@ export class WatchUtil {
     if (retryExhausted) {
       throw new AppError(`Operation failed after ${state.errorIterations} attempts`);
     }
-
-    cleanup?.();
   }
 
   /**  Watch compiler events  */

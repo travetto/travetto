@@ -7,7 +7,7 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 /**
  * Exports model schemas
  */
-@CliCommand({ with: { env: true, module: true } })
+@CliCommand({ with: { profiles: true, module: true } })
 export class ModelExportCommand extends BaseModelCommand {
 
   getOperation(): 'exportModel' { return 'exportModel'; }

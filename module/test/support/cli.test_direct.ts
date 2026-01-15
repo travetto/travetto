@@ -23,7 +23,6 @@ export class TestDirectCommand {
 
   preMain(): void {
     Env.TRV_ROLE.set('test');
-    Env.TRV_ENV.set('test');
     Env.TRV_LOG_PLAIN.set(true);
     Env.TRV_LOG_TIME.clear();
   }

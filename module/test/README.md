@@ -82,7 +82,7 @@ import * as Δdebug from "@travetto/runtime/src/debug.js";
 import * as Δcheck from "@travetto/test/src/assert/check.js";
 import * as Δfunction from "@travetto/runtime/src/function.js";
 import * as Δschema from "@travetto/schema/src/decorator/schema.js";
-var Δm_1 = ["@travetto/test", "doc/assert-example.ts"];
+const Δm_1 = ["@travetto/test", "doc/assert-example.ts"];
 import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 let SimpleTest = class SimpleTest {

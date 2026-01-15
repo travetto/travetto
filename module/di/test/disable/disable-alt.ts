@@ -11,7 +11,7 @@ class AltDisableSuite {
 
   @BeforeAll()
   before(): void {
-    process.env.NAME = 'prod';
+    process.env.NAME = 'production';
   }
 
   @Test()

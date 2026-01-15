@@ -25,9 +25,9 @@ $ trv web:rpc-client --help
 Usage: web:rpc-client [options] <type:config|node|web> [output:string]
 
 Options:
-  -e, --env <string>     Application environment
-  -m, --module <module>  Module to run for
-  -h, --help             display help for command
+  -p, --profile <string>  Application profiles
+  -m, --module <module>   Module to run for
+  -h, --help              display help for command
 ```
 
 ## Example

@@ -35,12 +35,12 @@ While running any code within the framework, there are common patterns/goals for
 ```typescript
 class $Runtime {
   constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>);
-  /** Get env name, with support for the default env */
-  get env(): string | undefined;
+  /** The role we are running as */
+  get role(): Role;
   /** Are we in production mode */
   get production(): boolean;
-  /** Get environment type mode */
-  get envType(): 'production' | 'development' | 'test';
+  /** Are we in development mode */
+  get localDevelopment(): boolean;
   /** Get debug value */
   get debug(): false | string;
   /** Manifest main */
@@ -87,15 +87,11 @@ interface EnvData {
      */
     NODE_ENV: 'development' | 'production';
     /** 
-     * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
+     * Outputs all console.debug messages, defaults to off
      */
     DEBUG: boolean | string;
     /** 
-     * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.  
-     */
-    TRV_ENV: string;
-    /** 
-     * Special role to run as, used to access additional files from the manifest during runtime.  
+     * The role we are running as, allows access to additional files from the manifest during runtime.
      */
     TRV_ROLE: Role;
     /** 
@@ -112,6 +108,11 @@ interface EnvData {
      * @default 2s
      */
     TRV_SHUTDOWN_WAIT: TimeSpan | number;
+    /** 
+     * The time to wait for stdout to drain during shutdown
+     * @default 0s
+     */
+    TRV_SHUTDOWN_STDOUT_WAIT: TimeSpan | number;
     /**
      * The desired runtime module 
      */
@@ -214,7 +215,7 @@ export function work() {
 ```javascript
 import * as Δfunction from "@travetto/runtime/src/function.js";
 import * as Δconsole from "@travetto/runtime/src/console.js";
-var Δm_1 = ["@travetto/runtime", "doc/transpile.ts"];
+const Δm_1 = ["@travetto/runtime", "doc/transpile.ts"];
 export function work() {
     Δconsole.log({ level: "debug", import: Δm_1, line: 2, scope: "work", args: ['Start Work'] });
     try {
@@ -282,7 +283,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L19) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L20) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript

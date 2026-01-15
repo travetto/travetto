@@ -15,8 +15,8 @@ export type ManifestDepCore = {
   main?: boolean;
   /** Is this a module that is part of the workspace */
   workspace?: boolean;
-  /** Should this module be deployed to prod? */
-  prod: boolean;
+  /** Should this module be deployed to production? */
+  production: boolean;
   /** Is the module intended to be published? */
   internal?: boolean;
 };
@@ -69,8 +69,8 @@ export type PackageModule = Omit<ManifestModule, 'files' | 'parents' | 'roles'> 
     roleRoot?: boolean;
     /** Travetto package info */
     travetto?: Package['travetto'];
-    /** Prod dependencies */
-    prodDependencies: Set<string>;
+    /** Production dependencies */
+    dependencies: Set<string>;
     /** Set of parent package names */
     parentSet: Set<string>;
     /** Set of child package names */

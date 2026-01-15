@@ -13,6 +13,22 @@ type Profile = [string, number] | readonly [string, number];
  */
 export class FileConfigSource implements ConfigSource {
 
+  static getProfiles(): Profile[] {
+    const profiles: Profile[] = [
+      ['application', 100]
+    ];
+    if (Runtime.role === 'std') {
+      if (Runtime.localDevelopment) {
+        profiles.push(['local', 200]);
+      }
+    } else {
+      profiles.push([Runtime.role, 200]);
+    }
+    profiles.push(...(Env.TRV_PROFILES.list ?? [])
+      .map((profile, i) => [profile, 300 + i * 10] as const));
+    return profiles;
+  }
+
   #profiles: Profile[];
   #searchPaths: string[];
   #parser: ParserManager;
@@ -20,12 +36,7 @@ export class FileConfigSource implements ConfigSource {
   constructor(parser: ParserManager) {
     this.#parser = parser;
     this.#searchPaths = RuntimeResources.searchPaths.toReversed();
-    this.#profiles = ([
-      ['application', 100],
-      [Runtime.env!, 200],
-      ...(Env.TRV_PROFILES.list ?? [])
-        .map((profile, i) => [profile, 300 + i * 10] as const)
-    ] as const).filter(entry => !!entry[0]);
+    this.#profiles = FileConfigSource.getProfiles();
   }
 
   async get(): Promise<ConfigPayload[]> {

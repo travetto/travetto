@@ -33,7 +33,8 @@ The compiler cli supports the following operations:
    *  `info` - Retrieve the compiler information, if running
    *  `event <log|progress|state>` - Watch events in realtime as newline delimited JSON
    *  `exec <file> [...args]` - Allow for compiling and executing an entrypoint file
-   *  `manifest --prod [output]` - Generate the project manifest
+   *  `manifest [output]` - Generate the project manifest
+   *  `manifest:production [output]` - Generate the production project manifest
 
 In addition to the normal output, the compiler supports an environment variable `TRV_BUILD` that supports the following values: `debug`, `info`, `warn` or `none`.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. `<other>` from above), the default level is `warn`.  Otherwise the default logging level is `info`.
 

@@ -8,21 +8,22 @@ const TodoRoot = d.ref('Todo App', RuntimeIndex.getModule('@travetto/todo-app')!
 const port = 12555;
 
 async function init() {
-  Env.TRV_LOG_PLAIN.set(false);
-
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.spawn('trv', ['web:http'], {
+  const cmd = DocRunUtil.spawn('trv', ['web:http', '--no-restart-on-change'], {
     env: {
-      ...process.env, WEB_HTTP_PORT: `${port}`, WEB_HTTP_TLS: '0', WEB_BASE_URL: `http://localhost:${port}`,
-      ...Env.TRV_RESTART_ON_CHANGE.export(false)
-    }
+      ...process.env,
+      WEB_HTTP_PORT: `${port}`,
+      WEB_HTTP_TLS: '0',
+      WEB_BASE_URL: `http://localhost:${port}`,
+      ...Env.TRV_ROLE.export('std'),
+      ...Env.TRV_LOG_PLAIN.export(false),
+    },
   });
 
   ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); });
 
-  cmd.stdout?.on('data', chunk =>
-    startupBuffer.push(Buffer.from(chunk)));
+  cmd.stdout?.on('data', (chunk: Buffer) => startupBuffer.push(chunk));
 
   while (startupBuffer.length === 0) {
     await Util.blockingTimeout(100);
@@ -152,7 +153,6 @@ $ npx trv eslint:register
       <c.Execution
         title='Create Output' cmd='trv' args={['main', 'doc/create-todo.ts', key, `${port}`]}
         config={{
-          env: { TRV_LOG_PLAIN: '1' },
           rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
           formatCommand: (name, args) => [name, ...args].map(arg =>
             arg.replaceAll('doc/create', 'support/create').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')
@@ -165,7 +165,6 @@ $ npx trv eslint:register
       <c.Code title='Listing Todos by fetch' src='doc/list-todo.ts' />
 
       <c.Execution title='Listing Output' cmd='trv' args={['main', 'doc/list-todo.ts', key, `${port}`]} config={{
-        env: { TRV_LOG_PLAIN: '1' },
         rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
         formatCommand: (name, args) => [name, ...args].map(
           arg => arg.replaceAll('doc/list', 'support/list').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')

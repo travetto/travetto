@@ -320,13 +320,12 @@ npx trv web:http
       name: '@travetto/mono-repo',
       path: '<workspace-root>',
       mono: true,
-      manager: 'npm',
-      defaultEnv: 'local'
+      manager: 'npm'
     }
   },
   runtime: {
-    env: 'local',
-    envType: 'development',
+    production: false,
+    role: 'std',
     debug: false,
     resourcePaths: [
       './resources',

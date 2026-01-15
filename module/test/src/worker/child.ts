@@ -42,8 +42,6 @@ export class TestChildWorker extends IpcChannel<TestRun> {
       ConsoleManager.set({ log: () => { } });
     }
 
-    RunUtil.registerCleanup('worker');
-
     // Listen for inbound requests
     this.on('*', event => this.onCommand(event));
 

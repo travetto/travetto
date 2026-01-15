@@ -12,8 +12,6 @@ import type { TestRunInput } from '../../src/model/test.ts';
 export async function runTests(state: TestConsumerConfig, input: TestRunInput): Promise<void> {
   const { RunUtil } = await import('../../src/execute/run.ts');
 
-  RunUtil.registerCleanup('runner');
-
   try {
     const result = await RunUtil.runTests(state, input);
     process.exitCode = result ? 0 : 1;

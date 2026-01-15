@@ -6,7 +6,7 @@ import { DependencyRegistryIndex } from '@travetto/di';
 import { EditorService } from './bin/editor.ts';
 
 /** The email editor compilation service and output serving */
-@CliCommand({ with: { env: true } })
+@CliCommand({ with: { profiles: true } })
 export class EmailEditorCommand {
 
   preMain(): void {

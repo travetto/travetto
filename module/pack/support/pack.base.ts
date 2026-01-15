@@ -17,7 +17,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
   static get entryPoints(): string[] {
     return RuntimeIndex.find({
-      module: module => module.prod,
+      module: module => module.production,
       folder: folder => folder === 'support',
       file: file => file.sourceFile.includes('entry.')
     })
@@ -130,7 +130,7 @@ export abstract class BasePackCommand implements CliCommandShape {
     return [...RuntimeIndex.getModuleList('all')]
       .map(name => RuntimeIndex.getModule(name))
       .filter(module => !!module)
-      .filter(module => module.prod)
+      .filter(module => module.production)
       .map(module => PackageUtil.readPackage(module?.sourcePath))
       .map(pkg => pkg?.travetto?.build?.binaryDependencies ?? [])
       .flat();

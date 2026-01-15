@@ -75,7 +75,7 @@ export class ExecutionManager {
     } catch (error) {
       await this.#onError(error);
     } finally {
-      await ShutdownManager.gracefulShutdown('@travetto/cli:execute');
+      await ShutdownManager.shutdown();
     }
   }
 }

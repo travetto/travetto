@@ -5,7 +5,7 @@ import type { Package, PackageDependencyType } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 import type { PackageModule } from './types/manifest.ts';
 
-type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { roleRoot?: boolean, parent?: PackageModule };
+type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'production'>> & { roleRoot?: boolean, parent?: PackageModule };
 
 type VisitableNode = {
   /** Request package */
@@ -43,11 +43,11 @@ export class PackageModuleVisitor {
   /**
    * Build a package module
    */
-  #create(sourcePath: string, { main, workspace, prod = false, roleRoot = false, parent }: CreateOpts = {}): VisitableNode {
+  #create(sourcePath: string, { main, workspace, production = false, roleRoot = false, parent }: CreateOpts = {}): VisitableNode {
     const pkg = PackageUtil.readPackage(sourcePath);
     const value = this.#cache[sourcePath] ??= {
       main,
-      prod,
+      production,
       name: pkg.name,
       version: pkg.version,
       workspace: workspace ?? (pkg.name in this.#workspaceModules),
@@ -56,7 +56,7 @@ export class PackageModuleVisitor {
       outputFolder: `node_modules/${pkg.name}`,
       state: {
         childSet: new Set(), parentSet: new Set(), roleSet: new Set(), roleRoot,
-        travetto: pkg.travetto, prodDependencies: new Set(Object.keys(pkg.dependencies ?? {}))
+        travetto: pkg.travetto, dependencies: new Set(Object.keys(pkg.dependencies ?? {}))
       }
     };
 
@@ -98,7 +98,7 @@ export class PackageModuleVisitor {
   }
 
   /**
-   * Propagate prod, role information through graph
+   * Propagate production, role information through graph
    */
   async #complete(modules: Iterable<PackageModule>): Promise<PackageModule[]> {
     const mapping = new Map([...modules].map(item => [item.name, { parent: new Set(item.state.parentSet), item }]));
@@ -132,8 +132,8 @@ export class PackageModuleVisitor {
               child.item.state.roleSet.add(role);
             }
           }
-          // Allow prod to trickle down as needed
-          child.item.prod ||= (item.prod && item.state.prodDependencies.has(childName));
+          // Allow production to trickle down as needed
+          child.item.production ||= (item.production && item.state.dependencies.has(childName));
         }
       }
       // Remove from mapping
@@ -155,7 +155,7 @@ export class PackageModuleVisitor {
    */
   async visit(): Promise<Iterable<PackageModule>> {
     const seen = new Set<PackageModule>();
-    const mainRequire = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
+    const mainRequire = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, production: true });
 
     const queue = [
       mainRequire,

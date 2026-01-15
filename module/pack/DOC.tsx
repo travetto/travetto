@@ -52,7 +52,7 @@ node cli run myapp
         <li>{d.method('writeEntryScript')} - Create the entry script based on the {d.input('--entry-command')}, {d.input('args')}</li>
         <li>{d.method('copyResources')} - Will pull in local {d.path('resources/**')} files into the final output</li>
         <li>{d.method('primeAppCache')} - Runs {d.input('trv run')} to ensure the appropriate files are generated to allow for running the application.  This only applies if the entry point is equivalent to {d.input('trv run')}</li>
-        <li>{d.method('writeManifest')} - Produces the {d.input('prod')}-ready manifest that is used at runtime.  Removes all devDependencies from the manifest.json</li>
+        <li>{d.method('writeManifest')} - Produces the {d.input('production')}-ready manifest that is used at runtime.  Removes all devDependencies from the manifest.json</li>
         <li>{d.method('bundle')} - Invokes {d.library('Rollup')} with the appropriate file set to produce a single output .js file.  Depending on the module type ({d.library('CommonJS')} or {d.library('EcmascriptModule')}) the build process differs to handle the dynamic loading that application does at runtime.</li>
       </ul>
     </c.SubSection>

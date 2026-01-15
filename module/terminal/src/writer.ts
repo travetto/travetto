@@ -48,9 +48,12 @@ export class TerminalWriter {
     if (output.isTTY) {
       if (on && !this.#cleanup) {
         const exit = (): Promise<void> => this.reset().commit(false);
-        const free = ShutdownManager.onGracefulShutdown(exit);
+        ShutdownManager.onGracefulShutdown(exit);
         process.on('exit', exit);
-        this.#cleanup = (): undefined => { free(); process.off('exit', exit); };
+        this.#cleanup = (): undefined => {
+          ShutdownManager.signal.removeEventListener('abort', exit);
+          process.off('exit', exit);
+        };
       } else if (!on) {
         this.#cleanup = this.#cleanup?.();
       }

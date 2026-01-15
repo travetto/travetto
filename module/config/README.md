@@ -22,8 +22,8 @@ The configuration information is comprised of:
 
 Config loading follows a defined resolution path, below is the order in increasing specificity (`ext` can be `yaml`, `yml`, `json`, `properties`):
    1. `resources/application.<ext>` - Priority `100` - Load the default `application.<ext>` if available.
-   1. `resources/{env}.<ext>` - Priority `200` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
-   1. `resources/*.<ext>` - Priority `300` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
+   1. `resources/{role}.<ext>` - Priority `150` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ROLE`. If the role is `std`, it is replaced with `local` for local development.
+   1. `resources/*.<ext>` - Priority `200` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
    1. [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) [ConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/types.ts#L11) - Priority `???` - These are custom config sources provided by the module, and are able to define their own priorities
    1. [OverrideConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/override.ts#L9) - Priority `999` - This is for [@EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L37) overrides, and is at the top priority for all built-in config sources.
 
@@ -48,7 +48,7 @@ database:
     password: test
 ```
 
-**Config: resources/prod.json**
+**Config: resources/production.json**
 ```json
 {
   "database": {
@@ -64,7 +64,7 @@ with environment variables
 
 **Config: Environment variables**
 ```properties
-TRV_ENV = prod
+TRV_PROFILES=production
 ```
 
 At runtime the resolved config would be:
@@ -86,9 +86,14 @@ Config {
       detail: 'module/config/doc/resources/application.yml'
     },
     {
+      priority: 200,
+      source: 'file://local',
+      detail: 'resources/local.yml'
+    },
+    {
       priority: 300,
-      source: 'file://prod',
-      detail: 'module/config/doc/resources/prod.json'
+      source: 'file://production',
+      detail: 'module/config/doc/resources/production.json'
     },
     { priority: 999, source: 'memory://override' }
   ],
@@ -246,9 +251,14 @@ Config {
       detail: 'module/config/doc/resources/application.yml'
     },
     {
+      priority: 200,
+      source: 'file://local',
+      detail: 'resources/local.yml'
+    },
+    {
       priority: 300,
-      source: 'file://prod',
-      detail: 'module/config/doc/resources/prod.json'
+      source: 'file://production',
+      detail: 'module/config/doc/resources/production.json'
     },
     { priority: 999, source: 'memory://override' }
   ],

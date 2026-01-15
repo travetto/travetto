@@ -27,6 +27,7 @@
     "directory": "module/config"
   },
   "dependencies": {
+    "@travetto/cli": "^7.0.6",
     "@travetto/di": "^7.0.6",
     "@travetto/schema": "^7.0.6",
     "yaml": "^2.8.2"

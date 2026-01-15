@@ -8,9 +8,9 @@ declare module '@travetto/runtime' {
      */
     TRV_CLI_IPC: string;
     /** 
-     * Overrides behavior for allowing restart on changes 
+     * Signals to the child they are the restart target
      */
-    TRV_RESTART_ON_CHANGE: boolean;
+    TRV_RESTART_TARGET: boolean;
     /** 
      * Overrides behavior for triggering debug session via IPC
      */

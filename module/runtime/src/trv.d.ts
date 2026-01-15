@@ -1,6 +1,6 @@
 import { type ManifestModuleRole } from '@travetto/manifest';
 import { type TimeSpan } from './time.ts';
-type Role = Exclude<ManifestModuleRole, 'std' | 'compile'>;
+type Role = Exclude<ManifestModuleRole, 'compile'>;
 
 declare module "@travetto/runtime" {
   interface EnvData {
@@ -10,15 +10,11 @@ declare module "@travetto/runtime" {
      */
     NODE_ENV: 'development' | 'production';
     /** 
-     * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
+     * Outputs all console.debug messages, defaults to off
      */
     DEBUG: boolean | string;
     /** 
-     * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.  
-     */
-    TRV_ENV: string;
-    /** 
-     * Special role to run as, used to access additional files from the manifest during runtime.  
+     * The role we are running as, allows access to additional files from the manifest during runtime.
      */
     TRV_ROLE: Role;
     /** 
@@ -35,6 +31,11 @@ declare module "@travetto/runtime" {
      * @default 2s
      */
     TRV_SHUTDOWN_WAIT: TimeSpan | number;
+    /** 
+     * The time to wait for stdout to drain during shutdown
+     * @default 0s
+     */
+    TRV_SHUTDOWN_STDOUT_WAIT: TimeSpan | number;
     /**
      * The desired runtime module 
      */

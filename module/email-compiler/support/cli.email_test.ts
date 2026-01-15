@@ -10,7 +10,7 @@ import { EditorService } from './bin/editor.ts';
 /**
  * CLI Entry point for running the email server
  */
-@CliCommand({ with: { env: true } })
+@CliCommand({ with: { profiles: true } })
 export class EmailTestCommand implements CliCommandShape {
 
   preMain(): void {

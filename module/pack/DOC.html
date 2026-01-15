@@ -88,7 +88,7 @@ Every <a class="module-link" href="https://github.com/travetto/travetto/tree/mai
 <li><code class="item method">writeEntryScript</code> - Create the entry script based on the <code class="item input">--entry-command</code>, <code class="item input">args</code></li>
 <li><code class="item method">copyResources</code> - Will pull in local <code class="item path">resources/**</code> files into the final output</li>
 <li><code class="item method">primeAppCache</code> - Runs <code class="item input">trv run</code> to ensure the appropriate files are generated to allow for running the application.  This only applies if the entry point is equivalent to <code class="item input">trv run</code></li>
-<li><code class="item method">writeManifest</code> - Produces the <code class="item input">prod</code>-ready manifest that is used at runtime.  Removes all devDependencies from the manifest.json</li>
+<li><code class="item method">writeManifest</code> - Produces the <code class="item input">production</code>-ready manifest that is used at runtime.  Removes all devDependencies from the manifest.json</li>
 <li><code class="item method">bundle</code> - Invokes <a target="_blank" class="external-link" href="https://rollupjs.org/">Rollup</a> with the appropriate file set to produce a single output .js file.  Depending on the module type (<a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">CommonJS</a> or <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a>) the build process differs to handle the dynamic loading that application does at runtime.</li>
 </ul>
 

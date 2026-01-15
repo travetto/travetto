@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { CliCommand } from '@travetto/cli';
 import { c, d } from '@travetto/doc';
-import { Env, RuntimeResources, toConcrete } from '@travetto/runtime';
+import { RuntimeResources, toConcrete } from '@travetto/runtime';
 import { WebRequest, WebResponse } from '@travetto/web';
 
 import type { WebHttpServer } from './src/types.ts';
@@ -18,10 +18,7 @@ export const text = <>
 
     By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
 
-    <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{
-      workingDirectory: './doc-exec',
-      env: Env.TRV_RESTART_ON_CHANGE.export(false)
-    }} />
+    <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{ workingDirectory: './doc-exec', env: { TRV_ROLE: 'doc' } }} />
 
     <c.SubSection title="Configuration">
       <c.Code title="Standard Web Http Config" src={WebHttpConfig} />
@@ -68,7 +65,7 @@ export const text = <>
     <ul>
       <li>TLS support is configured</li>
       <li>{d.library('NodeForge')} is installed</li>
-      <li>Not running in prod</li>
+      <li>Not running in production</li>
       <li>No keys provided</li>
     </ul>
 

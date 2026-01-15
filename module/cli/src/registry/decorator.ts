@@ -7,14 +7,14 @@ import { CliModuleUtil } from '../module.ts';
 import { CliParseUtil } from '../parse.ts';
 import { CliUtil } from '../util.ts';
 
-type Cmd = CliCommandShape & { env?: string };
+type Cmd = CliCommandShape & { profiles?: string[] };
 
 type CliCommandConfigOptions = {
   runTarget?: boolean;
   runtimeModule?: 'current' | 'command';
   with?: {
     /** Application environment */
-    env?: boolean;
+    profiles?: boolean;
     /** Module to run for */
     module?: boolean;
     /** Should debug invocation trigger via ipc */
@@ -32,15 +32,15 @@ type WithHandler<K extends keyof WithConfig> = (config?: WithConfig[K]) => ({
 } | undefined);
 
 const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
-  env: (config) => {
+  profiles: (config) => {
     if (!config) { return; }
     return {
-      name: 'env',
-      run: cmd => Env.TRV_ENV.set(cmd.env || Runtime.env),
+      name: 'profiles',
+      run: cmd => cmd.profiles && Env.TRV_PROFILES.set([...cmd.profiles, ...(Env.TRV_PROFILES.list ?? [])]),
       field: {
         type: String,
-        aliases: ['-e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
-        description: 'Application environment',
+        aliases: ['--profile', '--profiles', CliParseUtil.toEnvField(Env.TRV_PROFILES.key)],
+        description: 'Application profiles',
         required: { active: false },
       },
     };
@@ -62,7 +62,7 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
     if (!config) { return; }
     return {
       name: 'debugIpc',
-      run: cmd => CliUtil.runWithDebugIpc(cmd).then((executed) => executed && process.exit(0)),
+      run: cmd => CliUtil.runWithDebugIpc(cmd),
       field: {
         type: Boolean,
         aliases: ['-di', CliParseUtil.toEnvField(Env.TRV_DEBUG_IPC.key)],
@@ -79,9 +79,9 @@ const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
       run: cmd => CliUtil.runWithRestartOnChange(cmd),
       field: {
         type: Boolean,
-        aliases: ['-rc', CliParseUtil.toEnvField(Env.TRV_RESTART_ON_CHANGE.key)],
+        aliases: ['-rc'],
         description: 'Should the invocation automatically restart on source changes',
-        default: config !== 'optional' && Runtime.envType === 'development',
+        default: config !== 'optional' && Runtime.localDevelopment,
         required: { active: false },
       },
     };

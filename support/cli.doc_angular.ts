@@ -13,11 +13,16 @@ const page = (file: string): string => path.resolve('related/travetto.github.io/
  */
 @CliCommand()
 export class DocAngularCommand {
+
+  preMain(): void {
+    Env.DEBUG.set(false);
+  }
+
   async main(target?: string): Promise<void> {
     const root = Runtime.workspace.path;
 
     if (target && target.startsWith(root)) {
-      target = target.replace(root, '').split('/').pop()!;
+      target = target.replace(root, '').split('/').at(-1);
     }
 
     const modules = new Set((await CliModuleUtil.findModules('workspace'))

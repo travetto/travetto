@@ -64,8 +64,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: existsSync(path.resolve(workspace.path, 'yarn.lock')) ? 'yarn' : 'npm',
-      defaultEnv: workspace.travetto?.defaultEnv ?? 'local'
+      manager: existsSync(path.resolve(workspace.path, 'yarn.lock')) ? 'yarn' : 'npm'
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,

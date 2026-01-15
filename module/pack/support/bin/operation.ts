@@ -221,7 +221,7 @@ export class PackOperation {
   }
 
   /**
-   * Produce the output manifest, only including prod dependencies
+   * Produce the output manifest, only including production dependencies
    */
   static async * writeManifest(config: CommonPackConfig): AsyncIterable<string[]> {
     const out = path.resolve(config.buildDirectory, config.manifestFile);
