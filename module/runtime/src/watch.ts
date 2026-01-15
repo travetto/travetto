@@ -35,7 +35,7 @@ export class WatchUtil {
   /**
    * Run with restart capability
    */
-  static async runWithRetry(run: (state: RetryRunState & { signal: AbortSignal }) => Promise<RetryRunState['result']>, options?: Partial<RetryRunConfig>): Promise<void> {
+  static async runWithRetry(run: (state: RetryRunState & { signal: AbortSignal }) => Promise<ShutdownReason>, options?: Partial<RetryRunConfig>): Promise<void> {
     let retryExhausted = false;
 
     const state: RetryRunState = {
@@ -59,8 +59,7 @@ export class WatchUtil {
 
       state.result = await run({ ...state, signal: ShutdownManager.signal }).catch(() => 'error' as const);
       switch (state.result) {
-        case 'exit':
-        case 'shutdown': break outer;
+        case 'quit': break outer;
         case 'error': state.errorIterations += 1; break;
         case 'restart': {
           state.startTime = Date.now();

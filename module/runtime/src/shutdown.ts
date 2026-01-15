@@ -5,12 +5,12 @@ import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
 
 type Handler = (event: Event) => unknown;
-export type ShutdownReason = 'shutdown' | 'restart' | 'error' | 'exit';
-export type ShutdownSignal = 'SIGINT' | 'SIGTERM' | 'SIGUSR2' | string | undefined;
-export type ShutdownEvent = { signal?: ShutdownSignal, reason?: ShutdownReason, type: 'shutdown' };
+export type ShutdownReason = 'restart' | 'error' | 'quit';
+type ShutdownSignal = 'SIGINT' | 'SIGTERM' | 'SIGUSR2' | string | undefined;
+type ShutdownEvent = { signal?: ShutdownSignal, reason?: ShutdownReason, type: 'shutdown' };
 
 const isShutdownEvent = (event: unknown): event is ShutdownEvent =>
-  typeof event === 'object' && event !== null && 'type' in event && event.type === 'shutdown';
+  typeof event === 'object' && event !== null && 'type' in event && event.type === 'quit';
 
 
 /**
@@ -62,23 +62,22 @@ export class ShutdownManager {
 
   /** Convert exit code to a reason string  */
   static reasonForExitCode(code: number): ShutdownReason {
-    return (code === this.#restartExitCode) ? 'restart' : (code === 0) ? 'shutdown' : 'error';
+    return (code === this.#restartExitCode) ? 'restart' : (code === 0 || code === null) ? 'quit' : 'error';
   }
 
   static exitCodeForReason(reason: ShutdownReason | number): number {
     switch (reason) {
       case 'restart': return this.#restartExitCode;
       case 'error': return 1;
-      case 'exit':
-      case 'shutdown': return 0;
+      case 'quit': return 0;
       default: return reason;
     }
   }
 
   /** Trigger a watch signal signal to a subprocess */
-  static async shutdownChild(subprocess: ChildProcess, reason: ShutdownReason | number): Promise<number> {
+  static async shutdownChild(subprocess: ChildProcess, config: { reason: ShutdownReason | number, exit?: boolean }): Promise<number> {
     const result = new Promise<void>(resolve => { subprocess.once('close', () => resolve()); });
-    subprocess.send!({ source: 'SIGINT', reason, type: 'shutdown' });
+    subprocess.send!({ source: 'SIGINT', type: 'shutdown', ...config });
     await result;
     return subprocess.exitCode ?? 0;
   }
@@ -86,28 +85,28 @@ export class ShutdownManager {
   /**
    * Shutdown the application gracefully
    */
-  static async shutdown(event?: Omit<ShutdownEvent, 'type'>): Promise<void> {
-    const { signal: source, reason } = event ?? {};
+  static async shutdown(event?: { signal?: ShutdownSignal, reason?: ShutdownReason | number, exit?: boolean }): Promise<void> {
+    const { signal, reason } = event ?? {};
 
-    if (this.#shouldIgnoreInterrupt && source === 'SIGINT') {
+    if (this.#shouldIgnoreInterrupt && signal === 'SIGINT') {
       return;
     }
     if (this.#controller.signal.aborted) {
       if (this.#startedAt && (Date.now() - this.#startedAt) > 500) {
-        console.warn('Shutdown already in progress, exiting immediately', { source });
+        console.warn('Shutdown already in progress, exiting immediately', { source: signal });
         process.exit(0); // Quit immediately
       } else {
         return;
       }
     }
 
-    if (process.stdout.isTTY && source === 'SIGINT') {
+    if (process.stdout.isTTY && signal === 'SIGINT') {
       process.stdout.write('\n');
     }
 
     process.removeAllListeners('message'); // Allow shutdown if anything is still listening
 
-    const context = source ? [{ source, pid: process.pid }] : [{ pid: process.pid }];
+    const context = signal ? [{ source: signal, pid: process.pid }] : [{ pid: process.pid }];
     this.#startedAt = Date.now();
     this.#controller.abort('Shutdown started');
     await Util.queueMacroTask(); // Force the event loop to wait one cycle
@@ -136,7 +135,7 @@ export class ShutdownManager {
       await Util.blockingTimeout(stdoutDrain);
     }
 
-    if (reason === 'exit') {
+    if (event?.exit) {
       process.exit();
     }
   }
