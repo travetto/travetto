@@ -1,14 +1,24 @@
+import type { ChildProcess } from 'node:child_process';
+
 import { Env } from './env.ts';
 import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
 
 type Handler = (event: Event) => unknown;
+export type ShutdownReason = number | 'shutdown' | 'restart' | 'error' | 'exit';
+export type ShutdownSignal = 'SIGINT' | 'SIGTERM' | 'SIGUSR2' | string | undefined;
+export type ShutdownEvent = { signal?: ShutdownSignal, reason?: ShutdownReason, type: 'shutdown' };
+
+const isShutdownEvent = (event: unknown): event is ShutdownEvent =>
+  typeof event === 'object' && event !== null && 'type' in event && event.type === 'shutdown';
+
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
  */
 export class ShutdownManager {
 
+  static #restartExitCode = 200;
   static #shouldIgnoreInterrupt = false;
   static #registered = new Map<Handler, Handler>();
   static #pending: Function[] = [];
@@ -22,22 +32,27 @@ export class ShutdownManager {
     this.#controller.signal.removeEventListener = (type: 'abort', listener: Handler): void => {
       this.#removeListener(type, this.#registered.get(listener) ?? listener);
     };
+    if (process.connected) { // If we are a subprocess, always be ready to shutdown
+      process.on('message', event => isShutdownEvent(event) && this.shutdown(event));
+    }
   }
 
   static get signal(): AbortSignal {
     return this.#controller.signal;
   }
 
-  static disableInterrupt(): void {
+  static disableInterrupt(): typeof ShutdownManager {
     this.#shouldIgnoreInterrupt = true;
+    return this;
   }
 
+  /** Listen for graceful shutdown events */
   static onGracefulShutdown(listener: Handler): void {
     if (!this.#registered.size) {
       process
-        .on('SIGINT', () => this.shutdown('SIGINT')) // Ensure we get a newline on ctrl-c
-        .on('SIGUSR2', () => this.shutdown('SIGUSR2'))
-        .on('SIGTERM', () => this.shutdown('SIGTERM'));
+        .on('SIGINT', () => this.shutdown({ signal: 'SIGINT' })) // Ensure we get a newline on ctrl-c
+        .on('SIGUSR2', () => this.shutdown({ signal: 'SIGUSR2' }))
+        .on('SIGTERM', () => this.shutdown({ signal: 'SIGTERM' }));
     }
 
     const wrappedListener: Handler = event => { this.#pending.push(() => listener(event)); };
@@ -45,14 +60,28 @@ export class ShutdownManager {
     return this.#addListener('abort', wrappedListener);
   }
 
+  /** Convert exit code to a reason string  */
+  static reasonForExitCode(code: number): Exclude<ShutdownReason, number> {
+    return (code === this.#restartExitCode) ? 'restart' : (code === 0) ? 'shutdown' : 'error';
+  }
+
+  /** Trigger a watch signal signal to a subprocess */
+  static async shutdownChild(subprocess: ChildProcess, reason: ShutdownReason): Promise<number> {
+    const result = new Promise<void>(resolve => { subprocess.once('close', () => resolve()); });
+    subprocess.send!({ source: 'SIGINT', reason, type: 'shutdown' });
+    await result;
+    return subprocess.exitCode ?? 0;
+  }
+
   /**
    * Shutdown the application gracefully
    */
-  static async shutdown(source?: string, code?: number): Promise<void> {
+  static async shutdown(event?: Omit<ShutdownEvent, 'type'>): Promise<void> {
+    const { signal: source, reason } = event ?? {};
+
     if (this.#shouldIgnoreInterrupt && source === 'SIGINT') {
       return;
-    }
-    if (this.#controller.signal.aborted) {
+    } else if (this.#controller.signal.aborted) {
       if (this.#startedAt && (Date.now() - this.#startedAt) > 500) {
         console.warn('Shutdown already in progress, exiting immediately', { source });
         process.exit(0); // Quit immediately
@@ -82,18 +111,28 @@ export class ShutdownManager {
 
     const winner = await Promise.race([timeoutTasks, allPendingTasks]);
 
-    process.exitCode = code ?? process.exitCode ?? 0;
+    switch (reason) {
+      case 'restart': process.exitCode = this.#restartExitCode; break;
+      case 'error': process.exitCode = 1; break;
+      case 'shutdown': process.exitCode = 0; break;
+      case 'exit': process.exitCode = 0; break;
+      case undefined: break;
+      default: process.exitCode = reason;
+    }
 
     if (winner !== this) {
       console.debug('Shutdown completed', ...context);
     } else {
       console.warn('Shutdown timed out', ...context);
-      process.exit(1); // Indicate error on timeout
     }
 
     if (Env.TRV_SHUTDOWN_STDOUT_WAIT.isSet) {
       const stdoutDrain = TimeUtil.fromValue(Env.TRV_SHUTDOWN_STDOUT_WAIT.value)!;
       await Util.blockingTimeout(stdoutDrain);
+    }
+
+    if (reason === 'exit') {
+      process.exit();
     }
   }
 }

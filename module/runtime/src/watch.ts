@@ -1,18 +1,16 @@
-import type { ChildProcess } from 'node:child_process';
-
 import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler';
 
 import { AppError } from './error.ts';
 import { Util } from './util.ts';
 import { RuntimeIndex } from './manifest-index.ts';
-import { ShutdownManager } from './shutdown.ts';
+import { ShutdownManager, type ShutdownReason } from './shutdown.ts';
 import { castTo } from './types.ts';
 
 type RetryRunState = {
   iteration: number;
   startTime: number;
   errorIterations: number;
-  result?: 'error' | 'restart' | 'stop';
+  result?: Exclude<ShutdownReason, number>;
 };
 
 type RetryRunConfig = {
@@ -26,34 +24,6 @@ type RetryRunConfig = {
  * Utilities for watching resources
  */
 export class WatchUtil {
-
-  static #RESTART_EXIT_CODE = 200;
-
-  /** Convert exit code to a result type  */
-  static exitCodeToResult(code: number): RetryRunState['result'] {
-    return code === this.#RESTART_EXIT_CODE ? 'restart' : (code !== null && code > 0) ? 'error' : 'stop';
-  }
-
-  /** Exit with a restart exit code */
-  static exitWithRestart(): void {
-    ShutdownManager.shutdown('SIGTERM', this.#RESTART_EXIT_CODE);
-  }
-
-  /** Listen for restart signals */
-  static listenForSignals(): void {
-    ShutdownManager.disableInterrupt();
-    process.on('message', event => {
-      switch (event) {
-        case 'WATCH_RESTART': this.exitWithRestart(); break;
-        case 'WATCH_SHUTDOWN': ShutdownManager.shutdown('SIGTERM', 0); break;
-      }
-    });
-  }
-
-  /** Trigger a watch signal signal to a subprocess */
-  static triggerSignal(subprocess: ChildProcess, signal: 'WATCH_RESTART' | 'WATCH_SHUTDOWN'): void {
-    subprocess.connected && subprocess.send?.(signal);
-  }
 
   /** Compute the delay before restarting */
   static computeRestartDelay(state: RetryRunState, config: RetryRunConfig): number {
@@ -89,7 +59,7 @@ export class WatchUtil {
 
       state.result = await run({ ...state, signal: ShutdownManager.signal }).catch(() => 'error' as const);
       switch (state.result) {
-        case 'stop': break outer;
+        case 'shutdown': break outer;
         case 'error': state.errorIterations += 1; break;
         case 'restart': {
           state.startTime = Date.now();
