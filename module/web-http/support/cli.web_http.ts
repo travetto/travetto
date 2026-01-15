@@ -35,7 +35,8 @@ export class WebHttpCommand implements CliCommandShape {
       const result = this.killConflict ? await NetUtil.freePortOnConflict(err) : undefined;
       if (result?.processId) {
         console.warn('Killed process owning port', result);
-        process.exit(1);
+        process.exitCode = 1; // Indicate error, restart will use if in that mode
+        return;
       }
       throw err;
     }

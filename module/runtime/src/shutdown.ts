@@ -88,13 +88,12 @@ export class ShutdownManager {
       console.debug('Shutdown completed', ...context);
     } else {
       console.warn('Shutdown timed out', ...context);
+      process.exit(1); // Indicate error on timeout
     }
 
     if (Env.TRV_SHUTDOWN_STDOUT_WAIT.isSet) {
       const stdoutDrain = TimeUtil.fromValue(Env.TRV_SHUTDOWN_STDOUT_WAIT.value)!;
       await Util.blockingTimeout(stdoutDrain);
     }
-
-    process.exit();
   }
 }

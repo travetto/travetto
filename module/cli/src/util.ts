@@ -65,6 +65,7 @@ export class CliUtil {
     );
 
     await ShutdownManager.shutdown();
+    process.exit();
   }
 
   /**
