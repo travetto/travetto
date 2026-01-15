@@ -1,5 +1,5 @@
 // @trv-no-transform
-import { getManifestContext, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import { getManifestContext, ManifestUtil } from '@travetto/manifest';
 
 import { Log } from '../src/log.ts';
 import { CompilerManager } from '../src/server/manager.ts';
@@ -35,13 +35,6 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
 
   Log.initLevel('error');
   Log.root = ctx.workspace.path;
-
-
-  if (PackageUtil.readPackage(`${ctx.workspace.path}/package.json`).type !== 'module') {
-    console.error('ERROR: Only ESM modules are supported, package.json must be of type module');
-    process.exitCode = 1;
-    return;
-  }
 
   switch (operation) {
     case undefined:
