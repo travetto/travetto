@@ -29,16 +29,15 @@ export class CliUtil {
    * Run a command as restartable, linking into self
    */
   static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<void> {
-    if (cmd.restartOnChange !== true && !Env.TRV_RESTART_TARGET.isTrue) {
+    if (Env.TRV_RESTART_TARGET.isTrue) {
+      Env.TRV_RESTART_TARGET.clear();
+      ShutdownManager.disableInterrupt();
+      return;
+    } else if (cmd.restartOnChange !== true) {
       return; // Not restarting, run normal
     }
 
     ShutdownManager.disableInterrupt();
-
-    if (Env.TRV_RESTART_TARGET.isTrue) {
-      Env.TRV_RESTART_TARGET.clear();
-      return;
-    }
 
     let child: ChildProcess | undefined;
     void WatchUtil.watchCompilerEvents('file', () => child && ShutdownManager.shutdownChild(child, 'restart'));
