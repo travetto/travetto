@@ -54,11 +54,6 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
     readPackage(resolve(`${moduleName}/package.json`)) :
     findPackage(root, pkg => !!pkg) ?? workspace;
 
-  if (workspace.type !== 'module') {
-    console.error('ERROR: Only ESM modules are supported, package.json must be of type module');
-    process.exit(1);
-  }
-
   return {
     workspace: {
       name: workspace.name ?? 'untitled',

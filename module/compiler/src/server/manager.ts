@@ -30,7 +30,7 @@ export class CompilerManager {
       env: {
         ...process.env,
         TRV_COMPILER_WATCH: String(watching),
-        TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
+        TRV_MANIFEST: CommonUtil.resolveCompiledOutput(ctx, ctx.workspace.name),
       },
       detached: true,
       stdio: ['pipe', 1, 2, 'ipc'],

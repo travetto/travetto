@@ -1,5 +1,5 @@
 // @trv-no-transform
-import { getManifestContext, ManifestUtil } from '@travetto/manifest';
+import { getManifestContext, ManifestUtil, PackageUtil } from '@travetto/manifest';
 
 import { Log } from '../src/log.ts';
 import { CompilerManager } from '../src/server/manager.ts';
@@ -36,6 +36,13 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
   Log.initLevel('error');
   Log.root = ctx.workspace.path;
 
+
+  if (PackageUtil.readPackage(`${ctx.workspace.path}/package.json`).type !== 'module') {
+    console.error('ERROR: Only ESM modules are supported, package.json must be of type module');
+    process.exitCode = 1;
+    return;
+  }
+
   switch (operation) {
     case undefined:
     case 'help': console.log(HELP); break;
@@ -43,10 +50,7 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
     case 'watch': return CompilerManager.compile(ctx, client, { watch: true });
     case 'build': return CompilerManager.compile(ctx, client, { watch: false });
     case 'restart': return CompilerManager.compile(ctx, client, { watch: true, forceRestart: true });
-    case 'info': {
-      const info = await client.info();
-      return CommonUtil.writeStdout(2, info);
-    }
+    case 'info': return CommonUtil.writeStdout(2, await client.info());
     case 'event': {
       if (!EventUtil.isComplilerEventType(args[0])) {
         throw new Error(`Unknown event type: ${args[0]}`);
@@ -86,12 +90,15 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
     case 'exec': {
       await CompilerManager.compileIfNecessary(ctx, client);
       Log.initLevel('none');
-      process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
-      const importTarget = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', args[0]);
+      process.env.TRV_MANIFEST = CommonUtil.resolveCompiledOutput(ctx, ctx.main.name); // Setup for running
+      const importTarget = CommonUtil.resolveCompiledOutput(ctx, args[0]);
       process.argv = [process.argv0, importTarget, ...args.slice(1)];
       // Return function to run import on a module
       return import(importTarget);
     }
-    default: console.error(`\nUnknown trvc operation: ${operation}\n${HELP}`);
+    default: {
+      process.exitCode = 1;
+      console.error(`\nUnknown trvc operation: ${operation}\n${HELP}`);
+    }
   }
 }

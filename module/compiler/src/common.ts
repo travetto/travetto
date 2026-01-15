@@ -73,6 +73,13 @@ export class CommonUtil {
   }
 
   /**
+   * Resolve compiler output path
+   */
+  static resolveCompiledOutput(ctx: ManifestContext, ...args: string[]): string {
+    return path.resolve(ctx.workspace.path, ctx.build.outputFolder, 'node_modules', ...args);
+  }
+
+  /**
    * Write to stdout with backpressure handling
    */
   static async writeStdout(level: number, data: unknown): Promise<void> {
