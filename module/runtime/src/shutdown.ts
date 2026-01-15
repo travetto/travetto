@@ -68,9 +68,9 @@ export class ShutdownManager {
   static exitCodeForReason(reason: ShutdownReason | number): number {
     switch (reason) {
       case 'restart': return this.#restartExitCode;
-      case 'shutdown': return 0;
       case 'error': return 1;
-      case 'exit': return 0;
+      case 'exit':
+      case 'shutdown': return 0;
       default: return reason;
     }
   }

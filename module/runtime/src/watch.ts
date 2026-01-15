@@ -59,6 +59,7 @@ export class WatchUtil {
 
       state.result = await run({ ...state, signal: ShutdownManager.signal }).catch(() => 'error' as const);
       switch (state.result) {
+        case 'exit':
         case 'shutdown': break outer;
         case 'error': state.errorIterations += 1; break;
         case 'restart': {
