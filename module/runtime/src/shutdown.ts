@@ -5,7 +5,7 @@ import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
 
 type Handler = (event: Event) => unknown;
-export type ShutdownReason = number | 'shutdown' | 'restart' | 'error' | 'exit';
+export type ShutdownReason = 'shutdown' | 'restart' | 'error' | 'exit';
 export type ShutdownSignal = 'SIGINT' | 'SIGTERM' | 'SIGUSR2' | string | undefined;
 export type ShutdownEvent = { signal?: ShutdownSignal, reason?: ShutdownReason, type: 'shutdown' };
 
@@ -61,12 +61,12 @@ export class ShutdownManager {
   }
 
   /** Convert exit code to a reason string  */
-  static reasonForExitCode(code: number): Exclude<ShutdownReason, number> {
+  static reasonForExitCode(code: number): ShutdownReason {
     return (code === this.#restartExitCode) ? 'restart' : (code === 0) ? 'shutdown' : 'error';
   }
 
   /** Trigger a watch signal signal to a subprocess */
-  static async shutdownChild(subprocess: ChildProcess, reason: ShutdownReason): Promise<number> {
+  static async shutdownChild(subprocess: ChildProcess, reason: ShutdownReason | number): Promise<number> {
     const result = new Promise<void>(resolve => { subprocess.once('close', () => resolve()); });
     subprocess.send!({ source: 'SIGINT', reason, type: 'shutdown' });
     await result;

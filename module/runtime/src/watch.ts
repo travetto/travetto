@@ -10,7 +10,7 @@ type RetryRunState = {
   iteration: number;
   startTime: number;
   errorIterations: number;
-  result?: Exclude<ShutdownReason, number>;
+  result?: ShutdownReason;
 };
 
 type RetryRunConfig = {
