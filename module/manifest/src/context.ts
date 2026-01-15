@@ -46,6 +46,10 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
  */
 export function getManifestContext(root: string = process.cwd()): ManifestContext {
   const workspace = findPackage(root, pkg => !!pkg?.workspaces || !!pkg?.travetto?.build?.isolated);
+  if (workspace.type !== 'module') {
+    throw new Error('Only ESM modules are supported, package.json must be of type module');
+  }
+
   const build = workspace.travetto?.build ?? {};
   const resolve = createRequire(path.resolve(workspace.path, 'node_modules')).resolve.bind(null);
   const wsPrefix = `${workspace.path}/`;
@@ -53,10 +57,6 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
   const modulePkg = (!!workspace.workspaces && moduleName) ?
     readPackage(resolve(`${moduleName}/package.json`)) :
     findPackage(root, pkg => !!pkg) ?? workspace;
-
-  if (workspace.type !== 'module') {
-    throw new Error('Only ESM modules are supported, package.json must be of type module');
-  }
 
   return {
     workspace: {
