@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-memory",
-  "version": "7.0.6",
+  "version": "7.1.0",
   "type": "module",
   "description": "Memory backing for the travetto model module.",
   "keywords": [
@@ -26,14 +26,14 @@
     "directory": "module/model-memory"
   },
   "dependencies": {
-    "@travetto/config": "^7.0.6",
-    "@travetto/di": "^7.0.6",
-    "@travetto/model": "^7.0.6",
-    "@travetto/schema": "^7.0.6"
+    "@travetto/config": "^7.1.0",
+    "@travetto/di": "^7.1.0",
+    "@travetto/model": "^7.1.0",
+    "@travetto/schema": "^7.1.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.8",
-    "@travetto/test": "^7.0.6"
+    "@travetto/cli": "^7.1.0",
+    "@travetto/test": "^7.1.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

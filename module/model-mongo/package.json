@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-mongo",
-  "version": "7.0.6",
+  "version": "7.1.0",
   "type": "module",
   "description": "Mongo backing for the travetto model module.",
   "keywords": [
@@ -26,13 +26,13 @@
     "directory": "module/model-mongo"
   },
   "dependencies": {
-    "@travetto/config": "^7.0.6",
-    "@travetto/model": "^7.0.6",
-    "@travetto/model-query": "^7.0.6",
+    "@travetto/config": "^7.1.0",
+    "@travetto/model": "^7.1.0",
+    "@travetto/model-query": "^7.1.0",
     "mongodb": "^7.0.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.0.8"
+    "@travetto/cli": "^7.1.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
