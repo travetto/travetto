@@ -43,7 +43,10 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
     case 'watch': return CompilerManager.compile(ctx, client, { watch: true });
     case 'build': return CompilerManager.compile(ctx, client, { watch: false });
     case 'restart': return CompilerManager.compile(ctx, client, { watch: true, forceRestart: true });
-    case 'info': return CommonUtil.writeStdout(2, await client.info());
+    case 'info': {
+      const info = await client.info();
+      return CommonUtil.writeStdout(2, info);
+    }
     case 'event': {
       if (!EventUtil.isComplilerEventType(args[0])) {
         throw new Error(`Unknown event type: ${args[0]}`);
@@ -83,15 +86,12 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
     case 'exec': {
       await CompilerManager.compileIfNecessary(ctx, client);
       Log.initLevel('none');
-      process.env.TRV_MANIFEST = CommonUtil.resolveCompiledOutput(ctx, ctx.main.name); // Setup for running
-      const importTarget = CommonUtil.resolveCompiledOutput(ctx, args[0]);
+      process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
+      const importTarget = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', args[0]);
       process.argv = [process.argv0, importTarget, ...args.slice(1)];
       // Return function to run import on a module
       return import(importTarget);
     }
-    default: {
-      process.exitCode = 1;
-      console.error(`\nUnknown trvc operation: ${operation}\n${HELP}`);
-    }
+    default: console.error(`\nUnknown trvc operation: ${operation}\n${HELP}`);
   }
 }
