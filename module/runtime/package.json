@@ -1,6 +1,6 @@
 {
   "name": "@travetto/runtime",
-  "version": "7.1.0",
+  "version": "7.1.1",
   "type": "module",
   "description": "Runtime for travetto applications.",
   "keywords": [
