@@ -65,6 +65,16 @@ export class ShutdownManager {
     return (code === this.#restartExitCode) ? 'restart' : (code === 0) ? 'shutdown' : 'error';
   }
 
+  static exitCodeForReason(reason: ShutdownReason | number): number {
+    switch (reason) {
+      case 'restart': return this.#restartExitCode;
+      case 'shutdown': return 0;
+      case 'error': return 1;
+      case 'exit': return 0;
+      default: return reason;
+    }
+  }
+
   /** Trigger a watch signal signal to a subprocess */
   static async shutdownChild(subprocess: ChildProcess, reason: ShutdownReason | number): Promise<number> {
     const result = new Promise<void>(resolve => { subprocess.once('close', () => resolve()); });
@@ -81,7 +91,8 @@ export class ShutdownManager {
 
     if (this.#shouldIgnoreInterrupt && source === 'SIGINT') {
       return;
-    } else if (this.#controller.signal.aborted) {
+    }
+    if (this.#controller.signal.aborted) {
       if (this.#startedAt && (Date.now() - this.#startedAt) > 500) {
         console.warn('Shutdown already in progress, exiting immediately', { source });
         process.exit(0); // Quit immediately
@@ -110,14 +121,8 @@ export class ShutdownManager {
     })));
 
     const winner = await Promise.race([timeoutTasks, allPendingTasks]);
-
-    switch (reason) {
-      case 'restart': process.exitCode = this.#restartExitCode; break;
-      case 'error': process.exitCode = 1; break;
-      case 'shutdown': process.exitCode = 0; break;
-      case 'exit': process.exitCode = 0; break;
-      case undefined: break;
-      default: process.exitCode = reason;
+    if (reason !== undefined) {
+      process.exitCode = this.exitCodeForReason(reason);
     }
 
     if (winner !== this) {
