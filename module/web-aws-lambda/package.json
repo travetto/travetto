@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-aws-lambda",
-  "version": "7.1.1",
+  "version": "7.1.2",
   "type": "module",
   "description": "Web APIs entry point support for AWS Lambdas.",
   "keywords": [
@@ -26,13 +26,13 @@
     "directory": "module/web-aws-lambda"
   },
   "dependencies": {
-    "@travetto/web": "^7.1.1",
+    "@travetto/web": "^7.1.2",
     "@types/aws-lambda": "^8.10.159"
   },
   "peerDependencies": {
-    "@travetto/cli": "^7.1.1",
-    "@travetto/pack": "^7.1.1",
-    "@travetto/test": "^7.1.1"
+    "@travetto/cli": "^7.1.2",
+    "@travetto/pack": "^7.1.2",
+    "@travetto/test": "^7.1.2"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-rpc",
-  "version": "7.1.1",
+  "version": "7.1.2",
   "type": "module",
   "description": "RPC support for a Web Application",
   "keywords": [
@@ -27,9 +27,9 @@
     "directory": "module/web-rpc"
   },
   "dependencies": {
-    "@travetto/config": "^7.1.1",
-    "@travetto/schema": "^7.1.1",
-    "@travetto/web": "^7.1.1"
+    "@travetto/config": "^7.1.2",
+    "@travetto/schema": "^7.1.2",
+    "@travetto/web": "^7.1.2"
   },
   "travetto": {
     "displayName": "Web RPC Support"
