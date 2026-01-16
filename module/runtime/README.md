@@ -108,11 +108,6 @@ interface EnvData {
      * @default 2s
      */
     TRV_SHUTDOWN_WAIT: TimeSpan | number;
-    /** 
-     * The time to wait for stdout to drain during shutdown
-     * @default 0s
-     */
-    TRV_SHUTDOWN_STDOUT_WAIT: TimeSpan | number;
     /**
      * The desired runtime module 
      */
@@ -353,7 +348,7 @@ As a registered shutdown handler, you can do.
 import { ShutdownManager } from '@travetto/runtime';
 
 export function registerShutdownHandler() {
-  ShutdownManager.onGracefulShutdown(async () => {
+  ShutdownManager.signal.addEventListener('abort', () => {
     // Do important work, the framework will wait until all async
     //   operations are completed before finishing shutdown
   });
