@@ -1,4 +1,4 @@
-import { ConsoleManager, Runtime, ShutdownManager } from '@travetto/runtime';
+import { ConsoleManager, Runtime, ShutdownManager, Util } from '@travetto/runtime';
 
 import { HelpUtil } from './help.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
@@ -63,6 +63,9 @@ export class ExecutionManager {
    */
   static async run(argv: string[]): Promise<void> {
     try {
+      // Wait 50ms to allow stdout to flush on shutdown
+      ShutdownManager.signal.addEventListener('abort', () => Util.blockingTimeout(50));
+
       const { cmd, args, help } = CliParseUtil.getArgs(argv);
       if (!cmd) {
         console.info!(await HelpUtil.renderAllHelp());

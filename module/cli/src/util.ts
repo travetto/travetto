@@ -31,7 +31,7 @@ export class CliUtil {
   static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<void> {
     if (Env.TRV_RESTART_TARGET.isTrue) {
       Env.TRV_RESTART_TARGET.clear();
-      WatchUtil.listenForSignals();
+      ShutdownManager.disableInterrupt();
       return;
     } else if (cmd.restartOnChange !== true) {
       return; // Not restarting, run normal
@@ -40,8 +40,8 @@ export class CliUtil {
     ShutdownManager.disableInterrupt();
 
     let child: ChildProcess | undefined;
-    void WatchUtil.watchCompilerEvents('file', () => child && WatchUtil.triggerSignal(child, 'WATCH_RESTART'));
-    process.on('SIGINT', () => child && WatchUtil.triggerSignal(child, 'WATCH_SHUTDOWN'));
+    void WatchUtil.watchCompilerEvents('file', () => ShutdownManager.shutdownChild(child!, { signal: 'SIGTERM', reason: 'restart', exit: true }));
+    process.on('SIGINT', () => ShutdownManager.shutdownChild(child!, { signal: 'SIGTERM', reason: 'quit', exit: true }));
 
     const env = { ...process.env, ...Env.TRV_RESTART_TARGET.export(true) };
 
@@ -49,7 +49,7 @@ export class CliUtil {
       async () => {
         child = spawn(process.argv0, process.argv.slice(1), { env, stdio: ['pipe', 1, 2, 'ipc'] });
         const { code } = await ExecUtil.deferToSubprocess(child);
-        return WatchUtil.exitCodeToResult(code);
+        return ShutdownManager.reasonForExitCode(code);
       },
       {
         maxRetries: 5,
@@ -64,8 +64,7 @@ export class CliUtil {
       }
     );
 
-    await ShutdownManager.shutdown();
-    process.exit();
+    await ShutdownManager.shutdown({ reason: 'quit', exit: true });
   }
 
   /**

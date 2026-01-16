@@ -1,18 +1,16 @@
-import type { ChildProcess } from 'node:child_process';
-
 import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler';
 
 import { AppError } from './error.ts';
 import { Util } from './util.ts';
 import { RuntimeIndex } from './manifest-index.ts';
-import { ShutdownManager } from './shutdown.ts';
+import { ShutdownManager, type ShutdownReason } from './shutdown.ts';
 import { castTo } from './types.ts';
 
 type RetryRunState = {
   iteration: number;
   startTime: number;
   errorIterations: number;
-  result?: 'error' | 'restart' | 'stop';
+  result?: ShutdownReason;
 };
 
 type RetryRunConfig = {
@@ -27,34 +25,6 @@ type RetryRunConfig = {
  */
 export class WatchUtil {
 
-  static #RESTART_EXIT_CODE = 200;
-
-  /** Convert exit code to a result type  */
-  static exitCodeToResult(code: number): RetryRunState['result'] {
-    return code === this.#RESTART_EXIT_CODE ? 'restart' : (code !== null && code > 0) ? 'error' : 'stop';
-  }
-
-  /** Exit with a restart exit code */
-  static exitWithRestart(): void {
-    ShutdownManager.shutdown('SIGTERM', this.#RESTART_EXIT_CODE);
-  }
-
-  /** Listen for restart signals */
-  static listenForSignals(): void {
-    ShutdownManager.disableInterrupt();
-    process.on('message', event => {
-      switch (event) {
-        case 'WATCH_RESTART': this.exitWithRestart(); break;
-        case 'WATCH_SHUTDOWN': ShutdownManager.shutdown('SIGTERM', 0); break;
-      }
-    });
-  }
-
-  /** Trigger a watch signal signal to a subprocess */
-  static triggerSignal(subprocess: ChildProcess, signal: 'WATCH_RESTART' | 'WATCH_SHUTDOWN'): void {
-    subprocess.connected && subprocess.send?.(signal);
-  }
-
   /** Compute the delay before restarting */
   static computeRestartDelay(state: RetryRunState, config: RetryRunConfig): number {
     return state.result === 'error'
@@ -65,7 +35,7 @@ export class WatchUtil {
   /**
    * Run with restart capability
    */
-  static async runWithRetry(run: (state: RetryRunState & { signal: AbortSignal }) => Promise<RetryRunState['result']>, options?: Partial<RetryRunConfig>): Promise<void> {
+  static async runWithRetry(run: (state: RetryRunState & { signal: AbortSignal }) => Promise<ShutdownReason>, options?: Partial<RetryRunConfig>): Promise<void> {
     let retryExhausted = false;
 
     const state: RetryRunState = {
@@ -89,7 +59,7 @@ export class WatchUtil {
 
       state.result = await run({ ...state, signal: ShutdownManager.signal }).catch(() => 'error' as const);
       switch (state.result) {
-        case 'stop': break outer;
+        case 'quit': break outer;
         case 'error': state.errorIterations += 1; break;
         case 'restart': {
           state.startTime = Date.now();
@@ -114,7 +84,12 @@ export class WatchUtil {
     options?: Partial<RetryRunConfig>,
   ): Promise<void> {
     const { CompilerClient } = await import('@travetto/compiler/src/server/client.ts');
-    const client = new CompilerClient(RuntimeIndex.manifest, console);
+    const client = new CompilerClient(RuntimeIndex.manifest, {
+      debug: (...args: unknown[]): void => console.debug(...args),
+      info: (...args: unknown[]): void => console.info(...args),
+      warn: (...args: unknown[]): void => console.warn(...args),
+      error: (...args: unknown[]): void => console.error(...args),
+    });
 
     return this.runWithRetry(async ({ signal }) => {
       await client.waitForState(['compile-end', 'watch-start'], undefined, signal);

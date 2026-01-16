@@ -122,11 +122,6 @@ The functionality we support for testing and retrieving environment information 
    */</span>
   <span class="token constant">TRV_SHUTDOWN_WAIT</span><span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   <span class="token comment">/**
-   * The time to wait for stdout to drain during shutdown
-   * @default 0s
-   */</span>
-  <span class="token constant">TRV_SHUTDOWN_STDOUT_WAIT</span><span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
    * The desired runtime module
    */</span>
   <span class="token constant">TRV_MODULE</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
@@ -396,7 +391,7 @@ As a registered shutdown handler, you can do.
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShutdownManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">registerShutdownHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  ShutdownManager<span class="token punctuation">.</span><span class="token function">onGracefulShutdown</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+  ShutdownManager<span class="token punctuation">.</span>signal<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'abort'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Do important work, the framework will wait until all async</span>
     <span class="token comment">//   operations are completed before finishing shutdown</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>

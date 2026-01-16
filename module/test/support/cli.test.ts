@@ -36,7 +36,6 @@ export class TestCommand implements CliCommandShape {
     Env.DEBUG.set(false);
     Env.TRV_LOG_PLAIN.set(true);
     Env.TRV_LOG_TIME.clear();
-    Env.TRV_SHUTDOWN_STDOUT_WAIT.set(50);
   }
 
   async preValidate(): Promise<void> {

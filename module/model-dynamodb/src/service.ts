@@ -114,7 +114,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async postConstruct(): Promise<void> {
     this.client = new DynamoDB({ ...this.config.client });
     await ModelStorageUtil.storageInitialization(this);
-    ShutdownManager.onGracefulShutdown(async () => this.client.destroy());
+    ShutdownManager.signal.addEventListener('abort', async () => this.client.destroy());
   }
 
   // Storage
