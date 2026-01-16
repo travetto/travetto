@@ -4,26 +4,26 @@ import { Env } from './env.ts';
 import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
 
+const MAPPING = [['restart', 200], ['error', 1], ['quit', 0]] as const;
+export type ShutdownReason = typeof MAPPING[number][0];
+
+const REASON_TO_CODE = new Map<ShutdownReason, number>(MAPPING);
+const CODE_TO_REASON = new Map<number, ShutdownReason>(MAPPING.map(([k, v]) => [v, k]));
+
 type Handler = (event: Event) => unknown;
-export type ShutdownReason = 'restart' | 'error' | 'quit';
 type ShutdownSignal = 'SIGINT' | 'SIGTERM' | 'SIGUSR2' | string | undefined;
 type ShutdownEvent = { signal?: ShutdownSignal, reason?: ShutdownReason | number, exit?: boolean };
 
 const isShutdownEvent = (event: unknown): event is ShutdownEvent =>
   typeof event === 'object' && event !== null && 'type' in event && event.type === 'shutdown';
 
-const RESTART_EXIT_CODE = 200;
-
-const REASON_TO_CODE = new Map<ShutdownReason, number>([
-  ['restart', RESTART_EXIT_CODE],
-  ['error', 1],
-  ['quit', 0],
-]);
-const CODE_TO_REASON = new Map<number, ShutdownReason>([
-  [RESTART_EXIT_CODE, 'restart'],
-  [1, 'error'],
-  [0, 'quit'],
-]);
+const wrapped = async (handler: Handler): Promise<void> => {
+  try {
+    await handler(new Event('abort'));
+  } catch (err) {
+    console.error('Error during shutdown handler', err);
+  }
+};
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
@@ -63,32 +63,6 @@ export class ShutdownManager {
     subprocess?.send!({ type: 'shutdown', ...config });
   }
 
-  /** Wait for pending tasks to complete */
-  static async #runShutdown(event?: ShutdownEvent): Promise<void> {
-    const context = { ...event, pid: process.pid };
-
-    this.#controller.abort('Shutdown started');
-    console.debug('Shutdown started', context, { pending: this.#registered.size });
-    await Util.queueMacroTask();
-
-    const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
-    const allPendingTasks = Promise.all([...this.#registered].map(async handler => {
-      try {
-        await handler(null!);
-      } catch (err) {
-        console.warn('Error during shutdown handler', err,);
-      }
-    }));
-    const timeoutTasks = Util.nonBlockingTimeout(timeout).then(() => this);
-    const winner = await Promise.race([timeoutTasks, allPendingTasks]);
-
-    if (winner !== this) {
-      console.debug('Shutdown completed', context);
-    } else {
-      console.warn('Shutdown timed out', context);
-    }
-  }
-
   /**
    * Shutdown the application gracefully
    */
@@ -112,7 +86,22 @@ export class ShutdownManager {
       process.exitCode = (typeof reason === 'string' ? REASON_TO_CODE.get(reason) : reason);
     }
 
-    await this.#runShutdown(event);
+    const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
+    const context = { ...event, pid: process.pid, timeout, pending: this.#registered.size };
+
+    this.#controller.abort('Shutdown started');
+    console.debug('Shutdown started', context);
+
+    const winner = await Promise.race([
+      Util.nonBlockingTimeout(timeout).then(() => this),
+      Promise.all([...this.#registered].map(wrapped))
+    ]);
+
+    if (winner !== this) {
+      console.debug('Shutdown completed', context);
+    } else {
+      console.warn('Shutdown timed out', context);
+    }
 
     if (event?.exit) {
       process.exit();
