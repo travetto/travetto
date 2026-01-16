@@ -59,14 +59,8 @@ export class ShutdownManager {
   }
 
   /** Trigger a watch signal signal to a subprocess */
-  static async shutdownChild(subprocess: ChildProcess, config?: ShutdownEvent): Promise<number> {
-    if (!subprocess) {
-      return 0;
-    }
-    const result = new Promise<void>(resolve => subprocess.once('close', () => resolve()));
-    subprocess.send!({ type: 'shutdown', ...config });
-    await result;
-    return subprocess.exitCode ?? 0;
+  static async shutdownChild(subprocess: ChildProcess, config?: ShutdownEvent): Promise<void> {
+    subprocess?.send!({ type: 'shutdown', ...config });
   }
 
   /** Wait for pending tasks to complete */
