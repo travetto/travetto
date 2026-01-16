@@ -14,4 +14,4 @@ if (process.env.npm_lifecycle_script?.includes('trv-scaffold')) { // Is npx  run
 }
 
 const { invoke } = await import('@travetto/compiler/support/invoke.ts');
-await invoke('exec', ['@travetto/cli/support/entry.trv.js', 'scaffold', '-c', current, ...process.argv.slice(2)]);
+await invoke('exec', ['@travetto/cli/support/entry.trv.ts', 'scaffold', '-c', current, ...process.argv.slice(2)]);

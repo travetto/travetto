@@ -40,8 +40,8 @@ export class CliUtil {
     ShutdownManager.disableInterrupt();
 
     let child: ChildProcess | undefined;
-    void WatchUtil.watchCompilerEvents('file', () => ShutdownManager.shutdownChild(child!, { signal: 'SIGTERM', reason: 'restart', exit: true }));
-    process.on('SIGINT', () => ShutdownManager.shutdownChild(child!, { signal: 'SIGTERM', reason: 'quit', exit: true }));
+    void WatchUtil.watchCompilerEvents('file', () => ShutdownManager.shutdownChild(child!, { reason: 'restart', mode: 'exit' }));
+    process.on('SIGINT', () => ShutdownManager.shutdownChild(child!, { mode: 'exit' }));
 
     const env = { ...process.env, ...Env.TRV_RESTART_TARGET.export(true) };
 
@@ -64,7 +64,7 @@ export class CliUtil {
       }
     );
 
-    await ShutdownManager.shutdown({ reason: 'quit', exit: true });
+    await ShutdownManager.shutdown({ mode: 'exit' });
   }
 
   /**
