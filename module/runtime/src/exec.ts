@@ -6,8 +6,6 @@ import { castTo } from './types.ts';
 
 const ResultSymbol = Symbol();
 
-type ExecOptions<T extends boolean = boolean> = { catch?: boolean, binary?: T };
-
 /**
  * Result of an execution
  */
@@ -50,9 +48,9 @@ export class ExecUtil {
    * @param options The options to use to enhance the process
    */
   static getResult(subProcess: ChildProcess): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: ExecOptions<false>): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: ExecOptions<true>): Promise<ExecutionResult<Buffer>>;
-  static getResult<T extends string | Buffer>(subProcess: ChildProcess, options: ExecOptions = {}): Promise<ExecutionResult<T>> {
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
+  static getResult<T extends string | Buffer>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
     const typed: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
     const result = typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];

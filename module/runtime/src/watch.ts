@@ -85,10 +85,10 @@ export class WatchUtil {
   ): Promise<void> {
     const { CompilerClient } = await import('@travetto/compiler/src/server/client.ts');
     const client = new CompilerClient(RuntimeIndex.manifest, {
-      debug: (...args): void => console.debug(...args),
-      info: (...args): void => console.info(...args),
-      warn: (...args): void => console.warn(...args),
-      error: (...args): void => console.error(...args),
+      debug: (...args: unknown[]): void => console.debug(...args),
+      info: (...args: unknown[]): void => console.info(...args),
+      warn: (...args: unknown[]): void => console.warn(...args),
+      error: (...args: unknown[]): void => console.error(...args),
     });
 
     return this.runWithRetry(async ({ signal }) => {
