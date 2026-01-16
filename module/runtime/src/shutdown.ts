@@ -29,46 +29,28 @@ const CODE_TO_REASON = new Map<number, ShutdownReason>([
  * Shutdown manager, allowing for listening for graceful shutdowns
  */
 export class ShutdownManager {
-
   static #shouldIgnoreInterrupt = false;
-  static #registered = new Map<Handler, Handler>();
-  static #pending: Function[] = [];
+  static #registered = new Set<Handler>();
   static #controller = new AbortController();
-  static #startedAt: number = 0;
-  static #addListener = this.#controller.signal.addEventListener.bind(this.#controller.signal);
-  static #removeListener = this.#controller.signal.removeEventListener.bind(this.#controller.signal);
 
   static {
-    this.#controller.signal.addEventListener = (type: 'abort', listener: Handler): void => this.onGracefulShutdown(listener);
-    this.#controller.signal.removeEventListener = (type: 'abort', listener: Handler): void => {
-      this.#removeListener(type, this.#registered.get(listener) ?? listener);
-    };
-    process.on('message', event => {
-      isShutdownEvent(event) && this.shutdown(event);
-    });
+    this.#controller.signal.addEventListener = (_: 'abort', listener: Handler): void => { this.#registered.add(listener); };
+    this.#controller.signal.removeEventListener = (_: 'abort', listener: Handler): void => { this.#registered.delete(listener); };
+    process
+      .on('message', event => { isShutdownEvent(event) && this.shutdown(event); })
+      .on('SIGINT', () => this.shutdown({ signal: 'SIGINT' }))
+      .on('SIGUSR2', () => this.shutdown({ signal: 'SIGUSR2' }))
+      .on('SIGTERM', () => this.shutdown({ signal: 'SIGTERM' }));
   }
 
   static get signal(): AbortSignal {
     return this.#controller.signal;
   }
 
+  /** Disable SIGINT interrupt handling */
   static disableInterrupt(): typeof ShutdownManager {
     this.#shouldIgnoreInterrupt = true;
     return this;
-  }
-
-  /** Listen for graceful shutdown events */
-  static onGracefulShutdown(listener: Handler): void {
-    if (!this.#registered.size) {
-      process
-        .on('SIGINT', () => this.shutdown({ signal: 'SIGINT' }))
-        .on('SIGUSR2', () => this.shutdown({ signal: 'SIGUSR2' }))
-        .on('SIGTERM', () => this.shutdown({ signal: 'SIGTERM' }));
-    }
-
-    const wrappedListener: Handler = event => { this.#pending.push(() => listener(event)); };
-    this.#registered.set(listener, wrappedListener);
-    return this.#addListener('abort', wrappedListener);
   }
 
   /** Convert exit code to a reason string  */
@@ -88,19 +70,24 @@ export class ShutdownManager {
   }
 
   /** Wait for pending tasks to complete */
-  static async #waitForPendingTasks(event?: ShutdownEvent): Promise<void> {
+  static async #runShutdown(event?: ShutdownEvent): Promise<void> {
     const context = { ...event, pid: process.pid };
-    const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
-    const timeoutTasks = Util.nonBlockingTimeout(timeout).then(() => this);
 
-    console.debug('Shutdown started', context, { pending: this.#pending.length });
+    this.#controller.abort('Shutdown started');
+    console.debug('Shutdown started', context, { pending: this.#registered.size });
     await Util.queueMacroTask();
 
-    const allPendingTasks = Promise.all(this.#pending.map(fn => Promise.resolve(fn()).catch(err => {
-      console.error('Error during shutdown task', err, context);
-    })));
-
+    const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
+    const allPendingTasks = Promise.all([...this.#registered].map(async handler => {
+      try {
+        await handler(null!);
+      } catch (err) {
+        console.warn('Error during shutdown handler', err,);
+      }
+    }));
+    const timeoutTasks = Util.nonBlockingTimeout(timeout).then(() => this);
     const winner = await Promise.race([timeoutTasks, allPendingTasks]);
+
     if (winner !== this) {
       console.debug('Shutdown completed', context);
     } else {
@@ -108,23 +95,22 @@ export class ShutdownManager {
     }
   }
 
-  /** Begin the shutdown process */
-  static #beginShutdown(event?: ShutdownEvent): void {
-    process.removeAllListeners('message'); // Allow shutdown if anything is still listening
+  /**
+   * Shutdown the application gracefully
+   */
+  static async shutdown(event?: ShutdownEvent): Promise<void> {
+    if ((event?.signal === 'SIGINT' && this.#shouldIgnoreInterrupt) || this.#controller.signal.aborted) {
+      return;
+    }
+
+    process // Allow shutdown if anything is still listening
+      .removeAllListeners('message')
+      .removeAllListeners('SIGINT')
+      .removeAllListeners('SIGTERM')
+      .removeAllListeners('SIGUSR2');
 
     if (event?.signal === 'SIGINT' && process.stdout.isTTY) {
       process.stdout.write('\n');
-    }
-
-    this.#controller.abort('Shutdown started');
-    this.#startedAt = Date.now();
-  }
-
-  /** Complete shutdown after pending tasks completed */
-  static async  #completeShutdown(event?: ShutdownEvent): Promise<void> {
-    if (Env.TRV_SHUTDOWN_STDOUT_WAIT.isSet) {
-      const stdoutDrain = TimeUtil.fromValue(Env.TRV_SHUTDOWN_STDOUT_WAIT.value)!;
-      await Util.blockingTimeout(stdoutDrain);
     }
 
     if (event?.reason !== undefined) {
@@ -132,37 +118,10 @@ export class ShutdownManager {
       process.exitCode = (typeof reason === 'string' ? REASON_TO_CODE.get(reason) : reason);
     }
 
+    await this.#runShutdown(event);
+
     if (event?.exit) {
       process.exit();
     }
-  }
-
-  /** Should we run the shutdown process */
-  static #shouldRunShutdown(event?: ShutdownEvent): boolean {
-    const shutdownAlreadyStarted = this.#startedAt && (Date.now() - this.#startedAt) > 500;
-
-    if (event?.signal === 'SIGINT' && this.#shouldIgnoreInterrupt) {
-      return false;
-    } else if (shutdownAlreadyStarted) {
-      console.warn('Shutdown already in progress, exiting immediately', event);
-      process.exit(0); // Quit immediately
-    } else if (this.#controller.signal.aborted) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Shutdown the application gracefully
-   */
-  static async shutdown(event?: ShutdownEvent): Promise<void> {
-    if (!this.#shouldRunShutdown(event)) {
-      return;
-    }
-
-    this.#beginShutdown(event);
-    await this.#waitForPendingTasks(event);
-    await this.#completeShutdown(event);
   }
 }
