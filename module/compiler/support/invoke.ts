@@ -87,7 +87,7 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
       await CompilerManager.compileIfNecessary(ctx, client);
       Log.initLevel('none');
       process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
-      const importTarget = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', args[0]);
+      const importTarget = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', args[0]).replace(/\.ts$/, '.js');
       process.argv = [process.argv0, importTarget, ...args.slice(1)];
       // Return function to run import on a module
       return import(importTarget);

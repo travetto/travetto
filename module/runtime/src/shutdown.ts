@@ -11,8 +11,7 @@ const REASON_TO_CODE = new Map<ShutdownReason, number>(MAPPING);
 const CODE_TO_REASON = new Map<number, ShutdownReason>(MAPPING.map(([k, v]) => [v, k]));
 
 type Handler = (event: Event) => unknown;
-type ShutdownSignal = 'SIGINT' | 'SIGTERM' | 'SIGUSR2' | string | undefined;
-type ShutdownEvent = { signal?: ShutdownSignal, reason?: ShutdownReason | number, exit?: boolean };
+type ShutdownEvent = { reason?: ShutdownReason, mode?: 'exit' | 'interrupt' };
 
 const isShutdownEvent = (event: unknown): event is ShutdownEvent =>
   typeof event === 'object' && event !== null && 'type' in event && event.type === 'shutdown';
@@ -38,9 +37,8 @@ export class ShutdownManager {
     this.#controller.signal.removeEventListener = (_: 'abort', listener: Handler): void => { this.#registered.delete(listener); };
     process
       .on('message', event => { isShutdownEvent(event) && this.shutdown(event); })
-      .on('SIGINT', () => this.shutdown({ signal: 'SIGINT' }))
-      .on('SIGUSR2', () => this.shutdown({ signal: 'SIGUSR2' }))
-      .on('SIGTERM', () => this.shutdown({ signal: 'SIGTERM' }));
+      .on('SIGINT', () => this.shutdown({ mode: 'interrupt' }))
+      .on('SIGTERM', () => this.shutdown());
   }
 
   static get signal(): AbortSignal {
@@ -66,29 +64,24 @@ export class ShutdownManager {
   /**
    * Shutdown the application gracefully
    */
-  static async shutdown(event?: ShutdownEvent): Promise<void> {
-    if ((event?.signal === 'SIGINT' && this.#shouldIgnoreInterrupt) || this.#controller.signal.aborted) {
+  static async shutdown({ reason = 'quit', mode = undefined }: ShutdownEvent = {}): Promise<void> {
+    if ((mode === 'interrupt' && this.#shouldIgnoreInterrupt) || this.#controller.signal.aborted) {
       return;
     }
 
     process // Allow shutdown if anything is still listening
       .removeAllListeners('message')
       .removeAllListeners('SIGINT')
-      .removeAllListeners('SIGTERM')
-      .removeAllListeners('SIGUSR2');
+      .removeAllListeners('SIGTERM');
 
-    if (event?.signal === 'SIGINT' && process.stdout.isTTY) {
+    if (mode === 'interrupt' && process.stdout.isTTY) {
       process.stdout.write('\n');
     }
 
-    if (event?.reason !== undefined) {
-      const { reason } = event;
-      process.exitCode = (typeof reason === 'string' ? REASON_TO_CODE.get(reason) : reason);
-    }
+    process.exitCode ??= REASON_TO_CODE.get(reason);
 
     const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
-    const context = { ...event, pid: process.pid, timeout, pending: this.#registered.size };
-
+    const context = { reason, mode, pid: process.pid, timeout, pending: this.#registered.size };
     this.#controller.abort('Shutdown started');
     console.debug('Shutdown started', context);
 
@@ -103,7 +96,7 @@ export class ShutdownManager {
       console.warn('Shutdown timed out', context);
     }
 
-    if (event?.exit) {
+    if (mode === 'exit') {
       process.exit();
     }
   }
