@@ -38,7 +38,6 @@ export class ShutdownManager {
     process
       .on('message', event => { isShutdownEvent(event) && this.shutdown(event); })
       .on('SIGINT', () => this.shutdown({ mode: 'interrupt' }))
-      .on('SIGUSR2', () => this.shutdown({ reason: 'restart' }))
       .on('SIGTERM', () => this.shutdown());
   }
 
@@ -73,8 +72,7 @@ export class ShutdownManager {
     process // Allow shutdown if anything is still listening
       .removeAllListeners('message')
       .removeAllListeners('SIGINT')
-      .removeAllListeners('SIGTERM')
-      .removeAllListeners('SIGUSR2');
+      .removeAllListeners('SIGTERM');
 
     if (mode === 'interrupt' && process.stdout.isTTY) {
       process.stdout.write('\n');

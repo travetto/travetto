@@ -6,6 +6,8 @@ import { castTo } from './types.ts';
 
 const ResultSymbol = Symbol();
 
+type ExecOptions<T extends boolean = boolean> = { catch?: boolean, binary?: T };
+
 /**
  * Result of an execution
  */
@@ -40,24 +42,6 @@ type ExecutionBaseResult = Omit<ExecutionResult, 'stdout' | 'stderr'>;
 export class ExecUtil {
 
   /**
-   * Defer control to subprocess execution, mainly used for nested execution
-   */
-  static async deferToSubprocess(child: ChildProcess): Promise<ExecutionResult> {
-    const messageToChild = (value: unknown): void => { child.send(value!); };
-    const messageToParent = (value: unknown): void => { process.send?.(value); };
-
-    try {
-      process.on('message', messageToChild);
-      child.on('message', messageToParent);
-      const result = await this.getResult(child, { catch: true });
-      process.exitCode = child.exitCode;
-      return result;
-    } finally {
-      process.off('message', messageToChild);
-    }
-  }
-
-  /**
    * Take a child process, and some additional options, and produce a promise that
    * represents the entire execution.  On successful completion the promise will resolve, and
    * on failed completion the promise will reject.
@@ -66,9 +50,9 @@ export class ExecUtil {
    * @param options The options to use to enhance the process
    */
   static getResult(subProcess: ChildProcess): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
-  static getResult<T extends string | Buffer>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
+  static getResult(subProcess: ChildProcess, options: ExecOptions<false>): Promise<ExecutionResult<string>>;
+  static getResult(subProcess: ChildProcess, options: ExecOptions<true>): Promise<ExecutionResult<Buffer>>;
+  static getResult<T extends string | Buffer>(subProcess: ChildProcess, options: ExecOptions = {}): Promise<ExecutionResult<T>> {
     const typed: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
     const result = typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];

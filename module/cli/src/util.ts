@@ -41,14 +41,16 @@ export class CliUtil {
 
     let child: ChildProcess | undefined;
     void WatchUtil.watchCompilerEvents('file', () => ShutdownManager.shutdownChild(child!, { reason: 'restart', mode: 'exit' }));
-    process.on('SIGINT', () => ShutdownManager.shutdownChild(child!, { mode: 'exit' }));
+    process
+      .on('SIGINT', () => ShutdownManager.shutdownChild(child!, { mode: 'exit' }))
+      .on('message', msg => child?.send?.(msg!));
 
     const env = { ...process.env, ...Env.TRV_RESTART_TARGET.export(true) };
 
     await WatchUtil.runWithRetry(
       async () => {
         child = spawn(process.argv0, process.argv.slice(1), { env, stdio: ['pipe', 1, 2, 'ipc'] });
-        const { code } = await ExecUtil.deferToSubprocess(child);
+        const { code } = await ExecUtil.getResult(child, { catch: true });
         return ShutdownManager.reasonForExitCode(code);
       },
       {
