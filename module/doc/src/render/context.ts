@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { PackageUtil } from '@travetto/manifest';
-import { castTo, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { castTo, RuntimeIndex } from '@travetto/runtime';
 
 import { type JSXElementByFn, c } from '../jsx.ts';
 import { DocResolveUtil, type ResolvedCode, type ResolvedRef, type ResolvedSnippetLink } from '../util/resolve.ts';
