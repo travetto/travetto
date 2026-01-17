@@ -75,11 +75,11 @@ $ cd todo-project
 
 $ git init .
 
-$ npm init -f
-$ npm install @travetto/{log,web-http,model-mongo,cli}
-$ npm install -D @travetto/{eslint,compiler,test}
+$ ${d.workspaceInitCommand()}
+$ ${d.installCommand('@travetto/{log,web-http,model-mongo,cli}', true)}
+$ ${d.installCommand('@travetto/{eslint,compiler,test}')}
 
-$ npx trv eslint:register
+$ ${d.packageCommand('trv', ['eslint:register'])}
 `} />
     </c.Section>
     <c.Section title='Establishing The Model'>

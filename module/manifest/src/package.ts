@@ -128,6 +128,26 @@ export class PackageUtil {
   }
 
   /**
+   * Get an the command for executing a package level binary
+   */
+  static getPackageCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, args: string[] = []): string {
+    switch (ctx.workspace.manager) {
+      case 'npm':
+      case 'yarn': return `npx ${pkg} ${args.join(' ')}`.trim();
+    }
+  }
+
+  /**
+   * Get an the command for executing a package level binary
+   */
+  static getWorkspaceInitCommand(ctx: { workspace: { manager: NodePackageManager } }): string {
+    switch (ctx.workspace.manager) {
+      case 'npm': return 'npm init -f';
+      case 'yarn': return 'yarn init -y';
+    }
+  }
+
+  /**
    * Get install example for a given package
    */
   static getInstallInstructions(pkg: string): string {
