@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import * as vscode from 'vscode';
-import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
+import type { ChildProcess, SpawnOptions } from 'node:child_process';
 import path from 'node:path';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
@@ -55,7 +55,7 @@ class TestRunnerFeature extends BaseFeature {
       stdio: ['pipe', 'pipe', 2, 'ipc']
     };
 
-    this.#server = spawn('node', [RunUtil.cliFile, 'test:watch', '--format', 'exec', '--mode', 'change'], config)
+    this.#server = Workspace.spawnPackageCommand('trv', ['test:watch', '--format', 'exec', '--mode', 'change'], config)
       .on('message', (event: TestWatchEvent) => {
         switch (event.type) {
           case 'log': return this.log.info('[Log  ]', event.message);

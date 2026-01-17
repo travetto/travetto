@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import timers from 'node:timers/promises';
 import path from 'node:path';
 import fs from 'node:fs';
+import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 
 import { IndexedFile, IndexedModule, type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil } from '@travetto/manifest';
 import type { CompilerStateType } from '@travetto/compiler/src/types.ts';
@@ -166,5 +167,10 @@ export class Workspace {
     }
 
     return this.#importToFile[imp] = resolved;
+  }
+
+  /** Spawn a package command */
+  static spawnPackageCommand(cmd: string, args: string[], config: SpawnOptions = {}): ChildProcess {
+    return spawn('node', [this.workspaceIndex.resolvePackageCommand(cmd), ...args], config);
   }
 }

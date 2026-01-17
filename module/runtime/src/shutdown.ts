@@ -35,10 +35,12 @@ export class ShutdownManager {
   static {
     this.#controller.signal.addEventListener = (_: 'abort', listener: Handler): void => { this.#registered.add(listener); };
     this.#controller.signal.removeEventListener = (_: 'abort', listener: Handler): void => { this.#registered.delete(listener); };
-    process
-      .on('message', event => { isShutdownEvent(event) && this.shutdown(event); })
-      .on('SIGINT', () => this.shutdown({ mode: 'interrupt' }))
-      .on('SIGTERM', () => this.shutdown());
+    try {
+      process
+        .on('message', event => { isShutdownEvent(event) && this.shutdown(event); })
+        .on('SIGINT', () => this.shutdown({ mode: 'interrupt' }))
+        .on('SIGTERM', () => this.shutdown());
+    } catch { }
   }
 
   static get signal(): AbortSignal {

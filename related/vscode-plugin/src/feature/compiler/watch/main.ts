@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ChildProcess, spawn } from 'node:child_process';
+import { ChildProcess } from 'node:child_process';
 
 import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
@@ -72,7 +72,7 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#log.trace('Running Compiler', 'trvc', command, args);
     const starting = command === 'start' || command === 'restart';
     this.#started ||= starting;
-    const subProcess = spawn(process.argv0, ['node_modules/.bin/trvc', command, ...args ?? []], {
+    const subProcess = Workspace.spawnPackageCommand('trvc', [command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
       stdio: ['pipe', starting ? 'ignore' : 'pipe', 'pipe'],

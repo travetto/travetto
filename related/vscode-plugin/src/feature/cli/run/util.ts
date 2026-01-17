@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { spawn } from 'child_process';
 
 import { ExecUtil, Env, JSONUtil } from '@travetto/runtime';
 
@@ -98,7 +97,7 @@ export class CliRunUtil {
 
   /** Spawn CLI  */
   static async #startCli(command: string, args: string[], action: string): Promise<{ stdout: string, stderr: string }> {
-    const subProcess = spawn('node', [RunUtil.cliFile, command, ...args], {
+    const subProcess = Workspace.spawnPackageCommand('trv', [command, ...args], {
       stdio: [0, 'pipe', 'pipe', 'ignore'],
       cwd: Workspace.path,
       env: { ...process.env, ...RunUtil.buildEnv(), ...Env.TRV_QUIET.export(true) }

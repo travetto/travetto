@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { cliTpl } from '@travetto/cli';
-import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Env, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { CommonPackConfig } from '../../src/types.ts';
 import { PackUtil } from './util.ts';
@@ -54,7 +54,7 @@ export class PackOperation {
     const cwd = RuntimeIndex.outputRoot;
     const out = RuntimeIndex.manifest.build.outputFolder;
 
-    const bundleCommand = [process.argv0, ExecUtil.resolvePackageCommand('rollup'), '-c', RuntimeIndex.resolveFileImport(config.rollupConfiguration)];
+    const bundleCommand = [process.argv0, RuntimeIndex.resolvePackageCommand('rollup'), '-c', RuntimeIndex.resolveFileImport(config.rollupConfiguration)];
 
     const entryPointFile = RuntimeIndex.getFromImport(config.entryPoint)!.outputFile.split(`${out}/`)[1];
 
@@ -225,7 +225,7 @@ export class PackOperation {
    */
   static async * writeManifest(config: CommonPackConfig): AsyncIterable<string[]> {
     const out = path.resolve(config.buildDirectory, config.manifestFile);
-    const cmd = [process.argv0, ExecUtil.resolvePackageCommand('trvc'), 'manifest:production', out];
+    const cmd = [process.argv0, RuntimeIndex.resolvePackageCommand('trvc'), 'manifest:production', out];
     const env = { ...Env.TRV_MODULE.export(config.module) };
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: config.manifestFile }}`);

@@ -11,11 +11,6 @@ const WORKSPACE = '${workspaceFolder}';
 export class RunUtil {
 
   static #baseEnv: EnvDict = { ...Env.DEBUG.export('') };
-  static #cliFile: string;
-
-  static get cliFile(): string {
-    return this.#cliFile ??= Workspace.resolveImport('@travetto/cli/bin/trv.js');
-  }
 
   static buildEnv(module?: string): EnvDict {
     return {
@@ -36,7 +31,7 @@ export class RunUtil {
   static buildDebugConfig(input: LaunchConfig): vscode.DebugConfiguration {
     if (input.useCli) {
       input.args = [input.main, ...input.args ?? []];
-      input.main = this.cliFile;
+      input.main = Workspace.workspaceIndex.resolvePackageCommand('trv');
     }
 
     const output = `${WORKSPACE}/${Workspace.outputFolder}`;

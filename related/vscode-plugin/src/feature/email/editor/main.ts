@@ -1,4 +1,4 @@
-import { ChildProcess, spawn } from 'node:child_process';
+import { ChildProcess } from 'node:child_process';
 import * as vscode from 'vscode';
 
 import { ExecUtil } from '@travetto/runtime';
@@ -7,7 +7,6 @@ import type { EmailCompiled } from '@travetto/email';
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
 
 import { Activatible } from '../../../core/activation.ts';
-import { RunUtil } from '../../../core/run.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
 import { BaseFeature } from '../../base.ts';
@@ -39,7 +38,7 @@ export class EmailCompilerFeature extends BaseFeature {
     if (this.#server || Workspace.compilerState !== 'watch-start') { return; }
 
     this.log.info('Starting server');
-    this.#server = spawn('node', [RunUtil.cliFile, 'email:editor'], {
+    this.#server = Workspace.spawnPackageCommand('trv', ['email:editor'], {
       cwd: Workspace.path,
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     })

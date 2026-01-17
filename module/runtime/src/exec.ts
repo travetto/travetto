@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
@@ -113,13 +112,8 @@ export class ExecUtil {
     }
   }
 
-  /** Resolve a package command tied to workspace */
-  static resolvePackageCommand(cmd: string): string {
-    return path.resolve(RuntimeIndex.manifest.workspace.path, 'node_modules', '.bin', cmd);
-  }
-
   /** Spawn a package command */
   static spawnPackageCommand(cmd: string, args: string[], config: SpawnOptions = {}): ChildProcess {
-    return spawn(process.argv0, [ExecUtil.resolvePackageCommand(cmd), ...args], config);
+    return spawn(process.argv0, [RuntimeIndex.resolvePackageCommand(cmd), ...args], config);
   }
 }

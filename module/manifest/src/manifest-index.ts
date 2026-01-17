@@ -330,4 +330,9 @@ export class ManifestIndex {
     const manifestLocation = ManifestUtil.getManifestLocation(moduleContext, moduleName);
     return ManifestUtil.readManifestSync(manifestLocation);
   }
+
+  /** Resolve a package command tied to workspace */
+  resolvePackageCommand(cmd: string): string {
+    return path.resolve(this.manifest.workspace.path, 'node_modules', '.bin', cmd);
+  }
 }
