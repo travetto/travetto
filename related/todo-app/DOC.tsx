@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, type DocJSXElementByFn, type DocJSXElement, isDocJSXElement, DocRunUtil } from '@travetto/doc';
 import { Model, type ModelType } from '@travetto/model';
-import { Env, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
+import { Env, ExecUtil, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
 
 const TodoRoot = d.ref('Todo App', RuntimeIndex.getModule('@travetto/todo-app')!.sourcePath);
 
@@ -10,7 +10,7 @@ const port = 12555;
 async function init() {
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.spawn('trv', ['web:http', '--no-restart-on-change'], {
+  const cmd = ExecUtil.spawnPackageCommand('trv', ['web:http', '--no-restart-on-change'], DocRunUtil.spawnOptions({
     env: {
       ...process.env,
       WEB_HTTP_PORT: `${port}`,
@@ -19,7 +19,7 @@ async function init() {
       ...Env.TRV_ROLE.export('std'),
       ...Env.TRV_LOG_PLAIN.export(false),
     },
-  });
+  }));
 
   ShutdownManager.signal.addEventListener('abort', () => { cmd.kill(); });
 

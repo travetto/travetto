@@ -2,7 +2,6 @@ import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 
 import { Env, ExecUtil, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
@@ -80,7 +79,7 @@ export class RunUtil {
    */
   static async resolveGlobInput({ globs, tags, metadata }: TestGlobInput): Promise<TestRun[]> {
     const digestProcess = await ExecUtil.getResult(
-      spawn(process.argv0, [Runtime.packageCommand('trv'), 'test:digest', '-o', 'json', ...globs], {
+      ExecUtil.spawnPackageCommand('trv', ['test:digest', '-o', 'json', ...globs], {
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) },
       }),
       { catch: true }

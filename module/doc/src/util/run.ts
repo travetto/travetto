@@ -1,6 +1,6 @@
 import os from 'node:os';
 import util from 'node:util';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import path from 'node:path';
 
 import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
@@ -71,11 +71,9 @@ export class DocRunUtil {
     return text;
   }
 
-  /**
-   * Spawn command with appropriate environment, and cwd
-   */
-  static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
-    return spawn(cmd, args, {
+  static spawnOptions(config: RunConfig & SpawnOptions): SpawnOptions {
+    return {
+      ...config,
       cwd: config.workingDirectory ?? this.workingDirectory(config),
       env: {
         ...process.env,
@@ -87,16 +85,12 @@ export class DocRunUtil {
         ...Env.TRV_MODULE.export(config.module ?? ''),
         ...config.env
       }
-    });
+    };
   }
 
-  /**
-   * Run command synchronously and return output
-   */
-  static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
+  static async handleRun(subProcess: ChildProcess, config: RunConfig): Promise<string> {
     let final: string;
     try {
-      const subProcess = this.spawn(cmd, args, config);
       const result = await ExecUtil.getResult(subProcess, { catch: true });
       if (!result.valid) {
         throw new Error(result.stderr);
@@ -114,9 +108,16 @@ export class DocRunUtil {
   }
 
   /**
+   * Run command synchronously and return output
+   */
+  static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
+    return this.handleRun(spawn(cmd, args, this.spawnOptions(config)), config);
+  }
+
+  /**
    * Run trv command
    */
   static async runPackageCommand(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
-    return this.run(process.argv0, [Runtime.packageCommand(cmd), ...args], config);
+    return this.handleRun(ExecUtil.spawnPackageCommand(cmd, args, this.spawnOptions(config)), config);
   }
 }

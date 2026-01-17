@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import mustache from 'mustache';
 
-import { castKey, castTo, ExecUtil, JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { castKey, castTo, ExecUtil, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 import { type NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
@@ -52,9 +52,11 @@ export class Context {
     this.#targetDirectory = path.resolve(targetDirectory);
   }
 
-  #exec(cmd: string, args: string[]): Promise<void> {
+  #exec(cmd: string, args: string[], options?: { isPackageCommand?: boolean }): Promise<void> {
     const terminal = new Terminal();
-    const subProcess = spawn(cmd, args, {
+    const spawnCmd = options?.isPackageCommand ? ExecUtil.spawnPackageCommand : spawn;
+    const subProcess = spawnCmd(cmd, args, {
+      ...options,
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
       env: { PATH: process.env.PATH },
@@ -205,10 +207,10 @@ export class Context {
     }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
-    await this.#exec(Runtime.packageCommand('trvc'), ['build']);
+    await this.#exec('trvc', ['build'], { isPackageCommand: true });
     if (this.#devDependencies.includes('@travetto/eslint')) {
       yield cliTpl`${{ type: 'ESLint Registration' }} `;
-      await this.#exec(Runtime.packageCommand('trv'), ['eslint:register']);
+      await this.#exec('trv', ['eslint:register'], { isPackageCommand: true });
     }
 
     yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDirectory }} `;
