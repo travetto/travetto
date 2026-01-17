@@ -120,6 +120,6 @@ export class ExecUtil {
 
   /** Spawn a package command */
   static spawnPackageCommand(cmd: string, args: string[], config: SpawnOptions = {}): ChildProcess {
-    return spawn(process.argv0, [this.resolvePackageCommand(cmd), ...args], config);
+    return spawn(process.argv0, [ExecUtil.resolvePackageCommand(cmd), ...args], config);
   }
 }

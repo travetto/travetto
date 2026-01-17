@@ -2,7 +2,7 @@ import type { ChildProcess, SpawnOptions } from 'node:child_process';
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
-  rewrite?: (text: string) => string;
+  rewrite?: (line: string) => string;
   module?: string;
   env?: Record<string, string>;
   workingDirectory?: string;

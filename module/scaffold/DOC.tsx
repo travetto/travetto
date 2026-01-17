@@ -18,8 +18,8 @@ $ git config --global.username <Username> #Set your git username
 
   <c.Terminal title='Running Generator' src={
     ['', '@<version-or-tag>']
-      .map(v => `${PackageUtil.getPackageCommand(Runtime, `@travetto/scaffold${v}`)}`)
-      .join('\n\n# or \n\n')
+      .map(v => `$ ${PackageUtil.getPackageCommand(Runtime, `@travetto/scaffold${v}`)}`)
+      .join('\n\n# or\n\n')
   } />
 
   The generator will ask about enabling the following features:
