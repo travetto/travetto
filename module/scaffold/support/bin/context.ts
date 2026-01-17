@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import path from 'node:path';
 
 import mustache from 'mustache';
@@ -52,9 +52,9 @@ export class Context {
     this.#targetDirectory = path.resolve(targetDirectory);
   }
 
-  #exec(cmd: string, args: string[], options?: { isPackageCommand?: boolean }): Promise<void> {
+  #exec(cmd: string, args: string[], options?: { spawn?: (cmd: string, args: string[], options?: SpawnOptions) => ChildProcess }): Promise<void> {
     const terminal = new Terminal();
-    const spawnCmd = options?.isPackageCommand ? ExecUtil.spawnPackageCommand : spawn;
+    const spawnCmd = options?.spawn ?? spawn;
     const subProcess = spawnCmd(cmd, args, {
       ...options,
       cwd: this.destination(),
@@ -207,10 +207,10 @@ export class Context {
     }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
-    await this.#exec('trvc', ['build'], { isPackageCommand: true });
+    await this.#exec('trvc', ['build'], { spawn: ExecUtil.spawnPackageCommand });
     if (this.#devDependencies.includes('@travetto/eslint')) {
       yield cliTpl`${{ type: 'ESLint Registration' }} `;
-      await this.#exec('trv', ['eslint:register'], { isPackageCommand: true });
+      await this.#exec('trv', ['eslint:register'], { spawn: ExecUtil.spawnPackageCommand });
     }
 
     yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDirectory }} `;
