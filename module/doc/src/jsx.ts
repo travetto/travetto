@@ -1,11 +1,11 @@
 import { castTo, Runtime, TypedObject } from '@travetto/runtime';
+import { PackageUtil } from '@travetto/manifest';
 
 import type { LIBRARIES } from './mapping/library.ts';
 import type { MODULES } from './mapping/module.ts';
 import type { CodeProps, RunConfig } from './util/types.ts';
 
 import { createElement, type JSXElement, type JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
-import { PackageUtil } from 'module/manifest/__index__.ts';
 
 type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
