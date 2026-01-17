@@ -1,74 +1,109 @@
 #!/bin/sh
-export DIST=/tmp/_home_tim_Code_travetto_related_todo-app
-export TRV_OUT=/home/tim/Code/travetto/.trv/output
-export ROOT=/home/tim/Code/travetto/related/todo-app
-export MOD=@travetto/todo-app
+export ROOT=/Users/arcsine/Code/travetto/related/todo-app
+export TRV_OUT=/Users/arcsine/Code/travetto/.trv/output
+export DIST=/var/folders/6q/gzbcsdxx31l7k79tbl4cjbbm0000gn/T/_Users_arcsine_Code_travetto_related_todo-app
+export MODULE=@travetto/todo-app
+export REPO_ROOT=/Users/arcsine/Code/travetto
 
 # Cleaning Output $DIST 
+
+echo "Cleaning Output $DIST"
 
 rm -rf $DIST
 mkdir -p $DIST
 
-# Writing .env.js 
+# Writing $DIST/.env 
 
-echo "process.env.TRV_MANIFEST = 'node_modules/$MOD';" > $DIST/.env.js
-echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
+echo "Writing $DIST/.env"
+
+echo "NODE_ENV=production" > $DIST/.env
+echo "TRV_MANIFEST=manifest.json" >> $DIST/.env
+echo "TRV_MODULE=$MODULE" >> $DIST/.env
+echo "TRV_CLI_IPC=" >> $DIST/.env
+echo "TRV_RESOURCE_OVERRIDES=@#resources=@@#resources" >> $DIST/.env
 
 # Writing package.json 
 
-echo "{\"type\":\"commonjs\"}" > $DIST/package.json
+echo "Writing package.json"
 
-# Writing entry scripts cli.sh args=(run web) 
+echo "{\"type\":\"module\",\"main\":\"todo-app.js\"}" > $DIST/package.json
 
-echo "#!/bin/sh" > $DIST/cli.sh
-echo "cd \$(dirname \"\$0\")" >> $DIST/cli.sh
-echo "node cli run web \$@" >> $DIST/cli.sh
-chmod 755 $DIST/cli.sh
+# Writing entry scripts todo-app.sh args=() 
 
-# Writing entry scripts cli.cmd args=(run web) 
+echo "Writing entry scripts todo-app.sh args=()"
 
-echo "" > $DIST/cli.cmd
-echo "cd %~p0" >> $DIST/cli.cmd
-echo "node cli run web %*" >> $DIST/cli.cmd
-chmod 755 $DIST/cli.cmd
+echo "#!/bin/sh" > $DIST/todo-app.sh
+echo "cd \$(dirname \"\$0\")" >> $DIST/todo-app.sh
+echo "node todo-app.js \$@" >> $DIST/todo-app.sh
+chmod 755 $DIST/todo-app.sh
 
-# Copying over resources 
+# Writing entry scripts todo-app.cmd args=() 
 
-mkdir -p $DIST/node_modules/$MOD
-cp $TRV_OUT/node_modules/$MOD/package.json $DIST/node_modules/$MOD/package.json
-mkdir -p $DIST/node_modules/@travetto/manifest
-cp $TRV_OUT/node_modules/@travetto/manifest/package.json $DIST/node_modules/@travetto/manifest/package.json
-cp -r -p $ROOT/resources $DIST/resources
+echo "Writing entry scripts todo-app.cmd args=()"
 
-# Writing Manifest node_modules/$MOD 
+echo "cd %~p0" > $DIST/todo-app.cmd
+echo "node todo-app.js %*" >> $DIST/todo-app.cmd
+chmod 755 $DIST/todo-app.cmd
 
-TRV_MODULE=$MOD npx trvc manifest:production $DIST/node_modules/$MOD
+# Copying over module resources 
 
-# Bundling Output minify=true sourcemap= entryPoint=node_modules/@travetto/cli/support/cli.js 
+echo "Copying over module resources"
 
-export BUNDLE_ENTRY=node_modules/@travetto/cli/support/cli.js
-export BUNDLE_ENTRY_NAME=cli
+cp -r -p $ROOT/resources/* $DIST/resources
+
+# Writing Manifest manifest.json 
+
+echo "Writing Manifest manifest.json"
+
+TRV_MODULE=$MODULE $REPO_ROOT/node_modules/.bin/trvc manifest:production $DIST/manifest.json
+
+# Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv.ts 
+
+echo "Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv.ts"
+
+export BUNDLE_ENTRY=node_modules/@travetto/cli/support/entry.trv.js
+export BUNDLE_MAIN_FILE=todo-app.js
 export BUNDLE_COMPRESS=true
+export BUNDLE_SOURCEMAP=false
+export BUNDLE_SOURCES=false
 export BUNDLE_OUTPUT=$DIST
-export TRV_MANIFEST=$TRV_OUT/node_modules/$MOD
+export BUNDLE_ENV_FILE=.env
+export TRV_MANIFEST=$TRV_OUT/node_modules/$MODULE
 cd $TRV_OUT
-npx rollup -c node_modules/@travetto/pack/support/bin/rollup.js
+$REPO_ROOT/node_modules/.bin/rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT
 
-# Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile 
+# Pulling Docker Base Image node:25-alpine 
 
-echo "FROM node:18-alpine3.16" > $DIST/Dockerfile
-echo "WORKDIR /app" >> $DIST/Dockerfile
-echo "COPY . ." >> $DIST/Dockerfile
+echo "Pulling Docker Base Image node:25-alpine"
+
+docker pull node:25-alpine
+
+# Detected Image OS node:25-alpine as alpine 
+
+echo "Detected Image OS node:25-alpine as alpine"
+
+
+# Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile.ts 
+
+echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile.ts"
+
+echo "FROM node:25-alpine" > $DIST/Dockerfile
+echo "RUN addgroup -g 2000 app && adduser -D -G app -u 2000 app" >> $DIST/Dockerfile
+echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
+echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile
+echo "ENV NODE_OPTIONS=\"\"" >> $DIST/Dockerfile
 echo "" >> $DIST/Dockerfile
-echo "ENTRYPOINT [\"/app/cli.sh\"]" >> $DIST/Dockerfile
-
-# Pulling Docker Base Image node:18-alpine3.16 
-
-docker pull node:18-alpine3.16
+echo "USER app" >> $DIST/Dockerfile
+echo "WORKDIR /app" >> $DIST/Dockerfile
+echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
 
 # Building Docker Container latest 
+
+echo "Building Docker Container latest"
 
 cd $DIST
 docker build -t travetto_todo-app:latest .
 cd $ROOT
+
+

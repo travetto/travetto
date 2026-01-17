@@ -186,9 +186,10 @@ As indicated, any of the pack operations can be ejected, and produce an output t
     <pre><code class="language-bash">$ trv pack:docker <span class="token parameter variable">-x</span> /dev/stdout web:http
 
 <span class="token comment">#!/bin/sh</span>
-<span class="token builtin class-name">export</span> <span class="token assign-left variable">DIST</span><span class="token operator">=</span>/tmp/<span class="token operator">&lt;</span>temp-folder<span class="token operator">></span>
-<span class="token builtin class-name">export</span> <span class="token assign-left variable">TRV_OUT</span><span class="token operator">=</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/.trv/output
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">ROOT</span><span class="token operator">=</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/related/todo-app
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">TRV_OUT</span><span class="token operator">=</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/.trv/output
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">REPO_ROOT</span><span class="token operator">=</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">DIST</span><span class="token operator">=</span>/tmp/<span class="token operator">&lt;</span>temp-folder<span class="token operator">></span>
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">MODULE</span><span class="token operator">=</span>&#64;travetto/todo-app
 
 <span class="token comment"># Cleaning Output $DIST</span>
@@ -241,7 +242,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">"Writing Manifest manifest.json"</span>
 
-<span class="token assign-left variable">TRV_MODULE</span><span class="token operator">=</span><span class="token variable">$MODULE</span> <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/node_modules/.bin/trvc manifest:production <span class="token variable">$DIST</span>/manifest.json
+<span class="token assign-left variable">TRV_MODULE</span><span class="token operator">=</span><span class="token variable">$MODULE</span> <span class="token variable">$REPO_ROOT</span>/node_modules/.bin/trvc manifest:production <span class="token variable">$DIST</span>/manifest.json
 
 <span class="token comment"># Bundling Output minify=true sourcemap=false entryPoint=&#64;travetto/cli/support/entry.trv.ts</span>
 
@@ -256,7 +257,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENV_FILE</span><span class="token operator">=</span>.env
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">TRV_MANIFEST</span><span class="token operator">=</span><span class="token variable">$TRV_OUT</span>/node_modules/<span class="token variable">$MODULE</span>
 <span class="token builtin class-name">cd</span> <span class="token variable">$TRV_OUT</span>
-<span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/node_modules/.bin/rollup <span class="token parameter variable">-c</span> <span class="token variable">$TRV_OUT</span>/node_modules/&#64;travetto/pack/support/rollup/build.js
+<span class="token variable">$REPO_ROOT</span>/node_modules/.bin/rollup <span class="token parameter variable">-c</span> <span class="token variable">$TRV_OUT</span>/node_modules/&#64;travetto/pack/support/rollup/build.js
 <span class="token builtin class-name">cd</span> <span class="token variable">$ROOT</span>
 
 <span class="token comment"># Pulling Docker Base Image node:25-alpine</span>

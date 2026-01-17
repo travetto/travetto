@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { spawn, type SpawnOptions } from 'node:child_process';
 import path from 'node:path';
 
-import { AppError, ExecUtil, RuntimeIndex } from '@travetto/runtime';
+import { AppError, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { ActiveShellCommand } from './shell.ts';
 
@@ -40,7 +40,8 @@ export class PackUtil {
    * Finalize eject output
    */
   static async writeEjectOutput(workspace: string, module: string, output: AsyncIterable<string>, file: string): Promise<void> {
-    const vars = { DIST: workspace, TRV_OUT: RuntimeIndex.outputRoot, ROOT: path.resolve(), MODULE: module };
+    const repoRoot = Runtime.workspaceRelative('.');
+    const vars = { ROOT: path.resolve(), TRV_OUT: RuntimeIndex.outputRoot, REPO_ROOT: repoRoot, DIST: workspace, MODULE: module };
 
     const replaceArgs = (text: string): string => Object.entries(vars)
       .reduce((result, [key, value]) => result.replaceAll(value, ActiveShellCommand.var(key)), text);
