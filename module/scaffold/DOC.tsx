@@ -1,5 +1,8 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
+import { PackageUtil } from '@travetto/manifest';
+import { Runtime } from '@travetto/runtime';
+
 import { Todo } from './doc/model.ts';
 
 export const text = <>
@@ -13,14 +16,11 @@ $ git config --global.username <Username> #Set your git username
 
   Once the necessary configuration is setup, you can invoke the scaffolding by running
 
-  <c.Terminal title='Running Generator' src={`
-$ ${d.packageCommand('@travetto/scaffold')}
-
-# or
-
-$ ${d.packageCommand('@travetto/scaffold@<version-or-tag>')}
-
-`} />
+  <c.Terminal title='Running Generator' src={
+    ['', '@<version-or-tag>']
+      .map(v => `${PackageUtil.getPackageCommand(Runtime, `@travetto/scaffold${v}`)}`)
+      .join('\n\n# or \n\n')
+  } />
 
   The generator will ask about enabling the following features:
 
