@@ -127,8 +127,7 @@ export const text = <>
 
     Ultimately, after resolution, the content of these files will be injected inline within the location.
 
-    <c.Code language='bash' title='Final arguments after Flag File resolution'
-      src={`${d.trv} call:db --host localhost --port 3306 --username app --password <custom>`} />
+    <c.Code language='bash' title='Final arguments after Flag File resolution' src={`${d.trv} call:db --host localhost --port 3306 --username app --password <custom>`} />
   </c.Section>
 
   <c.Section title='VSCode Integration'>
