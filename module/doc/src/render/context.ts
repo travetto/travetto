@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { PackageUtil } from '@travetto/manifest';
-import { castTo, RuntimeIndex } from '@travetto/runtime';
+import { castTo, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { type JSXElementByFn, c } from '../jsx.ts';
 import { DocResolveUtil, type ResolvedCode, type ResolvedRef, type ResolvedSnippetLink } from '../util/resolve.ts';
@@ -56,7 +56,7 @@ export class RenderContext {
    * Get rebuilt comment
    */
   get rebuildStamp(): string {
-    return `Please modify ${this.file.replace(this.repoRoot, this.baseUrl)} and execute "trv doc" to rebuild`;
+    return `Please modify ${this.file.replace(this.repoRoot, this.baseUrl)} and execute "${PackageUtil.getPackageCommand(Runtime, 'trv', ['doc'])}" to rebuild`;
   }
 
   /**

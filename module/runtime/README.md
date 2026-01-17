@@ -52,7 +52,7 @@ class $Runtime {
   /** Main source path */
   get mainSourcePath(): string;
   /** Get trv entrypoint */
-  get trvEntryPoint(): string;
+  packageCommand(cmd: string): string;
   /** Produce a workspace relative path */
   workspaceRelative(...parts: string[]): string;
   /** Strip off the workspace path from a file */

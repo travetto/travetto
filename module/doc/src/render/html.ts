@@ -52,7 +52,7 @@ export const Html: RenderProvider<RenderContext> = {
   },
   Install: async ({ context, node }) => {
     const highlighted = highlight(`
-${PackageUtil.getInstallInstructions(node.props.pkg)}
+${PackageUtil.getInstallInstructions(node.props.pkg, true)}
 `, 'bash');
 
     return `\n

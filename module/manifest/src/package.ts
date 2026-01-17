@@ -121,7 +121,7 @@ export class PackageUtil {
   static getInstallCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, production = false): string {
     let install: string;
     switch (ctx.workspace.manager) {
-      case 'npm': install = `npm i ${production ? '' : '--save-dev '}${pkg}`; break;
+      case 'npm': install = `npm install ${production ? '' : '--save-dev '}${pkg}`; break;
       case 'yarn': install = `yarn add ${production ? '' : '--dev '}${pkg}`; break;
     }
     return install;
@@ -150,9 +150,9 @@ export class PackageUtil {
   /**
    * Get install example for a given package
    */
-  static getInstallInstructions(pkg: string): string {
+  static getInstallInstructions(pkg: string, production = false): string {
     return (['npm', 'yarn'] as const)
-      .map(cmd => this.getInstallCommand({ workspace: { manager: cmd } }, pkg))
+      .map(cmd => this.getInstallCommand({ workspace: { manager: cmd } }, pkg, production))
       .join('\n\n# or\n\n');
   }
 }

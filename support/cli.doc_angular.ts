@@ -33,7 +33,7 @@ export class DocAngularCommand {
       // Build out docs
       await RepoExecUtil.execOnModules('workspace',
         module => {
-          const subProcess = spawn('trv', ['doc'], {
+          const subProcess = spawn(process.argv0, [Runtime.packageCommand('trv'), 'doc'], {
             timeout: 20000,
             cwd: module.sourceFolder,
             env: {
@@ -53,10 +53,11 @@ export class DocAngularCommand {
           progressMessage: module => `Running 'trv doc' [%idx/%total] ${module?.sourceFolder ?? ''}`,
           filter: module => modules.has(module)
         });
-      await ExecUtil.getResult(spawn('trv', ['doc'], { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: Runtime.mainSourcePath }));
+      await ExecUtil.getResult(spawn(process.argv0, [Runtime.packageCommand('trv'), 'doc'],
+        { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: Runtime.mainSourcePath }));
       modules.add(RuntimeIndex.mainModule);
     } else {
-      await ExecUtil.getResult(spawn('trv', ['doc'], {
+      await ExecUtil.getResult(spawn(process.argv0, [Runtime.packageCommand('trv'), 'doc'], {
         env: { ...process.env, ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
         cwd: [...modules][0].sourcePath,
         stdio: 'inherit'

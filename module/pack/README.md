@@ -225,7 +225,7 @@ cp -r -p $ROOT/resources/* $DIST/resources
 
 echo "Writing Manifest manifest.json"
 
-TRV_MODULE=$MODULE npx trvc manifest:production $DIST/manifest.json
+TRV_MODULE=$MODULE <workspace-root>/node_modules/.bin/trvc manifest:production $DIST/manifest.json
 
 # Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv.ts 
 
@@ -240,7 +240,7 @@ export BUNDLE_OUTPUT=$DIST
 export BUNDLE_ENV_FILE=.env
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MODULE
 cd $TRV_OUT
-npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
+<workspace-root>/node_modules/.bin/rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT
 
 # Pulling Docker Base Image node:25-alpine 

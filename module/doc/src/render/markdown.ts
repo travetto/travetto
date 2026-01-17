@@ -55,7 +55,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   Install: async ({ context, node }) =>
     `\n\n**Install: ${node.props.title}**
 \`\`\`bash
-${PackageUtil.getInstallInstructions(node.props.pkg)}
+${PackageUtil.getInstallInstructions(node.props.pkg, true)}
 \`\`\`
 `,
   Code: async ({ context, node, props }) => {
