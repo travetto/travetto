@@ -29,7 +29,7 @@ export const text = <>
       Within the command line, the {d.input('args')} are positional arguments that will be passed to the entry point on application run.
 
       <c.Code title='Packing an application run' src={`
-$ npx trv pack run myapp
+$ ${d.trv} pack run myapp
 `} />
 
       Would then produce an executable script, in the output folder, that would look like:

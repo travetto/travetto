@@ -25,12 +25,7 @@ $ npx @travetto/scaffold@<version-or-tag>
 The generator will ask about enabling the following features:
 
 ## Web Application
-The [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") provides the necessary integration for exposing web apis.  When selecting the `web` feature, you will need to specify which backend you want to include with your application, the default being [express](https://expressjs.com).  Currently you can select from:
-   *  [express](https://expressjs.com)
-   *  [koa](https://koajs.com/)
-   *  [fastify](https://www.fastify.io/)
-
-The code will establish some basic endpoints, specifically, `GET / ` as the root endpoint.  This will return the contents of your `package.json` as an identification operation.
+The [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") provides the necessary integration for exposing web apis, leveraging [Web HTTP Server Support](https://github.com/travetto/travetto/tree/main/module/web-http#readme "Web HTTP Server Support").   The code will establish some basic endpoints, specifically, `GET / ` as the root endpoint.  This will return the contents of your `package.json` as an identification operation.
 
 ### Additional Web Features
 In addition to the core functionality, the `web` feature has some useful sub-features.  Specifically:
@@ -49,7 +44,9 @@ Authentication is also supported on the Web endpoints by selecting [Web Auth](ht
 The [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
    *  [elasticsearch](https://elastic.co)
    *  [mongodb](https://mongodb.com)
-   *  [SQL](https://en.wikipedia.org/wiki/SQL)
+   *  [Postgres](https://postgresql.org)
+   *  [MySQL](https://www.mysql.com/)
+   *  [SQLite](https://www.sqlite.org/)
    *  [DynamoDB](https://aws.amazon.com/dynamodb/)
    *  [Firestore](https://firebase.google.com/docs/firestore)
 

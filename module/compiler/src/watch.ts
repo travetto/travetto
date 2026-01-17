@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 import type { CompilerState } from './state.ts';
@@ -116,7 +116,10 @@ export class CompilerWatcher {
   async #listenWorkspace(): Promise<void> {
     const lib = await import('@parcel/watcher');
     const ignore = await this.#getWatchIgnores();
-    const packageFiles = new Set(['package-lock.json', 'yarn.lock', 'package.json'].map(file => path.resolve(this.#root, file)));
+    const packageFiles = new Set([
+      'package.json',
+      ...PACKAGE_MANAGERS.flatMap(x => [...x.otherFiles, x.lock])
+    ].map(file => path.resolve(this.#root, file)));
 
     log.debug('Ignore Globs', ignore);
     log.debug('Watching', this.#root);

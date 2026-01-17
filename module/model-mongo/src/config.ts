@@ -29,34 +29,29 @@ export class MongoModelConfig {
    */
   port?: number;
   /**
-   * Direct mongo connection options
+   * Direct mongo connection options, these do not go on the connection string
    */
-  connectionOptions = {};
+  connectionOptions: mongo.MongoClientOptions = {};
   /**
    * Is using the SRV DNS record configuration
    */
   srvRecord?: boolean;
-
   /**
    * Mongo client options
    */
   options: mongo.MongoClientOptions = {};
-
   /**
    * Allow storage modification at runtime
    */
   modifyStorage?: boolean;
-
   /**
    * Frequency of culling for cullable content
    */
   cullRate?: number | TimeSpan;
-
   /**
    * Connection string
    */
   connectionString?: string;
-
   /**
    * Should we store the _id as a string in the id field
    */

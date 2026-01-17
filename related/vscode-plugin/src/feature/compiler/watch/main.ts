@@ -3,7 +3,7 @@ import { ChildProcess, spawn } from 'node:child_process';
 
 import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
-import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types.ts';
+import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/src/types.ts';
 
 import { BaseFeature } from '../../base.ts';
 import { Log } from '../../../core/log.ts';
@@ -69,10 +69,10 @@ export class CompilerWatchFeature extends BaseFeature {
    */
   run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info' | 'event', args?: string[], signal?: AbortSignal): ChildProcess {
     const debug = command !== 'info' && command !== 'event';
-    this.#log.trace('Running Compiler', 'npx', 'trvc', command, args);
+    this.#log.trace('Running Compiler', 'trvc', command, args);
     const starting = command === 'start' || command === 'restart';
     this.#started ||= starting;
-    const subProcess = spawn('npx', ['trvc', command, ...args ?? []], {
+    const subProcess = spawn(process.argv0, ['node_modules/.bin/trvc', command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
       stdio: ['pipe', starting ? 'ignore' : 'pipe', 'pipe'],

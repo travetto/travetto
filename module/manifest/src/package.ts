@@ -5,9 +5,8 @@ import { existsSync } from 'node:fs';
 import path from './path.ts';
 import { ManifestFileUtil } from './file.ts';
 
-import { PackagePathSymbol, type Package, type PackageWorkspaceEntry } from './types/package.ts';
+import { PackagePathSymbol, type Package, type PackageWorkspaceEntry, type NodePackageManager } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
-import type { NodePackageManager } from './types/common.ts';
 
 /**
  * Utilities for querying, traversing and reading package.json files.
@@ -80,7 +79,7 @@ export class PackageUtil {
       modulePath.endsWith('.json') ? modulePath : path.resolve(modulePath, 'package.json'),
     );
 
-    nodePackage.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
+    nodePackage.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for execution
 
     nodePackage[PackagePathSymbol] = modulePath;
     return nodePackage;
@@ -122,9 +121,38 @@ export class PackageUtil {
   static getInstallCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, production = false): string {
     let install: string;
     switch (ctx.workspace.manager) {
-      case 'npm': install = `npm i ${production ? '' : '--save-dev '}${pkg}`; break;
+      case 'npm': install = `npm install ${production ? '' : '--save-dev '}${pkg}`; break;
       case 'yarn': install = `yarn add ${production ? '' : '--dev '}${pkg}`; break;
     }
     return install;
+  }
+
+  /**
+   * Get an the command for executing a package level binary
+   */
+  static getPackageCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, args: string[] = []): string {
+    switch (ctx.workspace.manager) {
+      case 'npm':
+      case 'yarn': return `npx ${pkg} ${args.join(' ')}`.trim();
+    }
+  }
+
+  /**
+   * Get an the command for executing a package level binary
+   */
+  static getWorkspaceInitCommand(ctx: { workspace: { manager: NodePackageManager } }): string {
+    switch (ctx.workspace.manager) {
+      case 'npm': return 'npm init -f';
+      case 'yarn': return 'yarn init -y';
+    }
+  }
+
+  /**
+   * Get install example for a given package
+   */
+  static getInstallInstructions(pkg: string, production = false): string {
+    return (['npm', 'yarn'] as const)
+      .map(cmd => this.getInstallCommand({ workspace: { manager: cmd } }, pkg, production))
+      .join('\n\n# or\n\n');
   }
 }
