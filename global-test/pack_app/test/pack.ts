@@ -11,10 +11,7 @@ class PackAppSuite {
   async testPack() {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');
     const imageName = 'travetto-test_pack_app';
-    const entryPoint = Runtime.packageCommand('trv');
-    assert(Runtime.mainSourcePath.endsWith('pack_app'));
-    assert(entryPoint.startsWith('/Users'));
-    const proc = spawn(process.argv0, [entryPoint, 'pack:docker', '-dt', tag, 'run:double'], { cwd: Runtime.mainSourcePath });
+    const proc = spawn(process.argv0, [Runtime.packageCommand('trv'), 'pack:docker', '-dt', tag, 'run:double'], { cwd: Runtime.mainSourcePath });
 
     const state = await ExecUtil.getResult(proc, { catch: true });
     console.log(state.stderr);
