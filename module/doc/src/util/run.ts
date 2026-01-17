@@ -112,4 +112,11 @@ export class DocRunUtil {
 
     return this.cleanRunOutput(final, config);
   }
+
+  /**
+   * Run trv command
+   */
+  static async runPackageCommand(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
+    return this.run(process.argv0, [Runtime.packageCommand(cmd), ...args], config);
+  }
 }

@@ -80,7 +80,7 @@ export class RunUtil {
    */
   static async resolveGlobInput({ globs, tags, metadata }: TestGlobInput): Promise<TestRun[]> {
     const digestProcess = await ExecUtil.getResult(
-      spawn(process.argv0, [Runtime.trvEntryPoint, 'test:digest', '-o', 'json', ...globs], {
+      spawn(process.argv0, [Runtime.packageCommand('trv'), 'test:digest', '-o', 'json', ...globs], {
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) },
       }),
       { catch: true }

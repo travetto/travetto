@@ -51,7 +51,7 @@ export class DocCommand implements CliCommandShape {
     const [first, ...args] = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
     await WatchUtil.watchCompilerEvents('change', async ({ file }) => {
       if (file === this.input) {
-        const subProcess = spawn(process.argv0, [Runtime.trvEntryPoint, first, ...args], {
+        const subProcess = spawn(process.argv0, [Runtime.packageCommand('trv'), first, ...args], {
           cwd: Runtime.mainSourcePath,
           env: { ...process.env, ...Env.TRV_QUIET.export(true) },
           stdio: 'inherit'

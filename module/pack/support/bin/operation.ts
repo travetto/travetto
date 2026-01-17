@@ -54,7 +54,7 @@ export class PackOperation {
     const cwd = RuntimeIndex.outputRoot;
     const out = RuntimeIndex.manifest.build.outputFolder;
 
-    const bundleCommand = ['npx', 'rollup', '-c', RuntimeIndex.resolveFileImport(config.rollupConfiguration)];
+    const bundleCommand = [Runtime.packageCommand('rollup', true), '-c', RuntimeIndex.resolveFileImport(config.rollupConfiguration)];
 
     const entryPointFile = RuntimeIndex.getFromImport(config.entryPoint)!.outputFile.split(`${out}/`)[1];
 
@@ -225,7 +225,7 @@ export class PackOperation {
    */
   static async * writeManifest(config: CommonPackConfig): AsyncIterable<string[]> {
     const out = path.resolve(config.buildDirectory, config.manifestFile);
-    const cmd = ['npx', 'trvc', 'manifest:production', out];
+    const cmd = [Runtime.packageCommand('trvc', true), 'manifest:production', out];
     const env = { ...Env.TRV_MODULE.export(config.module) };
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: config.manifestFile }}`);

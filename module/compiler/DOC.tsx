@@ -4,10 +4,10 @@ import { d, c, DocRunUtil } from '@travetto/doc';
 const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /#/);
 
 export const text = async () => {
-  await DocRunUtil.run('npx', ['trvc', 'build'], { workingDirectory: './doc-exec' });
+  await DocRunUtil.runPackageCommand('trvc', ['build'], { workingDirectory: './doc-exec' });
 
   const output =
-    (await DocRunUtil.run('npx', ['trvc', 'help']))
+    (await DocRunUtil.runPackageCommand('trvc', ['help']))
       .split('\n')
       .filter(x => x.trim().startsWith('*'))
       .map<[string, string]>(x => {

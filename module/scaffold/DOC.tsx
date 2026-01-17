@@ -14,26 +14,18 @@ $ git config --global.username <Username> #Set your git username
   Once the necessary configuration is setup, you can invoke the scaffolding by running
 
   <c.Terminal title='Running Generator' src={`
-$ npx @travetto/scaffold
+$ ${d.packageCommand('@travetto/scaffold')}
 
 # or
 
-$ npx @travetto/scaffold@<version-or-tag>
+$ ${d.packageCommand('@travetto/scaffold@<version-or-tag>')}
 
 `} />
 
   The generator will ask about enabling the following features:
 
   <c.Section title='Web Application'>
-    The {d.module('Web')} provides the necessary integration for exposing web apis.  When selecting the {d.input('web')} feature, you will need to specify which backend you want to include with your application, the default being {d.library('Express')}.  Currently you can select from:
-
-    <ul>
-      <li>{d.library('Express')}</li>
-      <li>{d.library('Koa')}</li>
-      <li>{d.library('Fastify')}</li>
-    </ul>
-
-    The code will establish some basic endpoints, specifically, {d.input('GET / ')} as the root endpoint.  This will return the contents of your {d.path('package.json')} as an identification operation.
+    The {d.module('Web')} provides the necessary integration for exposing web apis, leveraging {d.module('WebHttp')}.   The code will establish some basic endpoints, specifically, {d.input('GET / ')} as the root endpoint.  This will return the contents of your {d.path('package.json')} as an identification operation.
 
     <c.SubSection title='Additional Web Features'>
       In addition to the core functionality, the {d.input('web')} feature has some useful sub-features.  Specifically:<br />
@@ -59,7 +51,9 @@ $ npx @travetto/scaffold@<version-or-tag>
     <ul>
       <li>{d.library('Elasticsearch')}</li>
       <li>{d.library('MongoDB')}</li>
-      <li>{d.library('SQL')}</li>
+      <li>{d.library('Postgres')}</li>
+      <li>{d.library('MySQL')}</li>
+      <li>{d.library('SQLite')}</li>
       <li>{d.library('DynamoDB')}</li>
       <li>{d.library('Firestore')}</li>
     </ul>

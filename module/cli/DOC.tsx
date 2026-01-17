@@ -116,7 +116,7 @@ export const text = <>
 
     As you can see in this file, it provides easy access to predefine the host, port, and user flags.
 
-    <c.Code language='bash' title='Using a Flag File' src='npx trv call:db +=base --password <custom>' />
+    <c.Code language='bash' title='Using a Flag File' src={d.packageCommand('trv', ['call:db', '+=base', '--password', '<custom>'])} />
 
     The flag files can be included in one of a few ways:
     <ul>
@@ -127,7 +127,8 @@ export const text = <>
 
     Ultimately, after resolution, the content of these files will be injected inline within the location.
 
-    <c.Code language='bash' title='Final arguments after Flag File resolution' src='npx trv call:db --host localhost --port 3306 --username app --password <custom>' />
+    <c.Code language='bash' title='Final arguments after Flag File resolution'
+      src={d.packageCommand('trv', ['call:db', '--host', 'localhost', '--port', '3306', '--username', 'app', '--password', '<custom>'])} />
   </c.Section>
 
   <c.Section title='VSCode Integration'>

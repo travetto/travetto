@@ -105,4 +105,5 @@ export const d = {
   field: (name: string) => createElement(c.Field, { name }),
   library: (name: keyof typeof LIBRARIES) => createElement(c.Library, { name }),
   module: (name: keyof typeof MODULES) => createElement(c.Module, { name }),
+  packageCommand: (cmd: string, args: string[] = []) => `npx ${cmd} ${args.join(' ')}`.trim(),
 };

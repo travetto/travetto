@@ -3,7 +3,7 @@ import { ChildProcess, spawn } from 'node:child_process';
 
 import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
-import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types.ts';
+import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/src/types.ts';
 
 import { BaseFeature } from '../../base.ts';
 import { Log } from '../../../core/log.ts';

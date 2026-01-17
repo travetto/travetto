@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import mustache from 'mustache';
 
-import { castKey, castTo, ExecUtil, JSONUtil, RuntimeIndex } from '@travetto/runtime';
+import { castKey, castTo, ExecUtil, JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 import { type NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
@@ -205,10 +205,10 @@ export class Context {
     }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
-    await this.#exec('npx', ['trvc', 'build']);
+    await this.#exec(Runtime.packageCommand('trvc'), ['build']);
     if (this.#devDependencies.includes('@travetto/eslint')) {
       yield cliTpl`${{ type: 'ESLint Registration' }} `;
-      await this.#exec('npx', ['trv', 'eslint:register']);
+      await this.#exec(Runtime.packageCommand('trv'), ['eslint:register']);
     }
 
     yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDirectory }} `;

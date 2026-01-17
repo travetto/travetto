@@ -79,7 +79,7 @@ export class PackageUtil {
       modulePath.endsWith('.json') ? modulePath : path.resolve(modulePath, 'package.json'),
     );
 
-    nodePackage.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
+    nodePackage.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for execution
 
     nodePackage[PackagePathSymbol] = modulePath;
     return nodePackage;

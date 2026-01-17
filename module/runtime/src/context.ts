@@ -69,8 +69,9 @@ class $Runtime {
   }
 
   /** Get trv entrypoint */
-  get trvEntryPoint(): string {
-    return this.workspaceRelative('node_modules', '.bin', 'trv');
+  packageCommand(cmd: string, relative = false): string {
+    const relativePath = `node_modules/.bin/${cmd}`;
+    return relative ? relativePath : this.workspaceRelative(relativePath);
   }
 
   /** Produce a workspace relative path */
