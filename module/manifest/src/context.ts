@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-import type { Package } from './types/package.ts';
+import { type Package, PACKAGE_MANAGERS } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 
 type Pkg = Package & { path: string };
@@ -45,7 +45,11 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
  * Gets build context
  */
 export function getManifestContext(root: string = process.cwd()): ManifestContext {
-  const workspace = findPackage(root, pkg => !!pkg?.workspaces || !!pkg?.travetto?.build?.isolated);
+  const workspace = findPackage(root, pkg =>
+    !!pkg?.workspaces ||
+    !!pkg?.travetto?.build?.isolated ||
+    (!!pkg && existsSync(path.resolve(pkg.path, 'pnpm-workspace.yaml')))
+  );
   if (workspace.type !== 'module') {
     throw new Error('Only ESM modules are supported, package.json must be of type module');
   }
@@ -58,12 +62,15 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
     readPackage(resolve(`${moduleName}/package.json`)) :
     findPackage(root, pkg => !!pkg) ?? workspace;
 
+  const manager = PACKAGE_MANAGERS.find(item =>
+    item.files.some(file => existsSync(path.resolve(workspace.path, file))));
+
   return {
     workspace: {
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: existsSync(path.resolve(workspace.path, 'yarn.lock')) ? 'yarn' : 'npm'
+      manager: manager?.type ?? 'npm'
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,

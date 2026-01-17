@@ -5,9 +5,8 @@ import { existsSync } from 'node:fs';
 import path from './path.ts';
 import { ManifestFileUtil } from './file.ts';
 
-import { PackagePathSymbol, type Package, type PackageWorkspaceEntry } from './types/package.ts';
+import { PackagePathSymbol, type Package, type PackageWorkspaceEntry, type NodePackageManager } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
-import type { NodePackageManager } from './types/common.ts';
 
 /**
  * Utilities for querying, traversing and reading package.json files.
@@ -126,5 +125,14 @@ export class PackageUtil {
       case 'yarn': install = `yarn add ${production ? '' : '--dev '}${pkg}`; break;
     }
     return install;
+  }
+
+  /**
+   * Get install example for a given package
+   */
+  static getInstallInstructions(pkg: string): string {
+    return (['npm', 'yarn'] as const)
+      .map(cmd => this.getInstallCommand({ workspace: { manager: cmd } }, pkg))
+      .join('\n\n# or\n\n');
   }
 }

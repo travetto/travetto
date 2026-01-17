@@ -8,7 +8,7 @@ import { CommonUtil } from '../src/common.ts';
 import { EventUtil } from '../src/event.ts';
 
 const HELP = `
-npx trvc [command]
+trvc [command]
 
 Available Commands:
  * start|watch                  - Run the compiler in watch mode

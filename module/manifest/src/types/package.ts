@@ -3,6 +3,13 @@ import type { ManifestContext } from './context.ts';
 
 export const PackagePathSymbol = Symbol.for('@travetto/manifest:package-path');
 
+export const PACKAGE_MANAGERS = [
+  { files: ['yarn.lock'], type: 'yarn', runner: 'npx' },
+  { files: ['package-lock.json'], type: 'npm', runner: 'npx' },
+] as const;
+
+export type NodePackageManager = (typeof PACKAGE_MANAGERS)[number]['type'];
+
 export type Package = {
   [PackagePathSymbol]?: string;
   name: string;
