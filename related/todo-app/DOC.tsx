@@ -79,7 +79,7 @@ $ ${d.workspaceInitCommand()}
 $ ${d.installCommand('@travetto/{log,web-http,model-mongo,cli}', true)}
 $ ${d.installCommand('@travetto/{eslint,compiler,test}')}
 
-$ ${d.packageCommand('trv', ['eslint:register'])}
+$ ${d.trv} eslint:register
 `} />
     </c.Section>
     <c.Section title='Establishing The Model'>
@@ -139,7 +139,7 @@ $ ${d.packageCommand('trv', ['eslint:register'])}
       First we must start the application:
 
       <c.Terminal
-        title='Start the Application' src={d.packageCommand('trv', ['web:http'])}
+        title='Start the Application' src={`${d.trv} web:http`}
       />
 
       <c.Terminal title='Application Startup' src={startupOutput} />

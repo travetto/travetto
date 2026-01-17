@@ -98,17 +98,17 @@ export const text = <>
 
         <c.Terminal title='Sample environment flags' src={`
 # Debug
-$ DEBUG=-@travetto/model ${d.packageCommand('trv', ['run', 'app'])}
-$ DEBUG=-@travetto/registry ${d.packageCommand('trv', ['run', 'app'])}
-$ DEBUG=@travetto/web ${d.packageCommand('trv', ['run', 'app'])}
-$ DEBUG=@travetto/*,-@travetto/model ${d.packageCommand('trv', ['run', 'app'])}
+$ DEBUG=-@travetto/model ${d.trv} run app
+$ DEBUG=-@travetto/registry ${d.trv} run app
+$ DEBUG=@travetto/web ${d.trv} run app
+$ DEBUG=@travetto/*,-@travetto/model ${d.trv} run app
 `} />
 
         Additionally, the logging framework will merge {d.library('Debug')} into the output stream, and supports the standard usage
 
         <c.Terminal title='Sample environment flags for standard usage' src={`
 # Debug
-$ DEBUG=express:*,@travetto/web ${d.packageCommand('trv', ['run', 'web'])}
+$ DEBUG=express:*,@travetto/web ${d.trv} run web
 `} />
       </c.SubSubSection>
     </c.SubSection>

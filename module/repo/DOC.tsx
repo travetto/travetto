@@ -19,7 +19,7 @@ export const text = <>
 
     Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
 
-    <c.Terminal title='Cutting a release candidate' src={d.packageCommand('trv', ['repo:version', 'prerelease', 'rc'])} />
+    <c.Terminal title='Cutting a release candidate' src={`${d.trv} repo:version prerelease rc`} />
 
     After a release is cut, a new commit will be created that marks the next stable point in the commit history.
 
@@ -40,7 +40,7 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
 
     By default the tool will execute a dry run only, and requires passing a flag to disable the dry run.
 
-    <c.Terminal title='Publishing changes' src={d.packageCommand('trv', ['repo:publish', '--no-dry-run'])} />
+    <c.Terminal title='Publishing changes' src={`${d.trv} repo:publish --no-dry-run`} />
 
     If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.
   </c.Section>

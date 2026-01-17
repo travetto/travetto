@@ -25,7 +25,7 @@ export const text = async () => {
       The configuration, while not necessary, makes it easy to consistently configure and generate the appropriate client.
 
       <c.Terminal title="Example Client Generation" src={`
-        ${d.packageCommand('trv', ['web:rpc-client', 'config'])}  
+        ${d.trv} web:rpc-client config  
       `} />
 
       You can manually invoke the client generation, but once configured, it will run automatically when running the web server as well.

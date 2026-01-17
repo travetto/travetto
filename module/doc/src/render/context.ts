@@ -56,7 +56,7 @@ export class RenderContext {
    * Get rebuilt comment
    */
   get rebuildStamp(): string {
-    return `Please modify ${this.file.replace(this.repoRoot, this.baseUrl)} and execute "${d.packageCommand('trv', ['doc'])}" to rebuild`;
+    return `Please modify ${this.file.replace(this.repoRoot, this.baseUrl)} and execute "${d.trv} doc" to rebuild`;
   }
 
   /**
