@@ -71,26 +71,28 @@ export class DocRunUtil {
     return text;
   }
 
-  static spawnOptions(config: RunConfig & SpawnOptions): SpawnOptions {
-    return {
-      ...config,
-      cwd: config.workingDirectory ?? this.workingDirectory(config),
-      env: {
-        ...process.env,
-        ...Env.DEBUG.export(false),
-        ...Env.TRV_CLI_IPC.export(undefined),
-        ...Env.TRV_MANIFEST.export(''),
-        ...Env.TRV_BUILD.export('none'),
-        ...Env.TRV_ROLE.export(undefined),
-        ...Env.TRV_MODULE.export(config.module ?? ''),
-        ...config.env
-      }
-    };
-  }
-
-  static async handleRun(subProcess: ChildProcess, config: RunConfig): Promise<string> {
+  /**
+   * Run command synchronously and return output
+   */
+  static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
     let final: string;
     try {
+      const spawnCmd = config.spawn ?? spawn;
+      const subProcess = spawnCmd(cmd, args, {
+        ...config,
+        cwd: config.workingDirectory ?? this.workingDirectory(config),
+        env: {
+          ...process.env,
+          ...Env.DEBUG.export(false),
+          ...Env.TRV_CLI_IPC.export(undefined),
+          ...Env.TRV_MANIFEST.export(''),
+          ...Env.TRV_BUILD.export('none'),
+          ...Env.TRV_ROLE.export(undefined),
+          ...Env.TRV_MODULE.export(config.module ?? ''),
+          ...config.env
+        }
+      });
+
       const result = await ExecUtil.getResult(subProcess, { catch: true });
       if (!result.valid) {
         throw new Error(result.stderr);
@@ -105,19 +107,5 @@ export class DocRunUtil {
     }
 
     return this.cleanRunOutput(final, config);
-  }
-
-  /**
-   * Run command synchronously and return output
-   */
-  static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
-    return this.handleRun(spawn(cmd, args, this.spawnOptions(config)), config);
-  }
-
-  /**
-   * Run trv command
-   */
-  static async runPackageCommand(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
-    return this.handleRun(ExecUtil.spawnPackageCommand(cmd, args, this.spawnOptions(config)), config);
   }
 }

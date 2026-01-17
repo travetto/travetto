@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, DocRunUtil } from '@travetto/doc';
-import { Runtime } from '@travetto/runtime';
+import { ExecUtil, Runtime } from '@travetto/runtime';
 
 export const text = async () => {
-  await DocRunUtil.runPackageCommand('trv', ['web:rpc-client', 'config'], { workingDirectory: './doc-exec' });
+  await DocRunUtil.run('trv', ['web:rpc-client', 'config'], { workingDirectory: './doc-exec', spawn: ExecUtil.spawnPackageCommand });
 
   return <>
     <c.StdHeader />

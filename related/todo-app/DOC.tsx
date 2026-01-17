@@ -10,7 +10,7 @@ const port = 12555;
 async function init() {
   const startupBuffer: Buffer[] = [];
 
-  const cmd = ExecUtil.spawnPackageCommand('trv', ['web:http', '--no-restart-on-change'], DocRunUtil.spawnOptions({
+  DocRunUtil.run('trv', ['web:http', '--no-restart-on-change'], {
     env: {
       ...process.env,
       WEB_HTTP_PORT: `${port}`,
@@ -19,11 +19,15 @@ async function init() {
       ...Env.TRV_ROLE.export('std'),
       ...Env.TRV_LOG_PLAIN.export(false),
     },
-  }));
-
-  ShutdownManager.signal.addEventListener('abort', () => { cmd.kill(); });
-
-  cmd.stdout?.on('data', (chunk: Buffer) => startupBuffer.push(chunk));
+    spawn: (command, args, opts) => {
+      const subProcess = ExecUtil.spawnPackageCommand(command, args, {
+        ...opts,
+        signal: ShutdownManager.signal
+      });
+      subProcess.stdout?.on('data', (chunk: Buffer) => startupBuffer.push(chunk));
+      return subProcess;
+    },
+  });
 
   while (startupBuffer.length === 0) {
     await Util.blockingTimeout(100);

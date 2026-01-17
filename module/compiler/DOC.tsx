@@ -1,13 +1,14 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, DocRunUtil } from '@travetto/doc';
+import { ExecUtil } from '@travetto/runtime';
 
 const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /#/);
 
 export const text = async () => {
-  await DocRunUtil.runPackageCommand('trvc', ['build'], { workingDirectory: './doc-exec' });
+  await DocRunUtil.run('trvc', ['build'], { workingDirectory: './doc-exec', spawn: ExecUtil.spawnPackageCommand });
 
   const output =
-    (await DocRunUtil.runPackageCommand('trvc', ['help']))
+    (await DocRunUtil.run('trvc', ['help'], { spawn: ExecUtil.spawnPackageCommand }))
       .split('\n')
       .filter(x => x.trim().startsWith('*'))
       .map<[string, string]>(x => {
