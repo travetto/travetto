@@ -100,7 +100,7 @@ export class MongoModelService implements
   }
 
   async postConstruct(): Promise<void> {
-    this.client = await MongoClient.connect(this.config.url, this.config.options);
+    this.client = await MongoClient.connect(this.config.url, this.config.connectionOptions);
     this.#db = this.client.db(this.config.namespace);
     this.#bucket = new GridFSBucket(this.#db, {
       bucketName: ModelBlobNamespace,

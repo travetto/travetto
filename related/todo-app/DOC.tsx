@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, type DocJSXElementByFn, type DocJSXElement, isDocJSXElement, DocRunUtil } from '@travetto/doc';
 import { Model, type ModelType } from '@travetto/model';
-import { Env, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
+import { Env, ExecUtil, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
 
 const TodoRoot = d.ref('Todo App', RuntimeIndex.getModule('@travetto/todo-app')!.sourcePath);
 
@@ -10,7 +10,7 @@ const port = 12555;
 async function init() {
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.spawn('trv', ['web:http', '--no-restart-on-change'], {
+  DocRunUtil.run('trv', ['web:http', '--no-restart-on-change'], {
     env: {
       ...process.env,
       WEB_HTTP_PORT: `${port}`,
@@ -19,11 +19,15 @@ async function init() {
       ...Env.TRV_ROLE.export('std'),
       ...Env.TRV_LOG_PLAIN.export(false),
     },
+    spawn: (command, args, opts) => {
+      const subProcess = ExecUtil.spawnPackageCommand(command, args, {
+        ...opts,
+        signal: ShutdownManager.signal
+      });
+      subProcess.stdout?.on('data', (chunk: Buffer) => startupBuffer.push(chunk));
+      return subProcess;
+    },
   });
-
-  ShutdownManager.signal.addEventListener('abort', () => { cmd.kill(); });
-
-  cmd.stdout?.on('data', (chunk: Buffer) => startupBuffer.push(chunk));
 
   while (startupBuffer.length === 0) {
     await Util.blockingTimeout(100);
@@ -75,11 +79,11 @@ $ cd todo-project
 
 $ git init .
 
-$ npm init -f
-$ npm i @travetto/{log,web-http,model-mongo,cli}
-$ npm i -D @travetto/{eslint,compiler,test}
+$ ${d.workspaceInitCommand()}
+$ ${d.installCommand('@travetto/{log,web-http,model-mongo,cli}', true)}
+$ ${d.installCommand('@travetto/{eslint,compiler,test}')}
 
-$ npx trv eslint:register
+$ ${d.trv} eslint:register
 `} />
     </c.Section>
     <c.Section title='Establishing The Model'>
@@ -139,7 +143,7 @@ $ npx trv eslint:register
       First we must start the application:
 
       <c.Terminal
-        title='Start the Application' src='npx trv web:http'
+        title='Start the Application' src={`${d.trv} web:http`}
       />
 
       <c.Terminal title='Application Startup' src={startupOutput} />

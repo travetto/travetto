@@ -25,7 +25,7 @@ export const text = <>
 
     Once installed, using the linter is as simple as invoking it via the cli:
 
-    <c.Terminal title='Running the Linter' src='npx trv eslint' />
+    <c.Terminal title='Running the Linter' src={`${d.trv} eslint`} />
 
     Or pointing your IDE to reference the registered configuration file.
   </c.Section>

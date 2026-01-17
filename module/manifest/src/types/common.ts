@@ -1,5 +1,3 @@
-export type NodePackageManager = 'yarn' | 'npm';
-
 export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture' | 'md';
 export type ManifestModuleFolderType =
   '$root' | '$index' | '$package' |

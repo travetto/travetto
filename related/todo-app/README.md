@@ -31,8 +31,8 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,web-http,model-mongo,cli}
-$ npm i -D @travetto/{eslint,compiler,test}
+$ npm install @travetto/{log,web-http,model-mongo,cli}
+$ npm install --save-dev @travetto/{eslint,compiler,test}
 
 $ npx trv eslint:register
 ```

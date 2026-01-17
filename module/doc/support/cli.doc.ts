@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 
 import { PackageUtil } from '@travetto/manifest';
 import { ExecUtil, Env, Runtime, WatchUtil } from '@travetto/runtime';
@@ -51,7 +50,7 @@ export class DocCommand implements CliCommandShape {
     const [first, ...args] = process.argv.slice(2).filter(arg => !/(-w|--watch)/.test(arg));
     await WatchUtil.watchCompilerEvents('change', async ({ file }) => {
       if (file === this.input) {
-        const subProcess = spawn(process.argv0, [Runtime.trvEntryPoint, first, ...args], {
+        const subProcess = ExecUtil.spawnPackageCommand('trv', [first, ...args], {
           cwd: Runtime.mainSourcePath,
           env: { ...process.env, ...Env.TRV_QUIET.export(true) },
           stdio: 'inherit'

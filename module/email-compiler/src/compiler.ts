@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 
 import { TypedObject, RuntimeIndex, Runtime, BinaryUtil, ExecUtil } from '@travetto/runtime';
 import { type EmailCompiled, MailUtil, type EmailTemplateImport, type EmailTemplateModule } from '@travetto/email';
@@ -88,7 +87,7 @@ export class EmailCompiler {
    * Spawn the compiler for a given file
    */
   static async spawnCompile(file: string): Promise<boolean> {
-    const child = spawn(process.argv0, [Runtime.trvEntryPoint, 'email:compile', file], {
+    const child = ExecUtil.spawnPackageCommand('trv', ['email:compile', file], {
       cwd: Runtime.mainSourcePath,
       env: { ...process.env },
     });

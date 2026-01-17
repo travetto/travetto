@@ -1,8 +1,10 @@
-import { type ChildProcess } from 'node:child_process';
+import path from 'node:path';
+import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
 
 import { castTo } from './types.ts';
+import { RuntimeIndex } from './manifest-index.ts';
 
 const ResultSymbol = Symbol();
 
@@ -109,5 +111,15 @@ export class ExecUtil {
     for await (const item of createInterface(stream)) {
       await handler(item);
     }
+  }
+
+  /** Resolve a package command tied to workspace */
+  static resolvePackageCommand(cmd: string): string {
+    return path.resolve(RuntimeIndex.manifest.workspace.path, 'node_modules', '.bin', cmd);
+  }
+
+  /** Spawn a package command */
+  static spawnPackageCommand(cmd: string, args: string[], config: SpawnOptions = {}): ChildProcess {
+    return spawn(process.argv0, [ExecUtil.resolvePackageCommand(cmd), ...args], config);
   }
 }

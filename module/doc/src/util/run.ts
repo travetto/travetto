@@ -1,6 +1,6 @@
 import os from 'node:os';
 import util from 'node:util';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import path from 'node:path';
 
 import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
@@ -62,32 +62,13 @@ export class DocRunUtil {
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
       .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
       .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, value) => value);
-    if (config.filter) {
-      text = text.split(/\n/g).filter(config.filter).join('\n');
-    }
-    if (config.rewrite) {
-      text = config.rewrite(text);
+    if (config.filter || config.rewrite) {
+      text = text.split(/\n/g)
+        .filter(line => config.filter?.(line) ?? true)
+        .map(line => config.rewrite?.(line) ?? line)
+        .join('\n');
     }
     return text;
-  }
-
-  /**
-   * Spawn command with appropriate environment, and cwd
-   */
-  static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
-    return spawn(cmd, args, {
-      cwd: config.workingDirectory ?? this.workingDirectory(config),
-      env: {
-        ...process.env,
-        ...Env.DEBUG.export(false),
-        ...Env.TRV_CLI_IPC.export(undefined),
-        ...Env.TRV_MANIFEST.export(''),
-        ...Env.TRV_BUILD.export('none'),
-        ...Env.TRV_ROLE.export(undefined),
-        ...Env.TRV_MODULE.export(config.module ?? ''),
-        ...config.env
-      }
-    });
   }
 
   /**
@@ -96,7 +77,22 @@ export class DocRunUtil {
   static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
     let final: string;
     try {
-      const subProcess = this.spawn(cmd, args, config);
+      const spawnCmd = config.spawn ?? spawn;
+      const subProcess = spawnCmd(cmd, args, {
+        ...config,
+        cwd: config.workingDirectory ?? this.workingDirectory(config),
+        env: {
+          ...process.env,
+          ...Env.DEBUG.export(false),
+          ...Env.TRV_CLI_IPC.export(undefined),
+          ...Env.TRV_MANIFEST.export(''),
+          ...Env.TRV_BUILD.export('none'),
+          ...Env.TRV_ROLE.export(undefined),
+          ...Env.TRV_MODULE.export(config.module ?? ''),
+          ...config.env
+        }
+      });
+
       const result = await ExecUtil.getResult(subProcess, { catch: true });
       if (!result.valid) {
         throw new Error(result.stderr);

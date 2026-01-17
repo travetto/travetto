@@ -25,11 +25,11 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "npx trvc build",    
-    {{#module_web}}"start": "npx trv web:http",{{/module_web}}
-    {{#module_test}}"test": "npx trv test",{{/module_test}}
-    {{#module_eslint}}"lint": "npx trv eslint",{{/module_eslint}}
-    "watch": "npx trvc watch"
+    "build": "trvc build",    
+    {{#module_web}}"start": "trv web:http",{{/module_web}}
+    {{#module_test}}"test": "trv test",{{/module_test}}
+    {{#module_eslint}}"lint": "trv eslint",{{/module_eslint}}
+    "watch": "trvc watch"
   },
   "files": [
     "src",

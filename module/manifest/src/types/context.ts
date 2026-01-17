@@ -1,4 +1,4 @@
-import type { NodePackageManager } from './common.ts';
+import type { NodePackageManager } from './package.ts';
 
 export type ManifestContext = {
   workspace: {

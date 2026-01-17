@@ -170,9 +170,10 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 $ trv pack:docker -x /dev/stdout web:http
 
 #!/bin/sh
-export DIST=/tmp/<temp-folder>
-export TRV_OUT=<workspace-root>/.trv/output
 export ROOT=<workspace-root>/related/todo-app
+export TRV_OUT=<workspace-root>/.trv/output
+export REPO_ROOT=<workspace-root>
+export DIST=/tmp/<temp-folder>
 export MODULE=@travetto/todo-app
 
 # Cleaning Output $DIST 
@@ -225,7 +226,7 @@ cp -r -p $ROOT/resources/* $DIST/resources
 
 echo "Writing Manifest manifest.json"
 
-TRV_MODULE=$MODULE npx trvc manifest:production $DIST/manifest.json
+TRV_MODULE=$MODULE node $REPO_ROOT/node_modules/.bin/trvc manifest:production $DIST/manifest.json
 
 # Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv.ts 
 
@@ -240,7 +241,7 @@ export BUNDLE_OUTPUT=$DIST
 export BUNDLE_ENV_FILE=.env
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MODULE
 cd $TRV_OUT
-npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
+node $REPO_ROOT/node_modules/.bin/rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT
 
 # Pulling Docker Base Image node:25-alpine 

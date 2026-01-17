@@ -4,7 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 import { IndexedFile, IndexedModule, type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil } from '@travetto/manifest';
-import type { CompilerStateType } from '@travetto/compiler/support/types.ts';
+import type { CompilerStateType } from '@travetto/compiler/src/types.ts';
 
 const SUFFIXES = ['.ts', '.js', '.tsx', '.jsx', '.d.ts'];
 

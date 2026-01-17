@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-import type { Package } from './types/package.ts';
+import { type Package, PACKAGE_MANAGERS } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 
 type Pkg = Package & { path: string };
@@ -63,7 +63,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: existsSync(path.resolve(workspace.path, 'yarn.lock')) ? 'yarn' : 'npm'
+      manager: PACKAGE_MANAGERS.find(item => existsSync(path.resolve(workspace.path, item.lock)))?.type ?? 'npm'
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,

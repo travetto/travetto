@@ -29,12 +29,7 @@ $ npx &#64;travetto/scaffold&#64;<span class="token operator">&lt;</span>version
 The generator will ask about enabling the following features:
 <h2 id="web-application">Web Application</h2>
 
-The <a class="module-link" routerLink="/docs/web" title="Declarative support for creating Web Applications">Web API</a> provides the necessary integration for exposing web apis.  When selecting the <code class="item input">web</code> feature, you will need to specify which backend you want to include with your application, the default being <a target="_blank" class="external-link" href="https://expressjs.com">express</a>.  Currently you can select from:
-<ul> <li><a target="_blank" class="external-link" href="https://expressjs.com">express</a></li>
-<li><a target="_blank" class="external-link" href="https://koajs.com/">koa</a></li>
-<li><a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a></li>
-</ul>
-The code will establish some basic endpoints, specifically, <code class="item input">GET /</code> as the root endpoint.  This will return the contents of your <code class="item path">package.json</code> as an identification operation.
+The <a class="module-link" routerLink="/docs/web" title="Declarative support for creating Web Applications">Web API</a> provides the necessary integration for exposing web apis, leveraging <a class="module-link" routerLink="/docs/web-http" title="Web HTTP Server Support">Web HTTP Server Support</a>.   The code will establish some basic endpoints, specifically, <code class="item input">GET /</code> as the root endpoint.  This will return the contents of your <code class="item path">package.json</code> as an identification operation.
 <h3 id="additional-web-features">Additional Web Features</h3>
 
 In addition to the core functionality, the <code class="item input">web</code> feature has some useful sub-features.  Specifically:<br><br>
@@ -54,7 +49,9 @@ Authentication is also supported on the Web endpoints by selecting <a class="mod
 The <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
 <ul> <li><a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a></li>
 <li><a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a></li>
-<li><a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a></li>
+<li><a target="_blank" class="external-link" href="https://postgresql.org">Postgres</a></li>
+<li><a target="_blank" class="external-link" href="https://www.mysql.com/">MySQL</a></li>
+<li><a target="_blank" class="external-link" href="https://www.sqlite.org/">SQLite</a></li>
 <li><a target="_blank" class="external-link" href="https://aws.amazon.com/dynamodb/">DynamoDB</a></li>
 <li><a target="_blank" class="external-link" href="https://firebase.google.com/docs/firestore">Firestore</a></li>
 </ul>

@@ -1,4 +1,5 @@
-import { castTo, TypedObject } from '@travetto/runtime';
+import { castTo, Runtime, TypedObject } from '@travetto/runtime';
+import { PackageUtil } from '@travetto/manifest';
 
 import type { LIBRARIES } from './mapping/library.ts';
 import type { MODULES } from './mapping/module.ts';
@@ -105,4 +106,7 @@ export const d = {
   field: (name: string) => createElement(c.Field, { name }),
   library: (name: keyof typeof LIBRARIES) => createElement(c.Library, { name }),
   module: (name: keyof typeof MODULES) => createElement(c.Module, { name }),
+  installCommand: (pkg: string, production?: boolean) => PackageUtil.getInstallCommand(Runtime, pkg, production),
+  workspaceInitCommand: () => PackageUtil.getWorkspaceInitCommand(Runtime),
+  get trv() { return PackageUtil.getPackageCommand(Runtime, 'trv'); },
 };

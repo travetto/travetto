@@ -28,8 +28,8 @@ export class ESLintCommand implements CliCommandShape {
   async main(): Promise<void> {
     const paths = await CliModuleUtil.findChangedPaths({ changed: this.changed, since: this.since, logError: true });
 
-    const result = await ExecUtil.getResult(spawn('npx', [
-      'eslint',
+    const result = await ExecUtil.getResult(spawn(process.argv0, [
+      Runtime.workspaceRelative('node_modules', '.bin', 'eslint'),
       '--cache',
       '--cache-location', Runtime.toolPath('.eslintcache'),
       ...(this.format ? ['--format', this.format] : []),

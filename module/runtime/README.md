@@ -51,8 +51,6 @@ class $Runtime {
   get monoRoot(): boolean;
   /** Main source path */
   get mainSourcePath(): string;
-  /** Get trv entrypoint */
-  get trvEntryPoint(): string;
   /** Produce a workspace relative path */
   workspaceRelative(...parts: string[]): string;
   /** Strip off the workspace path from a file */
@@ -323,7 +321,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L40) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L42) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 
