@@ -41,11 +41,17 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
   return pkg;
 }
 
+const WORKSPACE_FILES = PACKAGE_MANAGERS.map(x => x.workspaceFile!).filter(Boolean);
+
 /**
  * Gets build context
  */
 export function getManifestContext(root: string = process.cwd()): ManifestContext {
-  const workspace = findPackage(root, pkg => !!pkg?.workspaces || !!pkg?.travetto?.build?.isolated);
+  const workspace = findPackage(root, pkg =>
+    !!pkg?.workspaces ||
+    !!pkg?.travetto?.build?.isolated ||
+    (!!pkg && WORKSPACE_FILES.some(file => existsSync(path.resolve(pkg.path, file))))
+  );
   if (workspace.type !== 'module') {
     throw new Error('Only ESM modules are supported, package.json must be of type module');
   }

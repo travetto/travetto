@@ -1,10 +1,13 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { Runtime } from '@travetto/runtime';
+import { PACKAGE_MANAGERS } from '@travetto/manifest';
+
+const PACKAGE_MANAGER_LIST = PACKAGE_MANAGERS.map((manager, i) => i === 0 ? [d.library(manager.title)] : ['/', d.library(manager.title)]);
 
 export const text = <>
   <c.StdHeader />
-  The repo module aims to provide concise monorepo based tools.  The monorepo support within the {d.library('Travetto')} framework, is based on {d.library('Npm')}/{d.library('Yarn')} workspaces.  This module is not a requirement for monorepo support, but provides some quality of life improvements for:
+  The repo module aims to provide concise monorepo based tools.  The monorepo support within the {d.library('Travetto')} framework, is backed by the built in functionality of {PACKAGE_MANAGER_LIST}.  This module is not a requirement for monorepo support, but provides some quality of life improvements for:
   <ul>
     <li>Versioning releases</li>
     <li>Publishing releases</li>
@@ -13,7 +16,7 @@ export const text = <>
   </ul>
 
   <c.Section title='CLI - Version'>
-    The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by {d.library('Npm')}'s and {d.library('Yarn')}'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
+    The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by {PACKAGE_MANAGER_LIST}'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
 
     <c.Execution title='Version execution' cmd='trv' args={['repo:version', '-h']} />
 

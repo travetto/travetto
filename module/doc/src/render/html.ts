@@ -11,6 +11,7 @@ import { LIBRARIES } from '../mapping/library.ts';
 import type { RenderContext } from './context.ts';
 import { DocResolveUtil } from '../util/resolve.ts';
 import type { JSXElement } from '../../support/jsx-runtime.ts';
+import { PackageDocUtil } from '../util/package.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 const ENTITY_REGEX = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');
@@ -52,7 +53,7 @@ export const Html: RenderProvider<RenderContext> = {
   },
   Install: async ({ context, node }) => {
     const highlighted = highlight(`
-${PackageUtil.getInstallInstructions(node.props.pkg, true)}
+${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
 `, 'bash');
 
     return `\n

@@ -1,3 +1,5 @@
+import { PACKAGE_MANAGERS } from '@travetto/manifest';
+
 export type Feature = {
   title?: string;
   package?: string | string[];
@@ -15,10 +17,7 @@ export type Feature = {
 export const FEATURES: Feature[] = [
   {
     title: 'Package Manager',
-    choices: [
-      { title: 'NPM', field: 'packageManager', value: 'npm' },
-      { title: 'Yarn', field: 'packageManager', value: 'yarn' }
-    ],
+    choices: PACKAGE_MANAGERS.map(manager => ({ title: manager.title, field: 'packageManager', value: manager.type })),
     required: true,
     default: 'npm'
   },

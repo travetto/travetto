@@ -196,14 +196,14 @@ export class Context {
     switch (this.packageManager) {
       case 'npm': await this.#exec('npm', ['i']); break;
       case 'yarn': await this.#exec('yarn', []); break;
-      default: throw new Error(`Unknown package manager: ${this.packageManager} `);
+      case 'pnpm': await this.#exec('pnpm', ['install']); break;
     }
 
     yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
     switch (this.packageManager) {
       case 'npm': await this.#exec('npm', ['update', '-S']); break;
       case 'yarn': await this.#exec('yarn', ['upgrade']); break;
-      default: throw new Error(`Unknown package manager: ${this.packageManager} `);
+      case 'pnpm': await this.#exec('pnpm', ['update', '--latest']); break;
     }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;

@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c, type DocJSXElementByFn, type DocJSXElement, isDocJSXElement, DocRunUtil } from '@travetto/doc';
+import { d, c, type DocJSXElementByFn, type DocJSXElement, isDocJSXElement, DocRunUtil, PackageDocUtil } from '@travetto/doc';
 import { Model, type ModelType } from '@travetto/model';
 import { Env, ExecUtil, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
 
@@ -79,9 +79,9 @@ $ cd todo-project
 
 $ git init .
 
-$ ${d.workspaceInitCommand()}
-$ ${d.installCommand('@travetto/{log,web-http,model-mongo,cli}', true)}
-$ ${d.installCommand('@travetto/{eslint,compiler,test}')}
+$ ${PackageDocUtil.getWorkspaceInitCommand()}
+$ ${PackageDocUtil.getInstallCommand('@travetto/{log,web-http,model-mongo,cli}', true)}
+$ ${PackageDocUtil.getInstallCommand('@travetto/{eslint,compiler,test}')}
 
 $ ${d.trv} eslint:register
 `} />

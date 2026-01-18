@@ -9,6 +9,7 @@ import { MODULES } from '../mapping/module.ts';
 import { LIBRARIES } from '../mapping/library.ts';
 import type { RenderContext } from './context.ts';
 import { DocResolveUtil } from '../util/resolve.ts';
+import { PackageDocUtil } from '../util/package.ts';
 
 export const Markdown: RenderProvider<RenderContext> = {
   ext: 'md',
@@ -55,7 +56,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   Install: async ({ context, node }) =>
     `\n\n**Install: ${node.props.title}**
 \`\`\`bash
-${PackageUtil.getInstallInstructions(node.props.pkg, true)}
+${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
 \`\`\`
 `,
   Code: async ({ context, node, props }) => {

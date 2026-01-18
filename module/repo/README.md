@@ -13,14 +13,14 @@ npm install @travetto/repo
 yarn add @travetto/repo
 ```
 
-The repo module aims to provide concise monorepo based tools.  The monorepo support within the [Travetto](https://travetto.dev) framework, is based on [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)/[Yarn](https://yarnpg.com) workspaces.  This module is not a requirement for monorepo support, but provides some quality of life improvements for:
+The repo module aims to provide concise monorepo based tools.  The monorepo support within the [Travetto](https://travetto.dev) framework, is backed by the built in functionality of [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)/[Yarn](https://yarnpkg.com).  This module is not a requirement for monorepo support, but provides some quality of life improvements for:
    *  Versioning releases
    *  Publishing releases
    *  Listing local modules
    *  Running commands on all workspace modules
 
 ## CLI - Version
-The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)'s and [Yarn](https://yarnpg.com)'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
+The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)/[Yarn](https://yarnpkg.com)'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
 
 **Terminal: Version execution**
 ```bash

@@ -75,6 +75,8 @@ While running any code within the framework, there are common patterns/goals for
   <span class="token function">getImport</span><span class="token punctuation">(</span>handle<span class="token operator">:</span> <span class="token builtin">Function</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token comment">/** Import from a given path */</span>
   <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">importFrom</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>location<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token comment">/** Get an install command for a given npm module */</span>
+  <span class="token function">getInstallCommand</span><span class="token punctuation">(</span>pkg<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> production <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -359,7 +361,7 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="process-execution">Process Execution</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L42">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
 A simple example would be:
 
   <figure class="code">

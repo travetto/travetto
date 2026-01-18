@@ -134,7 +134,7 @@ The context contains:
    *  The location where all compiled code will be stored.  Defaults to: `.trv_output`. (*Can be overridden in your [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) in 'travetto.outputFolder'*)
    *  The location where the intermediate compiler will be created. Defaults to: `.trv_compiler`
    *  The location where tooling will be able to write to. Defaults to: `.trv_output`
-   *  Which package manager is in use [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://yarnpg.com)
+   *  Which package manager is in use [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)/[Yarn](https://yarnpkg.com)
    *  The main module version
    *  The main module description
    *  The framework version (based on @travetto/manifest)

@@ -2,8 +2,10 @@
 import path from 'node:path';
 
 import { d, c, COMMON_DATE } from '@travetto/doc';
-import { ManifestDeltaUtil, type ManifestRoot } from '@travetto/manifest';
+import { ManifestDeltaUtil, PACKAGE_MANAGERS, type ManifestRoot } from '@travetto/manifest';
 import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
+
+const PACKAGE_MANAGER_LIST = PACKAGE_MANAGERS.map((manager, i) => i === 0 ? [d.library(manager.title)] : ['/', d.library(manager.title)]);
 
 const DeltaRef = d.codeLink(ManifestDeltaUtil.name, 'src/delta.ts', new RegExp(`class ${ManifestDeltaUtil.name}`));
 
@@ -88,7 +90,7 @@ export const text = <>
         </li>
         <li>The location where the intermediate compiler will be created. Defaults to: {d.path('.trv_compiler')}</li>
         <li>The location where tooling will be able to write to. Defaults to: {d.path('.trv_output')}</li>
-        <li>Which package manager is in use {d.library('Npm')} or {d.library('Yarn')}</li>
+        <li>Which package manager is in use {PACKAGE_MANAGER_LIST}</li>
         <li>The main module version</li>
         <li>The main module description</li>
         <li>The framework version (based on @travetto/manifest)</li>
