@@ -18,7 +18,7 @@ export class PackageManager {
   /**
    * Is a module already published
    */
-  static isPublished(ctx: Ctx, module: IndexedModule): ChildProcess {
+  static getRemoteInfo(ctx: Ctx, module: IndexedModule): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'pnpm':
