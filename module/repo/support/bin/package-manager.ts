@@ -34,8 +34,8 @@ export class PackageManager {
       throw new Error(result.stderr);
     }
 
-    const parsed = JSONUtil.parseSafe<{ data: { dist?: { integrity?: string } } }>(result.stdout);
-    return parsed.data.dist?.integrity !== undefined;
+    const parsed = JSONUtil.parseSafe<{ data: { dist?: { integrity?: string } } }>(result.stdout || '{}');
+    return parsed.data?.dist?.integrity !== undefined;
   }
 
   /**
