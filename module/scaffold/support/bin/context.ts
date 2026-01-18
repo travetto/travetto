@@ -8,7 +8,6 @@ import { castKey, castTo, ExecUtil, JSONUtil, RuntimeIndex } from '@travetto/run
 import { cliTpl } from '@travetto/cli';
 import { type NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
-import { PackageManager } from '@travetto/repo';
 
 import type { Feature } from './features.ts';
 
@@ -67,8 +66,8 @@ export class Context {
       ExecUtil.readLines(subProcess.stderr,
         line => terminal.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
     }
-    return ExecUtil.getResult(subProcess).then(() => { });
 
+    return ExecUtil.getResult(subProcess).then(() => { });
   }
 
   get selfPath(): string {
@@ -93,26 +92,6 @@ export class Context {
       stdio: [0, 'pipe', 'pipe'],
       env: { PATH: process.env.PATH },
     };
-  }
-
-  installPackageDependences(): Promise<void> {
-    let args: string[];
-    switch (this.packageManager) {
-      case 'npm': args = ['install']; break;
-      case 'yarn': args = []; break;
-      case 'pnpm': args = ['install']; break;
-    }
-    return this.#exec(this.packageManager, args);
-  }
-
-  ensureLatestDependencies(): Promise<void> {
-    let args: string[];
-    switch (this.packageManager) {
-      case 'npm': args = ['update', '-S']; break;
-      case 'yarn': args = ['upgrade']; break;
-      case 'pnpm': args = ['update', '--latest']; break;
-    }
-    return this.#exec(this.packageManager, args);
   }
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
@@ -222,10 +201,18 @@ export class Context {
     await this.templateResolvedFiles();
 
     yield cliTpl`${{ type: 'Installing dependencies' }} `;
-    await this.installPackageDependences();
+    switch (this.packageManager) {
+      case 'npm': await this.#exec('npm', ['i']); break;
+      case 'yarn': await this.#exec('yarn', []); break;
+      case 'pnpm': await this.#exec('pnpm', ['install']); break;
+    }
 
     yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
-    await this.ensureLatestDependencies();
+    switch (this.packageManager) {
+      case 'npm': await this.#exec('npm', ['update', '-S']); break;
+      case 'yarn': await this.#exec('yarn', ['upgrade']); break;
+      case 'pnpm': await this.#exec('pnpm', ['update', '--latest']); break;
+    }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
     await this.#exec('trvc', ['build'], { spawn: ExecUtil.spawnPackageCommand });
