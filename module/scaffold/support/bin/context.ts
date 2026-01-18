@@ -86,14 +86,6 @@ export class Context {
     return JSONUtil.readFile<Listing>(this.source('listing.json'));
   }
 
-  get execOptions(): SpawnOptions {
-    return {
-      cwd: this.destination(),
-      stdio: [0, 'pipe', 'pipe'],
-      env: { PATH: process.env.PATH },
-    };
-  }
-
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
     const listing = Object.entries(await this.sourceListing)
       .filter(([, entry]) => !entry.requires ||
