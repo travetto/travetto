@@ -3,13 +3,15 @@ import type { ManifestContext } from './context.ts';
 
 export const PackagePathSymbol = Symbol.for('@travetto/manifest:package-path');
 
-export const PACKAGE_MANAGERS = [
-  { lock: 'package-lock.json', type: 'npm', title: 'Npm', workspaceFile: undefined },
-  { lock: 'yarn.lock', type: 'yarn', title: 'Yarn', workspaceFile: undefined },
-  { lock: 'pnpm-lock.yaml', type: 'pnpm', workspaceFile: 'pnpm-workspace.yaml', title: 'Pnpm' }
+const ALL_PACKAGE_MANAGERS = [
+  { lock: 'package-lock.json', type: 'npm', title: 'Npm', workspaceFile: undefined, active: true },
+  { lock: 'yarn.lock', type: 'yarn', title: 'Yarn', workspaceFile: undefined, active: true },
+  { lock: 'pnpm-lock.yaml', type: 'pnpm', workspaceFile: 'pnpm-workspace.yaml', title: 'Pnpm', active: false }
 ] as const;
 
-export type NodePackageManager = (typeof PACKAGE_MANAGERS)[number]['type'];
+export type NodePackageManager = (typeof ALL_PACKAGE_MANAGERS)[number]['type'];
+
+export const PACKAGE_MANAGERS = ALL_PACKAGE_MANAGERS.filter(manager => manager.active);
 
 export type Package = {
   [PackagePathSymbol]?: string;
