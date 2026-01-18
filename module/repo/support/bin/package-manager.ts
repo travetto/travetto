@@ -2,7 +2,7 @@ import path from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { ExecUtil, type ExecutionResult, JSONUtil } from '@travetto/runtime';
+import { ExecUtil, type ExecutionResult } from '@travetto/runtime';
 import { type IndexedModule, type ManifestContext, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -21,11 +21,10 @@ export class PackageManager {
   static isPublished(ctx: Ctx, module: IndexedModule): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
-      case 'npm':
-        args = ['show', `${module.name}@${module.version}`, 'version', '--json'];
-        break;
+      case 'pnpm':
       case 'yarn':
-        args = ['info', `${module.name}@${module.version}`, 'dist.integrity', '--json'];
+      case 'npm':
+        args = ['info', `${module.name}@${module.version}`, '--json'];
         break;
     }
     return spawn(ctx.workspace.manager, args, { cwd: module.sourceFolder });
@@ -35,18 +34,16 @@ export class PackageManager {
    * Validate published result
    */
   static validatePublishedResult(ctx: Ctx, module: IndexedModule, result: ExecutionResult<string>): boolean {
+    if (!result.valid && !result.stderr.includes('E404')) {
+      throw new Error(result.stderr);
+    }
+
     switch (ctx.workspace.manager) {
-      case 'npm': {
-        if (!result.valid && !result.stderr.includes('E404')) {
-          throw new Error(result.stderr);
-        }
-        const item: (string[] | string) = result.stdout ? JSONUtil.parseSafe(result.stdout) : [];
-        const found = Array.isArray(item) ? item.pop() : item;
-        return !!found && found === module.version;
-      }
+      case 'npm':
+      case 'pnpm':
       case 'yarn': {
-        const parsed = JSONUtil.parseSafe<{ data?: unknown }>(result.stdout);
-        return parsed.data !== undefined;
+        const parsed = JSON.parse(result.stdout);
+        return parsed.data.dist?.integrity !== undefined;
       }
     }
   }
@@ -59,6 +56,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
+      case 'pnpm':
       case 'yarn':
         args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...moduleArgs];
         break;
@@ -73,6 +71,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
+      case 'pnpm':
       case 'yarn':
         args = ['pack', '--dry-run'];
         break;
@@ -92,6 +91,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
+      case 'pnpm':
       case 'yarn':
         args = ['publish', '--tag', versionTag, '--access', 'public'];
         break;

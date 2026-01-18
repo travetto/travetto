@@ -1,14 +1,31 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+
 import type { ManifestModuleRole } from './common.ts';
 import type { ManifestContext } from './context.ts';
 
 export const PackagePathSymbol = Symbol.for('@travetto/manifest:package-path');
 
-export const PACKAGE_MANAGERS = [
-  { lock: 'yarn.lock', type: 'yarn', otherFiles: [] },
-  { lock: 'package-lock.json', type: 'npm', otherFiles: [] },
-] as const;
+export const PACKAGE_MANAGERS = {
+  yarn: {
+    lock: 'yarn.lock', type: 'yarn', otherFiles: [],
+    isWorkspace: (pkg: Package & { path?: string }) => pkg.workspaces,
+    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.yarn.lock))
+  },
+  npm: {
+    lock: 'package-lock.json', type: 'npm', otherFiles: [],
+    isWorkspace: (pkg: Package & { path?: string }) => pkg.workspaces,
+    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.npm.lock))
+  },
+  pnpm: {
+    lock: 'pnpm-lock.yaml', type: 'pnpm', otherFiles: ['pnpm-workspaces.yaml'],
+    workspaceFile: 'pnpm-workspaces.yaml',
+    isWorkspace: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.pnpm.workspaceFile)),
+    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.pnpm.lock))
+  },
+} as const;
 
-export type NodePackageManager = (typeof PACKAGE_MANAGERS)[number]['type'];
+export type NodePackageManager = keyof typeof PACKAGE_MANAGERS;
 
 export type Package = {
   [PackagePathSymbol]?: string;

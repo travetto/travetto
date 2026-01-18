@@ -13,7 +13,7 @@ const toPosix = (location: string): string => location.replaceAll('\\', '/');
 const readPackage = (file: string): Pkg => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: toPosix(path.dirname(file)) });
 
 /** Find package */
-function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
+function findPackage(base: string, pred: (_p: Pkg) => boolean): Pkg {
   let folder = `${base}/.`;
   let previous: string;
   let pkg: Pkg | undefined;
@@ -27,7 +27,7 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
     pkg = existsSync(folderPkg) ? readPackage(folderPkg) : pkg;
   } while (
     previous !== folder && // Not at root
-    !pred(pkg) && // Matches criteria
+    (!pkg || !pred(pkg)) && // Matches criteria
     !existsSync(path.resolve(folder, '.git')) // Not at source root
   );
 
@@ -45,7 +45,10 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
  * Gets build context
  */
 export function getManifestContext(root: string = process.cwd()): ManifestContext {
-  const workspace = findPackage(root, pkg => !!pkg?.workspaces || !!pkg?.travetto?.build?.isolated);
+  const workspace = findPackage(root, pkg =>
+    !!pkg.travetto?.build?.isolated ||
+    Object.values(PACKAGE_MANAGERS).some(manager => manager.isWorkspace(pkg))
+  );
   if (workspace.type !== 'module') {
     throw new Error('Only ESM modules are supported, package.json must be of type module');
   }
@@ -63,7 +66,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: PACKAGE_MANAGERS.find(item => existsSync(path.resolve(workspace.path, item.lock)))?.type ?? 'npm'
+      manager: Object.values(PACKAGE_MANAGERS).find(item => item.isActive(workspace))?.type ?? 'npm'
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,

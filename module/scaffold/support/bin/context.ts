@@ -185,26 +185,35 @@ export class Context {
     }
   }
 
-  async * install(): AsyncIterable<string | undefined> {
-
-    yield cliTpl`${{
-      type: 'Templating files'
-    }}`;
-    await this.templateResolvedFiles();
-
+  async * installPackageJson(): AsyncIterable<string> {
+    let args: string[];
     yield cliTpl`${{ type: 'Installing dependencies' }} `;
     switch (this.packageManager) {
-      case 'npm': await this.#exec('npm', ['i']); break;
-      case 'yarn': await this.#exec('yarn', []); break;
-      default: throw new Error(`Unknown package manager: ${this.packageManager} `);
+      case 'npm': args = ['i']; break;
+      case 'pnpm': args = ['i']; break;
+      case 'yarn': args = []; break;
     }
+    await this.#exec(this.packageManager, args);
+  }
 
+  async * updatePackages(): AsyncIterable<string> {
+    let args: string[];
     yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
     switch (this.packageManager) {
-      case 'npm': await this.#exec('npm', ['update', '-S']); break;
-      case 'yarn': await this.#exec('yarn', ['upgrade']); break;
-      default: throw new Error(`Unknown package manager: ${this.packageManager} `);
+      case 'npm': args = ['update', '-S']; break;
+      case 'pnpm': args = ['update', '--latest']; break;
+      case 'yarn': args = ['upgrade']; break;
     }
+    await this.#exec(this.packageManager, args);
+  }
+
+  async * install(): AsyncIterable<string | undefined> {
+
+    yield cliTpl`${{ type: 'Templating files' }}`;
+    await this.templateResolvedFiles();
+
+    yield* this.installPackageJson();
+    yield* this.updatePackages();
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
     await this.#exec('trvc', ['build'], { spawn: ExecUtil.spawnPackageCommand });

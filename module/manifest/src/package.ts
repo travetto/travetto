@@ -103,6 +103,10 @@ export class PackageUtil {
     } catch {
       let out: PackageWorkspaceEntry[];
       switch (ctx.workspace.manager) {
+        case 'pnpm': {
+          out = await this.#exec<{ path: string, name: string }[]>(rootPath, 'pnpm ls -r --depth -1 --json');
+          break;
+        }
         case 'yarn':
         case 'npm': {
           const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
@@ -123,6 +127,7 @@ export class PackageUtil {
     switch (ctx.workspace.manager) {
       case 'npm': install = `npm install ${production ? '' : '--save-dev '}${pkg}`; break;
       case 'yarn': install = `yarn add ${production ? '' : '--dev '}${pkg}`; break;
+      case 'pnpm': install = `pnpm add ${production ? '' : '--save-dev '}${pkg}`; break;
     }
     return install;
   }
@@ -134,6 +139,7 @@ export class PackageUtil {
     switch (ctx.workspace.manager) {
       case 'npm':
       case 'yarn': return `npx ${pkg} ${args.join(' ')}`.trim();
+      case 'pnpm': return `pnpx exec ${pkg} ${args.join(' ')}`.trim();
     }
   }
 
@@ -144,6 +150,7 @@ export class PackageUtil {
     switch (ctx.workspace.manager) {
       case 'npm': return 'npm init -f';
       case 'yarn': return 'yarn init -y';
+      case 'pnpm': return 'pnpm init -y';
     }
   }
 
@@ -151,7 +158,7 @@ export class PackageUtil {
    * Get install example for a given package
    */
   static getInstallInstructions(pkg: string, production = false): string {
-    return (['npm', 'yarn'] as const)
+    return (['npm', 'yarn', 'pnpm'] as const)
       .map(cmd => this.getInstallCommand({ workspace: { manager: cmd } }, pkg, production))
       .join('\n\n# or\n\n');
   }
