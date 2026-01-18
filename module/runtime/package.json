@@ -1,6 +1,6 @@
 {
   "name": "@travetto/runtime",
-  "version": "7.1.3",
+  "version": "7.1.4",
   "type": "module",
   "description": "Runtime for travetto applications.",
   "keywords": [
@@ -26,12 +26,12 @@
     "directory": "module/runtime"
   },
   "dependencies": {
-    "@travetto/manifest": "^7.1.2",
+    "@travetto/manifest": "^7.1.3",
     "@types/debug": "^4.1.12",
     "debug": "^4.4.3"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^7.1.2"
+    "@travetto/transformer": "^7.1.3"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

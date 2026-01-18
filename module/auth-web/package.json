@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-web",
-  "version": "7.1.3",
+  "version": "7.1.4",
   "type": "module",
   "description": "Web authentication integration support for the Travetto framework",
   "keywords": [
@@ -27,13 +27,13 @@
     "directory": "module/auth-web"
   },
   "dependencies": {
-    "@travetto/auth": "^7.1.3",
-    "@travetto/config": "^7.1.3",
-    "@travetto/web": "^7.1.3",
+    "@travetto/auth": "^7.1.4",
+    "@travetto/config": "^7.1.4",
+    "@travetto/web": "^7.1.4",
     "njwt": "^2.0.1"
   },
   "peerDependencies": {
-    "@travetto/test": "^7.1.3"
+    "@travetto/test": "^7.1.4"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
