@@ -3,12 +3,10 @@ import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process'
 import fs from 'node:fs/promises';
 
 import { type ExecutionResult, JSONUtil, Runtime } from '@travetto/runtime';
-import { type IndexedModule, type ManifestContext, type NodePackageManager, type Package, PackageUtil } from '@travetto/manifest';
+import { type IndexedModule, type NodePackageManager, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
-
-type Ctx = Omit<ManifestContext, 'build'>;
 
 /**
  * Utilities for working with package managers
