@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import path from './path.ts';
 import { ManifestFileUtil } from './file.ts';
 
-import { PackagePathSymbol, type Package, type PackageWorkspaceEntry, type NodePackageManager } from './types/package.ts';
+import { PackagePathSymbol, type Package, type PackageWorkspaceEntry } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 
 /**
@@ -105,54 +105,12 @@ export class PackageUtil {
       switch (ctx.workspace.manager) {
         case 'yarn':
         case 'npm': {
-          const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
-          out = workspaces.map(module => ({ path: path.resolve(ctx.workspace.path, module.location), name: module.name }));
+          out = await this.#exec<{ path: string, name: string }[]>(rootPath, 'npm query .workspace');
           break;
         }
       }
-      await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(out));
+      await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(out.map(item => ({ name: item.name, path: item.path }))));
       return out;
     }
-  }
-
-  /**
-   * Get an install command for a given npm module
-   */
-  static getInstallCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, production = false): string {
-    let install: string;
-    switch (ctx.workspace.manager) {
-      case 'npm': install = `npm install ${production ? '' : '--save-dev '}${pkg}`; break;
-      case 'yarn': install = `yarn add ${production ? '' : '--dev '}${pkg}`; break;
-    }
-    return install;
-  }
-
-  /**
-   * Get an the command for executing a package level binary
-   */
-  static getPackageCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, args: string[] = []): string {
-    switch (ctx.workspace.manager) {
-      case 'npm':
-      case 'yarn': return `npx ${pkg} ${args.join(' ')}`.trim();
-    }
-  }
-
-  /**
-   * Get an the command for executing a package level binary
-   */
-  static getWorkspaceInitCommand(ctx: { workspace: { manager: NodePackageManager } }): string {
-    switch (ctx.workspace.manager) {
-      case 'npm': return 'npm init -f';
-      case 'yarn': return 'yarn init -y';
-    }
-  }
-
-  /**
-   * Get install example for a given package
-   */
-  static getInstallInstructions(pkg: string, production = false): string {
-    return (['npm', 'yarn'] as const)
-      .map(cmd => this.getInstallCommand({ workspace: { manager: cmd } }, pkg, production))
-      .join('\n\n# or\n\n');
   }
 }

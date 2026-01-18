@@ -22,11 +22,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
-        args = ['show', `${module.name}@${module.version}`, 'version', '--json'];
-        break;
-      case 'yarn':
-        args = ['info', `${module.name}@${module.version}`, 'dist.integrity', '--json'];
-        break;
+      case 'yarn': args = ['info', `${module.name}@${module.version}`, '--json']; break;
     }
     return spawn(ctx.workspace.manager, args, { cwd: module.sourceFolder });
   }
@@ -35,20 +31,12 @@ export class PackageManager {
    * Validate published result
    */
   static validatePublishedResult(ctx: Ctx, module: IndexedModule, result: ExecutionResult<string>): boolean {
-    switch (ctx.workspace.manager) {
-      case 'npm': {
-        if (!result.valid && !result.stderr.includes('E404')) {
-          throw new Error(result.stderr);
-        }
-        const item: (string[] | string) = result.stdout ? JSONUtil.parseSafe(result.stdout) : [];
-        const found = Array.isArray(item) ? item.pop() : item;
-        return !!found && found === module.version;
-      }
-      case 'yarn': {
-        const parsed = JSONUtil.parseSafe<{ data?: unknown }>(result.stdout);
-        return parsed.data !== undefined;
-      }
+    if (!result.valid && !result.stderr.includes('E404')) {
+      throw new Error(result.stderr);
     }
+
+    const parsed = JSONUtil.parseSafe<{ data: { dist?: { integrity?: string } } }>(result.stdout);
+    return parsed.data.dist?.integrity !== undefined;
   }
 
   /**
@@ -59,11 +47,9 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
-      case 'yarn':
-        args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...moduleArgs];
-        break;
+      case 'yarn': args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : [])]; break;
     }
-    await ExecUtil.getResult(spawn(ctx.workspace.manager, args, { cwd: ctx.workspace.path, stdio: 'inherit' }));
+    await ExecUtil.getResult(spawn(ctx.workspace.manager, [...args, ...moduleArgs], { cwd: ctx.workspace.path, stdio: 'inherit' }));
   }
 
   /**
@@ -73,9 +59,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
-      case 'yarn':
-        args = ['pack', '--dry-run'];
-        break;
+      case 'yarn': args = ['pack', '--dry-run']; break;
     }
     return spawn(ctx.workspace.manager, args, { cwd: module.sourcePath });
   }
@@ -92,9 +76,7 @@ export class PackageManager {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
-      case 'yarn':
-        args = ['publish', '--tag', versionTag, '--access', 'public'];
-        break;
+      case 'yarn': args = ['publish', '--tag', versionTag, '--access', 'public']; break;
     }
     return spawn(ctx.workspace.manager, args, { cwd: module.sourcePath });
   }

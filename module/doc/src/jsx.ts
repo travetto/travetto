@@ -1,11 +1,11 @@
-import { castTo, Runtime, TypedObject } from '@travetto/runtime';
-import { PackageUtil } from '@travetto/manifest';
+import { castTo, TypedObject } from '@travetto/runtime';
 
 import type { LIBRARIES } from './mapping/library.ts';
 import type { MODULES } from './mapping/module.ts';
 import type { CodeProps, RunConfig } from './util/types.ts';
 
 import { createElement, type JSXElement, type JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
+import { PackageDocUtil } from './util/package.ts';
 
 type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
@@ -106,7 +106,5 @@ export const d = {
   field: (name: string) => createElement(c.Field, { name }),
   library: (name: keyof typeof LIBRARIES) => createElement(c.Library, { name }),
   module: (name: keyof typeof MODULES) => createElement(c.Module, { name }),
-  installCommand: (pkg: string, production?: boolean) => PackageUtil.getInstallCommand(Runtime, pkg, production),
-  workspaceInitCommand: () => PackageUtil.getWorkspaceInitCommand(Runtime),
-  get trv() { return PackageUtil.getPackageCommand(Runtime, 'trv'); },
+  get trv() { return PackageDocUtil.getPackageCommand('trv'); },
 };

@@ -136,6 +136,16 @@ class $Runtime {
     const imported = await import(location);
     return imported;
   }
+
+  /**
+   * Get an install command for a given npm module
+   */
+  getInstallCommand(pkg: string, production = false): string {
+    switch (this.workspace.manager) {
+      case 'npm': return `npm install ${production ? '' : '--save-dev '}${pkg}`;
+      case 'yarn': return `yarn add ${production ? '' : '--dev '}${pkg}`;
+    }
+  }
 }
 
 export const Runtime = new $Runtime(RuntimeIndex, Env.TRV_RESOURCE_OVERRIDES.object);
