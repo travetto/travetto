@@ -2,8 +2,7 @@ const cp = require('node:child_process');
 const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
 
-const toPosix = pth => pth.replaceAll('\\', '/');
-const loadPackage = (file) => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: toPosix(path.dirname(file)) });
+const loadPackage = (file) => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: path.dirname(file).replaceAll('\\', '/') });
 
 function findPackage(base, pred) {
   let folder = `${base}/.`;
@@ -52,32 +51,18 @@ let WORKSPACE_MODULES;
 
 function readPackage(pkg, context) {
   const workspacesMods = WORKSPACE_MODULES ??= collectModules();
-  if (!(pkg.name in workspacesMods)) {
-    return pkg;
-  }
-
-  if (workspacesMods[pkg.name].root) { // Monorepo root
-    for (const name of Object.keys(workspacesMods)) {
-      if (name !== pkg.name) {
-        (pkg.dependencies ??= {})[name] = 'workspace:*';
-      }
+  if (workspacesMods[pkg.name]?.root) { // Monorepo root
+    for (const name of Object.keys(workspacesMods).filter(x => x !== pkg.name)) {
+      (pkg.dependencies ??= {})[name] = 'workspace:*';
     }
-  } else {
+  } else if (pkg.name in workspacesMods) { // Non-root workspace module
     for (const key of ['dependencies', 'devDependencies', 'peerDependencies']) {
       for (const name of Object.keys(pkg[key] ?? {})) {
-        if (name in workspacesMods) {
-          delete pkg[key][name];
-        }
+        delete pkg[key][name];
       }
     }
   }
-
   return pkg;
 }
 
-
-module.exports = {
-  hooks: {
-    readPackage
-  }
-};
+module.exports = { hooks: { readPackage } };
