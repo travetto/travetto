@@ -22,6 +22,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
+    "predeploy": "rm -rf dist/ && ng build -c production",
     "deploy": "./deploy.sh"
   },
   "dependencies": {
