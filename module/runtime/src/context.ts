@@ -137,9 +137,7 @@ class $Runtime {
     return imported;
   }
 
-  /**
-   * Get an install command for a given npm module
-   */
+  /** Get an install command for a given npm module */
   getInstallCommand(pkg: string, production = false): string {
     switch (this.workspace.manager) {
       case 'npm': return `npm install ${production ? '' : '--save-dev '}${pkg}`;

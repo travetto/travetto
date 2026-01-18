@@ -98,12 +98,12 @@ export class PackageUtil {
       let args: string[];
       switch (ctx.workspace.manager) {
         case 'yarn':
-        case 'npm': args = ['workspaces', 'list', '--json']; break;
+        case 'npm': args = ['query', '.workspace']; break;
       }
 
       const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };
-      const text = execSync(`${ctx.workspace.manager} ${args.join(' ')}`, { cwd: rootPath, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).trim();
-      const out: PackageWorkspaceEntry[] = JSON.parse(text);
+      const text = execSync(`${ctx.workspace.manager} ${args.join(' ')}`, { cwd: rootPath, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] });
+      const out: PackageWorkspaceEntry[] = JSON.parse(text.trim());
       const filtered = out.map(item => ({ name: item.name, path: item.path }));
       await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(filtered));
       return filtered;
