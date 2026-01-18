@@ -118,7 +118,7 @@ export class CompilerWatcher {
     const ignore = await this.#getWatchIgnores();
     const packageFiles = new Set([
       'package.json',
-      ...Object.values(PACKAGE_MANAGERS).flatMap(x => [...x.otherFiles, x.lock])
+      ...Object.values(PACKAGE_MANAGERS).flatMap(x => x.importantFiles)
     ].map(file => path.resolve(this.#root, file)));
 
     log.debug('Ignore Globs', ignore);

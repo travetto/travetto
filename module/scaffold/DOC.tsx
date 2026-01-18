@@ -1,6 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
-import { PackageUtil } from '@travetto/manifest';
 import { Runtime } from '@travetto/runtime';
 
 import { Todo } from './doc/model.ts';
@@ -18,7 +17,7 @@ $ git config --global.username <Username> #Set your git username
 
   <c.Terminal title='Running Generator' src={
     ['', '@<version-or-tag>']
-      .map(v => `$ ${PackageUtil.getPackageCommand(Runtime, `@travetto/scaffold${v}`)}`)
+      .map(v => `$ ${Runtime.packageManager.execPackage('trv', [`@travetto/scaffold${v}`])}`)
       .join('\n\n# or\n\n')
   } />
 

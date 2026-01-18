@@ -46,7 +46,7 @@ export class RepoVersionCommand implements CliCommandShape {
       throw new Error('No modules available for versioning');
     }
 
-    await PackageManager.version(Runtime, modules, level, prefix);
+    await PackageManager.version(modules, level, prefix);
 
     const versions = await PackageManager.synchronizeVersions();
     if (this.commit) {

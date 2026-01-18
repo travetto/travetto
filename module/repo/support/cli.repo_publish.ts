@@ -1,5 +1,4 @@
 import { type CliCommandShape, CliCommand } from '@travetto/cli';
-import { Runtime } from '@travetto/runtime';
 
 import { PackageManager } from './bin/package-manager.ts';
 import { RepoExecUtil } from './bin/exec.ts';
@@ -14,11 +13,11 @@ export class RepoPublishCommand implements CliCommandShape {
   dryRun = true;
 
   async main(): Promise<void> {
-    const published = await RepoExecUtil.execOnModules('workspace', module => PackageManager.getRemoteInfo(Runtime, module), {
+    const published = await RepoExecUtil.execOnModules('workspace', module => PackageManager.getRemoteInfo(module), {
       filter: module => !!module.workspace && !module.internal,
       progressMessage: (module) => `Checking published [%idx/%total] -- ${module?.name}`,
       showStderr: false,
-      transformResult: (module, result) => PackageManager.validatePublishedResult(Runtime, module, result),
+      transformResult: (module, result) => PackageManager.validatePublishedResult(result),
     });
 
     if (this.dryRun) {
@@ -26,7 +25,7 @@ export class RepoPublishCommand implements CliCommandShape {
     }
 
     await RepoExecUtil.execOnModules(
-      'workspace', module => PackageManager.publish(Runtime, module, this.dryRun),
+      'workspace', module => PackageManager.publish(module, this.dryRun),
       {
         progressMessage: (module) => `Published [%idx/%total] -- ${module?.name}`,
         showStdout: false,

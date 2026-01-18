@@ -1,4 +1,3 @@
-import { PackageUtil } from '@travetto/manifest';
 import { Runtime } from '@travetto/runtime';
 
 import type { WebSecureKeyPair } from './types.ts';
@@ -18,7 +17,7 @@ export class WebTlsUtil {
     try {
       forge = (await import('node-forge')).default;
     } catch {
-      const install = PackageUtil.getInstallCommand(Runtime, 'node-forge');
+      const install = Runtime.packageManager.install('node-forge');
       throw new Error(`In order to generate TLS keys, you must install node-forge, "${install}"`);
     }
 

@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import path from './path.ts';
 import { ManifestFileUtil } from './file.ts';
 
-import { PackagePathSymbol, type Package, type PackageWorkspaceEntry, type NodePackageManager } from './types/package.ts';
+import { PackagePathSymbol, type Package, type PackageWorkspaceEntry, PACKAGE_MANAGERS } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 
 /**
@@ -16,12 +16,6 @@ export class PackageUtil {
   static #resolvers: Record<string, (imp: string) => string> = {};
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
-
-  static #exec<T>(workingDirectory: string, cmd: string): Promise<T> {
-    const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };
-    const text = execSync(cmd, { cwd: workingDirectory, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).toString().trim();
-    return JSON.parse(text);
-  }
 
   /**
    * Resolve import given a manifest context
@@ -101,56 +95,14 @@ export class PackageUtil {
     try {
       return this.#workspaces[rootPath] ??= ManifestFileUtil.readAsJsonSync<PackageWorkspaceEntry[]>(cache);
     } catch {
-      let out: PackageWorkspaceEntry[];
-      switch (ctx.workspace.manager) {
-        case 'pnpm': {
-          out = await this.#exec<{ path: string, name: string }[]>(rootPath, 'pnpm ls -r --depth -1 --json');
-          break;
-        }
-        case 'yarn':
-        case 'npm': {
-          const workspaces = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
-          out = workspaces.map(module => ({ path: path.resolve(ctx.workspace.path, module.location), name: module.name }));
-          break;
-        }
-      }
+      const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };
+      const cmd = execSync(PACKAGE_MANAGERS[ctx.workspace.manager].listWorkspace(), {
+        cwd: rootPath, encoding: 'utf8', env, stdio: ['pipe', 'pipe']
+      });
+
+      const out: PackageWorkspaceEntry[] = JSON.parse(cmd);
       await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(out));
       return out;
-    }
-  }
-
-  /**
-   * Get an install command for a given npm module
-   */
-  static getInstallCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, production = false): string {
-    let install: string;
-    switch (ctx.workspace.manager) {
-      case 'npm': install = `npm install ${production ? '' : '--save-dev '}${pkg}`; break;
-      case 'yarn': install = `yarn add ${production ? '' : '--dev '}${pkg}`; break;
-      case 'pnpm': install = `pnpm add ${production ? '' : '--save-dev '}${pkg}`; break;
-    }
-    return install;
-  }
-
-  /**
-   * Get an the command for executing a package level binary
-   */
-  static getPackageCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, args: string[] = []): string {
-    switch (ctx.workspace.manager) {
-      case 'npm':
-      case 'yarn': return `npx ${pkg} ${args.join(' ')}`.trim();
-      case 'pnpm': return `pnpx exec ${pkg} ${args.join(' ')}`.trim();
-    }
-  }
-
-  /**
-   * Get an the command for executing a package level binary
-   */
-  static getWorkspaceInitCommand(ctx: { workspace: { manager: NodePackageManager } }): string {
-    switch (ctx.workspace.manager) {
-      case 'npm': return 'npm init -f';
-      case 'yarn': return 'yarn init -y';
-      case 'pnpm': return 'pnpm init -y';
     }
   }
 
@@ -159,7 +111,7 @@ export class PackageUtil {
    */
   static getInstallInstructions(pkg: string, production = false): string {
     return (['npm', 'yarn', 'pnpm'] as const)
-      .map(cmd => this.getInstallCommand({ workspace: { manager: cmd } }, pkg, production))
+      .map(cmd => PACKAGE_MANAGERS[cmd].install(pkg, production))
       .join('\n\n# or\n\n');
   }
 }

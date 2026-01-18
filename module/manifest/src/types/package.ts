@@ -6,22 +6,73 @@ import type { ManifestContext } from './context.ts';
 
 export const PackagePathSymbol = Symbol.for('@travetto/manifest:package-path');
 
-export const PACKAGE_MANAGERS = {
+export type PackageManager<K extends string = string> = {
+  lock: string;
+  type: K;
+  workspaceFile?: string;
+  importantFiles: string[];
+  isWorkspace: (pkg: Package & { path?: string }) => boolean;
+  isActive: (pkg: Package & { path?: string }) => boolean;
+  install: (pkg: string, production?: boolean) => string;
+  workspaceInit: () => string;
+  installAll: () => string;
+  updateDependenciesToLatest: () => string;
+  execPackage: (pkg: string, args?: string[]) => string;
+  listWorkspace: () => string;
+  remoteInfo: (pkg: string, version: string) => string;
+  setVersion: (level: string, preid?: string) => string;
+  dryRunPack: () => string;
+  publish: (version: string) => string;
+};
+
+export const PACKAGE_MANAGERS: Record<'npm' | 'yarn' | 'pnpm', PackageManager> = {
   yarn: {
-    lock: 'yarn.lock', type: 'yarn', otherFiles: [],
-    isWorkspace: (pkg: Package & { path?: string }) => pkg.workspaces,
-    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.yarn.lock))
+    lock: 'yarn.lock', type: 'yarn',
+    isWorkspace: (pkg: Package & { path?: string }) => !!pkg.workspaces,
+    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.yarn.lock)),
+    install: (pkg: string, production?: boolean) => `yarn add ${production ? '' : '--dev '}${pkg}`,
+    workspaceInit: () => 'yarn init -y',
+    installAll: () => 'yarn',
+    updateDependenciesToLatest: () => 'yarn upgrade --latest',
+    execPackage: (pkg: string, args: string[] = []) => `npx ${[pkg, ...args].join(' ').trim()}`,
+    listWorkspace: () => 'npm query .workspace',
+    remoteInfo: (pkg: string, version: string) => `yarn info ${pkg}@${version} --json`,
+    setVersion: (level: string, preid?: string) => `yarn version --no-workspaces-update' ${level} ${preid ? `--preid ${preid}` : ''}`,
+    dryRunPack: () => 'yarn pack --dry-run',
+    publish: (version: string) => `yarn publish --tag ${version} --access public`,
+    get importantFiles(): string[] { return [PACKAGE_MANAGERS.yarn.lock]; }
   },
   npm: {
-    lock: 'package-lock.json', type: 'npm', otherFiles: [],
-    isWorkspace: (pkg: Package & { path?: string }) => pkg.workspaces,
-    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.npm.lock))
+    lock: 'package-lock.json', type: 'npm',
+    isWorkspace: (pkg: Package & { path?: string }) => !!pkg.workspaces,
+    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.npm.lock)),
+    install: (pkg: string, production?: boolean) => `npm install ${production ? '' : '--save-dev '}${pkg}`,
+    workspaceInit: () => 'npm init -f',
+    installAll: () => 'npm install',
+    updateDependenciesToLatest: () => 'npm update --save',
+    execPackage: (pkg: string, args: string[] = []) => `npx ${[pkg, ...args].join(' ').trim()}`,
+    listWorkspace: () => 'npm query .workspace',
+    remoteInfo: (pkg: string, version: string) => `npm info ${pkg}@${version} --json`,
+    setVersion: (level: string, preid?: string) => `npm version --no-workspaces-update' ${level} ${preid ? `--preid ${preid}` : ''}`,
+    dryRunPack: () => 'npm pack --dry-run',
+    publish: (version: string) => `npm publish --tag ${version} --access public`,
+    get importantFiles(): string[] { return [PACKAGE_MANAGERS.npm.lock]; }
   },
   pnpm: {
-    lock: 'pnpm-lock.yaml', type: 'pnpm', otherFiles: ['pnpm-workspaces.yaml'],
-    workspaceFile: 'pnpm-workspaces.yaml',
-    isWorkspace: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.pnpm.workspaceFile)),
-    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.pnpm.lock))
+    lock: 'pnpm-lock.yaml', type: 'pnpm', workspaceFile: 'pnpm-workspaces.yaml',
+    isWorkspace: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.pnpm.workspaceFile!)),
+    isActive: (pkg: Package & { path?: string }) => existsSync(path.resolve(pkg.path!, PACKAGE_MANAGERS.pnpm.lock)),
+    install: (pkg: string, production?: boolean) => `pnpm add ${production ? '' : '--save-dev '}${pkg}`,
+    workspaceInit: () => 'pnpm init -f',
+    installAll: () => 'pnpm install',
+    updateDependenciesToLatest: () => 'pnpm update --latest',
+    execPackage: (pkg: string, args: string[] = []) => `pnpm ${[pkg, ...args].join(' ').trim()}`,
+    listWorkspace: () => 'pnpm ls -r --depth -1 --json',
+    remoteInfo: (pkg: string, version: string) => `pnpm info ${pkg}@${version} --json`,
+    setVersion: (level: string, preid?: string) => `pnpm version --no-workspaces-update' ${level} ${preid ? `--preid ${preid}` : ''}`,
+    dryRunPack: () => 'pnpm pack --dry-run',
+    publish: (version: string) => `pnpm publish --tag ${version} --access public`,
+    get importantFiles(): string[] { return [PACKAGE_MANAGERS.pnpm.lock, PACKAGE_MANAGERS.pnpm.workspaceFile!]; }
   },
 } as const;
 

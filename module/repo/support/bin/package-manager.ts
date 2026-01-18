@@ -2,7 +2,7 @@ import path from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { ExecUtil, JSONUtil, type ExecutionResult } from '@travetto/runtime';
+import { ExecUtil, JSONUtil, Runtime, type ExecutionResult } from '@travetto/runtime';
 import { type IndexedModule, type ManifestContext, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -18,85 +18,50 @@ export class PackageManager {
   /**
    * Is a module already published
    */
-  static getRemoteInfo(ctx: Ctx, module: IndexedModule): ChildProcess {
-    let args: string[];
-    switch (ctx.workspace.manager) {
-      case 'pnpm':
-      case 'yarn':
-      case 'npm':
-        args = ['info', `${module.name}@${module.version}`, '--json'];
-        break;
-    }
-    return spawn(ctx.workspace.manager, args, { cwd: module.sourceFolder });
+  static getRemoteInfo(module: IndexedModule): ChildProcess {
+    const [cmd, ...args] = Runtime.packageManager.remoteInfo(module.name, module.version).split(' ');
+    return spawn(cmd, args, { cwd: module.sourceFolder });
   }
 
   /**
    * Validate published result
    */
-  static validatePublishedResult(ctx: Ctx, module: IndexedModule, result: ExecutionResult<string>): boolean {
+  static validatePublishedResult(result: ExecutionResult<string>): boolean {
     if (!result.valid && !result.stderr.includes('E404')) {
       throw new Error(result.stderr);
     }
-
-    switch (ctx.workspace.manager) {
-      case 'npm':
-      case 'pnpm':
-      case 'yarn': {
-        const parsed = JSONUtil.parseSafe<{ data: { dist?: { integrity?: string } } }>(result.stdout);
-        return parsed.data.dist?.integrity !== undefined;
-      }
-    }
+    const parsed = JSONUtil.parseSafe<{ data: { dist?: { integrity?: string } } }>(result.stdout);
+    return parsed.data.dist?.integrity !== undefined;
   }
 
   /**
    * Setting the version
    */
-  static async version(ctx: Ctx, modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
+  static async version(modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
     const moduleArgs = modules.flatMap(module => ['-w', module.sourceFolder]);
-    let args: string[];
-    switch (ctx.workspace.manager) {
-      case 'npm':
-      case 'pnpm':
-      case 'yarn':
-        args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...moduleArgs];
-        break;
-    }
-    await ExecUtil.getResult(spawn(ctx.workspace.manager, args, { cwd: ctx.workspace.path, stdio: 'inherit' }));
+    const [cmd, ...args] = Runtime.packageManager.setVersion(level, preid).split(' ');
+    await ExecUtil.getResult(spawn(cmd, [...args, ...moduleArgs], { cwd: Runtime.workspace.path, stdio: 'inherit' }));
   }
 
   /**
    * Dry-run packaging
    */
-  static dryRunPackaging(ctx: Ctx, module: IndexedModule): ChildProcess {
-    let args: string[];
-    switch (ctx.workspace.manager) {
-      case 'npm':
-      case 'pnpm':
-      case 'yarn':
-        args = ['pack', '--dry-run'];
-        break;
-    }
-    return spawn(ctx.workspace.manager, args, { cwd: module.sourcePath });
+  static dryRunPackaging(module: IndexedModule): ChildProcess {
+    const [cmd, ...args] = Runtime.packageManager.dryRunPack().split(' ');
+    return spawn(cmd, args, { cwd: module.sourcePath });
   }
 
   /**
    * Publish a module
    */
-  static publish(ctx: Ctx, module: IndexedModule, dryRun: boolean | undefined): ChildProcess {
+  static publish(module: IndexedModule, dryRun: boolean | undefined): ChildProcess {
     if (dryRun) {
-      return this.dryRunPackaging(ctx, module);
+      return this.dryRunPackaging(module);
     }
 
     const versionTag = module.version.match(/^.*-(rc|alpha|beta|next)[.]\d+/)?.[1] ?? 'latest';
-    let args: string[];
-    switch (ctx.workspace.manager) {
-      case 'npm':
-      case 'pnpm':
-      case 'yarn':
-        args = ['publish', '--tag', versionTag, '--access', 'public'];
-        break;
-    }
-    return spawn(ctx.workspace.manager, args, { cwd: module.sourcePath });
+    const [cmd, ...args] = Runtime.packageManager.publish(versionTag).split(' ');
+    return spawn(cmd, args, { cwd: module.sourcePath });
   }
 
   /**

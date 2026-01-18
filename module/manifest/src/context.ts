@@ -66,7 +66,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: Object.values(PACKAGE_MANAGERS).find(item => item.isActive(workspace))?.type ?? 'npm'
+      manager: Object.values(PACKAGE_MANAGERS).find(item => item.isActive(workspace))?.type as 'npm' ?? 'npm'
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
+import { type ManifestIndex, type ManifestContext, ManifestModuleUtil, PACKAGE_MANAGERS, type PackageManager } from '@travetto/manifest';
 
 import { Env } from './env.ts';
 import { RuntimeIndex } from './manifest-index.ts';
@@ -135,6 +135,10 @@ class $Runtime {
     location = ManifestModuleUtil.withOutputExtension(location);
     const imported = await import(location);
     return imported;
+  }
+
+  get packageManager(): PackageManager {
+    return PACKAGE_MANAGERS[this.workspace.manager];
   }
 }
 

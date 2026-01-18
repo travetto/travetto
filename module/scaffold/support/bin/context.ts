@@ -6,7 +6,7 @@ import mustache from 'mustache';
 
 import { castKey, castTo, ExecUtil, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
-import { type NodePackageManager, PackageUtil } from '@travetto/manifest';
+import { type NodePackageManager, PACKAGE_MANAGERS, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
 
 import type { Feature } from './features.ts';
@@ -185,35 +185,22 @@ export class Context {
     }
   }
 
-  async * installPackageJson(): AsyncIterable<string> {
-    let args: string[];
-    yield cliTpl`${{ type: 'Installing dependencies' }} `;
-    switch (this.packageManager) {
-      case 'npm': args = ['i']; break;
-      case 'pnpm': args = ['i']; break;
-      case 'yarn': args = []; break;
-    }
-    await this.#exec(this.packageManager, args);
-  }
-
-  async * updatePackages(): AsyncIterable<string> {
-    let args: string[];
-    yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
-    switch (this.packageManager) {
-      case 'npm': args = ['update', '-S']; break;
-      case 'pnpm': args = ['update', '--latest']; break;
-      case 'yarn': args = ['upgrade']; break;
-    }
-    await this.#exec(this.packageManager, args);
-  }
-
   async * install(): AsyncIterable<string | undefined> {
 
     yield cliTpl`${{ type: 'Templating files' }}`;
     await this.templateResolvedFiles();
 
-    yield* this.installPackageJson();
-    yield* this.updatePackages();
+    yield cliTpl`${{ type: 'Installing dependencies' }} `;
+    {
+      const [cmd, ...args] = PACKAGE_MANAGERS[this.packageManager].installAll().split(' ');
+      await this.#exec(cmd, args);
+    }
+
+    yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
+    {
+      const [cmd, ...args] = PACKAGE_MANAGERS[this.packageManager].updateDependenciesToLatest().split(' ');
+      await this.#exec(cmd, args);
+    }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
     await this.#exec('trvc', ['build'], { spawn: ExecUtil.spawnPackageCommand });
