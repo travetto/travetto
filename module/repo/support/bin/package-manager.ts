@@ -2,7 +2,7 @@ import path from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { ExecUtil, type ExecutionResult } from '@travetto/runtime';
+import { ExecUtil, JSONUtil, type ExecutionResult } from '@travetto/runtime';
 import { type IndexedModule, type ManifestContext, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -42,7 +42,7 @@ export class PackageManager {
       case 'npm':
       case 'pnpm':
       case 'yarn': {
-        const parsed = JSON.parse(result.stdout);
+        const parsed = JSONUtil.parseSafe<{ data: { dist?: { integrity?: string } } }>(result.stdout);
         return parsed.data.dist?.integrity !== undefined;
       }
     }
