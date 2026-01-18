@@ -8,6 +8,7 @@ import { castKey, castTo, ExecUtil, JSONUtil, RuntimeIndex } from '@travetto/run
 import { cliTpl } from '@travetto/cli';
 import { type NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
+import { PackageManager } from '@travetto/repo';
 
 import type { Feature } from './features.ts';
 
@@ -52,8 +53,16 @@ export class Context {
     this.#targetDirectory = path.resolve(targetDirectory);
   }
 
-  #exec(cmd: string, args: string[], options?: { spawn?: (cmd: string, args: string[], options?: SpawnOptions) => ChildProcess }): Promise<void> {
+  #handleProcess(subProcess: ChildProcess, identifier: string): Promise<void> {
     const terminal = new Terminal();
+    if (subProcess.stderr) {
+      ExecUtil.readLines(subProcess.stderr,
+        line => terminal.writer.writeLine(cliTpl`    ${{ identifier }}: ${line.trimEnd()}`).commit());
+    }
+    return ExecUtil.getResult(subProcess).then(() => { });
+  }
+
+  #exec(cmd: string, args: string[], options?: { spawn?: (cmd: string, args: string[], options?: SpawnOptions) => ChildProcess }): Promise<void> {
     const spawnCmd = options?.spawn ?? spawn;
     const subProcess = spawnCmd(cmd, args, {
       ...options,
@@ -61,13 +70,7 @@ export class Context {
       stdio: [0, 'pipe', 'pipe'],
       env: { PATH: process.env.PATH },
     });
-
-    if (subProcess.stderr) {
-      ExecUtil.readLines(subProcess.stderr,
-        line => terminal.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
-    }
-
-    return ExecUtil.getResult(subProcess).then(() => { });
+    return this.#handleProcess(subProcess, [cmd, ...args].join(' '));
   }
 
   get selfPath(): string {
@@ -84,6 +87,14 @@ export class Context {
 
   get sourceListing(): Promise<Listing> {
     return JSONUtil.readFile<Listing>(this.source('listing.json'));
+  }
+
+  get execOptions(): SpawnOptions {
+    return {
+      cwd: this.destination(),
+      stdio: [0, 'pipe', 'pipe'],
+      env: { PATH: process.env.PATH },
+    };
   }
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
@@ -193,18 +204,16 @@ export class Context {
     await this.templateResolvedFiles();
 
     yield cliTpl`${{ type: 'Installing dependencies' }} `;
-    switch (this.packageManager) {
-      case 'npm': await this.#exec('npm', ['i']); break;
-      case 'yarn': await this.#exec('yarn', []); break;
-      default: throw new Error(`Unknown package manager: ${this.packageManager} `);
-    }
+    await this.#handleProcess(
+      PackageManager.installPackageDependences(this.packageManager, this.execOptions),
+      'Installing Dependencies'
+    );
 
     yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
-    switch (this.packageManager) {
-      case 'npm': await this.#exec('npm', ['update', '-S']); break;
-      case 'yarn': await this.#exec('yarn', ['upgrade']); break;
-      default: throw new Error(`Unknown package manager: ${this.packageManager} `);
-    }
+    await this.#handleProcess(
+      PackageManager.ensureLatestDependencies(this.packageManager, this.execOptions),
+      'Installing Latest Dependencies'
+    );
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
     await this.#exec('trvc', ['build'], { spawn: ExecUtil.spawnPackageCommand });

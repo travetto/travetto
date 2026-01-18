@@ -17,12 +17,6 @@ export class PackageUtil {
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
 
-  static #exec<T>(workingDirectory: string, cmd: string): Promise<T> {
-    const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };
-    const text = execSync(cmd, { cwd: workingDirectory, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).toString().trim();
-    return JSON.parse(text);
-  }
-
   /**
    * Resolve import given a manifest context
    */
@@ -101,16 +95,18 @@ export class PackageUtil {
     try {
       return this.#workspaces[rootPath] ??= ManifestFileUtil.readAsJsonSync<PackageWorkspaceEntry[]>(cache);
     } catch {
-      let out: PackageWorkspaceEntry[];
+      let args: string[];
       switch (ctx.workspace.manager) {
         case 'yarn':
-        case 'npm': {
-          out = await this.#exec<{ path: string, name: string }[]>(rootPath, 'npm query .workspace');
-          break;
-        }
+        case 'npm': args = ['workspaces', 'list', '--json']; break;
       }
-      await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(out.map(item => ({ name: item.name, path: item.path }))));
-      return out;
+
+      const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };
+      const text = execSync(`${ctx.workspace.manager} ${args.join(' ')}`, { cwd: rootPath, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).trim();
+      const out: PackageWorkspaceEntry[] = JSON.parse(text);
+      const filtered = out.map(item => ({ name: item.name, path: item.path }));
+      await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(filtered));
+      return filtered;
     }
   }
 }

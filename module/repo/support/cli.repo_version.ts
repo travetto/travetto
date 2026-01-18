@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { CliModuleUtil, type CliCommandShape, CliCommand, CliScmUtil, type CliValidationError } from '@travetto/cli';
-import { Runtime } from '@travetto/runtime';
+import { ExecUtil, Runtime } from '@travetto/runtime';
 
 import { PackageManager, type SemverLevel } from './bin/package-manager.ts';
 
@@ -46,7 +46,7 @@ export class RepoVersionCommand implements CliCommandShape {
       throw new Error('No modules available for versioning');
     }
 
-    await PackageManager.version(Runtime, modules, level, prefix);
+    await ExecUtil.getResult(PackageManager.version(modules, level, prefix));
 
     const versions = await PackageManager.synchronizeVersions();
     if (this.commit) {
