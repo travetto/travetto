@@ -32,7 +32,7 @@
     "vscode:prepublish": "trv pack -sm -e travetto-plugin/support/entry.launch -b dist",
     "package": "vsce package --no-dependencies",
     "start": "trvc start",
-    "postinstall": "rm -rf node_modules/@travetto"
+    "postinstall": "rm -rf node_modules/@travetto && ln -sf ../../../../node_modules/.bin/trv node_modules/.bin/trv && ln -sf ../../../../node_modules/.bin/trvc node_modules/.bin/trvc"
   },
   "devDependencies": {
     "@travetto/cli": "^7.1.0",
