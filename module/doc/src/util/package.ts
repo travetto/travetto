@@ -1,4 +1,4 @@
-import { type NodePackageManager } from '@travetto/manifest';
+import { PACKAGE_MANAGERS, type NodePackageManager } from '@travetto/manifest';
 import { Runtime } from '@travetto/runtime';
 
 export class PackageDocUtil {
@@ -36,8 +36,8 @@ export class PackageDocUtil {
    * Get install example for a given package
    */
   static getInstallInstructions(pkg: string, production = false): string {
-    return (['npm', 'yarn'] as const)
-      .map(cmd => this.getInstallCommand(pkg, production, cmd))
+    return PACKAGE_MANAGERS
+      .map(manager => this.getInstallCommand(pkg, production, manager.type))
       .join('\n\n# or\n\n');
   }
 }
