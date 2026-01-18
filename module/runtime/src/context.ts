@@ -142,6 +142,7 @@ class $Runtime {
     switch (this.workspace.manager) {
       case 'npm': return `npm install ${production ? '' : '--save-dev '}${pkg}`;
       case 'yarn': return `yarn add ${production ? '' : '--dev '}${pkg}`;
+      case 'pnpm': return `pnpm add ${production ? '' : '--dev '}${pkg}`;
     }
   }
 }

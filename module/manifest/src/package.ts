@@ -99,6 +99,7 @@ export class PackageUtil {
       switch (ctx.workspace.manager) {
         case 'yarn':
         case 'npm': args = ['query', '.workspace']; break;
+        case 'pnpm': args = ['ls', '-r', '--depth', '-1', '--json']; break;
       }
 
       const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };

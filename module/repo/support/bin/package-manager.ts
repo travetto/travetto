@@ -20,7 +20,8 @@ export class PackageManager {
     let args: string[];
     switch (Runtime.workspace.manager) {
       case 'npm':
-      case 'yarn': args = ['info', `${module.name}@${module.version}`, '--json']; break;
+      case 'yarn':
+      case 'pnpm': args = ['info', `${module.name}@${module.version}`, '--json']; break;
     }
     return spawn(Runtime.workspace.manager, args, { cwd: module.sourceFolder });
   }
@@ -45,7 +46,8 @@ export class PackageManager {
     let args: string[];
     switch (Runtime.workspace.manager) {
       case 'npm':
-      case 'yarn': args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : [])]; break;
+      case 'yarn':
+      case 'pnpm': args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : [])]; break;
     }
     return spawn(Runtime.workspace.manager, [...args, ...moduleArgs], { cwd: Runtime.workspace.path, stdio: 'inherit' });
   }
@@ -57,7 +59,8 @@ export class PackageManager {
     let args: string[];
     switch (Runtime.workspace.manager) {
       case 'npm':
-      case 'yarn': args = ['pack', '--dry-run']; break;
+      case 'yarn':
+      case 'pnpm': args = ['pack', '--dry-run']; break;
     }
     return spawn(Runtime.workspace.manager, args, { cwd: module.sourcePath });
   }
@@ -74,7 +77,8 @@ export class PackageManager {
     let args: string[];
     switch (Runtime.workspace.manager) {
       case 'npm':
-      case 'yarn': args = ['publish', '--tag', versionTag, '--access', 'public']; break;
+      case 'yarn':
+      case 'pnpm': args = ['publish', '--tag', versionTag, '--access', 'public']; break;
     }
     return spawn(Runtime.workspace.manager, args, { cwd: module.sourcePath });
   }
@@ -82,8 +86,9 @@ export class PackageManager {
   static installPackageDependences(manager: NodePackageManager, options?: SpawnOptions): ChildProcess {
     let args: string[];
     switch (manager) {
-      case 'npm': args = ['i']; break;
+      case 'npm': args = ['install']; break;
       case 'yarn': args = []; break;
+      case 'pnpm': args = ['install']; break;
     }
     return spawn(manager, args, options ?? {});
   }
@@ -93,6 +98,7 @@ export class PackageManager {
     switch (manager) {
       case 'npm': args = ['update', '-S']; break;
       case 'yarn': args = ['upgrade']; break;
+      case 'pnpm': args = ['update', '--latest']; break;
     }
     return spawn(manager, args, options ?? {});
   }

@@ -4,8 +4,9 @@ import type { ManifestContext } from './context.ts';
 export const PackagePathSymbol = Symbol.for('@travetto/manifest:package-path');
 
 export const PACKAGE_MANAGERS = [
-  { lock: 'package-lock.json', type: 'npm', otherFiles: [], title: 'Npm' },
-  { lock: 'yarn.lock', type: 'yarn', otherFiles: [], title: 'Yarn' },
+  { lock: 'package-lock.json', type: 'npm', title: 'Npm', workspaceFile: undefined },
+  { lock: 'yarn.lock', type: 'yarn', title: 'Yarn', workspaceFile: undefined },
+  { lock: 'pnpm-lock.yaml', type: 'pnpm', workspaceFile: 'pnpm-workspace.yaml', title: 'Pnpm' }
 ] as const;
 
 export type NodePackageManager = (typeof PACKAGE_MANAGERS)[number]['type'];

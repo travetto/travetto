@@ -9,6 +9,7 @@ export class PackageDocUtil {
     switch (manager ?? Runtime.workspace.manager) {
       case 'npm':
       case 'yarn': return `npx ${pkg} ${args.join(' ')}`.trim();
+      case 'pnpm': return `pnpm ${pkg} ${args.join(' ')}`.trim();
     }
   }
 
@@ -19,6 +20,7 @@ export class PackageDocUtil {
     switch (manager ?? Runtime.workspace.manager) {
       case 'npm': return 'npm init -f';
       case 'yarn': return 'yarn init -y';
+      case 'pnpm': return 'pnpm init -y';
     }
   }
 
@@ -29,6 +31,7 @@ export class PackageDocUtil {
     switch (manager ?? Runtime.workspace.manager) {
       case 'npm': return `npm install ${production ? '' : '--save-dev '}${pkg}`;
       case 'yarn': return `yarn add ${production ? '' : '--dev '}${pkg}`;
+      case 'pnpm': return `pnpm add ${production ? '' : '--dev '}${pkg}`;
     }
   }
 
