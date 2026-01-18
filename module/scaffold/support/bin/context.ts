@@ -53,16 +53,8 @@ export class Context {
     this.#targetDirectory = path.resolve(targetDirectory);
   }
 
-  #handleProcess(subProcess: ChildProcess, identifier: string): Promise<void> {
-    const terminal = new Terminal();
-    if (subProcess.stderr) {
-      ExecUtil.readLines(subProcess.stderr,
-        line => terminal.writer.writeLine(cliTpl`    ${{ identifier }}: ${line.trimEnd()}`).commit());
-    }
-    return ExecUtil.getResult(subProcess).then(() => { });
-  }
-
   #exec(cmd: string, args: string[], options?: { spawn?: (cmd: string, args: string[], options?: SpawnOptions) => ChildProcess }): Promise<void> {
+    const terminal = new Terminal();
     const spawnCmd = options?.spawn ?? spawn;
     const subProcess = spawnCmd(cmd, args, {
       ...options,
@@ -70,7 +62,13 @@ export class Context {
       stdio: [0, 'pipe', 'pipe'],
       env: { PATH: process.env.PATH },
     });
-    return this.#handleProcess(subProcess, [cmd, ...args].join(' '));
+
+    if (subProcess.stderr) {
+      ExecUtil.readLines(subProcess.stderr,
+        line => terminal.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
+    }
+    return ExecUtil.getResult(subProcess).then(() => { });
+
   }
 
   get selfPath(): string {
@@ -95,6 +93,26 @@ export class Context {
       stdio: [0, 'pipe', 'pipe'],
       env: { PATH: process.env.PATH },
     };
+  }
+
+  installPackageDependences(): Promise<void> {
+    let args: string[];
+    switch (this.packageManager) {
+      case 'npm': args = ['install']; break;
+      case 'yarn': args = []; break;
+      case 'pnpm': args = ['install']; break;
+    }
+    return this.#exec(this.packageManager, args);
+  }
+
+  ensureLatestDependencies(): Promise<void> {
+    let args: string[];
+    switch (this.packageManager) {
+      case 'npm': args = ['update', '-S']; break;
+      case 'yarn': args = ['upgrade']; break;
+      case 'pnpm': args = ['update', '--latest']; break;
+    }
+    return this.#exec(this.packageManager, args);
   }
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
@@ -204,16 +222,10 @@ export class Context {
     await this.templateResolvedFiles();
 
     yield cliTpl`${{ type: 'Installing dependencies' }} `;
-    await this.#handleProcess(
-      PackageManager.installPackageDependences(this.packageManager, this.execOptions),
-      'Installing Dependencies'
-    );
+    await this.installPackageDependences();
 
     yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
-    await this.#handleProcess(
-      PackageManager.ensureLatestDependencies(this.packageManager, this.execOptions),
-      'Installing Latest Dependencies'
-    );
+    await this.ensureLatestDependencies();
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
     await this.#exec('trvc', ['build'], { spawn: ExecUtil.spawnPackageCommand });

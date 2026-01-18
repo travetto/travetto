@@ -1,9 +1,9 @@
 import path from 'node:path';
-import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
 import { type ExecutionResult, JSONUtil, Runtime } from '@travetto/runtime';
-import { type IndexedModule, type NodePackageManager, type Package, PackageUtil } from '@travetto/manifest';
+import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
@@ -81,26 +81,6 @@ export class PackageManager {
       case 'pnpm': args = ['publish', '--tag', versionTag, '--access', 'public']; break;
     }
     return spawn(Runtime.workspace.manager, args, { cwd: module.sourcePath });
-  }
-
-  static installPackageDependences(manager: NodePackageManager, options?: SpawnOptions): ChildProcess {
-    let args: string[];
-    switch (manager) {
-      case 'npm': args = ['install']; break;
-      case 'yarn': args = []; break;
-      case 'pnpm': args = ['install']; break;
-    }
-    return spawn(manager, args, options ?? {});
-  }
-
-  static ensureLatestDependencies(manager: NodePackageManager, options?: SpawnOptions): ChildProcess {
-    let args: string[];
-    switch (manager) {
-      case 'npm': args = ['update', '-S']; break;
-      case 'yarn': args = ['upgrade']; break;
-      case 'pnpm': args = ['update', '--latest']; break;
-    }
-    return spawn(manager, args, options ?? {});
   }
 
   /**
