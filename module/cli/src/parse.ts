@@ -10,7 +10,7 @@ type ParsedInput = ParsedState['all'][number];
 
 const RAW_SEPARATOR = '--';
 const VALID_FLAG = /^-{1,2}[a-z]/i;
-const HELP_FLAG = /^-h|--help$/;
+const HELP_FLAG = /^(-h|--help)$/;
 const LONG_FLAG_WITH_EQ = /^--[a-z][^= ]+=\S+/i;
 const CONFIG_PREFIX = '+=';
 const SPACE = new Set([32, 7, 13, 10]);

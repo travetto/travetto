@@ -29,6 +29,9 @@ class Entity {
   @CliFlag({ short: 'g' })
   age?: number;
 
+  @CliFlag({ short: 'hp' })
+  happy?: number;
+
   main(file: string, force: boolean, args?: string[]) { }
 }
 
@@ -163,6 +166,27 @@ class SchemaBindingSuite {
     assert(state.all[0].type === 'flag');
     assert(state.all[0].input === 'env.COLOREO');
     assert(state.all[1].type === 'arg');
+  }
+
+  @Test()
+  async testNegative() {
+    let state = await get('--age=-5');
+    const negativeAge = state.flags.find(f => f.fieldName === 'age' && f.value === '-5');
+    assert(negativeAge);
+
+    state = await get('-g', '-5');
+    const negativeAge2 = state.flags.find(f => f.fieldName === 'age' && f.value === '-5');
+    assert(negativeAge2);
+  }
+
+  @Test()
+  async hOverlap() {
+    const state = await get('-hp', '5');
+    assert(state.all.length === 1);
+
+    assert(state.flags[0].type === 'flag');
+    assert(state.flags[0].fieldName === 'happy');
+    assert(state.flags[0].value === '5');
   }
 
   @Test()

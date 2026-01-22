@@ -40,6 +40,16 @@ class ParseSuite {
   }
 
   @Test()
+  async testNegative() {
+    assert.deepStrictEqual(CliParseUtil.getArgs(['-a=-5', '-b', '-5']), { cmd: undefined, args: ['-a=-5', '-b', '-5'], help: false });
+  }
+
+  @Test()
+  async testHOverlap() {
+    assert.deepStrictEqual(CliParseUtil.getArgs(['-hp', '-5']), { cmd: undefined, args: ['-hp', '-5'], help: false });
+  }
+
+  @Test()
   async testTokens() {
     assert.deepStrictEqual(CliParseUtil.readToken('hello world'), { value: 'hello', next: 6 });
     assert.deepStrictEqual(CliParseUtil.readToken('hello world', 4), { value: 'o', next: 6 });
