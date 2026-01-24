@@ -1,5 +1,4 @@
 import { buffer } from 'node:stream/consumers';
-import type { Readable } from 'node:stream';
 
 import { AppError, BinaryUtil, castTo, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
@@ -9,8 +8,9 @@ import type { WebRequest } from '../../src/types/request.ts';
 import { DecompressInterceptor } from '../../src/interceptor/decompress.ts';
 import { WebBodyUtil } from '../../src/util/body.ts';
 import { WebCommonUtil } from '../../src/util/common.ts';
+import type { WebBinaryBody } from '../../src/types/message.ts';
 
-const toBuffer = (src: Buffer | Readable) => Buffer.isBuffer(src) ? src : buffer(src);
+const toBuffer = (src: WebBinaryBody) => Buffer.isBuffer(src) ? src : buffer(src);
 
 /**
  * Utilities for supporting custom test dispatchers

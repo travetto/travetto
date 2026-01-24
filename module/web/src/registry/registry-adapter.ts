@@ -60,7 +60,7 @@ function computeParameterLocation(endpoint: EndpointConfig, param: SchemaParamet
   if (!SchemaRegistryIndex.has(param.type)) {
     if ((param.type === String || param.type === Number) && name && endpoint.path.includes(`:${name}`)) {
       return 'path';
-    } else if (param.type === Blob || param.type === File || param.type === ArrayBuffer || param.type === Uint8Array) {
+    } else if (param.type === Blob || param.type === File || param.type === ArrayBuffer || param.type === Uint8Array || param.type === Buffer) {
       return 'body';
     }
     return 'query';

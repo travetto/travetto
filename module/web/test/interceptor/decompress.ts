@@ -9,6 +9,8 @@ import { Registry } from '@travetto/registry';
 import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
 import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
 
+import type { WebBinaryBody } from '../../src/types/message.ts';
+
 @Suite()
 class DecompressInterceptorSuite {
 
@@ -19,10 +21,10 @@ class DecompressInterceptorSuite {
 
   async decompress({ data, encoding, requestHeaders = {}, responseHeaders = {} }: {
     encoding: 'gzip' | 'br' | 'deflate' | 'identity';
-    data: number | Buffer | Readable;
+    data: number | WebBinaryBody;
     requestHeaders?: Record<string, string>;
     responseHeaders?: Record<string, string>;
-  }): Promise<Buffer | Readable> {
+  }): Promise<WebBinaryBody> {
     const interceptor = await DependencyRegistryIndex.getInstance(DecompressInterceptor);
     interceptor.config.applies = true;
 

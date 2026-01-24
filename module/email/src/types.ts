@@ -3,6 +3,8 @@ import type { Url } from 'node:url';
 
 import type { FileLoader } from '@travetto/runtime';
 
+type AttachmentInput = string | Buffer | Readable;
+
 /**
  * An address
  */
@@ -15,7 +17,7 @@ export interface EmailAddress {
  * An attachment for the email
  */
 interface AttachmentLike {
-  content?: string | Buffer | Readable;
+  content?: AttachmentInput;
   path?: string | Url;
 }
 
@@ -30,7 +32,7 @@ export interface EmailAttachment extends AttachmentLike {
   contentTransferEncoding?: false | '7bit' | 'base64' | 'quoted-printable';
   contentDisposition?: 'attachment' | 'inline';
   headers?: Record<string, string | string[]>;
-  raw?: string | Buffer | Readable | AttachmentLike;
+  raw?: AttachmentInput | AttachmentLike;
 }
 
 type EmailContentType = 'html' | 'text' | 'subject';
