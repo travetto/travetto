@@ -6,7 +6,9 @@ import type { Metadata, Sharp } from 'sharp';
 
 import { BinaryUtil, castTo, type BinaryInput } from '@travetto/runtime';
 
-type ImageFormat = 'jpeg' | 'png' | 'avif' | 'webp' | 'gif' | 'jxl';
+const VALID_EXTENSIONS = ['jpeg', 'jpg', 'png', 'avif', 'webp', 'gif', 'jxl'] as const;
+
+type ImageFormat = typeof VALID_EXTENSIONS[number];
 
 /**
  * Image convert options
@@ -35,6 +37,10 @@ export interface ConvertOptions {
  */
 export class ImageUtil {
 
+  static isKnownExtension(ext: string): ext is ImageFormat {
+    return VALID_EXTENSIONS.includes(castTo(ext));
+  }
+
   static async #getBuilder({ format, optimize, ...options }: ConvertOptions): Promise<Sharp> {
     const { default: sharp } = await import('sharp');
 
@@ -53,7 +59,7 @@ export class ImageUtil {
       .avif({ force: format === 'avif', ...optimize ? { quality: 70 } : {} })
       .webp({ force: format === 'webp', ...optimize ? { quality: 80 } : {} })
       .png({ force: format === 'png', ...optimize ? { compressionLevel: 9, quality: 80, adaptiveFiltering: true } : {} })
-      .jpeg({ force: format === 'jpeg', ...optimize ? { quality: 80, progressive: true } : {} })
+      .jpeg({ force: format === 'jpeg' || format === 'jpg', ...optimize ? { quality: 80, progressive: true } : {} })
       .jxl({ force: format === 'jxl', ...optimize ? { lossless: false, quality: 80 } : {} })
       .gif({ force: format === 'gif', ...optimize ? { effort: 10 } : {} });
 
