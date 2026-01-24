@@ -1,6 +1,6 @@
 import type mongo from 'mongodb';
 
-import { type TimeSpan, TimeUtil, RuntimeResources, Runtime } from '@travetto/runtime';
+import { type TimeSpan, TimeUtil, RuntimeResources, Runtime, castTo } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 
 /**
@@ -61,8 +61,8 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resolve = (file: string | Buffer): Promise<string> | Buffer =>
-      Buffer.isBuffer(file) ? file : RuntimeResources.resolve(file).catch(() => file);
+    const resolve = <T extends string | Buffer>(file: T): Promise<T> =>
+      Buffer.isBuffer(file) ? Promise.resolve(file) : castTo(RuntimeResources.resolve(file).catch(() => file));
 
     if (this.connectionString) {
       const details = new URL(this.connectionString);
