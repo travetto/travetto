@@ -25,7 +25,7 @@
     "directory": "module/model-firestore"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^8.1.0",
+    "@google-cloud/firestore": "^8.2.0",
     "@travetto/config": "^7.1.4",
     "@travetto/model": "^7.1.4",
     "@travetto/runtime": "^7.1.4"
