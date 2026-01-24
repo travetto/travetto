@@ -4,7 +4,7 @@ import os from 'node:os';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { type Class, type TimeSpan, Runtime, type BlobMeta, type ByteRange, type BinarySource, BinaryUtil, JSONUtil } from '@travetto/runtime';
+import { type Class, type TimeSpan, Runtime, type BlobMeta, type ByteRange, type BinaryType, BinaryUtil, JSONUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -169,7 +169,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   // Blob
-  async upsertBlob(location: string, input: BinarySource, meta?: BlobMeta, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinaryType, meta?: BlobMeta, overwrite = true): Promise<void> {
     if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
       return;
     }

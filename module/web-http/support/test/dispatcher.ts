@@ -1,14 +1,14 @@
 import { buffer } from 'node:stream/consumers';
 
 import { Inject, Injectable } from '@travetto/di';
-import { type WebFilterContext, WebResponse, type WebDispatcher, WebBodyUtil, type WebBinarySource } from '@travetto/web';
+import { type WebFilterContext, WebResponse, type WebDispatcher, WebBodyUtil, type WebBinaryType } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
 import type { WebHttpConfig } from '../../src/config.ts';
 
-const toBuffer = (src: WebBinarySource) => Buffer.isBuffer(src) ? src : buffer(src);
+const toBuffer = (src: WebBinaryType) => Buffer.isBuffer(src) ? src : buffer(src);
 
 /**
  * Support for invoking http requests against the server

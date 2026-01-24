@@ -1,4 +1,4 @@
-import type { BinarySource, BlobMeta, ByteRange, TimeSpan } from '@travetto/runtime';
+import type { BinaryType, BlobMeta, ByteRange, TimeSpan } from '@travetto/runtime';
 
 /**
  * Support for Blobs CRUD.
@@ -14,7 +14,7 @@ export interface ModelBlobSupport {
    * @param meta Additional metadata to store with the blob
    * @param overwrite Should we replace content if already found, defaults to true
    */
-  upsertBlob(location: string, input: BinarySource, meta?: BlobMeta, overwrite?: boolean): Promise<void>;
+  upsertBlob(location: string, input: BinaryType, meta?: BlobMeta, overwrite?: boolean): Promise<void>;
 
   /**
    * Get blob from storage

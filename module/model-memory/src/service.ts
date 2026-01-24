@@ -3,7 +3,7 @@ import { buffer as toBuffer } from 'node:stream/consumers';
 
 import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BlobMeta,
-  type ByteRange, type BinarySource, BinaryUtil, JSONUtil
+  type ByteRange, type BinaryType, BinaryUtil, JSONUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -233,7 +233,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Blob Support
-  async upsertBlob(location: string, input: BinarySource, meta?: BlobMeta, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinaryType, meta?: BlobMeta, overwrite = true): Promise<void> {
     if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
       return;
     }

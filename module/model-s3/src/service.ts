@@ -1,4 +1,4 @@
-import { Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 import { text as toText, buffer as toBuffer } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
@@ -14,7 +14,7 @@ import {
 import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BlobMeta,
-  type ByteRange, type BinarySource, BinaryUtil, type TimeSpan, TimeUtil
+  type ByteRange, type BinaryType, BinaryUtil, type TimeSpan, TimeUtil
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -314,7 +314,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Blob support
-  async upsertBlob(location: string, input: BinarySource, meta?: BlobMeta, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinaryType, meta?: BlobMeta, overwrite = true): Promise<void> {
     if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
       return;
     }
@@ -339,18 +339,17 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       Range: `bytes=${range.start}-${range.end}`
     } : {}));
 
-    if (!result.Body) {
+    let body: BinaryType | string | undefined = result.Body;
+
+    if (!body) {
       throw new AppError('Unable to read type: undefined');
     }
 
-    if (typeof result.Body === 'string') { // string
-      return Readable.from(result.Body, { encoding: castTo<string>(result.Body).endsWith('=') ? 'base64' : 'utf8' });
-    } else if (Buffer.isBuffer(result.Body)) { // Buffer
-      return Readable.from(result.Body);
-    } else if ('pipe' in result.Body) { // Stream
-      return castTo<Readable>(result.Body);
+    if (typeof body === 'string') {
+      body = Buffer.from(body, castTo<string>(body).endsWith('=') ? 'base64' : 'utf8');
     }
-    throw new AppError(`Unable to read type: ${typeof result.Body}`);
+
+    return BinaryUtil.toReadable(body);
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
