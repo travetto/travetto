@@ -1,8 +1,7 @@
-import type { Readable } from 'node:stream';
-import { castTo } from '@travetto/runtime';
+import { castTo, type BinaryBasicSource } from '@travetto/runtime';
 import { WebHeaders, type WebHeadersInit } from './headers.ts';
 
-export type WebBinarySource = Readable | Buffer;
+export type WebBinarySource = BinaryBasicSource;
 
 export interface WebMessageInit<B = unknown, C = unknown> {
   context?: C;

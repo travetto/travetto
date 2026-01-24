@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
-import { text as toText, arrayBuffer as toArrayBuffer } from 'node:stream/consumers';
+import { text as toText, arrayBuffer as toArrayBuffer, buffer as toBuffer } from 'node:stream/consumers';
 import { isArrayBuffer, isUint8Array } from 'node:util/types';
 
 import { type BlobMeta, type ByteRange, castTo, hasFunction } from './types.ts';
@@ -17,7 +17,10 @@ type BlobSource = Readable | ReadableStream | Promise<Readable | ReadableStream>
 const BlobMetaSymbol = Symbol();
 
 const BINARY_CONSTRUCTORS = [Readable, Buffer, Blob, File, ReadableStream, ArrayBuffer, Uint8Array];
-export type BinaryInput = Readable | Buffer | Blob | ReadableStream | ArrayBuffer | Uint8Array;
+export type BinarySource = Readable | Buffer | Blob | ReadableStream | ArrayBuffer | Uint8Array |
+  AsyncIterable<string | Buffer | Uint8Array | ArrayBuffer>;
+
+export type BinaryBasicSource = Buffer | Readable;
 
 const BINARY_CONSTRUCTOR_SET = new Set(BINARY_CONSTRUCTORS);
 
@@ -41,10 +44,15 @@ export class BinaryUtil {
     return BINARY_CONSTRUCTOR_SET.has(castTo(value));
   }
 
+  /** Is the input a byte array */
+  static isByteArray(value: unknown): value is Uint8Array | Buffer | ArrayBuffer {
+    return Buffer.isBuffer(value) || this.isUint8Array(value) || this.isArrayBuffer(value);
+  }
+
   /**
    * Is value a binary type
    */
-  static isBinaryType(value: unknown): boolean {
+  static isBinaryType(value: unknown): value is BinarySource {
     return value instanceof Blob || Buffer.isBuffer(value) || this.isReadable(value) ||
       this.isArrayBuffer(value) || this.isReadableStream(value) || this.isAsyncIterable(value);
   }
@@ -64,7 +72,7 @@ export class BinaryUtil {
   /**
    * Compute hash from an input blob, buffer or readable stream.
    */
-  static async hashInput(input: BinaryInput): Promise<string> {
+  static async hashInput(input: BinarySource): Promise<string> {
     const hash = crypto.createHash('sha256').setEncoding('hex');
     if (Buffer.isBuffer(input)) {
       hash.write(input);
@@ -154,9 +162,11 @@ export class BinaryUtil {
     return `${parts.join('/')}${ext}`;
   }
 
-  static toReadable(input: BinaryInput): Readable {
+  static toReadable(input: BinarySource): Readable {
     if (this.isReadable(input)) {
       return input;
+    } else if (this.isAsyncIterable(input)) {
+      return Readable.from(input);
     } else if (Buffer.isBuffer(input)) {
       return Readable.from(input);
     } else if (this.isArrayBuffer(input)) {
@@ -170,7 +180,7 @@ export class BinaryUtil {
     }
   }
 
-  static toReadableStream(input: BinaryInput): ReadableStream {
+  static toReadableStream(input: BinarySource): ReadableStream {
     if (this.isReadableStream(input)) {
       return input;
     } else if (this.isReadable(input)) {
@@ -178,11 +188,11 @@ export class BinaryUtil {
     } else if (input instanceof Blob) {
       return input.stream();
     } else {
-      return ReadableStream.from(this.toReadable(input));
+      return Readable.toWeb(this.toReadable(input));
     }
   }
 
-  static toBuffer(input: BinaryInput): Promise<Buffer> {
+  static toBuffer(input: BinarySource): Promise<Buffer> {
     if (Buffer.isBuffer(input)) {
       return Promise.resolve(input);
     } else if (this.isArrayBuffer(input)) {
@@ -191,17 +201,45 @@ export class BinaryUtil {
       return Promise.resolve(Buffer.from(input));
     } else if (input instanceof Blob) {
       return input.arrayBuffer().then(data => Buffer.from(data));
-    } else if (input instanceof ReadableStream) {
-      return toArrayBuffer(Readable.fromWeb(input)).then(data => Buffer.from(data));
-    } else {
+    } else if (this.isReadableStream(input)) {
+      return toBuffer(input);
+    } else if (this.isArrayBuffer(input)) {
       return toArrayBuffer(input).then(data => Buffer.from(data));
+    } else if (this.isReadable(input)) {
+      return toBuffer(input);
+    } else {
+      return toBuffer(Readable.from(input));
     }
+  }
+
+  /**
+   * Convert input to Buffer, Readable or undefined if matching
+   */
+  static toBasic(input?: unknown): BinaryBasicSource | undefined {
+    if (input === null || input === undefined) {
+      return Buffer.alloc(0);
+    } else if (input instanceof Blob) {
+      return Readable.fromWeb(input.stream());
+    } else if (this.isReadableStream(input)) {
+      return Readable.fromWeb(input);
+    } else if (this.isReadable(input)) {
+      return input;
+    } else if (this.isAsyncIterable(input)) {
+      return Readable.from(input);
+    } else if (input === null || input === undefined) {
+      return Buffer.alloc(0);
+    } else if (this.isArrayBuffer(input)) {
+      return Buffer.from(input);
+    } else if (this.isUint8Array(input) || Buffer.isBuffer(input)) {
+      return Buffer.from(input);
+    }
+    return undefined;
   }
 
   /**
    * Convert input to a Readable, and get what metadata is available
    */
-  static async toReadableAndMetadata(input: BinaryInput, metadata: BlobMeta = {}): Promise<[Readable, BlobMeta]> {
+  static async toReadableAndMetadata(input: BinarySource, metadata: BlobMeta = {}): Promise<[Readable, BlobMeta]> {
     if (input instanceof Blob) {
       metadata = { ...this.getBlobMeta(input), ...metadata };
       metadata.size ??= input.size;

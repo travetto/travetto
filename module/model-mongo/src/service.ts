@@ -21,7 +21,7 @@ import {
 
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
-  castTo, asFull, type BlobMeta, type ByteRange, type BinaryInput, BinaryUtil
+  castTo, asFull, type BlobMeta, type ByteRange, type BinarySource, BinaryUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
@@ -284,7 +284,7 @@ export class MongoModelService implements
   }
 
   // Blob
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinarySource, meta?: BlobMeta, overwrite = true): Promise<void> {
     const existing = await this.getBlobMeta(location).then(() => true, () => false);
     if (!overwrite && existing) {
       return;

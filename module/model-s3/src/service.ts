@@ -14,7 +14,7 @@ import {
 import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BlobMeta,
-  type ByteRange, type BinaryInput, BinaryUtil, type TimeSpan, TimeUtil
+  type ByteRange, type BinarySource, BinaryUtil, type TimeSpan, TimeUtil
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -314,7 +314,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Blob support
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinarySource, meta?: BlobMeta, overwrite = true): Promise<void> {
     if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
       return;
     }

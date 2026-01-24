@@ -100,21 +100,16 @@ export class WebBodyUtil {
       for (const [key, value] of this.getBlobHeaders(body)) {
         out.headers.set(key, value);
       }
-      out.body = Readable.fromWeb(body.stream());
-    } else if (body instanceof FormData) {
+    }
+
+    const binaryBody = BinaryUtil.toBasic(body);
+
+    if (body instanceof FormData) {
       const boundary = `${'-'.repeat(24)}-multipart-${Util.uuid()}`;
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
       out.body = Readable.from(this.buildMultiPartBody(body, boundary));
-    } else if (BinaryUtil.isReadableStream(body)) {
-      out.body = Readable.fromWeb(body);
-    } else if (BinaryUtil.isAsyncIterable(body)) {
-      out.body = Readable.from(body);
-    } else if (body === null || body === undefined) {
-      out.body = Buffer.alloc(0);
-    } else if (BinaryUtil.isArrayBuffer(body)) {
-      out.body = Buffer.from(body);
-    } else if (BinaryUtil.isUint8Array(body)) {
-      out.body = Buffer.from(body);
+    } else if (binaryBody) {
+      out.body = binaryBody;
     } else {
       let text: string;
       if (typeof body === 'string') {
@@ -129,7 +124,7 @@ export class WebBodyUtil {
       out.body = Buffer.from(text, 'utf-8');
     }
 
-    if (Buffer.isBuffer(out.body)) {
+    if (BinaryUtil.isByteArray(out.body)) {
       out.headers.set('Content-Length', `${out.body.byteLength}`);
     }
 
