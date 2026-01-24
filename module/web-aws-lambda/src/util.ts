@@ -1,8 +1,6 @@
-import { buffer } from 'node:stream/consumers';
-
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo } from '@travetto/runtime';
 import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {
@@ -37,12 +35,7 @@ export class AwsLambdaWebUtil {
       context: response.context,
       ...WebBodyUtil.toBinaryMessage(response)
     });
-    let output: Buffer = Buffer.alloc(0);
-    if (Buffer.isBuffer(binaryResponse.body)) {
-      output = binaryResponse.body;
-    } else if (binaryResponse.body) {
-      output = await buffer(binaryResponse.body);
-    }
+    const output: Buffer = await BinaryUtil.toBuffer(binaryResponse.body);
     const isBase64Encoded = !!output.length && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};

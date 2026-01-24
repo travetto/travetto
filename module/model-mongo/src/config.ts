@@ -61,7 +61,8 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resolve = (file: string): Promise<string> => RuntimeResources.resolve(file).catch(() => file);
+    const resolve = (file: string | Buffer): Promise<string> | Buffer =>
+      Buffer.isBuffer(file) ? file : RuntimeResources.resolve(file).catch(() => file);
 
     if (this.connectionString) {
       const details = new URL(this.connectionString);
@@ -88,7 +89,7 @@ export class MongoModelConfig {
     const options = this.options;
     if (options.ssl) {
       if (options.cert) {
-        options.cert = await Promise.all([options.cert].flat(2).map(data => Buffer.isBuffer(data) ? data : resolve(data)));
+        options.cert = await Promise.all([options.cert].flat(2).map(resolve));
       }
       if (options.tlsCertificateKeyFile) {
         options.tlsCertificateKeyFile = await resolve(options.tlsCertificateKeyFile);

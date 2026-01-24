@@ -12,6 +12,7 @@ import { WebError } from '../types/error.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
 import { WebHeaderUtil } from '../util/header.ts';
+import { BinaryUtil } from '@travetto/runtime';
 
 const COMPRESSORS = {
   gzip: createGzip,
@@ -75,7 +76,7 @@ export class CompressInterceptor implements WebInterceptor {
 
     const binaryResponse = new WebResponse({ context: response.context, ...WebBodyUtil.toBinaryMessage(response) });
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
-    const len = Buffer.isBuffer(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
+    const len = BinaryUtil.isByteArray(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
 
     if (len !== undefined && len >= 0 && len < chunkSize || !binaryResponse.body) {
       return binaryResponse;
@@ -87,7 +88,7 @@ export class CompressInterceptor implements WebInterceptor {
     // If we are compressing
     binaryResponse.headers.set('Content-Encoding', type);
 
-    if (Buffer.isBuffer(binaryResponse.body)) {
+    if (BinaryUtil.isByteArray(binaryResponse.body)) {
       stream.end(binaryResponse.body);
       const out = await buffer(stream);
       binaryResponse.body = out;

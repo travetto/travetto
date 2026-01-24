@@ -11,6 +11,13 @@ export type JSONParseInput = string | Buffer;
 export class JSONUtil {
 
   /**
+   * Is valid input
+   */
+  static isValidInput(input: unknown): input is JSONParseInput {
+    return typeof input === 'string' || Buffer.isBuffer(input);
+  }
+
+  /**
    * Parse JSON safely
    */
   static parseSafe<T>(input: JSONParseInput, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
@@ -22,14 +29,25 @@ export class JSONUtil {
   }
 
   /**
+   * Encode JSON value as buffer
+   */
+  static toBuffer<T>(value: T | undefined): Buffer {
+    if (value === undefined) {
+      return Buffer.alloc(0);
+    }
+    const text = JSON.stringify(value);
+    return Buffer.from(text, 'utf8');
+  }
+
+  /**
    * Encode JSON value as base64 encoded string
    */
   static stringifyBase64<T>(value: T | undefined): string | undefined {
-    if (value === undefined) {
-      return;
+    const bytes = this.toBuffer(value);
+    if (bytes.length === 0) {
+      return undefined;
     }
-    const text = JSON.stringify(value);
-    return Buffer.from(text, 'utf8').toString('base64');
+    return bytes.toString('base64');
   }
 
   /**

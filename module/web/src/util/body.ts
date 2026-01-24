@@ -90,10 +90,6 @@ export class WebBodyUtil {
    */
   static toBinaryMessage(message: WebMessage): Omit<WebMessage<WebBinaryType>, 'context'> {
     const body = message.body;
-    if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
-      return castTo(message);
-    }
-
     const out: Omit<WebMessage<WebBinaryType>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
     if (body instanceof Blob) {
       for (const [key, value] of this.getBlobHeaders(body)) {

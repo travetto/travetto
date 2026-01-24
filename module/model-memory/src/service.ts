@@ -1,6 +1,3 @@
-import { Readable } from 'node:stream';
-import { buffer as toBuffer } from 'node:stream/consumers';
-
 import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BlobMeta,
   type ByteRange, type BinaryType, BinaryUtil, JSONUtil
@@ -122,7 +119,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const store = this.#getStore(cls);
     await this.#removeIndices(cls, item.id);
     if (action === 'write') {
-      store.set(item.id, Buffer.from(JSON.stringify(item)));
+      store.set(item.id, JSONUtil.toBuffer(item));
       await this.#writeIndices(cls, item);
       return item;
     } else {
@@ -241,8 +238,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const [stream, blobMeta] = await BinaryUtil.toReadableAndMetadata(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, Buffer.from(JSON.stringify(blobMeta)));
-    blobs.set(location, await toBuffer(stream));
+    metaContent.set(location, JSONUtil.toBuffer(blobMeta));
+    blobs.set(location, await BinaryUtil.toBuffer(stream));
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
@@ -253,7 +250,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
     const meta = await this.getBlobMeta(location);
-    return BinaryUtil.readableBlob(() => Readable.from(buffer), { ...meta, range: final });
+    return BinaryUtil.readableBlob(() => buffer, { ...meta, range: final });
   }
 
   async getBlobMeta(location: string): Promise<BlobMeta> {

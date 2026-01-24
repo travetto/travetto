@@ -40,12 +40,7 @@ export class ModelCrudUtil {
    * @param input Input as string or plain object
    */
   static async load<T extends ModelType>(cls: Class<T>, input: ModelLoadInput, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
-    let resolvedInput: object;
-    if (typeof input === 'string' || Buffer.isBuffer(input)) {
-      resolvedInput = JSONUtil.parseSafe(input);
-    } else {
-      resolvedInput = input;
-    }
+    const resolvedInput: object = JSONUtil.isValidInput(input) ? JSONUtil.parseSafe(input) : input;
 
     const result = SchemaRegistryIndex.getBaseClass(cls).from(resolvedInput);
 

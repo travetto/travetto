@@ -1,5 +1,4 @@
 import type { Readable } from 'node:stream';
-import { text as toText, buffer as toBuffer } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, type CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -217,7 +216,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     try {
       const result = await this.client.getObject(this.#query(cls, id));
       if (result.Body) {
-        const body = await toText(castTo(result.Body));
+        const body = await BinaryUtil.toBuffer(result.Body);
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistryIndex.getConfig(cls);
@@ -324,7 +323,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#queryBlob(location, {
-        Body: await toBuffer(stream),
+        Body: await BinaryUtil.toBuffer(stream),
         ContentLength: blobMeta.size,
         ...this.#getMetaBase(blobMeta),
       }));

@@ -12,7 +12,7 @@ import { type BlobMeta, type ByteRange, castTo, hasFunction } from './types.ts';
 import { Util } from './util.ts';
 import { AppError } from './error.ts';
 
-type BlobSource = Readable | ReadableStream | Promise<Readable | ReadableStream>;
+type BlobSource = Buffer | Readable | ReadableStream | Promise<Readable | ReadableStream | Buffer>;
 
 const BlobMetaSymbol = Symbol();
 
@@ -116,6 +116,8 @@ export class BinaryUtil {
         readable => {
           if (readable instanceof ReadableStream) {
             readable = Readable.fromWeb(readable);
+          } else if (Buffer.isBuffer(readable)) {
+            readable = Readable.from(readable);
           }
           return readable.pipe(stream);
         },
@@ -192,8 +194,10 @@ export class BinaryUtil {
     }
   }
 
-  static toBuffer(input: BinaryType): Promise<Buffer> {
-    if (Buffer.isBuffer(input)) {
+  static toBuffer(input: BinaryType | undefined): Promise<Buffer> {
+    if (input === undefined || input === null) {
+      return Promise.resolve(Buffer.alloc(0));
+    } else if (Buffer.isBuffer(input)) {
       return Promise.resolve(input);
     } else if (this.isArrayBuffer(input)) {
       return Promise.resolve(Buffer.from(input));
@@ -213,7 +217,7 @@ export class BinaryUtil {
   }
 
   /**
-   * Convert input to Buffer, Readable or undefined if matching
+   * Convert input to Basic Binary Type or undefined if not matching
    */
   static toBasic(input?: unknown): BinaryBasicType | undefined {
     if (input === null || input === undefined) {

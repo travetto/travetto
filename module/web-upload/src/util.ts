@@ -33,7 +33,7 @@ export class WebUploadUtil {
     let read = 0;
     return new Transform({
       transform(chunk, encoding, callback): void {
-        read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : (chunk instanceof Uint8Array ? chunk.byteLength : 0);
+        read += (typeof chunk === 'string') ? chunk.length : (BinaryUtil.isByteArray(chunk) ? chunk.byteLength : 0);
         if (read > maxSize) {
           callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
         } else {
