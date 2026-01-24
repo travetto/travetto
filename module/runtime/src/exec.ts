@@ -69,8 +69,8 @@ export class ExecUtil {
         };
 
         const final = {
-          stdout: options.binary ? buffers.stdout : buffers.stdout.toString('utf8'),
-          stderr: options.binary ? buffers.stderr : buffers.stderr.toString('utf8'),
+          stdout: options.binary ? buffers.stdout : buffers.stdout.toString(subProcess.stdout?.readableEncoding ?? 'utf8'),
+          stderr: options.binary ? buffers.stderr : buffers.stderr.toString(subProcess.stderr?.readableEncoding ?? 'utf8'),
           ...finalResult
         };
 
@@ -80,8 +80,20 @@ export class ExecUtil {
         );
       };
 
-      subProcess.stdout?.on('data', (data: string | Buffer) => stdout.push(Buffer.isBuffer(data) ? data : Buffer.from(data)));
-      subProcess.stderr?.on('data', (data: string | Buffer) => stderr.push(Buffer.isBuffer(data) ? data : Buffer.from(data)));
+      if (subProcess.stdout) {
+        if (subProcess.stdout.readableEncoding) {
+          subProcess.stdout.on('data', (data: string) => stdout.push(Buffer.from(data, subProcess.stdout!.readableEncoding!)));
+        } else {
+          subProcess.stdout.on('data', (data: Buffer) => stdout.push(data));
+        }
+      }
+      if (subProcess.stderr) {
+        if (subProcess.stderr.readableEncoding) {
+          subProcess.stderr.on('data', (data: string) => stderr.push(Buffer.from(data, subProcess.stderr!.readableEncoding!)));
+        } else {
+          subProcess.stderr.on('data', (data: Buffer) => stderr.push(data));
+        }
+      }
 
       subProcess.on('error', (error: Error) =>
         finish({ code: 1, message: error.message, valid: false }));

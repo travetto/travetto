@@ -39,7 +39,7 @@ export class ModelCrudUtil {
    */
   static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
     let resolvedInput: object;
-    if (typeof input === 'string' || input instanceof Buffer) {
+    if (typeof input === 'string' || Buffer.isBuffer(input)) {
       resolvedInput = JSONUtil.parseSafe(input);
     } else {
       resolvedInput = input;

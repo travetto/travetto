@@ -345,7 +345,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
     if (typeof result.Body === 'string') { // string
       return Readable.from(result.Body, { encoding: castTo<string>(result.Body).endsWith('=') ? 'base64' : 'utf8' });
-    } else if (result.Body instanceof Buffer) { // Buffer
+    } else if (Buffer.isBuffer(result.Body)) { // Buffer
       return Readable.from(result.Body);
     } else if ('pipe' in result.Body) { // Stream
       return castTo<Readable>(result.Body);
