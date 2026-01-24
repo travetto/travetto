@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
 import { buffer as toBuffer } from 'node:stream/consumers';
-import { createWriteStream } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
@@ -20,7 +20,7 @@ class ImageUtilSuite {
 
     assert(imgBuffer.length > 0);
 
-    const resizedBuffer = await ImageUtil.convert(imgBuffer, { h: 100, w: 100 });
+    const resizedBuffer = await ImageUtil.convertToBuffer(imgBuffer, { h: 100, w: 100 });
 
     assert(resizedBuffer.length > 0);
 
@@ -76,7 +76,7 @@ class ImageUtilSuite {
   @Test('resizeToFile')
   async resizeToFile() {
     const imgFile = await this.fixture.resolve('lincoln.jpg');
-    const out = await ImageUtil.convert(imgFile, {
+    const out = await ImageUtil.convert(createReadStream(imgFile), {
       w: 50,
       h: 50,
       optimize: true,
@@ -86,7 +86,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getMetadata(outFile);
+    const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.height === 50);
     assert(dims.width === 50);
 
@@ -105,7 +105,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getMetadata(outFile);
+    const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.width === 100);
     assert(dims.height === 134);
 
@@ -124,7 +124,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getMetadata(outFile);
+    const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.width === 100);
     assert(dims.height === 134);
 
@@ -145,7 +145,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const meta = await ImageUtil.getMetadata(outFile);
+    const meta = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(meta.width === 200);
     assert(meta.height === 200);
 

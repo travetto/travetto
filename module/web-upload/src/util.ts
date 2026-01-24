@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
-import { Readable, Transform } from 'node:stream';
+import { type Readable, Transform } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
@@ -58,7 +58,7 @@ export class WebUploadUtil {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }
 
-    const bodyStream = Buffer.isBuffer(request.body) ? Readable.from(request.body) : request.body;
+    const bodyStream = BinaryUtil.toReadable(request.body);
     request.body = undefined;
 
     const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));

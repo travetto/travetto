@@ -1,13 +1,11 @@
 import { Readable } from 'node:stream';
-import { buffer } from 'node:stream/consumers';
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
-
-const toBuffer = (src: Buffer | Readable) => Buffer.isBuffer(src) ? src : buffer(src);
+import { BinaryUtil } from '@travetto/runtime';
 
 @Suite()
 class BodyInterceptorSuite {
@@ -90,7 +88,7 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
+    const responseBuffer = await BinaryUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.length === 1000);
     assert(!responseBuffer.some(x => x !== 0));
   }
@@ -121,7 +119,7 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
+    const responseBuffer = await BinaryUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.length === koreanOutput.length);
   }
 
@@ -150,7 +148,7 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
+    const responseBuffer = await BinaryUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.length === koreanInput.length);
   }
 
@@ -179,7 +177,7 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
+    const responseBuffer = await BinaryUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.length === Buffer.from(koreanInput.toString('utf8')).length);
   }
 

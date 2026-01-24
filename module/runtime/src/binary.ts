@@ -129,4 +129,23 @@ export class BinaryUtil {
     const ext = path.extname(meta.filename ?? '') || '.bin';
     return `${parts.join('/')}${ext}`;
   }
+
+  static toReadable(input: BinaryInput): Readable {
+    return Buffer.isBuffer(input) ? Readable.from(input) :
+      (input instanceof Blob) ? Readable.fromWeb(input.stream()) :
+        (input instanceof ReadableStream) ? Readable.fromWeb(input) :
+          input;
+  }
+
+  static toBuffer(input: BinaryInput): Promise<Buffer> {
+    if (Buffer.isBuffer(input)) {
+      return Promise.resolve(input);
+    } else if (input instanceof Blob) {
+      return input.arrayBuffer().then(data => Buffer.from(data));
+    } else if (input instanceof ReadableStream) {
+      return toArrayBuffer(Readable.fromWeb(input)).then(data => Buffer.from(data));
+    } else {
+      return toArrayBuffer(input).then(data => Buffer.from(data));
+    }
+  }
 }

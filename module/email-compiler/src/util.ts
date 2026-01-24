@@ -1,4 +1,3 @@
-import { buffer as toBuffer } from 'node:stream/consumers';
 import path from 'node:path';
 import type { CompileResult, Options } from 'sass';
 
@@ -149,11 +148,10 @@ export class EmailCompileUtil {
     for (const [token, source] of tokens) {
       const ext = path.extname(source);
       if (/^[.](jpe?g|png)$/.test(ext)) {
-        const output = await ImageUtil.convert(
+        const buffer = await ImageUtil.convertToBuffer(
           await options.loader.readStream(source),
           { format: ext === '.png' ? 'png' : 'jpeg' }
         );
-        const buffer = await toBuffer(output);
         pendingImages.push([token, ext, buffer]);
       } else {
         pendingImages.push([token, ext, options.loader.read(source, true)]);
