@@ -239,7 +239,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, JSONUtil.toBuffer(blobMeta));
-    blobs.set(location, await BinaryUtil.toBuffer(stream));
+    blobs.set(location, await BinaryUtil.toByteArray(stream));
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {

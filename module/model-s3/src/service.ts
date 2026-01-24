@@ -217,7 +217,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     try {
       const result = await this.client.getObject(this.#query(cls, id));
       if (result.Body) {
-        const body = await BinaryUtil.toBuffer(result.Body);
+        const body = await BinaryUtil.toByteArray(result.Body);
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistryIndex.getConfig(cls);
@@ -324,7 +324,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#queryBlob(location, {
-        Body: await BinaryUtil.toBuffer(stream),
+        Body: await BinaryUtil.toByteArray(stream),
         ContentLength: blobMeta.size,
         ...this.#getMetaBase(blobMeta),
       }));

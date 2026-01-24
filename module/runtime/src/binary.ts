@@ -194,7 +194,7 @@ export class BinaryUtil {
     }
   }
 
-  static toBuffer(input: BinaryType | undefined): Promise<Buffer> {
+  static toByteArray(input: BinaryType | undefined): Promise<Buffer> {
     if (input === undefined || input === null) {
       return Promise.resolve(Buffer.alloc(0));
     } else if (Buffer.isBuffer(input)) {
