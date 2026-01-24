@@ -146,14 +146,14 @@ export class EmailCompileUtil {
     const pendingImages = [...tokens.entries()].map(async ([token, source]) => {
       const format = path.extname(source).substring(1);
 
-      let buffer: Buffer;
+      let bytes: Buffer;
       if (ImageUtil.isKnownExtension(format)) {
         const stream = await options.loader.readStream(source);
-        buffer = await ImageUtil.convertToBuffer(stream, { optimize: true, format });
+        bytes = await ImageUtil.convertToBuffer(stream, { optimize: true, format });
       } else {
-        buffer = await options.loader.read(source, true);
+        bytes = await options.loader.read(source, true);
       }
-      return [token, `data:image/${format};base64,${buffer.toString('base64')}`] as const;
+      return [token, `data:image/${format};base64,${bytes.toString('base64')}`] as const;
     });
 
     const imageMap = new Map(await Promise.all(pendingImages));
