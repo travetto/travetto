@@ -10,7 +10,7 @@ import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, ModelBlobUtil
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -238,7 +238,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       return;
     }
 
-    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
+    const [stream, blobMeta] = await BinaryUtil.toReadableAndMetadata(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, Buffer.from(JSON.stringify(blobMeta)));
@@ -248,7 +248,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const blobs = this.#find(ModelBlobNamespace, location, 'notfound');
     let buffer = blobs.get(location)!;
-    const final = range ? ModelBlobUtil.enforceRange(range, buffer.length) : undefined;
+    const final = range ? BinaryUtil.enforceRange(range, buffer.length) : undefined;
     if (final) {
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }

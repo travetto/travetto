@@ -1,14 +1,9 @@
-import type { Readable } from 'node:stream';
-import type { ReadableStream } from 'node:stream/web';
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Any = any;
 
 export type AnyMap = { [key: string]: Any };
 export type Class<T = Any> = abstract new (...args: Any[]) => T;
 export type ClassInstance<T = Any> = T & { constructor: Class<T> };
-
-export type BinaryInput = Blob | Buffer | Readable | ReadableStream;
 
 export type TypedFunction<R = Any, V = unknown> = (this: V, ...args: Any[]) => R;
 

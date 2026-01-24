@@ -10,7 +10,7 @@ import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport,
   type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
   NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -289,7 +289,7 @@ export class MongoModelService implements
     if (!overwrite && existing) {
       return;
     }
-    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
+    const [stream, blobMeta] = await BinaryUtil.toReadableAndMetadata(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, { metadata: blobMeta });
     await pipeline(stream, writeStream);
 
@@ -301,7 +301,7 @@ export class MongoModelService implements
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.getBlobMeta(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
+    const final = range ? BinaryUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
     return BinaryUtil.readableBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...meta, range: final });
   }

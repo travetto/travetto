@@ -83,7 +83,6 @@ export class ImageUtil {
     return ReadableStream.from(builder);
   }
 
-
   /**
    * Convert image as readable stream
    */

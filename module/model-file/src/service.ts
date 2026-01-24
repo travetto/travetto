@@ -10,8 +10,7 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex,
-  NotFoundError, type OptionalId, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelBlobUtil
+  NotFoundError, type OptionalId, ExistsError, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil
 } from '@travetto/model';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
@@ -175,7 +174,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
       return;
     }
 
-    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
+    const [stream, blobMeta] = await BinaryUtil.toReadableAndMetadata(input, meta);
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       await pipeline(stream, createWriteStream(file)),
@@ -186,7 +185,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const file = await this.#find(ModelBlobNamespace, BIN, location);
     const meta = await this.getBlobMeta(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
+    const final = range ? BinaryUtil.enforceRange(range, meta.size!) : undefined;
     return BinaryUtil.readableBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
   }
 

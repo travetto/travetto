@@ -14,7 +14,7 @@ import type { WebHeaders } from '../types/headers.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
 import { WebError } from '../types/error.ts';
-import type { WebBinaryBody } from '../types/message.ts';
+import type { WebBinarySource } from '../types/message.ts';
 
 const STREAM_DECOMPRESSORS = {
   gzip: zlib.createGunzip,
@@ -53,7 +53,7 @@ export class DecompressConfig {
 @Injectable()
 export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
 
-  static async decompress(headers: WebHeaders, input: WebBinaryBody, config: DecompressConfig): Promise<typeof input> {
+  static async decompress(headers: WebHeaders, input: WebBinarySource, config: DecompressConfig): Promise<typeof input> {
     const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 
     if (!config.supportedEncodings.includes(encoding)) {

@@ -6,12 +6,20 @@ import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toArrayBuffer } from 'node:stream/consumers';
-import { isArrayBuffer } from 'node:util/types';
+import { isArrayBuffer, isUint8Array } from 'node:util/types';
 
-import { type BinaryInput, type BlobMeta, hasFunction } from './types.ts';
+import { type BlobMeta, type ByteRange, castTo, hasFunction } from './types.ts';
 import { Util } from './util.ts';
+import { AppError } from './error.ts';
+
+type BlobSource = Readable | ReadableStream | Promise<Readable | ReadableStream>;
 
 const BlobMetaSymbol = Symbol();
+
+const BINARY_CONSTRUCTORS = [Readable, Buffer, Blob, File, ReadableStream, ArrayBuffer, Uint8Array];
+export type BinaryInput = Readable | Buffer | Blob | ReadableStream | ArrayBuffer | Uint8Array;
+
+const BINARY_CONSTRUCTOR_SET = new Set(BINARY_CONSTRUCTORS);
 
 /**
  * Common functions for dealing with binary data/streams
@@ -19,6 +27,8 @@ const BlobMetaSymbol = Symbol();
 export class BinaryUtil {
   /** Is Array Buffer */
   static isArrayBuffer = isArrayBuffer;
+  /** Is Uint8Array */
+  static isUint8Array = isUint8Array;
   /** Is Readable */
   static isReadable = hasFunction<Readable>('pipe');
   /** Is ReadableStream */
@@ -26,6 +36,10 @@ export class BinaryUtil {
   /** Is Async Iterable */
   static isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
     !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
+
+  static isBinaryConstructor(value: Function): boolean {
+    return BINARY_CONSTRUCTOR_SET.has(castTo(value));
+  }
 
   /**
    * Is value a binary type
@@ -54,6 +68,8 @@ export class BinaryUtil {
     const hash = crypto.createHash('sha256').setEncoding('hex');
     if (Buffer.isBuffer(input)) {
       hash.write(input);
+    } else if (this.isArrayBuffer(input)) {
+      hash.write(Buffer.from(input));
     } else if (input instanceof Blob) {
       await pipeline(Readable.fromWeb(input.stream()), hash);
     } else {
@@ -83,12 +99,20 @@ export class BinaryUtil {
   /**
    * Make a blob, and assign metadata
    */
-  static readableBlob(input: () => (Readable | Promise<Readable>), metadata: Omit<BlobMeta, 'filename'> & { filename: string }): File;
-  static readableBlob(input: () => (Readable | Promise<Readable>), metadata?: BlobMeta): Blob;
-  static readableBlob(input: () => (Readable | Promise<Readable>), metadata: BlobMeta = {}): Blob | File {
+  static readableBlob(input: () => BlobSource, metadata: Omit<BlobMeta, 'filename'> & { filename: string }): File;
+  static readableBlob(input: () => BlobSource, metadata?: BlobMeta): Blob;
+  static readableBlob(input: () => BlobSource, metadata: BlobMeta = {}): Blob | File {
     const go = (): Readable => {
       const stream = new PassThrough();
-      Promise.resolve(input()).then(readable => readable.pipe(stream), (error) => stream.destroy(error));
+      Promise.resolve(input()).then(
+        readable => {
+          if (readable instanceof ReadableStream) {
+            readable = Readable.fromWeb(readable);
+          }
+          return readable.pipe(stream);
+        },
+        error => stream.destroy(error)
+      );
       return stream;
     };
 
@@ -131,15 +155,40 @@ export class BinaryUtil {
   }
 
   static toReadable(input: BinaryInput): Readable {
-    return Buffer.isBuffer(input) ? Readable.from(input) :
-      (input instanceof Blob) ? Readable.fromWeb(input.stream()) :
-        (input instanceof ReadableStream) ? Readable.fromWeb(input) :
-          input;
+    if (this.isReadable(input)) {
+      return input;
+    } else if (Buffer.isBuffer(input)) {
+      return Readable.from(input);
+    } else if (this.isArrayBuffer(input)) {
+      return Readable.from(Buffer.from(input));
+    } else if (input instanceof Blob) {
+      return Readable.fromWeb(input.stream());
+    } else if (this.isReadableStream(input)) {
+      return Readable.fromWeb(input);
+    } else {
+      return Readable.from(Buffer.from(input));
+    }
+  }
+
+  static toReadableStream(input: BinaryInput): ReadableStream {
+    if (this.isReadableStream(input)) {
+      return input;
+    } else if (this.isReadable(input)) {
+      return Readable.toWeb(input);
+    } else if (input instanceof Blob) {
+      return input.stream();
+    } else {
+      return ReadableStream.from(this.toReadable(input));
+    }
   }
 
   static toBuffer(input: BinaryInput): Promise<Buffer> {
     if (Buffer.isBuffer(input)) {
       return Promise.resolve(input);
+    } else if (this.isArrayBuffer(input)) {
+      return Promise.resolve(Buffer.from(input));
+    } else if (this.isUint8Array(input)) {
+      return Promise.resolve(Buffer.from(input));
     } else if (input instanceof Blob) {
       return input.arrayBuffer().then(data => Buffer.from(data));
     } else if (input instanceof ReadableStream) {
@@ -147,5 +196,32 @@ export class BinaryUtil {
     } else {
       return toArrayBuffer(input).then(data => Buffer.from(data));
     }
+  }
+
+  /**
+   * Convert input to a Readable, and get what metadata is available
+   */
+  static async toReadableAndMetadata(input: BinaryInput, metadata: BlobMeta = {}): Promise<[Readable, BlobMeta]> {
+    if (input instanceof Blob) {
+      metadata = { ...this.getBlobMeta(input), ...metadata };
+      metadata.size ??= input.size;
+    } else if (this.isUint8Array(input) || this.isArrayBuffer(input) || Buffer.isBuffer(input)) {
+      metadata.size = input.byteLength;
+    }
+    return [this.toReadable(input), metadata ?? {}];
+  }
+
+  /**
+   * Enforce byte range for stream stream/file of a certain size
+   */
+  static enforceRange({ start, end }: ByteRange, size: number): Required<ByteRange> {
+    // End is inclusive
+    end = Math.min(end ?? (size - 1), size - 1);
+
+    if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {
+      throw new AppError('Invalid position, out of range', { category: 'data' });
+    }
+
+    return { start, end };
   }
 }

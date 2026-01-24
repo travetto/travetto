@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 
 import { type Any, BinaryUtil, castTo, hasToJSON, JSONUtil, Util } from '@travetto/runtime';
 
-import type { WebBinaryBody, WebMessage } from '../types/message.ts';
+import type { WebBinarySource, WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
 import { WebError } from '../types/error.ts';
 
@@ -33,7 +33,7 @@ export class WebBodyUtil {
       yield nl;
       if (data instanceof Blob) {
         for await (const chunk of data.stream()) {
-          yield chunk;
+          yield Buffer.from(chunk);
         }
       } else {
         yield data;
@@ -89,13 +89,13 @@ export class WebBodyUtil {
   /**
    * Convert an existing web message to a binary web message
    */
-  static toBinaryMessage(message: WebMessage): Omit<WebMessage<WebBinaryBody>, 'context'> {
+  static toBinaryMessage(message: WebMessage): Omit<WebMessage<WebBinarySource>, 'context'> {
     const body = message.body;
     if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
       return castTo(message);
     }
 
-    const out: Omit<WebMessage<WebBinaryBody>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
+    const out: Omit<WebMessage<WebBinarySource>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
     if (body instanceof Blob) {
       for (const [key, value] of this.getBlobHeaders(body)) {
         out.headers.set(key, value);
@@ -112,6 +112,8 @@ export class WebBodyUtil {
     } else if (body === null || body === undefined) {
       out.body = Buffer.alloc(0);
     } else if (BinaryUtil.isArrayBuffer(body)) {
+      out.body = Buffer.from(body);
+    } else if (BinaryUtil.isUint8Array(body)) {
       out.body = Buffer.from(body);
     } else {
       let text: string;
@@ -139,7 +141,7 @@ export class WebBodyUtil {
   /**
    * Set body and mark as unprocessed
    */
-  static markRaw(body: WebBinaryBody | undefined): typeof body {
+  static markRaw(body: WebBinarySource | undefined): typeof body {
     if (body) {
       Object.defineProperty(body, WebRawStreamSymbol, { value: body });
     }
@@ -149,7 +151,7 @@ export class WebBodyUtil {
   /**
    * Is the input raw
    */
-  static isRaw(body: unknown): body is WebBinaryBody {
+  static isRaw(body: unknown): body is WebBinarySource {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return !!body && ((Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) && (body as Any)[WebRawStreamSymbol] === body);
   }
@@ -168,7 +170,7 @@ export class WebBodyUtil {
   /**
    * Read text from an input source
    */
-  static async readText(input: Readable | Buffer, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
+  static async readText(input: WebBinarySource, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
     encoding ??= (Buffer.isBuffer(input) ? undefined : input.readableEncoding) ?? 'utf-8';
 
     let decoder: TextDecoder;
