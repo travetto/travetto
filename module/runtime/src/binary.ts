@@ -266,4 +266,51 @@ export class BinaryUtil {
 
     return { start, end };
   }
+
+  /**
+   * Generate buffer from hex string
+   */
+  static fromHexString(value: string): Buffer {
+    return Buffer.from(value, 'hex');
+  }
+
+  /**
+   * Convert hex bytes to string
+   */
+  static toHexString(value: Buffer | Uint8Array | ArrayBuffer): string {
+    if (this.isArrayBuffer(value)) {
+      value = Buffer.from(value);
+    } else if (this.isUint8Array(value)) {
+      value = Buffer.from(value);
+    }
+    return value.toString('hex');
+  }
+
+  /**
+   * Return buffer from base64 string
+   */
+  static fromBase64String(value: string): Buffer {
+    return Buffer.from(value, 'base64');
+  }
+
+  /**
+   * Return buffer from utf8 string
+   */
+  static fromUTF8String(value: string): Buffer {
+    return Buffer.from(value, 'utf8');
+  }
+
+  /**
+   * Convert utf8 value to base64 value string
+   */
+  static utf8ToBase64(value: string | Buffer): string {
+    return (Buffer.isBuffer(value) ? value : Buffer.from(value, 'utf8')).toString('base64');
+  }
+
+  /**
+   * Convert base64 value to utf8 string
+   */
+  static base64ToUTF8(value: string | Buffer): string {
+    return (Buffer.isBuffer(value) ? value : Buffer.from(value, 'base64')).toString('utf8');
+  }
 }

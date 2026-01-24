@@ -123,10 +123,10 @@ export class ConnectResponse implements Pick<ServerResponse,
     if (this.#headersSent) {
       this.flushHeaders();
     }
-    if (!Buffer.isBuffer(chunk)) {
-      this.#written.push(Buffer.from(`${chunk}`, castTo(encoding)));
-    } else {
+    if (chunk && Buffer.isBuffer(chunk)) {
       this.#written.push(chunk);
+    } else {
+      this.#written.push(Buffer.from(`${chunk}`, castTo(encoding)));
     }
     callback?.();
     return true;

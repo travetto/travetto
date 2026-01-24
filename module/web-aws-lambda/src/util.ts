@@ -10,7 +10,10 @@ export class AwsLambdaWebUtil {
    */
   static toWebRequest(event: APIGatewayProxyEvent): WebRequest {
     // Build request
-    const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
+    const body = !event.body ? undefined :
+      event.isBase64Encoded ?
+        BinaryUtil.fromBase64String(event.body) :
+        BinaryUtil.fromUTF8String(event.body);
 
     return new WebRequest({
       context: {
@@ -36,7 +39,7 @@ export class AwsLambdaWebUtil {
       ...WebBodyUtil.toBinaryMessage(response)
     });
     const output: Buffer = await BinaryUtil.toBuffer(binaryResponse.body);
-    const isBase64Encoded = !!output.length && base64Encoded;
+    const isBase64Encoded = !!output.byteLength && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};
 

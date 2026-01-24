@@ -43,7 +43,7 @@ class S3BlobSuite extends ModelBlobSuite {
   async largeFile() {
     const service: S3ModelService = castTo(await this.service);
     const buffer = Buffer.alloc(1.5 * service['config'].chunkSize);
-    for (let i = 0; i < buffer.length; i++) {
+    for (let i = 0; i < buffer.byteLength; i++) {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
@@ -52,7 +52,7 @@ class S3BlobSuite extends ModelBlobSuite {
     await service.upsertBlob(hash, buffer, {
       filename: 'Random.bin',
       contentType: 'binary/octet-stream',
-      size: buffer.length,
+      size: buffer.byteLength,
       hash
     });
 

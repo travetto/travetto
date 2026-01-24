@@ -78,7 +78,7 @@ export class EtagInterceptor implements WebInterceptor {
     }
 
     const minSize = ctx.config._minimumSize ??= WebCommonUtil.parseByteSize(ctx.config.minimumSize);
-    if (body.length < minSize) {
+    if (body.byteLength < minSize) {
       return binaryResponse;
     }
 

@@ -35,7 +35,7 @@ export class WebTestDispatchUtil {
     if (decompress) {
       if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
         const bufferResult = result = await toBuffer(result);
-        if (bufferResult.length) {
+        if (bufferResult.byteLength) {
           try {
             result = await DecompressInterceptor.decompress(
               response.headers,

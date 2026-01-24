@@ -13,7 +13,8 @@ import {
 import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BlobMeta,
-  type ByteRange, type BinaryType, BinaryUtil, type TimeSpan, TimeUtil
+  type ByteRange, type BinaryType, BinaryUtil, type TimeSpan, TimeUtil,
+  JSONUtil
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -139,7 +140,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       for await (const chunk of input) {
         const chunked = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
         buffers.push(chunked);
-        total += chunked.length;
+        total += chunked.byteLength;
         if (total > this.config.chunkSize) {
           await flush();
         }
@@ -246,11 +247,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
-    const content = Buffer.from(JSON.stringify(prepped), 'utf8');
+    const content = JSONUtil.toBuffer(prepped);
     await this.client.putObject(this.#query(cls, prepped.id, {
       Body: content,
       ContentType: 'application/json',
-      ContentLength: content.length,
+      ContentLength: content.byteLength,
       ...this.#getExpiryConfig(cls, prepped)
     }));
     return prepped;

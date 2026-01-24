@@ -245,7 +245,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const blobs = this.#find(ModelBlobNamespace, location, 'notfound');
     let buffer = blobs.get(location)!;
-    const final = range ? BinaryUtil.enforceRange(range, buffer.length) : undefined;
+    const final = range ? BinaryUtil.enforceRange(range, buffer.byteLength) : undefined;
     if (final) {
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
@@ -272,7 +272,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, Buffer.from(JSON.stringify(meta), 'utf8'));
+    metaContent.set(location, JSONUtil.toBuffer(meta));
   }
 
   // Expiry

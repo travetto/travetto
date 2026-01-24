@@ -89,7 +89,7 @@ class BodyInterceptorSuite {
     });
 
     const responseBuffer = await BinaryUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.length === 1000);
+    assert(responseBuffer.byteLength === 1000);
     assert(!responseBuffer.some(x => x !== 0));
   }
 
@@ -120,7 +120,7 @@ class BodyInterceptorSuite {
     });
 
     const responseBuffer = await BinaryUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.length === koreanOutput.length);
+    assert(responseBuffer.byteLength === koreanOutput.byteLength);
   }
 
   @Test()
@@ -149,7 +149,7 @@ class BodyInterceptorSuite {
     });
 
     const responseBuffer = await BinaryUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.length === koreanInput.length);
+    assert(responseBuffer.byteLength === koreanInput.byteLength);
   }
 
   @Test()
@@ -178,7 +178,7 @@ class BodyInterceptorSuite {
     });
 
     const responseBuffer = await BinaryUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.length === Buffer.from(koreanInput.toString('utf8')).length);
+    assert(responseBuffer.byteLength === Buffer.from(koreanInput.toString('utf8')).byteLength);
   }
 
   @Test()

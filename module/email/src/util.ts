@@ -43,7 +43,7 @@ export class MailUtil {
           headers: {
             'X-Attachment-Id': `${contentId}`
           },
-          content: Buffer.from(content, 'base64'),
+          content: BinaryUtil.fromBase64String(content),
           contentDisposition: 'inline',
           contentType
         });

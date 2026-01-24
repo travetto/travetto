@@ -18,13 +18,13 @@ class ImageUtilSuite {
   async resizeImage() {
     const imgBuffer = await this.fixture.read('apple.jpg', true);
 
-    assert(imgBuffer.length > 0);
+    assert(imgBuffer.byteLength > 0);
 
     const resizedBuffer = await ImageUtil.convertToBuffer(imgBuffer, { h: 100, w: 100 });
 
-    assert(resizedBuffer.length > 0);
+    assert(resizedBuffer.byteLength > 0);
 
-    assert(imgBuffer.length > resizedBuffer.length);
+    assert(imgBuffer.byteLength > resizedBuffer.byteLength);
   }
 
   @Test('compress png')
@@ -36,9 +36,9 @@ class ImageUtilSuite {
 
     const optimized = await toBuffer(out);
 
-    assert(optimized.length > 0);
+    assert(optimized.byteLength > 0);
 
-    assert(imgBuffer.length >= optimized.length);
+    assert(imgBuffer.byteLength >= optimized.byteLength);
   }
 
   @Test('compress jpeg')
@@ -50,9 +50,9 @@ class ImageUtilSuite {
 
     const optimized = await toBuffer(out);
 
-    assert(optimized.length > 0);
+    assert(optimized.byteLength > 0);
 
-    assert(imgBuffer.length >= optimized.length);
+    assert(imgBuffer.byteLength >= optimized.byteLength);
 
     assert((await ImageUtil.getMetadata(optimized)).format === 'avif');
   }
@@ -66,9 +66,9 @@ class ImageUtilSuite {
 
     const optimized = await toBuffer(out);
 
-    assert(optimized.length > 0);
+    assert(optimized.byteLength > 0);
 
-    assert(imgBuffer.length >= optimized.length);
+    assert(imgBuffer.byteLength >= optimized.byteLength);
 
     assert((await ImageUtil.getMetadata(optimized)).format === 'jpeg');
   }

@@ -4,7 +4,7 @@ import util from 'node:util';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo } from '@travetto/runtime';
 
 import type { WebChainedContext } from '../types/filter.ts';
 import type { WebResponse } from '../types/response.ts';
@@ -64,7 +64,7 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
       return input;
     }
 
-    if (Buffer.isBuffer(input)) {
+    if (BinaryUtil.isByteArray(input)) {
       return BUFFER_DECOMPRESSORS[encoding](input);
     } else {
       return input.pipe(STREAM_DECOMPRESSORS[encoding]());

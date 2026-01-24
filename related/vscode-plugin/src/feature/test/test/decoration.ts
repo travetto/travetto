@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import util from 'node:util';
 
 import type { TestResult, Assertion, TestConfig, TestLog, TestStatus } from '@travetto/test';
-import { JSONUtil } from '@travetto/runtime';
+import { BinaryUtil, JSONUtil } from '@travetto/runtime';
 
 import type { ErrorHoverAssertion, TestLevel } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
@@ -173,7 +173,7 @@ export class Decorations {
 
       new Log('test:decoration').debug(`Generated SVG for state ${state}: ${svg}`);
 
-      this.#imageUris[key] = vscode.Uri.parse(`data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`);
+      this.#imageUris[key] = vscode.Uri.parse(`data:image/svg+xml;base64,${BinaryUtil.utf8ToBase64(svg)}`);
     }
     return this.#imageUris[key];
   }

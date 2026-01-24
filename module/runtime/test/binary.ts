@@ -17,7 +17,7 @@ export class BytesUtilTest {
     const blobBytes = await buffer(Readable.fromWeb(await blob.stream()));
     const allBytes = await this.fixture.read('/logo.png', true);
     assert(blob.size === undefined);
-    assert(blobBytes.length === allBytes.length);
+    assert(blobBytes.byteLength === allBytes.byteLength);
     assert(blobBytes.equals(allBytes));
   }
 
@@ -27,7 +27,7 @@ export class BytesUtilTest {
     const blobBytes = await buffer(Readable.fromWeb(await blob.stream()));
     const allBytes = await buffer(Readable.fromWeb(await blob.stream()));
     assert(blob.size === undefined);
-    assert(blobBytes.length === allBytes.length);
+    assert(blobBytes.byteLength === allBytes.byteLength);
     assert(blobBytes.equals(allBytes));
   }
 

@@ -143,7 +143,7 @@ class DecompressInterceptorSuite {
     });
     assert(response);
     assert(Buffer.isBuffer(response));
-    assert(response.byteLength === preCompressed.length);
+    assert(response.byteLength === preCompressed.byteLength);
   }
 
   @Test()
@@ -156,7 +156,7 @@ class DecompressInterceptorSuite {
     });
     assert(response);
     assert(BinaryUtil.isReadable(response));
-    assert((await buffer(response)).byteLength === data.length);
+    assert((await buffer(response)).byteLength === data.byteLength);
   }
 
   @Test()

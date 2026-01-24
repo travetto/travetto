@@ -128,7 +128,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const savedMeta = meta(saved)!;
 
     assert('text/yaml' === savedMeta.contentType);
-    assert(buffer.length === savedMeta.size);
+    assert(buffer.byteLength === savedMeta.size);
     assert('asset.yml' === savedMeta.filename);
     assert(undefined === savedMeta.hash);
   }
@@ -157,7 +157,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const service = await this.service;
 
     const buffer = Buffer.alloc(1.5 * 10000);
-    for (let i = 0; i < buffer.length; i++) {
+    for (let i = 0; i < buffer.byteLength; i++) {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
@@ -181,11 +181,11 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
       contentType: 'image/jpeg',
       title: 'orange',
       filename: 'gary',
-      size: buffer.length,
+      size: buffer.byteLength,
     });
 
     const found = await service.getBlob('largeFile/one');
-    assert(found.size === buffer.length);
+    assert(found.size === buffer.byteLength);
     assert(found.type === 'image/jpeg');
     assert(BinaryUtil.getBlobMeta(found)?.title === 'orange');
     assert(BinaryUtil.getBlobMeta(found)?.filename === 'gary');

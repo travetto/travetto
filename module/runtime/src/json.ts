@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 
 import type { Any } from './types.ts';
+import { BinaryUtil } from './binary.ts';
 
 export type JSONParseInput = string | Buffer;
 
@@ -36,7 +37,7 @@ export class JSONUtil {
       return Buffer.alloc(0);
     }
     const text = JSON.stringify(value);
-    return Buffer.from(text, 'utf8');
+    return BinaryUtil.fromUTF8String(text);
   }
 
   /**
@@ -44,10 +45,10 @@ export class JSONUtil {
    */
   static stringifyBase64<T>(value: T | undefined): string | undefined {
     const bytes = this.toBuffer(value);
-    if (bytes.length === 0) {
+    if (bytes.byteLength === 0) {
       return undefined;
     }
-    return bytes.toString('base64');
+    return BinaryUtil.utf8ToBase64(bytes);
   }
 
   /**
@@ -60,7 +61,7 @@ export class JSONUtil {
       return undefined;
     }
 
-    let decoded = Buffer.from(input, 'base64').toString('utf8');
+    let decoded = BinaryUtil.base64ToUTF8(input);
 
     // Read from encoded if it happens
     if (decoded.startsWith('%')) {
