@@ -1,4 +1,4 @@
-import { castTo, type Class, Util, AppError, hasFunction, JSONUtil } from '@travetto/runtime';
+import { castTo, type Class, Util, AppError, hasFunction, JSONUtil, type JSONParseInput } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -8,6 +8,8 @@ import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
 import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
+
+type ModelLoadInput = JSONParseInput | object;
 
 export type ModelCrudProvider = {
   idSource: ModelIdSource;
@@ -37,7 +39,7 @@ export class ModelCrudUtil {
    * @param cls Class to load model for
    * @param input Input as string or plain object
    */
-  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
+  static async load<T extends ModelType>(cls: Class<T>, input: ModelLoadInput, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
     let resolvedInput: object;
     if (typeof input === 'string' || Buffer.isBuffer(input)) {
       resolvedInput = JSONUtil.parseSafe(input);

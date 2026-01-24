@@ -3,6 +3,8 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import type { Any } from './types.ts';
 
+export type JSONParseInput = string | Buffer;
+
 /**
  * JSON Utility functions
  */
@@ -11,7 +13,7 @@ export class JSONUtil {
   /**
    * Parse JSON safely
    */
-  static parseSafe<T>(input: string | Buffer, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
+  static parseSafe<T>(input: JSONParseInput, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
     if (typeof input !== 'string') {
       input = input.toString('utf8');
     }
