@@ -231,7 +231,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   // Blob Support
   async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
-    if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
+    if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
 
@@ -249,11 +249,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (final) {
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
-    const meta = await this.getBlobMeta(location);
+    const meta = await this.getBlobMetadata(location);
     return BinaryUtil.readableBlob(() => buffer, { ...meta, range: final });
   }
 
-  async getBlobMeta(location: string): Promise<BinaryMetadata> {
+  async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
     const meta: BinaryMetadata = JSONUtil.parseSafe(metaContent.get(location)!);
     return meta;
@@ -270,7 +270,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     }
   }
 
-  async updateBlobMeta(location: string, meta: BinaryMetadata): Promise<void> {
+  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, BinaryUtil.fromUTF8String(JSON.stringify(meta)));
   }

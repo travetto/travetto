@@ -314,7 +314,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   // Blob support
   async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
-    if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
+    if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
 
@@ -332,7 +332,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async #getObject(location: string, range?: Required<ByteRange>): Promise<Readable> {
+  async #getObject(location: string, range?: Required<ByteRange>): Promise<BinaryType> {
     // Read from s3
     const result = await this.client.getObject(this.#queryBlob(location, range ? {
       Range: `bytes=${range.start}-${range.end}`
@@ -354,9 +354,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const meta = await this.getBlobMeta(location);
+    const meta = await this.getBlobMetadata(location);
     const final = range ? BinaryUtil.enforceRange(range, meta.size!) : undefined;
-    const result = (): Promise<Readable> => this.#getObject(location, final);
+    const result = (): Promise<BinaryType> => this.#getObject(location, final);
     return BinaryUtil.readableBlob(result, { ...meta, range: final });
   }
 
@@ -374,7 +374,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async getBlobMeta(location: string): Promise<BinaryMetadata> {
+  async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const blob = await this.headBlob(location);
 
     if (blob) {
@@ -397,7 +397,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     await this.client.deleteObject(this.#queryBlob(location));
   }
 
-  async updateBlobMeta(location: string, meta: BinaryMetadata): Promise<void> {
+  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
     await this.client.copyObject({
       Bucket: this.config.bucket,
       Key: this.#basicKey(location),

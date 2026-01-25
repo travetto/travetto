@@ -170,7 +170,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   // Blob
   async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
-    if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
+    if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
 
@@ -184,12 +184,12 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const file = await this.#find(ModelBlobNamespace, BIN, location);
-    const meta = await this.getBlobMeta(location);
+    const meta = await this.getBlobMetadata(location);
     const final = range ? BinaryUtil.enforceRange(range, meta.size!) : undefined;
     return BinaryUtil.readableBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
   }
 
-  async getBlobMeta(location: string): Promise<BinaryMetadata> {
+  async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const file = await this.#find(ModelBlobNamespace, META, location);
     const content = await fs.readFile(file);
     const text: BinaryMetadata = JSONUtil.parseSafe(content);
@@ -208,7 +208,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     }
   }
 
-  async updateBlobMeta(location: string, meta: BinaryMetadata): Promise<void> {
+  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
     const file = await this.#find(ModelBlobNamespace, META, location);
     await fs.writeFile(file, JSON.stringify(meta));
   }

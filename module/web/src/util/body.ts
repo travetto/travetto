@@ -44,7 +44,7 @@ export class WebBodyUtil {
 
   /** Get Blob Headers */
   static getBlobHeaders(value: Blob): [string, string][] {
-    const meta = BinaryUtil.getBlobMeta(value);
+    const meta = BinaryUtil.getBlobMetadata(value);
 
     const toAdd: [string, string | undefined][] = [
       ['Content-Type', value.type],

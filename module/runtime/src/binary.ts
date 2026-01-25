@@ -13,8 +13,6 @@ import { type Any, type BinaryMetadata, type ByteRange, castTo, hasFunction } fr
 import { Util } from './util.ts';
 import { AppError } from './error.ts';
 
-type BlobSource = Buffer | Readable | ReadableStream | Promise<Readable | ReadableStream | Buffer>;
-
 const BlobMetaSymbol = Symbol();
 
 const BINARY_CONSTRUCTORS = [Readable, Buffer, Blob, File, ReadableStream, ArrayBuffer, Uint8Array];
@@ -117,18 +115,14 @@ export class BinaryUtil {
   /**
    * Make a blob, and assign metadata
    */
-  static readableBlob(input: () => BlobSource, metadata: Omit<BinaryMetadata, 'filename'> & { filename: string }): File;
-  static readableBlob(input: () => BlobSource, metadata?: BinaryMetadata): Blob;
-  static readableBlob(input: () => BlobSource, metadata: BinaryMetadata = {}): Blob | File {
+  static readableBlob(input: () => BinaryType | Promise<BinaryType>, metadata: Omit<BinaryMetadata, 'filename'> & { filename: string }): File;
+  static readableBlob(input: () => BinaryType | Promise<BinaryType>, metadata?: BinaryMetadata): Blob;
+  static readableBlob(input: () => BinaryType | Promise<BinaryType>, metadata: BinaryMetadata = {}): Blob | File {
     const go = (): Readable => {
       const stream = new PassThrough();
       Promise.resolve(input()).then(
-        readable => {
-          if (BinaryUtil.isReadableStream(readable)) {
-            readable = Readable.fromWeb(readable);
-          } else if (Buffer.isBuffer(readable)) {
-            readable = Readable.from(readable);
-          }
+        source => {
+          const readable = BinaryUtil.toReadable(source);
           return readable.pipe(stream);
         },
         error => stream.destroy(error)
@@ -154,7 +148,7 @@ export class BinaryUtil {
   /**
    * Get blob metadata
    */
-  static getBlobMeta(blob: Blob): BinaryMetadata | undefined {
+  static getBlobMetadata(blob: Blob): BinaryMetadata | undefined {
     const withMeta: Blob & { [BlobMetaSymbol]?: BinaryMetadata } = blob;
     return withMeta[BlobMetaSymbol];
   }
@@ -251,7 +245,7 @@ export class BinaryUtil {
    */
   static async toReadableAndMetadata(input: BinaryType, metadata: BinaryMetadata = {}): Promise<[Readable, BinaryMetadata]> {
     if (input instanceof Blob) {
-      metadata = { ...this.getBlobMeta(input), ...metadata };
+      metadata = { ...this.getBlobMetadata(input), ...metadata };
       metadata.size ??= input.size;
     } else if (this.isUint8Array(input) || this.isArrayBuffer(input) || Buffer.isBuffer(input)) {
       metadata.size = input.byteLength;

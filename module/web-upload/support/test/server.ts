@@ -10,7 +10,7 @@ import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { Upload } from '../../src/decorator.ts';
 import type { FileMap } from '../../src/types.ts';
 
-const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
+const bHash = (blob: Blob) => BinaryUtil.getBlobMetadata(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {

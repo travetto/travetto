@@ -26,7 +26,7 @@ export interface ModelBlobSupport {
    * Get metadata for blob
    * @param location The location of the blob
    */
-  getBlobMeta(location: string): Promise<BinaryMetadata>;
+  getBlobMetadata(location: string): Promise<BinaryMetadata>;
 
   /**
    * Delete blob by location
@@ -38,7 +38,7 @@ export interface ModelBlobSupport {
    * Update blob metadata
    * @param location The location of the blob
    */
-  updateBlobMeta(location: string, meta: BinaryMetadata): Promise<void>;
+  updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void>;
 
   /**
    * Produces an externally usable URL for sharing limited read access to a specific resource

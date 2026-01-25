@@ -285,7 +285,7 @@ export class MongoModelService implements
 
   // Blob
   async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
-    const existing = await this.getBlobMeta(location).then(() => true, () => false);
+    const existing = await this.getBlobMetadata(location).then(() => true, () => false);
     if (!overwrite && existing) {
       return;
     }
@@ -300,13 +300,13 @@ export class MongoModelService implements
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const meta = await this.getBlobMeta(location);
+    const meta = await this.getBlobMetadata(location);
     const final = range ? BinaryUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
     return BinaryUtil.readableBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...meta, range: final });
   }
 
-  async getBlobMeta(location: string): Promise<BinaryMetadata> {
+  async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const result = await this.#db.collection<{ metadata: BinaryMetadata }>(`${ModelBlobNamespace}.files`).findOne({ filename: location });
     return result!.metadata;
   }
@@ -316,7 +316,7 @@ export class MongoModelService implements
     await this.#bucket.delete(fileId);
   }
 
-  async updateBlobMeta(location: string, meta: BinaryMetadata): Promise<void> {
+  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
     await this.#db.collection<{ metadata: BinaryMetadata }>(`${ModelBlobNamespace}.files`).findOneAndUpdate(
       { filename: location },
       { $set: { metadata: meta, contentType: meta.contentType! } },

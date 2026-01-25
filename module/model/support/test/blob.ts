@@ -7,7 +7,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelBlobSupport } from '../../src/types/blob.ts';
 
-const meta = BinaryUtil.getBlobMeta;
+const meta = BinaryUtil.getBlobMetadata;
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
@@ -22,8 +22,8 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const id = Util.uuid();
 
     await service.upsertBlob(id, buffer);
-    const m = await service.getBlobMeta(id);
-    const retrieved = await service.getBlobMeta(id);
+    const m = await service.getBlobMetadata(id);
+    const retrieved = await service.getBlobMetadata(id);
     assert.deepStrictEqual(m, retrieved);
   }
 
@@ -35,13 +35,13 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const id = Util.uuid();
 
     await service.upsertBlob(id, buffer, { hash: '10' });
-    assert((await service.getBlobMeta(id)).hash === '10');
+    assert((await service.getBlobMetadata(id)).hash === '10');
 
     await service.upsertBlob(id, buffer, { hash: '20' });
-    assert((await service.getBlobMeta(id)).hash === '20');
+    assert((await service.getBlobMetadata(id)).hash === '20');
 
     await service.upsertBlob(id, buffer, { hash: '30' }, false);
-    assert((await service.getBlobMeta(id)).hash === '20');
+    assert((await service.getBlobMetadata(id)).hash === '20');
   }
 
   @Test()
@@ -51,7 +51,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const id = Util.uuid();
     await service.upsertBlob(id, buffer);
-    const { hash } = await service.getBlobMeta(id);
+    const { hash } = await service.getBlobMetadata(id);
 
     const retrieved = await service.getBlob(id);
     const { hash: received } = meta(retrieved)!;
@@ -139,12 +139,12 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     await this.writeAndGet();
 
-    await service.updateBlobMeta('orange', {
+    await service.updateBlobMetadata('orange', {
       contentType: 'text/yml',
       filename: 'orange.yml'
     });
 
-    const savedMeta = await service.getBlobMeta('orange');
+    const savedMeta = await service.getBlobMetadata('orange');
 
     assert('text/yml' === savedMeta.contentType);
     assert('orange.yml' === savedMeta.filename);
@@ -177,7 +177,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     assert(response.ok);
 
-    await service.updateBlobMeta('largeFile/one', {
+    await service.updateBlobMetadata('largeFile/one', {
       contentType: 'image/jpeg',
       title: 'orange',
       filename: 'gary',
@@ -187,7 +187,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const found = await service.getBlob('largeFile/one');
     assert(found.size === buffer.byteLength);
     assert(found.type === 'image/jpeg');
-    assert(BinaryUtil.getBlobMeta(found)?.title === 'orange');
-    assert(BinaryUtil.getBlobMeta(found)?.filename === 'gary');
+    assert(BinaryUtil.getBlobMetadata(found)?.title === 'orange');
+    assert(BinaryUtil.getBlobMetadata(found)?.filename === 'gary');
   }
 }

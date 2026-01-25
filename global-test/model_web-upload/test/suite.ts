@@ -10,7 +10,7 @@ import { Util, type BinaryMetadata, BinaryUtil, castTo, type AppError } from '@t
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
-const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
+const bHash = (blob: Blob) => BinaryUtil.getBlobMetadata(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -31,7 +31,7 @@ class TestUploadController {
   @Post('/')
   async upload(@Upload() file: Blob) {
     await this.service.upsertBlob('orange', file);
-    const desc = await this.service.getBlobMeta('orange');
+    const desc = await this.service.getBlobMetadata('orange');
     return { location: 'orange', meta: desc };
   }
 
