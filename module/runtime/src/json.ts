@@ -30,25 +30,13 @@ export class JSONUtil {
   }
 
   /**
-   * Encode JSON value as buffer
-   */
-  static toBuffer<T>(value: T | undefined): Buffer {
-    if (value === undefined) {
-      return Buffer.alloc(0);
-    }
-    const text = JSON.stringify(value);
-    return BinaryUtil.fromUTF8String(text);
-  }
-
-  /**
    * Encode JSON value as base64 encoded string
    */
   static stringifyBase64<T>(value: T | undefined): string | undefined {
-    const bytes = this.toBuffer(value);
-    if (bytes.byteLength === 0) {
+    if (value === undefined) {
       return undefined;
     }
-    return BinaryUtil.utf8ToBase64(bytes);
+    return BinaryUtil.utf8ToBase64(JSON.stringify(value));
   }
 
   /**

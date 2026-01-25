@@ -8,7 +8,7 @@ import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toArrayBuffer, buffer as toBuffer } from 'node:stream/consumers';
 import { isArrayBuffer, isUint8Array } from 'node:util/types';
 
-import { type BlobMeta, type ByteRange, castTo, hasFunction } from './types.ts';
+import { type Any, type BlobMeta, type ByteRange, castTo, hasFunction } from './types.ts';
 import { Util } from './util.ts';
 import { AppError } from './error.ts';
 
@@ -55,6 +55,15 @@ export class BinaryUtil {
   static isBinaryType(value: unknown): value is BinaryType {
     return value instanceof Blob || Buffer.isBuffer(value) || this.isReadable(value) ||
       this.isArrayBuffer(value) || this.isReadableStream(value) || this.isAsyncIterable(value);
+  }
+
+  /**
+   * Are we a basic binary type
+   * @param value 
+   * @returns 
+   */
+  static isBinaryBasicType(value: unknown): value is BinaryBasicType {
+    return Buffer.isBuffer(value) || this.isReadable(value);
   }
 
   /**
@@ -312,5 +321,9 @@ export class BinaryUtil {
    */
   static base64ToUTF8(value: string | Buffer): string {
     return (Buffer.isBuffer(value) ? value : Buffer.from(value, 'base64')).toString('utf8');
+  }
+
+  static readChunksAsBuffer(chunk: Any, encoding?: BufferEncoding | null): Buffer {
+    return Buffer.isBuffer(chunk) ? chunk : typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') : Buffer.from(`${chunk}`, 'utf8'); 2
   }
 }

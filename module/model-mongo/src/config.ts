@@ -1,7 +1,7 @@
 import type mongo from 'mongodb';
 
-import { type TimeSpan, TimeUtil, RuntimeResources, Runtime, castTo } from '@travetto/runtime';
-import { Config } from '@travetto/config';
+import { type TimeSpan, TimeUtil, Runtime } from '@travetto/runtime';
+import { Config, ConfigUtil } from '@travetto/config';
 
 /**
  * Mongo model config
@@ -61,9 +61,6 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resolve = <T extends string | Buffer>(file: T): Promise<T> =>
-      Buffer.isBuffer(file) ? Promise.resolve(file) : castTo(RuntimeResources.resolve(file).catch(() => file));
-
     if (this.connectionString) {
       const details = new URL(this.connectionString);
       this.hosts ??= details.hostname.split(',').filter(host => !!host);
@@ -89,16 +86,16 @@ export class MongoModelConfig {
     const options = this.options;
     if (options.ssl) {
       if (options.cert) {
-        options.cert = await Promise.all([options.cert].flat(2).map(resolve));
+        options.cert = await Promise.all([options.cert].flat(2).map(ConfigUtil.readFile));
       }
       if (options.tlsCertificateKeyFile) {
-        options.tlsCertificateKeyFile = await resolve(options.tlsCertificateKeyFile);
+        options.tlsCertificateKeyFile = await ConfigUtil.readFile(options.tlsCertificateKeyFile);
       }
       if (options.tlsCAFile) {
-        options.tlsCAFile = await resolve(options.tlsCAFile);
+        options.tlsCAFile = await ConfigUtil.readFile(options.tlsCAFile);
       }
       if (options.tlsCRLFile) {
-        options.tlsCRLFile = await resolve(options.tlsCRLFile);
+        options.tlsCRLFile = await ConfigUtil.readFile(options.tlsCRLFile);
       }
     }
 

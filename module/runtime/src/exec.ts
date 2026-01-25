@@ -4,6 +4,7 @@ import { createInterface } from 'node:readline/promises';
 
 import { castTo } from './types.ts';
 import { RuntimeIndex } from './manifest-index.ts';
+import { BinaryUtil } from './binary.ts';
 
 const ResultSymbol = Symbol();
 
@@ -81,18 +82,10 @@ export class ExecUtil {
       };
 
       if (subProcess.stdout) {
-        if (subProcess.stdout.readableEncoding) {
-          subProcess.stdout.on('data', (data: string) => stdout.push(Buffer.from(data, subProcess.stdout!.readableEncoding!)));
-        } else {
-          subProcess.stdout.on('data', (data: Buffer) => stdout.push(data));
-        }
+        subProcess.stdout.on('data', data => stdout.push(BinaryUtil.readChunksAsBuffer(data, subProcess.stdout?.readableEncoding)));
       }
       if (subProcess.stderr) {
-        if (subProcess.stderr.readableEncoding) {
-          subProcess.stderr.on('data', (data: string) => stderr.push(Buffer.from(data, subProcess.stderr!.readableEncoding!)));
-        } else {
-          subProcess.stderr.on('data', (data: Buffer) => stderr.push(data));
-        }
+        subProcess.stderr.on('data', data => stderr.push(BinaryUtil.readChunksAsBuffer(data, subProcess.stderr?.readableEncoding)));
       }
 
       subProcess.on('error', (error: Error) =>

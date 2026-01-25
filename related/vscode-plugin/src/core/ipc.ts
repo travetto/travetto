@@ -1,7 +1,7 @@
 import { ExtensionContext } from 'vscode';
 import http from 'node:http';
 
-import { Env, JSONUtil } from '@travetto/runtime';
+import { BinaryUtil, Env, JSONUtil } from '@travetto/runtime';
 
 import { TargetEvent } from './types.ts';
 import { Log } from './log.ts';
@@ -11,7 +11,7 @@ export class IpcSupport {
   static async readJSONRequest<T>(request: http.IncomingMessage): Promise<T> {
     const chunks: Buffer[] = [];
     for await (const chunk of request) {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      chunks.push(BinaryUtil.readChunksAsBuffer(chunk));
     }
     return JSONUtil.parseSafe(Buffer.concat(chunks));
   }

@@ -192,7 +192,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async getBlobMeta(location: string): Promise<BlobMeta> {
     const file = await this.#find(ModelBlobNamespace, META, location);
     const content = await fs.readFile(file);
-    const text: BlobMeta = JSONUtil.parseSafe(content.toString('utf8'));
+    const text: BlobMeta = JSONUtil.parseSafe(content);
     return text;
   }
 

@@ -138,7 +138,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     };
     try {
       for await (const chunk of input) {
-        const chunked = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        const chunked = BinaryUtil.readChunksAsBuffer(chunk);
         buffers.push(chunked);
         total += chunked.byteLength;
         if (total > this.config.chunkSize) {
@@ -247,7 +247,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
-    const content = JSONUtil.toBuffer(prepped);
+    const content = BinaryUtil.fromUTF8String(JSON.stringify(prepped));
     await this.client.putObject(this.#query(cls, prepped.id, {
       Body: content,
       ContentType: 'application/json',
@@ -339,14 +339,14 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       Range: `bytes=${range.start}-${range.end}`
     } : {}));
 
-    let body: BinaryType | string | undefined = result.Body;
+    let body: BinaryType | string | undefined = castTo(result.Body);
 
     if (!body) {
       throw new AppError('Unable to read type: undefined');
     }
 
     if (typeof body === 'string') {
-      body = Buffer.from(body, castTo<string>(body).endsWith('=') ? 'base64' : 'utf8');
+      body = body.endsWith('=') ? BinaryUtil.fromBase64String(body) : BinaryUtil.fromUTF8String(body);
     }
 
     return BinaryUtil.toReadable(body);

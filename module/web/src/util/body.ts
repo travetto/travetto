@@ -32,7 +32,7 @@ export class WebBodyUtil {
       yield nl;
       if (data instanceof Blob) {
         for await (const chunk of data.stream()) {
-          yield Buffer.from(chunk);
+          yield BinaryUtil.readChunksAsBuffer(chunk);
         }
       } else {
         yield data;
@@ -143,7 +143,7 @@ export class WebBodyUtil {
    */
   static isRaw(body: unknown): body is WebBinaryType {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!body && ((Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) && (body as Any)[WebRawStreamSymbol] === body);
+    return !!body && (BinaryUtil.isBinaryBasicType(body) && (body as Any)[WebRawStreamSymbol] === body);
   }
 
   /**
@@ -161,7 +161,7 @@ export class WebBodyUtil {
    * Read text from an input source
    */
   static async readText(input: WebBinaryType, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
-    encoding ??= (Buffer.isBuffer(input) ? undefined : input.readableEncoding) ?? 'utf-8';
+    encoding ??= (BinaryUtil.isReadable(input) ? input.readableEncoding : undefined) ?? 'utf-8';
 
     let decoder: TextDecoder;
     try {
@@ -170,19 +170,19 @@ export class WebBodyUtil {
       throw WebError.for('Specified Encoding Not Supported', 415, { encoding });
     }
 
-    if (Buffer.isBuffer(input)) {
+    if (BinaryUtil.isByteArray(input)) {
       if (input.byteLength > limit) {
         throw WebError.for('Request Entity Too Large', 413, { received: input.byteLength, limit });
       }
       return { text: decoder.decode(input), read: input.byteLength };
     }
 
-    let received = Buffer.isBuffer(input) ? input.byteOffset : 0;
+    let received = 0;
     const all: string[] = [];
 
     try {
-      for await (const chunk of castTo<AsyncIterable<string | Buffer>>(input.iterator({ destroyOnReturn: false }))) {
-        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, 'utf8');
+      for await (const chunk of input.iterator({ destroyOnReturn: false })) {
+        const buffer = BinaryUtil.readChunksAsBuffer(chunk);
         received += buffer.byteLength;
         if (received > limit) {
           throw WebError.for('Request Entity Too Large', 413, { received, limit });
