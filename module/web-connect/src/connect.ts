@@ -154,7 +154,7 @@ export class ConnectResponse implements Pick<ServerResponse,
 
   throwIfSent(): void {
     if (this.#headersSent) {
-      this.#response.body = Buffer.concat(this.#written);
+      this.#response.body = BinaryUtil.combineByteArrays(this.#written);
       throw this.#response;
     }
   }

@@ -33,7 +33,7 @@ export class WebUploadUtil {
     let read = 0;
     return new Transform({
       transform(chunk, encoding, callback): void {
-        read += ((typeof chunk === 'string') ? chunk.length : (BinaryUtil.isByteArray(chunk) ? chunk.byteLength : 0));
+        read += (typeof chunk === 'string' ? chunk.length : BinaryUtil.isByteArray(chunk) ? chunk.byteLength : 0);
         if (read > maxSize) {
           callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
         } else {
@@ -53,7 +53,7 @@ export class WebUploadUtil {
   /**
    * Get all the uploads, separating multipart from direct
    */
-  static async* getUploads(request: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
+  static async * getUploads(request: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
     if (!WebBodyUtil.isRaw(request.body)) {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }

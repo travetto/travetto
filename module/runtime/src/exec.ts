@@ -65,8 +65,8 @@ export class ExecUtil {
         done = true;
 
         const buffers = {
-          stdout: Buffer.concat(stdout),
-          stderr: Buffer.concat(stderr),
+          stdout: BinaryUtil.combineByteArrays(stdout),
+          stderr: BinaryUtil.combineByteArrays(stderr),
         };
 
         const final = {

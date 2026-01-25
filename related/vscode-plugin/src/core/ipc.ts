@@ -13,7 +13,7 @@ export class IpcSupport {
     for await (const chunk of request) {
       chunks.push(BinaryUtil.readChunksAsBuffer(chunk));
     }
-    return JSONUtil.parseSafe(Buffer.concat(chunks));
+    return JSONUtil.parseSafe(BinaryUtil.combineByteArrays(chunks));
   }
 
   #controller = new AbortController();

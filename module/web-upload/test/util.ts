@@ -6,6 +6,8 @@ import { pipeline } from 'node:stream/promises';
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { WebUploadUtil } from '@travetto/web-upload';
 
+const makeData = () => Buffer.alloc(100, 'A', 'utf8');
+
 @Suite()
 export class BytesUtilTest {
 
@@ -69,16 +71,16 @@ export class BytesUtilTest {
 
   @Test({ shouldThrow: 'size' })
   async testMaxBlobWrite() {
-    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(1), new PassThrough());
+    await pipeline(Readable.from(makeData()), WebUploadUtil.limitWrite(1), new PassThrough());
   }
 
   @Test({ shouldThrow: 'size' })
   async testMaxCloseBlobWrite() {
-    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(99), new PassThrough());
+    await pipeline(Readable.from(makeData()), WebUploadUtil.limitWrite(99), new PassThrough());
   }
 
   @Test()
   async testMaxExactBlobWrite() {
-    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(100), new PassThrough());
+    await pipeline(Readable.from(makeData()), WebUploadUtil.limitWrite(100), new PassThrough());
   }
 }

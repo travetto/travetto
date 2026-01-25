@@ -1,5 +1,3 @@
-import { buffer } from 'node:stream/consumers';
-
 import { AppError, BinaryUtil, castTo, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
@@ -8,9 +6,6 @@ import type { WebRequest } from '../../src/types/request.ts';
 import { DecompressInterceptor } from '../../src/interceptor/decompress.ts';
 import { WebBodyUtil } from '../../src/util/body.ts';
 import { WebCommonUtil } from '../../src/util/common.ts';
-import type { WebBinaryType } from '../../src/types/message.ts';
-
-const toBuffer = (src: WebBinaryType) => Buffer.isBuffer(src) ? src : buffer(src);
 
 /**
  * Utilities for supporting custom test dispatchers
@@ -21,7 +16,7 @@ export class WebTestDispatchUtil {
     if (request.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(request);
       sample.headers.forEach((v, k) => request.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      request.body = WebBodyUtil.markRaw(await toBuffer(sample.body!));
+      request.body = WebBodyUtil.markRaw(await BinaryUtil.toByteArray(sample.body!));
     }
     Object.assign(request.context, { httpQuery: BindUtil.flattenPaths(request.context.httpQuery ?? {}) });
     return request;
@@ -33,8 +28,8 @@ export class WebTestDispatchUtil {
     response.context.httpStatusCode = WebCommonUtil.getStatusCode(response);
 
     if (decompress) {
-      if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
-        const bufferResult = result = await toBuffer(result);
+      if (BinaryUtil.isBinaryBasicType(result)) {
+        const bufferResult = result = await BinaryUtil.toByteArray(result);
         if (bufferResult.byteLength) {
           try {
             result = await DecompressInterceptor.decompress(

@@ -176,8 +176,6 @@ export class BinaryUtil {
   static toReadable(input: BinaryType): Readable {
     if (this.isReadable(input)) {
       return input;
-    } else if (this.isAsyncIterable(input)) {
-      return Readable.from(input);
     } else if (Buffer.isBuffer(input)) {
       return Readable.from(input);
     } else if (this.isArrayBuffer(input)) {
@@ -186,8 +184,12 @@ export class BinaryUtil {
       return Readable.fromWeb(input.stream());
     } else if (this.isReadableStream(input)) {
       return Readable.fromWeb(input);
-    } else {
+    } else if (this.isUint8Array(input)) {
       return Readable.from(Buffer.from(input));
+    } else if (this.isArrayBuffer(input)) {
+      return Readable.from(Buffer.from(input));
+    } else {
+      return Readable.from(input);
     }
   }
 
@@ -324,6 +326,14 @@ export class BinaryUtil {
   }
 
   static readChunksAsBuffer(chunk: Any, encoding?: BufferEncoding | null): Buffer {
-    return Buffer.isBuffer(chunk) ? chunk : typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') : Buffer.from(`${chunk}`, 'utf8'); 2
+    return Buffer.isBuffer(chunk) ? chunk :
+      this.isUint8Array(chunk) ? Buffer.from(chunk) :
+        this.isArrayBuffer(chunk) ? Buffer.from(chunk) :
+          typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
+            Buffer.from(`${chunk}`, 'utf8'); 2
+  }
+
+  static combineByteArrays(arrays: Buffer[]): Buffer {
+    return Buffer.concat(arrays);
   }
 }

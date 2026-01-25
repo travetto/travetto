@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { type WebDispatcher, type WebFilterContext, type WebRequest, WebResponse } from '@travetto/web';
-import { AppError, asFull, castTo } from '@travetto/runtime';
+import { AppError, asFull, BinaryUtil, castTo } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -18,7 +18,7 @@ function toLambdaEvent(request: WebRequest): APIGatewayProxyEvent {
   const queryStringParameters: Record<string, string> = {};
   const multiValueQueryStringParameters: Record<string, string[]> = {};
 
-  if (!(body === undefined || body === null || Buffer.isBuffer(body))) {
+  if (!(body === undefined || body === null || BinaryUtil.isByteArray(body))) {
     throw new AppError('Unsupported request type, only buffer bodies supported');
   }
 
@@ -64,12 +64,13 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
 
   async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
     const event = toLambdaEvent(await WebTestDispatchUtil.applyRequestBody(request));
-
     const response = await this.app.handle(event, asFull<Context>({}));
 
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse<unknown>({
-        body: Buffer.from(response.body, response.isBase64Encoded ? 'base64' : 'utf8'),
+        body: response.isBase64Encoded ?
+          BinaryUtil.fromBase64String(response.body) :
+          BinaryUtil.fromUTF8String(response.body),
         headers: { ...response.headers ?? {}, ...response.multiValueHeaders ?? {} },
         context: {
           httpStatusCode: response.statusCode

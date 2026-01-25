@@ -98,6 +98,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadAll() {
     const uploads = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
+    console.error(uploads);
     const response = await this.request<BlobMeta>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload/all' } });
 
     const { hash } = await this.getFileMeta('/logo.png');

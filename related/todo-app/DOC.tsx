@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, type DocJSXElementByFn, type DocJSXElement, isDocJSXElement, DocRunUtil, PackageDocUtil } from '@travetto/doc';
 import { Model, type ModelType } from '@travetto/model';
-import { Env, ExecUtil, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
+import { BinaryUtil, Env, ExecUtil, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
 
 const TodoRoot = d.ref('Todo App', RuntimeIndex.getModule('@travetto/todo-app')!.sourcePath);
 
@@ -35,7 +35,7 @@ async function init() {
 
   await Util.blockingTimeout(1000);
 
-  return DocRunUtil.cleanRunOutput(Buffer.concat(startupBuffer).toString('utf8'), {});
+  return DocRunUtil.cleanRunOutput(BinaryUtil.combineByteArrays(startupBuffer).toString('utf8'), {});
 }
 
 function TableOfContents({ root }: { root: () => DocJSXElement }) {

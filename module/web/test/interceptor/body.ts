@@ -7,6 +7,8 @@ import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from 
 import { DependencyRegistryIndex } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
 
+const mkData = (size: number) => Buffer.alloc(size);
+
 @Suite()
 class BodyInterceptorSuite {
 
@@ -28,7 +30,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
+      body: WebBodyUtil.markRaw(BinaryUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -53,7 +55,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
+      body: WebBodyUtil.markRaw(BinaryUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -70,7 +72,7 @@ class BodyInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
-    const stream = Readable.from(Buffer.alloc(1000));
+    const stream = Readable.from(mkData(1000));
     const request = new WebRequest({
       context: {
         path: '/',
@@ -194,7 +196,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain; charset=orange',
       },
-      body: WebBodyUtil.markRaw(Buffer.alloc(0))
+      body: WebBodyUtil.markRaw(mkData(0))
     });
 
     await assert.rejects(
@@ -223,7 +225,7 @@ class BodyInterceptorSuite {
             'Content-Type': 'text/plain',
             'Content-Length': '20000'
           },
-          body: WebBodyUtil.markRaw(Buffer.alloc(20000))
+          body: WebBodyUtil.markRaw(mkData(20000))
         }),
         next: async () => null!,
         config
@@ -242,7 +244,7 @@ class BodyInterceptorSuite {
             headers: {
               'Content-Type': 'text/plain',
             },
-            body: WebBodyUtil.markRaw(Buffer.alloc(20000))
+            body: WebBodyUtil.markRaw(mkData(20000))
           }),
           next: async () => null!,
           config
@@ -267,7 +269,7 @@ class BodyInterceptorSuite {
             'Content-Type': 'text/plain',
             'Content-Length': '20000'
           },
-          body: WebBodyUtil.markRaw(Buffer.alloc(20001))
+          body: WebBodyUtil.markRaw(mkData(20001))
         }),
         next: async () => null!,
         config

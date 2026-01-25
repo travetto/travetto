@@ -116,7 +116,7 @@ export class WebBodyUtil {
       } else {
         text = JSON.stringify(body);
       }
-      out.body = Buffer.from(text, 'utf-8');
+      out.body = BinaryUtil.fromUTF8String(text);
     }
 
     if (BinaryUtil.isByteArray(out.body)) {
