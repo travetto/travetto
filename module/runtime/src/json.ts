@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 
-import type { Any } from './types.ts';
+import { hasToJSON, type Any } from './types.ts';
 import { BinaryUtil, type ByteArray } from './binary.ts';
 
 export type JSONParseInput = string | ByteArray;
@@ -79,5 +79,22 @@ export class JSONUtil {
     }
     const content = readFileSync(file, 'utf8');
     return this.parseSafe(content);
+  }
+
+  /**
+   * Serialize with standard behavior
+   */
+  static serialize(body: unknown): string {
+    let text: string;
+    if (typeof body === 'string') {
+      text = body;
+    } else if (hasToJSON(body)) {
+      text = JSON.stringify(body.toJSON());
+    } else if (body instanceof Error) {
+      text = JSON.stringify({ message: body.message });
+    } else {
+      text = JSON.stringify(body);
+    }
+    return text;
   }
 }

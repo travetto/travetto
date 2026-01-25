@@ -1,6 +1,6 @@
 import { TextDecoder } from 'node:util';
 
-import { type Any, type BinaryType, BinaryUtil, type ByteArray, castTo, hasToJSON, JSONUtil, Util } from '@travetto/runtime';
+import { type Any, type BinaryType, BinaryUtil, type ByteArray, castTo, JSONUtil, Util } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -8,7 +8,7 @@ import { WebError } from '../types/error.ts';
 
 const WebRawBinarySymbol = Symbol();
 
-const ZERO_BUFFER = BinaryUtil.fromUTF8String('');
+const NULL_TERMINATOR = BinaryUtil.fromUTF8String('');
 
 /**
  * Utility classes for supporting web body operations
@@ -106,21 +106,9 @@ export class WebBodyUtil {
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
       out.body = this.buildMultiPartBody(body, boundary);
     } else {
-      let text: string;
-      if (typeof body === 'string') {
-        text = body;
-      } else if (hasToJSON(body)) {
-        text = JSON.stringify(body.toJSON());
-      } else if (body instanceof Error) {
-        text = JSON.stringify({ message: body.message });
-      } else {
-        text = JSON.stringify(body);
-      }
+      const text = JSONUtil.serialize(body);
+      out.headers.set('Content-Length', `${text.length}`);
       out.body = BinaryUtil.fromUTF8String(text);
-    }
-
-    if (BinaryUtil.isByteArray(out.body)) {
-      out.headers.set('Content-Length', `${out.body.byteLength}`);
     }
 
     out.headers.setIfAbsent('Content-Type', this.defaultContentType(message.body));
@@ -182,14 +170,14 @@ export class WebBodyUtil {
 
     try {
       for await (const chunk of BinaryUtil.toByteStream(input)) {
-        const buffer = BinaryUtil.readChunk(chunk);
-        received += buffer.byteLength;
+        const bytes = BinaryUtil.readChunk(chunk);
+        received += bytes.byteLength;
         if (received > limit) {
           throw WebError.for('Request Entity Too Large', 413, { received, limit });
         }
-        all.push(decoder.decode(buffer, { stream: true }));
+        all.push(decoder.decode(bytes, { stream: true }));
       }
-      all.push(decoder.decode(ZERO_BUFFER, { stream: false }));
+      all.push(decoder.decode(NULL_TERMINATOR, { stream: false }));
       return { text: all.join(''), read: received };
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
