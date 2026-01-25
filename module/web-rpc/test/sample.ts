@@ -154,7 +154,7 @@ class WebRpcSuite extends BaseWebSuite {
         'content-type': 'application/octet-stream',
         'X-TRV-RPC-INPUTS': JSONUtil.stringifyBase64([null, 11])
       },
-      body: Buffer.alloc(100)
+      body: BinaryUtil.fromUTF8String('A'.repeat(100))
     });
 
     assert(createdStatus === 200);

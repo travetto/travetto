@@ -1,14 +1,14 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, type DocJSXElementByFn, type DocJSXElement, isDocJSXElement, DocRunUtil, PackageDocUtil } from '@travetto/doc';
 import { Model, type ModelType } from '@travetto/model';
-import { BinaryUtil, Env, ExecUtil, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete } from '@travetto/runtime';
+import { BinaryUtil, Env, ExecUtil, RuntimeIndex, ShutdownManager, Util, castTo, toConcrete, type ByteArray } from '@travetto/runtime';
 
 const TodoRoot = d.ref('Todo App', RuntimeIndex.getModule('@travetto/todo-app')!.sourcePath);
 
 const port = 12555;
 
 async function init() {
-  const startupBuffer: Buffer[] = [];
+  const startupBuffer: ByteArray[] = [];
 
   DocRunUtil.run('trv', ['web:http', '--no-restart-on-change'], {
     env: {
@@ -24,7 +24,7 @@ async function init() {
         ...opts,
         signal: ShutdownManager.signal
       });
-      subProcess.stdout?.on('data', (chunk: Buffer) => startupBuffer.push(chunk));
+      subProcess.stdout?.on('data', chunk => startupBuffer.push(BinaryUtil.readChunk(chunk)));
       return subProcess;
     },
   });

@@ -156,7 +156,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   async signedUrl() {
     const service = await this.service;
 
-    const buffer = Buffer.alloc(1.5 * 10000);
+    const buffer = BinaryUtil.fromUTF8String('A'.repeat(1.5 * 10000));
     for (let i = 0; i < buffer.byteLength; i++) {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }

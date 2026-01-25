@@ -3,14 +3,14 @@ import { createInterface } from 'node:readline/promises';
 
 import { castTo } from './types.ts';
 import { RuntimeIndex } from './manifest-index.ts';
-import { BinaryUtil, type BinaryType } from './binary.ts';
+import { BinaryUtil, type BinaryType, type ByteArray } from './binary.ts';
 
 const ResultSymbol = Symbol();
 
 /**
  * Result of an execution
  */
-export interface ExecutionResult<T extends string | Buffer = string | Buffer> {
+export interface ExecutionResult<T extends string | ByteArray = string | ByteArray> {
   /**
    * Stdout
    */
@@ -50,12 +50,12 @@ export class ExecUtil {
    */
   static getResult(subProcess: ChildProcess): Promise<ExecutionResult<string>>;
   static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
-  static getResult<T extends string | Buffer>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<ByteArray>>;
+  static getResult<T extends string | ByteArray>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
     const typed: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
     const result = typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
-      const stdout: Buffer[] = [];
-      const stderr: Buffer[] = [];
+      const stdout: ByteArray[] = [];
+      const stderr: ByteArray[] = [];
       let done = false;
       const finish = (finalResult: ExecutionBaseResult): void => {
         if (done) {
@@ -80,8 +80,8 @@ export class ExecUtil {
         );
       };
 
-      subProcess.stdout?.on('data', data => stdout.push(BinaryUtil.readChunksAsBuffer(data, subProcess.stdout?.readableEncoding)));
-      subProcess.stderr?.on('data', data => stderr.push(BinaryUtil.readChunksAsBuffer(data, subProcess.stderr?.readableEncoding)));
+      subProcess.stdout?.on('data', data => stdout.push(BinaryUtil.readChunk(data, subProcess.stdout?.readableEncoding)));
+      subProcess.stderr?.on('data', data => stderr.push(BinaryUtil.readChunk(data, subProcess.stderr?.readableEncoding)));
 
       subProcess.on('error', (error: Error) =>
         finish({ code: 1, message: error.message, valid: false }));

@@ -198,10 +198,19 @@ export class BinaryUtil {
       metadata.size ??= input.size;
     } else if (this.isByteArray(input)) {
       metadata.size = input.byteLength;
-    } else if (input instanceof FileReadStream) {
+    }
+
+    if (input instanceof FileReadStream) {
       metadata.filename ??= path.basename(input.path.toString());
       metadata.size ??= statSync(input.path.toString()).size;
     }
+
+    if (isReadable(input)) {
+      if (input.readableEncoding) {
+        metadata.contentEncoding ??= input.readableEncoding;
+      }
+    }
+
     return metadata;
   }
 
@@ -229,7 +238,7 @@ export class BinaryUtil {
   /**
    * Convert hex bytes to string
    */
-  static toHexString(value: Buffer | Uint8Array | ArrayBuffer): string {
+  static toHexString(value: ByteArray): string {
     return this.arrayToBuffer(value).toString('hex');
   }
 
@@ -243,7 +252,7 @@ export class BinaryUtil {
   /**
    * Convert value to base64 string
    */
-  static toBase64String(value: Buffer | Uint8Array | ArrayBuffer): string {
+  static toBase64String(value: ByteArray): string {
     return this.arrayToBuffer(value).toString('base64');
   }
 
@@ -275,14 +284,14 @@ export class BinaryUtil {
     return (Buffer.isBuffer(value) ? value : Buffer.from(value, 'base64')).toString('utf8');
   }
 
-  static readChunksAsBuffer(chunk: Any, encoding?: BufferEncoding | null): Buffer {
+  static readChunk(chunk: Any, encoding?: BufferEncoding | null): ByteArray {
     return this.isByteArray(chunk) ? this.arrayToBuffer(chunk) :
       typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
         Buffer.from(`${chunk}`, 'utf8');
   }
 
-  static combineByteArrays(arrays: Buffer[]): Buffer {
-    return Buffer.concat(arrays);
+  static combineByteArrays(arrays: ByteArray[]): ByteArray {
+    return Buffer.concat(arrays.map(x => this.arrayToBuffer(x)));
   }
 
   static detectEncoding(input: BinaryType): BufferEncoding | undefined {

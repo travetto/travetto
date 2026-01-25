@@ -7,7 +7,7 @@ import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from 
 import { DependencyRegistryIndex } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
 
-const mkData = (size: number) => Buffer.alloc(size);
+const mkData = (size: number) => BinaryUtil.fromUTF8String('A'.repeat(size));
 
 @Suite()
 class BodyInterceptorSuite {
@@ -92,7 +92,7 @@ class BodyInterceptorSuite {
 
     const responseBuffer = await BinaryUtil.toByteArray(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.byteLength === 1000);
-    assert(!BinaryUtil.arrayToBuffer(responseBuffer).some(x => x !== 0));
+    assert(!BinaryUtil.arrayToBuffer(responseBuffer).some(x => x !== 65));
   }
 
   @Test()

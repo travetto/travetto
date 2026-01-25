@@ -25,7 +25,7 @@ class CompressInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(CompressInterceptor);
     interceptor.config.applies = true;
 
-    let data: BinaryType = Buffer.alloc(size);
+    let data: BinaryType = BinaryUtil.fromUTF8String('A'.repeat(size));
     if (stream) {
       data = Readable.from(data);
     }

@@ -18,7 +18,7 @@ function toLambdaEvent(request: WebRequest<ByteArray>): APIGatewayProxyEvent {
   const queryStringParameters: Record<string, string> = {};
   const multiValueQueryStringParameters: Record<string, string[]> = {};
 
-  if (body && !Buffer.isBuffer(body)) {
+  if (body && !BinaryUtil.isByteArray(body)) {
     throw new AppError('Unsupported request type, only buffer bodies supported');
   }
 

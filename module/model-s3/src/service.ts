@@ -13,6 +13,7 @@ import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, type TimeSpan, TimeUtil,
+  type ByteArray,
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -119,13 +120,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(meta)));
 
     const parts: CompletedPart[] = [];
-    let buffers: Buffer[] = [];
+    let buffers: ByteArray[] = [];
     let total = 0;
     let i = 1;
     const flush = async (): Promise<void> => {
       if (!total) { return; }
       const part = await this.client.uploadPart(this.#queryBlob(id, {
-        Body: BinaryUtil.combineByteArrays(buffers),
+        Body: BinaryUtil.arrayToBuffer(BinaryUtil.combineByteArrays(buffers)),
         PartNumber: i,
         UploadId
       }));
@@ -136,7 +137,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     };
     try {
       for await (const chunk of BinaryUtil.toByteStream(input)) {
-        const chunked = BinaryUtil.readChunksAsBuffer(chunk);
+        const chunked = BinaryUtil.readChunk(chunk);
         buffers.push(chunked);
         total += chunked.byteLength;
         if (total > this.config.chunkSize) {

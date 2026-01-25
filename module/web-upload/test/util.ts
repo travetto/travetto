@@ -6,8 +6,9 @@ import { createReadStream } from 'node:fs';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { WebUploadUtil } from '@travetto/web-upload';
+import { BinaryUtil } from '@travetto/runtime';
 
-const makeData = () => [Buffer.alloc(100, 'A', 'utf8')];
+const makeData = () => [BinaryUtil.fromUTF8String('A'.repeat(100))];
 
 @Suite()
 export class BytesUtilTest {

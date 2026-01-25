@@ -1,7 +1,9 @@
 import assert from 'node:assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
+
 import { JSONUtil } from '../src/json.ts';
+import { BinaryUtil } from '../src/binary.ts';
 
 @Suite()
 export class JSONUtilTest {
@@ -14,7 +16,7 @@ export class JSONUtilTest {
 
   @Test()
   async parseSafeBuffer() {
-    const buffer = Buffer.from('{"count":42}', 'utf8');
+    const buffer = BinaryUtil.fromUTF8String('{"count":42}');
     const obj: { count: number } = JSONUtil.parseSafe(buffer);
     assert.deepStrictEqual(obj, { count: 42 });
   }
@@ -35,7 +37,7 @@ export class JSONUtilTest {
   @Test()
   async encodeBase64Simple() {
     const encoded = JSONUtil.stringifyBase64({ foo: 'bar' });
-    assert.strictEqual(encoded, Buffer.from('{"foo":"bar"}').toString('base64'));
+    assert.strictEqual(encoded, BinaryUtil.fromUTF8String('{"foo":"bar"}').toString('base64'));
   }
 
   @Test()
@@ -57,7 +59,7 @@ export class JSONUtilTest {
   @Test()
   async decodeBase64Simple() {
     const original = { test: 'data' };
-    const encoded = Buffer.from(JSON.stringify(original)).toString('base64');
+    const encoded = BinaryUtil.fromUTF8String(JSON.stringify(original)).toString('base64');
     const decoded: typeof original = JSONUtil.parseBase64(encoded);
     assert.deepStrictEqual(decoded, original);
   }
@@ -65,7 +67,7 @@ export class JSONUtilTest {
   @Test()
   async decodeBase64WithURIEncoding() {
     const original = { special: 'chars' };
-    const encoded = Buffer.from(encodeURIComponent(JSON.stringify(original))).toString('base64');
+    const encoded = BinaryUtil.fromUTF8String(encodeURIComponent(JSON.stringify(original))).toString('base64');
     const decoded: typeof original = JSONUtil.parseBase64(encoded);
     assert.deepStrictEqual(decoded, original);
   }

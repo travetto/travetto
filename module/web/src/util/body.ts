@@ -8,6 +8,8 @@ import { WebError } from '../types/error.ts';
 
 const WebRawBinarySymbol = Symbol();
 
+const ZERO_BUFFER = BinaryUtil.fromUTF8String('');
+
 /**
  * Utility classes for supporting web body operations
  */
@@ -180,14 +182,14 @@ export class WebBodyUtil {
 
     try {
       for await (const chunk of BinaryUtil.toByteStream(input)) {
-        const buffer = BinaryUtil.readChunksAsBuffer(chunk);
+        const buffer = BinaryUtil.readChunk(chunk);
         received += buffer.byteLength;
         if (received > limit) {
           throw WebError.for('Request Entity Too Large', 413, { received, limit });
         }
         all.push(decoder.decode(buffer, { stream: true }));
       }
-      all.push(decoder.decode(Buffer.alloc(0), { stream: false }));
+      all.push(decoder.decode(ZERO_BUFFER, { stream: false }));
       return { text: all.join(''), read: received };
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {

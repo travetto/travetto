@@ -3,6 +3,7 @@ import { c, d } from '@travetto/doc';
 import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager } from '@travetto/runtime';
 
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
+const ByteArrayConcrete = d.codeLink('ByteArrayConcrete', 'src/types/binary.ts', /export type ByteArray/);
 
 export const text = <>
   <c.StdHeader />
@@ -129,7 +130,7 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
     <br />
 
     <ul>
-      <li>{d.method('parseSafe(input: string | Buffer)')} parses JSON safely from a string or Buffer.</li>
+      <li>{d.method('parseSafe(input: string | ByteArray)')} parses JSON safely from a string or {ByteArrayConcrete}.</li>
       <li>{d.method('stringifyBase64(value: any)')} encodes a JSON value as a base64 encoded string.</li>
       <li>{d.method('parseBase64(input: string)')} decodes a JSON value from a base64 encoded string.</li>
       <li>{d.method('readFile(file: string)')} reads a JSON file asynchronously.</li>
