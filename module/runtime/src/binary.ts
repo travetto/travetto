@@ -71,14 +71,12 @@ export class BinaryUtil {
    */
   static async hashInput(input: BinaryType): Promise<string> {
     const hash = crypto.createHash('sha256').setEncoding('hex');
-    if (Buffer.isBuffer(input)) {
-      hash.write(input);
-    } else if (isArrayBuffer(input)) {
-      hash.write(Buffer.from(input));
-    } else if (input instanceof Blob) {
-      await pipeline(Readable.fromWeb(input.stream()), hash);
-    } else {
+    if (this.isByteStream(input)) {
       await pipeline(input, hash);
+    } else if (input instanceof Blob) {
+      await pipeline(input.stream(), hash);
+    } else {
+      hash.write(await this.toBuffer(input));
     }
     return hash.digest('hex').toString();
   }

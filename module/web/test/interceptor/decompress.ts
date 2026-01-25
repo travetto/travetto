@@ -75,7 +75,7 @@ class DecompressInterceptorSuite {
         next: async () => new WebResponse({ headers: responseHeaders }),
         config: interceptor.config
       });
-      if (BinaryUtil.isBinaryType(request.body) && !(request.body instanceof Blob)) {
+      if (BinaryUtil.isBinaryType(request.body)) {
         return request.body;
       } else {
         throw new AppError('Unexpected return type');
