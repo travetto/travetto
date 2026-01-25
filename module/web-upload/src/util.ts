@@ -110,9 +110,9 @@ export class WebUploadUtil {
     try {
       const target = createWriteStream(location);
 
-      await // (config.maxSize ?
-        // pipeline(stream, this.limitWrite(config.maxSize, field), target) :
-        pipeline(stream, target);
+      await (config.maxSize ?
+        pipeline(stream, this.limitWrite(config.maxSize, field), target) :
+        pipeline(stream, target));
 
       const detected = await this.getFileType(location);
 
