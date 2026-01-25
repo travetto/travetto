@@ -22,18 +22,13 @@ export type BinaryType = ByteArray | ByteStream | Blob;
 
 const BINARY_CONSTRUCTOR_SET = new Set(BINARY_CONSTRUCTORS);
 
+const isReadable = hasFunction<Readable>('pipe');
+const isReadableStream = hasFunction<ReadableStream>('pipeTo');
+
 /**
  * Common functions for dealing with binary data/streams
  */
 export class BinaryUtil {
-  /** Is Array Buffer */
-  static isArrayBuffer = isArrayBuffer;
-  /** Is Uint8Array */
-  static isUint8Array = isUint8Array;
-  /** Is Readable */
-  static isReadable = hasFunction<Readable>('pipe');
-  /** Is ReadableStream */
-  static isReadableStream = hasFunction<ReadableStream>('pipeTo');
   /** Is Async Iterable */
   static isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
     !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
@@ -44,12 +39,12 @@ export class BinaryUtil {
 
   /** Is the input a byte array */
   static isByteArray(value: unknown): value is ByteArray {
-    return this.isUint8Array(value) || this.isArrayBuffer(value);
+    return isUint8Array(value) || isArrayBuffer(value);
   }
 
   /** Is the input a byte stream */
   static isByteStream(value: unknown): value is ByteStream {
-    return this.isReadable(value) || this.isReadableStream(value) || this.isAsyncIterable(value);
+    return isReadable(value) || isReadableStream(value) || this.isAsyncIterable(value);
   }
 
   /**
@@ -78,7 +73,7 @@ export class BinaryUtil {
     const hash = crypto.createHash('sha256').setEncoding('hex');
     if (Buffer.isBuffer(input)) {
       hash.write(input);
-    } else if (this.isArrayBuffer(input)) {
+    } else if (isArrayBuffer(input)) {
       hash.write(Buffer.from(input));
     } else if (input instanceof Blob) {
       await pipeline(Readable.fromWeb(input.stream()), hash);
@@ -116,8 +111,9 @@ export class BinaryUtil {
       const stream = new PassThrough();
       Promise.resolve(input()).then(
         source => {
-          const readable = this.toReadable(source);
-          return readable.pipe(stream);
+          const readable = this.toByteStream(source);
+          pipeline(readable, stream).catch(error => stream.destroy(error));
+          return stream;
         },
         error => stream.destroy(error)
       );
@@ -155,17 +151,17 @@ export class BinaryUtil {
   }
 
   static toReadable(input: BinaryType): Readable {
-    if (this.isReadable(input)) {
+    if (isReadable(input)) {
       return input;
     } else if (Buffer.isBuffer(input)) {
       return Readable.from(input);
-    } else if (this.isArrayBuffer(input)) {
+    } else if (isArrayBuffer(input)) {
       return Readable.from(Buffer.from(input));
     } else if (input instanceof Blob) {
       return Readable.fromWeb(input.stream());
-    } else if (this.isReadableStream(input)) {
+    } else if (isReadableStream(input)) {
       return Readable.fromWeb(input);
-    } else if (this.isUint8Array(input)) {
+    } else if (isUint8Array(input)) {
       return Readable.from(Buffer.from(input));
     } else {
       return Readable.from(input);
@@ -180,18 +176,6 @@ export class BinaryUtil {
     }
   }
 
-  static toReadableStream(input: BinaryType): ReadableStream {
-    if (this.isReadableStream(input)) {
-      return input;
-    } else if (this.isReadable(input)) {
-      return Readable.toWeb(input);
-    } else if (input instanceof Blob) {
-      return input.stream();
-    } else {
-      return Readable.toWeb(this.toReadable(input));
-    }
-  }
-
   static toBuffer(input: BinaryType | undefined): Promise<Buffer> {
     return this.toByteArray(input);
   }
@@ -201,41 +185,19 @@ export class BinaryUtil {
       return Promise.resolve(Buffer.alloc(0));
     } else if (Buffer.isBuffer(input)) {
       return Promise.resolve(input);
-    } else if (this.isArrayBuffer(input)) {
+    } else if (isArrayBuffer(input)) {
       return Promise.resolve(Buffer.from(input));
-    } else if (this.isUint8Array(input)) {
+    } else if (isUint8Array(input)) {
       return Promise.resolve(Buffer.from(input));
     } else if (input instanceof Blob) {
       return input.arrayBuffer().then(data => Buffer.from(data));
-    } else if (this.isReadableStream(input)) {
+    } else if (isReadableStream(input)) {
       return consumers.buffer(input);
-    } else if (this.isReadable(input)) {
+    } else if (isReadable(input)) {
       return consumers.buffer(input);
     } else {
       return consumers.buffer(Readable.from(input));
     }
-  }
-
-  /**
-   * Convert input to Basic Binary Type or undefined if not matching
-   */
-  static toNodeType(input?: unknown): Readable | Buffer | undefined {
-    if (input === null || input === undefined) {
-      return Buffer.alloc(0);
-    } else if (input instanceof Blob) {
-      return Readable.fromWeb(input.stream());
-    } else if (this.isReadableStream(input)) {
-      return Readable.fromWeb(input);
-    } else if (this.isReadable(input)) {
-      return input;
-    } else if (this.isAsyncIterable(input)) {
-      return Readable.from(input);
-    } else if (this.isArrayBuffer(input)) {
-      return Buffer.from(input);
-    } else if (this.isUint8Array(input) || Buffer.isBuffer(input)) {
-      return Buffer.from(input);
-    }
-    return undefined;
   }
 
   static getMetadata(input: BinaryType, metadata: BinaryMetadata = {}): BinaryMetadata {
@@ -277,9 +239,9 @@ export class BinaryUtil {
    * Convert hex bytes to string
    */
   static toHexString(value: Buffer | Uint8Array | ArrayBuffer): string {
-    if (this.isArrayBuffer(value)) {
+    if (isArrayBuffer(value)) {
       value = Buffer.from(value);
-    } else if (!Buffer.isBuffer(value) && this.isUint8Array(value)) {
+    } else if (!Buffer.isBuffer(value) && isUint8Array(value)) {
       value = Buffer.from(value);
     }
     return value.toString('hex');
@@ -296,9 +258,9 @@ export class BinaryUtil {
    * Convert value to base64 string
    */
   static toBase64String(value: Buffer | Uint8Array | ArrayBuffer): string {
-    if (this.isArrayBuffer(value)) {
+    if (isArrayBuffer(value)) {
       value = Buffer.from(value);
-    } else if (!Buffer.isBuffer(value) && this.isUint8Array(value)) {
+    } else if (!Buffer.isBuffer(value) && isUint8Array(value)) {
       value = Buffer.from(value);
     }
     return value.toString('base64');
@@ -315,9 +277,9 @@ export class BinaryUtil {
    * Return utf8 string from bytes
    */
   static toUTF8String(value: ByteArray): string {
-    if (this.isArrayBuffer(value)) {
+    if (isArrayBuffer(value)) {
       value = Buffer.from(value);
-    } else if (!Buffer.isBuffer(value) && this.isUint8Array(value)) {
+    } else if (!Buffer.isBuffer(value) && isUint8Array(value)) {
       value = Buffer.from(value);
     }
     return value.toString('utf8');
@@ -339,8 +301,8 @@ export class BinaryUtil {
 
   static readChunksAsBuffer(chunk: Any, encoding?: BufferEncoding | null): Buffer {
     return Buffer.isBuffer(chunk) ? chunk :
-      this.isUint8Array(chunk) ? Buffer.from(chunk) :
-        this.isArrayBuffer(chunk) ? Buffer.from(chunk) :
+      isUint8Array(chunk) ? Buffer.from(chunk) :
+        isArrayBuffer(chunk) ? Buffer.from(chunk) :
           typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
             Buffer.from(`${chunk}`, 'utf8');
   }
@@ -350,7 +312,7 @@ export class BinaryUtil {
   }
 
   static detectEncoding(input: BinaryType): BufferEncoding | undefined {
-    if (this.isReadable(input)) {
+    if (isReadable(input)) {
       return input.readableEncoding!;
     }
   }
@@ -358,7 +320,7 @@ export class BinaryUtil {
   static sliceByteArray(input: ByteArray, start: number, end?: number): ByteArray {
     if (Buffer.isBuffer(input)) {
       return input.subarray(start, end);
-    } else if (this.isArrayBuffer(input)) {
+    } else if (isArrayBuffer(input)) {
       return input.slice(start, end);
     } else {
       return input.slice(start, end);

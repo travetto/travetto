@@ -1,7 +1,6 @@
 import assert from 'node:assert';
 import { brotliCompressSync, createBrotliCompress, createDeflate, createGzip, deflateSync, gzipSync } from 'node:zlib';
 import { Readable } from 'node:stream';
-import { buffer } from 'node:stream/consumers';
 import { pipeline } from 'node:stream/promises';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
@@ -76,7 +75,7 @@ class DecompressInterceptorSuite {
         next: async () => new WebResponse({ headers: responseHeaders }),
         config: interceptor.config
       });
-      if (BinaryUtil.isByteArray(request.body) || BinaryUtil.isReadable(request.body)) {
+      if (BinaryUtil.isBinaryType(request.body) && !(request.body instanceof Blob)) {
         return request.body;
       } else {
         throw new AppError('Unexpected return type');
@@ -156,8 +155,11 @@ class DecompressInterceptorSuite {
       encoding: 'gzip',
     });
     assert(response);
-    assert(BinaryUtil.isReadable(response));
-    assert((await buffer(response)).byteLength === data.byteLength);
+
+    assert(BinaryUtil.isByteStream(response));
+
+    const received = await BinaryUtil.toByteArray(response);
+    assert(received.byteLength === data.byteLength);
   }
 
   @Test()

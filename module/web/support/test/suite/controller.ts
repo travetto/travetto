@@ -57,7 +57,7 @@ export class TestController {
   @Get('/stream')
   @SetHeaders({ 'Content-Type': 'text/plain' })
   getStream() {
-    return BinaryUtil.toReadable(BinaryUtil.fromUTF8String('hello'));
+    return BinaryUtil.toByteStream(BinaryUtil.fromUTF8String('hello'));
   }
 
   @Get('/buffer')

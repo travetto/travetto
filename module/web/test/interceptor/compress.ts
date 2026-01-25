@@ -1,7 +1,7 @@
 import { gunzipSync, brotliDecompressSync, inflateSync, createGunzip } from 'node:zlib';
 import { Readable } from 'node:stream';
 import assert from 'node:assert';
-import { buffer } from 'node:stream/consumers';
+import { pipeline } from 'node:stream/promises';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Registry } from '@travetto/registry';
@@ -179,9 +179,11 @@ class CompressInterceptorSuite {
     });
 
     assert(response.body);
-    assert(BinaryUtil.isReadable(response.body));
+    assert(BinaryUtil.isByteStream(response.body));
 
-    const data = await buffer(response.body.pipe(createGunzip()));
+    const stream = createGunzip();
+    await pipeline(response.body, stream);
+    const data = await BinaryUtil.toByteArray(stream);
     assert(data.byteLength === 50000);
   }
 }

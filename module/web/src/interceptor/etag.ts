@@ -65,7 +65,7 @@ export class EtagInterceptor implements WebInterceptor {
 
     if (
       (statusCode >= 300 && statusCode !== 304) || // Ignore redirects
-      BinaryUtil.isReadableStream(response.body) // Ignore streams (unknown length)
+      BinaryUtil.isByteStream(response.body) // Ignore streams (unknown length)
     ) {
       return response;
     }

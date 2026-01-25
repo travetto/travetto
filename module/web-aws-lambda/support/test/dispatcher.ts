@@ -18,8 +18,8 @@ function toLambdaEvent(request: WebRequest): APIGatewayProxyEvent {
   const queryStringParameters: Record<string, string> = {};
   const multiValueQueryStringParameters: Record<string, string[]> = {};
 
-  if (!(body === undefined || body === null || BinaryUtil.isByteArray(body))) {
-    throw new AppError('Unsupported request type, only buffer bodies supported');
+  if (!(body === undefined || body === null || BinaryUtil.isByteArray(body) || body instanceof Blob)) {
+    throw new AppError('Unsupported request type, only buffer bodies supported', { details: { bodyType: typeof body, constructor: body?.constructor?.name } });
   }
 
   request.headers.forEach((v, k) => {

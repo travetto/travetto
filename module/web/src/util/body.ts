@@ -91,13 +91,13 @@ export class WebBodyUtil {
   static toBinaryMessage(message: WebMessage): Omit<WebMessage<BinaryType>, 'context'> {
     const body = message.body;
     const out: Omit<WebMessage<BinaryType>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
-    if (body instanceof Blob) {
-      for (const [key, value] of this.getBlobHeaders(body)) {
-        out.headers.set(key, value);
-      }
-    }
 
     if (BinaryUtil.isBinaryType(body)) {
+      if (body instanceof Blob) {
+        for (const [key, value] of this.getBlobHeaders(body)) {
+          out.headers.set(key, value);
+        }
+      }
       out.body = body;
     } else if (body instanceof FormData) {
       const boundary = `${'-'.repeat(24)}-multipart-${Util.uuid()}`;
@@ -179,7 +179,7 @@ export class WebBodyUtil {
     const all: string[] = [];
 
     try {
-      for await (const chunk of BinaryUtil.toReadable(input).iterator({ destroyOnReturn: false })) {
+      for await (const chunk of BinaryUtil.toByteStream(input)) {
         const buffer = BinaryUtil.readChunksAsBuffer(chunk);
         received += buffer.byteLength;
         if (received > limit) {

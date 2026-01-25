@@ -75,7 +75,7 @@ export class ImageUtil {
    */
   static async convert(image: BinaryType, options: ConvertOptions): Promise<Readable> {
     const builder = await this.#getBuilder(options);
-    pipeline(BinaryUtil.toReadable(image), builder);
+    pipeline(BinaryUtil.toByteStream(image), builder);
     return builder;
   }
 
@@ -84,7 +84,7 @@ export class ImageUtil {
    */
   static async getMetadata(image: BinaryType): Promise<ImageMetadata> {
     const { default: sharp } = await import('sharp');
-    const stream = typeof image === 'string' ? createReadStream(image) : BinaryUtil.toReadable(image);
+    const stream = typeof image === 'string' ? createReadStream(image) : BinaryUtil.toByteStream(image);
     const out = await new Promise<Metadata>((resolve, reject) =>
       pipeline(stream, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
     );
