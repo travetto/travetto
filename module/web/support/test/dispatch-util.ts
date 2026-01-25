@@ -1,4 +1,4 @@
-import { AppError, BinaryUtil, castTo, JSONUtil } from '@travetto/runtime';
+import { AppError, BinaryUtil, castTo, JSONUtil, type BinaryType, type ByteArray } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { WebResponse } from '../../src/types/response.ts';
@@ -12,14 +12,19 @@ import { WebCommonUtil } from '../../src/util/common.ts';
  */
 export class WebTestDispatchUtil {
 
-  static async applyRequestBody(request: WebRequest): Promise<WebRequest> {
+  static async applyRequestBody(request: WebRequest, toByteArray: true): Promise<WebRequest<ByteArray>>;
+  static async applyRequestBody(request: WebRequest, toByteArray?: false): Promise<WebRequest<BinaryType>>;
+  static async applyRequestBody(request: WebRequest, toByteArray: boolean = false): Promise<WebRequest<BinaryType>> {
     if (request.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(request);
       sample.headers.forEach((v, k) => request.headers.set(k, Array.isArray(v) ? v.join(',') : v));
+      if (toByteArray) {
+        sample.body = await BinaryUtil.toByteArray(sample.body);
+      }
       request.body = WebBodyUtil.markRawBinary(sample.body);
     }
     Object.assign(request.context, { httpQuery: BindUtil.flattenPaths(request.context.httpQuery ?? {}) });
-    return request;
+    return castTo(request);
   }
 
   static async finalizeResponseBody(response: WebResponse, decompress?: boolean): Promise<WebResponse> {

@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { type WebDispatcher, type WebFilterContext, type WebRequest, WebResponse } from '@travetto/web';
-import { AppError, asFull, BinaryUtil, castTo } from '@travetto/runtime';
+import { AppError, asFull, BinaryUtil, castTo, type ByteArray } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -11,15 +11,15 @@ import type { AwsLambdaWebHandler } from '../../src/handler.ts';
 /**
  * Create an api gateway event given a web request
  */
-function toLambdaEvent(request: WebRequest): APIGatewayProxyEvent {
+function toLambdaEvent(request: WebRequest<ByteArray>): APIGatewayProxyEvent {
   const body = request.body;
   const headers: Record<string, string> = {};
   const multiValueHeaders: Record<string, string[]> = {};
   const queryStringParameters: Record<string, string> = {};
   const multiValueQueryStringParameters: Record<string, string[]> = {};
 
-  if (!(body === undefined || body === null || BinaryUtil.isByteArray(body) || body instanceof Blob)) {
-    throw new AppError('Unsupported request type, only buffer bodies supported', { details: { bodyType: typeof body, constructor: body?.constructor?.name } });
+  if (body && !Buffer.isBuffer(body)) {
+    throw new AppError('Unsupported request type, only buffer bodies supported');
   }
 
   request.headers.forEach((v, k) => {
@@ -46,7 +46,7 @@ function toLambdaEvent(request: WebRequest): APIGatewayProxyEvent {
     headers,
     multiValueHeaders,
     isBase64Encoded: true,
-    body: body?.toString('base64')!,
+    body: request.body ? BinaryUtil.toBase64String(request.body) : null,
     requestContext: castTo({
       identity: castTo({ sourceIp: '127.0.0.1' }),
     }),
@@ -63,7 +63,7 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
   app: AwsLambdaWebHandler;
 
   async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
-    const event = toLambdaEvent(await WebTestDispatchUtil.applyRequestBody(request));
+    const event = toLambdaEvent(await WebTestDispatchUtil.applyRequestBody(request, true));
     const response = await this.app.handle(event, asFull<Context>({}));
 
     return WebTestDispatchUtil.finalizeResponseBody(

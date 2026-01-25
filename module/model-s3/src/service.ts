@@ -320,12 +320,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const metadata = BinaryUtil.getMetadata(input, meta);
 
     if (metadata.size && metadata.size < this.config.chunkSize) { // If smaller than chunk size
-      // Upload to s3
-      await this.client.putObject(this.#queryBlob(location, {
-        Body: await BinaryUtil.toByteArray(input),
+      const blob = this.#queryBlob(location, {
+        Body: BinaryUtil.toReadable(input),
         ContentLength: metadata.size,
         ...this.#getMetaBase(metadata),
-      }));
+      });
+      // Upload to s3
+      await this.client.putObject(blob);
     } else {
       await this.#writeMultipart(location, input, metadata);
     }
