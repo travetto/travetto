@@ -345,7 +345,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
 
     if (typeof body === 'string') {
-      body = body.endsWith('=') ? BinaryUtil.fromBase64String(body) : BinaryUtil.fromUTF8String(body);
+      body = body.endsWith('=') ?
+        BinaryUtil.fromBase64String(body) :
+        BinaryUtil.fromUTF8String(body);
     }
 
     return BinaryUtil.toReadable(body);

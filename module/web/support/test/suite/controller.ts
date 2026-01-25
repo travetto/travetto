@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream';
-
 import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
 
 import { Controller } from '../../../src/decorator/controller.ts';
@@ -59,7 +57,7 @@ export class TestController {
   @Get('/stream')
   @SetHeaders({ 'Content-Type': 'text/plain' })
   getStream() {
-    return Readable.from(BinaryUtil.fromUTF8String('hello'));
+    return BinaryUtil.toReadable(BinaryUtil.fromUTF8String('hello'));
   }
 
   @Get('/buffer')
