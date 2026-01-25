@@ -1,7 +1,6 @@
 import type { Readable } from 'node:stream';
 import zlib from 'node:zlib';
 import util from 'node:util';
-import { pipeline } from 'node:stream/promises';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -68,7 +67,7 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
       return BUFFER_DECOMPRESSORS[encoding](await BinaryUtil.toBuffer(input));
     } else if (BinaryUtil.isByteStream(input)) {
       const output = STREAM_DECOMPRESSORS[encoding]();
-      pipeline(input, output);
+      BinaryUtil.pipeline(input, output);
       return output;
     } else {
       throw WebError.for('Unable to decompress body: unsupported type', 400);

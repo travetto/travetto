@@ -1,6 +1,5 @@
 import { createReadStream } from 'node:fs';
 import type { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 import type { Metadata, Sharp } from 'sharp';
 
 import { BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
@@ -75,7 +74,7 @@ export class ImageUtil {
    */
   static async convert(image: BinaryType, options: ConvertOptions): Promise<Readable> {
     const builder = await this.#getBuilder(options);
-    pipeline(BinaryUtil.toByteStream(image), builder);
+    BinaryUtil.pipeline(image, builder);
     return builder;
   }
 
@@ -86,7 +85,7 @@ export class ImageUtil {
     const { default: sharp } = await import('sharp');
     const stream = typeof image === 'string' ? createReadStream(image) : BinaryUtil.toByteStream(image);
     const out = await new Promise<Metadata>((resolve, reject) =>
-      pipeline(stream, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
+      BinaryUtil.pipeline(stream, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
     );
     return {
       width: out.width!,

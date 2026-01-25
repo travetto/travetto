@@ -1,5 +1,4 @@
 import { type BrotliOptions, constants, createBrotliCompress, createDeflate, createGzip, type ZlibOptions } from 'node:zlib';
-import { pipeline } from 'node:stream/promises';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -94,7 +93,7 @@ export class CompressInterceptor implements WebInterceptor {
       binaryResponse.body = out;
       binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
     } else if (BinaryUtil.isByteStream(binaryResponse.body)) {
-      pipeline(binaryResponse.body, stream);
+      BinaryUtil.pipeline(binaryResponse.body, stream);
       binaryResponse.body = stream;
       binaryResponse.headers.delete('Content-Length');
     }

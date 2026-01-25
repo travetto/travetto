@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
-import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
 import { type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, JSONUtil } from '@travetto/runtime';
@@ -176,7 +175,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const metadata = BinaryUtil.getMetadata(input, meta);
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
-      await pipeline(await BinaryUtil.toByteStream(input), createWriteStream(file)),
+      BinaryUtil.pipeline(input, createWriteStream(file)),
       fs.writeFile(file.replace(BIN, META), JSON.stringify(metadata), 'utf8')
     ]);
   }

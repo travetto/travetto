@@ -58,7 +58,7 @@ export class WebUploadUtil {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }
 
-    const bodyStream = BinaryUtil.toByteStream(request.body);
+    const requestBody = request.body;
     request.body = undefined;
 
     const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
@@ -87,12 +87,12 @@ export class WebUploadUtil {
         .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`)));
 
       // Upload
-      pipeline(bodyStream, uploadHandler).catch(err => queue.throw(err));
+      BinaryUtil.pipeline(requestBody, uploadHandler).catch(err => queue.throw(err));
 
       yield* queue;
     } else {
       const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition')).parameters.filename;
-      yield { stream: bodyStream, filename, field: 'file' };
+      yield { stream: BinaryUtil.toByteStream(requestBody), filename, field: 'file' };
     }
   }
 

@@ -2,7 +2,6 @@ import type net from 'node:net';
 import http from 'node:http';
 import http2 from 'node:http2';
 import https from 'node:https';
-import { pipeline } from 'node:stream/promises';
 import { TLSSocket } from 'node:tls';
 
 import { WebBodyUtil, WebCommonUtil, type WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
@@ -132,12 +131,9 @@ export class WebHttpUtil {
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
     const body = binaryResponse.body;
 
-    if (BinaryUtil.isByteStream(body)) {
-      await pipeline(body, response);
+    if (body) {
+      await BinaryUtil.pipeline(body, response);
     } else {
-      if (body) {
-        await pipeline(await BinaryUtil.toByteStream(body), response);
-      }
       response.end();
     }
   }

@@ -3,7 +3,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { ReadStream as FileReadStream, statSync } from 'node:fs';
-import { PassThrough, Readable } from 'node:stream';
+import { PassThrough, Readable, type Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
@@ -71,13 +71,7 @@ export class BinaryUtil {
    */
   static async hashInput(input: BinaryType): Promise<string> {
     const hash = crypto.createHash('sha256').setEncoding('hex');
-    if (this.isByteStream(input)) {
-      await pipeline(input, hash);
-    } else if (input instanceof Blob) {
-      await pipeline(input.stream(), hash);
-    } else {
-      await pipeline(this.toReadable(input), hash);
-    }
+    await this.pipeline(input, hash);
     return hash.digest('hex').toString();
   }
 
@@ -119,8 +113,7 @@ export class BinaryUtil {
       const stream = new PassThrough();
       Promise.resolve(input()).then(
         source => {
-          const readable = this.toByteStream(source);
-          pipeline(readable, stream).catch(error => stream.destroy(error));
+          this.pipeline(source, stream).catch(error => stream.destroy(error));
           return stream;
         },
         error => stream.destroy(error)
@@ -306,5 +299,9 @@ export class BinaryUtil {
     } else {
       return input.slice(start, end);
     }
+  }
+
+  static pipeline(input: BinaryType, output: Writable): Promise<void> {
+    return pipeline(this.toByteStream(input), output);
   }
 }

@@ -1,5 +1,3 @@
-import { pipeline } from 'node:stream/promises';
-
 import {
   type Binary,
   type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
@@ -292,7 +290,7 @@ export class MongoModelService implements
     }
     const metadata = BinaryUtil.getMetadata(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, { metadata });
-    await pipeline(await BinaryUtil.toByteStream(input), writeStream);
+    await BinaryUtil.pipeline(input, writeStream);
 
     if (existing) {
       const [read] = await this.#bucket.find({ filename: location, _id: { $ne: writeStream.id } }).toArray();
