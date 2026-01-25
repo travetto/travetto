@@ -43,16 +43,16 @@ export class WebBodyUtil {
     yield bytes(`--${boundary}--${newLine}`);
   }
 
-  /** Get Blob Headers */
-  static getBlobHeaders(value: Blob): [string, string][] {
+  /** Get Metadata Headers */
+  static getMetadataHeaders(value: BinaryType): [string, string][] {
     const meta = BinaryUtil.getMetadata(value);
 
     const toAdd: [string, string | undefined][] = [
-      ['Content-Type', value.type],
-      ['Content-Length', `${value.size}`],
-      ['Content-Encoding', meta?.contentEncoding],
-      ['Cache-Control', meta?.cacheControl],
-      ['Content-Language', meta?.contentLanguage],
+      ['Content-Type', meta.contentType],
+      ['Content-Length', meta.size?.toString()],
+      ['Content-Encoding', meta.contentEncoding],
+      ['Cache-Control', meta.cacheControl],
+      ['Content-Language', meta.contentLanguage],
     ];
 
     if (meta?.range) {
@@ -64,6 +64,8 @@ export class WebBodyUtil {
 
     if (value instanceof File && value.name) {
       toAdd.push(['Content-disposition', `attachment; filename="${value.name}"`]);
+    } else if (meta.filename) {
+      toAdd.push(['Content-disposition', `attachment; filename="${meta.filename}"`]);
     }
 
     return toAdd.filter((pair): pair is [string, string] => !!pair[1]);
@@ -94,10 +96,8 @@ export class WebBodyUtil {
     const out: Omit<WebMessage<BinaryType>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
 
     if (BinaryUtil.isBinaryType(body)) {
-      if (body instanceof Blob) {
-        for (const [key, value] of this.getBlobHeaders(body)) {
-          out.headers.set(key, value);
-        }
+      for (const [key, value] of this.getMetadataHeaders(body)) {
+        out.headers.set(key, value);
       }
       out.body = body;
     } else if (body instanceof FormData) {
