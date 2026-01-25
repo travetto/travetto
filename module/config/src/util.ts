@@ -6,7 +6,7 @@ export class ConfigUtil {
    */
   static async readFile<T extends string | BinaryType>(input: T): Promise<T extends BinaryType ? Buffer : string> {
     if (BinaryUtil.isBinaryType(input)) {
-      return castTo(BinaryUtil.toByteArray(input));
+      return castTo(BinaryUtil.toBuffer(input));
     } else {
       try {
         return castTo(await RuntimeResources.resolve(input));

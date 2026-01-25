@@ -1,6 +1,7 @@
 import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
-  type ByteRange, type BinaryType, BinaryUtil, JSONUtil
+  type ByteRange, type BinaryType, BinaryUtil, JSONUtil,
+  type ByteArray
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -13,7 +14,7 @@ import {
 const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
-type StoreType = Map<string, Buffer>;
+type StoreType = Map<string, ByteArray>;
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -234,12 +235,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-
-    const [stream, metadata] = await BinaryUtil.toReadableAndMetadata(input, meta);
+    const metadata = BinaryUtil.getMetadata(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, BinaryUtil.fromUTF8String(JSON.stringify(metadata)));
-    blobs.set(location, await BinaryUtil.toByteArray(stream));
+    blobs.set(location, await BinaryUtil.toByteArray(input));
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
@@ -247,7 +247,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     let buffer = blobs.get(location)!;
     const final = range ? BinaryUtil.enforceRange(range, buffer.byteLength) : undefined;
     if (final) {
-      buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
+      buffer = BinaryUtil.sliceByteArray(buffer, final.start, final.end + 1);
     }
     const meta = await this.getBlobMetadata(location);
     return BinaryUtil.readableBlob(() => buffer, { ...meta, range: final });

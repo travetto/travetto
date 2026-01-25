@@ -2,7 +2,7 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
-import { ReadStream as FileReadStream } from 'node:fs';
+import { ReadStream as FileReadStream, statSync } from 'node:fs';
 import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
@@ -116,7 +116,7 @@ export class BinaryUtil {
       const stream = new PassThrough();
       Promise.resolve(input()).then(
         source => {
-          const readable = BinaryUtil.toReadable(source);
+          const readable = this.toReadable(source);
           return readable.pipe(stream);
         },
         error => stream.destroy(error)
@@ -137,14 +137,6 @@ export class BinaryUtil {
       bytes: { value: () => consumers.arrayBuffer(go()).then(buffer => new Uint8Array(buffer)) },
       [BlobMetaSymbol]: { value: metadata }
     });
-  }
-
-  /**
-   * Get blob metadata
-   */
-  static getBlobMetadata(blob: Blob): BinaryMetadata | undefined {
-    const withMeta: Blob & { [BlobMetaSymbol]?: BinaryMetadata } = blob;
-    return withMeta[BlobMetaSymbol];
   }
 
   /**
@@ -180,6 +172,14 @@ export class BinaryUtil {
     }
   }
 
+  static toByteStream(input: BinaryType): ByteStream {
+    if (this.isByteStream(input)) {
+      return input;
+    } else {
+      return this.toReadable(input);
+    }
+  }
+
   static toReadableStream(input: BinaryType): ReadableStream {
     if (this.isReadableStream(input)) {
       return input;
@@ -190,6 +190,10 @@ export class BinaryUtil {
     } else {
       return Readable.toWeb(this.toReadable(input));
     }
+  }
+
+  static toBuffer(input: BinaryType | undefined): Promise<Buffer> {
+    return this.toByteArray(input);
   }
 
   static toByteArray(input: BinaryType | undefined): Promise<Buffer> {
@@ -234,20 +238,18 @@ export class BinaryUtil {
     return undefined;
   }
 
-  /**
-   * Convert input to a Readable, and get what metadata is available
-   */
-  static async toReadableAndMetadata(input: BinaryType, metadata: BinaryMetadata = {}): Promise<[Readable, BinaryMetadata]> {
+  static getMetadata(input: BinaryType, metadata: BinaryMetadata = {}): BinaryMetadata {
     if (input instanceof Blob) {
-      metadata = { ...this.getBlobMetadata(input), ...metadata };
+      const withMeta: Blob & { [BlobMetaSymbol]?: BinaryMetadata } = input;
+      metadata = { ...withMeta[BlobMetaSymbol], ...metadata };
       metadata.size ??= input.size;
-    } else if (this.isUint8Array(input) || this.isArrayBuffer(input) || Buffer.isBuffer(input)) {
+    } else if (this.isByteArray(input)) {
       metadata.size = input.byteLength;
     } else if (input instanceof FileReadStream) {
       metadata.filename ??= path.basename(input.path.toString());
-      metadata.size ??= (await fs.stat(input.path.toString())).size;
+      metadata.size ??= statSync(input.path.toString()).size;
     }
-    return [this.toReadable(input), metadata ?? {}];
+    return metadata;
   }
 
   /**
@@ -277,7 +279,7 @@ export class BinaryUtil {
   static toHexString(value: Buffer | Uint8Array | ArrayBuffer): string {
     if (this.isArrayBuffer(value)) {
       value = Buffer.from(value);
-    } else if (this.isUint8Array(value)) {
+    } else if (!Buffer.isBuffer(value) && this.isUint8Array(value)) {
       value = Buffer.from(value);
     }
     return value.toString('hex');
@@ -296,7 +298,7 @@ export class BinaryUtil {
   static toBase64String(value: Buffer | Uint8Array | ArrayBuffer): string {
     if (this.isArrayBuffer(value)) {
       value = Buffer.from(value);
-    } else if (this.isUint8Array(value)) {
+    } else if (!Buffer.isBuffer(value) && this.isUint8Array(value)) {
       value = Buffer.from(value);
     }
     return value.toString('base64');
@@ -307,6 +309,18 @@ export class BinaryUtil {
    */
   static fromUTF8String(value: string): Buffer {
     return Buffer.from(value, 'utf8');
+  }
+
+  /**
+   * Return utf8 string from bytes
+   */
+  static toUTF8String(value: ByteArray): string {
+    if (this.isArrayBuffer(value)) {
+      value = Buffer.from(value);
+    } else if (!Buffer.isBuffer(value) && this.isUint8Array(value)) {
+      value = Buffer.from(value);
+    }
+    return value.toString('utf8');
   }
 
   /**
@@ -333,5 +347,21 @@ export class BinaryUtil {
 
   static combineByteArrays(arrays: Buffer[]): Buffer {
     return Buffer.concat(arrays);
+  }
+
+  static detectEncoding(input: BinaryType): BufferEncoding | undefined {
+    if (this.isReadable(input)) {
+      return input.readableEncoding!;
+    }
+  }
+
+  static sliceByteArray(input: ByteArray, start: number, end?: number): ByteArray {
+    if (Buffer.isBuffer(input)) {
+      return input.subarray(start, end);
+    } else if (this.isArrayBuffer(input)) {
+      return input.slice(start, end);
+    } else {
+      return input.slice(start, end);
+    }
   }
 }

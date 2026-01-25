@@ -30,7 +30,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: WebBodyUtil.markRaw(BinaryUtil.fromUTF8String('{ "hello": "world" }'))
+      body: WebBodyUtil.markRawBinary(BinaryUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -55,7 +55,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: WebBodyUtil.markRaw(BinaryUtil.fromUTF8String('{ "hello": "world" }'))
+      body: WebBodyUtil.markRawBinary(BinaryUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -81,7 +81,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'image/jpeg'
       },
-      body: WebBodyUtil.markRaw(stream)
+      body: WebBodyUtil.markRawBinary(stream)
     });
 
     const response = await interceptor.filter({
@@ -112,7 +112,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain; charset=euc-kr',
       },
-      body: WebBodyUtil.markRaw(BinaryUtil.toReadable(koreanInput))
+      body: WebBodyUtil.markRawBinary(koreanInput)
     });
 
     const response = await interceptor.filter({
@@ -141,7 +141,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'binary/ignore',
       },
-      body: WebBodyUtil.markRaw(BinaryUtil.toReadable(koreanInput))
+      body: WebBodyUtil.markRawBinary(koreanInput)
     });
 
     const response = await interceptor.filter({
@@ -170,7 +170,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain', // Will use utf8
       },
-      body: WebBodyUtil.markRaw(BinaryUtil.toReadable(koreanInput))
+      body: WebBodyUtil.markRawBinary(koreanInput)
     });
 
     const response = await interceptor.filter({
@@ -196,7 +196,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain; charset=orange',
       },
-      body: WebBodyUtil.markRaw(mkData(0))
+      body: WebBodyUtil.markRawBinary(mkData(0))
     });
 
     await assert.rejects(
@@ -225,7 +225,7 @@ class BodyInterceptorSuite {
             'Content-Type': 'text/plain',
             'Content-Length': '20000'
           },
-          body: WebBodyUtil.markRaw(mkData(20000))
+          body: WebBodyUtil.markRawBinary(mkData(20000))
         }),
         next: async () => null!,
         config
@@ -244,7 +244,7 @@ class BodyInterceptorSuite {
             headers: {
               'Content-Type': 'text/plain',
             },
-            body: WebBodyUtil.markRaw(mkData(20000))
+            body: WebBodyUtil.markRawBinary(mkData(20000))
           }),
           next: async () => null!,
           config
@@ -269,7 +269,7 @@ class BodyInterceptorSuite {
             'Content-Type': 'text/plain',
             'Content-Length': '20000'
           },
-          body: WebBodyUtil.markRaw(mkData(20001))
+          body: WebBodyUtil.markRawBinary(mkData(20001))
         }),
         next: async () => null!,
         config

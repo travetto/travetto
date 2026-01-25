@@ -1,8 +1,9 @@
 import { pipeline } from 'node:stream/promises';
 
 import {
+  type Binary,
   type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
-  type ObjectId, type Binary, type RootFilterOperators, type Filter,
+  type ObjectId, type RootFilterOperators, type Filter,
   type WithId as MongoWithId,
 } from 'mongodb';
 
@@ -289,9 +290,9 @@ export class MongoModelService implements
     if (!overwrite && existing) {
       return;
     }
-    const [stream, metadata] = await BinaryUtil.toReadableAndMetadata(input, meta);
+    const metadata = BinaryUtil.getMetadata(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, { metadata });
-    await pipeline(stream, writeStream);
+    await pipeline(await BinaryUtil.toByteStream(input), writeStream);
 
     if (existing) {
       const [read] = await this.#bucket.find({ filename: location, _id: { $ne: writeStream.id } }).toArray();

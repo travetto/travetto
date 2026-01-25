@@ -2,9 +2,9 @@ import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 
 import type { Any } from './types.ts';
-import { BinaryUtil } from './binary.ts';
+import { BinaryUtil, type ByteArray } from './binary.ts';
 
-export type JSONParseInput = string | Buffer;
+export type JSONParseInput = string | ByteArray;
 
 /**
  * JSON Utility functions
@@ -15,7 +15,7 @@ export class JSONUtil {
    * Is valid input
    */
   static isValidInput(input: unknown): input is JSONParseInput {
-    return typeof input === 'string' || Buffer.isBuffer(input);
+    return typeof input === 'string' || BinaryUtil.isByteArray(input);
   }
 
   /**
@@ -23,7 +23,7 @@ export class JSONUtil {
    */
   static parseSafe<T>(input: JSONParseInput, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
     if (typeof input !== 'string') {
-      input = input.toString('utf8');
+      input = BinaryUtil.toUTF8String(input);
     }
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, reviver);

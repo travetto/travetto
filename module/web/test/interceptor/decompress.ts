@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import { brotliCompressSync, createBrotliCompress, createDeflate, createGzip, deflateSync, gzipSync } from 'node:zlib';
 import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
+import { pipeline } from 'node:stream/promises';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
@@ -32,30 +33,28 @@ class DecompressInterceptorSuite {
       data = mkData(data);
     }
 
-    const src = BinaryUtil.toNodeType(data);
-
     switch (encoding) {
       case 'br': {
-        if (BinaryUtil.isByteArray(src)) {
-          data = brotliCompressSync(src);
-        } else if (src) {
-          data = src.pipe(createBrotliCompress());
+        if (BinaryUtil.isByteArray(data)) {
+          data = brotliCompressSync(data);
+        } else if (BinaryUtil.isByteStream(data)) {
+          await pipeline(data, data = createBrotliCompress());
         }
         break;
       }
       case 'gzip': {
-        if (BinaryUtil.isByteArray(src)) {
-          data = gzipSync(src);
-        } else if (src) {
-          data = src.pipe(createGzip());
+        if (BinaryUtil.isByteArray(data)) {
+          data = gzipSync(data);
+        } else if (BinaryUtil.isByteStream(data)) {
+          await pipeline(data, data = createGzip());
         }
         break;
       }
       case 'deflate': {
-        if (BinaryUtil.isByteArray(src)) {
-          data = deflateSync(src);
-        } else if (src) {
-          data = src.pipe(createDeflate());
+        if (BinaryUtil.isByteArray(data)) {
+          data = deflateSync(data);
+        } else if (BinaryUtil.isByteStream(data)) {
+          await pipeline(data, data = createDeflate());
         }
         break;
       }
@@ -69,7 +68,7 @@ class DecompressInterceptorSuite {
           path: '/',
           httpMethod: 'POST',
         },
-        body: WebBodyUtil.markRaw(data),
+        body: WebBodyUtil.markRawBinary(data),
         headers: requestHeaders
       });
       await interceptor.filter({

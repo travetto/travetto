@@ -7,7 +7,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelBlobSupport } from '../../src/types/blob.ts';
 
-const meta = BinaryUtil.getBlobMetadata;
+const meta = BinaryUtil.getMetadata;
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
@@ -187,7 +187,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const found = await service.getBlob('largeFile/one');
     assert(found.size === buffer.byteLength);
     assert(found.type === 'image/jpeg');
-    assert(BinaryUtil.getBlobMetadata(found)?.title === 'orange');
-    assert(BinaryUtil.getBlobMetadata(found)?.filename === 'gary');
+    assert(meta(found)?.title === 'orange');
+    assert(meta(found)?.filename === 'gary');
   }
 }

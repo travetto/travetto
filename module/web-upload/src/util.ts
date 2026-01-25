@@ -3,19 +3,19 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
-import { type Readable, Transform } from 'node:stream';
+import { Transform } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType } from '@travetto/runtime';
+import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType, type ByteStream } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
-type UploadItem = { stream: Readable, filename?: string, field: string };
+type UploadItem = { stream: ByteStream, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
 const RawFileSymbol = Symbol();
 const WebUploadSymbol = Symbol();
@@ -54,11 +54,11 @@ export class WebUploadUtil {
    * Get all the uploads, separating multipart from direct
    */
   static async * getUploads(request: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    if (!WebBodyUtil.isRaw(request.body)) {
+    if (!WebBodyUtil.isRawBinary(request.body)) {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }
 
-    const bodyStream = BinaryUtil.toReadable(request.body);
+    const bodyStream = BinaryUtil.toByteStream(request.body);
     request.body = undefined;
 
     const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
@@ -70,8 +70,7 @@ export class WebUploadUtil {
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
       const queue = new AsyncQueue<UploadItem>();
 
-      // Upload
-      bodyStream.pipe(busboy({
+      const uploadHandler = busboy({
         headers: {
           'content-type': request.headers.get('Content-Type')!,
           'content-disposition': request.headers.get('Content-Disposition')!,
@@ -85,7 +84,10 @@ export class WebUploadUtil {
         .on('file', (field, stream, filename) => queue.add({ stream, filename, field }))
         .on('limit', field => queue.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => queue.close())
-        .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`))));
+        .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`)));
+
+      // Upload
+      pipeline(bodyStream, uploadHandler).catch(err => queue.throw(err));
 
       yield* queue;
     } else {
@@ -151,10 +153,10 @@ export class WebUploadUtil {
     let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
 
-    const [stream, metadata] = await BinaryUtil.toReadableAndMetadata(input);
+    const metadata = BinaryUtil.getMetadata(input);
 
     try {
-      token = await fromStream(stream);
+      token = await fromStream(BinaryUtil.toReadable(input));
       matched = await parser.fromTokenizer(token);
     } finally {
       await token?.close();

@@ -10,7 +10,7 @@ import { Util, type BinaryMetadata, BinaryUtil, castTo, type AppError } from '@t
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
-const bHash = (blob: Blob) => BinaryUtil.getBlobMetadata(blob)?.hash;
+const bHash = (blob: Blob) => BinaryUtil.getMetadata(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {

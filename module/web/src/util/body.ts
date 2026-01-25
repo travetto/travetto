@@ -1,12 +1,12 @@
 import { TextDecoder } from 'node:util';
 
-import { type Any, type BinaryType, BinaryUtil, castTo, hasToJSON, JSONUtil, Util } from '@travetto/runtime';
+import { type Any, type BinaryType, BinaryUtil, type ByteArray, castTo, hasToJSON, JSONUtil, Util } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
 import { WebError } from '../types/error.ts';
 
-const WebRawStreamSymbol = Symbol();
+const WebRawBinarySymbol = Symbol();
 
 /**
  * Utility classes for supporting web body operations
@@ -16,7 +16,7 @@ export class WebBodyUtil {
   /**
    * Generate multipart body
    */
-  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<string | Buffer> {
+  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<ByteArray | string> {
     const nl = '\r\n';
     for (const [key, value] of form.entries()) {
       const data = value.slice();
@@ -32,7 +32,7 @@ export class WebBodyUtil {
       yield nl;
       if (data instanceof Blob) {
         for await (const chunk of data.stream()) {
-          yield BinaryUtil.readChunksAsBuffer(chunk);
+          yield chunk;
         }
       } else {
         yield data;
@@ -44,7 +44,7 @@ export class WebBodyUtil {
 
   /** Get Blob Headers */
   static getBlobHeaders(value: Blob): [string, string][] {
-    const meta = BinaryUtil.getBlobMetadata(value);
+    const meta = BinaryUtil.getMetadata(value);
 
     const toAdd: [string, string | undefined][] = [
       ['Content-Type', value.type],
@@ -97,14 +97,12 @@ export class WebBodyUtil {
       }
     }
 
-    const binaryBody = BinaryUtil.toNodeType(body);
-
-    if (body instanceof FormData) {
+    if (BinaryUtil.isBinaryType(body)) {
+      out.body = body;
+    } else if (body instanceof FormData) {
       const boundary = `${'-'.repeat(24)}-multipart-${Util.uuid()}`;
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
-      out.body = BinaryUtil.toReadable(this.buildMultiPartBody(body, boundary));
-    } else if (binaryBody) {
-      out.body = binaryBody;
+      out.body = this.buildMultiPartBody(body, boundary);
     } else {
       let text: string;
       if (typeof body === 'string') {
@@ -131,9 +129,9 @@ export class WebBodyUtil {
   /**
    * Set body and mark as unprocessed
    */
-  static markRaw(body: BinaryType | undefined): typeof body {
+  static markRawBinary(body: BinaryType | undefined): typeof body {
     if (body) {
-      Object.defineProperty(body, WebRawStreamSymbol, { value: body });
+      Object.defineProperty(body, WebRawBinarySymbol, { value: body });
     }
     return body;
   }
@@ -141,9 +139,9 @@ export class WebBodyUtil {
   /**
    * Is the input raw
    */
-  static isRaw(body: unknown): body is BinaryType {
+  static isRawBinary(body: unknown): body is BinaryType {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!body && (BinaryUtil.isBinaryType(body) && (body as Any)[WebRawStreamSymbol] === body);
+    return !!body && (BinaryUtil.isBinaryType(body) && (body as Any)[WebRawBinarySymbol] === body);
   }
 
   /**
@@ -161,7 +159,7 @@ export class WebBodyUtil {
    * Read text from an input source
    */
   static async readText(input: BinaryType, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
-    encoding ??= (BinaryUtil.isReadable(input) ? input.readableEncoding : undefined) ?? 'utf-8';
+    encoding ??= BinaryUtil.detectEncoding(input) ?? 'utf-8';
 
     let decoder: TextDecoder;
     try {

@@ -78,7 +78,7 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
   async filter({ request, config, next }: WebChainedContext<WebBodyConfig>): Promise<WebResponse> {
     const input = request.body;
 
-    if (!WebBodyUtil.isRaw(input)) {
+    if (!WebBodyUtil.isRawBinary(input)) {
       return next();
     }
 

@@ -1,6 +1,7 @@
 import type { Readable } from 'node:stream';
 import zlib from 'node:zlib';
 import util from 'node:util';
+import { pipeline } from 'node:stream/promises';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -64,9 +65,13 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
     }
 
     if (BinaryUtil.isByteArray(input)) {
-      return BUFFER_DECOMPRESSORS[encoding](await BinaryUtil.toByteArray(input));
+      return BUFFER_DECOMPRESSORS[encoding](await BinaryUtil.toBuffer(input));
+    } else if (BinaryUtil.isByteStream(input)) {
+      const output = STREAM_DECOMPRESSORS[encoding]();
+      pipeline(input, output);
+      return output;
     } else {
-      return BinaryUtil.toReadable(input).pipe(STREAM_DECOMPRESSORS[encoding]());
+      throw WebError.for('Unable to decompress body: unsupported type', 400);
     }
   }
 
@@ -81,9 +86,9 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
-    if (WebBodyUtil.isRaw(request.body)) {
+    if (WebBodyUtil.isRawBinary(request.body)) {
       const updatedBody = await DecompressInterceptor.decompress(request.headers, request.body, config);
-      request.body = WebBodyUtil.markRaw(updatedBody);
+      request.body = WebBodyUtil.markRawBinary(updatedBody);
     }
     return next();
   }

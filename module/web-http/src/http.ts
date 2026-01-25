@@ -119,7 +119,7 @@ export class WebHttpUtil {
         httpQuery: Object.fromEntries(new URLSearchParams(query)),
       },
       headers: request.headers,
-      body: WebBodyUtil.markRaw(request)
+      body: WebBodyUtil.markRawBinary(request)
     });
   }
 
@@ -132,12 +132,13 @@ export class WebHttpUtil {
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
     const body = binaryResponse.body;
 
-    if (BinaryUtil.isReadable(body)) {
+    if (BinaryUtil.isByteStream(body)) {
       await pipeline(body, response);
     } else {
       if (body) {
+        const bytes = await BinaryUtil.toBuffer(body);
         // Weird type union that http2 uses
-        'stream' in response ? response.write(body) : response.write(body);
+        'stream' in response ? response.write(bytes) : response.write(bytes);
       }
       response.end();
     }
