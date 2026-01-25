@@ -123,7 +123,7 @@ export class BinaryUtil {
       const stream = new PassThrough();
       Promise.resolve(input()).then(
         readable => {
-          if (readable instanceof ReadableStream) {
+          if (BinaryUtil.isReadableStream(readable)) {
             readable = Readable.fromWeb(readable);
           } else if (Buffer.isBuffer(readable)) {
             readable = Readable.from(readable);
@@ -270,7 +270,7 @@ export class BinaryUtil {
     end = Math.min(end ?? (size - 1), size - 1);
 
     if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {
-      throw new AppError('Invalid position, out of range', { category: 'data' });
+      throw new AppError('Invalid position, out of range', { category: 'data', details: { start, end, size } });
     }
 
     return { start, end };

@@ -33,7 +33,7 @@ export class WebUploadUtil {
     let read = 0;
     return new Transform({
       transform(chunk, encoding, callback): void {
-        read += (typeof chunk === 'string') ? chunk.length : (BinaryUtil.isByteArray(chunk) ? chunk.byteLength : 0);
+        read += ((typeof chunk === 'string') ? chunk.length : (BinaryUtil.isByteArray(chunk) ? chunk.byteLength : 0));
         if (read > maxSize) {
           callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
         } else {
@@ -110,9 +110,9 @@ export class WebUploadUtil {
     try {
       const target = createWriteStream(location);
 
-      await (config.maxSize ?
-        pipeline(stream, this.limitWrite(config.maxSize, field), target) :
-        pipeline(stream, target));
+      await // (config.maxSize ?
+        // pipeline(stream, this.limitWrite(config.maxSize, field), target) :
+        pipeline(stream, target);
 
       const detected = await this.getFileType(location);
 
