@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { type WebFilterContext, WebResponse, type WebDispatcher, WebBodyUtil, type WebBinaryType } from '@travetto/web';
+import { type WebFilterContext, WebResponse, type WebDispatcher, WebBodyUtil } from '@travetto/web';
 import { BinaryUtil, castTo } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';

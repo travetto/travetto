@@ -86,12 +86,12 @@ export const getClass = <T = unknown>(value: ClassInstance | Class): Class<T> =>
  */
 export type ByteRange = { start: number, end?: number };
 
-export interface BlobMeta {
-  /** Size of blob */
+export interface BinaryMetadata {
+  /** Size of binary data */
   size?: number;
   /** Mime type of the content */
   contentType?: string;
-  /** Hash of blob contents */
+  /** Hash of binary data contents */
   hash?: string;
   /** The original base filename of the file */
   filename?: string;
@@ -103,6 +103,6 @@ export interface BlobMeta {
   contentLanguage?: string;
   /** Cache control */
   cacheControl?: string;
-  /** Byte range for blob */
+  /** Byte range for binary data */
   range?: Required<ByteRange>;
 }

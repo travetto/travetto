@@ -112,7 +112,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain; charset=euc-kr',
       },
-      body: WebBodyUtil.markRaw(Readable.from(koreanInput))
+      body: WebBodyUtil.markRaw(BinaryUtil.toReadable(koreanInput))
     });
 
     const response = await interceptor.filter({
@@ -141,7 +141,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'binary/ignore',
       },
-      body: WebBodyUtil.markRaw(Readable.from(koreanInput))
+      body: WebBodyUtil.markRaw(BinaryUtil.toReadable(koreanInput))
     });
 
     const response = await interceptor.filter({
@@ -170,7 +170,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain', // Will use utf8
       },
-      body: WebBodyUtil.markRaw(Readable.from(koreanInput))
+      body: WebBodyUtil.markRaw(BinaryUtil.toReadable(koreanInput))
     });
 
     const response = await interceptor.filter({

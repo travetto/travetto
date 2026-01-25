@@ -3,6 +3,7 @@ import { type BrotliOptions, constants, createBrotliCompress, createDeflate, cre
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { BinaryUtil } from '@travetto/runtime';
 
 import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import type { WebInterceptorCategory } from '../types/core.ts';
@@ -12,7 +13,6 @@ import { WebError } from '../types/error.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
 import { WebHeaderUtil } from '../util/header.ts';
-import { BinaryUtil } from '@travetto/runtime';
 
 const COMPRESSORS = {
   gzip: createGzip,

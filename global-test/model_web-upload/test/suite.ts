@@ -6,7 +6,7 @@ import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
 import { Upload, type FileMap } from '@travetto/web-upload';
-import { Util, type BlobMeta, BinaryUtil, castTo, type AppError } from '@travetto/runtime';
+import { Util, type BinaryMetadata, BinaryUtil, castTo, type AppError } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
@@ -98,7 +98,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadAll() {
     const uploads = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const response = await this.request<BlobMeta>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload/all' } });
+    const response = await this.request<BinaryMetadata>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload/all' } });
 
     const { hash } = await this.getFileMeta('/logo.png');
     assert(response.body?.hash === hash);
@@ -108,7 +108,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async testUploadDirect() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const sent = castTo<Blob>(uploads.get('file'));
-    const response = await this.request<{ location: string, meta: BlobMeta }>({ context: { httpMethod: 'POST', path: '/test/upload' }, body: sent });
+    const response = await this.request<{ location: string, meta: BinaryMetadata }>({ context: { httpMethod: 'POST', path: '/test/upload' }, body: sent });
 
     const { hash } = await this.getFileMeta('/logo.png');
     assert(response.body?.meta.hash === hash);
@@ -117,7 +117,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const response = await this.request<{ location: string, meta: BlobMeta }>(
+    const response = await this.request<{ location: string, meta: BinaryMetadata }>(
       { body: uploads, context: { httpMethod: 'POST', path: '/test/upload' } }
     );
     const { hash } = await this.getFileMeta('/logo.png');

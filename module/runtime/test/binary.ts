@@ -4,7 +4,7 @@ import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { BinaryUtil, type BlobMeta } from '@travetto/runtime';
+import { BinaryUtil, type BinaryMetadata } from '@travetto/runtime';
 
 @Suite()
 export class BytesUtilTest {
@@ -50,7 +50,7 @@ export class BytesUtilTest {
 
   @Test()
   async simpleTest() {
-    const meta: BlobMeta = {
+    const meta: BinaryMetadata = {
       hash: 'ora_nge_bee_for_sly_',
       filename: 'bob'
     };
@@ -72,7 +72,7 @@ export class BytesUtilTest {
 
   @Test()
   async simpleShort() {
-    const meta: BlobMeta = {
+    const meta: BinaryMetadata = {
       hash: 'ora_nge_bee'
     };
 

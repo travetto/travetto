@@ -8,7 +8,7 @@ import { type Readable, Transform } from 'node:stream';
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
+import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
@@ -114,7 +114,7 @@ export class WebUploadUtil {
         pipeline(stream, this.limitWrite(config.maxSize, field), target) :
         pipeline(stream, target));
 
-      const detected = await this.getFileType(location);
+      const detected = await this.getFileType(createReadStream(location));
 
       if (!mimeCheck(detected.mime)) {
         throw new AppError(`Content type not allowed: ${detected.mime}`, { category: 'data' });
@@ -143,7 +143,7 @@ export class WebUploadUtil {
   /**
    * Get file type
    */
-  static async getFileType(input: string | Readable): Promise<FileType> {
+  static async getFileType(input: BinaryType): Promise<FileType> {
     const { FileTypeParser } = await import('file-type');
     const { fromStream } = await import('strtok3');
 
@@ -151,19 +151,21 @@ export class WebUploadUtil {
     let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
 
+    const [stream, metadata] = await BinaryUtil.toReadableAndMetadata(input);
+
     try {
-      token = await fromStream(typeof input === 'string' ? createReadStream(input) : input);
+      token = await fromStream(stream);
       matched = await parser.fromTokenizer(token);
     } finally {
       await token?.close();
     }
 
-    if (!matched && typeof input === 'string') {
+    if (!matched && metadata.filename) {
       const { Mime } = (await import('mime'));
       const otherTypes = (await import('mime/types/other.js')).default;
       const standardTypes = (await import('mime/types/standard.js')).default;
       const checker = new Mime(standardTypes, otherTypes);
-      const mime = checker.getType(input);
+      const mime = checker.getType(metadata.filename);
       if (mime) {
         return { ext: checker.getExtension(mime)!, mime };
       }

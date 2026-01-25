@@ -2,13 +2,14 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
+import { ReadStream as FileReadStream } from 'node:fs';
 import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toArrayBuffer, buffer as toBuffer } from 'node:stream/consumers';
 import { isArrayBuffer, isUint8Array } from 'node:util/types';
 
-import { type Any, type BlobMeta, type ByteRange, castTo, hasFunction } from './types.ts';
+import { type Any, type BinaryMetadata, type ByteRange, castTo, hasFunction } from './types.ts';
 import { Util } from './util.ts';
 import { AppError } from './error.ts';
 
@@ -59,8 +60,8 @@ export class BinaryUtil {
 
   /**
    * Are we a basic binary type
-   * @param value 
-   * @returns 
+   * @param value
+   * @returns
    */
   static isBinaryBasicType(value: unknown): value is BinaryBasicType {
     return Buffer.isBuffer(value) || this.isReadable(value);
@@ -116,9 +117,9 @@ export class BinaryUtil {
   /**
    * Make a blob, and assign metadata
    */
-  static readableBlob(input: () => BlobSource, metadata: Omit<BlobMeta, 'filename'> & { filename: string }): File;
-  static readableBlob(input: () => BlobSource, metadata?: BlobMeta): Blob;
-  static readableBlob(input: () => BlobSource, metadata: BlobMeta = {}): Blob | File {
+  static readableBlob(input: () => BlobSource, metadata: Omit<BinaryMetadata, 'filename'> & { filename: string }): File;
+  static readableBlob(input: () => BlobSource, metadata?: BinaryMetadata): Blob;
+  static readableBlob(input: () => BlobSource, metadata: BinaryMetadata = {}): Blob | File {
     const go = (): Readable => {
       const stream = new PassThrough();
       Promise.resolve(input()).then(
@@ -153,15 +154,15 @@ export class BinaryUtil {
   /**
    * Get blob metadata
    */
-  static getBlobMeta(blob: Blob): BlobMeta | undefined {
-    const withMeta: Blob & { [BlobMetaSymbol]?: BlobMeta } = blob;
+  static getBlobMeta(blob: Blob): BinaryMetadata | undefined {
+    const withMeta: Blob & { [BlobMetaSymbol]?: BinaryMetadata } = blob;
     return withMeta[BlobMetaSymbol];
   }
 
   /**
    * Get a hashed location/path for a blob
    */
-  static hashedBlobLocation(meta: BlobMeta): string {
+  static hashedBlobLocation(meta: BinaryMetadata): string {
     const hash = meta.hash ?? Util.uuid();
 
     let parts = hash.match(/(.{1,4})/g)!.slice();
@@ -185,8 +186,6 @@ export class BinaryUtil {
     } else if (this.isReadableStream(input)) {
       return Readable.fromWeb(input);
     } else if (this.isUint8Array(input)) {
-      return Readable.from(Buffer.from(input));
-    } else if (this.isArrayBuffer(input)) {
       return Readable.from(Buffer.from(input));
     } else {
       return Readable.from(input);
@@ -218,8 +217,6 @@ export class BinaryUtil {
       return input.arrayBuffer().then(data => Buffer.from(data));
     } else if (this.isReadableStream(input)) {
       return toBuffer(input);
-    } else if (this.isArrayBuffer(input)) {
-      return toArrayBuffer(input).then(data => Buffer.from(data));
     } else if (this.isReadable(input)) {
       return toBuffer(input);
     } else {
@@ -241,8 +238,6 @@ export class BinaryUtil {
       return input;
     } else if (this.isAsyncIterable(input)) {
       return Readable.from(input);
-    } else if (input === null || input === undefined) {
-      return Buffer.alloc(0);
     } else if (this.isArrayBuffer(input)) {
       return Buffer.from(input);
     } else if (this.isUint8Array(input) || Buffer.isBuffer(input)) {
@@ -254,12 +249,15 @@ export class BinaryUtil {
   /**
    * Convert input to a Readable, and get what metadata is available
    */
-  static async toReadableAndMetadata(input: BinaryType, metadata: BlobMeta = {}): Promise<[Readable, BlobMeta]> {
+  static async toReadableAndMetadata(input: BinaryType, metadata: BinaryMetadata = {}): Promise<[Readable, BinaryMetadata]> {
     if (input instanceof Blob) {
       metadata = { ...this.getBlobMeta(input), ...metadata };
       metadata.size ??= input.size;
     } else if (this.isUint8Array(input) || this.isArrayBuffer(input) || Buffer.isBuffer(input)) {
       metadata.size = input.byteLength;
+    } else if (input instanceof FileReadStream) {
+      metadata.filename ??= path.basename(input.path.toString());
+      metadata.size ??= (await fs.stat(input.path.toString())).size;
     }
     return [this.toReadable(input), metadata ?? {}];
   }
@@ -330,7 +328,7 @@ export class BinaryUtil {
       this.isUint8Array(chunk) ? Buffer.from(chunk) :
         this.isArrayBuffer(chunk) ? Buffer.from(chunk) :
           typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
-            Buffer.from(`${chunk}`, 'utf8'); 2
+            Buffer.from(`${chunk}`, 'utf8');
   }
 
   static combineByteArrays(arrays: Buffer[]): Buffer {

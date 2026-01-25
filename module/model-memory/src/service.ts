@@ -1,5 +1,5 @@
 import {
-  type Class, type TimeSpan, type DeepPartial, castTo, type BlobMeta,
+  type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, JSONUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
@@ -230,15 +230,15 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Blob Support
-  async upsertBlob(location: string, input: BinaryType, meta?: BlobMeta, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
     if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
       return;
     }
 
-    const [stream, blobMeta] = await BinaryUtil.toReadableAndMetadata(input, meta);
+    const [stream, metadata] = await BinaryUtil.toReadableAndMetadata(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, BinaryUtil.fromUTF8String(JSON.stringify(blobMeta)));
+    metaContent.set(location, BinaryUtil.fromUTF8String(JSON.stringify(metadata)));
     blobs.set(location, await BinaryUtil.toByteArray(stream));
   }
 
@@ -253,9 +253,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     return BinaryUtil.readableBlob(() => buffer, { ...meta, range: final });
   }
 
-  async getBlobMeta(location: string): Promise<BlobMeta> {
+  async getBlobMeta(location: string): Promise<BinaryMetadata> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
-    const meta: BlobMeta = JSONUtil.parseSafe(metaContent.get(location)!);
+    const meta: BinaryMetadata = JSONUtil.parseSafe(metaContent.get(location)!);
     return meta;
   }
 
@@ -270,7 +270,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     }
   }
 
-  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
+  async updateBlobMeta(location: string, meta: BinaryMetadata): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, BinaryUtil.fromUTF8String(JSON.stringify(meta)));
   }
