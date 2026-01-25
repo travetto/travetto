@@ -18,6 +18,8 @@ export class BytesUtilTest {
     const allBytes = await this.fixture.read('/logo.png', true);
     assert(blob.size === undefined);
     assert(blobBytes.byteLength === allBytes.byteLength);
+    assert(blobBytes instanceof Buffer);
+    assert(allBytes instanceof Buffer);
     assert(blobBytes.equals(allBytes));
   }
 
