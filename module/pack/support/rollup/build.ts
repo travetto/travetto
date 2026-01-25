@@ -1,3 +1,4 @@
+import commonjsRequire from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import jsonImport from '@rollup/plugin-json';
@@ -20,6 +21,7 @@ export default function buildConfig(): RollupOptions {
       jsonImport(),
       travettoEntryPlugin(config),
       travettoImportPlugin(config),
+      commonjsRequire({ ignore: id => config.ignore.has(id) }),
       nodeResolve({ preferBuiltins: true }),
       travettoSourcemaps(config),
       ...(config.output.compact ? [terser(config.minify)] : [])
