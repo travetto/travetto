@@ -17,7 +17,7 @@ const BlobMetaSymbol = Symbol();
 
 const BINARY_CONSTRUCTORS = [Readable, Buffer, Blob, File, ReadableStream, ArrayBuffer, Uint8Array];
 export type ByteArray = Uint8Array | Buffer | ArrayBuffer;
-export type ByteStream = Readable | ReadableStream | AsyncIterable<ByteArray | string>;
+export type ByteStream = Readable | ReadableStream | AsyncIterable<ByteArray>;
 export type BinaryType = ByteArray | ByteStream | Blob;
 
 const BINARY_CONSTRUCTOR_SET = new Set(BINARY_CONSTRUCTORS);
@@ -76,9 +76,19 @@ export class BinaryUtil {
     } else if (input instanceof Blob) {
       await pipeline(input.stream(), hash);
     } else {
-      hash.write(await this.toBuffer(input));
+      await pipeline(this.toReadable(input), hash);
     }
     return hash.digest('hex').toString();
+  }
+
+  static arrayToBuffer(input: ByteArray): Buffer {
+    if (Buffer.isBuffer(input)) {
+      return input;
+    } else if (isUint8Array(input)) {
+      return Buffer.from(input);
+    } else {
+      return Buffer.from(input);
+    }
   }
 
   /**
@@ -151,16 +161,12 @@ export class BinaryUtil {
   static toReadable(input: BinaryType): Readable {
     if (isReadable(input)) {
       return input;
-    } else if (Buffer.isBuffer(input)) {
-      return Readable.from(input);
-    } else if (isArrayBuffer(input)) {
-      return Readable.from(Buffer.from(input));
+    } else if (this.isByteArray(input)) {
+      return Readable.from(this.arrayToBuffer(input));
     } else if (input instanceof Blob) {
       return Readable.fromWeb(input.stream());
     } else if (isReadableStream(input)) {
       return Readable.fromWeb(input);
-    } else if (isUint8Array(input)) {
-      return Readable.from(Buffer.from(input));
     } else {
       return Readable.from(input);
     }
@@ -174,27 +180,21 @@ export class BinaryUtil {
     }
   }
 
-  static toBuffer(input: BinaryType | undefined): Promise<Buffer> {
-    return this.toByteArray(input);
+
+  static async toBuffer(input: BinaryType): Promise<Buffer> {
+    const bytes = await this.toByteArray(input);
+    return this.arrayToBuffer(bytes);
   }
 
-  static toByteArray(input: BinaryType | undefined): Promise<Buffer> {
-    if (input === undefined || input === null) {
-      return Promise.resolve(Buffer.alloc(0));
-    } else if (Buffer.isBuffer(input)) {
-      return Promise.resolve(input);
-    } else if (isArrayBuffer(input)) {
-      return Promise.resolve(Buffer.from(input));
-    } else if (isUint8Array(input)) {
-      return Promise.resolve(Buffer.from(input));
+  static async toByteArray(input: BinaryType | undefined): Promise<ByteArray> {
+    if (this.isByteArray(input)) {
+      return input;
+    } else if (this.isByteStream(input)) {
+      return consumers.buffer(input);
     } else if (input instanceof Blob) {
-      return input.arrayBuffer().then(data => Buffer.from(data));
-    } else if (isReadableStream(input)) {
-      return consumers.buffer(input);
-    } else if (isReadable(input)) {
-      return consumers.buffer(input);
+      return input.arrayBuffer();
     } else {
-      return consumers.buffer(Readable.from(input));
+      return Promise.resolve(Buffer.alloc(0));
     }
   }
 
@@ -237,12 +237,7 @@ export class BinaryUtil {
    * Convert hex bytes to string
    */
   static toHexString(value: Buffer | Uint8Array | ArrayBuffer): string {
-    if (isArrayBuffer(value)) {
-      value = Buffer.from(value);
-    } else if (!Buffer.isBuffer(value) && isUint8Array(value)) {
-      value = Buffer.from(value);
-    }
-    return value.toString('hex');
+    return this.arrayToBuffer(value).toString('hex');
   }
 
   /**
@@ -256,12 +251,7 @@ export class BinaryUtil {
    * Convert value to base64 string
    */
   static toBase64String(value: Buffer | Uint8Array | ArrayBuffer): string {
-    if (isArrayBuffer(value)) {
-      value = Buffer.from(value);
-    } else if (!Buffer.isBuffer(value) && isUint8Array(value)) {
-      value = Buffer.from(value);
-    }
-    return value.toString('base64');
+    return this.arrayToBuffer(value).toString('base64');
   }
 
   /**
@@ -275,12 +265,7 @@ export class BinaryUtil {
    * Return utf8 string from bytes
    */
   static toUTF8String(value: ByteArray): string {
-    if (isArrayBuffer(value)) {
-      value = Buffer.from(value);
-    } else if (!Buffer.isBuffer(value) && isUint8Array(value)) {
-      value = Buffer.from(value);
-    }
-    return value.toString('utf8');
+    return this.arrayToBuffer(value).toString('utf8');
   }
 
   /**
@@ -298,11 +283,9 @@ export class BinaryUtil {
   }
 
   static readChunksAsBuffer(chunk: Any, encoding?: BufferEncoding | null): Buffer {
-    return Buffer.isBuffer(chunk) ? chunk :
-      isUint8Array(chunk) ? Buffer.from(chunk) :
-        isArrayBuffer(chunk) ? Buffer.from(chunk) :
-          typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
-            Buffer.from(`${chunk}`, 'utf8');
+    return this.isByteArray(chunk) ? this.arrayToBuffer(chunk) :
+      typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
+        Buffer.from(`${chunk}`, 'utf8');
   }
 
   static combineByteArrays(arrays: Buffer[]): Buffer {

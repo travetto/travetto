@@ -136,9 +136,7 @@ export class WebHttpUtil {
       await pipeline(body, response);
     } else {
       if (body) {
-        const bytes = await BinaryUtil.toBuffer(body);
-        // Weird type union that http2 uses
-        'stream' in response ? response.write(bytes) : response.write(bytes);
+        await pipeline(await BinaryUtil.toByteStream(body), response);
       }
       response.end();
     }

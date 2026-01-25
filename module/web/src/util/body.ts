@@ -16,30 +16,31 @@ export class WebBodyUtil {
   /**
    * Generate multipart body
    */
-  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<ByteArray | string> {
-    const nl = '\r\n';
+  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<ByteArray> {
+    const newLine = '\r\n';
+    const bytes = (value: string): ByteArray => BinaryUtil.fromUTF8String(value);
     for (const [key, value] of form.entries()) {
       const data = value.slice();
       const filename = data instanceof File ? data.name : undefined;
       const size = data instanceof Blob ? data.size : data.length;
       const type = data instanceof Blob ? data.type : undefined;
-      yield `--${boundary}${nl}`;
-      yield `Content-Disposition: form-data; name="${key}"; filename="${filename ?? key}"${nl}`;
-      yield `Content-Length: ${size}${nl}`;
+      yield bytes(`--${boundary}${newLine}`);
+      yield bytes(`Content-Disposition: form-data; name="${key}"; filename="${filename ?? key}"${newLine}`);
+      yield bytes(`Content-Length: ${size}${newLine}`);
       if (type) {
-        yield `Content-Type: ${type}${nl}`;
+        yield bytes(`Content-Type: ${type}${newLine}`);
       }
-      yield nl;
+      yield bytes(newLine);
       if (data instanceof Blob) {
         for await (const chunk of data.stream()) {
           yield chunk;
         }
       } else {
-        yield data;
+        yield bytes(data);
       }
-      yield nl;
+      yield bytes(newLine);
     }
-    yield `--${boundary}--${nl}`;
+    yield bytes(`--${boundary}--${newLine}`);
   }
 
   /** Get Blob Headers */

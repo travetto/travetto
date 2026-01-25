@@ -18,7 +18,9 @@ export class FetchWebDispatcher implements WebDispatcher {
   async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
     const baseRequest = await WebTestDispatchUtil.applyRequestBody(request);
     const finalPath = WebTestDispatchUtil.buildPath(baseRequest);
-    const body: RequestInit['body'] = WebBodyUtil.isRawBinary(request.body) ? await BinaryUtil.toBuffer(request.body) : castTo(request.body);
+    const body: RequestInit['body'] = WebBodyUtil.isRawBinary(request.body) ?
+      await BinaryUtil.toBuffer(request.body) :
+      castTo(request.body);
     const { context: { httpMethod: method }, headers } = request;
 
     const response = await fetch(
