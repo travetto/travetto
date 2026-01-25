@@ -1,7 +1,7 @@
 import type mongo from 'mongodb';
 
-import { type TimeSpan, TimeUtil, Runtime } from '@travetto/runtime';
-import { Config, ConfigUtil } from '@travetto/config';
+import { type TimeSpan, TimeUtil, Runtime, RuntimeResources, BinaryUtil } from '@travetto/runtime';
+import { Config } from '@travetto/config';
 
 /**
  * Mongo model config
@@ -86,16 +86,20 @@ export class MongoModelConfig {
     const options = this.options;
     if (options.ssl) {
       if (options.cert) {
-        options.cert = await Promise.all([options.cert].flat(2).map(ConfigUtil.readFile));
+        const items = [options.cert].flat(2);
+        options.cert = await Promise.all(items.map(input =>
+          BinaryUtil.isBinaryType(input) ? BinaryUtil.toBuffer(input) :
+            RuntimeResources.resolve(input).catch(() => BinaryUtil.fromUTF8String(input))
+        ));
       }
       if (options.tlsCertificateKeyFile) {
-        options.tlsCertificateKeyFile = await ConfigUtil.readFile(options.tlsCertificateKeyFile);
+        options.tlsCertificateKeyFile = await RuntimeResources.resolve(options.tlsCertificateKeyFile);
       }
       if (options.tlsCAFile) {
-        options.tlsCAFile = await ConfigUtil.readFile(options.tlsCAFile);
+        options.tlsCAFile = await RuntimeResources.resolve(options.tlsCAFile);
       }
       if (options.tlsCRLFile) {
-        options.tlsCRLFile = await ConfigUtil.readFile(options.tlsCRLFile);
+        options.tlsCRLFile = await RuntimeResources.resolve(options.tlsCRLFile);
       }
     }
 

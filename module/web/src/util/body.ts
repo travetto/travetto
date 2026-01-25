@@ -106,9 +106,9 @@ export class WebBodyUtil {
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
       out.body = this.buildMultiPartBody(body, boundary);
     } else {
-      const text = JSONUtil.serialize(body);
-      out.headers.set('Content-Length', `${text.length}`);
-      out.body = BinaryUtil.fromUTF8String(text);
+      const bytes = BinaryUtil.fromUTF8String(JSONUtil.serialize(body));
+      out.headers.set('Content-Length', `${bytes.byteLength}`);
+      out.body = bytes;
     }
 
     out.headers.setIfAbsent('Content-Type', this.defaultContentType(message.body));

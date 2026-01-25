@@ -5,7 +5,7 @@ import https from 'node:https';
 import { TLSSocket } from 'node:tls';
 
 import { WebBodyUtil, WebCommonUtil, type WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
-import { BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
+import { type BinaryType, BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
 
 import type { WebSecureKeyPair, WebServerHandle } from './types.ts';
 
@@ -126,14 +126,17 @@ export class WebHttpUtil {
    * Send WebResponse to outbound http response
    */
   static async respondToServerResponse(webResponse: WebResponse, response: HttpResponse): Promise<void> {
-    const binaryResponse = new WebResponse({ context: webResponse.context, ...WebBodyUtil.toBinaryMessage(webResponse) });
+    const binaryResponse = new WebResponse<BinaryType>({ context: webResponse.context, ...WebBodyUtil.toBinaryMessage(webResponse) });
     binaryResponse.headers.forEach((value, key) => response.setHeader(key, value));
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
-    const body = binaryResponse.body;
 
-    if (body) {
-      await BinaryUtil.pipeline(body, response);
-    } else {
+    if (binaryResponse.body) {
+      await BinaryUtil.pipeline(binaryResponse.body, response).catch(err => {
+        console.error('Error piping response body:', err);
+        response.end();
+      });
+    }
+    if (!response.closed) {
       response.end();
     }
   }

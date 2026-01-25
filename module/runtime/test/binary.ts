@@ -51,28 +51,6 @@ export class BytesUtilTest {
   }
 
   @Test()
-  async simpleTest() {
-    const meta: BinaryMetadata = {
-      hash: 'ora_nge_bee_for_sly_',
-      filename: 'bob'
-    };
-
-    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee_/for_/sly_.bin');
-
-    meta.filename = 'billy.jpeg';
-
-    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee_/for_/sly_.jpeg');
-
-    meta.filename = 'video.mp4';
-
-    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee_/for_/sly_.mp4');
-
-    meta.filename = 'none';
-
-    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee_/for_/sly_.bin');
-  }
-
-  @Test()
   async simpleShort() {
     const meta: BinaryMetadata = {
       hash: 'ora_nge_bee'

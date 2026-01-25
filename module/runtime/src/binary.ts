@@ -8,9 +8,9 @@ import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isUint8Array } from 'node:util/types';
+import { createInterface } from 'node:readline/promises';
 
 import { type Any, type BinaryMetadata, type ByteRange, castTo, hasFunction } from './types.ts';
-import { Util } from './util.ts';
 import { AppError } from './error.ts';
 
 const BlobMetaSymbol = Symbol();
@@ -24,15 +24,13 @@ const BINARY_CONSTRUCTOR_SET = new Set(BINARY_CONSTRUCTORS);
 
 const isReadable = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
+const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
+  !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
 
 /**
  * Common functions for dealing with binary data/streams
  */
 export class BinaryUtil {
-  /** Is Async Iterable */
-  static isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
-    !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
-
   static isBinaryConstructor(value: Function): boolean {
     return BINARY_CONSTRUCTOR_SET.has(castTo(value));
   }
@@ -44,7 +42,7 @@ export class BinaryUtil {
 
   /** Is the input a byte stream */
   static isByteStream(value: unknown): value is ByteStream {
-    return isReadable(value) || isReadableStream(value) || this.isAsyncIterable(value);
+    return isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
   }
 
   /**
@@ -134,21 +132,6 @@ export class BinaryUtil {
       bytes: { value: () => consumers.arrayBuffer(go()).then(buffer => new Uint8Array(buffer)) },
       [BlobMetaSymbol]: { value: metadata }
     });
-  }
-
-  /**
-   * Get a hashed location/path for a blob
-   */
-  static hashedBlobLocation(meta: BinaryMetadata): string {
-    const hash = meta.hash ?? Util.uuid();
-
-    let parts = hash.match(/(.{1,4})/g)!.slice();
-    if (parts.length > 4) {
-      parts = [...parts.slice(0, 4), parts.slice(4).join('')];
-    }
-
-    const ext = path.extname(meta.filename ?? '') || '.bin';
-    return `${parts.join('/')}${ext}`;
   }
 
   static toReadable(input: BinaryType): Readable {
@@ -312,5 +295,14 @@ export class BinaryUtil {
 
   static pipeline(input: BinaryType, output: Writable): Promise<void> {
     return pipeline(this.toByteStream(input), output);
+  }
+
+  /**
+   * Consume lines
+   */
+  static async readLines(stream: BinaryType, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
+    for await (const item of createInterface(this.toReadable(stream))) {
+      await handler(item);
+    }
   }
 }

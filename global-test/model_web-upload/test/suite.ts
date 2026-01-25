@@ -63,7 +63,7 @@ class TestUploadController {
   @Get('*')
   async get() {
     const range = WebHeaderUtil.getRange(this.request.headers);
-    return await this.service.getBlob(this.request.context.path.replace(/^\/test\/upload\//, ''), range);
+    return this.service.getBlob(this.request.context.path.replace(/^\/test\/upload\//, ''), range);
   }
 }
 

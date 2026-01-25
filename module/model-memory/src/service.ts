@@ -243,14 +243,18 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
+
     const blobs = this.#find(ModelBlobNamespace, location, 'notfound');
+
     let data = blobs.get(location)!;
     const final = range ? BinaryUtil.enforceRange(range, data.byteLength) : undefined;
 
     if (final) {
       data = BinaryUtil.sliceByteArray(data, final.start, final.end + 1);
     }
+
     const meta = await this.getBlobMetadata(location);
+
     return BinaryUtil.readableBlob(() => data, { ...meta, range: final });
   }
 

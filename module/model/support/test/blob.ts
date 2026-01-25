@@ -156,9 +156,9 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   async signedUrl() {
     const service = await this.service;
 
-    const buffer = BinaryUtil.fromUTF8String('A'.repeat(1.5 * 10000));
-    for (let i = 0; i < buffer.byteLength; i++) {
-      buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
+    const bytes = BinaryUtil.fromUTF8String('A'.repeat(1.5 * 10000));
+    for (let i = 0; i < bytes.byteLength; i++) {
+      bytes.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
     const writable = await service.getBlobWriteUrl!('largeFile/one', {
@@ -170,7 +170,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const response = await fetch(writable, {
       method: 'PUT',
-      body: new File([buffer], 'gary', { type: 'image/jpeg' }),
+      body: new File([bytes], 'gary', { type: 'image/jpeg' }),
     });
 
     console.error(await response.text());
@@ -181,11 +181,11 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
       contentType: 'image/jpeg',
       title: 'orange',
       filename: 'gary',
-      size: buffer.byteLength,
+      size: bytes.byteLength,
     });
 
     const found = await service.getBlob('largeFile/one');
-    assert(found.size === buffer.byteLength);
+    assert(found.size === bytes.byteLength);
     assert(found.type === 'image/jpeg');
     assert(meta(found)?.title === 'orange');
     assert(meta(found)?.filename === 'gary');

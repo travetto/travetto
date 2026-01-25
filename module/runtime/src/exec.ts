@@ -1,9 +1,8 @@
 import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
-import { createInterface } from 'node:readline/promises';
 
 import { castTo } from './types.ts';
 import { RuntimeIndex } from './manifest-index.ts';
-import { BinaryUtil, type BinaryType, type ByteArray } from './binary.ts';
+import { BinaryUtil, type ByteArray } from './binary.ts';
 
 const ResultSymbol = Symbol();
 
@@ -101,15 +100,6 @@ export class ExecUtil {
         throw new Error(executionResult.message);
       }
     }));
-  }
-
-  /**
-   * Consume lines
-   */
-  static async readLines(stream: BinaryType, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
-    for await (const item of createInterface(BinaryUtil.toReadable(stream))) {
-      await handler(item);
-    }
   }
 
   /** Spawn a package command */
