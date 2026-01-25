@@ -90,7 +90,7 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await BinaryUtil.toByteArray(WebBodyUtil.toBinaryMessage(response).body!);
+    const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.byteLength === 1000);
     assert(!BinaryUtil.arrayToBuffer(responseBuffer).some(x => x !== 65));
   }
@@ -121,7 +121,7 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await BinaryUtil.toByteArray(WebBodyUtil.toBinaryMessage(response).body!);
+    const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.byteLength === koreanOutput.byteLength);
   }
 
@@ -150,7 +150,7 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await BinaryUtil.toByteArray(WebBodyUtil.toBinaryMessage(response).body!);
+    const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.byteLength === koreanInput.byteLength);
   }
 
@@ -179,7 +179,7 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await BinaryUtil.toByteArray(WebBodyUtil.toBinaryMessage(response).body!);
+    const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.byteLength === Buffer.from(koreanInput.toString('utf8')).byteLength);
   }
 

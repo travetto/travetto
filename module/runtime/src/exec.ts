@@ -2,14 +2,14 @@ import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process'
 
 import { castTo } from './types.ts';
 import { RuntimeIndex } from './manifest-index.ts';
-import { BinaryUtil, type ByteArray } from './binary.ts';
+import { BinaryUtil, type BinaryArray } from './binary.ts';
 
 const ResultSymbol = Symbol();
 
 /**
  * Result of an execution
  */
-export interface ExecutionResult<T extends string | ByteArray = string | ByteArray> {
+export interface ExecutionResult<T extends string | BinaryArray = string | BinaryArray> {
   /**
    * Stdout
    */
@@ -49,12 +49,12 @@ export class ExecUtil {
    */
   static getResult(subProcess: ChildProcess): Promise<ExecutionResult<string>>;
   static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<ByteArray>>;
-  static getResult<T extends string | ByteArray>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<BinaryArray>>;
+  static getResult<T extends string | BinaryArray>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
     const typed: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
     const result = typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
-      const stdout: ByteArray[] = [];
-      const stderr: ByteArray[] = [];
+      const stdout: BinaryArray[] = [];
+      const stderr: BinaryArray[] = [];
       let done = false;
       const finish = (finalResult: ExecutionBaseResult): void => {
         if (done) {
@@ -63,8 +63,8 @@ export class ExecUtil {
         done = true;
 
         const buffers = {
-          stdout: BinaryUtil.combineByteArrays(stdout),
-          stderr: BinaryUtil.combineByteArrays(stderr),
+          stdout: BinaryUtil.combineBinaryArrays(stdout),
+          stderr: BinaryUtil.combineBinaryArrays(stderr),
         };
 
         const final = {

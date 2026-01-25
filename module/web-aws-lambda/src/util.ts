@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { BinaryUtil, castTo, type ByteArray } from '@travetto/runtime';
+import { BinaryUtil, castTo, type BinaryArray } from '@travetto/runtime';
 import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {
@@ -38,7 +38,7 @@ export class AwsLambdaWebUtil {
       context: response.context,
       ...WebBodyUtil.toBinaryMessage(response)
     });
-    const output: ByteArray = await BinaryUtil.toByteArray(binaryResponse.body);
+    const output: BinaryArray = await BinaryUtil.toBinaryArray(binaryResponse.body);
     const isBase64Encoded = !!output.byteLength && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};

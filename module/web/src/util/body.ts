@@ -1,6 +1,6 @@
 import { TextDecoder } from 'node:util';
 
-import { type Any, type BinaryType, BinaryUtil, type ByteArray, castTo, JSONUtil, Util } from '@travetto/runtime';
+import { type Any, type BinaryType, BinaryUtil, type BinaryArray, castTo, JSONUtil, Util } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -18,9 +18,9 @@ export class WebBodyUtil {
   /**
    * Generate multipart body
    */
-  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<ByteArray> {
+  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<BinaryArray> {
     const newLine = '\r\n';
-    const bytes = (value: string): ByteArray => BinaryUtil.fromUTF8String(value);
+    const bytes = (value: string): BinaryArray => BinaryUtil.fromUTF8String(value);
     for (const [key, value] of form.entries()) {
       const data = value.slice();
       const filename = data instanceof File ? data.name : undefined;
@@ -158,7 +158,7 @@ export class WebBodyUtil {
       throw WebError.for('Specified Encoding Not Supported', 415, { encoding });
     }
 
-    if (BinaryUtil.isByteArray(input)) {
+    if (BinaryUtil.isBinaryArray(input)) {
       if (input.byteLength > limit) {
         throw WebError.for('Request Entity Too Large', 413, { received: input.byteLength, limit });
       }
@@ -169,7 +169,7 @@ export class WebBodyUtil {
     const all: string[] = [];
 
     try {
-      for await (const chunk of BinaryUtil.toByteStream(input)) {
+      for await (const chunk of BinaryUtil.toBinaryStream(input)) {
         const bytes = BinaryUtil.readChunk(chunk);
         received += bytes.byteLength;
         if (received > limit) {

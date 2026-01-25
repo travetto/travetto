@@ -8,14 +8,14 @@ import { Transform } from 'node:stream';
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType, type ByteStream } from '@travetto/runtime';
+import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType, type BinaryStream } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
-type UploadItem = { stream: ByteStream, filename?: string, field: string };
+type UploadItem = { stream: BinaryStream, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
 const RawFileSymbol = Symbol();
 const WebUploadSymbol = Symbol();
@@ -33,7 +33,7 @@ export class WebUploadUtil {
     let read = 0;
     return new Transform({
       transform(chunk, encoding, callback): void {
-        read += (typeof chunk === 'string' ? chunk.length : BinaryUtil.isByteArray(chunk) ? chunk.byteLength : 0);
+        read += (typeof chunk === 'string' ? chunk.length : BinaryUtil.isBinaryArray(chunk) ? chunk.byteLength : 0);
         if (read > maxSize) {
           callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
         } else {
@@ -92,7 +92,7 @@ export class WebUploadUtil {
       yield* queue;
     } else {
       const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition')).parameters.filename;
-      yield { stream: BinaryUtil.toByteStream(requestBody), filename, field: 'file' };
+      yield { stream: BinaryUtil.toBinaryStream(requestBody), filename, field: 'file' };
     }
   }
 

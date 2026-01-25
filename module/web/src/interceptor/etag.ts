@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
-import { BinaryUtil, type ByteArray } from '@travetto/runtime';
+import { BinaryUtil, type BinaryArray } from '@travetto/runtime';
 
 import type { WebChainedContext } from '../types/filter.ts';
 import { WebResponse } from '../types/response.ts';
@@ -48,7 +48,7 @@ export class EtagInterceptor implements WebInterceptor {
   @Inject()
   config: EtagConfig;
 
-  computeTag(body: ByteArray): string {
+  computeTag(body: BinaryArray): string {
     return body.byteLength === 0 ?
       '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
       crypto
@@ -65,7 +65,7 @@ export class EtagInterceptor implements WebInterceptor {
 
     if (
       (statusCode >= 300 && statusCode !== 304) || // Ignore redirects
-      BinaryUtil.isByteStream(response.body) // Ignore streams (unknown length)
+      BinaryUtil.isBinaryStream(response.body) // Ignore streams (unknown length)
     ) {
       return response;
     }
@@ -73,7 +73,7 @@ export class EtagInterceptor implements WebInterceptor {
     const binaryResponse = new WebResponse({ ...response, ...WebBodyUtil.toBinaryMessage(response) });
 
     const body = binaryResponse.body;
-    if (!BinaryUtil.isByteArray(body)) {
+    if (!BinaryUtil.isBinaryArray(body)) {
       return binaryResponse;
     }
 

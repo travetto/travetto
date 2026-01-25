@@ -2,9 +2,9 @@ import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 
 import { hasToJSON, type Any } from './types.ts';
-import { BinaryUtil, type ByteArray } from './binary.ts';
+import { BinaryUtil, type BinaryArray } from './binary.ts';
 
-export type JSONParseInput = string | ByteArray;
+export type JSONParseInput = string | BinaryArray;
 
 /**
  * JSON Utility functions
@@ -15,7 +15,7 @@ export class JSONUtil {
    * Is valid input
    */
   static isValidInput(input: unknown): input is JSONParseInput {
-    return typeof input === 'string' || BinaryUtil.isByteArray(input);
+    return typeof input === 'string' || BinaryUtil.isBinaryArray(input);
   }
 
   /**

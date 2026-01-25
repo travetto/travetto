@@ -139,7 +139,7 @@ class WebRpcSuite extends BaseWebSuite {
     });
 
     assert(removedStatusCode === 204);
-    assert(BinaryUtil.isByteArray(removed));
+    assert(BinaryUtil.isBinaryArray(removed));
     assert(removed.byteLength === 0);
   }
 

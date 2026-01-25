@@ -63,9 +63,9 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
       return input;
     }
 
-    if (BinaryUtil.isByteArray(input)) {
+    if (BinaryUtil.isBinaryArray(input)) {
       return BUFFER_DECOMPRESSORS[encoding](await BinaryUtil.toBuffer(input));
-    } else if (BinaryUtil.isByteStream(input)) {
+    } else if (BinaryUtil.isBinaryStream(input)) {
       const output = STREAM_DECOMPRESSORS[encoding]();
       BinaryUtil.pipeline(input, output);
       return output;

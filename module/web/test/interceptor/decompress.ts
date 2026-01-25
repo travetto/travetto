@@ -31,13 +31,13 @@ class DecompressInterceptorSuite {
       data = mkData(data);
     }
 
-    if (BinaryUtil.isByteStream(data)) {
+    if (BinaryUtil.isBinaryStream(data)) {
       switch (encoding) {
         case 'br': await BinaryUtil.pipeline(data, data = createBrotliCompress()); break;
         case 'gzip': await BinaryUtil.pipeline(data, data = createGzip()); break;
         case 'deflate': await BinaryUtil.pipeline(data, data = createDeflate()); break;
       }
-    } else if (BinaryUtil.isByteArray(data)) {
+    } else if (BinaryUtil.isBinaryArray(data)) {
       switch (encoding) {
         case 'br': data = brotliCompressSync(data); break;
         case 'gzip': data = gzipSync(data); break;
@@ -82,7 +82,7 @@ class DecompressInterceptorSuite {
       encoding: 'identity',
     });
     assert(response);
-    assert(BinaryUtil.isByteArray(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === 10000);
   }
 
@@ -93,7 +93,7 @@ class DecompressInterceptorSuite {
       encoding: 'gzip',
     });
     assert(response);
-    assert(BinaryUtil.isByteArray(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === 10000);
   }
 
@@ -104,7 +104,7 @@ class DecompressInterceptorSuite {
       encoding: 'br',
     });
     assert(response);
-    assert(BinaryUtil.isByteArray(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === 10000);
   }
 
@@ -115,7 +115,7 @@ class DecompressInterceptorSuite {
       encoding: 'deflate',
     });
     assert(response);
-    assert(BinaryUtil.isByteArray(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === 10000);
   }
 
@@ -128,7 +128,7 @@ class DecompressInterceptorSuite {
       encoding: 'identity',
     });
     assert(response);
-    assert(BinaryUtil.isByteArray(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === preCompressed.byteLength);
   }
 
@@ -143,9 +143,9 @@ class DecompressInterceptorSuite {
 
     assert(response);
 
-    assert(BinaryUtil.isByteStream(response));
+    assert(BinaryUtil.isBinaryStream(response));
 
-    const received = await BinaryUtil.toByteArray(response);
+    const received = await BinaryUtil.toBinaryArray(response);
     assert(received.byteLength === data.byteLength);
   }
 

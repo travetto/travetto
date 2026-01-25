@@ -1,4 +1,4 @@
-import { AppError, BinaryUtil, castTo, JSONUtil, type BinaryType, type ByteArray } from '@travetto/runtime';
+import { AppError, BinaryUtil, castTo, JSONUtil, type BinaryType, type BinaryArray } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { WebResponse } from '../../src/types/response.ts';
@@ -12,14 +12,14 @@ import { WebCommonUtil } from '../../src/util/common.ts';
  */
 export class WebTestDispatchUtil {
 
-  static async applyRequestBody(request: WebRequest, toByteArray: true): Promise<WebRequest<ByteArray>>;
+  static async applyRequestBody(request: WebRequest, toByteArray: true): Promise<WebRequest<BinaryArray>>;
   static async applyRequestBody(request: WebRequest, toByteArray?: false): Promise<WebRequest<BinaryType>>;
   static async applyRequestBody(request: WebRequest, toByteArray: boolean = false): Promise<WebRequest<BinaryType>> {
     if (request.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(request);
       sample.headers.forEach((v, k) => request.headers.set(k, Array.isArray(v) ? v.join(',') : v));
       if (toByteArray) {
-        sample.body = await BinaryUtil.toByteArray(sample.body);
+        sample.body = await BinaryUtil.toBinaryArray(sample.body);
       }
       request.body = WebBodyUtil.markRawBinary(sample.body);
     }
@@ -33,7 +33,7 @@ export class WebTestDispatchUtil {
     response.context.httpStatusCode = WebCommonUtil.getStatusCode(response);
 
     if (decompress && BinaryUtil.isBinaryType(result)) {
-      const bufferResult = result = await BinaryUtil.toByteArray(result);
+      const bufferResult = result = await BinaryUtil.toBinaryArray(result);
       if (bufferResult.byteLength) {
         try {
           result = await DecompressInterceptor.decompress(
@@ -45,7 +45,7 @@ export class WebTestDispatchUtil {
       }
     }
 
-    const text = () => BinaryUtil.isByteArray(result) ? BinaryUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
+    const text = () => BinaryUtil.isBinaryArray(result) ? BinaryUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
 
     if (text) {
       switch (response.headers.get('Content-Type')) {

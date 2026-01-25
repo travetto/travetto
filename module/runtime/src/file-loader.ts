@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import { AppError } from './error.ts';
 import { JSONUtil } from './json.ts';
-import type { ByteArray } from './binary.ts';
+import type { BinaryArray } from './binary.ts';
 
 /**
  * File loader that will search for files across the provided search paths
@@ -44,8 +44,8 @@ export class FileLoader {
    * @param relativePath The path to read
    */
   async read(relativePath: string, binary?: false): Promise<string>;
-  async read(relativePath: string, binary: true): Promise<ByteArray>;
-  async read(relativePath: string, binary = false): Promise<string | ByteArray> {
+  async read(relativePath: string, binary: true): Promise<BinaryArray>;
+  async read(relativePath: string, binary = false): Promise<string | BinaryArray> {
     const file = await this.resolve(relativePath);
     return fs.readFile(file, binary ? undefined : 'utf8');
   }

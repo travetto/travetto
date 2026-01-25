@@ -57,7 +57,7 @@ class CompressInterceptorSuite {
       size: 3000,
       requestHeaders: { 'Accept-Encoding': 'gzip ' }
     });
-    assert(BinaryUtil.isByteArray(response.body));
+    assert(BinaryUtil.isBinaryArray(response.body));
     assert(response.body.byteLength === 3000);
   }
 
@@ -67,7 +67,7 @@ class CompressInterceptorSuite {
       size: 50000,
       requestHeaders: { 'Accept-Encoding': 'gzip' }
     });
-    assert(BinaryUtil.isByteArray(response.body));
+    assert(BinaryUtil.isBinaryArray(response.body));
     assert(response.body.byteLength < 50000);
   }
 
@@ -78,14 +78,14 @@ class CompressInterceptorSuite {
       requestHeaders: { 'Accept-Encoding': 'gzip' },
       responseHeaders: { 'Cache-Control': 'no-transform' }
     });
-    assert(BinaryUtil.isByteArray(response.body));
+    assert(BinaryUtil.isBinaryArray(response.body));
     assert(response.body.byteLength === 50000);
 
     const response2 = await this.compress({
       size: 50000,
       requestHeaders: { 'Accept-Encoding': 'identity' },
     });
-    assert(BinaryUtil.isByteArray(response2.body));
+    assert(BinaryUtil.isBinaryArray(response2.body));
     assert(response2.body.byteLength === 50000);
   }
 
@@ -110,7 +110,7 @@ class CompressInterceptorSuite {
 
     const body = response.body;
     assert(body);
-    assert(BinaryUtil.isByteArray(body));
+    assert(BinaryUtil.isBinaryArray(body));
     assert(body.byteLength < 50000);
 
     assert.doesNotThrow(() => brotliDecompressSync(body));
@@ -127,7 +127,7 @@ class CompressInterceptorSuite {
 
     const body = response.body;
     assert(body);
-    assert(BinaryUtil.isByteArray(body));
+    assert(BinaryUtil.isBinaryArray(body));
     assert(body.byteLength < 50000);
 
     assert.doesNotThrow(() => gunzipSync(body));
@@ -144,7 +144,7 @@ class CompressInterceptorSuite {
 
     const body = response.body;
     assert(body);
-    assert(BinaryUtil.isByteArray(body));
+    assert(BinaryUtil.isBinaryArray(body));
     assert(body.byteLength < 50000);
 
     assert.doesNotThrow(() => inflateSync(body));
@@ -161,7 +161,7 @@ class CompressInterceptorSuite {
 
     const body = response.body;
     assert(body);
-    assert(BinaryUtil.isByteArray(body));
+    assert(BinaryUtil.isBinaryArray(body));
     assert(body.byteLength < 50000);
 
     assert.doesNotThrow(() => brotliDecompressSync(body));
@@ -178,11 +178,11 @@ class CompressInterceptorSuite {
     });
 
     assert(response.body);
-    assert(BinaryUtil.isByteStream(response.body));
+    assert(BinaryUtil.isBinaryStream(response.body));
 
     const stream = createGunzip();
     BinaryUtil.pipeline(response.body, stream);
-    const data = await BinaryUtil.toByteArray(stream);
+    const data = await BinaryUtil.toBinaryArray(stream);
     assert(data.byteLength === 50000);
   }
 }

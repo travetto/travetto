@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { type WebDispatcher, type WebFilterContext, type WebRequest, WebResponse } from '@travetto/web';
-import { AppError, asFull, BinaryUtil, castTo, type ByteArray } from '@travetto/runtime';
+import { AppError, asFull, BinaryUtil, castTo, type BinaryArray } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -11,14 +11,14 @@ import type { AwsLambdaWebHandler } from '../../src/handler.ts';
 /**
  * Create an api gateway event given a web request
  */
-function toLambdaEvent(request: WebRequest<ByteArray>): APIGatewayProxyEvent {
+function toLambdaEvent(request: WebRequest<BinaryArray>): APIGatewayProxyEvent {
   const body = request.body;
   const headers: Record<string, string> = {};
   const multiValueHeaders: Record<string, string[]> = {};
   const queryStringParameters: Record<string, string> = {};
   const multiValueQueryStringParameters: Record<string, string[]> = {};
 
-  if (body && !BinaryUtil.isByteArray(body)) {
+  if (body && !BinaryUtil.isBinaryArray(body)) {
     throw new AppError('Unsupported request type, only buffer bodies supported');
   }
 

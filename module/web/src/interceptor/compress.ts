@@ -75,7 +75,7 @@ export class CompressInterceptor implements WebInterceptor {
 
     const binaryResponse = new WebResponse({ context: response.context, ...WebBodyUtil.toBinaryMessage(response) });
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
-    const len = BinaryUtil.isByteArray(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
+    const len = BinaryUtil.isBinaryArray(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
 
     if (len !== undefined && len >= 0 && len < chunkSize || !binaryResponse.body) {
       return binaryResponse;
@@ -87,13 +87,13 @@ export class CompressInterceptor implements WebInterceptor {
     // If we are compressing
     binaryResponse.headers.set('Content-Encoding', type);
 
-    if (BinaryUtil.isByteStream(binaryResponse.body)) {
+    if (BinaryUtil.isBinaryStream(binaryResponse.body)) {
       BinaryUtil.pipeline(binaryResponse.body, stream);
       binaryResponse.body = stream;
       binaryResponse.headers.delete('Content-Length');
     } else {
       await BinaryUtil.pipeline(binaryResponse.body, stream);
-      const out = await BinaryUtil.toByteArray(stream);
+      const out = await BinaryUtil.toBinaryArray(stream);
       binaryResponse.body = out;
       binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
     }

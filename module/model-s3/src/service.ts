@@ -12,7 +12,7 @@ import {
 import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryUtil, type TimeSpan, TimeUtil, type ByteArray,
+  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray,
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -119,13 +119,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(meta)));
 
     const parts: CompletedPart[] = [];
-    let buffers: ByteArray[] = [];
+    let buffers: BinaryArray[] = [];
     let total = 0;
     let i = 1;
     const flush = async (): Promise<void> => {
       if (!total) { return; }
       const part = await this.client.uploadPart(this.#queryBlob(id, {
-        Body: BinaryUtil.arrayToBuffer(BinaryUtil.combineByteArrays(buffers)),
+        Body: BinaryUtil.arrayToBuffer(BinaryUtil.combineBinaryArrays(buffers)),
         PartNumber: i,
         UploadId
       }));
@@ -135,7 +135,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       total = 0;
     };
     try {
-      for await (const chunk of BinaryUtil.toByteStream(input)) {
+      for await (const chunk of BinaryUtil.toBinaryStream(input)) {
         const chunked = BinaryUtil.readChunk(chunk);
         buffers.push(chunked);
         total += chunked.byteLength;
@@ -215,7 +215,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     try {
       const result = await this.client.getObject(this.#query(cls, id));
       if (result.Body) {
-        const body = await BinaryUtil.toByteArray(result.Body);
+        const body = await BinaryUtil.toBinaryArray(result.Body);
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistryIndex.getConfig(cls);
