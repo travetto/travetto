@@ -131,10 +131,7 @@ export class WebHttpUtil {
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
 
     if (binaryResponse.body) {
-      await BinaryUtil.pipeline(binaryResponse.body, response).catch(err => {
-        console.error('Error piping response body:', err);
-        response.end();
-      });
+      await BinaryUtil.pipeline(binaryResponse.body, response);
     }
     if (!response.closed) {
       response.end();

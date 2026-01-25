@@ -45,12 +45,12 @@ export class WebTestDispatchUtil {
       }
     }
 
-    const text = BinaryUtil.isByteArray(result) ? BinaryUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
+    const text = () => BinaryUtil.isByteArray(result) ? BinaryUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
 
     if (text) {
       switch (response.headers.get('Content-Type')) {
-        case 'application/json': result = JSONUtil.parseSafe(castTo(text)); break;
-        case 'text/plain': result = text; break;
+        case 'application/json': result = JSONUtil.parseSafe(castTo(text())); break;
+        case 'text/plain': result = text(); break;
       }
     }
 

@@ -87,15 +87,15 @@ export class CompressInterceptor implements WebInterceptor {
     // If we are compressing
     binaryResponse.headers.set('Content-Encoding', type);
 
-    if (BinaryUtil.isByteArray(binaryResponse.body)) {
-      stream.end(binaryResponse.body);
-      const out = await BinaryUtil.toByteArray(stream);
-      binaryResponse.body = out;
-      binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
-    } else if (BinaryUtil.isByteStream(binaryResponse.body)) {
+    if (BinaryUtil.isByteStream(binaryResponse.body)) {
       BinaryUtil.pipeline(binaryResponse.body, stream);
       binaryResponse.body = stream;
       binaryResponse.headers.delete('Content-Length');
+    } else {
+      await BinaryUtil.pipeline(binaryResponse.body, stream);
+      const out = await BinaryUtil.toByteArray(stream);
+      binaryResponse.body = out;
+      binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
     }
 
     return binaryResponse;

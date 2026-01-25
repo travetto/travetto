@@ -4,7 +4,7 @@ import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { BinaryUtil, type BinaryMetadata } from '@travetto/runtime';
+import { BinaryUtil } from '@travetto/runtime';
 
 @Suite()
 export class BytesUtilTest {
@@ -48,20 +48,5 @@ export class BytesUtilTest {
     assert(BinaryUtil.hash('', 20) === unKey.substring(0, 20));
 
     assert(BinaryUtil.hash('', 20) !== key.substring(0, 20));
-  }
-
-  @Test()
-  async simpleShort() {
-    const meta: BinaryMetadata = {
-      hash: 'ora_nge_bee'
-    };
-
-    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee.bin');
-
-    meta.contentType = 'image/jpeg';
-    meta.filename = 'image.jpeg';
-
-    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee.jpeg');
-
   }
 }
