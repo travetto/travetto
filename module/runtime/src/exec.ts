@@ -81,12 +81,8 @@ export class ExecUtil {
         );
       };
 
-      if (subProcess.stdout) {
-        subProcess.stdout.on('data', data => stdout.push(BinaryUtil.readChunksAsBuffer(data, subProcess.stdout?.readableEncoding)));
-      }
-      if (subProcess.stderr) {
-        subProcess.stderr.on('data', data => stderr.push(BinaryUtil.readChunksAsBuffer(data, subProcess.stderr?.readableEncoding)));
-      }
+      subProcess.stdout?.on('data', data => stdout.push(BinaryUtil.readChunksAsBuffer(data, subProcess.stdout?.readableEncoding)));
+      subProcess.stderr?.on('data', data => stderr.push(BinaryUtil.readChunksAsBuffer(data, subProcess.stderr?.readableEncoding)));
 
       subProcess.on('error', (error: Error) =>
         finish({ code: 1, message: error.message, valid: false }));
