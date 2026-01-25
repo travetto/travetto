@@ -10,4 +10,3 @@ export * from './src/source/override.ts';
 export * from './src/source/memory.ts';
 export * from './src/source/types.ts';
 export * from './src/parser/yaml.ts';
-export * from './src/util.ts';
