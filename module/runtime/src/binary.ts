@@ -6,7 +6,7 @@ import { ReadStream as FileReadStream } from 'node:fs';
 import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
-import { text as toText, arrayBuffer as toArrayBuffer, buffer as toBuffer } from 'node:stream/consumers';
+import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isUint8Array } from 'node:util/types';
 
 import { type Any, type BinaryMetadata, type ByteRange, castTo, hasFunction } from './types.ts';
@@ -16,10 +16,9 @@ import { AppError } from './error.ts';
 const BlobMetaSymbol = Symbol();
 
 const BINARY_CONSTRUCTORS = [Readable, Buffer, Blob, File, ReadableStream, ArrayBuffer, Uint8Array];
-export type BinaryType = Readable | Buffer | Blob | ReadableStream | ArrayBuffer | Uint8Array |
-  AsyncIterable<string | Buffer | Uint8Array | ArrayBuffer>;
-
-export type BinaryBasicType = Buffer | Readable;
+export type ByteArray = Uint8Array | Buffer | ArrayBuffer;
+export type ByteStream = Readable | ReadableStream | AsyncIterable<ByteArray | string>;
+export type BinaryType = ByteArray | ByteStream | Blob;
 
 const BINARY_CONSTRUCTOR_SET = new Set(BINARY_CONSTRUCTORS);
 
@@ -44,25 +43,20 @@ export class BinaryUtil {
   }
 
   /** Is the input a byte array */
-  static isByteArray(value: unknown): value is Uint8Array | Buffer | ArrayBuffer {
-    return Buffer.isBuffer(value) || this.isUint8Array(value) || this.isArrayBuffer(value);
+  static isByteArray(value: unknown): value is ByteArray {
+    return this.isUint8Array(value) || this.isArrayBuffer(value);
+  }
+
+  /** Is the input a byte stream */
+  static isByteStream(value: unknown): value is ByteStream {
+    return this.isReadable(value) || this.isReadableStream(value) || this.isAsyncIterable(value);
   }
 
   /**
    * Is value a binary type
    */
   static isBinaryType(value: unknown): value is BinaryType {
-    return value instanceof Blob || Buffer.isBuffer(value) || this.isReadable(value) ||
-      this.isArrayBuffer(value) || this.isReadableStream(value) || this.isAsyncIterable(value);
-  }
-
-  /**
-   * Are we a basic binary type
-   * @param value
-   * @returns
-   */
-  static isBinaryBasicType(value: unknown): value is BinaryBasicType {
-    return Buffer.isBuffer(value) || this.isReadable(value);
+    return this.isByteArray(value) || this.isByteStream(value) || value instanceof Blob;
   }
 
   /**
@@ -138,9 +132,9 @@ export class BinaryUtil {
     return Object.defineProperties(out, {
       size: { value: size },
       stream: { value: () => ReadableStream.from(go()) },
-      arrayBuffer: { value: () => toArrayBuffer(go()) },
-      text: { value: () => toText(go()) },
-      bytes: { value: () => toArrayBuffer(go()).then(buffer => new Uint8Array(buffer)) },
+      arrayBuffer: { value: () => consumers.arrayBuffer(go()) },
+      text: { value: () => consumers.text(go()) },
+      bytes: { value: () => consumers.arrayBuffer(go()).then(buffer => new Uint8Array(buffer)) },
       [BlobMetaSymbol]: { value: metadata }
     });
   }
@@ -210,18 +204,18 @@ export class BinaryUtil {
     } else if (input instanceof Blob) {
       return input.arrayBuffer().then(data => Buffer.from(data));
     } else if (this.isReadableStream(input)) {
-      return toBuffer(input);
+      return consumers.buffer(input);
     } else if (this.isReadable(input)) {
-      return toBuffer(input);
+      return consumers.buffer(input);
     } else {
-      return toBuffer(Readable.from(input));
+      return consumers.buffer(Readable.from(input));
     }
   }
 
   /**
    * Convert input to Basic Binary Type or undefined if not matching
    */
-  static toBasic(input?: unknown): BinaryBasicType | undefined {
+  static toNodeType(input?: unknown): Readable | Buffer | undefined {
     if (input === null || input === undefined) {
       return Buffer.alloc(0);
     } else if (input instanceof Blob) {
@@ -294,6 +288,18 @@ export class BinaryUtil {
    */
   static fromBase64String(value: string): Buffer {
     return Buffer.from(value, 'base64');
+  }
+
+  /**
+   * Convert value to base64 string
+   */
+  static toBase64String(value: Buffer | Uint8Array | ArrayBuffer): string {
+    if (this.isArrayBuffer(value)) {
+      value = Buffer.from(value);
+    } else if (this.isUint8Array(value)) {
+      value = Buffer.from(value);
+    }
+    return value.toString('base64');
   }
 
   /**

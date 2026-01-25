@@ -4,7 +4,7 @@ import util from 'node:util';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { BinaryUtil, castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
 
 import type { WebChainedContext } from '../types/filter.ts';
 import type { WebResponse } from '../types/response.ts';
@@ -14,7 +14,6 @@ import type { WebHeaders } from '../types/headers.ts';
 
 import { WebBodyUtil } from '../util/body.ts';
 import { WebError } from '../types/error.ts';
-import type { WebBinaryType } from '../types/message.ts';
 
 const STREAM_DECOMPRESSORS = {
   gzip: zlib.createGunzip,
@@ -53,7 +52,7 @@ export class DecompressConfig {
 @Injectable()
 export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
 
-  static async decompress(headers: WebHeaders, input: WebBinaryType, config: DecompressConfig): Promise<typeof input> {
+  static async decompress(headers: WebHeaders, input: BinaryType, config: DecompressConfig): Promise<BinaryType> {
     const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 
     if (!config.supportedEncodings.includes(encoding)) {
@@ -65,9 +64,9 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
     }
 
     if (BinaryUtil.isByteArray(input)) {
-      return BUFFER_DECOMPRESSORS[encoding](input);
+      return BUFFER_DECOMPRESSORS[encoding](await BinaryUtil.toByteArray(input));
     } else {
-      return input.pipe(STREAM_DECOMPRESSORS[encoding]());
+      return BinaryUtil.toReadable(input).pipe(STREAM_DECOMPRESSORS[encoding]());
     }
   }
 

@@ -1,6 +1,5 @@
 import { createReadStream } from 'node:fs';
 import type { Readable } from 'node:stream';
-import { ReadableStream } from 'node:stream/web';
 import { pipeline } from 'node:stream/promises';
 import type { Metadata, Sharp } from 'sharp';
 
@@ -9,6 +8,12 @@ import { BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
 const VALID_EXTENSIONS = ['jpeg', 'jpg', 'png', 'avif', 'webp', 'gif', 'jxl'] as const;
 
 type ImageFormat = typeof VALID_EXTENSIONS[number];
+type ImageMetadata = {
+  width: number;
+  height: number;
+  aspect: number;
+  format: ImageFormat;
+};
 
 /**
  * Image convert options
@@ -66,41 +71,18 @@ export class ImageUtil {
   }
 
   /**
-   * Convert image as buffer
-   */
-  static async convertToBuffer(image: BinaryType, options: ConvertOptions): Promise<Buffer> {
-    const builder = await this.#getBuilder(options);
-    pipeline(await BinaryUtil.toReadable(image), builder);
-    return castTo(builder.toBuffer());
-  }
-
-  /**
-   * Convert image as readable stream
-   */
-  static async convertToReadableStream(image: BinaryType, options: ConvertOptions): Promise<ReadableStream> {
-    const builder = await this.#getBuilder(options);
-    pipeline(await BinaryUtil.toReadable(image), builder);
-    return ReadableStream.from(builder);
-  }
-
-  /**
    * Convert image as readable stream
    */
   static async convert(image: BinaryType, options: ConvertOptions): Promise<Readable> {
     const builder = await this.#getBuilder(options);
-    pipeline(await BinaryUtil.toReadable(image), builder);
+    pipeline(BinaryUtil.toReadable(image), builder);
     return builder;
   }
 
   /**
    * Get Image metadata
    */
-  static async getMetadata(image: BinaryType): Promise<{
-    width: number;
-    height: number;
-    aspect: number;
-    format: ImageFormat;
-  }> {
+  static async getMetadata(image: BinaryType): Promise<ImageMetadata> {
     const { default: sharp } = await import('sharp');
     const stream = typeof image === 'string' ? createReadStream(image) : BinaryUtil.toReadable(image);
     const out = await new Promise<Metadata>((resolve, reject) =>

@@ -1,7 +1,5 @@
-import { castTo, type BinaryBasicType } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 import { WebHeaders, type WebHeadersInit } from './headers.ts';
-
-export type WebBinaryType = BinaryBasicType;
 
 export interface WebMessageInit<B = unknown, C = unknown> {
   context?: C;

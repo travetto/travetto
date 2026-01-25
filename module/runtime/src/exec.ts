@@ -1,10 +1,9 @@
 import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
-import type { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
 
 import { castTo } from './types.ts';
 import { RuntimeIndex } from './manifest-index.ts';
-import { BinaryUtil } from './binary.ts';
+import { BinaryUtil, type BinaryType } from './binary.ts';
 
 const ResultSymbol = Symbol();
 
@@ -107,8 +106,8 @@ export class ExecUtil {
   /**
    * Consume lines
    */
-  static async readLines(stream: Readable, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
-    for await (const item of createInterface(stream)) {
+  static async readLines(stream: BinaryType, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
+    for await (const item of createInterface(BinaryUtil.toReadable(stream))) {
       await handler(item);
     }
   }

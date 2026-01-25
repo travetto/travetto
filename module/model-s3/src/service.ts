@@ -1,4 +1,3 @@
-import type { Readable } from 'node:stream';
 import { Agent } from 'node:https';
 
 import { S3, type CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -116,7 +115,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   /**
    * Write multipart file upload, in chunks
    */
-  async #writeMultipart(id: string, input: Readable, meta: BinaryMetadata): Promise<void> {
+  async #writeMultipart(id: string, input: BinaryType, meta: BinaryMetadata): Promise<void> {
     const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(meta)));
 
     const parts: CompletedPart[] = [];
@@ -136,7 +135,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       total = 0;
     };
     try {
-      for await (const chunk of input) {
+      for await (const chunk of BinaryUtil.toReadable(input)) {
         const chunked = BinaryUtil.readChunksAsBuffer(chunk);
         buffers.push(chunked);
         total += chunked.byteLength;

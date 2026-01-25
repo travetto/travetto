@@ -28,7 +28,7 @@ export class WebTestDispatchUtil {
     response.context.httpStatusCode = WebCommonUtil.getStatusCode(response);
 
     if (decompress) {
-      if (BinaryUtil.isBinaryBasicType(result)) {
+      if (BinaryUtil.isBinaryType(result)) {
         const bufferResult = result = await BinaryUtil.toByteArray(result);
         if (bufferResult.byteLength) {
           try {

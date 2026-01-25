@@ -7,9 +7,7 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
-import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
-
-import type { WebBinaryType } from '../../src/types/message.ts';
+import { AppError, BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
 
 const mkData = (size: number) => Buffer.alloc(size);
 
@@ -23,10 +21,10 @@ class DecompressInterceptorSuite {
 
   async decompress({ data, encoding, requestHeaders = {}, responseHeaders = {} }: {
     encoding: 'gzip' | 'br' | 'deflate' | 'identity';
-    data: number | WebBinaryType;
+    data: number | BinaryType;
     requestHeaders?: Record<string, string>;
     responseHeaders?: Record<string, string>;
-  }): Promise<WebBinaryType> {
+  }): Promise<BinaryType> {
     const interceptor = await DependencyRegistryIndex.getInstance(DecompressInterceptor);
     interceptor.config.applies = true;
 
@@ -34,28 +32,30 @@ class DecompressInterceptorSuite {
       data = mkData(data);
     }
 
+    const src = BinaryUtil.toNodeType(data);
+
     switch (encoding) {
       case 'br': {
-        if (BinaryUtil.isByteArray(data)) {
-          data = brotliCompressSync(data);
-        } else {
-          data = data.pipe(createBrotliCompress());
+        if (BinaryUtil.isByteArray(src)) {
+          data = brotliCompressSync(src);
+        } else if (src) {
+          data = src.pipe(createBrotliCompress());
         }
         break;
       }
       case 'gzip': {
-        if (BinaryUtil.isByteArray(data)) {
-          data = gzipSync(data);
-        } else {
-          data = data.pipe(createGzip());
+        if (BinaryUtil.isByteArray(src)) {
+          data = gzipSync(src);
+        } else if (src) {
+          data = src.pipe(createGzip());
         }
         break;
       }
       case 'deflate': {
-        if (BinaryUtil.isByteArray(data)) {
-          data = deflateSync(data);
-        } else {
-          data = data.pipe(createDeflate());
+        if (BinaryUtil.isByteArray(src)) {
+          data = deflateSync(src);
+        } else if (src) {
+          data = src.pipe(createDeflate());
         }
         break;
       }

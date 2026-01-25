@@ -2,12 +2,12 @@ import os from 'node:os';
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
-import { buffer as toBuffer } from 'node:stream/consumers';
 import { createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { ImageUtil } from '@travetto/image';
+import { BinaryUtil } from '@travetto/runtime';
 
 @Suite()
 class ImageUtilSuite {
@@ -20,7 +20,7 @@ class ImageUtilSuite {
 
     assert(imgBuffer.byteLength > 0);
 
-    const resizedBuffer = await ImageUtil.convertToBuffer(imgBuffer, { h: 100, w: 100 });
+    const resizedBuffer = await BinaryUtil.toByteArray(await ImageUtil.convert(imgBuffer, { h: 100, w: 100 }));
 
     assert(resizedBuffer.byteLength > 0);
 
@@ -34,7 +34,7 @@ class ImageUtilSuite {
 
     const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'png' });
 
-    const optimized = await toBuffer(out);
+    const optimized = await BinaryUtil.toByteArray(out);
 
     assert(optimized.byteLength > 0);
 
@@ -48,7 +48,7 @@ class ImageUtilSuite {
 
     const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'avif' });
 
-    const optimized = await toBuffer(out);
+    const optimized = await BinaryUtil.toByteArray(out);
 
     assert(optimized.byteLength > 0);
 
@@ -64,7 +64,7 @@ class ImageUtilSuite {
 
     const out = await ImageUtil.convert(imgStream, { optimize: true });
 
-    const optimized = await toBuffer(out);
+    const optimized = await BinaryUtil.toByteArray(out);
 
     assert(optimized.byteLength > 0);
 

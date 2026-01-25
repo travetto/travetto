@@ -5,9 +5,9 @@ import { buffer } from 'node:stream/consumers';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { CompressInterceptor, WebRequest, WebResponse, type WebBinaryType } from '@travetto/web';
+import { CompressInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { BinaryUtil } from '@travetto/runtime';
+import { BinaryUtil, type BinaryType } from '@travetto/runtime';
 
 @Suite()
 class CompressInterceptorSuite {
@@ -26,7 +26,7 @@ class CompressInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(CompressInterceptor);
     interceptor.config.applies = true;
 
-    let data: WebBinaryType = Buffer.alloc(size);
+    let data: BinaryType = Buffer.alloc(size);
     if (stream) {
       data = Readable.from(data);
     }

@@ -1,9 +1,9 @@
-import type { Readable } from 'node:stream';
 import type { Url } from 'node:url';
+import type { Readable } from 'node:stream';
 
 import type { FileLoader } from '@travetto/runtime';
 
-type AttachmentInput = string | Buffer | Readable;
+type AttachmentInput = string | Readable | Buffer;
 
 /**
  * An address
