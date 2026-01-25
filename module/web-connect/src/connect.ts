@@ -123,8 +123,8 @@ export class ConnectResponse implements Pick<ServerResponse,
     if (this.#headersSent) {
       this.flushHeaders();
     }
-    const chunked = BinaryUtil.readChunksAsBuffer(chunk);
-    this.#written.push(chunked, castTo(encoding));
+    const chunked = BinaryUtil.readChunksAsBuffer(chunk, castTo(encoding));
+    this.#written.push(chunked);
     callback?.();
     return true;
   }
