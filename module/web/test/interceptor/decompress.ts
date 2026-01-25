@@ -1,7 +1,6 @@
 import assert from 'node:assert';
-import { brotliCompressSync, createBrotliCompress, createDeflate, createGzip, deflateSync, gzipSync } from 'node:zlib';
+import { createBrotliCompress, brotliCompressSync, deflateSync, createDeflate, createGzip, gzipSync } from 'node:zlib';
 import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
@@ -9,7 +8,7 @@ import { Registry } from '@travetto/registry';
 import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
 import { AppError, BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
 
-const mkData = (size: number) => Buffer.alloc(size);
+const mkData = (size: number) => BinaryUtil.fromUTF8String('A'.repeat(size));
 
 @Suite()
 class DecompressInterceptorSuite {
@@ -32,30 +31,17 @@ class DecompressInterceptorSuite {
       data = mkData(data);
     }
 
-    switch (encoding) {
-      case 'br': {
-        if (BinaryUtil.isByteArray(data)) {
-          data = brotliCompressSync(data);
-        } else if (BinaryUtil.isByteStream(data)) {
-          await pipeline(data, data = createBrotliCompress());
-        }
-        break;
+    if (BinaryUtil.isByteStream(data)) {
+      switch (encoding) {
+        case 'br': await BinaryUtil.pipeline(data, data = createBrotliCompress()); break;
+        case 'gzip': await BinaryUtil.pipeline(data, data = createGzip()); break;
+        case 'deflate': await BinaryUtil.pipeline(data, data = createDeflate()); break;
       }
-      case 'gzip': {
-        if (BinaryUtil.isByteArray(data)) {
-          data = gzipSync(data);
-        } else if (BinaryUtil.isByteStream(data)) {
-          await pipeline(data, data = createGzip());
-        }
-        break;
-      }
-      case 'deflate': {
-        if (BinaryUtil.isByteArray(data)) {
-          data = deflateSync(data);
-        } else if (BinaryUtil.isByteStream(data)) {
-          await pipeline(data, data = createDeflate());
-        }
-        break;
+    } else if (BinaryUtil.isByteArray(data)) {
+      switch (encoding) {
+        case 'br': data = brotliCompressSync(data); break;
+        case 'gzip': data = gzipSync(data); break;
+        case 'deflate': data = deflateSync(data); break;
       }
     }
 
@@ -154,6 +140,7 @@ class DecompressInterceptorSuite {
       data: Readable.from(data),
       encoding: 'gzip',
     });
+
     assert(response);
 
     assert(BinaryUtil.isByteStream(response));
