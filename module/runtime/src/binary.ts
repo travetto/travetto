@@ -251,7 +251,7 @@ export class BinaryUtil {
    * Return buffer from utf8 string
    */
   static fromUTF8String(value: string): Buffer {
-    return Buffer.from(value, 'utf8');
+    return Buffer.from(value ?? '', 'utf8');
   }
 
   /**

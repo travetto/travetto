@@ -27,22 +27,20 @@ export class WebTestDispatchUtil {
 
     response.context.httpStatusCode = WebCommonUtil.getStatusCode(response);
 
-    if (decompress) {
-      if (BinaryUtil.isBinaryType(result)) {
-        const bufferResult = result = await BinaryUtil.toByteArray(result);
-        if (bufferResult.byteLength) {
-          try {
-            result = await DecompressInterceptor.decompress(
-              response.headers,
-              bufferResult,
-              { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
-            );
-          } catch { }
-        }
+    if (decompress && BinaryUtil.isBinaryType(result)) {
+      const bufferResult = result = await BinaryUtil.toByteArray(result);
+      if (bufferResult.byteLength) {
+        try {
+          result = await DecompressInterceptor.decompress(
+            response.headers,
+            bufferResult,
+            { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
+          );
+        } catch { }
       }
     }
 
-    const text = Buffer.isBuffer(result) ? result.toString('utf8') : (typeof result === 'string' ? result : undefined);
+    const text = BinaryUtil.isByteArray(result) ? BinaryUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
 
     if (text) {
       switch (response.headers.get('Content-Type')) {
