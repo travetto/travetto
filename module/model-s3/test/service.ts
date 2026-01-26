@@ -58,6 +58,9 @@ class S3BlobSuite extends ModelBlobSuite {
 
     const stream = await service.getBlob(hash);
     const resolved = await CodecUtil.hash(stream);
+    const blobBytes = await stream.bytes();
+    assert(buffer.byteLength === blobBytes.byteLength, 'Size mismatch');
+    assert(buffer.equals(blobBytes), 'Content mismatch');
     assert(resolved === hash);
   }
 }

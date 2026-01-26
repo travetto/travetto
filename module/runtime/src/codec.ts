@@ -73,10 +73,10 @@ export class CodecUtil {
         hash.digest(outputEncoding).substring(0, length)
       );
     } else {
-      if (typeof input !== 'string') {
-        input = BinaryUtil.arrayToBuffer(input).toString('utf8');
+      if (typeof input === 'string') {
+        input = this.fromUTF8String(input);
       }
-      hash.update(input);
+      hash.update(BinaryUtil.arrayToBuffer(input));
       return hash.digest(outputEncoding).substring(0, length);
     }
   }
