@@ -10,7 +10,7 @@ import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { Upload } from '../../src/decorator.ts';
 import type { FileMap } from '../../src/types.ts';
 
-const bHash = (blob: Blob) => BinaryUtil.getMetadata(blob)?.hash;
+const getHash = (blob: Blob) => BinaryUtil.getMetadata(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -18,28 +18,28 @@ class TestUploadController {
   @Post('/all')
   async uploadAll(@Upload() uploads: FileMap): Promise<{ hash?: string } | undefined> {
     for (const [, blob] of Object.entries(uploads)) {
-      return { hash: bHash(blob) };
+      return { hash: getHash(blob) };
     }
   }
 
   @Post('/')
   async upload(@Upload() file: File) {
-    return { hash: bHash(file) };
+    return { hash: getHash(file) };
   }
 
   @Post('/all-named')
   async uploads(@Upload() file1: Blob, @Upload() file2: Blob) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getHash(file1), hash2: getHash(file2) };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ types: ['!image/png'] }) file1: Blob, @Upload() file2: Blob) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getHash(file1), hash2: getHash(file2) };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ maxSize: 100 }) file1: File, @Upload({ maxSize: 8000 }) file2: File) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getHash(file1), hash2: getHash(file2) };
   }
 }
 

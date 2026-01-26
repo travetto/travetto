@@ -8,7 +8,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 import type { ModelBlobSupport } from '../../src/types/blob.ts';
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 
-const meta = BinaryUtil.getMetadata;
+const metadata = BinaryUtil.getMetadata;
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
@@ -55,7 +55,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const { hash } = await service.getBlobMetadata(id);
 
     const retrieved = await service.getBlob(id);
-    const { hash: received } = meta(retrieved)!;
+    const { hash: received } = metadata(retrieved)!;
     assert(hash === received);
   }
 
@@ -89,7 +89,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const partial = await service.getBlob(id, { start: 10, end: 20 });
     assert(partial.size === 11);
-    const partialMeta = meta(partial)!;
+    const partialMeta = metadata(partial)!;
     const subContent = await partial.text();
     const range = await ModelBlobUtil.enforceRange({ start: 10, end: 20 }, partialMeta.size!);
     assert(subContent.length === (range.end - range.start) + 1);
@@ -99,7 +99,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(subContent === og.substring(10, 21));
 
     const partialUnbounded = await service.getBlob(id, { start: 10 });
-    const partialUnboundedMeta = meta(partial)!;
+    const partialUnboundedMeta = metadata(partial)!;
     const subContent2 = await partialUnbounded.text();
     const range2 = await ModelBlobUtil.enforceRange({ start: 10 }, partialUnboundedMeta.size!);
     assert(subContent2.length === (range2.end - range2.start) + 1);
@@ -126,7 +126,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const buffer = await this.fixture.read('/asset.yml', true);
     await service.upsertBlob('orange', buffer, { contentType: 'text/yaml', filename: 'asset.yml' });
     const saved = await service.getBlob('orange');
-    const savedMeta = meta(saved)!;
+    const savedMeta = metadata(saved)!;
 
     assert('text/yaml' === savedMeta.contentType);
     assert(buffer.byteLength === savedMeta.size);
@@ -187,7 +187,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const found = await service.getBlob('largeFile/one');
     assert(found.size === bytes.byteLength);
     assert(found.type === 'image/jpeg');
-    assert(meta(found)?.title === 'orange');
-    assert(meta(found)?.filename === 'gary');
+    assert(metadata(found)?.title === 'orange');
+    assert(metadata(found)?.filename === 'gary');
   }
 }

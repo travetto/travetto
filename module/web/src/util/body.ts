@@ -24,8 +24,8 @@ export class WebBodyUtil {
     for (const [key, value] of form.entries()) {
       const data = value.slice();
       const filename = data instanceof File ? data.name : undefined;
-      const size = data instanceof Blob ? data.size : data.length;
-      const type = data instanceof Blob ? data.type : undefined;
+      const size = BinaryUtil.isBinaryContainer(data) ? data.size : data.length;
+      const type = BinaryUtil.isBinaryContainer(data) ? data.type : undefined;
       yield bytes(`--${boundary}${newLine}`);
       yield bytes(`Content-Disposition: form-data; name="${key}"; filename="${filename ?? key}"${newLine}`);
       yield bytes(`Content-Length: ${size}${newLine}`);
@@ -33,7 +33,7 @@ export class WebBodyUtil {
         yield bytes(`Content-Type: ${type}${newLine}`);
       }
       yield bytes(newLine);
-      if (data instanceof Blob) {
+      if (BinaryUtil.isBinaryContainer(data)) {
         for await (const chunk of data.stream()) {
           yield chunk;
         }
@@ -47,24 +47,24 @@ export class WebBodyUtil {
 
   /** Get Metadata Headers */
   static getMetadataHeaders(value: BinaryType): [string, string][] {
-    const meta = BinaryUtil.getMetadata(value);
+    const metadata = BinaryUtil.getMetadata(value);
 
     const toAdd: [string, string | undefined][] = [
-      ['Content-Type', meta.contentType],
-      ['Content-Length', (value instanceof Blob ? value.size : meta.size)?.toString()],
-      ['Content-Encoding', meta.contentEncoding],
-      ['Cache-Control', meta.cacheControl],
-      ['Content-Language', meta.contentLanguage],
+      ['Content-Type', metadata.contentType],
+      ['Content-Length', (BinaryUtil.isBinaryContainer(value) ? value.size : metadata.size)?.toString()],
+      ['Content-Encoding', metadata.contentEncoding],
+      ['Cache-Control', metadata.cacheControl],
+      ['Content-Language', metadata.contentLanguage],
     ];
 
-    if (meta?.range) {
+    if (metadata?.range) {
       toAdd.push(
         ['Accept-Ranges', 'bytes'],
-        ['Content-Range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`],
+        ['Content-Range', `bytes ${metadata.range.start}-${metadata.range.end}/${metadata.size}`],
       );
     }
 
-    const filename = (value instanceof File ? value.name : undefined) ?? meta.filename;
+    const filename = (value instanceof File ? value.name : undefined) ?? metadata.filename;
     if (filename) {
       toAdd.push(['Content-disposition', `attachment; filename="${filename}"`]);
     }

@@ -80,29 +80,3 @@ export function getParentClass(cls: Class): Class | undefined {
  */
 export const getClass = <T = unknown>(value: ClassInstance | Class): Class<T> =>
   'Ⲑid' in value ? castTo(value) : asConstructable<T>(value).constructor;
-
-/**
- * Range of bytes, inclusive
- */
-export type ByteRange = { start: number, end?: number };
-
-export interface BinaryMetadata {
-  /** Size of binary data */
-  size?: number;
-  /** Mime type of the content */
-  contentType?: string;
-  /** Hash of binary data contents */
-  hash?: string;
-  /** The original base filename of the file */
-  filename?: string;
-  /** Filenames title, optional for elements like images, audio, videos */
-  title?: string;
-  /** Content encoding */
-  contentEncoding?: string;
-  /** Content language */
-  contentLanguage?: string;
-  /** Cache control */
-  cacheControl?: string;
-  /** Byte range for binary data */
-  range?: Required<ByteRange>;
-}

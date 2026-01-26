@@ -1,7 +1,7 @@
 import crypto, { type BinaryToTextEncoding } from 'node:crypto';
 import { createInterface } from 'node:readline/promises';
 
-import { BinaryUtil, type BinaryArray, type BinaryStream, type BinaryType } from './binary.ts';
+import { BinaryUtil, type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType } from './binary.ts';
 import type { Any } from './types.ts';
 
 type HashConfig = {
@@ -61,23 +61,24 @@ export class CodecUtil {
    * @param outputEncoding The output encoding format
    */
   static hash(input: string | BinaryArray, config?: HashConfig): string;
-  static hash(input: BinaryStream | Blob, config?: HashConfig): Promise<string>;
+  static hash(input: BinaryStream | BinaryContainer, config?: HashConfig): Promise<string>;
   static hash(input: string | BinaryType, config?: HashConfig): string | Promise<string> {
     const hashAlgorithm = config?.hashAlgorithm ?? 'sha512';
     const outputEncoding = config?.outputEncoding ?? 'hex';
     const length = config?.length;
     const hash = crypto.createHash(hashAlgorithm).setEncoding(outputEncoding);
 
-    if (BinaryUtil.isBinaryStream(input) || input instanceof Blob) {
+    if (typeof input === 'string') {
+      input = this.fromUTF8String(input);
+    }
+
+    if (BinaryUtil.isBinaryArray(input)) {
+      hash.update(BinaryUtil.arrayToBuffer(input));
+      return hash.digest(outputEncoding).substring(0, length);
+    } else {
       return BinaryUtil.pipeline(input, hash).then(() =>
         hash.digest(outputEncoding).substring(0, length)
       );
-    } else {
-      if (typeof input === 'string') {
-        input = this.fromUTF8String(input);
-      }
-      hash.update(BinaryUtil.arrayToBuffer(input));
-      return hash.digest(outputEncoding).substring(0, length);
     }
   }
 
