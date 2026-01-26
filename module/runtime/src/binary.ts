@@ -5,7 +5,6 @@ import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
-import { createInterface } from 'node:readline/promises';
 
 import { type Any, type BinaryMetadata, castTo, hasFunction } from './types.ts';
 
@@ -22,6 +21,11 @@ const isReadable = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
 const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
   !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
+const isBinaryConstructor = (value: Function): boolean => BINARY_CONSTRUCTOR_SET.has(castTo(value));
+const isBinaryArray = (value: unknown): value is BinaryArray =>
+  isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value);
+const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
+const isBinaryType = (value: unknown): value is BinaryType => isBinaryArray(value) || isBinaryStream(value) || value instanceof Blob;
 
 /**
  * Common functions for dealing with binary data/streams
@@ -29,24 +33,15 @@ const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
 export class BinaryUtil {
 
   /** Is the provided value a binary constructor  */
-  static isBinaryConstructor(value: Function): boolean {
-    return BINARY_CONSTRUCTOR_SET.has(castTo(value));
-  }
-
+  static isBinaryConstructor = isBinaryConstructor;
   /** Is the input a byte array */
-  static isBinaryArray(value: unknown): value is BinaryArray {
-    return isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value);
-  }
-
+  static isBinaryArray = isBinaryArray;
+  /** Is the input a byte array */
+  static isBinaryArrayLike = isBinaryArray;
   /** Is the input a byte stream */
-  static isBinaryStream(value: unknown): value is BinaryStream {
-    return isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
-  }
-
+  static isBinaryStream = isBinaryStream;
   /** Is value a binary type  */
-  static isBinaryType(value: unknown): value is BinaryType {
-    return this.isBinaryArray(value) || this.isBinaryStream(value) || value instanceof Blob;
-  }
+  static isBinaryType = isBinaryType;
 
   /** Read metadata for a binary type, if available  */
   static getMetadata(input: BinaryType, metadata: BinaryMetadata = {}): BinaryMetadata {
@@ -54,7 +49,7 @@ export class BinaryUtil {
       const withMeta: Blob & { [BlobMetaSymbol]?: BinaryMetadata } = input;
       metadata = { ...withMeta[BlobMetaSymbol], ...metadata };
       metadata.size ??= input.size;
-    } else if (this.isBinaryArray(input)) {
+    } else if (isBinaryArray(input)) {
       metadata.size = input.byteLength;
     }
 
@@ -63,10 +58,8 @@ export class BinaryUtil {
       metadata.size ??= statSync(input.path.toString()).size;
     }
 
-    if (isReadable(input)) {
-      if (input.readableEncoding) {
-        metadata.contentEncoding ??= input.readableEncoding;
-      }
+    if (isReadable(input) && input.readableEncoding) {
+      metadata.contentEncoding ??= input.readableEncoding;
     }
 
     return metadata;
@@ -116,9 +109,9 @@ export class BinaryUtil {
 
   /** Convert input to a binary array  */
   static async toBinaryArray(input: BinaryType | undefined): Promise<BinaryArray> {
-    if (this.isBinaryArray(input)) {
+    if (isBinaryArray(input)) {
       return input;
-    } else if (this.isBinaryStream(input)) {
+    } else if (isBinaryStream(input)) {
       return consumers.buffer(input);
     } else if (input instanceof Blob) {
       return input.arrayBuffer();
@@ -137,7 +130,7 @@ export class BinaryUtil {
   static toReadable(input: BinaryType): Readable {
     if (isReadable(input)) {
       return input;
-    } else if (this.isBinaryArray(input)) {
+    } else if (isBinaryArray(input)) {
       return Readable.from(this.arrayToBuffer(input));
     } else if (input instanceof Blob) {
       return Readable.fromWeb(input.stream());
@@ -150,7 +143,7 @@ export class BinaryUtil {
 
   /** Convert input to a binary stream  */
   static toBinaryStream(input: BinaryType): BinaryStream {
-    if (this.isBinaryStream(input)) {
+    if (isBinaryStream(input)) {
       return input;
     } else {
       return this.toReadable(input);
@@ -159,7 +152,7 @@ export class BinaryUtil {
 
   /** Read chunk, default to toString if type is unknown  */
   static readChunk(chunk: Any, encoding?: BufferEncoding | null): BinaryArray {
-    return this.isBinaryArray(chunk) ? this.arrayToBuffer(chunk) :
+    return isBinaryArray(chunk) ? this.arrayToBuffer(chunk) :
       typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
         Buffer.from(`${chunk}`, 'utf8');
   }
@@ -183,13 +176,6 @@ export class BinaryUtil {
   /** Consume input into output  */
   static pipeline(input: BinaryType, output: Writable): Promise<void> {
     return pipeline(this.toBinaryStream(input), output);
-  }
-
-  /** Consume lines  */
-  static async readLines(stream: BinaryType, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
-    for await (const item of createInterface(this.toReadable(stream))) {
-      await handler(item);
-    }
   }
 
   /** Create a binary array of specified size, optionally filled with a value */

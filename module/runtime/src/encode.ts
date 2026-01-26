@@ -1,5 +1,6 @@
 import crypto, { type BinaryToTextEncoding } from 'node:crypto';
 import { BinaryUtil, type BinaryArray, type BinaryStream, type BinaryType } from './binary.ts';
+import { createInterface } from 'node:readline/promises';
 
 type HashConfig = {
   length?: number;
@@ -82,6 +83,13 @@ export class EncodeUtil {
   static detectEncoding(input: BinaryType): BufferEncoding | undefined {
     if (input && typeof input === 'object' && 'readableEncoding' in input && typeof input.readableEncoding === 'string') {
       return input.readableEncoding;
+    }
+  }
+
+  /** Consume lines  */
+  static async readLines(stream: BinaryType, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
+    for await (const item of createInterface(BinaryUtil.toReadable(stream))) {
+      await handler(item);
     }
   }
 }
