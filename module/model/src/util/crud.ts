@@ -1,4 +1,4 @@
-import { castTo, type Class, Util, AppError, hasFunction, JSONUtil } from '@travetto/runtime';
+import { castTo, type Class, Util, AppError, hasFunction, BinaryUtil, type BinaryArray, CodecUtil } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -8,6 +8,8 @@ import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
 import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
+
+type ModelLoadInput = string | BinaryArray | object;
 
 export type ModelCrudProvider = {
   idSource: ModelIdSource;
@@ -37,13 +39,9 @@ export class ModelCrudUtil {
    * @param cls Class to load model for
    * @param input Input as string or plain object
    */
-  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
-    let resolvedInput: object;
-    if (typeof input === 'string' || input instanceof Buffer) {
-      resolvedInput = JSONUtil.parseSafe(input);
-    } else {
-      resolvedInput = input;
-    }
+  static async load<T extends ModelType>(cls: Class<T>, input: ModelLoadInput, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
+    const resolvedInput: object = (typeof input === 'string' || BinaryUtil.isBinaryArray(input)) ?
+      CodecUtil.fromJSON(input) : input;
 
     const result = SchemaRegistryIndex.getBaseClass(cls).from(resolvedInput);
 

@@ -1,6 +1,6 @@
 import type { ConfigData } from '../parser/types.ts';
 import type { ConfigSource, ConfigPayload } from './types.ts';
-import { ConfigOverrideUtil } from '../util.ts';
+import { ConfigOverrideUtil } from '../override.ts';
 
 /**
  * Overridable config source, provides ability to override field level values, currently used by

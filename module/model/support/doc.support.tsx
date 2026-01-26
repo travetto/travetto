@@ -22,7 +22,7 @@ export const Links = {
   Blob: toLink('Blob', toConcrete<ModelBlobSupport>()),
 };
 
-export const ModelTypes = (fn: | Function): DocJSXElement[] => {
+export const ModelTypes = (fn: Function): DocJSXElement[] => {
   const { content } = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set<string>();

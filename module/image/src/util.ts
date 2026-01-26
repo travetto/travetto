@@ -1,13 +1,17 @@
-import { createReadStream } from 'node:fs';
-import { Readable } from 'node:stream';
-import { ReadableStream } from 'node:stream/web';
-import { pipeline } from 'node:stream/promises';
-import type { Metadata } from 'sharp';
+import type { Readable } from 'node:stream';
+import type { Metadata, Sharp } from 'sharp';
 
-import { castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
 
-type ImageFormat = 'jpeg' | 'png' | 'avif' | 'webp' | 'gif' | 'jxl';
-type Input = Buffer | string | ReadableStream | Readable;
+const VALID_EXTENSIONS = ['jpeg', 'jpg', 'png', 'avif', 'webp', 'gif', 'jxl'] as const;
+
+type ImageFormat = typeof VALID_EXTENSIONS[number];
+type ImageMetadata = {
+  width: number;
+  height: number;
+  aspect: number;
+  format: ImageFormat;
+};
 
 /**
  * Image convert options
@@ -36,10 +40,11 @@ export interface ConvertOptions {
  */
 export class ImageUtil {
 
-  /**
-   * Convert image
-   */
-  static async convert<T extends Input>(image: T, { format, optimize, ...options }: ConvertOptions): Promise<T extends string ? Readable : T> {
+  static isKnownExtension(ext: string): ext is ImageFormat {
+    return VALID_EXTENSIONS.includes(castTo(ext));
+  }
+
+  static async #getBuilder({ format, optimize, ...options }: ConvertOptions): Promise<Sharp> {
     const { default: sharp } = await import('sharp');
 
     let builder = sharp();
@@ -53,43 +58,33 @@ export class ImageUtil {
       });
     }
 
-    builder = builder
+    return builder = builder
       .avif({ force: format === 'avif', ...optimize ? { quality: 70 } : {} })
       .webp({ force: format === 'webp', ...optimize ? { quality: 80 } : {} })
       .png({ force: format === 'png', ...optimize ? { compressionLevel: 9, quality: 80, adaptiveFiltering: true } : {} })
-      .jpeg({ force: format === 'jpeg', ...optimize ? { quality: 80, progressive: true } : {} })
+      .jpeg({ force: format === 'jpeg' || format === 'jpg', ...optimize ? { quality: 80, progressive: true } : {} })
       .jxl({ force: format === 'jxl', ...optimize ? { lossless: false, quality: 80 } : {} })
       .gif({ force: format === 'gif', ...optimize ? { effort: 10 } : {} });
 
-    const stream = Buffer.isBuffer(image) ?
-      Readable.from(image) :
-      (typeof image === 'string' ? createReadStream(image) : image);
+  }
 
-    pipeline(stream, builder);
-    return castTo(
-      typeof image === 'string' ?
-        builder : Buffer.isBuffer(image) ?
-          builder.toBuffer() :
-          (image instanceof ReadableStream) ?
-            ReadableStream.from(builder) : builder
-    );
+  /**
+   * Convert image as readable stream
+   */
+  static async convert(image: BinaryType, options: ConvertOptions): Promise<Readable> {
+    const builder = await this.#getBuilder(options);
+    BinaryUtil.pipeline(image, builder);
+    return builder;
   }
 
   /**
    * Get Image metadata
    */
-  static async getMetadata(image: Input): Promise<{
-    width: number;
-    height: number;
-    aspect: number;
-    format: ImageFormat;
-  }> {
+  static async getMetadata(image: BinaryType): Promise<ImageMetadata> {
     const { default: sharp } = await import('sharp');
-    const out = await ((Buffer.isBuffer(image) || typeof image === 'string') ?
-      sharp(image).metadata() :
-      new Promise<Metadata>((resolve, reject) =>
-        pipeline(image, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
-      ));
+    const out = await new Promise<Metadata>((resolve, reject) =>
+      BinaryUtil.pipeline(image, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
+    );
     return {
       width: out.width!,
       height: out.height!,

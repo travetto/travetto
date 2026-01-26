@@ -3,19 +3,19 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
-import { Readable, Transform } from 'node:stream';
+import { Transform } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
+import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType, type BinaryStream, CodecUtil } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
-type UploadItem = { stream: Readable, filename?: string, field: string };
+type UploadItem = { stream: BinaryStream, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
 const RawFileSymbol = Symbol();
 const WebUploadSymbol = Symbol();
@@ -33,7 +33,7 @@ export class WebUploadUtil {
     let read = 0;
     return new Transform({
       transform(chunk, encoding, callback): void {
-        read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : (chunk instanceof Uint8Array ? chunk.byteLength : 0);
+        read += (typeof chunk === 'string' ? chunk.length : BinaryUtil.isBinaryArray(chunk) ? chunk.byteLength : 0);
         if (read > maxSize) {
           callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
         } else {
@@ -53,12 +53,12 @@ export class WebUploadUtil {
   /**
    * Get all the uploads, separating multipart from direct
    */
-  static async* getUploads(request: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    if (!WebBodyUtil.isRaw(request.body)) {
+  static async * getUploads(request: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
+    if (!WebBodyUtil.isRawBinary(request.body)) {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }
 
-    const bodyStream = Buffer.isBuffer(request.body) ? Readable.from(request.body) : request.body;
+    const requestBody = request.body;
     request.body = undefined;
 
     const contentType = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Type'));
@@ -70,8 +70,7 @@ export class WebUploadUtil {
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
       const queue = new AsyncQueue<UploadItem>();
 
-      // Upload
-      bodyStream.pipe(busboy({
+      const uploadHandler = busboy({
         headers: {
           'content-type': request.headers.get('Content-Type')!,
           'content-disposition': request.headers.get('Content-Disposition')!,
@@ -85,12 +84,15 @@ export class WebUploadUtil {
         .on('file', (field, stream, filename) => queue.add({ stream, filename, field }))
         .on('limit', field => queue.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => queue.close())
-        .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`))));
+        .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`)));
+
+      // Upload
+      BinaryUtil.pipeline(requestBody, uploadHandler).catch(err => queue.throw(err));
 
       yield* queue;
     } else {
       const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition')).parameters.filename;
-      yield { stream: bodyStream, filename, field: 'file' };
+      yield { stream: BinaryUtil.toBinaryStream(requestBody), filename, field: 'file' };
     }
   }
 
@@ -114,7 +116,7 @@ export class WebUploadUtil {
         pipeline(stream, this.limitWrite(config.maxSize, field), target) :
         pipeline(stream, target));
 
-      const detected = await this.getFileType(location);
+      const detected = await this.getFileType(createReadStream(location));
 
       if (!mimeCheck(detected.mime)) {
         throw new AppError(`Content type not allowed: ${detected.mime}`, { category: 'data' });
@@ -127,7 +129,7 @@ export class WebUploadUtil {
       const file = BinaryUtil.readableBlob(() => createReadStream(location), {
         contentType: detected.mime,
         filename,
-        hash: await BinaryUtil.hashInput(createReadStream(location)),
+        hash: await CodecUtil.hash(createReadStream(location), { hashAlgorithm: 'sha256' }),
         size: (await fs.stat(location)).size,
       });
 
@@ -143,7 +145,7 @@ export class WebUploadUtil {
   /**
    * Get file type
    */
-  static async getFileType(input: string | Readable): Promise<FileType> {
+  static async getFileType(input: BinaryType): Promise<FileType> {
     const { FileTypeParser } = await import('file-type');
     const { fromStream } = await import('strtok3');
 
@@ -151,19 +153,21 @@ export class WebUploadUtil {
     let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
 
+    const metadata = BinaryUtil.getMetadata(input);
+
     try {
-      token = await fromStream(typeof input === 'string' ? createReadStream(input) : input);
+      token = await fromStream(BinaryUtil.toReadable(input));
       matched = await parser.fromTokenizer(token);
     } finally {
       await token?.close();
     }
 
-    if (!matched && typeof input === 'string') {
+    if (!matched && metadata.filename) {
       const { Mime } = (await import('mime'));
       const otherTypes = (await import('mime/types/other.js')).default;
       const standardTypes = (await import('mime/types/standard.js')).default;
       const checker = new Mime(standardTypes, otherTypes);
-      const mime = checker.getType(input);
+      const mime = checker.getType(metadata.filename);
       if (mime) {
         return { ext: checker.getExtension(mime)!, mime };
       }

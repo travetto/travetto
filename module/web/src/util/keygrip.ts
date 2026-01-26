@@ -7,7 +7,7 @@ function timeSafeCompare(a: string, b: string): boolean {
   const key = crypto.randomBytes(32);
   const ah = crypto.createHmac('sha256', key).update(a).digest();
   const bh = crypto.createHmac('sha256', key).update(b).digest();
-  return ah.length === bh.length && crypto.timingSafeEqual(ah, bh);
+  return ah.byteLength === bh.byteLength && crypto.timingSafeEqual(ah, bh);
 }
 
 export class KeyGrip {

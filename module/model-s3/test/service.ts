@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { BinaryUtil, castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo, CodecUtil } from '@travetto/runtime';
 import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
@@ -42,22 +42,22 @@ class S3BlobSuite extends ModelBlobSuite {
   @Test({ timeout: 15000 })
   async largeFile() {
     const service: S3ModelService = castTo(await this.service);
-    const buffer = Buffer.alloc(1.5 * service['config'].chunkSize);
-    for (let i = 0; i < buffer.length; i++) {
+    const buffer = BinaryUtil.arrayToBuffer(BinaryUtil.makeBinaryArray(1.5 * service['config'].chunkSize));
+    for (let i = 0; i < buffer.byteLength; i++) {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
-    const hash = await BinaryUtil.hashInput(buffer);
+    const hash = await CodecUtil.hash(buffer);
 
     await service.upsertBlob(hash, buffer, {
       filename: 'Random.bin',
       contentType: 'binary/octet-stream',
-      size: buffer.length,
+      size: buffer.byteLength,
       hash
     });
 
     const stream = await service.getBlob(hash);
-    const resolved = await BinaryUtil.hashInput(stream);
+    const resolved = await CodecUtil.hash(stream);
     assert(resolved === hash);
   }
 }

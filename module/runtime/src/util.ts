@@ -1,5 +1,8 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
 import timers from 'node:timers/promises';
+import path from 'node:path';
+import os from 'node:os';
 
 import { castTo } from './types.ts';
 
@@ -117,5 +120,14 @@ export class Util {
     } else {
       return () => true;
     }
+  }
+
+  /** Write file and copy over when ready  */
+  static async bufferedFileWrite(file: string, content: string): Promise<void> {
+    const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
+    await fs.writeFile(temp, content, 'utf8');
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.copyFile(temp, file);
+    await fs.rm(temp, { force: true });
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { JSONUtil } from '@travetto/runtime';
+import { CodecUtil } from '@travetto/runtime';
 import { type ModelExpirySupport, NotFoundError } from '@travetto/model';
 import type { AuthContext, AuthService } from '@travetto/auth';
 
@@ -38,7 +38,7 @@ export class SessionService {
 
       const session = new Session({
         ...record,
-        data: JSONUtil.parseBase64(record.data)
+        data: CodecUtil.fromBase64JSON(record.data)
       });
 
       // Validate session
@@ -80,7 +80,7 @@ export class SessionService {
       if (session.action === 'create' || session.isChanged()) {
         await this.#modelService.upsert(SessionEntry, SessionEntry.from({
           ...session,
-          data: JSONUtil.stringifyBase64(session.data)
+          data: CodecUtil.toBase64JSON(session.data)
         }));
       }
       // If destroying

@@ -1,13 +1,14 @@
 import { TextDecoder } from 'node:util';
-import { Readable } from 'node:stream';
 
-import { type Any, BinaryUtil, castTo, hasToJSON, JSONUtil, Util } from '@travetto/runtime';
+import { type Any, type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON } from '@travetto/runtime';
 
-import type { WebBinaryBody, WebMessage } from '../types/message.ts';
+import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
 import { WebError } from '../types/error.ts';
 
-const WebRawStreamSymbol = Symbol();
+const WebRawBinarySymbol = Symbol();
+
+const NULL_TERMINATOR = BinaryUtil.makeBinaryArray(0);
 
 /**
  * Utility classes for supporting web body operations
@@ -17,42 +18,43 @@ export class WebBodyUtil {
   /**
    * Generate multipart body
    */
-  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<string | Buffer> {
-    const nl = '\r\n';
+  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<BinaryArray> {
+    const newLine = '\r\n';
+    const bytes = (value: string): BinaryArray => CodecUtil.fromUTF8String(value);
     for (const [key, value] of form.entries()) {
       const data = value.slice();
       const filename = data instanceof File ? data.name : undefined;
       const size = data instanceof Blob ? data.size : data.length;
       const type = data instanceof Blob ? data.type : undefined;
-      yield `--${boundary}${nl}`;
-      yield `Content-Disposition: form-data; name="${key}"; filename="${filename ?? key}"${nl}`;
-      yield `Content-Length: ${size}${nl}`;
+      yield bytes(`--${boundary}${newLine}`);
+      yield bytes(`Content-Disposition: form-data; name="${key}"; filename="${filename ?? key}"${newLine}`);
+      yield bytes(`Content-Length: ${size}${newLine}`);
       if (type) {
-        yield `Content-Type: ${type}${nl}`;
+        yield bytes(`Content-Type: ${type}${newLine}`);
       }
-      yield nl;
+      yield bytes(newLine);
       if (data instanceof Blob) {
         for await (const chunk of data.stream()) {
           yield chunk;
         }
       } else {
-        yield data;
+        yield bytes(data);
       }
-      yield nl;
+      yield bytes(newLine);
     }
-    yield `--${boundary}--${nl}`;
+    yield bytes(`--${boundary}--${newLine}`);
   }
 
-  /** Get Blob Headers */
-  static getBlobHeaders(value: Blob): [string, string][] {
-    const meta = BinaryUtil.getBlobMeta(value);
+  /** Get Metadata Headers */
+  static getMetadataHeaders(value: BinaryType): [string, string][] {
+    const meta = BinaryUtil.getMetadata(value);
 
     const toAdd: [string, string | undefined][] = [
-      ['Content-Type', value.type],
-      ['Content-Length', `${value.size}`],
-      ['Content-Encoding', meta?.contentEncoding],
-      ['Cache-Control', meta?.cacheControl],
-      ['Content-Language', meta?.contentLanguage],
+      ['Content-Type', meta.contentType],
+      ['Content-Length', (value instanceof Blob ? value.size : meta.size)?.toString()],
+      ['Content-Encoding', meta.contentEncoding],
+      ['Cache-Control', meta.cacheControl],
+      ['Content-Language', meta.contentLanguage],
     ];
 
     if (meta?.range) {
@@ -62,8 +64,9 @@ export class WebBodyUtil {
       );
     }
 
-    if (value instanceof File && value.name) {
-      toAdd.push(['Content-disposition', `attachment; filename="${value.name}"`]);
+    const filename = (value instanceof File ? value.name : undefined) ?? meta.filename;
+    if (filename) {
+      toAdd.push(['Content-disposition', `attachment; filename="${filename}"`]);
     }
 
     return toAdd.filter((pair): pair is [string, string] => !!pair[1]);
@@ -89,30 +92,19 @@ export class WebBodyUtil {
   /**
    * Convert an existing web message to a binary web message
    */
-  static toBinaryMessage(message: WebMessage): Omit<WebMessage<WebBinaryBody>, 'context'> {
+  static toBinaryMessage(message: WebMessage): Omit<WebMessage<BinaryType>, 'context'> {
     const body = message.body;
-    if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
-      return castTo(message);
-    }
+    const out: Omit<WebMessage<BinaryType>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
 
-    const out: Omit<WebMessage<WebBinaryBody>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
-    if (body instanceof Blob) {
-      for (const [key, value] of this.getBlobHeaders(body)) {
+    if (BinaryUtil.isBinaryType(body)) {
+      for (const [key, value] of this.getMetadataHeaders(body)) {
         out.headers.set(key, value);
       }
-      out.body = Readable.fromWeb(body.stream());
+      out.body = body;
     } else if (body instanceof FormData) {
       const boundary = `${'-'.repeat(24)}-multipart-${Util.uuid()}`;
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
-      out.body = Readable.from(this.buildMultiPartBody(body, boundary));
-    } else if (BinaryUtil.isReadableStream(body)) {
-      out.body = Readable.fromWeb(body);
-    } else if (BinaryUtil.isAsyncIterable(body)) {
-      out.body = Readable.from(body);
-    } else if (body === null || body === undefined) {
-      out.body = Buffer.alloc(0);
-    } else if (BinaryUtil.isArrayBuffer(body)) {
-      out.body = Buffer.from(body);
+      out.body = this.buildMultiPartBody(body, boundary);
     } else {
       let text: string;
       if (typeof body === 'string') {
@@ -124,11 +116,9 @@ export class WebBodyUtil {
       } else {
         text = JSON.stringify(body);
       }
-      out.body = Buffer.from(text, 'utf-8');
-    }
-
-    if (Buffer.isBuffer(out.body)) {
-      out.headers.set('Content-Length', `${out.body.byteLength}`);
+      const bytes = CodecUtil.fromUTF8String(text);
+      out.headers.set('Content-Length', `${bytes.byteLength}`);
+      out.body = bytes;
     }
 
     out.headers.setIfAbsent('Content-Type', this.defaultContentType(message.body));
@@ -139,9 +129,9 @@ export class WebBodyUtil {
   /**
    * Set body and mark as unprocessed
    */
-  static markRaw(body: WebBinaryBody | undefined): typeof body {
+  static markRawBinary(body: BinaryType | undefined): typeof body {
     if (body) {
-      Object.defineProperty(body, WebRawStreamSymbol, { value: body });
+      Object.defineProperty(body, WebRawBinarySymbol, { value: body });
     }
     return body;
   }
@@ -149,9 +139,9 @@ export class WebBodyUtil {
   /**
    * Is the input raw
    */
-  static isRaw(body: unknown): body is WebBinaryBody {
+  static isRawBinary(body: unknown): body is BinaryType {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!body && ((Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) && (body as Any)[WebRawStreamSymbol] === body);
+    return !!body && (BinaryUtil.isBinaryType(body) && (body as Any)[WebRawBinarySymbol] === body);
   }
 
   /**
@@ -160,7 +150,7 @@ export class WebBodyUtil {
   static parseBody(type: string, body: string): unknown {
     switch (type) {
       case 'text': return body;
-      case 'json': return JSONUtil.parseSafe(body);
+      case 'json': return CodecUtil.fromJSON(body);
       case 'form': return Object.fromEntries(new URLSearchParams(body));
     }
   }
@@ -168,8 +158,8 @@ export class WebBodyUtil {
   /**
    * Read text from an input source
    */
-  static async readText(input: Readable | Buffer, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
-    encoding ??= (Buffer.isBuffer(input) ? undefined : input.readableEncoding) ?? 'utf-8';
+  static async readText(input: BinaryType, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
+    encoding ??= CodecUtil.detectEncoding(input) ?? 'utf-8';
 
     let decoder: TextDecoder;
     try {
@@ -178,26 +168,26 @@ export class WebBodyUtil {
       throw WebError.for('Specified Encoding Not Supported', 415, { encoding });
     }
 
-    if (Buffer.isBuffer(input)) {
+    if (BinaryUtil.isBinaryArray(input)) {
       if (input.byteLength > limit) {
         throw WebError.for('Request Entity Too Large', 413, { received: input.byteLength, limit });
       }
       return { text: decoder.decode(input), read: input.byteLength };
     }
 
-    let received = Buffer.isBuffer(input) ? input.byteOffset : 0;
+    let received = 0;
     const all: string[] = [];
 
     try {
-      for await (const chunk of castTo<AsyncIterable<string | Buffer>>(input.iterator({ destroyOnReturn: false }))) {
-        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, 'utf8');
-        received += buffer.byteLength;
+      for await (const chunk of BinaryUtil.toBinaryStream(input)) {
+        const bytes = BinaryUtil.readChunk(chunk);
+        received += bytes.byteLength;
         if (received > limit) {
           throw WebError.for('Request Entity Too Large', 413, { received, limit });
         }
-        all.push(decoder.decode(buffer, { stream: true }));
+        all.push(decoder.decode(bytes, { stream: true }));
       }
-      all.push(decoder.decode(Buffer.alloc(0), { stream: false }));
+      all.push(decoder.decode(NULL_TERMINATOR, { stream: false }));
       return { text: all.join(''), read: received };
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {

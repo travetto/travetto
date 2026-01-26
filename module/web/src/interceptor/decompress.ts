@@ -4,7 +4,7 @@ import util from 'node:util';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
 
 import type { WebChainedContext } from '../types/filter.ts';
 import type { WebResponse } from '../types/response.ts';
@@ -52,7 +52,7 @@ export class DecompressConfig {
 @Injectable()
 export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
 
-  static async decompress(headers: WebHeaders, input: Buffer | Readable, config: DecompressConfig): Promise<typeof input> {
+  static async decompress(headers: WebHeaders, input: BinaryType, config: DecompressConfig): Promise<BinaryType> {
     const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 
     if (!config.supportedEncodings.includes(encoding)) {
@@ -63,10 +63,14 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
       return input;
     }
 
-    if (Buffer.isBuffer(input)) {
-      return BUFFER_DECOMPRESSORS[encoding](input);
+    if (BinaryUtil.isBinaryArray(input)) {
+      return BUFFER_DECOMPRESSORS[encoding](await BinaryUtil.toBinaryArray(input));
+    } else if (BinaryUtil.isBinaryStream(input)) {
+      const output = STREAM_DECOMPRESSORS[encoding]();
+      BinaryUtil.pipeline(input, output);
+      return output;
     } else {
-      return input.pipe(STREAM_DECOMPRESSORS[encoding]());
+      throw WebError.for('Unable to decompress body: unsupported type', 400);
     }
   }
 
@@ -81,9 +85,9 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
-    if (WebBodyUtil.isRaw(request.body)) {
+    if (WebBodyUtil.isRawBinary(request.body)) {
       const updatedBody = await DecompressInterceptor.decompress(request.headers, request.body, config);
-      request.body = WebBodyUtil.markRaw(updatedBody);
+      request.body = WebBodyUtil.markRawBinary(updatedBody);
     }
     return next();
   }

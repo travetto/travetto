@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, asFull, castTo, type Class, type RetainPrimitiveFields, safeAssign } from '@travetto/runtime';
+import { AppError, asFull, BinaryUtil, castTo, type Class, type RetainPrimitiveFields, safeAssign } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
 import { type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -60,7 +60,7 @@ function computeParameterLocation(endpoint: EndpointConfig, param: SchemaParamet
   if (!SchemaRegistryIndex.has(param.type)) {
     if ((param.type === String || param.type === Number) && name && endpoint.path.includes(`:${name}`)) {
       return 'path';
-    } else if (param.type === Blob || param.type === File || param.type === ArrayBuffer || param.type === Uint8Array) {
+    } else if (BinaryUtil.isBinaryConstructor(param.type)) {
       return 'body';
     }
     return 'query';

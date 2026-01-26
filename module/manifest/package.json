@@ -22,10 +22,10 @@
   ],
   "main": "__index__.ts",
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=25.0.0"
   },
   "dependencies": {
-    "@types/node": "^24.10.1"
+    "@types/node": "^25.0.10"
   },
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",

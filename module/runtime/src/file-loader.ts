@@ -4,7 +4,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { AppError } from './error.ts';
-import { JSONUtil } from './json.ts';
 
 /**
  * File loader that will search for files across the provided search paths
@@ -43,8 +42,8 @@ export class FileLoader {
    * @param relativePath The path to read
    */
   async read(relativePath: string, binary?: false): Promise<string>;
-  async read(relativePath: string, binary: true): Promise<Buffer>;
-  async read(relativePath: string, binary = false): Promise<string | Buffer> {
+  async read(relativePath: string, binary: true): Promise<Buffer<ArrayBuffer>>;
+  async read(relativePath: string, binary = false): Promise<string | Buffer<ArrayBuffer>> {
     const file = await this.resolve(relativePath);
     return fs.readFile(file, binary ? undefined : 'utf8');
   }
@@ -63,14 +62,7 @@ export class FileLoader {
    * @param relativePath The path to read
    */
   async readFile(relativePath: string): Promise<File> {
-    return new File([await this.read(relativePath, true)], path.basename(relativePath));
-  }
-
-  /**
-   * Read relative file as JSON
-   */
-  async readJSON<T>(relativePath: string): Promise<T> {
-    const location = await this.resolve(relativePath);
-    return JSONUtil.readFile<T>(location);
+    const buffer = await this.read(relativePath, true);
+    return new File([buffer], path.basename(relativePath));
   }
 }

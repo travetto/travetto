@@ -1,10 +1,14 @@
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
-import { PassThrough, Readable } from 'node:stream';
+import { PassThrough } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { createReadStream } from 'node:fs';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { WebUploadUtil } from '@travetto/web-upload';
+import { BinaryUtil } from '@travetto/runtime';
+
+const makeData = () => [BinaryUtil.makeBinaryArray(100)];
 
 @Suite()
 export class BytesUtilTest {
@@ -14,7 +18,7 @@ export class BytesUtilTest {
   @Test()
   async detectFileType() {
     const png = await this.fixture.resolve('/logo.png');
-    const fileType = await WebUploadUtil.getFileType(png);
+    const fileType = await WebUploadUtil.getFileType(createReadStream(png));
     assert(fileType.ext === 'png');
     assert(fileType.mime === 'image/png');
 
@@ -42,19 +46,19 @@ export class BytesUtilTest {
   @Test()
   async resolveFileType() {
     const file = await this.fixture.resolve('/empty');
-    const result = await WebUploadUtil.getFileType(file);
+    const result = await WebUploadUtil.getFileType(createReadStream(file));
     assert(result.mime === 'application/octet-stream');
 
     const file2 = await this.fixture.resolve('/empty.m4a');
-    const result2 = await WebUploadUtil.getFileType(file2);
+    const result2 = await WebUploadUtil.getFileType(createReadStream(file2));
     assert(result2.mime === 'audio/mp4');
 
     const file3 = await this.fixture.resolve('/small-audio.mp3');
-    const result3 = await WebUploadUtil.getFileType(file3);
+    const result3 = await WebUploadUtil.getFileType(createReadStream(file3));
     assert(result3.mime === 'audio/mpeg');
 
     const file4 = await this.fixture.resolve('/small-audio');
-    const result4 = await WebUploadUtil.getFileType(file4);
+    const result4 = await WebUploadUtil.getFileType(createReadStream(file4));
     assert(result4.mime === 'audio/mpeg');
   }
 
@@ -63,22 +67,22 @@ export class BytesUtilTest {
     const file = await this.fixture.resolve('/logo.png');
     await fs.copyFile(file, file.replace(/[.]png$/, ''));
     const png = await this.fixture.resolve('/logo');
-    const result = await WebUploadUtil.getFileType(png);
+    const result = await WebUploadUtil.getFileType(createReadStream(png));
     assert(result.mime === 'image/png');
   }
 
   @Test({ shouldThrow: 'size' })
   async testMaxBlobWrite() {
-    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(1), new PassThrough());
+    await pipeline(makeData(), WebUploadUtil.limitWrite(1), new PassThrough());
   }
 
   @Test({ shouldThrow: 'size' })
   async testMaxCloseBlobWrite() {
-    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(99), new PassThrough());
+    await pipeline(makeData(), WebUploadUtil.limitWrite(99), new PassThrough());
   }
 
   @Test()
   async testMaxExactBlobWrite() {
-    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(100), new PassThrough());
+    await pipeline(makeData(), WebUploadUtil.limitWrite(100), new PassThrough());
   }
 }

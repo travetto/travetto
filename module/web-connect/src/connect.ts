@@ -1,6 +1,6 @@
 import type { OutgoingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
 
-import { castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo, type BinaryArray } from '@travetto/runtime';
 import { type WebRequest, WebResponse } from '@travetto/web';
 
 export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> {
@@ -49,7 +49,7 @@ export class ConnectResponse implements Pick<ServerResponse,
   #response: WebResponse;
   #headersSent = false;
   #finished = false;
-  #written: Buffer[] = [];
+  #written: BinaryArray[] = [];
   #onEndHandlers: (() => void)[] = [];
 
   constructor(response?: WebResponse) {
@@ -123,11 +123,8 @@ export class ConnectResponse implements Pick<ServerResponse,
     if (this.#headersSent) {
       this.flushHeaders();
     }
-    if (!Buffer.isBuffer(chunk)) {
-      this.#written.push(Buffer.from(`${chunk}`, castTo(encoding)));
-    } else {
-      this.#written.push(chunk);
-    }
+    const chunked = BinaryUtil.readChunk(chunk, castTo(encoding));
+    this.#written.push(chunked);
     callback?.();
     return true;
   }
@@ -157,7 +154,7 @@ export class ConnectResponse implements Pick<ServerResponse,
 
   throwIfSent(): void {
     if (this.#headersSent) {
-      this.#response.body = Buffer.concat(this.#written);
+      this.#response.body = BinaryUtil.combineBinaryArrays(this.#written);
       throw this.#response;
     }
   }

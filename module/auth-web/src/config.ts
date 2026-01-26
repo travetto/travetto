@@ -1,5 +1,5 @@
 import { Config } from '@travetto/config';
-import { Runtime, AppError, BinaryUtil } from '@travetto/runtime';
+import { Runtime, AppError, CodecUtil } from '@travetto/runtime';
 import { Ignore, Secret } from '@travetto/schema';
 
 type KeyEntry = { key: string, id: string };
@@ -23,7 +23,7 @@ export class WebAuthConfig {
     }
     this.signingKey ??= 'dummy';
 
-    const all = [this.signingKey].flat().map(key => ({ key, id: BinaryUtil.hash(key, 8) }));
+    const all = [this.signingKey].flat().map(key => ({ key, id: CodecUtil.hash(key, { length: 8 }) }));
     this.keyMap = Object.fromEntries(all.map(entry => [entry.id, entry]));
     this.keyMap.default = all[0];
   }

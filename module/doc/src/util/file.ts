@@ -4,6 +4,8 @@ import path from 'node:path';
 import { AppError, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { type ManifestModuleFileType, ManifestModuleUtil } from '@travetto/manifest';
 
+import type { CodeSourceInput } from './types.ts';
+
 const ESLINT_PATTERN = /\s{0,10}\/\/ eslint.{0,300}$/g;
 const ENV_KEY = /Env.([^.]{1,100})[.]key/g;
 
@@ -24,6 +26,9 @@ const EXT_TO_LANG: Record<string, string> = {
   '.sh': 'bash',
 };
 
+type SourceOutput = { content: string, language: string, file: string };
+type SnippetOutput = { file: string, startIdx: number, lines: string[], language: string };
+
 /**
  * Standard file utilities
  */
@@ -35,7 +40,7 @@ export class DocFileUtil {
     return /^[@:A-Za-z0-9\/\\\-_.]+[.]([a-z]{2,10})$/.test(file);
   }
 
-  static readSource(input: string | Function): { content: string, language: string, file: string } {
+  static readSource(input: Exclude<CodeSourceInput, Promise<string>>): SourceOutput {
     let file: string | undefined;
     let content: string | undefined;
 
@@ -83,8 +88,8 @@ export class DocFileUtil {
     }
   }
 
-  static async readCodeSnippet(input: string | Function, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
-    const result = this.readSource(input);
+  static async readCodeSnippet(input: CodeSourceInput, startPattern: RegExp): Promise<SnippetOutput> {
+    const result = this.readSource(await input);
     const lines = result.content.split(/\n/);
     const startIdx = lines.findIndex(line => startPattern.test(line));
     if (startIdx < 0) {
@@ -96,14 +101,14 @@ export class DocFileUtil {
   /**
    * Determine if a file is a decorator
    */
-  static async isDecorator(name: string, file: string): Promise<boolean> {
+  static isDecorator(name: string, file: string): boolean {
 
     const key = `${name}:${file}`;
     if (key in this.#decCache) {
       return this.#decCache[key];
     }
 
-    const text = await this.readSource(file);
+    const text = this.readSource(file);
     const lines = text.content.split(/\n/g);
 
     const start = lines.findIndex(line => new RegExp(`function ${name}\\b`).test(line));

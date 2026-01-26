@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager } from '@travetto/runtime';
+import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager, CodecUtil, BinaryUtil } from '@travetto/runtime';
 
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
 
@@ -15,7 +15,8 @@ export const text = <>
     <li>Standard Error Support</li>
     <li>Console Management</li>
     <li>Resource Access</li>
-    <li>JSON Utilities</li>
+    <li>Encoding and Decoding Utilities</li>
+    <li>Binary Utilities</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
     <li>Process Execution</li>
@@ -122,18 +123,21 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
     The {FileLoader} also supports tying itself to {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
   </c.Section>
 
-  <c.Section title='JSON Utilities'>
-    The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well
-    as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal
-    is ease of use, but also a centralized location for performance and security improvements over time.
-    <br />
+  <c.Section title='Encoding and Decoding Utilities'>
+    The {CodecUtil} class provides a variety of static methods for encoding and decoding data.  It supports the following formats:
 
     <ul>
-      <li>{d.method('parseSafe(input: string | Buffer)')} parses JSON safely from a string or Buffer.</li>
-      <li>{d.method('stringifyBase64(value: any)')} encodes a JSON value as a base64 encoded string.</li>
-      <li>{d.method('parseBase64(input: string)')} decodes a JSON value from a base64 encoded string.</li>
-      <li>{d.method('readFile(file: string)')} reads a JSON file asynchronously.</li>
-      <li>{d.method('readFileSync(file: string, onMissing?: any)')} reads a JSON file synchronously.</li>
+      <li>Hex</li>
+      <li>Base64</li>
+      <li>UTF8</li>
+    </ul>
+
+    In addition to data formats, it also supports:
+
+    <ul>
+      <li>Base64 encoded JSON (compression friendly)</li>
+      <li>Hashing (SHA1, SHA256, SHA512, MD5)</li>
+      <li>Stream line reading</li>
     </ul>
   </c.Section>
 
@@ -145,6 +149,7 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
       <li>{d.method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
       <li>{d.method('hash(text: string, size?: number)')} produces a full sha512 hash.</li>
       <li>{d.method('resolvablePromise()')} produces a <c.Class name='Promise' /> instance with the {d.method('resolve')} and {d.method('reject')} methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li>
+      <li>{d.method('bufferedFileWrite(file:string, content: string)')} will write the file, using a temporary buffer file to ensure that the entire file is written before being moved to the final location.  This helps minimize file watch noise when writing files.</li>
     </ul>
 
     <c.Code title='Sample makeTemplate Usage' src={`
@@ -153,6 +158,12 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
 // produces
 '**age: 20** **name: bob**'
 `} />
+  </c.Section>
+
+  <c.Section title='Binary Utilities'>
+    The {BinaryUtil} class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types ({d.input('Buffer')}, {d.input('Stream')}) and Web Standard types ({d.input('Blob')}, {d.input('ArrayBuffer')}).
+
+    The framework leverages this to allow for seamless handling of binary data, regardless of the source.
   </c.Section>
 
   <c.Section title='Time Utilities'>

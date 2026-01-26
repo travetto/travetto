@@ -1,9 +1,6 @@
-import { Readable } from 'node:stream';
-import { buffer as toBuffer } from 'node:stream/consumers';
-
 import {
-  type Class, type TimeSpan, type DeepPartial, castTo, type BlobMeta,
-  type ByteRange, type BinaryInput, BinaryUtil, JSONUtil
+  type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
+  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, CodecUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -16,7 +13,7 @@ import {
 const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
-type StoreType = Map<string, Buffer>;
+type StoreType = Map<string, BinaryArray>;
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -122,7 +119,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const store = this.#getStore(cls);
     await this.#removeIndices(cls, item.id);
     if (action === 'write') {
-      store.set(item.id, Buffer.from(JSON.stringify(item)));
+      store.set(item.id, CodecUtil.fromUTF8String(JSON.stringify(item)));
       await this.#writeIndices(cls, item);
       return item;
     } else {
@@ -233,32 +230,36 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Blob Support
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
-    if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
+  async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
+    if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-
-    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
+    const metadata = BinaryUtil.getMetadata(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, Buffer.from(JSON.stringify(blobMeta)));
-    blobs.set(location, await toBuffer(stream));
+    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(metadata)));
+    blobs.set(location, await BinaryUtil.toBinaryArray(input));
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
+
     const blobs = this.#find(ModelBlobNamespace, location, 'notfound');
-    let buffer = blobs.get(location)!;
-    const final = range ? ModelBlobUtil.enforceRange(range, buffer.length) : undefined;
+
+    let data = blobs.get(location)!;
+    const final = range ? ModelBlobUtil.enforceRange(range, data.byteLength) : undefined;
+
     if (final) {
-      buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
+      data = BinaryUtil.sliceByteArray(data, final.start, final.end + 1);
     }
-    const meta = await this.getBlobMeta(location);
-    return BinaryUtil.readableBlob(() => Readable.from(buffer), { ...meta, range: final });
+
+    const meta = await this.getBlobMetadata(location);
+
+    return BinaryUtil.readableBlob(() => data, { ...meta, range: final });
   }
 
-  async getBlobMeta(location: string): Promise<BlobMeta> {
+  async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
-    const meta: BlobMeta = JSONUtil.parseSafe(metaContent.get(location)!);
+    const meta: BinaryMetadata = CodecUtil.fromJSON(metaContent.get(location)!);
     return meta;
   }
 
@@ -273,9 +274,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     }
   }
 
-  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
+  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, Buffer.from(JSON.stringify(meta), 'utf8'));
+    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(meta)));
   }
 
   // Expiry

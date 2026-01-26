@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
-import { ExecUtil, JSONUtil, Runtime } from '@travetto/runtime';
+import { CodecUtil, ExecUtil, Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 
 /**
@@ -24,8 +24,7 @@ export class OpenApiClientHelp {
       await fs.mkdir(path.dirname(formatCache), { recursive: true });
       await fs.writeFile(formatCache, JSON.stringify([...lines.toSorted(),]));
     }
-    const list: string[] = await JSONUtil.readFile(formatCache);
-    return list;
+    return await fs.readFile(formatCache).then(CodecUtil.fromJSON<string[]>);
   }
 
   static async help(dockerImage: string, extendedHelp: boolean): Promise<string[]> {

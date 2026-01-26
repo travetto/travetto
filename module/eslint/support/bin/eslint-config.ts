@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import eslintJs from '@eslint/js';
 import type { Linter } from 'eslint';
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
@@ -5,7 +6,7 @@ import stylisticPlugin from '@stylistic/eslint-plugin';
 import unusedImports from 'eslint-plugin-unused-imports';
 import importPlugin from 'eslint-plugin-import';
 
-import { castTo, JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { castTo, CodecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { IGNORES, GLOBALS, TS_OPTIONS } from './eslint-common.ts';
 import { STD_RULES } from './eslint-std-rules.ts';
@@ -28,7 +29,7 @@ for (const plugin of plugins) {
 
 const overrides = Runtime.workspaceRelative('eslint-overrides.json');
 
-const extra: (typeof STD_RULES)[] = JSONUtil.readFileSync(overrides, []);
+const extra: (typeof STD_RULES)[] = fs.existsSync(overrides) ? CodecUtil.fromJSON(fs.readFileSync(overrides)) : [];
 
 export const rules: Linter.Config[] = [
   eslintJs.configs.recommended,

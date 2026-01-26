@@ -1,6 +1,6 @@
 import type mongo from 'mongodb';
 
-import { type TimeSpan, TimeUtil, RuntimeResources, Runtime } from '@travetto/runtime';
+import { type TimeSpan, TimeUtil, Runtime, RuntimeResources, BinaryUtil, CodecUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 
 /**
@@ -61,8 +61,6 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resolve = (file: string): Promise<string> => RuntimeResources.resolve(file).catch(() => file);
-
     if (this.connectionString) {
       const details = new URL(this.connectionString);
       this.hosts ??= details.hostname.split(',').filter(host => !!host);
@@ -88,16 +86,20 @@ export class MongoModelConfig {
     const options = this.options;
     if (options.ssl) {
       if (options.cert) {
-        options.cert = await Promise.all([options.cert].flat(2).map(data => Buffer.isBuffer(data) ? data : resolve(data)));
+        const items = [options.cert].flat(2);
+        options.cert = await Promise.all(items.map(input =>
+          BinaryUtil.isBinaryType(input) ? BinaryUtil.toBuffer(input) :
+            RuntimeResources.resolve(input).catch(() => CodecUtil.fromUTF8String(input))
+        ));
       }
       if (options.tlsCertificateKeyFile) {
-        options.tlsCertificateKeyFile = await resolve(options.tlsCertificateKeyFile);
+        options.tlsCertificateKeyFile = await RuntimeResources.resolve(options.tlsCertificateKeyFile);
       }
       if (options.tlsCAFile) {
-        options.tlsCAFile = await resolve(options.tlsCAFile);
+        options.tlsCAFile = await RuntimeResources.resolve(options.tlsCAFile);
       }
       if (options.tlsCRLFile) {
-        options.tlsCRLFile = await resolve(options.tlsCRLFile);
+        options.tlsCRLFile = await RuntimeResources.resolve(options.tlsCRLFile);
       }
     }
 

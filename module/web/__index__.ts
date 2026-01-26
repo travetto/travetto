@@ -7,6 +7,7 @@ export * from './src/types/error.ts';
 export * from './src/types/cookie.ts';
 export * from './src/types/interceptor.ts';
 export * from './src/types/headers.ts';
+export * from './src/types/message.ts';
 
 export * from './src/context.ts';
 export * from './src/config.ts';

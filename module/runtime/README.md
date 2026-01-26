@@ -19,7 +19,8 @@ Runtime is the foundation of all [Travetto](https://travetto.dev) applications. 
    *  Standard Error Support
    *  Console Management
    *  Resource Access
-   *  JSON Utilities
+   *  Encoding and Decoding Utilities
+   *  Binary Utilities
    *  Common Utilities
    *  Time Utilities
    *  Process Execution
@@ -249,25 +250,28 @@ $ DEBUG=express:*,@travetto/web npx trv run web
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L12) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L12) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
-## JSON Utilities
-The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal is ease of use, but also a centralized location for performance and security improvements over time.
+## Encoding and Decoding Utilities
+The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16) class provides a variety of static methods for encoding and decoding data.  It supports the following formats:
+   *  Hex
+   *  Base64
+   *  UTF8
 
-   *  `parseSafe(input: string | Buffer)` parses JSON safely from a string or Buffer.
-   *  `stringifyBase64(value: any)` encodes a JSON value as a base64 encoded string.
-   *  `parseBase64(input: string)` decodes a JSON value from a base64 encoded string.
-   *  `readFile(file: string)` reads a JSON file asynchronously.
-   *  `readFileSync(file: string, onMissing?: any)` reads a JSON file synchronously.
+In addition to data formats, it also supports:
+   *  Base64 encoded JSON (compression friendly)
+   *  Hashing (SHA1, SHA256, SHA512, MD5)
+   *  Stream line reading
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L11) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L14) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.
    *  `resolvablePromise()` produces a `Promise` instance with the `resolve` and `reject` methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.
+   *  `bufferedFileWrite(file:string, content: string)` will write the file, using a temporary buffer file to ensure that the entire file is written before being moved to the final location.  This helps minimize file watch noise when writing files.
 
 **Code: Sample makeTemplate Usage**
 ```typescript
@@ -276,6 +280,9 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 // produces
 '**age: 20** **name: bob**'
 ```
+
+## Binary Utilities
+The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L33) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 ## Time Utilities
 [TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L20) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
@@ -323,7 +330,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L40) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 

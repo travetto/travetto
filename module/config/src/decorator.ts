@@ -3,7 +3,7 @@ import { DependencyRegistryIndex } from '@travetto/di';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ConfigurationService, ConfigBaseType } from './service.ts';
-import { ConfigOverrideUtil } from './util.ts';
+import { ConfigOverrideUtil } from './override.ts';
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation

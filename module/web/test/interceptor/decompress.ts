@@ -1,13 +1,11 @@
 import assert from 'node:assert';
-import { brotliCompressSync, createBrotliCompress, createDeflate, createGzip, deflateSync, gzipSync } from 'node:zlib';
-import { Readable } from 'node:stream';
-import { buffer } from 'node:stream/consumers';
+import { createBrotliCompress, brotliCompressSync, deflateSync, createDeflate, createGzip, gzipSync } from 'node:zlib';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
-import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
+import { AppError, BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
 
 @Suite()
 class DecompressInterceptorSuite {
@@ -19,41 +17,28 @@ class DecompressInterceptorSuite {
 
   async decompress({ data, encoding, requestHeaders = {}, responseHeaders = {} }: {
     encoding: 'gzip' | 'br' | 'deflate' | 'identity';
-    data: number | Buffer | Readable;
+    data: number | BinaryType;
     requestHeaders?: Record<string, string>;
     responseHeaders?: Record<string, string>;
-  }): Promise<Buffer | Readable> {
+  }): Promise<BinaryType> {
     const interceptor = await DependencyRegistryIndex.getInstance(DecompressInterceptor);
     interceptor.config.applies = true;
 
     if (typeof data === 'number') {
-      data = Buffer.alloc(data);
+      data = BinaryUtil.makeBinaryArray(data, 'A');
     }
 
-    switch (encoding) {
-      case 'br': {
-        if (Buffer.isBuffer(data)) {
-          data = brotliCompressSync(data);
-        } else {
-          data = data.pipe(createBrotliCompress());
-        }
-        break;
+    if (BinaryUtil.isBinaryStream(data)) {
+      switch (encoding) {
+        case 'br': await BinaryUtil.pipeline(data, data = createBrotliCompress()); break;
+        case 'gzip': await BinaryUtil.pipeline(data, data = createGzip()); break;
+        case 'deflate': await BinaryUtil.pipeline(data, data = createDeflate()); break;
       }
-      case 'gzip': {
-        if (Buffer.isBuffer(data)) {
-          data = gzipSync(data);
-        } else {
-          data = data.pipe(createGzip());
-        }
-        break;
-      }
-      case 'deflate': {
-        if (Buffer.isBuffer(data)) {
-          data = deflateSync(data);
-        } else {
-          data = data.pipe(createDeflate());
-        }
-        break;
+    } else if (BinaryUtil.isBinaryArray(data)) {
+      switch (encoding) {
+        case 'br': data = brotliCompressSync(data); break;
+        case 'gzip': data = gzipSync(data); break;
+        case 'deflate': data = deflateSync(data); break;
       }
     }
 
@@ -65,7 +50,7 @@ class DecompressInterceptorSuite {
           path: '/',
           httpMethod: 'POST',
         },
-        body: WebBodyUtil.markRaw(data),
+        body: WebBodyUtil.markRawBinary(data),
         headers: requestHeaders
       });
       await interceptor.filter({
@@ -73,7 +58,7 @@ class DecompressInterceptorSuite {
         next: async () => new WebResponse({ headers: responseHeaders }),
         config: interceptor.config
       });
-      if (Buffer.isBuffer(request.body) || BinaryUtil.isReadable(request.body)) {
+      if (BinaryUtil.isBinaryType(request.body)) {
         return request.body;
       } else {
         throw new AppError('Unexpected return type');
@@ -94,7 +79,7 @@ class DecompressInterceptorSuite {
       encoding: 'identity',
     });
     assert(response);
-    assert(Buffer.isBuffer(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === 10000);
   }
 
@@ -105,7 +90,7 @@ class DecompressInterceptorSuite {
       encoding: 'gzip',
     });
     assert(response);
-    assert(Buffer.isBuffer(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === 10000);
   }
 
@@ -116,7 +101,7 @@ class DecompressInterceptorSuite {
       encoding: 'br',
     });
     assert(response);
-    assert(Buffer.isBuffer(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === 10000);
   }
 
@@ -127,44 +112,45 @@ class DecompressInterceptorSuite {
       encoding: 'deflate',
     });
     assert(response);
-    assert(Buffer.isBuffer(response));
+    assert(BinaryUtil.isBinaryArray(response));
     assert(response.byteLength === 10000);
   }
 
   @Test()
   async preCompressed() {
-    const preCompressed = gzipSync(Buffer.alloc(1000));
+    const preCompressed = gzipSync(BinaryUtil.makeBinaryArray(1000, 'A'));
 
     const response = await this.decompress({
       data: preCompressed,
       encoding: 'identity',
     });
     assert(response);
-    assert(Buffer.isBuffer(response));
-    assert(response.byteLength === preCompressed.length);
+    assert(BinaryUtil.isBinaryArray(response));
+    assert(response.byteLength === preCompressed.byteLength);
   }
 
   @Test()
   async stream() {
-    const data = Buffer.alloc(1000);
+    const data = BinaryUtil.makeBinaryArray(1000, 'A');
 
     const response = await this.decompress({
-      data: Readable.from(data),
+      data: BinaryUtil.toReadable(data),
       encoding: 'gzip',
     });
     assert(response);
-    assert(BinaryUtil.isReadable(response));
-    assert((await buffer(response)).byteLength === data.length);
+    assert(BinaryUtil.isBinaryStream(response));
+    const received = await BinaryUtil.toBinaryArray(response);
+    assert(received.byteLength === data.byteLength);
   }
 
   @Test()
   async invalid() {
-    const data = Buffer.alloc(1000);
+    const data = BinaryUtil.makeBinaryArray(1000, 'A');
 
     await assert.rejects(
       () =>
         this.decompress({
-          data: Readable.from(data),
+          data: BinaryUtil.toReadable(data),
           encoding: castTo('google'),
         }),
       /Unsupported.*google/

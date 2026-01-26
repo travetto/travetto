@@ -1,5 +1,5 @@
 import { DocFileUtil } from './file.ts';
-import type { CodeProps } from './types.ts';
+import type { CodeProps, CodeSourceInput } from './types.ts';
 
 export type ResolvedRef = { title: string, file: string, line: number };
 export type ResolvedCode = { text: string, language: string, file?: string };
@@ -14,7 +14,7 @@ export class DocResolveUtil {
   static async resolveRef(title: string, file: string): Promise<ResolvedRef> {
 
     let line = 0;
-    const result = await DocFileUtil.readSource(file);
+    const result = DocFileUtil.readSource(file);
     file = result.file;
 
     if (result.content) {
@@ -25,15 +25,15 @@ export class DocResolveUtil {
       } else {
         line += 1;
       }
-      if (await DocFileUtil.isDecorator(title, file)) {
+      if (DocFileUtil.isDecorator(title, file)) {
         title = `@${title}`;
       }
     }
     return { title, file, line };
   }
 
-  static async resolveCode(content: string | Function, language?: string, outline = false): Promise<ResolvedCode> {
-    const result = DocFileUtil.readSource(content);
+  static async resolveCode(content: CodeSourceInput, language?: string, outline = false): Promise<ResolvedCode> {
+    const result = DocFileUtil.readSource(await content);
     let text = result.content;
 
     let file: string | undefined;
@@ -65,7 +65,7 @@ export class DocResolveUtil {
     return { file: resolvedFile, line: startIdx + 1 };
   }
 
-  static applyCodePropDefaults(props: CodeProps) {
+  static applyCodePropDefaults(props: CodeProps): void {
     const type = typeof props.src === 'function' ? props.src : undefined;
     props.startRe ??= (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${type.name.replaceAll('$', '\\$')}\\b`) : undefined);
     props.language ??= (type ? 'typescript' : undefined);

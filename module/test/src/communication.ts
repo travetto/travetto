@@ -1,4 +1,4 @@
-import { AppError, hasToJSON, JSONUtil } from '@travetto/runtime';
+import { AppError, CodecUtil, hasToJSON } from '@travetto/runtime';
 
 /**
  * Tools for communication serialization/deserialization especially with errors
@@ -31,14 +31,14 @@ export class CommunicationUtil {
    * Serialize to a standard object, instead of a string
    */
   static serializeToObject<R = Record<string, unknown>, T = unknown>(out: T): R {
-    return JSONUtil.parseSafe(this.serialize(out));
+    return CodecUtil.fromJSON(this.serialize(out));
   }
 
   /**
    * Deserialize from JSON
    */
   static deserialize<T = unknown>(input: string): T {
-    return JSONUtil.parseSafe(input, function (key, value) {
+    return CodecUtil.fromJSON(input, function (key, value) {
       if (value && typeof value === 'object' && '$' in value) {
         const error = AppError.fromJSON(value) ?? new Error();
         if (!(error instanceof AppError)) {

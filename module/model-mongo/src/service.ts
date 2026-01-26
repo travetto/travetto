@@ -1,8 +1,7 @@
-import { pipeline } from 'node:stream/promises';
-
 import {
+  type Binary,
   type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
-  type ObjectId, type Binary, type RootFilterOperators, type Filter,
+  type ObjectId, type RootFilterOperators, type Filter,
   type WithId as MongoWithId,
 } from 'mongodb';
 
@@ -21,7 +20,7 @@ import {
 
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
-  castTo, asFull, type BlobMeta, type ByteRange, type BinaryInput, BinaryUtil
+  castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
@@ -30,7 +29,7 @@ import type { MongoModelConfig } from './config.ts';
 
 const ListIndexSymbol = Symbol();
 
-type BlobRaw = GridFSFile & { metadata?: BlobMeta };
+type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 
 type MongoTextSearch = RootFilterOperators<unknown>['$text'];
 
@@ -284,14 +283,14 @@ export class MongoModelService implements
   }
 
   // Blob
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
-    const existing = await this.getBlobMeta(location).then(() => true, () => false);
+  async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
+    const existing = await this.getBlobMetadata(location).then(() => true, () => false);
     if (!overwrite && existing) {
       return;
     }
-    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
-    const writeStream = this.#bucket.openUploadStream(location, { metadata: blobMeta });
-    await pipeline(stream, writeStream);
+    const metadata = BinaryUtil.getMetadata(input, meta);
+    const writeStream = this.#bucket.openUploadStream(location, { metadata });
+    await BinaryUtil.pipeline(input, writeStream);
 
     if (existing) {
       const [read] = await this.#bucket.find({ filename: location, _id: { $ne: writeStream.id } }).toArray();
@@ -300,14 +299,14 @@ export class MongoModelService implements
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const meta = await this.getBlobMeta(location);
+    const meta = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
     return BinaryUtil.readableBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...meta, range: final });
   }
 
-  async getBlobMeta(location: string): Promise<BlobMeta> {
-    const result = await this.#db.collection<{ metadata: BlobMeta }>(`${ModelBlobNamespace}.files`).findOne({ filename: location });
+  async getBlobMetadata(location: string): Promise<BinaryMetadata> {
+    const result = await this.#db.collection<{ metadata: BinaryMetadata }>(`${ModelBlobNamespace}.files`).findOne({ filename: location });
     return result!.metadata;
   }
 
@@ -316,8 +315,8 @@ export class MongoModelService implements
     await this.#bucket.delete(fileId);
   }
 
-  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
-    await this.#db.collection<{ metadata: BlobMeta }>(`${ModelBlobNamespace}.files`).findOneAndUpdate(
+  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
+    await this.#db.collection<{ metadata: BinaryMetadata }>(`${ModelBlobNamespace}.files`).findOneAndUpdate(
       { filename: location },
       { $set: { metadata: meta, contentType: meta.contentType! } },
     );

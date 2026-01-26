@@ -2,12 +2,12 @@ import os from 'node:os';
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
-import { buffer as toBuffer } from 'node:stream/consumers';
-import { createWriteStream } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { ImageUtil } from '@travetto/image';
+import { BinaryUtil } from '@travetto/runtime';
 
 @Suite()
 class ImageUtilSuite {
@@ -18,13 +18,13 @@ class ImageUtilSuite {
   async resizeImage() {
     const imgBuffer = await this.fixture.read('apple.jpg', true);
 
-    assert(imgBuffer.length > 0);
+    assert(imgBuffer.byteLength > 0);
 
-    const resizedBuffer = await ImageUtil.convert(imgBuffer, { h: 100, w: 100 });
+    const resizedBuffer = await BinaryUtil.toBinaryArray(await ImageUtil.convert(imgBuffer, { h: 100, w: 100 }));
 
-    assert(resizedBuffer.length > 0);
+    assert(resizedBuffer.byteLength > 0);
 
-    assert(imgBuffer.length > resizedBuffer.length);
+    assert(imgBuffer.byteLength > resizedBuffer.byteLength);
   }
 
   @Test('compress png')
@@ -34,11 +34,11 @@ class ImageUtilSuite {
 
     const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'png' });
 
-    const optimized = await toBuffer(out);
+    const optimized = await BinaryUtil.toBinaryArray(out);
 
-    assert(optimized.length > 0);
+    assert(optimized.byteLength > 0);
 
-    assert(imgBuffer.length >= optimized.length);
+    assert(imgBuffer.byteLength >= optimized.byteLength);
   }
 
   @Test('compress jpeg')
@@ -48,11 +48,11 @@ class ImageUtilSuite {
 
     const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'avif' });
 
-    const optimized = await toBuffer(out);
+    const optimized = await BinaryUtil.toBinaryArray(out);
 
-    assert(optimized.length > 0);
+    assert(optimized.byteLength > 0);
 
-    assert(imgBuffer.length >= optimized.length);
+    assert(imgBuffer.byteLength >= optimized.byteLength);
 
     assert((await ImageUtil.getMetadata(optimized)).format === 'avif');
   }
@@ -64,11 +64,11 @@ class ImageUtilSuite {
 
     const out = await ImageUtil.convert(imgStream, { optimize: true });
 
-    const optimized = await toBuffer(out);
+    const optimized = await BinaryUtil.toBinaryArray(out);
 
-    assert(optimized.length > 0);
+    assert(optimized.byteLength > 0);
 
-    assert(imgBuffer.length >= optimized.length);
+    assert(imgBuffer.byteLength >= optimized.byteLength);
 
     assert((await ImageUtil.getMetadata(optimized)).format === 'jpeg');
   }
@@ -76,7 +76,7 @@ class ImageUtilSuite {
   @Test('resizeToFile')
   async resizeToFile() {
     const imgFile = await this.fixture.resolve('lincoln.jpg');
-    const out = await ImageUtil.convert(imgFile, {
+    const out = await ImageUtil.convert(createReadStream(imgFile), {
       w: 50,
       h: 50,
       optimize: true,
@@ -86,7 +86,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getMetadata(outFile);
+    const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.height === 50);
     assert(dims.width === 50);
 
@@ -105,7 +105,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getMetadata(outFile);
+    const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.width === 100);
     assert(dims.height === 134);
 
@@ -124,7 +124,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getMetadata(outFile);
+    const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.width === 100);
     assert(dims.height === 134);
 
@@ -145,7 +145,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const meta = await ImageUtil.getMetadata(outFile);
+    const meta = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(meta.width === 200);
     assert(meta.height === 200);
 

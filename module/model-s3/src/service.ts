@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream';
-import { text as toText, buffer as toBuffer } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, type CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -9,12 +7,13 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   type ModelCrudSupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex, ExistsError, NotFoundError, type OptionalId,
-  type ModelBlobSupport, type ModelExpirySupport, ModelBlobUtil, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil
+  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil, ModelBlobUtil
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import {
-  type Class, AppError, castTo, asFull, type BlobMeta,
-  type ByteRange, type BinaryInput, BinaryUtil, type TimeSpan, TimeUtil
+  type Class, AppError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
+  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray,
+  CodecUtil,
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -43,7 +42,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   constructor(config: S3ModelConfig) { this.config = config; }
 
-  #getMetaBase({ range: _, size, ...meta }: BlobMeta): MetaBase {
+  #getMetaBase({ range: _, size, ...meta }: BinaryMetadata): MetaBase {
     return {
       ContentType: meta.contentType,
       ...(meta.contentEncoding ? { ContentEncoding: meta.contentEncoding } : {}),
@@ -117,17 +116,17 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   /**
    * Write multipart file upload, in chunks
    */
-  async #writeMultipart(id: string, input: Readable, meta: BlobMeta): Promise<void> {
+  async #writeMultipart(id: string, input: BinaryType, meta: BinaryMetadata): Promise<void> {
     const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(meta)));
 
     const parts: CompletedPart[] = [];
-    let buffers: Buffer[] = [];
+    let buffers: BinaryArray[] = [];
     let total = 0;
     let i = 1;
     const flush = async (): Promise<void> => {
       if (!total) { return; }
       const part = await this.client.uploadPart(this.#queryBlob(id, {
-        Body: Buffer.concat(buffers),
+        Body: BinaryUtil.arrayToBuffer(BinaryUtil.combineBinaryArrays(buffers)),
         PartNumber: i,
         UploadId
       }));
@@ -137,10 +136,10 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       total = 0;
     };
     try {
-      for await (const chunk of input) {
-        const chunked = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      for await (const chunk of BinaryUtil.toBinaryStream(input)) {
+        const chunked = BinaryUtil.readChunk(chunk);
         buffers.push(chunked);
-        total += chunked.length;
+        total += chunked.byteLength;
         if (total > this.config.chunkSize) {
           await flush();
         }
@@ -217,7 +216,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     try {
       const result = await this.client.getObject(this.#query(cls, id));
       if (result.Body) {
-        const body = await toText(castTo(result.Body));
+        const body = await BinaryUtil.toBinaryArray(result.Body);
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistryIndex.getConfig(cls);
@@ -247,11 +246,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
-    const content = Buffer.from(JSON.stringify(prepped), 'utf8');
+    const content = CodecUtil.fromUTF8String(JSON.stringify(prepped));
     await this.client.putObject(this.#query(cls, prepped.id, {
       Body: content,
       ContentType: 'application/json',
-      ContentLength: content.length,
+      ContentLength: content.byteLength,
       ...this.#getExpiryConfig(cls, prepped)
     }));
     return prepped;
@@ -314,53 +313,51 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Blob support
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
-    if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
+  async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
+    if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
 
-    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
+    const metadata = BinaryUtil.getMetadata(input, meta);
 
-    if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size
+    if (metadata.size && metadata.size < this.config.chunkSize) { // If smaller than chunk size
+      const blob = this.#queryBlob(location, {
+        Body: BinaryUtil.toReadable(input),
+        ContentLength: metadata.size,
+        ...this.#getMetaBase(metadata),
+      });
       // Upload to s3
-      await this.client.putObject(this.#queryBlob(location, {
-        Body: await toBuffer(stream),
-        ContentLength: blobMeta.size,
-        ...this.#getMetaBase(blobMeta),
-      }));
+      await this.client.putObject(blob);
     } else {
-      await this.#writeMultipart(location, stream, blobMeta);
+      await this.#writeMultipart(location, input, metadata);
     }
   }
 
-  async #getObject(location: string, range?: Required<ByteRange>): Promise<Readable> {
+  async #getObject(location: string, range?: Required<ByteRange>): Promise<BinaryType> {
     // Read from s3
     const result = await this.client.getObject(this.#queryBlob(location, range ? {
       Range: `bytes=${range.start}-${range.end}`
     } : {}));
 
-    if (!result.Body) {
-      throw new AppError('Unable to read type: undefined');
-    }
+    const body: BinaryType | string | undefined = castTo(result.Body);
 
-    if (typeof result.Body === 'string') { // string
-      return Readable.from(result.Body, { encoding: castTo<string>(result.Body).endsWith('=') ? 'base64' : 'utf8' });
-    } else if (result.Body instanceof Buffer) { // Buffer
-      return Readable.from(result.Body);
-    } else if ('pipe' in result.Body) { // Stream
-      return castTo<Readable>(result.Body);
+    switch (typeof body) {
+      case 'undefined': throw new AppError('Unable to read type: undefined');
+      case 'string': return body.endsWith('=') ?
+        CodecUtil.fromBase64String(body) :
+        CodecUtil.fromUTF8String(body);
+      default: return body;
     }
-    throw new AppError(`Unable to read type: ${typeof result.Body}`);
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const meta = await this.getBlobMeta(location);
+    const meta = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
-    const result = (): Promise<Readable> => this.#getObject(location, final);
+    const result = (): Promise<BinaryType> => this.#getObject(location, final);
     return BinaryUtil.readableBlob(result, { ...meta, range: final });
   }
 
-  async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {
+  async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number }> {
     const query = this.#queryBlob(location);
     try {
       return (await this.client.headObject(query));
@@ -374,11 +371,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async getBlobMeta(location: string): Promise<BlobMeta> {
+  async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const blob = await this.headBlob(location);
 
     if (blob) {
-      const meta: BlobMeta = {
+      const meta: BinaryMetadata = {
         contentType: '',
         ...blob.Metadata,
         size: blob.ContentLength!,
@@ -397,7 +394,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     await this.client.deleteObject(this.#queryBlob(location));
   }
 
-  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
+  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
     await this.client.copyObject({
       Bucket: this.config.bucket,
       Key: this.#basicKey(location),
@@ -416,7 +413,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     );
   }
 
-  async getBlobWriteUrl(location: string, meta: BlobMeta, exp: TimeSpan = '1h'): Promise<string> {
+  async getBlobWriteUrl(location: string, meta: BinaryMetadata, exp: TimeSpan = '1h'): Promise<string> {
     const base = this.#getMetaBase(meta);
     return await getSignedUrl(
       this.client,

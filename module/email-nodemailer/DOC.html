@@ -56,7 +56,7 @@ Given the integration with <a target="_blank" class="external-link" href="https:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/email-nodemailer/doc/ses.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SESClient <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@aws-sdk/client-ses'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SESv2Client<span class="token punctuation">,</span> SendEmailCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@aws-sdk/client-sesv2'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NodemailerTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email-nodemailer'</span><span class="token punctuation">;</span>
@@ -65,7 +65,10 @@ Given the integration with <a target="_blank" class="external-link" href="https:
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodemailerTransport</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
-      <span class="token constant">SES</span><span class="token operator">:</span> SESClient
+      <span class="token constant">SES</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+        sesClient<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">SESv2Client</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        SendEmailCommand
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

@@ -4,7 +4,9 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { EtagInterceptor, WebRequest, WebResponse } from '@travetto/web';
-import { TimeUtil } from '@travetto/runtime';
+import { BinaryUtil, TimeUtil } from '@travetto/runtime';
+
+const makeData = () => BinaryUtil.makeBinaryArray(3000, '123');
 
 @Suite()
 class EtagInterceptorSuite {
@@ -19,7 +21,7 @@ class EtagInterceptorSuite {
     interceptor.config.applies = true;
     interceptor.config.minimumSize = 1;
 
-    const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
+    const data = makeData();
 
     const post1 = await interceptor.filter({
       request: new WebRequest({ context: { path: '/', httpMethod: 'POST' } }),
@@ -51,7 +53,7 @@ class EtagInterceptorSuite {
     interceptor.config.applies = true;
     interceptor.config.minimumSize = 1;
 
-    const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
+    const data = makeData();
 
     const get1 = await interceptor.filter({
       request: new WebRequest({
@@ -93,7 +95,7 @@ class EtagInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(EtagInterceptor);
     interceptor.config.applies = true;
 
-    const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
+    const data = makeData();
 
     const get = await interceptor.filter({
       request: new WebRequest({
@@ -116,7 +118,7 @@ class EtagInterceptorSuite {
     interceptor.config.applies = true;
     interceptor.config.minimumSize = 1;
 
-    const data = Buffer.from(Array(1000).fill([1, 2, 3]).flat());
+    const data = makeData();
 
     const get = await interceptor.filter({
       request: new WebRequest({

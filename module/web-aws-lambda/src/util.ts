@@ -1,8 +1,6 @@
-import { buffer } from 'node:stream/consumers';
-
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
 import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {
@@ -12,7 +10,10 @@ export class AwsLambdaWebUtil {
    */
   static toWebRequest(event: APIGatewayProxyEvent): WebRequest {
     // Build request
-    const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
+    const body = !event.body ? undefined :
+      event.isBase64Encoded ?
+        CodecUtil.fromBase64String(event.body) :
+        CodecUtil.fromUTF8String(event.body);
 
     return new WebRequest({
       context: {
@@ -25,7 +26,7 @@ export class AwsLambdaWebUtil {
         path: event.path,
       },
       headers: { ...event.headers, ...event.multiValueHeaders },
-      body: WebBodyUtil.markRaw(body)
+      body: WebBodyUtil.markRawBinary(body)
     });
   }
 
@@ -37,13 +38,8 @@ export class AwsLambdaWebUtil {
       context: response.context,
       ...WebBodyUtil.toBinaryMessage(response)
     });
-    let output: Buffer = Buffer.alloc(0);
-    if (Buffer.isBuffer(binaryResponse.body)) {
-      output = binaryResponse.body;
-    } else if (binaryResponse.body) {
-      output = await buffer(binaryResponse.body);
-    }
-    const isBase64Encoded = !!output.length && base64Encoded;
+    const output: BinaryArray = await BinaryUtil.toBinaryArray(binaryResponse.body);
+    const isBase64Encoded = !!output.byteLength && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};
 
@@ -58,7 +54,7 @@ export class AwsLambdaWebUtil {
     return {
       statusCode: WebCommonUtil.getStatusCode(binaryResponse),
       isBase64Encoded,
-      body: output.toString(isBase64Encoded ? 'base64' : 'utf8'),
+      body: isBase64Encoded ? CodecUtil.toBase64String(output) : CodecUtil.toUTF8String(output),
       headers,
       multiValueHeaders,
     };

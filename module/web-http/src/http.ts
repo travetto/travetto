@@ -2,11 +2,10 @@ import type net from 'node:net';
 import http from 'node:http';
 import http2 from 'node:http2';
 import https from 'node:https';
-import { pipeline } from 'node:stream/promises';
 import { TLSSocket } from 'node:tls';
 
 import { WebBodyUtil, WebCommonUtil, type WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
-import { BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
+import { type BinaryType, BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
 
 import type { WebSecureKeyPair, WebServerHandle } from './types.ts';
 
@@ -119,7 +118,7 @@ export class WebHttpUtil {
         httpQuery: Object.fromEntries(new URLSearchParams(query)),
       },
       headers: request.headers,
-      body: WebBodyUtil.markRaw(request)
+      body: WebBodyUtil.markRawBinary(request)
     });
   }
 
@@ -127,18 +126,14 @@ export class WebHttpUtil {
    * Send WebResponse to outbound http response
    */
   static async respondToServerResponse(webResponse: WebResponse, response: HttpResponse): Promise<void> {
-    const binaryResponse = new WebResponse({ context: webResponse.context, ...WebBodyUtil.toBinaryMessage(webResponse) });
+    const binaryResponse = new WebResponse<BinaryType>({ context: webResponse.context, ...WebBodyUtil.toBinaryMessage(webResponse) });
     binaryResponse.headers.forEach((value, key) => response.setHeader(key, value));
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
-    const body = binaryResponse.body;
 
-    if (BinaryUtil.isReadable(body)) {
-      await pipeline(body, response);
-    } else {
-      if (body) {
-        // Weird type union that http2 uses
-        'stream' in response ? response.write(body) : response.write(body);
-      }
+    if (binaryResponse.body) {
+      await BinaryUtil.pipeline(binaryResponse.body, response);
+    }
+    if (!response.closed) {
       response.end();
     }
   }

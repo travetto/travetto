@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { type WebDispatcher, type WebFilterContext, type WebRequest, WebResponse } from '@travetto/web';
-import { AppError, asFull, castTo } from '@travetto/runtime';
+import { AppError, asFull, BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -11,14 +11,14 @@ import type { AwsLambdaWebHandler } from '../../src/handler.ts';
 /**
  * Create an api gateway event given a web request
  */
-function toLambdaEvent(request: WebRequest): APIGatewayProxyEvent {
+function toLambdaEvent(request: WebRequest<BinaryArray>): APIGatewayProxyEvent {
   const body = request.body;
   const headers: Record<string, string> = {};
   const multiValueHeaders: Record<string, string[]> = {};
   const queryStringParameters: Record<string, string> = {};
   const multiValueQueryStringParameters: Record<string, string[]> = {};
 
-  if (!(body === undefined || body === null || Buffer.isBuffer(body))) {
+  if (body && !BinaryUtil.isBinaryArray(body)) {
     throw new AppError('Unsupported request type, only buffer bodies supported');
   }
 
@@ -46,7 +46,7 @@ function toLambdaEvent(request: WebRequest): APIGatewayProxyEvent {
     headers,
     multiValueHeaders,
     isBase64Encoded: true,
-    body: body?.toString('base64')!,
+    body: request.body ? CodecUtil.toBase64String(request.body) : null,
     requestContext: castTo({
       identity: castTo({ sourceIp: '127.0.0.1' }),
     }),
@@ -63,13 +63,14 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
   app: AwsLambdaWebHandler;
 
   async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
-    const event = toLambdaEvent(await WebTestDispatchUtil.applyRequestBody(request));
-
+    const event = toLambdaEvent(await WebTestDispatchUtil.applyRequestBody(request, true));
     const response = await this.app.handle(event, asFull<Context>({}));
 
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse<unknown>({
-        body: Buffer.from(response.body, response.isBase64Encoded ? 'base64' : 'utf8'),
+        body: response.isBase64Encoded ?
+          CodecUtil.fromBase64String(response.body) :
+          CodecUtil.fromUTF8String(response.body),
         headers: { ...response.headers ?? {}, ...response.multiValueHeaders ?? {} },
         context: {
           httpStatusCode: response.statusCode

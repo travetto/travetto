@@ -1,4 +1,4 @@
-import { Runtime, BinaryUtil } from '@travetto/runtime';
+import { Runtime, CodecUtil } from '@travetto/runtime';
 
 import type { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types.ts';
 
@@ -32,7 +32,7 @@ export class MailUtil {
     const contentMap = new Map<string, string>();
 
     // Max of 10mb
-    html = html.replace(/data:(image\/[^;]{1,50});base64,([^"']{1,10000000})/g, (__, contentType, content) => {
+    html = html.replace(/data:(image\/[^;]{1,50});base64,([^"']{1,10000000})/g, (__, contentType: string, content: string) => {
       // Ensure same data uris map to a single cid
       if (!contentMap.has(content)) {
         const contentId = `image-${idx += 1}`;
@@ -43,7 +43,7 @@ export class MailUtil {
           headers: {
             'X-Attachment-Id': `${contentId}`
           },
-          content: Buffer.from(content, 'base64'),
+          content: CodecUtil.fromBase64String(content),
           contentDisposition: 'inline',
           contentType
         });
@@ -54,9 +54,7 @@ export class MailUtil {
       }
     });
 
-    return {
-      html, attachments
-    };
+    return { html, attachments };
   }
 
   /**
@@ -78,7 +76,7 @@ export class MailUtil {
   static buildUniqueMessageId(message: EmailOptions): string {
     const from = this.getPrimaryEmail(message.from)!;
     const to = this.getPrimaryEmail(message.to)!;
-    const uniqueId = BinaryUtil.hash(`${to}${from}${message.subject}${Date.now()}`, 12);
+    const uniqueId = CodecUtil.hash(`${to}${from}${message.subject}${Date.now()}`, { length: 12 });
     return `<${uniqueId}@${from.split('@')[1]}>`;
   }
 }

@@ -1,16 +1,15 @@
 import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
-import type { Readable } from 'node:stream';
-import { createInterface } from 'node:readline/promises';
 
 import { castTo } from './types.ts';
 import { RuntimeIndex } from './manifest-index.ts';
+import { BinaryUtil, type BinaryArray } from './binary.ts';
 
 const ResultSymbol = Symbol();
 
 /**
  * Result of an execution
  */
-export interface ExecutionResult<T extends string | Buffer = string | Buffer> {
+export interface ExecutionResult<T extends string | BinaryArray = string | BinaryArray> {
   /**
    * Stdout
    */
@@ -50,12 +49,12 @@ export class ExecUtil {
    */
   static getResult(subProcess: ChildProcess): Promise<ExecutionResult<string>>;
   static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
-  static getResult<T extends string | Buffer>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<BinaryArray>>;
+  static getResult<T extends string | BinaryArray>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
     const typed: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
     const result = typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
-      const stdout: Buffer[] = [];
-      const stderr: Buffer[] = [];
+      const stdout: BinaryArray[] = [];
+      const stderr: BinaryArray[] = [];
       let done = false;
       const finish = (finalResult: ExecutionBaseResult): void => {
         if (done) {
@@ -64,13 +63,13 @@ export class ExecUtil {
         done = true;
 
         const buffers = {
-          stdout: Buffer.concat(stdout),
-          stderr: Buffer.concat(stderr),
+          stdout: BinaryUtil.combineBinaryArrays(stdout),
+          stderr: BinaryUtil.combineBinaryArrays(stderr),
         };
 
         const final = {
-          stdout: options.binary ? buffers.stdout : buffers.stdout.toString('utf8'),
-          stderr: options.binary ? buffers.stderr : buffers.stderr.toString('utf8'),
+          stdout: options.binary ? buffers.stdout : buffers.stdout.toString(subProcess.stdout?.readableEncoding ?? 'utf8'),
+          stderr: options.binary ? buffers.stderr : buffers.stderr.toString(subProcess.stderr?.readableEncoding ?? 'utf8'),
           ...finalResult
         };
 
@@ -80,8 +79,8 @@ export class ExecUtil {
         );
       };
 
-      subProcess.stdout?.on('data', (data: string | Buffer) => stdout.push(Buffer.isBuffer(data) ? data : Buffer.from(data)));
-      subProcess.stderr?.on('data', (data: string | Buffer) => stderr.push(Buffer.isBuffer(data) ? data : Buffer.from(data)));
+      subProcess.stdout?.on('data', data => stdout.push(BinaryUtil.readChunk(data, subProcess.stdout?.readableEncoding)));
+      subProcess.stderr?.on('data', data => stderr.push(BinaryUtil.readChunk(data, subProcess.stderr?.readableEncoding)));
 
       subProcess.on('error', (error: Error) =>
         finish({ code: 1, message: error.message, valid: false }));
@@ -101,15 +100,6 @@ export class ExecUtil {
         throw new Error(executionResult.message);
       }
     }));
-  }
-
-  /**
-   * Consume lines
-   */
-  static async readLines(stream: Readable, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
-    for await (const item of createInterface(stream)) {
-      await handler(item);
-    }
   }
 
   /** Spawn a package command */

@@ -59,9 +59,8 @@ export class FirestoreModelConfig {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
     if (this.credentialsFile && !this.credentials) {
-      this.credentials = FirestoreModelConfigCredentials.from(
-        await RuntimeResources.readJSON(this.credentialsFile)
-      );
+      const bytes = await RuntimeResources.read(this.credentialsFile, true);
+      this.credentials = FirestoreModelConfigCredentials.from(CodecUtil.fromJSON(bytes));
       await SchemaValidator.validate(FirestoreModelConfigCredentials, this.credentials);
     }
   }

@@ -9,4 +9,6 @@ export type RunConfig = {
   spawn?: (cmd: string, args: string[], options: SpawnOptions) => ChildProcess;
 };
 
-export type CodeProps = { title?: string, src: string | Function, language?: string, outline?: boolean, startRe?: RegExp, endRe?: RegExp };
+export type CodeSourceInput = string | Promise<string> | Function;
+
+export type CodeProps = { title?: string, src: CodeSourceInput, language?: string, outline?: boolean, startRe?: RegExp, endRe?: RegExp };

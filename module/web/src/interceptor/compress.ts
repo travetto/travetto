@@ -1,8 +1,8 @@
-import { buffer } from 'node:stream/consumers';
 import { type BrotliOptions, constants, createBrotliCompress, createDeflate, createGzip, type ZlibOptions } from 'node:zlib';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { BinaryUtil } from '@travetto/runtime';
 
 import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import type { WebInterceptorCategory } from '../types/core.ts';
@@ -75,7 +75,7 @@ export class CompressInterceptor implements WebInterceptor {
 
     const binaryResponse = new WebResponse({ context: response.context, ...WebBodyUtil.toBinaryMessage(response) });
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
-    const len = Buffer.isBuffer(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
+    const len = BinaryUtil.isBinaryArray(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
 
     if (len !== undefined && len >= 0 && len < chunkSize || !binaryResponse.body) {
       return binaryResponse;
@@ -87,15 +87,15 @@ export class CompressInterceptor implements WebInterceptor {
     // If we are compressing
     binaryResponse.headers.set('Content-Encoding', type);
 
-    if (Buffer.isBuffer(binaryResponse.body)) {
-      stream.end(binaryResponse.body);
-      const out = await buffer(stream);
-      binaryResponse.body = out;
-      binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
-    } else {
-      binaryResponse.body.pipe(stream);
+    if (BinaryUtil.isBinaryStream(binaryResponse.body)) {
+      BinaryUtil.pipeline(binaryResponse.body, stream);
       binaryResponse.body = stream;
       binaryResponse.headers.delete('Content-Length');
+    } else {
+      await BinaryUtil.pipeline(binaryResponse.body, stream);
+      const out = await BinaryUtil.toBinaryArray(stream);
+      binaryResponse.body = out;
+      binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
     }
 
     return binaryResponse;

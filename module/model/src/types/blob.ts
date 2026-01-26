@@ -1,4 +1,4 @@
-import type { BinaryInput, BlobMeta, ByteRange, TimeSpan } from '@travetto/runtime';
+import type { BinaryType, BinaryMetadata, ByteRange, TimeSpan } from '@travetto/runtime';
 
 /**
  * Support for Blobs CRUD.
@@ -14,7 +14,7 @@ export interface ModelBlobSupport {
    * @param meta Additional metadata to store with the blob
    * @param overwrite Should we replace content if already found, defaults to true
    */
-  upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite?: boolean): Promise<void>;
+  upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite?: boolean): Promise<void>;
 
   /**
    * Get blob from storage
@@ -26,7 +26,7 @@ export interface ModelBlobSupport {
    * Get metadata for blob
    * @param location The location of the blob
    */
-  getBlobMeta(location: string): Promise<BlobMeta>;
+  getBlobMetadata(location: string): Promise<BinaryMetadata>;
 
   /**
    * Delete blob by location
@@ -38,7 +38,7 @@ export interface ModelBlobSupport {
    * Update blob metadata
    * @param location The location of the blob
    */
-  updateBlobMeta(location: string, meta: BlobMeta): Promise<void>;
+  updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void>;
 
   /**
    * Produces an externally usable URL for sharing limited read access to a specific resource
@@ -55,5 +55,5 @@ export interface ModelBlobSupport {
    * @param meta The metadata to associate with the final asset
    * @param exp Expiry
    */
-  getBlobWriteUrl?(location: string, meta: BlobMeta, exp?: TimeSpan): Promise<string>;
+  getBlobWriteUrl?(location: string, meta: BinaryMetadata, exp?: TimeSpan): Promise<string>;
 }

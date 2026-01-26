@@ -1,13 +1,10 @@
-import { Readable } from 'node:stream';
-import { buffer } from 'node:stream/consumers';
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
-
-const toBuffer = (src: Buffer | Readable) => Buffer.isBuffer(src) ? src : buffer(src);
+import { BinaryUtil, CodecUtil } from '@travetto/runtime';
 
 @Suite()
 class BodyInterceptorSuite {
@@ -30,7 +27,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
+      body: WebBodyUtil.markRawBinary(CodecUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -55,7 +52,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
+      body: WebBodyUtil.markRawBinary(CodecUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -72,7 +69,7 @@ class BodyInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
-    const stream = Readable.from(Buffer.alloc(1000));
+    const stream = BinaryUtil.toReadable(BinaryUtil.makeBinaryArray(1000, 'A'));
     const request = new WebRequest({
       context: {
         path: '/',
@@ -81,7 +78,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'image/jpeg'
       },
-      body: WebBodyUtil.markRaw(stream)
+      body: WebBodyUtil.markRawBinary(stream)
     });
 
     const response = await interceptor.filter({
@@ -90,9 +87,9 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.length === 1000);
-    assert(!responseBuffer.some(x => x !== 0));
+    const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
+    assert(responseBuffer.byteLength === 1000);
+    assert(!BinaryUtil.arrayToBuffer(responseBuffer).some(x => x !== 65));
   }
 
   @Test()
@@ -112,7 +109,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain; charset=euc-kr',
       },
-      body: WebBodyUtil.markRaw(Readable.from(koreanInput))
+      body: WebBodyUtil.markRawBinary(koreanInput)
     });
 
     const response = await interceptor.filter({
@@ -121,8 +118,8 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.length === koreanOutput.length);
+    const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
+    assert(responseBuffer.byteLength === koreanOutput.byteLength);
   }
 
   @Test()
@@ -141,7 +138,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'binary/ignore',
       },
-      body: WebBodyUtil.markRaw(Readable.from(koreanInput))
+      body: WebBodyUtil.markRawBinary(koreanInput)
     });
 
     const response = await interceptor.filter({
@@ -150,8 +147,8 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.length === koreanInput.length);
+    const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
+    assert(responseBuffer.byteLength === koreanInput.byteLength);
   }
 
   @Test()
@@ -170,7 +167,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain', // Will use utf8
       },
-      body: WebBodyUtil.markRaw(Readable.from(koreanInput))
+      body: WebBodyUtil.markRawBinary(koreanInput)
     });
 
     const response = await interceptor.filter({
@@ -179,8 +176,8 @@ class BodyInterceptorSuite {
       config
     });
 
-    const responseBuffer = await toBuffer(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.length === Buffer.from(koreanInput.toString('utf8')).length);
+    const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
+    assert(responseBuffer.byteLength === Buffer.from(koreanInput.toString('utf8')).byteLength);
   }
 
   @Test()
@@ -196,7 +193,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain; charset=orange',
       },
-      body: WebBodyUtil.markRaw(Buffer.alloc(0))
+      body: WebBodyUtil.markRawBinary(BinaryUtil.makeBinaryArray(0))
     });
 
     await assert.rejects(
@@ -225,7 +222,7 @@ class BodyInterceptorSuite {
             'Content-Type': 'text/plain',
             'Content-Length': '20000'
           },
-          body: WebBodyUtil.markRaw(Buffer.alloc(20000))
+          body: WebBodyUtil.markRawBinary(BinaryUtil.makeBinaryArray(20000))
         }),
         next: async () => null!,
         config
@@ -244,7 +241,7 @@ class BodyInterceptorSuite {
             headers: {
               'Content-Type': 'text/plain',
             },
-            body: WebBodyUtil.markRaw(Buffer.alloc(20000))
+            body: WebBodyUtil.markRawBinary(BinaryUtil.makeBinaryArray(20000))
           }),
           next: async () => null!,
           config
@@ -269,7 +266,7 @@ class BodyInterceptorSuite {
             'Content-Type': 'text/plain',
             'Content-Length': '20000'
           },
-          body: WebBodyUtil.markRaw(Buffer.alloc(20001))
+          body: WebBodyUtil.markRawBinary(BinaryUtil.makeBinaryArray(20001))
         }),
         next: async () => null!,
         config

@@ -1,7 +1,7 @@
 import { ExtensionContext } from 'vscode';
 import http from 'node:http';
 
-import { Env, JSONUtil } from '@travetto/runtime';
+import { BinaryUtil, Env, JSONUtil, type ByteArray } from '@travetto/runtime';
 
 import { TargetEvent } from './types.ts';
 import { Log } from './log.ts';
@@ -9,11 +9,11 @@ import { Log } from './log.ts';
 export class IpcSupport {
 
   static async readJSONRequest<T>(request: http.IncomingMessage): Promise<T> {
-    const chunks: Buffer[] = [];
+    const chunks: ByteArray[] = [];
     for await (const chunk of request) {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      chunks.push(BinaryUtil.readChunk(chunk));
     }
-    return JSONUtil.parseSafe(Buffer.concat(chunks));
+    return JSONUtil.parseSafe(BinaryUtil.combineByteArrays(chunks));
   }
 
   #controller = new AbortController();

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { parse, stringify } from 'yaml';
 
-import { Runtime, BinaryUtil } from '@travetto/runtime';
+import { Runtime, Util } from '@travetto/runtime';
 
 import type { EditorConfigType } from './types.ts';
 
@@ -51,7 +51,7 @@ export class EditorConfig {
   static async ensureConfig(): Promise<string> {
     const resolved = Runtime.workspaceRelative(CONFIG_FILE);
     if (!(await fs.stat(resolved).catch(() => { }))) {
-      await BinaryUtil.bufferedFileWrite(resolved, this.getDefaultConfig());
+      await Util.bufferedFileWrite(resolved, this.getDefaultConfig());
     }
     return resolved;
   }
