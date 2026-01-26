@@ -3,7 +3,6 @@ import { c, d } from '@travetto/doc';
 import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager, CodecUtil, BinaryUtil } from '@travetto/runtime';
 
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
-const BinaryArrayConcrete = d.codeLink('BinaryArrayConcrete', 'src/binary.ts', /export type BinaryArray/);
 
 export const text = <>
   <c.StdHeader />
