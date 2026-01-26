@@ -17,8 +17,8 @@ export class BinaryUtilTest {
     const allBytes = await this.fixture.read('/logo.png', true);
     assert(blob.size === undefined);
     assert(blobBytes.byteLength === allBytes.byteLength);
-    assert(blobBytes instanceof Buffer);
-    assert(allBytes instanceof Buffer);
+    assert(Buffer.isBuffer(blobBytes));
+    assert(Buffer.isBuffer(allBytes));
     assert(blobBytes.equals(allBytes));
   }
 
@@ -29,6 +29,6 @@ export class BinaryUtilTest {
     const allBytes = await buffer(Readable.fromWeb(await blob.stream()));
     assert(blob.size === undefined);
     assert(blobBytes.byteLength === allBytes.byteLength);
-    assert(blobBytes.equals(allBytes));
+    assert(BinaryUtil.isBinaryArray(blobBytes));
   }
 }

@@ -11,7 +11,7 @@ import { type Any, type BinaryMetadata, castTo, hasFunction } from './types.ts';
 const BlobMetaSymbol = Symbol();
 
 const BINARY_CONSTRUCTORS = [Readable, Buffer, Blob, File, ReadableStream, ArrayBuffer, Uint8Array, Uint16Array, Uint32Array];
-export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Buffer | ArrayBuffer;
+export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Buffer<ArrayBuffer> | ArrayBuffer;
 export type BinaryStream = Readable | ReadableStream | AsyncIterable<BinaryArray>;
 export type BinaryType = BinaryArray | BinaryStream | Blob;
 
@@ -97,9 +97,9 @@ export class BinaryUtil {
   }
 
   /** Convert binary array to an explicit buffer  */
-  static arrayToBuffer(input: BinaryArray): Buffer {
+  static arrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {
     if (Buffer.isBuffer(input)) {
-      return input;
+      return castTo(input);
     } else if (isUint8Array(input) || isUint16Array(input) || isUint32Array(input)) {
       return Buffer.from(input);
     } else {
@@ -121,7 +121,7 @@ export class BinaryUtil {
   }
 
   /** Convert input to a buffer  */
-  static async toBuffer(input: BinaryType): Promise<Buffer> {
+  static async toBuffer(input: BinaryType): Promise<Buffer<ArrayBuffer>> {
     const bytes = await this.toBinaryArray(input);
     return this.arrayToBuffer(bytes);
   }

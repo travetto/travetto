@@ -57,14 +57,14 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     && Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
 }
 
-function registerTimeout<T extends (number | string | { unref(): unknown })>(
+function registerTimeout<T>(
   controller: AbortController,
   timeout: number,
   start: (fn: (...args: unknown[]) => unknown, delay: number) => T,
   stop: (value: T) => void
 ): void {
   const timer = start(() => controller.abort(), timeout);
-  if (!(typeof timer === 'number' || typeof timer === 'string')) {
+  if (timer && typeof timer === 'object' && 'unref' in timer && typeof timer.unref === 'function') {
     timer.unref();
   }
   controller.signal.onabort = (): void => { timer && stop(timer); };

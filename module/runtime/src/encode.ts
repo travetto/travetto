@@ -1,6 +1,7 @@
 import crypto, { type BinaryToTextEncoding } from 'node:crypto';
-import { BinaryUtil, type BinaryArray, type BinaryStream, type BinaryType } from './binary.ts';
 import { createInterface } from 'node:readline/promises';
+
+import { BinaryUtil, type BinaryArray, type BinaryStream, type BinaryType } from './binary.ts';
 
 type HashConfig = {
   length?: number;
@@ -14,7 +15,7 @@ type HashConfig = {
 export class EncodeUtil {
 
   /** Generate buffer from hex string  */
-  static fromHexString(value: string): Buffer {
+  static fromHexString(value: string): Buffer<ArrayBuffer> {
     return Buffer.from(value, 'hex');
   }
 
@@ -24,7 +25,7 @@ export class EncodeUtil {
   }
 
   /** Return buffer from base64 string  */
-  static fromBase64String(value: string): Buffer {
+  static fromBase64String(value: string): Buffer<ArrayBuffer> {
     return Buffer.from(value, 'base64');
   }
 
@@ -34,7 +35,7 @@ export class EncodeUtil {
   }
 
   /** Return buffer from utf8 string  */
-  static fromUTF8String(value: string): Buffer {
+  static fromUTF8String(value: string): Buffer<ArrayBuffer> {
     return Buffer.from(value ?? '', 'utf8');
   }
 
@@ -44,12 +45,12 @@ export class EncodeUtil {
   }
 
   /** Convert utf8 value to base64 value string  */
-  static utf8ToBase64(value: string | Buffer): string {
+  static utf8ToBase64(value: string | Buffer<ArrayBuffer>): string {
     return (Buffer.isBuffer(value) ? value : Buffer.from(value, 'utf8')).toString('base64');
   }
 
   /** Convert base64 value to utf8 string  */
-  static base64ToUTF8(value: string | Buffer): string {
+  static base64ToUTF8(value: string | Buffer<ArrayBuffer>): string {
     return (Buffer.isBuffer(value) ? value : Buffer.from(value, 'base64')).toString('utf8');
   }
 

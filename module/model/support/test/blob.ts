@@ -166,7 +166,6 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
       contentType: 'image/jpeg',
     });
 
-    console.log(writable);
     assert(writable);
 
     const response = await fetch(writable, {
