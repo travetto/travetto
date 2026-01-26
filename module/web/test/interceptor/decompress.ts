@@ -137,11 +137,8 @@ class DecompressInterceptorSuite {
       data: BinaryUtil.toReadable(data),
       encoding: 'gzip',
     });
-
     assert(response);
-
     assert(BinaryUtil.isBinaryStream(response));
-
     const received = await BinaryUtil.toBinaryArray(response);
     assert(received.byteLength === data.byteLength);
   }
