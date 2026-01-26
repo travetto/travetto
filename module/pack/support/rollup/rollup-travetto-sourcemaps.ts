@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 
 import type { LoadResult, Plugin, PluginContext, SourceMapInput } from 'rollup';
 
-import { FileLoader, JSONUtil } from '@travetto/runtime';
+import { CodecUtil, FileLoader } from '@travetto/runtime';
 
 import type { CoreRollupConfig } from '../../src/types.ts';
 
@@ -30,8 +30,7 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
             return null;
           }
           const loader = new FileLoader([path.dirname(id)]);
-          const bytes = await loader.read(mapPath, true);
-          const map: SourceMapInput = await JSONUtil.parseSafe(bytes);
+          const map = await loader.read(mapPath, true).then(CodecUtil.fromJSON<SourceMapInput>);
           return { code, map };
         }
         return { code, map: null };

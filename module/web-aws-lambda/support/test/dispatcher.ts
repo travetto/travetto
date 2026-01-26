@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { type WebDispatcher, type WebFilterContext, type WebRequest, WebResponse } from '@travetto/web';
-import { AppError, asFull, BinaryUtil, castTo, EncodeUtil, type BinaryArray } from '@travetto/runtime';
+import { AppError, asFull, BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -46,7 +46,7 @@ function toLambdaEvent(request: WebRequest<BinaryArray>): APIGatewayProxyEvent {
     headers,
     multiValueHeaders,
     isBase64Encoded: true,
-    body: request.body ? EncodeUtil.toBase64String(request.body) : null,
+    body: request.body ? CodecUtil.toBase64String(request.body) : null,
     requestContext: castTo({
       identity: castTo({ sourceIp: '127.0.0.1' }),
     }),
@@ -69,8 +69,8 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse<unknown>({
         body: response.isBase64Encoded ?
-          EncodeUtil.fromBase64String(response.body) :
-          EncodeUtil.fromUTF8String(response.body),
+          CodecUtil.fromBase64String(response.body) :
+          CodecUtil.fromUTF8String(response.body),
         headers: { ...response.headers ?? {}, ...response.multiValueHeaders ?? {} },
         context: {
           httpStatusCode: response.statusCode

@@ -3,7 +3,7 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, JSONUtil } from '@travetto/runtime';
+import { type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, CodecUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -190,7 +190,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const file = await this.#find(ModelBlobNamespace, META, location);
     const content = await fs.readFile(file);
-    const text: BinaryMetadata = JSONUtil.parseSafe(content);
+    const text: BinaryMetadata = CodecUtil.fromJSON(content);
     return text;
   }
 

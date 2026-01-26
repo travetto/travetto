@@ -20,6 +20,7 @@ Runtime is the foundation of all [Travetto](https://travetto.dev) applications. 
    *  Console Management
    *  Resource Access
    *  JSON Utilities
+   *  Binary Utilities
    *  Common Utilities
    *  Time Utilities
    *  Process Execution
@@ -249,21 +250,26 @@ $ DEBUG=express:*,@travetto/web npx trv run web
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L13) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L13) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## JSON Utilities
 The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal is ease of use, but also a centralized location for performance and security improvements over time.
 
-   *  `parseSafe(input: string | BinaryArray)` parses JSON safely from a string or [BinaryArrayConcrete](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L19).
+   *  `parseSafe(input: string | BinaryArray)` parses JSON safely from a string or [BinaryArrayConcrete](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L14).
    *  `stringifyBase64(value: any)` encodes a JSON value as a base64 encoded string.
    *  `parseBase64(input: string)` decodes a JSON value from a base64 encoded string.
-   *  `readFile(file: string)` reads a JSON file asynchronously.
-   *  `readFileSync(file: string, onMissing?: any)` reads a JSON file synchronously.
+
+## Binary Utilities
+The framework provides utilities for working with binary data. This includes methods for converting between different binary types, such as `Buffer`, `ArrayBuffer`, and various typed arrays. It also includes methods for encoding and decoding binary data to and from Base64 strings, as well as reading binary files from the filesystem.
+   *  `toBuffer(input: BinaryArray)` converts various binary types to a `Buffer`.
+   *  `fromBuffer(buffer: Buffer, targetType: Function)` converts a `Buffer` to the specified binary type.
+   *  `encodeBase64(input: BinaryArray)` encodes binary data to a Base64 string.
+   *  `decodeBase64(input: string)` decodes a Base64 string to a `Buffer`.
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L11) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L14) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.

@@ -3,7 +3,7 @@ import type { CompileResult, Options } from 'sass';
 
 import type { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageUtil } from '@travetto/image';
-import { BinaryUtil, EncodeUtil, RuntimeIndex, type BinaryArray } from '@travetto/runtime';
+import { BinaryUtil, CodecUtil, RuntimeIndex, type BinaryArray } from '@travetto/runtime';
 
 type Tokenized = {
   text: string;
@@ -154,7 +154,7 @@ export class EmailCompileUtil {
       } else {
         bytes = await options.loader.read(source, true);
       }
-      return [token, `data:image/${format};base64,${EncodeUtil.toBase64String(bytes)}`] as const;
+      return [token, `data:image/${format};base64,${CodecUtil.toBase64String(bytes)}`] as const;
     });
 
     const imageMap = new Map(await Promise.all(pendingImages));

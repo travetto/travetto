@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import mustache from 'mustache';
 
-import { castKey, castTo, EncodeUtil, ExecUtil, JSONUtil, RuntimeIndex } from '@travetto/runtime';
+import { castKey, castTo, CodecUtil, ExecUtil, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 import { type NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
@@ -63,7 +63,7 @@ export class Context {
     });
 
     if (subProcess.stderr) {
-      EncodeUtil.readLines(subProcess.stderr,
+      CodecUtil.readLines(subProcess.stderr,
         line => terminal.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
     }
 
@@ -83,7 +83,7 @@ export class Context {
   }
 
   get sourceListing(): Promise<Listing> {
-    return JSONUtil.readFile<Listing>(this.source('listing.json'));
+    return fs.readFile(this.source('listing.json')).then(CodecUtil.fromJSON<Listing>);
   }
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {

@@ -6,8 +6,8 @@ import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@t
 import { Env } from './env.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { describeFunction } from './function.ts';
-import { JSONUtil } from './json.ts';
 import type { Role } from './trv';
+import { CodecUtil } from './codec.ts';
 
 /** Constrained version of {@type ManifestContext} */
 class $Runtime {
@@ -119,7 +119,7 @@ class $Runtime {
       throw new Error(`Unable to find ${location}, not in the manifest`);
     } else if (location.endsWith('.json')) {
       location = this.#idx.getFromImport(location)?.sourceFile ?? location;
-      return fs.readFile(location, 'utf8').then(JSONUtil.parseSafe<T>);
+      return fs.readFile(location, 'utf8').then(CodecUtil.fromJSON<T>);
     }
 
     if (!ManifestModuleUtil.SOURCE_EXT_REGEX.test(location)) {

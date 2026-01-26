@@ -4,7 +4,7 @@ import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { BinaryUtil, EncodeUtil } from '@travetto/runtime';
+import { BinaryUtil, CodecUtil } from '@travetto/runtime';
 
 @Suite()
 class BodyInterceptorSuite {
@@ -27,7 +27,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: WebBodyUtil.markRawBinary(EncodeUtil.fromUTF8String('{ "hello": "world" }'))
+      body: WebBodyUtil.markRawBinary(CodecUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -52,7 +52,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: WebBodyUtil.markRawBinary(EncodeUtil.fromUTF8String('{ "hello": "world" }'))
+      body: WebBodyUtil.markRawBinary(CodecUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({

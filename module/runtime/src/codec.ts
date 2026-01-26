@@ -2,6 +2,7 @@ import crypto, { type BinaryToTextEncoding } from 'node:crypto';
 import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryStream, type BinaryType } from './binary.ts';
+import type { Any } from './types.ts';
 
 type HashConfig = {
   length?: number;
@@ -12,7 +13,7 @@ type HashConfig = {
 /**
  * Utilities for encoding and decoding common formats
  */
-export class EncodeUtil {
+export class CodecUtil {
 
   /** Generate buffer from hex string  */
   static fromHexString(value: string): Buffer<ArrayBuffer> {
@@ -92,5 +93,46 @@ export class EncodeUtil {
     for await (const item of createInterface(BinaryUtil.toReadable(stream))) {
       await handler(item);
     }
+  }
+
+  /**
+   * Parse JSON safely
+   */
+  static fromJSON<T>(input: BinaryArray | string, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
+    if (typeof input !== 'string') {
+      input = this.toUTF8String(input);
+    }
+    // TODO: Ensure we aren't vulnerable to prototype pollution
+    return JSON.parse(input, reviver);
+  }
+
+  /**
+   * Encode JSON value as base64 encoded string
+   */
+  static toBase64JSON<T>(value: T | undefined): string | undefined {
+    if (value === undefined) {
+      return undefined;
+    }
+    return this.utf8ToBase64(JSON.stringify(value));
+  }
+
+  /**
+   * Decode JSON value from base64 encoded string
+   */
+  static fromBase64JSON<T>(input: string): T;
+  static fromBase64JSON<T>(input?: undefined): undefined;
+  static fromBase64JSON<T>(input?: string | undefined): T | undefined {
+    if (!input) {
+      return undefined;
+    }
+
+    let decoded = CodecUtil.base64ToUTF8(input);
+
+    // Read from encoded if it happens
+    if (decoded.startsWith('%')) {
+      decoded = decodeURIComponent(decoded);
+    }
+
+    return this.fromJSON(decoded);
   }
 }

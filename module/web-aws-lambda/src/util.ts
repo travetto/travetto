@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { BinaryUtil, castTo, EncodeUtil, type BinaryArray } from '@travetto/runtime';
+import { BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
 import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {
@@ -12,8 +12,8 @@ export class AwsLambdaWebUtil {
     // Build request
     const body = !event.body ? undefined :
       event.isBase64Encoded ?
-        EncodeUtil.fromBase64String(event.body) :
-        EncodeUtil.fromUTF8String(event.body);
+        CodecUtil.fromBase64String(event.body) :
+        CodecUtil.fromUTF8String(event.body);
 
     return new WebRequest({
       context: {
@@ -54,7 +54,7 @@ export class AwsLambdaWebUtil {
     return {
       statusCode: WebCommonUtil.getStatusCode(binaryResponse),
       isBase64Encoded,
-      body: isBase64Encoded ? EncodeUtil.toBase64String(output) : EncodeUtil.toUTF8String(output),
+      body: isBase64Encoded ? CodecUtil.toBase64String(output) : CodecUtil.toUTF8String(output),
       headers,
       multiValueHeaders,
     };

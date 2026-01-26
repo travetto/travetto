@@ -134,8 +134,6 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
       <li>{d.method('parseSafe(input: string | BinaryArray)')} parses JSON safely from a string or {BinaryArrayConcrete}.</li>
       <li>{d.method('stringifyBase64(value: any)')} encodes a JSON value as a base64 encoded string.</li>
       <li>{d.method('parseBase64(input: string)')} decodes a JSON value from a base64 encoded string.</li>
-      <li>{d.method('readFile(file: string)')} reads a JSON file asynchronously.</li>
-      <li>{d.method('readFileSync(file: string, onMissing?: any)')} reads a JSON file synchronously.</li>
     </ul>
   </c.Section>
 

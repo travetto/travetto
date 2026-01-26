@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 
-import { type ExecutionResult, Env, Util, ExecUtil, castTo, EncodeUtil } from '@travetto/runtime';
+import { type ExecutionResult, Env, Util, ExecUtil, castTo, CodecUtil } from '@travetto/runtime';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -73,12 +73,12 @@ export class RepoExecUtil {
           processes.set(module, subProcess);
 
           if (config.showStdout && subProcess.stdout) {
-            EncodeUtil.readLines(subProcess.stdout, line =>
+            CodecUtil.readLines(subProcess.stdout, line =>
               stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
             );
           }
           if (config.showStderr && subProcess.stderr) {
-            EncodeUtil.readLines(subProcess.stderr, line =>
+            CodecUtil.readLines(subProcess.stderr, line =>
               stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
             );
           }

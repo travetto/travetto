@@ -1,4 +1,4 @@
-import { AppError, BinaryUtil, castTo, JSONUtil, type BinaryType, type BinaryArray, EncodeUtil } from '@travetto/runtime';
+import { AppError, BinaryUtil, castTo, type BinaryType, type BinaryArray, CodecUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { WebResponse } from '../../src/types/response.ts';
@@ -45,11 +45,11 @@ export class WebTestDispatchUtil {
       }
     }
 
-    const text = () => BinaryUtil.isBinaryArray(result) ? EncodeUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
+    const text = () => BinaryUtil.isBinaryArray(result) ? CodecUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
 
     if (text) {
       switch (response.headers.get('Content-Type')) {
-        case 'application/json': result = JSONUtil.parseSafe(castTo(text())); break;
+        case 'application/json': result = CodecUtil.fromJSON(castTo(text())); break;
         case 'text/plain': result = text(); break;
       }
     }

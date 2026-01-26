@@ -2,7 +2,7 @@ import { castTo, TypedObject } from '@travetto/runtime';
 
 import type { LIBRARIES } from './mapping/library.ts';
 import type { MODULES } from './mapping/module.ts';
-import type { CodeProps, RunConfig } from './util/types.ts';
+import type { CodeProps, CodeSourceInput, RunConfig } from './util/types.ts';
 
 import { createElement, type JSXElement, type JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
 import { PackageDocUtil } from './util/package.ts';
@@ -14,7 +14,7 @@ type HeaderProps = { title: string, description?: string };
 type ModuleProps = { name: keyof typeof MODULES };
 type LibraryProps = { name: keyof typeof LIBRARIES };
 type LinkProps = { title: string, href: string, line?: number };
-type CodeLinkProps = { title: string, src: string | Function, startRe: RegExp };
+type CodeLinkProps = { title: string, src: CodeSourceInput, startRe: RegExp };
 type Named = { name: string };
 type Titled = { title: string };
 
@@ -83,7 +83,7 @@ function CodeLinker(titleOrNode: string | JSXElement, src?: string, startRe?: Re
     props = { title: titleOrNode, src: src!, startRe: startRe! };
   } else if (titleOrNode.type === Code) {
     const node: JSXElementByFn<'Code'> = castTo(titleOrNode);
-    const srcName = typeof node.props.src === 'string' ? node.props.src : node.props.src.name;
+    const srcName = typeof node.props.src === 'string' ? node.props.src : (typeof node.props.src === 'function' ? node.props.src.name : '<UNNAMED>');
     props = {
       title: node.props.title ?? srcName,
       src: node.props.src,

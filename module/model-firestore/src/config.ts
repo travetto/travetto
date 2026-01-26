@@ -1,4 +1,4 @@
-import { JSONUtil, Runtime, RuntimeResources } from '@travetto/runtime';
+import { CodecUtil, Runtime, RuntimeResources } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Schema, SchemaValidator } from '@travetto/schema';
 
@@ -29,7 +29,7 @@ export class FirestoreModelConfig {
     }
     if (this.credentialsFile && !this.credentials) {
       const bytes = await RuntimeResources.read(this.credentialsFile, true);
-      this.credentials = FirestoreModelConfigCredentials.from(JSONUtil.parseSafe(bytes));
+      this.credentials = FirestoreModelConfigCredentials.from(CodecUtil.fromJSON(bytes));
       await SchemaValidator.validate(FirestoreModelConfigCredentials, this.credentials);
     }
   }

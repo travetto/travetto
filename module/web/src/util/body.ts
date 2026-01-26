@@ -1,6 +1,6 @@
 import { TextDecoder } from 'node:util';
 
-import { type Any, type BinaryType, BinaryUtil, type BinaryArray, castTo, JSONUtil, Util, EncodeUtil } from '@travetto/runtime';
+import { type Any, type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -8,7 +8,7 @@ import { WebError } from '../types/error.ts';
 
 const WebRawBinarySymbol = Symbol();
 
-const NULL_TERMINATOR = EncodeUtil.fromUTF8String('');
+const NULL_TERMINATOR = BinaryUtil.makeBinaryArray(0);
 
 /**
  * Utility classes for supporting web body operations
@@ -20,7 +20,7 @@ export class WebBodyUtil {
    */
   static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<BinaryArray> {
     const newLine = '\r\n';
-    const bytes = (value: string): BinaryArray => EncodeUtil.fromUTF8String(value);
+    const bytes = (value: string): BinaryArray => CodecUtil.fromUTF8String(value);
     for (const [key, value] of form.entries()) {
       const data = value.slice();
       const filename = data instanceof File ? data.name : undefined;
@@ -106,7 +106,17 @@ export class WebBodyUtil {
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
       out.body = this.buildMultiPartBody(body, boundary);
     } else {
-      const bytes = EncodeUtil.fromUTF8String(JSONUtil.serialize(body));
+      let text: string;
+      if (typeof body === 'string') {
+        text = body;
+      } else if (hasToJSON(body)) {
+        text = JSON.stringify(body.toJSON());
+      } else if (body instanceof Error) {
+        text = JSON.stringify({ message: body.message });
+      } else {
+        text = JSON.stringify(body);
+      }
+      const bytes = CodecUtil.fromUTF8String(text);
       out.headers.set('Content-Length', `${bytes.byteLength}`);
       out.body = bytes;
     }
@@ -140,7 +150,7 @@ export class WebBodyUtil {
   static parseBody(type: string, body: string): unknown {
     switch (type) {
       case 'text': return body;
-      case 'json': return JSONUtil.parseSafe(body);
+      case 'json': return CodecUtil.fromJSON(body);
       case 'form': return Object.fromEntries(new URLSearchParams(body));
     }
   }
@@ -149,7 +159,7 @@ export class WebBodyUtil {
    * Read text from an input source
    */
   static async readText(input: BinaryType, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
-    encoding ??= EncodeUtil.detectEncoding(input) ?? 'utf-8';
+    encoding ??= CodecUtil.detectEncoding(input) ?? 'utf-8';
 
     let decoder: TextDecoder;
     try {

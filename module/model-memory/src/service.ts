@@ -1,8 +1,6 @@
 import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
-  type ByteRange, type BinaryType, BinaryUtil, JSONUtil,
-  type BinaryArray,
-  EncodeUtil
+  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, CodecUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -121,7 +119,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const store = this.#getStore(cls);
     await this.#removeIndices(cls, item.id);
     if (action === 'write') {
-      store.set(item.id, EncodeUtil.fromUTF8String(JSON.stringify(item)));
+      store.set(item.id, CodecUtil.fromUTF8String(JSON.stringify(item)));
       await this.#writeIndices(cls, item);
       return item;
     } else {
@@ -239,7 +237,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const metadata = BinaryUtil.getMetadata(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, EncodeUtil.fromUTF8String(JSON.stringify(metadata)));
+    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(metadata)));
     blobs.set(location, await BinaryUtil.toBinaryArray(input));
   }
 
@@ -261,7 +259,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
-    const meta: BinaryMetadata = JSONUtil.parseSafe(metaContent.get(location)!);
+    const meta: BinaryMetadata = CodecUtil.fromJSON(metaContent.get(location)!);
     return meta;
   }
 
@@ -278,7 +276,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, EncodeUtil.fromUTF8String(JSON.stringify(meta)));
+    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(meta)));
   }
 
   // Expiry

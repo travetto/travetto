@@ -116,7 +116,7 @@ export class BinaryUtil {
     } else if (input instanceof Blob) {
       return input.arrayBuffer();
     } else {
-      return Buffer.alloc(0);
+      return this.makeBinaryArray(0);
     }
   }
 

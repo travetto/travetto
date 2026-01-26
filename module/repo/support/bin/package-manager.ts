@@ -2,7 +2,7 @@ import path from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { type ExecutionResult, JSONUtil, Runtime } from '@travetto/runtime';
+import { CodecUtil, type ExecutionResult, Runtime } from '@travetto/runtime';
 import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -34,7 +34,7 @@ export class PackageManager {
       throw new Error(result.stderr);
     }
 
-    const parsed = JSONUtil.parseSafe<{ data: { dist?: { integrity?: string } } }>(result.stdout || '{}');
+    const parsed = CodecUtil.fromJSON<{ data: { dist?: { integrity?: string } } }>(result.stdout || '{}');
     return parsed.data?.dist?.integrity !== undefined;
   }
 

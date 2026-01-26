@@ -1,4 +1,4 @@
-import { EncodeUtil, JSONUtil } from '@travetto/runtime';
+import { CodecUtil } from '@travetto/runtime';
 
 import type { CoreCacheConfig } from './types.ts';
 
@@ -13,7 +13,7 @@ export class CacheUtil {
   static generateKey(config: CoreCacheConfig, params: unknown[]): string {
     const input = config.params?.(params) ?? params;
     const keyParams = config.key?.(...input) ?? input;
-    const key = `${config.keySpace!}_${JSONUtil.stringifyBase64(keyParams)}`;
-    return EncodeUtil.hash(key, { length: 32 });
+    const key = `${config.keySpace!}_${CodecUtil.toBase64JSON(keyParams)}`;
+    return CodecUtil.hash(key, { length: 32 });
   }
 }

@@ -22,6 +22,7 @@ Runtime is the foundation of all <a target="_blank" class="external-link" href="
 <li>Console Management</li>
 <li>Resource Access</li>
 <li>JSON Utilities</li>
+<li>Binary Utilities</li>
 <li>Common Utilities</li>
 <li>Time Utilities</li>
 <li>Process Execution</li>
@@ -277,23 +278,30 @@ $ <span class="token assign-left variable">DEBUG</span><span class="token operat
 <h2 id="resource-access">Resource Access</h2>
 
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L13">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26">AppError</a> with a category of 'notfound'.  <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L13">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26">AppError</a> with a category of 'notfound'.  <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
 <h2 id="json-utilities">JSON Utilities</h2>
 
 The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal is ease of use, but also a centralized location for performance and security improvements over time.<br><br>
 
-<ul> <li><code class="item method">parseSafe(input: string | BinaryArray)</code> parses JSON safely from a string or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L19">BinaryArrayConcrete</a>.</li>
+<ul> <li><code class="item method">parseSafe(input: string | BinaryArray)</code> parses JSON safely from a string or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L14">BinaryArrayConcrete</a>.</li>
 <li><code class="item method">stringifyBase64(value: any)</code> encodes a JSON value as a base64 encoded string.</li>
 <li><code class="item method">parseBase64(input: string)</code> decodes a JSON value from a base64 encoded string.</li>
-<li><code class="item method">readFile(file: string)</code> reads a JSON file asynchronously.</li>
-<li><code class="item method">readFileSync(file: string, onMissing?: any)</code> reads a JSON file synchronously.</li>
+</ul>
+
+<h2 id="binary-utilities">Binary Utilities</h2>
+
+The framework provides utilities for working with binary data. This includes methods for converting between different binary types, such as <code class="item input">Buffer</code>, <code class="item input">ArrayBuffer</code>, and various typed arrays. It also includes methods for encoding and decoding binary data to and from Base64 strings, as well as reading binary files from the filesystem.
+<ul> <li><code class="item method">toBuffer(input: BinaryArray)</code> converts various binary types to a <code class="item input">Buffer</code>.</li>
+<li><code class="item method">fromBuffer(buffer: Buffer, targetType: Function)</code> converts a <code class="item input">Buffer</code> to the specified binary type.</li>
+<li><code class="item method">encodeBase64(input: BinaryArray)</code> encodes binary data to a Base64 string.</li>
+<li><code class="item method">decodeBase64(input: string)</code> decodes a Base64 string to a <code class="item input">Buffer</code>.</li>
 </ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L11">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L14">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
 <li><code class="item method">hash(text: string, size?: number)</code> produces a full sha512 hash.</li>
