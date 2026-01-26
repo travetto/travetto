@@ -130,7 +130,7 @@ export class MongoModelConfig {
         const items = [options.cert].flat(2);
         options.cert = await Promise.all(items.map(input =>
           BinaryUtil.isBinaryType(input) ? BinaryUtil.toBuffer(input) :
-            RuntimeResources.resolve(input).catch(() => EncodeUtil.fromUTF8String(input))
+            RuntimeResources.resolve(input).catch(() => CodecUtil.fromUTF8String(input))
         ));
       }
       if (options.tlsCertificateKeyFile) {

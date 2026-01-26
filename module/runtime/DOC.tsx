@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager } from '@travetto/runtime';
+import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager, CodecUtil } from '@travetto/runtime';
 
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
 const BinaryArrayConcrete = d.codeLink('BinaryArrayConcrete', 'src/binary.ts', /export type BinaryArray/);
@@ -16,7 +16,7 @@ export const text = <>
     <li>Standard Error Support</li>
     <li>Console Management</li>
     <li>Resource Access</li>
-    <li>JSON Utilities</li>
+    <li>Encoding and Decoding Utilities</li>
     <li>Binary Utilities</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
@@ -124,28 +124,8 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
     The {FileLoader} also supports tying itself to {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
   </c.Section>
 
-  <c.Section title='JSON Utilities'>
-    The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well
-    as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal
-    is ease of use, but also a centralized location for performance and security improvements over time.
-    <br />
-
-    <ul>
-      <li>{d.method('parseSafe(input: string | BinaryArray)')} parses JSON safely from a string or {BinaryArrayConcrete}.</li>
-      <li>{d.method('stringifyBase64(value: any)')} encodes a JSON value as a base64 encoded string.</li>
-      <li>{d.method('parseBase64(input: string)')} decodes a JSON value from a base64 encoded string.</li>
-    </ul>
-  </c.Section>
-
-  <c.Section title='Binary Utilities'>
-    The framework provides utilities for working with binary data. This includes methods for converting between different binary types, such as {d.input('Buffer')}, {d.input('ArrayBuffer')}, and various typed arrays. It also includes methods for encoding and decoding binary data to and from Base64 strings, as well as reading binary files from the filesystem.
-
-    <ul>
-      <li>{d.method('toBuffer(input: BinaryArray)')} converts various binary types to a {d.input('Buffer')}.</li>
-      <li>{d.method('fromBuffer(buffer: Buffer, targetType: Function)')} converts a {d.input('Buffer')} to the specified binary type.</li>
-      <li>{d.method('encodeBase64(input: BinaryArray)')} encodes binary data to a Base64 string.</li>
-      <li>{d.method('decodeBase64(input: string)')} decodes a Base64 string to a {d.input('Buffer')}.</li>
-    </ul>
+  <c.Section title='Encoding and Decoding Utilities'>
+    The {CodecUtil} class provides a variety of static methods for encoding and decoding data.  It supports the following formats:
   </c.Section>
 
   <c.Section title='Common Utilities'>

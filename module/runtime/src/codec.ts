@@ -65,7 +65,7 @@ export class CodecUtil {
   static hash(input: string | BinaryType, config?: HashConfig): string | Promise<string> {
     const hashAlgorithm = config?.hashAlgorithm ?? 'sha512';
     const outputEncoding = config?.outputEncoding ?? 'hex';
-    const length = config?.length ?? -1;
+    const length = config?.length;
     const hash = crypto.createHash(hashAlgorithm).setEncoding(outputEncoding);
 
     if (BinaryUtil.isBinaryStream(input) || input instanceof Blob) {

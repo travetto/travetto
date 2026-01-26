@@ -60,7 +60,7 @@ export class FirestoreModelConfig {
     }
     if (this.credentialsFile && !this.credentials) {
       const bytes = await RuntimeResources.read(this.credentialsFile, true);
-      this.credentials = FirestoreModelConfigCredentials.from(JSONUtil.parseSafe(bytes));
+      this.credentials = FirestoreModelConfigCredentials.from(CodecUtil.fromJSON(bytes));
       await SchemaValidator.validate(FirestoreModelConfigCredentials, this.credentials);
     }
   }

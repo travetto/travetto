@@ -45,7 +45,7 @@ class Config {
 
 **Code: ses to send all messages via the ses operation**
 ```typescript
-import { SESClient } from '@aws-sdk/client-ses';
+import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
 
 import { InjectableFactory } from '@travetto/di';
 import { NodemailerTransport } from '@travetto/email-nodemailer';
@@ -54,7 +54,10 @@ class Config {
   @InjectableFactory()
   static getTransport() {
     return new NodemailerTransport({
-      SES: SESClient
+      SES: {
+        sesClient: new SESv2Client(),
+        SendEmailCommand
+      },
     });
   }
 }
