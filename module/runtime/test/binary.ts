@@ -12,7 +12,7 @@ export class BinaryUtilTest {
 
   @Test()
   async verifyReadableBlob() {
-    const blob = await BinaryUtil.readableBlob(() => this.fixture.readStream('/logo.png'), {});
+    const blob = await BinaryUtil.toBlob(() => this.fixture.readStream('/logo.png'), {});
     const blobBytes = await buffer(Readable.fromWeb(await blob.stream()));
     const allBytes = await this.fixture.read('/logo.png', true);
     assert(blob.size === undefined);
@@ -24,7 +24,7 @@ export class BinaryUtilTest {
 
   @Test()
   async verifyReadableBlobMultiple() {
-    const blob = await BinaryUtil.readableBlob(() => this.fixture.readStream('/logo.png'), {});
+    const blob = await BinaryUtil.toBlob(() => this.fixture.readStream('/logo.png'), {});
     const blobBytes = await buffer(Readable.fromWeb(await blob.stream()));
     const allBytes = await buffer(Readable.fromWeb(await blob.stream()));
     assert(blob.size === undefined);

@@ -184,7 +184,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const file = await this.#find(ModelBlobNamespace, BIN, location);
     const meta = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
-    return BinaryUtil.readableBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
+    return BinaryUtil.toBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

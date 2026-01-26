@@ -254,7 +254,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
     const meta = await this.getBlobMetadata(location);
 
-    return BinaryUtil.readableBlob(() => data, { ...meta, range: final });
+    return BinaryUtil.toBlob(() => data, { ...meta, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

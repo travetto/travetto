@@ -126,7 +126,7 @@ export class WebUploadUtil {
         filename = `${filename}.${detected.ext}`;
       }
 
-      const file = BinaryUtil.readableBlob(() => createReadStream(location), {
+      const file = BinaryUtil.toBlob(() => createReadStream(location), {
         contentType: detected.mime,
         filename,
         hash: await CodecUtil.hash(createReadStream(location), { hashAlgorithm: 'sha256' }),

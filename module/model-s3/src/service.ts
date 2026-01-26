@@ -353,8 +353,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
-    const result = (): Promise<BinaryType> => this.#getObject(location, final);
-    return BinaryUtil.readableBlob(result, { ...meta, range: final });
+    return BinaryUtil.toBlob(() => this.#getObject(location, final), { ...meta, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number }> {

@@ -95,9 +95,9 @@ export class BinaryUtil {
   }
 
   /** Make a blob, and assign metadata  */
-  static readableBlob(input: () => BinaryType | Promise<BinaryType>, metadata: Omit<BinaryMetadata, 'filename'> & { filename: string }): File;
-  static readableBlob(input: () => BinaryType | Promise<BinaryType>, metadata?: BinaryMetadata): Blob;
-  static readableBlob(input: () => BinaryType | Promise<BinaryType>, metadata: BinaryMetadata = {}): Blob | File {
+  static toBlob(input: () => BinaryType | Promise<BinaryType>, metadata: Omit<BinaryMetadata, 'filename'> & { filename: string }): File;
+  static toBlob(input: () => BinaryType | Promise<BinaryType>, metadata?: BinaryMetadata): Blob;
+  static toBlob(input: () => BinaryType | Promise<BinaryType>, metadata: BinaryMetadata = {}): Blob | File {
     const go = (): Readable => {
       const stream = new PassThrough();
       Promise.resolve(input()).then(
