@@ -1,4 +1,3 @@
-import { createReadStream } from 'node:fs';
 import type { Readable } from 'node:stream';
 import type { Metadata, Sharp } from 'sharp';
 
@@ -83,9 +82,8 @@ export class ImageUtil {
    */
   static async getMetadata(image: BinaryType): Promise<ImageMetadata> {
     const { default: sharp } = await import('sharp');
-    const stream = typeof image === 'string' ? createReadStream(image) : BinaryUtil.toBinaryStream(image);
     const out = await new Promise<Metadata>((resolve, reject) =>
-      BinaryUtil.pipeline(stream, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
+      BinaryUtil.pipeline(image, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
     );
     return {
       width: out.width!,

@@ -9,7 +9,7 @@ import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, ModelBlobUtil
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -248,7 +248,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const blobs = this.#find(ModelBlobNamespace, location, 'notfound');
 
     let data = blobs.get(location)!;
-    const final = range ? BinaryUtil.enforceRange(range, data.byteLength) : undefined;
+    const final = range ? ModelBlobUtil.enforceRange(range, data.byteLength) : undefined;
 
     if (final) {
       data = BinaryUtil.sliceByteArray(data, final.start, final.end + 1);

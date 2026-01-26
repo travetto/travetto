@@ -7,8 +7,7 @@ import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
 import { createInterface } from 'node:readline/promises';
 
-import { type Any, type BinaryMetadata, type ByteRange, castTo, hasFunction } from './types.ts';
-import { AppError } from './error.ts';
+import { type Any, type BinaryMetadata, castTo, hasFunction } from './types.ts';
 
 const BlobMetaSymbol = Symbol();
 
@@ -28,6 +27,7 @@ const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
  * Common functions for dealing with binary data/streams
  */
 export class BinaryUtil {
+
   /** Is the provided value a binary constructor  */
   static isBinaryConstructor(value: Function): boolean {
     return BINARY_CONSTRUCTOR_SET.has(castTo(value));
@@ -155,18 +155,6 @@ export class BinaryUtil {
     } else {
       return this.toReadable(input);
     }
-  }
-
-  /** Enforce byte range for stream stream/file of a certain size  */
-  static enforceRange({ start, end }: ByteRange, size: number): Required<ByteRange> {
-    // End is inclusive
-    end = Math.min(end ?? (size - 1), size - 1);
-
-    if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {
-      throw new AppError('Invalid position, out of range', { category: 'data', details: { start, end, size } });
-    }
-
-    return { start, end };
   }
 
   /** Read chunk, default to toString if type is unknown  */

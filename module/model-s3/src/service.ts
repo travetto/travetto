@@ -7,7 +7,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   type ModelCrudSupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex, ExistsError, NotFoundError, type OptionalId,
-  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil
+  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil, ModelBlobUtil
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import {
@@ -352,7 +352,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.getBlobMetadata(location);
-    const final = range ? BinaryUtil.enforceRange(range, meta.size!) : undefined;
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const result = (): Promise<BinaryType> => this.#getObject(location, final);
     return BinaryUtil.readableBlob(result, { ...meta, range: final });
   }
