@@ -6,7 +6,7 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { CompressInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { BinaryUtil, type BinaryType } from '@travetto/runtime';
+import { BinaryUtil, type BinaryType, EncodeUtil } from '@travetto/runtime';
 
 @Suite()
 class CompressInterceptorSuite {
@@ -25,7 +25,7 @@ class CompressInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(CompressInterceptor);
     interceptor.config.applies = true;
 
-    let data: BinaryType = BinaryUtil.fromUTF8String('A'.repeat(size));
+    let data: BinaryType = EncodeUtil.fromUTF8String('A'.repeat(size));
     if (stream) {
       data = Readable.from(data);
     }

@@ -8,7 +8,7 @@ import { Transform } from 'node:stream';
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType, type BinaryStream } from '@travetto/runtime';
+import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType, type BinaryStream, EncodeUtil } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
@@ -129,7 +129,7 @@ export class WebUploadUtil {
       const file = BinaryUtil.readableBlob(() => createReadStream(location), {
         contentType: detected.mime,
         filename,
-        hash: await BinaryUtil.hashInput(createReadStream(location)),
+        hash: await EncodeUtil.hash(createReadStream(location), { hashAlgorithm: 'sha256' }),
         size: (await fs.stat(location)).size,
       });
 

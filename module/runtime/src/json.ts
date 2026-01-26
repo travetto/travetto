@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import { hasToJSON, type Any } from './types.ts';
 import { BinaryUtil, type BinaryArray } from './binary.ts';
+import { EncodeUtil } from './encode.ts';
 
 export type JSONParseInput = string | BinaryArray;
 
@@ -23,7 +24,7 @@ export class JSONUtil {
    */
   static parseSafe<T>(input: JSONParseInput, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
     if (typeof input !== 'string') {
-      input = BinaryUtil.toUTF8String(input);
+      input = EncodeUtil.toUTF8String(input);
     }
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, reviver);
@@ -36,20 +37,20 @@ export class JSONUtil {
     if (value === undefined) {
       return undefined;
     }
-    return BinaryUtil.utf8ToBase64(JSON.stringify(value));
+    return EncodeUtil.utf8ToBase64(JSON.stringify(value));
   }
 
   /**
    * Decode JSON value from base64 encoded string
    */
   static parseBase64<T>(input: string): T;
-  static parseBase64<T>(input?: string | undefined): T | undefined;
+  static parseBase64<T>(input?: undefined): undefined;
   static parseBase64<T>(input?: string | undefined): T | undefined {
     if (!input) {
       return undefined;
     }
 
-    let decoded = BinaryUtil.base64ToUTF8(input);
+    let decoded = EncodeUtil.base64ToUTF8(input);
 
     // Read from encoded if it happens
     if (decoded.startsWith('%')) {

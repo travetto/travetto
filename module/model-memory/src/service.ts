@@ -1,7 +1,8 @@
 import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, JSONUtil,
-  type BinaryArray
+  type BinaryArray,
+  EncodeUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -120,7 +121,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const store = this.#getStore(cls);
     await this.#removeIndices(cls, item.id);
     if (action === 'write') {
-      store.set(item.id, BinaryUtil.fromUTF8String(JSON.stringify(item)));
+      store.set(item.id, EncodeUtil.fromUTF8String(JSON.stringify(item)));
       await this.#writeIndices(cls, item);
       return item;
     } else {
@@ -238,7 +239,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const metadata = BinaryUtil.getMetadata(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, BinaryUtil.fromUTF8String(JSON.stringify(metadata)));
+    metaContent.set(location, EncodeUtil.fromUTF8String(JSON.stringify(metadata)));
     blobs.set(location, await BinaryUtil.toBinaryArray(input));
   }
 
@@ -277,7 +278,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, BinaryUtil.fromUTF8String(JSON.stringify(meta)));
+    metaContent.set(location, EncodeUtil.fromUTF8String(JSON.stringify(meta)));
   }
 
   // Expiry

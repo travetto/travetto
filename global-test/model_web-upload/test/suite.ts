@@ -6,7 +6,7 @@ import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
 import { Upload, type FileMap } from '@travetto/web-upload';
-import { Util, type BinaryMetadata, BinaryUtil, castTo, type AppError } from '@travetto/runtime';
+import { Util, type BinaryMetadata, BinaryUtil, castTo, type AppError, EncodeUtil } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
@@ -86,7 +86,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
   async getFileMeta(pth: string) {
     const loc = await this.fixture.readStream(pth);
-    return { hash: await BinaryUtil.hashInput(loc) };
+    return { hash: await EncodeUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
   }
 
   @BeforeAll()

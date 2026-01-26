@@ -13,6 +13,7 @@ import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
   BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray,
+  EncodeUtil,
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -245,7 +246,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
-    const content = BinaryUtil.fromUTF8String(JSON.stringify(prepped));
+    const content = EncodeUtil.fromUTF8String(JSON.stringify(prepped));
     await this.client.putObject(this.#query(cls, prepped.id, {
       Body: content,
       ContentType: 'application/json',
@@ -343,8 +344,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     switch (typeof body) {
       case 'undefined': throw new AppError('Unable to read type: undefined');
       case 'string': return body.endsWith('=') ?
-        BinaryUtil.fromBase64String(body) :
-        BinaryUtil.fromUTF8String(body);
+        EncodeUtil.fromBase64String(body) :
+        EncodeUtil.fromUTF8String(body);
       default: return body;
     }
   }

@@ -1,6 +1,6 @@
 import type mongo from 'mongodb';
 
-import { type TimeSpan, TimeUtil, Runtime, RuntimeResources, BinaryUtil } from '@travetto/runtime';
+import { type TimeSpan, TimeUtil, Runtime, RuntimeResources, BinaryUtil, EncodeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 
 /**
@@ -89,7 +89,7 @@ export class MongoModelConfig {
         const items = [options.cert].flat(2);
         options.cert = await Promise.all(items.map(input =>
           BinaryUtil.isBinaryType(input) ? BinaryUtil.toBuffer(input) :
-            RuntimeResources.resolve(input).catch(() => BinaryUtil.fromUTF8String(input))
+            RuntimeResources.resolve(input).catch(() => EncodeUtil.fromUTF8String(input))
         ));
       }
       if (options.tlsCertificateKeyFile) {

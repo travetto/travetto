@@ -8,7 +8,7 @@ import { Test, Suite, TestFixtures } from '@travetto/test';
 import { WebUploadUtil } from '@travetto/web-upload';
 import { BinaryUtil } from '@travetto/runtime';
 
-const makeData = () => [BinaryUtil.fromUTF8String('A'.repeat(100))];
+const makeData = () => [BinaryUtil.makeBinaryArray(100)];
 
 @Suite()
 export class BytesUtilTest {

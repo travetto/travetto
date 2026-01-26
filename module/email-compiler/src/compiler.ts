@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { TypedObject, RuntimeIndex, Runtime, BinaryUtil, ExecUtil } from '@travetto/runtime';
+import { TypedObject, RuntimeIndex, Runtime, ExecUtil, Util } from '@travetto/runtime';
 import { type EmailCompiled, MailUtil, type EmailTemplateImport, type EmailTemplateModule } from '@travetto/email';
 
 import { EmailCompileUtil } from './util.ts';
@@ -57,7 +57,7 @@ export class EmailCompiler {
     await Promise.all(TypedObject.keys(outs).map(async key => {
       if (message[key]) {
         const content = MailUtil.buildBrand(file, message[key], 'trv email:compile');
-        await BinaryUtil.bufferedFileWrite(outs[key], content);
+        await Util.bufferedFileWrite(outs[key], content);
       } else {
         await fs.rm(outs[key], { force: true }); // Remove file if data not provided
       }

@@ -1,4 +1,4 @@
-import { Runtime, BinaryUtil } from '@travetto/runtime';
+import { Runtime, EncodeUtil } from '@travetto/runtime';
 
 import type { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types.ts';
 
@@ -43,7 +43,7 @@ export class MailUtil {
           headers: {
             'X-Attachment-Id': `${contentId}`
           },
-          content: BinaryUtil.fromBase64String(content),
+          content: EncodeUtil.fromBase64String(content),
           contentDisposition: 'inline',
           contentType
         });
@@ -76,7 +76,7 @@ export class MailUtil {
   static buildUniqueMessageId(message: EmailOptions): string {
     const from = this.getPrimaryEmail(message.from)!;
     const to = this.getPrimaryEmail(message.to)!;
-    const uniqueId = BinaryUtil.hash(`${to}${from}${message.subject}${Date.now()}`, 12);
+    const uniqueId = EncodeUtil.hash(`${to}${from}${message.subject}${Date.now()}`, { length: 12 });
     return `<${uniqueId}@${from.split('@')[1]}>`;
   }
 }

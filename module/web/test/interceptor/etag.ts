@@ -6,7 +6,7 @@ import { Registry } from '@travetto/registry';
 import { EtagInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { BinaryUtil, TimeUtil } from '@travetto/runtime';
 
-const makeData = () => BinaryUtil.fromUTF8String('123'.repeat(1000));
+const makeData = () => BinaryUtil.makeBinaryArray(3000, '123');
 
 @Suite()
 class EtagInterceptorSuite {

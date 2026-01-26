@@ -3,7 +3,7 @@ import {
   type IndexDescriptionInfo
 } from 'mongodb';
 
-import { AppError, BinaryUtil, castTo, type Class, toConcrete, TypedObject } from '@travetto/runtime';
+import { AppError, EncodeUtil, castTo, type Class, toConcrete, TypedObject } from '@travetto/runtime';
 import { type DistanceUnit, type PageableModelQuery, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
@@ -50,7 +50,7 @@ export class MongoUtil {
   }
 
   static uuid(value: string): Binary {
-    return new Binary(BinaryUtil.fromHexString(value.replaceAll('-', '')), Binary.SUBTYPE_UUID);
+    return new Binary(EncodeUtil.fromHexString(value.replaceAll('-', '')), Binary.SUBTYPE_UUID);
   }
 
   static idToString(id: string | ObjectId | Binary): string {
@@ -59,7 +59,7 @@ export class MongoUtil {
     } else if (id instanceof ObjectId) {
       return id.toHexString();
     } else {
-      return BinaryUtil.toHexString(id.buffer);
+      return EncodeUtil.toHexString(id.buffer);
     }
   }
 

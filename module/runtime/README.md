@@ -249,14 +249,14 @@ $ DEBUG=express:*,@travetto/web npx trv run web
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L12) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L13) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L12) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L13) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## JSON Utilities
 The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal is ease of use, but also a centralized location for performance and security improvements over time.
 
-   *  `parseSafe(input: string | Buffer)` parses JSON safely from a string or Buffer.
+   *  `parseSafe(input: string | BinaryArray)` parses JSON safely from a string or [BinaryArrayConcrete](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L19).
    *  `stringifyBase64(value: any)` encodes a JSON value as a base64 encoded string.
    *  `parseBase64(input: string)` decodes a JSON value from a base64 encoded string.
    *  `readFile(file: string)` reads a JSON file asynchronously.
@@ -323,7 +323,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L40) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 

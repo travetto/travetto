@@ -6,6 +6,7 @@ export * from './src/context.ts';
 export * from './src/debug.ts';
 export * from './src/error.ts';
 export * from './src/exec.ts';
+export * from './src/encode.ts';
 export * from './src/env.ts';
 export * from './src/file-loader.ts';
 export * from './src/function.ts';

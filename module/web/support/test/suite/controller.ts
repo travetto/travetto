@@ -1,4 +1,4 @@
-import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
+import { AppError, BinaryUtil, castTo, EncodeUtil } from '@travetto/runtime';
 
 import { Controller } from '../../../src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch } from '../../../src/decorator/endpoint.ts';
@@ -57,13 +57,13 @@ export class TestController {
   @Get('/stream')
   @SetHeaders({ 'Content-Type': 'text/plain' })
   getStream() {
-    return BinaryUtil.toBinaryStream(BinaryUtil.fromUTF8String('hello'));
+    return BinaryUtil.toBinaryStream(EncodeUtil.fromUTF8String('hello'));
   }
 
   @Get('/buffer')
   @Produces('text/plain')
   getBuffer() {
-    return BinaryUtil.fromUTF8String('hello');
+    return EncodeUtil.fromUTF8String('hello');
   }
 
   @Get('/renderable')

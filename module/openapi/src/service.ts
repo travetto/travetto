@@ -1,7 +1,8 @@
+import { createReadStream, existsSync } from 'node:fs';
 import type { OpenAPIObject } from 'openapi3-ts/oas31';
 import { stringify } from 'yaml';
 
-import { BinaryUtil } from '@travetto/runtime';
+import { EncodeUtil, Util } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerVisitUtil, type WebConfig } from '@travetto/web';
 
@@ -76,7 +77,17 @@ export class OpenApiService {
         JSON.stringify(spec, undefined, 2) :
         stringify(spec);
 
-      await BinaryUtil.bufferedFileWrite(this.apiSpecConfig.output, output, true);
+      if (existsSync(this.apiSpecConfig.output)) {
+        const existing = await EncodeUtil.hash(createReadStream(this.apiSpecConfig.output));
+        const toWrite = await EncodeUtil.hash(output);
+
+        if (existing === toWrite) {
+          console.debug('OpenAPI spec unchanged, skipping write');
+          return;
+        }
+      }
+
+      await Util.bufferedFileWrite(this.apiSpecConfig.output, output);
     } catch (error) {
       console.error('Unable to persist openapi spec', error);
     }

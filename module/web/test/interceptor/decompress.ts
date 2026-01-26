@@ -1,14 +1,11 @@
 import assert from 'node:assert';
 import { createBrotliCompress, brotliCompressSync, deflateSync, createDeflate, createGzip, gzipSync } from 'node:zlib';
-import { Readable } from 'node:stream';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
 import { AppError, BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
-
-const mkData = (size: number) => BinaryUtil.fromUTF8String('A'.repeat(size));
 
 @Suite()
 class DecompressInterceptorSuite {
@@ -28,7 +25,7 @@ class DecompressInterceptorSuite {
     interceptor.config.applies = true;
 
     if (typeof data === 'number') {
-      data = mkData(data);
+      data = BinaryUtil.makeBinaryArray(data, 'A');
     }
 
     if (BinaryUtil.isBinaryStream(data)) {
@@ -121,7 +118,7 @@ class DecompressInterceptorSuite {
 
   @Test()
   async preCompressed() {
-    const preCompressed = gzipSync(mkData(1000));
+    const preCompressed = gzipSync(BinaryUtil.makeBinaryArray(1000, 'A'));
 
     const response = await this.decompress({
       data: preCompressed,
@@ -134,10 +131,10 @@ class DecompressInterceptorSuite {
 
   @Test()
   async stream() {
-    const data = mkData(1000);
+    const data = BinaryUtil.makeBinaryArray(1000, 'A');
 
     const response = await this.decompress({
-      data: Readable.from(data),
+      data: BinaryUtil.toReadable(data),
       encoding: 'gzip',
     });
 
@@ -151,12 +148,12 @@ class DecompressInterceptorSuite {
 
   @Test()
   async invalid() {
-    const data = mkData(1000);
+    const data = BinaryUtil.makeBinaryArray(1000, 'A');
 
     await assert.rejects(
       () =>
         this.decompress({
-          data: Readable.from(data),
+          data: BinaryUtil.toReadable(data),
           encoding: castTo('google'),
         }),
       /Unsupported.*google/

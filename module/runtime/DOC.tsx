@@ -3,7 +3,7 @@ import { c, d } from '@travetto/doc';
 import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager } from '@travetto/runtime';
 
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
-const ByteArrayConcrete = d.codeLink('ByteArrayConcrete', 'src/types/binary.ts', /export type ByteArray/);
+const BinaryArrayConcrete = d.codeLink('BinaryArrayConcrete', 'src/binary.ts', /export type BinaryArray/);
 
 export const text = <>
   <c.StdHeader />
@@ -17,6 +17,7 @@ export const text = <>
     <li>Console Management</li>
     <li>Resource Access</li>
     <li>JSON Utilities</li>
+    <li>Binary Utilities</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
     <li>Process Execution</li>
@@ -130,11 +131,22 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
     <br />
 
     <ul>
-      <li>{d.method('parseSafe(input: string | ByteArray)')} parses JSON safely from a string or {ByteArrayConcrete}.</li>
+      <li>{d.method('parseSafe(input: string | BinaryArray)')} parses JSON safely from a string or {BinaryArrayConcrete}.</li>
       <li>{d.method('stringifyBase64(value: any)')} encodes a JSON value as a base64 encoded string.</li>
       <li>{d.method('parseBase64(input: string)')} decodes a JSON value from a base64 encoded string.</li>
       <li>{d.method('readFile(file: string)')} reads a JSON file asynchronously.</li>
       <li>{d.method('readFileSync(file: string, onMissing?: any)')} reads a JSON file synchronously.</li>
+    </ul>
+  </c.Section>
+
+  <c.Section title='Binary Utilities'>
+    The framework provides utilities for working with binary data. This includes methods for converting between different binary types, such as {d.input('Buffer')}, {d.input('ArrayBuffer')}, and various typed arrays. It also includes methods for encoding and decoding binary data to and from Base64 strings, as well as reading binary files from the filesystem.
+
+    <ul>
+      <li>{d.method('toBuffer(input: BinaryArray)')} converts various binary types to a {d.input('Buffer')}.</li>
+      <li>{d.method('fromBuffer(buffer: Buffer, targetType: Function)')} converts a {d.input('Buffer')} to the specified binary type.</li>
+      <li>{d.method('encodeBase64(input: BinaryArray)')} encodes binary data to a Base64 string.</li>
+      <li>{d.method('decodeBase64(input: string)')} decodes a Base64 string to a {d.input('Buffer')}.</li>
     </ul>
   </c.Section>
 

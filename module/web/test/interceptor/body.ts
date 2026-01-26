@@ -1,13 +1,10 @@
-import { Readable } from 'node:stream';
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { BinaryUtil } from '@travetto/runtime';
-
-const mkData = (size: number) => BinaryUtil.fromUTF8String('A'.repeat(size));
+import { BinaryUtil, EncodeUtil } from '@travetto/runtime';
 
 @Suite()
 class BodyInterceptorSuite {
@@ -30,7 +27,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: WebBodyUtil.markRawBinary(BinaryUtil.fromUTF8String('{ "hello": "world" }'))
+      body: WebBodyUtil.markRawBinary(EncodeUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -55,7 +52,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: WebBodyUtil.markRawBinary(BinaryUtil.fromUTF8String('{ "hello": "world" }'))
+      body: WebBodyUtil.markRawBinary(EncodeUtil.fromUTF8String('{ "hello": "world" }'))
     });
 
     const response = await interceptor.filter({
@@ -72,7 +69,7 @@ class BodyInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
-    const stream = Readable.from(mkData(1000));
+    const stream = BinaryUtil.toReadable(BinaryUtil.makeBinaryArray(1000, 'A'));
     const request = new WebRequest({
       context: {
         path: '/',
@@ -196,7 +193,7 @@ class BodyInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain; charset=orange',
       },
-      body: WebBodyUtil.markRawBinary(mkData(0))
+      body: WebBodyUtil.markRawBinary(BinaryUtil.makeBinaryArray(0))
     });
 
     await assert.rejects(
@@ -225,7 +222,7 @@ class BodyInterceptorSuite {
             'Content-Type': 'text/plain',
             'Content-Length': '20000'
           },
-          body: WebBodyUtil.markRawBinary(mkData(20000))
+          body: WebBodyUtil.markRawBinary(BinaryUtil.makeBinaryArray(20000))
         }),
         next: async () => null!,
         config
@@ -244,7 +241,7 @@ class BodyInterceptorSuite {
             headers: {
               'Content-Type': 'text/plain',
             },
-            body: WebBodyUtil.markRawBinary(mkData(20000))
+            body: WebBodyUtil.markRawBinary(BinaryUtil.makeBinaryArray(20000))
           }),
           next: async () => null!,
           config
@@ -269,7 +266,7 @@ class BodyInterceptorSuite {
             'Content-Type': 'text/plain',
             'Content-Length': '20000'
           },
-          body: WebBodyUtil.markRawBinary(mkData(20001))
+          body: WebBodyUtil.markRawBinary(BinaryUtil.makeBinaryArray(20001))
         }),
         next: async () => null!,
         config
