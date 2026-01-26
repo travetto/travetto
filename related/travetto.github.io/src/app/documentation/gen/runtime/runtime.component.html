@@ -21,7 +21,7 @@ Runtime is the foundation of all <a target="_blank" class="external-link" href="
 <li>Standard Error Support</li>
 <li>Console Management</li>
 <li>Resource Access</li>
-<li>JSON Utilities</li>
+<li>Encoding and Decoding Utilities</li>
 <li>Binary Utilities</li>
 <li>Common Utilities</li>
 <li>Time Utilities</li>
@@ -281,22 +281,17 @@ The primary access patterns for resources, is to directly request a file, and to
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26">AppError</a> with a category of 'notfound'.  <br><br>
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
-<h2 id="json-utilities">JSON Utilities</h2>
+<h2 id="encoding-and-decoding-utilities">Encoding and Decoding Utilities</h2>
 
-The framework provides utilities for working with JSON data.  This module provides methods for reading and writing JSON files, as well as serializing and deserializing JSON data.  It also provides support for working with Base64 encoded data for web safe transfer.  The primary goal is ease of use, but also a centralized location for performance and security improvements over time.<br><br>
-
-<ul> <li><code class="item method">parseSafe(input: string | BinaryArray)</code> parses JSON safely from a string or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L14">BinaryArrayConcrete</a>.</li>
-<li><code class="item method">stringifyBase64(value: any)</code> encodes a JSON value as a base64 encoded string.</li>
-<li><code class="item method">parseBase64(input: string)</code> decodes a JSON value from a base64 encoded string.</li>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a> class provides a variety of static methods for encoding and decoding data.  It supports the following formats:
+<ul> <li>Hex</li>
+<li>Base64</li>
+<li>UTF8</li>
 </ul>
-
-<h2 id="binary-utilities">Binary Utilities</h2>
-
-The framework provides utilities for working with binary data. This includes methods for converting between different binary types, such as <code class="item input">Buffer</code>, <code class="item input">ArrayBuffer</code>, and various typed arrays. It also includes methods for encoding and decoding binary data to and from Base64 strings, as well as reading binary files from the filesystem.
-<ul> <li><code class="item method">toBuffer(input: BinaryArray)</code> converts various binary types to a <code class="item input">Buffer</code>.</li>
-<li><code class="item method">fromBuffer(buffer: Buffer, targetType: Function)</code> converts a <code class="item input">Buffer</code> to the specified binary type.</li>
-<li><code class="item method">encodeBase64(input: BinaryArray)</code> encodes binary data to a Base64 string.</li>
-<li><code class="item method">decodeBase64(input: string)</code> decodes a Base64 string to a <code class="item input">Buffer</code>.</li>
+In addition to data formats, it also supports:
+<ul> <li>Base64 encoded JSON (compression friendly)</li>
+<li>Hashing (SHA1, SHA256, SHA512, MD5)</li>
+<li>Stream line reading</li>
 </ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
@@ -306,6 +301,7 @@ Common utilities used throughout the framework. Currently <a target="_blank" cla
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
 <li><code class="item method">hash(text: string, size?: number)</code> produces a full sha512 hash.</li>
 <li><code class="item method">resolvablePromise()</code> produces a <code class="item class">Promise</code> instance with the <code class="item method">resolve</code> and <code class="item method">reject</code> methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li>
+<li><code class="item method">bufferedFileWrite(file:string, content: string)</code> will write the file, using a temporary buffer file to ensure that the entire file is written before being moved to the final location.  This helps minimize file watch noise when writing files.</li>
 </ul>
 
   <figure class="code">
@@ -317,6 +313,10 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 <span class="token comment">// produces</span>
 <span class="token string">'**age: 20** **name: bob**'</span></code></pre>
   </figure>
+
+<h2 id="binary-utilities">Binary Utilities</h2>
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L33">BinaryUtil</a> class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (<code class="item input">Buffer</code>, <code class="item input">Stream</code>) and Web Standard types (<code class="item input">Blob</code>, <code class="item input">ArrayBuffer</code>). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 <h2 id="time-utilities">Time Utilities</h2>
 
