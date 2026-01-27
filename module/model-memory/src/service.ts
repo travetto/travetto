@@ -119,7 +119,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const store = this.#getStore(cls);
     await this.#removeIndices(cls, item.id);
     if (action === 'write') {
-      store.set(item.id, CodecUtil.fromUTF8String(JSON.stringify(item)));
+      store.set(item.id, CodecUtil.toJSON(item));
       await this.#writeIndices(cls, item);
       return item;
     } else {
@@ -237,7 +237,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const resolved = BinaryBlob.getMetadata(input, metadata);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(resolved)));
+    metaContent.set(location, CodecUtil.toJSON(resolved));
     blobs.set(location, await BinaryUtil.toBinaryArray(input));
   }
 
@@ -275,7 +275,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(metadata)));
+    metaContent.set(location, CodecUtil.toJSON(metadata));
   }
 
   // Expiry

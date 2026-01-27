@@ -245,7 +245,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
-    const content = CodecUtil.fromUTF8String(JSON.stringify(prepped));
+    const content = CodecUtil.toJSON(prepped);
     await this.client.putObject(this.#query(cls, prepped.id, {
       Body: content,
       ContentType: 'application/json',

@@ -108,6 +108,13 @@ export class CodecUtil {
   }
 
   /**
+   * JSON to bytes
+   */
+  static toJSON(value: Any, replacer?: (this: unknown, key: string, value: Any) => unknown): Buffer {
+    return this.fromUTF8String(JSON.stringify(value, replacer));
+  }
+
+  /**
    * Encode JSON value as base64 encoded string
    */
   static toBase64JSON<T>(value: T | undefined): string | undefined {
