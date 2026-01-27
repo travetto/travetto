@@ -1,6 +1,6 @@
 import { TextDecoder } from 'node:util';
 
-import { type Any, type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON, BinaryBlob } from '@travetto/runtime';
+import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON, BinaryBlob } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -140,8 +140,7 @@ export class WebBodyUtil {
    * Is the input raw
    */
   static isRawBinary(body: unknown): body is BinaryType {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!body && (BinaryUtil.isBinaryType(body) && (body as Any)[WebRawBinarySymbol] === body);
+    return BinaryUtil.isBinaryType(body) && castTo<{ [WebRawBinarySymbol]: unknown }>(body)[WebRawBinarySymbol] === body;
   }
 
   /**

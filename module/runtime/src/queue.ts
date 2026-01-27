@@ -3,7 +3,7 @@
  */
 export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
 
-  #queue: X[] = [];
+  #buffer: X[] = [];
   #done = false;
   #ready = Promise.withResolvers<void>();
 
@@ -11,7 +11,7 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
    * Initial set of items
    */
   constructor(initial: Iterable<X> = [], signal?: AbortSignal) {
-    this.#queue.push(...initial);
+    this.#buffer.push(...initial);
     signal?.addEventListener('abort', () => this.close());
     if (signal?.aborted) {
       this.close();
@@ -27,11 +27,11 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
    * Wait for next event to fire
    */
   async next(): Promise<IteratorResult<X>> {
-    while (!this.#done && !this.#queue.length) {
+    while (!this.#done && !this.#buffer.length) {
       await this.#ready.promise;
       this.#ready = Promise.withResolvers<void>();
     }
-    return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };
+    return { value: (this.#buffer.length ? this.#buffer.shift() : undefined)!, done: this.#done };
   }
 
   /**
@@ -39,7 +39,7 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
    * @param {boolean} immediate Determines if item(s) should be append or prepended to the queue
    */
   add(item: X, immediate = false): void {
-    this.#queue[immediate ? 'unshift' : 'push'](item);
+    this.#buffer[immediate ? 'unshift' : 'push'](item);
     this.#ready.resolve();
   }
 

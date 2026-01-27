@@ -23,7 +23,7 @@ const isBinaryArray = (value: unknown): value is BinaryArray =>
   isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value);
 const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
 const isBinaryContainer = (value: unknown): value is BinaryContainer => value instanceof Blob;
-const isBinaryType = (value: unknown): value is BinaryType => isBinaryArray(value) || isBinaryStream(value) || isBinaryContainer(value);
+const isBinaryType = (value: unknown): value is BinaryType => !!value && (isBinaryArray(value) || isBinaryStream(value) || isBinaryContainer(value));
 
 /**
  * Common functions for dealing with binary data/streams

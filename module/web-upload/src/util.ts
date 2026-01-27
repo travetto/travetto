@@ -108,7 +108,7 @@ export class WebUploadUtil {
         pipeline(stream, this.limitWrite(config.maxSize, field), target) :
         pipeline(stream, target));
 
-      const detected = await this.getFileType(createReadStream(location));
+      const detected = await this.getFileType(createReadStream(location), location);
 
       if (!mimeCheck(detected.mime)) {
         throw new AppError(`Content type not allowed: ${detected.mime}`, { category: 'data' });
@@ -134,18 +134,13 @@ export class WebUploadUtil {
   /**
    * Get file type
    */
-  static async getFileType(input: BinaryType): Promise<FileType> {
+  static async getFileType(input: BinaryType, filename: string): Promise<FileType> {
     const { FileTypeParser } = await import('file-type');
     const { fromStream } = await import('strtok3');
 
     const parser = new FileTypeParser();
     let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
-    let filename;
-
-    if ('path' in input && typeof input.path === 'string') {
-      filename = input.path;
-    }
 
     try {
       token = await fromStream(BinaryUtil.toReadable(input));
