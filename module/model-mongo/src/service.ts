@@ -284,13 +284,13 @@ export class MongoModelService implements
   }
 
   // Blob
-  async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinaryType, metadata?: BinaryMetadata, overwrite = true): Promise<void> {
     const existing = await this.getBlobMetadata(location).then(() => true, () => false);
     if (!overwrite && existing) {
       return;
     }
-    const metadata = BinaryBlob.getMetadata(input, meta);
-    const writeStream = this.#bucket.openUploadStream(location, { metadata });
+    const resolved = BinaryBlob.getMetadata(input, metadata);
+    const writeStream = this.#bucket.openUploadStream(location, { metadata: resolved });
     await BinaryUtil.pipeline(input, writeStream);
 
     if (existing) {
@@ -300,10 +300,10 @@ export class MongoModelService implements
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const meta = await this.getBlobMetadata(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
+    const metadata = await this.getBlobMetadata(location);
+    const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
-    return new BinaryBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...meta, range: final });
+    return new BinaryBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {
@@ -316,10 +316,10 @@ export class MongoModelService implements
     await this.#bucket.delete(fileId);
   }
 
-  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
+  async updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void> {
     await this.#db.collection<{ metadata: BinaryMetadata }>(`${ModelBlobNamespace}.files`).findOneAndUpdate(
       { filename: location },
-      { $set: { metadata: meta, contentType: meta.contentType! } },
+      { $set: { metadata, contentType: metadata.contentType! } },
     );
   }
 

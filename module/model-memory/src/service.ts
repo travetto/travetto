@@ -230,14 +230,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Blob Support
-  async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinaryType, metadata?: BinaryMetadata, overwrite = true): Promise<void> {
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-    const metadata = BinaryBlob.getMetadata(input, meta);
+    const resolved = BinaryBlob.getMetadata(input, metadata);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(metadata)));
+    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(resolved)));
     blobs.set(location, await BinaryUtil.toBinaryArray(input));
   }
 
@@ -252,15 +252,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       data = BinaryUtil.sliceByteArray(data, final.start, final.end + 1);
     }
 
-    const meta = await this.getBlobMetadata(location);
+    const metadata = await this.getBlobMetadata(location);
 
-    return new BinaryBlob(data, { ...meta, range: final });
+    return new BinaryBlob(data, { ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
-    const meta: BinaryMetadata = CodecUtil.fromJSON(metaContent.get(location)!);
-    return meta;
+    return CodecUtil.fromJSON(metaContent.get(location)!);
   }
 
   async deleteBlob(location: string): Promise<void> {
@@ -274,9 +273,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     }
   }
 
-  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
+  async updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(meta)));
+    metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(metadata)));
   }
 
   // Expiry

@@ -141,8 +141,11 @@ export class WebUploadUtil {
     const parser = new FileTypeParser();
     let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
+    let filename;
 
-    const metadata = BinaryBlob.getMetadata(input);
+    if ('path' in input && typeof input.path === 'string') {
+      filename = input.path;
+    }
 
     try {
       token = await fromStream(BinaryUtil.toReadable(input));
@@ -151,12 +154,12 @@ export class WebUploadUtil {
       await token?.close();
     }
 
-    if (!matched && metadata.filename) {
+    if (!matched && filename) {
       const { Mime } = (await import('mime'));
       const otherTypes = (await import('mime/types/other.js')).default;
       const standardTypes = (await import('mime/types/standard.js')).default;
       const checker = new Mime(standardTypes, otherTypes);
-      const mime = checker.getType(metadata.filename);
+      const mime = checker.getType(filename);
       if (mime) {
         return { ext: checker.getExtension(mime)!, mime };
       }

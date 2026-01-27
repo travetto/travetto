@@ -41,14 +41,14 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   constructor(config: S3ModelConfig) { this.config = config; }
 
-  #getMetaBase({ range: _, size, ...meta }: BinaryMetadata): MetaBase {
+  #getMetaBase({ range: _, size, ...metadata }: BinaryMetadata): MetaBase {
     return {
-      ContentType: meta.contentType,
-      ...(meta.contentEncoding ? { ContentEncoding: meta.contentEncoding } : {}),
-      ...(meta.contentLanguage ? { ContentLanguage: meta.contentLanguage } : {}),
-      ...(meta.cacheControl ? { CacheControl: meta.cacheControl } : {}),
+      ContentType: metadata.contentType,
+      ...(metadata.contentEncoding ? { ContentEncoding: metadata.contentEncoding } : {}),
+      ...(metadata.contentLanguage ? { ContentLanguage: metadata.contentLanguage } : {}),
+      ...(metadata.cacheControl ? { CacheControl: metadata.cacheControl } : {}),
       Metadata: {
-        ...meta,
+        ...metadata,
         ...(size ? { size: `${size}` } : {})
       }
     };
@@ -115,8 +115,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   /**
    * Write multipart file upload, in chunks
    */
-  async #writeMultipart(id: string, input: BinaryType, meta: BinaryMetadata): Promise<void> {
-    const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(meta)));
+  async #writeMultipart(id: string, input: BinaryType, metadata: BinaryMetadata): Promise<void> {
+    const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(metadata)));
 
     const parts: CompletedPart[] = [];
     let buffers: BinaryArray[] = [];
@@ -312,23 +312,23 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Blob support
-  async upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite = true): Promise<void> {
+  async upsertBlob(location: string, input: BinaryType, metadata?: BinaryMetadata, overwrite = true): Promise<void> {
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
 
-    const metadata = BinaryBlob.getMetadata(input, meta);
+    const resolved = BinaryBlob.getMetadata(input, metadata);
 
-    if (metadata.size && metadata.size < this.config.chunkSize) { // If smaller than chunk size
+    if (resolved.size && resolved.size < this.config.chunkSize) { // If smaller than chunk size
       const blob = this.#queryBlob(location, {
         Body: BinaryUtil.toReadable(input),
-        ContentLength: metadata.size,
-        ...this.#getMetaBase(metadata),
+        ContentLength: resolved.size,
+        ...this.#getMetaBase(resolved),
       });
       // Upload to s3
       await this.client.putObject(blob);
     } else {
-      await this.#writeMultipart(location, input, metadata);
+      await this.#writeMultipart(location, input, resolved);
     }
   }
 
@@ -350,9 +350,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const meta = await this.getBlobMetadata(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
-    return new BinaryBlob(() => this.#getObject(location, final), { ...meta, range: final });
+    const metadata = await this.getBlobMetadata(location);
+    const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
+    return new BinaryBlob(() => this.#getObject(location, final), { ...metadata, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number }> {
@@ -373,16 +373,16 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const blob = await this.headBlob(location);
 
     if (blob) {
-      const meta: BinaryMetadata = {
+      const metadata: BinaryMetadata = {
         contentType: '',
         ...blob.Metadata,
         size: blob.ContentLength!,
       };
-      if (hasContentType(meta)) {
-        meta['contentType'] = meta['contenttype']!;
-        delete meta['contenttype'];
+      if (hasContentType(metadata)) {
+        metadata['contentType'] = metadata['contenttype']!;
+        delete metadata['contenttype'];
       }
-      return meta;
+      return metadata;
     } else {
       throw new NotFoundError('Blob', location);
     }
@@ -392,12 +392,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     await this.client.deleteObject(this.#queryBlob(location));
   }
 
-  async updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void> {
+  async updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void> {
     await this.client.copyObject({
       Bucket: this.config.bucket,
       Key: this.#basicKey(location),
       CopySource: `/${this.config.bucket}/${this.#basicKey(location)}`,
-      ...this.#getMetaBase(meta),
+      ...this.#getMetaBase(metadata),
       MetadataDirective: 'REPLACE'
     });
   }
@@ -411,19 +411,19 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     );
   }
 
-  async getBlobWriteUrl(location: string, meta: BinaryMetadata, exp: TimeSpan = '1h'): Promise<string> {
-    const base = this.#getMetaBase(meta);
+  async getBlobWriteUrl(location: string, metadata: BinaryMetadata, exp: TimeSpan = '1h'): Promise<string> {
+    const base = this.#getMetaBase(metadata);
     return await getSignedUrl(
       this.client,
       new PutObjectCommand({
         ...this.#queryBlob(location),
         ...base,
-        ...(meta.size ? { ContentLength: meta.size } : {}),
-        ...((meta.hash && meta.hash !== '-1') ? { ChecksumSHA256: meta.hash } : {}),
+        ...(metadata.size ? { ContentLength: metadata.size } : {}),
+        ...((metadata.hash && metadata.hash !== '-1') ? { ChecksumSHA256: metadata.hash } : {}),
       }),
       {
         expiresIn: TimeUtil.asSeconds(exp),
-        ...(meta.contentType ? { signableHeaders: new Set(['content-type']) } : {})
+        ...(metadata.contentType ? { signableHeaders: new Set(['content-type']) } : {})
       }
     );
   }
