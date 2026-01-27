@@ -25,7 +25,7 @@ function hasContentType<T>(value: T): value is T & { contenttype?: string } {
   return value !== undefined && value !== null && Object.hasOwn(value, 'contenttype');
 }
 
-type MetaBase = Pick<CreateMultipartUploadRequest,
+type S3Metadata = Pick<CreateMultipartUploadRequest,
   'ContentType' | 'Metadata' | 'ContentEncoding' | 'ContentLanguage' | 'CacheControl' | 'ContentDisposition'
 >;
 
@@ -41,7 +41,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   constructor(config: S3ModelConfig) { this.config = config; }
 
-  #getMetaBase({ range: _, size, ...metadata }: BinaryMetadata): MetaBase {
+  #getMetadata({ range: _, size, ...metadata }: BinaryMetadata): S3Metadata {
     return {
       ContentType: metadata.contentType,
       ...(metadata.contentEncoding ? { ContentEncoding: metadata.contentEncoding } : {}),
@@ -116,7 +116,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
    * Write multipart file upload, in chunks
    */
   async #writeMultipart(id: string, input: BinaryType, metadata: BinaryMetadata): Promise<void> {
-    const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetaBase(metadata)));
+    const { UploadId } = await this.client.createMultipartUpload(this.#queryBlob(id, this.#getMetadata(metadata)));
 
     const parts: CompletedPart[] = [];
     let buffers: BinaryArray[] = [];
@@ -323,7 +323,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       const blob = this.#queryBlob(location, {
         Body: BinaryUtil.toReadable(input),
         ContentLength: resolved.size,
-        ...this.#getMetaBase(resolved),
+        ...this.#getMetadata(resolved),
       });
       // Upload to s3
       await this.client.putObject(blob);
@@ -397,7 +397,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       Bucket: this.config.bucket,
       Key: this.#basicKey(location),
       CopySource: `/${this.config.bucket}/${this.#basicKey(location)}`,
-      ...this.#getMetaBase(metadata),
+      ...this.#getMetadata(metadata),
       MetadataDirective: 'REPLACE'
     });
   }
@@ -412,7 +412,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async getBlobWriteUrl(location: string, metadata: BinaryMetadata, exp: TimeSpan = '1h'): Promise<string> {
-    const base = this.#getMetaBase(metadata);
+    const base = this.#getMetadata(metadata);
     return await getSignedUrl(
       this.client,
       new PutObjectCommand({

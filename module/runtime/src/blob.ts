@@ -54,9 +54,7 @@ export class BinaryBlob extends Blob {
     } else if (BinaryUtil.isBinaryArray(input)) {
       metadata.size = input.byteLength;
     } else if (isReadable(input)) {
-      if (input.readableEncoding) {
-        metadata.contentEncoding ??= input.readableEncoding;
-      }
+      metadata.contentEncoding ??= input.readableEncoding!;
       if ('path' in input && typeof input.path === 'string') {
         metadata.filename ??= path.basename(input.path);
         metadata.size ??= statSync(input.path).size;
