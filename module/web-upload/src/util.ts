@@ -8,16 +8,15 @@ import { Transform } from 'node:stream';
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType, type BinaryStream, CodecUtil } from '@travetto/runtime';
+import { AsyncQueue, AppError, Util, BinaryUtil, type BinaryType, type BinaryStream, CodecUtil, BinaryBlob } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
-import type { FileMap } from './types.ts';
+import type { UploadMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
 type UploadItem = { stream: BinaryStream, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
-const RawFileSymbol = Symbol();
 const WebUploadSymbol = Symbol();
 
 /**
@@ -41,13 +40,6 @@ export class WebUploadUtil {
         }
       },
     });
-  }
-
-  /**
-   * Get uploaded file path location
-   */
-  static getUploadLocation(file: File): string {
-    return castTo<{ [RawFileSymbol]: string }>(file)[RawFileSymbol];
   }
 
   /**
@@ -99,7 +91,7 @@ export class WebUploadUtil {
   /**
    * Convert an UploadItem to a File
    */
-  static async toFile({ stream, filename, field }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
+  static async toBinaryBlob({ stream, filename, field }: UploadItem, config: Partial<WebUploadConfig>): Promise<BinaryBlob> {
     const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDirectory, { recursive: true });
 
@@ -126,16 +118,13 @@ export class WebUploadUtil {
         filename = `${filename}.${detected.ext}`;
       }
 
-      const file = BinaryUtil.toBlob(() => createReadStream(location), {
+      return new BinaryBlob(() => createReadStream(location), {
         contentType: detected.mime,
         filename,
         hash: await CodecUtil.hash(createReadStream(location), { hashAlgorithm: 'sha256' }),
         size: (await fs.stat(location)).size,
+        rawLocation: location
       });
-
-      Object.assign(file, { [RawFileSymbol]: location });
-
-      return file;
     } catch (error) {
       await remove();
       throw error;
@@ -153,7 +142,7 @@ export class WebUploadUtil {
     let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
 
-    const metadata = BinaryUtil.getMetadata(input);
+    const metadata = BinaryBlob.getMetadata(input);
 
     try {
       token = await fromStream(BinaryUtil.toReadable(input));
@@ -178,23 +167,23 @@ export class WebUploadUtil {
   /**
    * Finish upload
    */
-  static async finishUpload(upload: File, config: Partial<WebUploadConfig>): Promise<void> {
+  static async finishUpload(upload: BinaryBlob, config: Partial<WebUploadConfig>): Promise<void> {
     if (config.cleanupFiles !== false) {
-      await fs.rm(this.getUploadLocation(upload), { force: true });
+      await fs.rm(upload.metadata.rawLocation!, { force: true });
     }
   }
 
   /**
    * Get Uploads
    */
-  static getRequestUploads(request: WebRequest & { [WebUploadSymbol]?: FileMap }): FileMap {
+  static getRequestUploads(request: WebRequest & { [WebUploadSymbol]?: UploadMap }): UploadMap {
     return request[WebUploadSymbol] ?? {};
   }
 
   /**
    * Set Uploads
    */
-  static setRequestUploads(request: WebRequest & { [WebUploadSymbol]?: FileMap }, uploads: FileMap): void {
+  static setRequestUploads(request: WebRequest & { [WebUploadSymbol]?: UploadMap }, uploads: UploadMap): void {
     request[WebUploadSymbol] ??= uploads;
   }
 }

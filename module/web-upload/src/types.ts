@@ -1,4 +1,6 @@
+import type { BinaryBlob } from '@travetto/runtime';
+
 /**
  * @concrete
  */
-export interface FileMap extends Record<string, File> { }
+export interface UploadMap extends Record<string, BinaryBlob> { }

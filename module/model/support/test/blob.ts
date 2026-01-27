@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
-import { BinaryUtil, Util } from '@travetto/runtime';
+import { BinaryBlob, BinaryUtil, Util } from '@travetto/runtime';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelBlobSupport } from '../../src/types/blob.ts';
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 
-const metadata = BinaryUtil.getMetadata;
+const metadata = BinaryBlob.getMetadata;
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {

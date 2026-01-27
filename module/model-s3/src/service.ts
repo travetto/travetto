@@ -12,8 +12,7 @@ import {
 import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray,
-  CodecUtil,
+  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil, BinaryBlob,
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -318,7 +317,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       return;
     }
 
-    const metadata = BinaryUtil.getMetadata(input, meta);
+    const metadata = BinaryBlob.getMetadata(input, meta);
 
     if (metadata.size && metadata.size < this.config.chunkSize) { // If smaller than chunk size
       const blob = this.#queryBlob(location, {
@@ -353,7 +352,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
-    return BinaryUtil.toBlob(() => this.#getObject(location, final), { ...meta, range: final });
+    return new BinaryBlob(() => this.#getObject(location, final), { ...meta, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number }> {

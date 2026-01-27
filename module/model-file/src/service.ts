@@ -3,7 +3,10 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, CodecUtil } from '@travetto/runtime';
+import {
+  type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType,
+  BinaryBlob, BinaryUtil, CodecUtil
+} from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -172,7 +175,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-    const metadata = BinaryUtil.getMetadata(input, meta);
+    const metadata = BinaryBlob.getMetadata(input, meta);
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       BinaryUtil.pipeline(input, createWriteStream(file)),
@@ -184,7 +187,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const file = await this.#find(ModelBlobNamespace, BIN, location);
     const meta = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
-    return BinaryUtil.toBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
+    return new BinaryBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

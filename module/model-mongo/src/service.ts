@@ -20,7 +20,8 @@ import {
 
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
-  castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil
+  castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil,
+  BinaryBlob
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
@@ -288,7 +289,7 @@ export class MongoModelService implements
     if (!overwrite && existing) {
       return;
     }
-    const metadata = BinaryUtil.getMetadata(input, meta);
+    const metadata = BinaryBlob.getMetadata(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, { metadata });
     await BinaryUtil.pipeline(input, writeStream);
 
@@ -302,7 +303,7 @@ export class MongoModelService implements
     const meta = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
-    return BinaryUtil.toBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...meta, range: final });
+    return new BinaryBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...meta, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

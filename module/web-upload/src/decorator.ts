@@ -4,12 +4,12 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor.ts';
 import type { WebUploadConfig } from './config.ts';
-import type { FileMap } from './types.ts';
+import type { UploadMap } from './types.ts';
 import { WebUploadUtil } from './util.ts';
 
 type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 
-const FileMapContract = toConcrete<FileMap>();
+const FileMapContract = toConcrete<UploadMap>();
 
 /**
  * Allows for supporting uploads

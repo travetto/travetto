@@ -1,6 +1,4 @@
-import path from 'node:path';
-import { statSync } from 'node:fs';
-import { PassThrough, Readable, type Writable } from 'node:stream';
+import { Readable, type Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
@@ -8,47 +6,19 @@ import { isArrayBuffer, isTypedArray, isUint16Array, isUint32Array, isUint8Array
 
 import { type Any, castTo, hasFunction } from './types.ts';
 
-const BinaryMetaSymbol = Symbol();
-
-const BINARY_CONSTRUCTORS = [Readable, Buffer, Blob, File, ReadableStream, ArrayBuffer, Uint8Array, Uint16Array, Uint32Array];
+const BINARY_CONSTRUCTORS: Function[] = [castTo(Readable), Buffer, Blob, castTo(ReadableStream), ArrayBuffer, Uint8Array, Uint16Array, Uint32Array];
 export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Buffer<ArrayBuffer> | ArrayBuffer;
 export type BinaryStream = Readable | ReadableStream | AsyncIterable<BinaryArray>;
 export type BinaryContainer = Blob | File;
 export type BinaryType = BinaryArray | BinaryStream | BinaryContainer;
 
-/**
- * Range of bytes, inclusive
- */
-export type ByteRange = { start: number, end?: number };
-
-export interface BinaryMetadata {
-  /** Size of binary data */
-  size?: number;
-  /** Mime type of the content */
-  contentType?: string;
-  /** Hash of binary data contents */
-  hash?: string;
-  /** The original base filename of the file */
-  filename?: string;
-  /** Filenames title, optional for elements like images, audio, videos */
-  title?: string;
-  /** Content encoding */
-  contentEncoding?: string;
-  /** Content language */
-  contentLanguage?: string;
-  /** Cache control */
-  cacheControl?: string;
-  /** Byte range for binary data */
-  range?: Required<ByteRange>;
-}
-
-const BINARY_CONSTRUCTOR_SET = new Set(BINARY_CONSTRUCTORS);
+const BINARY_CONSTRUCTOR_SET = new Set<Function>(BINARY_CONSTRUCTORS);
 
 const isReadable = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
 const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
   !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
-const isBinaryConstructor = (value: Function): boolean => BINARY_CONSTRUCTOR_SET.has(castTo(value));
+const isBinaryConstructor = (value: Function): boolean => BINARY_CONSTRUCTOR_SET.has(value) || BINARY_CONSTRUCTOR_SET.has(Object.getPrototypeOf(value));
 const isBinaryArray = (value: unknown): value is BinaryArray =>
   isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value);
 const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
@@ -70,60 +40,6 @@ export class BinaryUtil {
   static isBinaryContainer = isBinaryContainer;
   /** Is value a binary type  */
   static isBinaryType = isBinaryType;
-
-  /** Read metadata for a binary type, if available  */
-  static getMetadata(input: BinaryType, metadata: BinaryMetadata = {}): BinaryMetadata {
-    const withMeta: BinaryType & { [BinaryMetaSymbol]?: BinaryMetadata } = input;
-
-    metadata = { ...withMeta[BinaryMetaSymbol], ...metadata };
-
-    if (isBinaryContainer(input)) {
-      metadata.size ??= input.size;
-    } else if (isBinaryArray(input)) {
-      metadata.size = input.byteLength;
-    } else if (isReadable(input)) {
-      if (input.readableEncoding) {
-        metadata.contentEncoding ??= input.readableEncoding;
-      }
-      if ('path' in input && typeof input.path === 'string') {
-        metadata.filename ??= path.basename(input.path);
-        metadata.size ??= statSync(input.path).size;
-      }
-    }
-
-    return metadata;
-  }
-
-  /** Make a blob, and assign metadata  */
-  static toBlob(input: () => BinaryType | Promise<BinaryType>, metadata: Omit<BinaryMetadata, 'filename'> & { filename: string }): File;
-  static toBlob(input: () => BinaryType | Promise<BinaryType>, metadata?: BinaryMetadata): Blob;
-  static toBlob(input: () => BinaryType | Promise<BinaryType>, metadata: BinaryMetadata = {}): Blob | File {
-    const go = (): Readable => {
-      const stream = new PassThrough();
-      Promise.resolve(input()).then(
-        source => {
-          this.pipeline(source, stream).catch(error => stream.destroy(error));
-          return stream;
-        },
-        error => stream.destroy(error)
-      );
-      return stream;
-    };
-
-    const size = metadata.range ? (metadata.range.end - metadata.range.start) + 1 : metadata.size;
-    const out: Blob = metadata.filename ?
-      new File([], path.basename(metadata.filename), { type: metadata.contentType }) :
-      new Blob([], { type: metadata.contentType });
-
-    return Object.defineProperties(out, {
-      size: { value: size },
-      stream: { value: () => ReadableStream.from(go()) },
-      arrayBuffer: { value: () => consumers.arrayBuffer(go()) },
-      text: { value: () => consumers.text(go()) },
-      bytes: { value: () => consumers.arrayBuffer(go()).then(buffer => new Uint8Array(buffer)) },
-      [BinaryMetaSymbol]: { value: metadata }
-    });
-  }
 
   /** Convert binary array to an explicit buffer  */
   static arrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {

@@ -5,7 +5,7 @@ import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
-import { Upload, type FileMap } from '@travetto/web-upload';
+import { Upload, type UploadMap } from '@travetto/web-upload';
 import { Util, type BinaryMetadata, BinaryUtil, castTo, type AppError, CodecUtil } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
@@ -22,7 +22,7 @@ class TestUploadController {
   request: WebRequest;
 
   @Post('/all')
-  async uploadAll(@Upload() uploads: FileMap) {
+  async uploadAll(@Upload() uploads: UploadMap) {
     for (const [, file] of Object.entries(uploads)) {
       return { hash: bHash(file), size: file.size };
     }

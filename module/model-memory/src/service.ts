@@ -1,6 +1,6 @@
 import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
-  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, CodecUtil
+  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, CodecUtil, BinaryBlob
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -234,7 +234,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-    const metadata = BinaryUtil.getMetadata(input, meta);
+    const metadata = BinaryBlob.getMetadata(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, CodecUtil.fromUTF8String(JSON.stringify(metadata)));
@@ -254,7 +254,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
     const meta = await this.getBlobMetadata(location);
 
-    return BinaryUtil.toBlob(() => data, { ...meta, range: final });
+    return new BinaryBlob(data, { ...meta, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

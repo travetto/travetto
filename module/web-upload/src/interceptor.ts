@@ -6,7 +6,7 @@ import {
 
 import type { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
-import type { FileMap } from './types.ts';
+import type { UploadMap } from './types.ts';
 
 @Injectable()
 export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
@@ -35,11 +35,11 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<WebUploadConfig>): Promise<WebResponse> {
-    const uploads: FileMap = {};
+    const uploads: UploadMap = {};
 
     try {
       for await (const item of WebUploadUtil.getUploads(request, config)) {
-        uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
+        uploads[item.field] = await WebUploadUtil.toBinaryBlob(item, config.uploads?.[item.field] ?? config);
       }
 
       WebUploadUtil.setRequestUploads(request, uploads);

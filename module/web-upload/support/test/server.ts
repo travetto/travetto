@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { BinaryUtil, castTo, CodecUtil } from '@travetto/runtime';
+import { BinaryBlob, castTo, CodecUtil } from '@travetto/runtime';
 import { Controller, Post } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { Registry } from '@travetto/registry';
@@ -8,15 +8,15 @@ import { Registry } from '@travetto/registry';
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 import { Upload } from '../../src/decorator.ts';
-import type { FileMap } from '../../src/types.ts';
+import type { UploadMap } from '../../src/types.ts';
 
-const getHash = (blob: Blob) => BinaryUtil.getMetadata(blob)?.hash;
+const getHash = (blob: Blob) => BinaryBlob.getMetadata(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
 
   @Post('/all')
-  async uploadAll(@Upload() uploads: FileMap): Promise<{ hash?: string } | undefined> {
+  async uploadAll(@Upload() uploads: UploadMap): Promise<{ hash?: string } | undefined> {
     for (const [, blob] of Object.entries(uploads)) {
       return { hash: getHash(blob) };
     }
