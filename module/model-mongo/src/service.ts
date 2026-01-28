@@ -289,7 +289,7 @@ export class MongoModelService implements
     if (!overwrite && existing) {
       return;
     }
-    const resolved = BinaryBlob.getMetadata(input, metadata);
+    const resolved = await BinaryBlob.computeMetadata(input, metadata);
     const writeStream = this.#bucket.openUploadStream(location, { metadata: resolved });
     await BinaryUtil.pipeline(input, writeStream);
 
@@ -303,7 +303,7 @@ export class MongoModelService implements
     const metadata = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
-    return new BinaryBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...metadata, range: final });
+    return new BinaryBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange)).updateMetadata({ ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

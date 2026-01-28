@@ -51,7 +51,7 @@ export class WebBodyUtil {
 
     const toAdd: [string, string | undefined][] = [
       ['Content-Type', metadata.contentType],
-      ['Content-Length', (BinaryUtil.isBinaryContainer(value) ? value.size : metadata.size)?.toString()],
+      ['Content-Length', metadata.size?.toString()],
       ['Content-Encoding', metadata.contentEncoding],
       ['Cache-Control', metadata.cacheControl],
       ['Content-Language', metadata.contentLanguage],
@@ -64,9 +64,8 @@ export class WebBodyUtil {
       );
     }
 
-    const filename = (value instanceof File ? value.name : undefined) ?? metadata.filename;
-    if (filename) {
-      toAdd.push(['Content-disposition', `attachment; filename="${filename}"`]);
+    if (metadata.filename) {
+      toAdd.push(['Content-disposition', `attachment; filename="${metadata.filename}"`]);
     }
 
     return toAdd.filter((pair): pair is [string, string] => !!pair[1]);

@@ -1,14 +1,14 @@
-import { createReadStream, createWriteStream } from 'node:fs';
+import { createReadStream, createWriteStream, ReadStream } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
-import { Transform } from 'node:stream';
+import { Transform, type Readable } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, Util, BinaryUtil, type BinaryType, type BinaryStream, CodecUtil, BinaryBlob } from '@travetto/runtime';
+import { AsyncQueue, AppError, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryBlob } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { UploadMap } from './types.ts';
@@ -100,6 +100,7 @@ export class WebUploadUtil {
     const location = path.resolve(uniqueDirectory, filename);
     const remove = (): Promise<void> => fs.rm(location).catch(() => { });
     const mimeCheck = config.matcher ??= WebCommonUtil.mimeTypeMatcher(config.types);
+    const response = (): Readable => createReadStream(location);
 
     try {
       const target = createWriteStream(location);
@@ -108,7 +109,7 @@ export class WebUploadUtil {
         pipeline(stream, this.limitWrite(config.maxSize, field), target) :
         pipeline(stream, target));
 
-      const detected = await this.getFileType(createReadStream(location), location);
+      const detected = await this.getFileType(response());
 
       if (!mimeCheck(detected.mime)) {
         throw new AppError(`Content type not allowed: ${detected.mime}`, { category: 'data' });
@@ -118,13 +119,13 @@ export class WebUploadUtil {
         filename = `${filename}.${detected.ext}`;
       }
 
-      return new BinaryBlob(() => createReadStream(location), {
+      const metadata = await BinaryBlob.computeMetadata(response(), {
         contentType: detected.mime,
         filename,
-        hash: await CodecUtil.hash(createReadStream(location), { hashAlgorithm: 'sha256' }),
-        size: (await fs.stat(location)).size,
         rawLocation: location
       });
+
+      return new BinaryBlob(response).updateMetadata(metadata);
     } catch (error) {
       await remove();
       throw error;
@@ -134,13 +135,18 @@ export class WebUploadUtil {
   /**
    * Get file type
    */
-  static async getFileType(input: BinaryType, filename: string): Promise<FileType> {
+  static async getFileType(input: BinaryType, filename?: string): Promise<FileType> {
     const { FileTypeParser } = await import('file-type');
     const { fromStream } = await import('strtok3');
 
     const parser = new FileTypeParser();
     let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
+
+    if (input instanceof ReadStream) {
+      filename ??= input.path.toString('utf8');
+      input = createReadStream(input.path); // Recreate stream to not consume it
+    }
 
     try {
       token = await fromStream(BinaryUtil.toReadable(input));
@@ -167,7 +173,7 @@ export class WebUploadUtil {
    */
   static async finishUpload(upload: BinaryBlob, config: Partial<WebUploadConfig>): Promise<void> {
     if (config.cleanupFiles !== false) {
-      await fs.rm(upload.metadata.rawLocation!, { force: true });
+      await fs.rm(BinaryBlob.getMetadata(upload).rawLocation!, { force: true });
     }
   }
 

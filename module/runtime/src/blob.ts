@@ -1,10 +1,12 @@
 import path from 'node:path';
-import { statSync } from 'node:fs';
+import { createReadStream, ReadStream } from 'node:fs';
+import fs from 'node:fs/promises';
 import { Readable, PassThrough } from 'node:stream';
 import { isPromise } from 'node:util/types';
 
 import { BinaryUtil, type BinaryType } from './binary.ts';
 import { hasFunction } from './types.ts';
+import { CodecUtil } from './codec.ts';
 
 const isReadable = hasFunction<Readable>('pipe');
 
@@ -36,67 +38,90 @@ export interface BinaryMetadata {
   rawLocation?: string;
 }
 
-
 const BinaryMetaSymbol = Symbol();
 
 export class BinaryBlob extends Blob {
 
-  /** Read metadata for a binary type, if available  */
-  static getMetadata(input: BinaryType, metadata: BinaryMetadata = {}): BinaryMetadata {
+  static setMetadata(input: BinaryType, metadata: BinaryMetadata): BinaryMetadata {
     const withMeta: BinaryType & { [BinaryMetaSymbol]?: BinaryMetadata } = input;
-
-    metadata = { ...withMeta[BinaryMetaSymbol], ...metadata };
-
-    if (input instanceof BinaryBlob) {
-      metadata = { ...input.metadata, ...metadata };
-    } else if (BinaryUtil.isBinaryContainer(input)) {
-      metadata.size ??= input.size;
-    } else if (BinaryUtil.isBinaryArray(input)) {
-      metadata.size = input.byteLength;
-    } else if (isReadable(input)) {
-      metadata.contentEncoding ??= input.readableEncoding!;
-      if ('path' in input && typeof input.path === 'string') {
-        metadata.filename ??= path.basename(input.path);
-        metadata.size ??= statSync(input.path).size;
-      }
-    }
-
+    withMeta[BinaryMetaSymbol] = metadata;
     return metadata;
   }
 
-  size: number;
-  type: string;
+  /** Read metadata for a binary type, if available  */
+  static getMetadata(input: BinaryType): BinaryMetadata {
+    const withMeta: BinaryType & { [BinaryMetaSymbol]?: BinaryMetadata } = input;
+    return withMeta[BinaryMetaSymbol] ?? {};
+  }
+
+  static async computeMetadata(input: BinaryType, metadata: BinaryMetadata = {}): Promise<BinaryMetadata> {
+    metadata = { ...BinaryBlob.getMetadata(input), ...metadata };
+
+    if (BinaryUtil.isBinaryContainer(input)) {
+      metadata.size ??= input.size;
+      metadata.contentType ??= input.type;
+      if (input instanceof File) {
+        metadata.filename ??= input.name;
+      }
+    } else if (BinaryUtil.isBinaryArray(input)) {
+      metadata.size ??= input.byteLength;
+      metadata.hash ??= await CodecUtil.hash(input, { hashAlgorithm: 'sha256' });
+    } else if (isReadable(input)) {
+      metadata.contentEncoding ??= input.readableEncoding!;
+      if (input instanceof ReadStream) {
+        metadata.rawLocation ??= input.path.toString();
+      }
+    }
+
+    if (metadata.rawLocation) {
+      metadata.filename ??= path.basename(metadata.rawLocation);
+      metadata.size ??= (await fs.stat(metadata.rawLocation)).size;
+      metadata.hash ??= await CodecUtil.hash(createReadStream(metadata.rawLocation!), { hashAlgorithm: 'sha256' });
+    }
+
+
+    if (metadata.size) {
+      metadata.range ??= { start: 0, end: metadata.size - 1 };
+    }
+
+    return BinaryBlob.setMetadata(input, metadata);
+  }
+
 
   #source: BinaryType | (() => (BinaryType | Promise<BinaryType>));
-  #type: BinaryType | undefined;
 
-  metadata: BinaryMetadata = {};
-
-  constructor(source: BinaryType | (() => (BinaryType | Promise<BinaryType>)), metadata: BinaryMetadata = {}) {
+  constructor(source: BinaryType | (() => (BinaryType | Promise<BinaryType>))) {
     super(); // We just need the inheritance, not the actual Blob constructor behavior
     this.#source = source;
-    this.metadata = metadata;
+  }
+
+  get size(): number {
+    const meta = BinaryBlob.getMetadata(this);
+    return (meta.range ? (meta.range.end - meta.range.start) + 1 : meta.size) ?? 0;
+  }
+
+  get type(): string {
+    const meta = BinaryBlob.getMetadata(this);
+    return meta.contentType ?? '';
   }
 
   get source(): BinaryType {
-    if (this.#type !== undefined) {
-      return this.#type;
-    }
     const value = (typeof this.#source === 'function') ? this.#source() : this.#source;
     if (isPromise(value)) {
       const stream = new PassThrough();
-      this.#type = stream;
-      value.then(
-        source => {
-          BinaryUtil.pipeline(source, stream).catch(error => stream.destroy(error));
-          return stream;
-        },
-        error => stream.destroy(error)
-      );
+      value.then(source => BinaryUtil.pipeline(source, stream)).catch(error => stream.destroy(error));
+      return stream;
     } else {
-      this.#type = value;
+      return value;
     }
-    return this.#type;
+  }
+
+  updateMetadata(metadata: BinaryMetadata): this {
+    BinaryBlob.setMetadata(this, {
+      ...BinaryBlob.getMetadata(this),
+      ...metadata
+    });
+    return this;
   }
 
   arrayBuffer(): Promise<ArrayBuffer> {
@@ -111,7 +136,12 @@ export class BinaryBlob extends Blob {
     return new BinaryBlob(async () => {
       const buffer = await BinaryUtil.toBinaryArray(this.source);
       return BinaryUtil.sliceByteArray(buffer, start ?? 0, end);
-    }, this.metadata);
+    }).updateMetadata({
+      range: {
+        start: start ?? 0,
+        end: (end !== undefined ? end : this.size) - 1
+      }
+    });
   }
 
   stream(): ReadableStream<NodeJS.NonSharedUint8Array> {

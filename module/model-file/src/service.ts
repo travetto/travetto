@@ -175,7 +175,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-    const resolved = BinaryBlob.getMetadata(input, metadata);
+    const resolved = await BinaryBlob.computeMetadata(input, metadata);
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       BinaryUtil.pipeline(input, createWriteStream(file)),
@@ -187,7 +187,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const file = await this.#find(ModelBlobNamespace, BIN, location);
     const metadata = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
-    return new BinaryBlob(() => createReadStream(file, { ...range }), { ...metadata, range: final });
+    return new BinaryBlob(() => createReadStream(file, range)).updateMetadata({ ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

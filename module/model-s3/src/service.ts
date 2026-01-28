@@ -317,7 +317,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       return;
     }
 
-    const resolved = BinaryBlob.getMetadata(input, metadata);
+    const resolved = await BinaryBlob.computeMetadata(input, metadata);
 
     if (resolved.size && resolved.size < this.config.chunkSize) { // If smaller than chunk size
       const blob = this.#queryBlob(location, {
@@ -352,7 +352,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const metadata = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
-    return new BinaryBlob(() => this.#getObject(location, final), { ...metadata, range: final });
+    return new BinaryBlob(() => this.#getObject(location, final)).updateMetadata({ ...metadata, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number }> {
