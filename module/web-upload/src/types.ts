@@ -1,3 +1,5 @@
+import '@travetto/runtime';
+
 /**
  * @concrete
  */
