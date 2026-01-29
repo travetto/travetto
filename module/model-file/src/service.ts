@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import {
   type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryBlob, BinaryUtil, CodecUtil
+  BinaryFile, BinaryUtil, CodecUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -190,7 +190,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const file = await this.#find(ModelBlobNamespace, BIN, location);
     const metadata = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
-    return new BinaryBlob(() => createReadStream(file, range)).updateMetadata({ ...metadata, range: final });
+    return new BinaryFile(() => createReadStream(file, range)).updateMetadata({ ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

@@ -21,7 +21,7 @@ import {
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
   castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil,
-  BinaryBlob
+  BinaryFile
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
@@ -306,7 +306,7 @@ export class MongoModelService implements
     const metadata = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
-    return new BinaryBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange)).updateMetadata({ ...metadata, range: final });
+    return new BinaryFile(() => this.#bucket.openDownloadStreamByName(location, mongoRange)).updateMetadata({ ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

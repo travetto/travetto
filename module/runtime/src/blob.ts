@@ -3,12 +3,12 @@ import { isPromise } from 'node:util/types';
 
 import { BinaryUtil, type BinaryMetadata, type BinaryType } from './binary.ts';
 
-export class BinaryBlob extends Blob {
+export class BinaryFile extends File {
 
   #source: BinaryType | (() => (BinaryType | Promise<BinaryType>));
 
   constructor(source: BinaryType | (() => (BinaryType | Promise<BinaryType>))) {
-    super(); // We just need the inheritance, not the actual Blob constructor behavior
+    super([], ''); // We just need the inheritance, not the actual Blob constructor behavior
     this.#source = source;
   }
 
@@ -33,6 +33,11 @@ export class BinaryBlob extends Blob {
     }
   }
 
+  get filename(): string {
+    const meta = BinaryUtil.getMetadata(this);
+    return meta.filename ?? meta.rawLocation ?? '';
+  }
+
   updateMetadata(metadata: BinaryMetadata): this {
     BinaryUtil.setMetadata(this, {
       ...BinaryUtil.getMetadata(this),
@@ -50,7 +55,7 @@ export class BinaryBlob extends Blob {
   }
 
   slice(start?: number, end?: number, _contentType?: string): Blob {
-    return new BinaryBlob(async () => {
+    return new BinaryFile(async () => {
       const buffer = await BinaryUtil.toBinaryArray(this.source);
       return BinaryUtil.sliceByteArray(buffer, start ?? 0, end);
     }).updateMetadata({

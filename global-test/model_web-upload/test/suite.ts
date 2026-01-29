@@ -6,7 +6,7 @@ import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
 import { Upload, type UploadMap } from '@travetto/web-upload';
-import { Util, type BinaryMetadata, castTo, type AppError, BinaryUtil } from '@travetto/runtime';
+import { Util, type BinaryMetadata, castTo, type AppError, BinaryUtil, BinaryFile } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
@@ -75,11 +75,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
     const data = new FormData();
     await Promise.all(files.map(async ({ name, type, resource }) => {
-      const file = await this.fixture.readFile(resource);
-      if (type) {
-        Object.defineProperty(file, 'type', { value: type });
-      }
-      data.append(name, file);
+      data.append(name, new BinaryFile(() => this.fixture.readStream(resource)).updateMetadata({ contentType: type }));
     }));
     return data;
   }
@@ -253,7 +249,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
           httpMethod: 'GET', path: `/test/upload/${loc}`,
         },
         headers: {
-          // Range: 'bytes=0-9'
+          Range: 'bytes=0-9'
         }
       }
     );

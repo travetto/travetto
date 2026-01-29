@@ -3,7 +3,6 @@ import { createInterface } from 'node:readline/promises';
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
 import type { Any } from './types.ts';
 
-
 /**
  * Utilities for encoding and decoding common formats
  */

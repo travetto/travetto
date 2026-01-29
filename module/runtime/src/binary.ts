@@ -49,6 +49,7 @@ type HashConfig = {
 };
 
 const BINARY_CONSTRUCTOR_SET = new Set<Function>(BINARY_CONSTRUCTORS);
+const BinaryMetaSymbol = Symbol();
 
 const isReadable = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
@@ -60,8 +61,6 @@ const isBinaryArray = (value: unknown): value is BinaryArray =>
 const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
 const isBinaryContainer = (value: unknown): value is BinaryContainer => value instanceof Blob;
 const isBinaryType = (value: unknown): value is BinaryType => !!value && (isBinaryArray(value) || isBinaryStream(value) || isBinaryContainer(value));
-
-const BinaryMetaSymbol = Symbol();
 
 /**
  * Common functions for dealing with binary data/streams
@@ -91,7 +90,6 @@ export class BinaryUtil {
     const withMeta: BinaryType & { [BinaryMetaSymbol]?: BinaryMetadata } = input;
     return withMeta[BinaryMetaSymbol] ?? {};
   }
-
 
   /** Convert binary array to an explicit buffer  */
   static arrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {
@@ -211,15 +209,15 @@ export class BinaryUtil {
   static async computeMetadata(input: BinaryType, base: BinaryMetadata = {}): Promise<BinaryMetadata> {
     const metadata: BinaryMetadata = { ...base };
 
-    if (BinaryUtil.isBinaryContainer(input)) {
+    if (this.isBinaryContainer(input)) {
       metadata.size ??= input.size;
       metadata.contentType ??= input.type;
       if (input instanceof File) {
         metadata.filename ??= input.name;
       }
-    } else if (BinaryUtil.isBinaryArray(input)) {
+    } else if (this.isBinaryArray(input)) {
       metadata.size ??= input.byteLength;
-      metadata.hash ??= await BinaryUtil.hash(input, { hashAlgorithm: 'sha256' });
+      metadata.hash ??= await this.hash(input, { hashAlgorithm: 'sha256' });
     } else if (isReadable(input)) {
       metadata.contentEncoding ??= input.readableEncoding!;
       if (input instanceof ReadStream) {
@@ -230,7 +228,7 @@ export class BinaryUtil {
     if (metadata.rawLocation) {
       metadata.filename ??= path.basename(metadata.rawLocation);
       metadata.size ??= (await fs.stat(metadata.rawLocation)).size;
-      metadata.hash ??= await BinaryUtil.hash(createReadStream(metadata.rawLocation!), { hashAlgorithm: 'sha256' });
+      metadata.hash ??= await this.hash(createReadStream(metadata.rawLocation!), { hashAlgorithm: 'sha256' });
     }
 
     if (metadata.size) {
