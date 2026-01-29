@@ -1,5 +1,3 @@
-import fs from 'node:fs/promises';
-
 import { Inject, Injectable } from '@travetto/di';
 import {
   BodyInterceptor, type WebInterceptor, type WebInterceptorCategory, type WebChainedContext,
@@ -49,10 +47,8 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
 
       return await next();
     } finally {
-      for (const [field, item] of Object.entries(uploads)) {
-        if ((config.uploads?.[field] ?? config).cleanupFiles !== false) {
-          await fs.rm(BinaryUtil.getMetadata(item).rawLocation!, { force: true });
-        }
+      for (const item of Object.values(uploads)) {
+        await BinaryUtil.getMetadata(item).cleanup?.();
       }
     }
   }

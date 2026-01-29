@@ -40,6 +40,8 @@ export interface BinaryMetadata {
   range?: Required<ByteRange>;
   /** Raw location */
   rawLocation?: string;
+  /** Is there a cleanup handler for this data */
+  cleanup?: () => (Promise<unknown> | unknown);
 }
 
 type HashConfig = {

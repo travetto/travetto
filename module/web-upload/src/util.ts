@@ -171,7 +171,8 @@ export class WebUploadUtil {
       const metadata = await BinaryUtil.computeMetadata(response(), {
         contentType: detected.mime,
         filename,
-        rawLocation: location
+        rawLocation: location,
+        cleanup: config.cleanupFiles !== false ? (): Promise<void> => fs.rm(location).catch(() => { }) : undefined,
       });
 
       return new BinaryFile(response).updateMetadata(metadata);
