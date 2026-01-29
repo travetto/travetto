@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { castTo, CodecUtil } from '@travetto/runtime';
+import { BinaryUtil, castTo, CodecUtil } from '@travetto/runtime';
 
 @Suite()
 export class CodecUtilTest {
@@ -16,15 +16,15 @@ export class CodecUtilTest {
     hash.update('roger');
     const key = hash.digest('hex');
 
-    assert(CodecUtil.hash('roger', { length: 64 }) === key.substring(0, 64));
+    assert(BinaryUtil.hash('roger', { length: 64 }) === key.substring(0, 64));
 
     const hash2 = crypto.createHash('sha512');
     hash2.update('');
     const unKey = hash2.digest('hex');
 
-    assert(CodecUtil.hash('', { length: 20 }) === unKey.substring(0, 20));
+    assert(BinaryUtil.hash('', { length: 20 }) === unKey.substring(0, 20));
 
-    assert(CodecUtil.hash('', { length: 20 }) !== key.substring(0, 20));
+    assert(BinaryUtil.hash('', { length: 20 }) !== key.substring(0, 20));
   }
 
 
@@ -197,7 +197,7 @@ export class CodecUtilTest {
   async verifyAsyncHash() {
     const text = 'hello world';
     const stream = Readable.from([text]);
-    const hash = await CodecUtil.hash(stream, { length: 32 });
+    const hash = await BinaryUtil.hash(stream, { length: 32 });
     const expected = crypto.createHash('sha512').update(text).digest('hex').substring(0, 32);
     assert.strictEqual(hash, expected);
   }
@@ -206,17 +206,17 @@ export class CodecUtilTest {
   async verifyHashAlgorithms() {
     const text = 'test value';
 
-    const sha1 = CodecUtil.hash(text, { hashAlgorithm: 'sha1' });
+    const sha1 = BinaryUtil.hash(text, { hashAlgorithm: 'sha1' });
     assert.strictEqual(sha1.length, 40); // 20 bytes * 2 hex
 
-    const md5 = CodecUtil.hash(text, { hashAlgorithm: 'md5' });
+    const md5 = BinaryUtil.hash(text, { hashAlgorithm: 'md5' });
     assert.strictEqual(md5.length, 32); // 16 bytes * 2 hex
   }
 
   @Test()
   async verifyHashBinaryInput() {
     const input = Buffer.from('binary data');
-    const hash = CodecUtil.hash(input, { length: 10 });
+    const hash = BinaryUtil.hash(input, { length: 10 });
     assert.strictEqual(hash.length, 10);
   }
 }

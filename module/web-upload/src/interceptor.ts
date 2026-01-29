@@ -1,8 +1,11 @@
+import fs from 'node:fs/promises';
+
 import { Inject, Injectable } from '@travetto/di';
 import {
   BodyInterceptor, type WebInterceptor, type WebInterceptorCategory, type WebChainedContext,
   type WebResponse, DecompressInterceptor, type WebInterceptorContext
 } from '@travetto/web';
+import { BinaryUtil } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
@@ -39,7 +42,7 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
 
     try {
       for await (const item of WebUploadUtil.getUploads(request, config)) {
-        uploads[item.field] = await WebUploadUtil.toBinaryBlob(item, config.uploads?.[item.field] ?? config);
+        uploads[item.field] = await WebUploadUtil.toBlob(item, config.uploads?.[item.field] ?? config);
       }
 
       WebUploadUtil.setRequestUploads(request, uploads);
@@ -47,7 +50,9 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
       return await next();
     } finally {
       for (const [field, item] of Object.entries(uploads)) {
-        await WebUploadUtil.finishUpload(item, config.uploads?.[field] ?? config);
+        if ((config.uploads?.[field] ?? config).cleanupFiles !== false) {
+          await fs.rm(BinaryUtil.getMetadata(item).rawLocation!, { force: true });
+        }
       }
     }
   }

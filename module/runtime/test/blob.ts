@@ -1,5 +1,4 @@
 import assert from 'node:assert';
-import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
@@ -13,7 +12,7 @@ export class BlobUtilSuite {
   @Test()
   async verifyReadableBlob() {
     const stream = () => this.fixture.readStream('/logo.png');
-    const blob = new BinaryBlob(stream).updateMetadata(await BinaryBlob.computeMetadata(await stream()));
+    const blob = new BinaryBlob(stream).updateMetadata(await BinaryUtil.computeMetadata(await stream()));
     const blobBytes = await buffer(blob.stream());
     const allBytes = await this.fixture.read('/logo.png', true);
     assert(blob.size === blobBytes.length);
@@ -26,8 +25,8 @@ export class BlobUtilSuite {
   @Test()
   async verifyReadableBlobMultiple() {
     const stream = () => this.fixture.readStream('/logo.png');
-    const blob = new BinaryBlob(stream).updateMetadata(await BinaryBlob.computeMetadata(await stream()));
-    await BinaryBlob.computeMetadata(blob);
+    const blob = new BinaryBlob(stream).updateMetadata(await BinaryUtil.computeMetadata(await stream()));
+    await BinaryUtil.computeMetadata(blob);
     const blobBytes = await buffer(blob.stream());
     const allBytes = await buffer(blob.stream());
     assert(blob.size === blobBytes.length);

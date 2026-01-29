@@ -2,7 +2,7 @@ import { createReadStream, existsSync } from 'node:fs';
 import type { OpenAPIObject } from 'openapi3-ts/oas31';
 import { stringify } from 'yaml';
 
-import { CodecUtil, Util } from '@travetto/runtime';
+import { BinaryUtil, Util } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerVisitUtil, type WebConfig } from '@travetto/web';
 
@@ -78,8 +78,8 @@ export class OpenApiService {
         stringify(spec);
 
       if (existsSync(this.apiSpecConfig.output)) {
-        const existing = await CodecUtil.hash(createReadStream(this.apiSpecConfig.output));
-        const toWrite = await CodecUtil.hash(output);
+        const existing = await BinaryUtil.hash(createReadStream(this.apiSpecConfig.output));
+        const toWrite = await BinaryUtil.hash(output);
 
         if (existing === toWrite) {
           console.debug('OpenAPI spec unchanged, skipping write');

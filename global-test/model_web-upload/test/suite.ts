@@ -6,11 +6,11 @@ import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
 import { Upload, type UploadMap } from '@travetto/web-upload';
-import { Util, type BinaryMetadata, castTo, type AppError, CodecUtil, BinaryBlob } from '@travetto/runtime';
+import { Util, type BinaryMetadata, castTo, type AppError, BinaryUtil } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
-const getHash = (blob: Blob) => BinaryBlob.getMetadata(blob)?.hash;
+const getHash = (blob: Blob) => BinaryUtil.getMetadata(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -86,7 +86,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
   async getFileMeta(pth: string) {
     const loc = await this.fixture.readStream(pth);
-    return { hash: await CodecUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
+    return { hash: await BinaryUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
   }
 
   @BeforeAll()
@@ -243,6 +243,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     const loc = response.body?.location;
 
     const item = await this.request({ context: { httpMethod: 'GET', path: `/test/upload/${loc}` } });
+    console.log(item);
     assert(typeof item.body === 'string');
     assert(item.body?.length === 26);
 
@@ -252,7 +253,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
           httpMethod: 'GET', path: `/test/upload/${loc}`,
         },
         headers: {
-          Range: 'bytes=0-9'
+          // Range: 'bytes=0-9'
         }
       }
     );

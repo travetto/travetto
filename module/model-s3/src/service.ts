@@ -317,7 +317,10 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       return;
     }
 
-    const resolved = await BinaryBlob.computeMetadata(input, metadata);
+    const resolved = await BinaryUtil.computeMetadata(input, {
+      ...BinaryUtil.getMetadata(input),
+      ...metadata
+    });
 
     if (resolved.size && resolved.size < this.config.chunkSize) { // If smaller than chunk size
       const blob = this.#queryBlob(location, {

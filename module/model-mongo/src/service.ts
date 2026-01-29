@@ -289,7 +289,10 @@ export class MongoModelService implements
     if (!overwrite && existing) {
       return;
     }
-    const resolved = await BinaryBlob.computeMetadata(input, metadata);
+    const resolved = await BinaryUtil.computeMetadata(input, {
+      ...BinaryUtil.getMetadata(input),
+      ...metadata
+    });
     const writeStream = this.#bucket.openUploadStream(location, { metadata: resolved });
     await BinaryUtil.pipeline(input, writeStream);
 

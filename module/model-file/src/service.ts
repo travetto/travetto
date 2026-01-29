@@ -175,7 +175,10 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-    const resolved = await BinaryBlob.computeMetadata(input, metadata);
+    const resolved = await BinaryUtil.computeMetadata(input, {
+      ...BinaryUtil.getMetadata(input),
+      ...metadata
+    });
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       BinaryUtil.pipeline(input, createWriteStream(file)),

@@ -91,7 +91,7 @@ export class WebUploadUtil {
   /**
    * Convert an UploadItem to a File
    */
-  static async toBinaryBlob({ stream, filename, field }: UploadItem, config: Partial<WebUploadConfig>): Promise<BinaryBlob> {
+  static async toBlob({ stream, filename, field }: UploadItem, config: Partial<WebUploadConfig>): Promise<Blob> {
     const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDirectory, { recursive: true });
 
@@ -119,7 +119,7 @@ export class WebUploadUtil {
         filename = `${filename}.${detected.ext}`;
       }
 
-      const metadata = await BinaryBlob.computeMetadata(response(), {
+      const metadata = await BinaryUtil.computeMetadata(response(), {
         contentType: detected.mime,
         filename,
         rawLocation: location
@@ -136,12 +136,9 @@ export class WebUploadUtil {
    * Get file type
    */
   static async getFileType(input: BinaryType, filename?: string): Promise<FileType> {
-    const { FileTypeParser } = await import('file-type');
-    const { fromStream } = await import('strtok3');
-
-    const parser = new FileTypeParser();
-    let token: ReturnType<typeof fromStream> | undefined;
     let matched: FileType | undefined;
+
+    let cleanup: (() => Promise<void>) | undefined;
 
     if (input instanceof ReadStream) {
       filename ??= input.path.toString('utf8');
@@ -149,10 +146,14 @@ export class WebUploadUtil {
     }
 
     try {
-      token = await fromStream(BinaryUtil.toReadable(input));
+      const { FileTypeParser } = await import('file-type');
+      const { fromStream } = await import('strtok3');
+      const parser = new FileTypeParser();
+      const token = await fromStream(BinaryUtil.toReadable(input));
+      cleanup = (): Promise<void> => token.close();
       matched = await parser.fromTokenizer(token);
     } finally {
-      await token?.close();
+      await cleanup?.();
     }
 
     if (!matched && filename) {
@@ -165,15 +166,16 @@ export class WebUploadUtil {
         return { ext: checker.getExtension(mime)!, mime };
       }
     }
+
     return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
   }
 
   /**
    * Finish upload
    */
-  static async finishUpload(upload: BinaryBlob, config: Partial<WebUploadConfig>): Promise<void> {
+  static async finishUpload(upload: BinaryType, config: Partial<WebUploadConfig>): Promise<void> {
     if (config.cleanupFiles !== false) {
-      await fs.rm(BinaryBlob.getMetadata(upload).rawLocation!, { force: true });
+      await fs.rm(BinaryUtil.getMetadata(upload).rawLocation!, { force: true });
     }
   }
 

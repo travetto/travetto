@@ -234,7 +234,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-    const resolved = await BinaryBlob.computeMetadata(input, metadata);
+    const resolved = await BinaryUtil.computeMetadata(input, {
+      ...BinaryUtil.getMetadata(input),
+      ...metadata
+    });
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, CodecUtil.toJSON(resolved));
