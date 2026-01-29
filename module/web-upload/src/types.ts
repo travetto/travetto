@@ -1,4 +1,4 @@
 /**
  * @concrete
  */
-export interface UploadMap extends Record<string, Blob> { }
+export interface FileMap extends Record<string, File> { }

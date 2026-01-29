@@ -4,12 +4,12 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor.ts';
 import type { WebUploadConfig } from './config.ts';
-import type { UploadMap } from './types.ts';
+import type { FileMap } from './types.ts';
 import { WebUploadUtil } from './util.ts';
 
 type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 
-const UploadMapContract = toConcrete<UploadMap>();
+const FileMapContract = toConcrete<FileMap>();
 
 /**
  * Allows for supporting uploads
@@ -55,14 +55,14 @@ export function Upload(
         const input = SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx];
 
         if (!input) {
-          throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${UploadMapContract.name}`);
+          throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
-        if (!(input.type === Blob || input.type === File || input.type === UploadMapContract)) {
-          throw new AppError(`Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${UploadMapContract.name}`);
+        if (!(input.type === Blob || input.type === File || input.type === FileMapContract)) {
+          throw new AppError(`Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
-        const isMap = input.type === UploadMapContract;
+        const isMap = input.type === FileMapContract;
         const map = WebUploadUtil.getRequestUploads(request);
         return isMap ? map : map[getName()];
       }

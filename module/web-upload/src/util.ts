@@ -11,7 +11,7 @@ import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@tra
 import { AsyncQueue, AppError, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryFile } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
-import type { UploadMap } from './types.ts';
+import type { FileMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
@@ -140,7 +140,7 @@ export class WebUploadUtil {
   /**
    * Convert an UploadItem to a File
    */
-  static async toBlob({ stream, filename, field, contentType }: UploadItem, config: Partial<WebUploadConfig>): Promise<Blob> {
+  static async toBlob({ stream, filename, field, contentType }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
     const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDirectory, { recursive: true });
 
@@ -186,14 +186,14 @@ export class WebUploadUtil {
   /**
    * Get Uploads
    */
-  static getRequestUploads(request: WebRequest & { [WebUploadSymbol]?: UploadMap }): UploadMap {
+  static getRequestUploads(request: WebRequest & { [WebUploadSymbol]?: FileMap }): FileMap {
     return request[WebUploadSymbol] ?? {};
   }
 
   /**
    * Set Uploads
    */
-  static setRequestUploads(request: WebRequest & { [WebUploadSymbol]?: UploadMap }, uploads: UploadMap): void {
+  static setRequestUploads(request: WebRequest & { [WebUploadSymbol]?: FileMap }, uploads: FileMap): void {
     request[WebUploadSymbol] ??= uploads;
   }
 }

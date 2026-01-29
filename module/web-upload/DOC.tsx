@@ -3,10 +3,10 @@ import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import { Endpoint } from '@travetto/web';
 
-import type { UploadMap } from './src/types.ts';
+import type { FileMap } from './src/types.ts';
 import { Upload } from './src/decorator.ts';
 
-const FileMapContract = toConcrete<UploadMap>();
+const FileMapContract = toConcrete<FileMap>();
 
 export const text = <>
   <c.StdHeader />

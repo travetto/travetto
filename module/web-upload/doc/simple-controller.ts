@@ -1,5 +1,5 @@
 import { Controller, Post, Get } from '@travetto/web';
-import { type UploadMap, Upload } from '@travetto/web-upload';
+import { type FileMap, Upload } from '@travetto/web-upload';
 
 @Controller('/simple')
 export class Simple {
@@ -26,7 +26,7 @@ export class Simple {
    * @param uploads A map of files that were uploaded
    */
   @Post('/files')
-  async loadFiles(@Upload() uploads: UploadMap) {
+  async loadFiles(@Upload() uploads: FileMap) {
     for (const [, upload] of Object.entries(uploads)) {
       return upload;
     }

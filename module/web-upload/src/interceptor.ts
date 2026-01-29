@@ -9,7 +9,7 @@ import { BinaryUtil } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
-import type { UploadMap } from './types.ts';
+import type { FileMap } from './types.ts';
 
 @Injectable()
 export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
@@ -38,7 +38,7 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<WebUploadConfig>): Promise<WebResponse> {
-    const uploads: UploadMap = {};
+    const uploads: FileMap = {};
 
     try {
       for await (const item of WebUploadUtil.getUploads(request, config)) {
