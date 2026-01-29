@@ -1,4 +1,4 @@
-import { createReadStream, createWriteStream, ReadStream } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
@@ -126,12 +126,7 @@ export class WebUploadUtil {
   /**
    * Get file type
    */
-  static async getFileType(input: BinaryType, filename?: string, contentType?: string): Promise<FileType> {
-    if (input instanceof ReadStream) {
-      filename ??= input.path.toString('utf8');
-      input = createReadStream(input.path); // Recreate stream to not consume it
-    }
-
+  static async getFileType(input: BinaryType, filename: string, contentType?: string): Promise<FileType> {
     return (await this.detectMimeTypeFromBinary(input)) ??
       (await this.detectMimeTypeFromRequestInput(filename, contentType)) ??
       { ext: 'bin', mime: 'application/octet-stream' };
