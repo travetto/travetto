@@ -151,8 +151,6 @@ export class WebUploadUtil {
     const mimeCheck = config.matcher ??= WebCommonUtil.mimeTypeMatcher(config.types);
     const response = (): Readable => createReadStream(location);
 
-    console.log(`Uploading file field=${field}, filename=${filename} to ${location} with contentType=${contentType}`);
-
     try {
       const target = createWriteStream(location);
 
