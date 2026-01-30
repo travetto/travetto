@@ -8,7 +8,7 @@ import { Transform, type Readable } from 'node:stream';
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryFile } from '@travetto/runtime';
+import { AsyncQueue, AppError, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryMetadataUtil } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
@@ -135,7 +135,7 @@ export class WebUploadUtil {
   /**
    * Convert an UploadItem to a File
    */
-  static async toBlob({ stream, filename, field, contentType }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
+  static async toFile({ stream, filename, field, contentType }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
     const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDirectory, { recursive: true });
 
@@ -163,14 +163,12 @@ export class WebUploadUtil {
         filename = `${filename}.${detected.ext}`;
       }
 
-      const metadata = await BinaryUtil.computeMetadata(response(), {
-        contentType: detected.mime,
-        filename,
-        rawLocation: location,
-        cleanup: config.cleanupFiles !== false ? (): Promise<void> => fs.rm(location).catch(() => { }) : undefined,
+      const metadata = await BinaryMetadataUtil.compute(response(), { contentType: detected.mime, filename, }, location);
+      const file = BinaryMetadataUtil.makeFile(response, metadata);
+      Object.defineProperty(file, 'cleanup', {
+        value: () => config.cleanupFiles !== false && fs.rm(location).catch(() => { })
       });
-
-      return new BinaryFile(response, metadata);
+      return file;
     } catch (error) {
       await remove();
       throw error;

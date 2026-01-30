@@ -5,14 +5,14 @@ import path from 'node:path';
 
 import {
   type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryFile, BinaryUtil, CodecUtil
+  BinaryUtil, CodecUtil, BinaryMetadataUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex,
-  NotFoundError, type OptionalId, ExistsError, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil, ModelBlobUtil
+  NotFoundError, type OptionalId, ExistsError, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil
 } from '@travetto/model';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
@@ -175,10 +175,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-    const resolved = await BinaryUtil.computeMetadata(input, {
-      ...BinaryUtil.getMetadata(input),
-      ...metadata
-    });
+    const resolved = await BinaryMetadataUtil.compute(input, metadata);
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       BinaryUtil.pipeline(input, createWriteStream(file)),
@@ -189,8 +186,8 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const file = await this.#find(ModelBlobNamespace, BIN, location);
     const metadata = await this.getBlobMetadata(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
-    return new BinaryFile(() => createReadStream(file, range), { ...metadata, range: final });
+    const final = range ? BinaryMetadataUtil.enforceRange(range, metadata) : undefined;
+    return BinaryMetadataUtil.makeBlob(() => createReadStream(file, final), { ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

@@ -255,15 +255,13 @@ The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/s
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Encoding and Decoding Utilities
-The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16) class provides a variety of static methods for encoding and decoding data.  It supports the following formats:
+The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L9) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
    *  Hex
    *  Base64
    *  UTF8
-
-In addition to data formats, it also supports:
-   *  Base64 encoded JSON (compression friendly)
-   *  Hashing (SHA1, SHA256, SHA512, MD5)
-   *  Stream line reading
+   *  UTT8 Encoded JSON
+   *  Base64 Encoded JSON
+   *  New Line Delimited UTF8
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L14) includes:
@@ -282,7 +280,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Binary Utilities
-The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L61) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
+The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L70) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 ## Time Utilities
 [TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L20) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.

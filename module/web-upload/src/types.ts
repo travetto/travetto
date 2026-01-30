@@ -1,4 +1,4 @@
 /**
  * @concrete
  */
-export interface FileMap extends Record<string, File> { }
+export interface FileMap extends Record<string, File & { cleanup?: () => Promise<void> }> { }

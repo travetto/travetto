@@ -207,10 +207,10 @@ Some implementations also allow for the ability to read/write binary data as <a 
    * Upsert blob to storage
    * &#64;param location The location of the blob
    * &#64;param input The actual blob to write
-   * &#64;param meta Additional metadata to store with the blob
+   * &#64;param metadata Additional metadata to store with the blob
    * &#64;param overwrite Should we replace content if already found, defaults to true
    */</span>
-  <span class="token function">upsertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> input<span class="token operator">:</span> BinaryType<span class="token punctuation">,</span> meta<span class="token operator">?</span><span class="token operator">:</span> BinaryMetadata<span class="token punctuation">,</span> overwrite<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">upsertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> input<span class="token operator">:</span> BinaryType<span class="token punctuation">,</span> metadata<span class="token operator">?</span><span class="token operator">:</span> BinaryMetadata<span class="token punctuation">,</span> overwrite<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Get blob from storage
@@ -233,8 +233,9 @@ Some implementations also allow for the ability to read/write binary data as <a 
   <span class="token comment">/**
    * Update blob metadata
    * &#64;param location The location of the blob
+   * &#64;param metadata The metadata to update
    */</span>
-  <span class="token function">updateBlobMetadata</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> meta<span class="token operator">:</span> BinaryMetadata<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">updateBlobMetadata</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> metadata<span class="token operator">:</span> BinaryMetadata<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Produces an externally usable URL for sharing limited read access to a specific resource
@@ -248,10 +249,10 @@ Some implementations also allow for the ability to read/write binary data as <a 
    * Produces an externally usable URL for sharing allowing direct write access
    *
    * &#64;param location The asset location to write to
-   * &#64;param meta The metadata to associate with the final asset
-   * &#64;param exp Expiry
+   * &#64;param metadata The metadata to associate with the final asset
+   * &#64;param expiresIn Expiry
    */</span>
-  getBlobWriteUrl<span class="token operator">?</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> meta<span class="token operator">:</span> BinaryMetadata<span class="token punctuation">,</span> exp<span class="token operator">?</span><span class="token operator">:</span> TimeSpan<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  getBlobWriteUrl<span class="token operator">?</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> metadata<span class="token operator">:</span> BinaryMetadata<span class="token punctuation">,</span> expiresIn<span class="token operator">?</span><span class="token operator">:</span> TimeSpan<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

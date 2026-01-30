@@ -1,6 +1,6 @@
 import { TextDecoder } from 'node:util';
 
-import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON } from '@travetto/runtime';
+import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON, BinaryMetadataUtil } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -47,9 +47,9 @@ export class WebBodyUtil {
 
   /** Get Metadata Headers */
   static getMetadataHeaders(value: BinaryType): [string, string][] {
-    const metadata = BinaryUtil.getMetadata(value);
+    const metadata = BinaryMetadataUtil.read(value);
 
-    const length = metadata.range ? (metadata.range.end - metadata.range.start) + 1 : metadata.size;
+    const length = BinaryMetadataUtil.readDataSize(value);
 
     const toAdd: [string, string | undefined][] = [
       ['Content-Type', metadata.contentType],

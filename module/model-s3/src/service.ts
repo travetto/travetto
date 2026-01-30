@@ -7,12 +7,14 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   type ModelCrudSupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex, ExistsError, NotFoundError, type OptionalId,
-  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil, ModelBlobUtil
+  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil, BinaryFile,
+  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil,
+  BinaryMetadataUtil,
+  TypedObject,
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -41,16 +43,16 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   constructor(config: S3ModelConfig) { this.config = config; }
 
-  #getMetadata({ range: _range, size, cleanup: _cleanup, ...metadata }: BinaryMetadata): S3Metadata {
+  #getMetadata(metadata: BinaryMetadata): S3Metadata {
     return {
       ContentType: metadata.contentType,
       ...(metadata.contentEncoding ? { ContentEncoding: metadata.contentEncoding } : {}),
       ...(metadata.contentLanguage ? { ContentLanguage: metadata.contentLanguage } : {}),
       ...(metadata.cacheControl ? { CacheControl: metadata.cacheControl } : {}),
-      Metadata: {
-        ...metadata,
-        ...(size ? { size: `${size}` } : {})
-      }
+      Metadata: TypedObject.fromEntries(
+        TypedObject.entries(metadata)
+          .map(([key, value]) => [key, JSON.stringify(value)] as const)
+      )
     };
   }
 
@@ -317,15 +319,14 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       return;
     }
 
-    const resolved = await BinaryUtil.computeMetadata(input, {
-      ...BinaryUtil.getMetadata(input),
-      ...metadata
-    });
+    const resolved = await BinaryMetadataUtil.compute(input, metadata);
 
-    if (resolved.size && resolved.size < this.config.chunkSize) { // If smaller than chunk size
+    const size = BinaryMetadataUtil.readDataSize(input);
+
+    if (size && size < this.config.chunkSize) { // If smaller than chunk size
       const blob = this.#queryBlob(location, {
         Body: BinaryUtil.toReadable(input),
-        ContentLength: resolved.size,
+        ContentLength: size,
         ...this.#getMetadata(resolved),
       });
       // Upload to s3
@@ -354,8 +355,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const metadata = await this.getBlobMetadata(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
-    return new BinaryFile(() => this.#getObject(location, final), { ...metadata, range: final });
+    const final = range ? BinaryMetadataUtil.enforceRange(range, metadata) : undefined;
+    return BinaryMetadataUtil.makeBlob(() => this.#getObject(location, final), { ...metadata, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number }> {
@@ -414,7 +415,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     );
   }
 
-  async getBlobWriteUrl(location: string, metadata: BinaryMetadata, exp: TimeSpan = '1h'): Promise<string> {
+  async getBlobWriteUrl(location: string, metadata: BinaryMetadata, expiresIn: TimeSpan = '1h'): Promise<string> {
     const base = this.#getMetadata(metadata);
     return await getSignedUrl(
       this.client,
@@ -425,7 +426,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         ...((metadata.hash && metadata.hash !== '-1') ? { ChecksumSHA256: metadata.hash } : {}),
       }),
       {
-        expiresIn: TimeUtil.asSeconds(exp),
+        expiresIn: TimeUtil.asSeconds(expiresIn),
         ...(metadata.contentType ? { signableHeaders: new Set(['content-type']) } : {})
       }
     );

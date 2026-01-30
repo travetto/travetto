@@ -54,7 +54,7 @@ export interface ModelBlobSupport {
    *
    * @param location The asset location to write to
    * @param metadata The metadata to associate with the final asset
-   * @param exp Expiry
+   * @param expiresIn Expiry
    */
-  getBlobWriteUrl?(location: string, metadata: BinaryMetadata, exp?: TimeSpan): Promise<string>;
+  getBlobWriteUrl?(location: string, metadata: BinaryMetadata, expiresIn?: TimeSpan): Promise<string>;
 }

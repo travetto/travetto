@@ -124,20 +124,15 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
   </c.Section>
 
   <c.Section title='Encoding and Decoding Utilities'>
-    The {CodecUtil} class provides a variety of static methods for encoding and decoding data.  It supports the following formats:
+    The {CodecUtil} class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
 
     <ul>
       <li>Hex</li>
       <li>Base64</li>
       <li>UTF8</li>
-    </ul>
-
-    In addition to data formats, it also supports:
-
-    <ul>
-      <li>Base64 encoded JSON (compression friendly)</li>
-      <li>Hashing (SHA1, SHA256, SHA512, MD5)</li>
-      <li>Stream line reading</li>
+      <li>UTT8 Encoded JSON</li>
+      <li>Base64 Encoded JSON</li>
+      <li>New Line Delimited UTF8</li>
     </ul>
   </c.Section>
 

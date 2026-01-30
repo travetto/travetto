@@ -283,15 +283,13 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="encoding-and-decoding-utilities">Encoding and Decoding Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a> class provides a variety of static methods for encoding and decoding data.  It supports the following formats:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L9">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
 <ul> <li>Hex</li>
 <li>Base64</li>
 <li>UTF8</li>
-</ul>
-In addition to data formats, it also supports:
-<ul> <li>Base64 encoded JSON (compression friendly)</li>
-<li>Hashing (SHA1, SHA256, SHA512, MD5)</li>
-<li>Stream line reading</li>
+<li>UTT8 Encoded JSON</li>
+<li>Base64 Encoded JSON</li>
+<li>New Line Delimited UTF8</li>
 </ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
@@ -316,7 +314,7 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="binary-utilities">Binary Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L61">BinaryUtil</a> class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (<code class="item input">Buffer</code>, <code class="item input">Stream</code>) and Web Standard types (<code class="item input">Blob</code>, <code class="item input">ArrayBuffer</code>). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L70">BinaryUtil</a> class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (<code class="item input">Buffer</code>, <code class="item input">Stream</code>) and Web Standard types (<code class="item input">Blob</code>, <code class="item input">ArrayBuffer</code>). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 <h2 id="time-utilities">Time Utilities</h2>
 

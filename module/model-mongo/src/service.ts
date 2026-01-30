@@ -9,7 +9,7 @@ import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport,
   type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
   NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -20,8 +20,7 @@ import {
 
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
-  castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil,
-  BinaryFile
+  castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
@@ -289,10 +288,7 @@ export class MongoModelService implements
     if (!overwrite && existing) {
       return;
     }
-    const resolved = await BinaryUtil.computeMetadata(input, {
-      ...BinaryUtil.getMetadata(input),
-      ...metadata
-    });
+    const resolved = await BinaryMetadataUtil.compute(input, metadata);
     const writeStream = this.#bucket.openUploadStream(location, { metadata: resolved });
     await BinaryUtil.pipeline(input, writeStream);
 
@@ -304,9 +300,9 @@ export class MongoModelService implements
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const metadata = await this.getBlobMetadata(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
+    const final = range ? BinaryMetadataUtil.enforceRange(range, metadata) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
-    return new BinaryFile(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...metadata, range: final });
+    return BinaryMetadataUtil.makeBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {
