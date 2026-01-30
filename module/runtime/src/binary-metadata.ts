@@ -77,6 +77,17 @@ class BinaryBlob extends Blob {
     const buffer = await BinaryUtil.toBinaryArray(this.#src());
     return CodecUtil.toUTF8String(buffer);
   }
+
+  slice(start?: number, end?: number, _contentType?: string): Blob {
+    const src = this.#src;
+    return BinaryMetadataUtil.makeBlob(
+      async () => {
+        const data = await BinaryUtil.toBinaryArray(src());
+        return BinaryUtil.sliceByteArray(data, start, end);
+      },
+      BinaryMetadataUtil.read(this)
+    );
+  }
 }
 
 export class BinaryMetadataUtil {
@@ -119,13 +130,17 @@ export class BinaryMetadataUtil {
     }
   }
 
+  /** Compute the length of the binary data to be returned */
   static readLength(input: BinaryType): number | undefined {
     const metadata = this.read(input);
     return metadata.range ? (metadata.range.end - metadata.range.start + 1) : metadata.size;
   }
 
   /** Compute metadata for a given binary input */
-  static async compute(input: BinaryType, base: BinaryMetadata = {}): Promise<BinaryMetadata> {
+  static async compute(input: BlobInput, base: BinaryMetadata = {}): Promise<BinaryMetadata> {
+    if (typeof input === 'function') {
+      input = await input();
+    }
     const metadata = { ...BinaryMetadataUtil.read(input), ...base };
 
     if (BinaryUtil.isBinaryContainer(input)) {
@@ -137,15 +152,14 @@ export class BinaryMetadataUtil {
     } else if (BinaryUtil.isBinaryArray(input)) {
       metadata.size ??= input.byteLength;
       metadata.hash ??= await this.hash(input, { hashAlgorithm: 'sha256' });
-    } else if (isReadable(input)) {
-      metadata.contentEncoding ??= input.readableEncoding!;
-    }
-
-    if (input instanceof ReadStream) {
+    } else if (input instanceof ReadStream) {
       const location = input.path.toString();
       metadata.filename ??= path.basename(location);
+      metadata.contentEncoding ??= input.readableEncoding!;
       metadata.size ??= (await fs.stat(location)).size;
       metadata.hash ??= await this.hash(createReadStream(location), { hashAlgorithm: 'sha256' });
+    } else if (isReadable(input)) {
+      metadata.contentEncoding ??= input.readableEncoding!;
     }
 
     return metadata;

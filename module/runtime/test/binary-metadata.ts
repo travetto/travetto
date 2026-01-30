@@ -14,7 +14,7 @@ export class BinaryMetadataUtilSuite {
   @Test()
   async verifyReadableBlob() {
     const stream = () => this.fixture.readStream('/logo.png');
-    const blob = BinaryMetadataUtil.makeBlob(stream, await BinaryMetadataUtil.compute(await stream()));
+    const blob = BinaryMetadataUtil.makeBlob(stream, await BinaryMetadataUtil.compute(stream));
     const blobBytes = await buffer(blob.stream());
     const allBytes = await this.fixture.read('/logo.png', true);
     assert(blob.size > 0);
@@ -28,7 +28,7 @@ export class BinaryMetadataUtilSuite {
   @Test()
   async verifyReadableBlobMultiple() {
     const stream = () => this.fixture.readStream('/logo.png');
-    const blob = BinaryMetadataUtil.makeBlob(stream, await BinaryMetadataUtil.compute(await stream()));
+    const blob = BinaryMetadataUtil.makeBlob(stream, await BinaryMetadataUtil.compute(stream));
     await BinaryMetadataUtil.compute(blob);
     const blobBytes = await buffer(blob.stream());
     const allBytes = await buffer(blob.stream());

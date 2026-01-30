@@ -108,7 +108,7 @@ export class BinaryUtil {
   }
 
   /** Agnostic slice of binary array  */
-  static sliceByteArray(input: BinaryArray, start: number, end?: number): BinaryArray {
+  static sliceByteArray(input: BinaryArray, start?: number, end?: number): BinaryArray {
     if (Buffer.isBuffer(input)) {
       return input.subarray(start, end);
     } else if (isArrayBuffer(input)) {

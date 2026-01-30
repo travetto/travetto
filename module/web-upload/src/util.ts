@@ -163,7 +163,7 @@ export class WebUploadUtil {
         filename = `${filename}.${detected.ext}`;
       }
 
-      const metadata = await BinaryMetadataUtil.compute(response(), { contentType: detected.mime, filename, });
+      const metadata = await BinaryMetadataUtil.compute(response, { contentType: detected.mime, filename, });
       const file = BinaryMetadataUtil.makeFile(response, metadata);
       Object.defineProperty(file, 'cleanup', {
         value: () => config.cleanupFiles !== false && fs.rm(location).catch(() => { })
