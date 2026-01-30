@@ -59,32 +59,27 @@ class BinaryBlob extends File {
   get type(): string { return BinaryMetadataUtil.read(this).contentType ?? ''; }
   get name(): string { return BinaryMetadataUtil.read(this).filename ?? ''; }
 
-  async arrayBuffer(): Promise<ArrayBuffer> {
-    const data = await BinaryUtil.toBuffer(this.#src());
-    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+  arrayBuffer(): Promise<ArrayBuffer> {
+    return BinaryUtil.toBuffer(this.#src()).then(data => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
   }
 
-  async bytes(): Promise<NodeJS.NonSharedUint8Array> {
-    const data = await BinaryUtil.toBinaryArray(this.#src());
-    return new Uint8Array(data);
+  bytes(): Promise<NodeJS.NonSharedUint8Array> {
+    return BinaryUtil.toBinaryArray(this.#src()).then(data => new Uint8Array(data));
   }
 
   stream(): ReadableStream {
     return Readable.toWeb(BinaryUtil.toReadable(this.#src()));
   }
 
-  async text(): Promise<string> {
-    const buffer = await BinaryUtil.toBinaryArray(this.#src());
-    return CodecUtil.toUTF8String(buffer);
+  text(): Promise<string> {
+    return BinaryUtil.toBinaryArray(this.#src()).then(CodecUtil.toUTF8String);
   }
 
   slice(start?: number, end?: number, _contentType?: string): Blob {
     const src = this.#src;
     return BinaryMetadataUtil.makeBlob(
-      async () => {
-        const data = await BinaryUtil.toBinaryArray(src());
-        return BinaryUtil.sliceByteArray(data, start, end);
-      },
+      () => BinaryUtil.toBinaryArray(src())
+        .then(data => BinaryUtil.sliceByteArray(data, start, end)),
       BinaryMetadataUtil.read(this)
     );
   }
