@@ -45,19 +45,19 @@ type HashConfig = {
 
 const BinaryMetaSymbol = Symbol();
 
-class BinaryBlob extends Blob {
+class BinaryBlob extends File {
 
   #src: () => BinaryType;
 
   constructor(source: BlobInput, metadata?: BinaryMetadata) {
-    super([]);
+    super([], '');
     this.#src = (): BinaryType => BinaryUtil.toSynchronous(source);
     BinaryMetadataUtil.write(this, metadata ?? {});
   }
 
-  get size(): number { return BinaryMetadataUtil.readLength(this)! ?? 0; }
-  get type(): string { return BinaryMetadataUtil.read(this).contentType!; }
-  get name(): string | undefined { return BinaryMetadataUtil.read(this).filename; }
+  get size(): number { return BinaryMetadataUtil.readLength(this) ?? 0; }
+  get type(): string { return BinaryMetadataUtil.read(this).contentType ?? ''; }
+  get name(): string { return BinaryMetadataUtil.read(this).filename ?? ''; }
 
   async arrayBuffer(): Promise<ArrayBuffer> {
     const data = await BinaryUtil.toBuffer(this.#src());
