@@ -8,8 +8,6 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 import type { ModelBlobSupport } from '../../src/types/blob.ts';
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 
-const metadata = BinaryUtil.getMetadata;
-
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
@@ -55,7 +53,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const { hash } = await service.getBlobMetadata(id);
 
     const retrieved = await service.getBlob(id);
-    const { hash: received } = metadata(retrieved)!;
+    const { hash: received } = BinaryUtil.getMetadata(retrieved)!;
     assert(hash === received);
   }
 
@@ -89,7 +87,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const partial = await service.getBlob(id, { start: 10, end: 20 });
     assert(partial.size === 11);
-    const partialMeta = metadata(partial)!;
+    const partialMeta = BinaryUtil.getMetadata(partial)!;
     const subContent = await partial.text();
     const range = await ModelBlobUtil.enforceRange({ start: 10, end: 20 }, partialMeta.size!);
     assert(subContent.length === (range.end - range.start) + 1);
@@ -99,7 +97,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(subContent === og.substring(10, 21));
 
     const partialUnbounded = await service.getBlob(id, { start: 10 });
-    const partialUnboundedMeta = metadata(partial)!;
+    const partialUnboundedMeta = BinaryUtil.getMetadata(partialUnbounded)!;
     const subContent2 = await partialUnbounded.text();
     const range2 = await ModelBlobUtil.enforceRange({ start: 10 }, partialUnboundedMeta.size!);
     assert(subContent2.length === (range2.end - range2.start) + 1);
@@ -126,12 +124,13 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const buffer = await this.fixture.read('/asset.yml', true);
     await service.upsertBlob('orange', buffer, { contentType: 'text/yaml', filename: 'asset.yml' });
     const saved = await service.getBlob('orange');
-    const savedMeta = metadata(saved)!;
+    const savedMeta = BinaryUtil.getMetadata(saved)!;
+    console.error(savedMeta);
 
     assert('text/yaml' === savedMeta.contentType);
     assert(buffer.byteLength === savedMeta.size);
     assert('asset.yml' === savedMeta.filename);
-    assert(undefined === savedMeta.hash);
+    assert(!!savedMeta.hash);
   }
 
   @Test()
@@ -149,7 +148,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     assert('text/yml' === savedMeta.contentType);
     assert('orange.yml' === savedMeta.filename);
-    assert(undefined === savedMeta.hash);
+    assert(savedMeta.hash === undefined);
   }
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -185,9 +184,10 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     });
 
     const found = await service.getBlob('largeFile/one');
+    const foundMeta = BinaryUtil.getMetadata(found);
     assert(found.size === bytes.byteLength);
     assert(found.type === 'image/jpeg');
-    assert(metadata(found)?.title === 'orange');
-    assert(metadata(found)?.filename === 'gary');
+    assert(foundMeta.title === 'orange');
+    assert(foundMeta.filename === 'gary');
   }
 }

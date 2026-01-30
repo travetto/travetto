@@ -1,6 +1,6 @@
 import { TextDecoder } from 'node:util';
 
-import { type Any, type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON } from '@travetto/runtime';
+import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -49,9 +49,11 @@ export class WebBodyUtil {
   static getMetadataHeaders(value: BinaryType): [string, string][] {
     const metadata = BinaryUtil.getMetadata(value);
 
+    const length = metadata.range ? (metadata.range.end - metadata.range.start) + 1 : metadata.size;
+
     const toAdd: [string, string | undefined][] = [
       ['Content-Type', metadata.contentType],
-      ['Content-Length', (BinaryUtil.isBinaryContainer(value) ? value.size : metadata.size)?.toString()],
+      ['Content-Length', length?.toString()],
       ['Content-Encoding', metadata.contentEncoding],
       ['Cache-Control', metadata.cacheControl],
       ['Content-Language', metadata.contentLanguage],
@@ -64,9 +66,8 @@ export class WebBodyUtil {
       );
     }
 
-    const filename = (value instanceof File ? value.name : undefined) ?? metadata.filename;
-    if (filename) {
-      toAdd.push(['Content-disposition', `attachment; filename="${filename}"`]);
+    if (metadata.filename) {
+      toAdd.push(['Content-disposition', `attachment; filename="${metadata.filename}"`]);
     }
 
     return toAdd.filter((pair): pair is [string, string] => !!pair[1]);
@@ -140,8 +141,7 @@ export class WebBodyUtil {
    * Is the input raw
    */
   static isRawBinary(body: unknown): body is BinaryType {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!body && (BinaryUtil.isBinaryType(body) && (body as Any)[WebRawBinarySymbol] === body);
+    return BinaryUtil.isBinaryType(body) && castTo<{ [WebRawBinarySymbol]: unknown }>(body)[WebRawBinarySymbol] === body;
   }
 
   /**

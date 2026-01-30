@@ -11,10 +11,10 @@ export interface ModelBlobSupport {
    * Upsert blob to storage
    * @param location The location of the blob
    * @param input The actual blob to write
-   * @param meta Additional metadata to store with the blob
+   * @param metadata Additional metadata to store with the blob
    * @param overwrite Should we replace content if already found, defaults to true
    */
-  upsertBlob(location: string, input: BinaryType, meta?: BinaryMetadata, overwrite?: boolean): Promise<void>;
+  upsertBlob(location: string, input: BinaryType, metadata?: BinaryMetadata, overwrite?: boolean): Promise<void>;
 
   /**
    * Get blob from storage
@@ -37,8 +37,9 @@ export interface ModelBlobSupport {
   /**
    * Update blob metadata
    * @param location The location of the blob
+   * @param metadata The metadata to update
    */
-  updateBlobMetadata(location: string, meta: BinaryMetadata): Promise<void>;
+  updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void>;
 
   /**
    * Produces an externally usable URL for sharing limited read access to a specific resource
@@ -52,8 +53,8 @@ export interface ModelBlobSupport {
    * Produces an externally usable URL for sharing allowing direct write access
    *
    * @param location The asset location to write to
-   * @param meta The metadata to associate with the final asset
+   * @param metadata The metadata to associate with the final asset
    * @param exp Expiry
    */
-  getBlobWriteUrl?(location: string, meta: BinaryMetadata, exp?: TimeSpan): Promise<string>;
+  getBlobWriteUrl?(location: string, metadata: BinaryMetadata, exp?: TimeSpan): Promise<string>;
 }

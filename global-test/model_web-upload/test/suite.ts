@@ -6,11 +6,11 @@ import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
 import { Upload, type FileMap } from '@travetto/web-upload';
-import { Util, type BinaryMetadata, BinaryUtil, castTo, type AppError, CodecUtil } from '@travetto/runtime';
+import { Util, type BinaryMetadata, castTo, type AppError, BinaryUtil, BinaryFile } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
-const bHash = (blob: Blob) => BinaryUtil.getMetadata(blob)?.hash;
+const getHash = (blob: Blob) => BinaryUtil.getMetadata(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -24,7 +24,7 @@ class TestUploadController {
   @Post('/all')
   async uploadAll(@Upload() uploads: FileMap) {
     for (const [, file] of Object.entries(uploads)) {
-      return { hash: bHash(file), size: file.size };
+      return { hash: getHash(file), size: file.size };
     }
   }
 
@@ -47,17 +47,17 @@ class TestUploadController {
 
   @Post('/all-named')
   async uploads(@Upload() file1: Blob, @Upload() file2: Blob) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getHash(file1), hash2: getHash(file2) };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ types: ['!image/png'] }) file1: Blob, @Upload() file2: Blob) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getHash(file1), hash2: getHash(file2) };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ maxSize: 100 }) file1: File, @Upload({ maxSize: 8000 }) file2: File) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getHash(file1), hash2: getHash(file2) };
   }
 
   @Get('*')
@@ -75,18 +75,14 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
     const data = new FormData();
     await Promise.all(files.map(async ({ name, type, resource }) => {
-      const file = await this.fixture.readFile(resource);
-      if (type) {
-        Object.defineProperty(file, 'type', { value: type });
-      }
-      data.append(name, file);
+      data.append(name, new BinaryFile(() => this.fixture.readStream(resource), { contentType: type }));
     }));
     return data;
   }
 
   async getFileMeta(pth: string) {
     const loc = await this.fixture.readStream(pth);
-    return { hash: await CodecUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
+    return { hash: await BinaryUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
   }
 
   @BeforeAll()
@@ -243,6 +239,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     const loc = response.body?.location;
 
     const item = await this.request({ context: { httpMethod: 'GET', path: `/test/upload/${loc}` } });
+    console.log(item);
     assert(typeof item.body === 'string');
     assert(item.body?.length === 26);
 

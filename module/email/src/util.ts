@@ -1,4 +1,4 @@
-import { Runtime, CodecUtil } from '@travetto/runtime';
+import { Runtime, CodecUtil, BinaryUtil } from '@travetto/runtime';
 
 import type { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types.ts';
 
@@ -76,7 +76,7 @@ export class MailUtil {
   static buildUniqueMessageId(message: EmailOptions): string {
     const from = this.getPrimaryEmail(message.from)!;
     const to = this.getPrimaryEmail(message.to)!;
-    const uniqueId = CodecUtil.hash(`${to}${from}${message.subject}${Date.now()}`, { length: 12 });
+    const uniqueId = BinaryUtil.hash(`${to}${from}${message.subject}${Date.now()}`, { length: 12 });
     return `<${uniqueId}@${from.split('@')[1]}>`;
   }
 }

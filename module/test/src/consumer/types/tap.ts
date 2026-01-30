@@ -47,9 +47,9 @@ export class TapEmitter implements TestConsumerShape {
   /**
    * Output supplemental data (e.g. logs)
    */
-  logMeta(meta: Record<string, unknown>): void {
+  logMeta(metadata: Record<string, unknown>): void {
     const lineLength = this.#terminal.width - 5;
-    let body = stringify(meta, { lineWidth: lineLength, indent: 2 });
+    let body = stringify(metadata, { lineWidth: lineLength, indent: 2 });
     body = body.split('\n').map(line => `  ${line}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }

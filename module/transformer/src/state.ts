@@ -189,7 +189,7 @@ export class TransformerState implements State {
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? [])
       .map(decorator => this.getDecoratorMeta(decorator))
-      .filter(meta => !!meta) : [];
+      .filter(metadata => !!metadata) : [];
   }
 
   /**
@@ -309,7 +309,7 @@ export class TransformerState implements State {
     const targetScope = typeof input === 'string' ? input : input[ModuleNameSymbol]!;
     const target = `${targetScope}:${name}`;
     const list = this.getDecoratorList(node);
-    return list.find(meta => meta.targets?.includes(target) && (!module || meta.name === name && meta.module === module))?.decorator;
+    return list.find(item => item.targets?.includes(target) && (!module || item.name === name && item.module === module))?.decorator;
   }
 
   /**

@@ -1,14 +1,7 @@
-import crypto, { type BinaryToTextEncoding } from 'node:crypto';
 import { createInterface } from 'node:readline/promises';
 
-import { BinaryUtil, type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType } from './binary.ts';
+import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
 import type { Any } from './types.ts';
-
-type HashConfig = {
-  length?: number;
-  hashAlgorithm?: 'sha1' | 'sha256' | 'sha512' | 'md5';
-  outputEncoding?: BinaryToTextEncoding;
-};
 
 /**
  * Utilities for encoding and decoding common formats
@@ -55,33 +48,6 @@ export class CodecUtil {
     return (Buffer.isBuffer(value) ? value : Buffer.from(value, 'base64')).toString('utf8');
   }
 
-  /** Generate a hash from an input value  * @param input The seed value to build the hash from
-   * @param length The optional length of the hash to generate
-   * @param hashAlgorithm The hash algorithm to use
-   * @param outputEncoding The output encoding format
-   */
-  static hash(input: string | BinaryArray, config?: HashConfig): string;
-  static hash(input: BinaryStream | BinaryContainer, config?: HashConfig): Promise<string>;
-  static hash(input: string | BinaryType, config?: HashConfig): string | Promise<string> {
-    const hashAlgorithm = config?.hashAlgorithm ?? 'sha512';
-    const outputEncoding = config?.outputEncoding ?? 'hex';
-    const length = config?.length;
-    const hash = crypto.createHash(hashAlgorithm).setEncoding(outputEncoding);
-
-    if (typeof input === 'string') {
-      input = this.fromUTF8String(input);
-    }
-
-    if (BinaryUtil.isBinaryArray(input)) {
-      hash.update(BinaryUtil.arrayToBuffer(input));
-      return hash.digest(outputEncoding).substring(0, length);
-    } else {
-      return BinaryUtil.pipeline(input, hash).then(() =>
-        hash.digest(outputEncoding).substring(0, length)
-      );
-    }
-  }
-
   /** Detect encoding of a binary type, if possible  */
   static detectEncoding(input: BinaryType): BufferEncoding | undefined {
     if (input && typeof input === 'object' && 'readableEncoding' in input && typeof input.readableEncoding === 'string') {
@@ -105,6 +71,13 @@ export class CodecUtil {
     }
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, reviver);
+  }
+
+  /**
+   * JSON to bytes
+   */
+  static toJSON(value: Any, replacer?: (this: unknown, key: string, value: Any) => unknown): Buffer {
+    return this.fromUTF8String(JSON.stringify(value, replacer));
   }
 
   /**

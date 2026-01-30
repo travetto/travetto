@@ -49,7 +49,7 @@ export class MetadataRegistrationUtil {
     state[RegisterImportSymbol] ??= state.importFile(this.REGISTER_IMPORT);
 
     const tag = this.tag(state, source ?? node);
-    const meta = state.factory.createCallExpression(
+    const metadata = state.factory.createCallExpression(
       state.createAccess(state[RegisterImportSymbol].identifier, this.REGISTER_FN),
       [],
       [
@@ -58,7 +58,7 @@ export class MetadataRegistrationUtil {
         state.fromLiteral(tag),
       ]
     );
-    state.addStatements([state.factory.createExpressionStatement(meta)]);
+    state.addStatements([state.factory.createExpressionStatement(metadata)]);
   }
 
   /**
@@ -73,7 +73,7 @@ export class MetadataRegistrationUtil {
 
     const name = node.name?.escapedText.toString() ?? '';
 
-    const meta = state.factory.createCallExpression(
+    const metadata = state.factory.createCallExpression(
       state.createAccess(state[RegisterImportSymbol].identifier, this.REGISTER_FN),
       [],
       [
@@ -94,7 +94,7 @@ export class MetadataRegistrationUtil {
       [
         state.factory.createClassStaticBlockDeclaration(
           state.factory.createBlock([
-            state.factory.createExpressionStatement(meta)
+            state.factory.createExpressionStatement(metadata)
           ])
         ),
         ...node.members

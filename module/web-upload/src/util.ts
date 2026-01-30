@@ -3,21 +3,20 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
-import { Transform } from 'node:stream';
+import { Transform, type Readable } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, castTo, Util, BinaryUtil, type BinaryType, type BinaryStream, CodecUtil } from '@travetto/runtime';
+import { AsyncQueue, AppError, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryFile } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
-type UploadItem = { stream: BinaryStream, filename?: string, field: string };
+type UploadItem = { stream: BinaryStream, filename?: string, field: string, contentType?: string };
 type FileType = { ext: string, mime: string };
-const RawFileSymbol = Symbol();
 const WebUploadSymbol = Symbol();
 
 /**
@@ -41,13 +40,6 @@ export class WebUploadUtil {
         }
       },
     });
-  }
-
-  /**
-   * Get uploaded file path location
-   */
-  static getUploadLocation(file: File): string {
-    return castTo<{ [RawFileSymbol]: string }>(file)[RawFileSymbol];
   }
 
   /**
@@ -81,7 +73,7 @@ export class WebUploadUtil {
         },
         limits: { fileSize: largestMax }
       })
-        .on('file', (field, stream, filename) => queue.add({ stream, filename, field }))
+        .on('file', (field, stream, filename, _encoding, mimetype) => queue.add({ stream, filename, field, contentType: mimetype }))
         .on('limit', field => queue.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => queue.close())
         .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`)));
@@ -92,14 +84,58 @@ export class WebUploadUtil {
       yield* queue;
     } else {
       const filename = WebHeaderUtil.parseHeaderSegment(request.headers.get('Content-Disposition')).parameters.filename;
-      yield { stream: BinaryUtil.toBinaryStream(requestBody), filename, field: 'file' };
+      yield { stream: BinaryUtil.toBinaryStream(requestBody), filename, field: 'file', contentType: contentType.value };
     }
+  }
+
+  /**
+   * Detect mime from request input, usually http headers
+   */
+  static async detectMimeTypeFromRequestInput(location?: string, contentType?: string): Promise<FileType | undefined> {
+    const { Mime } = (await import('mime'));
+    const otherTypes = (await import('mime/types/other.js')).default;
+    const standardTypes = (await import('mime/types/standard.js')).default;
+    const checker = new Mime(standardTypes, otherTypes);
+    if (contentType) {
+      return { ext: checker.getExtension(contentType)!, mime: contentType };
+    } else if (location) {
+      const mime = checker.getType(location);
+      if (mime) {
+        return { mime, ext: checker.getExtension(mime)! };
+      }
+    }
+  }
+
+  /**
+   * Detect mime from the binary source
+   */
+  static async detectMimeTypeFromBinary(input: BinaryType): Promise<FileType | undefined> {
+    let cleanup: (() => Promise<void>) | undefined;
+    try {
+      const { FileTypeParser } = await import('file-type');
+      const { fromStream } = await import('strtok3');
+      const parser = new FileTypeParser();
+      const token = await fromStream(BinaryUtil.toReadable(input));
+      cleanup = (): Promise<void> => token.close();
+      return await parser.fromTokenizer(token);
+    } finally {
+      await cleanup?.();
+    }
+  }
+
+  /**
+   * Get file type
+   */
+  static async getFileType(input: BinaryType, filename?: string, contentType?: string): Promise<FileType> {
+    return (await this.detectMimeTypeFromBinary(input)) ??
+      (await this.detectMimeTypeFromRequestInput(filename, contentType)) ??
+      { ext: 'bin', mime: 'application/octet-stream' };
   }
 
   /**
    * Convert an UploadItem to a File
    */
-  static async toFile({ stream, filename, field }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
+  static async toBlob({ stream, filename, field, contentType }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
     const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDirectory, { recursive: true });
 
@@ -108,6 +144,7 @@ export class WebUploadUtil {
     const location = path.resolve(uniqueDirectory, filename);
     const remove = (): Promise<void> => fs.rm(location).catch(() => { });
     const mimeCheck = config.matcher ??= WebCommonUtil.mimeTypeMatcher(config.types);
+    const response = (): Readable => createReadStream(location);
 
     try {
       const target = createWriteStream(location);
@@ -116,7 +153,7 @@ export class WebUploadUtil {
         pipeline(stream, this.limitWrite(config.maxSize, field), target) :
         pipeline(stream, target));
 
-      const detected = await this.getFileType(createReadStream(location));
+      const detected = await this.getFileType(response(), filename, contentType);
 
       if (!mimeCheck(detected.mime)) {
         throw new AppError(`Content type not allowed: ${detected.mime}`, { category: 'data' });
@@ -126,61 +163,17 @@ export class WebUploadUtil {
         filename = `${filename}.${detected.ext}`;
       }
 
-      const file = BinaryUtil.toBlob(() => createReadStream(location), {
+      const metadata = await BinaryUtil.computeMetadata(response(), {
         contentType: detected.mime,
         filename,
-        hash: await CodecUtil.hash(createReadStream(location), { hashAlgorithm: 'sha256' }),
-        size: (await fs.stat(location)).size,
+        rawLocation: location,
+        cleanup: config.cleanupFiles !== false ? (): Promise<void> => fs.rm(location).catch(() => { }) : undefined,
       });
 
-      Object.assign(file, { [RawFileSymbol]: location });
-
-      return file;
+      return new BinaryFile(response, metadata);
     } catch (error) {
       await remove();
       throw error;
-    }
-  }
-
-  /**
-   * Get file type
-   */
-  static async getFileType(input: BinaryType): Promise<FileType> {
-    const { FileTypeParser } = await import('file-type');
-    const { fromStream } = await import('strtok3');
-
-    const parser = new FileTypeParser();
-    let token: ReturnType<typeof fromStream> | undefined;
-    let matched: FileType | undefined;
-
-    const metadata = BinaryUtil.getMetadata(input);
-
-    try {
-      token = await fromStream(BinaryUtil.toReadable(input));
-      matched = await parser.fromTokenizer(token);
-    } finally {
-      await token?.close();
-    }
-
-    if (!matched && metadata.filename) {
-      const { Mime } = (await import('mime'));
-      const otherTypes = (await import('mime/types/other.js')).default;
-      const standardTypes = (await import('mime/types/standard.js')).default;
-      const checker = new Mime(standardTypes, otherTypes);
-      const mime = checker.getType(metadata.filename);
-      if (mime) {
-        return { ext: checker.getExtension(mime)!, mime };
-      }
-    }
-    return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
-  }
-
-  /**
-   * Finish upload
-   */
-  static async finishUpload(upload: File, config: Partial<WebUploadConfig>): Promise<void> {
-    if (config.cleanupFiles !== false) {
-      await fs.rm(this.getUploadLocation(upload), { force: true });
     }
   }
 

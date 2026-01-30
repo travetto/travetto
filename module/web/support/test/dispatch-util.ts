@@ -49,7 +49,7 @@ export class WebTestDispatchUtil {
 
     if (text) {
       switch (response.headers.get('Content-Type')) {
-        case 'application/json': result = CodecUtil.fromJSON(castTo(text())); break;
+        case 'application/json': result = CodecUtil.fromJSON(text()!); break;
         case 'text/plain': result = text(); break;
       }
     }

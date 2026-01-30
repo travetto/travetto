@@ -10,5 +10,11 @@
     "**/.trv/**": true,
     "related/vscode-plugin/out/**": true,
     "**/.angular/**": true,
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/*.code-search": true,
+    "**/.dart_tool": true,
+    "archived/**": true,
   }
 }
