@@ -1,8 +1,8 @@
-import { Readable, type Writable } from 'node:stream';
+import { PassThrough, Readable, type Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
-import { isArrayBuffer, isTypedArray, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
+import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
 
 import { type Any, castTo, hasFunction } from './types.ts';
 
@@ -126,5 +126,19 @@ export class BinaryUtil {
   /** Create a binary array of specified size, optionally filled with a value */
   static makeBinaryArray(size: number, fill?: string | number): BinaryArray {
     return Buffer.alloc(size, fill);
+  }
+
+  /**
+   * Convert an inbound binary type or factory into a synchronous binary type
+   */
+  static toSynchronous(input: BinaryType | (() => (BinaryType | Promise<BinaryType>))): BinaryType {
+    const value = (typeof input === 'function') ? input() : input;
+    if (isPromise(value)) {
+      const stream = new PassThrough();
+      value.then(result => BinaryUtil.pipeline(result, stream)).catch(error => stream.destroy(error));
+      return stream;
+    } else {
+      return value;
+    }
   }
 }

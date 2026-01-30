@@ -2,16 +2,16 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createReadStream, ReadStream } from 'node:fs';
-import { PassThrough, Readable } from 'node:stream';
-import { isPromise } from 'node:util/types';
+import { Readable } from 'node:stream';
 
 import { BinaryUtil, type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType } from './binary.ts';
-import { hasFunction } from './types.ts';
+import { castTo, hasFunction } from './types.ts';
 import { AppError } from './error.ts';
+import { CodecUtil } from './codec.ts';
 
 const isReadable = hasFunction<Readable>('pipe');
 
-type BlobBinaryInput = BinaryType | (() => (BinaryType | Promise<BinaryType>));
+type BlobInput = BinaryType | (() => (BinaryType | Promise<BinaryType>));
 
 /** Range of bytes, inclusive */
 export type ByteRange = { start: number, end?: number };
@@ -45,36 +45,41 @@ type HashConfig = {
 
 const BinaryMetaSymbol = Symbol();
 
-export class BinaryMetadataUtil {
-  /**
-   * Establishes the blob/file properties and metadata
-   */
-  static #finishBlob<T extends Blob>(blob: T, source: BlobBinaryInput, metadata?: BinaryMetadata): T {
-    const getSource = (): BinaryType => {
-      const value = (typeof source === 'function') ? source() : source;
-      if (isPromise(value)) {
-        const stream = new PassThrough();
-        value.then(result => BinaryUtil.pipeline(result, stream)).catch(error => stream.destroy(error));
-        return stream;
-      } else {
-        return value;
-      }
-    };
+class BinaryBlob extends Blob {
 
-    BinaryMetadataUtil.write(blob, metadata ?? {});
+  #src: () => BinaryType;
 
-    Object.defineProperties(blob, {
-      size: { get: () => BinaryMetadataUtil.readDataSize(blob) },
-      type: { get: () => BinaryMetadataUtil.read(blob).contentType },
-      filename: { get: () => BinaryMetadataUtil.read(blob).filename },
-      arrayBuffer: { value: () => BinaryUtil.toBuffer(getSource()).then(data => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)) },
-      bytes: { value: () => BinaryUtil.toBinaryArray(getSource()).then(data => new Uint8Array(data)) },
-      stream: { value: () => Readable.toWeb(BinaryUtil.toReadable(getSource())) },
-      text: { value: () => BinaryUtil.toBuffer(getSource()).then(buffer => buffer.toString('utf8')) },
-    });
-    return blob;
+  constructor(source: BlobInput, metadata?: BinaryMetadata) {
+    super([]);
+    this.#src = (): BinaryType => BinaryUtil.toSynchronous(source);
+    BinaryMetadataUtil.write(this, metadata ?? {});
   }
 
+  get size(): number { return BinaryMetadataUtil.readLength(this)! ?? 0; }
+  get type(): string { return BinaryMetadataUtil.read(this).contentType!; }
+  get name(): string | undefined { return BinaryMetadataUtil.read(this).filename; }
+
+  async arrayBuffer(): Promise<ArrayBuffer> {
+    const data = await BinaryUtil.toBuffer(this.#src());
+    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+  }
+
+  async bytes(): Promise<NodeJS.NonSharedUint8Array> {
+    const data = await BinaryUtil.toBinaryArray(this.#src());
+    return new Uint8Array(data);
+  }
+
+  stream(): ReadableStream {
+    return Readable.toWeb(BinaryUtil.toReadable(this.#src()));
+  }
+
+  async text(): Promise<string> {
+    const buffer = await BinaryUtil.toBinaryArray(this.#src());
+    return CodecUtil.toUTF8String(buffer);
+  }
+}
+
+export class BinaryMetadataUtil {
   /** Set metadata for a binary type  */
   static write(input: BinaryType, metadata: BinaryMetadata): BinaryMetadata {
     const withMeta: BinaryType & { [BinaryMetaSymbol]?: BinaryMetadata } = input;
@@ -114,17 +119,14 @@ export class BinaryMetadataUtil {
     }
   }
 
-  static readDataSize(input: BinaryType): number | undefined {
+  static readLength(input: BinaryType): number | undefined {
     const metadata = this.read(input);
     return metadata.range ? (metadata.range.end - metadata.range.start + 1) : metadata.size;
   }
 
   /** Compute metadata for a given binary input */
-  static async compute(input: BinaryType, base: BinaryMetadata = {}, rawLocation?: string): Promise<BinaryMetadata> {
-    const metadata: BinaryMetadata = {
-      ...BinaryMetadataUtil.read(input),
-      ...base
-    };
+  static async compute(input: BinaryType, base: BinaryMetadata = {}): Promise<BinaryMetadata> {
+    const metadata = { ...BinaryMetadataUtil.read(input), ...base };
 
     if (BinaryUtil.isBinaryContainer(input)) {
       metadata.size ??= input.size;
@@ -137,15 +139,13 @@ export class BinaryMetadataUtil {
       metadata.hash ??= await this.hash(input, { hashAlgorithm: 'sha256' });
     } else if (isReadable(input)) {
       metadata.contentEncoding ??= input.readableEncoding!;
-      if (input instanceof ReadStream) {
-        rawLocation ??= input.path.toString();
-      }
     }
 
-    if (rawLocation) {
-      metadata.filename ??= path.basename(rawLocation);
-      metadata.size ??= (await fs.stat(rawLocation)).size;
-      metadata.hash ??= await this.hash(createReadStream(rawLocation!), { hashAlgorithm: 'sha256' });
+    if (input instanceof ReadStream) {
+      const location = input.path.toString();
+      metadata.filename ??= path.basename(location);
+      metadata.size ??= (await fs.stat(location)).size;
+      metadata.hash ??= await this.hash(createReadStream(location), { hashAlgorithm: 'sha256' });
     }
 
     return metadata;
@@ -154,15 +154,15 @@ export class BinaryMetadataUtil {
   /**
    * Make a blob that contains the appropriate metadata
    */
-  static makeBlob(source: BlobBinaryInput, metadata?: BinaryMetadata): Blob {
-    return BinaryMetadataUtil.#finishBlob(new Blob(), source, metadata);
+  static makeBlob(source: BlobInput, metadata?: BinaryMetadata): Blob {
+    return new BinaryBlob(source, metadata);
   }
 
   /**
    * Make a file that contains the appropriate metadata
    */
-  static makeFile(source: BlobBinaryInput, metadata: BinaryMetadata): File {
-    return BinaryMetadataUtil.#finishBlob(new File([], ''), source, metadata);
+  static makeFile(source: BlobInput, metadata: BinaryMetadata): File {
+    return castTo(new BinaryBlob(source, metadata));
   }
 
   /**
