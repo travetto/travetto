@@ -49,9 +49,11 @@ export class WebBodyUtil {
   static getMetadataHeaders(value: BinaryType): [string, string][] {
     const metadata = BinaryUtil.getMetadata(value);
 
+    const length = metadata.range ? (metadata.range.end - metadata.range.start) + 1 : metadata.size;
+
     const toAdd: [string, string | undefined][] = [
       ['Content-Type', metadata.contentType],
-      ['Content-Length', metadata.size?.toString()],
+      ['Content-Length', length?.toString()],
       ['Content-Encoding', metadata.contentEncoding],
       ['Cache-Control', metadata.cacheControl],
       ['Content-Language', metadata.contentLanguage],
