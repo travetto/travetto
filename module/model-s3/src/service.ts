@@ -51,7 +51,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       ...(metadata.cacheControl ? { CacheControl: metadata.cacheControl } : {}),
       Metadata: TypedObject.fromEntries(
         TypedObject.entries(metadata)
-          .map(([key, value]) => [key, JSON.stringify(value)] as const)
+          .map(([key, value]) => [key, typeof value === 'string' ? value : JSON.stringify(value)] as const)
       )
     };
   }
