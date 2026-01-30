@@ -170,7 +170,7 @@ export class WebUploadUtil {
         cleanup: config.cleanupFiles !== false ? (): Promise<void> => fs.rm(location).catch(() => { }) : undefined,
       });
 
-      return new BinaryFile(response).updateMetadata(metadata);
+      return new BinaryFile(response, metadata);
     } catch (error) {
       await remove();
       throw error;

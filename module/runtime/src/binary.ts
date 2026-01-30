@@ -6,7 +6,7 @@ import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isTypedArray, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
 import path from 'node:path';
-import { createReadStream, ReadStream } from 'node:fs';
+import { createReadStream } from 'node:fs';
 
 import { type Any, castTo, hasFunction } from './types.ts';
 
@@ -83,8 +83,7 @@ export class BinaryUtil {
   /** Set metadata for a binary type  */
   static setMetadata(input: BinaryType, metadata: BinaryMetadata): BinaryMetadata {
     const withMeta: BinaryType & { [BinaryMetaSymbol]?: BinaryMetadata } = input;
-    withMeta[BinaryMetaSymbol] = metadata;
-    return metadata;
+    return withMeta[BinaryMetaSymbol] = metadata;
   }
 
   /** Read metadata for a binary type, if available  */
@@ -220,11 +219,6 @@ export class BinaryUtil {
     } else if (this.isBinaryArray(input)) {
       metadata.size ??= input.byteLength;
       metadata.hash ??= await this.hash(input, { hashAlgorithm: 'sha256' });
-    } else if (isReadable(input)) {
-      metadata.contentEncoding ??= input.readableEncoding!;
-      if (input instanceof ReadStream) {
-        metadata.rawLocation ??= input.path.toString();
-      }
     }
 
     if (metadata.rawLocation) {

@@ -41,7 +41,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   constructor(config: S3ModelConfig) { this.config = config; }
 
-  #getMetadata({ range: _, size, ...metadata }: BinaryMetadata): S3Metadata {
+  #getMetadata({ range: _range, size, cleanup: _cleanup, ...metadata }: BinaryMetadata): S3Metadata {
     return {
       ContentType: metadata.contentType,
       ...(metadata.contentEncoding ? { ContentEncoding: metadata.contentEncoding } : {}),
@@ -355,7 +355,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const metadata = await this.getBlobMetadata(location);
     const final = range ? ModelBlobUtil.enforceRange(range, metadata.size!) : undefined;
-    return new BinaryFile(() => this.#getObject(location, final)).updateMetadata({ ...metadata, range: final });
+    return new BinaryFile(() => this.#getObject(location, final), { ...metadata, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number }> {

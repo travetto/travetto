@@ -7,9 +7,14 @@ export class BinaryFile extends File {
 
   #source: BinaryType | (() => (BinaryType | Promise<BinaryType>));
 
-  constructor(source: BinaryType | (() => (BinaryType | Promise<BinaryType>))) {
+  constructor(source: BinaryType | (() => (BinaryType | Promise<BinaryType>)), metadata?: BinaryMetadata) {
     super([], ''); // We just need the inheritance, not the actual Blob constructor behavior
     this.#source = source;
+    BinaryUtil.setMetadata(this, {
+      ...BinaryUtil.getMetadata(this),
+      ...metadata
+    });
+    return this;
   }
 
   get size(): number {
@@ -38,14 +43,6 @@ export class BinaryFile extends File {
     return meta.filename ?? meta.rawLocation ?? '';
   }
 
-  updateMetadata(metadata: BinaryMetadata): this {
-    BinaryUtil.setMetadata(this, {
-      ...BinaryUtil.getMetadata(this),
-      ...metadata
-    });
-    return this;
-  }
-
   arrayBuffer(): Promise<ArrayBuffer> {
     return BinaryUtil.toBuffer(this.source).then(buffer => buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength));
   }
@@ -55,15 +52,18 @@ export class BinaryFile extends File {
   }
 
   slice(start?: number, end?: number, _contentType?: string): Blob {
-    return new BinaryFile(async () => {
-      const buffer = await BinaryUtil.toBinaryArray(this.source);
-      return BinaryUtil.sliceByteArray(buffer, start ?? 0, end);
-    }).updateMetadata({
-      range: {
-        start: start ?? 0,
-        end: (end !== undefined ? end : this.size) - 1
+    return new BinaryFile(
+      async () => {
+        const buffer = await BinaryUtil.toBinaryArray(this.source);
+        return BinaryUtil.sliceByteArray(buffer, start ?? 0, end);
+      },
+      {
+        range: {
+          start: start ?? 0,
+          end: (end !== undefined ? end : this.size) - 1
+        }
       }
-    });
+    );
   }
 
   stream(): ReadableStream<NodeJS.NonSharedUint8Array> {
