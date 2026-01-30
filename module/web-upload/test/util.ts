@@ -50,7 +50,7 @@ export class BytesUtilTest {
     assert(result.mime === 'application/octet-stream');
 
     const file2 = await this.fixture.resolve('/empty.m4a');
-    const result2 = await WebUploadUtil.getFileType(createReadStream(file2));
+    const result2 = await WebUploadUtil.getFileType(createReadStream(file2), file2);
     assert(result2.mime === 'audio/mp4');
 
     const file3 = await this.fixture.resolve('/small-audio.mp3');

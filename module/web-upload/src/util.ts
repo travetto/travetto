@@ -126,7 +126,7 @@ export class WebUploadUtil {
   /**
    * Get file type
    */
-  static async getFileType(input: BinaryType, filename: string, contentType?: string): Promise<FileType> {
+  static async getFileType(input: BinaryType, filename?: string, contentType?: string): Promise<FileType> {
     return (await this.detectMimeTypeFromBinary(input)) ??
       (await this.detectMimeTypeFromRequestInput(filename, contentType)) ??
       { ext: 'bin', mime: 'application/octet-stream' };
