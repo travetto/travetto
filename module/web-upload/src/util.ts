@@ -164,7 +164,7 @@ export class WebUploadUtil {
       }
 
       const metadata = await BinaryMetadataUtil.compute(response, { contentType: detected.mime, filename, });
-      const file = BinaryMetadataUtil.setBlobSource(new File([], ''), response, metadata);
+      const file = BinaryMetadataUtil.defineBlob(new File([], ''), response, metadata);
       Object.defineProperty(file, 'cleanup', {
         value: () => config.cleanupFiles !== false && fs.rm(location).catch(() => { })
       });

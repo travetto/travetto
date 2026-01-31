@@ -75,7 +75,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
     const data = new FormData();
     await Promise.all(files.map(async ({ name, type, resource }) => {
-      data.append(name, BinaryMetadataUtil.setBlobSource(
+      data.append(name, BinaryMetadataUtil.defineBlob(
         new File([], ''),
         () => this.fixture.readStream(resource),
         { contentType: type, filename: resource }

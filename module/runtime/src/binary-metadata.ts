@@ -122,7 +122,7 @@ export class BinaryMetadataUtil {
   /**
    * Rewrite a blob to support metadata, and provide a dynamic input source
    */
-  static setBlobSource<T extends Blob>(target: T, input: BlobInput, metadata: BinaryMetadata = {}): typeof target {
+  static defineBlob<T extends Blob>(target: T, input: BlobInput, metadata: BinaryMetadata = {}): typeof target {
     const inputFn = async (): Promise<BinaryType> => typeof input === 'function' ? await input() : input;
     this.write(target, metadata);
 
@@ -137,7 +137,7 @@ export class BinaryMetadataUtil {
       slice: {
         value: (start?: number, end?: number, _contentType?: string) => {
           const result = target instanceof File ? new File([], '') : new Blob([]);
-          return BinaryMetadataUtil.setBlobSource(result,
+          return BinaryMetadataUtil.defineBlob(result,
             () => inputFn().then(BinaryUtil.toBuffer).then(data => BinaryUtil.sliceByteArray(data, start, end)),
             {
               ...metadata,
@@ -154,7 +154,7 @@ export class BinaryMetadataUtil {
    * Make a blob that contains the appropriate metadata
    */
   static makeBlob(source: BlobInput, metadata?: BinaryMetadata): Blob {
-    return this.setBlobSource(new Blob([]), source, metadata);
+    return this.defineBlob(new Blob([]), source, metadata);
   }
 
   /**
