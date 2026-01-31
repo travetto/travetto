@@ -124,7 +124,7 @@ export class BinaryMetadataUtil {
    */
   static setBlobSource<T extends Blob>(target: T, input: BlobInput, metadata: BinaryMetadata = {}): typeof target {
 
-    const source = () => BinaryUtil.toSynchronous(input);
+    const source = (): BinaryType => BinaryUtil.toSynchronous(input);
     this.write(target, metadata);
 
     Object.defineProperties(target, {
@@ -133,6 +133,7 @@ export class BinaryMetadataUtil {
       name: { get() { return metadata.filename; } },
       arrayBuffer: { value: () => BinaryUtil.toBuffer(source()).then(data => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)) },
       stream: { value: () => Readable.toWeb(BinaryUtil.toReadable(source())) },
+      bytes: { value: () => BinaryUtil.toBuffer(source()) },
       text: { value: () => BinaryUtil.toBuffer(source()).then(data => CodecUtil.toUTF8String(data)) },
       slice: {
         value: (start?: number, end?: number, _contentType?: string) => {
