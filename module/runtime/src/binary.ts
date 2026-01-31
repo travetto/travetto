@@ -4,7 +4,7 @@ import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
 
-import { type Any, castTo, hasFunction } from './types.ts';
+import { type Any, castTo, type Class, hasFunction } from './types.ts';
 
 const BINARY_CONSTRUCTORS: Function[] = [castTo(Readable), Buffer, Blob, castTo(ReadableStream), ArrayBuffer, Uint8Array, Uint16Array, Uint32Array];
 export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Buffer<ArrayBuffer> | ArrayBuffer;
@@ -18,7 +18,7 @@ const isReadable = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
 const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
   !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
-const isBinaryConstructor = (value: Function): boolean => BINARY_CONSTRUCTOR_SET.has(value) || BINARY_CONSTRUCTOR_SET.has(Object.getPrototypeOf(value));
+const isBinaryConstructor = (value: Function | Class): boolean => BINARY_CONSTRUCTOR_SET.has(value) || BINARY_CONSTRUCTOR_SET.has(Object.getPrototypeOf(value));
 const isBinaryArray = (value: unknown): value is BinaryArray =>
   isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value);
 const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
