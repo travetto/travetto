@@ -123,28 +123,27 @@ export class BinaryMetadataUtil {
    * Rewrite a blob to support metadata, and provide a dynamic input source
    */
   static setBlobSource<T extends Blob>(target: T, input: BlobInput, metadata: BinaryMetadata = {}): typeof target {
-
-    const source = (): BinaryType => BinaryUtil.toSynchronous(input);
+    const inputFn = async (): Promise<BinaryType> => typeof input === 'function' ? await input() : input;
     this.write(target, metadata);
 
     Object.defineProperties(target, {
       size: { get() { return BinaryMetadataUtil.readLength(metadata); } },
       type: { get() { return metadata.contentType; } },
       name: { get() { return metadata.filename; } },
-      arrayBuffer: { value: () => BinaryUtil.toBuffer(source()).then(data => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)) },
-      stream: { value: () => Readable.toWeb(BinaryUtil.toReadable(source())) },
-      bytes: { value: () => BinaryUtil.toBuffer(source()) },
-      text: { value: () => BinaryUtil.toBuffer(source()).then(data => CodecUtil.toUTF8String(data)) },
+      arrayBuffer: { value: () => inputFn().then(BinaryUtil.toBuffer).then(data => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)) },
+      stream: { value: () => Readable.toWeb(BinaryUtil.toReadable(BinaryUtil.toSynchronous(input))) },
+      bytes: { value: () => inputFn().then(BinaryUtil.toBuffer) },
+      text: { value: () => inputFn().then(BinaryUtil.toBuffer).then(CodecUtil.toUTF8String) },
       slice: {
         value: (start?: number, end?: number, _contentType?: string) => {
           const result = target instanceof File ? new File([], '') : new Blob([]);
-          return BinaryMetadataUtil.setBlobSource(result, async () => {
-            const bytes = BinaryUtil.sliceByteArray(await BinaryUtil.toBuffer(source()), start, end);
-            return bytes;
-          }, {
-            ...metadata,
-            range: { start: start ?? 0, end: end ?? metadata.size! - 1 },
-          });
+          return BinaryMetadataUtil.setBlobSource(result,
+            () => inputFn().then(BinaryUtil.toBuffer).then(data => BinaryUtil.sliceByteArray(data, start, end)),
+            {
+              ...metadata,
+              range: { start: start ?? 0, end: end ?? metadata.size! - 1 },
+            }
+          );
         }
       }
     });
