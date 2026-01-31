@@ -1,13 +1,14 @@
 import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
-  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, CodecUtil, BinaryFile
+  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, CodecUtil,
+  BinaryMetadataUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, ModelBlobUtil
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -234,10 +235,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
       return;
     }
-    const resolved = await BinaryUtil.computeMetadata(input, {
-      ...BinaryUtil.getMetadata(input),
-      ...metadata
-    });
+    const resolved = await BinaryMetadataUtil.compute(input, metadata);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, CodecUtil.toJSON(resolved));
@@ -249,14 +247,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const blobs = this.#find(ModelBlobNamespace, location, 'notfound');
 
     let data = blobs.get(location)!;
-    const final = range ? ModelBlobUtil.enforceRange(range, data.byteLength) : undefined;
+    const final = range ? BinaryMetadataUtil.enforceRange(range, { size: data.byteLength }) : undefined;
 
     if (final) {
       data = BinaryUtil.sliceByteArray(data, final.start, final.end + 1);
     }
 
     const metadata = await this.getBlobMetadata(location);
-    return new BinaryFile(data, { ...metadata, range: final });
+    return BinaryMetadataUtil.makeBlob(data, { ...metadata, range: final });
   }
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {

@@ -6,11 +6,11 @@ import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
 import { Upload, type FileMap } from '@travetto/web-upload';
-import { Util, type BinaryMetadata, castTo, type AppError, BinaryUtil, BinaryFile } from '@travetto/runtime';
+import { Util, type BinaryMetadata, castTo, type AppError, BinaryMetadataUtil } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
-const getHash = (blob: Blob) => BinaryUtil.getMetadata(blob)?.hash;
+const getHash = (blob: Blob) => BinaryMetadataUtil.read(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -75,14 +75,18 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
     const data = new FormData();
     await Promise.all(files.map(async ({ name, type, resource }) => {
-      data.append(name, new BinaryFile(() => this.fixture.readStream(resource), { contentType: type }));
+      data.append(name, BinaryMetadataUtil.defineBlob(
+        new File([], ''),
+        () => this.fixture.readStream(resource),
+        { contentType: type, filename: resource }
+      ));
     }));
     return data;
   }
 
   async getFileMeta(pth: string) {
     const loc = await this.fixture.readStream(pth);
-    return { hash: await BinaryUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
+    return { hash: await BinaryMetadataUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
   }
 
   @BeforeAll()

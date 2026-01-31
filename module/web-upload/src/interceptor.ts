@@ -3,11 +3,9 @@ import {
   BodyInterceptor, type WebInterceptor, type WebInterceptorCategory, type WebChainedContext,
   type WebResponse, DecompressInterceptor, type WebInterceptorContext
 } from '@travetto/web';
-import { BinaryUtil } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
-import type { FileMap } from './types.ts';
 
 @Injectable()
 export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
@@ -36,11 +34,11 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<WebUploadConfig>): Promise<WebResponse> {
-    const uploads: FileMap = {};
+    const uploads: Record<string, File & { cleanup?: () => Promise<void> }> = {};
 
     try {
       for await (const item of WebUploadUtil.getUploads(request, config)) {
-        uploads[item.field] = await WebUploadUtil.toBlob(item, config.uploads?.[item.field] ?? config);
+        uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
       }
 
       WebUploadUtil.setRequestUploads(request, uploads);
@@ -48,7 +46,7 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
       return await next();
     } finally {
       for (const item of Object.values(uploads)) {
-        await BinaryUtil.getMetadata(item).cleanup?.();
+        await item.cleanup?.();
       }
     }
   }

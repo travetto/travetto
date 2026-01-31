@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { BinaryUtil, castTo } from '@travetto/runtime';
+import { BinaryMetadataUtil, BinaryUtil, castTo } from '@travetto/runtime';
 import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
@@ -47,7 +47,7 @@ class S3BlobSuite extends ModelBlobSuite {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
-    const hash = await BinaryUtil.hash(buffer);
+    const hash = await BinaryMetadataUtil.hash(buffer);
 
     await service.upsertBlob(hash, buffer, {
       filename: 'Random.bin',
@@ -56,9 +56,11 @@ class S3BlobSuite extends ModelBlobSuite {
       hash
     });
 
-    const stream = await service.getBlob(hash);
-    const resolved = await BinaryUtil.hash(stream);
-    const blobBytes = await stream.bytes();
+    const blob = await service.getBlob(hash);
+    const resolved = await BinaryMetadataUtil.hash(blob);
+    const blobBytes = await blob.bytes();
+    assert(buffer.byteLength > 0);
+    assert(blobBytes.byteLength > 0);
     assert(buffer.byteLength === blobBytes.byteLength, 'Size mismatch');
     assert(buffer.equals(blobBytes), 'Content mismatch');
     assert(resolved === hash);
