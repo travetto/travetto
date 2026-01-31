@@ -75,7 +75,9 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
     const data = new FormData();
     await Promise.all(files.map(async ({ name, type, resource }) => {
-      data.append(name, BinaryMetadataUtil.makeBlob(() => this.fixture.readStream(resource), { contentType: type }));
+      const source = () => this.fixture.readStream(resource);
+      const file = BinaryMetadataUtil.setBlobSource(new File([], ''), source, { contentType: type, filename: resource });
+      data.append(name, file);
     }));
     return data;
   }
@@ -192,6 +194,10 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'logo.png', type: 'image/png' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
+
+    console.log('Uploading bad files', {
+      files: uploadBad
+    });
 
     const badResponse = await this.request<{ hash1: string, hash2: string }>(
       {

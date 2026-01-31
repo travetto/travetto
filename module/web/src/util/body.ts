@@ -15,62 +15,60 @@ const NULL_TERMINATOR = BinaryUtil.makeBinaryArray(0);
  */
 export class WebBodyUtil {
 
+  /** Get Metadata Headers */
+  static getMetadataHeaders(value: BinaryType): [string, string][] {
+    const metadata = BinaryMetadataUtil.read(value);
+    const length = BinaryMetadataUtil.readLength(metadata);
+
+    const result = [
+      ['Content-Type', metadata.contentType],
+      ['Content-Length', length],
+      ['Content-Encoding', metadata.contentEncoding],
+      ['Cache-Control', metadata.cacheControl],
+      ['Content-Language', metadata.contentLanguage],
+      ...(metadata.range ? [['Accept-Ranges', 'bytes']] : []),
+      ...(metadata.range ? [['Content-Range', `bytes ${metadata.range.start}-${metadata.range.end}/${metadata.size}`]] : []),
+      ...(metadata.filename ? [['Content-Disposition', `attachment; filename="${metadata.filename}"`]] : [])
+    ]
+      .map((pair) => [pair[0], pair[1]?.toString()])
+      .filter((pair): pair is [string, string] => pair[1] !== undefined);
+
+    return result;
+  }
+
   /**
    * Generate multipart body
    */
   static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<BinaryArray> {
-    const newLine = '\r\n';
-    const bytes = (value: string): BinaryArray => CodecUtil.fromUTF8String(value);
-    for (const [key, value] of form.entries()) {
-      const data = value.slice();
-      const filename = data instanceof File ? data.name : undefined;
-      const size = BinaryUtil.isBinaryContainer(data) ? data.size : data.length;
-      const type = BinaryUtil.isBinaryContainer(data) ? data.type : undefined;
-      yield bytes(`--${boundary}${newLine}`);
-      yield bytes(`Content-Disposition: form-data; name="${key}"; filename="${filename ?? key}"${newLine}`);
-      yield bytes(`Content-Length: ${size}${newLine}`);
-      if (type) {
-        yield bytes(`Content-Type: ${type}${newLine}`);
+    const bytes = (value: string = '', suffix = '\r\n'): BinaryArray => CodecUtil.fromUTF8String(`${value}${suffix}`);
+    for (const [key, item] of form.entries()) {
+      yield bytes(`--${boundary}`);
+      const binaryValue = typeof item === 'string' ? CodecUtil.fromUTF8String(item) : item.slice();
+
+      // Headers
+      if (typeof item == 'string') {
+        BinaryMetadataUtil.write(binaryValue, { size: item.length });
       }
-      yield bytes(newLine);
-      if (BinaryUtil.isBinaryContainer(data)) {
-        for await (const chunk of data.stream()) {
-          yield chunk;
+
+      if (item instanceof File) {
+        yield bytes(`Content-Disposition: form-data; name="${key}"; filename="${item.name || key}"`);
+      }
+
+      for (const [header, value] of WebBodyUtil.getMetadataHeaders(binaryValue)) {
+        if (header.startsWith('Content-') && header !== 'Content-Disposition') {
+          yield bytes(`${header}: ${value}`);
         }
-      } else {
-        yield bytes(data);
       }
-      yield bytes(newLine);
+
+      yield bytes();
+      if (binaryValue instanceof Blob) {
+        yield* BinaryUtil.toBinaryStream(binaryValue);
+      } else {
+        yield binaryValue;
+      }
+      yield bytes();
     }
-    yield bytes(`--${boundary}--${newLine}`);
-  }
-
-  /** Get Metadata Headers */
-  static getMetadataHeaders(value: BinaryType): [string, string][] {
-    const metadata = BinaryMetadataUtil.read(value);
-
-    const length = BinaryMetadataUtil.readLength(value);
-
-    const toAdd: [string, string | undefined][] = [
-      ['Content-Type', metadata.contentType],
-      ['Content-Length', length?.toString()],
-      ['Content-Encoding', metadata.contentEncoding],
-      ['Cache-Control', metadata.cacheControl],
-      ['Content-Language', metadata.contentLanguage],
-    ];
-
-    if (metadata?.range) {
-      toAdd.push(
-        ['Accept-Ranges', 'bytes'],
-        ['Content-Range', `bytes ${metadata.range.start}-${metadata.range.end}/${metadata.size}`],
-      );
-    }
-
-    if (metadata.filename) {
-      toAdd.push(['Content-disposition', `attachment; filename="${metadata.filename}"`]);
-    }
-
-    return toAdd.filter((pair): pair is [string, string] => !!pair[1]);
+    yield bytes(`--${boundary}--`);
   }
 
   /**
@@ -94,7 +92,7 @@ export class WebBodyUtil {
    * Convert an existing web message to a binary web message
    */
   static toBinaryMessage(message: WebMessage): Omit<WebMessage<BinaryType>, 'context'> {
-    const body = message.body;
+    const { body } = message;
     const out: Omit<WebMessage<BinaryType>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
 
     if (BinaryUtil.isBinaryType(body)) {
@@ -122,7 +120,7 @@ export class WebBodyUtil {
       out.body = bytes;
     }
 
-    out.headers.setIfAbsent('Content-Type', this.defaultContentType(message.body));
+    out.headers.setIfAbsent('Content-Type', this.defaultContentType(body));
 
     return castTo(out);
   }
