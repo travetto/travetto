@@ -12,9 +12,7 @@ import {
 import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil,
-  BinaryMetadataUtil,
-  TypedObject,
+  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil, BinaryMetadataUtil, TypedObject,
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
