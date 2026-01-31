@@ -67,7 +67,7 @@ export class CodecUtil {
    */
   static fromJSON<T>(input: BinaryArray | string, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
     if (typeof input !== 'string') {
-      input = this.toUTF8String(input);
+      input = CodecUtil.toUTF8String(input);
     }
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, reviver);
@@ -77,7 +77,7 @@ export class CodecUtil {
    * JSON to bytes
    */
   static toJSON(value: Any, replacer?: (this: unknown, key: string, value: Any) => unknown): Buffer {
-    return this.fromUTF8String(JSON.stringify(value, replacer));
+    return CodecUtil.fromUTF8String(JSON.stringify(value, replacer));
   }
 
   /**
@@ -87,7 +87,7 @@ export class CodecUtil {
     if (value === undefined) {
       return undefined;
     }
-    return this.utf8ToBase64(JSON.stringify(value));
+    return CodecUtil.utf8ToBase64(JSON.stringify(value));
   }
 
   /**
@@ -107,6 +107,6 @@ export class CodecUtil {
       decoded = decodeURIComponent(decoded);
     }
 
-    return this.fromJSON(decoded);
+    return CodecUtil.fromJSON(decoded);
   }
 }

@@ -61,14 +61,14 @@ export class BinaryUtil {
     } else if (isBinaryContainer(input)) {
       return input.arrayBuffer();
     } else {
-      return this.makeBinaryArray(0);
+      return BinaryUtil.makeBinaryArray(0);
     }
   }
 
   /** Convert input to a buffer  */
   static async toBuffer(input: BinaryType): Promise<Buffer<ArrayBuffer>> {
-    const bytes = await this.toBinaryArray(input);
-    return this.arrayToBuffer(bytes);
+    const bytes = await BinaryUtil.toBinaryArray(input);
+    return BinaryUtil.arrayToBuffer(bytes);
   }
 
   /** Convert input to a readable stream  */
@@ -76,7 +76,7 @@ export class BinaryUtil {
     if (isReadable(input)) {
       return input;
     } else if (isBinaryArray(input)) {
-      return Readable.from(this.arrayToBuffer(input));
+      return Readable.from(BinaryUtil.arrayToBuffer(input));
     } else if (isBinaryContainer(input)) {
       return Readable.fromWeb(input.stream());
     } else if (isReadableStream(input)) {
@@ -91,20 +91,20 @@ export class BinaryUtil {
     if (isBinaryStream(input)) {
       return input;
     } else {
-      return this.toReadable(input);
+      return BinaryUtil.toReadable(input);
     }
   }
 
   /** Read chunk, default to toString if type is unknown  */
   static readChunk(chunk: Any, encoding?: BufferEncoding | null): BinaryArray {
-    return isBinaryArray(chunk) ? this.arrayToBuffer(chunk) :
+    return isBinaryArray(chunk) ? BinaryUtil.arrayToBuffer(chunk) :
       typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
         Buffer.from(`${chunk}`, 'utf8');
   }
 
   /** Combine binary arrays  */
   static combineBinaryArrays(arrays: BinaryArray[]): BinaryArray {
-    return Buffer.concat(arrays.map(x => this.arrayToBuffer(x)));
+    return Buffer.concat(arrays.map(x => BinaryUtil.arrayToBuffer(x)));
   }
 
   /** Agnostic slice of binary array  */
@@ -120,7 +120,7 @@ export class BinaryUtil {
 
   /** Consume input into output  */
   static pipeline(input: BinaryType, output: Writable): Promise<void> {
-    return pipeline(this.toBinaryStream(input), output);
+    return pipeline(BinaryUtil.toBinaryStream(input), output);
   }
 
   /** Create a binary array of specified size, optionally filled with a value */
