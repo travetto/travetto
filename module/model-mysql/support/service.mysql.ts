@@ -1,6 +1,6 @@
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.MYSQL_VERSION || '9.5';
+const version = process.env.MYSQL_VERSION || '9.6';
 
 export const service: ServiceDescriptor = {
   name: 'mysql',
