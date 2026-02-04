@@ -82,7 +82,7 @@ export class ShutdownManager {
 
     process.exitCode ??= REASON_TO_CODE.get(reason);
 
-    const timeout = TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.value) ?? 2000;
+    const timeout = TimeUtil.asMillis(Env.TRV_SHUTDOWN_WAIT.value ?? 2000);
     const context = { reason, mode, pid: process.pid, timeout, pending: this.#registered.size };
     this.#controller.abort('Shutdown started');
     console.debug('Shutdown started', context);

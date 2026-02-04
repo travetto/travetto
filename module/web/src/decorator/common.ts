@@ -49,7 +49,7 @@ export function CacheControl(input: TimeSpan | number | CacheControlInput, extra
   const { cacheableAge, isPrivate } = input;
   return register({
     responseContext: {
-      ...(cacheableAge !== undefined ? { cacheableAge: TimeUtil.asSeconds(cacheableAge) } : {}),
+      ...(cacheableAge !== undefined ? { cacheableAge: TimeUtil.duration(cacheableAge).total({ unit: 'seconds' }) } : {}),
       ...isPrivate !== undefined ? { isPrivate } : {}
     }
   });

@@ -1,20 +1,38 @@
-const MIN = 1000 * 60;
-const DAY = 24 * MIN * 60;
-const TIME_UNITS = {
-  y: DAY * 365,
-  M: DAY * 30,
-  w: DAY * 7,
-  d: DAY,
-  h: MIN * 60,
-  m: MIN,
-  s: 1000,
-  ms: 1
-};
+import { Temporal } from 'temporal-polyfill';
 
-export type TimeSpan = `${number}${keyof typeof TIME_UNITS}`;
-export type TimeUnit = keyof typeof TIME_UNITS;
+import { AppError } from './error.ts';
 
-const TIME_PATTERN = new RegExp(`^(?<amount>-?[0-9.]+)(?<unit>${Object.keys(TIME_UNITS).join('|')})$`);
+const TIME_UNIT_TO_DURATION_UNIT = {
+  y: 'years',
+  year: 'years',
+  years: 'years',
+  M: 'months',
+  month: 'months',
+  months: 'months',
+  w: 'weeks',
+  week: 'weeks',
+  weeks: 'weeks',
+  d: 'days',
+  day: 'days',
+  days: 'days',
+  h: 'hours',
+  hour: 'hours',
+  hours: 'hours',
+  m: 'minutes',
+  minute: 'minutes',
+  minutes: 'minutes',
+  s: 'seconds',
+  second: 'seconds',
+  seconds: 'seconds',
+  ms: 'milliseconds',
+  millisecond: 'milliseconds',
+  milliseconds: 'milliseconds'
+} as const;
+
+export type TimeSpan = `${number}${keyof typeof TIME_UNIT_TO_DURATION_UNIT}`;
+export type TimeUnit = keyof typeof TIME_UNIT_TO_DURATION_UNIT;
+
+const TIME_PATTERN = new RegExp(`^(?<amount>-?[0-9.]+)(?<unit>${Object.keys(TIME_UNIT_TO_DURATION_UNIT).join('|')})$`);
 const TIME_LIKE_STRING = /\d{1,30}[a-z]$/i;
 
 export class TimeUtil {
@@ -27,59 +45,37 @@ export class TimeUtil {
     return TIME_PATTERN.test(value);
   }
 
+  static duration(input: Date | TimeSpan | number | string, inputUnit?: TimeUnit): Temporal.Duration {
+    let value: number;
+    let unit: TimeUnit;
+    if (input instanceof Date) {
+      value = input.getTime();
+      unit = 'ms';
+    } else if (typeof input === 'number') {
+      value = input;
+      unit ??= inputUnit ?? 'ms';
+    } else if (TIME_LIKE_STRING.test(input)) {
+      const groups = input.match(TIME_PATTERN)?.groups ?? {};
+      const amountString = groups.amount ?? `${input}`;
+      value = amountString.includes('.') ? parseFloat(amountString) : parseInt(amountString, 10);
+      unit = (groups.unit || 'ms') as TimeUnit;
+    } else {
+      value = parseInt(input, 10);
+      unit = 'ms';
+    }
+    if (Number.isNaN(value)) {
+      throw new AppError(`Unable to parse time value: ${input}`, { category: 'data' });
+    }
+    return Temporal.Duration.from({ [TIME_UNIT_TO_DURATION_UNIT[unit]]: value });
+  }
+
   /**
    * Returns time units convert to ms
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static asMillis(amount: Date | number | TimeSpan, unit?: TimeUnit): number {
-    if (amount instanceof Date) {
-      return amount.getTime();
-    } else if (typeof amount === 'string') {
-      const groups: { amount?: string, unit?: TimeUnit } = amount.match(TIME_PATTERN)?.groups ?? {};
-      const amountString = groups.amount ?? `${amount}`;
-      unit = groups.unit ?? unit ?? 'ms';
-      if (!TIME_UNITS[unit]) {
-        return NaN;
-      }
-      amount = amountString.includes('.') ? parseFloat(amountString) : parseInt(amountString, 10);
-    }
-    return amount * TIME_UNITS[unit ?? 'ms'];
-  }
-
-  /**
-   * Returns the time converted to seconds
-   * @param date The date to convert
-   */
-  static asSeconds(date: Date | number | TimeSpan, unit?: TimeUnit): number {
-    return Math.trunc(this.asMillis(date, unit) / 1000);
-  }
-
-  /**
-   * Returns the time converted to a Date
-   * @param date The date to convert
-   */
-  static asDate(date: Date | number | TimeSpan, unit?: TimeUnit): Date {
-    return new Date(this.asMillis(date, unit));
-  }
-
-  /**
-   * Resolve time or span to possible time
-   */
-  static fromValue(value: Date | number | string | undefined): number | undefined {
-    switch (typeof value) {
-      case 'number': return Number.isNaN(value) ? undefined : value;
-      case 'object': return value.getTime();
-      case 'undefined': return undefined;
-      case 'string': {
-        if (TIME_LIKE_STRING.test(value)) { // Looks like span
-          return this.isTimeSpan(value) ? this.asMillis(value) : undefined;
-        } else {
-          const parsed = parseInt(value, 10);
-          return Number.isNaN(parsed) ? undefined : parsed;
-        }
-      }
-    }
+  static asMillis(amount: Date | number | string | TimeSpan, unit?: TimeUnit): number {
+    return this.duration(amount, unit).total({ unit: 'milliseconds' });
   }
 
   /**
@@ -88,7 +84,7 @@ export class TimeUtil {
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
   static fromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date {
-    return new Date(Date.now() + this.asMillis(amount, unit));
+    return new Date(Temporal.Now.instant().add(this.duration(amount, unit)).epochMilliseconds);
   }
 
   /**
@@ -96,10 +92,11 @@ export class TimeUtil {
    * @param time Time in milliseconds
    */
   static asClock(time: number): string {
-    const rawSeconds = Math.trunc(time / 1000);
-    const seconds = rawSeconds % 60;
-    const minutes = Math.trunc(rawSeconds / 60) % 60;
-    const hours = Math.trunc(rawSeconds / 3600);
+    const duration = this.duration(time, 'ms');
+    const seconds = duration.total({ unit: 'seconds' }) % 60;
+    const minutes = duration.total({ unit: 'minutes' }) % 60;
+    const hours = duration.total({ unit: 'hours' });
+
     if (hours) {
       return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
     } else if (minutes) {
