@@ -405,11 +405,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Signed urls
-  async getBlobReadUrl(location: string, exp: TimeSpan = '1h'): Promise<string> {
+  async getBlobReadUrl(location: string, expiresIn: TimeSpan = '1h'): Promise<string> {
     return await getSignedUrl(
       this.client,
       new GetObjectCommand(this.#queryBlob(location)),
-      { expiresIn: TimeUtil.asSeconds(exp) }
+      { expiresIn: TimeUtil.asSeconds(expiresIn) }
     );
   }
 

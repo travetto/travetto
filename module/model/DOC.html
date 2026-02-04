@@ -241,9 +241,9 @@ Some implementations also allow for the ability to read/write binary data as <a 
    * Produces an externally usable URL for sharing limited read access to a specific resource
    *
    * @param location The asset location to read from
-   * @param exp Expiry
+   * @param expiresIn Expiry
    */</span>
-  getBlobReadUrl<span class="token operator">?</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> exp<span class="token operator">?</span><span class="token operator">:</span> TimeSpan<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  getBlobReadUrl<span class="token operator">?</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> expiresIn<span class="token operator">?</span><span class="token operator">:</span> TimeSpan<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Produces an externally usable URL for sharing allowing direct write access

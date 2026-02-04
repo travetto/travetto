@@ -45,9 +45,9 @@ export interface ModelBlobSupport {
    * Produces an externally usable URL for sharing limited read access to a specific resource
    *
    * @param location The asset location to read from
-   * @param exp Expiry
+   * @param expiresIn Expiry
    */
-  getBlobReadUrl?(location: string, exp?: TimeSpan): Promise<string>;
+  getBlobReadUrl?(location: string, expiresIn?: TimeSpan): Promise<string>;
 
   /**
    * Produces an externally usable URL for sharing allowing direct write access
