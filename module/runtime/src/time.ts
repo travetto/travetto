@@ -86,9 +86,9 @@ export class TimeUtil {
    */
   static asClock(input: TimeSpanInput): string {
     const duration = this.duration(input);
-    const seconds = duration.total({ unit: 'seconds' }) % 60;
-    const minutes = duration.total({ unit: 'minutes' }) % 60;
-    const hours = duration.total({ unit: 'hours' });
+    const seconds = Math.trunc(duration.total({ unit: 'seconds' })) % 60;
+    const minutes = Math.trunc(duration.total({ unit: 'minutes' })) % 60;
+    const hours = Math.trunc(duration.total({ unit: 'hours' }));
     const toFixed = (value: number): string => value.toString().padStart(2, '0');
 
     if (hours) {

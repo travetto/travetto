@@ -7,13 +7,41 @@ import { TimeUtil } from '@travetto/runtime';
 class TimeSuite {
 
   @Test()
-  verifyMillis() {
-    assert(TimeUtil.duration(1000, 'ms').total({ unit: 'milliseconds' }) === 1000);
-    assert(TimeUtil.duration('1000ms').total({ unit: 'milliseconds' }) === 1000);
-    assert(TimeUtil.duration(1, 's').total({ unit: 'milliseconds' }) === 1000);
-    assert(TimeUtil.duration('1s').total({ unit: 'milliseconds' }) === 1000);
-    assert(TimeUtil.duration(.0166666666666666666666, 'm').total({ unit: 'milliseconds' }) === 1000);
-    assert(TimeUtil.duration('.0166666666666666666666m').total({ unit: 'milliseconds' }) === 1000);
+  verifyDuration() {
+    assert(TimeUtil.duration(1000).milliseconds === 1000);
+    assert(TimeUtil.duration('10s').seconds === 10);
+    assert(TimeUtil.duration('10m').minutes === 10);
+    assert(TimeUtil.duration('10h').hours === 10);
+    assert(TimeUtil.duration('10d').days === 10);
+    assert(TimeUtil.duration('10w').weeks === 10);
+    assert(TimeUtil.duration('10y').years === 10);
+
+    assert(TimeUtil.duration('10').milliseconds === 10);
+
+    assert(TimeUtil.duration('-10s').seconds === -10);
+
+    assert.throws(() => TimeUtil.duration('abc'), /Unable to parse/);
+  }
+
+  @Test()
+  verifyDurationTypes() {
+    // Full names
+    for (const unit of ['years',  'months',  'weeks', 'days', 'hours',  'minutes', 'seconds', 'milliseconds'] as const) {
+      assert(TimeUtil.duration(`10${unit}`)[unit] === 10);
+      assert(TimeUtil.duration(`10${unit.replace(/s$/, '' )}`)[unit] === 10);
+    }
+
+    // Aliases
+    assert(TimeUtil.duration('10ms').milliseconds === 10);
+    assert(TimeUtil.duration('10M').months === 10);
+
+    // Negative numbers
+    assert(TimeUtil.duration(-1000).milliseconds === -1000);
+    assert(TimeUtil.duration('-1000').milliseconds === -1000);
+
+    // Passthrough
+    const dur = TimeUtil.duration('10s');
+    assert(TimeUtil.duration(dur).seconds === 10);
   }
 
   @Test()
