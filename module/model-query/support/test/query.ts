@@ -345,8 +345,8 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const simple3 = await service.queryCount(Aged, {
       where: {
         createdAt: {
-          $gt: '-.9d',
-          $lt: '2.9d'
+          $gt: '-1296m', // -1.9d
+          $lt: '4176m' // 2.9d
         }
       }
     });
@@ -355,8 +355,8 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const simple4 = await service.queryCount(Aged, {
       where: {
         createdAt: {
-          $gt: TimeUtil.fromNow('-0.1d'),
-          $lt: TimeUtil.fromNow('2.9d')
+          $gt: TimeUtil.fromNow('-144m'), // -0.1d
+          $lt: TimeUtil.fromNow('4176m') // 2.9d
         }
       }
     });

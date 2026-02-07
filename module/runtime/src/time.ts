@@ -66,7 +66,19 @@ export class TimeUtil {
    * Returns a new date with `amount` units into the future
    */
   static fromNow(input: TimeSpanInput): Date {
-    return new Date(Temporal.Now.instant().add(this.duration(input)).epochMilliseconds);
+    let delta = this.duration(input);
+    if (delta.days || delta.weeks || delta.months || delta.years) {
+      delta = Temporal.Duration.from({
+        minutes: delta.minutes,
+        seconds: delta.seconds,
+        milliseconds: delta.milliseconds,
+        hours: delta.days * 24 +
+          delta.weeks * 7 * 24 +
+          delta.months * 30 * 24 +
+          delta.years * 365 * 24,
+      });
+    }
+    return new Date(Temporal.Now.instant().add(delta).epochMilliseconds);
   }
 
   /**
