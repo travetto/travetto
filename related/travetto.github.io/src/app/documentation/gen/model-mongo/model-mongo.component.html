@@ -153,7 +153,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       options<span class="token punctuation">.</span>waitQueueTimeoutMS <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-      options<span class="token punctuation">.</span>serverSelectionTimeoutMS <span class="token operator">=</span> TimeUtil<span class="token punctuation">.</span><span class="token function">asMillis</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'s'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      options<span class="token punctuation">.</span>serverSelectionTimeoutMS <span class="token operator">=</span> <span class="token number">1000</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 

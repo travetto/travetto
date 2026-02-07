@@ -1,111 +1,93 @@
-const MIN = 1000 * 60;
-const DAY = 24 * MIN * 60;
-const TIME_UNITS = {
-  y: DAY * 365,
-  M: DAY * 30,
-  w: DAY * 7,
-  d: DAY,
-  h: MIN * 60,
-  m: MIN,
-  s: 1000,
-  ms: 1
-};
+import { Temporal } from 'temporal-polyfill';
 
-export type TimeSpan = `${number}${keyof typeof TIME_UNITS}`;
-export type TimeUnit = keyof typeof TIME_UNITS;
+import { AppError } from './error.ts';
+import { castTo } from './types.ts';
 
-const TIME_PATTERN = new RegExp(`^(?<amount>-?[0-9.]+)(?<unit>${Object.keys(TIME_UNITS).join('|')})$`);
-const TIME_LIKE_STRING = /\d{1,30}[a-z]$/i;
+const TIME_UNIT_TO_TEMPORAL_UNIT = {
+  y: 'years', year: 'years', years: 'years',
+  M: 'months', month: 'months', months: 'months',
+  w: 'weeks', week: 'weeks', weeks: 'weeks',
+  d: 'days', day: 'days', days: 'days',
+  h: 'hours', hour: 'hours', hours: 'hours',
+  m: 'minutes', minute: 'minutes', minutes: 'minutes',
+  s: 'seconds', second: 'seconds', seconds: 'seconds',
+  ms: 'milliseconds', millisecond: 'milliseconds', milliseconds: 'milliseconds'
+} as const;
+type TemporalUnit = typeof TIME_UNIT_TO_TEMPORAL_UNIT[keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT];
+
+export type TimeSpan = `${number}${keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT}`;
+export type TimeUnit = keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT;
+
+const TIME_PATTERN = /^(?<amount>-?[0-9]+)(?<unit>(?:(?:year|month|week|day|hour|minute|second|millisecond)s?)|(?:y|M|w|d|h|m|s|ms))$/;
 
 export class TimeUtil {
 
   /**
    * Test to see if a string is valid for relative time
-   * @param val
    */
   static isTimeSpan(value: string): value is TimeSpan {
     return TIME_PATTERN.test(value);
   }
 
   /**
-   * Returns time units convert to ms
-   * @param amount Number of units to extend
-   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
+   * Exposes the ability to create a duration succinctly
    */
-  static asMillis(amount: Date | number | TimeSpan, unit?: TimeUnit): number {
-    if (amount instanceof Date) {
-      return amount.getTime();
-    } else if (typeof amount === 'string') {
-      const groups: { amount?: string, unit?: TimeUnit } = amount.match(TIME_PATTERN)?.groups ?? {};
-      const amountString = groups.amount ?? `${amount}`;
-      unit = groups.unit ?? unit ?? 'ms';
-      if (!TIME_UNITS[unit]) {
-        return NaN;
-      }
-      amount = amountString.includes('.') ? parseFloat(amountString) : parseInt(amountString, 10);
+  static duration(input: TimeSpan | number | string, outputUnit: TimeUnit): number;
+  static duration(input: TimeSpan | number | string, outputUnit: undefined): Temporal.Duration;
+  static duration(input: TimeSpan | number | string): Temporal.Duration;
+  static duration(input: TimeSpan | number | string, outputUnit?: TimeUnit): Temporal.Duration | number {
+    let value: number;
+    let unit: TemporalUnit = 'milliseconds';
+    if (typeof input === 'string' && TIME_PATTERN.test(input)) {
+      const groups = input.match(TIME_PATTERN)?.groups ?? {};
+      value = parseInt(groups.amount ?? `${input}`, 10);
+      unit = TIME_UNIT_TO_TEMPORAL_UNIT[castTo<TimeUnit>(groups.unit || 'ms')];
+    } else if (typeof input === 'number') {
+      value = input;
+    } else {
+      value = parseInt(input, 10);
     }
-    return amount * TIME_UNITS[unit ?? 'ms'];
-  }
+    if (Number.isNaN(value)) {
+      throw new AppError(`Unable to parse time value: ${input}`, { category: 'data' });
+    }
 
-  /**
-   * Returns the time converted to seconds
-   * @param date The date to convert
-   */
-  static asSeconds(date: Date | number | TimeSpan, unit?: TimeUnit): number {
-    return Math.trunc(this.asMillis(date, unit) / 1000);
-  }
+    switch (unit) {
+      case 'years': { unit = 'hours'; value = value * 365 * 24; break; }
+      case 'months': { value = value * 30 * 24; unit = 'hours'; break; }
+      case 'weeks': { value = value * 7 * 24; unit = 'hours'; break; }
+      case 'days': { value = value * 24; unit = 'hours'; break; }
+    }
 
-  /**
-   * Returns the time converted to a Date
-   * @param date The date to convert
-   */
-  static asDate(date: Date | number | TimeSpan, unit?: TimeUnit): Date {
-    return new Date(this.asMillis(date, unit));
-  }
-
-  /**
-   * Resolve time or span to possible time
-   */
-  static fromValue(value: Date | number | string | undefined): number | undefined {
-    switch (typeof value) {
-      case 'number': return Number.isNaN(value) ? undefined : value;
-      case 'object': return value.getTime();
-      case 'undefined': return undefined;
-      case 'string': {
-        if (TIME_LIKE_STRING.test(value)) { // Looks like span
-          return this.isTimeSpan(value) ? this.asMillis(value) : undefined;
-        } else {
-          const parsed = parseInt(value, 10);
-          return Number.isNaN(parsed) ? undefined : parsed;
-        }
-      }
+    const duration = Temporal.Duration.from({ [unit]: value });
+    if (outputUnit) {
+      return Math.trunc(duration.total(TIME_UNIT_TO_TEMPORAL_UNIT[outputUnit]));
+    } else {
+      return duration;
     }
   }
 
   /**
    * Returns a new date with `amount` units into the future
-   * @param amount Number of units to extend
-   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static fromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date {
-    return new Date(Date.now() + this.asMillis(amount, unit));
+  static fromNow(input: TimeSpan | number | string): Date {
+    return new Date(Temporal.Now.instant().add(this.duration(input)).epochMilliseconds);
   }
 
   /**
    * Returns a pretty timestamp
-   * @param time Time in milliseconds
    */
-  static asClock(time: number): string {
-    const rawSeconds = Math.trunc(time / 1000);
-    const seconds = rawSeconds % 60;
-    const minutes = Math.trunc(rawSeconds / 60) % 60;
-    const hours = Math.trunc(rawSeconds / 3600);
+  static asClock(input: TimeSpan | number | string): string {
+    const seconds = this.duration(input, 's') % 60;
+    const minutes = this.duration(input, 'm') % 60;
+    const hours = this.duration(input, 'h');
+    const toFixed = (value: number): string => value.toString().padStart(2, '0');
+
     if (hours) {
-      return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
+      return `${toFixed(hours)}h ${toFixed(minutes)}m`;
     } else if (minutes) {
-      return `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+      return `${toFixed(minutes)}m ${toFixed(seconds)}s`;
     } else {
-      return `${seconds.toString().padStart(2, '0')}s`;
+      return `${toFixed(seconds)}s`;
     }
   }
 }

@@ -409,7 +409,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return await getSignedUrl(
       this.client,
       new GetObjectCommand(this.#queryBlob(location)),
-      { expiresIn: TimeUtil.asSeconds(expiresIn) }
+      { expiresIn: TimeUtil.duration(expiresIn, 's') }
     );
   }
 
@@ -424,7 +424,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         ...((metadata.hash && metadata.hash !== '-1') ? { ChecksumSHA256: metadata.hash } : {}),
       }),
       {
-        expiresIn: TimeUtil.asSeconds(expiresIn),
+        expiresIn: TimeUtil.duration(expiresIn, 's'),
         ...(metadata.contentType ? { signableHeaders: new Set(['content-type']) } : {})
       }
     );

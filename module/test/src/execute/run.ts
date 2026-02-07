@@ -229,7 +229,7 @@ export class RunUtil {
         run => buildStandardTestManager(consumer, run),
         runs,
         {
-          idleTimeoutMillis: TimeUtil.asMillis(10, 's'),
+          idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
           min: 1,
           max: consumerConfig.concurrency
         }

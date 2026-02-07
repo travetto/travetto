@@ -283,47 +283,27 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L31) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L20) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L23) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript
 export class TimeUtil {
   /**
    * Test to see if a string is valid for relative time
-   * @param val
    */
   static isTimeSpan(value: string): value is TimeSpan;
   /**
-   * Returns time units convert to ms
-   * @param amount Number of units to extend
-   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
+   * Exposes the ability to create a duration succinctly
    */
-  static asMillis(amount: Date | number | TimeSpan, unit?: TimeUnit): number;
-  /**
-   * Returns the time converted to seconds
-   * @param date The date to convert
-   */
-  static asSeconds(date: Date | number | TimeSpan, unit?: TimeUnit): number;
-  /**
-   * Returns the time converted to a Date
-   * @param date The date to convert
-   */
-  static asDate(date: Date | number | TimeSpan, unit?: TimeUnit): Date;
-  /**
-   * Resolve time or span to possible time
-   */
-  static fromValue(value: Date | number | string | undefined): number | undefined;
+  static duration(input: TimeSpan | number | string, outputUnit: TimeUnit): number;
   /**
    * Returns a new date with `amount` units into the future
-   * @param amount Number of units to extend
-   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static fromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date;
+  static fromNow(input: TimeSpan | number | string): Date;
   /**
    * Returns a pretty timestamp
-   * @param time Time in milliseconds
    */
-  static asClock(time: number): string;
+  static asClock(input: TimeSpan | number | string): string;
 }
 ```
 

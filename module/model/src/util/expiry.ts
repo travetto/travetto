@@ -34,7 +34,7 @@ export class ModelExpiryUtil {
   static registerCull(service: ModelExpirySupport & { readonly config?: { cullRate?: number | TimeSpan } }): void {
     const cullable = ModelRegistryIndex.getClasses().filter(cls => !!ModelRegistryIndex.getConfig(cls).expiresAt);
     if (service.deleteExpired && cullable.length) {
-      const cullInterval = TimeUtil.asMillis(service.config?.cullRate ?? '10m');
+      const cullInterval = TimeUtil.duration(service.config?.cullRate ?? '10m', 'ms');
 
       (async (): Promise<void> => {
         await Util.nonBlockingTimeout(1000);

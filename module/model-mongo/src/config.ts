@@ -1,6 +1,6 @@
 import type mongo from 'mongodb';
 
-import { type TimeSpan, TimeUtil, Runtime, RuntimeResources, BinaryUtil, CodecUtil } from '@travetto/runtime';
+import { type TimeSpan, Runtime, RuntimeResources, BinaryUtil, CodecUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 
 /**
@@ -105,7 +105,7 @@ export class MongoModelConfig {
 
     if (!Runtime.production) {
       options.waitQueueTimeoutMS = 0;
-      options.serverSelectionTimeoutMS = TimeUtil.asMillis(1, 's');
+      options.serverSelectionTimeoutMS = 1000;
     }
   }
 

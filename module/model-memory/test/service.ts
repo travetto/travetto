@@ -50,7 +50,7 @@ class MemoryExpirySuite extends ModelExpirySuite {
 
     // Create
     await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: TimeUtil.fromNow(500, 'ms'),
+      expiresAt: TimeUtil.fromNow('500ms'),
       payload: 'abcdefghij'.repeat(5 * KB) // 50mb
     }));
 

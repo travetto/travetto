@@ -318,50 +318,30 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="time-utilities">Time Utilities</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L20">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L23">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
   <figure class="code">
     <figcaption class="code">Time Utilities
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L20">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L23">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TimeUtil</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Test to see if a string is valid for relative time
-   * &#64;param val
    */</span>
   <span class="token keyword">static</span> <span class="token function">isTimeSpan</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> value <span class="token keyword">is</span> TimeSpan<span class="token punctuation">;</span>
   <span class="token comment">/**
-   * Returns time units convert to ms
-   * &#64;param amount Number of units to extend
-   * &#64;param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
+   * Exposes the ability to create a duration succinctly
    */</span>
-  <span class="token keyword">static</span> <span class="token function">asMillis</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> Date <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">?</span><span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Returns the time converted to seconds
-   * &#64;param date The date to convert
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">asSeconds</span><span class="token punctuation">(</span>date<span class="token operator">:</span> Date <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">?</span><span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Returns the time converted to a Date
-   * &#64;param date The date to convert
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">asDate</span><span class="token punctuation">(</span>date<span class="token operator">:</span> Date <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">?</span><span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> Date<span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Resolve time or span to possible time
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">fromValue</span><span class="token punctuation">(</span>value<span class="token operator">:</span> Date <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">duration</span><span class="token punctuation">(</span>input<span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">,</span> outputUnit<span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Returns a new date with `amount` units into the future
-   * &#64;param amount Number of units to extend
-   * &#64;param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */</span>
-  <span class="token keyword">static</span> <span class="token function">fromNow</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> Date<span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">fromNow</span><span class="token punctuation">(</span>input<span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> Date<span class="token punctuation">;</span>
   <span class="token comment">/**
    * Returns a pretty timestamp
-   * &#64;param time Time in milliseconds
    */</span>
-  <span class="token keyword">static</span> <span class="token function">asClock</span><span class="token punctuation">(</span>time<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">asClock</span><span class="token punctuation">(</span>input<span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

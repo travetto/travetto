@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
-import { type TimeSpan, type TimeUnit, TimeUtil } from '@travetto/runtime';
+import { type TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ExpiresAt, Model } from '../../src/registry/decorator.ts';
 import type { ModelExpirySupport } from '../../src/types/expiry.ts';
@@ -23,12 +23,12 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
   delayFactor: number = 1;
 
-  async wait(n: number | TimeSpan) {
-    await timers.setTimeout(TimeUtil.asMillis(n) * this.delayFactor);
+  async wait(input: TimeSpan | number | string) {
+    await timers.setTimeout(TimeUtil.duration(input, 'ms') * this.delayFactor);
   }
 
-  timeFromNow(v: number | TimeSpan, unit?: TimeUnit) {
-    return TimeUtil.fromNow(TimeUtil.asMillis(v, unit) * this.delayFactor);
+  timeFromNow(input: TimeSpan | number | string) {
+    return TimeUtil.fromNow(TimeUtil.duration(input, 'ms') * this.delayFactor);
   }
 
   @Test()

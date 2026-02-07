@@ -16,7 +16,7 @@ import { ExecutionError } from './error.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 import { TestModelUtil } from '../model/util.ts';
 
-const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.value) ?? 5000;
+const TEST_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_TIMEOUT.value || 5000, 'ms');
 
 /**
  * Support execution of the tests

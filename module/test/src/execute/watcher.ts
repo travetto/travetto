@@ -48,7 +48,7 @@ export class TestWatcher {
       buildStandardTestManager.bind(null, consumer),
       queue,
       {
-        idleTimeoutMillis: TimeUtil.asMillis('2m'),
+        idleTimeoutMillis: TimeUtil.duration('2m', 'ms'),
         min: 2,
         max: WorkPool.DEFAULT_SIZE
       }

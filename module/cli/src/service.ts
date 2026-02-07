@@ -42,7 +42,7 @@ export class ServiceRunner {
   async #isRunning(full = false): Promise<boolean> {
     const port = ports(this.#descriptor.port!)[0];
     const start = Date.now();
-    const timeoutMs = TimeUtil.asMillis(full ? this.#descriptor.startupTimeout ?? 5000 : 100);
+    const timeoutMs = TimeUtil.duration(full ? this.#descriptor.startupTimeout ?? 5000 : 100, 'ms');
     while ((Date.now() - start) < timeoutMs) {
       try {
         const sock = net.createConnection(port, 'localhost');
