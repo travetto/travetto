@@ -4,30 +4,14 @@ import { AppError } from './error.ts';
 import { castTo } from './types.ts';
 
 const TIME_UNIT_TO_DURATION_UNIT = {
-  y: 'years',
-  year: 'years',
-  years: 'years',
-  M: 'months',
-  month: 'months',
-  months: 'months',
-  w: 'weeks',
-  week: 'weeks',
-  weeks: 'weeks',
-  d: 'days',
-  day: 'days',
-  days: 'days',
-  h: 'hours',
-  hour: 'hours',
-  hours: 'hours',
-  m: 'minutes',
-  minute: 'minutes',
-  minutes: 'minutes',
-  s: 'seconds',
-  second: 'seconds',
-  seconds: 'seconds',
-  ms: 'milliseconds',
-  millisecond: 'milliseconds',
-  milliseconds: 'milliseconds'
+  y: 'years', year: 'years', years: 'years',
+  M: 'months', month: 'months', months: 'months',
+  w: 'weeks', week: 'weeks', weeks: 'weeks',
+  d: 'days', day: 'days', days: 'days',
+  h: 'hours', hour: 'hours', hours: 'hours',
+  m: 'minutes', minute: 'minutes', minutes: 'minutes',
+  s: 'seconds', second: 'seconds', seconds: 'seconds',
+  ms: 'milliseconds', millisecond: 'milliseconds', milliseconds: 'milliseconds'
 } as const;
 
 export type TimeSpan = `${number}${keyof typeof TIME_UNIT_TO_DURATION_UNIT}`;
@@ -41,7 +25,6 @@ export class TimeUtil {
 
   /**
    * Test to see if a string is valid for relative time
-   * @param val
    */
   static isTimeSpan(value: string): value is TimeSpan {
     return TIME_PATTERN.test(value);
@@ -55,24 +38,22 @@ export class TimeUtil {
   static duration(input: TimeSpanInput): Temporal.Duration;
   static duration(input: TimeSpanInput, outputUnit?: TimeUnit): Temporal.Duration | number {
     let value: number;
-    let unit: TimeUnit;
-    if (input instanceof Temporal.Duration) {
-      value = Math.trunc(input.total('milliseconds'));
-      unit = 'ms';
-    } else if (typeof input === 'number') {
-      value = input;
-      unit = 'ms';
-    } else if (TIME_PATTERN.test(input)) {
+    let unit: TimeUnit = 'ms';
+    if (typeof input === 'string' && TIME_PATTERN.test(input)) {
       const groups = input.match(TIME_PATTERN)?.groups ?? {};
       value = parseInt(groups.amount ?? `${input}`, 10);
       unit = castTo<TimeUnit>(groups.unit || 'ms');
+    } else if (input instanceof Temporal.Duration) {
+      value = Math.trunc(input.total('milliseconds'));
+    } else if (typeof input === 'number') {
+      value = input;
     } else {
       value = parseInt(input, 10);
-      unit = 'ms';
     }
     if (Number.isNaN(value)) {
       throw new AppError(`Unable to parse time value: ${input}`, { category: 'data' });
     }
+
     const duration = Temporal.Duration.from({ [TIME_UNIT_TO_DURATION_UNIT[unit]]: value });
     if (outputUnit) {
       return Math.trunc(duration.total(TIME_UNIT_TO_DURATION_UNIT[outputUnit]));
@@ -83,7 +64,6 @@ export class TimeUtil {
 
   /**
    * Returns a new date with `amount` units into the future
-   * @param input Number of units to extend
    */
   static fromNow(input: TimeSpanInput): Date {
     return new Date(Temporal.Now.instant().add(this.duration(input)).epochMilliseconds);
@@ -91,7 +71,6 @@ export class TimeUtil {
 
   /**
    * Returns a pretty timestamp
-   * @param input Time span
    */
   static asClock(input: TimeSpanInput): string {
     const seconds = this.duration(input, 's') % 60;
