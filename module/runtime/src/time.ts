@@ -20,8 +20,6 @@ export type TimeUnit = keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT;
 
 const TIME_PATTERN = /^(?<amount>-?[0-9]+)(?<unit>(?:(?:year|month|week|day|hour|minute|second|millisecond)s?)|(?:y|M|w|d|h|m|s|ms))$/;
 
-export type TimeSpanInput = TimeSpan | number | string;
-
 export class TimeUtil {
 
   /**
@@ -34,10 +32,10 @@ export class TimeUtil {
   /**
    * Exposes the ability to create a duration succinctly
    */
-  static duration(input: TimeSpanInput, outputUnit: TimeUnit): number;
-  static duration(input: TimeSpanInput, outputUnit: undefined): Temporal.Duration;
-  static duration(input: TimeSpanInput): Temporal.Duration;
-  static duration(input: TimeSpanInput, outputUnit?: TimeUnit): Temporal.Duration | number {
+  static duration(input: TimeSpan | number | string, outputUnit: TimeUnit): number;
+  static duration(input: TimeSpan | number | string, outputUnit: undefined): Temporal.Duration;
+  static duration(input: TimeSpan | number | string): Temporal.Duration;
+  static duration(input: TimeSpan | number | string, outputUnit?: TimeUnit): Temporal.Duration | number {
     let value: number;
     let unit: TemporalUnit = 'milliseconds';
     if (typeof input === 'string' && TIME_PATTERN.test(input)) {
@@ -71,14 +69,14 @@ export class TimeUtil {
   /**
    * Returns a new date with `amount` units into the future
    */
-  static fromNow(input: TimeSpanInput): Date {
+  static fromNow(input: TimeSpan | number | string): Date {
     return new Date(Temporal.Now.instant().add(this.duration(input)).epochMilliseconds);
   }
 
   /**
    * Returns a pretty timestamp
    */
-  static asClock(input: TimeSpanInput): string {
+  static asClock(input: TimeSpan | number | string): string {
     const seconds = this.duration(input, 's') % 60;
     const minutes = this.duration(input, 'm') % 60;
     const hours = this.duration(input, 'h');
