@@ -3,7 +3,7 @@ import { Temporal } from 'temporal-polyfill';
 import { AppError } from './error.ts';
 import { castTo } from './types.ts';
 
-const TIME_UNIT_TO_DURATION_UNIT = {
+const TIME_UNIT_TO_TEMPORAL_UNIT = {
   y: 'years', year: 'years', years: 'years',
   M: 'months', month: 'months', months: 'months',
   w: 'weeks', week: 'weeks', weeks: 'weeks',
@@ -13,13 +13,14 @@ const TIME_UNIT_TO_DURATION_UNIT = {
   s: 'seconds', second: 'seconds', seconds: 'seconds',
   ms: 'milliseconds', millisecond: 'milliseconds', milliseconds: 'milliseconds'
 } as const;
+type TemporalUnit = typeof TIME_UNIT_TO_TEMPORAL_UNIT[keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT];
 
-export type TimeSpan = `${number}${keyof typeof TIME_UNIT_TO_DURATION_UNIT}`;
-export type TimeUnit = keyof typeof TIME_UNIT_TO_DURATION_UNIT;
+export type TimeSpan = `${number}${keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT}`;
+export type TimeUnit = keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT;
 
 const TIME_PATTERN = /^(?<amount>-?[0-9]+)(?<unit>(?:(?:year|month|week|day|hour|minute|second|millisecond)s?)|(?:y|M|w|d|h|m|s|ms))$/;
 
-export type TimeSpanInput = Temporal.Duration | TimeSpan | number | string;
+export type TimeSpanInput = TimeSpan | number | string;
 
 export class TimeUtil {
 
@@ -38,13 +39,11 @@ export class TimeUtil {
   static duration(input: TimeSpanInput): Temporal.Duration;
   static duration(input: TimeSpanInput, outputUnit?: TimeUnit): Temporal.Duration | number {
     let value: number;
-    let unit: TimeUnit = 'ms';
+    let unit: TemporalUnit = 'milliseconds';
     if (typeof input === 'string' && TIME_PATTERN.test(input)) {
       const groups = input.match(TIME_PATTERN)?.groups ?? {};
       value = parseInt(groups.amount ?? `${input}`, 10);
-      unit = castTo<TimeUnit>(groups.unit || 'ms');
-    } else if (input instanceof Temporal.Duration) {
-      value = Math.trunc(input.total('milliseconds'));
+      unit = TIME_UNIT_TO_TEMPORAL_UNIT[castTo<TimeUnit>(groups.unit || 'ms')];
     } else if (typeof input === 'number') {
       value = input;
     } else {
@@ -54,9 +53,16 @@ export class TimeUtil {
       throw new AppError(`Unable to parse time value: ${input}`, { category: 'data' });
     }
 
-    const duration = Temporal.Duration.from({ [TIME_UNIT_TO_DURATION_UNIT[unit]]: value });
+    switch (unit) {
+      case 'years': { unit = 'hours'; value = value * 365 * 24; break; }
+      case 'months': { value = value * 30 * 24; unit = 'hours'; break; }
+      case 'weeks': { value = value * 7 * 24; unit = 'hours'; break; }
+      case 'days': { value = value * 24; unit = 'hours'; break; }
+    }
+
+    const duration = Temporal.Duration.from({ [unit]: value });
     if (outputUnit) {
-      return Math.trunc(duration.total(TIME_UNIT_TO_DURATION_UNIT[outputUnit]));
+      return Math.trunc(duration.total(TIME_UNIT_TO_TEMPORAL_UNIT[outputUnit]));
     } else {
       return duration;
     }
@@ -66,19 +72,7 @@ export class TimeUtil {
    * Returns a new date with `amount` units into the future
    */
   static fromNow(input: TimeSpanInput): Date {
-    let delta = this.duration(input);
-    if (delta.days || delta.weeks || delta.months || delta.years) {
-      delta = Temporal.Duration.from({
-        minutes: delta.minutes,
-        seconds: delta.seconds,
-        milliseconds: delta.milliseconds,
-        hours: delta.days * 24 +
-          delta.weeks * 7 * 24 +
-          delta.months * 30 * 24 +
-          delta.years * 365 * 24,
-      });
-    }
-    return new Date(Temporal.Now.instant().add(delta).epochMilliseconds);
+    return new Date(Temporal.Now.instant().add(this.duration(input)).epochMilliseconds);
   }
 
   /**

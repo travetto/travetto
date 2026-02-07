@@ -12,9 +12,10 @@ class TimeSuite {
     assert(TimeUtil.duration('10s').seconds === 10);
     assert(TimeUtil.duration('10m').minutes === 10);
     assert(TimeUtil.duration('10h').hours === 10);
-    assert(TimeUtil.duration('10d').days === 10);
-    assert(TimeUtil.duration('10w').weeks === 10);
-    assert(TimeUtil.duration('10y').years === 10);
+
+    assert(TimeUtil.duration('10d').hours === 240);
+    assert(TimeUtil.duration('10w').hours === 240 * 7);
+    assert(TimeUtil.duration('10y').hours === 24 * 365 * 10);
 
     assert(TimeUtil.duration('10').milliseconds === 10);
 
@@ -26,22 +27,29 @@ class TimeSuite {
   @Test()
   verifyDurationTypes() {
     // Full names
-    for (const unit of ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds'] as const) {
+    for (const unit of ['hours', 'minutes', 'seconds', 'milliseconds'] as const) {
       assert(TimeUtil.duration(`10${unit}`)[unit] === 10);
       assert(TimeUtil.duration(`10${unit.replace(/s$/, '')}`)[unit] === 10);
     }
 
+    assert(TimeUtil.duration('10d').days === 0);
+    assert(TimeUtil.duration('10d').hours === 240);
+
+    assert(TimeUtil.duration('10months').months === 0);
+    assert(TimeUtil.duration('10M').hours === 10 * 24 * 30);
+
+    assert(TimeUtil.duration('10weeks').weeks === 0);
+    assert(TimeUtil.duration('10week').hours === 10 * 24 * 7);
+
+    assert(TimeUtil.duration('10y').years === 0);
+    assert(TimeUtil.duration('10y').hours === 10 * 24 * 365);
+
     // Aliases
     assert(TimeUtil.duration('10ms').milliseconds === 10);
-    assert(TimeUtil.duration('10M').months === 10);
 
     // Negative numbers
     assert(TimeUtil.duration(-1000).milliseconds === -1000);
     assert(TimeUtil.duration('-1000').milliseconds === -1000);
-
-    // Passthrough
-    const dur = TimeUtil.duration('10s');
-    assert(TimeUtil.duration(dur).total({ unit: 'seconds' }) === 10);
   }
 
   @Test()
@@ -54,8 +62,7 @@ class TimeSuite {
 
     assert(TimeUtil.duration(1000, 's') === 1);
 
-    const d = TimeUtil.duration('1m');
-    assert(TimeUtil.duration(d, 's') === 60);
+    assert(TimeUtil.duration('1m', 's') === 60);
   }
 
   @Test()
