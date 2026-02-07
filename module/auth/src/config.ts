@@ -12,6 +12,6 @@ export class AuthConfig {
   maxAgeMs: number;
 
   postConstruct(): void {
-    this.maxAgeMs = TimeUtil.duration(this.maxAge).total({ unit: 'milliseconds' });
+    this.maxAgeMs = TimeUtil.duration(this.maxAge, 'ms');
   }
 }

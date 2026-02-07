@@ -24,11 +24,11 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   delayFactor: number = 1;
 
   async wait(input: TimeSpanInput) {
-    await timers.setTimeout(TimeUtil.duration(input).total({ unit: 'milliseconds' }) * this.delayFactor);
+    await timers.setTimeout(TimeUtil.duration(input, 'ms') * this.delayFactor);
   }
 
   timeFromNow(input: TimeSpanInput) {
-    return TimeUtil.fromNow(TimeUtil.duration(input).total({ unit: 'milliseconds' }) * this.delayFactor);
+    return TimeUtil.fromNow(TimeUtil.duration(input, 'ms') * this.delayFactor);
   }
 
   @Test()

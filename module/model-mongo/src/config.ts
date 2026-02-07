@@ -105,7 +105,7 @@ export class MongoModelConfig {
 
     if (!Runtime.production) {
       options.waitQueueTimeoutMS = 0;
-      options.serverSelectionTimeoutMS = TimeUtil.duration('1s').total({ unit: 'milliseconds' });
+      options.serverSelectionTimeoutMS = TimeUtil.duration('1s', 'ms');
     }
   }
 

@@ -50,11 +50,15 @@ export class TimeUtil {
   /**
    * Exposes the ability to create a duration succinctly
    */
-  static duration(input: TimeSpanInput): Temporal.Duration {
+  static duration(input: TimeSpanInput, outputUnit: TimeUnit): number;
+  static duration(input: TimeSpanInput, outputUnit: undefined): Temporal.Duration;
+  static duration(input: TimeSpanInput): Temporal.Duration;
+  static duration(input: TimeSpanInput, outputUnit?: TimeUnit): Temporal.Duration | number {
     let value: number;
     let unit: TimeUnit;
     if (input instanceof Temporal.Duration) {
-      return Temporal.Duration.from(input);
+      value = Math.trunc(input.total('milliseconds'));
+      unit = 'ms';
     } else if (typeof input === 'number') {
       value = input;
       unit = 'ms';
@@ -69,7 +73,12 @@ export class TimeUtil {
     if (Number.isNaN(value)) {
       throw new AppError(`Unable to parse time value: ${input}`, { category: 'data' });
     }
-    return Temporal.Duration.from({ [TIME_UNIT_TO_DURATION_UNIT[unit]]: value });
+    const duration = Temporal.Duration.from({ [TIME_UNIT_TO_DURATION_UNIT[unit]]: value });
+    if (outputUnit) {
+      return Math.trunc(duration.total(TIME_UNIT_TO_DURATION_UNIT[outputUnit]));
+    } else {
+      return duration;
+    }
   }
 
   /**
@@ -85,10 +94,9 @@ export class TimeUtil {
    * @param input Time span
    */
   static asClock(input: TimeSpanInput): string {
-    const duration = this.duration(input);
-    const seconds = Math.trunc(duration.total({ unit: 'seconds' })) % 60;
-    const minutes = Math.trunc(duration.total({ unit: 'minutes' })) % 60;
-    const hours = Math.trunc(duration.total({ unit: 'hours' }));
+    const seconds = this.duration(input, 's') % 60;
+    const minutes = this.duration(input, 'm') % 60;
+    const hours = this.duration(input, 'h');
     const toFixed = (value: number): string => value.toString().padStart(2, '0');
 
     if (hours) {

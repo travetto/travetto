@@ -41,7 +41,21 @@ class TimeSuite {
 
     // Passthrough
     const dur = TimeUtil.duration('10s');
-    assert(TimeUtil.duration(dur).seconds === 10);
+    assert(TimeUtil.duration(dur).total({ unit: 'seconds' }) === 10);
+  }
+
+  @Test()
+  verifyDurationConversion() {
+    assert(TimeUtil.duration('1m', 'ms') === 60000);
+    assert(TimeUtil.duration('1h', 'm') === 60);
+    assert(TimeUtil.duration('1d', 'h') === 24);
+    assert(TimeUtil.duration('60s', 'm') === 1);
+    assert(TimeUtil.duration('3000ms', 's') === 3);
+
+    assert(TimeUtil.duration(1000, 's') === 1);
+
+    const d = TimeUtil.duration('1m');
+    assert(TimeUtil.duration(d, 's') === 60);
   }
 
   @Test()

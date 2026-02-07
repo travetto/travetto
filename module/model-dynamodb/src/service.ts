@@ -41,7 +41,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (config.expiresAt) {
       const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item);
       if (expiresAt) {
-        expiry = TimeUtil.duration(expiresAt.getTime()).total({ unit: 'seconds' });
+        expiry = TimeUtil.duration(expiresAt.getTime(), 's');
       }
     }
 
