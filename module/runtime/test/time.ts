@@ -8,12 +8,12 @@ class TimeSuite {
 
   @Test()
   verifyMillis() {
-    assert(TimeUtil.asMillis(1000, 'ms') === 1000);
-    assert(TimeUtil.asMillis('1000ms') === 1000);
-    assert(TimeUtil.asMillis(1, 's') === 1000);
-    assert(TimeUtil.asMillis('1s') === 1000);
-    assert(TimeUtil.asMillis(.0166666666666666666666, 'm') === 1000);
-    assert(TimeUtil.asMillis('.0166666666666666666666m') === 1000);
+    assert(TimeUtil.duration(1000, 'ms').total({ unit: 'milliseconds' }) === 1000);
+    assert(TimeUtil.duration('1000ms').total({ unit: 'milliseconds' }) === 1000);
+    assert(TimeUtil.duration(1, 's').total({ unit: 'milliseconds' }) === 1000);
+    assert(TimeUtil.duration('1s').total({ unit: 'milliseconds' }) === 1000);
+    assert(TimeUtil.duration(.0166666666666666666666, 'm').total({ unit: 'milliseconds' }) === 1000);
+    assert(TimeUtil.duration('.0166666666666666666666m').total({ unit: 'milliseconds' }) === 1000);
   }
 
   @Test()

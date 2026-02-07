@@ -7,7 +7,7 @@ import { CacheError } from './error.ts';
 import { CacheUtil } from './util.ts';
 import { type CacheAware, CacheConfigSymbol, CacheModelSymbol, EvictConfigSymbol } from './types.ts';
 
-const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
+const INFINITE_MAX_AGE = TimeUtil.duration('10y').total({ unit: 'milliseconds' });
 
 @Index({
   name: 'keySpace',

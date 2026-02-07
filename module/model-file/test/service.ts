@@ -56,7 +56,7 @@ class FileExpirySuite extends ModelExpirySuite {
 
     // Create
     await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: TimeUtil.fromNow(500, 'ms'),
+      expiresAt: TimeUtil.fromNow('500ms'),
     }));
 
     allFiles = await countFiles();

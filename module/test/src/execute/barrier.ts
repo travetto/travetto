@@ -13,7 +13,7 @@ export class Barrier {
    */
   static timeout(duration: number | TimeSpan, operation: string = 'Operation'): { promise: Promise<void>, resolve: () => unknown } {
     const resolver = Promise.withResolvers<void>();
-    const durationMs = TimeUtil.asMillis(duration);
+    const durationMs = TimeUtil.duration(duration).total({ unit: 'milliseconds' });
     let timeout: NodeJS.Timeout;
     if (!durationMs) {
       resolver.resolve();

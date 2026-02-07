@@ -53,8 +53,8 @@ export class SchemaFaker {
 
   static #between(fromDays: number, toDays: number): Date {
     return faker.date.between({
-      from: TimeUtil.fromNow(fromDays, 'd'),
-      to: TimeUtil.fromNow(toDays, 'd')
+      from: TimeUtil.fromNow(`${fromDays}d`),
+      to: TimeUtil.fromNow(`${toDays}d`)
     });
   }
 
@@ -116,7 +116,7 @@ export class SchemaFaker {
     const max = config.max && typeof config.max.limit !== 'number' ? config.max.limit : undefined;
 
     if (min !== undefined || max !== undefined) {
-      return faker.date.between({ from: min || TimeUtil.fromNow(-50, 'd'), to: max || new Date() });
+      return faker.date.between({ from: min || TimeUtil.fromNow('-50d'), to: max || new Date() });
     } else {
       for (const [regex, fn] of this.#namesToType.date) {
         if (regex.test(name)) {

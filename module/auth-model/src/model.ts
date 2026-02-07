@@ -156,7 +156,7 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
     const salt = await Util.uuid();
 
     identity.resetToken = await AuthModelUtil.generateHash(Util.uuid(), salt, 25000, 32);
-    identity.resetExpires = TimeUtil.fromNow(1, 'h');
+    identity.resetExpires = TimeUtil.fromNow('1h');
 
     const output: Partial<T> = { ...user, ...this.fromPrincipal(identity) };
     await this.#modelService.update(this.#cls, this.#cls.from(castTo(output)));

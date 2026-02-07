@@ -16,7 +16,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
 ): MethodDecorator {
   if (input !== undefined) {
     if (typeof input === 'string' || typeof input === 'number') {
-      config.maxAge = TimeUtil.asMillis(input);
+      config.maxAge = TimeUtil.duration(input).total({ unit: 'milliseconds' });
     } else {
       config = input;
     }

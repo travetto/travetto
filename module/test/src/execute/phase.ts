@@ -8,7 +8,7 @@ class TestBreakout extends Error {
   source?: Error;
 }
 
-const TEST_PHASE_TIMEOUT = TimeUtil.asMillis(Env.TRV_TEST_PHASE_TIMEOUT.value ?? 15000);
+const TEST_PHASE_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_PHASE_TIMEOUT.value ?? 15000).total({ unit: 'milliseconds' });
 
 /**
  * Test Phase Execution Manager.
