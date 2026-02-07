@@ -72,7 +72,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     const { default: { create } } = await import('njwt');
     const jwt = create({}, '-')
       .setExpiration(value.expiresAt!)
-      .setIssuedAt(TimeUtil.duration(value.issuedAt!.getTime(), 's'))
+      .setIssuedAt(TimeUtil.duration((value.issuedAt ?? new Date()).getTime(), 's'))
       .setClaim('core', castTo({ ...value }))
       .setIssuer(value.issuer!)
       .setJti(value.sessionId!)
