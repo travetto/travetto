@@ -26,9 +26,9 @@ class TimeSuite {
   @Test()
   verifyDurationTypes() {
     // Full names
-    for (const unit of ['years',  'months',  'weeks', 'days', 'hours',  'minutes', 'seconds', 'milliseconds'] as const) {
+    for (const unit of ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds'] as const) {
       assert(TimeUtil.duration(`10${unit}`)[unit] === 10);
-      assert(TimeUtil.duration(`10${unit.replace(/s$/, '' )}`)[unit] === 10);
+      assert(TimeUtil.duration(`10${unit.replace(/s$/, '')}`)[unit] === 10);
     }
 
     // Aliases
@@ -56,6 +56,25 @@ class TimeSuite {
 
     const d = TimeUtil.duration('1m');
     assert(TimeUtil.duration(d, 's') === 60);
+  }
+
+  @Test()
+  verifyFromNow() {
+    const start = Date.now();
+    const future = TimeUtil.fromNow('10s');
+    const diff = future.getTime() - start;
+    // Allow for some execution time variance
+    assert(diff >= 9000 && diff <= 11000);
+
+    const past = TimeUtil.fromNow('-10s');
+    const diffPast = start - past.getTime();
+    assert(diffPast >= 9000 && diffPast <= 11000);
+
+    // Test larger units conversion
+    const futureDay = TimeUtil.fromNow('1d'); // Should count as 24 hours
+    const diffDay = futureDay.getTime() - start;
+    const dayMs = 24 * 60 * 60 * 1000;
+    assert(diffDay >= (dayMs - 1000) && diffDay <= (dayMs + 1000));
   }
 
   @Test()
