@@ -1,4 +1,4 @@
-import { Runtime, CodecUtil, BinaryMetadataUtil, BinaryUtil } from '@travetto/runtime';
+import { Runtime, CodecUtil, BinaryMetadataUtil } from '@travetto/runtime';
 
 import type { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types.ts';
 
@@ -43,7 +43,7 @@ export class MailUtil {
           headers: {
             'X-Attachment-Id': `${contentId}`
           },
-          content: BinaryUtil.arrayToBuffer(CodecUtil.fromBase64String(content)),
+          content: CodecUtil.fromBase64String(content),
           contentDisposition: 'inline',
           contentType
         });
