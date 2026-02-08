@@ -378,7 +378,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
    1. global - Intended to run outside of the request flow - [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L13)
    1. terminal - Handles once request and response are finished building - [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L28), [RespondInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L12)
    1. pre-request - Prepares the request for running - [TrustProxyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/trust-proxy.ts#L23)
-   1. request - Handles inbound request, validation, and body preparation - [DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53), [AcceptInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L33), [BodyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L57), [CookieInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L60) 
+   1. request - Handles inbound request, validation, and body preparation - [DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L50), [AcceptInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/accept.ts#L33), [BodyInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body.ts#L57), [CookieInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookie.ts#L60) 
    1. response - Prepares outbound response - [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L44), [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51), [EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L41), [CacheControlInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cache-control.ts#L23) 
    1. application - Lives outside of the general request/response behavior, [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") uses this for login and logout flows.
 
@@ -445,7 +445,7 @@ export class AcceptConfig {
 ```
 
 #### DecompressInterceptor
-[DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L53) handles decompressing the inbound request, if supported.  This relies upon HTTP standards for content encoding, and negotiating the appropriate decompression scheme.
+[DecompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/decompress.ts#L50) handles decompressing the inbound request, if supported.  This relies upon HTTP standards for content encoding, and negotiating the appropriate decompression scheme.
 
 **Code: Decompress Config**
 ```typescript
