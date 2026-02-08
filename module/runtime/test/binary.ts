@@ -4,20 +4,27 @@ import { ReadableStream } from 'node:stream/web';
 import { buffer } from 'node:stream/consumers';
 
 import { Test, Suite } from '@travetto/test';
-import { BinaryUtil } from '@travetto/runtime';
+import {
+  BinaryUtil, toConcrete, type BinaryArray,
+  type BinaryStream, type BinaryType, type BinaryContainer
+} from '@travetto/runtime';
 
 @Suite()
 export class BinaryUtilTest {
 
   @Test()
   verifyIsBinaryConstructor() {
-    assert(BinaryUtil.isBinaryConstructor(Readable));
-    assert(BinaryUtil.isBinaryConstructor(Buffer));
-    assert(BinaryUtil.isBinaryConstructor(Blob));
-    assert(BinaryUtil.isBinaryConstructor(File));
-    assert(BinaryUtil.isBinaryConstructor(Uint8Array));
-    assert(!BinaryUtil.isBinaryConstructor(String));
-    assert(!BinaryUtil.isBinaryConstructor(Number));
+    assert(BinaryUtil.isBinaryTypeReference(Readable));
+    assert(BinaryUtil.isBinaryTypeReference(Buffer));
+    assert(BinaryUtil.isBinaryTypeReference(Blob));
+    assert(BinaryUtil.isBinaryTypeReference(File));
+    assert(BinaryUtil.isBinaryTypeReference(Uint8Array));
+    assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryArray>()));
+    assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryStream>()));
+    assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryContainer>()));
+    assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryType>()));
+    assert(!BinaryUtil.isBinaryTypeReference(String));
+    assert(!BinaryUtil.isBinaryTypeReference(Number));
   }
 
   @Test()

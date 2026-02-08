@@ -35,7 +35,7 @@ function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): T
 
 function ensureBinary<T extends SchemaBasicType>(config?: T): void {
   if (config?.type) {
-    config.binary = BinaryUtil.isBinaryConstructor(config.type) || BinaryUtil.isBinaryReference(config.type);
+    config.binary = BinaryUtil.isBinaryTypeReference(config.type);
   }
 }
 
