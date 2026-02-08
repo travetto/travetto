@@ -4,8 +4,7 @@ import { AppError, BinaryUtil, castKey, castTo, type Class, describeFunction, sa
 import {
   type SchemaClassConfig, type SchemaMethodConfig, type SchemaFieldConfig,
   type SchemaParameterConfig, type SchemaInputConfig, type SchemaFieldMap, type SchemaCoreConfig,
-  CONSTRUCTOR_PROPERTY,
-  type SchemaBasicType
+  type SchemaBasicType, CONSTRUCTOR_PROPERTY
 } from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
