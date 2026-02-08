@@ -36,3 +36,10 @@ declare module 'stream' {
    */
   interface Readable { }
 }
+
+declare module 'stream/web' {
+  /**
+   * @concrete node:stream/web#ReadableStream
+   */
+  interface ReadableStream { }
+}

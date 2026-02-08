@@ -1,9 +1,9 @@
 import assert from 'node:assert';
-import type { Readable } from 'node:stream';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Schema, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
+import type { BinaryStream } from '@travetto/runtime';
 
 import type { Address2 } from './models/address.ts';
 
@@ -26,7 +26,7 @@ class User {
   address: Address;
   address2?: Address2;
   address3?: Address3;
-  image?: Readable;
+  image?: BinaryStream;
 }
 
 @Suite()

@@ -71,6 +71,10 @@ export class CodecUtil {
     if (typeof input !== 'string') {
       input = CodecUtil.toUTF8String(input);
     }
+    if (!input) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return undefined as T;
+    }
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, reviver);
   }

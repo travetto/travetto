@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
-import { Transform, type Readable } from 'node:stream';
+import { Transform } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
@@ -144,7 +144,7 @@ export class WebUploadUtil {
     const location = path.resolve(uniqueDirectory, filename);
     const remove = (): Promise<void> => fs.rm(location).catch(() => { });
     const mimeCheck = config.matcher ??= WebCommonUtil.mimeTypeMatcher(config.types);
-    const response = (): Readable => createReadStream(location);
+    const response = (): BinaryStream => createReadStream(location);
 
     try {
       const target = createWriteStream(location);

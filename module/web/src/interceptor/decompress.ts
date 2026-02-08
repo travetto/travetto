@@ -1,4 +1,3 @@
-import type { Readable } from 'node:stream';
 import zlib from 'node:zlib';
 import util from 'node:util';
 
@@ -18,18 +17,16 @@ import { WebError } from '../types/error.ts';
 const STREAM_DECOMPRESSORS = {
   gzip: zlib.createGunzip,
   deflate: zlib.createInflate,
-  br: zlib.createBrotliDecompress,
-  identity: (): Readable => null!
+  br: zlib.createBrotliDecompress
 };
 
 const BUFFER_DECOMPRESSORS = {
   gzip: util.promisify(zlib.gunzip),
   deflate: util.promisify(zlib.inflate),
-  br: util.promisify(zlib.brotliDecompress),
-  identity: (): Readable => null!
+  br: util.promisify(zlib.brotliDecompress)
 };
 
-type WebDecompressEncoding = keyof typeof BUFFER_DECOMPRESSORS;
+type WebDecompressEncoding = (keyof typeof BUFFER_DECOMPRESSORS) | 'identity';
 
 /**
  * Web body parse configuration
@@ -53,7 +50,7 @@ export class DecompressConfig {
 export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
 
   static async decompress(headers: WebHeaders, input: BinaryType, config: DecompressConfig): Promise<BinaryType> {
-    const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
+    const encoding: WebDecompressEncoding = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 
     if (!config.supportedEncodings.includes(encoding)) {
       throw WebError.for(`Unsupported Content-Encoding: ${encoding}`, 415);

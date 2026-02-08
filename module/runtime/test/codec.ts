@@ -1,8 +1,7 @@
 import assert from 'node:assert';
-import { Readable } from 'node:stream';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { castTo, CodecUtil } from '@travetto/runtime';
+import { castTo, CodecUtil, type BinaryStream } from '@travetto/runtime';
 
 @Suite()
 export class CodecUtilTest {
@@ -146,19 +145,23 @@ export class CodecUtilTest {
 
   @Test()
   async verifyDetectEncoding() {
-    const withEncoding: Readable = castTo({ readableEncoding: 'utf8' });
+    const withEncoding: BinaryStream = castTo({ readableEncoding: 'utf8' });
     assert.strictEqual(CodecUtil.detectEncoding(withEncoding), 'utf8');
 
-    const withoutEnc: Readable = castTo({});
+    const withoutEnc: BinaryStream = castTo({});
     assert.strictEqual(CodecUtil.detectEncoding(withoutEnc), undefined);
   }
 
   @Test()
   async verifyReadLines() {
     const lines = ['one', 'two', 'three'];
-    const stream = Readable.from(lines.map(x => `${x}\n`));
+    async function* stream() {
+      for (const line of lines) {
+        yield CodecUtil.fromUTF8String(`${line}\n`);
+      }
+    }
     const collected: string[] = [];
-    await CodecUtil.readLines(stream, (line) => collected.push(line));
+    await CodecUtil.readLines(stream(), (line) => collected.push(line));
     assert.deepStrictEqual(collected, lines);
   }
 }

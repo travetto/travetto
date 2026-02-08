@@ -1,11 +1,11 @@
 import assert from 'node:assert';
-import { Readable } from 'node:stream';
 
 import { Registry } from '@travetto/registry';
 import { IsPrivate } from '@travetto/schema';
 import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { OpenapiVisitor } from '@travetto/openapi';
+import { BinaryUtil, type BinaryStream } from '@travetto/runtime';
 
 import { TestUser } from './model.ts';
 
@@ -63,8 +63,8 @@ class TestCont {
   }
 
   @Get('/download')
-  async download(size?: number): Promise<Readable> {
-    return new Readable({});
+  async download(size?: number): Promise<BinaryStream> {
+    return BinaryUtil.toBinaryStream(BinaryUtil.makeBinaryArray(0));
   }
 
   @IsPrivate()
