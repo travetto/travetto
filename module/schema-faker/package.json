@@ -26,7 +26,7 @@
     "directory": "module/schema-faker"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.2.0",
+    "@faker-js/faker": "^10.3.0",
     "@travetto/schema": "^7.1.4"
   },
   "travetto": {
