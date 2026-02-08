@@ -132,7 +132,7 @@ export class BinaryUtil {
     if (isBinaryStream(input)) {
       return input;
     } else {
-      return BinaryUtil.toReadable(input);
+      return BinaryUtil.toReadableStream(input);
     }
   }
 

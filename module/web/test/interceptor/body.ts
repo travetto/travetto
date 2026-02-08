@@ -69,7 +69,7 @@ class BodyInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
-    const stream = BinaryUtil.toReadable(BinaryUtil.makeBinaryArray(1000, 'A'));
+    const stream = BinaryUtil.toReadableStream(BinaryUtil.makeBinaryArray(1000, 'A'));
     const request = new WebRequest({
       context: {
         path: '/',

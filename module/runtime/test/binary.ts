@@ -136,14 +136,14 @@ export class BinaryUtilTest {
   async verifyToReadable() {
     // Buffer
     const buf = Buffer.from('hello');
-    const r1 = BinaryUtil.toReadable(buf);
-    assert(r1 instanceof Readable);
+    const r1 = BinaryUtil.toReadableStream(buf);
+    assert(r1 instanceof ReadableStream);
     assert((await buffer(r1)).toString() === 'hello');
 
     // Blob
     const blob = new Blob(['world']);
-    const r2 = BinaryUtil.toReadable(blob);
-    assert(r2 instanceof Readable);
+    const r2 = BinaryUtil.toReadableStream(blob);
+    assert(r2 instanceof ReadableStream);
     assert((await buffer(r2)).toString() === 'world');
 
     // ReadableStream
@@ -153,8 +153,8 @@ export class BinaryUtilTest {
         controller.close();
       }
     });
-    const r3 = BinaryUtil.toReadable(rs);
-    assert(r3 instanceof Readable);
+    const r3 = BinaryUtil.toReadableStream(rs);
+    assert(r3 instanceof ReadableStream);
     assert((await buffer(r3)).toString() === 'A');
   }
 
@@ -162,7 +162,7 @@ export class BinaryUtilTest {
   async verifyToBinaryStream() {
     const input = Buffer.from('test');
     const stream = BinaryUtil.toBinaryStream(input);
-    assert(stream instanceof Readable);
+    assert(stream instanceof ReadableStream);
 
     const stream2 = Readable.from('test2');
     assert(BinaryUtil.toBinaryStream(stream2) === stream2);
