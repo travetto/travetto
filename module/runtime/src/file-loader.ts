@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { AppError } from './error.ts';
-import type { BinaryStream } from './binary.ts';
+import { BinaryUtil, type BinaryArray, type BinaryStream } from './binary.ts';
 
 /**
  * File loader that will search for files across the provided search paths
@@ -50,7 +50,7 @@ export class FileLoader {
    * Read a file as a byte array, after resolving the path
    * @param relativePath The path to read
    */
-  async readBinaryArray(relativePath: string): Promise<Buffer<ArrayBuffer>> {
+  async readBinaryArray(relativePath: string): Promise<BinaryArray> {
     const file = await this.resolve(relativePath);
     return fs.readFile(file);
   }
@@ -69,7 +69,7 @@ export class FileLoader {
    * @param relativePath The path to read
    */
   async readFile(relativePath: string): Promise<File> {
-    const buffer = await this.readBinaryArray(relativePath);
+    const buffer = BinaryUtil.arrayToBuffer(await this.readBinaryArray(relativePath));
     return new File([buffer], path.basename(relativePath));
   }
 }
