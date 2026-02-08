@@ -2,7 +2,7 @@ import { PassThrough, Readable, type Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
-import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
+import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array, isUint8ClampedArray } from 'node:util/types';
 
 import { type Any, castTo, hasFunction, toConcrete } from './types.ts';
 
@@ -10,7 +10,7 @@ import { type Any, castTo, hasFunction, toConcrete } from './types.ts';
  * Binary Array
  * @concrete
  */
-export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Buffer<ArrayBuffer> | ArrayBuffer;
+export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Uint8ClampedArray | Buffer<ArrayBuffer> | ArrayBuffer;
 /**
  * Binary Stream
  * @concrete
@@ -29,7 +29,7 @@ export type BinaryType = BinaryArray | BinaryStream | BinaryContainer;
 
 const BINARY_CONSTRUCTOR_SET = new Set<unknown>([
   Readable, Buffer, Blob, ReadableStream, ArrayBuffer, Uint8Array,
-  Uint16Array, Uint32Array, globalThis.ReadableStream
+  Uint16Array, Uint32Array, Uint8ClampedArray
 ]);
 
 let BINARY_REFS: Set<unknown> | undefined;
@@ -48,7 +48,7 @@ const isReadableStream = hasFunction<ReadableStream>('pipeTo');
 const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
   !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
 const isBinaryArray = (value: unknown): value is BinaryArray =>
-  isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value);
+  isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value) || isUint8ClampedArray(value);
 const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
 const isBinaryContainer = (value: unknown): value is BinaryContainer => value instanceof Blob;
 const isBinaryType = (value: unknown): value is BinaryType => !!value && (isBinaryArray(value) || isBinaryStream(value) || isBinaryContainer(value));
