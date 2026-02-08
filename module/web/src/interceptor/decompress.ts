@@ -1,5 +1,6 @@
 import zlib from 'node:zlib';
 import util from 'node:util';
+import { pipeline } from 'node:stream/promises';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -20,13 +21,13 @@ const STREAM_DECOMPRESSORS = {
   br: zlib.createBrotliDecompress
 };
 
-const BUFFER_DECOMPRESSORS = {
+const ARRAY_DECOMPRESSORS = {
   gzip: util.promisify(zlib.gunzip),
   deflate: util.promisify(zlib.inflate),
   br: util.promisify(zlib.brotliDecompress)
 };
 
-type WebDecompressEncoding = (keyof typeof BUFFER_DECOMPRESSORS) | 'identity';
+type WebDecompressEncoding = (keyof typeof ARRAY_DECOMPRESSORS) | 'identity';
 
 /**
  * Web body parse configuration
@@ -61,10 +62,10 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
     }
 
     if (BinaryUtil.isBinaryArray(input)) {
-      return BUFFER_DECOMPRESSORS[encoding](await BinaryUtil.toBinaryArray(input));
+      return ARRAY_DECOMPRESSORS[encoding](await BinaryUtil.toBinaryArray(input));
     } else if (BinaryUtil.isBinaryStream(input)) {
       const output = STREAM_DECOMPRESSORS[encoding]();
-      BinaryUtil.pipeline(input, output);
+      void pipeline(input, output);
       return output;
     } else {
       throw WebError.for('Unable to decompress body: unsupported type', 400);

@@ -31,8 +31,9 @@ export class WebUploadUtil {
   static limitWrite(maxSize: number, field?: string): Transform {
     let read = 0;
     return new Transform({
-      transform(chunk, encoding, callback): void {
-        read += (typeof chunk === 'string' ? chunk.length : BinaryUtil.isBinaryArray(chunk) ? chunk.byteLength : 0);
+      transform(input, encoding, callback): void {
+        const chunk = BinaryUtil.readChunk(input, encoding);
+        read += chunk.byteLength;
         if (read > maxSize) {
           callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
         } else {
@@ -79,7 +80,7 @@ export class WebUploadUtil {
         .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`)));
 
       // Upload
-      BinaryUtil.pipeline(requestBody, uploadHandler).catch(err => queue.throw(err));
+      void BinaryUtil.pipeline(requestBody, uploadHandler).catch(err => queue.throw(err));
 
       yield* queue;
     } else {

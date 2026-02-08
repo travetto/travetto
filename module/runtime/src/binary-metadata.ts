@@ -126,15 +126,15 @@ export class BinaryMetadataUtil {
       size: { get() { return BinaryMetadataUtil.readLength(metadata); } },
       type: { get() { return metadata.contentType; } },
       name: { get() { return metadata.filename; } },
-      arrayBuffer: { value: () => inputFn().then(BinaryUtil.toBuffer).then(data => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)) },
+      arrayBuffer: { value: () => inputFn().then(BinaryUtil.toArrayBuffer) },
       stream: { value: () => BinaryUtil.toReadableStream(BinaryUtil.toSynchronous(input)) },
       bytes: { value: () => inputFn().then(BinaryUtil.toBuffer) },
-      text: { value: () => inputFn().then(BinaryUtil.toBuffer).then(CodecUtil.toUTF8String) },
+      text: { value: () => inputFn().then(BinaryUtil.toBinaryArray).then(CodecUtil.toUTF8String) },
       slice: {
         value: (start?: number, end?: number, _contentType?: string) => {
           const result = target instanceof File ? new File([], '') : new Blob([]);
           return BinaryMetadataUtil.defineBlob(result,
-            () => inputFn().then(BinaryUtil.toBuffer).then(data => BinaryUtil.sliceByteArray(data, start, end)),
+            () => inputFn().then(BinaryUtil.toBinaryArray).then(data => BinaryUtil.sliceByteArray(data, start, end)),
             {
               ...metadata,
               range: { start: start ?? 0, end: end ?? metadata.size! - 1 },

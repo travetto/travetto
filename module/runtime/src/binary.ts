@@ -97,6 +97,12 @@ export class BinaryUtil {
     return BinaryUtil.binaryArrayToBuffer(bytes);
   }
 
+  /** Convert input to an ArrayBuffer  */
+  static async toArrayBuffer(input: BinaryType): Promise<ArrayBuffer> {
+    const data = await BinaryUtil.toBuffer(input);
+    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+  }
+
   /** Convert input to a readable stream  */
   static toReadable(input: BinaryType): Readable {
     if (isReadable(input)) {
@@ -136,7 +142,7 @@ export class BinaryUtil {
 
   /** Read chunk, default to toString if type is unknown  */
   static readChunk(chunk: Any, encoding?: BufferEncoding | null): BinaryArray {
-    return isBinaryArray(chunk) ? BinaryUtil.binaryArrayToBuffer(chunk) :
+    return isBinaryArray(chunk) ? chunk :
       typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
         Buffer.from(`${chunk}`, 'utf8');
   }

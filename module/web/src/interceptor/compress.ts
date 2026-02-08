@@ -1,4 +1,5 @@
-import { type BrotliOptions, constants, createBrotliCompress, createDeflate, createGzip, type ZlibOptions } from 'node:zlib';
+import zlib from 'node:zlib';
+import util from 'node:util';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -13,13 +14,19 @@ import { WebError } from '../types/error.ts';
 import { WebBodyUtil } from '../util/body.ts';
 import { WebHeaderUtil } from '../util/header.ts';
 
-const COMPRESSORS = {
-  gzip: createGzip,
-  deflate: createDeflate,
-  br: createBrotliCompress,
+const STREAM_COMPRESSORS = {
+  gzip: zlib.createGzip,
+  deflate: zlib.createDeflate,
+  br: zlib.createBrotliCompress,
 };
 
-type WebCompressEncoding = keyof typeof COMPRESSORS | 'identity';
+const ARRAY_COMPRESSORS = {
+  gzip: util.promisify(zlib.gzip),
+  deflate: util.promisify(zlib.deflate),
+  br: util.promisify(zlib.brotliCompress),
+};
+
+type WebCompressEncoding = keyof typeof ARRAY_COMPRESSORS | 'identity';
 
 @Config('web.compress')
 export class CompressConfig {
@@ -30,7 +37,7 @@ export class CompressConfig {
   /**
    * Raw encoding options
    */
-  raw?: (ZlibOptions & BrotliOptions) | undefined;
+  raw?: (zlib.ZlibOptions & zlib.BrotliOptions) | undefined;
   /**
    * Supported encodings
    */
@@ -63,39 +70,39 @@ export class CompressInterceptor implements WebInterceptor {
     }
 
     const accepts = request.headers.get('Accept-Encoding');
-    const type = WebHeaderUtil.negotiateHeader(accepts ?? '*', supportedEncodings);
+    const encoding = WebHeaderUtil.negotiateHeader(accepts ?? '*', supportedEncodings);
 
-    if (!type) {
+    if (!encoding) {
       throw WebError.for(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`, 406);
     }
 
-    if (type === 'identity') {
+    if (encoding === 'identity') {
       return response;
     }
 
     const binaryResponse = new WebResponse({ context: response.context, ...WebBodyUtil.toBinaryMessage(response) });
-    const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
+    const chunkSize = raw.chunkSize ?? zlib.constants.Z_DEFAULT_CHUNK;
     const len = BinaryUtil.isBinaryArray(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
 
     if (len !== undefined && len >= 0 && len < chunkSize || !binaryResponse.body) {
       return binaryResponse;
     }
 
-    const options = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
-    const stream = COMPRESSORS[type](options);
+    const options = encoding === 'br' ? { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
 
     // If we are compressing
-    binaryResponse.headers.set('Content-Encoding', type);
+    binaryResponse.headers.set('Content-Encoding', encoding);
 
-    if (BinaryUtil.isBinaryStream(binaryResponse.body)) {
-      BinaryUtil.pipeline(binaryResponse.body, stream);
-      binaryResponse.body = stream;
-      binaryResponse.headers.delete('Content-Length');
-    } else {
-      await BinaryUtil.pipeline(binaryResponse.body, stream);
-      const out = await BinaryUtil.toBinaryArray(stream);
+    if (BinaryUtil.isBinaryArray(binaryResponse.body)) {
+      const compressor = ARRAY_COMPRESSORS[encoding];
+      const out = await compressor(await BinaryUtil.toBuffer(binaryResponse.body), options);
       binaryResponse.body = out;
       binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
+    } else {
+      const compressedStream = STREAM_COMPRESSORS[encoding](options);
+      void BinaryUtil.pipeline(binaryResponse.body, compressedStream);
+      binaryResponse.body = compressedStream;
+      binaryResponse.headers.delete('Content-Length');
     }
 
     return binaryResponse;
