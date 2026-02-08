@@ -98,8 +98,8 @@ class BodyInterceptorSuite {
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
-    const koreanInput = await fixtures.read('/korean.euckr.txt', true);
-    const koreanOutput = await fixtures.read('/korean.utf8.txt', true);
+    const koreanInput = await fixtures.readBinaryArray('/korean.euckr.txt');
+    const koreanOutput = await fixtures.readBinaryArray('/korean.utf8.txt');
 
     const request = new WebRequest({
       context: {
@@ -128,7 +128,7 @@ class BodyInterceptorSuite {
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
-    const koreanInput = await fixtures.read('/korean.euckr.txt', true);
+    const koreanInput = await fixtures.readBinaryArray('/korean.euckr.txt');
 
     const request = new WebRequest({
       context: {
@@ -157,7 +157,7 @@ class BodyInterceptorSuite {
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
-    const koreanInput = await fixtures.read('/korean.euckr.txt', true);
+    const koreanInput = await fixtures.readBinaryArray('/korean.euckr.txt');
 
     const request = new WebRequest({
       context: {

@@ -37,9 +37,9 @@ export class MailService {
   async getCompiled(key: string): Promise<EmailCompiled> {
     if (!this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
-        RuntimeResources.read(`${key}.compiled.html`),
-        RuntimeResources.read(`${key}.compiled.text`),
-        RuntimeResources.read(`${key}.compiled.subject`)
+        RuntimeResources.readText(`${key}.compiled.html`),
+        RuntimeResources.readText(`${key}.compiled.text`),
+        RuntimeResources.readText(`${key}.compiled.subject`)
       ].map(file => file.then(MailUtil.purgeBrand)));
       if (this.#cacheResults) {
         this.#compiled.set(key, { html, text, subject });

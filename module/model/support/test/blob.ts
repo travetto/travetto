@@ -15,7 +15,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   @Test()
   async writeBasic(): Promise<void> {
     const service = await this.service;
-    const buffer = await this.fixture.read('/asset.yml', true);
+    const buffer = await this.fixture.readBinaryArray('/asset.yml');
 
     const id = Util.uuid();
 
@@ -28,7 +28,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   @Test()
   async upsert(): Promise<void> {
     const service = await this.service;
-    const buffer = await this.fixture.read('/asset.yml', true);
+    const buffer = await this.fixture.readBinaryArray('/asset.yml');
 
     const id = Util.uuid();
 
@@ -45,7 +45,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   @Test()
   async writeStream(): Promise<void> {
     const service = await this.service;
-    const buffer = await this.fixture.read('/asset.yml', true);
+    const buffer = await this.fixture.readBinaryArray('/asset.yml');
 
     const id = Util.uuid();
     await service.upsertBlob(id, buffer);
@@ -59,7 +59,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   @Test()
   async writeAndDelete(): Promise<void> {
     const service = await this.service;
-    const buffer = await this.fixture.read('/asset.yml', true);
+    const buffer = await this.fixture.readBinaryArray('/asset.yml');
 
     const id = Util.uuid();
     await service.upsertBlob(id, buffer);
@@ -74,7 +74,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   @Test()
   async partialStream(): Promise<void> {
     const service = await this.service;
-    const buffer = await this.fixture.read('/text.txt', true);
+    const buffer = await this.fixture.readBinaryArray('/text.txt');
 
     const id = Util.uuid();
     await service.upsertBlob(id, buffer);
@@ -91,7 +91,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const range = await BinaryMetadataUtil.enforceRange({ start: 10, end: 20 }, partialMeta);
     assert(subContent.length === (range.end - range.start) + 1);
 
-    const og = await this.fixture.read('/text.txt');
+    const og = await this.fixture.readText('/text.txt');
 
     assert(subContent === og.substring(10, 21));
 
@@ -120,7 +120,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   @Test()
   async writeAndGet() {
     const service = await this.service;
-    const buffer = await this.fixture.read('/asset.yml', true);
+    const buffer = await this.fixture.readBinaryArray('/asset.yml');
     await service.upsertBlob('orange', buffer, { contentType: 'text/yaml', filename: 'asset.yml' });
     const saved = await service.getBlob('orange');
     const savedMeta = BinaryMetadataUtil.read(saved)!;

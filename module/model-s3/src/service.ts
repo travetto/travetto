@@ -247,7 +247,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
     const content = CodecUtil.toJSON(prepped);
     await this.client.putObject(this.#query(cls, prepped.id, {
-      Body: content,
+      Body: BinaryUtil.arrayToBuffer(content),
       ContentType: 'application/json',
       ContentLength: content.byteLength,
       ...this.#getExpiryConfig(cls, prepped)

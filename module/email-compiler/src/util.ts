@@ -148,11 +148,11 @@ export class EmailCompileUtil {
 
       let bytes: BinaryArray;
       if (ImageUtil.isKnownExtension(format)) {
-        const stream = await options.loader.readStream(source);
+        const stream = await options.loader.readBinaryStream(source);
         const converted = await ImageUtil.convert(stream, { optimize: true, format });
         bytes = await BinaryUtil.toBinaryArray(converted);
       } else {
-        bytes = await options.loader.read(source, true);
+        bytes = await options.loader.readBinaryArray(source);
       }
       return [token, `data:image/${format};base64,${CodecUtil.toBase64String(bytes)}`] as const;
     });
@@ -185,7 +185,7 @@ export class EmailCompileUtil {
   static async applyStyles(html: string, options: EmailTemplateResource): Promise<string> {
     const styles = [
       options.globalStyles ?? '',
-      await options.loader.read('/email/main.scss').catch(() => '')
+      await options.loader.readText('/email/main.scss').catch(() => '')
     ]
       .filter(line => !!line)
       .join('\n');

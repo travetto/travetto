@@ -77,15 +77,15 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     await Promise.all(files.map(async ({ name, type, resource }) => {
       data.append(name, BinaryMetadataUtil.defineBlob(
         new File([], ''),
-        () => this.fixture.readStream(resource),
+        () => this.fixture.readBinaryStream(resource),
         { contentType: type, filename: resource }
       ));
     }));
     return data;
   }
 
-  async getFileMeta(pth: string) {
-    const loc = await this.fixture.readStream(pth);
+  async getFileMeta(location: string) {
+    const loc = await this.fixture.readBinaryStream(location);
     return { hash: await BinaryMetadataUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
   }
 

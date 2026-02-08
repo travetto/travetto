@@ -27,7 +27,7 @@ export class PassportUtil {
    * @returns base64 encoded state value, if state is provided
    */
   static writeState(state?: Record<string, unknown>): string | undefined {
-    return CodecUtil.toBase64JSON(state);
+    return state ? CodecUtil.toBase64JSON(state) : undefined;
   }
 
   /**

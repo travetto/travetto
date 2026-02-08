@@ -35,7 +35,7 @@ export const Html: RenderProvider<RenderContext> = {
       .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`);
 
     if (isRoot) {
-      const wrapper = await context.loader.read('/email/inky.wrapper.html');
+      const wrapper = await context.loader.readText('/email/inky.wrapper.html');
 
       // Get Subject
       const headerTop: string[] = [];

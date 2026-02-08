@@ -52,12 +52,6 @@ export class CodecUtilTest {
   }
 
   @Test()
-  async encodeBase64JSONUndefined() {
-    const encoded = CodecUtil.toBase64JSON(undefined);
-    assert.strictEqual(encoded, undefined);
-  }
-
-  @Test()
   async decodeBase64JSONSimple() {
     const original = { test: 'data' };
     const encoded = CodecUtil.fromUTF8String(JSON.stringify(original)).toString('base64');
@@ -76,12 +70,6 @@ export class CodecUtilTest {
   @Test()
   async decodeBase64JSONEmpty() {
     const decoded = CodecUtil.fromBase64JSON('');
-    assert.strictEqual(decoded, undefined);
-  }
-
-  @Test()
-  async decodeBase64JSONUndefined() {
-    const decoded = CodecUtil.fromBase64JSON(undefined);
     assert.strictEqual(decoded, undefined);
   }
 

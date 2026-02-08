@@ -17,8 +17,8 @@ const pending = new Set<Function>([]);
 
 /**
  * Initialize the meta data for a function/class
- * @param fn Class
- * @param `file` Filename
+ * @param input Class or function to register
+ * @param [module, relativePath] File location
  * @param `hash` Hash of class contents
  * @param `line` Line number in source
  * @param `methods` Methods and their hashes
@@ -26,41 +26,41 @@ const pending = new Set<Function>([]);
  * @private
  */
 export function registerFunction(
-  fn: Function, [pkg, pth]: [string, string], tag: FunctionMetadataTag,
+  input: Function, [module, relativePath]: [string, string], tag: FunctionMetadataTag,
   methods?: Record<string, FunctionMetadataTag>, abstract?: boolean,
 ): void {
-  const modulePath = ManifestModuleUtil.withoutSourceExtension(pth);
+  const modulePath = ManifestModuleUtil.withoutSourceExtension(relativePath);
 
   const metadata: FunctionMetadata = {
-    id: (fn.name ? `${pkg}:${modulePath}#${fn.name}` : `${pkg}:${modulePath}`),
-    import: `${pkg}/${pth}`,
-    module: pkg,
+    id: (input.name ? `${module}:${modulePath}#${input.name}` : `${module}:${modulePath}`),
+    import: `${module}/${relativePath}`,
+    module,
     modulePath,
     ...tag,
     methods,
     abstract,
     class: methods !== undefined
   };
-  pending.add(fn);
-  Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [MetadataSymbol]: { value: metadata } });
+  pending.add(input);
+  Object.defineProperties(input, { Ⲑid: { value: metadata.id }, [MetadataSymbol]: { value: metadata } });
 }
 
 /**
  * Flush all pending function registers
  */
 export function flushPendingFunctions(): Function[] {
-  const fns = [...pending];
+  const functions = [...pending];
   pending.clear();
-  return fns;
+  return functions;
 }
 
 /**
  * Read metadata
  */
-export function describeFunction(fn: Function): FunctionMetadata;
-export function describeFunction(fn?: Function): FunctionMetadata | undefined {
-  const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = fn;
-  return _fn?.[MetadataSymbol];
+export function describeFunction(input: Function): FunctionMetadata;
+export function describeFunction(input?: Function): FunctionMetadata | undefined {
+  const resolved: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = input;
+  return resolved?.[MetadataSymbol];
 }
 
 const foreignTypeRegistry = new Map<string, Function>();

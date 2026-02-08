@@ -144,9 +144,9 @@ export class TransformerState implements State {
   /**
    * Import a decorator, generally to handle erasure
    */
-  importDecorator(pth: string, name: string): ts.PropertyAccessExpression | undefined {
-    if (!this.#decorators.has(`${pth}:${name}`)) {
-      const ref = this.#imports.importFile(pth);
+  importDecorator(location: string, name: string): ts.PropertyAccessExpression | undefined {
+    if (!this.#decorators.has(`${location}:${name}`)) {
+      const ref = this.#imports.importFile(location);
       const identifier = this.factory.createIdentifier(name);
       this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.identifier, identifier));
     }
@@ -156,8 +156,8 @@ export class TransformerState implements State {
   /**
    * Create a decorator to add functionality to a declaration
    */
-  createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]): ts.Decorator {
-    this.importDecorator(pth, name);
+  createDecorator(location: string, name: string, ...contents: (ts.Expression | undefined)[]): ts.Decorator {
+    this.importDecorator(location, name);
     return CoreUtil.createDecorator(this.factory, this.#decorators.get(name)!, ...contents);
   }
 
