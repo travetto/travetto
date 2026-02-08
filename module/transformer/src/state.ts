@@ -144,9 +144,9 @@ export class TransformerState implements State {
   /**
    * Import a decorator, generally to handle erasure
    */
-  importDecorator(pth: string, name: string): ts.PropertyAccessExpression | undefined {
-    if (!this.#decorators.has(`${pth}:${name}`)) {
-      const ref = this.#imports.importFile(pth);
+  importDecorator(location: string, name: string): ts.PropertyAccessExpression | undefined {
+    if (!this.#decorators.has(`${location}:${name}`)) {
+      const ref = this.#imports.importFile(location);
       const identifier = this.factory.createIdentifier(name);
       this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.identifier, identifier));
     }
@@ -156,8 +156,8 @@ export class TransformerState implements State {
   /**
    * Create a decorator to add functionality to a declaration
    */
-  createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]): ts.Decorator {
-    this.importDecorator(pth, name);
+  createDecorator(location: string, name: string, ...contents: (ts.Expression | undefined)[]): ts.Decorator {
+    this.importDecorator(location, name);
     return CoreUtil.createDecorator(this.factory, this.#decorators.get(name)!, ...contents);
   }
 
@@ -281,14 +281,29 @@ export class TransformerState implements State {
   }
 
   /**
+   * Gets the module identifier target
+   */
+  getModuleIdentifierTarget(): [string | undefined, string] {
+    const entry = this.#resolver.getFileImport(this.source.fileName);
+    return [entry?.module, entry?.relativeFile ?? ''];
+  }
+
+  /**
+   * Build a class identifier string
+   */
+  buildClassId(text: string): string {
+    const [module, source] = this.getModuleIdentifierTarget();
+    return `${module}:${source}#${text}`;
+  }
+
+  /**
    * Get filename identifier, regardless of module system
    */
   getModuleIdentifier(): ts.Expression {
     if (this.#moduleIdentifier === undefined) {
       this.#moduleIdentifier = this.factory.createUniqueName('Δm');
-      const entry = this.#resolver.getFileImport(this.source.fileName);
       const declaration = this.factory.createVariableDeclaration(this.#moduleIdentifier, undefined, undefined,
-        this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
+        this.fromLiteral(this.getModuleIdentifierTarget())
       );
       this.addStatements([
         this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([declaration], ts.NodeFlags.Const))
@@ -403,30 +418,40 @@ export class TransformerState implements State {
   /**
    * Produce a foreign target type
    */
-  getForeignTarget(type: ForeignType): ts.Expression {
+  getForeignTarget(typeOrClassId: ForeignType | string): ts.Expression {
     const file = this.importFile(FOREIGN_TYPE_REGISTRY_FILE);
     return this.factory.createCallExpression(this.createAccess(
       file.identifier,
       this.factory.createIdentifier('foreignType'),
     ), [], [
-      this.fromLiteral(type.classId)
+      this.fromLiteral(typeof typeOrClassId === 'string' ? typeOrClassId : typeOrClassId.classId)
     ]);
   }
 
   /**
    * Return a concrete type the given type of a node
    */
-  getConcreteType(node: ts.Node): ts.Expression {
+  getConcreteType(node: ts.Node, fallback?: ts.Expression): ts.Expression {
     const type = this.resolveType(node);
-
-    if (type.key === 'managed') {
-      return this.getOrImport(type);
-    } else if (type.key === 'foreign') {
-      return this.getForeignTarget(type);
-    } else {
-      const file = node.getSourceFile().fileName;
-      const source = this.getFileImportName(file);
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${type.key}: ${source}`);
+    try {
+      if (type.key === 'managed') {
+        return this.getOrImport(type);
+      } else if (type.key === 'foreign') {
+        return this.getForeignTarget(type);
+      } else {
+        const targetId = this.buildClassId(node.getText());
+        if (this.#resolver.isKnownFile(node.getSourceFile().fileName)) {
+          return this.getForeignTarget(targetId);
+        } else {
+          throw new Error(`Unable to import non - external type: ${node.getText()} ${type.key}: ${targetId} `);
+        }
+      }
+    } catch (err) {
+      if (fallback) {
+        return fallback;
+      } else {
+        throw err;
+      }
     }
   }
 

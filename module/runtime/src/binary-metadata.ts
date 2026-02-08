@@ -2,14 +2,10 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createReadStream, ReadStream } from 'node:fs';
-import { Readable } from 'node:stream';
 
 import { BinaryUtil, type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType } from './binary.ts';
-import { hasFunction } from './types.ts';
 import { AppError } from './error.ts';
 import { CodecUtil } from './codec.ts';
-
-const isReadable = hasFunction<Readable>('pipe');
 
 type BlobInput = BinaryType | (() => (BinaryType | Promise<BinaryType>));
 
@@ -72,11 +68,11 @@ export class BinaryMetadataUtil {
     const hash = crypto.createHash(hashAlgorithm).setEncoding(outputEncoding);
 
     if (typeof input === 'string') {
-      input = Buffer.from(input, 'utf8');
+      input = CodecUtil.fromUTF8String(input);
     }
 
     if (BinaryUtil.isBinaryArray(input)) {
-      hash.update(BinaryUtil.arrayToBuffer(input));
+      hash.update(BinaryUtil.binaryArrayToBuffer(input));
       return hash.digest(outputEncoding).substring(0, length);
     } else {
       return BinaryUtil.pipeline(input, hash).then(() =>
@@ -112,7 +108,7 @@ export class BinaryMetadataUtil {
       metadata.contentEncoding ??= input.readableEncoding!;
       metadata.size ??= (await fs.stat(location)).size;
       metadata.hash ??= await this.hash(createReadStream(location), { hashAlgorithm: 'sha256' });
-    } else if (isReadable(input)) {
+    } else if (input && typeof input === 'object' && 'readableEncoding' in input && typeof input.readableEncoding === 'string') {
       metadata.contentEncoding ??= input.readableEncoding!;
     }
 
@@ -131,7 +127,7 @@ export class BinaryMetadataUtil {
       type: { get() { return metadata.contentType; } },
       name: { get() { return metadata.filename; } },
       arrayBuffer: { value: () => inputFn().then(BinaryUtil.toBuffer).then(data => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)) },
-      stream: { value: () => Readable.toWeb(BinaryUtil.toReadable(BinaryUtil.toSynchronous(input))) },
+      stream: { value: () => BinaryUtil.toReadableStream(BinaryUtil.toSynchronous(input)) },
       bytes: { value: () => inputFn().then(BinaryUtil.toBuffer) },
       text: { value: () => inputFn().then(BinaryUtil.toBuffer).then(CodecUtil.toUTF8String) },
       slice: {

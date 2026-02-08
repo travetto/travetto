@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Body, Controller, Delete, Get, Post, Put } from '@travetto/web';
 import { Specifier } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { BinaryUtil, CodecUtil, Util } from '@travetto/runtime';
+import { BinaryUtil, CodecUtil, Util, type BinaryArray } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
@@ -37,7 +37,7 @@ export class UserController {
   }
 
   @Put('/upload')
-  async uploadFun(@Body() @Specifier('file') data: Buffer, multiplier = 1): Promise<number> {
+  async uploadFun(@Body() @Specifier('file') data: BinaryArray, multiplier = 1): Promise<number> {
     return data.byteLength * multiplier;
   }
 }

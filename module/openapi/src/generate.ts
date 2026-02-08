@@ -4,7 +4,7 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import { type EndpointConfig, type ControllerConfig, type EndpointParameterConfig, type ControllerVisitor, HTTP_METHODS } from '@travetto/web';
-import { AppError, BinaryUtil, type Class, describeFunction } from '@travetto/runtime';
+import { AppError, type Class, describeFunction } from '@travetto/runtime';
 import {
   type SchemaFieldConfig, type SchemaClassConfig, SchemaNameResolver,
   type SchemaInputConfig, SchemaRegistryIndex, type SchemaBasicType, type SchemaParameterConfig
@@ -237,7 +237,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
     if (!body || body.type === undefined) {
       return { content: {}, description: '' };
-    } else if (BinaryUtil.isBinaryConstructor(body.type)) {
+    } else if (body.binary) {
       return {
         content: {
           [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } },

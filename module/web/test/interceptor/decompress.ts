@@ -134,7 +134,7 @@ class DecompressInterceptorSuite {
     const data = BinaryUtil.makeBinaryArray(1000, 'A');
 
     const response = await this.decompress({
-      data: BinaryUtil.toReadable(data),
+      data: BinaryUtil.toReadableStream(data),
       encoding: 'gzip',
     });
     assert(response);
@@ -150,7 +150,7 @@ class DecompressInterceptorSuite {
     await assert.rejects(
       () =>
         this.decompress({
-          data: BinaryUtil.toReadable(data),
+          data: BinaryUtil.toReadableStream(data),
           encoding: castTo('google'),
         }),
       /Unsupported.*google/

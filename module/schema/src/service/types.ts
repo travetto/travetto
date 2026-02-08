@@ -20,6 +20,10 @@ export type SchemaBasicType = {
    */
   array?: boolean;
   /**
+   * Is the type a binary type
+   */
+  binary?: boolean;
+  /**
    * The class tied to the type
    */
   type: Class & {

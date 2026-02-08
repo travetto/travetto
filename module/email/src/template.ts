@@ -30,7 +30,7 @@ export class MustacheInterpolator implements MailInterpolator {
     const promises: Promise<string>[] = [];
     template = template.replace(/[{]{2,3}>\s+(\S+)([.]html)?\s*[}]{2,3}/g, (all: string, name: string) => {
       promises.push(
-        RuntimeResources.read(`${name}.html`) // Ensure html file
+        RuntimeResources.readText(`${name}.html`) // Ensure html file
           .then(contents => this.resolveNested(contents))
       );
       return `$%${promises.length - 1}%$`;

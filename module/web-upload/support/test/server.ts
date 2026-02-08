@@ -71,7 +71,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const uploads = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
     const response = await this.request<{ hash: string }>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload/all' } });
 
-    const file = await this.fixture.readStream('/logo.png');
+    const file = await this.fixture.readBinaryStream('/logo.png');
     assert(response.body?.hash === await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' }));
   }
 
@@ -81,7 +81,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const sent = castTo<Blob>(uploads.get('file'));
     const response = await this.request<{ hash: string }>({ context: { httpMethod: 'POST', path: '/test/upload' }, body: sent });
 
-    const file = await this.fixture.readStream('/logo.png');
+    const file = await this.fixture.readBinaryStream('/logo.png');
     assert(response.body?.hash === await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' }));
   }
 
@@ -90,7 +90,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const response = await this.request<{ hash: string }>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload' } });
 
-    const file = await this.fixture.readStream('/logo.png');
+    const file = await this.fixture.readBinaryStream('/logo.png');
     assert(response.body?.hash === await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' }));
   }
 
@@ -106,7 +106,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
         httpMethod: 'POST', path: '/test/upload/all-named'
       }
     });
-    const file = await this.fixture.readStream('/logo.png');
+    const file = await this.fixture.readBinaryStream('/logo.png');
     const hash = await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' });
 
     assert(response.body?.hash1 === hash);
@@ -136,10 +136,10 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     }, false);
     assert(response.context.httpStatusCode === 200);
 
-    const file1 = await this.fixture.readStream('/logo.gif');
+    const file1 = await this.fixture.readBinaryStream('/logo.gif');
     const hash1 = await BinaryMetadataUtil.hash(file1, { hashAlgorithm: 'sha256' });
 
-    const file2 = await this.fixture.readStream('/logo.png');
+    const file2 = await this.fixture.readBinaryStream('/logo.png');
     const hash2 = await BinaryMetadataUtil.hash(file2, { hashAlgorithm: 'sha256' });
 
     assert(response.body?.hash1 === hash1);
@@ -169,10 +169,10 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     }, false);
     assert(response.context.httpStatusCode === 200);
 
-    const file1 = await this.fixture.readStream('/asset.yml');
+    const file1 = await this.fixture.readBinaryStream('/asset.yml');
     const hash1 = await BinaryMetadataUtil.hash(file1, { hashAlgorithm: 'sha256' });
 
-    const file2 = await this.fixture.readStream('/logo.png');
+    const file2 = await this.fixture.readBinaryStream('/logo.png');
     const hash2 = await BinaryMetadataUtil.hash(file2, { hashAlgorithm: 'sha256' });
 
     assert(response.body?.hash1 === hash1);

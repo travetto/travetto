@@ -1,7 +1,20 @@
 import type mongo from 'mongodb';
 
-import { type TimeSpan, Runtime, RuntimeResources, BinaryUtil, CodecUtil } from '@travetto/runtime';
+import { type TimeSpan, Runtime, RuntimeResources, BinaryUtil, CodecUtil, type BinaryType, type BinaryArray } from '@travetto/runtime';
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
+
+const readCert = async (input: BinaryType | string): Promise<BinaryArray> => {
+  if (BinaryUtil.isBinaryType(input)) {
+    return BinaryUtil.toBinaryArray(input);
+  } else {
+    try {
+      return await RuntimeResources.readBinaryArray(input);
+    } catch {
+      return CodecUtil.fromUTF8String(input);
+    }
+  }
+};
 
 /**
  * Mongo model config
@@ -39,7 +52,10 @@ export class MongoModelConfig {
   /**
    * Mongo client options
    */
-  options: mongo.MongoClientOptions = {};
+  @Field({ type: Object })
+  options: Omit<mongo.MongoClientOptions, 'cert'> & {
+    cert?: | Buffer | string | BinaryType | (BinaryType | Buffer | string)[];
+  } = {};
   /**
    * Allow storage modification at runtime
    */
@@ -86,11 +102,8 @@ export class MongoModelConfig {
     const options = this.options;
     if (options.ssl) {
       if (options.cert) {
-        const items = [options.cert].flat(2);
-        options.cert = await Promise.all(items.map(input =>
-          BinaryUtil.isBinaryType(input) ? BinaryUtil.toBuffer(input) :
-            RuntimeResources.resolve(input).catch(() => CodecUtil.fromUTF8String(input))
-        ));
+        options.cert = (await Promise.all([options.cert].flat(2).map(readCert)))
+          .map(BinaryUtil.binaryArrayToBuffer);
       }
       if (options.tlsCertificateKeyFile) {
         options.tlsCertificateKeyFile = await RuntimeResources.resolve(options.tlsCertificateKeyFile);
@@ -116,7 +129,12 @@ export class MongoModelConfig {
     const hosts = this.hosts!
       .map(host => (this.srvRecord || host.includes(':')) ? host : `${host}:${this.port ?? 27017}`)
       .join(',');
-    const optionString = new URLSearchParams(Object.entries(this.options)).toString();
+    const optionString = new URLSearchParams(
+      Object.entries(this.options)
+        .filter((pair): pair is [string, string | number | boolean] => ['string', 'number', 'boolean'].includes(typeof pair[1]))
+        .map(([k, v]) => [k, `${v}`])
+    )
+      .toString();
     let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(part => !!part).join(':')}@`;

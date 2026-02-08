@@ -59,17 +59,17 @@ export class AssertUtil {
       return { import: importLocation, line: 1 };
     }
 
-    const pth = best.trim().split(/\s+/g).slice(1).pop()!;
-    if (!pth) {
+    const location = best.trim().split(/\s+/g).slice(1).pop()!;
+    if (!location) {
       return { import: importLocation, line: 1 };
     }
 
-    const [file, lineNo] = pth
+    const [file, lineNumber] = location
       .replace(/[()]/g, '')
       .replace(/^[A-Za-z]:/, '')
       .split(':');
 
-    let line = parseInt(lineNo, 10);
+    let line = parseInt(lineNumber, 10);
     if (Number.isNaN(line)) {
       line = -1;
     }

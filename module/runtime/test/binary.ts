@@ -4,20 +4,30 @@ import { ReadableStream } from 'node:stream/web';
 import { buffer } from 'node:stream/consumers';
 
 import { Test, Suite } from '@travetto/test';
-import { BinaryUtil } from '@travetto/runtime';
+import {
+  BinaryUtil, toConcrete, type BinaryArray,
+  type BinaryStream, type BinaryType, type BinaryContainer
+} from '@travetto/runtime';
 
 @Suite()
 export class BinaryUtilTest {
 
   @Test()
   verifyIsBinaryConstructor() {
-    assert(BinaryUtil.isBinaryConstructor(Readable));
-    assert(BinaryUtil.isBinaryConstructor(Buffer));
-    assert(BinaryUtil.isBinaryConstructor(Blob));
-    assert(BinaryUtil.isBinaryConstructor(File));
-    assert(BinaryUtil.isBinaryConstructor(Uint8Array));
-    assert(!BinaryUtil.isBinaryConstructor(String));
-    assert(!BinaryUtil.isBinaryConstructor(Number));
+    assert(BinaryUtil.isBinaryTypeReference(Readable));
+    assert(BinaryUtil.isBinaryTypeReference(Buffer));
+    assert(BinaryUtil.isBinaryTypeReference(Blob));
+    assert(BinaryUtil.isBinaryTypeReference(File));
+    assert(BinaryUtil.isBinaryTypeReference(Uint8Array));
+    assert(BinaryUtil.isBinaryTypeReference(Uint16Array));
+    assert(BinaryUtil.isBinaryTypeReference(Uint32Array));
+    assert(BinaryUtil.isBinaryTypeReference(Uint8ClampedArray));
+    assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryArray>()));
+    assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryStream>()));
+    assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryContainer>()));
+    assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryType>()));
+    assert(!BinaryUtil.isBinaryTypeReference(String));
+    assert(!BinaryUtil.isBinaryTypeReference(Number));
   }
 
   @Test()
@@ -69,12 +79,18 @@ export class BinaryUtilTest {
   @Test()
   verifyArrayToBuffer() {
     const input = new Uint8Array([1, 2, 3]);
-    const buf = BinaryUtil.arrayToBuffer(input);
+    const buf = BinaryUtil.binaryArrayToBuffer(input);
     assert(Buffer.isBuffer(buf));
     assert(buf.length === 3);
     assert(buf[0] === 1);
 
-    const buf2 = BinaryUtil.arrayToBuffer(Buffer.from([4, 5]));
+    const input32 = new Uint32Array([2 ** 31 - 1]);
+    const buf32 = BinaryUtil.binaryArrayToBuffer(input32);
+    assert(Buffer.isBuffer(buf32));
+    assert(buf32.length === input32.byteLength);
+    assert(buf32.equals(Buffer.from(input32.buffer)));
+
+    const buf2 = BinaryUtil.binaryArrayToBuffer(Buffer.from([4, 5]));
     assert(Buffer.isBuffer(buf2));
     assert(buf2[0] === 4);
 
@@ -82,7 +98,7 @@ export class BinaryUtilTest {
     const view = new Uint8Array(ab);
     view[0] = 6;
     view[1] = 7;
-    const buf3 = BinaryUtil.arrayToBuffer(ab);
+    const buf3 = BinaryUtil.binaryArrayToBuffer(ab);
     assert(Buffer.isBuffer(buf3));
     assert(buf3[0] === 6);
   }
@@ -120,14 +136,14 @@ export class BinaryUtilTest {
   async verifyToReadable() {
     // Buffer
     const buf = Buffer.from('hello');
-    const r1 = BinaryUtil.toReadable(buf);
-    assert(r1 instanceof Readable);
+    const r1 = BinaryUtil.toReadableStream(buf);
+    assert(r1 instanceof ReadableStream);
     assert((await buffer(r1)).toString() === 'hello');
 
     // Blob
     const blob = new Blob(['world']);
-    const r2 = BinaryUtil.toReadable(blob);
-    assert(r2 instanceof Readable);
+    const r2 = BinaryUtil.toReadableStream(blob);
+    assert(r2 instanceof ReadableStream);
     assert((await buffer(r2)).toString() === 'world');
 
     // ReadableStream
@@ -137,8 +153,8 @@ export class BinaryUtilTest {
         controller.close();
       }
     });
-    const r3 = BinaryUtil.toReadable(rs);
-    assert(r3 instanceof Readable);
+    const r3 = BinaryUtil.toReadableStream(rs);
+    assert(r3 instanceof ReadableStream);
     assert((await buffer(r3)).toString() === 'A');
   }
 
@@ -146,7 +162,7 @@ export class BinaryUtilTest {
   async verifyToBinaryStream() {
     const input = Buffer.from('test');
     const stream = BinaryUtil.toBinaryStream(input);
-    assert(stream instanceof Readable);
+    assert(stream instanceof ReadableStream);
 
     const stream2 = Readable.from('test2');
     assert(BinaryUtil.toBinaryStream(stream2) === stream2);
@@ -183,7 +199,7 @@ export class BinaryUtilTest {
     const u8 = new Uint8Array([1, 2, 3, 4, 5]);
     const sliced = BinaryUtil.sliceByteArray(u8, 1, 3);
     assert(sliced.byteLength === 2);
-    const resolved = BinaryUtil.arrayToBuffer(sliced);
+    const resolved = BinaryUtil.binaryArrayToBuffer(sliced);
     assert(resolved[0] === 2);
     assert(resolved[1] === 3);
   }

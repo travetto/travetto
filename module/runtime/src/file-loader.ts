@@ -1,9 +1,9 @@
 import { createReadStream } from 'node:fs';
-import type { Readable } from 'node:stream';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { AppError } from './error.ts';
+import { BinaryUtil, type BinaryArray, type BinaryStream } from './binary.ts';
 
 /**
  * File loader that will search for files across the provided search paths
@@ -38,23 +38,30 @@ export class FileLoader {
   }
 
   /**
-   * Read a file, after resolving the path
+   * Read a file as utf8 text, after resolving the path
    * @param relativePath The path to read
    */
-  async read(relativePath: string, binary?: false): Promise<string>;
-  async read(relativePath: string, binary: true): Promise<Buffer<ArrayBuffer>>;
-  async read(relativePath: string, binary = false): Promise<string | Buffer<ArrayBuffer>> {
+  async readText(relativePath: string): Promise<string> {
     const file = await this.resolve(relativePath);
-    return fs.readFile(file, binary ? undefined : 'utf8');
+    return fs.readFile(file, 'utf8');
+  }
+
+  /**
+   * Read a file as a byte array, after resolving the path
+   * @param relativePath The path to read
+   */
+  async readBinaryArray(relativePath: string): Promise<BinaryArray> {
+    const file = await this.resolve(relativePath);
+    return fs.readFile(file);
   }
 
   /**
    * Read a file as a stream
    * @param relativePath The path to read
    */
-  async readStream(relativePath: string, binary = true): Promise<Readable> {
+  async readBinaryStream(relativePath: string): Promise<BinaryStream> {
     const file = await this.resolve(relativePath);
-    return createReadStream(file, { encoding: binary ? undefined : 'utf8' });
+    return createReadStream(file);
   }
 
   /**
@@ -62,7 +69,7 @@ export class FileLoader {
    * @param relativePath The path to read
    */
   async readFile(relativePath: string): Promise<File> {
-    const buffer = await this.read(relativePath, true);
+    const buffer = BinaryUtil.binaryArrayToBuffer(await this.readBinaryArray(relativePath));
     return new File([buffer], path.basename(relativePath));
   }
 }

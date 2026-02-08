@@ -22,6 +22,16 @@ declare global {
    */
   interface File { }
 
+  /**
+   * @concrete node:stream/web#ReadableStream
+   */
+  interface ReadableStream { }
+
+  /**
+   * @concrete node:buffer#Buffer
+   */
+  interface Buffer { }
+
   namespace NodeJS {
     /**
      * @concrete node:stream#Readable
@@ -30,9 +40,28 @@ declare global {
   }
 }
 
+declare module 'buffer' {
+  /**
+   * @concrete node:buffer#Blob
+   */
+  interface Blob { }
+
+  /**
+   * @concrete node:buffer#File
+   */
+  interface File { }
+}
+
 declare module 'stream' {
   /**
    * @concrete node:stream#Readable
    */
   interface Readable { }
+}
+
+declare module 'stream/web' {
+  /**
+   * @concrete node:stream/web#ReadableStream
+   */
+  interface ReadableStream { }
 }

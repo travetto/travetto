@@ -18,6 +18,6 @@ class FileLoaderSuite {
     assert(loc.startsWith(Runtime.mainSourcePath));
 
     const stat = await fs.stat(loc);
-    assert((await loader.read('logo.png', true)).byteLength === stat.size);
+    assert((await loader.readBinaryArray('logo.png')).byteLength === stat.size);
   }
 }

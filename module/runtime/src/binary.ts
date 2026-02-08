@@ -2,25 +2,53 @@ import { PassThrough, Readable, type Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
-import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
+import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array, isUint8ClampedArray } from 'node:util/types';
 
-import { type Any, castTo, type Class, hasFunction } from './types.ts';
+import { type Any, castTo, hasFunction, toConcrete } from './types.ts';
 
-const BINARY_CONSTRUCTORS: Function[] = [castTo(Readable), Buffer, Blob, castTo(ReadableStream), ArrayBuffer, Uint8Array, Uint16Array, Uint32Array];
-export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Buffer<ArrayBuffer> | ArrayBuffer;
+/**
+ * Binary Array
+ * @concrete
+ */
+export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Uint8ClampedArray | Buffer<ArrayBuffer> | ArrayBuffer;
+/**
+ * Binary Stream
+ * @concrete
+ */
 export type BinaryStream = Readable | ReadableStream | AsyncIterable<BinaryArray>;
+/**
+ * Binary Container
+ * @concrete
+ */
 export type BinaryContainer = Blob | File;
+/**
+ * Binary Type
+ * @concrete
+ */
 export type BinaryType = BinaryArray | BinaryStream | BinaryContainer;
 
-const BINARY_CONSTRUCTOR_SET = new Set<Function>(BINARY_CONSTRUCTORS);
+const BINARY_CONSTRUCTOR_SET = new Set<unknown>([
+  Readable, Buffer, Blob, ReadableStream, ArrayBuffer, Uint8Array,
+  Uint16Array, Uint32Array, Uint8ClampedArray
+]);
+
+let BINARY_REFS: Set<unknown> | undefined;
+const isBinaryTypeReference = (value: unknown): boolean =>
+  BINARY_CONSTRUCTOR_SET.has(value) ||
+  BINARY_CONSTRUCTOR_SET.has(Object.getPrototypeOf(value)) ||
+  (BINARY_REFS ||= new Set<unknown>([
+    toConcrete<BinaryType>(),
+    toConcrete<BinaryStream>(),
+    toConcrete<BinaryArray>(),
+    toConcrete<BinaryContainer>(),
+  ])).has(value);
 
 const isReadable = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
 const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
   !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
-const isBinaryConstructor = (value: Function | Class): boolean => BINARY_CONSTRUCTOR_SET.has(value) || BINARY_CONSTRUCTOR_SET.has(Object.getPrototypeOf(value));
 const isBinaryArray = (value: unknown): value is BinaryArray =>
-  isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value);
+  isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value) || isUint8ClampedArray(value);
 const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
 const isBinaryContainer = (value: unknown): value is BinaryContainer => value instanceof Blob;
 const isBinaryType = (value: unknown): value is BinaryType => !!value && (isBinaryArray(value) || isBinaryStream(value) || isBinaryContainer(value));
@@ -30,8 +58,6 @@ const isBinaryType = (value: unknown): value is BinaryType => !!value && (isBina
  */
 export class BinaryUtil {
 
-  /** Is the provided value a binary constructor  */
-  static isBinaryConstructor = isBinaryConstructor;
   /** Is the input a byte array */
   static isBinaryArray = isBinaryArray;
   /** Is the input a byte stream */
@@ -40,35 +66,35 @@ export class BinaryUtil {
   static isBinaryContainer = isBinaryContainer;
   /** Is value a binary type  */
   static isBinaryType = isBinaryType;
+  /** Is a binary reference */
+  static isBinaryTypeReference = isBinaryTypeReference;
 
   /** Convert binary array to an explicit buffer  */
-  static arrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {
+  static binaryArrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {
     if (Buffer.isBuffer(input)) {
       return castTo(input);
     } else if (isTypedArray(input)) {
-      return Buffer.from(input);
+      return castTo(Buffer.from(input.buffer));
     } else {
       return Buffer.from(input);
     }
   }
 
   /** Convert input to a binary array  */
-  static async toBinaryArray(input: BinaryType | undefined): Promise<BinaryArray> {
+  static async toBinaryArray(input: BinaryType): Promise<BinaryArray> {
     if (isBinaryArray(input)) {
       return input;
     } else if (isBinaryStream(input)) {
       return consumers.buffer(input);
-    } else if (isBinaryContainer(input)) {
-      return input.arrayBuffer();
     } else {
-      return BinaryUtil.makeBinaryArray(0);
+      return input.arrayBuffer();
     }
   }
 
   /** Convert input to a buffer  */
   static async toBuffer(input: BinaryType): Promise<Buffer<ArrayBuffer>> {
     const bytes = await BinaryUtil.toBinaryArray(input);
-    return BinaryUtil.arrayToBuffer(bytes);
+    return BinaryUtil.binaryArrayToBuffer(bytes);
   }
 
   /** Convert input to a readable stream  */
@@ -76,7 +102,7 @@ export class BinaryUtil {
     if (isReadable(input)) {
       return input;
     } else if (isBinaryArray(input)) {
-      return Readable.from(BinaryUtil.arrayToBuffer(input));
+      return Readable.from(BinaryUtil.binaryArrayToBuffer(input));
     } else if (isBinaryContainer(input)) {
       return Readable.fromWeb(input.stream());
     } else if (isReadableStream(input)) {
@@ -86,25 +112,38 @@ export class BinaryUtil {
     }
   }
 
+  /** Convert input to a binary ReadableStream  */
+  static toReadableStream(input: BinaryType): ReadableStream {
+    if (isReadableStream(input)) {
+      return input;
+    } else if (isReadable(input)) {
+      return Readable.toWeb(input);
+    } else if (isBinaryContainer(input)) {
+      return input.stream();
+    } else {
+      return Readable.toWeb(BinaryUtil.toReadable(input));
+    }
+  }
+
   /** Convert input to a binary stream  */
   static toBinaryStream(input: BinaryType): BinaryStream {
     if (isBinaryStream(input)) {
       return input;
     } else {
-      return BinaryUtil.toReadable(input);
+      return BinaryUtil.toReadableStream(input);
     }
   }
 
   /** Read chunk, default to toString if type is unknown  */
   static readChunk(chunk: Any, encoding?: BufferEncoding | null): BinaryArray {
-    return isBinaryArray(chunk) ? BinaryUtil.arrayToBuffer(chunk) :
+    return isBinaryArray(chunk) ? BinaryUtil.binaryArrayToBuffer(chunk) :
       typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
         Buffer.from(`${chunk}`, 'utf8');
   }
 
   /** Combine binary arrays  */
   static combineBinaryArrays(arrays: BinaryArray[]): BinaryArray {
-    return Buffer.concat(arrays.map(x => BinaryUtil.arrayToBuffer(x)));
+    return Buffer.concat(arrays.map(x => BinaryUtil.binaryArrayToBuffer(x)));
   }
 
   /** Agnostic slice of binary array  */

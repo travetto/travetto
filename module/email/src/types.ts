@@ -1,9 +1,6 @@
 import type { Url } from 'node:url';
-import type { Readable } from 'node:stream';
 
-import type { FileLoader } from '@travetto/runtime';
-
-type AttachmentInput = string | Readable | Buffer;
+import type { BinaryType, FileLoader } from '@travetto/runtime';
 
 /**
  * An address
@@ -16,15 +13,15 @@ export interface EmailAddress {
 /**
  * An attachment for the email
  */
-interface AttachmentLike {
-  content?: AttachmentInput;
+interface AttachmentLike<B extends BinaryType = BinaryType> {
+  content?: B | string;
   path?: string | Url;
 }
 
 /**
  * A full attachment
  */
-export interface EmailAttachment extends AttachmentLike {
+export interface EmailAttachment<B extends BinaryType = BinaryType> extends AttachmentLike<B> {
   filename?: string | false;
   cid?: string;
   encoding?: string;
@@ -32,7 +29,7 @@ export interface EmailAttachment extends AttachmentLike {
   contentTransferEncoding?: false | '7bit' | 'base64' | 'quoted-printable';
   contentDisposition?: 'attachment' | 'inline';
   headers?: Record<string, string | string[]>;
-  raw?: AttachmentInput | AttachmentLike;
+  raw?: B | string;
 }
 
 type EmailContentType = 'html' | 'text' | 'subject';
@@ -44,7 +41,7 @@ export type EmailIdentityList = EmailIdentity | EmailIdentity[];
  * Full message options
  * @concrete
  */
-export interface EmailOptions {
+export interface EmailOptions<B extends BinaryType = BinaryType> {
   html: string;
   text?: string;
   subject: string;
@@ -61,8 +58,8 @@ export interface EmailOptions {
   inReplyTo?: EmailIdentity;
   references?: string | string[];
   headers?: Record<string, string | string[]>;
-  attachments?: EmailAttachment[];
-  alternatives?: EmailAttachment[];
+  attachments?: EmailAttachment<B>[];
+  alternatives?: EmailAttachment<B>[];
   messageId?: string;
   date?: Date | string;
   encoding?: string;

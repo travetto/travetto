@@ -69,7 +69,7 @@ class BodyInterceptorSuite {
     const interceptor = await DependencyRegistryIndex.getInstance(BodyInterceptor);
     const config = { ...interceptor.config, applies: true };
 
-    const stream = BinaryUtil.toReadable(BinaryUtil.makeBinaryArray(1000, 'A'));
+    const stream = BinaryUtil.toReadableStream(BinaryUtil.makeBinaryArray(1000, 'A'));
     const request = new WebRequest({
       context: {
         path: '/',
@@ -89,7 +89,7 @@ class BodyInterceptorSuite {
 
     const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.byteLength === 1000);
-    assert(!BinaryUtil.arrayToBuffer(responseBuffer).some(x => x !== 65));
+    assert(!BinaryUtil.binaryArrayToBuffer(responseBuffer).some(x => x !== 65));
   }
 
   @Test()
@@ -98,8 +98,8 @@ class BodyInterceptorSuite {
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
-    const koreanInput = await fixtures.read('/korean.euckr.txt', true);
-    const koreanOutput = await fixtures.read('/korean.utf8.txt', true);
+    const koreanInput = await fixtures.readBinaryArray('/korean.euckr.txt');
+    const koreanOutput = await fixtures.readBinaryArray('/korean.utf8.txt');
 
     const request = new WebRequest({
       context: {
@@ -128,7 +128,7 @@ class BodyInterceptorSuite {
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
-    const koreanInput = await fixtures.read('/korean.euckr.txt', true);
+    const koreanInput = await fixtures.readBinaryArray('/korean.euckr.txt');
 
     const request = new WebRequest({
       context: {
@@ -157,7 +157,7 @@ class BodyInterceptorSuite {
     const config = { ...interceptor.config, applies: true };
 
     const fixtures = new TestFixtures();
-    const koreanInput = await fixtures.read('/korean.euckr.txt', true);
+    const koreanInput = await fixtures.readBinaryArray('/korean.euckr.txt');
 
     const request = new WebRequest({
       context: {
@@ -177,7 +177,7 @@ class BodyInterceptorSuite {
     });
 
     const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.byteLength === Buffer.from(koreanInput.toString('utf8')).byteLength);
+    assert(responseBuffer.byteLength === CodecUtil.fromUTF8String(koreanInput.toString('utf8')).byteLength);
   }
 
   @Test()

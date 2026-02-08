@@ -151,32 +151,32 @@ export class ManifestUtil {
    * Efficient lookup for path-based graphs
    */
   static lookupTrie<T>(
-    inputs: T[], getPath: (value: T) => string[], validateUnknown?: (pth: string[]) => boolean
-  ): (pth: string[]) => T | undefined {
-    type TrieNode = { value?: T, subs: Record<string, TrieNode> };
-    const root: TrieNode = { subs: {} };
+    inputs: T[], getPath: (value: T) => string[], validateUnknown?: (inputPath: string[]) => boolean
+  ): (inputPath: string[]) => T | undefined {
+    type TrieNode = { value?: T, subPaths: Record<string, TrieNode> };
+    const root: TrieNode = { subPaths: {} };
     for (const item of inputs) {
-      const pth = getPath(item);
+      const inputPath = getPath(item);
       let node = root;
-      for (const sub of pth) {
-        if (sub) {
-          node = node.subs[sub] ??= { subs: {} };
+      for (const subPath of inputPath) {
+        if (subPath) {
+          node = node.subPaths[subPath] ??= { subPaths: {} };
         }
       }
       node.value = item;
     }
 
-    return pth => {
+    return inputPath => {
       let node = root;
       let value = node.value;
-      let i = 0;
+      let index = 0;
 
-      for (const sub of pth) {
-        i += 1;
+      for (const subPath of inputPath) {
+        index += 1;
         if (node) {
-          node = node.subs[sub];
+          node = node.subPaths[subPath];
           value = node?.value ?? value;
-        } else if (validateUnknown && !node && !validateUnknown(pth.slice(0, i))) {
+        } else if (validateUnknown && !node && !validateUnknown(inputPath.slice(0, index))) {
           value = undefined;
           break;
         }

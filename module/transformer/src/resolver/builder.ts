@@ -43,7 +43,12 @@ const GLOBAL_COMPLEX: Record<string, Function> = {
 const UNDEFINED_GLOBAL = { undefined: 1, void: 1, null: 1 };
 const SIMPLE_NAMES: Record<string, string> = { String: 'string', Number: 'number', Boolean: 'boolean', Object: 'object' };
 const GLOBAL_SIMPLE: Record<string, Function> = {
-  RegExp, Date, Number, Boolean, String, Function, Object, Error,
+  RegExp, Date, Number, Boolean, String, Function, Object, Error, BigInt,
+  ArrayBuffer, SharedArrayBuffer,
+  Uint8Array, Uint16Array, Uint32Array,
+  Int8Array, Int16Array, Int32Array,
+  Uint8ClampedArray, BigInt64Array, BigUint64Array,
+  Float16Array, Float32Array, Float64Array,
   PromiseConstructor: Promise.constructor
 };
 
@@ -177,7 +182,7 @@ export const TypeBuilder: {
   literal: {
     build: (resolver, type) => {
       // Handle void/undefined
-      const name = resolver.getTypeAsString(type) ?? '';
+      const name = (resolver.getTypeAsString(type) ?? '').split('<')[0]; // Ensure we strip off any type arguments for lookup
       const complexName = CoreUtil.getSymbol(type)?.getName() ?? '';
 
       if (name in UNDEFINED_GLOBAL) {

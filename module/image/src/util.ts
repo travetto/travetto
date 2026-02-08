@@ -1,7 +1,6 @@
-import type { Readable } from 'node:stream';
 import type { Metadata, Sharp } from 'sharp';
 
-import { BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
+import { BinaryUtil, castTo, type BinaryStream, type BinaryType } from '@travetto/runtime';
 
 const VALID_EXTENSIONS = ['jpeg', 'jpg', 'png', 'avif', 'webp', 'gif', 'jxl'] as const;
 
@@ -71,7 +70,7 @@ export class ImageUtil {
   /**
    * Convert image as readable stream
    */
-  static async convert(image: BinaryType, options: ConvertOptions): Promise<Readable> {
+  static async convert(image: BinaryType, options: ConvertOptions): Promise<BinaryStream> {
     const builder = await this.#getBuilder(options);
     BinaryUtil.pipeline(image, builder);
     return builder;

@@ -1,5 +1,4 @@
 import { gunzipSync, brotliDecompressSync, inflateSync, createGunzip } from 'node:zlib';
-import { Readable } from 'node:stream';
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
@@ -27,7 +26,7 @@ class CompressInterceptorSuite {
 
     let data: BinaryType = CodecUtil.fromUTF8String('A'.repeat(size));
     if (stream) {
-      data = Readable.from(data);
+      data = BinaryUtil.toBinaryStream(data);
     }
 
     try {
