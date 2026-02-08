@@ -61,7 +61,7 @@ export class AcceptInterceptor implements WebInterceptor<AcceptConfig> {
       this.validate(request, config);
       return response = await next();
     } catch (error) {
-      throw response = await WebCommonUtil.catchResponse(error);
+      throw response = WebCommonUtil.catchResponse(error);
     } finally {
       response?.headers.setIfAbsent('Accept', config.types.join(','));
     }

@@ -13,7 +13,7 @@ export class ModelQueryCrudUtil {
    * Delete all expired
    */
   static async deleteExpired<T extends ModelType>(service: ModelQueryCrudSupport & ModelCrudSupport, cls: Class<T>): Promise<number> {
-    const expiry = await ModelRegistryIndex.getExpiryFieldName(cls);
+    const expiry = ModelRegistryIndex.getExpiryFieldName(cls);
     const count = await service.deleteByQuery<ModelType>(cls, {
       where: {
         [expiry]: {

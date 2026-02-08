@@ -101,7 +101,7 @@ export class BinaryMetadataUtil {
       }
     } else if (BinaryUtil.isBinaryArray(input)) {
       metadata.size ??= input.byteLength;
-      metadata.hash ??= await this.hash(input, { hashAlgorithm: 'sha256' });
+      metadata.hash ??= this.hash(input, { hashAlgorithm: 'sha256' });
     } else if (input instanceof ReadStream) {
       const location = input.path.toString();
       metadata.filename ??= path.basename(location);

@@ -108,15 +108,14 @@ export class VerifyTest {
   async verifyArrayOperationsWithEmpty() {
     for (const op of ['$in', '$nin', '$all', '$elemMatch']) {
 
-      assert.throws(() => {
+      await assert.rejects(async () =>
         QueryVerifier.verify(User, {
           where: {
             email: {
               [op]: []
             }
           }
-        });
-      }, /Validation Error/i);
+        }), /Validation Error/i);
     }
   }
 }

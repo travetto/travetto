@@ -66,7 +66,6 @@ export abstract class AuthSessionServerSuite {
   @WithAsyncContext()
   @Test()
   async testUnauthenticatedSession() {
-    await assert.throws(() => this.sessionContext.get(true), AuthenticationError);
-
+    assert.throws(() => this.sessionContext.get(true), AuthenticationError);
   }
 }

@@ -60,7 +60,7 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
     case 'manifest': {
       let manifest = await ManifestUtil.buildManifest(ctx);
       if (operation === 'manifest:production') {
-        manifest = await ManifestUtil.createProductionManifest(manifest);
+        manifest = ManifestUtil.createProductionManifest(manifest);
       }
       if (args[0]) {
         await ManifestUtil.writeManifestToFile(args[0], manifest);

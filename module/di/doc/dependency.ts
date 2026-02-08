@@ -2,7 +2,7 @@ import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class DependentService {
-  doWork() { }
+  async doWork() { }
 }
 
 export class CustomService {

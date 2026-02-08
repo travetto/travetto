@@ -134,7 +134,7 @@ export class ServiceRunner {
       if (operation === 'restart' || operation === 'start') {
         if (!await this.#hasImage()) {
           yield ['message', 'Starting image download'];
-          for await (const line of await this.#pullImage()) {
+          for await (const line of this.#pullImage()) {
             yield ['message', `Downloading: ${line}`];
           }
           yield ['message', 'Image download complete'];

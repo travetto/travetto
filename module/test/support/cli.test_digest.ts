@@ -19,7 +19,7 @@ export class TestDigestCommand {
 
   async main(globs: string[] = ['**/*']) {
     // Load all tests
-    for await (const imp of await RunUtil.getTestImports(globs)) {
+    for await (const imp of RunUtil.getTestImports(globs)) {
       try {
         await Runtime.importFrom(imp);
       } catch (error) {

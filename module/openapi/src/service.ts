@@ -79,7 +79,7 @@ export class OpenApiService {
 
       if (existsSync(this.apiSpecConfig.output)) {
         const existing = await BinaryMetadataUtil.hash(createReadStream(this.apiSpecConfig.output));
-        const toWrite = await BinaryMetadataUtil.hash(output);
+        const toWrite = BinaryMetadataUtil.hash(output);
 
         if (existing === toWrite) {
           console.debug('OpenAPI spec unchanged, skipping write');

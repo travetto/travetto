@@ -16,7 +16,7 @@ export class ExecutionManager {
   static async #onError(error: unknown): Promise<void> {
     process.exitCode ??= 1;
     if (error instanceof CliValidationResultError) {
-      console.error!(await HelpUtil.renderValidationError(error));
+      console.error!(HelpUtil.renderValidationError(error));
       console.error!(await HelpUtil.renderCommandHelp(error.command));
     } else if (error instanceof CliUnknownCommandError) {
       if (error.help) {
@@ -39,7 +39,7 @@ export class ExecutionManager {
     const state = command._parsed = await CliParseUtil.parse(schema, fullArgs);
 
     await command.preBind?.();
-    const boundArgs = await CliCommandSchemaUtil.bindInput(command, state);
+    const boundArgs = CliCommandSchemaUtil.bindInput(command, state);
     return { command, boundArgs };
   }
 

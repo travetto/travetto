@@ -47,7 +47,7 @@ class S3BlobSuite extends ModelBlobSuite {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
-    const hash = await BinaryMetadataUtil.hash(buffer);
+    const hash = BinaryMetadataUtil.hash(buffer);
 
     await service.upsertBlob(hash, buffer, {
       filename: 'Random.bin',

@@ -50,7 +50,7 @@ export class WorkPool {
           const worker: Worker<I, O> = {
             id: Util.uuid(),
             active: true,
-            ...isWorkerFactory(input) ? await input() : { execute: input }
+            ...isWorkerFactory(input) ? input() : { execute: input }
           };
           await worker.init?.();
           return worker;

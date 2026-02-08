@@ -134,8 +134,11 @@ export class CliParseUtil {
   static async expandArgs(schema: SchemaClassConfig, args: string[]): Promise<string[]> {
     const separatorIndex = args.includes(RAW_SEPARATOR) ? args.indexOf(RAW_SEPARATOR) : args.length;
     const module = this.getSpecifiedModule(schema, args);
-    return (await Promise.all(args.map((arg, i) =>
-      arg.startsWith(CONFIG_PREFIX) && (i < separatorIndex || separatorIndex < 0) ? this.readFlagFile(arg, module) : arg))).flat();
+    return Promise
+      .all(args.map(async (arg, i) =>
+        await (arg.startsWith(CONFIG_PREFIX) && (i < separatorIndex || separatorIndex < 0) ? this.readFlagFile(arg, module) : arg))
+      )
+      .then(expanded => expanded.flat());
   }
 
   /**

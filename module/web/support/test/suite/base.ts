@@ -54,7 +54,7 @@ export abstract class BaseWebSuite {
 
   @AfterAll()
   async destroySever(): Promise<void> {
-    await this.#cleanup?.();
+    this.#cleanup?.();
     this.#cleanup = undefined;
   }
 

@@ -318,14 +318,12 @@ export class SQLModelUtil {
       (wrappers[key] ??= { stack, records: [] }).records.push({ stack, value });
     };
 
-    const all = items.map(item =>
+    items.map(item =>
       this.visitSchemaInstance(cls, item, {
         onRoot: ({ path, value }) => track(path, value),
         onSub: ({ path, value }) => track(path, value),
         onSimple: ({ path, value }) => track(path, value)
       }));
-
-    await Promise.all(all);
 
     const result = [...Object.values(wrappers)].toSorted((a, b) => a.stack.length - b.stack.length);
     return result;

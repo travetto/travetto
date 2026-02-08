@@ -8,6 +8,7 @@ export const STD_RULES: Linter.Config['rules'] = {
   '@typescript-eslint/explicit-function-return-type': 0,
   '@typescript-eslint/no-non-null-assertion': 0,
   '@typescript-eslint/no-explicit-any': 'warn',
+  '@typescript-eslint/await-thenable': 'error',
   '@typescript-eslint/parameter-properties': 'error',
   '@typescript-eslint/explicit-member-accessibility': [0, { accessibility: 'explicit' }],
   indent: 0,

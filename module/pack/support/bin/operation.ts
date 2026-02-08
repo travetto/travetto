@@ -245,7 +245,7 @@ export class PackOperation {
     yield* PackOperation.title(config, cliTpl`${{ title: 'Compressing' }} ${{ path: config.output }}`);
 
     if (config.ejectFile) {
-      await ActiveShellCommand.mkdir(path.dirname(config.output));
+      yield ActiveShellCommand.mkdir(path.dirname(config.output));
       yield ActiveShellCommand.chdir(config.buildDirectory);
       yield ActiveShellCommand.zip(config.output);
       yield ActiveShellCommand.chdir(path.resolve());

@@ -65,7 +65,7 @@ export class RunUtil {
         }
       }
     } else {
-      for await (const match of all) {
+      for (const match of all) {
         if (await this.isTestFile(match.sourceFile)) {
           yield match.import;
         }

@@ -50,7 +50,7 @@ export class ConfigurationService {
    *  - If of the same priority, then alpha sort on the source
    */
   async postConstruct(): Promise<void> {
-    const providers = await DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
+    const providers = DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
       providers.map(async (candidate) => await DependencyRegistryIndex.getInstance<ConfigSource>(candidate.candidateType, candidate.qualifier))
@@ -62,7 +62,7 @@ export class ConfigurationService {
       new FileConfigSource(parser),
       ...configs,
       new OverrideConfigSource()
-    ].map(source => source.get()));
+    ].map(async source => source.get()));
 
     const payloads = possible
       .flat()
@@ -93,7 +93,7 @@ export class ConfigurationService {
    *   - Will not show fields marked as secret
    */
   async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
-    const configTargets = await DependencyRegistryIndex.getCandidates(ConfigBaseType);
+    const configTargets = DependencyRegistryIndex.getCandidates(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
         .filter(candidate => candidate.qualifier === getDefaultQualifier(candidate.class)) // Is self targeting?

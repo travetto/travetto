@@ -34,7 +34,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
   );
 
   await channel.once(TestWorkerEvents.READY); // Wait for the child to be ready
-  await channel.send(TestWorkerEvents.INIT); // Initialize
+  channel.send(TestWorkerEvents.INIT); // Initialize
   await channel.once(TestWorkerEvents.INIT_COMPLETE); // Wait for complete
 
   channel.on('*', async event => {
@@ -44,9 +44,9 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
         log(parsed);
       } else if (parsed.type === 'removeTest') {
         log(`Received remove event ${JSON.stringify(event)}@${consumer.constructor.name}`);
-        await consumer.onRemoveEvent?.(parsed); // Forward remove events
+        consumer.onRemoveEvent?.(parsed); // Forward remove events
       } else {
-        await consumer.onEvent(parsed);  // Forward standard events
+        consumer.onEvent(parsed);  // Forward standard events
       }
     } catch {
       // Do nothing

@@ -37,7 +37,7 @@ export class SessionEndpoints {
 
   @Get('/logout')
   async logout() {
-    await this.session.destroy();
+    this.session.destroy();
   }
 
   @Get('/info/age')

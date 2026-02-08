@@ -157,7 +157,7 @@ export class Compiler {
 
     EventUtil.sendEvent('state', { state: 'init', extra: { processId: process.pid } });
 
-    const emitter = await this.getCompiler();
+    const emitter = this.getCompiler();
     let failure: Error | undefined;
 
     log.debug('Compiler loaded');

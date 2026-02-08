@@ -116,7 +116,7 @@ export class WebUploadUtil {
       const { FileTypeParser } = await import('file-type');
       const { fromWebStream } = await import('strtok3');
       const parser = new FileTypeParser();
-      const token = await fromWebStream(BinaryUtil.toReadableStream(input));
+      const token = fromWebStream(BinaryUtil.toReadableStream(input));
       cleanup = (): Promise<void> => token.close();
       return await parser.fromTokenizer(token);
     } finally {

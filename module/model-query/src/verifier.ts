@@ -269,7 +269,7 @@ export class QueryVerifier {
   /**
    * Verify the query
    */
-  static verify<T>(cls: Class<T>, query?: ModelQuery<T> | Query<T> | PageableModelQuery<T>): void {
+  static async verify<T>(cls: Class<T>, query?: ModelQuery<T> | Query<T> | PageableModelQuery<T>): Promise<void> {
     if (!query) {
       return;
     }

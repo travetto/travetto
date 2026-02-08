@@ -88,7 +88,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(partial.size === 11);
     const partialMeta = BinaryMetadataUtil.read(partial)!;
     const subContent = await partial.text();
-    const range = await BinaryMetadataUtil.enforceRange({ start: 10, end: 20 }, partialMeta);
+    const range = BinaryMetadataUtil.enforceRange({ start: 10, end: 20 }, partialMeta);
     assert(subContent.length === (range.end - range.start) + 1);
 
     const og = await this.fixture.readText('/text.txt');
@@ -98,7 +98,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const partialUnbounded = await service.getBlob(id, { start: 10 });
     const partialUnboundedMeta = BinaryMetadataUtil.read(partialUnbounded)!;
     const subContent2 = await partialUnbounded.text();
-    const range2 = await BinaryMetadataUtil.enforceRange({ start: 10 }, partialUnboundedMeta);
+    const range2 = BinaryMetadataUtil.enforceRange({ start: 10 }, partialUnboundedMeta);
     assert(subContent2.length === (range2.end - range2.start) + 1);
     assert(subContent2.startsWith('klm'));
     assert(subContent2.endsWith('xyz'));

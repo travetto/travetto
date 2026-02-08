@@ -45,7 +45,7 @@ class SchemaBindingSuite {
   async checkArgs(args: string[], expected: unknown[], raw?: unknown[]) {
     const entity = new Entity();
     const parsed = await get(...args);
-    const found = await CliCommandSchemaUtil.bindInput(entity, parsed);
+    const found = CliCommandSchemaUtil.bindInput(entity, parsed);
     assert.deepStrictEqual(found, expected);
     if (raw) {
       assert.deepStrictEqual(unused(parsed), raw);
@@ -60,10 +60,10 @@ class SchemaBindingSuite {
   @Test()
   async testFlags() {
     const entity = new Entity();
-    await CliCommandSchemaUtil.bindInput(entity, await get('--age', '30'));
+    CliCommandSchemaUtil.bindInput(entity, await get('--age', '30'));
     assert(entity.age === 30);
 
-    await CliCommandSchemaUtil.bindInput(entity, await get('-g', '40'));
+    CliCommandSchemaUtil.bindInput(entity, await get('-g', '40'));
     // @ts-ignore
     assert(entity.age === 40);
 
@@ -72,26 +72,26 @@ class SchemaBindingSuite {
     assert(parsed[0].fieldName === 'age');
     assert(parsed[0].value === '50');
 
-    await CliCommandSchemaUtil.bindInput(entity, await get('--age=50'));
+    CliCommandSchemaUtil.bindInput(entity, await get('--age=50'));
     assert(entity.age === 50);
 
-    await CliCommandSchemaUtil.bindInput(entity, await get('--age'));
+    CliCommandSchemaUtil.bindInput(entity, await get('--age'));
     assert(entity.age === undefined);
 
-    await CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g', '20'));
+    CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g', '20'));
     assert(entity.age === 20);
 
-    await CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g'));
+    CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g'));
     assert(entity.age === undefined);
 
-    await CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g', 'red'));
+    CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g', 'red'));
     assert(isNaN(entity.age));
 
     process.env.COLOREO = '100';
-    await CliCommandSchemaUtil.bindInput(entity, await get('--color'));
+    CliCommandSchemaUtil.bindInput(entity, await get('--color'));
     assert(entity.color === undefined);
 
-    await CliCommandSchemaUtil.bindInput(entity, await get());
+    CliCommandSchemaUtil.bindInput(entity, await get());
     assert(entity.color === '100');
   }
 
@@ -139,16 +139,16 @@ class SchemaBindingSuite {
     const entity = new Entity();
     let state = await get('-i', '10', '-i', '20', 'george');
 
-    await CliCommandSchemaUtil.bindInput(entity, state);
-    let args = await CliCommandSchemaUtil.bindInput(entity, state);
+    CliCommandSchemaUtil.bindInput(entity, state);
+    let args = CliCommandSchemaUtil.bindInput(entity, state);
     assert.deepStrictEqual(entity.ids, [10, 20]);
     assert.deepStrictEqual(args, ['george', undefined, undefined]);
 
     state = await get('-i', '-10', '--ids', '22', 'george', 'yes', '200');
     assert(state.all.find(x => x.type === 'flag' && x.input === '-i' && x.value === '-10'));
 
-    await CliCommandSchemaUtil.bindInput(entity, state);
-    args = await CliCommandSchemaUtil.bindInput(entity, state);
+    CliCommandSchemaUtil.bindInput(entity, state);
+    args = CliCommandSchemaUtil.bindInput(entity, state);
     assert.deepStrictEqual(args, ['george', true, ['200']]);
     assert.deepStrictEqual(entity.ids, [-10, 22]);
   }

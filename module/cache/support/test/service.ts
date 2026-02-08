@@ -96,7 +96,7 @@ export abstract class CacheServiceSuite {
 
   @Test()
   async basic() {
-    const service = await this.testService;
+    const service = this.testService;
     let start = Date.now();
     let res = await service.basic(10);
     let diff = Date.now() - start;
@@ -112,7 +112,7 @@ export abstract class CacheServiceSuite {
 
   @Test()
   async aging() {
-    const service = await this.testService;
+    const service = this.testService;
 
     let start = Date.now();
     let res = await service.agesQuickly(10);
@@ -131,7 +131,7 @@ export abstract class CacheServiceSuite {
 
   @Test()
   async ageWithExtension() {
-    const service = await this.testService;
+    const service = this.testService;
 
     let start = Date.now();
     let res = await service.ageExtension(10);
@@ -159,7 +159,7 @@ export abstract class CacheServiceSuite {
 
   @Test()
   async complex() {
-    const service = await this.testService;
+    const service = this.testService;
 
     const val = await service.complexInput({ a: 5, b: 20 }, 20);
     const val2 = await service.complexInput({ a: 5, b: 20 }, 20);
@@ -174,7 +174,7 @@ export abstract class CacheServiceSuite {
 
   @Test()
   async customKey() {
-    const service = await this.testService;
+    const service = this.testService;
 
     const val4 = await service.customKey({ a: 5, b: 20 }, 20);
     const val5 = await service.customKey({ b: 5, a: 20 }, 30);
@@ -186,7 +186,7 @@ export abstract class CacheServiceSuite {
 
   @Test()
   async reinstating() {
-    const service = await this.testService;
+    const service = this.testService;
 
     const user = await service.getUser('200');
     assert(user instanceof User);
@@ -197,7 +197,7 @@ export abstract class CacheServiceSuite {
 
   @Test()
   async eviction() {
-    const service = await this.testService;
+    const service = this.testService;
 
     await service.getUser('200');
     const start = Date.now();
@@ -221,7 +221,7 @@ export abstract class CacheServiceSuite {
       return;
     }
 
-    const service = await this.testService;
+    const service = this.testService;
 
     // Prime cache
     for (let i = 0; i < 10; i++) {

@@ -89,7 +89,7 @@ class AltTestController {
 @Suite()
 class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
-    const inst = await ControllerRegistryIndex.getConfig(cls);
+    const inst = ControllerRegistryIndex.getConfig(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
     const response = await endpoint.filter!({ request: new WebRequest({}) });
     return response.headers.get('Name') ?? undefined;

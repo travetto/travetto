@@ -28,7 +28,7 @@ export class CliModuleUtil {
     for (const module of await CliScmUtil.findChangedModules(fromHash, toHash)) {
       out.set(module.name, module);
       if (transitive) {
-        for (const sub of await RuntimeIndex.getDependentModules(module, 'parents')) {
+        for (const sub of RuntimeIndex.getDependentModules(module, 'parents')) {
           out.set(sub.name, sub);
         }
       }

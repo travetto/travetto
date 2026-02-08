@@ -67,7 +67,7 @@ export class SessionService {
     }
 
     // Ensure latest expiry information before persisting
-    await this.authService.manageExpiry(this.authContext.principal);
+    this.authService.manageExpiry(this.authContext.principal);
 
     const principal = this.authContext.principal;
 
