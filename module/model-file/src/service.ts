@@ -179,7 +179,9 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       BinaryUtil.pipeline(input, createWriteStream(file)),
-      fs.writeFile(file.replace(BIN, META), CodecUtil.toJSON(resolved))
+      fs.writeFile(file.replace(BIN, META),
+        BinaryUtil.arrayToBuffer(CodecUtil.toJSON(resolved))
+      )
     ]);
   }
 
@@ -211,7 +213,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   async updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void> {
     const file = await this.#find(ModelBlobNamespace, META, location);
-    await fs.writeFile(file, CodecUtil.toJSON(metadata));
+    await fs.writeFile(file, BinaryUtil.arrayToBuffer(CodecUtil.toJSON(metadata)));
   }
 
   // Expiry
