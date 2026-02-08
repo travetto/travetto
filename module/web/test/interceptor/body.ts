@@ -177,7 +177,7 @@ class BodyInterceptorSuite {
     });
 
     const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
-    assert(responseBuffer.byteLength === Buffer.from(koreanInput.toString('utf8')).byteLength);
+    assert(responseBuffer.byteLength === CodecUtil.fromUTF8String(koreanInput.toString('utf8')).byteLength);
   }
 
   @Test()
