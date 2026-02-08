@@ -7,7 +7,7 @@ import type ses from 'nodemailer/lib/ses-transport';
 import type sendmail from 'nodemailer/lib/sendmail-transport';
 
 import { type MailTransport, type EmailOptions, type SentEmail } from '@travetto/email';
-import { BinaryUtil, castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo, CodecUtil } from '@travetto/runtime';
 
 type Transport = TransportType | json.Options | smtp.Options | ses.Options | sendmail.Options;
 
@@ -26,9 +26,9 @@ export class NodemailerTransport implements MailTransport {
     for (const attachment of message.attachments ?? []) {
       if (attachment.content) {
         if (typeof attachment.content === 'string') {
-          attachment.content = Buffer.from(attachment.content, 'utf-8');
+          attachment.content = CodecUtil.fromUTF8String(attachment.content);
         } else if (BinaryUtil.isBinaryArray(attachment.content)) {
-          attachment.content = BinaryUtil.arrayToBuffer(attachment.content);
+          attachment.content = BinaryUtil.binaryArrayToBuffer(attachment.content);
         } else {
           attachment.content = BinaryUtil.toReadable(attachment.content);
         }

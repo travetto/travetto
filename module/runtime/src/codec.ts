@@ -17,7 +17,7 @@ export class CodecUtil {
 
   /** Convert hex bytes to string  */
   static toHexString(value: BinaryArray): string {
-    return BinaryUtil.arrayToBuffer(value).toString('hex');
+    return BinaryUtil.binaryArrayToBuffer(value).toString('hex');
   }
 
   /** Return buffer from base64 string  */
@@ -27,7 +27,7 @@ export class CodecUtil {
 
   /** Convert value to base64 string  */
   static toBase64String(value: BinaryArray): string {
-    return BinaryUtil.arrayToBuffer(value).toString('base64');
+    return BinaryUtil.binaryArrayToBuffer(value).toString('base64');
   }
 
   /** Return buffer from utf8 string  */
@@ -37,7 +37,7 @@ export class CodecUtil {
 
   /** Return utf8 string from bytes  */
   static toUTF8String(value: BinaryArray): string {
-    return BinaryUtil.arrayToBuffer(value).toString('utf8');
+    return BinaryUtil.binaryArrayToBuffer(value).toString('utf8');
   }
 
   /** Convert utf8 value to base64 value string  */

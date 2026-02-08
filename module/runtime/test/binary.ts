@@ -79,12 +79,18 @@ export class BinaryUtilTest {
   @Test()
   verifyArrayToBuffer() {
     const input = new Uint8Array([1, 2, 3]);
-    const buf = BinaryUtil.arrayToBuffer(input);
+    const buf = BinaryUtil.binaryArrayToBuffer(input);
     assert(Buffer.isBuffer(buf));
     assert(buf.length === 3);
     assert(buf[0] === 1);
 
-    const buf2 = BinaryUtil.arrayToBuffer(Buffer.from([4, 5]));
+    const input32 = new Uint32Array([2 ** 31 - 1]);
+    const buf32 = BinaryUtil.binaryArrayToBuffer(input32);
+    assert(Buffer.isBuffer(buf32));
+    assert(buf32.length === input32.byteLength);
+    assert(buf32.equals(Buffer.from(input32.buffer)));
+
+    const buf2 = BinaryUtil.binaryArrayToBuffer(Buffer.from([4, 5]));
     assert(Buffer.isBuffer(buf2));
     assert(buf2[0] === 4);
 
@@ -92,7 +98,7 @@ export class BinaryUtilTest {
     const view = new Uint8Array(ab);
     view[0] = 6;
     view[1] = 7;
-    const buf3 = BinaryUtil.arrayToBuffer(ab);
+    const buf3 = BinaryUtil.binaryArrayToBuffer(ab);
     assert(Buffer.isBuffer(buf3));
     assert(buf3[0] === 6);
   }
@@ -193,7 +199,7 @@ export class BinaryUtilTest {
     const u8 = new Uint8Array([1, 2, 3, 4, 5]);
     const sliced = BinaryUtil.sliceByteArray(u8, 1, 3);
     assert(sliced.byteLength === 2);
-    const resolved = BinaryUtil.arrayToBuffer(sliced);
+    const resolved = BinaryUtil.binaryArrayToBuffer(sliced);
     assert(resolved[0] === 2);
     assert(resolved[1] === 3);
   }

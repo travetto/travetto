@@ -70,11 +70,11 @@ export class BinaryUtil {
   static isBinaryTypeReference = isBinaryTypeReference;
 
   /** Convert binary array to an explicit buffer  */
-  static arrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {
+  static binaryArrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {
     if (Buffer.isBuffer(input)) {
       return castTo(input);
     } else if (isTypedArray(input)) {
-      return Buffer.from(input);
+      return castTo(Buffer.from(input.buffer));
     } else {
       return Buffer.from(input);
     }
@@ -96,7 +96,7 @@ export class BinaryUtil {
   /** Convert input to a buffer  */
   static async toBuffer(input: BinaryType): Promise<Buffer<ArrayBuffer>> {
     const bytes = await BinaryUtil.toBinaryArray(input);
-    return BinaryUtil.arrayToBuffer(bytes);
+    return BinaryUtil.binaryArrayToBuffer(bytes);
   }
 
   /** Convert input to a readable stream  */
@@ -104,13 +104,26 @@ export class BinaryUtil {
     if (isReadable(input)) {
       return input;
     } else if (isBinaryArray(input)) {
-      return Readable.from(BinaryUtil.arrayToBuffer(input));
+      return Readable.from(BinaryUtil.binaryArrayToBuffer(input));
     } else if (isBinaryContainer(input)) {
       return Readable.fromWeb(input.stream());
     } else if (isReadableStream(input)) {
       return Readable.fromWeb(input);
     } else {
       return Readable.from(input);
+    }
+  }
+
+  /** Convert input to a binary ReadableStream  */
+  static toReadableStream(input: BinaryType): ReadableStream {
+    if (isReadableStream(input)) {
+      return input;
+    } else if (isReadable(input)) {
+      return Readable.toWeb(input);
+    } else if (isBinaryContainer(input)) {
+      return input.stream();
+    } else {
+      return Readable.toWeb(BinaryUtil.toReadable(input));
     }
   }
 
@@ -125,14 +138,14 @@ export class BinaryUtil {
 
   /** Read chunk, default to toString if type is unknown  */
   static readChunk(chunk: Any, encoding?: BufferEncoding | null): BinaryArray {
-    return isBinaryArray(chunk) ? BinaryUtil.arrayToBuffer(chunk) :
+    return isBinaryArray(chunk) ? BinaryUtil.binaryArrayToBuffer(chunk) :
       typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
         Buffer.from(`${chunk}`, 'utf8');
   }
 
   /** Combine binary arrays  */
   static combineBinaryArrays(arrays: BinaryArray[]): BinaryArray {
-    return Buffer.concat(arrays.map(x => BinaryUtil.arrayToBuffer(x)));
+    return Buffer.concat(arrays.map(x => BinaryUtil.binaryArrayToBuffer(x)));
   }
 
   /** Agnostic slice of binary array  */

@@ -89,7 +89,7 @@ class BodyInterceptorSuite {
 
     const responseBuffer = await BinaryUtil.toBinaryArray(WebBodyUtil.toBinaryMessage(response).body!);
     assert(responseBuffer.byteLength === 1000);
-    assert(!BinaryUtil.arrayToBuffer(responseBuffer).some(x => x !== 65));
+    assert(!BinaryUtil.binaryArrayToBuffer(responseBuffer).some(x => x !== 65));
   }
 
   @Test()

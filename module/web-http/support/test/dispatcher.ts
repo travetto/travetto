@@ -19,7 +19,7 @@ export class FetchWebDispatcher implements WebDispatcher {
     const baseRequest = await WebTestDispatchUtil.applyRequestBody(request);
     const finalPath = WebTestDispatchUtil.buildPath(baseRequest);
     const body: RequestInit['body'] = WebBodyUtil.isRawBinary(request.body) ?
-      await BinaryUtil.toBuffer(request.body) :
+      await BinaryUtil.toBinaryArray(request.body) :
       castTo(request.body);
     const { context: { httpMethod: method }, headers } = request;
 

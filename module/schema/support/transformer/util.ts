@@ -215,7 +215,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     const resolved = this.toConcreteType(state, typeExpr, node, config?.root ?? node);
-    const type = typeExpr.key === 'foreign' ? state.getConcreteType(node) :
+    const type = typeExpr.key === 'foreign' ? state.getConcreteType(node, state.factory.createIdentifier('Object')) :
       ts.isArrayLiteralExpression(resolved) ? resolved.elements[0] : resolved;
 
     params.unshift(LiteralUtil.fromLiteral(state.factory, {

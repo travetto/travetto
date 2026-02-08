@@ -69,7 +69,7 @@ export class FileLoader {
    * @param relativePath The path to read
    */
   async readFile(relativePath: string): Promise<File> {
-    const buffer = BinaryUtil.arrayToBuffer(await this.readBinaryArray(relativePath));
+    const buffer = BinaryUtil.binaryArrayToBuffer(await this.readBinaryArray(relativePath));
     return new File([buffer], path.basename(relativePath));
   }
 }

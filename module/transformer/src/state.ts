@@ -416,17 +416,24 @@ export class TransformerState implements State {
   /**
    * Return a concrete type the given type of a node
    */
-  getConcreteType(node: ts.Node): ts.Expression {
+  getConcreteType(node: ts.Node, fallback?: ts.Expression): ts.Expression {
     const type = this.resolveType(node);
-
-    if (type.key === 'managed') {
-      return this.getOrImport(type);
-    } else if (type.key === 'foreign') {
-      return this.getForeignTarget(type);
-    } else {
-      const file = node.getSourceFile().fileName;
-      const source = this.getFileImportName(file);
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${type.key}: ${source}`);
+    try {
+      if (type.key === 'managed') {
+        return this.getOrImport(type);
+      } else if (type.key === 'foreign') {
+        return this.getForeignTarget(type);
+      } else {
+        const file = node.getSourceFile().fileName;
+        const source = this.getFileImportName(file);
+        throw new Error(`Unable to import non-external type: ${node.getText()} ${type.key}: ${source}`);
+      }
+    } catch (err) {
+      if (fallback) {
+        return fallback;
+      } else {
+        throw err;
+      }
     }
   }
 

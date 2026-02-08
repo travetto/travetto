@@ -42,7 +42,7 @@ class S3BlobSuite extends ModelBlobSuite {
   @Test({ timeout: 15000 })
   async largeFile() {
     const service: S3ModelService = castTo(await this.service);
-    const buffer = BinaryUtil.arrayToBuffer(BinaryUtil.makeBinaryArray(1.5 * service['config'].chunkSize));
+    const buffer = BinaryUtil.binaryArrayToBuffer(BinaryUtil.makeBinaryArray(1.5 * service['config'].chunkSize));
     for (let i = 0; i < buffer.byteLength; i++) {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
