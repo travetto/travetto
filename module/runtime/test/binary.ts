@@ -19,6 +19,8 @@ export class BinaryUtilTest {
     assert(BinaryUtil.isBinaryTypeReference(Blob));
     assert(BinaryUtil.isBinaryTypeReference(File));
     assert(BinaryUtil.isBinaryTypeReference(Uint8Array));
+    assert(BinaryUtil.isBinaryTypeReference(Uint16Array));
+    assert(BinaryUtil.isBinaryTypeReference(Uint32Array));
     assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryArray>()));
     assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryStream>()));
     assert(BinaryUtil.isBinaryTypeReference(toConcrete<BinaryContainer>()));
