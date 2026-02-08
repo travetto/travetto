@@ -1,10 +1,11 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, castKey, castTo, type Class, describeFunction, safeAssign } from '@travetto/runtime';
+import { AppError, BinaryUtil, castKey, castTo, type Class, describeFunction, safeAssign } from '@travetto/runtime';
 
 import {
   type SchemaClassConfig, type SchemaMethodConfig, type SchemaFieldConfig,
   type SchemaParameterConfig, type SchemaInputConfig, type SchemaFieldMap, type SchemaCoreConfig,
-  CONSTRUCTOR_PROPERTY
+  CONSTRUCTOR_PROPERTY,
+  type SchemaBasicType
 } from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
@@ -32,6 +33,12 @@ function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): T
   });
 }
 
+function ensureBinary<T extends SchemaBasicType>(config?: T): void {
+  if (config?.type) {
+    config.binary = BinaryUtil.isBinaryConstructor(config.type) || BinaryUtil.isBinaryReference(config.type);
+  }
+}
+
 function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     if (config) {
@@ -48,6 +55,7 @@ function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>
       });
     }
     combineCore(base, config);
+    ensureBinary(base);
   }
   return base;
 }
@@ -65,6 +73,7 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
         safeAssign(base.parameters[param.index], param);
       }
     }
+    ensureBinary(config.returnType);
   }
   return base;
 }

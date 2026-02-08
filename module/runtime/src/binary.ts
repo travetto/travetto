@@ -4,16 +4,40 @@ import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array } from 'node:util/types';
 
-import { type Any, castTo, type Class, hasFunction } from './types.ts';
+import { type Any, castTo, type Class, hasFunction, toConcrete } from './types.ts';
 
 const BINARY_CONSTRUCTORS: Function[] = [castTo(Readable), Buffer, Blob, castTo(ReadableStream), ArrayBuffer, Uint8Array, Uint16Array, Uint32Array];
+/**
+ * Binary Array
+ * @concrete
+ */
 export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Buffer<ArrayBuffer> | ArrayBuffer;
+/**
+ * Binary Stream
+ * @concrete
+ */
 export type BinaryStream = Readable | ReadableStream | AsyncIterable<BinaryArray>;
+/**
+ * Binary Container
+ * @concrete
+ */
 export type BinaryContainer = Blob | File;
+/**
+ * Binary Type
+ * @concrete
+ */
 export type BinaryType = BinaryArray | BinaryStream | BinaryContainer;
 
-const BINARY_CONSTRUCTOR_SET = new Set<Function>(BINARY_CONSTRUCTORS);
+let BINARY_REFS: Set<unknown> | undefined;
+const isBinaryReference = (value: unknown): boolean =>
+  (BINARY_REFS ||= new Set<unknown>([
+    toConcrete<BinaryType>(),
+    toConcrete<BinaryStream>(),
+    toConcrete<BinaryArray>(),
+    toConcrete<BinaryContainer>(),
+  ])).has(value);
 
+const BINARY_CONSTRUCTOR_SET = new Set<Function>(BINARY_CONSTRUCTORS);
 const isReadable = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
 const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
@@ -40,6 +64,8 @@ export class BinaryUtil {
   static isBinaryContainer = isBinaryContainer;
   /** Is value a binary type  */
   static isBinaryType = isBinaryType;
+  /** Is a binary reference */
+  static isBinaryReference = isBinaryReference;
 
   /** Convert binary array to an explicit buffer  */
   static arrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {

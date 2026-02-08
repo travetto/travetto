@@ -5,7 +5,7 @@ import { IsPrivate } from '@travetto/schema';
 import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { OpenapiVisitor } from '@travetto/openapi';
-import { BinaryUtil, type BinaryStream } from '@travetto/runtime';
+import { BinaryUtil } from '@travetto/runtime';
 
 import { TestUser } from './model.ts';
 
@@ -63,7 +63,7 @@ class TestCont {
   }
 
   @Get('/download')
-  async download(size?: number): Promise<BinaryStream> {
+  async download(size?: number) {
     return BinaryUtil.toBinaryStream(BinaryUtil.makeBinaryArray(0));
   }
 
