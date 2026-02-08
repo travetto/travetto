@@ -9,6 +9,11 @@ import type { BinaryArray, BinaryStream, BinaryType } from '@travetto/runtime';
 
 @Schema()
 class BinaryTestContainer {
+
+  notString: string;
+  notBoolean: boolean;
+  notNumber: number;
+
   buffer: Buffer;
   blob: Blob;
   file: File;
@@ -43,7 +48,11 @@ class BinaryTest {
     const config = SchemaRegistryIndex.get(BinaryTestContainer);
 
     for (const [key, field] of Object.entries(config.getFields())) {
-      assert(field.binary, `Field ${key} is not marked as binary`);
+      if (field.name.startsWith('not')) {
+        assert(!field.binary, `Field ${key} is incorrectly marked as binary`);
+      } else {
+        assert(field.binary, `Field ${key} is not marked as binary`);
+      }
     }
   }
 }
