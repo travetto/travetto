@@ -38,7 +38,10 @@ export class AwsLambdaWebUtil {
       context: response.context,
       ...WebBodyUtil.toBinaryMessage(response)
     });
-    const output: BinaryArray = await BinaryUtil.toBinaryArray(binaryResponse.body);
+    const output: BinaryArray = binaryResponse.body ?
+      await BinaryUtil.toBinaryArray(binaryResponse.body) :
+      BinaryUtil.makeBinaryArray(0);
+
     const isBase64Encoded = !!output.byteLength && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};

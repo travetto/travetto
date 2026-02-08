@@ -19,7 +19,9 @@ export class WebTestDispatchUtil {
       const sample = WebBodyUtil.toBinaryMessage(request);
       sample.headers.forEach((v, k) => request.headers.set(k, Array.isArray(v) ? v.join(',') : v));
       if (toByteArray) {
-        sample.body = await BinaryUtil.toBinaryArray(sample.body);
+        sample.body = sample.body ?
+          await BinaryUtil.toBinaryArray(sample.body) :
+          BinaryUtil.makeBinaryArray(0);
       }
       request.body = WebBodyUtil.markRawBinary(sample.body);
     }

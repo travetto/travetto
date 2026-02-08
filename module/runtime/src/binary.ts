@@ -81,15 +81,13 @@ export class BinaryUtil {
   }
 
   /** Convert input to a binary array  */
-  static async toBinaryArray(input: BinaryType | undefined): Promise<BinaryArray> {
+  static async toBinaryArray(input: BinaryType): Promise<BinaryArray> {
     if (isBinaryArray(input)) {
       return input;
     } else if (isBinaryStream(input)) {
       return consumers.buffer(input);
-    } else if (isBinaryContainer(input)) {
-      return input.arrayBuffer();
     } else {
-      return BinaryUtil.makeBinaryArray(0);
+      return input.arrayBuffer();
     }
   }
 
