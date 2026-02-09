@@ -1,4 +1,5 @@
-import { Client, errors, type estypes } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import {
   type ModelCrudSupport, type BulkOperation, type BulkResponse, type ModelBulkSupport, type ModelExpirySupport,
@@ -531,7 +532,7 @@ export class ElasticsearchModelService implements
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = await Promise.all(result.hits.hits.map(hit => castTo<T>(({ [field]: field === 'id' ? hit._id : hit._source![field] }))));
+    const all = result.hits.hits.map(hit => castTo<T>(({ [field]: field === 'id' ? hit._id : hit._source![field] })));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query && query.limit);
   }
 

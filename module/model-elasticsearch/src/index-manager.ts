@@ -1,4 +1,5 @@
-import type { Client, estypes } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import type { Class } from '@travetto/runtime';
 import { ModelRegistryIndex, type ModelType, type ModelStorageSupport } from '@travetto/model';

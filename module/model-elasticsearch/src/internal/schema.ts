@@ -1,4 +1,4 @@
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import { type Class, toConcrete } from '@travetto/runtime';
 import { type Point, DataUtil, SchemaRegistryIndex } from '@travetto/schema';

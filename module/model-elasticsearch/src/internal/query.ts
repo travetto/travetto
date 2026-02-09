@@ -1,4 +1,4 @@
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import { castTo, type Class, TypedObject } from '@travetto/runtime';
 import { type WhereClause, type SelectClause, type SortClause, type Query, ModelQueryUtil } from '@travetto/model-query';
