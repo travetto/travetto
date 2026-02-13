@@ -12,10 +12,6 @@ type SchemaTypeConfig = {
    * Controls how provided data is validated
    */
   validate?(input: unknown): string | undefined;
-  /**
-   * Override for the name type
-   */
-  name?: string;
 };
 
 /**
@@ -44,7 +40,10 @@ export class SchemaTypeUtil {
     return Object.getOwnPropertyDescriptor(cls, Special)?.value;
   }
 
-  static setSchemaTypeConfig(cls: Class | Function, config: SchemaTypeConfig): void {
+  static setSchemaTypeConfig(cls: Class | Function, config: SchemaTypeConfig & { name?: string }): void {
     Object.defineProperty(cls, Special, { value: config });
+    if (config.name) {
+      Object.defineProperty(cls, 'name', { value: config.name });
+    }
   }
 }

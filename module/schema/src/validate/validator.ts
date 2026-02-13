@@ -1,5 +1,3 @@
-import { isTypedArray } from 'node:util/types';
-
 import { castKey, castTo, type Class, type ClassInstance, TypedObject } from '@travetto/runtime';
 
 import type { SchemaInputConfig, SchemaFieldMap } from '../service/types.ts';
@@ -12,6 +10,7 @@ import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
 
 const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
+type NumericComparable = number | bigint | Date;
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
@@ -27,8 +26,8 @@ function isClassInstance<T>(value: unknown): value is ClassInstance<T> {
   return !DataUtil.isPlainObject(value) && value !== null && typeof value === 'object' && !!value.constructor;
 }
 
-function isRangeValue(value: unknown): value is number | string | Date {
-  return typeof value === 'string' || typeof value === 'number' || typeof value === 'bigint' || value instanceof Date;
+function isRangeValue(value: unknown): value is NumericComparable {
+  return typeof value === 'number' || typeof value === 'bigint' || value instanceof Date;
 }
 
 function isLengthValue(value: unknown): value is { length: number } {
@@ -114,7 +113,7 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | number | bigint | Date): boolean {
+  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | NumericComparable): boolean {
     const config = input[key]!;
     const parsed = (typeof value === 'string') ?
       input.type === castTo(BigInt) ? BigInt(value.replace(/n$/, '')) :
@@ -139,15 +138,19 @@ export class SchemaValidator {
       const kind = config.validate(value);
       switch (kind) {
         case undefined: break;
-        case 'type': return [{ kind, type: config?.name ?? input.type.name }];
+        case 'type': return [{ kind, type: input.type.name }];
         default: criteria.push([kind]);
       }
     } else if (PrimitiveTypes.has(input.type)) {
       if (typeof value !== input.type.name.toLowerCase()) {
         return [{ kind: 'type', type: input.type.name.toLowerCase() }];
+      } else if (Number.isNaN(value)) {
+        return [{ kind: 'type', type: 'number' }];
       }
-    } else if (!(value instanceof input.type)) { // If not an instance of the type
-      return [{ kind: 'type', type: config?.name ?? input.type.name }];
+    } else if (SchemaRegistryIndex.has(input.type)) {
+      if (!(value instanceof input.type)) { // If not an instance of the type
+        return [{ kind: 'type', type: input.type.name }];
+      }
     }
 
     if (input.match) {

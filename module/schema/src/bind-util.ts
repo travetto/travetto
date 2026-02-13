@@ -231,10 +231,11 @@ export class BindUtil {
             }
 
             if (SchemaRegistryIndex.has(field.type)) {
+              const complexType = field.type;
               if (field.array && Array.isArray(value)) {
-                value = value.map(item => this.bindSchema(field.type, item, config));
+                value = value.map(item => this.bindSchema(complexType, item, config));
               } else {
-                value = this.bindSchema(field.type, value, config);
+                value = this.bindSchema(complexType, value, config);
               }
             } else if (field.array && Array.isArray(value)) {
               value = value.map(item => this.#coerceType(field, item));
@@ -272,18 +273,18 @@ export class BindUtil {
     if (config.required?.active === false && (value === undefined || value === null)) {
       return value;
     }
-    const complex = SchemaRegistryIndex.has(config.type);
-    const bindConfig: BindConfig | undefined = (complex && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
+    const complexType = SchemaRegistryIndex.has(config.type) ? config.type : undefined;
+    const bindConfig: BindConfig | undefined = (complexType && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
-      if (complex) {
-        value = subValue.map(item => this.bindSchema(config.type, item, bindConfig));
+      if (complexType) {
+        value = subValue.map(item => this.bindSchema(complexType, item, bindConfig));
       } else {
         value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
-      if (complex) {
-        value = this.bindSchema(config.type, value, bindConfig);
+      if (complexType) {
+        value = this.bindSchema(complexType, value, bindConfig);
       } else {
         value = DataUtil.coerceType(value, config.type, false);
       }

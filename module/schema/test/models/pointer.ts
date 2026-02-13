@@ -1,10 +1,14 @@
+import { SchemaTypeUtil } from '@travetto/schema';
+
 /**
  * @concrete #SpecialTypeTarget
  */
 export type SpecialType = string | number | true;
 
-export class SpecialTypeTarget {
-  static validateSchema(input: unknown) {
+export class SpecialTypeTarget { }
+
+SchemaTypeUtil.setSchemaTypeConfig(SpecialTypeTarget, {
+  validate(input: unknown) {
     console.log('Validating schema', { input });
     if (input !== undefined) {
       switch (typeof input) {
@@ -25,8 +29,8 @@ export class SpecialTypeTarget {
           return 'type';
       }
     }
-  }
-  static bindSchema(input: unknown) {
+  },
+  bind(input: unknown) {
     return input;
   }
-}
+});
