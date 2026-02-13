@@ -38,9 +38,7 @@ export class ControllerVisitUtil {
         await this.#onSchemaEvent(visitor, endpointSchema.returnType.type);
       }
       for (const param of endpointSchema.parameters) {
-        if (param.type) {
-          await this.#onSchemaEvent(visitor, param.type);
-        }
+        await this.#onSchemaEvent(visitor, param.type);
       }
       await visitor.onEndpointEnd?.(endpoint, controller);
     }
