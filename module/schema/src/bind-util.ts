@@ -272,17 +272,17 @@ export class BindUtil {
     if (config.required?.active === false && (value === undefined || value === null)) {
       return value;
     }
-    const hasComplexType = SchemaRegistryIndex.has(config.type);
+    const complex = SchemaRegistryIndex.has(config.type);
     const bindConfig: BindConfig | undefined = (config.type && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
-      if (hasComplexType) {
+      if (complex) {
         value = subValue.map(item => this.bindSchema(config.type, item, bindConfig));
       } else {
         value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
-      if (hasComplexType) {
+      if (complex) {
         value = this.bindSchema(config.type, value, bindConfig);
       } else {
         value = DataUtil.coerceType(value, config.type, false);
