@@ -1,3 +1,5 @@
+import type { NumericLikeIntrinsic } from '@travetto/runtime';
+
 export type ValidationKindCore = 'required' | 'match' | 'min' | 'max' | 'minlength' | 'maxlength' | 'enum' | 'type';
 export type ValidationKind = ValidationKindCore | string;
 
@@ -29,7 +31,7 @@ export interface ValidationError {
   /**
    * Number to compare against
    */
-  limit?: number | Date;
+  limit?: NumericLikeIntrinsic;
   /**
    * The type of the field
    */
@@ -67,7 +69,7 @@ export interface ValidationResult {
   /**
    * Number to compare against
    */
-  limit?: number | Date;
+  limit?: NumericLikeIntrinsic;
 }
 
 type OrPromise<T> = T | Promise<T>;

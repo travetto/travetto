@@ -8,6 +8,7 @@ import { DataUtil } from '../data.ts';
 import { CommonRegexToName } from './regex.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
+import { UnknownType } from '../types.ts';
 
 const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
 type NumericComparable = number | bigint | Date;
@@ -80,7 +81,7 @@ export class SchemaValidator {
     const { type, array } = input;
     const complex = SchemaRegistryIndex.has(type);
 
-    if (type === Object) {
+    if (type === Object || type === UnknownType) {
       return [];
     } else if (array) {
       if (!Array.isArray(value)) {
@@ -153,12 +154,8 @@ export class SchemaValidator {
       }
     }
 
-    if (input.match) {
-      if (typeof value !== 'string' || !input.match.regex.test(value)) {
-        criteria.push(['match', input.match]);
-      } else if (Array.isArray(value) && value.some(v => typeof v !== 'string' || !input.match!.regex.test(v))) {
-        criteria.push(['match', input.match]);
-      }
+    if (input.match && (typeof value !== 'string' || !input.match.regex.test(value))) {
+      criteria.push(['match', input.match]);
     }
 
     if (input.minlength && (!isLengthValue(value) || value.length < input.minlength.limit)) {
@@ -181,12 +178,7 @@ export class SchemaValidator {
       criteria.push(['max', input.max]);
     }
 
-    const errors: ValidationResult[] = [];
-    for (const [key, block] of criteria) {
-      errors.push({ ...block, kind: key, value });
-    }
-
-    return errors;
+    return criteria.map(([key, block]) => ({ ...block, kind: key, value }));
   }
 
   /**

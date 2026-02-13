@@ -31,5 +31,5 @@ export class PointContract { }
 SchemaTypeUtil.setSchemaTypeConfig(PointContract, {
   validate: validatePoint,
   bind: bindPoint,
-  name: 'Point'
 });
+Object.defineProperty(PointContract, 'name', { value: 'Point' });

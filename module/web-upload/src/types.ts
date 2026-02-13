@@ -6,6 +6,5 @@ import { SchemaTypeUtil } from '@travetto/schema';
  */
 export interface FileMap extends Record<string, File> { }
 
-SchemaTypeUtil.setSchemaTypeConfig(toConcrete<FileMap>(), {
-  validate: (input) => (typeof input === 'object' && !!input && Object.values(input).every(v => v instanceof Blob)) ? undefined : 'type',
-});
+SchemaTypeUtil.register(toConcrete<FileMap>(),
+  input => typeof input === 'object' && !!input && Object.values(input).every(v => v instanceof Blob));

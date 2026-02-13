@@ -14,7 +14,9 @@ export type AsyncMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<Ty
 export type AsyncIterableMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<AsyncIterable<R>, V>>;
 export type ClassTDecorator<T extends Class = Class> = (target: T) => T | void;
 
-export type Primitive = number | bigint | boolean | string;
+export type NumericPrimitive = number | bigint;
+export type Primitive = NumericPrimitive | boolean | string;
+export type NumericLikeIntrinsic = Date | NumericPrimitive;
 
 export type IntrinsicType = Primitive | Date | Readable | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Buffer | Blob | File;
 
@@ -61,11 +63,6 @@ export const hasFunction = <T>(key: keyof T) => (value: unknown): value is T =>
   typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
-
-/**
- * A type representing unknown type
- */
-export class UnknownType { }
 
 export function toConcrete<T extends unknown>(): Class<T> {
   return arguments[0];
