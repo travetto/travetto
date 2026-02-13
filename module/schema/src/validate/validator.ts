@@ -11,8 +11,7 @@ import { CommonRegexToName } from './regex.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
 
-// Side effects
-import './instrinsic.ts';
+const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
@@ -29,11 +28,11 @@ function isClassInstance<T>(value: unknown): value is ClassInstance<T> {
 }
 
 function isRangeValue(value: unknown): value is number | string | Date {
-  return typeof value === 'string' || typeof value === 'number' || value instanceof Date;
+  return typeof value === 'string' || typeof value === 'number' || typeof value === 'bigint' || value instanceof Date;
 }
 
-function isLengthValue(value: unknown): value is (unknown[] | string | Uint8Array) {
-  return value !== null && (Array.isArray(value) || typeof value === 'string' || isTypedArray(value));
+function isLengthValue(value: unknown): value is { length: number } {
+  return (typeof value === 'string' || (typeof value === 'object' && !!value && 'length' in value && typeof value.length === 'number'));
 }
 
 /**
@@ -135,19 +134,20 @@ export class SchemaValidator {
   static #validateInput(input: SchemaInputConfig, value: unknown): ValidationResult[] {
     const criteria: ([string, SchemaInputConfig[ValidationKindCore]] | [string])[] = [];
     const config = SchemaTypeUtil.getSchemaTypeConfig(input.type);
-    const typeName = config?.name ?? input.type.name;
+
     if (config?.validate) {
       const kind = config.validate(value);
       switch (kind) {
         case undefined: break;
-        case 'type': return [{ kind, type: typeName }];
-        default:
-          criteria.push([kind]);
+        case 'type': return [{ kind, type: config?.name ?? input.type.name }];
+        default: criteria.push([kind]);
+      }
+    } else if (PrimitiveTypes.has(input.type)) {
+      if (typeof value !== input.type.name.toLowerCase()) {
+        return [{ kind: 'type', type: input.type.name.toLowerCase() }];
       }
     } else if (!(value instanceof input.type)) { // If not an instance of the type
-      // Early exit for type mismatch
-      criteria.push(['type']);
-      return [{ kind: 'type', type: typeName }];
+      return [{ kind: 'type', type: config?.name ?? input.type.name }];
     }
 
     if (input.match) {
@@ -226,10 +226,6 @@ export class SchemaValidator {
    * Validate the class level validations
    */
   static async #validateClassLevel<T>(cls: Class<T>, item: T, view?: string): Promise<ValidationError[]> {
-    if (!SchemaRegistryIndex.has(cls)) {
-      return [];
-    }
-
     const classConfig = SchemaRegistryIndex.getConfig(cls);
     const errors: ValidationError[] = [];
 
@@ -272,7 +268,7 @@ export class SchemaValidator {
     // Validate using standard behaviors
     const errors = [
       ...this.#validateFields(fields, item, ''),
-      ... await this.#validateClassLevel(cls, item, view)
+      ...(SchemaRegistryIndex.has(cls) ? await this.#validateClassLevel(cls, item, view) : [])
     ];
     if (errors.length) {
       throw new ValidationResultError(errors);
@@ -329,7 +325,7 @@ export class SchemaValidator {
       const i = param.index;
       errors.push(...[
         ... this.#validateInputSchema(param, params[i]),
-        ... await this.#validateClassLevel(param.type, params[i])
+        ... (SchemaRegistryIndex.has(param.type) ? await this.#validateClassLevel(param.type, params[i]) : [])
       ].map(error => {
         if (param.name && typeof param.name === 'string') {
           error.path = !prefixes[i] ?

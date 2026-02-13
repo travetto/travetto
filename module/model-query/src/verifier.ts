@@ -91,10 +91,12 @@ export class QueryVerifier {
         // Otherwise recurse
         const subCls = field.type;
         const subValue = value;
-        if (handler.onComplexType && handler.onComplexType(state, subCls, subValue, field.array ?? false)) {
-          continue;
+        if (SchemaRegistryIndex.has(subCls)) {
+          if (handler.onComplexType && handler.onComplexType(state, subCls, subValue, field.array ?? false)) {
+            continue;
+          }
+          this.processGenericClause(state.extend(key), subCls, subValue, handler);
         }
-        this.processGenericClause(state.extend(key), subCls, subValue, handler);
       }
     }
   }

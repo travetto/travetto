@@ -24,9 +24,9 @@ export type SchemaBasicType = {
    */
   binary?: boolean;
   /**
-   * The class tied to the type
+   * The function tied to the type
    */
-  type: Class;
+  type: Function;
   /**
    * Is the field a foreign type
    */

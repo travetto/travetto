@@ -23,24 +23,20 @@ type SchemaTypeConfig = {
  */
 export class SchemaTypeUtil {
   static {
-    this.#register(String, value => typeof value === 'string', 'string');
-    this.#register(Number, value => typeof value === 'number', 'number');
-    this.#register(BigInt, value => typeof value === 'bigint', 'bigint');
-    this.#register(Boolean, value => typeof value === 'boolean', 'boolean');
-    this.#register(Date, value => value instanceof Date && !Number.isNaN(value.getTime()));
     this.#register(Buffer, Buffer.isBuffer);
     this.#register(Uint8Array, isUint8Array);
     this.#register(Uint16Array, isUint16Array);
     this.#register(Uint32Array, isUint32Array);
     this.#register(ArrayBuffer, isArrayBuffer);
+    this.#register(Date, value => value instanceof Date && !Number.isNaN(value.getTime()));
     this.#register(toConcrete<BinaryType>(), BinaryUtil.isBinaryType);
     this.#register(toConcrete<BinaryArray>(), BinaryUtil.isBinaryArray);
     this.#register(toConcrete<BinaryStream>(), BinaryUtil.isBinaryStream);
   }
 
-  static #register(type: Class | Function, fn: (value: unknown) => boolean, name?: string): void {
+  static #register(type: Class | Function, fn: (value: unknown) => boolean): void {
     this.setSchemaTypeConfig(type, {
-      validate: (item: unknown) => fn(item) ? undefined : 'type', name
+      validate: (item: unknown) => fn(item) ? undefined : 'type'
     });
   }
 

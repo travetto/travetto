@@ -23,8 +23,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
-  static has(cls: Class): boolean {
-    return this.#instance.store.has(cls);
+  static has(cls: Class | Function): cls is Class {
+    return this.#instance.store.has(castTo(cls));
   }
 
   static getDiscriminatedTypes(cls: Class): string[] | undefined {
