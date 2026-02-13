@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, asFull, castTo, type Class, type RetainPrimitiveFields, safeAssign } from '@travetto/runtime';
+import { AppError, asFull, castTo, type Class, type RetainIntrinsicFields, safeAssign } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
 import { type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -163,7 +163,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
 
   registerInterceptorConfig<T extends WebInterceptor>(
     cls: Class<T>,
-    config: Partial<RetainPrimitiveFields<T['config']>>,
+    config: Partial<RetainIntrinsicFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): ControllerConfig {
     return this.register({ interceptorConfigs: [[cls, castTo(config)]], ...extra });
@@ -172,7 +172,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   registerEndpointInterceptorConfig<T extends WebInterceptor>(
     property: string,
     cls: Class<T>,
-    config: Partial<RetainPrimitiveFields<T['config']>>,
+    config: Partial<RetainIntrinsicFields<T['config']>>,
     extra?: Partial<EndpointConfig>
   ): EndpointConfig {
     return this.registerEndpoint(property, { interceptorConfigs: [[cls, castTo(config)]], ...extra });

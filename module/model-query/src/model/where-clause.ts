@@ -1,10 +1,10 @@
-import type { Primitive, RetainPrimitiveFields, TimeSpan } from '@travetto/runtime';
+import type { Primitive, ValidFields, TimeSpan } from '@travetto/runtime';
 import type { Point } from '@travetto/schema';
 
-export type QueryPrimitive = Primitive | Point;
+export type QueryPrimitive = Primitive | Date | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
-export type RetainQueryPrimitiveFields<T> = RetainPrimitiveFields<T, Point>;
+export type RetainQueryPrimitiveFields<T> = ValidFields<T, Primitive | Date | Point>;
 
 type General<T> = {
   $eq?: T;

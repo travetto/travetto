@@ -14,5 +14,6 @@ export * from './src/bind-util.ts';
 export * from './src/data.ts';
 export * from './src/name.ts';
 export * from './src/types.ts';
+export * from './src/type-config.ts';
 export * from './src/service/registry-index.ts';
 export * from './src/service/registry-adapter.ts';

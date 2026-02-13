@@ -1,4 +1,4 @@
-import { type Class, type ClassInstance, getClass, type RetainPrimitiveFields, type TimeSpan, TimeUtil } from '@travetto/runtime';
+import { type Class, type ClassInstance, getClass, type RetainIntrinsicFields, type TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import type { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
@@ -74,7 +74,7 @@ export function Accepts(types: [string, ...string[]]): EndpointDecorator {
  */
 export const ConfigureInterceptor = <T extends WebInterceptor>(
   cls: Class<T>,
-  config: Partial<RetainPrimitiveFields<T['config']>>,
+  config: Partial<RetainIntrinsicFields<T['config']>>,
   extra?: Partial<EndpointConfig & ControllerConfig>
 ): EndpointDecorator =>
   ControllerRegistryIndex.createInterceptorConfigDecorator(cls, config, extra);

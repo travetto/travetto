@@ -1,4 +1,4 @@
-import { type Any, type Class, type ClassInstance, getClass } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, getClass, type Primitive } from '@travetto/runtime';
 
 import { CommonRegex } from '../validate/regex.ts';
 import { CONSTRUCTOR_PROPERTY, type SchemaInputConfig } from '../service/types.ts';
@@ -55,7 +55,7 @@ export function Required(active = true, message?: string): PropType<unknown> { r
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Enum(values: string[], message?: string): PropType<string | number> {
+export function Enum(values: string[], message?: string): PropType<Primitive> {
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return input({ enum: { values, message } });
 }
@@ -90,7 +90,7 @@ export function Match(regex: RegExp, message?: string): PropType<string | string
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MinLength(limit: number, message?: string): PropType<string | unknown[]> {
+export function MinLength(limit: number, message?: string): PropType<{ length: number }> {
   return input({ minlength: { limit, message }, ...(limit === 0 ? { required: { active: false } } : {}) });
 }
 
@@ -101,7 +101,7 @@ export function MinLength(limit: number, message?: string): PropType<string | un
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MaxLength(limit: number, message?: string): PropType<string | unknown[]> { return input({ maxlength: { limit, message } }); }
+export function MaxLength(limit: number, message?: string): PropType<{ length: number }> { return input({ maxlength: { limit, message } }); }
 
 /**
  * The minimum value
@@ -110,7 +110,7 @@ export function MaxLength(limit: number, message?: string): PropType<string | un
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Min<T extends number | Date>(limit: T, message?: string): PropType<Date | number> {
+export function Min<T extends number | Date>(limit: T, message?: string): PropType<Date | number | bigint> {
   return input({ min: { limit, message } });
 }
 
@@ -121,7 +121,7 @@ export function Min<T extends number | Date>(limit: T, message?: string): PropTy
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Max<T extends number | Date>(limit: T, message?: string): PropType<Date | number> {
+export function Max<T extends number | Date>(limit: T, message?: string): PropType<Date | number | bigint> {
   return input({ max: { limit, message } });
 }
 
@@ -163,7 +163,7 @@ export function Precision(digits: number, decimals?: number): PropType<number> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Integer(): PropType<number> { return Precision(0); }
+export function Integer(): PropType<number | bigint> { return Precision(0); }
 
 /**
  * Mark a number as a float
@@ -177,14 +177,14 @@ export function Float(): PropType<number> { return Precision(10, 7); }
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Long(): PropType<number> { return Precision(19, 0); }
+export function Long(): PropType<number | bigint> { return Precision(19, 0); }
 
 /**
  * Mark a number as a currency
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Currency(): PropType<number> { return Precision(13, 2); }
+export function Currency(): PropType<number | bigint> { return Precision(13, 2); }
 
 /**
  * Specifier for the input

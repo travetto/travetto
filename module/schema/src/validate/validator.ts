@@ -1,3 +1,5 @@
+import { isTypedArray } from 'node:util/types';
+
 import { castKey, castTo, type Class, type ClassInstance, TypedObject } from '@travetto/runtime';
 
 import type { SchemaInputConfig, SchemaFieldMap } from '../service/types.ts';
@@ -7,6 +9,10 @@ import { isValidationError, TypeMismatchError, ValidationResultError } from './e
 import { DataUtil } from '../data.ts';
 import { CommonRegexToName } from './regex.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import { SchemaTypeUtil } from '../type-config.ts';
+
+// Side effects
+import './instrinsic.ts';
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
@@ -24,6 +30,10 @@ function isClassInstance<T>(value: unknown): value is ClassInstance<T> {
 
 function isRangeValue(value: unknown): value is number | string | Date {
   return typeof value === 'string' || typeof value === 'number' || value instanceof Date;
+}
+
+function isLengthValue(value: unknown): value is (unknown[] | string | Uint8Array) {
+  return value !== null && (Array.isArray(value) || typeof value === 'string' || isTypedArray(value));
 }
 
 /**
@@ -105,13 +115,14 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | number | Date): boolean {
+  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | number | bigint | Date): boolean {
     const config = input[key]!;
     const parsed = (typeof value === 'string') ?
-      (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
+      input.type === castTo(BigInt) ? BigInt(value.replace(/n$/, '')) :
+        (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
       (value instanceof Date ? value.getTime() : value);
 
-    const boundary = (typeof config.limit === 'number' ? config.limit : config.limit.getTime());
+    const boundary = (typeof config.limit === 'number' || typeof config.limit === 'bigint') ? config.limit : config.limit.getTime();
     return key === 'min' ? parsed < boundary : parsed > boundary;
   }
 
@@ -123,36 +134,35 @@ export class SchemaValidator {
    */
   static #validateInput(input: SchemaInputConfig, value: unknown): ValidationResult[] {
     const criteria: ([string, SchemaInputConfig[ValidationKindCore]] | [string])[] = [];
-
-    if (
-      (input.type === String && (typeof value !== 'string')) ||
-      (input.type === Number && ((typeof value !== 'number') || Number.isNaN(value))) ||
-      (input.type === Date && (!(value instanceof Date) || Number.isNaN(value.getTime()))) ||
-      (input.type === Boolean && typeof value !== 'boolean')
-    ) {
-      criteria.push(['type']);
-      return [{ kind: 'type', type: input.type.name.toLowerCase() }];
-    }
-
-    if (input.type?.validateSchema) {
-      const kind = input.type.validateSchema(value);
+    const config = SchemaTypeUtil.getSchemaTypeConfig(input.type);
+    const typeName = config?.name ?? input.type.name;
+    if (config?.validate) {
+      const kind = config.validate(value);
       switch (kind) {
         case undefined: break;
-        case 'type': return [{ kind, type: input.type.name }];
+        case 'type': return [{ kind, type: typeName }];
         default:
           criteria.push([kind]);
       }
+    } else if (!(value instanceof input.type)) { // If not an instance of the type
+      // Early exit for type mismatch
+      criteria.push(['type']);
+      return [{ kind: 'type', type: typeName }];
     }
 
-    if (input.match && !input.match.regex.test(`${value}`)) {
-      criteria.push(['match', input.match]);
+    if (input.match) {
+      if (typeof value !== 'string' || !input.match.regex.test(value)) {
+        criteria.push(['match', input.match]);
+      } else if (Array.isArray(value) && value.some(v => typeof v !== 'string' || !input.match!.regex.test(v))) {
+        criteria.push(['match', input.match]);
+      }
     }
 
-    if (input.minlength && `${value}`.length < input.minlength.limit) {
+    if (input.minlength && (!isLengthValue(value) || value.length < input.minlength.limit)) {
       criteria.push(['minlength', input.minlength]);
     }
 
-    if (input.maxlength && `${value}`.length > input.maxlength.limit) {
+    if (input.maxlength && (!isLengthValue(value) || value.length > input.maxlength.limit)) {
       criteria.push(['maxlength', input.maxlength]);
     }
 
