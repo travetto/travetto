@@ -16,6 +16,8 @@ type SchemaTypeConfig = {
  * Utility for managing schema type configuration
  */
 export class SchemaTypeUtil {
+  static cache = new Map<Function, SchemaTypeConfig>();
+
   static {
     // Primitive Types
     this.register(Date, value => value instanceof Date && !Number.isNaN(value.getTime()));
@@ -32,20 +34,17 @@ export class SchemaTypeUtil {
     this.register(File, value => value instanceof File);
   }
 
-  static #cache = new Map<Function, SchemaTypeConfig>();
-
-
   static register(type: Class | Function, fn: (value: unknown) => boolean): void {
-    this.setSchemaTypeConfig(type, {
+    SchemaTypeUtil.setSchemaTypeConfig(type, {
       validate: (item: unknown) => fn(item) ? undefined : 'type'
     });
   }
 
   static getSchemaTypeConfig(type: Function): SchemaTypeConfig | undefined {
-    return this.#cache.get(type);
+    return this.cache.get(type);
   }
 
   static setSchemaTypeConfig(type: Function, config: SchemaTypeConfig): void {
-    this.#cache.set(type, config);
+    this.cache.set(type, config);
   }
 }

@@ -56,6 +56,8 @@ export class LiteralUtil {
     } else if (typeof value === 'number') {
       const number = factory.createNumericLiteral(Math.abs(value));
       value = value < 0 ? factory.createPrefixMinus(number) : number;
+    } else if (typeof value === 'bigint') {
+      value = factory.createBigIntLiteral(value.toString());
     } else if (typeof value === 'boolean') {
       value = value ? factory.createTrue() : factory.createFalse();
     } else if (value instanceof RegExp) {
@@ -103,6 +105,8 @@ export class LiteralUtil {
       return null;
     } else if (ts.isStringLiteral(value)) {
       return value.text;
+    } else if (ts.isBigIntLiteral(value)) {
+      return BigInt(value.text.replace(/n$/i, ''));
     } else if (ts.isNumericLiteral(value)) {
       const txt = value.text;
       if (txt.includes('.')) {
@@ -179,6 +183,8 @@ export class LiteralUtil {
         out.push('(?:true|false)');
       } else if (value === String) {
         out.push('.+');
+      } else if (typeof value === 'bigint') {
+        out.push(`${value}n`);
       } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
         out.push(`${value}`);
       } else {

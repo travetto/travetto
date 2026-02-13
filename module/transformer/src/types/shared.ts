@@ -27,7 +27,7 @@ export type Import = {
 };
 
 /** Template Literal Types */
-export type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
+export type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor | BigIntConstructor;
 export type TemplateLiteral = { operation: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
 export function transformCast<T>(input: unknown): T {
