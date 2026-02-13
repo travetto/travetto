@@ -113,7 +113,7 @@ export function MaxLength(limit: number, message?: string): PropType<WithLength>
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Min<T extends number | Date>(limit: T, message?: string): PropType<NumericLikeIntrinsic> {
+export function Min<T extends NumericLikeIntrinsic>(limit: T, message?: string): PropType<NumericLikeIntrinsic | NumericLikeIntrinsic[]> {
   return input({ min: { limit, message } });
 }
 
@@ -124,7 +124,7 @@ export function Min<T extends number | Date>(limit: T, message?: string): PropTy
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Max<T extends number | Date>(limit: T, message?: string): PropType<NumericLikeIntrinsic> {
+export function Max<T extends NumericLikeIntrinsic>(limit: T, message?: string): PropType<NumericLikeIntrinsic | NumericLikeIntrinsic[]> {
   return input({ max: { limit, message } });
 }
 

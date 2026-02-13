@@ -1,4 +1,6 @@
 import { isUint8Array, isUint16Array, isUint32Array, isArrayBuffer } from 'node:util/types';
+import { Readable } from 'node:stream';
+
 import { type Class, type BinaryArray, type BinaryType, type BinaryStream, BinaryUtil, toConcrete } from '@travetto/runtime';
 
 type SchemaTypeConfig = {
@@ -27,6 +29,8 @@ export class SchemaTypeUtil {
     this.register(Uint16Array, isUint16Array);
     this.register(Uint32Array, isUint32Array);
     this.register(ArrayBuffer, isArrayBuffer);
+    this.register(ReadableStream, value => value instanceof ReadableStream);
+    this.register(Readable, value => value instanceof Readable);
     this.register(toConcrete<BinaryType>(), BinaryUtil.isBinaryType);
     this.register(toConcrete<BinaryArray>(), BinaryUtil.isBinaryArray);
     this.register(toConcrete<BinaryStream>(), BinaryUtil.isBinaryStream);

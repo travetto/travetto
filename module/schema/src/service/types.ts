@@ -1,4 +1,4 @@
-import type { Any, Class, IntrinsicType, Primitive } from '@travetto/runtime';
+import type { Any, Class, IntrinsicType, NumericLikeIntrinsic, Primitive } from '@travetto/runtime';
 
 import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
@@ -168,11 +168,11 @@ export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
   /**
    * Minimum value configuration
    */
-  min?: { limit: number | Date, message?: string };
+  min?: { limit: NumericLikeIntrinsic, message?: string };
   /**
    * Maximum value configuration
    */
-  max?: { limit: number | Date, message?: string };
+  max?: { limit: NumericLikeIntrinsic, message?: string };
   /**
    * Minimum length configuration
    */
