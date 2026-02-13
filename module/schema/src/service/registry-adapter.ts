@@ -303,7 +303,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return methodConfig;
   }
 
-  getMethodReturnType(method: string): Function {
+  getMethodReturnType(method: string): Class {
     return this.getMethod(method).returnType!.type;
   }
 
