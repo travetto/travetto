@@ -114,14 +114,10 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | NumericComparable): boolean {
+  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: NumericComparable): boolean {
     const config = input[key]!;
-    const parsed = (typeof value === 'string') ?
-      input.type === castTo(BigInt) ? BigInt(value.replace(/n$/, '')) :
-        (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
-      (value instanceof Date ? value.getTime() : value);
-
-    const boundary = (typeof config.limit === 'number' || typeof config.limit === 'bigint') ? config.limit : config.limit.getTime();
+    const parsed = (value instanceof Date ? value.getTime() : value);
+    const boundary = (config.limit instanceof Date) ? config.limit.getTime() : config.limit;
     return key === 'min' ? parsed < boundary : parsed > boundary;
   }
 
@@ -132,7 +128,7 @@ export class SchemaValidator {
    * @param value The actual value
    */
   static #validateInput(input: SchemaInputConfig, value: unknown): ValidationResult[] {
-    const criteria: ([string, SchemaInputConfig[ValidationKindCore]] | [string])[] = [];
+    const criteria: [string, SchemaInputConfig[ValidationKindCore]][] = [];
     const config = SchemaTypeUtil.getSchemaTypeConfig(input.type);
 
     if (config?.validate) {
@@ -140,7 +136,7 @@ export class SchemaValidator {
       switch (kind) {
         case undefined: break;
         case 'type': return [{ kind, type: input.type.name }];
-        default: criteria.push([kind]);
+        default: return [{ kind, value }];
       }
     } else if (PrimitiveTypes.has(input.type)) {
       if (typeof value !== input.type.name.toLowerCase()) {
