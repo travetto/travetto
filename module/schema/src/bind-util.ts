@@ -273,7 +273,7 @@ export class BindUtil {
       return value;
     }
     const complex = SchemaRegistryIndex.has(config.type);
-    const bindConfig: BindConfig | undefined = (config.type && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
+    const bindConfig: BindConfig | undefined = (complex && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
       if (complex) {
