@@ -217,6 +217,10 @@ export class SchemaValidator {
    * Validate the class level validations
    */
   static async #validateClassLevel<T>(cls: Class<T>, item: T, view?: string): Promise<ValidationError[]> {
+    if (!SchemaRegistryIndex.has(cls)) {
+      return [];
+    }
+
     const classConfig = SchemaRegistryIndex.getConfig(cls);
     const errors: ValidationError[] = [];
 
@@ -259,7 +263,7 @@ export class SchemaValidator {
     // Validate using standard behaviors
     const errors = [
       ...this.#validateFields(fields, item, ''),
-      ...(SchemaRegistryIndex.has(cls) ? await this.#validateClassLevel(cls, item, view) : [])
+      ...await this.#validateClassLevel(cls, item, view)
     ];
     if (errors.length) {
       throw new ValidationResultError(errors);
@@ -316,7 +320,7 @@ export class SchemaValidator {
       const i = param.index;
       errors.push(...[
         ... this.#validateInputSchema(param, params[i]),
-        ... (SchemaRegistryIndex.has(param.type) ? await this.#validateClassLevel(param.type, params[i]) : [])
+        ... await this.#validateClassLevel(param.type, params[i])
       ].map(error => {
         if (param.name && typeof param.name === 'string') {
           error.path = !prefixes[i] ?
