@@ -1,3 +1,4 @@
+import { CodecUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
 import type { LogFormatter, LogEvent } from '../types.ts';
@@ -26,7 +27,7 @@ export class GoogleLogFormatter implements LogFormatter {
       delete context.statusCode;
     }
 
-    return JSON.stringify({
+    return CodecUtil.toUTF8JSON({
       context,
       'logging.googleapis.com/sourceLocation': { file: `${event.module}/${event.modulePath}`, line: event.line },
       'logging.googleapis.com/labels': { module: event.module, scope: event.scope },

@@ -2,6 +2,7 @@ import { setMaxListeners } from 'node:events';
 import timers from 'node:timers/promises';
 
 import { type ManifestContext, path } from '@travetto/manifest';
+import { CodecUtil } from '@travetto/runtime';
 
 import { Log } from './log.ts';
 
@@ -77,7 +78,7 @@ export class CommonUtil {
    */
   static async writeStdout(level: number, data: unknown): Promise<void> {
     if (data === undefined) { return; }
-    process.stdout.write(`${JSON.stringify(data, undefined, level)}\n`) ||
+    process.stdout.write(`${CodecUtil.toUTF8JSON(data, undefined, level)}\n`) ||
       await new Promise(resolve => process.stdout.once('drain', resolve));
   };
 }

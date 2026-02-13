@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { cliTpl } from '@travetto/cli';
-import { Env, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { CodecUtil, Env, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { CommonPackConfig } from '../../src/types.ts';
 import { PackUtil } from './util.ts';
@@ -107,12 +107,12 @@ export class PackOperation {
     if (config.ejectFile) {
       yield* ActiveShellCommand.createFile(
         path.resolve(config.buildDirectory, file),
-        [JSON.stringify(pkg)]
+        [CodecUtil.toUTF8JSON(pkg, { indent: 2 })]
       );
     } else {
       await PackUtil.writeRawFile(
         path.resolve(config.buildDirectory, file),
-        [JSON.stringify(pkg, null, 2)]
+        [CodecUtil.toUTF8JSON(pkg, { indent: 2 })]
       );
     }
   }

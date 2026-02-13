@@ -87,7 +87,7 @@ export class PackageManager {
    * Write package
    */
   static async writePackageIfChanged(modulePath: string, pkg: Package): Promise<void> {
-    const final = JSON.stringify(pkg, null, 2);
+    const final = CodecUtil.toUTF8JSON(pkg, { indent: 2 });
     const target = path.resolve(modulePath, 'package.json');
     const current = (await fs.readFile(target, 'utf8').catch(() => '')).trim();
     if (final !== current) {

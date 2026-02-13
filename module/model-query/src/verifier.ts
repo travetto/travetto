@@ -1,6 +1,6 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
 import { DataUtil, ValidationResultError, type ValidationError, SchemaRegistryIndex } from '@travetto/schema';
-import type { Class } from '@travetto/runtime';
+import { CodecUtil, type Class } from '@travetto/runtime';
 
 import type { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
 
@@ -228,7 +228,7 @@ export class QueryVerifier {
         if (value === 1 || value === -1 || typeof value === 'boolean') {
           return;
         }
-        state.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSON.stringify(value)}`);
+        state.log(`Only true, false -1, and 1 are allowed for sorting, not ${CodecUtil.toUTF8JSON(value)}`);
       }
     });
   }

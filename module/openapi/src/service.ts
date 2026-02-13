@@ -2,7 +2,7 @@ import { createReadStream, existsSync } from 'node:fs';
 import type { OpenAPIObject } from 'openapi3-ts/oas31';
 import { stringify } from 'yaml';
 
-import { BinaryMetadataUtil, Util } from '@travetto/runtime';
+import { BinaryMetadataUtil, CodecUtil, Util } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerVisitUtil, type WebConfig } from '@travetto/web';
 
@@ -74,7 +74,7 @@ export class OpenApiService {
       const spec = await this.getSpec();
 
       const output = this.apiSpecConfig.output.endsWith('.json') ?
-        JSON.stringify(spec, undefined, 2) :
+        CodecUtil.toUTF8JSON(spec, { indent: 2 }) :
         stringify(spec);
 
       if (existsSync(this.apiSpecConfig.output)) {

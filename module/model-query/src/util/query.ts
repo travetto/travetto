@@ -21,7 +21,9 @@ export class ModelQueryUtil {
    * @returns
    */
   static resolveComparator(value: unknown): unknown {
-    if (typeof value === 'string' && TimeUtil.isTimeSpan(value)) {
+    if (typeof value === 'bigint') {
+      return value.toString();
+    } else if (typeof value === 'string' && TimeUtil.isTimeSpan(value)) {
       return TimeUtil.fromNow(value);
     } else {
       return value;

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { castTo, CodecUtil, type BinaryStream } from '@travetto/runtime';
+import { AppError, castTo, CodecUtil, type BinaryStream } from '@travetto/runtime';
 
 @Suite()
 export class CodecUtilTest {
@@ -163,5 +163,31 @@ export class CodecUtilTest {
     const collected: string[] = [];
     await CodecUtil.readLines(stream(), (line) => collected.push(line));
     assert.deepStrictEqual(collected, lines);
+  }
+
+  @Test()
+  async verifySerialize() {
+    const payload = {
+      err: new AppError('Uh-oh'),
+      count: 2000n
+    };
+
+    const plain = CodecUtil.jsonTOJSON(payload, { defaultReplacer: true, defaultReviver: false });
+    assert(typeof plain === 'object');
+    assert(plain);
+    assert('err' in plain);
+    assert(typeof plain.err === 'object');
+    assert(plain.err);
+    assert('$error' in plain.err);
+    assert('stack' in plain.err);
+    assert(typeof plain.err.stack === 'string');
+
+    console.error(plain);
+
+    const complex: typeof payload = CodecUtil.jsonTOJSON(plain, { defaultReplacer: false, defaultReviver: true });
+
+    assert(complex.err instanceof AppError);
+    assert(complex.err.stack === payload.err.stack);
+    assert(typeof complex.count === 'bigint');
   }
 }

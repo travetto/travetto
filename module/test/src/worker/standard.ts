@@ -1,13 +1,12 @@
 import { fork } from 'node:child_process';
 
-import { Env, RuntimeIndex } from '@travetto/runtime';
+import { CodecUtil, Env, RuntimeIndex } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
 import { TestWorkerEvents, type TestLogEvent } from './types.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
-import { CommunicationUtil } from '../communication.ts';
 
 const log = (message: string | TestLogEvent): void => {
   const event: TestLogEvent = typeof message === 'string' ? { type: 'log', message } : message;
@@ -39,7 +38,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async event => {
     try {
-      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = CommunicationUtil.deserializeFromObject(event);
+      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = CodecUtil.jsonTOJSON(event, { defaultReplacer: false });
       if (parsed.type === 'log') {
         log(parsed);
       } else if (parsed.type === 'removeTest') {
@@ -60,7 +59,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   // Wait for complete
   const completedEvent = await complete;
-  const result: { error?: unknown } = await CommunicationUtil.deserializeFromObject(completedEvent);
+  const result: { error?: unknown } = CodecUtil.jsonTOJSON(completedEvent, { defaultReplacer: false });
 
   // Kill on complete
   await channel.destroy();

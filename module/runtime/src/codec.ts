@@ -1,9 +1,64 @@
 import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
-import type { Any } from './types.ts';
+import { hasToJSON } from './types.ts';
+import { AppError } from './error.ts';
 
 type TextInput = string | BinaryArray;
+
+type Transformer = (this: unknown, key: string, value: unknown) => unknown;
+
+type JSONOutputConfig = {
+  replacer?: Transformer;
+  defaultReplacer?: boolean;
+  indent?: number;
+};
+
+type JSONInputConfig = {
+  reviver?: Transformer;
+  defaultReviver?: boolean;
+};
+
+function isFauxError(value: unknown): value is Error & { $error: true } {
+  return typeof value === 'object' && value !== null && '$error' in value;
+}
+
+const DEFAULT_REPLACER = (_: unknown, value: unknown): unknown => {
+  if (typeof value === 'bigint') {
+    return `${value.toString()}n`;
+  } else if (value instanceof Error) {
+    return {
+      $error: true,
+      ...hasToJSON(value) ? value.toJSON() : value,
+      name: value.name,
+      message: value.message,
+      stack: value.stack,
+    };
+  } else {
+    return value;
+  }
+};
+
+const DEFAULT_REVIVER = (_key: unknown, value: unknown): unknown => {
+  if (typeof value === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z$/.test(value)) {
+      return new Date(value);
+    } else if (/^-?d+n$/.test(value)) {
+      return BigInt(value.slice(0, -1));
+    }
+  } else if (isFauxError(value)) {
+    const error = AppError.fromJSON(value) ?? new Error();
+    if (!(error instanceof AppError)) {
+      const { $error: _, ...rest } = value;
+      Object.assign(error, rest);
+    }
+    error.message = value.message;
+    error.stack = value.stack;
+    error.name = value.name;
+    return error;
+  }
+  return value;
+};
 
 /**
  * Utilities for encoding and decoding common formats
@@ -67,7 +122,7 @@ export class CodecUtil {
   /**
    * Parse JSON safely
    */
-  static fromJSON<T>(input: TextInput, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
+  static fromJSON<T>(input: TextInput, config?: JSONInputConfig): T {
     if (typeof input !== 'string') {
       input = CodecUtil.toUTF8String(input);
     }
@@ -75,22 +130,60 @@ export class CodecUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return undefined as T;
     }
+
+    let reviver: Transformer | undefined = config?.reviver;
+    if (config?.defaultReviver !== false) {
+      if (reviver) {
+        const original = reviver;
+        reviver = (key: string, subValue: unknown): unknown =>
+          DEFAULT_REVIVER(key, original(key, subValue));
+      } else {
+        reviver = DEFAULT_REVIVER;
+      }
+    }
+
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, reviver);
   }
 
   /**
+   * JSON to UTF8
+   */
+  static toUTF8JSON(value: unknown, config?: JSONOutputConfig): string {
+    let replacer: Transformer | undefined = config?.replacer;
+    if (config?.defaultReplacer !== false) {
+      if (replacer) {
+        const original = replacer;
+        replacer = (key: string, subValue: unknown): unknown =>
+          DEFAULT_REPLACER(key, original(key, subValue));
+      } else {
+        replacer = DEFAULT_REPLACER;
+      }
+    }
+
+    return JSON.stringify(value, replacer, config?.indent);
+  }
+
+  /**
    * JSON to bytes
    */
-  static toJSON(value: Any, replacer?: (this: unknown, key: string, value: Any) => unknown): BinaryArray {
-    return CodecUtil.fromUTF8String(JSON.stringify(value, replacer));
+  static toJSON(value: unknown, config?: JSONOutputConfig): BinaryArray {
+    return this.fromUTF8String(this.toUTF8JSON(value, config));
   }
 
   /**
    * Encode JSON value as base64 encoded string
    */
-  static toBase64JSON<T>(value: T): string {
-    return CodecUtil.utf8ToBase64(JSON.stringify(value));
+  static toBase64JSON<T>(value: T, config?: JSONOutputConfig): string {
+    return CodecUtil.utf8ToBase64(this.toUTF8JSON(value, config));
+  }
+
+  /**
+   * JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value
+   */
+  static jsonTOJSON<T, R>(input: T, config: JSONInputConfig & JSONOutputConfig): R {
+    const json = this.toJSON(input, config);
+    return this.fromJSON<R>(json, config);
   }
 
   /**

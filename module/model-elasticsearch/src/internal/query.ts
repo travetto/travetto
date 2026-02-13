@@ -75,9 +75,14 @@ export class ElasticsearchQueryUtil {
         ((property === 'id' && !path) ? '_id' : `${path}${property}`) :
         `${path}${property}`;
 
+      const cleanValue = (value: unknown): unknown =>
+        typeof value === 'bigint' ? value.toString() :
+          Array.isArray(value) ? value.map(cleanValue) :
+            value;
+
       const subPathQuery = (value: unknown): {} => (property === 'id' && !path) ?
         { ids: { values: Array.isArray(value) ? value : [value] } } :
-        { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
+        { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: cleanValue(value) } };
 
       if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
@@ -88,7 +93,7 @@ export class ElasticsearchQueryUtil {
             inner
           );
         } else {
-          const value = top[subKey];
+          const value = cleanValue(top[subKey]);
 
           switch (subKey) {
             case '$all': {
