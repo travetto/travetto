@@ -34,11 +34,11 @@ export class ControllerVisitUtil {
       }
 
       await visitor.onEndpointStart?.(endpoint, controller);
-      if (endpointSchema.returnType && SchemaRegistryIndex.has(endpointSchema.returnType.type)) {
+      if (endpointSchema.returnType) {
         await this.#onSchemaEvent(visitor, endpointSchema.returnType.type);
       }
       for (const param of endpointSchema.parameters) {
-        if (param.type && SchemaRegistryIndex.has(param.type)) {
+        if (param.type) {
           await this.#onSchemaEvent(visitor, param.type);
         }
       }
