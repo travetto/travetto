@@ -26,7 +26,7 @@ export type SchemaBasicType = {
   /**
    * The function tied to the type
    */
-  type: Function;
+  type: Class;
   /**
    * Is the field a foreign type
    */

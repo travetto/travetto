@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { type Class, classConstruct, describeFunction, safeAssign } from '@travetto/runtime';
+import { castTo, type Class, classConstruct, describeFunction, safeAssign } from '@travetto/runtime';
 import { CONSTRUCTOR_PROPERTY, SchemaRegistryIndex } from '@travetto/schema';
 
 import { type InjectableConfig, getDefaultQualifier, type InjectableCandidate } from '../types.ts';
@@ -64,7 +64,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   finalize(): void {
     for (const method of Object.keys(this.#config.candidates)) {
       const candidate = this.#config.candidates[method];
-      const candidateType = SchemaRegistryIndex.get(candidate.class).getMethodReturnType(method);
+      const candidateType: Class = castTo(SchemaRegistryIndex.get(candidate.class).getMethodReturnType(method));
       candidate.candidateType = candidateType;
       candidate.qualifier ??= getDefaultQualifier(candidateType);
     }

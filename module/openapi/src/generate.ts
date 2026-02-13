@@ -77,7 +77,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Get the type for a given class
    */
   #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
-    let field: { type: Class<unknown>, precision?: [number, number | undefined] };
+    let field: { type: Class, precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
       field = { type: inputOrClass };
     } else {
@@ -149,10 +149,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       config.minLength = input.minlength.limit;
     }
     if (input.min) {
-      config.minimum = typeof input.min.limit === 'number' ? input.min.limit : input.min.limit.getTime();
+      config.minimum = input.min.limit instanceof Date ? input.min.limit.getTime() : input.min.limit;
     }
     if (input.max) {
-      config.maximum = typeof input.max.limit === 'number' ? input.max.limit : input.max.limit.getTime();
+      config.maximum = input.max.limit instanceof Date ? input.max.limit.getTime() : input.max.limit;
     }
     if (input.enum) {
       config.enum = input.enum.values;

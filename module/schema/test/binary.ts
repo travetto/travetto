@@ -96,9 +96,9 @@ class BinaryTest {
       }),
       globalStream: Readable.from([Buffer.from([21])]),
 
-      data: Readable.from([Buffer.from([22])]) as BinaryStream,
-      byteArray: new Uint16Array([23, 24]) as BinaryArray,
-      type: Buffer.from([25]) as BinaryType,
+      data: castTo<Readable>(Readable.from([Buffer.from([22])])),
+      byteArray: castTo<Uint16Array>(new Uint16Array([23, 24])),
+      type: castTo<Buffer>(Buffer.from([25])),
 
       unit8Array: new Uint8Array([26, 27]),
       unit16Array: new Uint16Array([28, 29]),
