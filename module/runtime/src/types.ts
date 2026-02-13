@@ -18,7 +18,7 @@ export type NumericPrimitive = number | bigint;
 export type Primitive = NumericPrimitive | boolean | string;
 export type NumericLikeIntrinsic = Date | NumericPrimitive;
 
-export type IntrinsicType = Primitive | Date | Readable | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Buffer | Blob | File;
+export type IntrinsicType = Primitive | Date | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Readable | Buffer | Blob | File;
 
 export type DeepPartial<T> = {
   [P in keyof T]?: (T[P] extends (IntrinsicType | undefined) ? (T[P] | undefined) :
@@ -27,7 +27,7 @@ export type DeepPartial<T> = {
 
 export type ValidFields<T, I> = {
   [K in keyof T]:
-  (T[K] extends (I | undefined) ? K :
+  (T[K] extends (Primitive | I | undefined) ? K :
     (T[K] extends (Function | undefined) ? never :
       K))
 }[keyof T];

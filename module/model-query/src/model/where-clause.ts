@@ -4,7 +4,7 @@ import type { Point } from '@travetto/schema';
 export type QueryPrimitive = Primitive | Date | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
-export type RetainQueryPrimitiveFields<T> = ValidFields<T, Primitive | Date | Point>;
+export type RetainQueryPrimitiveFields<T> = Pick<T, ValidFields<T, QueryPrimitive>>;
 
 type General<T> = {
   $eq?: T;
