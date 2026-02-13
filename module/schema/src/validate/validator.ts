@@ -263,7 +263,7 @@ export class SchemaValidator {
     // Validate using standard behaviors
     const errors = [
       ...this.#validateFields(fields, item, ''),
-      ...await this.#validateClassLevel(cls, item, view)
+      ... await this.#validateClassLevel(cls, item, view)
     ];
     if (errors.length) {
       throw new ValidationResultError(errors);
