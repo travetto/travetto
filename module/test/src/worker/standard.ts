@@ -17,7 +17,7 @@ const log = (message: string | TestLogEvent): void => {
  *  Produce a handler for the child worker
  */
 export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun | TestDiffInput): Promise<void> {
-  log(`Worker Input ${JSON.stringify(run)}`);
+  log(`Worker Input ${CodecUtil.toUTF8JSON(run)}`);
 
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(
@@ -42,7 +42,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
       if (parsed.type === 'log') {
         log(parsed);
       } else if (parsed.type === 'removeTest') {
-        log(`Received remove event ${JSON.stringify(event)}@${consumer.constructor.name}`);
+        log(`Received remove event ${CodecUtil.toUTF8JSON(event)}@${consumer.constructor.name}`);
         consumer.onRemoveEvent?.(parsed); // Forward remove events
       } else {
         consumer.onEvent(parsed);  // Forward standard events

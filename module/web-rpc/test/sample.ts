@@ -97,7 +97,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify([{
+      body: CodecUtil.toUTF8JSON([{
         text: 'A new item',
         userId: 'its a me'
       }])
@@ -116,7 +116,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify([])
+      body: CodecUtil.toUTF8JSON([])
     });
 
     assert(Array.isArray(list));
@@ -133,7 +133,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify([
+      body: CodecUtil.toUTF8JSON([
         list[0].id
       ])
     });
