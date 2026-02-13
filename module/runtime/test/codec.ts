@@ -24,14 +24,23 @@ export class CodecUtilTest {
   @Test()
   async parseSafeWithReviver() {
     const json = '{"date":"2025-12-21"}';
-    const obj: { date: Date } = CodecUtil.fromJSON(json, (key, value) => {
-      if (key === 'date') {
-        return new Date(value);
+    const obj: { date: Date } = CodecUtil.fromJSON(json, {
+      reviver: (key, value) => {
+        if (key === 'date' && typeof value === 'string') {
+          return new Date(value);
+        }
+        return value;
       }
-      return value;
     });
     assert(obj.date instanceof Date);
     assert.strictEqual(obj.date.toISOString().split('T')[0], '2025-12-21');
+
+
+    const obj2: { date: Date } = CodecUtil.fromJSON(CodecUtil.toUTF8JSON({
+      date: new Date('2025-12-21')
+    }));
+    assert(obj2.date instanceof Date);
+    assert.strictEqual(obj2.date.toISOString().split('T')[0], '2025-12-21');
   }
 
   @Test()
@@ -172,7 +181,7 @@ export class CodecUtilTest {
       count: 2000n
     };
 
-    const plain = CodecUtil.jsonTOJSON(payload, { defaultReplacer: true, defaultReviver: false });
+    const plain = CodecUtil.jsonTOJSON(payload, { defaultReviver: false });
     assert(typeof plain === 'object');
     assert(plain);
     assert('err' in plain);
@@ -182,9 +191,7 @@ export class CodecUtilTest {
     assert('stack' in plain.err);
     assert(typeof plain.err.stack === 'string');
 
-    console.error(plain);
-
-    const complex: typeof payload = CodecUtil.jsonTOJSON(plain, { defaultReplacer: false, defaultReviver: true });
+    const complex: typeof payload = CodecUtil.jsonTOJSON(plain, { defaultReviver: true });
 
     assert(complex.err instanceof AppError);
     assert(complex.err.stack === payload.err.stack);

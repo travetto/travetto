@@ -107,7 +107,8 @@ export class CliUtil {
    * Write data to channel and ensure its flushed before continuing
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
-    return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data : CodecUtil.toUTF8JSON(data), () => resolve()));
+    return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data :
+      CodecUtil.toUTF8JSON(data, { indent: 2 }), () => resolve()));
   }
 
   /**

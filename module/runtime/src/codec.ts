@@ -1,12 +1,12 @@
 import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
-import { hasToJSON } from './types.ts';
+import { hasToJSON, type Any } from './types.ts';
 import { AppError } from './error.ts';
 
 type TextInput = string | BinaryArray;
 
-type Transformer = (this: unknown, key: string, value: unknown) => unknown;
+type Transformer = (this: unknown, key: string, value: unknown, target?: unknown) => unknown;
 
 type JSONOutputConfig = {
   replacer?: Transformer;
@@ -19,31 +19,35 @@ type JSONInputConfig = {
   defaultReviver?: boolean;
 };
 
+const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
+const BIGINT_REGEX = /^-?\d+n$/;
+
 function isFauxError(value: unknown): value is Error & { $error: true } {
-  return typeof value === 'object' && value !== null && '$error' in value;
+  return typeof value === 'object' && !!value && '$error' in value;
 }
 
-const DEFAULT_REPLACER = (_: unknown, value: unknown): unknown => {
-  if (typeof value === 'bigint') {
-    return `${value.toString()}n`;
-  } else if (value instanceof Error) {
+const DEFAULT_REPLACER = function (this: Any, key: string | symbol, value: unknown): unknown {
+  const rawValue = this[key];
+  if (typeof rawValue === 'bigint') {
+    return `${rawValue.toString()}n`;
+  } else if (rawValue instanceof Error) {
     return {
       $error: true,
-      ...hasToJSON(value) ? value.toJSON() : value,
-      name: value.name,
-      message: value.message,
-      stack: value.stack,
+      ...hasToJSON(rawValue) ? rawValue.toJSON() : rawValue,
+      name: rawValue.name,
+      message: rawValue.message,
+      stack: rawValue.stack,
     };
   } else {
     return value;
   }
 };
 
-const DEFAULT_REVIVER = (_key: unknown, value: unknown): unknown => {
+const DEFAULT_REVIVER = function (this: Any, _key: string | symbol, value: unknown): unknown {
   if (typeof value === 'string') {
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z$/.test(value)) {
+    if (ISO_8601_REGEX.test(value)) {
       return new Date(value);
-    } else if (/^-?d+n$/.test(value)) {
+    } else if (BIGINT_REGEX.test(value)) {
       return BigInt(value.slice(0, -1));
     }
   } else if (isFauxError(value)) {

@@ -29,11 +29,11 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
 
   /** Convert from JSON object */
   static fromJSON(error: unknown): AppError | undefined {
-    if (!!error && typeof error === 'object' &&
+    if (typeof error === 'object' && !!error &&
       ('message' in error && typeof error.message === 'string') &&
       ('category' in error && typeof error.category === 'string') &&
       ('type' in error && typeof error.type === 'string') &&
-      ('at' in error && typeof error.at === 'string')
+      ('at' in error && (typeof error.at === 'string' || error.at instanceof Date))
     ) {
       return new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(error));
     }
