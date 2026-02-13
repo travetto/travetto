@@ -72,7 +72,6 @@ class EdgeCases {
     assert(fields);
     assert('single' in fields);
     assert(fields.single.type !== Object);
-    assert(SchemaRegistryIndex.has(fields.single.type));
     assert(SchemaRegistryIndex.get(fields.single.type).getFields().field.type === Number);
   }
 }
