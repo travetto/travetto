@@ -27,7 +27,7 @@ function isFauxError(value: unknown): value is Error & { $error: true } {
 }
 
 const DEFAULT_REPLACER = function (this: Any, key: string | symbol, value: unknown): unknown {
-  const rawValue = this[key];
+  const rawValue = this ? this[key] : value;
   if (typeof rawValue === 'bigint') {
     return `${rawValue.toString()}n`;
   } else if (rawValue instanceof Error) {

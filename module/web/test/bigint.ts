@@ -96,8 +96,8 @@ class BigIntWebTest extends BaseWebSuite {
 
     assert(response1.body);
     // BigInt values are serialized as strings with 'n' suffix in JSON responses
-    assert.strictEqual(response1.body.id, '123n');
-    assert.strictEqual(response1.body.value, '456789012345678901234567890n');
+    assert.strictEqual(response1.body.id, 123n);
+    assert.strictEqual(response1.body.value, 456789012345678901234567890n);
     assert.strictEqual(response1.body.name, 'test');
 
     // Send bigint as numeric string (without 'n' suffix)
@@ -107,8 +107,8 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response2.body);
-    assert.strictEqual(response2.body.id, '999n');
-    assert.strictEqual(response2.body.value, '123456789012345n');
+    assert.strictEqual(response2.body.id, 999n);
+    assert.strictEqual(response2.body.value, 123456789012345n);
     assert.strictEqual(response2.body.name, 'test2');
 
     // Send bigint as number (for values within safe integer range)
@@ -118,8 +118,8 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response3.body);
-    assert.strictEqual(response3.body.id, '42n');
-    assert.strictEqual(response3.body.value, '9007199254740991n');
+    assert.strictEqual(response3.body.id, 42n);
+    assert.strictEqual(response3.body.value, 9007199254740991n);
     assert.strictEqual(response3.body.name, 'test3');
   }
 
@@ -135,7 +135,7 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response1.body);
-    assert.strictEqual(response1.body.value, '123456789n');
+    assert.strictEqual(response1.body.value, 123456789n);
 
     // BigInt as numeric string
     const response2 = await this.request<{ value: string }>({
@@ -147,7 +147,7 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response2.body);
-    assert.strictEqual(response2.body.value, '987654321n');
+    assert.strictEqual(response2.body.value, 987654321n);
 
     // BigInt as number
     const response3 = await this.request<{ value: string }>({
@@ -159,7 +159,7 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response3.body);
-    assert.strictEqual(response3.body.value, '999n');
+    assert.strictEqual(response3.body.value, 999n);
   }
 
   @Test()
@@ -171,9 +171,9 @@ class BigIntWebTest extends BaseWebSuite {
 
     assert(response1.body);
     assert.strictEqual(response1.body.values.length, 3);
-    assert.strictEqual(response1.body.values[0], '1n');
-    assert.strictEqual(response1.body.values[1], '2n');
-    assert.strictEqual(response1.body.values[2], '3n');
+    assert.strictEqual(response1.body.values[0], 1n);
+    assert.strictEqual(response1.body.values[1], 2n);
+    assert.strictEqual(response1.body.values[2], 3n);
 
     const response2 = await this.request<{ values: string[] }>({
       context: { httpMethod: 'POST', path: '/test/bigint/array' },
@@ -182,9 +182,9 @@ class BigIntWebTest extends BaseWebSuite {
 
     assert(response2.body);
     assert.strictEqual(response2.body.values.length, 3);
-    assert.strictEqual(response2.body.values[0], '100n');
-    assert.strictEqual(response2.body.values[1], '200n');
-    assert.strictEqual(response2.body.values[2], '300n');
+    assert.strictEqual(response2.body.values[0], 100n);
+    assert.strictEqual(response2.body.values[1], 200n);
+    assert.strictEqual(response2.body.values[2], 300n);
 
     const response3 = await this.request<{ values: string[] }>({
       context: { httpMethod: 'POST', path: '/test/bigint/array' },
@@ -193,9 +193,9 @@ class BigIntWebTest extends BaseWebSuite {
 
     assert(response3.body);
     assert.strictEqual(response3.body.values.length, 3);
-    assert.strictEqual(response3.body.values[0], '10n');
-    assert.strictEqual(response3.body.values[1], '20n');
-    assert.strictEqual(response3.body.values[2], '30n');
+    assert.strictEqual(response3.body.values[0], 10n);
+    assert.strictEqual(response3.body.values[1], 20n);
+    assert.strictEqual(response3.body.values[2], 30n);
   }
 
   @Test()
@@ -210,9 +210,9 @@ class BigIntWebTest extends BaseWebSuite {
 
     assert(response1.body);
     assert.strictEqual(response1.body.values.length, 3);
-    assert.strictEqual(response1.body.values[0], '1n');
-    assert.strictEqual(response1.body.values[1], '2n');
-    assert.strictEqual(response1.body.values[2], '3n');
+    assert.strictEqual(response1.body.values[0], 1n);
+    assert.strictEqual(response1.body.values[1], 2n);
+    assert.strictEqual(response1.body.values[2], 3n);
 
     const response2 = await this.request<{ values: string[] }>({
       context: {
@@ -224,9 +224,9 @@ class BigIntWebTest extends BaseWebSuite {
 
     assert(response2.body);
     assert.strictEqual(response2.body.values.length, 3);
-    assert.strictEqual(response2.body.values[0], '100n');
-    assert.strictEqual(response2.body.values[1], '200n');
-    assert.strictEqual(response2.body.values[2], '300n');
+    assert.strictEqual(response2.body.values[0], 100n);
+    assert.strictEqual(response2.body.values[1], 200n);
+    assert.strictEqual(response2.body.values[2], 300n);
   }
 
   @Test()
@@ -238,7 +238,7 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response1.body);
-    assert.strictEqual(response1.body.amount, '500n');
+    assert.strictEqual(response1.body.amount, 500n);
 
     // Below minimum
     const response2 = await this.request<{ message: string }>({
@@ -268,8 +268,8 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response1.body);
-    assert.strictEqual(response1.body.required, '100n');
-    assert.strictEqual(response1.body.optional, '200n');
+    assert.strictEqual(response1.body.required, 100n);
+    assert.strictEqual(response1.body.optional, 200n);
 
     // Without optional
     const response2 = await this.request<{ required: string, optional?: string }>({
@@ -278,7 +278,7 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response2.body);
-    assert.strictEqual(response2.body.required, '100n');
+    assert.strictEqual(response2.body.required, 100n);
     assert(response2.body.optional === undefined);
 
     // Missing required
@@ -304,7 +304,7 @@ class BigIntWebTest extends BaseWebSuite {
     });
 
     assert(response.body);
-    assert.strictEqual(response.body.bigIntValue, '9007199254740991n');
+    assert.strictEqual(response.body.bigIntValue, 9007199254740991n);
     assert.strictEqual(response.body.numberValue, 42.5);
     assert.strictEqual(response.body.stringValue, 'hello');
     assert.strictEqual(response.body.booleanValue, true);
@@ -343,7 +343,7 @@ class BigIntWebTest extends BaseWebSuite {
 
     assert(response.body);
     // BigInt serialized back as string with 'n' suffix
-    assert.strictEqual(response.body.value, '99999999999999999999999999999n');
+    assert.strictEqual(response.body.value, 99999999999999999999999999999n);
     assert.strictEqual(response.body.name, 'large');
   }
 
@@ -358,9 +358,9 @@ class BigIntWebTest extends BaseWebSuite {
     assert(response.body);
 
     // BigInt values are serialized as strings with 'n' suffix in JSON
-    assert.strictEqual(typeof response.body.id, 'string');
-    assert.strictEqual(typeof response.body.value, 'string');
-    assert.strictEqual(response.body.id, '123n');
-    assert.strictEqual(response.body.value, '456n');
+    assert.strictEqual(typeof response.body.id, 'bigint');
+    assert.strictEqual(typeof response.body.value, 'bigint');
+    assert.strictEqual(response.body.id, 123n);
+    assert.strictEqual(response.body.value, 456n);
   }
 }
