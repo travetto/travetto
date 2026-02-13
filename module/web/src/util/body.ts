@@ -9,6 +9,7 @@ import { WebError } from '../types/error.ts';
 const WebRawBinarySymbol = Symbol();
 
 const NULL_TERMINATOR = BinaryUtil.makeBinaryArray(0);
+const BIGINT_REPLACER = (_: unknown, value: unknown): unknown => typeof value === 'bigint' ? `${value.toString()}n` : value;
 
 /**
  * Utility classes for supporting web body operations
@@ -109,11 +110,11 @@ export class WebBodyUtil {
       if (typeof body === 'string') {
         text = body;
       } else if (hasToJSON(body)) {
-        text = JSON.stringify(body.toJSON());
+        text = JSON.stringify(body.toJSON(), BIGINT_REPLACER);
       } else if (body instanceof Error) {
         text = JSON.stringify({ message: body.message });
       } else {
-        text = JSON.stringify(body);
+        text = JSON.stringify(body, BIGINT_REPLACER);
       }
       const bytes = CodecUtil.fromUTF8String(text);
       out.headers.set('Content-Length', `${bytes.byteLength}`);

@@ -4,7 +4,7 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import { type EndpointConfig, type ControllerConfig, type EndpointParameterConfig, type ControllerVisitor, HTTP_METHODS } from '@travetto/web';
-import { AppError, type Class, describeFunction } from '@travetto/runtime';
+import { AppError, castTo, type Class, describeFunction } from '@travetto/runtime';
 import {
   type SchemaFieldConfig, type SchemaClassConfig, SchemaNameResolver,
   type SchemaInputConfig, SchemaRegistryIndex, type SchemaBasicType, type SchemaParameterConfig
@@ -93,6 +93,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     } else {
       switch (field.type) {
         case String: out.type = 'string'; break;
+        case castTo(BigInt):
+          out.type = 'integer';
+          out.format = 'int64';
+          break;
         case Number: {
           if (field.precision) {
             const [, decimals] = field.precision;
@@ -149,10 +153,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       config.minLength = input.minlength.limit;
     }
     if (input.min) {
-      config.minimum = input.min.limit instanceof Date ? input.min.limit.getTime() : input.min.limit;
+      config.minimum = input.min.limit instanceof Date ? input.min.limit.getTime() : castTo(input.min.limit);
     }
     if (input.max) {
-      config.maximum = input.max.limit instanceof Date ? input.max.limit.getTime() : input.max.limit;
+      config.maximum = input.max.limit instanceof Date ? input.max.limit.getTime() : castTo(input.max.limit);
     }
     if (input.enum) {
       config.enum = input.enum.values;
