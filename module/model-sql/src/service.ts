@@ -253,8 +253,7 @@ export class SQLModelService implements
   @Connected()
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
-    const { records } = await this.#exec<{ total: string | number }>(this.#dialect.getQueryCountSQL(cls, ModelQueryUtil.getWhereClause(cls, query.where)));
-    return +records[0].total;
+    return this.#dialect.getCountForQuery(cls, query);
   }
 
   @Connected()

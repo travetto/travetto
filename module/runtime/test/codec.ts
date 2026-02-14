@@ -181,7 +181,7 @@ export class CodecUtilTest {
       count: 2000n
     };
 
-    const plain = CodecUtil.jsonTOJSON(payload, { defaultReviver: false });
+    const plain = CodecUtil.toJSONObject(payload, { reviver: false });
     assert(typeof plain === 'object');
     assert(plain);
     assert('err' in plain);
@@ -191,7 +191,7 @@ export class CodecUtilTest {
     assert('stack' in plain.err);
     assert(typeof plain.err.stack === 'string');
 
-    const complex: typeof payload = CodecUtil.jsonTOJSON(plain, { defaultReviver: true });
+    const complex: typeof payload = CodecUtil.toJSONObject(plain);
 
     assert(complex.err instanceof AppError);
     assert(complex.err.stack === payload.err.stack);

@@ -1,5 +1,5 @@
 /* eslint-disable @stylistic/indent */
-import { DataUtil, type SchemaFieldConfig, Schema, SchemaRegistryIndex, type Point } from '@travetto/schema';
+import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { type Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete, CodecUtil } from '@travetto/runtime';
 import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil } from '@travetto/model-query';
 import type { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
@@ -8,6 +8,9 @@ import { SQLModelUtil } from '../util.ts';
 import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
 import type { Connection } from '../connection/base.ts';
 import type { VisitStack } from '../types.ts';
+
+const toNumber = (value: unknown): number =>
+  typeof value === 'number' ? value : (typeof value === 'bigint' ? Number(value) : 0);
 
 const PointConcrete = toConcrete<Point>();
 
@@ -21,11 +24,6 @@ export type SQLTableDescription = {
   foreignKeys: { name: string, from_column: string, to_column: string, to_table: string }[];
   indices: { name: string, columns: { name: string, desc: boolean }[], is_unique: boolean }[];
 };
-
-@Schema()
-class Total {
-  total: number;
-}
 
 function makeField(name: string, type: Class, required: boolean, extra: Partial<SchemaFieldConfig>): SchemaFieldConfig {
   return {
@@ -212,6 +210,8 @@ export abstract class SQLDialect implements DialectState {
       }
     } else if (config.type === Boolean) {
       return `${value ? 'TRUE' : 'FALSE'}`;
+    } else if (config.type === castTo(BigInt)) {
+      return value.toString();
     } else if (config.type === Number) {
       return `${value}`;
     } else if (config.type === Date) {
@@ -234,7 +234,9 @@ export abstract class SQLDialect implements DialectState {
   getColumnType(config: SchemaFieldConfig): string {
     let type: string = '';
 
-    if (config.type === Number) {
+    if (config.type === castTo(BigInt)) {
+      type = this.COLUMN_TYPES.BIGINT;
+    } else if (config.type === Number) {
       type = this.COLUMN_TYPES.INT;
       if (config.precision) {
         const [digits, decimals] = config.precision;
@@ -290,18 +292,21 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Delete query and return count removed
    */
-  async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number> {
+  async deleteAndGetCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
     const { count } = await this.executeSQL<T>(this.getDeleteSQL(SQLModelUtil.classToStack(cls), query.where));
-    return count;
+    return toNumber(count);
   }
 
   /**
    * Get the count for a given query
    */
-  async getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number> {
-    const { records } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query.where));
-    const [record] = records;
-    return Total.from(record).total;
+  async getCountForQuery<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
+    const { records } = await this.executeSQL<{ total: number }>(
+      this.getQueryCountSQL(cls,
+        ModelQueryUtil.getWhereClause(cls, query.where)
+      )
+    );
+    return toNumber(records[0].total);
   }
 
   /**

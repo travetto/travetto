@@ -12,7 +12,7 @@ import { TestConsumer } from '../decorator.ts';
 export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsumerShape {
 
   sendPayload(payload: unknown & { type: string }): void {
-    this.send(payload.type, CodecUtil.jsonTOJSON(payload, { defaultReviver: false }));
+    this.send(payload.type, CodecUtil.toJSONObject(payload));
   }
 
   onEvent(event: TestEvent): void {

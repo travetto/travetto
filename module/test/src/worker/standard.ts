@@ -38,7 +38,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async event => {
     try {
-      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = CodecUtil.jsonTOJSON(event, { defaultReplacer: false });
+      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = CodecUtil.toJSONObject(event);
       if (parsed.type === 'log') {
         log(parsed);
       } else if (parsed.type === 'removeTest') {
@@ -59,7 +59,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   // Wait for complete
   const completedEvent = await complete;
-  const result: { error?: unknown } = CodecUtil.jsonTOJSON(completedEvent, { defaultReplacer: false });
+  const result: { error?: unknown } = CodecUtil.toJSONObject(completedEvent);
 
   // Kill on complete
   await channel.destroy();

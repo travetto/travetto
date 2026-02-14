@@ -13,7 +13,7 @@ import type { FirestoreModelConfig } from './config.ts';
 const clone = structuredClone;
 
 const toSimpleObject = <T>(input: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
-  CodecUtil.jsonTOJSON(input, {
+  CodecUtil.toJSONObject(input, {
     replacer: (_, value) => value ?? null,
     reviver: (_, value) => value ?? missingValue
   });

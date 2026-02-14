@@ -1,47 +1,33 @@
 import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
-import { hasToJSON, type Any } from './types.ts';
+import { type Any } from './types.ts';
 import { AppError } from './error.ts';
 
 type TextInput = string | BinaryArray;
 
 type Transformer = (this: unknown, key: string, value: unknown, target?: unknown) => unknown;
 
+Object.defineProperty(BigInt.prototype, 'toJSON', {
+  value() { return `${this.toString()}n`; }
+});
+
 type JSONOutputConfig = {
   replacer?: Transformer;
-  defaultReplacer?: boolean;
   indent?: number;
 };
 
 type JSONInputConfig = {
-  reviver?: Transformer;
-  defaultReviver?: boolean;
+  reviver?: Transformer | false;
+};
+
+type JSONInputOutputConfig = {
+  replacer?: Transformer;
+  reviver?: Transformer | false;
 };
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
 const BIGINT_REGEX = /^-?\d+n$/;
-
-function isFauxError(value: unknown): value is Error & { $error: true } {
-  return typeof value === 'object' && !!value && '$error' in value;
-}
-
-const DEFAULT_REPLACER = function (this: Any, key: string | symbol, value: unknown): unknown {
-  const rawValue = this ? this[key] : value;
-  if (typeof rawValue === 'bigint') {
-    return `${rawValue.toString()}n`;
-  } else if (rawValue instanceof Error) {
-    return {
-      $error: true,
-      ...hasToJSON(rawValue) ? rawValue.toJSON() : rawValue,
-      name: rawValue.name,
-      message: rawValue.message,
-      stack: rawValue.stack,
-    };
-  } else {
-    return value;
-  }
-};
 
 const DEFAULT_REVIVER = function (this: Any, _key: string | symbol, value: unknown): unknown {
   if (typeof value === 'string') {
@@ -50,16 +36,8 @@ const DEFAULT_REVIVER = function (this: Any, _key: string | symbol, value: unkno
     } else if (BIGINT_REGEX.test(value)) {
       return BigInt(value.slice(0, -1));
     }
-  } else if (isFauxError(value)) {
-    const error = AppError.fromJSON(value) ?? new Error();
-    if (!(error instanceof AppError)) {
-      const { $error: _, ...rest } = value;
-      Object.assign(error, rest);
-    }
-    error.message = value.message;
-    error.stack = value.stack;
-    error.name = value.name;
-    return error;
+  } else if (AppError.isJSON(value)) {
+    return AppError.fromJSON(value) ?? value;
   }
   return value;
 };
@@ -135,16 +113,7 @@ export class CodecUtil {
       return undefined as T;
     }
 
-    let reviver: Transformer | undefined = config?.reviver;
-    if (config?.defaultReviver !== false) {
-      if (reviver) {
-        const original = reviver;
-        reviver = (key: string, subValue: unknown): unknown =>
-          DEFAULT_REVIVER(key, original(key, subValue));
-      } else {
-        reviver = DEFAULT_REVIVER;
-      }
-    }
+    const reviver = config?.reviver === false ? undefined : config?.reviver ?? DEFAULT_REVIVER;
 
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, reviver);
@@ -154,18 +123,7 @@ export class CodecUtil {
    * JSON to UTF8
    */
   static toUTF8JSON(value: unknown, config?: JSONOutputConfig): string {
-    let replacer: Transformer | undefined = config?.replacer;
-    if (config?.defaultReplacer !== false) {
-      if (replacer) {
-        const original = replacer;
-        replacer = (key: string, subValue: unknown): unknown =>
-          DEFAULT_REPLACER(key, original(key, subValue));
-      } else {
-        replacer = DEFAULT_REPLACER;
-      }
-    }
-
-    return JSON.stringify(value, replacer, config?.indent);
+    return JSON.stringify(value, config?.replacer, config?.indent);
   }
 
   /**
@@ -185,7 +143,7 @@ export class CodecUtil {
   /**
    * JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value
    */
-  static jsonTOJSON<T, R>(input: T, config: JSONInputConfig & JSONOutputConfig): R {
+  static toJSONObject<T, R>(input: T, config?: JSONInputOutputConfig): R {
     const json = this.toJSON(input, config);
     return this.fromJSON<R>(json, config);
   }
