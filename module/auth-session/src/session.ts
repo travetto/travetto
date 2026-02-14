@@ -1,4 +1,5 @@
-import { type AnyMap, castKey, castTo, CodecUtil } from '@travetto/runtime';
+import { type AnyMap, castKey, castTo, JSONUtil } from '@travetto/runtime';
+
 
 /**
  * @concrete
@@ -57,7 +58,7 @@ export class Session<T extends SessionData = SessionData> {
     this.#expiresAtLoaded = this.expiresAt ?? new Date();
 
     // Hash the session as it stands
-    this.#payload = CodecUtil.toUTF8JSON(this);
+    this.#payload = JSONUtil.toUTF8JSON(this);
   }
 
   /**
@@ -79,7 +80,7 @@ export class Session<T extends SessionData = SessionData> {
    * Determine if session has changed
    */
   isChanged(): boolean {
-    return this.isTimeChanged() || this.#payload !== CodecUtil.toUTF8JSON(this);
+    return this.isTimeChanged() || this.#payload !== JSONUtil.toUTF8JSON(this);
   }
 
   /**

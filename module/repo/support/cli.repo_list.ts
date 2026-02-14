@@ -1,5 +1,5 @@
 import { type CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
-import { CodecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 const write = (line: string): Promise<void> => new Promise(resolve => process.stdout.write(`${line}\n`, () => resolve()));
 
@@ -39,7 +39,7 @@ export class ListModuleCommand implements CliCommandShape {
       }
       case 'json': {
         const outputMap = CliModuleUtil.getDependencyGraph(modules);
-        await write(CodecUtil.toUTF8JSON(
+        await write(JSONUtil.toUTF8JSON(
           Object.entries(outputMap)
             .map(([name, children]) => ({ name, children, workspace: RuntimeIndex.getModule(name)?.workspace })),
           { indent: 2 }

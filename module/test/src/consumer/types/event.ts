@@ -1,6 +1,6 @@
 import type { Writable } from 'node:stream';
 
-import { CodecUtil } from '@travetto/runtime';
+import { JSONUtil } from '@travetto/runtime';
 
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';
@@ -18,7 +18,7 @@ export class EventStreamer implements TestConsumerShape {
   }
 
   sendPayload(payload: unknown): void {
-    this.#stream.write(`${CodecUtil.toUTF8JSON(payload)}\n`);
+    this.#stream.write(`${JSONUtil.toUTF8JSON(payload)}\n`);
   }
 
   onEvent(event: TestEvent): void {

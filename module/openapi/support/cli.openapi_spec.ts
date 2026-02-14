@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { type CliCommandShape, CliCommand } from '@travetto/cli';
-import { CodecUtil, Env } from '@travetto/runtime';
+import { JSONUtil, Env } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { DependencyRegistryIndex } from '@travetto/di';
 
@@ -26,7 +26,7 @@ export class OpenApiSpecCommand implements CliCommandShape {
 
     const instance = await DependencyRegistryIndex.getInstance(OpenApiService);
     const result = await instance.getSpec();
-    const text = CodecUtil.toUTF8JSON(result, { indent: 2 });
+    const text = JSONUtil.toUTF8JSON(result, { indent: 2 });
 
     if (this.output === '-' || !this.output) {
       console.log!(text);

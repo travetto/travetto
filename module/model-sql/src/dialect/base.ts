@@ -1,6 +1,6 @@
 /* eslint-disable @stylistic/indent */
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } from '@travetto/schema';
-import { type Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete, CodecUtil } from '@travetto/runtime';
+import { type Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
 import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil } from '@travetto/model-query';
 import type { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
 
@@ -220,7 +220,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (config.type === PointConcrete && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
     } else if (config.type === Object) {
-      return this.quote(CodecUtil.toUTF8JSON(value).replace(/[']/g, "''"));
+      return this.quote(JSONUtil.toUTF8JSON(value).replace(/[']/g, "''"));
     }
     throw new AppError(`Unknown value type for field ${config.name}, ${value}`, { category: 'data' });
   }

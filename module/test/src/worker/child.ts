@@ -1,6 +1,6 @@
 import { createWriteStream } from 'node:fs';
 
-import { CodecUtil, ConsoleManager, Env, Runtime } from '@travetto/runtime';
+import { JSONUtil, ConsoleManager, Env, Runtime } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
 import { RunUtil } from '../execute/run.ts';
@@ -24,7 +24,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
         throw error;
       }
       // Mark as errored out
-      this.send(type, CodecUtil.toJSONObject({ error }, { reviver: false }));
+      this.send(type, { $JSON: JSONUtil.toUTF8JSON({ error }) });
     }
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { CodecUtil } from '@travetto/runtime';
+import { JSONUtil } from '@travetto/runtime';
 
 import type { LogEvent, LogFormatter } from '../types.ts';
 import { LogFormatUtil } from './util.ts';
@@ -25,7 +25,7 @@ export class JsonLogFormatter implements LogFormatter {
     const { message: _m, args: _a, ...rest } = event;
     const message = LogFormatUtil.getLogMessage(event);
     const context = LogFormatUtil.getContext(event);
-    return CodecUtil.toUTF8JSON({
+    return JSONUtil.toUTF8JSON({
       ...rest,
       ...(message ? { message } : {}),
       ...(context ? { context } : {}),

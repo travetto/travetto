@@ -11,6 +11,7 @@ export * from './src/codec.ts';
 export * from './src/env.ts';
 export * from './src/file-loader.ts';
 export * from './src/function.ts';
+export * from './src/json.ts';
 export * from './src/manifest-index.ts';
 export * from './src/queue.ts';
 export * from './src/resources.ts';
