@@ -29,23 +29,22 @@ type JSONInputOutputConfig = {
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
 const BIGINT_REGEX = /^-?\d+n$/;
 
-const DEFAULT_REVIVER = function (this: Any, _key: string | symbol, value: unknown): unknown {
-  if (typeof value === 'string') {
-    if (ISO_8601_REGEX.test(value)) {
-      return new Date(value);
-    } else if (BIGINT_REGEX.test(value)) {
-      return BigInt(value.slice(0, -1));
-    }
-  } else if (AppError.isJSON(value)) {
-    return AppError.fromJSON(value) ?? value;
-  }
-  return value;
-};
-
 /**
  * Utilities for encoding and decoding common formats
  */
 export class CodecUtil {
+  static DEFAULT_REVIVER = function (this: Any, _key: string | symbol, value: unknown): unknown {
+    if (typeof value === 'string') {
+      if (ISO_8601_REGEX.test(value)) {
+        return new Date(value);
+      } else if (BIGINT_REGEX.test(value)) {
+        return BigInt(value.slice(0, -1));
+      }
+    } else if (AppError.isJSON(value)) {
+      return AppError.fromJSON(value) ?? value;
+    }
+    return value;
+  };
 
   /** Generate buffer from hex string  */
   static fromHexString(value: string): BinaryArray {
@@ -113,7 +112,7 @@ export class CodecUtil {
       return undefined!;
     }
 
-    const reviver = config?.reviver === false ? undefined : config?.reviver ?? DEFAULT_REVIVER;
+    const reviver = config?.reviver === false ? undefined : config?.reviver ?? CodecUtil.DEFAULT_REVIVER;
 
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, reviver);
