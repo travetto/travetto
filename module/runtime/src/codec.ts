@@ -1,39 +1,26 @@
 import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
-import type { Any } from './types.ts';
 import { AppError } from './error.ts';
 
 type TextInput = string | BinaryArray;
 
-type Transformer = (this: unknown, key: string, value: unknown, target?: unknown) => unknown;
-
-Object.defineProperty(BigInt.prototype, 'toJSON', {
-  value() { return `${this.toString()}n`; }
-});
-
-type JSONOutputConfig = {
-  replacer?: Transformer;
-  indent?: number;
-};
-
-type JSONInputConfig = {
-  reviver?: Transformer | false;
-};
-
-type JSONInputOutputConfig = {
-  replacer?: Transformer;
-  reviver?: Transformer | false;
-};
+type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
+type JSONOutputConfig = { replacer?: JSONTransformer, indent?: number };
+type JSONInputConfig = { reviver?: JSONTransformer | false };
+type JSONInputOutputConfig = (JSONInputConfig & JSONOutputConfig);
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
 const BIGINT_REGEX = /^-?\d+n$/;
+Object.defineProperty(BigInt.prototype, 'toJSON', {
+  value() { return `${this.toString()}n`; }
+});
 
 /**
  * Utilities for encoding and decoding common formats
  */
 export class CodecUtil {
-  static DEFAULT_REVIVER = function (this: Any, _key: string | symbol, value: unknown): unknown {
+  static DEFAULT_REVIVER = function (_key: string | symbol, value: unknown): unknown {
     if (typeof value === 'string') {
       if (ISO_8601_REGEX.test(value)) {
         return new Date(value);
@@ -100,9 +87,7 @@ export class CodecUtil {
     }
   }
 
-  /**
-   * Parse JSON safely
-   */
+  /** Parse JSON safely */
   static fromJSON<T>(input: TextInput, config?: JSONInputConfig): T {
     if (typeof input !== 'string') {
       input = CodecUtil.toUTF8String(input);
@@ -118,38 +103,28 @@ export class CodecUtil {
     return JSON.parse(input, reviver);
   }
 
-  /**
-   * JSON to UTF8
-   */
+  /** JSON to UTF8 */
   static toUTF8JSON(value: unknown, config?: JSONOutputConfig): string {
     return JSON.stringify(value, config?.replacer, config?.indent);
   }
 
-  /**
-   * JSON to bytes
-   */
+  /** JSON to bytes */
   static toJSON(value: unknown, config?: JSONOutputConfig): BinaryArray {
     return this.fromUTF8String(this.toUTF8JSON(value, config));
   }
 
-  /**
-   * Encode JSON value as base64 encoded string
-   */
+  /** Encode JSON value as base64 encoded string */
   static toBase64JSON<T>(value: T, config?: JSONOutputConfig): string {
     return CodecUtil.utf8ToBase64(this.toUTF8JSON(value, config));
   }
 
-  /**
-   * JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value
-   */
+  /** JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value */
   static toJSONObject<T, R>(input: T, config?: JSONInputOutputConfig): R {
     const json = this.toJSON(input, config);
     return this.fromJSON<R>(json, config);
   }
 
-  /**
-   * Decode JSON value from base64 encoded string
-   */
+  /** Decode JSON value from base64 encoded string */
   static fromBase64JSON<T>(input: TextInput): T {
     let decoded = CodecUtil.base64ToUTF8(input);
 
