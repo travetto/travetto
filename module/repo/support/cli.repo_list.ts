@@ -39,7 +39,7 @@ export class ListModuleCommand implements CliCommandShape {
       }
       case 'json': {
         const outputMap = CliModuleUtil.getDependencyGraph(modules);
-        await write(JSONUtil.toUTF8JSON(
+        await write(JSONUtil.toUTF8(
           Object.entries(outputMap)
             .map(([name, children]) => ({ name, children, workspace: RuntimeIndex.getModule(name)?.workspace })),
           { indent: 2 }

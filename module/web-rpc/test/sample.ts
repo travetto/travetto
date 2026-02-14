@@ -97,7 +97,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSONUtil.toUTF8JSON([{
+      body: JSONUtil.toUTF8([{
         text: 'A new item',
         userId: 'its a me'
       }])
@@ -116,7 +116,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSONUtil.toUTF8JSON([])
+      body: JSONUtil.toUTF8([])
     });
 
     assert(Array.isArray(list));
@@ -133,7 +133,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSONUtil.toUTF8JSON([
+      body: JSONUtil.toUTF8([
         list[0].id
       ])
     });
@@ -152,7 +152,7 @@ class WebRpcSuite extends BaseWebSuite {
       },
       headers: {
         'content-type': 'application/octet-stream',
-        'X-TRV-RPC-INPUTS': JSONUtil.toBase64JSON([null, 11])
+        'X-TRV-RPC-INPUTS': JSONUtil.toBase64([null, 11])
       },
       body: CodecUtil.fromUTF8String('A'.repeat(100))
     });
@@ -169,7 +169,7 @@ class WebRpcSuite extends BaseWebSuite {
       count: 2000n
     };
 
-    const plain = JSONUtil.toJSONObject(payload, { reviveBigInts: false, reviveErrors: false });
+    const plain = JSONUtil.clone(payload, { reviveBigInts: false, reviveErrors: false });
     assert(typeof plain === 'object');
     assert(plain);
     assert('err' in plain);
@@ -179,7 +179,7 @@ class WebRpcSuite extends BaseWebSuite {
     assert('stack' in plain.err);
     assert(typeof plain.err.stack === 'string');
 
-    const complex: typeof payload = JSONUtil.toJSONObject(plain);
+    const complex: typeof payload = JSONUtil.clone(plain);
 
     assert(complex.err instanceof AppError);
     assert(complex.err.stack === payload.err.stack);

@@ -106,7 +106,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       }
       switch (action) {
         case 'write': {
-          multi.set(key, JSONUtil.toUTF8JSON(item));
+          multi.set(key, JSONUtil.toUTF8(item));
           this.#addIndices(cls, item, multi);
           break;
         }
@@ -119,7 +119,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     } else {
       switch (action) {
         case 'write': {
-          await this.client.set(key, JSONUtil.toUTF8JSON(item));
+          await this.client.set(key, JSONUtil.toUTF8(item));
           break;
         }
         case 'delete': {

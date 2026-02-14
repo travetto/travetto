@@ -22,9 +22,9 @@ export class OpenApiClientHelp {
         .map(line => line.replace(/^\s+-\s+/, '').trim());
 
       await fs.mkdir(path.dirname(formatCache), { recursive: true });
-      await fs.writeFile(formatCache, JSONUtil.toUTF8JSON([...lines.toSorted(),]));
+      await fs.writeFile(formatCache, JSONUtil.toUTF8([...lines.toSorted(),]));
     }
-    return await fs.readFile(formatCache).then(JSONUtil.fromJSON<string[]>);
+    return await fs.readFile(formatCache).then(JSONUtil.fromBinaryArray<string[]>);
   }
 
   static async help(dockerImage: string, extendedHelp: boolean): Promise<string[]> {

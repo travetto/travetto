@@ -70,7 +70,7 @@ export class HelpUtil {
       const desc = [cliTpl`${{ title: field.description }}`];
 
       if (key !== 'help' && defaultValue !== undefined) {
-        desc.push(cliTpl`(default: ${{ input: JSONUtil.toUTF8JSON(defaultValue) }})`);
+        desc.push(cliTpl`(default: ${{ input: JSONUtil.toUTF8(defaultValue) }})`);
       }
       descriptions.push(desc.join(' '));
     }

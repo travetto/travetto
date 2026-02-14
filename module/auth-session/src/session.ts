@@ -58,7 +58,7 @@ export class Session<T extends SessionData = SessionData> {
     this.#expiresAtLoaded = this.expiresAt ?? new Date();
 
     // Hash the session as it stands
-    this.#payload = JSONUtil.toUTF8JSON(this);
+    this.#payload = JSONUtil.toUTF8(this);
   }
 
   /**
@@ -80,7 +80,7 @@ export class Session<T extends SessionData = SessionData> {
    * Determine if session has changed
    */
   isChanged(): boolean {
-    return this.isTimeChanged() || this.#payload !== JSONUtil.toUTF8JSON(this);
+    return this.isTimeChanged() || this.#payload !== JSONUtil.toUTF8(this);
   }
 
   /**

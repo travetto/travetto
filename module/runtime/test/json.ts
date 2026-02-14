@@ -8,21 +8,21 @@ class JSONUtilSuite {
 
   @Test()
   async parseSafeString() {
-    const obj: { name: string } = JSONUtil.fromJSON('{"name":"test"}');
+    const obj: { name: string } = JSONUtil.fromUTF8('{"name":"test"}');
     assert.deepStrictEqual(obj, { name: 'test' });
   }
 
   @Test()
   async parseSafeBuffer() {
     const buffer = CodecUtil.fromUTF8String('{"count":42}');
-    const obj: { count: number } = JSONUtil.fromJSON(buffer);
+    const obj: { count: number } = JSONUtil.fromBinaryArray(buffer);
     assert.deepStrictEqual(obj, { count: 42 });
   }
 
   @Test()
   async parseSafeWithReviver() {
     const json = '{"date":"2025-12-21"}';
-    const obj: { date: Date } = JSONUtil.fromJSON(json, {
+    const obj: { date: Date } = JSONUtil.fromUTF8(json, {
       reviver: (key, value) => {
         if (key === 'date' && typeof value === 'string') {
           return new Date(value);
@@ -34,7 +34,7 @@ class JSONUtilSuite {
     assert.strictEqual(obj.date.toISOString().split('T')[0], '2025-12-21');
 
 
-    const obj2: { date: Date } = JSONUtil.fromJSON(JSONUtil.toUTF8JSON({
+    const obj2: { date: Date } = JSONUtil.fromUTF8(JSONUtil.toUTF8({
       date: new Date('2025-12-21')
     }));
     assert(obj2.date instanceof Date);
@@ -43,17 +43,17 @@ class JSONUtilSuite {
 
   @Test()
   async encodeBase64JSONSimple() {
-    const encoded = JSONUtil.toBase64JSON({ foo: 'bar' });
+    const encoded = JSONUtil.toBase64({ foo: 'bar' });
     assert.strictEqual(encoded, CodecUtil.fromUTF8String('{"foo":"bar"}').toString('base64'));
   }
 
   @Test()
   async encodeBase64JSONComplex() {
     const data = { items: [1, 2, 3], nested: { key: 'value' } };
-    const encoded = JSONUtil.toBase64JSON(data);
+    const encoded = JSONUtil.toBase64(data);
     assert.strictEqual(typeof encoded, 'string');
     // Verify it can be decoded back
-    const decoded: typeof data = JSONUtil.fromBase64JSON(encoded!);
+    const decoded: typeof data = JSONUtil.fromBase64(encoded!);
     assert.deepStrictEqual(decoded, data);
   }
 
@@ -61,7 +61,7 @@ class JSONUtilSuite {
   async decodeBase64JSONSimple() {
     const original = { test: 'data' };
     const encoded = CodecUtil.fromUTF8String(JSON.stringify(original)).toString('base64');
-    const decoded: typeof original = JSONUtil.fromBase64JSON(encoded);
+    const decoded: typeof original = JSONUtil.fromBase64(encoded);
     assert.deepStrictEqual(decoded, original);
   }
 
@@ -69,20 +69,20 @@ class JSONUtilSuite {
   async decodeBase64JSONWithURIEncoding() {
     const original = { special: 'chars' };
     const encoded = CodecUtil.fromUTF8String(encodeURIComponent(JSON.stringify(original))).toString('base64');
-    const decoded: typeof original = JSONUtil.fromBase64JSON(encoded);
+    const decoded: typeof original = JSONUtil.fromBase64(encoded);
     assert.deepStrictEqual(decoded, original);
   }
 
   @Test()
   async decodeBase64JSONEmpty() {
-    const decoded = JSONUtil.fromBase64JSON('');
+    const decoded = JSONUtil.fromBase64('');
     assert.strictEqual(decoded, undefined);
   }
 
   @Test()
   async parseSafeInvalidJSON() {
     assert.throws(() => {
-      JSONUtil.fromJSON('not valid json');
+      JSONUtil.fromUTF8('not valid json');
     });
   }
 
@@ -97,8 +97,8 @@ class JSONUtilSuite {
       object: { nested: { deep: 'value' } }
     };
 
-    const encoded = JSONUtil.toBase64JSON(original);
-    const decoded: typeof original = JSONUtil.fromBase64JSON(encoded!);
+    const encoded = JSONUtil.toBase64(original);
+    const decoded: typeof original = JSONUtil.fromBase64(encoded!);
 
     assert.deepStrictEqual(decoded, original);
   }

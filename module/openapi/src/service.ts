@@ -74,7 +74,7 @@ export class OpenApiService {
       const spec = await this.getSpec();
 
       const output = this.apiSpecConfig.output.endsWith('.json') ?
-        JSONUtil.toUTF8JSON(spec, { indent: 2 }) :
+        JSONUtil.toUTF8(spec, { indent: 2 }) :
         stringify(spec);
 
       if (existsSync(this.apiSpecConfig.output)) {

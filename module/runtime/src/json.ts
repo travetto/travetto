@@ -34,44 +34,37 @@ export class JSONUtil {
       return config?.reviver ? config.reviver.call(this, key, value) : value;
     };
 
+  /** Binary Array to JSON */
+  static fromBinaryArray<T>(input: BinaryArray, config?: JSONInputConfig): T {
+    return JSONUtil.fromUTF8(CodecUtil.toUTF8String(input), config);
+  }
 
-  /** Parse JSON safely */
-  static fromJSON<T>(input: TextInput, config?: JSONInputConfig): T {
-    if (typeof input !== 'string') {
-      input = CodecUtil.toUTF8String(input);
-    }
+  /** JSON to Binary Array */
+  static toBinaryArray(value: unknown, config?: JSONOutputConfig): BinaryArray {
+    return CodecUtil.fromUTF8String(this.toUTF8(value, config));
+  }
 
+  /** UTF8 string to JSON */
+  static fromUTF8<T>(input: string, config?: JSONInputConfig): T {
     if (!input.trim()) {
       return undefined!;
     }
-
     // TODO: Ensure we aren't vulnerable to prototype pollution
     return JSON.parse(input, JSONUtil.buildReviver(config));
   }
 
-  /** JSON to UTF8 */
-  static toUTF8JSON(value: unknown, config?: JSONOutputConfig): string {
+  /** JSON to UTF8 string */
+  static toUTF8(value: unknown, config?: JSONOutputConfig): string {
     return JSON.stringify(value, config?.replacer, config?.indent);
   }
 
-  /** JSON to bytes */
-  static toBinaryArrayJSON(value: unknown, config?: JSONOutputConfig): BinaryArray {
-    return CodecUtil.fromUTF8String(this.toUTF8JSON(value, config));
-  }
-
   /** Encode JSON value as base64 encoded string */
-  static toBase64JSON<T>(value: T, config?: JSONOutputConfig): string {
-    return CodecUtil.utf8ToBase64(this.toUTF8JSON(value, config));
-  }
-
-  /** JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value */
-  static toJSONObject<T, R>(input: T, config?: JSONInputOutputConfig): R {
-    const json = JSONUtil.toBinaryArrayJSON(input, config);
-    return JSONUtil.fromJSON<R>(json, config);
+  static toBase64<T>(value: T, config?: JSONOutputConfig): string {
+    return CodecUtil.utf8ToBase64(this.toUTF8(value, config));
   }
 
   /** Decode JSON value from base64 encoded string */
-  static fromBase64JSON<T>(input: TextInput): T {
+  static fromBase64<T>(input: TextInput): T {
     let decoded = CodecUtil.base64ToUTF8(input);
 
     // Read from encoded if it happens
@@ -79,6 +72,12 @@ export class JSONUtil {
       decoded = decodeURIComponent(decoded);
     }
 
-    return JSONUtil.fromJSON(decoded);
+    return JSONUtil.fromUTF8(decoded);
+  }
+
+  /** JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value */
+  static clone<T, R>(input: T, config?: JSONInputOutputConfig): R {
+    const json = JSONUtil.toBinaryArray(input, config);
+    return JSONUtil.fromBinaryArray<R>(json, config);
   }
 }

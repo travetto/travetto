@@ -18,7 +18,7 @@ export class EventStreamer implements TestConsumerShape {
   }
 
   sendPayload(payload: unknown): void {
-    this.#stream.write(`${JSONUtil.toUTF8JSON(payload)}\n`);
+    this.#stream.write(`${JSONUtil.toUTF8(payload)}\n`);
   }
 
   onEvent(event: TestEvent): void {

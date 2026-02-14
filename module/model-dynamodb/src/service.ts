@@ -61,7 +61,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
             id: DynamoDBUtil.toValue(item.id),
-            body: DynamoDBUtil.toValue(JSONUtil.toUTF8JSON(item)),
+            body: DynamoDBUtil.toValue(JSONUtil.toUTF8(item)),
             ...(expiry !== undefined ? { [EXP_ATTR]: DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
           },
@@ -92,7 +92,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             ...expr
           ].filter(part => !!part).join(', ')}`,
           ExpressionAttributeValues: {
-            ':body': DynamoDBUtil.toValue(JSONUtil.toUTF8JSON(item)),
+            ':body': DynamoDBUtil.toValue(JSONUtil.toUTF8(item)),
             ...(expiry !== undefined ? { ':expr': DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
           },

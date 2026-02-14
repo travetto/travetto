@@ -27,7 +27,7 @@ export class GoogleLogFormatter implements LogFormatter {
       delete context.statusCode;
     }
 
-    return JSONUtil.toUTF8JSON({
+    return JSONUtil.toUTF8({
       context,
       'logging.googleapis.com/sourceLocation': { file: `${event.module}/${event.modulePath}`, line: event.line },
       'logging.googleapis.com/labels': { module: event.module, scope: event.scope },

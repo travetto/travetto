@@ -22,7 +22,7 @@ export class AssertUtil {
         if (isCleanable(value)) {
           return value.toClean();
         } else if (value === null || value.constructor === Object || Array.isArray(value) || value instanceof Date) {
-          return JSONUtil.toUTF8JSON(value);
+          return JSONUtil.toUTF8(value);
         }
         break;
       }

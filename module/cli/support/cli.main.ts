@@ -32,7 +32,7 @@ export class MainCommand implements CliCommandShape {
 
     if (result !== undefined) {
       if (process.connected) { process.send?.(result); }
-      const payload = typeof result === 'string' ? result : (result instanceof Error ? result.stack : JSONUtil.toUTF8JSON(result));
+      const payload = typeof result === 'string' ? result : (result instanceof Error ? result.stack : JSONUtil.toUTF8(result));
       process[process.exitCode ? 'stderr' : 'stdout'].write(`${payload}\n`);
     }
   }

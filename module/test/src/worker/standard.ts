@@ -17,7 +17,7 @@ const log = (message: string | TestLogEvent): void => {
  *  Produce a handler for the child worker
  */
 export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun | TestDiffInput): Promise<void> {
-  log(`Worker Input ${JSONUtil.toUTF8JSON(run)}`);
+  log(`Worker Input ${JSONUtil.toUTF8(run)}`);
 
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(
@@ -39,13 +39,13 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
   channel.on('*', async event => {
     try {
       if (!!event && typeof event === 'object' && '$JSON' in event && typeof event.$JSON === 'string') {
-        event = JSONUtil.fromJSON(event.$JSON);
+        event = JSONUtil.fromUTF8(event.$JSON);
       }
       const parsed: TestEvent | TestRemoveEvent | TestLogEvent = castTo(event);
       if (parsed.type === 'log') {
         log(parsed);
       } else if (parsed.type === 'removeTest') {
-        log(`Received remove event ${JSONUtil.toUTF8JSON(event)}@${consumer.constructor.name}`);
+        log(`Received remove event ${JSONUtil.toUTF8(event)}@${consumer.constructor.name}`);
         consumer.onRemoveEvent?.(parsed); // Forward remove events
       } else {
         consumer.onEvent(parsed);  // Forward standard events
@@ -62,7 +62,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   // Wait for complete
   const completedEvent = await complete;
-  const result: { error?: unknown } = JSONUtil.toJSONObject(completedEvent);
+  const result: { error?: unknown } = JSONUtil.clone(completedEvent);
 
   // Kill on complete
   await channel.destroy();

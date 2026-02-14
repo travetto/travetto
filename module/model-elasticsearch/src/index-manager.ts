@@ -79,7 +79,7 @@ export class IndexManager implements ModelStorageSupport {
   async exportModel(cls: Class<ModelType>): Promise<string> {
     const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
     const { index } = this.getIdentity(cls); // Already namespaced
-    return `curl -XPOST $ES_HOST/${index} -d '${JSONUtil.toUTF8JSON({
+    return `curl -XPOST $ES_HOST/${index} -d '${JSONUtil.toUTF8({
       mappings: schema,
       settings: this.config.indexCreate
     })}'`;

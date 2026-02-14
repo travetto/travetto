@@ -228,7 +228,7 @@ export class QueryVerifier {
         if (value === 1 || value === -1 || typeof value === 'boolean') {
           return;
         }
-        state.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSONUtil.toUTF8JSON(value)}`);
+        state.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSONUtil.toUTF8(value)}`);
       }
     });
   }

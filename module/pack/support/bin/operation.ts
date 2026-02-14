@@ -107,12 +107,12 @@ export class PackOperation {
     if (config.ejectFile) {
       yield* ActiveShellCommand.createFile(
         path.resolve(config.buildDirectory, file),
-        [JSONUtil.toUTF8JSON(pkg, { indent: 2 })]
+        [JSONUtil.toUTF8(pkg, { indent: 2 })]
       );
     } else {
       await PackUtil.writeRawFile(
         path.resolve(config.buildDirectory, file),
-        [JSONUtil.toUTF8JSON(pkg, { indent: 2 })]
+        [JSONUtil.toUTF8(pkg, { indent: 2 })]
       );
     }
   }

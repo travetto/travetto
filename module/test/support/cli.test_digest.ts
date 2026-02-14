@@ -40,7 +40,7 @@ export class TestDigestCommand {
       });
 
     if (this.output === 'json') {
-      console.log(JSONUtil.toUTF8JSON(all));
+      console.log(JSONUtil.toUTF8(all));
     } else {
       for (const item of all) {
         console.log(`${item.classId}#${item.methodName}`, item.tags?.join('|') ?? '');

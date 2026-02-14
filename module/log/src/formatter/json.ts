@@ -25,7 +25,7 @@ export class JsonLogFormatter implements LogFormatter {
     const { message: _m, args: _a, ...rest } = event;
     const message = LogFormatUtil.getLogMessage(event);
     const context = LogFormatUtil.getContext(event);
-    return JSONUtil.toUTF8JSON({
+    return JSONUtil.toUTF8({
       ...rest,
       ...(message ? { message } : {}),
       ...(context ? { context } : {}),

@@ -24,7 +24,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
         throw error;
       }
       // Mark as errored out
-      this.send(type, { $JSON: JSONUtil.toUTF8JSON({ error }) });
+      this.send(type, { $JSON: JSONUtil.toUTF8({ error }) });
     }
   }
 
