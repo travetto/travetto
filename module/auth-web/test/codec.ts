@@ -4,7 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { WebResponse } from '@travetto/web';
 import { type AuthContextInterceptor, CommonPrincipalCodecSymbol, type JWTPrincipalCodec, type WebAuthConfig } from '@travetto/auth-web';
-import { CodecUtil } from '@travetto/runtime';
+import { JSONUtil } from '@travetto/runtime';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
@@ -81,8 +81,8 @@ export class CodecTest {
       details: {}
     });
 
-    const sig1: { kid: string } = CodecUtil.fromBase64JSON(token1.split('.')[0]);
-    const sig2: { kid: string } = CodecUtil.fromBase64JSON(token2.split('.')[0]);
+    const sig1: { kid: string } = JSONUtil.fromBase64(token1.split('.')[0]);
+    const sig2: { kid: string } = JSONUtil.fromBase64(token2.split('.')[0]);
     assert(sig1.kid !== sig2.kid);
     assert(sig1.kid === 'orange');
   }

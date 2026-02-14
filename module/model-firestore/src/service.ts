@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type PartialWithFieldValue, type Query } from '@google-cloud/firestore';
 
-import { CodecUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
@@ -11,7 +11,7 @@ import {
 import type { FirestoreModelConfig } from './config.ts';
 
 const setMissingValues = <T>(input: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
-  CodecUtil.toJSONObject(input, {
+  JSONUtil.clone(input, {
     replacer: (_, value) => value ?? null,
     reviver: (_, value) => value ?? missingValue
   });

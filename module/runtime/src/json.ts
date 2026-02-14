@@ -7,6 +7,7 @@ type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
 type JSONOutputConfig = { replacer?: JSONTransformer, indent?: number };
 type JSONInputConfig = {
   reviver?: JSONTransformer;
+  reviveStandard?: boolean;
   reviveDates?: boolean;
   reviveBigInts?: boolean;
   reviveErrors?: boolean;
@@ -22,17 +23,23 @@ Object.defineProperty(BigInt.prototype, 'toJSON', {
 /** Utilities for JSON operations */
 export class JSONUtil {
 
-  static buildReviver = (config?: JSONInputConfig) =>
-    function (this: unknown, key: string, value: unknown): unknown {
-      if (config?.reviveDates !== false && typeof value === 'string' && ISO_8601_REGEX.test(value)) {
+  static buildReviver = (config?: JSONInputConfig) => {
+    const reviveDates = config?.reviveDates === true || config?.reviveStandard !== false;
+    const reviveBigInts = config?.reviveBigInts === true || config?.reviveStandard !== false;
+    const reviveErrors = config?.reviveErrors === true || config?.reviveStandard !== false;
+
+    return function (this: unknown, key: string, value: unknown): unknown {
+      const isString = typeof value === 'string';
+      if (reviveDates && isString && ISO_8601_REGEX.test(value)) {
         return new Date(value);
-      } else if (config?.reviveBigInts !== false && typeof value === 'string' && BIGINT_REGEX.test(value)) {
+      } else if (reviveBigInts && isString && BIGINT_REGEX.test(value)) {
         return BigInt(value.slice(0, -1));
-      } else if (config?.reviveErrors !== false && AppError.isJSON(value)) {
+      } else if (reviveErrors && AppError.isJSON(value)) {
         return AppError.fromJSON(value) ?? value;
       }
       return config?.reviver ? config.reviver.call(this, key, value) : value;
     };
+  };
 
   /** Binary Array to JSON */
   static fromBinaryArray<T>(input: BinaryArray, config?: JSONInputConfig): T {

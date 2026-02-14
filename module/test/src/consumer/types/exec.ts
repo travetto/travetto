@@ -1,5 +1,5 @@
 import { IpcChannel } from '@travetto/worker';
-import { CodecUtil } from '@travetto/runtime';
+import { JSONUtil } from '@travetto/runtime';
 
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';
@@ -12,7 +12,7 @@ import { TestConsumer } from '../decorator.ts';
 export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsumerShape {
 
   sendPayload(payload: unknown & { type: string }): void {
-    this.send(payload.type, CodecUtil.toJSONObject(payload, { reviver: false }));
+    this.send(payload.type, JSONUtil.clone(payload, { reviveBigInts: false, reviveDates: false, reviveErrors: false }));
   }
 
   onEvent(event: TestEvent): void {
