@@ -1,6 +1,6 @@
 import {
   Binary, type CreateIndexesOptions, type Filter, type FindCursor, type IndexDirection, ObjectId, type WithId as MongoWithId,
-  type IndexDescriptionInfo, Long
+  type IndexDescriptionInfo
 } from 'mongodb';
 
 import { AppError, CodecUtil, castTo, type Class, toConcrete, TypedObject, BinaryUtil } from '@travetto/runtime';
@@ -153,11 +153,7 @@ export class MongoUtil {
             }
           };
         }
-        let result: unknown = value;
-        if (typeof result === 'bigint') {
-          result = new Long(result.toString());
-        }
-        out[subpath === 'id' ? '_id' : subpath] = result;
+        out[subpath === 'id' ? '_id' : subpath] = value;
       }
     }
     return out;

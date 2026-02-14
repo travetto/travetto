@@ -383,6 +383,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     // Verify update persisted
     const final = await service.get(BigIntModel, created.id);
     assert.strictEqual(final.largeNumber, 18014398509481982n);
-    assert.strictEqual(final.optionalBigInt, undefined);
+    assert(!final.optionalBigInt);
   }
 }

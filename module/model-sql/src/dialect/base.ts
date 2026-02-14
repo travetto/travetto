@@ -9,9 +9,6 @@ import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/typ
 import type { Connection } from '../connection/base.ts';
 import type { VisitStack } from '../types.ts';
 
-const toNumber = (value: unknown): number =>
-  typeof value === 'number' ? value : (typeof value === 'bigint' ? Number(value) : 0);
-
 const PointConcrete = toConcrete<Point>();
 
 interface Alias {
@@ -294,7 +291,7 @@ export abstract class SQLDialect implements DialectState {
    */
   async deleteAndGetCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
     const { count } = await this.executeSQL<T>(this.getDeleteSQL(SQLModelUtil.classToStack(cls), query.where));
-    return toNumber(count);
+    return DataUtil.coerceType(count, Number);
   }
 
   /**
@@ -306,7 +303,7 @@ export abstract class SQLDialect implements DialectState {
         ModelQueryUtil.getWhereClause(cls, query.where)
       )
     );
-    return toNumber(records[0].total);
+    return DataUtil.coerceType(records[0].total, Number);
   }
 
   /**
