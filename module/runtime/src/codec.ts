@@ -109,7 +109,7 @@ export class CodecUtil {
   }
 
   /** JSON to bytes */
-  static toJSON(value: unknown, config?: JSONOutputConfig): BinaryArray {
+  static toBinaryArrayJSON(value: unknown, config?: JSONOutputConfig): BinaryArray {
     return this.fromUTF8String(this.toUTF8JSON(value, config));
   }
 
@@ -120,7 +120,7 @@ export class CodecUtil {
 
   /** JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value */
   static toJSONObject<T, R>(input: T, config?: JSONInputOutputConfig): R {
-    const json = this.toJSON(input, config);
+    const json = this.toBinaryArrayJSON(input, config);
     return this.fromJSON<R>(json, config);
   }
 

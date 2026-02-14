@@ -109,11 +109,11 @@ export class WebBodyUtil {
       if (typeof body === 'string') {
         text = CodecUtil.fromUTF8String(body);
       } else if (hasToJSON(body)) {
-        text = CodecUtil.toJSON(body.toJSON());
+        text = CodecUtil.toBinaryArrayJSON(body.toJSON());
       } else if (body instanceof Error) {
-        text = CodecUtil.toJSON({ message: body.message });
+        text = CodecUtil.toBinaryArrayJSON({ message: body.message });
       } else {
-        text = CodecUtil.toJSON(body);
+        text = CodecUtil.toBinaryArrayJSON(body);
       }
       out.headers.set('Content-Length', `${text.byteLength}`);
       out.body = text;

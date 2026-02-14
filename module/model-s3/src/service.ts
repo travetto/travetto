@@ -245,7 +245,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
-    const content = CodecUtil.toJSON(prepped);
+    const content = CodecUtil.toBinaryArrayJSON(prepped);
     await this.client.putObject(this.#query(cls, prepped.id, {
       Body: BinaryUtil.binaryArrayToBuffer(content),
       ContentType: 'application/json',
