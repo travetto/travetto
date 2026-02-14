@@ -41,7 +41,7 @@ export class JSONUtil {
 
   /** JSON to Binary Array */
   static toBinaryArray(value: unknown, config?: JSONOutputConfig): BinaryArray {
-    return CodecUtil.fromUTF8String(this.toUTF8(value, config));
+    return CodecUtil.fromUTF8String(JSONUtil.toUTF8(value, config));
   }
 
   /** UTF8 string to JSON */
@@ -60,7 +60,7 @@ export class JSONUtil {
 
   /** Encode JSON value as base64 encoded string */
   static toBase64<T>(value: T, config?: JSONOutputConfig): string {
-    return CodecUtil.utf8ToBase64(this.toUTF8(value, config));
+    return CodecUtil.utf8ToBase64(JSONUtil.toUTF8(value, config));
   }
 
   /** Decode JSON value from base64 encoded string */

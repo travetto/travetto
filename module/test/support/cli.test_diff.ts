@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { CodecUtil, Env, RuntimeIndex } from '@travetto/runtime';
+import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
@@ -31,7 +31,7 @@ export class TestDiffCommand {
   }
 
   async main(importOrFile: string, diff: string): Promise<void> {
-    const diffSource = await fs.readFile(diff).then(CodecUtil.fromJSON<TestDiffSource>);
+    const diffSource = await fs.readFile(diff).then(JSONUtil.fromBinaryArray<TestDiffSource>);
     const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)?.import!;
 
     return runTests(

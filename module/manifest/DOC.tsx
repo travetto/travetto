@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 
 import { d, c, COMMON_DATE } from '@travetto/doc';
 import { ManifestDeltaUtil, PACKAGE_MANAGERS, type ManifestRoot } from '@travetto/manifest';
-import { CodecUtil, RuntimeIndex } from '@travetto/runtime';
+import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 
 const PACKAGE_MANAGER_LIST = PACKAGE_MANAGERS.map((manager, i) => i === 0 ? [d.library(manager.title)] : ['/', d.library(manager.title)]);
 
@@ -13,7 +13,7 @@ const DeltaRef = d.codeLink(ManifestDeltaUtil.name, 'src/delta.ts', new RegExp(`
 const manifest = async () => {
   const manifestFile = path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json');
   const bytes = await fs.readFile(manifestFile);
-  const result: Partial<Pick<ManifestRoot, 'modules'>> & Omit<ManifestRoot, 'modules'> = CodecUtil.fromJSON(bytes);
+  const result: Partial<Pick<ManifestRoot, 'modules'>> & Omit<ManifestRoot, 'modules'> = JSONUtil.fromBinaryArray(bytes);
   const modules = Object.fromEntries(Object.entries(result.modules!).filter(([key]) => key === '@travetto/manifest'));
   delete result.modules;
   result.workspace.path = '<generated>';

@@ -1,4 +1,4 @@
-import { AppError, BinaryUtil, castTo, type BinaryType, type BinaryArray, CodecUtil } from '@travetto/runtime';
+import { BinaryUtil, castTo, type BinaryType, type BinaryArray, CodecUtil, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { WebResponse } from '../../src/types/response.ts';
@@ -47,19 +47,18 @@ export class WebTestDispatchUtil {
       }
     }
 
-    const text = () => BinaryUtil.isBinaryArray(result) ? CodecUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
-
-    if (text) {
-      switch (response.headers.get('Content-Type')) {
-        case 'application/json': result = CodecUtil.fromJSON(text()!); break;
-        case 'text/plain': result = text(); break;
-      }
+    switch (response.headers.get('Content-Type')) {
+      case 'application/json':
+        result = BinaryUtil.isBinaryArray(result) ? JSONUtil.fromBinaryArray(result) :
+          (typeof result === 'string' ? JSONUtil.fromUTF8(result) : result);
+        break;
+      case 'text/plain':
+        result = BinaryUtil.isBinaryArray(result) ? CodecUtil.toUTF8String(result) :
+          (typeof result === 'string' ? result : undefined);
+        break;
     }
 
     if (response.context.httpStatusCode && response.context.httpStatusCode >= 400) {
-      if (AppError.isJSON(result)) {
-        result = AppError.fromJSON(result) ?? result;
-      }
       result = WebCommonUtil.catchResponse(result).body;
     }
 

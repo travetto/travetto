@@ -1,6 +1,6 @@
 import { TextDecoder } from 'node:util';
 
-import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON, BinaryMetadataUtil } from '@travetto/runtime';
+import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON, BinaryMetadataUtil, JSONUtil } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -109,11 +109,11 @@ export class WebBodyUtil {
       if (typeof body === 'string') {
         text = CodecUtil.fromUTF8String(body);
       } else if (hasToJSON(body)) {
-        text = CodecUtil.toBinaryArrayJSON(body.toJSON());
+        text = JSONUtil.toBinaryArray(body.toJSON());
       } else if (body instanceof Error) {
-        text = CodecUtil.toBinaryArrayJSON({ message: body.message });
+        text = JSONUtil.toBinaryArray({ message: body.message });
       } else {
-        text = CodecUtil.toBinaryArrayJSON(body);
+        text = JSONUtil.toBinaryArray(body);
       }
       out.headers.set('Content-Length', `${text.byteLength}`);
       out.body = text;
@@ -147,7 +147,7 @@ export class WebBodyUtil {
   static parseBody(type: string, body: string): unknown {
     switch (type) {
       case 'text': return body;
-      case 'json': return CodecUtil.fromJSON(body);
+      case 'json': return JSONUtil.fromUTF8(body);
       case 'form': return Object.fromEntries(new URLSearchParams(body));
     }
   }
