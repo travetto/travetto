@@ -1,7 +1,7 @@
 import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
-import { type Any } from './types.ts';
+import type { Any } from './types.ts';
 import { AppError } from './error.ts';
 
 type TextInput = string | BinaryArray;
@@ -108,9 +108,9 @@ export class CodecUtil {
     if (typeof input !== 'string') {
       input = CodecUtil.toUTF8String(input);
     }
-    if (!input) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return undefined as T;
+
+    if (!input.trim()) {
+      return undefined!;
     }
 
     const reviver = config?.reviver === false ? undefined : config?.reviver ?? DEFAULT_REVIVER;

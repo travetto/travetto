@@ -30,12 +30,9 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
   static defaultCategory?: ErrorCategory;
 
   static isJSON(value: unknown): value is ErrorJSON {
-    return (typeof value === 'object' && !!value && '$error' in value &&
-      ('message' in value && typeof value.message === 'string') &&
-      ('category' in value && typeof value.category === 'string') &&
-      ('type' in value && typeof value.type === 'string') &&
-      ('at' in value && (typeof value.at === 'string' || value.at instanceof Date))
-    );
+    return typeof value === 'object' && !!value &&
+      '$error' in value && 'message' in value && 'category' in value &&
+      'type' in value && 'at' in value;
   }
 
   /** Convert from JSON object */
