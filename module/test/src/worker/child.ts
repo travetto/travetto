@@ -24,7 +24,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
         throw error;
       }
       // Mark as errored out
-      this.send(type, CodecUtil.toJSONObject({ error }));
+      this.send(type, CodecUtil.toJSONObject({ error }, { reviver: false }));
     }
   }
 
