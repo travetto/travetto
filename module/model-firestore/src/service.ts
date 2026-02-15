@@ -10,7 +10,7 @@ import {
 
 import type { FirestoreModelConfig } from './config.ts';
 
-const clone = structuredClone;
+const clone = JSONUtil.clone;
 const setMissingValues = <T>(input: T, missingValue: unknown): T =>
   JSONUtil.clone(input, { replacer: (_, value) => value ?? null, reviver: (_, value) => value ?? missingValue });
 
