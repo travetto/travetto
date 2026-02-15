@@ -37,8 +37,9 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
   static fromJSON(error: AppErrorJSON): AppError {
     const { $error: _, ...rest } = error;
     const result = new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(rest));
-    result.message = error.message;
-    result.stack = error.stack ?? result.stack;
+    if (error.stack) {
+      result.stack = error.stack;
+    }
     return result;
   }
 
@@ -67,8 +68,8 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
    * Serializes an error to a basic object
    */
   toJSON(includeStack = false): AppErrorJSON {
+    // @ts-expect-error
     return {
-      $error: 'trv',
       message: this.message,
       category: this.category,
       ...(this.cause ? { cause: `${this.cause}` } : undefined),

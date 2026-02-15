@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Env } from '@travetto/runtime';
+import { Env, JSONUtil } from '@travetto/runtime';
 
 import { EnvDict, LaunchConfig } from './types.ts';
 import { Workspace } from './workspace.ts';
@@ -80,7 +80,7 @@ export class RunUtil {
     try {
       await vscode.debug.startDebugging(Workspace.folder, this.buildDebugConfig(config));
     } catch (error) {
-      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
+      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSONUtil.toUTF8(error));
     }
   }
 }

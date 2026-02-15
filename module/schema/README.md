@@ -218,7 +218,6 @@ would produce an exception similar to following structure
 $ trv main doc/person-invalid-output.ts
 
 Validation Failed {
-  "$error": "trv",
   "message": "Validation errors have occurred",
   "category": "data",
   "type": "ValidationResultError",
@@ -389,7 +388,6 @@ All that happens now, is the type is exported, and the class above is able to pr
 $ trv main doc/custom-type-output.ts
 
 Validation Failed {
-  "$error": "trv",
   "message": "Validation errors have occurred",
   "category": "data",
   "type": "ValidationResultError",

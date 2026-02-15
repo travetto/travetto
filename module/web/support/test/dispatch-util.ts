@@ -50,7 +50,7 @@ export class WebTestDispatchUtil {
     switch (response.headers.get('Content-Type')) {
       case 'application/json':
         result = BinaryUtil.isBinaryArray(result) ? JSONUtil.fromBinaryArray(result) :
-          (typeof result === 'string' ? JSONUtil.fromUTF8(result) : result);
+          (typeof result === 'string' ? JSONUtil.fromUTF8(result) : undefined);
         break;
       case 'text/plain':
         result = BinaryUtil.isBinaryArray(result) ? CodecUtil.toUTF8String(result) :
