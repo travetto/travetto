@@ -55,7 +55,7 @@ export class WebTestDispatchUtil {
     }
 
     if (typeof result === 'string' && isJSON) {
-      result = JSONUtil.fromUTF8(result, { reviver: JSONUtil.STANDRD_REVIVER });
+      result = JSONUtil.fromUTF8(result, { reviver: JSONUtil.TRANSMIT_REVIVER });
     }
 
     if (response.context.httpStatusCode && response.context.httpStatusCode >= 400) {

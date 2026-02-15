@@ -36,7 +36,7 @@ class JSONUtilSuite {
 
     const obj2: { date: Date } = JSONUtil.fromUTF8(JSONUtil.toUTF8({
       date: new Date('2025-12-21')
-    }), { reviver: JSONUtil.STANDRD_REVIVER });
+    }), { reviver: JSONUtil.TRANSMIT_REVIVER });
     assert(obj2.date instanceof Date);
     assert.strictEqual(obj2.date.toISOString().split('T')[0], '2025-12-21');
   }

@@ -1,7 +1,6 @@
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { AppError } from './error.ts';
-import { castTo } from './types.ts';
 
 type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
 type JSONOutputConfig = {
@@ -15,7 +14,17 @@ type JSONCloneConfig = JSONOutputConfig & JSONInputConfig;
 
 Object.defineProperty(BigInt.prototype, 'toJSON', {
   value() { return `${this}n`; },
-  configurable: true,
+});
+
+Object.defineProperty(Error.prototype, 'toJSON', {
+  value() {
+    return {
+      $trv: 'Error',
+      message: this.message,
+      name: this.name,
+      stack: this.stack,
+    };
+  },
 });
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
@@ -25,7 +34,7 @@ const IS_ERROR = (value: unknown): value is Error => typeof value === 'object' &
 /** Utilities for JSON  */
 export class JSONUtil {
 
-  static STANDRD_REVIVER: JSONTransformer = function (this: unknown, key: string, value: unknown): unknown {
+  static TRANSMIT_REVIVER: JSONTransformer = function (this: unknown, key: string, value: unknown): unknown {
     if (typeof value === 'string') {
       if (value.endsWith('n') && BIGINT_REGEX.test(value)) {
         return BigInt(value.slice(0, -1));
@@ -89,27 +98,11 @@ export class JSONUtil {
     return JSONUtil.fromUTF8(JSONUtil.toUTF8(input, config), config);
   }
 
-  static cloneForTransmit<T, R = T>(input: T, config?: JSONCloneConfig): R {
-    try {
-      Object.defineProperty(Error.prototype, 'toJSON', {
-        value(this: Error) {
-          return {
-            $trv: 'Error',
-            message: this.message,
-            name: this.name,
-            stack: this.stack,
-          };
-        },
-        configurable: true,
-      });
-
-      return JSONUtil.clone<T, R>(input, config);
-    } finally {
-      delete castTo<{ toJSON?: unknown }>(Error.prototype).toJSON;
-    }
+  static cloneForTransmit<T, R = T>(input: T): R {
+    return JSONUtil.clone<T, R>(input);
   }
 
   static cloneFromTransmit<T, R = T>(input: T): R {
-    return JSONUtil.clone<T, R>(input, { reviver: JSONUtil.STANDRD_REVIVER });
+    return JSONUtil.clone<T, R>(input, { reviver: JSONUtil.TRANSMIT_REVIVER });
   }
 }
