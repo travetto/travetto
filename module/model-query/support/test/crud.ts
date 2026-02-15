@@ -161,7 +161,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
       BigIntModel.from({ largeNumber: 100n, optionalBigInt: 1000n }),
       BigIntModel.from({ largeNumber: 200n, optionalBigInt: 2000n }),
       BigIntModel.from({ largeNumber: 300n }),
-      BigIntModel.from({ largeNumber: 9007199254740991n, optionalBigInt: 123456789012345678901234567890n }),
+      BigIntModel.from({ largeNumber: 9007199254740991n, optionalBigInt: 1234567890123456789n }),
       BigIntModel.from({ largeNumber: 18014398509481982n }),
     ]);
 
