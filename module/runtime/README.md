@@ -164,9 +164,9 @@ export class EnvProp<T> {
 ```
 
 ## Standard Error Support
-While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L24) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module and HTTP status codes). 
+While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module and HTTP status codes). 
 
-The [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L24) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+The [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
    *  `general` - General purpose errors
    *  `system` - Synonym for `general`
    *  `data` - Data format, content, etc are incorrect. Generally correlated to bad input.
@@ -250,7 +250,7 @@ $ DEBUG=express:*,@travetto/web npx trv run web
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L24) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17) with a category of 'notfound'.  
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
