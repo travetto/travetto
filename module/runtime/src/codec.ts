@@ -45,8 +45,14 @@ export class CodecUtil {
   }
 
   /** Convert base64 value to utf8 string  */
-  static base64ToUTF8(value: TextInput): string {
-    return this.toUTF8String(typeof value === 'string' ? Buffer.from(value, 'base64') : value);
+  static base64ToUTF8(value: TextInput, checkIfEncoded = false): string {
+    const result = this.toUTF8String(typeof value === 'string' ? Buffer.from(value, 'base64') : value);
+
+    // Read from encoded if it happens
+    if (checkIfEncoded && result.startsWith('%')) {
+      return decodeURIComponent(result);
+    }
+    return result;
   }
 
   /** Detect encoding of a binary type, if possible  */

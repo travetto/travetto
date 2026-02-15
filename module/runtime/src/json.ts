@@ -158,14 +158,7 @@ export class JSONUtil {
 
   /** Decode JSON value from base64 encoded string */
   static fromBase64<T>(input: string): T {
-    let decoded = CodecUtil.base64ToUTF8(input);
-
-    // Read from encoded if it happens
-    if (decoded.startsWith('%')) {
-      decoded = decodeURIComponent(decoded);
-    }
-
-    return JSONUtil.fromUTF8(decoded);
+    return JSONUtil.fromUTF8(CodecUtil.base64ToUTF8(input, true));
   }
 
   /** JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value */
