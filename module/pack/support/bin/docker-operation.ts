@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { CodecUtil, Runtime } from '@travetto/runtime';
+import { JSONUtil, Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell.ts';
@@ -82,7 +82,7 @@ export class DockerPackOperation {
       yield ActiveShellCommand.chdir(path.resolve());
     } else {
       await PackUtil.runCommand(cmd, { cwd: config.buildDirectory, stdio: [0, 'pipe', 2] });
-      const [image]: [{ Size: number }] = CodecUtil.fromJSON(await PackUtil.runCommand(['docker', 'inspect', config.dockerImage]));
+      const [image] = await PackUtil.runCommand(['docker', 'inspect', config.dockerImage]).then(JSONUtil.fromUTF8<[{ Size: number }]>);
       yield [cliTpl`${{ title: 'Built Docker Container  ' }} ${{ identifier: 'sizeMb' }}=${{ param: Math.trunc(image.Size / 2 ** 20) }}`];
     }
   }

@@ -16,7 +16,7 @@
   </figure>
 
 This module provides a clean and direct mechanism for processing uploads, built upon <a target="_blank" class="external-link" href="https://github.com/fastify/busboy">&#64;fastify/busboy</a>. The module also provides some best practices with respect to temporary file management.<br><br>
-Once the files are uploaded, they are exposed via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> parameters using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-upload/src/decorator.ts#L20">&#64;Upload</a> decorator.  This decorator requires the related field type to be a standard <a target="_blank" class="external-link" href="https://nodejs.org/api/buffer.html#class-file">Buffer</a> object, or a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-upload/src/types.ts#L4">FileMap</a>.<br><br>
+Once the files are uploaded, they are exposed via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> parameters using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-upload/src/decorator.ts#L20">&#64;Upload</a> decorator.  This decorator requires the related field type to be a standard <a target="_blank" class="external-link" href="https://nodejs.org/api/buffer.html#class-file">Buffer</a> object, or a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-upload/src/types.ts#L7">FileMap</a>.<br><br>
 A simple example:
 
   <figure class="code">

@@ -9,39 +9,18 @@ export type ErrorCategory =
   'timeout' |
   'unavailable';
 
-export type AppErrorOptions<T> =
-  ErrorOptions &
-  {
-    at?: Date | string | number;
-    type?: string;
-    category?: ErrorCategory;
-  } &
-  (T extends undefined ?
-    { details?: T } :
-    { details: T });
+export type AppErrorOptions<T> = Omit<Partial<AppError>, 'details'> & (T extends undefined ? { details?: T } : { details: T });
 
 /**
  * Framework error class, with the aim of being extensible
  */
 export class AppError<T = Record<string, unknown> | undefined> extends Error {
 
-  static defaultCategory?: ErrorCategory;
-
-  /** Convert from JSON object */
-  static fromJSON(error: unknown): AppError | undefined {
-    if (!!error && typeof error === 'object' &&
-      ('message' in error && typeof error.message === 'string') &&
-      ('category' in error && typeof error.category === 'string') &&
-      ('type' in error && typeof error.type === 'string') &&
-      ('at' in error && typeof error.at === 'string')
-    ) {
-      return new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(error));
-    }
-  }
+  static defaultCategory: ErrorCategory = 'general';
 
   type: string;
   category: ErrorCategory;
-  at: string;
+  at: Date;
   details: T;
 
   /**
@@ -57,22 +36,6 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
     this.type = options?.type ?? this.constructor.name;
     this.details = options?.details!;
     this.category = options?.category ?? castTo<typeof AppError>(this.constructor).defaultCategory ?? 'general';
-    this.at = new Date(options?.at ?? Date.now()).toISOString();
-  }
-
-  /**
-   * Serializes an error to a basic object
-   */
-  toJSON(): AppErrorOptions<T> & { message: string } {
-    const options: AppErrorOptions<unknown> = {
-      category: this.category,
-      ...(this.cause ? { cause: `${this.cause}` } : undefined),
-      type: this.type,
-      at: this.at,
-      ...(this.details ? { details: this.details } : undefined!),
-    };
-
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return { message: this.message, ...options as AppErrorOptions<T> };
+    this.at = new Date(options?.at ?? Date.now());
   }
 }

@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { AppError, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
+import { AppError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
 import type { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -96,7 +96,7 @@ export class CliUtil {
     console.log('Triggering IPC request', request);
 
     Object.entries(process.env).forEach(([key, value]) => validEnv(key) && (env[key] = value!));
-    const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSON.stringify(request) });
+    const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSONUtil.toUTF8(request) });
 
     if (!sent.ok) {
       throw new AppError(`IPC Request failed: ${sent.status} ${await sent.text()}`);
@@ -107,7 +107,8 @@ export class CliUtil {
    * Write data to channel and ensure its flushed before continuing
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
-    return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data : JSON.stringify(data, null, 2), () => resolve()));
+    return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data :
+      JSONUtil.toUTF8Pretty(data), () => resolve()));
   }
 
   /**

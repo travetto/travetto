@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import path from 'node:path';
 
-import { Env, ExecUtil, Util, RuntimeIndex, Runtime, TimeUtil, CodecUtil } from '@travetto/runtime';
+import { Env, ExecUtil, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 import { Registry } from '@travetto/registry';
 
@@ -97,7 +97,7 @@ export class RunUtil {
       ) :
       ((): boolean => true);
 
-    const parsed: TestConfig[] = CodecUtil.fromJSON(digestProcess.stdout);
+    const parsed: TestConfig[] = JSONUtil.fromUTF8(digestProcess.stdout);
 
     const events = parsed.filter(testFilter).reduce((runs, test) => {
       if (!runs.has(test.classId)) {

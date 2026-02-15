@@ -1,4 +1,5 @@
 import { Registry } from '@travetto/registry';
+import { JSONUtil } from '@travetto/runtime';
 
 import { validate } from './person-binding-invalid.ts';
 
@@ -8,6 +9,6 @@ export async function main(): Promise<void> {
   try {
     await validate();
   } catch (error) {
-    console.warn!('Validation Failed', JSON.stringify(error, null, 2));
+    console.warn!('Validation Failed', JSONUtil.toUTF8Pretty(error));
   }
 }

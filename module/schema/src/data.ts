@@ -152,9 +152,11 @@ export class DataUtil {
             input :
             typeof input === 'number' ?
               new Date(input) :
-              (typeof input === 'string' && /^[-]?\d+$/.test(input)) ?
-                new Date(parseInt(input, 10)) :
-                new Date(input.toString());
+              typeof input === 'bigint' ?
+                new Date(Number(input)) :
+                (typeof input === 'string' && /^[-]?\d+$/.test(input)) ?
+                  new Date(parseInt(input, 10)) :
+                  new Date(input.toString());
         }
         if (strict && value && Number.isNaN(value.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
@@ -162,6 +164,9 @@ export class DataUtil {
         return value;
       }
       case Number: {
+        if (typeof input === 'bigint') {
+          return Number(input);
+        }
         const value = `${input}`.includes('.') ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
         if (strict && Number.isNaN(value)) {
           throw new Error(`Invalid numeric value: ${input}`);

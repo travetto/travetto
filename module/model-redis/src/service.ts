@@ -1,6 +1,6 @@
 import { createClient } from '@redis/client';
 
-import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport,
   NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId,
@@ -106,7 +106,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       }
       switch (action) {
         case 'write': {
-          multi.set(key, JSON.stringify(item));
+          multi.set(key, JSONUtil.toUTF8(item));
           this.#addIndices(cls, item, multi);
           break;
         }
@@ -119,7 +119,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     } else {
       switch (action) {
         case 'write': {
-          await this.client.set(key, JSON.stringify(item));
+          await this.client.set(key, JSONUtil.toUTF8(item));
           break;
         }
         case 'delete': {

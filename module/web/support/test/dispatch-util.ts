@@ -1,4 +1,4 @@
-import { AppError, BinaryUtil, castTo, type BinaryType, type BinaryArray, CodecUtil } from '@travetto/runtime';
+import { BinaryUtil, castTo, type BinaryType, type BinaryArray, CodecUtil, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { WebResponse } from '../../src/types/response.ts';
@@ -47,17 +47,19 @@ export class WebTestDispatchUtil {
       }
     }
 
-    const text = () => BinaryUtil.isBinaryArray(result) ? CodecUtil.toUTF8String(result) : (typeof result === 'string' ? result : undefined);
+    const isJSON = response.headers.get('Content-Type') === 'application/json';
+    const isText = response.headers.get('Content-Type')?.startsWith('text/') ?? false;
 
-    if (text) {
-      switch (response.headers.get('Content-Type')) {
-        case 'application/json': result = CodecUtil.fromJSON(text()!); break;
-        case 'text/plain': result = text(); break;
-      }
+    if (BinaryUtil.isBinaryArray(result) && (isJSON || isText)) {
+      result = CodecUtil.toUTF8String(result);
+    }
+
+    if (typeof result === 'string' && isJSON) {
+      result = JSONUtil.fromUTF8(result, { reviver: JSONUtil.TRANSMIT_REVIVER });
     }
 
     if (response.context.httpStatusCode && response.context.httpStatusCode >= 400) {
-      result = WebCommonUtil.catchResponse(AppError.fromJSON(result) ?? result).body;
+      result = WebCommonUtil.catchResponse(result).body;
     }
 
     response.body = result;

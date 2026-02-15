@@ -1,6 +1,6 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
 import { DataUtil, ValidationResultError, type ValidationError, SchemaRegistryIndex } from '@travetto/schema';
-import type { Class } from '@travetto/runtime';
+import { JSONUtil, type Class } from '@travetto/runtime';
 
 import type { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
 
@@ -29,8 +29,8 @@ const SORT = 'sort';
 // const GROUP_BY = 'groupBy';
 
 const MULTIPLE_KEYS_ALLOWED = new Set([
-  '$maxDistance', '$gt',
-  '$minDistance', '$lt',
+  '$maxDistance', '$gt', '$gte',
+  '$minDistance', '$lt', '$lte',
   '$near'
 ]);
 
@@ -110,14 +110,12 @@ export class QueryVerifier {
    * Check operator clause
    */
   static checkOperatorClause(state: State, declaredType: SimpleType, value: unknown, allowed: Record<string, Set<string>>, isArray: boolean): void {
-    if (isArray) {
-      if (Array.isArray(value)) {
-        // Handle array literal
-        for (const item of value) {
-          this.checkOperatorClause(state, declaredType, item, allowed, false);
-        }
-        return;
+    if (isArray && Array.isArray(value)) {
+      // Handle array literal
+      for (const item of value) {
+        this.checkOperatorClause(state, declaredType, item, allowed, false);
       }
+      return;
     }
 
     if (!DataUtil.isPlainObject(value)) {
@@ -228,7 +226,7 @@ export class QueryVerifier {
         if (value === 1 || value === -1 || typeof value === 'boolean') {
           return;
         }
-        state.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSON.stringify(value)}`);
+        state.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSONUtil.toUTF8(value)}`);
       }
     });
   }

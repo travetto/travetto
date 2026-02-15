@@ -1,10 +1,10 @@
 import { Injectable } from '@travetto/di';
-import { CodecUtil } from '@travetto/runtime';
+import { JSONUtil } from '@travetto/runtime';
 
 import type { ConfigParser } from './types.ts';
 
 @Injectable()
 export class JSONConfigParser implements ConfigParser {
   ext = ['.json'];
-  parse = CodecUtil.fromJSON;
+  parse = JSONUtil.fromUTF8;
 }

@@ -1,5 +1,5 @@
 import type { SchemaFieldConfig, Point } from '@travetto/schema';
-import { type Class, toConcrete } from '@travetto/runtime';
+import { castTo, type Class, toConcrete } from '@travetto/runtime';
 
 const st = (value: string | string[], isArray: boolean = false): Set<string> =>
   new Set((Array.isArray(value) ? value : [value]).map(item => isArray ? `${item}[]` : item));
@@ -18,6 +18,8 @@ const geo = (type: string): Record<string, Set<string>> => ({
 
 const PointConcrete = toConcrete<Point>();
 
+const PRIMITIVE_TYPES = new Set(['string', 'number', 'boolean', 'bigint'] as const);
+
 /**
  * Basic type support
  */
@@ -28,6 +30,7 @@ export class TypeUtil {
   static OPERATORS = {
     string: { ...basic(st('string')), ...scalar(st('string', true)), ...str() },
     number: { ...basic(st('number')), ...scalar(st('number', true)), ...comp(st('number')) },
+    bigint: { ...basic(st('bigint')), ...scalar(st('bigint', true)), ...comp(st('bigint')) },
     boolean: { ...basic(st('boolean')), ...scalar(st('boolean', true)) },
     Date: { ...basic(st('Date')), ...scalar(st('Date', true)), ...comp(st(['string', 'Date'])) },
     Point: { ...basic(st('Point')), ...geo('Point') }
@@ -36,12 +39,13 @@ export class TypeUtil {
   /**
    * Get declared type of a given field, only for primitive types
    */
-  static getDeclaredType(field: SchemaFieldConfig | Class): keyof typeof TypeUtil.OPERATORS | undefined {
+  static getDeclaredType(field: SchemaFieldConfig | Function | Class): keyof typeof TypeUtil.OPERATORS | undefined {
     const type = 'type' in field ? field.type : field;
     switch (type) {
       case String: return 'string';
       case Number: return 'number';
       case Boolean: return 'boolean';
+      case BigInt: return 'bigint';
       case Date: return 'Date';
       case PointConcrete: return 'Point';
       default: {
@@ -57,7 +61,7 @@ export class TypeUtil {
    */
   static getActualType(value: unknown): string {
     const type = typeof value;
-    if (['string', 'number', 'boolean'].includes(type)) {
+    if (PRIMITIVE_TYPES.has(castTo(type))) {
       return type;
     } else if (value instanceof RegExp) {
       return 'RegExp';

@@ -16,7 +16,7 @@ yarn add @travetto/log
 This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L43) in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. The logging infrastructure is built upon the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") system, and so new loggers can be created that rely upon dependency injected services and sources.
 
 ## Extending the Common Logger
-By default, the system ships with the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L13), and by default will leverage the [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L39) and the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7). The configuration [CommonLoggerConfig](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L13) provides two configuration variables that allows for switching out [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L39) for the [JsonLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/json.ts#L16), depending on the value of `CommonLoggerConfig.format`.  Additionally the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7) can be swapped out for the [FileLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/file.ts#L11) depending on the value of `CommonLoggerConfig.output`.
+By default, the system ships with the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L13), and by default will leverage the [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L39) and the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7). The configuration [CommonLoggerConfig](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L13) provides two configuration variables that allows for switching out [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L39) for the [JsonLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/json.ts#L17), depending on the value of `CommonLoggerConfig.format`.  Additionally the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7) can be swapped out for the [FileLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/file.ts#L11) depending on the value of `CommonLoggerConfig.output`.
 
 **Code: Standard Logging Config**
 ```typescript
@@ -95,13 +95,14 @@ The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/typ
 ```typescript
 import { Injectable } from '@travetto/di';
 import type { LogEvent, Logger } from '@travetto/log';
+import { JSONUtil } from '@travetto/runtime';
 
 @Injectable()
 export class CustomLogger implements Logger {
   log(event: LogEvent): void {
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');
-    const body = JSON.stringify(event);
+    const body = JSONUtil.toUTF8(event);
     fetch('http://localhost:8080/log', { method: 'POST', headers, body, });
   }
 }

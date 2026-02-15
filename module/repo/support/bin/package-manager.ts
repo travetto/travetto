@@ -2,7 +2,7 @@ import path from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { CodecUtil, type ExecutionResult, Runtime } from '@travetto/runtime';
+import { JSONUtil, type ExecutionResult, Runtime } from '@travetto/runtime';
 import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -34,7 +34,7 @@ export class PackageManager {
       throw new Error(result.stderr);
     }
 
-    const parsed = CodecUtil.fromJSON<{ data: { dist?: { integrity?: string } } }>(result.stdout || '{}');
+    const parsed = JSONUtil.fromUTF8<{ data: { dist?: { integrity?: string } } }>(result.stdout || '{}');
     return parsed.data?.dist?.integrity !== undefined;
   }
 
@@ -87,7 +87,7 @@ export class PackageManager {
    * Write package
    */
   static async writePackageIfChanged(modulePath: string, pkg: Package): Promise<void> {
-    const final = JSON.stringify(pkg, null, 2);
+    const final = JSONUtil.toUTF8Pretty(pkg);
     const target = path.resolve(modulePath, 'package.json');
     const current = (await fs.readFile(target, 'utf8').catch(() => '')).trim();
     if (final !== current) {

@@ -1,8 +1,14 @@
-import { type Any, type Class, type ClassInstance, getClass } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, getClass, type NumericLikeIntrinsic, type NumericPrimitive, type Primitive } from '@travetto/runtime';
 
 import { CommonRegex } from '../validate/regex.ts';
 import { CONSTRUCTOR_PROPERTY, type SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+
+type StringType = string | string[];
+type LengthType = string | unknown[] | Uint8Array | Uint16Array | Uint32Array;
+type NumberType = NumericPrimitive | NumericPrimitive[];
+type NumberLikeType = NumericLikeIntrinsic | NumericLikeIntrinsic[];
+type EnumType = Exclude<Primitive, 'boolean'> | Exclude<Primitive, 'boolean'>[];
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(
   instance: T, property: K, idx?: TypedPropertyDescriptor<Any> | number
@@ -55,7 +61,7 @@ export function Required(active = true, message?: string): PropType<unknown> { r
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Enum(values: string[], message?: string): PropType<string | number> {
+export function Enum(values: string[], message?: string): PropType<EnumType> {
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return input({ enum: { values, message } });
 }
@@ -65,14 +71,14 @@ export function Enum(values: string[], message?: string): PropType<string | numb
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Text(): PropType<string | string[]> { return input({ specifiers: ['text'] }); }
+export function Text(): PropType<StringType> { return input({ specifiers: ['text'] }); }
 
 /**
  * Mark the input to indicate it's for long form text
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function LongText(): PropType<string | string[]> { return input({ specifiers: ['text', 'long'] }); }
+export function LongText(): PropType<StringType> { return input({ specifiers: ['text', 'long'] }); }
 
 /**
  * Require the input to match a specific RegExp
@@ -81,7 +87,7 @@ export function LongText(): PropType<string | string[]> { return input({ specifi
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Match(regex: RegExp, message?: string): PropType<string | string[]> { return input({ match: { regex, message } }); }
+export function Match(regex: RegExp, message?: string): PropType<StringType> { return input({ match: { regex, message } }); }
 
 /**
  * The minimum length for the string or array
@@ -90,7 +96,7 @@ export function Match(regex: RegExp, message?: string): PropType<string | string
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MinLength(limit: number, message?: string): PropType<string | unknown[]> {
+export function MinLength(limit: number, message?: string): PropType<LengthType> {
   return input({ minlength: { limit, message }, ...(limit === 0 ? { required: { active: false } } : {}) });
 }
 
@@ -101,7 +107,7 @@ export function MinLength(limit: number, message?: string): PropType<string | un
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MaxLength(limit: number, message?: string): PropType<string | unknown[]> { return input({ maxlength: { limit, message } }); }
+export function MaxLength(limit: number, message?: string): PropType<LengthType> { return input({ maxlength: { limit, message } }); }
 
 /**
  * The minimum value
@@ -110,8 +116,8 @@ export function MaxLength(limit: number, message?: string): PropType<string | un
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Min<T extends number | Date>(limit: T, message?: string): PropType<Date | number> {
-  return input({ min: { limit, message } });
+export function Min(limit: NumericLikeIntrinsic, message?: string): PropType<NumberLikeType> {
+  return input<NumberLikeType>({ min: { limit, message } });
 }
 
 /**
@@ -121,8 +127,8 @@ export function Min<T extends number | Date>(limit: T, message?: string): PropTy
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Max<T extends number | Date>(limit: T, message?: string): PropType<Date | number> {
-  return input({ max: { limit, message } });
+export function Max(limit: NumericLikeIntrinsic, message?: string): PropType<NumberLikeType> {
+  return input<NumberLikeType>({ max: { limit, message } });
 }
 
 /**
@@ -131,7 +137,7 @@ export function Max<T extends number | Date>(limit: T, message?: string): PropTy
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Email(message?: string): PropType<string | string[]> { return Match(CommonRegex.email, message); }
+export function Email(message?: string): PropType<StringType> { return Match(CommonRegex.email, message); }
 
 /**
  * Mark an input as an telephone number
@@ -139,7 +145,7 @@ export function Email(message?: string): PropType<string | string[]> { return Ma
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Telephone(message?: string): PropType<string | string[]> { return Match(CommonRegex.telephone, message); }
+export function Telephone(message?: string): PropType<StringType> { return Match(CommonRegex.telephone, message); }
 
 /**
  * Mark an input as a url
@@ -147,7 +153,7 @@ export function Telephone(message?: string): PropType<string | string[]> { retur
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Url(message?: string): PropType<string | string[]> { return Match(CommonRegex.url, message); }
+export function Url(message?: string): PropType<StringType> { return Match(CommonRegex.url, message); }
 
 /**
  * Determine the numeric precision of the value
@@ -163,7 +169,7 @@ export function Precision(digits: number, decimals?: number): PropType<number> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Integer(): PropType<number> { return Precision(0); }
+export function Integer(): PropType<NumberType> { return Precision(0); }
 
 /**
  * Mark a number as a float
@@ -177,14 +183,14 @@ export function Float(): PropType<number> { return Precision(10, 7); }
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Long(): PropType<number> { return Precision(19, 0); }
+export function Long(): PropType<NumberType> { return Precision(19, 0); }
 
 /**
  * Mark a number as a currency
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Currency(): PropType<number> { return Precision(13, 2); }
+export function Currency(): PropType<NumberType> { return Precision(13, 2); }
 
 /**
  * Specifier for the input

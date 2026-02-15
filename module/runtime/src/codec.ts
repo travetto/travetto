@@ -1,7 +1,6 @@
 import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
-import type { Any } from './types.ts';
 
 type TextInput = string | BinaryArray;
 
@@ -47,7 +46,14 @@ export class CodecUtil {
 
   /** Convert base64 value to utf8 string  */
   static base64ToUTF8(value: TextInput): string {
-    return this.toUTF8String(typeof value === 'string' ? Buffer.from(value, 'base64') : value);
+    const result = this.toUTF8String(typeof value === 'string' ? Buffer.from(value, 'base64') : value);
+    return result;
+  }
+
+  /** Convert url encoded base64 value to utf8 string  */
+  static urlEncodedBase64ToUTF8(value: TextInput): string {
+    const result = this.base64ToUTF8(value);
+    return result.startsWith('%') ? decodeURIComponent(result) : result;
   }
 
   /** Detect encoding of a binary type, if possible  */
@@ -62,48 +68,5 @@ export class CodecUtil {
     for await (const item of createInterface(BinaryUtil.toReadable(stream))) {
       await handler(item);
     }
-  }
-
-  /**
-   * Parse JSON safely
-   */
-  static fromJSON<T>(input: TextInput, reviver?: (this: unknown, key: string, value: Any) => unknown): T {
-    if (typeof input !== 'string') {
-      input = CodecUtil.toUTF8String(input);
-    }
-    if (!input) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return undefined as T;
-    }
-    // TODO: Ensure we aren't vulnerable to prototype pollution
-    return JSON.parse(input, reviver);
-  }
-
-  /**
-   * JSON to bytes
-   */
-  static toJSON(value: Any, replacer?: (this: unknown, key: string, value: Any) => unknown): BinaryArray {
-    return CodecUtil.fromUTF8String(JSON.stringify(value, replacer));
-  }
-
-  /**
-   * Encode JSON value as base64 encoded string
-   */
-  static toBase64JSON<T>(value: T): string {
-    return CodecUtil.utf8ToBase64(JSON.stringify(value));
-  }
-
-  /**
-   * Decode JSON value from base64 encoded string
-   */
-  static fromBase64JSON<T>(input: TextInput): T {
-    let decoded = CodecUtil.base64ToUTF8(input);
-
-    // Read from encoded if it happens
-    if (decoded.startsWith('%')) {
-      decoded = decodeURIComponent(decoded);
-    }
-
-    return CodecUtil.fromJSON(decoded);
   }
 }

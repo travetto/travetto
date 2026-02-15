@@ -1,5 +1,7 @@
 import type { Writable } from 'node:stream';
 
+import { JSONUtil } from '@travetto/runtime';
+
 import type { SuitesSummary } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
 
@@ -18,6 +20,6 @@ export class JSONEmitter {
   onEvent(): void { }
 
   onSummary(summary: SuitesSummary): void {
-    this.#stream.write(JSON.stringify(summary, undefined, 2));
+    this.#stream.write(JSONUtil.toUTF8Pretty(summary));
   }
 }

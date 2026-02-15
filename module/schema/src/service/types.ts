@@ -1,4 +1,4 @@
-import type { Any, Class, Primitive } from '@travetto/runtime';
+import type { Any, Class, IntrinsicType, NumericLikeIntrinsic, Primitive } from '@travetto/runtime';
 
 import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
@@ -26,10 +26,7 @@ export type SchemaBasicType = {
   /**
    * The class tied to the type
    */
-  type: Class & {
-    bindSchema?(input: unknown): undefined | unknown;
-    validateSchema?(input: unknown): string | undefined;
-  };
+  type: Class;
   /**
    * Is the field a foreign type
    */
@@ -171,11 +168,11 @@ export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
   /**
    * Minimum value configuration
    */
-  min?: { limit: number | Date, message?: string };
+  min?: { limit: NumericLikeIntrinsic, message?: string };
   /**
    * Maximum value configuration
    */
-  max?: { limit: number | Date, message?: string };
+  max?: { limit: NumericLikeIntrinsic, message?: string };
   /**
    * Minimum length configuration
    */
@@ -187,11 +184,11 @@ export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
   /**
    * Enumerated values
    */
-  enum?: { values: (string | number | boolean)[], message: string };
+  enum?: { values: Primitive[], message: string };
   /**
    * Default value
    */
-  default?: Primitive | [];
+  default?: IntrinsicType | [];
 }
 
 /**

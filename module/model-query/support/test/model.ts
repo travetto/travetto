@@ -92,3 +92,10 @@ export class WithNestedNestedLists {
   tags?: string[] = [];
   sub?: NamedSubNested;
 }
+
+@Model('bigint-model-2')
+export class BigIntModel {
+  id: string;
+  largeNumber: bigint;
+  optionalBigInt?: bigint;
+}

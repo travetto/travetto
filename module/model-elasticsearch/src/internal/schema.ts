@@ -1,6 +1,6 @@
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/api/types';
 
-import { type Class, toConcrete } from '@travetto/runtime';
+import { castTo, type Class, toConcrete } from '@travetto/runtime';
 import { type Point, DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
@@ -84,6 +84,8 @@ export class ElasticsearchSchemaUtil {
     for (const [field, config] of Object.entries(fields)) {
       if (config.type === PointConcrete) {
         properties[field] = { type: 'geo_point' };
+      } else if (config.type === castTo(BigInt)) {
+        properties[field] = { type: 'long' };
       } else if (config.type === Number) {
         let property: Record<string, unknown> = { type: 'integer' };
         if (config.precision) {

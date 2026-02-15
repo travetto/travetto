@@ -1,5 +1,5 @@
 import { CliCommand } from '@travetto/cli';
-import { Env, Runtime, describeFunction } from '@travetto/runtime';
+import { JSONUtil, Env, Runtime, describeFunction } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { IsPrivate } from '@travetto/schema';
 
@@ -40,7 +40,7 @@ export class TestDigestCommand {
       });
 
     if (this.output === 'json') {
-      console.log(JSON.stringify(all));
+      console.log(JSONUtil.toUTF8(all));
     } else {
       for (const item of all) {
         console.log(`${item.classId}#${item.methodName}`, item.tags?.join('|') ?? '');

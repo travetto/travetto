@@ -1,7 +1,7 @@
 import { createPool } from 'mysql2';
-import type { PoolConnection, Pool, OkPacket, ResultSetHeader } from 'mysql2/promise';
+import type { PoolConnection, Pool, OkPacket, ResultSetHeader, TypeCastField } from 'mysql2/promise';
 
-import { castTo, CodecUtil, ShutdownManager } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 import type { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, type SQLModelConfig } from '@travetto/model-sql';
@@ -35,6 +35,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
       database: this.#config.database,
       host: this.#config.host,
       port: this.#config.port,
+      supportBigNumbers: true,
       timezone: '+00:00',
       typeCast: this.typeCast.bind(this),
       ...(this.#config.options || {})
@@ -47,13 +48,17 @@ export class MySQLConnection extends Connection<PoolConnection> {
   /**
    * Support some basic type support for JSON data
    */
-  typeCast(field: unknown, next: () => unknown): unknown {
+  typeCast(field: TypeCastField, next: () => unknown): unknown {
     const result = next();
-    if (typeof result === 'string' && (field && typeof field === 'object' && 'type' in field) && (field.type === 'JSON' || field.type === 'BLOB')) {
-      if (result.charAt(0) === '{' && result.charAt(result.length - 1) === '}') {
-        try {
-          return CodecUtil.fromJSON(result);
-        } catch { }
+    switch (field.type) {
+      case 'JSON':
+      case 'BLOB': {
+        if (typeof result === 'string' && result.charAt(0) === '{' && result.charAt(result.length - 1) === '}') {
+          try {
+            return JSONUtil.fromUTF8(result);
+          } catch { }
+        }
+        break;
       }
     }
     return result;

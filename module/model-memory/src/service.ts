@@ -1,7 +1,6 @@
 import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
-  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, CodecUtil,
-  BinaryMetadataUtil
+  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -120,7 +119,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const store = this.#getStore(cls);
     await this.#removeIndices(cls, item.id);
     if (action === 'write') {
-      store.set(item.id, CodecUtil.toJSON(item));
+      store.set(item.id, JSONUtil.toBinaryArray(item));
       await this.#writeIndices(cls, item);
       return item;
     } else {
@@ -238,7 +237,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const resolved = await BinaryMetadataUtil.compute(input, metadata);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, CodecUtil.toJSON(resolved));
+    metaContent.set(location, JSONUtil.toBinaryArray(resolved));
     blobs.set(location, await BinaryUtil.toBinaryArray(input));
   }
 
@@ -259,7 +258,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
-    return CodecUtil.fromJSON(metaContent.get(location)!);
+    return JSONUtil.fromBinaryArray(metaContent.get(location)!);
   }
 
   async deleteBlob(location: string): Promise<void> {
@@ -275,7 +274,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void> {
     const metaContent = this.#getStore(ModelBlobMetaNamespace);
-    metaContent.set(location, CodecUtil.toJSON(metadata));
+    metaContent.set(location, JSONUtil.toBinaryArray(metadata));
   }
 
   // Expiry

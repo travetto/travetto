@@ -4,7 +4,7 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import { type EndpointConfig, type ControllerConfig, type EndpointParameterConfig, type ControllerVisitor, HTTP_METHODS } from '@travetto/web';
-import { AppError, type Class, describeFunction } from '@travetto/runtime';
+import { AppError, castTo, type Class, describeFunction } from '@travetto/runtime';
 import {
   type SchemaFieldConfig, type SchemaClassConfig, SchemaNameResolver,
   type SchemaInputConfig, SchemaRegistryIndex, type SchemaBasicType, type SchemaParameterConfig
@@ -77,7 +77,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Get the type for a given class
    */
   #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
-    let field: { type: Class<unknown>, precision?: [number, number | undefined] };
+    let field: { type: Class, precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
       field = { type: inputOrClass };
     } else {
@@ -93,6 +93,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     } else {
       switch (field.type) {
         case String: out.type = 'string'; break;
+        case castTo(BigInt):
+          out.type = 'integer';
+          out.format = 'int64';
+          break;
         case Number: {
           if (field.precision) {
             const [, decimals] = field.precision;
@@ -149,10 +153,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       config.minLength = input.minlength.limit;
     }
     if (input.min) {
-      config.minimum = typeof input.min.limit === 'number' ? input.min.limit : input.min.limit.getTime();
+      config.minimum = input.min.limit instanceof Date ? input.min.limit.getTime() : castTo(input.min.limit);
     }
     if (input.max) {
-      config.maximum = typeof input.max.limit === 'number' ? input.max.limit : input.max.limit.getTime();
+      config.maximum = input.max.limit instanceof Date ? input.max.limit.getTime() : castTo(input.max.limit);
     }
     if (input.enum) {
       config.enum = input.enum.values;

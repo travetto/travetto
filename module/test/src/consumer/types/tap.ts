@@ -2,7 +2,7 @@ import path from 'node:path';
 import { stringify } from 'yaml';
 
 import { Terminal } from '@travetto/terminal';
-import { TimeUtil, RuntimeIndex, hasToJSON } from '@travetto/runtime';
+import { TimeUtil, RuntimeIndex, hasToJSON, JSONUtil } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
@@ -61,7 +61,7 @@ export class TapEmitter implements TestConsumerShape {
   errorToString(error?: Error): string | undefined {
     if (error && error.name !== 'AssertionError') {
       if (error instanceof Error) {
-        let out = JSON.stringify(hasToJSON(error) ? error.toJSON() : error, null, 2);
+        let out = JSONUtil.toUTF8(hasToJSON(error) ? error.toJSON() : error, { indent: 2 });
         if (this.#options?.verbose && error.stack) {
           out = `${out}\n${error.stack}`;
         }

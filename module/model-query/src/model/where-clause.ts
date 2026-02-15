@@ -1,10 +1,10 @@
-import type { Primitive, RetainPrimitiveFields, TimeSpan } from '@travetto/runtime';
+import type { Primitive, ValidFields, TimeSpan } from '@travetto/runtime';
 import type { Point } from '@travetto/schema';
 
-export type QueryPrimitive = Primitive | Point;
+export type QueryPrimitive = Primitive | Date | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
-export type RetainQueryPrimitiveFields<T> = RetainPrimitiveFields<T, Point>;
+export type RetainQueryPrimitiveFields<T> = Pick<T, ValidFields<T, QueryPrimitive>>;
 
 type General<T> = {
   $eq?: T;
@@ -45,12 +45,13 @@ type GeoField = {
 export type PropWhereClause<T> = {
   [P in keyof T]?:
   (T[P] extends (number | undefined) ? (General<number> | ScalarField<number> | ComparableField<number> | number) :
-    (T[P] extends (string | undefined) ? (General<string> | ScalarField<string> | StringField | string) :
-      (T[P] extends (boolean | undefined) ? (General<boolean> | boolean) :
-        (T[P] extends (Date | undefined) ? (General<Date> | ScalarField<Date> | ComparableField<Date | TimeSpan> | Date) :
-          (T[P] extends (Point | undefined) ? (General<Point> | ScalarField<Point> | GeoField | Point) :
-            (T[P] extends ((infer U)[] | undefined) ? ArrayField<U> :
-              (T[P] extends (object | undefined) ? PropWhereClause<RetainQueryPrimitiveFields<T[P]>> : never)))))));
+    (T[P] extends (bigint | undefined) ? (General<bigint> | ScalarField<bigint> | ComparableField<bigint> | bigint) :
+      (T[P] extends (string | undefined) ? (General<string> | ScalarField<string> | StringField | string) :
+        (T[P] extends (boolean | undefined) ? (General<boolean> | boolean) :
+          (T[P] extends (Date | undefined) ? (General<Date> | ScalarField<Date> | ComparableField<Date | TimeSpan> | Date) :
+            (T[P] extends (Point | undefined) ? (General<Point> | ScalarField<Point> | GeoField | Point) :
+              (T[P] extends ((infer U)[] | undefined) ? ArrayField<U> :
+                (T[P] extends (object | undefined) ? PropWhereClause<RetainQueryPrimitiveFields<T[P]>> : never))))))));
 };
 
 /**

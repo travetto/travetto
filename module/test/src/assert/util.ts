@@ -1,7 +1,7 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { asFull, type Class, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asFull, type Class, JSONUtil, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { TestConfig, Assertion, TestResult } from '../model/test.ts';
 import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
@@ -22,7 +22,7 @@ export class AssertUtil {
         if (isCleanable(value)) {
           return value.toClean();
         } else if (value === null || value.constructor === Object || Array.isArray(value) || value instanceof Date) {
-          return JSON.stringify(value);
+          return JSONUtil.toUTF8(value);
         }
         break;
       }

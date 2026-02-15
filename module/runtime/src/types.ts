@@ -1,3 +1,5 @@
+import type { Readable } from 'node:stream';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Any = any;
 
@@ -12,21 +14,25 @@ export type AsyncMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<Ty
 export type AsyncIterableMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<AsyncIterable<R>, V>>;
 export type ClassTDecorator<T extends Class = Class> = (target: T) => T | void;
 
-export type Primitive = number | bigint | boolean | string | Date;
+export type NumericPrimitive = number | bigint;
+export type Primitive = NumericPrimitive | boolean | string;
+export type NumericLikeIntrinsic = Date | NumericPrimitive;
+
+export type IntrinsicType = Primitive | Date | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Readable | Buffer | Blob | File;
 
 export type DeepPartial<T> = {
-  [P in keyof T]?: (T[P] extends (Primitive | undefined) ? (T[P] | undefined) :
+  [P in keyof T]?: (T[P] extends (IntrinsicType | undefined) ? (T[P] | undefined) :
     (T[P] extends Any[] ? (DeepPartial<T[P][number]> | null | undefined)[] : DeepPartial<T[P]>));
 };
 
-type ValidPrimitiveFields<T, Z = undefined> = {
+export type ValidFields<T, I> = {
   [K in keyof T]:
-  (T[K] extends (Primitive | Z | undefined) ? K :
+  (T[K] extends (Primitive | I | undefined) ? K :
     (T[K] extends (Function | undefined) ? never :
       K))
 }[keyof T];
 
-export type RetainPrimitiveFields<T, Z = undefined> = Pick<T, ValidPrimitiveFields<T, Z>>;
+export type RetainIntrinsicFields<T> = Pick<T, ValidFields<T, IntrinsicType>>;
 
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
@@ -57,11 +63,6 @@ export const hasFunction = <T>(key: keyof T) => (value: unknown): value is T =>
   typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
-
-/**
- * A type representing unknown type
- */
-export class UnknownType { }
 
 export function toConcrete<T extends unknown>(): Class<T> {
   return arguments[0];

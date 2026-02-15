@@ -8,7 +8,7 @@ import { SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationR
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit,
-  RangeSchema
+  RangeSchema, BigIntSchema, BigIntRangeSchema, BigIntOptionalSchema, NumberArrayMinMaxSchema, BigIntArrayMinMaxSchema
 } from './models/validation.ts';
 import { Accessors } from './models/binding.ts';
 
@@ -427,6 +427,192 @@ class Validation {
       assert(err.details.errors.length === 1);
       assert(err.details.errors[0].path === 'value');
       assert(err.details.errors[0].message.includes('is greater than (100)'));
+    });
+  }
+
+  @Test()
+  async verifyBigIntValidation() {
+    // Valid bigint
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntSchema, { value: 42n })
+    );
+
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntSchema, { value: 9007199254740991n })
+    );
+
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntSchema, { value: -123n })
+    );
+
+    // Invalid type - should fail validation
+    await assert.rejects(() => SchemaValidator.validate(BigIntSchema, castTo({ value: 42 })), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].kind === 'type');
+    });
+
+    await assert.rejects(() => SchemaValidator.validate(BigIntSchema, castTo({ value: '42' })), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].kind === 'type');
+    });
+
+    // Missing required field
+    await assert.rejects(() => SchemaValidator.validate(BigIntSchema, castTo({})), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].kind === 'required');
+    });
+  }
+
+  @Test()
+  async verifyBigIntOptional() {
+    // Valid with value
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntOptionalSchema, castTo({ value: 42n }))
+    );
+
+    // Valid without value
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntOptionalSchema, castTo({}))
+    );
+
+    // Invalid type
+    await assert.rejects(() => SchemaValidator.validate(BigIntOptionalSchema, castTo({ value: 42 })), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].kind === 'type');
+    });
+  }
+
+  @Test()
+  async verifyBigIntMinMaxValues() {
+    // Valid cases
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntRangeSchema, { value: 10n })
+    );
+
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntRangeSchema, { value: 50n })
+    );
+
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntRangeSchema, { value: 100n })
+    );
+
+    // Below minimum
+    await assert.rejects(() => SchemaValidator.validate(BigIntRangeSchema, { value: 9n }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].kind === 'min');
+      assert(err.details.errors[0].message.includes('is less than'));
+    });
+
+    // Above maximum
+    await assert.rejects(() => SchemaValidator.validate(BigIntRangeSchema, { value: 101n }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].kind === 'max');
+      assert(err.details.errors[0].message.includes('is greater than'));
+    });
+
+    // Large values
+    await assert.rejects(() => SchemaValidator.validate(BigIntRangeSchema, { value: 9007199254740991n }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].kind === 'max');
+    });
+
+    await assert.rejects(() => SchemaValidator.validate(BigIntRangeSchema, { value: -10n }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].kind === 'min');
+    });
+  }
+
+  @Test()
+  async verifyNumberArrayMinMax() {
+    // All values meet min requirement
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0, 5, 10, 100] })
+    );
+
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0] })
+    );
+
+    // Value below minimum
+    await assert.rejects(() => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0, 5, -1] }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'values[2]');
+      assert(err.details.errors[0].kind === 'min');
+      assert(err.details.errors[0].message.includes('is less than'));
+    });
+
+    await assert.rejects(() => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [-10, 5, 10] }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'values[0]');
+      assert(err.details.errors[0].kind === 'min');
+    });
+
+    // Empty array should fail required check
+    await assert.rejects(() => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [] }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'values');
+      assert(err.details.errors[0].kind === 'required');
+    });
+  }
+
+  @Test()
+  async verifyBigIntArrayMinMax() {
+    // All values meet min requirement
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n, 5n, 10n, 100n] })
+    );
+
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n] })
+    );
+
+    // Value below minimum
+    await assert.rejects(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n, 5n, -1n] }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'values[2]');
+      assert(err.details.errors[0].kind === 'min');
+      assert(err.details.errors[0].message.includes('is less than'));
+    });
+
+    await assert.rejects(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [-10n, 5n, 10n] }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'values[0]');
+      assert(err.details.errors[0].kind === 'min');
+    });
+
+    // Large bigint values
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [9007199254740991n, 5n] })
+    );
+
+    // Empty array should fail required check
+    await assert.rejects(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [] }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'values');
+      assert(err.details.errors[0].kind === 'required');
     });
   }
 }

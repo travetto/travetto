@@ -12,7 +12,7 @@ import {
 import { Injectable } from '@travetto/di';
 import {
   type Class, AppError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil, BinaryMetadataUtil, TypedObject,
+  BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil, BinaryMetadataUtil, TypedObject, JSONUtil
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
@@ -49,7 +49,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       ...(metadata.cacheControl ? { CacheControl: metadata.cacheControl } : {}),
       Metadata: TypedObject.fromEntries(
         TypedObject.entries(metadata)
-          .map(([key, value]) => [key, typeof value === 'string' ? value : JSON.stringify(value)] as const)
+          .map(([key, value]) => [key, typeof value === 'string' ? value : JSONUtil.toUTF8(value)] as const)
       )
     };
   }
@@ -245,7 +245,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
-    const content = CodecUtil.toJSON(prepped);
+    const content = JSONUtil.toBinaryArray(prepped);
     await this.client.putObject(this.#query(cls, prepped.id, {
       Body: BinaryUtil.binaryArrayToBuffer(content),
       ContentType: 'application/json',

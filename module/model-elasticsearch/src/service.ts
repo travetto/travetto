@@ -1,11 +1,12 @@
-import { Client, errors, type estypes } from '@elastic/elasticsearch';
+import { Client, errors, Serializer } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import {
   type ModelCrudSupport, type BulkOperation, type BulkResponse, type ModelBulkSupport, type ModelExpirySupport,
   type ModelIndexedSupport, type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
-import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
+import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -21,6 +22,13 @@ import type { EsBulkError } from './internal/types.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import { IndexManager } from './index-manager.ts';
+
+const ELASTICSEARCH_REPLACER = {
+  replacer(this: unknown, key: string, value: unknown): unknown {
+    // @ts-expect-error
+    return (typeof this[key] === 'bigint' ? this[key].toString() : value);
+  }
+};
 
 /**
  * Elasticsearch model source.
@@ -39,6 +47,23 @@ export class ElasticsearchModelService implements
   config: ElasticsearchModelConfig;
 
   constructor(config: ElasticsearchModelConfig) { this.config = config; }
+
+  async postConstruct(this: ElasticsearchModelService): Promise<void> {
+    this.client = new Client({
+      nodes: this.config.hosts,
+      ...(this.config.options || {}),
+      Serializer: class extends Serializer {
+        deserialize = JSONUtil.fromUTF8;
+        serialize = (obj: unknown): string => JSONUtil.toUTF8(obj, ELASTICSEARCH_REPLACER);
+      }
+    });
+    await this.client.cluster.health({});
+    this.manager = new IndexManager(this.config, this.client);
+
+    await ModelStorageUtil.storageInitialization(this.manager);
+    ShutdownManager.signal.addEventListener('abort', () => this.client.close());
+    ModelExpiryUtil.registerCull(this);
+  }
 
   /**
    * Directly run the search
@@ -107,19 +132,6 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async postConstruct(this: ElasticsearchModelService): Promise<void> {
-    this.client = new Client({
-      nodes: this.config.hosts,
-      ...(this.config.options || {}),
-    });
-    await this.client.cluster.health({});
-    this.manager = new IndexManager(this.config, this.client);
-
-    await ModelStorageUtil.storageInitialization(this.manager);
-    ShutdownManager.signal.addEventListener('abort', () => this.client.close());
-    ModelExpiryUtil.registerCull(this);
-  }
-
   createStorage(): Promise<void> { return this.manager.createStorage(); }
   deleteStorage(): Promise<void> { return this.manager.deleteStorage(); }
   upsertModel(cls: Class): Promise<void> { return this.manager.upsertModel(cls); }
@@ -157,22 +169,17 @@ export class ElasticsearchModelService implements
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    try {
-      const clean = await ModelCrudUtil.preStore(cls, item, this);
-      const id = this.preUpdate(clean);
+    const clean = await ModelCrudUtil.preStore(cls, item, this);
+    const id = this.preUpdate(clean);
 
-      await this.client.index({
-        ...this.manager.getIdentity(cls),
-        id,
-        refresh: true,
-        body: castTo<T & { id: never }>(clean)
-      });
+    await this.client.index({
+      ...this.manager.getIdentity(cls),
+      id,
+      refresh: true,
+      body: castTo<T & { id: never }>(clean)
+    });
 
-      return this.postUpdate(clean, id);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+    return this.postUpdate(clean, id);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
@@ -531,7 +538,7 @@ export class ElasticsearchModelService implements
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = await Promise.all(result.hits.hits.map(hit => castTo<T>(({ [field]: field === 'id' ? hit._id : hit._source![field] }))));
+    const all = result.hits.hits.map(hit => castTo<T>(({ [field]: field === 'id' ? hit._id : hit._source![field] })));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query && query.limit);
   }
 

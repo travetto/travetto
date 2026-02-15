@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager, CodecUtil, BinaryUtil } from '@travetto/runtime';
+import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager, CodecUtil, BinaryUtil, JSONUtil } from '@travetto/runtime';
 
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
 
@@ -17,6 +17,7 @@ export const text = <>
     <li>Resource Access</li>
     <li>Encoding and Decoding Utilities</li>
     <li>Binary Utilities</li>
+    <li>JSON Utilities</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
     <li>Process Execution</li>
@@ -159,6 +160,26 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
     The {BinaryUtil} class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types ({d.input('Buffer')}, {d.input('Stream')}) and Web Standard types ({d.input('Blob')}, {d.input('ArrayBuffer')}).
 
     The framework leverages this to allow for seamless handling of binary data, regardless of the source.
+  </c.Section>
+
+  <c.Section title='JSON Utilities'>
+    The {JSONUtil} class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like {d.input('Date')}, {d.input('BigInt')}, and {d.input('Error')} objects seamlessly.
+
+    Key features include:
+    <ul>
+      <li>{d.method('fromUTF8(input, config?)')} - Parse JSON from a UTF-8 string</li>
+      <li>{d.method('toUTF8(value, config?)')} - Serialize a value to JSON string</li>
+      <li>{d.method('toUTF8Pretty(value)')} - Serialize with pretty formatting (2-space indent)</li>
+      <li>{d.method('fromBinaryArray(input)')} - Parse JSON from binary array</li>
+      <li>{d.method('toBinaryArray(value, config?)')} - Serialize to binary array (UTF-8 encoded)</li>
+      <li>{d.method('toBase64(value)')} - Encode JSON as base64 string</li>
+      <li>{d.method('fromBase64(input)')} - Decode JSON from base64 string</li>
+      <li>{d.method('clone(input, config?)')} - Deep clone objects with optional transformations</li>
+      <li>{d.method('cloneForTransmit(input)')} - Clone for transmission with error serialization</li>
+      <li>{d.method('cloneFromTransmit(input)')} - Clone from transmission with type restoration</li>
+    </ul>
+
+    The {d.input('TRANSMIT_REVIVER')} automatically restores {d.input('Date')} objects and {d.input('BigInt')} values during deserialization, making it ideal for transmitting complex data structures across network boundaries.
   </c.Section>
 
   <c.Section title='Time Utilities'>

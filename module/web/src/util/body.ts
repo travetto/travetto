@@ -1,6 +1,6 @@
 import { TextDecoder } from 'node:util';
 
-import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON, BinaryMetadataUtil } from '@travetto/runtime';
+import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON, BinaryMetadataUtil, JSONUtil } from '@travetto/runtime';
 
 import type { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
@@ -105,19 +105,18 @@ export class WebBodyUtil {
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
       out.body = this.buildMultiPartBody(body, boundary);
     } else {
-      let text: string;
+      let text: BinaryArray;
       if (typeof body === 'string') {
-        text = body;
+        text = CodecUtil.fromUTF8String(body);
       } else if (hasToJSON(body)) {
-        text = JSON.stringify(body.toJSON());
+        text = JSONUtil.toBinaryArray(body.toJSON());
       } else if (body instanceof Error) {
-        text = JSON.stringify({ message: body.message });
+        text = JSONUtil.toBinaryArray({ message: body.message });
       } else {
-        text = JSON.stringify(body);
+        text = JSONUtil.toBinaryArray(body);
       }
-      const bytes = CodecUtil.fromUTF8String(text);
-      out.headers.set('Content-Length', `${bytes.byteLength}`);
-      out.body = bytes;
+      out.headers.set('Content-Length', `${text.byteLength}`);
+      out.body = text;
     }
 
     out.headers.setIfAbsent('Content-Type', this.defaultContentType(body));
@@ -148,7 +147,7 @@ export class WebBodyUtil {
   static parseBody(type: string, body: string): unknown {
     switch (type) {
       case 'text': return body;
-      case 'json': return CodecUtil.fromJSON(body);
+      case 'json': return JSONUtil.fromUTF8(body);
       case 'form': return Object.fromEntries(new URLSearchParams(body));
     }
   }

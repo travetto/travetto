@@ -3,12 +3,12 @@ import fs from 'node:fs/promises';
 
 import type { LoadResult, Plugin, PluginContext, SourceMapInput } from 'rollup';
 
-import { CodecUtil, FileLoader } from '@travetto/runtime';
+import { JSONUtil, FileLoader } from '@travetto/runtime';
 
 import type { CoreRollupConfig } from '../../src/types.ts';
 
 function toString(error: unknown): string {
-  return error instanceof Error ? error.stack ?? error.toString() : JSON.stringify(error);
+  return error instanceof Error ? error.stack ?? error.toString() : JSONUtil.toUTF8(error);
 }
 // Pulled from https://github.com/Azure/azure-sdk-for-js/blob/main/common/tools/dev-tool/src/config/rollup.base.config.ts#L128
 export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
@@ -30,8 +30,8 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
             return null;
           }
           const loader = new FileLoader([path.dirname(id)]);
-          const map = await loader.readBinaryArray(mapPath)
-            .then(CodecUtil.fromBase64JSON<SourceMapInput>);
+          const map = await loader.readText(mapPath)
+            .then(JSONUtil.fromBase64<SourceMapInput>);
           return { code, map };
         }
         return { code, map: null };

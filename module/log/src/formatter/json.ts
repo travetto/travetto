@@ -1,5 +1,6 @@
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { JSONUtil } from '@travetto/runtime';
 
 import type { LogEvent, LogFormatter } from '../types.ts';
 import { LogFormatUtil } from './util.ts';
@@ -24,10 +25,10 @@ export class JsonLogFormatter implements LogFormatter {
     const { message: _m, args: _a, ...rest } = event;
     const message = LogFormatUtil.getLogMessage(event);
     const context = LogFormatUtil.getContext(event);
-    return JSON.stringify({
+    return JSONUtil.toUTF8({
       ...rest,
       ...(message ? { message } : {}),
       ...(context ? { context } : {}),
-    }, null, this.config.jsonIndent);
+    }, { indent: this.config.jsonIndent });
   }
 }

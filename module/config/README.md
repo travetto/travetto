@@ -129,7 +129,7 @@ export class MemoryConfigSource implements ConfigSource {
 
 **Code: Environment JSON Provider**
 ```typescript
-import { CodecUtil } from '@travetto/runtime';
+import { JSONUtil } from '@travetto/runtime';
 import type { ConfigSource, ConfigPayload } from './types.ts';
 
 /**
@@ -146,7 +146,7 @@ export class EnvConfigSource implements ConfigSource {
 
   get(): ConfigPayload | undefined {
     try {
-      const data: Record<string, unknown> = CodecUtil.fromJSON(process.env[this.#envKey] || '{}');
+      const data: Record<string, unknown> = JSONUtil.fromUTF8(process.env[this.#envKey] || '{}');
       return { data, priority: this.#priority, source: `env://${this.#envKey}` };
     } catch {
       console.error(`env.${this.#envKey} is an invalid format`, { text: process.env[this.#envKey] });
@@ -209,10 +209,11 @@ You can see that the `DBConfig` allows for the `port` to be overridden by the `D
 $ trv main doc/dbconfig-run.ts
 
 {
+  '$trv': 'AppError',
   message: 'Failed to construct @travetto/config:doc/dbconfig#DBConfig as validation errors have occurred',
   category: 'data',
   type: 'ValidationResultError',
-  at: '2029-03-14T04:00:00.618Z',
+  at: 2029-03-14T04:00:00.618Z,
   details: {
     class: '@travetto/config:doc/dbconfig#DBConfig',
     import: '@travetto/config/doc/dbconfig.ts',

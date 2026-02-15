@@ -73,27 +73,27 @@ From this schema, the registry would have the following information:
 
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L24">@Field</a> defines a field that will be serialized.</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L49">@Required</a> defines a that field should be required</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L58">@Enum</a> defines the allowable values that a field can have</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L84">@Match</a> defines a regular expression that the field value should match</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L93">@MinLength</a> enforces min length of a string</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L104">@MaxLength</a> enforces max length of a string</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L93">@Min</a> enforces min value for a date or a number</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L104">@Max</a> enforces max value for a date or a number</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L134">@Email</a> ensures string field matches basic email regex</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L142">@Telephone</a> ensures string field matches basic telephone regex</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L150">@Url</a> ensures string field matches basic url regex</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L55">@Required</a> defines a that field should be required</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L64">@Enum</a> defines the allowable values that a field can have</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L90">@Match</a> defines a regular expression that the field value should match</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L99">@MinLength</a> enforces min length of a string</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L110">@MaxLength</a> enforces max length of a string</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L99">@Min</a> enforces min value for a date or a number</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L110">@Max</a> enforces max value for a date or a number</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L140">@Email</a> ensures string field matches basic email regex</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L148">@Telephone</a> ensures string field matches basic telephone regex</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L156">@Url</a> ensures string field matches basic url regex</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L41">@Ignore</a> exclude from auto schema registration</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L166">@Integer</a> ensures number passed in is only a whole number</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L173">@Float</a> ensures number passed in allows fractional values</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L187">@Currency</a> provides support for standard currency</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L68">@Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L75">@LongText</a> same as text, but expects longer form content</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L172">@Integer</a> ensures number passed in is only a whole number</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L179">@Float</a> ensures number passed in allows fractional values</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L193">@Currency</a> provides support for standard currency</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L74">@Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L81">@LongText</a> same as text, but expects longer form content</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L40">@Readonly</a> defines a that field should not be bindable external to the class</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L33">@Writeonly</a> defines a that field should not be exported in serialization, but that it can be bound to</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L48">@Secret</a> marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L195">@Specifier</a> attributes additional specifiers to a field, allowing for more specification beyond just the field's type.</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L202">@DiscriminatorField</a> allows for promoting a given field as the owner of the sub type discriminator.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L201">@Specifier</a> attributes additional specifiers to a field, allowing for more specification beyond just the field's type.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L208">@DiscriminatorField</a> allows for promoting a given field as the owner of the sub type discriminator.</li>
 </ul>
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. <br><br>
 Just like the class, all fields can be defined with
@@ -247,6 +247,7 @@ would produce an exception similar to following structure
     <pre><code class="language-bash">$ trv main doc/person-invalid-output.ts
 
 Validation Failed <span class="token punctuation">{{'{'}}</span>
+  <span class="token string">"<span class="token variable">$trv</span>"</span><span class="token builtin class-name">:</span> <span class="token string">"AppError"</span>,
   <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Validation errors have occurred"</span>,
   <span class="token string">"category"</span><span class="token builtin class-name">:</span> <span class="token string">"data"</span>,
   <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"ValidationResultError"</span>,
@@ -306,7 +307,7 @@ When the validator is executed, it has access to the entire object, and you can 
 
   <figure class="code">
     <figcaption class="code">Validation Error Structure
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema/src/validate/types.ts#L8">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema/src/validate/types.ts#L10">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ValidationError</span> <span class="token punctuation">{{'{'}}</span>
@@ -333,7 +334,7 @@ When the validator is executed, it has access to the entire object, and you can 
   <span class="token comment">/**
    * Number to compare against
    */</span>
-  limit<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> Date<span class="token punctuation">;</span>
+  limit<span class="token operator">?</span><span class="token operator">:</span> NumericLikeIntrinsic<span class="token punctuation">;</span>
   <span class="token comment">/**
    * The type of the field
    */</span>
@@ -372,35 +373,39 @@ This feature is meant to allow for simple Typescript types to be able to be back
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DataUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../data.ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaTypeUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../type-config.ts'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> InvalidSymbol <span class="token operator">=</span> <span class="token function">Symbol</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
- * Point Contract
+ * Convert to tuple of two numbers
  */</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">PointContract</span> <span class="token punctuation">{{'{'}}</span>
-
-  <span class="token comment">/**
-   * Validate we have an actual point
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">validateSchema</span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token string">'type'</span> <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> bound <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">bindSchema</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> bound <span class="token operator">!==</span> InvalidSymbol <span class="token operator">&amp;&amp;</span> bound <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">isNaN</span><span class="token punctuation">(</span>bound<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">isNaN</span><span class="token punctuation">(</span>bound<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token keyword">undefined</span> <span class="token operator">:</span> <span class="token string">'type'</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token comment">/**
-   * Convert to tuple of two numbers
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">bindSchema</span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token builtin">number</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token keyword">typeof</span> InvalidSymbol <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token builtin">Array</span><span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> input<span class="token punctuation">.</span>length <span class="token operator">===</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">const</span> <span class="token punctuation">[</span>a<span class="token punctuation">,</span> b<span class="token punctuation">]</span> <span class="token operator">=</span> input<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>value <span class="token operator">=></span> DataUtil<span class="token punctuation">.</span><span class="token function">coerceType</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> Number<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token keyword">return</span> <span class="token punctuation">[</span>a<span class="token punctuation">,</span> b<span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">return</span> InvalidSymbol<span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span>
+<span class="token keyword">function</span> <span class="token function">bindPoint</span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token builtin">number</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token keyword">typeof</span> InvalidSymbol <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token builtin">Array</span><span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> input<span class="token punctuation">.</span>length <span class="token operator">===</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> <span class="token punctuation">[</span>a<span class="token punctuation">,</span> b<span class="token punctuation">]</span> <span class="token operator">=</span> input<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>value <span class="token operator">=></span> DataUtil<span class="token punctuation">.</span><span class="token function">coerceType</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> Number<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">[</span>a<span class="token punctuation">,</span> b<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> InvalidSymbol<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 
+<span class="token comment">/**
+ * Validate we have an actual point
+ */</span>
+<span class="token keyword">function</span> <span class="token function">validatePoint</span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token string">'type'</span> <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> bound <span class="token operator">=</span> <span class="token function">bindPoint</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> bound <span class="token operator">!==</span> InvalidSymbol <span class="token operator">&amp;&amp;</span> bound <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">isNaN</span><span class="token punctuation">(</span>bound<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">isNaN</span><span class="token punctuation">(</span>bound<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token keyword">undefined</span> <span class="token operator">:</span> <span class="token string">'type'</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token comment">/**
+ * Point Contract
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">PointContract</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+
+SchemaTypeUtil<span class="token punctuation">.</span><span class="token function">setSchemaTypeConfig</span><span class="token punctuation">(</span>PointContract<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+  validate<span class="token operator">:</span> validatePoint<span class="token punctuation">,</span>
+  bind<span class="token operator">:</span> bindPoint<span class="token punctuation">,</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>PointContract<span class="token punctuation">,</span> <span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> value<span class="token operator">:</span> <span class="token string">'Point'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
   </figure>
 
@@ -432,6 +437,7 @@ All that happens now, is the type is exported, and the class above is able to pr
     <pre><code class="language-bash">$ trv main doc/custom-type-output.ts
 
 Validation Failed <span class="token punctuation">{{'{'}}</span>
+  <span class="token string">"<span class="token variable">$trv</span>"</span><span class="token builtin class-name">:</span> <span class="token string">"AppError"</span>,
   <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Validation errors have occurred"</span>,
   <span class="token string">"category"</span><span class="token builtin class-name">:</span> <span class="token string">"data"</span>,
   <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"ValidationResultError"</span>,

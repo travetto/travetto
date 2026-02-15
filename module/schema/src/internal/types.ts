@@ -1,31 +1,35 @@
 import { DataUtil } from '../data.ts';
+import { SchemaTypeUtil } from '../type-config.ts';
 
 const InvalidSymbol = Symbol();
 
 /**
- * Point Contract
+ * Convert to tuple of two numbers
  */
-export class PointContract {
-
-  /**
-   * Validate we have an actual point
-   */
-  static validateSchema(input: unknown): 'type' | undefined {
-    const bound = this.bindSchema(input);
-    return bound !== InvalidSymbol && bound && !isNaN(bound[0]) && !isNaN(bound[1]) ? undefined : 'type';
-  }
-
-  /**
-   * Convert to tuple of two numbers
-   */
-  static bindSchema(input: unknown): [number, number] | typeof InvalidSymbol | undefined {
-    if (Array.isArray(input) && input.length === 2) {
-      const [a, b] = input.map(value => DataUtil.coerceType(value, Number, false));
-      return [a, b];
-    } else {
-      return InvalidSymbol;
-    }
+function bindPoint(input: unknown): [number, number] | typeof InvalidSymbol | undefined {
+  if (Array.isArray(input) && input.length === 2) {
+    const [a, b] = input.map(value => DataUtil.coerceType(value, Number, false));
+    return [a, b];
+  } else {
+    return InvalidSymbol;
   }
 }
 
+/**
+ * Validate we have an actual point
+ */
+function validatePoint(input: unknown): 'type' | undefined {
+  const bound = bindPoint(input);
+  return bound !== InvalidSymbol && bound && !isNaN(bound[0]) && !isNaN(bound[1]) ? undefined : 'type';
+}
+
+/**
+ * Point Contract
+ */
+export class PointContract { }
+
+SchemaTypeUtil.setSchemaTypeConfig(PointContract, {
+  validate: validatePoint,
+  bind: bindPoint,
+});
 Object.defineProperty(PointContract, 'name', { value: 'Point' });

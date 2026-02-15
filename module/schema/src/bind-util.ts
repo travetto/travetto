@@ -3,6 +3,7 @@ import { castTo, type Class, classConstruct, asFull, TypedObject, castKey } from
 import { DataUtil } from './data.ts';
 import type { SchemaInputConfig, SchemaParameterConfig, SchemaFieldMap } from './service/types.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
+import { SchemaTypeUtil } from './type-config.ts';
 
 type BindConfig = {
   view?: string;
@@ -25,8 +26,9 @@ export class BindUtil {
    * @param value The provided value
    */
   static #coerceType<T>(config: SchemaInputConfig, value: unknown): T | null | undefined {
-    if (config.type?.bindSchema) {
-      value = config.type.bindSchema(value);
+    const typeConfig = SchemaTypeUtil.getSchemaTypeConfig(config.type);
+    if (typeConfig?.bind) {
+      value = typeConfig.bind(value);
     } else {
       value = DataUtil.coerceType(value, config.type, false);
 

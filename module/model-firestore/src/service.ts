@@ -1,6 +1,6 @@
-import { type DocumentData, FieldValue, Firestore, type PartialWithFieldValue, type Query } from '@google-cloud/firestore';
+import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { CodecUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
@@ -10,10 +10,9 @@ import {
 
 import type { FirestoreModelConfig } from './config.ts';
 
-const clone = structuredClone;
-
-const toSimpleObject = <T>(input: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
-  CodecUtil.fromJSON(JSON.stringify(input, (_, value) => value ?? null), (_, value) => value ?? missingValue);
+const clone = JSONUtil.clone;
+const setMissingValues = <T>(input: T, missingValue: unknown): T =>
+  JSONUtil.clone(input, { replacer: (_, value) => value ?? null, reviver: (_, value) => value ?? missingValue });
 
 /**
  * A model service backed by Firestore
@@ -40,7 +39,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async postConstruct(): Promise<void> {
-    this.client = new Firestore(this.config);
+    this.client = new Firestore({ ...this.config, useBigInt: true });
     ShutdownManager.signal.addEventListener('abort', () => this.client.terminate());
   }
 
@@ -66,21 +65,21 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(prepped.id).create(clone(prepped));
+    await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).update(clone<DocumentData>(prepped));
+    await this.#getCollection(cls).doc(item.id).set(clone<DocumentData>(prepped), { merge: false });
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(prepped.id).set(clone(prepped));
+    await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped));
     return prepped;
   }
 
@@ -88,7 +87,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
-    const cleaned = toSimpleObject(full, FieldValue.delete());
+    const cleaned = setMissingValues(full, FieldValue.delete());
     await this.#getCollection(cls).doc(id).set(cleaned, { mergeFields: Object.keys(full) });
     return this.get(cls, id);
   }

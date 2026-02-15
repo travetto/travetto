@@ -31,13 +31,13 @@ export class IpcSupport {
         if (/post/i.test(request.method || '')) {
           const event = await IpcSupport.readJSONRequest<TargetEvent>(request);
           this.#log.info('Received IPC event', event);
-          this.#handler(event);
+          await this.#handler(event);
         }
         response.statusCode = 200;
-        response.end(JSON.stringify({ ok: true }));
+        response.end(JSONUtil.toUTF8({ ok: true }));
       } catch (error) {
         response.statusCode = 500;
-        response.end(JSON.stringify({ error: `${error}` }));
+        response.end(JSONUtil.toUTF8({ error: `${error}` }));
       }
     });
     await new Promise<void>(resolve => {

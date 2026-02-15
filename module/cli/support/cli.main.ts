@@ -1,4 +1,4 @@
-import { Runtime } from '@travetto/runtime';
+import { JSONUtil, Runtime } from '@travetto/runtime';
 import { type CliCommandShape, CliCommand, type CliValidationError, type ParsedState } from '@travetto/cli';
 import { Ignore, IsPrivate } from '@travetto/schema';
 
@@ -32,7 +32,7 @@ export class MainCommand implements CliCommandShape {
 
     if (result !== undefined) {
       if (process.connected) { process.send?.(result); }
-      const payload = typeof result === 'string' ? result : (result instanceof Error ? result.stack : JSON.stringify(result));
+      const payload = typeof result === 'string' ? result : (result instanceof Error ? result.stack : JSONUtil.toUTF8(result));
       process[process.exitCode ? 'stderr' : 'stdout'].write(`${payload}\n`);
     }
   }

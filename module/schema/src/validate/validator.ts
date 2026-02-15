@@ -7,6 +7,11 @@ import { isValidationError, TypeMismatchError, ValidationResultError } from './e
 import { DataUtil } from '../data.ts';
 import { CommonRegexToName } from './regex.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import { SchemaTypeUtil } from '../type-config.ts';
+import { UnknownType } from '../types.ts';
+
+const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
+type NumericComparable = number | bigint | Date;
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
@@ -22,8 +27,12 @@ function isClassInstance<T>(value: unknown): value is ClassInstance<T> {
   return !DataUtil.isPlainObject(value) && value !== null && typeof value === 'object' && !!value.constructor;
 }
 
-function isRangeValue(value: unknown): value is number | string | Date {
-  return typeof value === 'string' || typeof value === 'number' || value instanceof Date;
+function isRangeValue(value: unknown): value is NumericComparable {
+  return typeof value === 'number' || typeof value === 'bigint' || value instanceof Date;
+}
+
+function isLengthValue(value: unknown): value is { length: number } {
+  return (typeof value === 'string' || (typeof value === 'object' && !!value && 'length' in value && typeof value.length === 'number'));
 }
 
 /**
@@ -72,7 +81,7 @@ export class SchemaValidator {
     const { type, array } = input;
     const complex = SchemaRegistryIndex.has(type);
 
-    if (type === Object) {
+    if (type === Object || type === UnknownType) {
       return [];
     } else if (array) {
       if (!Array.isArray(value)) {
@@ -105,13 +114,10 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: string | number | Date): boolean {
+  static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: NumericComparable): boolean {
     const config = input[key]!;
-    const parsed = (typeof value === 'string') ?
-      (input.type === Date ? Date.parse(value) : parseInt(value, 10)) :
-      (value instanceof Date ? value.getTime() : value);
-
-    const boundary = (typeof config.limit === 'number' ? config.limit : config.limit.getTime());
+    const parsed = (value instanceof Date ? value.getTime() : value);
+    const boundary = (config.limit instanceof Date) ? config.limit.getTime() : config.limit;
     return key === 'min' ? parsed < boundary : parsed > boundary;
   }
 
@@ -122,37 +128,37 @@ export class SchemaValidator {
    * @param value The actual value
    */
   static #validateInput(input: SchemaInputConfig, value: unknown): ValidationResult[] {
-    const criteria: ([string, SchemaInputConfig[ValidationKindCore]] | [string])[] = [];
+    const criteria: [string, SchemaInputConfig[ValidationKindCore]][] = [];
+    const config = SchemaTypeUtil.getSchemaTypeConfig(input.type);
 
-    if (
-      (input.type === String && (typeof value !== 'string')) ||
-      (input.type === Number && ((typeof value !== 'number') || Number.isNaN(value))) ||
-      (input.type === Date && (!(value instanceof Date) || Number.isNaN(value.getTime()))) ||
-      (input.type === Boolean && typeof value !== 'boolean')
-    ) {
-      criteria.push(['type']);
-      return [{ kind: 'type', type: input.type.name.toLowerCase() }];
-    }
-
-    if (input.type?.validateSchema) {
-      const kind = input.type.validateSchema(value);
+    if (config?.validate) {
+      const kind = config.validate(value);
       switch (kind) {
         case undefined: break;
         case 'type': return [{ kind, type: input.type.name }];
-        default:
-          criteria.push([kind]);
+        default: return [{ kind, value }];
+      }
+    } else if (PrimitiveTypes.has(input.type)) {
+      if (typeof value !== input.type.name.toLowerCase()) {
+        return [{ kind: 'type', type: input.type.name.toLowerCase() }];
+      } else if (Number.isNaN(value)) {
+        return [{ kind: 'type', type: 'number' }];
+      }
+    } else if (SchemaRegistryIndex.has(input.type)) {
+      if (!(value instanceof input.type)) { // If not an instance of the type
+        return [{ kind: 'type', type: input.type.name }];
       }
     }
 
-    if (input.match && !input.match.regex.test(`${value}`)) {
+    if (input.match && (typeof value !== 'string' || !input.match.regex.test(value))) {
       criteria.push(['match', input.match]);
     }
 
-    if (input.minlength && `${value}`.length < input.minlength.limit) {
+    if (input.minlength && (!isLengthValue(value) || value.length < input.minlength.limit)) {
       criteria.push(['minlength', input.minlength]);
     }
 
-    if (input.maxlength && `${value}`.length > input.maxlength.limit) {
+    if (input.maxlength && (!isLengthValue(value) || value.length > input.maxlength.limit)) {
       criteria.push(['maxlength', input.maxlength]);
     }
 
@@ -168,12 +174,7 @@ export class SchemaValidator {
       criteria.push(['max', input.max]);
     }
 
-    const errors: ValidationResult[] = [];
-    for (const [key, block] of criteria) {
-      errors.push({ ...block, kind: key, value });
-    }
-
-    return errors;
+    return criteria.map(([key, block]) => ({ ...block, kind: key, value }));
   }
 
   /**

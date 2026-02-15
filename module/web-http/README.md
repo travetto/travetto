@@ -126,7 +126,7 @@ export class WebHttpConfig {
   async postConstruct(): Promise<void> {
     this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
     this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
-    this.bindAddress ||= await NetUtil.getLocalAddress();
+    this.bindAddress ||= NetUtil.getLocalAddress();
 
     if (!this.tls) {
       // Clear out keys if tls is not set

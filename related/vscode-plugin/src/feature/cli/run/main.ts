@@ -9,6 +9,7 @@ import { RunUtil } from '../../../core/run.ts';
 
 import { RunChoice } from './types.ts';
 import { CliRunUtil } from './util.ts';
+import { JSONUtil } from '@travetto/runtime';
 
 type Recent = { mode: 'recent', count: number };
 type All = { mode: 'all' };
@@ -51,7 +52,7 @@ export class CliRunFeature extends BaseFeature {
 
       vscode.window.showInformationMessage('Added new configuration to launch.json!');
     } catch (error) {
-      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
+      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSONUtil.toUTF8(error));
     }
   }
 
@@ -71,7 +72,7 @@ export class CliRunFeature extends BaseFeature {
         return this.debugTarget(choice, choice.inputs);
       }
     } catch (error) {
-      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSON.stringify(error));
+      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSONUtil.toUTF8(error));
     }
   }
 

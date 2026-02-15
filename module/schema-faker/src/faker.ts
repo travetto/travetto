@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { type Class, TimeUtil } from '@travetto/runtime';
+import { castTo, type Class, TimeUtil } from '@travetto/runtime';
 import { BindUtil, type SchemaFieldConfig, CommonRegex, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
@@ -89,21 +89,30 @@ export class SchemaFaker {
     let offset = 1;
 
     if (precision !== undefined) {
-      min = min === undefined ? -((10 ** precision[0]) - 1) : min;
-      max = max === undefined ? ((10 ** precision[0]) - 1) : max;
+      min ??= -((10 ** precision[0]) - 1);
+      max ??= ((10 ** precision[0]) - 1);
       if (precision[1] !== undefined) {
         offset = (10 ** (precision[1] || 0));
       }
     }
 
-    max = max === undefined ? 1000 : max;
-    min = min === undefined ? 0 : min;
+    max ??= 1000;
+    min ??= 0;
 
     const range = (max - min) * offset;
-
     const result = Math.trunc(Math.random() * range);
-
     return (result / offset) + min;
+  }
+
+
+  /**
+   * Get a new bigint value
+   * @param config BigInt config
+   */
+  static #bigInt(config: SchemaFieldConfig): bigint {
+    const min = config.min && typeof config.min.limit === 'bigint' ? config.min.limit : 0n;
+    const max = config.max && typeof config.max.limit === 'bigint' ? config.max.limit : 1000n;
+    return faker.number.bigInt({ min, max, });
   }
 
   /**
@@ -112,8 +121,8 @@ export class SchemaFaker {
    */
   static #date(config: SchemaFieldConfig): Date {
     const name = config.name.toLowerCase();
-    const min = config.min && typeof config.min.limit !== 'number' ? config.min.limit : undefined;
-    const max = config.max && typeof config.max.limit !== 'number' ? config.max.limit : undefined;
+    const min = config.min && config.min.limit instanceof Date ? config.min.limit : undefined;
+    const max = config.max && config.max.limit instanceof Date ? config.max.limit : undefined;
 
     if (min !== undefined || max !== undefined) {
       return faker.date.between({ from: min || TimeUtil.fromNow('-50d'), to: max || new Date() });
@@ -162,19 +171,15 @@ export class SchemaFaker {
     } else if (config.enum) {
       return faker.helpers.arrayElement(config.enum.values);
     } else {
-
-      const typ = config.type;
-
-      if (typ === Number) {
-        return this.#number(config);
-      } else if (typ === String) {
-        return this.#string(config);
-      } else if (typ === Date) {
-        return this.#date(config);
-      } else if (typ === Boolean) {
-        return faker.datatype.boolean();
-      } else if (SchemaRegistryIndex.has(typ)) {
-        return this.generate(typ);
+      switch (config.type) {
+        case Number: return this.#number(config);
+        case castTo(BigInt): return this.#bigInt(config);
+        case String: return this.#string(config);
+        case Date: return this.#date(config);
+        case Boolean: return faker.datatype.boolean();
+      }
+      if (SchemaRegistryIndex.has(config.type)) {
+        return this.generate(config.type);
       }
     }
   }

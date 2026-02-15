@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { castKey, getClass } from '@travetto/runtime';
+import { castKey, getClass, JSONUtil } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
@@ -70,7 +70,7 @@ export class HelpUtil {
       const desc = [cliTpl`${{ title: field.description }}`];
 
       if (key !== 'help' && defaultValue !== undefined) {
-        desc.push(cliTpl`(default: ${{ input: JSON.stringify(defaultValue) }})`);
+        desc.push(cliTpl`(default: ${{ input: JSONUtil.toUTF8(defaultValue) }})`);
       }
       descriptions.push(desc.join(' '));
     }

@@ -142,3 +142,32 @@ export class RangeSchema {
   @Min(10) @Max(100)
   value: number;
 }
+
+@Schema()
+export class BigIntSchema {
+  value: bigint;
+}
+
+@Schema()
+export class BigIntRangeSchema {
+  @Min(10n) @Max(100n)
+  value: bigint;
+}
+
+@Schema()
+export class BigIntOptionalSchema {
+  @Required(false)
+  value?: bigint;
+}
+
+@Schema()
+export class NumberArrayMinMaxSchema {
+  @Min(0)
+  values: number[];
+}
+
+@Schema()
+export class BigIntArrayMinMaxSchema {
+  @Min(0n)
+  values: bigint[];
+}

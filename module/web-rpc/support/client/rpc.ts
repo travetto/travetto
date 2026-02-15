@@ -17,6 +17,22 @@ const extendHeaders = (base: RequestInit['headers'], toAdd: Record<string, strin
   return headers;
 };
 
+const jsonToString = (input: unknown): string =>
+  JSON.stringify(input, (key, value): unknown => typeof value === 'bigint' ? `${value.toString()}n` : value);
+
+const stringToJson = <T = unknown>(input: string): T =>
+  JSON.parse(input, (key, value): unknown => {
+    if (typeof value === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z$/.test(value)) {
+        return new Date(value);
+      } else if (/^-?d+n$/.test(value)) {
+        return BigInt(value.slice(0, -1));
+      }
+    }
+    return value;
+  });
+
+
 export type PreRequestHandler = (item: RequestInit) => Promise<RequestInit | undefined | void>;
 export type PostResponseHandler = (item: Response) => Promise<Response | undefined | void>;
 
@@ -85,14 +101,14 @@ export function getBody(inputs: unknown[], isBodyRequest: boolean): { body: Form
     return {
       body: undefined,
       headers: {
-        'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(JSON.stringify(inputs)))
+        'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(jsonToString(inputs)))
       }
     };
   }
   // If we do not have a blob, simple output
   if (!inputs.some(isBlobLike)) {
     return {
-      body: JSON.stringify(inputs),
+      body: jsonToString(inputs),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -115,25 +131,22 @@ export function getBody(inputs: unknown[], isBodyRequest: boolean): { body: Form
   return {
     body: form,
     headers: {
-      'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(JSON.stringify(plainInputs)))
+      'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(jsonToString(plainInputs)))
     }
   };
 }
 
-export function consumeJSON<T>(text: string | unknown): T {
-  if (typeof text !== 'string') {
-    return consumeJSON(JSON.stringify(text));
-  } else if (text === null || text === undefined || text === '') {
+export function consumeJSON<T>(input: string | unknown): T {
+  let text: string;
+  if (input === null || input === undefined || input === '') {
     return undefined!;
+  } else if (typeof input !== 'string') {
+    text = jsonToString(input);
+  } else {
+    text = input;
   }
   try {
-    return JSON.parse(text, (key, value): unknown => {
-      if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/.test(value)) {
-        return new Date(value);
-      } else {
-        return value;
-      }
-    });
+    return stringToJson<T>(text);
   } catch (error) {
     throw new Error(`Unable to parse response: ${text}, Unknown error: ${error}`);
   }

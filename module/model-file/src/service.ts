@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import {
   type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryUtil, CodecUtil, BinaryMetadataUtil
+  BinaryUtil, JSONUtil, BinaryMetadataUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -139,7 +139,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
 
     const file = await this.#resolveName(cls, '.json', item.id);
-    await fs.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
+    await fs.writeFile(file, BinaryUtil.binaryArrayToBuffer(JSONUtil.toBinaryArray(item)));
 
     return prepped;
   }
@@ -149,7 +149,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const id = item.id;
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
     const file = await this.#resolveName(cls, '.json', full.id);
-    await fs.writeFile(file, JSON.stringify(full), { encoding: 'utf8' });
+    await fs.writeFile(file, BinaryUtil.binaryArrayToBuffer(JSONUtil.toBinaryArray(full)));
     return full;
   }
 
@@ -179,7 +179,9 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       BinaryUtil.pipeline(input, createWriteStream(file)),
-      BinaryUtil.pipeline(CodecUtil.toJSON(resolved), createWriteStream(file.replace(BIN, META)))
+      BinaryUtil.pipeline(
+        JSONUtil.toBinaryArray(resolved),
+        createWriteStream(file.replace(BIN, META)))
     ]);
   }
 
@@ -193,7 +195,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async getBlobMetadata(location: string): Promise<BinaryMetadata> {
     const file = await this.#find(ModelBlobNamespace, META, location);
     const content = await fs.readFile(file);
-    const text: BinaryMetadata = CodecUtil.fromJSON(content);
+    const text: BinaryMetadata = JSONUtil.fromBinaryArray(content);
     return text;
   }
 
@@ -211,7 +213,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   async updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void> {
     const file = await this.#find(ModelBlobNamespace, META, location);
-    await BinaryUtil.pipeline(CodecUtil.toJSON(metadata), createWriteStream(file));
+    await BinaryUtil.pipeline(JSONUtil.toBinaryArray(metadata), createWriteStream(file));
   }
 
   // Expiry

@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Body, Controller, Delete, Get, Post, Put } from '@travetto/web';
 import { Specifier } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { BinaryUtil, CodecUtil, Util, type BinaryArray } from '@travetto/runtime';
+import { AppError, BinaryUtil, CodecUtil, JSONUtil, Util, type BinaryArray } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
@@ -97,7 +97,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify([{
+      body: JSONUtil.toUTF8([{
         text: 'A new item',
         userId: 'its a me'
       }])
@@ -116,7 +116,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify([])
+      body: JSONUtil.toUTF8([])
     });
 
     assert(Array.isArray(list));
@@ -133,7 +133,7 @@ class WebRpcSuite extends BaseWebSuite {
       headers: {
         'content-type': 'application/json'
       },
-      body: JSON.stringify([
+      body: JSONUtil.toUTF8([
         list[0].id
       ])
     });
@@ -152,12 +152,37 @@ class WebRpcSuite extends BaseWebSuite {
       },
       headers: {
         'content-type': 'application/octet-stream',
-        'X-TRV-RPC-INPUTS': CodecUtil.toBase64JSON([null, 11])
+        'X-TRV-RPC-INPUTS': JSONUtil.toBase64([null, 11])
       },
       body: CodecUtil.fromUTF8String('A'.repeat(100))
     });
 
     assert(createdStatus === 200);
     assert(created === 1100);
+  }
+
+
+  @Test()
+  async verifySerialize() {
+    const payload = {
+      err: new AppError('Uh-oh'),
+      count: 2000n
+    };
+
+    const plain = JSONUtil.cloneForTransmit(payload);
+    assert(typeof plain === 'object');
+    assert(plain);
+    assert('err' in plain);
+    assert(typeof plain.err === 'object');
+    assert(plain.err);
+    assert('$trv' in plain.err);
+    assert('stack' in plain.err);
+    assert(typeof plain.err.stack === 'string');
+
+    const complex: typeof payload = JSONUtil.cloneFromTransmit(plain);
+
+    assert(complex.err instanceof AppError);
+    assert(complex.err.stack === payload.err.stack);
+    assert(typeof complex.count === 'bigint');
   }
 }

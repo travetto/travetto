@@ -2,11 +2,9 @@ import { consumeError } from './rpc.ts';
 
 export async function toNodeError(payload: unknown): Promise<Error> {
   try {
-    let result = undefined;
-    const { AppError } = await import('@travetto/runtime');
-    result = AppError.fromJSON(payload);
-    if (result) {
-      return result;
+    const { JSONUtil } = await import('@travetto/runtime');
+    if (JSONUtil.isJSONError(payload)) {
+      return JSONUtil.jsonErrorToError(payload);
     }
   } catch { }
   return consumeError(payload);

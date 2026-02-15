@@ -67,6 +67,13 @@ class Dated {
   updatedDate: Date;
 }
 
+@Model()
+class BigIntModel {
+  id: string;
+  largeNumber: bigint;
+  optionalBigInt?: bigint;
+}
+
 @Suite()
 export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
@@ -342,5 +349,40 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o2.names.length === 1);
     assert(o2.simples);
     assert(o2.simples.length === 1);
+  }
+
+  @Test('Verify bigint storage and retrieval')
+  async testBigIntReadWrite() {
+    const service = await this.service;
+
+    // Create with bigint values
+    const created = await service.create(BigIntModel, BigIntModel.from({
+      largeNumber: 9007199254740991n, // Number.MAX_SAFE_INTEGER as bigint
+      optionalBigInt: 1234567890123456789n
+    }));
+
+    assert(created.id);
+    assert.strictEqual(created.largeNumber, 9007199254740991n);
+    assert.strictEqual(created.optionalBigInt, 1234567890123456789n);
+
+    // Retrieve and verify
+    const retrieved = await service.get(BigIntModel, created.id);
+    assert.strictEqual(retrieved.largeNumber, 9007199254740991n);
+    assert.strictEqual(retrieved.optionalBigInt, 1234567890123456789n);
+
+    // Update with new bigint value
+    const updated = await service.update(BigIntModel, BigIntModel.from({
+      id: created.id,
+      largeNumber: 18014398509481982n,
+      optionalBigInt: undefined
+    }));
+
+    assert.strictEqual(updated.largeNumber, 18014398509481982n);
+    assert.strictEqual(updated.optionalBigInt, undefined);
+
+    // Verify update persisted
+    const final = await service.get(BigIntModel, created.id);
+    assert.strictEqual(final.largeNumber, 18014398509481982n);
+    assert(!final.optionalBigInt);
   }
 }

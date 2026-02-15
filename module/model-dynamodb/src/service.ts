@@ -1,6 +1,6 @@
 import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 
-import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
+import { JSONUtil, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
@@ -61,7 +61,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
             id: DynamoDBUtil.toValue(item.id),
-            body: DynamoDBUtil.toValue(JSON.stringify(item)),
+            body: DynamoDBUtil.toValue(JSONUtil.toUTF8(item)),
             ...(expiry !== undefined ? { [EXP_ATTR]: DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
           },
@@ -92,7 +92,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             ...expr
           ].filter(part => !!part).join(', ')}`,
           ExpressionAttributeValues: {
-            ':body': DynamoDBUtil.toValue(JSON.stringify(item)),
+            ':body': DynamoDBUtil.toValue(JSONUtil.toUTF8(item)),
             ...(expiry !== undefined ? { ':expr': DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
           },
