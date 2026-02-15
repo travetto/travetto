@@ -139,7 +139,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
 
     const file = await this.#resolveName(cls, '.json', item.id);
-    await fs.writeFile(file, BinaryUtil.binaryArrayToBuffer(JSONUtil.toBinaryArray(item)), { encoding: 'utf8' });
+    await fs.writeFile(file, BinaryUtil.binaryArrayToBuffer(JSONUtil.toBinaryArray(item)));
 
     return prepped;
   }
@@ -149,7 +149,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const id = item.id;
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
     const file = await this.#resolveName(cls, '.json', full.id);
-    await fs.writeFile(file, BinaryUtil.binaryArrayToBuffer(JSONUtil.toBinaryArray(full)), { encoding: 'utf8' });
+    await fs.writeFile(file, BinaryUtil.binaryArrayToBuffer(JSONUtil.toBinaryArray(full)));
     return full;
   }
 
@@ -179,7 +179,9 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       BinaryUtil.pipeline(input, createWriteStream(file)),
-      BinaryUtil.pipeline(JSONUtil.toBinaryArray(resolved), createWriteStream(file.replace(BIN, META)))
+      BinaryUtil.pipeline(
+        JSONUtil.toBinaryArray(resolved),
+        createWriteStream(file.replace(BIN, META)))
     ]);
   }
 

@@ -108,7 +108,7 @@ export class CliUtil {
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
     return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data :
-      JSONUtil.toUTF8(data, { indent: 2 }), () => resolve()));
+      JSONUtil.toUTF8Pretty(data), () => resolve()));
   }
 
   /**

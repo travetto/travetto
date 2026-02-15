@@ -26,7 +26,7 @@ export class OpenApiSpecCommand implements CliCommandShape {
 
     const instance = await DependencyRegistryIndex.getInstance(OpenApiService);
     const result = await instance.getSpec();
-    const text = JSONUtil.toUTF8(result, { indent: 2 });
+    const text = JSONUtil.toUTF8Pretty(result);
 
     if (this.output === '-' || !this.output) {
       console.log!(text);

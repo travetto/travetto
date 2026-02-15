@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
@@ -11,7 +11,7 @@ import {
 import type { FirestoreModelConfig } from './config.ts';
 
 const setMissingValues = <T>(input: T, missingValue: unknown = null): T =>
-  JSONUtil.clone(input, { replace: { MissingValue: null }, revive: { all: false, MissingValue: missingValue } });
+  JSON.parse(JSON.stringify(input, (_, value) => value ?? null), (_, value) => value ?? missingValue);
 
 /**
  * A model service backed by Firestore

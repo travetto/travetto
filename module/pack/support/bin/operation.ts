@@ -112,7 +112,7 @@ export class PackOperation {
     } else {
       await PackUtil.writeRawFile(
         path.resolve(config.buildDirectory, file),
-        [JSONUtil.toUTF8(pkg, { indent: 2 })]
+        [JSONUtil.toUTF8Pretty(pkg)]
       );
     }
   }

@@ -2,7 +2,6 @@ import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { AppError } from './error.ts';
 
-type TextInput = string | BinaryArray;
 type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
 type JSONOutputConfig = {
   indent?: number;
@@ -107,7 +106,7 @@ export class JSONUtil {
           return {
             message: value.message,
             name: value.name,
-            ...(config?.replace?.includeStack ? { stack: value.stack } : {}),
+            ...(config?.replace?.includeStack !== false ? { stack: value.stack } : {}),
             $error: 'plain',
           };
         }
@@ -137,6 +136,11 @@ export class JSONUtil {
     return JSON.stringify(value, JSONUtil.buildReplacer(config), config?.indent);
   }
 
+  /** JSON to UTF8 pretty string */
+  static toUTF8Pretty(value: unknown): string {
+    return this.toUTF8(value, { indent: 2 });
+  }
+
   /** Binary Array to JSON */
   static fromBinaryArray<T>(input: BinaryArray, config?: JSONInputConfig): T {
     return JSONUtil.fromUTF8(CodecUtil.toUTF8String(input), config);
@@ -148,12 +152,12 @@ export class JSONUtil {
   }
 
   /** Encode JSON value as base64 encoded string */
-  static toBase64<T>(value: T, config?: JSONOutputConfig): string {
-    return CodecUtil.utf8ToBase64(JSONUtil.toUTF8(value, config));
+  static toBase64<T>(value: T): string {
+    return CodecUtil.utf8ToBase64(JSONUtil.toUTF8(value));
   }
 
   /** Decode JSON value from base64 encoded string */
-  static fromBase64<T>(input: TextInput): T {
+  static fromBase64<T>(input: string): T {
     let decoded = CodecUtil.base64ToUTF8(input);
 
     // Read from encoded if it happens

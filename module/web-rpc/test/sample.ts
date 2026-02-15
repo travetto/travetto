@@ -175,7 +175,7 @@ class WebRpcSuite extends BaseWebSuite {
     assert('err' in plain);
     assert(typeof plain.err === 'object');
     assert(plain.err);
-    assert('$error' in plain.err);
+    assert('$trv' in plain.err);
     assert('stack' in plain.err);
     assert(typeof plain.err.stack === 'string');
 

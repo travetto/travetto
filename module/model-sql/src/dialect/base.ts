@@ -220,7 +220,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (config.type === PointConcrete && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
     } else if (config.type === Object) {
-      return this.quote(JSONUtil.toUTF8(value).replace(/[']/g, "''"));
+      return this.quote(JSONUtil.toUTF8(value).replaceAll("'", "''"));
     }
     throw new AppError(`Unknown value type for field ${config.name}, ${value}`, { category: 'data' });
   }

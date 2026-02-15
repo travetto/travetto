@@ -30,7 +30,7 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
             return null;
           }
           const loader = new FileLoader([path.dirname(id)]);
-          const map = await loader.readBinaryArray(mapPath)
+          const map = await loader.readText(mapPath)
             .then(JSONUtil.fromBase64<SourceMapInput>);
           return { code, map };
         }

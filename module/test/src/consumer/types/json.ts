@@ -20,6 +20,6 @@ export class JSONEmitter {
   onEvent(): void { }
 
   onSummary(summary: SuitesSummary): void {
-    this.#stream.write(JSONUtil.toUTF8(summary, { indent: 2 }));
+    this.#stream.write(JSONUtil.toUTF8Pretty(summary));
   }
 }

@@ -9,6 +9,6 @@ export async function main(): Promise<void> {
   try {
     await validate();
   } catch (error) {
-    console.warn!('Validation Failed', JSONUtil.toUTF8(error, { indent: 2 }));
+    console.warn!('Validation Failed', JSONUtil.toUTF8Pretty(error));
   }
 }

@@ -38,7 +38,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async event => {
     try {
-      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = JSONUtil.clone(event, { replace: { all: false } });
+      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = JSONUtil.clone(event);
       if (parsed.type === 'log') {
         log(parsed);
       } else if (parsed.type === 'removeTest') {
