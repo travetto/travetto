@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { AppError, castTo, CodecUtil, type BinaryStream } from '@travetto/runtime';
+import { castTo, CodecUtil, type BinaryStream } from '@travetto/runtime';
 
 @Suite()
 export class CodecUtilTest {
