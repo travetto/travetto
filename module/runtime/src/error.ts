@@ -7,16 +7,7 @@ export type ErrorCategory =
   'timeout' |
   'unavailable';
 
-export type AppErrorOptions<T> =
-  ErrorOptions &
-  {
-    at?: Date | string | number;
-    type?: string;
-    category?: ErrorCategory;
-  } &
-  (T extends undefined ?
-    { details?: T } :
-    { details: T });
+export type AppErrorOptions<T> = Omit<Partial<AppError>, 'details'> & (T extends undefined ? { details?: T } : { details: T });
 
 /**
  * Framework error class, with the aim of being extensible

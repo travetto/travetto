@@ -79,6 +79,7 @@ export class JSONUtil {
       return {
         $trv: 'AppError',
         message: error.message,
+        name: undefined!,
         category: error.category,
         ...(error.cause ? { cause: `${error.cause}` } : undefined),
         type: error.type,
