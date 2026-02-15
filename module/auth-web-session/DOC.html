@@ -53,7 +53,7 @@ This module's main responsibilities is to expose <a class="module-link" href="ht
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-Once operating within the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L6">Session</a> boundaries, the session state can be injected via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64">@ContextParam</a> s, injected as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/context.ts#L11">SessionContext</a>,  or accessed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14">SessionService</a>.
+Once operating within the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L7">Session</a> boundaries, the session state can be injected via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64">@ContextParam</a> s, injected as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/context.ts#L11">SessionContext</a>,  or accessed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14">SessionService</a>.
 
   <figure class="code">
     <figcaption class="code">Sample Usage
@@ -80,7 +80,7 @@ Once operating within the <a target="_blank" class="source-link" href="https://g
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>session<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>session<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/info/age'</span><span class="token punctuation">)</span>

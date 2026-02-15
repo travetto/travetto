@@ -49,7 +49,7 @@ export class AuthSessionInterceptor implements WebInterceptor {
 }
 ```
 
-Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L6) boundaries, the session state can be injected via [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64)s, injected as [SessionContext](https://github.com/travetto/travetto/tree/main/module/auth-session/src/context.ts#L11),  or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14).
+Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L7) boundaries, the session state can be injected via [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L64)s, injected as [SessionContext](https://github.com/travetto/travetto/tree/main/module/auth-session/src/context.ts#L11),  or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14).
 
 **Code: Sample Usage**
 ```typescript
@@ -73,7 +73,7 @@ export class SessionEndpoints {
 
   @Get('/logout')
   async logout() {
-    await this.session.destroy();
+    this.session.destroy();
   }
 
   @Get('/info/age')
