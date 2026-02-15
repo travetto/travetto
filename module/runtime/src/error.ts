@@ -1,4 +1,4 @@
-import { castTo } from './types';
+import { castTo } from './types.ts';
 
 export type ErrorCategory =
   'general' |
