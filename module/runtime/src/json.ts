@@ -16,7 +16,6 @@ type JSONOutputConfig = {
     MissingValue?: unknown;
     includeStack?: boolean;
     bigintSuffix?: string;
-    bigintForce?: boolean;
   };
 };
 type JSONInputConfig = {
@@ -92,7 +91,6 @@ export class JSONUtil {
       Error: config?.replace?.Error ?? all,
       MissingValue: (config?.replace && 'MissingValue' in config.replace),
       bigintSuffix: config?.replace?.bigintSuffix ?? 'n',
-      bigintForce: config?.replace?.bigintForce ?? false
     };
 
     const cacheKey = config ? Object.values(resolved).map(v => `${v}`).join('|') : 'DEFAULT';
@@ -102,11 +100,7 @@ export class JSONUtil {
         if (resolved.Date && value instanceof Date) {
           return value.toISOString();
         } else if (resolved.BigInt && typeof value === 'bigint') {
-          if (resolved.bigintForce || value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER) {
-            return `${value}${resolved.bigintSuffix}`;
-          } else {
-            return Number(value);
-          }
+          return `${value}${resolved.bigintSuffix}`;
         } else if (resolved.AppError && value instanceof AppError) {
           return { ...value.toJSON(config?.replace?.includeStack), $error: 'trv', };
         } else if (resolved.Error && value instanceof Error) {
