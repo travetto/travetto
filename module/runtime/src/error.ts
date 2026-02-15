@@ -37,9 +37,7 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
   static fromJSON(error: AppErrorJSON): AppError {
     const { $trv: _, ...rest } = error;
     const result = new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(rest));
-    if (error.stack) {
-      result.stack = error.stack;
-    }
+    result.stack = error.stack;
     return result;
   }
 
