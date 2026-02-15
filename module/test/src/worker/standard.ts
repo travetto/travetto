@@ -1,6 +1,6 @@
 import { fork } from 'node:child_process';
 
-import { castTo, JSONUtil, Env, RuntimeIndex } from '@travetto/runtime';
+import { JSONUtil, Env, RuntimeIndex } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
 import { TestWorkerEvents, type TestLogEvent } from './types.ts';
@@ -38,10 +38,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async event => {
     try {
-      if (!!event && typeof event === 'object' && '$JSON' in event && typeof event.$JSON === 'string') {
-        event = JSONUtil.fromUTF8(event.$JSON);
-      }
-      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = castTo(event);
+      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = JSONUtil.clone(event);
       if (parsed.type === 'log') {
         log(parsed);
       } else if (parsed.type === 'removeTest') {

@@ -14,6 +14,7 @@ type JSONOutputConfig = {
     AppError?: boolean;
     Error?: boolean;
     MissingValue?: unknown;
+    includeStack?: boolean;
   };
 };
 type JSONInputConfig = {
@@ -31,7 +32,7 @@ type JSONCloneConfig = (JSONInputConfig & JSONOutputConfig);
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
 const BIGINT_REGEX = /^-?\d+n$/;
-const IS_ERROR = (value: unknown): value is Error => typeof value === 'object' && value !== null && 'message' in value && 'name' in value;
+const IS_ERROR = (value: unknown): value is Error => typeof value === 'object' && value !== null && '$error' in value && value.$error === 'plain';
 
 /** Utilities for JSON  */
 export class JSONUtil {
@@ -56,7 +57,7 @@ export class JSONUtil {
       } else if (resolved.Error && IS_ERROR(value)) {
         const error = new Error(value.message);
         error.name = value.name;
-        error.stack = value.stack;
+        error.stack = value.stack ?? error.stack;
         value = error;
       }
       value = config?.reviver ? config.reviver.call(this, key, value) : value;
@@ -83,9 +84,14 @@ export class JSONUtil {
       } else if (resolved.BigInt && typeof value === 'bigint') {
         return `${value}n`;
       } else if (resolved.AppError && value instanceof AppError) {
-        return value.toJSON();
+        return value.toJSON(config?.replace?.includeStack);
       } else if (resolved.Error && value instanceof Error) {
-        return { message: value.message, name: value.name, stack: value.stack, $error: true };
+        return {
+          $error: 'plain',
+          message: value.message,
+          name: value.name,
+          ...(config?.replace?.includeStack ? { stack: value.stack } : {}),
+        };
       }
       value = config?.replacer ? config.replacer.call(this, key, value) : value;
       if (resolved.MissingValue && (value === null || value === undefined)) {
@@ -138,13 +144,12 @@ export class JSONUtil {
   }
 
   /** JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value */
-  static clone<T, R>(input: T, config?: JSONCloneConfig): R {
+  static clone<T, R = T>(input: T, config?: JSONCloneConfig): R {
     const json = JSONUtil.toUTF8(input, config);
     return JSONUtil.fromUTF8<R>(json, config);
   }
 
-  /** Clone for transmit */
-  static cloneForTransmit<T>(input: unknown, config?: JSONCloneConfig): T {
-    return JSONUtil.clone(input, { revive: { all: false }, ...config });
+  static cloneForTransmit<T, R = T>(input: T): R {
+    return JSONUtil.clone<T, R>(input, { revive: { all: false }, replace: { includeStack: true } });
   }
 }

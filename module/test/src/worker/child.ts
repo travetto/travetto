@@ -24,7 +24,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
         throw error;
       }
       // Mark as errored out
-      this.send(type, JSONUtil.cloneForTransmit<Record<string, unknown>>(error));
+      this.send(type, JSONUtil.cloneForTransmit(error));
     }
   }
 
