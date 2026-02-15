@@ -1,3 +1,5 @@
+import { castTo } from './types';
+
 export type ErrorCategory =
   'general' |
   'notfound' |
@@ -13,6 +15,8 @@ export type AppErrorOptions<T> = Omit<Partial<AppError>, 'details'> & (T extends
  * Framework error class, with the aim of being extensible
  */
 export class AppError<T = Record<string, unknown> | undefined> extends Error {
+
+  static defaultCategory: ErrorCategory = 'general';
 
   type: string;
   category: ErrorCategory;
@@ -31,7 +35,7 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
     super(message, options?.cause ? { cause: options.cause } : undefined);
     this.type = options?.type ?? this.constructor.name;
     this.details = options?.details!;
-    this.category = options?.category ?? 'general';
+    this.category = options?.category ?? castTo<typeof AppError>(this.constructor).defaultCategory ?? 'general';
     this.at = new Date(options?.at ?? Date.now());
   }
 }
