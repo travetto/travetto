@@ -72,7 +72,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).update(clone<DocumentData>(prepped));
+    await this.#getCollection(cls).doc(item.id).set(clone<DocumentData>(prepped), { merge: false });
     return prepped;
   }
 
