@@ -23,15 +23,6 @@ import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import { IndexManager } from './index-manager.ts';
 
-class CustomSerializer extends Serializer {
-  serialize(obj: unknown): string {
-    return JSONUtil.toUTF8(obj, { replace: { Error: false, AppError: false, bigintSuffix: '' } });
-  }
-  deserialize<T = unknown>(json: string): T {
-    return JSONUtil.fromUTF8(json);
-  }
-};
-
 /**
  * Elasticsearch model source.
  */
@@ -54,7 +45,14 @@ export class ElasticsearchModelService implements
     this.client = new Client({
       nodes: this.config.hosts,
       ...(this.config.options || {}),
-      Serializer: CustomSerializer
+      Serializer: class extends Serializer {
+        serialize(obj: unknown): string {
+          return JSONUtil.toUTF8(obj, { replace: { Error: false, AppError: false, bigintSuffix: '' } });
+        }
+        deserialize<T = unknown>(json: string): T {
+          return JSONUtil.fromUTF8(json);
+        }
+      }
     });
     await this.client.cluster.health({});
     this.manager = new IndexManager(this.config, this.client);
