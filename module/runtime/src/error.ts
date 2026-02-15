@@ -20,7 +20,7 @@ export type AppErrorOptions<T> =
     { details?: T } :
     { details: T });
 
-type ErrorJSON = Omit<AppError, 'toJSON'> & { $error: true };
+type AppErrorJSON = Omit<AppError, 'toJSON'> & { $error: 'trv' };
 
 /**
  * Framework error class, with the aim of being extensible
@@ -29,14 +29,14 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
 
   static defaultCategory?: ErrorCategory;
 
-  static isJSON(value: unknown): value is ErrorJSON {
+  static isJSON(value: unknown): value is AppErrorJSON {
     return typeof value === 'object' && !!value &&
-      '$error' in value && 'message' in value && 'category' in value &&
+      '$error' in value && value.$error === 'trv' && 'message' in value && 'category' in value &&
       'type' in value && 'at' in value;
   }
 
   /** Convert from JSON object */
-  static fromJSON(error: ErrorJSON): AppError | undefined {
+  static fromJSON(error: AppErrorJSON): AppError {
     const { $error: _, ...rest } = error;
     const result = new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(rest));
     result.message = error.message;
@@ -69,11 +69,11 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
   /**
    * Serializes an error to a basic object
    */
-  toJSON(): ErrorJSON {
+  toJSON(): AppErrorJSON {
     return {
       message: this.message,
       name: this.name,
-      $error: true,
+      $error: 'trv',
       category: this.category,
       ...(this.cause ? { cause: `${this.cause}` } : undefined),
       type: this.type,

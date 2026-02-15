@@ -169,7 +169,7 @@ class WebRpcSuite extends BaseWebSuite {
       count: 2000n
     };
 
-    const plain = JSONUtil.clone(payload, { reviveStandard: false });
+    const plain = JSONUtil.cloneForTransmit(payload);
     assert(typeof plain === 'object');
     assert(plain);
     assert('err' in plain);

@@ -7,66 +7,91 @@ type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
 type JSONOutputConfig = {
   indent?: number;
   replacer?: JSONTransformer;
-  replaceStandard?: boolean;
-  replaceDates?: boolean;
-  replaceBigInts?: boolean;
-  replaceErrors?: boolean;
-  replaceMissingValue?: unknown;
+  replace?: {
+    all?: boolean;
+    Date?: boolean;
+    BigInt?: boolean;
+    AppError?: boolean;
+    Error?: boolean;
+    MissingValue?: unknown;
+  };
 };
 type JSONInputConfig = {
   reviver?: JSONTransformer;
-  reviveStandard?: boolean;
-  reviveDates?: boolean;
-  reviveBigInts?: boolean;
-  reviveErrors?: boolean;
-  reviveMissingValue?: unknown;
+  revive?: {
+    all?: boolean;
+    Date?: boolean;
+    BigInt?: boolean;
+    AppError?: boolean;
+    Error?: boolean;
+    MissingValue?: unknown;
+  };
 };
 type JSONCloneConfig = (JSONInputConfig & JSONOutputConfig);
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
 const BIGINT_REGEX = /^-?\d+n$/;
+const IS_ERROR = (value: unknown): value is Error => typeof value === 'object' && value !== null && 'message' in value && 'name' in value;
 
 /** Utilities for JSON  */
 export class JSONUtil {
 
   static buildReviver = (config?: JSONInputConfig) => {
-    const reviveDates = config?.reviveDates === true || config?.reviveStandard !== false;
-    const reviveBigInts = config?.reviveBigInts === true || config?.reviveStandard !== false;
-    const reviveErrors = config?.reviveErrors === true || config?.reviveStandard !== false;
-    const reviveMissingValue = config && 'reviveMissingValue' in config;
+    const all = config?.revive?.all ?? true;
+    const resolved: Record<string, boolean> = {
+      Date: all && (config?.revive?.Date ?? true),
+      BigInt: all && (config?.revive?.BigInt ?? true),
+      AppError: all && (config?.revive?.AppError ?? true),
+      Error: all && (config?.revive?.Error ?? true),
+      MissingValue: (!!config?.revive && 'MissingValue' in config.revive)
+    };
 
     return function (this: unknown, key: string, value: unknown): unknown {
-      const isString = typeof value === 'string';
-      if (reviveDates && isString && ISO_8601_REGEX.test(value)) {
-        return new Date(value);
-      } else if (reviveBigInts && isString && BIGINT_REGEX.test(value)) {
-        return BigInt(value.slice(0, -1));
-      } else if (reviveErrors && AppError.isJSON(value)) {
-        return AppError.fromJSON(value) ?? value;
-      } else if (reviveMissingValue && (value === null || value === undefined)) {
-        return config!.reviveMissingValue;
+      if (resolved.Date && typeof value === 'string' && ISO_8601_REGEX.test(value)) {
+        value = new Date(value);
+      } else if (resolved.BigInt && typeof value === 'string' && BIGINT_REGEX.test(value)) {
+        value = BigInt(value.slice(0, -1));
+      } else if (resolved.AppError && AppError.isJSON(value)) {
+        value = AppError.fromJSON(value);
+      } else if (resolved.Error && IS_ERROR(value)) {
+        const error = new Error(value.message);
+        error.name = value.name;
+        error.stack = value.stack;
+        value = error;
       }
-      return config?.reviver ? config.reviver.call(this, key, value) : value;
+      value = config?.reviver ? config.reviver.call(this, key, value) : value;
+      if (resolved.MissingValue && (value === null || value === undefined)) {
+        value = config!.revive?.MissingValue;
+      }
+      return value;
     };
   };
 
   static buildReplacer = (config?: JSONOutputConfig): JSONTransformer | undefined => {
-    const replaceDates = config?.replaceDates === true || config?.replaceStandard !== false;
-    const replaceBigInts = config?.replaceBigInts === true || config?.replaceStandard !== false;
-    const replaceErrors = config?.replaceErrors === true || config?.replaceStandard !== false;
-    const replaceMissingValue = config && 'replaceMissingValue' in config;
+    const all = config?.replace?.all ?? true;
+    const resolved = {
+      Date: all && (config?.replace?.Date ?? true),
+      BigInt: all && (config?.replace?.BigInt ?? true),
+      AppError: all && (config?.replace?.AppError ?? true),
+      Error: all && (config?.replace?.Error ?? true),
+      MissingValue: (config?.replace && 'MissingValue' in config.replace)
+    };
 
     return function (this: unknown, key: string, value: unknown): unknown {
-      if (replaceDates && value instanceof Date) {
+      if (resolved.Date && value instanceof Date) {
         return value.toISOString();
-      } else if (replaceBigInts && typeof value === 'bigint') {
+      } else if (resolved.BigInt && typeof value === 'bigint') {
         return `${value}n`;
-      } else if (replaceErrors && value instanceof AppError) {
+      } else if (resolved.AppError && value instanceof AppError) {
         return value.toJSON();
-      } else if (replaceMissingValue && (value === null || value === undefined)) {
-        return config!.replaceMissingValue;
+      } else if (resolved.Error && value instanceof Error) {
+        return { message: value.message, name: value.name, stack: value.stack, $error: true };
       }
-      return config?.replacer ? config.replacer.call(this, key, value) : value;
+      value = config?.replacer ? config.replacer.call(this, key, value) : value;
+      if (resolved.MissingValue && (value === null || value === undefined)) {
+        value = config!.replace!.MissingValue;
+      }
+      return value;
     };
   };
 
@@ -120,6 +145,6 @@ export class JSONUtil {
 
   /** Clone for transmit */
   static cloneForTransmit<T>(input: unknown, config?: JSONCloneConfig): T {
-    return JSONUtil.clone(input, { reviveStandard: false, ...config });
+    return JSONUtil.clone(input, { revive: { all: false }, ...config });
   }
 }

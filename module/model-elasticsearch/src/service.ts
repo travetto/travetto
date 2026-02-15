@@ -158,22 +158,17 @@ export class ElasticsearchModelService implements
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    try {
-      const clean = await ModelCrudUtil.preStore(cls, item, this);
-      const id = this.preUpdate(clean);
+    const clean = await ModelCrudUtil.preStore(cls, item, this);
+    const id = this.preUpdate(clean);
 
-      await this.client.index({
-        ...this.manager.getIdentity(cls),
-        id,
-        refresh: true,
-        body: castTo<T & { id: never }>(clean)
-      });
+    await this.client.index({
+      ...this.manager.getIdentity(cls),
+      id,
+      refresh: true,
+      body: castTo<T & { id: never }>(clean)
+    });
 
-      return this.postUpdate(clean, id);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+    return this.postUpdate(clean, id);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
