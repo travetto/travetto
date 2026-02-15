@@ -24,7 +24,7 @@ export interface Authenticator<T = unknown, C = unknown, P extends Principal = P
    *
    * @returns Valid principal if authenticated
    * @returns undefined if authentication is valid, but incomplete (multi-step)
-   * @throws AppError if authentication fails
+   * @throws Error if authentication fails
    */
   authenticate(payload: T, context?: C): Promise<P | undefined> | P | undefined;
 }

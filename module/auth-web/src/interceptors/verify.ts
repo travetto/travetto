@@ -1,4 +1,4 @@
-import { AppError, Util } from '@travetto/runtime';
+import { RuntimeError, Util } from '@travetto/runtime';
 import type { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse, WebInterceptorContext } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -72,7 +72,7 @@ export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig
         if (!principal) {
           throw new AuthenticationError('User is unauthenticated');
         } else if (!config.matcher(new Set(principal.permissions))) {
-          throw new AppError('Access denied', { category: 'permissions' });
+          throw new RuntimeError('Access denied', { category: 'permissions' });
         }
         break;
       }

@@ -1,6 +1,6 @@
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
-import { AppError, type AppErrorOptions } from './error.ts';
+import { RuntimeError, type RuntimeErrorOptions } from './error.ts';
 import { castTo } from './types.ts';
 
 type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
@@ -9,7 +9,7 @@ type JSONInputConfig = { reviver?: JSONTransformer };
 type JSONCloneConfig = JSONOutputConfig & JSONInputConfig;
 type ErrorShape<T extends string, V> = { $trv: T, message: string, stack?: string } & V;
 type JSONError =
-  ErrorShape<'AppError', AppErrorOptions<Record<string, unknown>>> |
+  ErrorShape<'runtime', RuntimeErrorOptions<Record<string, unknown>>> |
   ErrorShape<'plain', { name: string }>;
 
 Object.defineProperty(BigInt.prototype, 'toJSON', {
@@ -20,7 +20,7 @@ Object.defineProperty(Error.prototype, 'toJSON', {
   value() { return JSONUtil.errorToJSONError(this); },
 });
 
-Object.defineProperty(AppError.prototype, 'toJSON', {
+Object.defineProperty(RuntimeError.prototype, 'toJSON', {
   value() { return JSONUtil.errorToJSONError(this); },
 });
 
@@ -48,16 +48,16 @@ export class JSONUtil {
 
   static isJSONError(value: unknown): value is JSONError {
     return typeof value === 'object' && value !== null && '$trv' in value && (
-      value.$trv === AppError.name || value.$trv === 'plain'
+      value.$trv === 'runtime' || value.$trv === 'plain'
     );
   }
 
   /** Convert from JSON object */
-  static jsonErrorToError(error: JSONError): Error | AppError {
+  static jsonErrorToError(error: JSONError): Error | RuntimeError {
     switch (error.$trv) {
-      case 'AppError': {
+      case 'runtime': {
         const { $trv: _, ...rest } = error;
-        const result = new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(rest));
+        const result = new RuntimeError(error.message, castTo<RuntimeErrorOptions<Record<string, unknown>>>(rest));
         result.stack = error.stack;
         return result;
       }
@@ -73,11 +73,11 @@ export class JSONUtil {
   /**
    * Serializes an error to a basic object
    */
-  static errorToJSONError(error: AppError | Error, includeStack?: boolean): JSONError | undefined {
+  static errorToJSONError(error: RuntimeError | Error, includeStack?: boolean): JSONError | undefined {
     includeStack ??= JSONUtil.includeStackTraces;
-    if (error instanceof AppError) {
+    if (error instanceof RuntimeError) {
       return {
-        $trv: 'AppError',
+        $trv: 'runtime',
         message: error.message,
         category: error.category,
         ...(error.cause ? { cause: `${error.cause}` } : undefined),

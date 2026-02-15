@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-polyfill';
 
-import { AppError } from './error.ts';
+import { RuntimeError } from './error.ts';
 import { castTo } from './types.ts';
 
 const TIME_UNIT_TO_TEMPORAL_UNIT = {
@@ -48,7 +48,7 @@ export class TimeUtil {
       value = parseInt(input, 10);
     }
     if (Number.isNaN(value)) {
-      throw new AppError(`Unable to parse time value: ${input}`, { category: 'data' });
+      throw new RuntimeError(`Unable to parse time value: ${input}`, { category: 'data' });
     }
 
     switch (unit) {

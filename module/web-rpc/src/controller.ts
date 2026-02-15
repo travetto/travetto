@@ -1,5 +1,5 @@
 import { Inject } from '@travetto/di';
-import { type Any, AppError, JSONUtil } from '@travetto/runtime';
+import { type Any, RuntimeError, JSONUtil } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 import {
   HeaderParam, Controller, ExcludeInterceptors, ControllerRegistryIndex,
@@ -36,7 +36,7 @@ export class WebRpcController {
     const endpoint = ControllerRegistryIndex.getEndpointConfigById(target);
 
     if (!endpoint || !endpoint.filter) {
-      throw new AppError('Unknown endpoint', { category: 'notfound' });
+      throw new RuntimeError('Unknown endpoint', { category: 'notfound' });
     }
 
     const { request } = this.ctx;
@@ -54,7 +54,7 @@ export class WebRpcController {
         request.body = params[bodyParamIdx];
       }
     } else if (body) {
-      throw new AppError('Invalid parameters, must be an array', { category: 'data' });
+      throw new RuntimeError('Invalid parameters, must be an array', { category: 'data' });
     } else {
       params = [];
     }

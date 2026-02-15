@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, BinaryUtil, castKey, castTo, type Class, describeFunction, safeAssign } from '@travetto/runtime';
+import { RuntimeError, BinaryUtil, castKey, castTo, type Class, describeFunction, safeAssign } from '@travetto/runtime';
 
 import {
   type SchemaClassConfig, type SchemaMethodConfig, type SchemaFieldConfig,
@@ -298,7 +298,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   getMethod(method: string): SchemaMethodConfig {
     const methodConfig = this.#config.methods[method];
     if (!methodConfig) {
-      throw new AppError(`Unknown method ${String(method)} on class ${this.#cls.Ⲑid}`);
+      throw new RuntimeError(`Unknown method ${String(method)} on class ${this.#cls.Ⲑid}`);
     }
     return methodConfig;
   }
@@ -312,7 +312,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       return this.#config.fields;
     }
     if (!this.#views.has(view)) {
-      throw new AppError(`Unknown view ${view} for class ${this.#cls.Ⲑid}`);
+      throw new RuntimeError(`Unknown view ${view} for class ${this.#cls.Ⲑid}`);
     }
     return this.#views.get(view)!;
   }

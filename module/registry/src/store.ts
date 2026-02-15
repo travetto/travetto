@@ -1,4 +1,4 @@
-import { AppError, castTo, type Class, getParentClass } from '@travetto/runtime';
+import { RuntimeError, castTo, type Class, getParentClass } from '@travetto/runtime';
 
 import type { RegistrationMethods, RegistryAdapter, RegistrySimpleStore } from './types.ts';
 
@@ -51,14 +51,14 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
 
   getForRegister(cls: Class, allowFinalized = false): A {
     if (this.#finalized.get(cls) && !allowFinalized) {
-      throw new AppError(`Class ${cls.Ⲑid} is already finalized`);
+      throw new RuntimeError(`Class ${cls.Ⲑid} is already finalized`);
     }
     return this.adapter(cls);
   }
 
   get(cls: Class): Omit<A, RegistrationMethods> {
     if (!this.has(cls)) {
-      throw new AppError(`Class ${cls.Ⲑid} is not registered for ${this.#adapterCls.Ⲑid}`);
+      throw new RuntimeError(`Class ${cls.Ⲑid} is not registered for ${this.#adapterCls.Ⲑid}`);
     }
     return this.adapter(cls);
   }

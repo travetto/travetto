@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 
-import { AppError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
+import { RuntimeError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
 import type { CliCommandShape, CliCommandShapeFields } from './types.ts';
 
@@ -99,7 +99,7 @@ export class CliUtil {
     const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSONUtil.toUTF8(request) });
 
     if (!sent.ok) {
-      throw new AppError(`IPC Request failed: ${sent.status} ${await sent.text()}`);
+      throw new RuntimeError(`IPC Request failed: ${sent.status} ${await sent.text()}`);
     }
   }
 

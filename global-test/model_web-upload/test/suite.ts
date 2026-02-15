@@ -6,7 +6,7 @@ import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
 import { Upload, type FileMap } from '@travetto/web-upload';
-import { Util, type BinaryMetadata, castTo, type AppError, BinaryMetadataUtil } from '@travetto/runtime';
+import { Util, type BinaryMetadata, castTo, type RuntimeError, BinaryMetadataUtil } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
@@ -278,7 +278,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     assert(itemRanged2.body?.length === 3);
     assert(itemRanged2.body === 'xyz');
 
-    const itemRanged3 = await this.request<AppError>(
+    const itemRanged3 = await this.request<RuntimeError>(
       {
         context: {
           httpMethod: 'GET',

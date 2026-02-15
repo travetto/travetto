@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/runtime';
+import { RuntimeError } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import type { ModelAuthService } from '@travetto/auth-model';
 
@@ -14,7 +14,7 @@ class UserService {
     try {
       return await this.auth.authenticate(identity);
     } catch (error) {
-      if (error instanceof AppError && error.category === 'notfound') {
+      if (error instanceof RuntimeError && error.category === 'notfound') {
         return await this.auth.register(identity);
       } else {
         throw error;

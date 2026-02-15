@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { AppError } from './error.ts';
+import { RuntimeError } from './error.ts';
 import { BinaryUtil, type BinaryArray, type BinaryStream } from './binary.ts';
 
 /**
@@ -34,7 +34,7 @@ export class FileLoader {
         return resolved;
       }
     }
-    throw new AppError(`Unable to find: ${relativePath}, searched=${this.searchPaths.join(',')}`, { category: 'notfound' });
+    throw new RuntimeError(`Unable to find: ${relativePath}, searched=${this.searchPaths.join(',')}`, { category: 'notfound' });
   }
 
   /**

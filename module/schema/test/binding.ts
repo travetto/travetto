@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { AppError } from '@travetto/runtime';
+import { RuntimeError } from '@travetto/runtime';
 import { BindUtil, SchemaValidator } from '@travetto/schema';
 
 import { Address } from './models/address.ts';
@@ -160,7 +160,7 @@ class DataBinding {
     assert.throws(() => Poly2.from({
       type: 'poly1',
       names: ['1', '2', '3'],
-    }), AppError);
+    }), RuntimeError);
   }
 
   @Test('should handle regex fields')

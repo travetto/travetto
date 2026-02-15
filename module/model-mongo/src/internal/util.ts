@@ -3,7 +3,7 @@ import {
   type IndexDescriptionInfo
 } from 'mongodb';
 
-import { AppError, CodecUtil, castTo, type Class, toConcrete, TypedObject, BinaryUtil } from '@travetto/runtime';
+import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, TypedObject, BinaryUtil } from '@travetto/runtime';
 import { type DistanceUnit, type PageableModelQuery, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
@@ -109,7 +109,7 @@ export class MongoUtil {
           const temp = value[firstKey];
           out._id = { [firstKey]: Array.isArray(temp) ? temp.map(subValue => this.uuid(subValue)) : this.uuid(`${temp}`) };
         } else {
-          throw new AppError('Invalid id query');
+          throw new RuntimeError('Invalid id query');
         }
       } else if ((isPlain && !firstKey.startsWith('$')) || value?.constructor?.Ⲑid) {
         if (recursive) {

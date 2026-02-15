@@ -1,5 +1,5 @@
 import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { AppError, castTo, type Class } from '@travetto/runtime';
+import { RuntimeError, castTo, type Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { IndexConfig, IndexType, ModelConfig } from './types.ts';
@@ -77,7 +77,7 @@ export class ModelRegistryIndex implements RegistryIndex {
 
     // Don't allow two models with same class name, or same store name
     if (classes.size > 1) {
-      throw new AppError('Duplicate models with same store name', {
+      throw new RuntimeError('Duplicate models with same store name', {
         details: { classes: [...classes].toSorted() }
       });
     }
@@ -122,7 +122,7 @@ export class ModelRegistryIndex implements RegistryIndex {
   getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
     const expiry = this.getConfig(cls).expiresAt;
     if (!expiry) {
-      throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`);
+      throw new RuntimeError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`);
     }
     return castTo(expiry);
   }

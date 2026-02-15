@@ -1,4 +1,4 @@
-import { type Class, AppError } from '@travetto/runtime';
+import { type Class, RuntimeError } from '@travetto/runtime';
 import type { ValidationError, ValidationResultError } from '@travetto/schema';
 
 import type { ModelCrudSupport } from './crud.ts';
@@ -42,7 +42,7 @@ type BulkErrorItem = { message: string, type: string, errors?: ValidationError[]
 /**
  * Bulk processing error
  */
-export class BulkProcessError extends AppError<{ errors: BulkErrorItem[] }> {
+export class BulkProcessError extends RuntimeError<{ errors: BulkErrorItem[] }> {
   constructor(errors: { idx: number, error: ValidationResultError }[]) {
     super('Bulk processing errors have occurred', {
       category: 'data',

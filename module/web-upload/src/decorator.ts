@@ -1,4 +1,4 @@
-import { AppError, toConcrete, type ClassInstance, getClass } from '@travetto/runtime';
+import { RuntimeError, toConcrete, type ClassInstance, getClass } from '@travetto/runtime';
 import { ControllerRegistryIndex, type EndpointParameterConfig, Param } from '@travetto/web';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -55,11 +55,11 @@ export function Upload(
         const input = SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx];
 
         if (!input) {
-          throw new AppError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
+          throw new RuntimeError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
         if (!(input.type === Blob || input.type === File || input.type === FileMapContract)) {
-          throw new AppError(`Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
+          throw new RuntimeError(`Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
         const isMap = input.type === FileMapContract;

@@ -1,4 +1,4 @@
-import { AppError, type ErrorCategory, Util } from '@travetto/runtime';
+import { RuntimeError, type ErrorCategory, Util } from '@travetto/runtime';
 
 import { WebResponse } from '../types/response.ts';
 import type { WebRequest } from '../types/request.ts';
@@ -116,8 +116,8 @@ export class WebCommonUtil {
 
     const body = error instanceof Error ? error :
       (!!error && typeof error === 'object' && ('message' in error && typeof error.message === 'string')) ?
-        new AppError(error.message, { details: error }) :
-        new AppError(`${error}`);
+        new RuntimeError(error.message, { details: error }) :
+        new RuntimeError(`${error}`);
 
     const webError: Error & Partial<WebError> = body;
     const statusCode = webError.details?.statusCode ?? ERROR_CATEGORY_STATUS[webError.category!] ?? 500;

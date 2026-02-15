@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, asFull, type Class, describeFunction, Runtime, safeAssign } from '@travetto/runtime';
+import { RuntimeError, asFull, type Class, describeFunction, Runtime, safeAssign } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { SuiteConfig } from '../model/suite.ts';
@@ -126,7 +126,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
   getMethod(method: string): TestConfig {
     const test = this.#config.tests[method];
     if (!test) {
-      throw new AppError(`Test not registered: ${String(method)} on ${this.#cls.name}`);
+      throw new RuntimeError(`Test not registered: ${String(method)} on ${this.#cls.name}`);
     }
     return test;
   }

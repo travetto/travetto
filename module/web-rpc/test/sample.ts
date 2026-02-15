@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Body, Controller, Delete, Get, Post, Put } from '@travetto/web';
 import { Specifier } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { AppError, BinaryUtil, CodecUtil, JSONUtil, Util, type BinaryArray } from '@travetto/runtime';
+import { RuntimeError, BinaryUtil, CodecUtil, JSONUtil, Util, type BinaryArray } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
@@ -165,7 +165,7 @@ class WebRpcSuite extends BaseWebSuite {
   @Test()
   async verifySerialize() {
     const payload = {
-      err: new AppError('Uh-oh'),
+      err: new RuntimeError('Uh-oh'),
       count: 2000n
     };
 
@@ -181,7 +181,7 @@ class WebRpcSuite extends BaseWebSuite {
 
     const complex: typeof payload = JSONUtil.cloneFromTransmit(plain);
 
-    assert(complex.err instanceof AppError);
+    assert(complex.err instanceof RuntimeError);
     assert(complex.err.stack === payload.err.stack);
     assert(typeof complex.count === 'bigint');
   }

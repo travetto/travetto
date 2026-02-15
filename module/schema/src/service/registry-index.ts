@@ -1,5 +1,5 @@
 import { type RegistrationMethods, type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { AppError, castKey, castTo, type Class, classConstruct, getParentClass } from '@travetto/runtime';
+import { RuntimeError, castKey, castTo, type Class, classConstruct, getParentClass } from '@travetto/runtime';
 
 import type { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 import { type SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
@@ -125,14 +125,14 @@ export class SchemaRegistryIndex implements RegistryIndex {
       const map = this.#byDiscriminatedTypes.get(base);
       const type = castTo<string>(item[castKey<T>(discriminatedField)]) ?? discriminatedType;
       if (!type) {
-        throw new AppError(`Unable to resolve discriminated type for class ${base.name} without a type`);
+        throw new RuntimeError(`Unable to resolve discriminated type for class ${base.name} without a type`);
       }
       if (!map?.has(type)) {
-        throw new AppError(`Unable to resolve discriminated type '${type}' for class ${base.name}`);
+        throw new RuntimeError(`Unable to resolve discriminated type '${type}' for class ${base.name}`);
       }
       const requested = map.get(type)!;
       if (!(classConstruct(requested) instanceof targetClass)) {
-        throw new AppError(`Resolved discriminated type '${type}' for class ${base.name} is not an instance of requested type ${targetClass.name}`);
+        throw new RuntimeError(`Resolved discriminated type '${type}' for class ${base.name} is not an instance of requested type ${targetClass.name}`);
       }
       return requested;
     }

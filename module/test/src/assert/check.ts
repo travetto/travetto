@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { isPromise } from 'node:util/types';
 
-import { AppError, type Class, castTo, castKey, asConstructable } from '@travetto/runtime';
+import { RuntimeError, type Class, castTo, castKey, asConstructable } from '@travetto/runtime';
 
 import type { ThrowableError, TestConfig, Assertion } from '../model/test.ts';
 import { AssertCapture, type CapturedAssertion } from './capture.ts';
@@ -13,7 +13,7 @@ type StringFields<T> = {
   (T[K] extends string ? K : never)
 }[Extract<keyof T, string>];
 
-const isClass = (input: unknown): input is Class => input === Error || input === AppError || Object.getPrototypeOf(input) !== Object.getPrototypeOf(Function);
+const isClass = (input: unknown): input is Class => input === Error || input === RuntimeError || Object.getPrototypeOf(input) !== Object.getPrototypeOf(Function);
 
 /**
  * Check assertion

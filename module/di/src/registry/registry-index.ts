@@ -1,5 +1,5 @@
 import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { AppError, castKey, castTo, type Class, describeFunction, getParentClass, hasFunction, TypedObject } from '@travetto/runtime';
+import { RuntimeError, castKey, castTo, type Class, describeFunction, getParentClass, hasFunction, TypedObject } from '@travetto/runtime';
 import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types.ts';
@@ -184,7 +184,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
    */
   async getInstance<T>(candidateType: Class<T>, requestedQualifier?: symbol, resolution?: ResolutionType): Promise<T> {
     if (!candidateType) {
-      throw new AppError('Unable to get instance when target is undefined');
+      throw new RuntimeError('Unable to get instance when target is undefined');
     }
 
     const { target, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier, resolution);

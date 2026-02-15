@@ -1,7 +1,7 @@
 import { ExpiresAt, Index, Model, type ModelExpirySupport, NotFoundError, ModelStorageUtil, ModelIndexedUtil } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
-import { AppError, JSONUtil, TimeUtil } from '@travetto/runtime';
+import { RuntimeError, JSONUtil, TimeUtil } from '@travetto/runtime';
 
 import { CacheError } from './error.ts';
 import { CacheUtil } from './util.ts';
@@ -109,7 +109,7 @@ export class CacheService {
       }
       await Promise.all(removes);
     } else {
-      throw new AppError('Unable to delete all on an un-indexed database');
+      throw new RuntimeError('Unable to delete all on an un-indexed database');
     }
   }
 

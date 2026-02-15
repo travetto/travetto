@@ -4,7 +4,7 @@ import path from 'node:path';
 import { createReadStream, ReadStream } from 'node:fs';
 
 import { BinaryUtil, type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType } from './binary.ts';
-import { AppError } from './error.ts';
+import { RuntimeError } from './error.ts';
 import { CodecUtil } from './codec.ts';
 
 type BlobInput = BinaryType | (() => (BinaryType | Promise<BinaryType>));
@@ -158,7 +158,7 @@ export class BinaryMetadataUtil {
    */
   static enforceRange(range: ByteRange, metadata?: BinaryMetadata): Required<ByteRange> {
     if (!metadata || metadata.size === undefined) {
-      throw new AppError('Cannot enforce range on data with unknown size', { category: 'data' });
+      throw new RuntimeError('Cannot enforce range on data with unknown size', { category: 'data' });
     }
     const size = metadata.size;
 
@@ -166,7 +166,7 @@ export class BinaryMetadataUtil {
     const [start, end] = [range.start, Math.min(range.end ?? (size - 1), size - 1)];
 
     if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {
-      throw new AppError('Invalid position, out of range', { category: 'data', details: { start, end, size } });
+      throw new RuntimeError('Invalid position, out of range', { category: 'data', details: { start, end, size } });
     }
 
     return { start, end };

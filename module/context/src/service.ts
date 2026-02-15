@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { Injectable } from '@travetto/di';
-import { AppError, AsyncQueue, castTo } from '@travetto/runtime';
+import { RuntimeError, AsyncQueue, castTo } from '@travetto/runtime';
 
 type Ctx<T = unknown> = Record<string | symbol, T>;
 
@@ -21,7 +21,7 @@ export class AsyncContext {
   #get<T = unknown>(): Ctx<T> {
     const store = this.storage.getStore();
     if (!store) {
-      throw new AppError('Context is not initialized');
+      throw new RuntimeError('Context is not initialized');
     }
     return castTo(store);
   }

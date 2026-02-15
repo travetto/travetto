@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@travetto/di';
 import { MailUtil, type EmailCompiled, type MailInterpolator } from '@travetto/email';
-import { AppError, TypedObject, WatchUtil } from '@travetto/runtime';
+import { RuntimeError, TypedObject, WatchUtil } from '@travetto/runtime';
 
 import type { EditorSendService } from './send.ts';
 import { EditorConfig } from './config.ts';
@@ -63,7 +63,7 @@ export class EditorService {
    */
   async listen(): Promise<void> {
     if (!process.connected || !process.send) {
-      throw new AppError('Unable to run email editor, missing ipc channel');
+      throw new RuntimeError('Unable to run email editor, missing ipc channel');
     }
     process.on('message', async (request: EditorRequest) => {
       switch (request.type) {

@@ -279,7 +279,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 **Code: Memory Service Test Configuration**
 ```typescript
 import { DependencyRegistryIndex } from '@travetto/di';
-import { AppError, castTo, type Class, classConstruct } from '@travetto/runtime';
+import { RuntimeError, castTo, type Class, classConstruct } from '@travetto/runtime';
 
 import { ModelBulkUtil } from '../../src/util/bulk.ts';
 import { ModelCrudUtil } from '../../src/util/crud.ts';
@@ -307,7 +307,7 @@ export abstract class BaseModelSuite<T> {
       }
       return i;
     } else {
-      throw new AppError(`Size is not supported for this service: ${this.serviceClass.name}`);
+      throw new RuntimeError(`Size is not supported for this service: ${this.serviceClass.name}`);
     }
   }
 

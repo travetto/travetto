@@ -1,4 +1,4 @@
-import { castTo, type Class, Util, AppError, hasFunction, BinaryUtil, type BinaryArray, JSONUtil } from '@travetto/runtime';
+import { castTo, type Class, Util, RuntimeError, hasFunction, BinaryUtil, type BinaryArray, JSONUtil } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -142,11 +142,11 @@ export class ModelCrudUtil {
    */
   static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view?: string): Promise<Partial<T>> {
     if (!DataUtil.isPlainObject(item)) {
-      throw new AppError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, { category: 'data' });
+      throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, { category: 'data' });
     }
     const keys = Object.keys(item);
     if ((keys.length === 1 && item.id) || keys.length === 0) {
-      throw new AppError('No fields to update');
+      throw new RuntimeError('No fields to update');
     } else {
       item = { ...item };
       delete item.id;

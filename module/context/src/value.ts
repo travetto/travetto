@@ -1,6 +1,6 @@
 import type { AsyncLocalStorage } from 'node:async_hooks';
 
-import { AppError, castTo } from '@travetto/runtime';
+import { RuntimeError, castTo } from '@travetto/runtime';
 
 type Payload<T> = Record<string | symbol, T | undefined>;
 type Storage<T = unknown> = AsyncLocalStorage<Payload<T>>;
@@ -36,7 +36,7 @@ export class AsyncContextValue<T = unknown> {
   #store(mode: keyof ReadWriteConfig): Payload<T> | undefined {
     const store = (this.#storage ??= this.#source()).getStore();
     if (!store && this.#failIfUnbound[mode]) {
-      throw new AppError('Context not initialized');
+      throw new RuntimeError('Context not initialized');
     }
     return store;
   }
