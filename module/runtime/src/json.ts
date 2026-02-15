@@ -1,38 +1,36 @@
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
-import { AppError } from './error.ts';
+import { AppError, type AppErrorOptions } from './error.ts';
+import { castTo } from './types.ts';
 
 type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
-type JSONOutputConfig = {
-  indent?: number;
-  replacer?: JSONTransformer;
-};
-type JSONInputConfig = {
-  reviver?: JSONTransformer;
-};
+type JSONOutputConfig = { indent?: number, replacer?: JSONTransformer };
+type JSONInputConfig = { reviver?: JSONTransformer };
 type JSONCloneConfig = JSONOutputConfig & JSONInputConfig;
+type ErrorShape<T extends string, V> = { $trv: T, message: string, stack?: string } & V;
+type JSONError =
+  ErrorShape<'AppError', AppErrorOptions<Record<string, unknown>>> |
+  ErrorShape<'plain', { name: string }>;
 
 Object.defineProperty(BigInt.prototype, 'toJSON', {
   value() { return `${this}n`; },
 });
 
 Object.defineProperty(Error.prototype, 'toJSON', {
-  value() {
-    return {
-      $trv: 'Error',
-      message: this.message,
-      name: this.name,
-      stack: this.stack,
-    };
-  },
+  value() { return JSONUtil.errorToJSONError(this); },
+});
+
+Object.defineProperty(AppError.prototype, 'toJSON', {
+  value() { return JSONUtil.errorToJSONError(this); },
 });
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
 const BIGINT_REGEX = /^-?\d+n$/;
-const IS_ERROR = (value: unknown): value is Error => typeof value === 'object' && value !== null && '$error' in value && value.$error === 'plain';
 
 /** Utilities for JSON  */
 export class JSONUtil {
+
+  static includeStackTraces = false;
 
   static TRANSMIT_REVIVER: JSONTransformer = function (this: unknown, key: string, value: unknown): unknown {
     if (typeof value === 'string') {
@@ -41,18 +39,62 @@ export class JSONUtil {
       } else if (ISO_8601_REGEX.test(value)) {
         return new Date(value);
       }
-    } else if (typeof value === 'object' && value && '$trv' in value) {
-      if (AppError.isJSON(value)) {
-        return AppError.fromJSON(value);
-      } else if (IS_ERROR(value)) {
-        const error = new Error(value.message);
-        error.name = value.name;
-        error.stack = value.stack ?? error.stack;
-        return error;
-      }
+    } else if (JSONUtil.isJSONError(value)) {
+      return JSONUtil.jsonErrorToError(value);
     }
     return value;
   };
+
+
+  static isJSONError(value: unknown): value is JSONError {
+    return typeof value === 'object' && value !== null && '$trv' in value && (
+      value.$trv === AppError.name || value.$trv === 'plain'
+    );
+  }
+
+  /** Convert from JSON object */
+  static jsonErrorToError(error: JSONError): Error | AppError {
+    switch (error.$trv) {
+      case 'AppError': {
+        const { $trv: _, ...rest } = error;
+        const result = new AppError(error.message, castTo<AppErrorOptions<Record<string, unknown>>>(rest));
+        result.stack = error.stack;
+        return result;
+      }
+      case 'plain': {
+        const result = new Error(error.message);
+        result.name = error.name;
+        result.stack = error.stack ?? result.stack;
+        return result;
+      }
+    }
+  }
+
+  /**
+   * Serializes an error to a basic object
+   */
+  static errorToJSONError(error: AppError | Error, includeStack?: boolean): JSONError | undefined {
+    includeStack ??= JSONUtil.includeStackTraces;
+    if (error instanceof AppError) {
+      return {
+        $trv: 'AppError',
+        message: error.message,
+        category: error.category,
+        ...(error.cause ? { cause: `${error.cause}` } : undefined),
+        type: error.type,
+        at: error.at,
+        ...(error.details ? { details: error.details } : undefined!),
+        ...(includeStack ? { stack: error.stack } : undefined)
+      };
+    } else {
+      return {
+        $trv: 'plain',
+        message: error.message,
+        name: error.name,
+        ...(includeStack ? { stack: error.stack } : undefined)
+      };
+    }
+  }
 
   /** UTF8 string to JSON */
   static fromUTF8<T>(input: string, config?: JSONInputConfig): T {
@@ -99,7 +141,12 @@ export class JSONUtil {
   }
 
   static cloneForTransmit<T, R = T>(input: T): R {
-    return JSONUtil.clone<T, R>(input);
+    try {
+      this.includeStackTraces = true;
+      return JSONUtil.clone<T, R>(input);
+    } finally {
+      this.includeStackTraces = false;
+    }
   }
 
   static cloneFromTransmit<T, R = T>(input: T): R {
