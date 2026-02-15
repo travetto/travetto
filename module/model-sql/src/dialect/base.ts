@@ -451,13 +451,13 @@ export abstract class SQLDialect implements DialectState {
 
           switch (subKey) {
             case '$nin': case '$in': {
-              const arr = (Array.isArray(value) ? value : [value]).map(item => resolve(item));
+              const arr = (Array.isArray(value) ? value : [value]).map(resolve);
               items.push(`${sPath} ${SQL_OPS[subKey]} (${arr.join(',')})`);
               break;
             }
             case '$all': {
               const set = new Set();
-              const arr = [value].flat().filter(item => !set.has(item) && !!set.add(item)).map(item => resolve(item));
+              const arr = [value].flat().filter(item => !set.has(item) && !!set.add(item)).map(resolve);
               const valueTable = this.parentTable(sStack);
               const alias = `_all_${sStack.length}`;
               const pPath = this.identifier(this.parentPathField.name);

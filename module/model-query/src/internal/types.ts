@@ -45,7 +45,7 @@ export class TypeUtil {
       case String: return 'string';
       case Number: return 'number';
       case Boolean: return 'boolean';
-      case BigInt: return 'number';
+      case BigInt: return 'bigint';
       case Date: return 'Date';
       case PointConcrete: return 'Point';
       default: {

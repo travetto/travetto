@@ -15,6 +15,7 @@ type JSONOutputConfig = {
     Error?: boolean;
     MissingValue?: unknown;
     includeStack?: boolean;
+    bigintSuffix?: string;
   };
 };
 type JSONInputConfig = {
@@ -26,12 +27,12 @@ type JSONInputConfig = {
     AppError?: boolean;
     Error?: boolean;
     MissingValue?: unknown;
+    bigintSuffix?: string;
   };
 };
 type JSONCloneConfig = (JSONInputConfig & JSONOutputConfig);
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
-const BIGINT_REGEX = /^-?\d+n$/;
 const IS_ERROR = (value: unknown): value is Error => typeof value === 'object' && value !== null && '$error' in value && value.$error === 'plain';
 
 /** Utilities for JSON  */
@@ -47,11 +48,14 @@ export class JSONUtil {
       MissingValue: (!!config?.revive && 'MissingValue' in config.revive)
     };
 
+    const bigintSuffix = config?.revive?.bigintSuffix ?? 'n';
+    const BIGINT_REGEX = new RegExp(`^-?\\d+${bigintSuffix}$`);
+
     return function (this: unknown, key: string, value: unknown): unknown {
       if (resolved.Date && typeof value === 'string' && ISO_8601_REGEX.test(value)) {
         value = new Date(value);
       } else if (resolved.BigInt && typeof value === 'string' && BIGINT_REGEX.test(value)) {
-        value = BigInt(value.slice(0, -1));
+        value = BigInt(value.slice(0, -bigintSuffix.length));
       } else if (resolved.AppError && AppError.isJSON(value)) {
         value = AppError.fromJSON(value);
       } else if (resolved.Error && IS_ERROR(value)) {
@@ -78,11 +82,13 @@ export class JSONUtil {
       MissingValue: (config?.replace && 'MissingValue' in config.replace)
     };
 
+    const bigintSuffix = config?.replace?.bigintSuffix ?? 'n';
+
     return function (this: unknown, key: string, value: unknown): unknown {
       if (resolved.Date && value instanceof Date) {
         return value.toISOString();
       } else if (resolved.BigInt && typeof value === 'bigint') {
-        return `${value}n`;
+        return `${value}${bigintSuffix}`;
       } else if (resolved.AppError && value instanceof AppError) {
         return value.toJSON(config?.replace?.includeStack);
       } else if (resolved.Error && value instanceof Error) {

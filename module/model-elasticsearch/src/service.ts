@@ -1,4 +1,4 @@
-import { Client, errors } from '@elastic/elasticsearch';
+import { Client, errors, Serializer } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import {
@@ -6,7 +6,7 @@ import {
   type ModelIndexedSupport, type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
-import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
+import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -22,6 +22,15 @@ import type { EsBulkError } from './internal/types.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import { IndexManager } from './index-manager.ts';
+
+class CustomSerializer extends Serializer {
+  serialize(obj: unknown): string {
+    return JSONUtil.toUTF8(obj, { replace: { Error: false, AppError: false, bigintSuffix: '' } });
+  }
+  deserialize<T = unknown>(json: string): T {
+    return JSONUtil.fromUTF8(json);
+  }
+};
 
 /**
  * Elasticsearch model source.
@@ -40,6 +49,20 @@ export class ElasticsearchModelService implements
   config: ElasticsearchModelConfig;
 
   constructor(config: ElasticsearchModelConfig) { this.config = config; }
+
+  async postConstruct(this: ElasticsearchModelService): Promise<void> {
+    this.client = new Client({
+      nodes: this.config.hosts,
+      ...(this.config.options || {}),
+      Serializer: CustomSerializer
+    });
+    await this.client.cluster.health({});
+    this.manager = new IndexManager(this.config, this.client);
+
+    await ModelStorageUtil.storageInitialization(this.manager);
+    ShutdownManager.signal.addEventListener('abort', () => this.client.close());
+    ModelExpiryUtil.registerCull(this);
+  }
 
   /**
    * Directly run the search
@@ -106,19 +129,6 @@ export class ElasticsearchModelService implements
     } else {
       return item;
     }
-  }
-
-  async postConstruct(this: ElasticsearchModelService): Promise<void> {
-    this.client = new Client({
-      nodes: this.config.hosts,
-      ...(this.config.options || {}),
-    });
-    await this.client.cluster.health({});
-    this.manager = new IndexManager(this.config, this.client);
-
-    await ModelStorageUtil.storageInitialization(this.manager);
-    ShutdownManager.signal.addEventListener('abort', () => this.client.close());
-    ModelExpiryUtil.registerCull(this);
   }
 
   createStorage(): Promise<void> { return this.manager.createStorage(); }
