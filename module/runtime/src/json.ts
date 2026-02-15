@@ -38,73 +38,88 @@ const IS_ERROR = (value: unknown): value is Error => typeof value === 'object' &
 /** Utilities for JSON  */
 export class JSONUtil {
 
-  static buildReviver = (config?: JSONInputConfig) => {
+  static #revivers = new Map<string, JSONTransformer>();
+  static #replacers = new Map<string, JSONTransformer>();
+
+  static buildReviver = (config?: JSONInputConfig): JSONTransformer => {
+
     const all = config?.revive?.all ?? true;
-    const resolved: Record<string, boolean> = {
-      Date: all && (config?.revive?.Date ?? true),
-      BigInt: all && (config?.revive?.BigInt ?? true),
-      AppError: all && (config?.revive?.AppError ?? true),
-      Error: all && (config?.revive?.Error ?? true),
-      MissingValue: (!!config?.revive && 'MissingValue' in config.revive)
+    const resolved = {
+      Date: config?.revive?.Date ?? all,
+      BigInt: config?.revive?.BigInt ?? all,
+      AppError: config?.revive?.AppError ?? all,
+      Error: config?.revive?.Error ?? all,
+      MissingValue: (!!config?.revive && 'MissingValue' in config.revive),
+      bigintSuffix: config?.revive?.bigintSuffix ?? 'n'
     };
 
-    const bigintSuffix = config?.revive?.bigintSuffix ?? 'n';
-    const BIGINT_REGEX = new RegExp(`^-?\\d+${bigintSuffix}$`);
+    const cacheKey = config ? Object.values(resolved).map(v => `${v}`).join('|') : 'DEFAULT';
 
-    return function (this: unknown, key: string, value: unknown): unknown {
-      if (resolved.Date && typeof value === 'string' && ISO_8601_REGEX.test(value)) {
-        value = new Date(value);
-      } else if (resolved.BigInt && typeof value === 'string' && BIGINT_REGEX.test(value)) {
-        value = BigInt(value.slice(0, -bigintSuffix.length));
-      } else if (resolved.AppError && AppError.isJSON(value)) {
-        value = AppError.fromJSON(value);
-      } else if (resolved.Error && IS_ERROR(value)) {
-        const error = new Error(value.message);
-        error.name = value.name;
-        error.stack = value.stack ?? error.stack;
-        value = error;
-      }
-      value = config?.reviver ? config.reviver.call(this, key, value) : value;
-      if (resolved.MissingValue && (value === null || value === undefined)) {
-        value = config!.revive?.MissingValue;
-      }
-      return value;
-    };
+    if (!this.#revivers.has(cacheKey)) {
+      const BIGINT_REGEX = new RegExp(`^-?\\d+${resolved.bigintSuffix}$`);
+
+      const reviver = function (this: unknown, key: string, value: unknown): unknown {
+        if (resolved.Date && typeof value === 'string' && ISO_8601_REGEX.test(value)) {
+          value = new Date(value);
+        } else if (resolved.BigInt && typeof value === 'string' && BIGINT_REGEX.test(value)) {
+          value = BigInt(value.slice(0, -resolved.bigintSuffix.length));
+        } else if (resolved.AppError && AppError.isJSON(value)) {
+          value = AppError.fromJSON(value);
+        } else if (resolved.Error && IS_ERROR(value)) {
+          const error = new Error(value.message);
+          error.name = value.name;
+          error.stack = value.stack ?? error.stack;
+          value = error;
+        }
+        value = config?.reviver ? config.reviver.call(this, key, value) : value;
+        if (resolved.MissingValue && (value === null || value === undefined)) {
+          value = config!.revive?.MissingValue;
+        }
+        return value;
+      };
+      this.#revivers.set(cacheKey, reviver);
+    }
+    return this.#revivers.get(cacheKey)!;
   };
 
-  static buildReplacer = (config?: JSONOutputConfig): JSONTransformer | undefined => {
+  static buildReplacer = (config?: JSONOutputConfig): JSONTransformer => {
     const all = config?.replace?.all ?? true;
     const resolved = {
-      Date: all && (config?.replace?.Date ?? true),
-      BigInt: all && (config?.replace?.BigInt ?? true),
-      AppError: all && (config?.replace?.AppError ?? true),
-      Error: all && (config?.replace?.Error ?? true),
-      MissingValue: (config?.replace && 'MissingValue' in config.replace)
+      Date: config?.replace?.Date ?? all,
+      BigInt: config?.replace?.BigInt ?? all,
+      AppError: config?.replace?.AppError ?? all,
+      Error: config?.replace?.Error ?? all,
+      MissingValue: (config?.replace && 'MissingValue' in config.replace),
+      bigintSuffix: config?.replace?.bigintSuffix ?? 'n'
     };
 
-    const bigintSuffix = config?.replace?.bigintSuffix ?? 'n';
+    const cacheKey = config ? Object.values(resolved).map(v => `${v}`).join('|') : 'DEFAULT';
 
-    return function (this: unknown, key: string, value: unknown): unknown {
-      if (resolved.Date && value instanceof Date) {
-        return value.toISOString();
-      } else if (resolved.BigInt && typeof value === 'bigint') {
-        return `${value}${bigintSuffix}`;
-      } else if (resolved.AppError && value instanceof AppError) {
-        return value.toJSON(config?.replace?.includeStack);
-      } else if (resolved.Error && value instanceof Error) {
-        return {
-          $error: 'plain',
-          message: value.message,
-          name: value.name,
-          ...(config?.replace?.includeStack ? { stack: value.stack } : {}),
-        };
-      }
-      value = config?.replacer ? config.replacer.call(this, key, value) : value;
-      if (resolved.MissingValue && (value === null || value === undefined)) {
-        value = config!.replace!.MissingValue;
-      }
-      return value;
-    };
+    if (!this.#replacers.has(cacheKey)) {
+      const replacer = function (this: unknown, key: string, value: unknown): unknown {
+        if (resolved.Date && value instanceof Date) {
+          return value.toISOString();
+        } else if (resolved.BigInt && typeof value === 'bigint') {
+          return `${value}${resolved.bigintSuffix}`;
+        } else if (resolved.AppError && value instanceof AppError) {
+          return { ...value.toJSON(config?.replace?.includeStack), $error: 'trv', };
+        } else if (resolved.Error && value instanceof Error) {
+          return {
+            message: value.message,
+            name: value.name,
+            ...(config?.replace?.includeStack ? { stack: value.stack } : {}),
+            $error: 'plain',
+          };
+        }
+        value = config?.replacer ? config.replacer.call(this, key, value) : value;
+        if (resolved.MissingValue && (value === null || value === undefined)) {
+          value = config!.replace!.MissingValue;
+        }
+        return value;
+      };
+      this.#replacers.set(cacheKey, replacer);
+    }
+    return this.#replacers.get(cacheKey)!;
   };
 
 
