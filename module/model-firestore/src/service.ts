@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
@@ -10,8 +10,9 @@ import {
 
 import type { FirestoreModelConfig } from './config.ts';
 
-const setMissingValues = <T>(input: T, missingValue: unknown = null): T =>
-  JSON.parse(JSON.stringify(input, (_, value) => value ?? null), (_, value) => value ?? missingValue);
+const clone = structuredClone;
+const setMissingValues = <T>(input: T, missingValue: unknown): T =>
+  JSONUtil.clone(input, { replacer: (_, value) => value ?? null, reviver: (_, value) => value ?? missingValue });
 
 /**
  * A model service backed by Firestore
@@ -64,21 +65,21 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(prepped.id).create(setMissingValues<DocumentData>(prepped));
+    await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).update(setMissingValues<DocumentData>(prepped));
+    await this.#getCollection(cls).doc(item.id).update(clone<DocumentData>(prepped));
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(prepped.id).set(setMissingValues<DocumentData>(prepped));
+    await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped));
     return prepped;
   }
 

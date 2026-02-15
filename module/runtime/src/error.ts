@@ -67,7 +67,7 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
   /**
    * Serializes an error to a basic object
    */
-  toJSON(includeStack = false): AppErrorJSON {
+  toJSON(): AppErrorJSON {
     return {
       $trv: AppError.name,
       message: this.message,
@@ -76,7 +76,7 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
       type: this.type,
       at: this.at,
       ...(this.details ? { details: this.details } : undefined!),
-      ...(includeStack ? { stack: this.stack } : undefined)
+      stack: this.stack
     };
   }
 }

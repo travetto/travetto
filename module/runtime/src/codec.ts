@@ -45,14 +45,15 @@ export class CodecUtil {
   }
 
   /** Convert base64 value to utf8 string  */
-  static base64ToUTF8(value: TextInput, checkIfEncoded = false): string {
+  static base64ToUTF8(value: TextInput): string {
     const result = this.toUTF8String(typeof value === 'string' ? Buffer.from(value, 'base64') : value);
-
-    // Read from encoded if it happens
-    if (checkIfEncoded && result.startsWith('%')) {
-      return decodeURIComponent(result);
-    }
     return result;
+  }
+
+  /** Convert url encoded base64 value to utf8 string  */
+  static urlEncodedBase64ToUTF8(value: TextInput): string {
+    const result = this.base64ToUTF8(value);
+    return result.startsWith('%') ? decodeURIComponent(result) : result;
   }
 
   /** Detect encoding of a binary type, if possible  */

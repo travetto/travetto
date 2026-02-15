@@ -179,7 +179,7 @@ class WebRpcSuite extends BaseWebSuite {
     assert('stack' in plain.err);
     assert(typeof plain.err.stack === 'string');
 
-    const complex: typeof payload = JSONUtil.clone(plain);
+    const complex: typeof payload = JSONUtil.cloneFromTransmit(plain);
 
     assert(complex.err instanceof AppError);
     assert(complex.err.stack === payload.err.stack);

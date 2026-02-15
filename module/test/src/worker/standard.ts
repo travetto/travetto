@@ -38,7 +38,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async event => {
     try {
-      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = JSONUtil.clone(event);
+      const parsed: TestEvent | TestRemoveEvent | TestLogEvent = JSONUtil.cloneFromTransmit(event);
       if (parsed.type === 'log') {
         log(parsed);
       } else if (parsed.type === 'removeTest') {
@@ -59,7 +59,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   // Wait for complete
   const completedEvent = await complete;
-  const result: { error?: unknown } = JSONUtil.clone(completedEvent);
+  const result: { error?: unknown } = JSONUtil.cloneFromTransmit(completedEvent);
 
   // Kill on complete
   await channel.destroy();
