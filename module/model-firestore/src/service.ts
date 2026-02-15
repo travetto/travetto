@@ -11,7 +11,7 @@ import {
 import type { FirestoreModelConfig } from './config.ts';
 
 const setMissingValues = <T>(input: T, missingValue: unknown = null): T =>
-  JSONUtil.clone(input, { reviveMissingValue: missingValue, reviveStandard: false });
+  JSONUtil.clone(input, { replace: { MissingValue: null }, revive: { all: false, MissingValue: missingValue } });
 
 /**
  * A model service backed by Firestore
