@@ -8,7 +8,7 @@ import { Transform } from 'node:stream';
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, AppError, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryMetadataUtil } from '@travetto/runtime';
+import { AsyncQueue, RuntimeError, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryMetadataUtil } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
@@ -35,7 +35,7 @@ export class WebUploadUtil {
         const chunk = BinaryUtil.readChunk(input, encoding);
         read += chunk.byteLength;
         if (read > maxSize) {
-          callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
+          callback(new RuntimeError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
         } else {
           callback(null, chunk);
         }
@@ -48,7 +48,7 @@ export class WebUploadUtil {
    */
   static async * getUploads(request: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
     if (!WebBodyUtil.isRawBinary(request.body)) {
-      throw new AppError('No input stream provided for upload', { category: 'data' });
+      throw new RuntimeError('No input stream provided for upload', { category: 'data' });
     }
 
     const requestBody = request.body;
@@ -75,7 +75,7 @@ export class WebUploadUtil {
         limits: { fileSize: largestMax }
       })
         .on('file', (field, stream, filename, _encoding, mimetype) => queue.add({ stream, filename, field, contentType: mimetype }))
-        .on('limit', field => queue.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
+        .on('limit', field => queue.throw(new RuntimeError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => queue.close())
         .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`)));
 
@@ -157,7 +157,7 @@ export class WebUploadUtil {
       const detected = await this.getFileType(response(), filename, contentType);
 
       if (!mimeCheck(detected.mime)) {
-        throw new AppError(`Content type not allowed: ${detected.mime}`, { category: 'data' });
+        throw new RuntimeError(`Content type not allowed: ${detected.mime}`, { category: 'data' });
       }
 
       if (!path.extname(filename)) {

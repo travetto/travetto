@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { AppError, toConcrete, castTo, type Class, Env, Runtime, RuntimeResources, getClass } from '@travetto/runtime';
+import { RuntimeError, toConcrete, castTo, type Class, Env, Runtime, RuntimeResources, getClass } from '@travetto/runtime';
 import { DependencyRegistryIndex, getDefaultQualifier, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -119,7 +119,7 @@ export class ConfigurationService {
   async bindTo<T>(cls: Class<T>, item: T, namespace: string, validate = true): Promise<T> {
     const classId = cls.Ⲑid;
     if (!SchemaRegistryIndex.has(cls)) {
-      throw new AppError(`${classId} is not a valid schema class, config is not supported`);
+      throw new RuntimeError(`${classId} is not a valid schema class, config is not supported`);
     }
     BindUtil.bindSchemaToObject(cls, item, this.#get(namespace));
     if (validate) {

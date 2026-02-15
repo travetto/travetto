@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { AppError, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { RuntimeError, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import type { IndexedModule } from '@travetto/manifest';
 
 export class CliScmUtil {
@@ -50,7 +50,7 @@ export class CliScmUtil {
     const rootPath = Runtime.workspace.path;
     const result = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: rootPath }), { catch: true });
     if (!result.valid) {
-      throw new AppError('Unable to detect changes between', { category: 'data', details: { fromHash, toHash, output: (result.stderr || result.stdout) } });
+      throw new RuntimeError('Unable to detect changes between', { category: 'data', details: { fromHash, toHash, output: (result.stderr || result.stdout) } });
     }
     const out = new Set<string>();
     for (const line of result.stdout.split(/\n/g)) {

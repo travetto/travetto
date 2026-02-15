@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager, CodecUtil, BinaryUtil, JSONUtil } from '@travetto/runtime';
+import { ExecUtil, RuntimeError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager, CodecUtil, BinaryUtil, JSONUtil } from '@travetto/runtime';
 
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
 
@@ -53,9 +53,9 @@ export const text = <>
 
   <c.Section title='Standard Error Support'>
 
-    While the framework is 100 % compatible with standard {d.input('Error')} instances, there are cases in which additional functionality is desired. Within the framework we use {AppError} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the {d.module('Web')} module and HTTP status codes). <br />
+    While the framework is 100 % compatible with standard {d.input('Error')} instances, there are cases in which additional functionality is desired. Within the framework we use {RuntimeError} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the {d.module('Web')} module and HTTP status codes). <br />
 
-    The {AppError} takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+    The {RuntimeError} takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
     <ul>
       <li>{d.input('general')} - General purpose errors</li>
       <li>{d.input('system')} - Synonym for {d.input('general')}</li>
@@ -119,7 +119,7 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
   <c.Section title='Resource Access'>
     The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the {d.module('Manifest')}'s data for what resources were found at manifesting time.<br />
 
-    The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  <br />
+    The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {RuntimeError} with a category of 'notfound'.  <br />
 
     The {FileLoader} also supports tying itself to {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
   </c.Section>

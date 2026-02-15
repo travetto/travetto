@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { AppError, asFull, castTo, type Class, type RetainIntrinsicFields, safeAssign } from '@travetto/runtime';
+import { RuntimeError, asFull, castTo, type Class, type RetainIntrinsicFields, safeAssign } from '@travetto/runtime';
 import { WebHeaders } from '@travetto/web';
 import { type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -156,7 +156,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   getEndpointConfig(method: string): EndpointConfig {
     const endpoint = this.#endpoints.get(method);
     if (!endpoint) {
-      throw new AppError(`Endpoint not registered: ${String(method)} on ${this.#cls.name}`);
+      throw new RuntimeError(`Endpoint not registered: ${String(method)} on ${this.#cls.name}`);
     }
     return endpoint;
   }

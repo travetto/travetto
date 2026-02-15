@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
-import { AppError, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { RuntimeError, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { type ManifestModuleFileType, ManifestModuleUtil } from '@travetto/manifest';
 
 import type { CodeSourceInput } from './types.ts';
@@ -60,7 +60,7 @@ export class DocFileUtil {
     } else {
       file = Runtime.getSourceFile(input);
       if (!existsSync(file)) {
-        throw new AppError(`Unknown file: ${typeof input === 'string' ? input : input.name} => ${file}`);
+        throw new RuntimeError(`Unknown file: ${typeof input === 'string' ? input : input.name} => ${file}`);
       }
       content = readFileSync(file, 'utf8');
     }

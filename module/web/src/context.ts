@@ -1,6 +1,6 @@
 import { AsyncContextValue, type AsyncContext } from '@travetto/context';
 import { Inject, Injectable } from '@travetto/di';
-import { AppError, castTo, type Class } from '@travetto/runtime';
+import { RuntimeError, castTo, type Class } from '@travetto/runtime';
 
 import { WebRequest } from './types/request.ts';
 
@@ -38,7 +38,7 @@ export class WebAsyncContext {
   getSource<T>(cls: Class<T>): () => T {
     const item = this.#byType.get(cls.Ⲑid);
     if (!item) {
-      throw new AppError('Unknown type for web context');
+      throw new RuntimeError('Unknown type for web context');
     }
     return castTo(item);
   }

@@ -11,7 +11,7 @@ import {
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import {
-  type Class, AppError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
+  type Class, RuntimeError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
   BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil, BinaryMetadataUtil, TypedObject, JSONUtil
 } from '@travetto/runtime';
 
@@ -343,7 +343,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const body: BinaryType | string | undefined = castTo(result.Body);
 
     switch (typeof body) {
-      case 'undefined': throw new AppError('Unable to read type: undefined');
+      case 'undefined': throw new RuntimeError('Unable to read type: undefined');
       case 'string': return body.endsWith('=') ?
         CodecUtil.fromBase64String(body) :
         CodecUtil.fromUTF8String(body);

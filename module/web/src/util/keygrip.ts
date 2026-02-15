@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { AppError, castKey } from '@travetto/runtime';
+import { RuntimeError, castKey } from '@travetto/runtime';
 
 const CHAR_MAPPING = { '/': '_', '+': '-', '=': '' };
 
@@ -18,7 +18,7 @@ export class KeyGrip {
 
   constructor(keys: string[], algorithm = 'sha1', encoding: crypto.BinaryToTextEncoding = 'base64') {
     if (!keys.length) {
-      throw new AppError('Keys must be defined');
+      throw new RuntimeError('Keys must be defined');
     }
     this.#keys = keys;
     this.#algorithm = algorithm;

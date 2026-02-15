@@ -9,12 +9,12 @@ export type ErrorCategory =
   'timeout' |
   'unavailable';
 
-export type AppErrorOptions<T> = Omit<Partial<AppError>, 'details'> & (T extends undefined ? { details?: T } : { details: T });
+export type RuntimeErrorOptions<T> = Omit<Partial<RuntimeError>, 'details'> & (T extends undefined ? { details?: T } : { details: T });
 
 /**
  * Framework error class, with the aim of being extensible
  */
-export class AppError<T = Record<string, unknown> | undefined> extends Error {
+export class RuntimeError<T = Record<string, unknown> | undefined> extends Error {
 
   static defaultCategory: ErrorCategory = 'general';
 
@@ -24,18 +24,18 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
   details: T;
 
   /**
-   * Build an app error
+   * Build a runtime error
    *
    * @param message The error message
    */
   constructor(
     ...[message, options]:
-      T extends undefined ? ([string] | [string, AppErrorOptions<T>]) : [string, AppErrorOptions<T>]
+      T extends undefined ? ([string] | [string, RuntimeErrorOptions<T>]) : [string, RuntimeErrorOptions<T>]
   ) {
     super(message, options?.cause ? { cause: options.cause } : undefined);
     this.type = options?.type ?? this.constructor.name;
     this.details = options?.details!;
-    this.category = options?.category ?? castTo<typeof AppError>(this.constructor).defaultCategory ?? 'general';
+    this.category = options?.category ?? castTo<typeof RuntimeError>(this.constructor).defaultCategory ?? 'general';
     this.at = new Date(options?.at ?? Date.now());
   }
 }

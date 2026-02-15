@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import util from 'node:util';
 
-import { AppError, Util } from '@travetto/runtime';
+import { RuntimeError, Util } from '@travetto/runtime';
 
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
@@ -33,7 +33,7 @@ export class AuthModelUtil {
    */
   static async generatePassword(password: string, salt: number | string = 32): Promise<{ salt: string, hash: string }> {
     if (!password) {
-      throw new AppError('Password is required', { category: 'data' });
+      throw new RuntimeError('Password is required', { category: 'data' });
     }
 
     salt = typeof salt === 'number' ? Util.uuid(salt) : salt;

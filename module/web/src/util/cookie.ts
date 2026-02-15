@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/runtime';
+import { RuntimeError } from '@travetto/runtime';
 
 import type { Cookie, CookieGetOptions, CookieSetOptions } from '../types/cookie.ts';
 import { KeyGrip } from './keygrip.ts';
@@ -86,11 +86,11 @@ export class CookieJar {
     };
 
     if (!this.#setOptions.secure && alias.secure) {
-      throw new AppError('Cannot send secure cookie over unencrypted connection');
+      throw new RuntimeError('Cannot send secure cookie over unencrypted connection');
     }
 
     if (alias.signed && !this.#grip) {
-      throw new AppError('Signing keys required for signed cookies');
+      throw new RuntimeError('Signing keys required for signed cookies');
     }
 
     if (alias.maxAge !== undefined && !alias.expires) {

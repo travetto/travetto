@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { type WebDispatcher, type WebFilterContext, type WebRequest, WebResponse } from '@travetto/web';
-import { AppError, asFull, BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
+import { RuntimeError, asFull, BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -19,7 +19,7 @@ function toLambdaEvent(request: WebRequest<BinaryArray>): APIGatewayProxyEvent {
   const multiValueQueryStringParameters: Record<string, string[]> = {};
 
   if (body && !BinaryUtil.isBinaryArray(body)) {
-    throw new AppError('Unsupported request type, only buffer bodies supported');
+    throw new RuntimeError('Unsupported request type, only buffer bodies supported');
   }
 
   request.headers.forEach((v, k) => {

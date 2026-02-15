@@ -4,7 +4,7 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import { type EndpointConfig, type ControllerConfig, type EndpointParameterConfig, type ControllerVisitor, HTTP_METHODS } from '@travetto/web';
-import { AppError, castTo, type Class, describeFunction } from '@travetto/runtime';
+import { RuntimeError, castTo, type Class, describeFunction } from '@travetto/runtime';
 import {
   type SchemaFieldConfig, type SchemaClassConfig, SchemaNameResolver,
   type SchemaInputConfig, SchemaRegistryIndex, type SchemaBasicType, type SchemaParameterConfig
@@ -47,7 +47,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    */
   #schemaToDotParams(location: 'query' | 'header', input: SchemaInputConfig, prefix: string = '', rootField: SchemaInputConfig = input): ParameterObject[] {
     if (!SchemaRegistryIndex.has(input.type)) {
-      throw new AppError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
+      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
 
     const fields = SchemaRegistryIndex.get(input.type).getFields(input.view);

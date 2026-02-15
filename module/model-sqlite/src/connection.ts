@@ -4,7 +4,7 @@ import path from 'node:path';
 import sqlDb, { type Database, type Options } from 'better-sqlite3';
 import { type Pool, createPool } from 'generic-pool';
 
-import { ShutdownManager, Util, Runtime, AppError, castTo } from '@travetto/runtime';
+import { ShutdownManager, Util, Runtime, RuntimeError, castTo } from '@travetto/runtime';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { type SQLModelConfig, Connection } from '@travetto/model-sql';
@@ -45,7 +45,7 @@ export class SqliteConnection extends Connection<Database> {
         }
       }
     }
-    throw new AppError('Max retries exceeded');
+    throw new RuntimeError('Max retries exceeded');
   }
 
   async #create(): Promise<Database> {

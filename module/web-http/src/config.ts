@@ -1,6 +1,6 @@
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore, Secret } from '@travetto/schema';
-import { AppError, Runtime, RuntimeResources } from '@travetto/runtime';
+import { RuntimeError, Runtime, RuntimeResources } from '@travetto/runtime';
 import { NetUtil } from '@travetto/web';
 
 import type { WebSecureKeyPair } from './types.ts';
@@ -55,7 +55,7 @@ export class WebHttpConfig {
       this.tlsKeys = undefined;
     } else if (!this.tlsKeys) {
       if (Runtime.production) {
-        throw new AppError('Default tls keys are only valid for development use, please specify a config value at web.tls.keys');
+        throw new RuntimeError('Default tls keys are only valid for development use, please specify a config value at web.tls.keys');
       }
       this.tlsKeys = await WebTlsUtil.generateKeyPair();
     } else {

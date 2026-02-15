@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { AppError, castTo, type Class } from '@travetto/runtime';
+import { RuntimeError, castTo, type Class } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { type ModelCrudSupport, Model, Transient } from '@travetto/model';
@@ -76,7 +76,7 @@ export abstract class AuthModelServiceSuite {
       await this.authService.authenticate(pre);
       assert.fail('Should not have gotten here');
     } catch (err) {
-      if (err instanceof AppError && err.category === 'notfound') {
+      if (err instanceof RuntimeError && err.category === 'notfound') {
         const user = await this.authService.register(pre);
         assert.ok(user.hash);
         assert.ok(user.id);

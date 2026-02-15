@@ -52,7 +52,7 @@ export interface Authenticator<T = unknown, C = unknown, P extends Principal = P
    *
    * @returns Valid principal if authenticated
    * @returns undefined if authentication is valid, but incomplete (multi-step)
-   * @throws AppError if authentication fails
+   * @throws Error if authentication fails
    */
   authenticate(payload: T, context?: C): Promise<P | undefined> | P | undefined;
 }
@@ -123,7 +123,7 @@ import type { Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 import { type AuthContext, AuthenticationError, type AuthToken, type Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
 import { type WebResponse, type WebRequest, type WebAsyncContext, CookieJar } from '@travetto/web';
-import { AppError, castTo, TimeUtil } from '@travetto/runtime';
+import { RuntimeError, castTo, TimeUtil } from '@travetto/runtime';
 
 import { CommonPrincipalCodecSymbol, type PrincipalCodec } from './types.ts';
 import type { WebAuthConfig } from './config.ts';
@@ -186,7 +186,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   async create(value: Principal, keyId: string = 'default'): Promise<string> {
     const entry = this.config.keyMap[keyId];
     if (!entry) {
-      throw new AppError('Requested unknown key for signing');
+      throw new RuntimeError('Requested unknown key for signing');
     }
     // Weird issue with their ES module support
     const { default: { create } } = await import('njwt');

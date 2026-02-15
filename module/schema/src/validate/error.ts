@@ -1,4 +1,4 @@
-import { type Class, AppError } from '@travetto/runtime';
+import { type Class, RuntimeError } from '@travetto/runtime';
 import type { ValidationError } from './types.ts';
 
 /**
@@ -6,7 +6,7 @@ import type { ValidationError } from './types.ts';
  *
  * Hold all the validation errors for a given schema validation
  */
-export class ValidationResultError extends AppError<{ errors: ValidationError[] }> {
+export class ValidationResultError extends RuntimeError<{ errors: ValidationError[] }> {
   constructor(errors: ValidationError[]) {
     super('Validation errors have occurred', { category: 'data', details: { errors } });
   }
@@ -16,7 +16,7 @@ export class ValidationResultError extends AppError<{ errors: ValidationError[] 
  * Represents when a requested objects's type doesn't match the class being used to request.
  * Primarily applies to polymorphic types
  */
-export class TypeMismatchError extends AppError {
+export class TypeMismatchError extends RuntimeError {
   constructor(cls: Class | string, type: string) {
     super(`Expected ${typeof cls === 'string' ? cls : cls.name} but found ${type}`, { category: 'data' });
   }

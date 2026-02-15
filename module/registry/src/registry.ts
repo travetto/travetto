@@ -1,4 +1,4 @@
-import { AppError, castTo, type Class, Env, flushPendingFunctions, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { RuntimeError, castTo, type Class, Env, flushPendingFunctions, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { RegistryIndex, RegistryIndexClass } from './types.ts';
 
@@ -27,7 +27,7 @@ class $Registry {
 
   validateConstructor(source: unknown): void {
     if (source !== this) {
-      throw new AppError('constructor is private');
+      throw new RuntimeError('constructor is private');
     }
   }
 
@@ -100,7 +100,7 @@ class $Registry {
    */
   verifyInitialized(): void {
     if (!this.#resolved) {
-      throw new AppError('Registry not initialized, call init() first');
+      throw new RuntimeError('Registry not initialized, call init() first');
     }
   }
 

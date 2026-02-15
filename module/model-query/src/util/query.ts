@@ -1,4 +1,4 @@
-import { type Class, AppError, TimeUtil, castTo, hasFunction } from '@travetto/runtime';
+import { type Class, RuntimeError, TimeUtil, castTo, hasFunction } from '@travetto/runtime';
 import { type ModelType, NotFoundError, ModelRegistryIndex } from '@travetto/model';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -46,7 +46,7 @@ export class ModelQueryUtil {
         throw error;
       }
     } else {
-      throw new AppError(`Invalid number of results: ${result.length}`, { category: 'data' });
+      throw new RuntimeError(`Invalid number of results: ${result.length}`, { category: 'data' });
     }
   }
 

@@ -1,6 +1,6 @@
 import router from 'find-my-way';
 
-import { AppError } from '@travetto/runtime';
+import { RuntimeError } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
 
 import type { EndpointConfig } from '../registry/types.ts';
@@ -44,7 +44,7 @@ export class StandardWebRouter extends BaseWebRouter {
     const endpoint = this.#cache.get(handler!);
     if (!endpoint) {
       return new WebResponse({
-        body: new AppError(`Unknown endpoint ${httpMethod} ${request.context.path}`, { category: 'notfound' }),
+        body: new RuntimeError(`Unknown endpoint ${httpMethod} ${request.context.path}`, { category: 'notfound' }),
       });
     }
     Object.assign(request.context, { pathParams: params });

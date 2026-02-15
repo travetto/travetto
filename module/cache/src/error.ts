@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/runtime';
+import { RuntimeError } from '@travetto/runtime';
 
 /** Cache Error Class */
-export class CacheError extends AppError { }
+export class CacheError extends RuntimeError { }

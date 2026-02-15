@@ -1,4 +1,4 @@
-import { AppError, BinaryUtil, castTo, CodecUtil } from '@travetto/runtime';
+import { RuntimeError, BinaryUtil, castTo, CodecUtil } from '@travetto/runtime';
 
 import { Controller } from '../../../src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch } from '../../../src/decorator/endpoint.ts';
@@ -96,6 +96,6 @@ export class TestController {
 
   @Post('/ip')
   notFound() {
-    throw new AppError('Uh-oh', { category: 'general' });
+    throw new RuntimeError('Uh-oh', { category: 'general' });
   }
 }

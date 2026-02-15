@@ -1,6 +1,6 @@
 import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler';
 
-import { AppError } from './error.ts';
+import { RuntimeError } from './error.ts';
 import { Util } from './util.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { ShutdownManager, type ShutdownReason } from './shutdown.ts';
@@ -72,7 +72,7 @@ export class WatchUtil {
     }
 
     if (retryExhausted) {
-      throw new AppError(`Operation failed after ${state.errorIterations} attempts`);
+      throw new RuntimeError(`Operation failed after ${state.errorIterations} attempts`);
     }
   }
 
