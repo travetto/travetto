@@ -47,15 +47,15 @@ export class WebTestDispatchUtil {
       }
     }
 
-    switch (response.headers.get('Content-Type')) {
-      case 'application/json':
-        result = BinaryUtil.isBinaryArray(result) ? JSONUtil.fromBinaryArray(result) :
-          (typeof result === 'string' ? JSONUtil.fromUTF8(result) : undefined);
-        break;
-      case 'text/plain':
-        result = BinaryUtil.isBinaryArray(result) ? CodecUtil.toUTF8String(result) :
-          (typeof result === 'string' ? result : undefined);
-        break;
+    const isJSON = response.headers.get('Content-Type') === 'application/json';
+    const isText = response.headers.get('Content-Type')?.startsWith('text/') ?? false;
+
+    if (BinaryUtil.isBinaryArray(result) && (isJSON || isText)) {
+      result = CodecUtil.toUTF8String(result);
+    }
+
+    if (typeof result === 'string' && isJSON) {
+      result = JSONUtil.fromUTF8(result);
     }
 
     if (response.context.httpStatusCode && response.context.httpStatusCode >= 400) {

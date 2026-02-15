@@ -47,7 +47,7 @@ export class ElasticsearchModelService implements
       ...(this.config.options || {}),
       Serializer: class extends Serializer {
         serialize(obj: unknown): string {
-          return JSONUtil.toUTF8(obj, { replace: { Error: false, AppError: false, bigintSuffix: '' } });
+          return JSONUtil.toUTF8(obj, { replacer: (_, value) => (typeof value === 'bigint' ? `${value}` : value) });
         }
         deserialize<T = unknown>(json: string): T {
           return JSONUtil.fromUTF8(json);
