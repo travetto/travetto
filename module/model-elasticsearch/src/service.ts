@@ -23,6 +23,13 @@ import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import { IndexManager } from './index-manager.ts';
 
+const ELASTICSEARCH_REPLACER = {
+  replacer(this: unknown, key: string, value: unknown): unknown {
+    // @ts-expect-error
+    return (typeof this[key] === 'bigint' ? this[key].toString() : value);
+  }
+};
+
 /**
  * Elasticsearch model source.
  */
@@ -46,12 +53,8 @@ export class ElasticsearchModelService implements
       nodes: this.config.hosts,
       ...(this.config.options || {}),
       Serializer: class extends Serializer {
-        serialize(obj: unknown): string {
-          return JSONUtil.toUTF8(obj, { replacer: (_, value) => (typeof value === 'bigint' ? `${value}` : value) });
-        }
-        deserialize<T = unknown>(json: string): T {
-          return JSONUtil.fromUTF8(json);
-        }
+        deserialize = JSONUtil.fromUTF8;
+        serialize = (obj: unknown): string => JSONUtil.toUTF8(obj, ELASTICSEARCH_REPLACER);
       }
     });
     await this.client.cluster.health({});

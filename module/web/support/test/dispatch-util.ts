@@ -56,6 +56,7 @@ export class WebTestDispatchUtil {
 
     if (typeof result === 'string' && isJSON) {
       result = JSONUtil.fromUTF8(result);
+      result = JSONUtil.cloneFromTransmit(result);
     }
 
     if (response.context.httpStatusCode && response.context.httpStatusCode >= 400) {
