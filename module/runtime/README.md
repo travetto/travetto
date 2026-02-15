@@ -21,6 +21,7 @@ Runtime is the foundation of all [Travetto](https://travetto.dev) applications. 
    *  Resource Access
    *  Encoding and Decoding Utilities
    *  Binary Utilities
+   *  JSON Utilities
    *  Common Utilities
    *  Time Utilities
    *  Process Execution
@@ -281,6 +282,21 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 
 ## Binary Utilities
 The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L59) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
+
+## JSON Utilities
+The [JSONUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L31) class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like `Date`, `BigInt`, and `Error` objects seamlessly. Key features include:
+   *  `fromUTF8(input, config?)` - Parse JSON from a UTF-8 string
+   *  `toUTF8(value, config?)` - Serialize a value to JSON string
+   *  `toUTF8Pretty(value)` - Serialize with pretty formatting (2-space indent)
+   *  `fromBinaryArray(input)` - Parse JSON from binary array
+   *  `toBinaryArray(value, config?)` - Serialize to binary array (UTF-8 encoded)
+   *  `toBase64(value)` - Encode JSON as base64 string
+   *  `fromBase64(input)` - Decode JSON from base64 string
+   *  `clone(input, config?)` - Deep clone objects with optional transformations
+   *  `cloneForTransmit(input)` - Clone for transmission with error serialization
+   *  `cloneFromTransmit(input)` - Clone from transmission with type restoration
+
+The `TRANSMIT_REVIVER` automatically restores `Date` objects and `BigInt` values during deserialization, making it ideal for transmitting complex data structures across network boundaries.
 
 ## Time Utilities
 [TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L23) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.

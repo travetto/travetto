@@ -23,6 +23,7 @@ Runtime is the foundation of all <a target="_blank" class="external-link" href="
 <li>Resource Access</li>
 <li>Encoding and Decoding Utilities</li>
 <li>Binary Utilities</li>
+<li>JSON Utilities</li>
 <li>Common Utilities</li>
 <li>Time Utilities</li>
 <li>Process Execution</li>
@@ -315,6 +316,22 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 <h2 id="binary-utilities">Binary Utilities</h2>
 
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L59">BinaryUtil</a> class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (<code class="item input">Buffer</code>, <code class="item input">Stream</code>) and Web Standard types (<code class="item input">Blob</code>, <code class="item input">ArrayBuffer</code>). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
+
+<h2 id="json-utilities">JSON Utilities</h2>
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L31">JSONUtil</a> class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like <code class="item input">Date</code>, <code class="item input">BigInt</code>, and <code class="item input">Error</code> objects seamlessly. Key features include:
+<ul> <li><code class="item method">fromUTF8(input, config?)</code> - Parse JSON from a UTF-8 string</li>
+<li><code class="item method">toUTF8(value, config?)</code> - Serialize a value to JSON string</li>
+<li><code class="item method">toUTF8Pretty(value)</code> - Serialize with pretty formatting (2-space indent)</li>
+<li><code class="item method">fromBinaryArray(input)</code> - Parse JSON from binary array</li>
+<li><code class="item method">toBinaryArray(value, config?)</code> - Serialize to binary array (UTF-8 encoded)</li>
+<li><code class="item method">toBase64(value)</code> - Encode JSON as base64 string</li>
+<li><code class="item method">fromBase64(input)</code> - Decode JSON from base64 string</li>
+<li><code class="item method">clone(input, config?)</code> - Deep clone objects with optional transformations</li>
+<li><code class="item method">cloneForTransmit(input)</code> - Clone for transmission with error serialization</li>
+<li><code class="item method">cloneFromTransmit(input)</code> - Clone from transmission with type restoration</li>
+</ul>
+The <code class="item input">TRANSMIT_REVIVER</code> automatically restores <code class="item input">Date</code> objects and <code class="item input">BigInt</code> values during deserialization, making it ideal for transmitting complex data structures across network boundaries.
 
 <h2 id="time-utilities">Time Utilities</h2>
 
