@@ -42,7 +42,7 @@ export class PropertiesConfigParser implements ConfigParser {
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i];
       while (i < lines.length && line.endsWith('\\')) {
-        line = `${line.replace(/\\$/, '')}${lines[i += 1].trimStart()}`;
+        line = `${line.replace(/[\\]$/, '')}${lines[i += 1].trimStart()}`;
       }
       const entry = PropertiesConfigParser.parseLine(line);
       if (entry) {

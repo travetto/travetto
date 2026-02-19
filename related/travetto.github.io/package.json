@@ -41,7 +41,7 @@
     "@types/node": "^22.19.13",
     "source-map-explorer": "^2.5.3",
     "ts-node": "~10.9.1",
-    "typescript": "~5.9.3"
+    "typescript": "6.0.0-beta"
   },
   "private": true,
   "publishConfig": {

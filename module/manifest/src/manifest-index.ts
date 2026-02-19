@@ -312,10 +312,7 @@ export class ManifestIndex {
       const moduleSet = new Set(this.getDependentModules(event.module, 'parents').map(module => module.name));
       moduleSet.add(this.manifest.workspace.name);
       for (const moduleName of moduleSet) {
-        if (!itemsByModule.has(moduleName)) {
-          itemsByModule.set(moduleName, []);
-        }
-        itemsByModule.get(moduleName)!.push(event.item);
+        itemsByModule.getOrInsert(moduleName, []).push(event.item);
       }
     }
     return itemsByModule;

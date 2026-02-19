@@ -82,13 +82,7 @@ export class DiagnosticManager {
 
   afterTest(test: TestResult): void {
     const file = Workspace.resolveImport(test.import);
-    if (!this.#tracked.has(file)) {
-      this.#tracked.set(file, new Map());
-    }
-    if (!this.#tracked.get(file)!.has(test.classId)) {
-      this.#tracked.get(file)!.set(test.classId, new Map());
-    }
-    this.#tracked.get(file)!.get(test.classId)!.set(test.methodName, test);
+    this.#tracked.getOrInsert(file, new Map()).getOrInsert(test.classId, new Map()).set(test.methodName, test);
     this.#setDiagnostics(file);
   }
 

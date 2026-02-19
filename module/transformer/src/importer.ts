@@ -110,16 +110,15 @@ export class ImportManager {
    * Produces a unique identifier for a given file
    */
   getIdentifier(file: string, name?: string): ts.Identifier {
-    if (!this.#identifiers.has(file)) {
+    return this.#identifiers.getOrInsertComputed(file, () => {
       if (name) {
-        this.#identifiers.set(file, this.factory.createIdentifier(name));
+        return this.factory.createIdentifier(name);
       } else {
         const key = path.basename(file, path.extname(file)).replace(/\W+/g, '_');
         const suffix = this.#idx[key] = (this.#idx[key] ?? -1) + 1;
-        this.#identifiers.set(file, this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`));
+        return this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`);
       }
-    }
-    return this.#identifiers.get(file)!;
+    });
   }
 
   /**
