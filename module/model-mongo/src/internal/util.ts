@@ -51,7 +51,7 @@ export class MongoUtil {
 
   static uuid(value: string): Binary {
     return new Binary(
-      BinaryUtil.binaryArrayToBuffer(
+      BinaryUtil.binaryArrayToUint8Array(
         CodecUtil.fromHexString(value.replaceAll('-', ''))
       ),
       Binary.SUBTYPE_UUID

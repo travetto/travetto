@@ -125,7 +125,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const flush = async (): Promise<void> => {
       if (!total) { return; }
       const part = await this.client.uploadPart(this.#queryBlob(id, {
-        Body: BinaryUtil.binaryArrayToBuffer(BinaryUtil.combineBinaryArrays(buffers)),
+        Body: BinaryUtil.binaryArrayToUint8Array(BinaryUtil.combineBinaryArrays(buffers)),
         PartNumber: i,
         UploadId
       }));
@@ -247,7 +247,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
     const content = JSONUtil.toBinaryArray(prepped);
     await this.client.putObject(this.#query(cls, prepped.id, {
-      Body: BinaryUtil.binaryArrayToBuffer(content),
+      Body: BinaryUtil.binaryArrayToUint8Array(content),
       ContentType: 'application/json',
       ContentLength: content.byteLength,
       ...this.#getExpiryConfig(cls, prepped)
