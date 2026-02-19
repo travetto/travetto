@@ -28,7 +28,7 @@ export class NodemailerTransport implements MailTransport {
         if (typeof attachment.content === 'string') {
           attachment.content = CodecUtil.fromUTF8String(attachment.content);
         } else if (BinaryUtil.isBinaryArray(attachment.content)) {
-          attachment.content = BinaryUtil.binaryArrayToBuffer(attachment.content);
+          attachment.content = BinaryUtil.binaryArrayToUint8Array(attachment.content);
         } else {
           attachment.content = BinaryUtil.toReadable(attachment.content);
         }

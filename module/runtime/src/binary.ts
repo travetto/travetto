@@ -80,6 +80,17 @@ export class BinaryUtil {
     }
   }
 
+  /** Convert binary array to an explicit uint8array  */
+  static binaryArrayToUint8Array(input: BinaryArray): Uint8Array {
+    if (isUint8Array(input)) {
+      return castTo(input);
+    } else if (isTypedArray(input)) {
+      return castTo(Buffer.from(input.buffer));
+    } else {
+      return Buffer.from(input);
+    }
+  }
+
   /** Convert input to a binary array  */
   static async toBinaryArray(input: BinaryType): Promise<BinaryArray> {
     if (isBinaryArray(input)) {

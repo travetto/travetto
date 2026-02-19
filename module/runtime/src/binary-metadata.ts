@@ -72,7 +72,7 @@ export class BinaryMetadataUtil {
     }
 
     if (BinaryUtil.isBinaryArray(input)) {
-      hash.update(BinaryUtil.binaryArrayToBuffer(input));
+      hash.update(BinaryUtil.binaryArrayToUint8Array(input));
       return hash.digest(outputEncoding).substring(0, length);
     } else {
       return BinaryUtil.pipeline(input, hash).then(() =>
