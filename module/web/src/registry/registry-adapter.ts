@@ -100,7 +100,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   registerEndpoint(method: string, ...data: Partial<EndpointConfig>[]): EndpointConfig {
     this.register();
 
-    if (!this.#endpoints.has(method)) {
+    const resolved = this.#endpoints.getOrInsertComputed(method, () => {
       const endpointConfig = asFull<EndpointConfig>({
         path: '/',
         fullPath: '/',
@@ -117,11 +117,11 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
         responseFinalizer: undefined
       });
       this.#config.endpoints.push(endpointConfig);
-      this.#endpoints.set(method, endpointConfig);
-    }
+      return endpointConfig;
+    });
 
-    combineEndpointConfigs(this.#config, this.#endpoints.get(method)!, ...data);
-    return this.#endpoints.get(method)!;
+    combineEndpointConfigs(this.#config, resolved, ...data);
+    return resolved;
   }
 
   registerEndpointParameter(method: string, idx: number, ...config: Partial<EndpointParameterConfig>[]): EndpointParameterConfig {

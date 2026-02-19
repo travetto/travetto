@@ -35,10 +35,7 @@ export type Transformer = {
   name: string;
 };
 
-export type TransformerSet<S extends State = State> = {
-  before?: Map<string, NodeTransformer<S>[]>;
-  after?: Map<string, NodeTransformer<S>[]>;
-};
+export type TransformerSet<S extends State = State> = Map<'before' | 'after', Map<string, NodeTransformer<S>[]>>;
 
 export interface NodeTransformer<S extends State = State, T extends TransformerType = TransformerType, N extends ts.Node = ts.Node> {
   type: T;
