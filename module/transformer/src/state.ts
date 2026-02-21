@@ -157,7 +157,7 @@ export class TransformerState implements State {
    */
   createDecorator(location: string, name: string, ...contents: (ts.Expression | undefined)[]): ts.Decorator {
     this.importDecorator(location, name);
-    return CoreUtil.createDecorator(this.factory, this.#decorators.get(name)!, ...contents);
+    return CoreUtil.createDecorator(this.factory, this.#decorators.get(`${location}:${name}`)!, ...contents);
   }
 
   /**
