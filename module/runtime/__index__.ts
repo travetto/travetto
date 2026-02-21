@@ -1,3 +1,5 @@
+export * from './src/polyfill.ts';
+
 import type { } from './src/global.d.ts';
 import type { } from './src/trv.d.ts';
 export * from './src/binary.ts';

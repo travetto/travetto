@@ -28,10 +28,10 @@
     "@stylistic/eslint-plugin": "^5.9.0",
     "@travetto/runtime": "^7.1.4",
     "@types/eslint": "^9.6.1",
-    "@typescript-eslint/eslint-plugin": "^8.56.1",
-    "@typescript-eslint/parser": "^8.56.1",
-    "eslint": "^10.0.0",
-    "eslint-plugin-import": "^2.32.0",
+    "@typescript-eslint/typescript-estree": "canary",
+    "@typescript-eslint/eslint-plugin": "canary",
+    "@typescript-eslint/parser": "canary",
+    "eslint": "^10.0.1",
     "eslint-plugin-unused-imports": "^4.4.1"
   },
   "peerDependencies": {

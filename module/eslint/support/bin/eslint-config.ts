@@ -4,7 +4,7 @@ import type { Linter } from 'eslint';
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import stylisticPlugin from '@stylistic/eslint-plugin';
 import unusedImports from 'eslint-plugin-unused-imports';
-import importPlugin from 'eslint-plugin-import';
+// import importPlugin from 'eslint-plugin-import';
 
 import { castTo, JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 
@@ -44,7 +44,7 @@ export const rules: Linter.Config[] = [
       '@typescript-eslint': {
         rules: castTo(tsEslintPlugin.rules),
       },
-      import: importPlugin,
+      //import: importPlugin,
       'unused-imports': unusedImports,
       ...(Object.fromEntries(plugins.map(plugin => [plugin.name, plugin])))
     },
@@ -64,7 +64,7 @@ export const rules: Linter.Config[] = [
         rules: stylisticPlugin.rules
       },
       'unused-imports': unusedImports,
-      import: importPlugin,
+      // import: importPlugin,
     },
     rules: {
       ...Object.fromEntries(Object.entries(STD_RULES!).filter(rule => !rule[0].startsWith('@typescript'))),
