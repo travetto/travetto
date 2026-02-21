@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import timers from 'node:timers/promises';
 import path from 'node:path';
@@ -43,14 +42,14 @@ export class Util {
    * @param length The length of the uuid to generate
    */
   static uuid(length: number = 32): string {
-    const bytes = crypto.randomBytes(Math.ceil(length / 2));
+    const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2)));
     if (length === 32) { // Make valid uuid-v4
       // eslint-disable-next-line no-bitwise
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
       // eslint-disable-next-line no-bitwise
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
     }
-    return bytes.toString('hex').substring(0, length);
+    return bytes.toHex().substring(0, length);
   }
 
   /**

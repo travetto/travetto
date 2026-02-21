@@ -7,7 +7,8 @@ import { CookieJar } from '@travetto/web';
 class CookieJarSuite {
   @Test()
   async simpleTest() {
-    const jar = new CookieJar().importCookieHeader(
+    const jar = new CookieJar();
+    await jar.importCookieHeader(
       'age=  20, gonzo; height=30; auth=10000000xx; borange!!!'
     );
 
@@ -19,23 +20,25 @@ class CookieJarSuite {
 
   @Test()
   async simpleSignTest() {
-    const jar = new CookieJar({ keys: ['test'] });
+    const jar = new CookieJar({}, ['test']);
     jar.set({ name: 'test', value: 'green' });
 
     assert(jar.has('test'));
     assert(!jar.has('test.sig'));
 
-    const reload = new CookieJar({ keys: ['test'] }).import(jar.getAll());
+    const reload = new CookieJar({}, ['test']);
+    await reload.import(jar.getAll());
 
     assert(reload.has('test'));
     assert(!reload.has('test.sig'));
 
-    assert(reload.exportSetCookieHeader().find(x => x.includes('test.sig')));
+    const output = await jar.exportSetCookieHeader();
+    assert(output.find(x => x.includes('test.sig')));
   }
 
   @Test()
   async simplSignMismatch() {
-    const jar = new CookieJar({ keys: ['test'] });
+    const jar = new CookieJar({}, ['test']);
     jar.set({ name: 'test', value: 'green' });
     jar.set({ name: 'test2', value: 'green', signed: false });
 

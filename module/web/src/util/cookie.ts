@@ -7,40 +7,43 @@ import { WebHeaderUtil } from './header.ts';
 const pairText = (cookie: Cookie): string => `${cookie.name}=${cookie.value}`;
 const pair = (key: string, value: unknown): string => `${key}=${value}`;
 
-type CookieJarOptions = { keys?: string[] } & CookieSetOptions;
+type CookieJarOptions = CookieSetOptions;
 
 export class CookieJar {
 
-  #grip?: KeyGrip;
+  #grip: KeyGrip;
   #cookies: Record<string, Cookie> = {};
   #setOptions: CookieSetOptions = {};
   #deleteOptions: CookieSetOptions = { maxAge: 0, expires: undefined };
 
-  constructor({ keys, ...options }: CookieJarOptions = {}) {
-    this.#grip = keys?.length ? new KeyGrip(keys) : undefined;
+  constructor(options: CookieJarOptions = {}, keys?: string[] | KeyGrip) {
+    this.#grip = (keys instanceof KeyGrip ? keys : new KeyGrip(keys ?? []));
     this.#setOptions = {
       secure: false,
       path: '/',
-      signed: !!keys?.length,
       ...options,
     };
   }
 
-  #exportCookie(cookie: Cookie, response?: boolean): string[] {
+  get shouldSign(): boolean {
+    return this.#setOptions.signed ?? this.#grip.active;
+  }
+
+  async export(cookie: Cookie, response?: boolean): Promise<string[]> {
     const suffix = response ? WebHeaderUtil.buildCookieSuffix(cookie) : null;
     const payload = pairText(cookie);
     const out = suffix ? [[payload, ...suffix].join(';')] : [payload];
     if (cookie.signed) {
-      const sigPair = pair(`${cookie.name}.sig`, this.#grip!.sign(payload));
+      const sigPair = pair(`${cookie.name}.sig`, await this.#grip.sign(payload));
       out.push(suffix ? [sigPair, ...suffix].join(';') : sigPair);
     }
     return out;
   }
 
-  import(cookies: Cookie[]): this {
+  async import(cookies: Cookie[]): Promise<void> {
     const signatures: Record<string, string> = {};
     for (const cookie of cookies) {
-      if (this.#setOptions.signed && cookie.name.endsWith('.sig')) {
+      if (this.shouldSign && cookie.name.endsWith('.sig')) {
         signatures[cookie.name.replace(/[.]sig$/, '')] = cookie.value!;
       } else {
         this.#cookies[cookie.name] = { signed: false, ...cookie };
@@ -55,19 +58,18 @@ export class CookieJar {
       cookie.signed = true;
 
       const computed = pairText(cookie);
-      const index = this.#grip!.index(computed, value);
+      const result = await this.#grip.isValid(computed, value);
 
-      if (index < 0) {
+      if (result === 'invalid') {
         delete this.#cookies[name];
-      } else if (index >= 1) {
+      } else if (result === 'stale') {
         cookie.response = true;
       }
     }
-    return this;
   }
 
   has(name: string, options: CookieGetOptions = {}): boolean {
-    const needSigned = options.signed ?? this.#setOptions.signed;
+    const needSigned = options.signed ?? this.shouldSign
     return name in this.#cookies && this.#cookies[name].signed === needSigned;
   }
 
@@ -78,45 +80,52 @@ export class CookieJar {
   }
 
   set(cookie: Cookie): void {
-    const alias = this.#cookies[cookie.name] = {
+    const alias = {
       ...this.#setOptions,
       ...cookie,
       response: true,
       ...(cookie.value === null || cookie.value === undefined) ? this.#deleteOptions : {},
     };
 
+    alias.signed ??= this.shouldSign;
+
     if (!this.#setOptions.secure && alias.secure) {
       throw new RuntimeError('Cannot send secure cookie over unencrypted connection');
     }
 
-    if (alias.signed && !this.#grip) {
+    if (alias.signed && !this.#grip.active) {
       throw new RuntimeError('Signing keys required for signed cookies');
     }
 
     if (alias.maxAge !== undefined && !alias.expires) {
       alias.expires = new Date(Date.now() + alias.maxAge);
     }
+
+    this.#cookies[cookie.name] = alias;
   }
 
   getAll(): Cookie[] {
     return Object.values(this.#cookies);
   }
 
-  importCookieHeader(header: string | null | undefined): this {
+  importCookieHeader(header: string | null | undefined): Promise<void> {
     return this.import(WebHeaderUtil.parseCookieHeader(header ?? ''));
   }
 
-  importSetCookieHeader(headers: string[] | null | undefined): this {
+  importSetCookieHeader(headers: string[] | null | undefined): Promise<void> {
     return this.import(headers?.map(WebHeaderUtil.parseSetCookieHeader) ?? []);
   }
 
-  exportCookieHeader(): string {
-    return this.getAll().flatMap(cookie => this.#exportCookie(cookie)).join('; ');
+  exportCookieHeader(): Promise<string> {
+    return Promise.all(this.getAll()
+      .map(cookie => this.export(cookie)))
+      .then(parts => parts.flat().join('; '));
   }
 
-  exportSetCookieHeader(): string[] {
-    return this.getAll()
+  exportSetCookieHeader(): Promise<string[]> {
+    return Promise.all(this.getAll()
       .filter(cookie => cookie.response)
-      .flatMap(cookie => this.#exportCookie(cookie, true));
+      .map(cookie => this.export(cookie, true)))
+      .then(parts => parts.flat());
   }
 }
