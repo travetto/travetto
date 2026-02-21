@@ -145,7 +145,7 @@ class SimpleController {
   @Get('/')
   async simpleGet() {
     let data: Data | undefined;
-    //
+    // Do work
     return data;
   }
 }
