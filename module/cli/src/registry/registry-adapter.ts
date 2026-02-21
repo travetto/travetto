@@ -51,7 +51,6 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
 
       if (short === undefined) {
         short = fieldName.charAt(0);
-
         if (!used.has(short)) {
           aliases.push(`-${short}`);
           used.add(short);
