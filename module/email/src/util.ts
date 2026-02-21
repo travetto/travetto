@@ -32,9 +32,9 @@ export class MailUtil {
     const contentMap = new Map<string, string>();
 
     // Max of 10mb
-    html = html.replace(/data:(image\/[^;]{1,50});base64,([^"']{1,10000000})/g, (__, contentType: string, content: string) => {
+    html = html.replace(/data:(image\/[^;]{1,50});base64,([^"']{1,10000000})/g, (__, contentType: string, content: string) =>
       // Ensure same data uris map to a single cid
-      return contentMap.getOrInsertComputed(content, () => {
+      contentMap.getOrInsertComputed(content, () => {
         const contentId = `image-${idx += 1}`;
         const ext = contentType.split('/')[1];
         attachments.push({
@@ -48,8 +48,7 @@ export class MailUtil {
           contentType
         });
         return `cid:${contentId}`;
-      });
-    });
+      }));
 
     return { html, attachments };
   }

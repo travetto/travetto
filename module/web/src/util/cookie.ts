@@ -69,7 +69,7 @@ export class CookieJar {
   }
 
   has(name: string, options: CookieGetOptions = {}): boolean {
-    const needSigned = options.signed ?? this.shouldSign
+    const needSigned = options.signed ?? this.shouldSign;
     return name in this.#cookies && this.#cookies[name].signed === needSigned;
   }
 

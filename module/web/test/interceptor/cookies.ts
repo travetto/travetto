@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse, KeyGrip, type WebHeaders, type Cookie } from '@travetto/web';
+import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse, KeyGrip, type Cookie } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { AsyncContext } from '@travetto/context';

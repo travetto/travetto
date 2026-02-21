@@ -155,7 +155,6 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     assert.deepStrictEqual(response.body, { age: 1 });
 
     response = await this.request({ context: { httpMethod: 'GET', path: '/test/session' }, headers: { [key]: header } });
-    header = response.headers.get(key) ?? header;
     assert.deepStrictEqual(response.body, { age: 2 });
   }
 

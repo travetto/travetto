@@ -1,6 +1,6 @@
 import { timingSafeEqual } from 'node:crypto';
 
-import { BinaryUtil, CodecUtil, RuntimeError, type BinaryArray } from '@travetto/runtime';
+import { BinaryUtil, CodecUtil, type BinaryArray } from '@travetto/runtime';
 
 const CHAR_MAPPING: Record<string, string> = { '/': '_', '+': '-', '=': '' };
 

@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { Ignore, Secret } from '@travetto/schema';
+import { Secret } from '@travetto/schema';
 import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 
 import type { WebChainedContext } from '../types/filter.ts';
@@ -10,7 +10,7 @@ import type { WebInterceptorCategory } from '../types/core.ts';
 
 import type { WebConfig } from '../config.ts';
 import type { Cookie, CookieSetOptions } from '../types/cookie.ts';
-import { KeyGrip } from '../util/keygrip.ts'
+import { KeyGrip } from '../util/keygrip.ts';
 import { CookieJar } from '../util/cookie.ts';
 import type { WebAsyncContext } from '../context.ts';
 

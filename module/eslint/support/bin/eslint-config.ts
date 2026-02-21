@@ -44,7 +44,7 @@ export const rules: Linter.Config[] = [
       '@typescript-eslint': {
         rules: castTo(tsEslintPlugin.rules),
       },
-      //import: importPlugin,
+      // import: importPlugin,
       'unused-imports': unusedImports,
       ...(Object.fromEntries(plugins.map(plugin => [plugin.name, plugin])))
     },
@@ -81,6 +81,8 @@ export const rules: Linter.Config[] = [
     files: ['**/DOC.ts', '**/DOC.tsx', '**/doc/**/*.ts', '**/doc/**/*.tsx'],
     rules: {
       'max-len': 0,
+      'no-unassigned-vars': 0,
+      'no-useless-assignment': 0,
       'no-unused-private-class-members': 0,
       '@typescript-eslint/no-unused-vars': 0,
       '@typescript-eslint/explicit-function-return-type': 0

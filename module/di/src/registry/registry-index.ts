@@ -192,20 +192,21 @@ export class DependencyRegistryIndex implements RegistryIndex {
     const instances = this.#instances.getOrInsert(target, new Map());
     const instancePromises = this.#instancePromises.getOrInsert(target, new Map());
 
-    const instancePromise = instancePromises.getOrInsertComputed(qualifier, async () => {
-      const instancePromise = this.construct(candidateType, qualifier);
-      try {
-        const instance = await instancePromise;
-        instances.set(qualifier, instance);
-        return instance;
-      } catch (error) {
-        // Clear it out, don't save failed constructions
-        instancePromises.delete(qualifier);
-        throw error;
-      }
-    });
+    if (instancePromises.has(qualifier)) {
+      return castTo(instancePromises.get(qualifier));
+    }
 
-    return castTo(instancePromise);
+    const instancePromise = this.construct(candidateType, qualifier);
+    instancePromises.set(qualifier, instancePromise);
+    try {
+      const instance = await instancePromise;
+      instances.set(qualifier, instance);
+      return instance;
+    } catch (error) {
+      // Clear it out, don't save failed constructions
+      instancePromises.delete(qualifier);
+      throw error;
+    }
   }
 
   /**
