@@ -145,7 +145,7 @@ export class TransformerState implements State {
    * Import a decorator, generally to handle erasure
    */
   importDecorator(location: string, name: string): ts.PropertyAccessExpression | undefined {
-    return this.#decorators.getOrInsertComputed(name, () => {
+    return this.#decorators.getOrInsertComputed(`${location}:${name}`, () => {
       const ref = this.#imports.importFile(location);
       const identifier = this.factory.createIdentifier(name);
       return this.factory.createPropertyAccessExpression(ref.identifier, identifier);

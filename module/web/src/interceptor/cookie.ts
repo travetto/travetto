@@ -10,9 +10,9 @@ import type { WebInterceptorCategory } from '../types/core.ts';
 
 import type { WebConfig } from '../config.ts';
 import type { Cookie, CookieSetOptions } from '../types/cookie.ts';
+import { KeyGrip } from '../util/keygrip.ts'
 import { CookieJar } from '../util/cookie.ts';
 import type { WebAsyncContext } from '../context.ts';
-import { KeyGrip } from '@travetto/web';
 
 /**
  * Web cookie configuration
