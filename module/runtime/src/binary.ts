@@ -4,7 +4,7 @@ import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array, isUint8ClampedArray } from 'node:util/types';
 
-import { type Any, castTo, hasFunction, toConcrete } from './types.ts';
+import { castTo, hasFunction, toConcrete } from './types.ts';
 
 /**
  * Binary Array
@@ -149,13 +149,6 @@ export class BinaryUtil {
     } else {
       return BinaryUtil.toReadableStream(input);
     }
-  }
-
-  /** Read chunk, default to toString if type is unknown  */
-  static readChunk(chunk: Any, encoding?: BufferEncoding | null): BinaryArray {
-    return isBinaryArray(chunk) ? chunk :
-      typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
-        Buffer.from(`${chunk}`, 'utf8');
   }
 
   /** Combine binary arrays  */

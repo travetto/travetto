@@ -177,7 +177,7 @@ export class WebBodyUtil {
 
     try {
       for await (const chunk of BinaryUtil.toBinaryStream(input)) {
-        const bytes = BinaryUtil.readChunk(chunk);
+        const bytes = CodecUtil.readUtf8Chunk(chunk);
         received += bytes.byteLength;
         if (received > limit) {
           throw WebError.for('Request Entity Too Large', 413, { received, limit });

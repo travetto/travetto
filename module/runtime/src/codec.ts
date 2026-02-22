@@ -2,6 +2,7 @@ import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
 import { RuntimeError } from './error.ts';
+import { castTo, type Any } from './types.ts';
 
 type TextInput = string | BinaryArray;
 
@@ -86,5 +87,19 @@ export class CodecUtil {
     for await (const item of createInterface(BinaryUtil.toReadable(stream))) {
       await handler(item);
     }
+  }
+
+  /** Read chunk as utf8 if not a binary array */
+  static readUtf8Chunk(chunk: Any): BinaryArray {
+    return BinaryUtil.isBinaryArray(chunk) ? chunk : this.fromUTF8String(typeof chunk === 'string' ? chunk : `${chunk}`);
+  }
+
+  /** Read chunk, default to toString if type is unknown  */
+  static readChunk(chunk: Any, encoding?: string | null): BinaryArray {
+    if (!encoding) {
+      return this.readUtf8Chunk(chunk);
+    }
+    return BinaryUtil.isBinaryArray(chunk) ? chunk :
+      Buffer.from(typeof chunk === 'string' ? chunk : `${chunk}`, castTo(encoding ?? 'utf8'));
   }
 }

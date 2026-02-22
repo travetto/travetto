@@ -80,4 +80,20 @@ export class CodecUtilTest {
     await CodecUtil.readLines(stream(), (line) => collected.push(line));
     assert.deepStrictEqual(collected, lines);
   }
+
+
+  @Test()
+  verifyReadChunk() {
+    const b1 = CodecUtil.readUtf8Chunk('hello');
+    assert(isUint8Array(b1));
+    assert(new TextDecoder('utf8').decode(b1) === 'hello');
+
+    const b2 = CodecUtil.readUtf8Chunk(Buffer.from('world'));
+    assert(Buffer.isBuffer(b2));
+    assert(b2.toString() === 'world');
+
+    const b3 = CodecUtil.readUtf8Chunk(123);
+    assert(isUint8Array(b3));
+    assert(new TextDecoder('utf8').decode(b3) === '123');
+  }
 }
