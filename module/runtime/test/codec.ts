@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { isUint8Array } from 'node:util/types';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { castTo, CodecUtil, type BinaryStream } from '@travetto/runtime';
@@ -14,7 +15,8 @@ export class CodecUtilTest {
     const hex = '68656c6c6f20776f726c64';
 
     const buffer = CodecUtil.fromHexString(hex);
-    assert.strictEqual(buffer.toString('utf8'), original);
+    const decoder = new TextDecoder('utf8');
+    assert.strictEqual(decoder.decode(buffer), original);
 
     const hexBack = CodecUtil.toHexString(Buffer.from(original));
     assert.strictEqual(hexBack, hex);
@@ -26,7 +28,8 @@ export class CodecUtilTest {
     const b64 = 'aGVsbG8gd29ybGQ=';
 
     const buffer = CodecUtil.fromBase64String(b64);
-    assert.strictEqual(buffer.toString('utf8'), original);
+    const decoder = new TextDecoder('utf8');
+    assert.strictEqual(decoder.decode(buffer), original);
 
     const b64Back = CodecUtil.toBase64String(Buffer.from(original));
     assert.strictEqual(b64Back, b64);
@@ -36,8 +39,9 @@ export class CodecUtilTest {
   async verifyUTF8Conversion() {
     const original = 'hello world';
     const buffer = CodecUtil.fromUTF8String(original);
-    assert.ok(Buffer.isBuffer(buffer));
-    assert.strictEqual(buffer.toString('utf8'), original);
+    assert.ok(isUint8Array(buffer));
+    const decoder = new TextDecoder('utf8');
+    assert.strictEqual(decoder.decode(buffer), original);
 
     const textBack = CodecUtil.toUTF8String(buffer);
     assert.strictEqual(textBack, original);

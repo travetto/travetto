@@ -1,8 +1,12 @@
 import { createInterface } from 'node:readline/promises';
 
 import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
+import { RuntimeError } from './error.ts';
 
 type TextInput = string | BinaryArray;
+
+const UTF8_DECODER = new TextDecoder('utf8');
+const UTF8_ENCODER = new TextEncoder();
 
 /**
  * Utilities for encoding and decoding common formats
@@ -11,42 +15,56 @@ export class CodecUtil {
 
   /** Generate buffer from hex string  */
   static fromHexString(value: string): BinaryArray {
-    return Buffer.from(value, 'hex');
+    try {
+      return Uint8Array.fromHex(value);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        throw new RuntimeError('Invalid hex string', { cause: err });
+      }
+      throw err;
+    }
   }
 
   /** Convert hex bytes to string  */
   static toHexString(value: BinaryArray): string {
-    return BinaryUtil.binaryArrayToBuffer(value).toString('hex');
+    return BinaryUtil.binaryArrayToUint8Array(value).toHex();
   }
 
   /** Return buffer from base64 string  */
   static fromBase64String(value: string): BinaryArray {
-    return Buffer.from(value, 'base64');
+    try {
+      return Uint8Array.fromBase64(value);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        throw new RuntimeError('Invalid base64 string', { cause: err });
+      }
+      throw err;
+    }
   }
 
   /** Convert value to base64 string  */
   static toBase64String(value: BinaryArray): string {
-    return BinaryUtil.binaryArrayToBuffer(value).toString('base64');
+    return BinaryUtil.binaryArrayToUint8Array(value).toBase64();
   }
 
   /** Return buffer from utf8 string  */
   static fromUTF8String(value: string): BinaryArray {
-    return Buffer.from(value ?? '', 'utf8');
+    return UTF8_ENCODER.encode(value);
   }
 
   /** Return utf8 string from bytes  */
   static toUTF8String(value: BinaryArray): string {
-    return BinaryUtil.binaryArrayToBuffer(value).toString('utf8');
+    return UTF8_DECODER.decode(BinaryUtil.binaryArrayToUint8Array(value));
   }
 
   /** Convert utf8 value to base64 value string  */
   static utf8ToBase64(value: TextInput): string {
-    return this.toBase64String(typeof value === 'string' ? Buffer.from(value, 'utf8') : value);
+    return this.toBase64String(typeof value === 'string' ? this.fromUTF8String(value) : value);
   }
 
   /** Convert base64 value to utf8 string  */
   static base64ToUTF8(value: TextInput): string {
-    const result = this.toUTF8String(typeof value === 'string' ? Buffer.from(value, 'base64') : value);
+    const result = this.toUTF8String(typeof value === 'string' ? this.fromBase64String(value) : value);
     return result;
   }
 
@@ -57,7 +75,7 @@ export class CodecUtil {
   }
 
   /** Detect encoding of a binary type, if possible  */
-  static detectEncoding(input: BinaryType): BufferEncoding | undefined {
+  static detectEncoding(input: BinaryType): string | undefined {
     if (input && typeof input === 'object' && 'readableEncoding' in input && typeof input.readableEncoding === 'string') {
       return input.readableEncoding;
     }
