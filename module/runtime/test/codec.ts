@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { isUint8Array } from 'node:util/types';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { castTo, CodecUtil, type BinaryStream } from '@travetto/runtime';
+import { castTo, CodecUtil, RuntimeError, type BinaryStream } from '@travetto/runtime';
 
 @Suite()
 export class CodecUtilTest {
@@ -23,6 +23,27 @@ export class CodecUtilTest {
   }
 
   @Test()
+  async verifyHexConversionErrors() {
+    // Invalid hex string - odd length
+    assert.throws(
+      () => CodecUtil.fromHexString('abc'),
+      RuntimeError
+    );
+
+    // Invalid hex string - non-hex characters
+    assert.throws(
+      () => CodecUtil.fromHexString('zzzz'),
+      /Invalid hex string/
+    );
+
+    // Invalid hex string - contains invalid characters
+    assert.throws(
+      () => CodecUtil.fromHexString('12gh'),
+      /Invalid hex string/
+    );
+  }
+
+  @Test()
   async verifyBase64Conversion() {
     const original = 'hello world';
     const b64 = 'aGVsbG8gd29ybGQ=';
@@ -33,6 +54,27 @@ export class CodecUtilTest {
 
     const b64Back = CodecUtil.toBase64String(Buffer.from(original));
     assert.strictEqual(b64Back, b64);
+  }
+
+  @Test()
+  async verifyBase64ConversionErrors() {
+    // Invalid base64 string - invalid characters (!)
+    assert.throws(
+      () => CodecUtil.fromBase64String('!!!invalid!!!'),
+      RuntimeError
+    );
+
+    // Invalid base64 string - invalid character (@)
+    assert.throws(
+      () => CodecUtil.fromBase64String('aGVs@bG8='),
+      /Invalid base64 string/
+    );
+
+    // Invalid base64 string - emoji
+    assert.throws(
+      () => CodecUtil.fromBase64String('hello😊world'),
+      /Invalid base64 string/
+    );
   }
 
   @Test()
@@ -55,7 +97,7 @@ export class CodecUtilTest {
     assert.strictEqual(text, original);
 
     const b64Buf = CodecUtil.utf8ToBase64(Buffer.from(original));
-    const textBuf = CodecUtil.base64ToUTF8(Buffer.from(b64, 'base64'));
+    const textBuf = CodecUtil.base64ToUTF8(Buffer.from(b64Buf, 'base64'));
     assert.strictEqual(textBuf, original);
   }
 
