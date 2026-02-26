@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { stringify } from 'yaml';
 
-import { Terminal } from '@travetto/terminal';
+import { Terminal, StyleUtil } from '@travetto/terminal';
 import { TimeUtil, RuntimeIndex, hasToJSON, JSONUtil } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
@@ -41,7 +41,7 @@ export class TapEmitter implements TestConsumerShape {
    */
   onStart(): void {
     this.#start = Date.now();
-    this.log(this.#enhancer.suiteName('TAP version 14')!);
+    this.log(this.#enhancer.suiteName('TAP version 14'));
   }
 
   /**
@@ -79,23 +79,32 @@ export class TapEmitter implements TestConsumerShape {
     if (event.type === 'test' && event.phase === 'after') {
       const { test } = event;
       const suiteId = this.#enhancer.suiteName(test.classId);
-      let header = `${suiteId} - ${this.#enhancer.testName(test.methodName)}`;
-      if (test.description) {
-        header += `: ${this.#enhancer.testDescription(test.description)}`;
-      }
+      const sourceFile = RuntimeIndex.getFromImport(test.import)!.sourceFile;
+
+      const header = [
+        StyleUtil.link(suiteId, `file://${sourceFile}`),
+        ' - ',
+        StyleUtil.link(this.#enhancer.testName(test.methodName), `file://${sourceFile}#${test.lineBodyStart}`),
+        ...test.description ? [`: ${this.#enhancer.testDescription(test.description)}`] : []
+      ].join('');
+
       this.log(`# ${header}`);
 
       // Handle each assertion
       if (test.assertions.length) {
         let subCount = 0;
         for (const asrt of test.assertions) {
+          const assertSourceFile = RuntimeIndex.getFromImport(asrt.import)!.sourceFile;
           const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
-          const location = asrt.import ? `./${path.relative(process.cwd(), RuntimeIndex.getFromImport(asrt.import)!.sourceFile)}` : '<unknown>';
+          const location = asrt.import ? `./${path.relative(process.cwd(), assertSourceFile)}` : '<unknown>';
           let subMessage = [
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(location)}:${this.#enhancer.assertLine(asrt.line)}`
+            StyleUtil.link(
+              `${this.#enhancer.assertFile(location)}:${this.#enhancer.assertLine(asrt.line)}`,
+              `file://${assertSourceFile}#${asrt.line}`
+            )
           ].join(' ');
 
           if (asrt.error) {

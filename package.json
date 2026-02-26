@@ -41,7 +41,7 @@
   "overrides": {
     "whatwg-url": "15.1.0",
     "debug": "4.4.3",
-    "typescript": "6.0.0-dev.20260222",
+    "typescript": "6.0.0-dev.20260225",
     "minimatch": "^10.2.2"
   },
   "devDependencies": {
