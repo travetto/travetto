@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/runtime';
+import { describeFunction, type Class } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { SuiteRegistryIndex, TestFixtures } from '@travetto/test';
@@ -23,7 +23,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
     SuiteRegistryIndex.getForRegister(target).register({
       phaseHandlers: [{
         type: 'beforeAll',
-        import: '@travetto/model/support/test/suite.ts',
+        import: describeFunction(ModelSuite).import,
         async action(this: T & { [Loaded]?: boolean }) {
           await Registry.init();
 
@@ -40,7 +40,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       },
       {
         type: 'beforeEach',
-        import: '@travetto/model/support/test/suite.ts',
+        import: describeFunction(ModelSuite).import,
         async action(this: T) {
           const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
@@ -55,7 +55,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       },
       {
         type: 'afterEach',
-        import: '@travetto/model/support/test/suite.ts',
+        import: describeFunction(ModelSuite).import,
         async action(this: T) {
           const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
@@ -77,7 +77,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       },
       {
         type: 'afterAll',
-        import: '@travetto/model/support/test/suite.ts',
+        import: describeFunction(ModelSuite).import,
         async action(this: T) {
           const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {

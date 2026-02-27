@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/runtime';
+import { describeFunction, type Class } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { SuiteRegistryIndex } from '@travetto/test';
 
@@ -13,7 +13,7 @@ export function InjectableSuite() {
     SuiteRegistryIndex.getForRegister(cls).register({
       phaseHandlers: [{
         type: 'beforeEach',
-        import: '@travetto/model/support/test/suite.ts',
+        import: describeFunction(InjectableSuite).import,
         async action(this: unknown) {
           await Registry.init();
           await DependencyRegistryIndex.injectFields(this, cls);

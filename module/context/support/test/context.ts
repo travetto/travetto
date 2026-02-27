@@ -1,5 +1,5 @@
 import { DependencyRegistryIndex } from '@travetto/di';
-import type { Class } from '@travetto/runtime';
+import { describeFunction, type Class } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { SuiteRegistryIndex } from '@travetto/test';
 
@@ -22,7 +22,7 @@ export function WithSuiteContext() {
     SuiteRegistryIndex.getForRegister(target).register({
       phaseHandlers: [{
         type: 'beforeEach',
-        import: '@travetto/context/support/test/context.ts',
+        import: describeFunction(WithSuiteContext).import,
         async action(this: { [Init]?: boolean } & Record<string, Function>) {
           if (!this[Init]) {
             this[Init] = true;
