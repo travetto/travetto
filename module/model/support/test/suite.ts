@@ -21,8 +21,10 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
   return (target: Class<T>): void => {
     target.prototype.fixtures = fixtures;
     SuiteRegistryIndex.getForRegister(target).register({
-      beforeAll: [
-        async function (this: T & { [Loaded]?: boolean }) {
+      phaseHandlers: [{
+        type: 'beforeAll',
+        import: '@travetto/model/support/test/suite.ts',
+        async action(this: T & { [Loaded]?: boolean }) {
           await Registry.init();
 
           if (!this[Loaded]) {
@@ -35,9 +37,11 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
             this[Loaded] = true;
           }
         }
-      ],
-      beforeEach: [
-        async function (this: T) {
+      },
+      {
+        type: 'beforeEach',
+        import: '@travetto/model/support/test/suite.ts',
+        async action(this: T) {
           const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
             await service.createStorage();
@@ -48,9 +52,11 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
             }
           }
         }
-      ],
-      afterEach: [
-        async function (this: T) {
+      },
+      {
+        type: 'afterEach',
+        import: '@travetto/model/support/test/suite.ts',
+        async action(this: T) {
           const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
             const models = ModelRegistryIndex.getClasses().filter(m => m === SchemaRegistryIndex.getBaseClass(m));
@@ -68,9 +74,11 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
             }
           }
         }
-      ],
-      afterAll: [
-        async function (this: T) {
+      },
+      {
+        type: 'afterAll',
+        import: '@travetto/model/support/test/suite.ts',
+        async action(this: T) {
           const service = await DependencyRegistryIndex.getInstance(this.serviceClass, qualifier);
           if (ModelStorageUtil.isSupported(service)) {
             if (service.deleteModel) {
@@ -83,7 +91,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
             await service.deleteStorage();
           }
         }
-      ]
+      }]
     });
   };
 }

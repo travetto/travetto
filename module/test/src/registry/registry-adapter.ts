@@ -7,28 +7,23 @@ import type { TestConfig } from '../model/test.ts';
 
 function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConfig>[]): SuiteConfig {
   for (const config of subConfig) {
-    if (config.beforeAll) {
-      baseConfig.beforeAll = [...baseConfig.beforeAll, ...config.beforeAll];
-    }
-    if (config.beforeEach) {
-      baseConfig.beforeEach = [...baseConfig.beforeEach, ...config.beforeEach];
-    }
-    if (config.afterAll) {
-      baseConfig.afterAll = [...baseConfig.afterAll, ...config.afterAll];
-    }
-    if (config.afterEach) {
-      baseConfig.afterEach = [...baseConfig.afterEach, ...config.afterEach];
-    }
     if (config.tags) {
       baseConfig.tags = [...baseConfig.tags ?? [], ...config.tags];
     }
     baseConfig.skip = config.skip ?? baseConfig.skip;
 
+    if (config.phaseHandlers) {
+      baseConfig.phaseHandlers = [
+        ...(baseConfig.phaseHandlers ?? []),
+        ...config.phaseHandlers.map(x => ({ import: config.import, ...x }))
+      ];
+    }
+
     if (config.tests) {
       for (const [key, test] of Object.entries(config.tests ?? {})) {
         baseConfig.tests[key] = {
           ...test,
-          sourceImport: Runtime.getImport(baseConfig.class),
+          sourceImport: test.import,
           class: baseConfig.class,
           classId: baseConfig.classId,
           import: baseConfig.import,
@@ -74,10 +69,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         lineEnd: lines?.[1],
         sourceHash: hash,
         tests: {},
-        beforeAll: [],
-        beforeEach: [],
-        afterAll: [],
-        afterEach: []
+        phaseHandlers: [],
       });
     }
     combineClasses(this.#config, ...data);

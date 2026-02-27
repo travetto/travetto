@@ -1,11 +1,12 @@
 import { Env, TimeUtil } from '@travetto/runtime';
 
-import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
+import type { SuiteConfig, SuiteFailure, SuiteResult, SuitePhase } from '../model/suite.ts';
 import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
 
 class TestBreakout extends Error {
   source?: Error;
+  import?: string;
 }
 
 const TEST_PHASE_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_PHASE_TIMEOUT.value ?? 15000, 'ms');
@@ -30,21 +31,19 @@ export class TestPhaseManager {
   /**
    * Run a distinct phase of the test execution
    */
-  async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach'): Promise<void> {
+  async runPhase(phase: SuitePhase): Promise<void> {
     let error: Error | undefined;
-    for (const fn of this.#suite[phase]) {
+    for (const handler of this.#suite.phaseHandlers.filter(item => item.type === phase)) {
 
       // Ensure all the criteria below are satisfied before moving forward
-      error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => fn.call(this.#suite.instance));
+      error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => handler.action.call(this.#suite.instance));
 
       if (error) {
-        break;
+        const tbo = new TestBreakout(`[[${phase}]]`);
+        tbo.source = error;
+        tbo.import = handler.import;
+        throw tbo;
       }
-    }
-    if (error) {
-      const tbo = new TestBreakout(`[[${phase}]]`);
-      tbo.source = error;
-      throw tbo;
     }
   }
 
@@ -83,7 +82,8 @@ export class TestPhaseManager {
     const failure = AssertUtil.generateSuiteFailure(
       this.#suite,
       error instanceof TestBreakout ? error.message : 'all',
-      error instanceof TestBreakout ? error.source! : error
+      error instanceof TestBreakout ? error.source! : error,
+      error instanceof TestBreakout ? error.import! : undefined
     );
 
     this.#onSuiteFailure(failure);

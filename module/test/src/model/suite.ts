@@ -3,6 +3,14 @@ import type { Class } from '@travetto/runtime';
 import type { Assertion, TestConfig, TestResult, TestStatus } from './test.ts';
 import type { Skip, SuiteCore } from './common.ts';
 
+export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
+
+export type SuitePhaseHandler = {
+  type: SuitePhase;
+  import?: string;
+  action: Function;
+};
+
 /**
  * Suite configuration
  */
@@ -24,21 +32,9 @@ export interface SuiteConfig extends SuiteCore {
    */
   tests: Record<string, TestConfig>;
   /**
-   * Before all handlers
+   * Phase handlers
    */
-  beforeAll: Function[];
-  /**
-   * Before each handlers
-   */
-  beforeEach: Function[];
-  /**
-   * After each handlers
-   */
-  afterEach: Function[];
-  /**
-   * After all handlers
-   */
-  afterAll: Function[];
+  phaseHandlers: SuitePhaseHandler[];
 }
 
 /**

@@ -20,8 +20,10 @@ export function WithSuiteContext() {
     }
 
     SuiteRegistryIndex.getForRegister(target).register({
-      beforeEach: [
-        async function (this: { [Init]?: boolean } & Record<string, Function>) {
+      phaseHandlers: [{
+        type: 'beforeEach',
+        import: '@travetto/context/support/test/context.ts',
+        async action(this: { [Init]?: boolean } & Record<string, Function>) {
           if (!this[Init]) {
             this[Init] = true;
             await Registry.init();
@@ -33,7 +35,7 @@ export function WithSuiteContext() {
             }
           }
         }
-      ]
+      }]
     });
   };
 }

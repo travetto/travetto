@@ -11,12 +11,14 @@ import { DependencyRegistryIndex } from '../../src/registry/registry-index.ts';
 export function InjectableSuite() {
   return (cls: Class) => {
     SuiteRegistryIndex.getForRegister(cls).register({
-      beforeEach: [
-        async function (this: unknown) {
+      phaseHandlers: [{
+        type: 'beforeEach',
+        import: '@travetto/model/support/test/suite.ts',
+        async action(this: unknown) {
           await Registry.init();
           await DependencyRegistryIndex.injectFields(this, cls);
         },
-      ]
+      }]
     });
   };
 }

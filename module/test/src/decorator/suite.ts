@@ -3,8 +3,6 @@ import { castTo, type Class, type ClassInstance, describeFunction, getClass } fr
 import type { SuiteConfig } from '../model/suite.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
-export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
-
 /**
  * Register a class to be defined as a test suite, and a candidate for testing
  * @param description The Suite description
@@ -36,7 +34,9 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
  */
 export function BeforeAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ beforeAll: [descriptor.value] });
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({
+      phaseHandlers: [{ type: 'beforeAll', action: descriptor.value }]
+    });
     return descriptor;
   };
 }
@@ -47,7 +47,9 @@ export function BeforeAll() {
  */
 export function BeforeEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ beforeEach: [descriptor.value] });
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({
+      phaseHandlers: [{ type: 'beforeEach', action: descriptor.value }]
+    });
     return descriptor;
   };
 }
@@ -58,7 +60,9 @@ export function BeforeEach() {
  */
 export function AfterAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ afterAll: [descriptor.value] });
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({
+      phaseHandlers: [{ type: 'afterAll', action: descriptor.value }]
+    });
     return descriptor;
   };
 }
@@ -69,7 +73,9 @@ export function AfterAll() {
  */
 export function AfterEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).register({ afterEach: [descriptor.value] });
+    SuiteRegistryIndex.getForRegister(getClass(instance)).register({
+      phaseHandlers: [{ type: 'afterEach', action: descriptor.value }]
+    });
     return descriptor;
   };
 }
