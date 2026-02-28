@@ -40,6 +40,7 @@ export interface Counts {
   passed: number;
   skipped: number;
   failed: number;
+  errored: number;
   unknown: number;
   total: number;
 }

@@ -94,6 +94,7 @@ export class TestExecutor {
     return {
       passed: 0,
       failed: 0,
+      errored: 0,
       skipped: 0,
       unknown: 0,
       total: 0,

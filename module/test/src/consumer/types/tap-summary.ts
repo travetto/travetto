@@ -2,7 +2,7 @@ import { Util, AsyncQueue } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
-import type { TestResult } from '../../model/test.ts';
+import type { TestResult, TestStatus } from '../../model/test.ts';
 
 import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
@@ -49,22 +49,20 @@ export class TapSummaryEmitter implements TestConsumerShape {
 
   async onStart(state: TestRunState): Promise<void> {
     this.#consumer.onStart();
-
-    let failed = 0;
-    let skipped = 0;
-    let completed = 0;
+    const total: Record<TestStatus | 'count', number> = { errored: 0, failed: 0, passed: 0, skipped: 0, unknown: 0, count: 0 };
     const success = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
     const fail = StyleUtil.getStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
     this.#progress = this.#terminal.streamToBottom(
       Util.mapAsyncIterable(
         this.#results,
         (value) => {
-          failed += (value.status === 'failed' ? 1 : 0);
-          skipped += (value.status === 'skipped' ? 1 : 0);
-          completed += (value.status !== 'skipped' ? 1 : 0);
-          return { value: `Tests %idx/%total [${failed} failed, ${skipped} skipped] -- ${value.classId}`, total: state.testCount, idx: completed };
+          total[value.status] += 1;
+          total.count += 1;
+          const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
+          return { value: `Tests %idx/%total [${statusLine}] -- ${value.classId}`, total: state.testCount, idx: total.count };
+
         },
-        TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: failed ? fail : success }) })
+        TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: (total.failed || total.errored) ? fail : success }) })
       ),
       { minDelay: 100 }
     );

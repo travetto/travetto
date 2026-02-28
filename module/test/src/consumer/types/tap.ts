@@ -133,10 +133,16 @@ export class TapEmitter implements TestConsumerShape {
       this.log(status);
 
       // Handle error
-      if (test.status === 'failed' && test.error) {
-        const msg = this.errorToString(test.error);
-        if (msg) {
-          this.logMeta({ error: msg });
+      switch (test.status) {
+        case 'errored':
+        case 'failed': {
+          if (test.error) {
+            const msg = this.errorToString(test.error);
+            if (msg) {
+              this.logMeta({ error: msg });
+            }
+          }
+          break;
         }
       }
 
@@ -171,13 +177,15 @@ export class TapEmitter implements TestConsumerShape {
       }
     }
 
-    const allPassed = summary.failed === 0;
+    const allPassed = !summary.failed && !summary.errored;
 
     this.log([
       this.#enhancer[allPassed ? 'success' : 'failure']('Results'),
       `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`,
       allPassed ? 'failed' : this.#enhancer.failure('failed'),
       `${this.#enhancer.total(summary.failed)}`,
+      allPassed ? 'errored' : this.#enhancer.failure('errored'),
+      `${this.#enhancer.total(summary.errored)}`,
       'skipped',
       this.#enhancer.total(summary.skipped),
       `# (Total Test Time: ${TimeUtil.asClock(summary.duration)}, Total Run Time: ${TimeUtil.asClock(Date.now() - this.#start)})`

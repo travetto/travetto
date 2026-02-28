@@ -10,6 +10,7 @@ export class TestResultsSummarizer implements TestConsumerShape {
   summary: SuitesSummary = {
     passed: 0,
     failed: 0,
+    errored: 0,
     skipped: 0,
     unknown: 0,
     total: 0,
@@ -21,6 +22,7 @@ export class TestResultsSummarizer implements TestConsumerShape {
   #merge(result: SuiteResult): void {
     this.summary.suites.push(result);
     this.summary.failed += result.failed;
+    this.summary.errored += result.errored;
     this.summary.passed += result.passed;
     this.summary.unknown += result.unknown;
     this.summary.skipped += result.skipped;
