@@ -5,7 +5,7 @@ import type { Skip, SuiteCore } from './common.ts';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 
-export type SuitePhaseHandler = Partial<Record<SuitePhase, (instance: Any) => Promise<unknown> | unknown>>;
+export type SuitePhaseHandler<T extends object> = Partial<Record<SuitePhase, (instance: T) => Promise<unknown> | unknown>>;
 
 /**
  * Suite configuration
@@ -30,7 +30,7 @@ export interface SuiteConfig extends SuiteCore {
   /**
    * Phase handlers
    */
-  phaseHandlers: SuitePhaseHandler[];
+  phaseHandlers: SuitePhaseHandler<Any>[];
 }
 
 /**

@@ -5,34 +5,23 @@ import { SuiteRegistryIndex } from '@travetto/test';
 
 import { AsyncContext } from '../../src/service.ts';
 
-const Init = Symbol();
-
-function wrapped(ctx: AsyncContext, og: Function) {
-  return function (this: unknown) {
-    return ctx.run(og.bind(this));
-  };
-}
-
-class ContextSuiteHandler<T> {
+class ContextSuiteHandler<T extends object> {
   target: Class<T>;
-  wrapped: Function;
 
   constructor(target: Class<T>) {
     this.target = target;
   }
 
-  async beforeEach(instance: T & { [Init]?: boolean }) {
-    if (!instance[Init]) {
-      instance[Init] = true;
-      await Registry.init();
-      const ctx = await DependencyRegistryIndex.getInstance(AsyncContext);
-      for (const test of Object.values(SuiteRegistryIndex.getConfig(this.target).tests)) {
-        const methodName = castKey<typeof instance>(test.methodName);
-        if (methodName in instance && typeof instance[methodName] === 'function') {
-          const fn = wrapped(ctx, instance[methodName]);
-          Object.defineProperty(fn, 'name', { value: test.methodName });
-          instance[methodName] = castTo(fn);
-        }
+  async beforeAll(instance: T) {
+    await Registry.init();
+    const ctx = await DependencyRegistryIndex.getInstance(AsyncContext);
+    for (const test of Object.values(SuiteRegistryIndex.getConfig(this.target).tests)) {
+      const methodName = castKey<typeof instance>(test.methodName);
+      if (methodName in instance && typeof instance[methodName] === 'function') {
+        const og = instance[methodName];
+        const wrapped = function (this: unknown) { return ctx.run(og.bind(this)); };
+        Object.defineProperty(wrapped, 'name', { value: test.methodName });
+        instance[methodName] = castTo(wrapped);
       }
     }
   }
