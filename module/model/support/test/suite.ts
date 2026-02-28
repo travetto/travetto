@@ -1,18 +1,16 @@
 import { type Class } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { SuiteRegistryIndex, TestFixtures } from '@travetto/test';
+import { SuiteRegistryIndex, TestFixtures, type SuitePhaseHandler } from '@travetto/test';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
 import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
-const Loaded = Symbol();
-
 type ConfigType = { autoCreate?: boolean, namespace?: string };
 
-class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass: Class }> {
+class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass: Class }> implements SuitePhaseHandler {
   qualifier?: symbol;
   target: Class<T>;
   constructor(target: Class<T>, qualifier?: symbol) {
@@ -20,18 +18,16 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass
     this.target = target;
   }
 
-  async beforeAll(instance: T & { [Loaded]?: boolean }) {
+  async beforeAll(instance: T) {
     await Registry.init();
 
-    if (!instance[Loaded]) {
-      const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
-      if ('namespace' in config) {
-        config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
-      }
-      // We manually create
-      config.autoCreate = false;
-      instance[Loaded] = true;
+    const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
+    if ('namespace' in config) {
+      config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
     }
+
+    // We manually create
+    config.autoCreate = false;
   }
 
   async beforeEach(instance: T) {

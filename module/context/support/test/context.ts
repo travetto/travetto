@@ -1,11 +1,11 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { castKey, castTo, type Class } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
-import { SuiteRegistryIndex } from '@travetto/test';
+import { SuiteRegistryIndex, type SuitePhaseHandler } from '@travetto/test';
 
 import { AsyncContext } from '../../src/service.ts';
 
-class ContextSuiteHandler<T extends object> {
+class ContextSuiteHandler<T extends object> implements SuitePhaseHandler<T> {
   target: Class<T>;
 
   constructor(target: Class<T>) {
