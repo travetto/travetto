@@ -1,6 +1,6 @@
 import type { Any, Class } from '@travetto/runtime';
 
-import type { Assertion, TestConfig, TestResult, TestStatus } from './test.ts';
+import type { TestConfig, TestResult, TestStatus } from './test.ts';
 import type { Skip, SuiteCore } from './common.ts';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
@@ -67,8 +67,6 @@ export interface SuiteResult extends Counts, SuiteCore {
  * A total suite failure
  */
 export interface SuiteFailure {
-  assert: Assertion;
-  testResult: TestResult;
-  test: TestConfig;
+  testResults: TestResult[];
   suite: SuiteConfig;
 }

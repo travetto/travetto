@@ -81,16 +81,18 @@ export class TestPhaseManager {
     }
 
     this.#progress = [];
+    const testResults = [];
 
-    const failure = AssertUtil.generateSuiteFailure(
-      this.#suite,
-      error instanceof TestBreakout ? error.message : 'all',
-      error instanceof TestBreakout ? error.source! : error,
-      error instanceof TestBreakout ? error.import! : undefined
-    );
+    for (const test of Object.values(this.#suite.tests)) {
+      testResults.push(AssertUtil.generateSuiteTestFailure(
+        this.#suite,
+        test.methodName,
+        error instanceof TestBreakout ? error.source! : error,
+        error instanceof TestBreakout ? error.import! : undefined
+      ));
+    }
 
-    this.#onSuiteFailure(failure);
-    this.#result.tests[failure.testResult.methodName] = failure.testResult;
+    this.#onSuiteFailure({ suite: this.#suite, testResults });
     this.#result.failed++;
   }
 }

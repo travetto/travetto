@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { asFull, type Class, JSONUtil, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import type { TestConfig, Assertion, TestResult } from '../model/test.ts';
+import type { Assertion, TestResult } from '../model/test.ts';
 import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
 
 const isCleanable = hasFunction<{ toClean(): unknown }>('toClean');
@@ -86,7 +86,7 @@ export class AssertUtil {
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateSuiteFailure(suite: SuiteConfig, methodName: string, error: Error, importLocation: string = suite.import): SuiteFailure {
+  static generateSuiteTestFailure(suite: SuiteConfig, methodName: string, error: Error, importLocation: string = suite.import): TestResult {
     const { import: imp, ...rest } = this.getPositionOfError(error, importLocation);
     let line = rest.line;
 
@@ -107,12 +107,8 @@ export class AssertUtil {
       ...coreAll,
       status: 'failed', error, duration: 0, durationTotal: 0, assertions: [assert], output: []
     };
-    const test: TestConfig = {
-      ...coreAll,
-      class: suite.class, skip: false
-    };
 
-    return { assert, testResult, test, suite };
+    return testResult;
   }
 
   /**
@@ -125,6 +121,6 @@ export class AssertUtil {
       class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: importLocation
     });
     error.message = error.message.replaceAll(Runtime.mainSourcePath, '.');
-    return this.generateSuiteFailure(suite, 'require', error);
+    return { suite, testResults: [this.generateSuiteTestFailure(suite, 'require', error)] };
   }
 }

@@ -29,22 +29,14 @@ export class TestExecutor {
   /**
    * Handles communicating a suite-level error
    * @param failure
-   * @param withSuite
    */
-  #onSuiteFailure(failure: SuiteFailure, triggerSuite?: boolean): void {
-    if (triggerSuite) {
-      this.#consumer.onEvent({ type: 'suite', phase: 'before', suite: failure.suite });
-    }
-
-    this.#consumer.onEvent({ type: 'test', phase: 'before', test: failure.test });
-    this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: failure.assert });
-    this.#consumer.onEvent({ type: 'test', phase: 'after', test: failure.testResult });
-
-    if (triggerSuite) {
-      this.#consumer.onEvent({
-        type: 'suite', phase: 'after',
-        suite: { ...castTo(failure.suite), failed: 1, passed: 0, total: 1, skipped: 0 }
-      });
+  #onSuiteFailure(failure: SuiteFailure): void {
+    for (const result of failure.testResults) {
+      this.#consumer.onEvent({ type: 'test', phase: 'before', test: failure.suite.tests[result.methodName] });
+      for (const assertion of result.assertions) {
+        this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion });
+      }
+      this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
     }
   }
 
@@ -211,8 +203,9 @@ export class TestExecutor {
 
         // Run test
         const testResult = await this.executeTest(test);
-        result[testResult.status]++;
         result.tests[testResult.methodName] = testResult;
+        result[testResult.status]++;
+        result.total += 1;
 
         // Handle after each
         await manager.endPhase('each');
@@ -229,7 +222,6 @@ export class TestExecutor {
     process.env = { ...originalEnv };
 
     result.duration = Date.now() - startTime;
-    result.total = result.passed + result.failed + result.skipped;
     result.status = TestModelUtil.countsToTestStatus(result);
 
     // Mark suite complete
