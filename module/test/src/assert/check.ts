@@ -3,10 +3,12 @@ import { isPromise } from 'node:util/types';
 
 import { RuntimeError, type Class, castTo, castKey, asConstructable } from '@travetto/runtime';
 
-import type { ThrowableError, TestConfig, Assertion } from '../model/test.ts';
+import type { ThrowableError, TestConfig, Assertion, TestStatus } from '../model/test.ts';
 import { AssertCapture, type CapturedAssertion } from './capture.ts';
 import { AssertUtil } from './util.ts';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types.ts';
+import type { Test } from '@travetto/transformer/doc/upper.ts';
+import { TestExecutionError } from '../model/error.ts';
 
 type StringFields<T> = {
   [K in Extract<keyof T, string>]:
@@ -282,8 +284,27 @@ export class AssertCheck {
       line,
       operator: 'throws',
       error,
+      unexpected: true,
       message: error.message,
       text: ('operator' in error ? error.operator : '') || '(uncaught)'
     });
+  }
+
+  /**
+   * Validate the test result based on the error and test configuration
+   */
+  static validateTestResultError(test: TestConfig, error: Error | undefined): [TestStatus, Error | undefined] {
+    if (error instanceof assert.AssertionError) {
+      return ['failed', error];
+    } else if (error instanceof TestExecutionError) {
+      this.checkUnhandled(test, error);
+      return ['errored', error];
+    } else if (error === undefined || test.shouldThrow) {
+      error = this.checkError(test.shouldThrow, error); // Rewrite error
+      return [error ? 'failed' : 'passed', error];
+    } else {
+      this.checkUnhandled(test, error);
+      return ['errored', error];
+    }
   }
 }

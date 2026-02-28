@@ -1,5 +1,3 @@
-import { AssertionError } from 'node:assert';
-
 import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 
@@ -12,7 +10,6 @@ import { ConsoleCapture } from './console.ts';
 import { TestPhaseManager } from './phase.ts';
 import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
-import { ExecutionError } from './error.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 import { TestModelUtil } from '../model/util.ts';
 
@@ -149,28 +146,15 @@ export class TestExecutor {
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
     // Run method and get result
-    let error = await this.#executeTestMethod(test);
-
-    if (!error) {
-      error = AssertCheck.checkError(test.shouldThrow, error); // Rewrite error
-    } else {
-      if (error instanceof AssertionError) {
-        // Pass, do nothing
-      } else if (error instanceof ExecutionError) { // Errors that are not expected
-        AssertCheck.checkUnhandled(test, error);
-      } else if (test.shouldThrow) {
-        error = AssertCheck.checkError(test.shouldThrow, error); // Rewrite error
-      } else if (error instanceof Error) {
-        AssertCheck.checkUnhandled(test, error);
-      }
-    }
+    const error = await this.#executeTestMethod(test);
+    const [status, finalError] = AssertCheck.validateTestResultError(test, error);
 
     Object.assign(result, {
-      status: error ? 'failed' : 'passed',
+      status,
       output: consoleCapture.end(),
       assertions: getAssertions(),
       duration: Date.now() - startTime,
-      ...(error ? { error } : {})
+      ...(finalError ? { error: finalError } : {})
     });
 
     // Mark completion
