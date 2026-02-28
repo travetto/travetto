@@ -130,7 +130,9 @@ export class TableManager {
 
     const sqlCommands = await this.getUpsertTablesSQL(cls);
     for (const key of ['dropIndex', 'table', 'createIndex'] as const) {
-      await Promise.all(sqlCommands[key].map(command => this.#exec(command)));
+      for (const command of sqlCommands[key]) {
+        await this.#exec(command);
+      }
     }
   }
 
