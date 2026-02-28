@@ -4,11 +4,6 @@ import type { SuiteConfig, SuiteFailure, SuiteResult, SuitePhase } from '../mode
 import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
 
-class TestBreakout extends Error {
-  source?: Error;
-  import?: string;
-}
-
 const TEST_PHASE_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_PHASE_TIMEOUT.value ?? 15000, 'ms');
 
 /**
@@ -42,10 +37,9 @@ export class TestPhaseManager {
       error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => handler[phase]?.(this.#suite.instance));
 
       if (error) {
-        const tbo = new TestBreakout(`[[${phase}]]`);
-        tbo.source = error;
-        tbo.import = describeFunction(handler.constructor)?.import;
-        throw tbo;
+        const toThrow = new Error(`[[${phase}]]`, { cause: error });
+        Object.assign(toThrow, { import: describeFunction(handler.constructor) ?? undefined });
+        throw toThrow;
       }
     }
   }
@@ -81,18 +75,7 @@ export class TestPhaseManager {
     }
 
     this.#progress = [];
-    const testResults = [];
-
-    for (const test of Object.values(this.#suite.tests)) {
-      testResults.push(AssertUtil.generateSuiteTestFailure(
-        this.#suite,
-        test.methodName,
-        error instanceof TestBreakout ? error.source! : error,
-        error instanceof TestBreakout ? error.import! : undefined
-      ));
-    }
-
-    this.#onSuiteFailure({ suite: this.#suite, testResults });
+    this.#onSuiteFailure(AssertUtil.generateSuiteFailure(this.#suite, error));
     this.#result.failed++;
   }
 }

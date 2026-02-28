@@ -86,7 +86,8 @@ export class AssertUtil {
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateSuiteTestFailure(suite: SuiteConfig, methodName: string, error: Error, importLocation: string = suite.import): TestResult {
+  static generateSuiteTestFailure(config: { suite: SuiteConfig, methodName: string, error: Error, importLocation: string }): TestResult {
+    const { suite, methodName, error, importLocation } = config;
     const { import: imp, ...rest } = this.getPositionOfError(error, importLocation);
     let line = rest.line;
 
@@ -112,6 +113,22 @@ export class AssertUtil {
   }
 
   /**
+   * Generate suite failure
+   */
+  static generateSuiteFailure(suite: SuiteConfig, error: Error): SuiteFailure {
+    const testResults: TestResult[] = [];
+    for (const test of Object.values(suite.tests)) {
+      testResults.push(this.generateSuiteTestFailure({
+        suite,
+        methodName: test.methodName,
+        error: error.cause instanceof Error ? error.cause : error,
+        importLocation: 'import' in error && typeof error.import === 'string' ? error.import : suite.import
+      }));
+    }
+    return { suite, testResults };
+  }
+
+  /**
    * Define import failure as a SuiteFailure object
    */
   static gernerateImportFailure(importLocation: string, error: Error): SuiteFailure {
@@ -121,6 +138,6 @@ export class AssertUtil {
       class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: importLocation
     });
     error.message = error.message.replaceAll(Runtime.mainSourcePath, '.');
-    return { suite, testResults: [this.generateSuiteTestFailure(suite, 'require', error)] };
+    return { suite, testResults: [this.generateSuiteTestFailure({ suite, methodName: 'require', error, importLocation: suite.import })] };
   }
 }
