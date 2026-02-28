@@ -47,9 +47,8 @@ export class PostgreSQLDialect extends SQLDialect {
   async describeTable(table: string): Promise<SQLTableDescription | undefined> {
     const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
 
-    const [columns, foreignKeys, indices] = await Promise.all([
-      // 1. Columns
-      this.executeSQL<{ name: string, type: string, is_not_null: boolean }>(`
+    // 1. Columns
+    const columns = await this.executeSQL<{ name: string, type: string, is_not_null: boolean }>(`
       SELECT
         a.attname AS name,
         pg_catalog.format_type(a.atttypid, a.atttypmod) AS type,
@@ -66,10 +65,14 @@ export class PostgreSQLDialect extends SQLDialect {
         AND a.attname NOT IN (${IGNORE_FIELDS.join(',')})
       ORDER BY
         a.attnum;
-    `),
+    `);
 
-      // 2. Foreign Keys
-      this.executeSQL<{ name: string, from_column: string, to_column: string, to_table: string }>(`
+    if (!columns.count) {
+      return undefined;
+    }
+
+    // 2. Foreign Keys
+    const foreignKeys = await this.executeSQL<{ name: string, from_column: string, to_column: string, to_table: string }>(`
       SELECT
         tc.constraint_name AS name, 
         kcu.column_name AS from_column,
@@ -82,10 +85,10 @@ export class PostgreSQLDialect extends SQLDialect {
         ON ccu.constraint_name = tc.constraint_name
       WHERE tc.constraint_type = 'FOREIGN KEY' 
         AND tc.table_name = '${table}'
-    `),
+    `);
 
-      // 3. Indices
-      this.executeSQL<{ name: string, is_unique: boolean, columns: string[] }>(`
+    // 3. Indices
+    const indices = await this.executeSQL<{ name: string, is_unique: boolean, columns: string[] }>(`
       SELECT
         i.relname AS name,
         ix.indisunique AS is_unique,
@@ -101,12 +104,7 @@ export class PostgreSQLDialect extends SQLDialect {
         AND NOT ix.indisprimary
         AND co.conindid IS NULL
       GROUP BY i.relname, ix.indisunique
-    `)
-    ]);
-
-    if (!columns.count) {
-      return undefined;
-    }
+    `);
 
     return {
       columns: columns.records.map(col => ({
