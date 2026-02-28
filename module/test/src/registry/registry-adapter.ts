@@ -13,10 +13,7 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
     baseConfig.skip = config.skip ?? baseConfig.skip;
 
     if (config.phaseHandlers) {
-      baseConfig.phaseHandlers = [
-        ...(baseConfig.phaseHandlers ?? []),
-        ...config.phaseHandlers.map(x => ({ import: config.import, ...x }))
-      ];
+      baseConfig.phaseHandlers = [...(baseConfig.phaseHandlers ?? []), ...config.phaseHandlers];
     }
 
     if (config.tests) {

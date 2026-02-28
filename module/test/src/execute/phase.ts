@@ -1,4 +1,4 @@
-import { Env, TimeUtil } from '@travetto/runtime';
+import { describeFunction, Env, TimeUtil } from '@travetto/runtime';
 
 import type { SuiteConfig, SuiteFailure, SuiteResult, SuitePhase } from '../model/suite.ts';
 import { AssertUtil } from '../assert/util.ts';
@@ -33,15 +33,18 @@ export class TestPhaseManager {
    */
   async runPhase(phase: SuitePhase): Promise<void> {
     let error: Error | undefined;
-    for (const handler of this.#suite.phaseHandlers.filter(item => item.type === phase)) {
+    for (const handler of this.#suite.phaseHandlers) {
+      if (!handler[phase]) {
+        continue;
+      }
 
       // Ensure all the criteria below are satisfied before moving forward
-      error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => handler.action.call(this.#suite.instance));
+      error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => handler[phase]?.(this.#suite.instance));
 
       if (error) {
         const tbo = new TestBreakout(`[[${phase}]]`);
         tbo.source = error;
-        tbo.import = handler.import;
+        tbo.import = describeFunction(handler.constructor)?.import;
         throw tbo;
       }
     }

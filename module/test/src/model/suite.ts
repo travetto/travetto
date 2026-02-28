@@ -1,15 +1,11 @@
-import type { Class } from '@travetto/runtime';
+import type { Any, Class } from '@travetto/runtime';
 
 import type { Assertion, TestConfig, TestResult, TestStatus } from './test.ts';
 import type { Skip, SuiteCore } from './common.ts';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 
-export type SuitePhaseHandler = {
-  type: SuitePhase;
-  import?: string;
-  action: Function;
-};
+export type SuitePhaseHandler = Partial<Record<SuitePhase, (instance: Any) => Promise<unknown> | unknown>>;
 
 /**
  * Suite configuration

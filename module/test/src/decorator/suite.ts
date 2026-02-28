@@ -35,7 +35,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
 export function BeforeAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).register({
-      phaseHandlers: [{ type: 'beforeAll', action: descriptor.value }]
+      phaseHandlers: [{ beforeAll: (realInstance: unknown): unknown => descriptor.value.call(realInstance) }]
     });
     return descriptor;
   };
@@ -48,7 +48,7 @@ export function BeforeAll() {
 export function BeforeEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).register({
-      phaseHandlers: [{ type: 'beforeEach', action: descriptor.value }]
+      phaseHandlers: [{ beforeEach: (realInstance: unknown): unknown => descriptor.value.call(realInstance) }]
     });
     return descriptor;
   };
@@ -61,7 +61,7 @@ export function BeforeEach() {
 export function AfterAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).register({
-      phaseHandlers: [{ type: 'afterAll', action: descriptor.value }]
+      phaseHandlers: [{ afterAll: (realInstance: unknown): unknown => descriptor.value.call(realInstance) }]
     });
     return descriptor;
   };
@@ -74,7 +74,7 @@ export function AfterAll() {
 export function AfterEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistryIndex.getForRegister(getClass(instance)).register({
-      phaseHandlers: [{ type: 'afterEach', action: descriptor.value }]
+      phaseHandlers: [{ afterEach: (realInstance: unknown): unknown => descriptor.value.call(realInstance) }]
     });
     return descriptor;
   };
