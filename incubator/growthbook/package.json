@@ -1,0 +1,38 @@
+{
+  "name": "@travetto/growthbook",
+  "version": "5.0.14",
+  "description": "Growthbook feature flagging support",
+  "keywords": [
+    "feature-flag",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "incubator/growthbook"
+  },
+  "dependencies": {
+    "@travetto/schema": "^5.0.14",
+    "@travetto/auth-rest": "^5.0.18",
+    "@growthbook/growthbook": "^1.3.1",
+    "eventsource": "^3.0.2"
+  },
+  "travetto": {
+    "displayName": "Growthbook Support"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}
