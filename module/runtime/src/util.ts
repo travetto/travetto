@@ -117,4 +117,19 @@ export class Util {
       return () => true;
     }
   }
+
+  /**
+   * Return the stack trace as parts of filename, line, column
+   */
+  static stackTraceToParts(stack?: string): { filename: string, line: number, column: number }[] {
+    if (!stack) {
+      return [];
+    }
+    return stack
+      .replace(/[\\/]/g, '/')
+      .split('\n')
+      .filter(lineText => lineText.includes('('))
+      .map(lineText => lineText.split('(')[1].split(')')[0].split(':'))
+      .map(([filename, line, column]) => ({ filename, line: line ? parseInt(line, 10) : -1, column: column ? parseInt(column, 10) : -1 }));
+  }
 }

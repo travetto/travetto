@@ -20,7 +20,6 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
       for (const [key, test] of Object.entries(config.tests ?? {})) {
         baseConfig.tests[key] = {
           ...test,
-          sourceImport: test.import,
           class: baseConfig.class,
           classId: baseConfig.classId,
           import: baseConfig.import,
@@ -82,6 +81,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         class: this.#cls,
         tags: [],
         skip: false,
+        sourceImport: Runtime.getImport(this.#cls),
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],

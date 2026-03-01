@@ -1,9 +1,9 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { asFull, type Class, JSONUtil, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asFull, type Class, JSONUtil, hasFunction, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
 
-import type { Assertion, TestResult } from '../model/test.ts';
+import type { TestResult } from '../model/test.ts';
 import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
 
 const isCleanable = hasFunction<{ toClean(): unknown }>('toClean');
@@ -39,48 +39,15 @@ export class AssertUtil {
   /**
    * Determine file location for a given error and the stack trace
    */
-  static getPositionOfError(error: Error, importLocation: string): { import: string, line: number } {
-    const workingDirectory = Runtime.mainSourcePath;
-    const lines = (error.stack ?? new Error().stack!)
-      .replace(/[\\/]/g, '/')
-      .split('\n')
-      // Exclude node_modules, target self
-      .filter(lineText => lineText.includes(workingDirectory) && (!lineText.includes('node_modules') || lineText.includes('/support/')));
+  static getPositionOfError(error: Error, importLocation: string): { import: string, line?: number } {
+    const best = Util.stackTraceToParts(error.stack ?? new Error().stack!)
+      .map(frame => {
+        const imp = (RuntimeIndex.getFromSource(frame.filename) ?? RuntimeIndex.getEntry(frame.filename))?.import;
+        return { ...frame, import: imp! };
+      })
+      .find(frame => !!frame.import);
 
-    const filename = RuntimeIndex.getFromImport(importLocation)?.sourceFile!;
-
-    let best = lines.filter(lineText => lineText.includes(filename))[0];
-
-    if (!best) {
-      [best] = lines.filter(lineText => lineText.includes(`${workingDirectory}/test`));
-    }
-
-    if (!best) {
-      return { import: importLocation, line: 1 };
-    }
-
-    const location = best.trim().split(/\s+/g).slice(1).pop()!;
-    if (!location) {
-      return { import: importLocation, line: 1 };
-    }
-
-    const [file, lineNumber] = location
-      .replace(/[()]/g, '')
-      .replace(/^[A-Za-z]:/, '')
-      .split(':');
-
-    let line = parseInt(lineNumber, 10);
-    if (Number.isNaN(line)) {
-      line = -1;
-    }
-
-    const outFileParts = file.split(workingDirectory.replace(/^[A-Za-z]:/, ''));
-
-    const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
-
-    const result = { import: RuntimeIndex.getFromSource(outFile)?.import!, line };
-
-    return result;
+    return best ?? { import: importLocation };
   }
 
   /**
@@ -88,25 +55,24 @@ export class AssertUtil {
    */
   static generateSuiteTestFailure(config: { suite: SuiteConfig, methodName: string, error: Error, importLocation: string }): TestResult {
     const { suite, methodName, error, importLocation } = config;
-    const { import: imp, ...rest } = this.getPositionOfError(error, importLocation);
-    let line = rest.line;
-
-    if (line === 1 && suite.lineStart) {
-      line = suite.lineStart;
-    }
-
-    const msg = error.message.split(/\n/)[0];
-
-    const core = { import: imp, classId: suite.classId, methodName, sourceHash: suite.sourceHash };
-    const coreAll = { ...core, description: msg, lineStart: line, lineEnd: line, lineBodyStart: line };
-
-    const assert: Assertion = {
-      ...core,
-      operator: 'throw', error, line, message: msg, text: methodName
-    };
+    const { import: assertImport, line } = this.getPositionOfError(error, importLocation);
     const testResult: TestResult = {
-      ...coreAll,
-      status: 'failed', error, duration: 0, durationTotal: 0, assertions: [assert], output: []
+      ...suite.tests[methodName],
+      status: 'failed',
+      error,
+      duration: 0,
+      durationTotal: 0,
+      output: [],
+      assertions: [{
+        import: assertImport,
+        methodName,
+        classId: suite.classId,
+        operator: 'throw',
+        error,
+        line: line ?? (assertImport === suite.import ? suite.lineStart : 1),
+        message: error.message.split(/\n/)[0],
+        text: methodName
+      }],
     };
 
     return testResult;
@@ -116,16 +82,16 @@ export class AssertUtil {
    * Generate suite failure
    */
   static generateSuiteFailure(suite: SuiteConfig, error: Error): SuiteFailure {
-    const testResults: TestResult[] = [];
-    for (const test of Object.values(suite.tests)) {
-      testResults.push(this.generateSuiteTestFailure({
-        suite,
-        methodName: test.methodName,
-        error: error.cause instanceof Error ? error.cause : error,
-        importLocation: 'import' in error && typeof error.import === 'string' ? error.import : suite.import
-      }));
-    }
-    return { suite, testResults };
+    return {
+      suite, testResults: Object.values(suite.tests).map(test =>
+        this.generateSuiteTestFailure({
+          suite,
+          methodName: test.methodName,
+          error: error.cause instanceof Error ? error.cause : error,
+          importLocation: 'import' in error && typeof error.import === 'string' ? error.import : suite.import
+        })
+      )
+    };
   }
 
   /**

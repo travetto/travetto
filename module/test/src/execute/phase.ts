@@ -37,7 +37,7 @@ export class TestPhaseManager {
       error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => handler[phase]?.(this.#suite.instance));
 
       if (error) {
-        const toThrow = new Error(`[[${phase}]]`, { cause: error });
+        const toThrow = new Error(phase, { cause: error });
         Object.assign(toThrow, { import: describeFunction(handler.constructor) ?? undefined });
         throw toThrow;
       }
@@ -68,14 +68,22 @@ export class TestPhaseManager {
       throw error;
     }
 
-    for (const ph of this.#progress) {
-      try {
-        await this.runPhase(ph === 'all' ? 'afterAll' : 'afterEach');
-      } catch { /* Do nothing */ }
+    const isBeforePhase = error.message === 'beforeAll' || error.message === 'beforeEach';
+
+    if (isBeforePhase) {
+      for (const remaining of this.#progress) {
+        try {
+          await this.runPhase(remaining === 'all' ? 'afterAll' : 'afterEach');
+        } catch { /* Do nothing */ }
+      }
     }
 
     this.#progress = [];
-    this.#onSuiteFailure(AssertUtil.generateSuiteFailure(this.#suite, error));
+
+    if (isBeforePhase) {
+      this.#onSuiteFailure(AssertUtil.generateSuiteFailure(this.#suite, error));
+    }
+
     this.#result.failed++;
   }
 }

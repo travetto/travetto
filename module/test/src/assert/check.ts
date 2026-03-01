@@ -7,7 +7,6 @@ import type { ThrowableError, TestConfig, Assertion, TestStatus } from '../model
 import { AssertCapture, type CapturedAssertion } from './capture.ts';
 import { AssertUtil } from './util.ts';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types.ts';
-import type { Test } from '@travetto/transformer/doc/upper.ts';
 import { TestExecutionError } from '../model/error.ts';
 
 type StringFields<T> = {
@@ -274,14 +273,11 @@ export class AssertCheck {
    * Look for any unhandled exceptions
    */
   static checkUnhandled(test: TestConfig, error: Error | assert.AssertionError): void {
-    let line = AssertUtil.getPositionOfError(error, test.sourceImport ?? test.import).line;
-    if (line === 1) {
-      line = test.lineStart;
-    }
+    const { line } = AssertUtil.getPositionOfError(error, test.sourceImport ?? test.import);
 
     AssertCapture.add({
       import: test.import,
-      line,
+      line: line ?? test.lineStart,
       operator: 'throws',
       error,
       unexpected: true,

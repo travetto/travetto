@@ -80,11 +80,12 @@ export class TapEmitter implements TestConsumerShape {
       const { test } = event;
       const suiteId = this.#enhancer.suiteName(test.classId);
       const sourceFile = RuntimeIndex.getFromImport(test.import)!.sourceFile;
+      const testSourceFile = test.sourceImport ? RuntimeIndex.getFromImport(test.sourceImport)!.sourceFile : sourceFile;
 
       const header = [
         StyleUtil.link(suiteId, `file://${sourceFile}`),
         ' - ',
-        StyleUtil.link(this.#enhancer.testName(test.methodName), `file://${sourceFile}#${test.lineBodyStart}`),
+        StyleUtil.link(this.#enhancer.testName(test.methodName), `file://${testSourceFile}#${test.lineBodyStart}`),
         ...test.description ? [`: ${this.#enhancer.testDescription(test.description)}`] : []
       ].join('');
 
