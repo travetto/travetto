@@ -1,8 +1,9 @@
 import { describeFunction, Env, TimeUtil } from '@travetto/runtime';
 
-import type { SuiteConfig, SuiteFailure, SuiteResult, SuitePhase } from '../model/suite.ts';
+import type { SuiteConfig, SuitePhase } from '../model/suite.ts';
 import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
+import type { TestConfig, TestResult } from '../model/test.ts';
 
 const TEST_PHASE_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_PHASE_TIMEOUT.value ?? 15000, 'ms');
 
@@ -14,13 +15,9 @@ const TEST_PHASE_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_PHASE_TIMEOUT.value ??
 export class TestPhaseManager {
   #progress: ('all' | 'each')[] = [];
   #suite: SuiteConfig;
-  #result: SuiteResult;
-  #onSuiteFailure: (fail: SuiteFailure) => void;
 
-  constructor(suite: SuiteConfig, result: SuiteResult, onSuiteFailure: (fail: SuiteFailure) => void) {
+  constructor(suite: SuiteConfig) {
     this.#suite = suite;
-    this.#result = result;
-    this.#onSuiteFailure = onSuiteFailure;
   }
 
   /**
@@ -61,29 +58,21 @@ export class TestPhaseManager {
   }
 
   /**
-   * On error, handle stubbing out error for the phases in progress
+   * Handles if an error occurs during a phase, ensuring that we attempt to end the phase and then return the appropriate test results for the failure
    */
-  async onError(error: Error | unknown): Promise<void> {
-    if (!(error instanceof Error)) {
-      throw error;
+  async errorPhase(phase: 'all' | 'each', error: unknown, suite: SuiteConfig, test?: TestConfig): Promise<TestResult[]> {
+    try { await this.endPhase(phase); } catch { }
+    if (!(error instanceof Error)) { throw error; }
+
+    // Don't propagate our own errors
+    if (error.message === 'afterAll' || error.message === 'afterEach') {
+      return [];
     }
 
-    const isBeforePhase = error.message === 'beforeAll' || error.message === 'beforeEach';
-
-    if (isBeforePhase) {
-      for (const remaining of this.#progress) {
-        try {
-          await this.runPhase(remaining === 'all' ? 'afterAll' : 'afterEach');
-        } catch { /* Do nothing */ }
-      }
+    if (test) {
+      return [AssertUtil.generateSuiteTestFailure({ suite, error, test })];
+    } else {
+      return AssertUtil.generateSuiteTestFailures(suite, error);
     }
-
-    this.#progress = [];
-
-    if (isBeforePhase) {
-      this.#onSuiteFailure(AssertUtil.generateSuiteFailure(this.#suite, error));
-    }
-
-    this.#result.failed++;
   }
 }

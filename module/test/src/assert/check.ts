@@ -273,10 +273,10 @@ export class AssertCheck {
    * Look for any unhandled exceptions
    */
   static checkUnhandled(test: TestConfig, error: Error | assert.AssertionError): void {
-    const { line } = AssertUtil.getPositionOfError(error, test.declarationImport ?? test.import);
+    const { line } = AssertUtil.getPositionOfError(error) ?? {};
 
     AssertCapture.add({
-      import: test.import,
+      import: test.declarationImport ?? test.import,
       line: line ?? test.lineStart,
       operator: 'throws',
       error,

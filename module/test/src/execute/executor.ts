@@ -2,7 +2,7 @@ import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtim
 import { Registry } from '@travetto/registry';
 
 import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
-import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
+import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
 import { AssertCheck } from '../assert/check.ts';
 import { AssertCapture } from '../assert/capture.ts';
@@ -26,17 +26,21 @@ export class TestExecutor {
     this.#consumer = consumer;
   }
 
-  /**
-   * Handles communicating a suite-level error
-   * @param failure
-   */
-  #onSuiteFailure(failure: SuiteFailure): void {
-    for (const result of failure.testResults) {
-      this.#consumer.onEvent({ type: 'test', phase: 'before', test: failure.suite.tests[result.methodName] });
-      for (const assertion of result.assertions) {
-        this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion });
+  #onSuiteTestFailure(result: TestResult, test: TestConfig): void {
+    this.#consumer.onEvent({ type: 'test', phase: 'before', test });
+    for (const assertion of result.assertions) {
+      this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion });
+    }
+    this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
+  }
+
+  #recordSuiteErrors(suiteConfig: SuiteConfig, suiteResult: SuiteResult, errors: TestResult[]): void {
+    for (const test of errors) {
+      if (!suiteResult.tests[test.methodName]) {
+        this.#onSuiteTestFailure(test, suiteConfig.tests[test.methodName]);
+        suiteResult.errored += 1;
+        suiteResult.total += 1;
       }
-      this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
     }
   }
 
@@ -186,7 +190,7 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
-    const manager = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
+    const manager = new TestPhaseManager(suite);
 
     const originalEnv = { ...process.env };
 
@@ -206,25 +210,31 @@ export class TestExecutor {
         process.env = { ...suiteEnv };
 
         const testStart = Date.now();
+        try {
 
-        // Handle BeforeEach
-        await manager.startPhase('each');
+          // Handle BeforeEach
+          await manager.startPhase('each');
 
-        // Run test
-        const testResult = await this.executeTest(test, suite);
-        result.tests[testResult.methodName] = testResult;
-        result[testResult.status]++;
-        result.total += 1;
+          // Run test
+          const testResult = await this.executeTest(test, suite);
+          result.tests[testResult.methodName] = testResult;
+          result[testResult.status]++;
+          result.total += 1;
 
-        // Handle after each
-        await manager.endPhase('each');
-        testResult.durationTotal = Date.now() - testStart;
+          // Handle after each
+          await manager.endPhase('each');
+          testResult.durationTotal = Date.now() - testStart;
+        } catch (testError) {
+          const errors = await manager.errorPhase('each', testError, suite, test);
+          this.#recordSuiteErrors(suite, result, errors);
+        }
       }
 
       // Handle after all
       await manager.endPhase('all');
-    } catch (error) {
-      await manager.onError(error);
+    } catch (suiteError) {
+      const errors = await manager.errorPhase('all', suiteError, suite);
+      this.#recordSuiteErrors(suite, result, errors);
     }
 
     // Restore env
@@ -248,7 +258,12 @@ export class TestExecutor {
         throw error;
       }
       console.error(error);
-      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(run.import, error));
+
+      // Fire import failure as a test failure for each test in the suite
+      const { result, test, suite } = AssertUtil.gernerateImportFailure(run.import, error);
+      this.#consumer.onEvent({ type: 'suite', phase: 'before', suite });
+      this.#onSuiteTestFailure(result, test);
+      this.#consumer.onEvent({ type: 'suite', phase: 'after', suite });
       return;
     }
 

@@ -62,11 +62,3 @@ export interface SuiteResult extends Counts, SuiteCore {
    */
   status: TestStatus;
 }
-
-/**
- * A total suite failure
- */
-export interface SuiteFailure {
-  testResults: TestResult[];
-  suite: SuiteConfig;
-}
