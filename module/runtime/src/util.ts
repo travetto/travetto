@@ -1,8 +1,12 @@
 import timers from 'node:timers/promises';
+import { path } from '@travetto/manifest';
 
 import { castTo } from './types.ts';
 
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
+type StackFrame = { message: string, filename: string, line: number, column: number };
+
+const STACK_POSITION_REGEX = /[(]\s*(?<filename>[^()]+[.]([cm]?[jt]s))([:](?<line>\d+))?([:](?<column>\d+))?\s*[)]/;
 
 /**
  * Grab bag of common utilities
@@ -121,15 +125,25 @@ export class Util {
   /**
    * Return the stack trace as parts of filename, line, column
    */
-  static stackTraceToParts(stack?: string): { filename: string, line: number, column: number }[] {
+  static stackTraceToParts(stack?: string): StackFrame[] {
     if (!stack) {
       return [];
     }
     return stack
-      .replace(/[\\/]/g, '/')
       .split('\n')
-      .filter(lineText => lineText.includes('('))
-      .map(lineText => lineText.split('(')[1].split(')')[0].split(':'))
-      .map(([filename, line, column]) => ({ filename, line: line ? parseInt(line, 10) : -1, column: column ? parseInt(column, 10) : -1 }));
+      .map(frameText => {
+        const match = STACK_POSITION_REGEX.exec(frameText);
+        if (!match || !match.groups) {
+          return undefined;
+        }
+        const { filename, line, column } = match.groups;
+        return {
+          message: frameText.split(match[0])[0].trim(),
+          filename: path.normalize(filename),
+          line: line ? parseInt(line, 10) : 1,
+          column: column ? parseInt(column, 10) : 1
+        };
+      })
+      .filter(item => item !== undefined);
   }
 }

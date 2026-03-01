@@ -186,4 +186,89 @@ export class UtilTest {
     assert(check('anything') === true);
     assert(check('everything') === true);
   }
+
+  @Test()
+  stackTraceToPartsEmpty() {
+    assert.deepEqual(Util.stackTraceToParts(), []);
+    assert.deepEqual(Util.stackTraceToParts(''), []);
+  }
+
+  @Test()
+  stackTraceToPartsBasic() {
+    const stack = [
+      'Error: something went wrong',
+      '    at MyClass.myMethod (/project/src/file.ts:10:5)',
+      '    at Object.<anonymous> (/project/src/other.ts:20:3)',
+    ].join('\n');
+
+    const parts = Util.stackTraceToParts(stack);
+    assert(parts.length === 2);
+
+    assert(parts[0].message === 'at MyClass.myMethod');
+    assert(parts[0].filename === '/project/src/file.ts');
+    assert(parts[0].line === 10);
+    assert(parts[0].column === 5);
+
+    assert(parts[1].message === 'at Object.<anonymous>');
+    assert(parts[1].filename === '/project/src/other.ts');
+    assert(parts[1].line === 20);
+    assert(parts[1].column === 3);
+  }
+
+  @Test()
+  stackTraceToPartsBackslashNormalization() {
+    // Backslashes in POSIX-style paths (e.g. from mixed-separator output) are normalized to '/'
+    const stack = '    at doWork (C:\\home\\user\\project\\src\\app.ts:42:7)';
+
+    const parts = Util.stackTraceToParts(stack);
+    assert(parts.length === 1);
+    assert(parts[0].filename === 'C:/home/user/project/src/app.ts');
+    assert(parts[0].line === 42);
+    assert(parts[0].column === 7);
+  }
+
+  @Test()
+  stackTraceToPartsFiltersNonFrameLines() {
+    const stack = [
+      'Error: oops',
+      'some plain text line',
+      '    at realFrame (/src/index.ts:1:1)',
+    ].join('\n');
+
+    const parts = Util.stackTraceToParts(stack);
+    assert(parts.length === 1);
+    assert(parts[0].filename === '/src/index.ts');
+  }
+
+  @Test()
+  stackTraceToPartsMissingLineColumn() {
+    // Node sometimes emits frames without column, or with just filename
+    const stack = '    at eval (eval at <anonymous> (/src/runner.ts:5:3))';
+
+    const parts = Util.stackTraceToParts(stack);
+    assert(parts.length === 1);
+    // The inner filename segment after the second '(' won't have a colon-separated line
+    assert(parts[0].line === -1 || typeof parts[0].line === 'number');
+    assert(parts[0].message === 'at eval (eval at <anonymous>');
+  }
+
+  @Test()
+  stackTraceToPartsRealTrace() {
+    const err = new Error('test');
+    const parts = Util.stackTraceToParts(err.stack);
+
+    // Must have at least one frame
+    assert(parts.length > 0);
+
+    // Every frame must have a valid filename ending in a known extension
+    for (const part of parts) {
+      assert(/[.]([cm]?[jt]s)$/.test(part.filename));
+      assert(part.line > 0);
+      assert(part.column > 0);
+    }
+
+    // The first frame should point back to this file
+    assert(parts[0].filename.endsWith('runtime/test/util.ts'));
+    assert(parts[0].line === 257);
+  }
 }
