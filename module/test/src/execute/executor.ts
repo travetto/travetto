@@ -76,7 +76,8 @@ export class TestExecutor {
   #skipTest(test: TestConfig, result: SuiteResult): void {
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
-    result.skipped++;
+    result.skipped += 1;
+    result.total += 1;
     this.#consumer.onEvent({
       type: 'test',
       phase: 'after',
