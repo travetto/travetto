@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-web-passport",
-  "version": "7.1.4",
+  "version": "8.0.0-alpha.0",
   "description": "Web authentication integration support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -26,11 +26,11 @@
     "directory": "module/auth-web-passport"
   },
   "dependencies": {
-    "@travetto/auth": "^7.1.4",
-    "@travetto/auth-web": "^7.1.4",
-    "@travetto/config": "^7.1.4",
-    "@travetto/web": "^7.1.4",
-    "@travetto/web-connect": "^7.1.4",
+    "@travetto/auth": "^8.0.0-alpha.0",
+    "@travetto/auth-web": "^8.0.0-alpha.0",
+    "@travetto/config": "^8.0.0-alpha.0",
+    "@travetto/web": "^8.0.0-alpha.0",
+    "@travetto/web-connect": "^8.0.0-alpha.0",
     "@types/passport": "^1.0.17",
     "passport": "^0.7.0"
   },
