@@ -67,28 +67,28 @@ export class DiagnosticManager {
   }
 
   refreshStatus(): void {
-    const { total, passed, failed, unknown } = [...this.#tracked.values()]
+    const { total, passed, failed, errored } = [...this.#tracked.values()]
       .flatMap(m => [...m.values()])
       .flatMap(t => [...t.values()])
       .reduce((acc, t) => {
         acc.total += 1;
         acc[t.status] += 1;
         return acc;
-      }, { total: 0, passed: 0, failed: 0, skipped: 0, unknown: 0 });
+      }, { total: 0, passed: 0, failed: 0, errored: 0, skipped: 0, unknown: 0 });
 
-    const status = failed > 0 ? 'failed' : passed === total ? 'passed' : 'unknown';
+    let status: TestStatus;
+    switch (true) {
+      case errored > 0: status = 'errored'; break;
+      case failed > 0: status = 'failed'; break;
+      case passed === total: status = 'passed'; break;
+      default: status = 'unknown';
+    }
     this.setStatus(`Tests \$(pass-filled) ${passed} \$(alert) ${failed}`, status);
   }
 
   afterTest(test: TestResult): void {
     const file = Workspace.resolveImport(test.import);
-    if (!this.#tracked.has(file)) {
-      this.#tracked.set(file, new Map());
-    }
-    if (!this.#tracked.get(file)!.has(test.classId)) {
-      this.#tracked.get(file)!.set(test.classId, new Map());
-    }
-    this.#tracked.get(file)!.get(test.classId)!.set(test.methodName, test);
+    this.#tracked.getOrInsert(file, new Map()).getOrInsert(test.classId, new Map()).set(test.methodName, test);
     this.#setDiagnostics(file);
   }
 
@@ -142,6 +142,7 @@ export class DiagnosticManager {
         this.#status.backgroundColor = undefined;
         this.#status.color = Style.COLORS.passed;
         break;
+      case 'errored':
       case 'failed':
         this.#status.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
         this.#status.color = new vscode.ThemeColor('statusBarItem.errorForeground');

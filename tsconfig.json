@@ -1,8 +1,7 @@
 {
   "extends": "./module/compiler/tsconfig.trv.json",
   "compilerOptions": {
-    "rootDir": ".",
-    "baseUrl": "./"
+    "rootDir": "."
   },
   "exclude": [
     "related/travetto*/**",

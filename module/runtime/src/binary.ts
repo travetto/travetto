@@ -4,7 +4,7 @@ import { ReadableStream } from 'node:stream/web';
 import consumers from 'node:stream/consumers';
 import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array, isUint8ClampedArray } from 'node:util/types';
 
-import { type Any, castTo, hasFunction, toConcrete } from './types.ts';
+import { castTo, hasFunction, toConcrete } from './types.ts';
 
 /**
  * Binary Array
@@ -29,7 +29,7 @@ export type BinaryType = BinaryArray | BinaryStream | BinaryContainer;
 
 const BINARY_CONSTRUCTOR_SET = new Set<unknown>([
   Readable, Buffer, Blob, ReadableStream, ArrayBuffer, Uint8Array,
-  Uint16Array, Uint32Array, Uint8ClampedArray
+  Uint16Array, Uint32Array, Uint8ClampedArray, File
 ]);
 
 let BINARY_REFS: Set<unknown> | undefined;
@@ -72,6 +72,17 @@ export class BinaryUtil {
   /** Convert binary array to an explicit buffer  */
   static binaryArrayToBuffer(input: BinaryArray): Buffer<ArrayBuffer> {
     if (Buffer.isBuffer(input)) {
+      return castTo(input);
+    } else if (isTypedArray(input)) {
+      return castTo(Buffer.from(input.buffer));
+    } else {
+      return Buffer.from(input);
+    }
+  }
+
+  /** Convert binary array to an explicit uint8array  */
+  static binaryArrayToUint8Array(input: BinaryArray): Uint8Array {
+    if (isUint8Array(input)) {
       return castTo(input);
     } else if (isTypedArray(input)) {
       return castTo(Buffer.from(input.buffer));
@@ -138,13 +149,6 @@ export class BinaryUtil {
     } else {
       return BinaryUtil.toReadableStream(input);
     }
-  }
-
-  /** Read chunk, default to toString if type is unknown  */
-  static readChunk(chunk: Any, encoding?: BufferEncoding | null): BinaryArray {
-    return isBinaryArray(chunk) ? chunk :
-      typeof chunk === 'string' ? Buffer.from(chunk, encoding ?? 'utf8') :
-        Buffer.from(`${chunk}`, 'utf8');
   }
 
   /** Combine binary arrays  */

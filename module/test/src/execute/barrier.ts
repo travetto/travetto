@@ -3,7 +3,7 @@ import { createHook, executionAsyncId } from 'node:async_hooks';
 
 import { type TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 
-import { ExecutionError, TimeoutError } from './error.ts';
+import { TestExecutionError, TimeoutError } from '../model/error.ts';
 
 const UNCAUGHT_ERR_EVENTS = ['unhandledRejection', 'uncaughtException'] as const;
 
@@ -67,7 +67,7 @@ export class Barrier {
           await Util.queueMacroTask();
           i -= 1;
           if (i === 0) {
-            throw new ExecutionError(`Pending promises: ${pending.size}`);
+            throw new TestExecutionError(`Pending promises: ${pending.size}`);
           }
         }
       },

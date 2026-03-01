@@ -75,10 +75,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
       return;
     }
     const base = this.getBaseClass(cls);
-    if (!this.#byDiscriminatedTypes.has(base)) {
-      this.#byDiscriminatedTypes.set(base, new Map());
-    }
-    this.#byDiscriminatedTypes.get(base)!.set(config.discriminatedType, cls);
+    this.#byDiscriminatedTypes.getOrInsert(base, new Map()).set(config.discriminatedType, cls);
   }
 
   beforeChangeSetComplete(): void {
@@ -97,7 +94,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
    * Find base schema class for a given class
    */
   getBaseClass(cls: Class): Class {
-    if (!this.#baseSchema.has(cls)) {
+    return this.#baseSchema.getOrInsertComputed(cls, () => {
       let config = this.getClassConfig(cls);
       let parent: Class | undefined = cls;
       while (parent && config.discriminatedType && !config.discriminatedBase) {
@@ -106,9 +103,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
           config = this.store.getOptional(parent)?.get() ?? config;
         }
       }
-      this.#baseSchema.set(cls, config.class);
-    }
-    return this.#baseSchema.get(cls)!;
+      return config.class;
+    });
   }
 
   /**

@@ -48,7 +48,7 @@ export class DocRenderer {
       title = DocFileUtil.isDecorator(cls.name, source.file) ? `@${title ?? cls.name}` : (title ?? cls.name);
       const node = this.#support.createElement('CodeLink', {
         src: source.file,
-        startRe: new RegExp(`(class|function|interface)\\s+(${cls.name.replaceAll('$', '\\$')})`),
+        startRe: new RegExp(`(class|function|interface)\\s+(${RegExp.escape(cls.name)})`),
         title
       });
       // @ts-expect-error

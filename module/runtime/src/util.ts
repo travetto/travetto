@@ -1,8 +1,4 @@
-import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
 import timers from 'node:timers/promises';
-import path from 'node:path';
-import os from 'node:os';
 
 import { castTo } from './types.ts';
 
@@ -43,14 +39,14 @@ export class Util {
    * @param length The length of the uuid to generate
    */
   static uuid(length: number = 32): string {
-    const bytes = crypto.randomBytes(Math.ceil(length / 2));
+    const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2)));
     if (length === 32) { // Make valid uuid-v4
       // eslint-disable-next-line no-bitwise
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
       // eslint-disable-next-line no-bitwise
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
     }
-    return bytes.toString('hex').substring(0, length);
+    return bytes.toHex().substring(0, length);
   }
 
   /**
@@ -122,12 +118,18 @@ export class Util {
     }
   }
 
-  /** Write file and copy over when ready  */
-  static async bufferedFileWrite(file: string, content: string): Promise<void> {
-    const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
-    await fs.writeFile(temp, content, 'utf8');
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.copyFile(temp, file);
-    await fs.rm(temp, { force: true });
+  /**
+   * Return the stack trace as parts of filename, line, column
+   */
+  static stackTraceToParts(stack?: string): { filename: string, line: number, column: number }[] {
+    if (!stack) {
+      return [];
+    }
+    return stack
+      .replace(/[\\/]/g, '/')
+      .split('\n')
+      .filter(lineText => lineText.includes('('))
+      .map(lineText => lineText.split('(')[1].split(')')[0].split(':'))
+      .map(([filename, line, column]) => ({ filename, line: line ? parseInt(line, 10) : -1, column: column ? parseInt(column, 10) : -1 }));
   }
 }

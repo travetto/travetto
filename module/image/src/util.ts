@@ -57,7 +57,7 @@ export class ImageUtil {
       });
     }
 
-    return builder = builder
+    return builder
       .avif({ force: format === 'avif', ...optimize ? { quality: 70 } : {} })
       .webp({ force: format === 'webp', ...optimize ? { quality: 80 } : {} })
       .png({ force: format === 'png', ...optimize ? { compressionLevel: 9, quality: 80, adaptiveFiltering: true } : {} })

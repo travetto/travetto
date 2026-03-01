@@ -2,13 +2,14 @@ import { Util, AsyncQueue } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
-import type { TestResult } from '../../model/test.ts';
+import type { TestResult, TestStatus } from '../../model/test.ts';
 
 import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
 
 import { TapEmitter } from './tap.ts';
 import { CONSOLE_ENHANCER, type TestResultsEnhancer } from '../enhancer.ts';
+import type { SuiteResult } from '../../model/suite.ts';
 
 type Result = {
   key: string;
@@ -22,12 +23,7 @@ type Result = {
 @TestConsumer()
 export class TapSummaryEmitter implements TestConsumerShape {
 
-  #timings = new Map([
-    ['file', new Map<string, Result>()],
-    ['module', new Map<string, Result>()],
-    ['suite', new Map<string, Result>()],
-    ['test', new Map<string, Result>()],
-  ] as const);
+  #timings = new Map<'test' | 'module' | 'file' | 'suite', Map<string, Result>>();
 
   #terminal: Terminal;
   #results = new AsyncQueue<TestResult>();
@@ -42,6 +38,50 @@ export class TapSummaryEmitter implements TestConsumerShape {
     this.#consumer = new TapEmitter(this.#terminal, this.#enhancer);
   }
 
+  #computeTimings(suite: SuiteResult): void {
+    const [module] = suite.classId.split(/:/);
+    const [file] = suite.classId.split(/#/);
+
+    const testCount = Object.keys(suite.tests).length;
+
+    const foundModule = this.#timings
+      .getOrInsert('module', new Map<string, Result>())
+      .getOrInsert(module, { key: module, duration: 0, tests: 0 });
+
+    foundModule.duration += suite.duration;
+    foundModule.tests += testCount;
+
+    const foundFile = this.#timings
+      .getOrInsert('file', new Map<string, Result>())
+      .getOrInsert(file, { key: file, duration: 0, tests: 0 });
+
+    foundFile.duration += suite.duration;
+    foundFile.tests += testCount;
+
+    this.#timings
+      .getOrInsert('suite', new Map<string, Result>())
+      .set(suite.classId, {
+        key: suite.classId,
+        duration: suite.duration,
+        tests: testCount
+      });
+  }
+
+  #renderTimings(): void {
+    const count = +(this.#options?.count ?? 5);
+    this.#consumer.log('\n---');
+    for (const [title, results] of [...this.#timings.entries()].toSorted((a, b) => a[0].localeCompare(b[0]))) {
+      this.#consumer.log(`${this.#enhancer.suiteName(`Top ${count} slowest ${title}s`)}: `);
+      const top10 = [...results.values()].toSorted((a, b) => b.duration - a.duration).slice(0, count);
+
+      for (const result of top10) {
+        console.log(`  * ${this.#enhancer.testName(result.key)} - ${this.#enhancer.total(result.duration)}ms / ${this.#enhancer.total(result.tests)} tests`);
+      }
+      this.#consumer.log('');
+    }
+    this.#consumer.log('...');
+  }
+
   setOptions(options?: Record<string, unknown>): Promise<void> | void {
     this.#options = options;
     this.#consumer.setOptions(options);
@@ -49,22 +89,20 @@ export class TapSummaryEmitter implements TestConsumerShape {
 
   async onStart(state: TestRunState): Promise<void> {
     this.#consumer.onStart();
-
-    let failed = 0;
-    let skipped = 0;
-    let completed = 0;
+    const total: Record<TestStatus | 'count', number> = { errored: 0, failed: 0, passed: 0, skipped: 0, unknown: 0, count: 0 };
     const success = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
     const fail = StyleUtil.getStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
     this.#progress = this.#terminal.streamToBottom(
       Util.mapAsyncIterable(
         this.#results,
         (value) => {
-          failed += (value.status === 'failed' ? 1 : 0);
-          skipped += (value.status === 'skipped' ? 1 : 0);
-          completed += (value.status !== 'skipped' ? 1 : 0);
-          return { value: `Tests %idx/%total [${failed} failed, ${skipped} skipped] -- ${value.classId}`, total: state.testCount, idx: completed };
+          total[value.status] += 1;
+          total.count += 1;
+          const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
+          return { value: `Tests %idx/%total [${statusLine}] -- ${value.classId}`, total: state.testCount, idx: total.count };
+
         },
-        TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: failed ? fail : success }) })
+        TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: (total.failed || total.errored) ? fail : success }) })
       ),
       { minDelay: 100 }
     );
@@ -77,40 +115,16 @@ export class TapSummaryEmitter implements TestConsumerShape {
       if (test.status === 'failed') {
         this.#consumer.onEvent(event);
       }
-      const tests = this.#timings.get('test')!;
+      const tests = this.#timings.getOrInsert('test', new Map<string, Result>());
       tests.set(`${event.test.classId}/${event.test.methodName}`, {
         key: `${event.test.classId}/${event.test.methodName}`,
         duration: test.duration,
         tests: 1
       });
     } else if (event.type === 'suite' && event.phase === 'after') {
-      const [module] = event.suite.classId.split(/:/);
-      const [file] = event.suite.classId.split(/#/);
-
-      const modules = this.#timings.get('module')!;
-      const files = this.#timings.get('file')!;
-      const suites = this.#timings.get('suite')!;
-
-      if (!modules!.has(module)) {
-        modules.set(module, { key: module, duration: 0, tests: 0 });
+      if (this.#options?.timings) {
+        this.#computeTimings(event.suite);
       }
-
-      if (!files.has(file)) {
-        files.set(file, { key: file, duration: 0, tests: 0 });
-      }
-
-      const testCount = Object.keys(event.suite.tests).length;
-
-      suites.set(event.suite.classId, {
-        key: event.suite.classId,
-        duration: event.suite.duration,
-        tests: testCount
-      });
-
-      files.get(file)!.duration += event.suite.duration;
-      files.get(file)!.tests += testCount;
-      modules.get(module)!.duration += event.suite.duration;
-      modules.get(module)!.tests += testCount;
     }
   }
 
@@ -123,18 +137,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
     this.#consumer.onSummary?.(summary);
 
     if (this.#options?.timings) {
-      const count = +(this.#options?.count ?? 5);
-      this.#consumer.log('\n---');
-      for (const [title, results] of [...this.#timings.entries()].toSorted((a, b) => a[0].localeCompare(b[0]))) {
-        this.#consumer.log(`${this.#enhancer.suiteName(`Top ${count} slowest ${title}s`)}: `);
-        const top10 = [...results.values()].toSorted((a, b) => b.duration - a.duration).slice(0, count);
-
-        for (const result of top10) {
-          console.log(`  * ${this.#enhancer.testName(result.key)} - ${this.#enhancer.total(result.duration)}ms / ${this.#enhancer.total(result.tests)} tests`);
-        }
-        this.#consumer.log('');
-      }
-      this.#consumer.log('...');
+      this.#renderTimings();
     }
   }
 }

@@ -1,43 +1,63 @@
-import crypto from 'node:crypto';
-import { RuntimeError, castKey } from '@travetto/runtime';
+import { timingSafeEqual } from 'node:crypto';
 
-const CHAR_MAPPING = { '/': '_', '+': '-', '=': '' };
+import { BinaryUtil, CodecUtil, type BinaryArray } from '@travetto/runtime';
 
-function timeSafeCompare(a: string, b: string): boolean {
-  const key = crypto.randomBytes(32);
-  const ah = crypto.createHmac('sha256', key).update(a).digest();
-  const bh = crypto.createHmac('sha256', key).update(b).digest();
-  return ah.byteLength === bh.byteLength && crypto.timingSafeEqual(ah, bh);
-}
+const CHAR_MAPPING: Record<string, string> = { '/': '_', '+': '-', '=': '' };
 
 export class KeyGrip {
 
+  static async getRandomHmacKey(): Promise<CryptoKey> {
+    const keyBytes = crypto.getRandomValues(new Uint8Array(32));
+    return crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  }
+
+  static async hmac(value: string, cryptoKey: CryptoKey): Promise<BinaryArray> {
+    const input = BinaryUtil.binaryArrayToBuffer(CodecUtil.fromUTF8String(value));
+    return BinaryUtil.binaryArrayToUint8Array(await crypto.subtle.sign('HMAC', cryptoKey, input));
+  }
+
   #keys: string[];
-  #algorithm: string;
-  #encoding: crypto.BinaryToTextEncoding;
+  #cryptoKeys = new Map<string, Promise<CryptoKey>>();
 
-  constructor(keys: string[], algorithm = 'sha1', encoding: crypto.BinaryToTextEncoding = 'base64') {
-    if (!keys.length) {
-      throw new RuntimeError('Keys must be defined');
-    }
+  constructor(keys: string[]) {
     this.#keys = keys;
-    this.#algorithm = algorithm;
-    this.#encoding = encoding;
   }
 
-  sign(data: string, key?: string): string {
-    return crypto
-      .createHmac(this.#algorithm, key ?? this.#keys[0])
-      .update(data)
-      .digest(this.#encoding)
-      .replace(/[/+=]/g, ch => CHAR_MAPPING[castKey(ch)]);
+  get active(): boolean {
+    return this.#keys.length > 0;
   }
 
-  verify(data: string, digest: string): boolean {
-    return this.index(data, digest) > -1;
+  async getCryptoKey(key: string): Promise<CryptoKey> {
+    return this.#cryptoKeys.getOrInsertComputed(key, async () => {
+      const keyBytes = BinaryUtil.binaryArrayToBuffer(CodecUtil.fromUTF8String(key));
+      return crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    });
   }
 
-  index(data: string, digest: string): number {
-    return this.#keys.findIndex(key => timeSafeCompare(digest, this.sign(data, key)));
+  async sign(data: string, key?: string): Promise<string> {
+    const cryptoKey = await this.getCryptoKey(key ?? this.#keys[0]);
+    const signature = await KeyGrip.hmac(data, cryptoKey);
+    return CodecUtil.toBase64String(signature).replace(/[/+=]/g, ch => CHAR_MAPPING[ch]);
+  }
+
+  verify(data: string, digest: string): Promise<boolean> {
+    return this.isValid(data, digest).then(result => result !== 'invalid');
+  }
+
+  async isValid(data: string, digest: string): Promise<'valid' | 'invalid' | 'stale'> {
+    const key = await KeyGrip.getRandomHmacKey();
+    const digestBytes = BinaryUtil.binaryArrayToUint8Array(await KeyGrip.hmac(digest, key));
+
+    for (let i = 0; i < this.#keys.length; i++) {
+      const signedBytes = BinaryUtil.binaryArrayToUint8Array(await KeyGrip.hmac(await this.sign(data, this.#keys[i]), key));
+
+      if (
+        signedBytes.byteLength === digestBytes.byteLength &&
+        timingSafeEqual(digestBytes, signedBytes)
+      ) {
+        return i === 0 ? 'valid' : 'stale';
+      }
+    }
+    return 'invalid';
   }
 }

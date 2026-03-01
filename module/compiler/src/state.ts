@@ -306,10 +306,9 @@ export class CompilerState implements CompilerHost {
   }
 
   getSourceFile(sourceFile: string, language: ScriptTarget): SourceFile {
-    if (!this.#sourceFileObjects.has(sourceFile)) {
+    return this.#sourceFileObjects.getOrInsertComputed(sourceFile, () => {
       const content = this.readFile(sourceFile)!;
-      this.#sourceFileObjects.set(sourceFile, ts.createSourceFile(sourceFile, content ?? '', language));
-    }
-    return this.#sourceFileObjects.get(sourceFile)!;
+      return ts.createSourceFile(sourceFile, content ?? '', language);
+    });
   }
 }

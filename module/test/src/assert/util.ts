@@ -1,10 +1,10 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { asFull, type Class, JSONUtil, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asFull, type Class, JSONUtil, hasFunction, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
 
-import type { TestConfig, Assertion, TestResult } from '../model/test.ts';
-import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
+import type { TestConfig, TestResult } from '../model/test.ts';
+import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
 
 const isCleanable = hasFunction<{ toClean(): unknown }>('toClean');
 
@@ -39,92 +39,94 @@ export class AssertUtil {
   /**
    * Determine file location for a given error and the stack trace
    */
-  static getPositionOfError(error: Error, importLocation: string): { import: string, line: number } {
-    const workingDirectory = Runtime.mainSourcePath;
-    const lines = (error.stack ?? new Error().stack!)
-      .replace(/[\\/]/g, '/')
-      .split('\n')
-      // Exclude node_modules, target self
-      .filter(lineText => lineText.includes(workingDirectory) && (!lineText.includes('node_modules') || lineText.includes('/support/')));
+  static getPositionOfError(error: Error): { import: string, line: number } | undefined {
+    const stack = error.stack ?? new Error().stack!;
+    const frames = Util.stackTraceToParts(stack)
+      .map(frame => {
+        const imp = (RuntimeIndex.getFromSource(frame.filename) ?? RuntimeIndex.getEntry(frame.filename))?.import;
+        return { ...frame, import: imp! };
+      })
+      .filter(frame => !!frame.import);
 
-    const filename = RuntimeIndex.getFromImport(importLocation)?.sourceFile!;
-
-    let best = lines.filter(lineText => lineText.includes(filename))[0];
-
-    if (!best) {
-      [best] = lines.filter(lineText => lineText.includes(`${workingDirectory}/test`));
-    }
-
-    if (!best) {
-      return { import: importLocation, line: 1 };
-    }
-
-    const location = best.trim().split(/\s+/g).slice(1).pop()!;
-    if (!location) {
-      return { import: importLocation, line: 1 };
-    }
-
-    const [file, lineNumber] = location
-      .replace(/[()]/g, '')
-      .replace(/^[A-Za-z]:/, '')
-      .split(':');
-
-    let line = parseInt(lineNumber, 10);
-    if (Number.isNaN(line)) {
-      line = -1;
-    }
-
-    const outFileParts = file.split(workingDirectory.replace(/^[A-Za-z]:/, ''));
-
-    const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
-
-    const result = { import: RuntimeIndex.getFromSource(outFile)?.import!, line };
-
-    return result;
+    return frames[0];
   }
 
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateSuiteFailure(suite: SuiteConfig, methodName: string, error: Error): SuiteFailure {
-    const { import: imp, ...rest } = this.getPositionOfError(error, suite.import);
-    let line = rest.line;
-
-    if (line === 1 && suite.lineStart) {
-      line = suite.lineStart;
-    }
-
-    const msg = error.message.split(/\n/)[0];
-
-    const core = { import: imp, classId: suite.classId, methodName, sourceHash: suite.sourceHash };
-    const coreAll = { ...core, description: msg, lineStart: line, lineEnd: line, lineBodyStart: line };
-
-    const assert: Assertion = {
-      ...core,
-      operator: 'throw', error, line, message: msg, text: methodName
-    };
+  static generateSuiteTestFailure(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): TestResult {
+    const { suite, test, error, importLocation } = config;
+    const testImport = importLocation ?? test.import;
+    const position = this.getPositionOfError(error);
+    const line = position?.line ?? (testImport === suite.import ? suite.lineStart : 1);
     const testResult: TestResult = {
-      ...coreAll,
-      status: 'failed', error, duration: 0, durationTotal: 0, assertions: [assert], output: []
-    };
-    const test: TestConfig = {
-      ...coreAll,
-      class: suite.class, skip: false
+      ...suite.tests[test.methodName],
+      suiteLineStart: suite.lineStart,
+      status: 'errored',
+      error,
+      duration: 0,
+      durationTotal: 0,
+      output: [],
+      assertions: [{
+        import: position?.import ?? testImport,
+        methodName: test.methodName,
+        classId: suite.classId,
+        operator: 'throw',
+        error,
+        line,
+        message: error.message.split(/\n/)[0],
+        text: test.methodName
+      }],
     };
 
-    return { assert, testResult, test, suite };
+    return testResult;
   }
 
   /**
-   * Define import failure as a SuiteFailure object
+   * Generate suite failure
    */
-  static gernerateImportFailure(importLocation: string, error: Error): SuiteFailure {
+  static generateSuiteTestFailures(suite: SuiteConfig, error: Error): TestResult[] {
+    const finalError = error.cause instanceof Error ? error.cause : error;
+    return Object.values(suite.tests).map(test => this.generateSuiteTestFailure({ suite, test, error: finalError }));
+  }
+
+  /**
+   * Define import failure as a TestResult
+   */
+  static gernerateImportFailure(importLocation: string, error: Error): { result: TestResult, test: TestConfig, suite: SuiteResult & SuiteConfig } {
     const name = path.basename(importLocation);
     const classId = `${RuntimeIndex.getFromImport(importLocation)?.id}#${name}`;
     const suite = asFull<SuiteConfig & SuiteResult>({
       class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: importLocation
     });
     error.message = error.message.replaceAll(Runtime.mainSourcePath, '.');
-    return this.generateSuiteFailure(suite, 'require', error);
+    const result = this.generateSuiteTestFailure({
+      suite,
+      test: {
+        methodName: 'require',
+        classId,
+        import: importLocation,
+        class: suite.class,
+        lineBodyStart: 1,
+        lineStart: 1,
+        lineEnd: 1,
+        skip: false
+      },
+      error
+    });
+    const test: TestConfig = {
+      methodName: 'import',
+      classId,
+      import: importLocation,
+      declarationImport: importLocation,
+      lineStart: 0,
+      lineEnd: 0,
+      lineBodyStart: 0,
+      tags: [],
+      description: 'Import Failure',
+      skip: false,
+      class: undefined!
+    };
+    return { result, test, suite };
   }
 }

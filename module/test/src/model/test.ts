@@ -10,7 +10,7 @@ export type TestDiffSource = Record<string, {
   methods: Record<string, number>;
 }>;
 
-export type TestStatus = 'passed' | 'skipped' | 'failed' | 'unknown';
+export type TestStatus = 'passed' | 'skipped' | 'errored' | 'failed' | 'unknown';
 
 /**
  * Specific configuration for a test
@@ -116,6 +116,10 @@ export interface TestResult extends TestCore {
    * Logging output
    */
   output: TestLog[];
+  /**
+   * Know where the suite started for this test
+   */
+  suiteLineStart: number;
 }
 
 /**

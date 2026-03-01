@@ -159,7 +159,7 @@ class UserService {
 ```
 
 ## Common Utilities
-The [AuthModelUtil](https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L11) provides the following functionality:
+The [AuthModelUtil](https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L6) provides the following functionality:
 
 **Code: Auth util structure**
 ```typescript
@@ -173,7 +173,7 @@ export class AuthModelUtil {
    * @param keylen Length of hash
    * @param digest Digest method
    */
-  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string>;
+  static async generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'SHA-256'): Promise<string>;
   /**
    * Generate a salted password, with the ability to validate the password
    *

@@ -60,22 +60,14 @@ export class VisitorFactory<S extends State = State> {
    */
   #init(transformers: NodeTransformer<S, TransformerType, ts.Node>[]): void {
     for (const trn of transformers) {
-      if (!this.#transformers.has(trn.type)) {
-        this.#transformers.set(trn.type, {});
-      }
-      const set = this.#transformers.get(trn.type)!;
+      const set = this.#transformers.getOrInsert(trn.type, new Map());
+
       const targets = trn.target && trn.target.length ? trn.target : ['__all__'];
 
       for (const target of targets) {
         for (const phase of ['before', 'after'] as const) {
           if (trn[phase]) {
-            if (!set[phase]) {
-              set[phase] = new Map();
-            }
-            if (!set[phase]!.has(target)) {
-              set[phase]!.set(target, []);
-            }
-            set[phase]!.get(target)!.push(trn);
+            set.getOrInsert(phase, new Map()).getOrInsert(target, []).push(trn);
           }
         }
       }
@@ -138,11 +130,11 @@ export class VisitorFactory<S extends State = State> {
    * Handle transformer that target both ascent and descent
    */
   executePhaseAlways<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T): T | undefined {
-    if (!set[phase]?.size) {
+    if (!set.get(phase)?.size) {
       return;
     }
 
-    for (const all of set[phase]!.get('__all__') ?? []) {
+    for (const all of set.get(phase)!.get('__all__') ?? []) {
       node = all[phase]!<T>(state, node) ?? node;
     }
     return node;
@@ -152,7 +144,7 @@ export class VisitorFactory<S extends State = State> {
    * Handle a single phase of transformation
    */
   executePhase<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T): T | undefined {
-    if (!set[phase]?.size) {
+    if (!set.get(phase)?.size) {
       return;
     }
 
@@ -169,7 +161,7 @@ export class VisitorFactory<S extends State = State> {
     }
 
     for (const [key, decorator] of targets.entries()) {
-      const values = set[phase]!.get(key);
+      const values = set.get(phase)!.get(key);
       if (!values || !values.length) {
         continue;
       }

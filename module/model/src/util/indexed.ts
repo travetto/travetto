@@ -71,7 +71,6 @@ export class ModelIndexedUtil {
         if (empty === undefined || empty === Error) {
           throw new IndexNotSupported(cls, config, `Missing field value for ${parts.join('.')}`);
         }
-        itemRef = castTo(empty!);
       } else {
         if (field !== sortField || (opts.includeSortInFields ?? true)) {
           fields.push({ path: parts, value: castTo(itemRef) });

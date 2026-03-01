@@ -44,7 +44,7 @@ export interface TestCore extends SuiteCore {
    */
   lineBodyStart: number;
   /**
-   * For extended suites, this is location of the actual file where the test exists
+   * For extended suites, this is where the test is declared
    */
-  sourceImport?: string;
+  declarationImport?: string;
 }

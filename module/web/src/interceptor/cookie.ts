@@ -10,6 +10,7 @@ import type { WebInterceptorCategory } from '../types/core.ts';
 
 import type { WebConfig } from '../config.ts';
 import type { Cookie, CookieSetOptions } from '../types/cookie.ts';
+import { KeyGrip } from '../util/keygrip.ts';
 import { CookieJar } from '../util/cookie.ts';
 import type { WebAsyncContext } from '../context.ts';
 
@@ -61,6 +62,8 @@ export class CookieInterceptor implements WebInterceptor<CookieConfig> {
 
   #cookieJar = new AsyncContextValue<CookieJar>(this);
 
+  keyGrip: KeyGrip;
+
   category: WebInterceptorCategory = 'request';
 
   @Inject()
@@ -77,13 +80,13 @@ export class CookieInterceptor implements WebInterceptor<CookieConfig> {
 
   postConstruct(): void {
     this.webAsyncContext.registerSource(CookieJar, () => this.#cookieJar.get());
+    this.keyGrip ??= new KeyGrip(this.config.keys ?? []);
   }
 
   finalizeConfig({ config }: WebInterceptorContext<CookieConfig>): CookieConfig {
     const url = new URL(this.webConfig.baseUrl ?? 'x://localhost');
     config.secure ??= url.protocol === 'https:';
     config.domain ??= url.hostname;
-    config.signed ??= !!config.keys?.length;
     return config;
   }
 
@@ -92,11 +95,12 @@ export class CookieInterceptor implements WebInterceptor<CookieConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<CookieConfig>): Promise<WebResponse> {
-    const jar = new CookieJar(config).importCookieHeader(request.headers.get('Cookie'));
+    const jar = new CookieJar(config, this.keyGrip);
+    await jar.importCookieHeader(request.headers.get('Cookie'));
     this.#cookieJar.set(jar);
 
     const response = await next();
-    for (const cookie of jar.exportSetCookieHeader()) { response.headers.append('Set-Cookie', cookie); }
+    for (const cookie of await jar.exportSetCookieHeader()) { response.headers.append('Set-Cookie', cookie); }
     return response;
   }
 }

@@ -89,16 +89,20 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   @Inject()
   config: WebAuthConfig;
 
-  getCookie(headers: WebHeaders): Cookie | undefined {
-    return new CookieJar().importSetCookieHeader(headers.getSetCookie()).getAll()[0];
+  async getCookie(headers: WebHeaders): Promise<Cookie | undefined> {
+    const jar = new CookieJar();
+    await jar.importSetCookieHeader(headers.getSetCookie());
+    return jar.getAll()[0];
   }
 
-  getCookieHeader(headers: WebHeaders): string | undefined {
-    return new CookieJar().importSetCookieHeader(headers.getSetCookie()).exportCookieHeader();
+  async getCookieHeader(headers: WebHeaders): Promise<string | undefined> {
+    const jar = new CookieJar();
+    await jar.importSetCookieHeader(headers.getSetCookie());
+    return jar.exportCookieHeader();
   }
 
-  getCookieExpires(headers: WebHeaders): Date | undefined {
-    const v = this.getCookie(headers)?.expires;
+  async getCookieExpires(headers: WebHeaders): Promise<Date | undefined> {
+    const v = (await this.getCookie(headers))?.expires;
     return v ? new Date(v) : undefined;
   }
 
@@ -151,7 +155,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
       }
     }, false);
     assert(statusCode === 201);
-    const cookie = this.getCookieHeader(headers);
+    const cookie = await this.getCookieHeader(headers);
     assert(cookie);
 
     const { context: { httpStatusCode: lastStatus } } = await this.request({
@@ -222,7 +226,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
       }
     }, false);
     assert(statusCode === 201);
-    const cookie = this.getCookieHeader(headers);
+    const cookie = await this.getCookieHeader(headers);
     assert(cookie);
 
     const { body, context: { httpStatusCode: lastStatus } } = await this.request({
@@ -250,17 +254,17 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     assert(statusCode === 201);
 
     const start = Date.now();
-    const cookie = this.getCookieHeader(headers);
+    const cookie = await this.getCookieHeader(headers);
     assert(cookie);
 
-    const expires = this.getCookieExpires(headers);
+    const expires = await this.getCookieExpires(headers);
     assert(expires);
 
     const { headers: selfHeaders, context: { httpStatusCode: lastStatus } } = await this.request({
       context: { httpMethod: 'GET', path: '/test/auth/self' },
       headers: { cookie }
     }, false);
-    assert(this.getCookie(selfHeaders) === undefined);
+    assert(await this.getCookie(selfHeaders) === undefined);
     assert(lastStatus === 200);
 
     const used = (Date.now() - start);
@@ -272,9 +276,9 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
       headers: { cookie }
     }, false);
     assert(lastStatus2 === 200);
-    assert(this.getCookie(selfHeadersRenew));
+    assert(await this.getCookie(selfHeadersRenew));
 
-    const expiresRenew = this.getCookieExpires(selfHeadersRenew);
+    const expiresRenew = await this.getCookieExpires(selfHeadersRenew);
     assert(expiresRenew);
 
     const delta = expiresRenew.getTime() - expires.getTime();

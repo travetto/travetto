@@ -1,10 +1,8 @@
-import { AssertionError } from 'node:assert';
-
 import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 
 import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
-import type { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
+import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
 import { AssertCheck } from '../assert/check.ts';
 import { AssertCapture } from '../assert/capture.ts';
@@ -12,7 +10,6 @@ import { ConsoleCapture } from './console.ts';
 import { TestPhaseManager } from './phase.ts';
 import { AssertUtil } from '../assert/util.ts';
 import { Barrier } from './barrier.ts';
-import { ExecutionError } from './error.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 import { TestModelUtil } from '../model/util.ts';
 
@@ -29,25 +26,21 @@ export class TestExecutor {
     this.#consumer = consumer;
   }
 
-  /**
-   * Handles communicating a suite-level error
-   * @param failure
-   * @param withSuite
-   */
-  #onSuiteFailure(failure: SuiteFailure, triggerSuite?: boolean): void {
-    if (triggerSuite) {
-      this.#consumer.onEvent({ type: 'suite', phase: 'before', suite: failure.suite });
+  #onSuiteTestFailure(result: TestResult, test: TestConfig): void {
+    this.#consumer.onEvent({ type: 'test', phase: 'before', test });
+    for (const assertion of result.assertions) {
+      this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion });
     }
+    this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
+  }
 
-    this.#consumer.onEvent({ type: 'test', phase: 'before', test: failure.test });
-    this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: failure.assert });
-    this.#consumer.onEvent({ type: 'test', phase: 'after', test: failure.testResult });
-
-    if (triggerSuite) {
-      this.#consumer.onEvent({
-        type: 'suite', phase: 'after',
-        suite: { ...castTo(failure.suite), failed: 1, passed: 0, total: 1, skipped: 0 }
-      });
+  #recordSuiteErrors(suiteConfig: SuiteConfig, suiteResult: SuiteResult, errors: TestResult[]): void {
+    for (const test of errors) {
+      if (!suiteResult.tests[test.methodName]) {
+        this.#onSuiteTestFailure(test, suiteConfig.tests[test.methodName]);
+        suiteResult.errored += 1;
+        suiteResult.total += 1;
+      }
     }
   }
 
@@ -83,8 +76,17 @@ export class TestExecutor {
   #skipTest(test: TestConfig, result: SuiteResult): void {
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
-    result.skipped++;
-    this.#consumer.onEvent({ type: 'test', phase: 'after', test: { ...test, assertions: [], duration: 0, durationTotal: 0, output: [], status: 'skipped' } });
+    result.skipped += 1;
+    result.total += 1;
+    this.#consumer.onEvent({
+      type: 'test',
+      phase: 'after',
+      test: {
+        ...test,
+        suiteLineStart: result.lineStart,
+        assertions: [], duration: 0, durationTotal: 0, output: [], status: 'skipped'
+      }
+    });
   }
 
   /**
@@ -94,6 +96,7 @@ export class TestExecutor {
     return {
       passed: 0,
       failed: 0,
+      errored: 0,
       skipped: 0,
       unknown: 0,
       total: 0,
@@ -111,7 +114,7 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  async executeTest(test: TestConfig): Promise<TestResult> {
+  async executeTest(test: TestConfig, suite: SuiteConfig): Promise<TestResult> {
 
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
@@ -123,11 +126,12 @@ export class TestExecutor {
       description: test.description,
       classId: test.classId,
       tags: test.tags,
+      suiteLineStart: suite.lineStart,
       lineStart: test.lineStart,
       lineEnd: test.lineEnd,
       lineBodyStart: test.lineBodyStart,
       import: test.import,
-      sourceImport: test.sourceImport,
+      declarationImport: test.declarationImport,
       sourceHash: test.sourceHash,
       status: 'unknown',
       assertions: [],
@@ -148,28 +152,15 @@ export class TestExecutor {
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
     // Run method and get result
-    let error = await this.#executeTestMethod(test);
-
-    if (!error) {
-      error = AssertCheck.checkError(test.shouldThrow, error); // Rewrite error
-    } else {
-      if (error instanceof AssertionError) {
-        // Pass, do nothing
-      } else if (error instanceof ExecutionError) { // Errors that are not expected
-        AssertCheck.checkUnhandled(test, error);
-      } else if (test.shouldThrow) {
-        error = AssertCheck.checkError(test.shouldThrow, error); // Rewrite error
-      } else if (error instanceof Error) {
-        AssertCheck.checkUnhandled(test, error);
-      }
-    }
+    const error = await this.#executeTestMethod(test);
+    const [status, finalError] = AssertCheck.validateTestResultError(test, error);
 
     Object.assign(result, {
-      status: error ? 'failed' : 'passed',
+      status,
       output: consoleCapture.end(),
       assertions: getAssertions(),
       duration: Date.now() - startTime,
-      ...(error ? { error } : {})
+      ...(finalError ? { error: finalError } : {})
     });
 
     // Mark completion
@@ -200,7 +191,7 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
-    const manager = new TestPhaseManager(suite, result, event => this.#onSuiteFailure(event));
+    const manager = new TestPhaseManager(suite);
 
     const originalEnv = { ...process.env };
 
@@ -220,31 +211,37 @@ export class TestExecutor {
         process.env = { ...suiteEnv };
 
         const testStart = Date.now();
+        try {
 
-        // Handle BeforeEach
-        await manager.startPhase('each');
+          // Handle BeforeEach
+          await manager.startPhase('each');
 
-        // Run test
-        const testResult = await this.executeTest(test);
-        result[testResult.status]++;
-        result.tests[testResult.methodName] = testResult;
+          // Run test
+          const testResult = await this.executeTest(test, suite);
+          result.tests[testResult.methodName] = testResult;
+          result[testResult.status]++;
+          result.total += 1;
 
-        // Handle after each
-        await manager.endPhase('each');
-        testResult.durationTotal = Date.now() - testStart;
+          // Handle after each
+          await manager.endPhase('each');
+          testResult.durationTotal = Date.now() - testStart;
+        } catch (testError) {
+          const errors = await manager.errorPhase('each', testError, suite, test);
+          this.#recordSuiteErrors(suite, result, errors);
+        }
       }
 
       // Handle after all
       await manager.endPhase('all');
-    } catch (error) {
-      await manager.onError(error);
+    } catch (suiteError) {
+      const errors = await manager.errorPhase('all', suiteError, suite);
+      this.#recordSuiteErrors(suite, result, errors);
     }
 
     // Restore env
     process.env = { ...originalEnv };
 
     result.duration = Date.now() - startTime;
-    result.total = result.passed + result.failed + result.skipped;
     result.status = TestModelUtil.countsToTestStatus(result);
 
     // Mark suite complete
@@ -262,7 +259,12 @@ export class TestExecutor {
         throw error;
       }
       console.error(error);
-      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(run.import, error));
+
+      // Fire import failure as a test failure for each test in the suite
+      const { result, test, suite } = AssertUtil.gernerateImportFailure(run.import, error);
+      this.#consumer.onEvent({ type: 'suite', phase: 'before', suite });
+      this.#onSuiteTestFailure(result, test);
+      this.#consumer.onEvent({ type: 'suite', phase: 'after', suite });
       return;
     }
 

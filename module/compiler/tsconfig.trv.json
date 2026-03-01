@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
-    "module": "ES2022",
+    "module": "esnext",
     "target": "esnext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "lib": [
-      "ES2024",
-      "ESNext.Collection"
+      "ESNext",
     ],
     "jsx": "react-jsx",
+    "stableTypeOrdering": true,
     "strict": true,
     "declaration": true,
     "declarationMap": true,
-    "esModuleInterop": true,
+    "noUncheckedSideEffectImports": true,
+    "libReplacement": false,
     "strictPropertyInitialization": false,
     "erasableSyntaxOnly": true,
     "experimentalDecorators": true,

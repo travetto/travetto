@@ -321,14 +321,13 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
    * Provides the prototype-derived descriptor for a property
    */
   getAccessorDescriptor(field: string): PropertyDescriptor {
-    if (!this.#accessorDescriptors.has(field)) {
+    return this.#accessorDescriptors.getOrInsertComputed(field, () => {
       let proto = this.#cls.prototype;
       while (proto && !Object.hasOwn(proto, field)) {
         proto = proto.prototype;
       }
-      this.#accessorDescriptors.set(field, Object.getOwnPropertyDescriptor(proto, field)!);
-    }
-    return this.#accessorDescriptors.get(field)!;
+      return Object.getOwnPropertyDescriptor(proto, field)!;
+    });
   }
 
   /**

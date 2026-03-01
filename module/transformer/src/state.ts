@@ -145,12 +145,11 @@ export class TransformerState implements State {
    * Import a decorator, generally to handle erasure
    */
   importDecorator(location: string, name: string): ts.PropertyAccessExpression | undefined {
-    if (!this.#decorators.has(`${location}:${name}`)) {
+    return this.#decorators.getOrInsertComputed(`${location}:${name}`, () => {
       const ref = this.#imports.importFile(location);
       const identifier = this.factory.createIdentifier(name);
-      this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.identifier, identifier));
-    }
-    return this.#decorators.get(name);
+      return this.factory.createPropertyAccessExpression(ref.identifier, identifier);
+    });
   }
 
   /**
@@ -158,7 +157,7 @@ export class TransformerState implements State {
    */
   createDecorator(location: string, name: string, ...contents: (ts.Expression | undefined)[]): ts.Decorator {
     this.importDecorator(location, name);
-    return CoreUtil.createDecorator(this.factory, this.#decorators.get(name)!, ...contents);
+    return CoreUtil.createDecorator(this.factory, this.#decorators.get(`${location}:${name}`)!, ...contents);
   }
 
   /**
@@ -225,10 +224,7 @@ export class TransformerState implements State {
     } else if (before !== undefined) {
       idx = before;
     }
-    if (!this.added.has(idx)) {
-      this.added.set(idx, []);
-    }
-    this.added.get(idx)!.push(...added);
+    this.added.getOrInsert(idx, []).push(...added);
   }
 
   /**
@@ -379,11 +375,11 @@ export class TransformerState implements State {
    */
   registerIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
     let exists = true;
-    if (!this.#syntheticIdentifiers.has(id)) {
-      this.#syntheticIdentifiers.set(id, this.factory.createIdentifier(id));
+    const resolved = this.#syntheticIdentifiers.getOrInsertComputed(id, () => {
       exists = false;
-    }
-    return [this.#syntheticIdentifiers.get(id)!, exists];
+      return this.factory.createIdentifier(id);
+    });
+    return [resolved, exists];
   }
 
   /**
