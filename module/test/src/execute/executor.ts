@@ -26,7 +26,7 @@ export class TestExecutor {
     this.#consumer = consumer;
   }
 
-  #onSuiteTestFailure(result: TestResult, test: TestConfig): void {
+  #onSuiteTestError(result: TestResult, test: TestConfig): void {
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
     for (const assertion of result.assertions) {
       this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion });
@@ -37,7 +37,7 @@ export class TestExecutor {
   #recordSuiteErrors(suiteConfig: SuiteConfig, suiteResult: SuiteResult, errors: TestResult[]): void {
     for (const test of errors) {
       if (!suiteResult.tests[test.methodName]) {
-        this.#onSuiteTestFailure(test, suiteConfig.tests[test.methodName]);
+        this.#onSuiteTestError(test, suiteConfig.tests[test.methodName]);
         suiteResult.errored += 1;
         suiteResult.total += 1;
       }
@@ -263,7 +263,7 @@ export class TestExecutor {
       // Fire import failure as a test failure for each test in the suite
       const { result, test, suite } = AssertUtil.gernerateImportFailure(run.import, error);
       this.#consumer.onEvent({ type: 'suite', phase: 'before', suite });
-      this.#onSuiteTestFailure(result, test);
+      this.#onSuiteTestError(result, test);
       this.#consumer.onEvent({ type: 'suite', phase: 'after', suite });
       return;
     }
