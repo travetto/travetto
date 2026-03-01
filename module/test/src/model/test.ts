@@ -116,6 +116,10 @@ export interface TestResult extends TestCore {
    * Logging output
    */
   output: TestLog[];
+  /**
+   * Know where the suite started for this test
+   */
+  suiteLineStart: number;
 }
 
 /**

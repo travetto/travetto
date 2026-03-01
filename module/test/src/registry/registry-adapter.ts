@@ -81,7 +81,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         class: this.#cls,
         tags: [],
         skip: false,
-        sourceImport: Runtime.getImport(this.#cls),
+        declarationImport: Runtime.getImport(this.#cls),
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],

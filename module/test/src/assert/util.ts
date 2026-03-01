@@ -58,6 +58,7 @@ export class AssertUtil {
     const { import: assertImport, line } = this.getPositionOfError(error, importLocation);
     const testResult: TestResult = {
       ...suite.tests[methodName],
+      suiteLineStart: suite.lineStart,
       status: 'failed',
       error,
       duration: 0,

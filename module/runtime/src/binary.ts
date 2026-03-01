@@ -29,7 +29,7 @@ export type BinaryType = BinaryArray | BinaryStream | BinaryContainer;
 
 const BINARY_CONSTRUCTOR_SET = new Set<unknown>([
   Readable, Buffer, Blob, ReadableStream, ArrayBuffer, Uint8Array,
-  Uint16Array, Uint32Array, Uint8ClampedArray
+  Uint16Array, Uint32Array, Uint8ClampedArray, File
 ]);
 
 let BINARY_REFS: Set<unknown> | undefined;

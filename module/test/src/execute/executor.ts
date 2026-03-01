@@ -73,7 +73,15 @@ export class TestExecutor {
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
     result.skipped++;
-    this.#consumer.onEvent({ type: 'test', phase: 'after', test: { ...test, assertions: [], duration: 0, durationTotal: 0, output: [], status: 'skipped' } });
+    this.#consumer.onEvent({
+      type: 'test',
+      phase: 'after',
+      test: {
+        ...test,
+        suiteLineStart: result.lineStart,
+        assertions: [], duration: 0, durationTotal: 0, output: [], status: 'skipped'
+      }
+    });
   }
 
   /**
@@ -101,7 +109,7 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  async executeTest(test: TestConfig): Promise<TestResult> {
+  async executeTest(test: TestConfig, suite: SuiteConfig): Promise<TestResult> {
 
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
@@ -113,11 +121,12 @@ export class TestExecutor {
       description: test.description,
       classId: test.classId,
       tags: test.tags,
+      suiteLineStart: suite.lineStart,
       lineStart: test.lineStart,
       lineEnd: test.lineEnd,
       lineBodyStart: test.lineBodyStart,
       import: test.import,
-      sourceImport: test.sourceImport,
+      declarationImport: test.declarationImport,
       sourceHash: test.sourceHash,
       status: 'unknown',
       assertions: [],
@@ -202,7 +211,7 @@ export class TestExecutor {
         await manager.startPhase('each');
 
         // Run test
-        const testResult = await this.executeTest(test);
+        const testResult = await this.executeTest(test, suite);
         result.tests[testResult.methodName] = testResult;
         result[testResult.status]++;
         result.total += 1;
