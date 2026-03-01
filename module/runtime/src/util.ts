@@ -6,7 +6,7 @@ import { castTo } from './types.ts';
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
 type StackFrame = { message: string, filename: string, line: number, column: number };
 
-const STACK_POSITION_REGEX = /[(]\s{0,5}(?<filename>[^()]{1,1000}[.]([cm]?[jt]s))([:](?<line>\d{1,10}))?([:](?<column>\d{1,10}))?\s{0,5}[)]/;
+const STACK_POSITION_PATTERN = /[(]\s{0,5}(?<filename>[^()]{1,1000}[.]([cm]?[jt]s))([:](?<line>\d{1,10}))?([:](?<column>\d{1,10}))?\s{0,5}[)]/;
 
 /**
  * Grab bag of common utilities
@@ -132,7 +132,7 @@ export class Util {
     return stack
       .split('\n')
       .map(frameText => {
-        const match = STACK_POSITION_REGEX.exec(frameText);
+        const match = STACK_POSITION_PATTERN.exec(frameText);
         if (!match || !match.groups) {
           return undefined;
         }

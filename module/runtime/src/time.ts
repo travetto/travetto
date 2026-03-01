@@ -16,7 +16,7 @@ type TemporalUnit = typeof TIME_UNIT_TO_TEMPORAL_UNIT[keyof typeof TIME_UNIT_TO_
 export type TimeSpan = `${number}${keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT}`;
 export type TimeUnit = keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT;
 
-const TIME_PATTERN = /^(?<amount>-?[0-9]+)(?<unit>(?:(?:year|month|week|day|hour|minute|second|millisecond)s?)|(?:y|M|w|d|h|m|s|ms))$/;
+const TIME_PATTERN = /^(?<amount>-?[0-9]+)(?<unit>(?:year|month|week|day|hour|minute|second|millisecond)s?|y|M|w|d|h|m|s|ms)$/;
 
 export class TimeUtil {
 
