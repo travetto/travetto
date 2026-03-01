@@ -33,7 +33,7 @@ export class DeclarationUtil {
    * Find declaration for a type, symbol or a declaration
    */
   static getDeclarations(type: ts.Type | ts.Symbol | ts.Declaration[]): ts.Declaration[] {
-    let declarations: ts.Declaration[] = [];
+    let declarations: ts.Declaration[];
     if (Array.isArray(type)) {
       declarations = type;
     } else {

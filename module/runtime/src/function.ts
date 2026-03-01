@@ -65,9 +65,5 @@ export function describeFunction(input?: Function): FunctionMetadata | undefined
 
 const foreignTypeRegistry = new Map<string, Function>();
 export function foreignType(id: string): Function {
-  if (!foreignTypeRegistry.has(id)) {
-    const type = class { static Ⲑid = id; };
-    foreignTypeRegistry.set(id, type);
-  }
-  return foreignTypeRegistry.get(id)!;
+  return foreignTypeRegistry.getOrInsert(id, class { static Ⲑid = id; });
 }

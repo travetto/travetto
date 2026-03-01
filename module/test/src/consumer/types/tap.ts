@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { stringify } from 'yaml';
 
-import { Terminal } from '@travetto/terminal';
+import { Terminal, StyleUtil } from '@travetto/terminal';
 import { TimeUtil, RuntimeIndex, hasToJSON, JSONUtil } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
@@ -41,7 +41,7 @@ export class TapEmitter implements TestConsumerShape {
    */
   onStart(): void {
     this.#start = Date.now();
-    this.log(this.#enhancer.suiteName('TAP version 14')!);
+    this.log(this.#enhancer.suiteName('TAP version 14'));
   }
 
   /**
@@ -79,23 +79,33 @@ export class TapEmitter implements TestConsumerShape {
     if (event.type === 'test' && event.phase === 'after') {
       const { test } = event;
       const suiteId = this.#enhancer.suiteName(test.classId);
-      let header = `${suiteId} - ${this.#enhancer.testName(test.methodName)}`;
-      if (test.description) {
-        header += `: ${this.#enhancer.testDescription(test.description)}`;
-      }
+      const suiteSourceFile = RuntimeIndex.getFromImport(test.import)!.sourceFile;
+      const testSourceFile = test.declarationImport ? RuntimeIndex.getFromImport(test.declarationImport)!.sourceFile : suiteSourceFile;
+
+      const header = [
+        StyleUtil.link(suiteId, `file://${suiteSourceFile}#${test.suiteLineStart ?? 1}`),
+        ' - ',
+        StyleUtil.link(this.#enhancer.testName(test.methodName), `file://${testSourceFile}#${test.lineStart}`),
+        ...test.description ? [`: ${this.#enhancer.testDescription(test.description)}`] : []
+      ].join('');
+
       this.log(`# ${header}`);
 
       // Handle each assertion
       if (test.assertions.length) {
         let subCount = 0;
         for (const asrt of test.assertions) {
+          const assertSourceFile = RuntimeIndex.getFromImport(asrt.import)!.sourceFile;
           const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
-          const location = asrt.import ? `./${path.relative(process.cwd(), RuntimeIndex.getFromImport(asrt.import)!.sourceFile)}` : '<unknown>';
+          const location = asrt.import ? `./${path.relative(process.cwd(), assertSourceFile)}` : '<unknown>';
           let subMessage = [
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(location)}:${this.#enhancer.assertLine(asrt.line)}`
+            StyleUtil.link(
+              `${this.#enhancer.assertFile(location)}:${this.#enhancer.assertLine(asrt.line)}`,
+              `file://${assertSourceFile}#${asrt.line}`
+            )
           ].join(' ');
 
           if (asrt.error) {
@@ -124,10 +134,16 @@ export class TapEmitter implements TestConsumerShape {
       this.log(status);
 
       // Handle error
-      if (test.status === 'failed' && test.error) {
-        const msg = this.errorToString(test.error);
-        if (msg) {
-          this.logMeta({ error: msg });
+      switch (test.status) {
+        case 'errored':
+        case 'failed': {
+          if (test.error) {
+            const msg = this.errorToString(test.error);
+            if (msg) {
+              this.logMeta({ error: msg });
+            }
+          }
+          break;
         }
       }
 
@@ -162,13 +178,15 @@ export class TapEmitter implements TestConsumerShape {
       }
     }
 
-    const allPassed = summary.failed === 0;
+    const allPassed = !summary.failed && !summary.errored;
 
     this.log([
       this.#enhancer[allPassed ? 'success' : 'failure']('Results'),
       `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`,
       allPassed ? 'failed' : this.#enhancer.failure('failed'),
       `${this.#enhancer.total(summary.failed)}`,
+      allPassed ? 'errored' : this.#enhancer.failure('errored'),
+      `${this.#enhancer.total(summary.errored)}`,
       'skipped',
       this.#enhancer.total(summary.skipped),
       `# (Total Test Time: ${TimeUtil.asClock(summary.duration)}, Total Run Time: ${TimeUtil.asClock(Date.now() - this.#start)})`

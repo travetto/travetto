@@ -57,10 +57,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   #getStore<T extends ModelType>(cls: Class<T> | string): StoreType {
     const key = typeof cls === 'string' ? cls : ModelRegistryIndex.getStoreName(cls);
-    if (!this.#store.has(key)) {
-      this.#store.set(key, new Map());
-    }
-    return this.#store.get(key)!;
+    return this.#store.getOrInsert(key, new Map());
   }
 
   #find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'exists' | 'notfound'): StoreType {
@@ -92,23 +89,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
       const idxName = indexName(cls, idx);
       const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
-      let index = this.#indices[idx.type].get(idxName)?.get(key);
 
-      if (!index) {
-        if (!this.#indices[idx.type].has(idxName)) {
-          this.#indices[idx.type].set(idxName, new Map());
-        }
-        if (idx.type === 'sorted') {
-          this.#indices[idx.type].get(idxName)!.set(key, index = new Map());
-        } else {
-          this.#indices[idx.type].get(idxName)!.set(key, index = new Set());
-        }
-      }
-
-      if (index instanceof Map) {
-        index?.set(item.id, +sort!);
+      if (idx.type === 'sorted') {
+        this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, +sort!);
       } else {
-        index?.add(item.id);
+        this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(item.id);
       }
     }
   }

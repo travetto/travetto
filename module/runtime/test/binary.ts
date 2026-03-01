@@ -169,21 +169,6 @@ export class BinaryUtilTest {
   }
 
   @Test()
-  verifyReadChunk() {
-    const b1 = BinaryUtil.readChunk('hello');
-    assert(Buffer.isBuffer(b1));
-    assert(b1.toString() === 'hello');
-
-    const b2 = BinaryUtil.readChunk(Buffer.from('world'));
-    assert(Buffer.isBuffer(b2));
-    assert(b2.toString() === 'world');
-
-    const b3 = BinaryUtil.readChunk(123);
-    assert(Buffer.isBuffer(b3));
-    assert(b3.toString() === '123');
-  }
-
-  @Test()
   verifyCombineBinaryArrays() {
     const b1 = Buffer.from('hel');
     const b2 = new Uint8Array([108, 111]); // 'lo'

@@ -100,10 +100,9 @@ export class RunUtil {
     const parsed: TestConfig[] = JSONUtil.fromUTF8(digestProcess.stdout);
 
     const events = parsed.filter(testFilter).reduce((runs, test) => {
-      if (!runs.has(test.classId)) {
-        runs.set(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid(), metadata });
-      }
-      runs.get(test.classId)!.methodNames!.push(test.methodName);
+      runs.getOrInsert(test.classId,
+        { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid(), metadata }
+      ).methodNames!.push(test.methodName);
       return runs;
     }, new Map<string, TestRun>());
 

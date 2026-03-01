@@ -148,7 +148,7 @@ export function consumeJSON<T>(input: string | unknown): T {
   try {
     return stringToJson<T>(text);
   } catch (error) {
-    throw new Error(`Unable to parse response: ${text}, Unknown error: ${error}`);
+    throw new Error(`Unable to parse response: ${text}`, { cause: error });
   }
 }
 

@@ -44,7 +44,7 @@ class JSONUtilSuite {
   @Test()
   async encodeBase64JSONSimple() {
     const encoded = JSONUtil.toBase64({ foo: 'bar' });
-    assert.strictEqual(encoded, CodecUtil.fromUTF8String('{"foo":"bar"}').toString('base64'));
+    assert.strictEqual(encoded, CodecUtil.utf8ToBase64('{"foo":"bar"}'));
   }
 
   @Test()
@@ -60,7 +60,7 @@ class JSONUtilSuite {
   @Test()
   async decodeBase64JSONSimple() {
     const original = { test: 'data' };
-    const encoded = CodecUtil.fromUTF8String(JSON.stringify(original)).toString('base64');
+    const encoded = CodecUtil.utf8ToBase64(JSON.stringify(original));
     const decoded: typeof original = JSONUtil.fromBase64(encoded);
     assert.deepStrictEqual(decoded, original);
   }
@@ -68,7 +68,7 @@ class JSONUtilSuite {
   @Test()
   async decodeBase64JSONWithURIEncoding() {
     const original = { special: 'chars' };
-    const encoded = CodecUtil.fromUTF8String(encodeURIComponent(JSON.stringify(original))).toString('base64');
+    const encoded = CodecUtil.utf8ToBase64(encodeURIComponent(JSON.stringify(original)));
     const decoded: typeof original = JSONUtil.fromBase64(encoded);
     assert.deepStrictEqual(decoded, original);
   }

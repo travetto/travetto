@@ -1,9 +1,4 @@
-import crypto from 'node:crypto';
-import util from 'node:util';
-
-import { RuntimeError, Util } from '@travetto/runtime';
-
-const pbkdf2 = util.promisify(crypto.pbkdf2);
+import { BinaryUtil, CodecUtil, RuntimeError, Util } from '@travetto/runtime';
 
 /**
  * Standard auth utilities
@@ -19,9 +14,27 @@ export class AuthModelUtil {
    * @param keylen Length of hash
    * @param digest Digest method
    */
-  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string> {
-    const half = Math.trunc(Math.ceil(keylen / 2));
-    return pbkdf2(value, salt, iterations, half, digest).then(buffer => buffer.toString('hex').substring(0, keylen));
+  static async generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'SHA-256'): Promise<string> {
+    const hashKey = await crypto.subtle.importKey(
+      'raw',
+      BinaryUtil.binaryArrayToBuffer(CodecUtil.fromUTF8String(value)),
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    );
+
+    const result = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        hash: { name: digest },
+        salt: BinaryUtil.binaryArrayToBuffer(CodecUtil.fromUTF8String(salt)),
+        iterations,
+      },
+      hashKey,
+      keylen * 8
+    );
+
+    return BinaryUtil.binaryArrayToUint8Array(result).toHex().substring(0, keylen);
   }
 
   /**

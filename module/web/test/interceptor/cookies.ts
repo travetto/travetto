@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse, KeyGrip } from '@travetto/web';
+import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse, KeyGrip, type Cookie } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { AsyncContext } from '@travetto/context';
@@ -13,17 +13,22 @@ class CookiesInterceptorSuite {
     await Registry.init();
   }
 
+  async getCookies(keys: string[] | undefined, headers: string[]): Promise<Cookie[]> {
+    const jar = new CookieJar({}, keys);
+    await jar.importSetCookieHeader(headers);
+    return jar.getAll();
+  }
+
   async testCookies(
     initialCookieHeader: string,
     update: (cookies: CookieJar) => void,
-    signingKeys?: string[]
+    grip?: KeyGrip | undefined
   ): Promise<string[]> {
     const interceptor = await DependencyRegistryIndex.getInstance(CookieInterceptor);
     const context = await DependencyRegistryIndex.getInstance(AsyncContext);
 
-    interceptor.config.keys = signingKeys;
+    interceptor.keyGrip = grip ?? new KeyGrip([]);
     interceptor.config.secure = true;
-    interceptor.config.signed = !!signingKeys?.length;
 
     const response = await context.run(async () => interceptor.filter({
       request: new WebRequest({
@@ -50,7 +55,7 @@ class CookiesInterceptorSuite {
       }
     );
 
-    const cookies = new CookieJar().importSetCookieHeader(headers).getAll();
+    const cookies = await this.getCookies(undefined, headers);
 
     assert(cookies.length === 1);
     assert(cookies[0].name === 'valid');
@@ -61,17 +66,17 @@ class CookiesInterceptorSuite {
   async testSigned() {
     const grip = new KeyGrip(['billy']);
     const headers = await this.testCookies(
-      `age=100; age.sig=${grip.sign('age=100')}`,
+      `age=100; age.sig=${await grip.sign('age=100')}`,
       jar => {
         jar.set({
           name: 'valid',
           value: (!!jar.get('age', { signed: true })).toString()
         });
       },
-      ['billy']
+      grip
     );
 
-    const cookies = new CookieJar({ keys: ['billy'] }).importSetCookieHeader(headers).getAll();
+    const cookies = await this.getCookies(['billy'], headers);
 
     assert(cookies.length === 1);
     assert(cookies[0].name === 'valid');
@@ -83,12 +88,12 @@ class CookiesInterceptorSuite {
   async testRotating() {
     const grip = new KeyGrip(['billy']);
     const headers = await this.testCookies(
-      `age=100; age.sig=${grip.sign('age=100')}`,
+      `age=100; age.sig=${await grip.sign('age=100')}`,
       jar => { },
-      ['bally', 'billy']
+      new KeyGrip(['bally', 'billy'])
     );
 
-    const cookies = new CookieJar({ keys: ['bally'] }).importSetCookieHeader(headers).getAll();
+    const cookies = await this.getCookies(['bally'], headers);
 
     assert(cookies.length === 1);
     assert(cookies[0].name === 'age');
@@ -100,7 +105,7 @@ class CookiesInterceptorSuite {
   async testInvalidSigned() {
     const grip = new KeyGrip(['billy']);
     const headers = await this.testCookies(
-      `age=100; age.sig=${grip.sign('age=100')}`,
+      `age=100; age.sig=${await grip.sign('age=100')}`,
       jar => {
         jar.set({
           name: 'valid',
@@ -111,10 +116,10 @@ class CookiesInterceptorSuite {
           value: (!!jar.get('age', { signed: false })).toString()
         });
       },
-      ['bally']
+      new KeyGrip(['bally'])
     );
 
-    const cookies = new CookieJar({ keys: ['bally'] }).importSetCookieHeader(headers).getAll();
+    const cookies = await this.getCookies(['bally'], headers);
 
     assert(cookies.length === 2);
 

@@ -79,7 +79,6 @@ class $ConsoleManager implements ConsoleListener {
    * Enable/disable enhanced debugging
    */
   enhanceDebug(active: boolean): void {
-    Error.stackTraceLimit = active ? 50 : 10;
     if (active) {
       debug.formatArgs = function (args: string[]): void {
         args.unshift(this.namespace);

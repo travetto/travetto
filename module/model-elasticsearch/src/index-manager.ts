@@ -41,12 +41,12 @@ export class IndexManager implements ModelStorageSupport {
    * Build the elasticsearch identity set for a given class (index)
    */
   getIdentity<T extends ModelType>(cls: Class<T>): { index: string } {
-    if (!this.#identities.has(cls)) {
+    const result = this.#identities.getOrInsertComputed(cls, () => {
       const col = this.getStore(cls);
       const index = this.getNamespacedIndex(col);
-      this.#identities.set(cls, { index });
-    }
-    return { ...this.#identities.get(cls)! };
+      return { index };
+    });
+    return { ...result };
   }
 
   /**

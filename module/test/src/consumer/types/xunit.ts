@@ -60,7 +60,8 @@ export class XunitEmitter implements TestConsumerShape {
 
       if (test.error) {
         const assertion = test.assertions.find(item => !!item.error)!;
-        body = `<failure type="${assertion.text}" message="${encodeURIComponent(assertion.message!)}"><![CDATA[${assertion.error!.stack}]]></failure>`;
+        const node = test.status === 'failed' ? 'failure' : 'error';
+        body = `<${node} type="${assertion.text}" message="${encodeURIComponent(assertion.message!)}"><![CDATA[${assertion.error!.stack}]]></${node}>`;
       }
 
       const groupedByLevel: Record<string, string[]> = {};
@@ -90,7 +91,7 @@ export class XunitEmitter implements TestConsumerShape {
     time="${suite.duration}"
     tests="${suite.total}"
     failures="${suite.failed}"
-    errors="${suite.failed}"
+    errors="${suite.errored}"
     skipped="${suite.skipped}"
     file="${RuntimeIndex.getFromImport(suite.import)!.sourceFile}"
   >
@@ -112,7 +113,8 @@ export class XunitEmitter implements TestConsumerShape {
   time="${summary.duration}"
   tests="${summary.total}"
   failures="${summary.failed}"
-  errors="${summary.failed}"
+  errors="${summary.errored}"
+  skipped="${summary.skipped}"
 >
  ${this.#suites.join('\n')}
 </testsuites>

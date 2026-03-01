@@ -176,11 +176,11 @@ Additionally, there exists a common practice of mapping various external securit
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L11">AuthModelUtil</a> provides the following functionality:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L6">AuthModelUtil</a> provides the following functionality:
 
   <figure class="code">
     <figcaption class="code">Auth util structure
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L11">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L6">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthModelUtil</span> <span class="token punctuation">{{'{'}}</span>
@@ -193,7 +193,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
    * &#64;param keylen Length of hash
    * &#64;param digest Digest method
    */</span>
-  <span class="token keyword">static</span> <span class="token function">generateHash</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> iterations <span class="token operator">=</span> <span class="token number">25000</span><span class="token punctuation">,</span> keylen <span class="token operator">=</span> <span class="token number">256</span><span class="token punctuation">,</span> digest <span class="token operator">=</span> <span class="token string">'sha256'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">generateHash</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> iterations <span class="token operator">=</span> <span class="token number">25000</span><span class="token punctuation">,</span> keylen <span class="token operator">=</span> <span class="token number">256</span><span class="token punctuation">,</span> digest <span class="token operator">=</span> <span class="token string">'SHA-256'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Generate a salted password, with the ability to validate the password
    *

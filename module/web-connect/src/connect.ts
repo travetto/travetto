@@ -1,6 +1,6 @@
 import type { OutgoingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
 
-import { BinaryUtil, castTo, type BinaryArray } from '@travetto/runtime';
+import { BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
 import { type WebRequest, WebResponse } from '@travetto/web';
 
 export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> {
@@ -75,7 +75,7 @@ export class ConnectResponse implements Pick<ServerResponse,
   writeHead(statusCode: unknown, statusMessage?: unknown, headers?: unknown): this {
     this.#response.context.httpStatusCode = castTo(statusCode);
     for (const [key, value] of Object.entries(headers ?? {})) {
-      this.#response.headers.set(key, value);
+      this.#response.headers.set(key, typeof value === 'string' ? value : `${value}`);
     }
     this.#headersSent = true;
     return this;
@@ -123,7 +123,7 @@ export class ConnectResponse implements Pick<ServerResponse,
     if (this.#headersSent) {
       this.flushHeaders();
     }
-    const chunked = BinaryUtil.readChunk(chunk, castTo(encoding));
+    const chunked = CodecUtil.readChunk(chunk, encoding ? `${encoding}` : undefined);
     this.#written.push(chunked);
     callback?.();
     return true;

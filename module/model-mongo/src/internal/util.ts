@@ -50,12 +50,19 @@ export class MongoUtil {
   }
 
   static uuid(value: string): Binary {
-    return new Binary(
-      BinaryUtil.binaryArrayToBuffer(
-        CodecUtil.fromHexString(value.replaceAll('-', ''))
-      ),
-      Binary.SUBTYPE_UUID
-    );
+    try {
+      return new Binary(
+        BinaryUtil.binaryArrayToUint8Array(
+          CodecUtil.fromHexString(value.replaceAll('-', ''))
+        ),
+        Binary.SUBTYPE_UUID
+      );
+    } catch (err) {
+      if (err instanceof RuntimeError && err.message === 'Invalid hex string') {
+        return null!;
+      }
+      throw err;
+    }
   }
 
   static idToString(id: string | ObjectId | Binary): string {

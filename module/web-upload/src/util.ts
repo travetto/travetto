@@ -8,7 +8,7 @@ import { Transform } from 'node:stream';
 import busboy from '@fastify/busboy';
 
 import { type WebRequest, WebCommonUtil, WebBodyUtil, WebHeaderUtil } from '@travetto/web';
-import { AsyncQueue, RuntimeError, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryMetadataUtil } from '@travetto/runtime';
+import { AsyncQueue, RuntimeError, CodecUtil, Util, BinaryUtil, type BinaryType, type BinaryStream, BinaryMetadataUtil } from '@travetto/runtime';
 
 import type { WebUploadConfig } from './config.ts';
 import type { FileMap } from './types.ts';
@@ -32,7 +32,7 @@ export class WebUploadUtil {
     let read = 0;
     return new Transform({
       transform(input, encoding, callback): void {
-        const chunk = BinaryUtil.readChunk(input, encoding);
+        const chunk = CodecUtil.readChunk(input, encoding);
         read += chunk.byteLength;
         if (read > maxSize) {
           callback(new RuntimeError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));

@@ -103,7 +103,7 @@ export class MongoModelConfig {
     if (options.ssl) {
       if (options.cert) {
         options.cert = (await Promise.all([options.cert].flat(2).map(readCert)))
-          .map(BinaryUtil.binaryArrayToBuffer);
+          .map(BinaryUtil.binaryArrayToUint8Array);
       }
       if (options.tlsCertificateKeyFile) {
         options.tlsCertificateKeyFile = await RuntimeResources.resolve(options.tlsCertificateKeyFile);

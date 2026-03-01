@@ -7,6 +7,7 @@ export interface CapturedAssertion extends Partial<Assertion> {
   line: number;
   text: string;
   operator: string;
+  unexpected?: boolean;
 }
 
 /**

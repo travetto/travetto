@@ -3,6 +3,7 @@ import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process'
 import { castTo } from './types.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { BinaryUtil, type BinaryArray } from './binary.ts';
+import { CodecUtil } from './codec.ts';
 
 const ResultSymbol = Symbol();
 
@@ -79,8 +80,8 @@ export class ExecUtil {
         );
       };
 
-      subProcess.stdout?.on('data', data => stdout.push(BinaryUtil.readChunk(data, subProcess.stdout?.readableEncoding)));
-      subProcess.stderr?.on('data', data => stderr.push(BinaryUtil.readChunk(data, subProcess.stderr?.readableEncoding)));
+      subProcess.stdout?.on('data', data => stdout.push(CodecUtil.readChunk(data, subProcess.stdout?.readableEncoding)));
+      subProcess.stderr?.on('data', data => stderr.push(CodecUtil.readChunk(data, subProcess.stderr?.readableEncoding)));
 
       subProcess.on('error', (error: Error) =>
         finish({ code: 1, message: error.message, valid: false }));

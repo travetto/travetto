@@ -2,7 +2,8 @@ import { createReadStream, existsSync } from 'node:fs';
 import type { OpenAPIObject } from 'openapi3-ts/oas31';
 import { stringify } from 'yaml';
 
-import { BinaryMetadataUtil, JSONUtil, Util } from '@travetto/runtime';
+import { ManifestFileUtil } from '@travetto/manifest';
+import { BinaryMetadataUtil, JSONUtil } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerVisitUtil, type WebConfig } from '@travetto/web';
 
@@ -87,7 +88,7 @@ export class OpenApiService {
         }
       }
 
-      await Util.bufferedFileWrite(this.apiSpecConfig.output, output);
+      await ManifestFileUtil.bufferedFileWrite(this.apiSpecConfig.output, output);
     } catch (error) {
       console.error('Unable to persist openapi spec', error);
     }

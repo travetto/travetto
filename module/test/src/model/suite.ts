@@ -1,7 +1,11 @@
-import type { Class } from '@travetto/runtime';
+import type { Any, Class } from '@travetto/runtime';
 
-import type { Assertion, TestConfig, TestResult, TestStatus } from './test.ts';
+import type { TestConfig, TestResult, TestStatus } from './test.ts';
 import type { Skip, SuiteCore } from './common.ts';
+
+export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
+
+export type SuitePhaseHandler<T extends object> = Partial<Record<SuitePhase, (instance: T) => Promise<unknown> | unknown>>;
 
 /**
  * Suite configuration
@@ -24,21 +28,9 @@ export interface SuiteConfig extends SuiteCore {
    */
   tests: Record<string, TestConfig>;
   /**
-   * Before all handlers
+   * Phase handlers
    */
-  beforeAll: Function[];
-  /**
-   * Before each handlers
-   */
-  beforeEach: Function[];
-  /**
-   * After each handlers
-   */
-  afterEach: Function[];
-  /**
-   * After all handlers
-   */
-  afterAll: Function[];
+  phaseHandlers: SuitePhaseHandler<Any>[];
 }
 
 /**
@@ -48,6 +40,7 @@ export interface Counts {
   passed: number;
   skipped: number;
   failed: number;
+  errored: number;
   unknown: number;
   total: number;
 }
@@ -68,14 +61,4 @@ export interface SuiteResult extends Counts, SuiteCore {
    * Overall status
    */
   status: TestStatus;
-}
-
-/**
- * A total suite failure
- */
-export interface SuiteFailure {
-  assert: Assertion;
-  testResult: TestResult;
-  test: TestConfig;
-  suite: SuiteConfig;
 }

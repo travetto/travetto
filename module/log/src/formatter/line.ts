@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { Env } from '@travetto/runtime';
+import { Env, RuntimeIndex } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -43,6 +43,7 @@ export class LineLogFormatterConfig {
   @EnvVar(Env.TRV_LOG_TIME.key)
   time?: 's' | 'ms' | string;
 
+  links?: boolean;
   colorize?: boolean;
   align?: boolean;
   level?: boolean;
@@ -62,6 +63,7 @@ export class LineLogFormatterConfig {
     this.time ??= (!this.plain ? 'ms' : undefined);
     this.plain ??= !StyleUtil.enabled;
     this.colorize ??= !this.plain;
+    this.links ??= !this.plain;
     this.location ??= !this.plain;
     this.level ??= !this.plain;
     this.align ??= !this.plain;
@@ -121,6 +123,9 @@ export class LineLogFormatter implements LogFormatter {
       let location = event.line ? `${namespace}:${event.line}` : namespace;
       if (this.config.colorize) {
         location = STYLES.location(location);
+      }
+      if (this.config.links) {
+        location = StyleUtil.link(location, `file://${RuntimeIndex.getModule(event.module)?.sourcePath}/${event.modulePath}${event.line ? `#${event.line}` : ''}`);
       }
       out.push(`[${location}]`);
     }

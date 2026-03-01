@@ -108,12 +108,12 @@ class $Registry {
    * Register a new index
    */
   registerIndex<T extends RegistryIndexClass>(indexCls: T): InstanceType<T> {
-    if (!this.#indexByClass.has(indexCls)) {
+    const result = this.#indexByClass.getOrInsertComputed(indexCls, () => {
       const instance = new indexCls(this);
-      this.#indexByClass.set(indexCls, instance);
       this.#indexes.push(instance);
-    }
-    return castTo(this.#indexByClass.get(indexCls));
+      return instance;
+    });
+    return castTo(result);
   }
 
   /**

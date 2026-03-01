@@ -19,7 +19,7 @@ export class DocResolveUtil {
 
     if (result.content) {
       line = result.content.split(/\n/g)
-        .findIndex(lineText => new RegExp(`(class|interface|function)[ ]+${title.replaceAll('$', '\\$')}`).test(lineText));
+        .findIndex(lineText => new RegExp(`(class|interface|function)[ ]+${RegExp.escape(title)}`).test(lineText));
       if (line < 0) {
         line = 0;
       } else {
@@ -67,7 +67,7 @@ export class DocResolveUtil {
 
   static applyCodePropDefaults(props: CodeProps): void {
     const type = typeof props.src === 'function' ? props.src : undefined;
-    props.startRe ??= (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${type.name.replaceAll('$', '\\$')}\\b`) : undefined);
+    props.startRe ??= (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${RegExp.escape(type.name)}\\b`) : undefined);
     props.language ??= (type ? 'typescript' : undefined);
     props.endRe ??= (type ? /^[}]/ : undefined);
     props.title ??= typeof props.src == 'function' ? props.src.name.replace(/^[$]/, '') : undefined;

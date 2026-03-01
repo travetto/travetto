@@ -93,7 +93,7 @@ export class PackageUtil {
     const rootPath = ctx.workspace.path;
     const cache = path.resolve(rootPath, ctx.build.outputFolder, 'workspaces.json');
     try {
-      return this.#workspaces[rootPath] ??= ManifestFileUtil.readAsJsonSync<PackageWorkspaceEntry[]>(cache);
+      return this.#workspaces[rootPath] ??= ManifestFileUtil.readAsJsonSync(cache);
     } catch {
       let args: string[];
       switch (ctx.workspace.manager) {

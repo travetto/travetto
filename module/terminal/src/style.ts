@@ -22,6 +22,8 @@ const toLinear = (v: number): number => {
   return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
 };
 
+const ESC = '\x1b';
+
 export class StyleUtil {
 
   /** Compute RGB values for ANSI 256 color code */
@@ -139,4 +141,8 @@ export class StyleUtil {
     };
   }
 
+  /** Make a URL link */
+  static link(text: string, url: string): string {
+    return `${ESC}]8;;${url}${ESC}\\${text}${ESC}]8;;${ESC}\\`;
+  }
 }

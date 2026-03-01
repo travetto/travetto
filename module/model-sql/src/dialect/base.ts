@@ -662,9 +662,9 @@ ${this.getLimitSQL(cls, query)}`;
       (array ? [castTo<SchemaFieldConfig>(config)] : []);
 
     if (!parent) {
-      let idField = fields.find(field => field.name === this.idField.name);
+      const idField = fields.find(field => field.name === this.idField.name);
       if (!idField) {
-        fields.push(idField = this.idField);
+        fields.push(this.idField);
       }
     }
 

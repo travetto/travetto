@@ -10,10 +10,13 @@ export class ManifestFileUtil {
    */
   static async bufferedFileWrite(file: string, content: string): Promise<void> {
     const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
-    await fs.writeFile(temp, content, 'utf8');
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.copyFile(temp, file);
-    await fs.rm(temp, { force: true });
+    try {
+      await fs.writeFile(temp, content, 'utf8');
+      await fs.mkdir(path.dirname(file), { recursive: true });
+      await fs.copyFile(temp, file);
+    } finally {
+      await fs.rm(temp, { force: true });
+    }
   }
 
   /**

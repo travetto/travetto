@@ -1,5 +1,3 @@
-import { Temporal } from 'temporal-polyfill';
-
 import { RuntimeError } from './error.ts';
 import { castTo } from './types.ts';
 
@@ -18,7 +16,7 @@ type TemporalUnit = typeof TIME_UNIT_TO_TEMPORAL_UNIT[keyof typeof TIME_UNIT_TO_
 export type TimeSpan = `${number}${keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT}`;
 export type TimeUnit = keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT;
 
-const TIME_PATTERN = /^(?<amount>-?[0-9]+)(?<unit>(?:(?:year|month|week|day|hour|minute|second|millisecond)s?)|(?:y|M|w|d|h|m|s|ms))$/;
+const TIME_PATTERN = /^(?<amount>-?[0-9]+)(?<unit>(?:year|month|week|day|hour|minute|second|millisecond)s?|y|M|w|d|h|m|s|ms)$/;
 
 export class TimeUtil {
 
@@ -60,7 +58,13 @@ export class TimeUtil {
 
     const duration = Temporal.Duration.from({ [unit]: value });
     if (outputUnit) {
-      return Math.trunc(duration.total(TIME_UNIT_TO_TEMPORAL_UNIT[outputUnit]));
+      const resolved = TIME_UNIT_TO_TEMPORAL_UNIT[outputUnit];
+      switch (resolved) {
+        case 'years': return Math.trunc(duration.total('hours') / (365 * 24));
+        case 'months': return Math.trunc(duration.total('hours') / (30 * 24));
+        case 'weeks': return Math.trunc(duration.total('hours') / (7 * 24));
+        default: return Math.trunc(duration.total(resolved));
+      }
     } else {
       return duration;
     }
