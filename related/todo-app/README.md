@@ -397,6 +397,7 @@ npx trv web:http
       LineLogFormatterConfig: {
         plain: false,
         time: 'ms',
+        links: true,
         colorize: true,
         align: true,
         level: true,

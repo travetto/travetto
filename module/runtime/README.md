@@ -256,7 +256,7 @@ The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/s
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Encoding and Decoding Utilities
-The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L14) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L15) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
    *  Hex
    *  Base64
    *  UTF8
@@ -265,7 +265,7 @@ The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/sr
    *  New Line Delimited UTF8
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L10) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L14) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.
@@ -324,7 +324,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L40) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 

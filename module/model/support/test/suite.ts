@@ -10,7 +10,7 @@ import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
 type ConfigType = { autoCreate?: boolean, namespace?: string };
 
-class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass: Class }> implements SuitePhaseHandler {
+class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass: Class }> implements SuitePhaseHandler<T> {
   qualifier?: symbol;
   target: Class<T>;
   constructor(target: Class<T>, qualifier?: symbol) {

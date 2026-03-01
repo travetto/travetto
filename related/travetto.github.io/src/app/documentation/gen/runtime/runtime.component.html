@@ -284,7 +284,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="encoding-and-decoding-utilities">Encoding and Decoding Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L14">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L15">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
 <ul> <li>Hex</li>
 <li>Base64</li>
 <li>UTF8</li>
@@ -295,7 +295,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L10">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L14">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
 <li><code class="item method">hash(text: string, size?: number)</code> produces a full sha512 hash.</li>
@@ -364,7 +364,7 @@ The <code class="item input">TRANSMIT_REVIVER</code> automatically restores <cod
 
 <h2 id="process-execution">Process Execution</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L40">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
 A simple example would be:
 
   <figure class="code">
