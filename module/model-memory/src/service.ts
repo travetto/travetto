@@ -2,7 +2,7 @@ import {
   type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil
 } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
@@ -130,7 +130,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     throw new NotFoundError(cls, key);
   }
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async initializeClient(): Promise<void> {
     await ModelStorageUtil.storageInitialization(this);
     ModelExpiryUtil.registerCull(this);
 

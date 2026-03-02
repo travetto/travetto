@@ -22,7 +22,7 @@ import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
   castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
 } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 
 import { MongoUtil, type PlainIdx, type WithId } from './internal/util.ts';
 import type { MongoModelConfig } from './config.ts';
@@ -98,7 +98,8 @@ export class MongoModelService implements
     return files[0];
   }
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async initializeClient(): Promise<void> {
     this.client = await MongoClient.connect(this.config.url, {
       ...this.config.connectionOptions,
       useBigInt64: true,

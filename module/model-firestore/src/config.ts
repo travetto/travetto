@@ -1,6 +1,7 @@
 import { JSONUtil, Runtime, RuntimeResources } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Schema, SchemaValidator } from '@travetto/schema';
+import { PostConstruct } from '@travetto/di';
 
 @Schema()
 class FirestoreModelConfigCredentials {
@@ -19,7 +20,8 @@ export class FirestoreModelConfig {
   modifyStorage?: boolean;
   credentials?: FirestoreModelConfigCredentials;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     if (!this.databaseURL && !Runtime.production) {
       this.projectId ??= 'trv-local-dev';
       this.emulator ??= 'localhost:7000'; // From docker

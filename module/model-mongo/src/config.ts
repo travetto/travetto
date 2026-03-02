@@ -3,6 +3,7 @@ import type mongo from 'mongodb';
 import { type TimeSpan, Runtime, RuntimeResources, BinaryUtil, CodecUtil, type BinaryType, type BinaryArray } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
+import { PostConstruct } from '@travetto/di';
 
 const readCert = async (input: BinaryType | string): Promise<BinaryArray> => {
   if (BinaryUtil.isBinaryType(input)) {
@@ -76,7 +77,8 @@ export class MongoModelConfig {
   /**
    * Load all the ssl certs as needed
    */
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     if (this.connectionString) {
       const details = new URL(this.connectionString);
       this.hosts ??= details.hostname.split(',').filter(host => !!host);

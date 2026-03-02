@@ -14,7 +14,7 @@ class MongoConfigSuite {
     assert(config);
 
     config.connectionString = 'mongodb+srv://user:password@hostname.com:3000/namespace';
-    await config.postConstruct();
+    await config.finalizeConfig();
 
     assert(config.srvRecord);
     assert(config.username === 'user');
@@ -33,7 +33,7 @@ class MongoConfigSuite {
 
     config.connectionString = 'mongodb+srv://user:password@hostname.com:3000/namespace';
     config.srvRecord = false;
-    await config.postConstruct();
+    await config.finalizeConfig();
 
     assert(!config.srvRecord);
   }

@@ -8,7 +8,7 @@ import {
 } from '@travetto/model';
 import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport,
   type ModelQuerySupport, type PageableModelQuery, type Query, type ValidStringFields,
@@ -48,7 +48,8 @@ export class ElasticsearchModelService implements
 
   constructor(config: ElasticsearchModelConfig) { this.config = config; }
 
-  async postConstruct(this: ElasticsearchModelService): Promise<void> {
+  @PostConstruct()
+  async initializeClient(this: ElasticsearchModelService): Promise<void> {
     this.client = new Client({
       nodes: this.config.hosts,
       ...(this.config.options || {}),

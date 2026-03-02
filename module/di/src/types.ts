@@ -75,6 +75,10 @@ export interface InjectableConfig<T = unknown> {
    * Candidates that are injectable
    */
   candidates: Record<string, InjectableCandidate>;
+  /**
+   * Post construct methods to run after construction of the instance
+   */
+  postConstruct: ((this: T) => Promise<unknown> | unknown)[];
 }
 
 export function getDefaultQualifier(cls: Class): symbol {
@@ -82,7 +86,3 @@ export function getDefaultQualifier(cls: Class): symbol {
 }
 
 export const PrimaryCandidateSymbol = Symbol();
-
-export type InjectableClassMetadata = {
-  postConstruct: Record<string, (<T>(inst: T) => Promise<void>)>;
-};

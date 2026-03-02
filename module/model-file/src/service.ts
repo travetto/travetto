@@ -7,7 +7,7 @@ import {
   type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType,
   BinaryUtil, JSONUtil, BinaryMetadataUtil
 } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
@@ -30,7 +30,8 @@ export class FileModelConfig {
   modifyStorage?: boolean;
   cullRate?: number | TimeSpan;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     this.folder ??= path.resolve(os.tmpdir(), `trv_file_${Runtime.main.name.replace(/[^a-z]/ig, '_')}`);
   }
 }
@@ -90,7 +91,8 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     return file;
   }
 
-  postConstruct(): void {
+  @PostConstruct()
+  initializeClient(): void {
     ModelExpiryUtil.registerCull(this);
   }
 

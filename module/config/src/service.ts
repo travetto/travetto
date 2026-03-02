@@ -1,7 +1,7 @@
 import util from 'node:util';
 
 import { RuntimeError, toConcrete, castTo, type Class, Env, Runtime, RuntimeResources, getClass } from '@travetto/runtime';
-import { DependencyRegistryIndex, getDefaultQualifier, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, getDefaultQualifier, Injectable, PostConstruct } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
@@ -49,7 +49,8 @@ export class ConfigurationService {
    *  - When dealing with two profiles of the same name, they are then sorted by priority
    *  - If of the same priority, then alpha sort on the source
    */
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async loadConfigurations(): Promise<void> {
     const providers = DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(

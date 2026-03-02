@@ -9,7 +9,7 @@ import {
   type ModelCrudSupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex, ExistsError, NotFoundError, type OptionalId,
   type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil
 } from '@travetto/model';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type Class, RuntimeError, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
   BinaryUtil, type TimeSpan, TimeUtil, type BinaryArray, CodecUtil, BinaryMetadataUtil, TypedObject, JSONUtil
@@ -178,7 +178,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async initializeClient(): Promise<void> {
     this.client = new S3({
       ...this.config.config,
       ...('requestHandler' in this.config.config ? {

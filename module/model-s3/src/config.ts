@@ -4,6 +4,7 @@ import type s3 from '@aws-sdk/client-s3';
 import { Config, EnvVar } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import { Runtime } from '@travetto/runtime';
+import { PostConstruct } from '@travetto/di';
 
 /**
  * S3 Support as an Asset Source
@@ -41,7 +42,8 @@ export class S3ModelConfig {
   /**
    * Produces the s3 config from the provide details, post construction
    */
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     if (!Runtime.production) {
       this.endpoint ??= 'http://localhost:4566'; // From docker
       this.bucket ??= 'app';

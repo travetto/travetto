@@ -1,5 +1,6 @@
 import type { TimeSpan } from '@travetto/runtime';
 import { Config } from '@travetto/config';
+import { PostConstruct } from '@travetto/di';
 
 import type { EsSchemaConfig } from './internal/types.ts';
 
@@ -56,7 +57,8 @@ export class ElasticsearchModelConfig {
   /**
    * Build final hosts
    */
-  postConstruct(): void {
+  @PostConstruct()
+  finalizeConfig(): void {
     console.debug('Constructed', { config: this });
     this.hosts = this.hosts
       .map(host => host.includes(':') ? host : `${host}:${this.port}`)

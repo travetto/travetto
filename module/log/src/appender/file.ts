@@ -2,7 +2,7 @@ import { createWriteStream, type WriteStream, mkdirSync, openSync, appendFileSyn
 import path from 'node:path';
 
 import { Env, Runtime } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 
 import type { LogAppender, LogEvent } from '../types.ts';
@@ -14,7 +14,8 @@ export class FileLogAppenderConfig {
 
   writeSync = false;
 
-  postConstruct(): void {
+  @PostConstruct()
+  finalizeConfig(): void {
     if (!this.output || this.output === 'file' || this.output === 'console') {
       this.output = Runtime.toolPath('@', 'output.log');
     }

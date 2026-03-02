@@ -1,16 +1,13 @@
 import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { RuntimeError, castKey, castTo, type Class, describeFunction, getParentClass, hasFunction, TypedObject } from '@travetto/runtime';
+import { RuntimeError, castKey, castTo, type Class, describeFunction, getParentClass, TypedObject } from '@travetto/runtime';
 import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { Dependency, InjectableCandidate, InjectableClassMetadata, InjectableConfig, ResolutionType } from '../types.ts';
+import type { Dependency, InjectableCandidate, InjectableConfig, ResolutionType } from '../types.ts';
 import { DependencyRegistryAdapter } from './registry-adapter.ts';
 import { InjectionError } from '../error.ts';
 import { DependencyRegistryResolver } from './registry-resolver.ts';
 
 const MetadataSymbol = Symbol();
-
-const hasPostConstruct = hasFunction<{ postConstruct: () => Promise<unknown> }>('postConstruct');
-const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDestroy');
 
 function readMetadata(item: { metadata?: Record<symbol, unknown> }): Dependency | undefined {
   return castTo<Dependency | undefined>(item.metadata?.[MetadataSymbol]);
@@ -22,6 +19,10 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   static getForRegister(cls: Class): DependencyRegistryAdapter {
     return this.#instance.store.getForRegister(cls);
+  }
+
+  static registerClass(cls: Class, ...data: Partial<InjectableConfig<unknown>>[]): InjectableCandidate {
+    return this.#instance.store.getForRegister(cls).registerClass(...data);
   }
 
   static getInstance<T>(candidateType: Class<T>, qualifier?: symbol, resolution?: ResolutionType): Promise<T> {
@@ -38,10 +39,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   static injectFields<T extends { constructor: Class<T> }>(item: T, cls = item.constructor): Promise<T> {
     return this.#instance.injectFields(cls, item, cls);
-  }
-
-  static registerClassMetadata(cls: Class, metadata: InjectableClassMetadata): void {
-    SchemaRegistryIndex.getForRegister(cls).registerMetadata<InjectableClassMetadata>(MetadataSymbol, metadata);
   }
 
   static registerParameterMetadata(cls: Class, method: string, index: number, metadata: Dependency): void {
@@ -157,26 +154,18 @@ export class DependencyRegistryIndex implements RegistryIndex {
     const { candidate } = this.#resolver.resolveCandidate(candidateType, qualifier);
     const targetType = candidate.candidateType;
     const params = await this.fetchDependencyParameters(candidate);
-    const inst = await candidate.factory(...params);
+    const instance = await candidate.factory(...params);
+    const { postConstruct } = this.getConfig(targetType);
 
     // And auto-wire fields
-    await this.injectFields(targetType, inst, candidate.class);
-
-    // Run post construct, if it wasn't passed in, otherwise it was already created
-    if (hasPostConstruct(inst) && !params.includes(inst)) {
-      await inst.postConstruct();
-    }
-
-    const metadata = SchemaRegistryIndex.has(targetType) ?
-      SchemaRegistryIndex.get(targetType).getMetadata<InjectableClassMetadata>(MetadataSymbol) : undefined;
+    await this.injectFields(targetType, instance, candidate.class);
 
     // Run post constructors
-    for (const operation of Object.values(metadata?.postConstruct ?? {})) {
-      await operation(inst);
+    for (const operation of postConstruct) {
+      await operation.call(instance, instance);
     }
 
-    // Proxy if necessary
-    return inst;
+    return instance;
   }
 
   /**
@@ -214,11 +203,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
    */
   destroyInstance(candidateType: Class, requestedQualifier: symbol): void {
     const { target, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier);
-
-    const activeInstance = this.#instances.get(target)?.get(qualifier);
-    if (hasPreDestroy(activeInstance)) {
-      activeInstance.preDestroy();
-    }
 
     this.#resolver.removeClass(candidateType, qualifier);
     this.#instances.get(target)?.delete(qualifier);

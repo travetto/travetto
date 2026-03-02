@@ -52,3 +52,14 @@ export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol)
     });
   };
 }
+
+/**
+ * Register Class Metadata
+ */
+export function PostConstruct() {
+  return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<() => Any>): void => {
+    DependencyRegistryIndex.registerClass(getClass(instance), {
+      postConstruct: [descriptor.value!]
+    });
+  };
+}

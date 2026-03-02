@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { Inject, Injectable, InjectableFactory, PostConstruct } from '@travetto/di';
 import { Required } from '@travetto/schema';
 
 import { DbConfig, type AltConfig, Empty } from './config.ts';
@@ -32,7 +32,8 @@ export class Database {
   @Required(false)
   altConfig: AltConfig;
 
-  postConstruct() {
+  @PostConstruct()
+  initialize() {
     console.log('Creating database', { url: this.dbConfig.getUrl() });
   }
 

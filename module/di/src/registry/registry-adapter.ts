@@ -19,7 +19,11 @@ function combineClasses<T extends InjectableConfig>(base: T, ...overrides: Parti
       candidates: {
         ...base.candidates,
         ...override.candidates,
-      }
+      },
+      ...(override.postConstruct ?
+        { postConstruct: [...base.postConstruct, ...override.postConstruct] } :
+        {}
+      ),
     });
   }
   return base;
@@ -34,7 +38,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   }
 
   register(...data: Partial<InjectableConfig<unknown>>[]): InjectableConfig<unknown> {
-    this.#config ??= { class: this.#cls, candidates: {} };
+    this.#config ??= { class: this.#cls, candidates: {}, postConstruct: [] };
     return combineClasses(this.#config, ...data);
   }
 
@@ -61,13 +65,15 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     return this.#config;
   }
 
-  finalize(): void {
+  finalize(parent?: InjectableConfig): void {
     for (const method of Object.keys(this.#config.candidates)) {
       const candidate = this.#config.candidates[method];
       const candidateType = SchemaRegistryIndex.get(candidate.class).getMethodReturnType(method);
       candidate.candidateType = candidateType;
       candidate.qualifier ??= getDefaultQualifier(candidateType);
     }
+    // Inherit post construct from parent
+    this.#config.postConstruct = [...(parent?.postConstruct ?? []), ...this.#config.postConstruct];
   }
 
   getCandidateConfigs(): InjectableCandidate[] {

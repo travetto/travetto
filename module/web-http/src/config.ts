@@ -2,6 +2,7 @@ import { Config, EnvVar } from '@travetto/config';
 import { Ignore, Secret } from '@travetto/schema';
 import { RuntimeError, Runtime, RuntimeResources } from '@travetto/runtime';
 import { NetUtil } from '@travetto/web';
+import { PostConstruct } from '@travetto/di';
 
 import type { WebSecureKeyPair } from './types.ts';
 import { WebTlsUtil } from './tls.ts';
@@ -45,7 +46,8 @@ export class WebHttpConfig {
   @Ignore()
   fetchUrl: string;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
     this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
     this.bindAddress ||= NetUtil.getLocalAddress();

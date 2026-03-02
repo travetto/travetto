@@ -1,7 +1,7 @@
 import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 
 import { JSONUtil, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelIndexedSupport, type ModelType, NotFoundError, ExistsError,
@@ -111,7 +111,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async initializeClient(): Promise<void> {
     this.client = new DynamoDB({ ...this.config.client });
     await ModelStorageUtil.storageInitialization(this);
     ShutdownManager.signal.addEventListener('abort', async () => this.client.destroy());
