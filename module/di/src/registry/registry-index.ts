@@ -21,8 +21,16 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.#instance.store.getForRegister(cls);
   }
 
+  static registerPostConstruct(cls: Class, operation: () => Promise<void>): void {
+    this.#instance.store.getForRegister(cls).register({ postConstruct: [operation] });
+  }
+
   static registerClass(cls: Class, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
     return this.#instance.store.getForRegister(cls).registerClass(...data);
+  }
+
+  static registerFactory(cls: Class, method: string, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
+    return this.#instance.store.getForRegister(cls).registerFactory(method, ...data);
   }
 
   static getInstance<T>(candidateType: Class<T>, qualifier?: symbol, resolution?: ResolutionType): Promise<T> {

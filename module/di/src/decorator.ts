@@ -15,7 +15,7 @@ const fromInput = <T extends { qualifier?: symbol }>(input?: T | symbol): T =>
  */
 export function Injectable(input?: Partial<InjectableCandidate> | symbol) {
   return <T extends Class>(cls: T): void => {
-    DependencyRegistryIndex.getForRegister(cls).registerClass(fromInput(input));
+    DependencyRegistryIndex.registerClass(cls, fromInput(input));
   };
 }
 
@@ -47,7 +47,7 @@ export function Inject(input?: InjectConfig | symbol) {
  */
 export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol) {
   return <T extends Class>(cls: T, property: string, descriptor: TypedPropertyDescriptor<(...args: Any[]) => Any>): void => {
-    DependencyRegistryIndex.getForRegister(cls).registerFactory(property, fromInput(input), {
+    DependencyRegistryIndex.registerFactory(cls, property, fromInput(input), {
       factory: (...params: unknown[]) => descriptor.value!.apply(cls, params),
     });
   };
@@ -58,8 +58,6 @@ export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol)
  */
 export function PostConstruct() {
   return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<() => Any>): void => {
-    DependencyRegistryIndex.getForRegister(getClass(instance)).register({
-      postConstruct: [descriptor.value!]
-    });
+    DependencyRegistryIndex.registerPostConstruct(getClass(instance), descriptor.value!);
   };
 }

@@ -17,12 +17,12 @@ export function Config(namespace: string) {
 
     ConfigOverrideUtil.setOverrideConfig(cls, namespace);
 
-    DependencyRegistryIndex.getForRegister(cls).register({
-      postConstruct: [async function (this: ClassInstance): Promise<void> {
+    DependencyRegistryIndex.registerPostConstruct(cls,
+      async function (this: ClassInstance): Promise<void> {
         const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
         await config.bindTo(cls, this, namespace);
-      }]
-    });
+      }
+    );
     return cls;
   };
 }
