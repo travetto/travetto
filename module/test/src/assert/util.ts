@@ -40,15 +40,13 @@ export class AssertUtil {
    * Determine file location for a given error and the stack trace
    */
   static getPositionOfError(error: Error): { import: string, line: number } | undefined {
-    const stack = error.stack ?? new Error().stack!;
-    const frames = Util.stackTraceToParts(stack)
+    const frames = Util.stackTraceToParts(error.stack ?? new Error().stack!)
       .map(frame => {
-        const imp = (RuntimeIndex.getFromSource(frame.filename) ?? RuntimeIndex.getEntry(frame.filename))?.import;
-        return { ...frame, import: imp! };
-      })
-      .filter(frame => !!frame.import);
+        const entry = RuntimeIndex.getEntry(frame.filename);
+        return { ...frame, import: entry?.import!, line: entry?.type === 'ts' ? frame.line : 1 };
+      });
 
-    return frames[0];
+    return frames.find(frame => frame.import);
   }
 
   /**
