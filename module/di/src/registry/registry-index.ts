@@ -163,7 +163,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
     const targetType = candidate.candidateType;
     const params = await this.fetchDependencyParameters(candidate);
     const instance = await candidate.factory(...params);
-    const { postConstruct } = this.getConfig(targetType);
+    const postConstruct = this.store.has(targetType) ? this.getConfig(targetType).postConstruct : [];
 
     // And auto-wire fields
     await this.injectFields(targetType, instance, candidate.class);
