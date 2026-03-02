@@ -17,6 +17,7 @@ export function Config(namespace: string) {
 
     ConfigOverrideUtil.setOverrideConfig(cls, namespace);
 
+    DependencyRegistryIndex.registerClass(cls);
     DependencyRegistryIndex.registerPostConstruct(cls,
       async function (this: ClassInstance): Promise<void> {
         const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
