@@ -21,7 +21,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.#instance.store.getForRegister(cls);
   }
 
-  static registerClass(cls: Class, ...data: Partial<InjectableConfig<unknown>>[]): InjectableCandidate {
+  static registerClass(cls: Class, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
     return this.#instance.store.getForRegister(cls).registerClass(...data);
   }
 
@@ -162,7 +162,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
     // Run post constructors
     for (const operation of postConstruct) {
-      await operation.call(instance, instance);
+      await operation.call(instance);
     }
 
     return instance;

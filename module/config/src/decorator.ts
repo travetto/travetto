@@ -17,7 +17,7 @@ export function Config(namespace: string) {
 
     ConfigOverrideUtil.setOverrideConfig(cls, namespace);
 
-    DependencyRegistryIndex.registerClass(cls, {
+    DependencyRegistryIndex.getForRegister(cls).register({
       postConstruct: [async function (this: ClassInstance): Promise<void> {
         const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
         await config.bindTo(cls, this, namespace);

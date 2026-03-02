@@ -13,18 +13,12 @@ function combineInjectableCandidates<T extends InjectableCandidate>(base: T, ...
 
 function combineClasses<T extends InjectableConfig>(base: T, ...overrides: Partial<T>[]): typeof base {
   for (const override of overrides) {
-    Object.assign(base, {
-      ...base,
-      ...override,
-      candidates: {
-        ...base.candidates,
-        ...override.candidates,
-      },
-      ...(override.postConstruct ?
-        { postConstruct: [...base.postConstruct, ...override.postConstruct] } :
-        {}
-      ),
-    });
+    if (override.candidates) {
+      base.candidates = { ...base.candidates, ...override.candidates };
+    }
+    if (override.postConstruct) {
+      base.postConstruct = [...base.postConstruct, ...override.postConstruct];
+    }
   }
   return base;
 }

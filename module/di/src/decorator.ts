@@ -58,7 +58,7 @@ export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol)
  */
 export function PostConstruct() {
   return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<() => Any>): void => {
-    DependencyRegistryIndex.registerClass(getClass(instance), {
+    DependencyRegistryIndex.getForRegister(getClass(instance)).register({
       postConstruct: [descriptor.value!]
     });
   };
