@@ -54,7 +54,7 @@ export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol)
 }
 
 /**
- * Register Class Metadata
+ * Register post construction handler
  */
 export function PostConstruct() {
   return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<() => Any>): void => {
