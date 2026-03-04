@@ -110,7 +110,7 @@ export class AppConfig {
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L48) method.
 
 ## Maintaining Auth Context
-The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-web/src/interceptors/context.ts#L20) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") modules.  It serves to take an authenticated principal (via the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)/[WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3)) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14). Leveraging [WebAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-web/src/config.ts#L8)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between using a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
+The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-web/src/interceptors/context.ts#L20) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") modules.  It serves to take an authenticated principal (via the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)/[WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3)) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14). Leveraging [WebAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-web/src/config.ts#L9)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between using a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
 
 **Note for Cookie Use:** The automatic renewal, update, seamless receipt and transmission of the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) cookie act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. 
 
@@ -121,7 +121,7 @@ The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-
 import type { Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
 import { type AuthContext, AuthenticationError, type AuthToken, type Principal } from '@travetto/auth';
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, PostConstruct } from '@travetto/di';
 import { type WebResponse, type WebRequest, type WebAsyncContext, CookieJar } from '@travetto/web';
 import { RuntimeError, castTo, TimeUtil } from '@travetto/runtime';
 
@@ -146,7 +146,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   #verifier: Verifier;
   #algorithm: SupportedAlgorithms = 'HS256';
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeVerifier(): Promise<void> {
     // Weird issue with their ES module support
     const { default: { createVerifier } } = await import('njwt');
     this.#verifier = createVerifier()

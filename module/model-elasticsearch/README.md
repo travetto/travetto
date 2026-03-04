@@ -42,7 +42,7 @@ export class Init {
 }
 ```
 
-where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10) is defined by:
+where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L11) is defined by:
 
 **Code: Structure of ElasticsearchModelConfig**
 ```typescript
@@ -96,7 +96,8 @@ export class ElasticsearchModelConfig {
   /**
    * Build final hosts
    */
-  postConstruct(): void {
+  @PostConstruct()
+  finalizeConfig(): void {
     console.debug('Constructed', { config: this });
     this.hosts = this.hosts
       .map(host => host.includes(':') ? host : `${host}:${this.port}`)

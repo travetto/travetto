@@ -43,7 +43,7 @@ export class Init {
 }
 ```
 
-where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mongo/src/config.ts#L23) is defined by:
+where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mongo/src/config.ts#L24) is defined by:
 
 **Code: Structure of MongoModelConfig**
 ```typescript
@@ -104,7 +104,8 @@ export class MongoModelConfig {
   /**
    * Load all the ssl certs as needed
    */
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     if (this.connectionString) {
       const details = new URL(this.connectionString);
       this.hosts ??= details.hostname.split(',').filter(host => !!host);
