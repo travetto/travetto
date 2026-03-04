@@ -5,7 +5,6 @@ import { SessionModelSymbol } from '@travetto/auth-session';
 import { S3ModelService, S3ModelConfig } from '@travetto/model-s3';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
-import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
 class Config {
   @InjectableFactory(SessionModelSymbol)
@@ -15,8 +14,7 @@ class Config {
 }
 
 @Suite()
-@ModelSuite()
-class S3AuthSessionServerSuite extends AuthSessionServerSuite {
+class S3AuthSessionServerSuite extends AuthSessionServerSuite<S3ModelService> {
   timeScale = 10;
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;

@@ -7,7 +7,6 @@ import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { SqliteDialect } from '@travetto/model-sqlite';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
-import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -21,8 +20,7 @@ class Config {
 }
 
 @Suite()
-@ModelSuite()
-class SqliteAuthSessionServerSuite extends AuthSessionServerSuite {
+class SqliteAuthSessionServerSuite extends AuthSessionServerSuite<SQLModelService> {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

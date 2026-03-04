@@ -5,7 +5,6 @@ import { SessionModelSymbol } from '@travetto/auth-session';
 import { ElasticsearchModelService, ElasticsearchModelConfig } from '@travetto/model-elasticsearch';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
-import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
 class Config {
   @InjectableFactory(SessionModelSymbol)
@@ -15,8 +14,7 @@ class Config {
 }
 
 @Suite()
-@ModelSuite()
-class ElasticsearchAuthSessionServerSuite extends AuthSessionServerSuite {
+class ElasticsearchAuthSessionServerSuite extends AuthSessionServerSuite<ElasticsearchModelService> {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }
