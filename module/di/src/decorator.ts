@@ -56,8 +56,8 @@ export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol)
 /**
  * Register post construction handler
  */
-export function PostConstruct() {
+export function PostConstruct(priority: number = 10) {
   return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<() => Any>): void => {
-    DependencyRegistryIndex.registerPostConstruct(getClass(instance), descriptor.value!);
+    DependencyRegistryIndex.registerPostConstruct(getClass(instance), { operation: descriptor.value!, priority });
   };
 }

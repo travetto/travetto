@@ -18,12 +18,13 @@ export function Config(namespace: string) {
     ConfigOverrideUtil.setOverrideConfig(cls, namespace);
 
     DependencyRegistryIndex.registerClass(cls);
-    DependencyRegistryIndex.registerPostConstruct(cls,
-      async function (this: ClassInstance): Promise<void> {
+    DependencyRegistryIndex.registerPostConstruct(cls, {
+      priority: 0,
+      async operation(this: ClassInstance): Promise<void> {
         const config = await DependencyRegistryIndex.getInstance(ConfigurationService);
         await config.bindTo(cls, this, namespace);
       }
-    );
+    });
     return cls;
   };
 }

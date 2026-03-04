@@ -63,6 +63,13 @@ export interface InjectableCandidate<T = unknown> {
   qualifier?: symbol;
 }
 
+/** Post Construct Handler */
+export type PostConstructor<T> = {
+  operation: ((this: T) => Promise<unknown> | unknown);
+  priority: number;
+};
+
+
 /**
  * Full injectable configuration for a class
  */
@@ -78,7 +85,7 @@ export interface InjectableConfig<T = unknown> {
   /**
    * Post construct methods to run after construction of the instance
    */
-  postConstruct: ((this: T) => Promise<unknown> | unknown)[];
+  postConstruct: PostConstructor<T>[];
 }
 
 export function getDefaultQualifier(cls: Class): symbol {

@@ -2,7 +2,7 @@ import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/regi
 import { RuntimeError, castKey, castTo, type Class, describeFunction, getParentClass, TypedObject } from '@travetto/runtime';
 import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { Dependency, InjectableCandidate, InjectableConfig, ResolutionType } from '../types.ts';
+import type { Dependency, InjectableCandidate, InjectableConfig, PostConstructor, ResolutionType } from '../types.ts';
 import { DependencyRegistryAdapter } from './registry-adapter.ts';
 import { InjectionError } from '../error.ts';
 import { DependencyRegistryResolver } from './registry-resolver.ts';
@@ -21,8 +21,8 @@ export class DependencyRegistryIndex implements RegistryIndex {
     return this.#instance.store.getForRegister(cls);
   }
 
-  static registerPostConstruct(cls: Class, operation: () => Promise<void>): void {
-    this.#instance.store.getForRegister(cls).register({ postConstruct: [operation] });
+  static registerPostConstruct<T>(cls: Class<T>, handler: PostConstructor<T>): void {
+    this.#instance.store.getForRegister(cls).register({ postConstruct: [castTo(handler)] });
   }
 
   static registerClass(cls: Class, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
@@ -169,7 +169,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
     await this.injectFields(targetType, instance, candidate.class);
 
     // Run post constructors
-    for (const operation of postConstruct) {
+    for (const { operation } of postConstruct.sort((a, b) => a.priority - b.priority)) {
       await operation.call(instance);
     }
 
