@@ -37,7 +37,7 @@ export class Init {
 }
 ```
 
-where the [S3ModelConfig](https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L12) is defined by:
+where the [S3ModelConfig](https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L13) is defined by:
 
 **Code: Structure of S3ModelConfig**
 ```typescript
@@ -74,7 +74,8 @@ export class S3ModelConfig {
   /**
    * Produces the s3 config from the provide details, post construction
    */
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     if (!Runtime.production) {
       this.endpoint ??= 'http://localhost:4566'; // From docker
       this.bucket ??= 'app';

@@ -123,7 +123,8 @@ export class WebHttpConfig {
   @Ignore()
   fetchUrl: string;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
     this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
     this.bindAddress ||= NetUtil.getLocalAddress();

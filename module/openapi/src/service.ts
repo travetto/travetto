@@ -4,7 +4,7 @@ import { stringify } from 'yaml';
 
 import { ManifestFileUtil } from '@travetto/manifest';
 import { BinaryMetadataUtil, JSONUtil } from '@travetto/runtime';
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, PostConstruct } from '@travetto/di';
 import { ControllerVisitUtil, type WebConfig } from '@travetto/web';
 
 import type { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config.ts';
@@ -43,7 +43,8 @@ export class OpenApiService {
   /**
    * Initialize after schemas are readied
    */
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     if (!this.apiHostConfig.servers && this.webConfig.baseUrl) {
       this.apiHostConfig.servers = [{ url: this.webConfig.baseUrl }];
     }

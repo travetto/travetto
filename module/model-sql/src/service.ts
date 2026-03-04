@@ -7,7 +7,7 @@ import {
 import { castTo, type Class } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
 import type { AsyncContext } from '@travetto/context';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
   type PageableModelQuery, type ValidStringFields, type WhereClauseRaw, QueryVerifier, type ModelQuerySuggestSupport,
@@ -98,7 +98,8 @@ export class SQLModelService implements
     }
   }
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async initializeClient(): Promise<void> {
     await this.#dialect.connection.init?.();
     this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LENGTH);
     this.#manager = new TableManager(this.#context, this.#dialect);

@@ -1,5 +1,5 @@
 import { type Class, toConcrete } from '@travetto/runtime';
-import { DependencyRegistryIndex, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable, PostConstruct } from '@travetto/di';
 import { ControllerRegistryIndex } from '@travetto/web';
 
 import type { ControllerConfig, EndpointConfig } from '../registry/types.ts';
@@ -34,7 +34,8 @@ export abstract class BaseWebRouter implements WebRouter {
   /**
    * Initialize router, encapsulating common patterns for standard router setup
    */
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async registerRoutes(): Promise<void> {
 
     this.#interceptors = await DependencyRegistryIndex.getInstances(toConcrete<WebInterceptor>());
     this.#interceptors = EndpointUtil.orderInterceptors(this.#interceptors);

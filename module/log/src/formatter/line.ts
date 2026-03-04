@@ -1,7 +1,7 @@
 import util from 'node:util';
 
 import { Env, RuntimeIndex } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { StyleUtil, type TermStyleFn } from '@travetto/terminal';
@@ -59,7 +59,8 @@ export class LineLogFormatterConfig {
     colors: boolean;
   };
 
-  postConstruct(): void {
+  @PostConstruct()
+  finalizeConfig(): void {
     this.time ??= (!this.plain ? 'ms' : undefined);
     this.plain ??= !StyleUtil.enabled;
     this.colorize ??= !this.plain;

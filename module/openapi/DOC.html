@@ -34,6 +34,7 @@ All of the high level configurations can be found in the following structure:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Runtime <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Required <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PostConstruct <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * API Information, infers as much as possible from the package.json
@@ -53,7 +54,8 @@ All of the high level configurations can be found in the following structure:
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Required</span></span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span>
   version<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 
-  <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">PostConstruct</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token function">finalizeConfig</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>title <span class="token operator">??=</span> Runtime<span class="token punctuation">.</span>main<span class="token punctuation">.</span>name<span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>version <span class="token operator">??=</span> Runtime<span class="token punctuation">.</span>main<span class="token punctuation">.</span>version<span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>description <span class="token operator">??=</span> Runtime<span class="token punctuation">.</span>main<span class="token punctuation">.</span>description<span class="token punctuation">;</span>
@@ -97,7 +99,8 @@ All of the high level configurations can be found in the following structure:
    */</span>
   exposeAllSchemas<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
 
-  <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">PostConstruct</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">finalizeConfig</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">||</span> <span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">===</span> <span class="token string">'-'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>persist <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>

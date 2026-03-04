@@ -36,7 +36,7 @@ export class Init {
 }
 ```
 
-where the [FirestoreModelConfig](https://github.com/travetto/travetto/tree/main/module/model-firestore/src/config.ts#L6) is defined by:
+where the [FirestoreModelConfig](https://github.com/travetto/travetto/tree/main/module/model-firestore/src/config.ts#L7) is defined by:
 
 **Code: Structure of FirestoreModelConfig**
 ```typescript
@@ -50,7 +50,8 @@ export class FirestoreModelConfig {
   modifyStorage?: boolean;
   credentials?: FirestoreModelConfigCredentials;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     if (!this.databaseURL && !Runtime.production) {
       this.projectId ??= 'trv-local-dev';
       this.emulator ??= 'localhost:7000'; // From docker

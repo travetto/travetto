@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { Inject, Injectable } from '@travetto/di';
+import { Inject, Injectable, PostConstruct } from '@travetto/di';
 import { ControllerRegistryIndex } from '@travetto/web';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
@@ -16,7 +16,8 @@ export class WebRpcClientGeneratorService {
   @Inject()
   config: WebRpcConfig;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async initialRender(): Promise<void> {
     this.render();
   }
 

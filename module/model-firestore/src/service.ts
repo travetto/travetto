@@ -1,7 +1,7 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
 import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelIndexedSupport, type ModelType, NotFoundError, type OptionalId,
@@ -38,7 +38,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.client.collection(this.#resolveTable(cls));
   }
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async initializeClient(): Promise<void> {
     this.client = new Firestore({ ...this.config, useBigInt: true });
     ShutdownManager.signal.addEventListener('abort', () => this.client.terminate());
   }

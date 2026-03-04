@@ -1,7 +1,7 @@
 import type { Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
 import { type AuthContext, AuthenticationError, type AuthToken, type Principal } from '@travetto/auth';
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, PostConstruct } from '@travetto/di';
 import { type WebResponse, type WebRequest, type WebAsyncContext, CookieJar } from '@travetto/web';
 import { RuntimeError, castTo, TimeUtil } from '@travetto/runtime';
 
@@ -26,7 +26,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   #verifier: Verifier;
   #algorithm: SupportedAlgorithms = 'HS256';
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeVerifier(): Promise<void> {
     // Weird issue with their ES module support
     const { default: { createVerifier } } = await import('njwt');
     this.#verifier = createVerifier()

@@ -6,7 +6,7 @@ import {
   NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
 } from '@travetto/model';
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 
 import type { RedisModelConfig } from './config.ts';
 
@@ -167,7 +167,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async initializeClient(): Promise<void> {
     this.client = createClient(this.config.client);
     await this.client.connect();
     await ModelStorageUtil.storageInitialization(this);

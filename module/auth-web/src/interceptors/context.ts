@@ -1,6 +1,6 @@
 import { toConcrete } from '@travetto/runtime';
 import type { WebInterceptor, WebAsyncContext, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
-import { Injectable, Inject, DependencyRegistryIndex } from '@travetto/di';
+import { Injectable, Inject, DependencyRegistryIndex, PostConstruct } from '@travetto/di';
 import type { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 import { Required } from '@travetto/schema';
 
@@ -37,7 +37,8 @@ export class AuthContextInterceptor implements WebInterceptor {
   @Inject()
   webAsyncContext: WebAsyncContext;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async registerContextHandlers(): Promise<void> {
     this.codec ??= await DependencyRegistryIndex.getInstance(toConcrete<PrincipalCodec>(), CommonPrincipalCodecSymbol);
     this.webAsyncContext.registerSource(toConcrete<Principal>(), () => this.authContext.principal);
     this.webAsyncContext.registerSource(toConcrete<AuthToken>(), () => this.authContext.authToken);

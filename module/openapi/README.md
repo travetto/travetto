@@ -31,6 +31,7 @@ import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas
 import { Config } from '@travetto/config';
 import { Runtime } from '@travetto/runtime';
 import { Required } from '@travetto/schema';
+import { PostConstruct } from '@travetto/di';
 
 /**
  * API Information, infers as much as possible from the package.json
@@ -50,7 +51,8 @@ export class ApiInfoConfig {
   @Required(false)
   version: string;
 
-  postConstruct(): void {
+  @PostConstruct()
+  finalizeConfig(): void {
     this.title ??= Runtime.main.name;
     this.version ??= Runtime.main.version;
     this.description ??= Runtime.main.description;
@@ -94,7 +96,8 @@ export class ApiSpecConfig {
    */
   exposeAllSchemas: boolean = false;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async finalizeConfig(): Promise<void> {
     if (!this.output || this.output === '-') {
       this.persist = false;
     } else {

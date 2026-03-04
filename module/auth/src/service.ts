@@ -1,5 +1,5 @@
 
-import { DependencyRegistryIndex, getDefaultQualifier, Inject, Injectable } from '@travetto/di';
+import { DependencyRegistryIndex, getDefaultQualifier, Inject, Injectable, PostConstruct } from '@travetto/di';
 import { toConcrete, TimeUtil } from '@travetto/runtime';
 
 import type { Principal } from './types/principal.ts';
@@ -23,7 +23,8 @@ export class AuthService {
   @Inject()
   authorizer?: Authorizer;
 
-  async postConstruct(): Promise<void> {
+  @PostConstruct()
+  async registerAuthenticators(): Promise<void> {
     // Find all authenticators
     const AuthenticatorTarget = toConcrete<Authenticator>();
     for (const source of DependencyRegistryIndex.getCandidates(AuthenticatorTarget)) {

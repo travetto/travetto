@@ -1,6 +1,7 @@
 import type dynamodb from '@aws-sdk/client-dynamodb';
 
 import { Config } from '@travetto/config';
+import { PostConstruct } from '@travetto/di';
 import { Runtime } from '@travetto/runtime';
 
 @Config('model.dynamodb')
@@ -11,7 +12,8 @@ export class DynamoDBModelConfig {
   modifyStorage?: boolean;
   namespace?: string;
 
-  postConstruct(): void {
+  @PostConstruct()
+  finalizeConfig(): void {
     if (!Runtime.production) {
       this.client.endpoint ??= 'http://localhost:8000'; // From docker
     }

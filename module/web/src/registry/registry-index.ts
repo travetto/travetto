@@ -74,10 +74,10 @@ export class ControllerRegistryIndex implements RegistryIndex {
    * @param target Controller class
    */
   bindContextParamsOnPostConstruct(cls: Class): void {
-    DependencyRegistryIndex.registerClassMetadata(cls, {
-      postConstruct: {
-        ContextParam: (instance: ClassInstance) => this.#bindContextParams(instance)
-      }
+    const bind = (instance: ClassInstance): Promise<void> => this.#bindContextParams(instance);
+    DependencyRegistryIndex.registerPostConstruct(cls, {
+      operation(this: ClassInstance): Promise<void> { return bind(this); },
+      priority: 100
     });
   }
 

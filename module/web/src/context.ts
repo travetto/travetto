@@ -1,5 +1,5 @@
 import { AsyncContextValue, type AsyncContext } from '@travetto/context';
-import { Inject, Injectable } from '@travetto/di';
+import { Inject, Injectable, PostConstruct } from '@travetto/di';
 import { RuntimeError, castTo, type Class } from '@travetto/runtime';
 
 import { WebRequest } from './types/request.ts';
@@ -20,7 +20,8 @@ export class WebAsyncContext {
     return this.#request.get()!;
   }
 
-  postConstruct(): void {
+  @PostConstruct()
+  exposeContext(): void {
     this.registerSource(WebRequest, () => this.#request.get());
   }
 

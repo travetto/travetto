@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 import { type AsyncContext, AsyncContextValue } from '@travetto/context';
@@ -78,7 +78,8 @@ export class CookieInterceptor implements WebInterceptor<CookieConfig> {
   @Inject()
   context: AsyncContext;
 
-  postConstruct(): void {
+  @PostConstruct()
+  exposeContext(): void {
     this.webAsyncContext.registerSource(CookieJar, () => this.#cookieJar.get());
     this.keyGrip ??= new KeyGrip(this.config.keys ?? []);
   }

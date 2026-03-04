@@ -1,4 +1,5 @@
 import { Config } from '@travetto/config';
+import { PostConstruct } from '@travetto/di';
 import { type TimeSpan, TimeUtil } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
@@ -11,7 +12,8 @@ export class AuthConfig {
   @Ignore()
   maxAgeMs: number;
 
-  postConstruct(): void {
+  @PostConstruct()
+  finalize(): void {
     this.maxAgeMs = TimeUtil.duration(this.maxAge, 'ms');
   }
 }

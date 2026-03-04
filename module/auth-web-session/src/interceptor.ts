@@ -1,5 +1,5 @@
 import { toConcrete } from '@travetto/runtime';
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, PostConstruct } from '@travetto/di';
 import type { WebInterceptor, WebAsyncContext, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
 import type { Session, SessionContext, SessionData, SessionService } from '@travetto/auth-session';
 import { AuthContextInterceptor } from '@travetto/auth-web';
@@ -22,7 +22,8 @@ export class AuthSessionInterceptor implements WebInterceptor {
   @Inject()
   webAsyncContext: WebAsyncContext;
 
-  postConstruct(): void {
+  @PostConstruct()
+  exposeSessionContext(): void {
     this.webAsyncContext.registerSource(toConcrete<Session>(), () => this.context.get(true));
     this.webAsyncContext.registerSource(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
