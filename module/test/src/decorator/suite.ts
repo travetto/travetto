@@ -1,4 +1,4 @@
-import { castTo, type Class, type ClassInstance, describeFunction, getClass } from '@travetto/runtime';
+import { castTo, type Class, type ClassInstance, getClass } from '@travetto/runtime';
 
 import type { SuiteConfig } from '../model/suite.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
@@ -15,11 +15,9 @@ export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassDecorator {
   const decorator = (cls: Class): typeof cls => {
-    const isAbstract = describeFunction(cls).abstract;
     SuiteRegistryIndex.getForRegister(cls).register(
       ...(typeof description !== 'string' && description ? [description] : []),
       ...rest,
-      ...isAbstract ? [{ skip: true }] : [],
       ...(typeof description === 'string' ? [{ description }] : []),
     );
     return cls;

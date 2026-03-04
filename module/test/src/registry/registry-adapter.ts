@@ -8,7 +8,7 @@ import type { TestConfig } from '../model/test.ts';
 function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConfig>[]): SuiteConfig {
   for (const config of subConfig) {
     if (config.tags) {
-      baseConfig.tags = [...baseConfig.tags ?? [], ...config.tags];
+      baseConfig.tags = [...new Set([...baseConfig.tags ?? [], ...config.tags])];
     }
     baseConfig.skip = config.skip ?? baseConfig.skip;
 
@@ -26,6 +26,21 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
         };
       }
     }
+  }
+  return baseConfig;
+}
+
+function combineWithParent(baseConfig: SuiteConfig, parentConfig: SuiteConfig): SuiteConfig {
+  baseConfig.tags = [...parentConfig.tags ?? [], ...baseConfig.tags ?? []];
+  baseConfig.skip = baseConfig.skip ?? parentConfig.skip;
+  baseConfig.phaseHandlers = [...(parentConfig.phaseHandlers ?? []), ...(baseConfig.phaseHandlers ?? [])];
+  for (const [key, test] of Object.entries(parentConfig.tests ?? {})) {
+    baseConfig.tests[key] = {
+      ...test,
+      class: baseConfig.class,
+      classId: baseConfig.classId,
+      import: baseConfig.import,
+    };
   }
   return baseConfig;
 }
@@ -54,12 +69,12 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
 
   register(...data: Partial<SuiteConfig>[]): SuiteConfig {
     if (!this.#config) {
-      const { lines, hash } = describeFunction(this.#cls) ?? {};
+      const { lines, hash, abstract: isAbstract } = describeFunction(this.#cls) ?? {};
       this.#config = asFull<SuiteConfig>({
         class: this.#cls,
         classId: this.#cls.Ⲑid,
         tags: [],
-        skip: false,
+        skip: isAbstract,
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
@@ -99,11 +114,11 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
 
   finalize(parent?: SuiteConfig): void {
     if (parent) {
-      combineClasses(this.#config, parent);
+      combineWithParent(this.#config, parent);
     }
 
     for (const test of Object.values(this.#config.tests)) {
-      test.tags = [...test.tags ?? [], ...this.#config.tags ?? []];
+      test.tags = [...new Set([...test.tags ?? [], ...this.#config.tags ?? []])];
       test.description ||= SchemaRegistryIndex.get(this.#cls).getMethod(test.methodName).description;
     }
   }
