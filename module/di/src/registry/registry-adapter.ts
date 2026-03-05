@@ -67,7 +67,8 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
       candidate.qualifier ??= getDefaultQualifier(candidateType);
     }
     // Inherit post construct from parent
-    this.#config.postConstruct = [...(parent?.postConstruct ?? []), ...this.#config.postConstruct];
+    this.#config.postConstruct = [...(parent?.postConstruct ?? []), ...this.#config.postConstruct]
+      .sort((a, b) => (a.priority ?? 1) - (b.priority ?? 1));
   }
 
   getCandidateConfigs(): InjectableCandidate[] {

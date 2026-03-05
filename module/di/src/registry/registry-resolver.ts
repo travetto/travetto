@@ -1,4 +1,4 @@
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaRegistryIndex, UnknownType } from '@travetto/schema';
 import { castTo, type Class } from '@travetto/runtime';
 
 import { getDefaultQualifier, type InjectableCandidate, PrimaryCandidateSymbol, type ResolutionType } from '../types.ts';
@@ -122,6 +122,10 @@ export class DependencyRegistryResolver {
    * @param qualifier
    */
   resolveCandidate<T>(candidateType: Class<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
+    if (!candidateType) {
+      throw new InjectionError('Unable to resolve candidate when target is undefined', UnknownType, qualifier ? [qualifier] : undefined);
+    }
+
     const qualifiers = this.#byCandidateType.get(candidateType) ?? new Map<symbol, InjectableCandidate>();
 
     let config: InjectableCandidate;

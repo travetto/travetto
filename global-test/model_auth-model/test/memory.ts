@@ -12,7 +12,7 @@ class Config {
 }
 
 @Suite()
-class MemoryAuthModelServiceSuite extends AuthModelServiceSuite {
+class MemoryAuthModelServiceSuite extends AuthModelServiceSuite<MemoryModelService> {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }

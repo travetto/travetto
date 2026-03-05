@@ -12,7 +12,7 @@ class Config {
 }
 
 @Suite()
-class RedisAuthModelServiceSuite extends AuthModelServiceSuite {
+class RedisAuthModelServiceSuite extends AuthModelServiceSuite<RedisModelService> {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

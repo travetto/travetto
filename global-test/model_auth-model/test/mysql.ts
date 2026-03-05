@@ -20,7 +20,7 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-class MySQLAuthModelServiceSuite extends AuthModelServiceSuite {
+class MySQLAuthModelServiceSuite extends AuthModelServiceSuite<SQLModelService> {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

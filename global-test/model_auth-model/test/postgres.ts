@@ -20,7 +20,7 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-class PostgreSQLAuthModelServiceSuite extends AuthModelServiceSuite {
+class PostgreSQLAuthModelServiceSuite extends AuthModelServiceSuite<SQLModelService> {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

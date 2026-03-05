@@ -10,6 +10,8 @@ import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
 type ConfigType = { autoCreate?: boolean, namespace?: string };
 
+const Loaded = Symbol();
+
 class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass: Class }> implements SuitePhaseHandler<T> {
   qualifier?: symbol;
   target: Class<T>;
@@ -18,16 +20,19 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass
     this.target = target;
   }
 
-  async beforeAll(instance: T) {
+  async beforeAll(instance: T & { [Loaded]?: boolean }) {
     await Registry.init();
 
-    const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
-    if ('namespace' in config) {
-      config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
-    }
+    if (!instance[Loaded]) {
+      const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
+      if ('namespace' in config) {
+        config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
+      }
 
-    // We manually create
-    config.autoCreate = false;
+      // We manually create
+      config.autoCreate = false;
+      instance[Loaded] = true;
+    }
   }
 
   async beforeEach(instance: T) {
@@ -45,16 +50,17 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass
   async afterEach(instance: T) {
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
-      const models = ModelRegistryIndex.getClasses().filter(m => m === SchemaRegistryIndex.getBaseClass(m));
+      const models = ModelRegistryIndex.getClasses()
+        .filter(model => model === SchemaRegistryIndex.getBaseClass(model));
 
       if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
         await service.truncateBlob();
       }
 
       if (service.truncateModel) {
-        await Promise.all(models.map(x => service.truncateModel!(x)));
+        await Promise.all(models.map(model => service.truncateModel!(model)));
       } else if (service.deleteModel) {
-        await Promise.all(models.map(x => service.deleteModel!(x)));
+        await Promise.all(models.map(model => service.deleteModel!(model)));
       } else {
         await service.deleteStorage(); // Purge it all
       }
