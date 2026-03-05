@@ -1,5 +1,5 @@
 import { type Class, type ClassInstance, Env, Runtime, RuntimeIndex, TypedObject, castTo, describeFunction, getClass } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex, type ValidationError } from '@travetto/schema';
+import { SchemaRegistryIndex, type ValidationError } from '@travetto/schema';
 
 import type { CliCommandShape } from '../types.ts';
 import { CliCommandRegistryIndex } from './registry-index.ts';
@@ -7,86 +7,96 @@ import { CliModuleUtil } from '../module.ts';
 import { CliParseUtil } from '../parse.ts';
 import { CliUtil } from '../util.ts';
 
-type Cmd = CliCommandShape & { profiles?: string[] };
-
 type CliCommandConfigOptions = {
   runTarget?: boolean;
   runtimeModule?: 'current' | 'command';
-  with?: {
-    /** Application environment */
-    profiles?: boolean;
-    /** Module to run for */
-    module?: boolean;
-    /** Should debug invocation trigger via ipc */
-    debugIpc?: boolean | 'optional';
-    /** Should restart on source change */
-    restartOnChange?: boolean | 'optional';
-  };
 };
 
-type WithConfig = Required<Exclude<CliCommandConfigOptions['with'], undefined>>;
-type WithHandler<K extends keyof WithConfig> = (config?: WithConfig[K]) => ({
-  name: K;
-  field: Partial<SchemaFieldConfig>;
-  run?: (cmd: Cmd) => (Promise<unknown> | unknown);
-} | undefined);
+/**
+ * Allows for a CLI command to support profiles
+ * @kind decorator
+ */
+export function CliProfilesSupport() {
+  return function <T extends CliCommandShape>(cls: Class<T>): void {
+    SchemaRegistryIndex.getForRegister(cls).registerField('profiles', {
+      type: String,
+      array: true,
+      aliases: ['--profile', '--profiles', CliParseUtil.toEnvField(Env.TRV_PROFILES.key)],
+      description: 'Application profiles',
+      required: { active: false },
+    });
 
-const FIELD_CONFIG: { [K in keyof WithConfig]: WithHandler<K> } = {
-  profiles: (config) => {
-    if (!config) { return; }
-    return {
-      name: 'profiles',
-      run: cmd => cmd.profiles && Env.TRV_PROFILES.set([...cmd.profiles, ...(Env.TRV_PROFILES.list ?? [])]),
-      field: {
-        type: String,
-        aliases: ['--profile', '--profiles', CliParseUtil.toEnvField(Env.TRV_PROFILES.key)],
-        description: 'Application profiles',
-        required: { active: false },
-      },
-    };
-  },
-  module: (config) => {
-    if (!config) { return; }
-    return {
-      name: 'module',
-      field: {
-        type: String,
-        aliases: ['-m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
-        description: 'Module to run for',
-        specifiers: ['module'],
-        required: { active: Runtime.monoRoot },
-      },
-    };
-  },
-  debugIpc: (config) => {
-    if (!config) { return; }
-    return {
-      name: 'debugIpc',
-      run: cmd => CliUtil.runWithDebugIpc(cmd),
-      field: {
-        type: Boolean,
-        aliases: ['-di', CliParseUtil.toEnvField(Env.TRV_DEBUG_IPC.key)],
-        description: 'Should debug invocation trigger via ipc',
-        default: config !== 'optional',
-        required: { active: false },
-      },
-    };
-  },
-  restartOnChange: (config) => {
-    if (!config) { return; }
-    return {
-      name: 'restartOnChange',
-      run: cmd => CliUtil.runWithRestartOnChange(cmd),
-      field: {
-        type: Boolean,
-        aliases: ['-rc'],
-        description: 'Should the invocation automatically restart on source changes',
-        default: config !== 'optional' && Runtime.localDevelopment,
-        required: { active: false },
-      },
-    };
+    CliCommandRegistryIndex.getForRegister(cls).register({
+      preMain: [cmd => {
+        if ('profiles' in cmd && Array.isArray(cmd.profiles) && cmd.profiles.length > 0) {
+          Env.TRV_PROFILES.set([...cmd.profiles, ...(Env.TRV_PROFILES.list ?? [])]);
+        }
+      }]
+    });
   }
 };
+
+/**
+ * Allows for a CLI command to support targeting a specific module
+ * @kind decorator
+ */
+export function CliModuleSupport() {
+  return function <T extends CliCommandShape>(cls: Class<T>): void {
+    SchemaRegistryIndex.getForRegister(cls).registerField('module', {
+      type: String,
+      aliases: ['-m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
+      description: 'Module to run for',
+      specifiers: ['module'],
+      required: { active: Runtime.monoRoot },
+    });
+  }
+}
+
+/**
+ * Allows for a CLI command to support restarting on source changes
+ * @kind decorator
+ */
+export function CliRestartOnChangeSupport(defaultValue: boolean = false) {
+  return function <T extends CliCommandShape>(cls: Class<T>): void {
+    SchemaRegistryIndex.getForRegister(cls).registerField('restartOnChange', {
+      type: Boolean,
+      aliases: ['-rc'],
+      description: 'Should the invocation automatically restart on source changes',
+      default: defaultValue && Runtime.localDevelopment,
+      required: { active: false },
+    });
+
+    CliCommandRegistryIndex.getForRegister(cls).register({
+      runTarget: true,
+      preMain: [cmd => CliUtil.runWithRestartOnChange(castTo<{ restartOnChange: boolean }>(cmd))]
+    });
+
+    Object.defineProperty(cls.prototype, 'restartOnChange', { value: defaultValue, writable: true })
+  }
+}
+
+/**
+ * Allows for a CLI command to support debugging invocations triggered via IPC
+ * @kind decorator
+ */
+export function CliDebugIpcSupport(defaultValue = false) {
+  return function <T extends CliCommandShape>(cls: Class<T>): void {
+    SchemaRegistryIndex.getForRegister(cls).registerField('debugIpc', {
+      type: Boolean,
+      aliases: ['-di', CliParseUtil.toEnvField(Env.TRV_DEBUG_IPC.key)],
+      description: 'Should debug invocation trigger via ipc',
+      default: defaultValue,
+      required: { active: false },
+    });
+
+    CliCommandRegistryIndex.getForRegister(cls).register({
+      runTarget: true,
+      preMain: [cmd => CliUtil.runWithDebugIpc(cmd._cfg!.name, castTo<{ debugIpc: boolean }>(cmd))]
+    });
+
+    Object.defineProperty(cls.prototype, 'debugIpc', { value: defaultValue, writable: true })
+  }
+}
 
 /**
  * Decorator to register a CLI command
@@ -104,25 +114,9 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
       return;
     }
 
-    const VALID_FIELDS = TypedObject.keys(FIELD_CONFIG).map((name) => FIELD_CONFIG[name](castTo(config.with?.[name]))).filter(x => !!x);
-
-    CliCommandRegistryIndex.getForRegister(target).register({
-      runTarget: config.runTarget,
-      preMain: async (cmd: Cmd) => {
-        for (const field of VALID_FIELDS) {
-          await field.run?.(cmd);
-        }
-      }
-    });
-
     const commandModule = description.module;
 
-    for (const { name, field: { type, ...field } } of VALID_FIELDS) {
-      adapter.registerField(name, { type }, field);
-      Object.defineProperty(target.prototype, name, { value: field.default, writable: true });
-    }
-
-    const runtimeModule = config.runtimeModule ?? (config.with?.module ? 'current' : undefined);
+    const runtimeModule = config.runtimeModule ?? (('module' in adapter.getFields()) ? 'current' : undefined);
 
     if (runtimeModule) { // Validate module
       adapter.register({

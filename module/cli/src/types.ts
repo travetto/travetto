@@ -97,6 +97,8 @@ export type CliCommandShapeFields = {
   module?: string;
 };
 
+type PreMainHandler = (cmd: CliCommandShape) => (unknown | Promise<unknown>);
+
 /**
  * CLI Command schema shape
  */
@@ -104,5 +106,5 @@ export interface CliCommandConfig {
   cls: Class<CliCommandShape>;
   name: string;
   runTarget?: boolean;
-  preMain?: (cmd: CliCommandShape) => void | Promise<void>;
+  preMain?: PreMainHandler[];
 }

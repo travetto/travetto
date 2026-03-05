@@ -50,7 +50,9 @@ export class ExecutionManager {
     await command.preValidate?.();
     await CliCommandSchemaUtil.validate(command, boundArgs);
 
-    await command._cfg!.preMain?.(command);
+    for (const preMain of command._cfg!.preMain ?? []) {
+      await preMain(command);
+    }
     await command.preMain?.();
 
     ConsoleManager.debug(Runtime.debug);

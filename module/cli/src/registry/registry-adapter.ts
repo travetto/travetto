@@ -11,6 +11,16 @@ const getName = (name: string): string => (name.match(CLI_FILE_REGEX)?.groups?.n
 const stripDashes = (flag?: string): string | undefined => flag?.replace(/^-+/, '');
 const toFlagName = (field: string): string => field.replace(/([a-z])([A-Z])/g, (_, left: string, right: string) => `${left}-${right.toLowerCase()}`);
 
+function combineClasses(base: CliCommandConfig, ...configs: Partial<CliCommandConfig>[]): CliCommandConfig {
+  for (const config of configs) {
+    base.runTarget = config.runTarget ?? base.runTarget;
+    if (config.preMain) {
+      base.preMain = [...base.preMain ?? [], ...config.preMain ?? []];
+    }
+  }
+  return base;
+}
+
 export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConfig> {
   #cls: Class;
   #config: CliCommandConfig;
@@ -76,9 +86,8 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
    */
   register(...configs: Partial<CliCommandConfig>[]): CliCommandConfig {
     const metadata = describeFunction(this.#cls);
-    this.#config ??= { cls: this.#cls, name: getName(metadata.import) };
-    Object.assign(this.#config, ...configs);
-    return this.#config;
+    this.#config ??= { cls: this.#cls, name: getName(metadata.import), preMain: [] };
+    return combineClasses(this.#config, ...configs);
   }
 
   /**

@@ -28,7 +28,7 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<void> {
+  static async runWithRestartOnChange<T extends { restartOnChange?: boolean | 'optional' }>(cmd: T): Promise<void> {
     if (Env.TRV_RESTART_TARGET.isTrue) {
       Env.TRV_RESTART_TARGET.clear();
       ShutdownManager.disableInterrupt();
@@ -72,7 +72,7 @@ export class CliUtil {
   /**
    * Dispatch IPC payload
    */
-  static async runWithDebugIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<void> {
+  static async runWithDebugIpc<T extends { debugIpc?: boolean | 'optional', module?: string }>(name: string, cmd: T): Promise<void> {
     if (cmd.debugIpc !== true || !Env.TRV_CLI_IPC.isSet) {
       return; // Not debugging, run normal
     }
@@ -87,7 +87,7 @@ export class CliUtil {
     const request = {
       type: '@travetto/cli:run',
       data: {
-        name: cmd._cfg!.name,
+        name,
         env,
         module: cmd.module ?? Runtime.main.name,
         args: process.argv.slice(3),

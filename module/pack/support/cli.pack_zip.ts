@@ -1,4 +1,4 @@
-import { CliCommand, CliUtil } from '@travetto/cli';
+import { CliCommand, CliModuleSupport, CliUtil } from '@travetto/cli';
 
 import { PackOperation } from './bin/operation.ts';
 import { BasePackCommand, type PackOperationShape } from './pack.base';
@@ -6,7 +6,8 @@ import { BasePackCommand, type PackOperationShape } from './pack.base';
 /**
  * Standard zip support for pack
  */
-@CliCommand({ with: { module: true } })
+@CliModuleSupport()
+@CliCommand()
 export class PackZipCommand extends BasePackCommand {
 
   preMain(): void {

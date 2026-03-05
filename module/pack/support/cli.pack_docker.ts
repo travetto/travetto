@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { RuntimeIndex } from '@travetto/runtime';
-import { CliCommand, CliFlag, CliUtil, type CliValidationError } from '@travetto/cli';
+import { CliCommand, CliFlag, CliModuleSupport, CliUtil, type CliValidationError } from '@travetto/cli';
 import { Ignore, Required } from '@travetto/schema';
 
 import { DockerPackOperation } from './bin/docker-operation.ts';
@@ -13,7 +13,8 @@ const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
 /**
  * Standard docker support for pack
  */
-@CliCommand({ with: { module: true } })
+@CliModuleSupport()
+@CliCommand()
 export class PackDockerCommand extends BasePackCommand {
   /**  Docker Factory source */
   @CliFlag({ short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
