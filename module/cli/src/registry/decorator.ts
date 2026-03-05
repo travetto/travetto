@@ -14,6 +14,7 @@ type CliCommandConfigOptions = {
 
 /**
  * Allows for a CLI command to support profiles
+ * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
 export function CliProfilesSupport() {
@@ -38,6 +39,7 @@ export function CliProfilesSupport() {
 
 /**
  * Allows for a CLI command to support targeting a specific module
+ * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
 export function CliModuleSupport() {
@@ -54,6 +56,7 @@ export function CliModuleSupport() {
 
 /**
  * Allows for a CLI command to support restarting on source changes
+ * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
 export function CliRestartOnChangeSupport(defaultValue: boolean = false) {
@@ -77,6 +80,7 @@ export function CliRestartOnChangeSupport(defaultValue: boolean = false) {
 
 /**
  * Allows for a CLI command to support debugging invocations triggered via IPC
+ * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
 export function CliDebugIpcSupport(defaultValue = false) {
@@ -113,6 +117,8 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
     if (!target.Ⲑid || description.abstract) {
       return;
     }
+
+    CliCommandRegistryIndex.getForRegister(target).register();
 
     const commandModule = description.module;
 
