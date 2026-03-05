@@ -92,7 +92,7 @@ export class TestExecutor {
   /**
    * An empty suite result based on a suite config
    */
-  createSuiteResult(suite: SuiteConfig): SuiteResult {
+  createSuiteResult(suite: SuiteConfig, override?: Partial<SuiteResult>): SuiteResult {
     return {
       passed: 0,
       failed: 0,
@@ -107,7 +107,8 @@ export class TestExecutor {
       classId: suite.classId,
       sourceHash: suite.sourceHash,
       duration: 0,
-      tests: {}
+      tests: {},
+      ...override
     };
   }
 
@@ -176,7 +177,20 @@ export class TestExecutor {
 
     suite.instance = classConstruct(suite.class);
 
-    if (!tests.length || await this.#shouldSkip(suite, suite.instance)) {
+    const shouldSkip = await this.#shouldSkip(suite, suite.instance);
+
+    if (shouldSkip) {
+      this.#consumer.onEvent({
+        phase: 'after', type: 'suite',
+        suite: this.createSuiteResult(suite, {
+          status: 'skipped',
+          skipped: tests.length,
+          total: tests.length
+        })
+      });
+    }
+
+    if (shouldSkip || !tests.length) {
       return;
     }
 

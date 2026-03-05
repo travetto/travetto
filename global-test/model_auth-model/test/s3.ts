@@ -12,7 +12,7 @@ class Config {
 }
 
 @Suite()
-class S3AuthModelServiceSuite extends AuthModelServiceSuite {
+class S3AuthModelServiceSuite extends AuthModelServiceSuite<S3ModelService> {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }

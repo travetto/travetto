@@ -12,7 +12,7 @@ class Config {
 }
 
 @Suite()
-class FileAuthModelServiceSuite extends AuthModelServiceSuite {
+class FileAuthModelServiceSuite extends AuthModelServiceSuite<FileModelService> {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }

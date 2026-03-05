@@ -40,9 +40,9 @@ class TestConfig {
 @Suite()
 @ModelSuite()
 @InjectableSuite()
-export abstract class AuthModelServiceSuite {
+export abstract class AuthModelServiceSuite<T> {
 
-  serviceClass: Class;
+  serviceClass: Class<T>;
   configClass: Class;
 
   @Inject()

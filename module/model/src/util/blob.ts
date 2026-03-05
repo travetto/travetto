@@ -10,4 +10,9 @@ export class ModelBlobUtil {
    * Type guard for determining if service supports blob operations
    */
   static isSupported = hasFunction<ModelBlobSupport>('getBlob');
+
+  /**
+   * Type guard for determining if service supports blob write urls
+   */
+  static isWriteUrlSupported = hasFunction<ModelBlobSupport>('getBlobWriteUrl');
 }

@@ -5,15 +5,19 @@ import { Inject } from '@travetto/di';
 import type { SessionContext, SessionService } from '@travetto/auth-session';
 import { type AuthContext, AuthenticationError } from '@travetto/auth';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
-import { Util } from '@travetto/runtime';
+import { Util, type Class } from '@travetto/runtime';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { ModelSuite } from '@travetto/model/support/test/suite';
 
 @Suite()
+@ModelSuite()
 @InjectableSuite()
-export abstract class AuthSessionServerSuite {
+export abstract class AuthSessionServerSuite<T> {
 
   timeScale = 1;
+  serviceClass: Class<T>;
+  configClass: Class;
 
   @Inject()
   auth: AuthContext;

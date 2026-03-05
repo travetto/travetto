@@ -12,7 +12,7 @@ class Config {
 }
 
 @Suite()
-class FirestoreAuthModelServiceSuite extends AuthModelServiceSuite {
+class FirestoreAuthModelServiceSuite extends AuthModelServiceSuite<FirestoreModelService> {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
 }

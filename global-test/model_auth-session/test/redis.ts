@@ -5,7 +5,6 @@ import { SessionModelSymbol } from '@travetto/auth-session';
 import { RedisModelService, RedisModelConfig } from '@travetto/model-redis';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
-import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
 class Config {
   @InjectableFactory(SessionModelSymbol)
@@ -15,8 +14,7 @@ class Config {
 }
 
 @Suite()
-@ModelSuite()
-class RedisAuthSessionServerSuite extends AuthSessionServerSuite {
+class RedisAuthSessionServerSuite extends AuthSessionServerSuite<RedisModelService> {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

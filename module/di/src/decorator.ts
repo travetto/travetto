@@ -55,6 +55,7 @@ export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol)
 
 /**
  * Register post construction handler
+ * @kind decorator
  */
 export function PostConstruct(priority: number = 10) {
   return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<() => Any>): void => {

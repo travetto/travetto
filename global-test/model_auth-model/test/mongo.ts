@@ -12,7 +12,7 @@ class Config {
 }
 
 @Suite()
-class MongoAuthModelServiceSuite extends AuthModelServiceSuite {
+class MongoAuthModelServiceSuite extends AuthModelServiceSuite<MongoModelService> {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

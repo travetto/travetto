@@ -172,7 +172,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     this.client = createClient(this.config.client);
     await this.client.connect();
     await ModelStorageUtil.storageInitialization(this);
-    ShutdownManager.signal.addEventListener('abort', () => this.client.destroy());
+    ShutdownManager.signal.addEventListener('abort', () => this.client.close());
     for (const cls of ModelRegistryIndex.getClasses()) {
       for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
         switch (idx.type) {

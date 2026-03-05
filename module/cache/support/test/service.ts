@@ -34,7 +34,7 @@ class SampleService {
     return num * 2;
   }
 
-  @Cache('source', '.5s')
+  @Cache('source', '500ms')
   async agesQuickly(num: number) {
     await timers.setTimeout(100);
     return num * 3;

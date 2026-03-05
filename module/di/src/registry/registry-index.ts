@@ -1,5 +1,5 @@
 import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { RuntimeError, castKey, castTo, type Class, describeFunction, getParentClass, TypedObject } from '@travetto/runtime';
+import { castKey, castTo, type Class, describeFunction, getParentClass, TypedObject } from '@travetto/runtime';
 import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { Dependency, InjectableCandidate, InjectableConfig, PostConstructor, ResolutionType } from '../types.ts';
@@ -57,7 +57,6 @@ export class DependencyRegistryIndex implements RegistryIndex {
     SchemaRegistryIndex.getForRegister(cls).registerFieldMetadata(field, MetadataSymbol, metadata);
   }
 
-  #instances = new Map<Class, Map<symbol, unknown>>();
   #instancePromises = new Map<Class, Map<symbol, Promise<unknown>>>();
   #resolver = new DependencyRegistryResolver();
 
@@ -160,17 +159,22 @@ export class DependencyRegistryIndex implements RegistryIndex {
    */
   async construct<T>(candidateType: Class<T>, qualifier: symbol): Promise<T> {
     const { candidate } = this.#resolver.resolveCandidate(candidateType, qualifier);
-    const targetType = candidate.candidateType;
+    const { candidateType: targetType } = candidate;
     const params = await this.fetchDependencyParameters(candidate);
     const instance = await candidate.factory(...params);
-    const postConstruct = this.store.has(targetType) ? this.getConfig(targetType).postConstruct : [];
 
     // And auto-wire fields
     await this.injectFields(targetType, instance, candidate.class);
 
-    // Run post constructors
-    for (const { operation } of postConstruct.sort((a, b) => a.priority - b.priority)) {
-      await operation.call(instance);
+    // Run post constructors if output is not already as a dependency
+    const isParameterTargetType = params.find(param => typeof param === 'object' && param !== null && param.constructor === targetType);
+
+    if (!isParameterTargetType) {
+      // Run post constructors
+      const postConstruct = this.store.has(targetType) ? this.getConfig(targetType).postConstruct : [];
+      for (const { operation } of postConstruct) {
+        await operation.call(instance);
+      }
     }
 
     return instance;
@@ -180,44 +184,10 @@ export class DependencyRegistryIndex implements RegistryIndex {
    * Get or create the instance
    */
   async getInstance<T>(candidateType: Class<T>, requestedQualifier?: symbol, resolution?: ResolutionType): Promise<T> {
-    if (!candidateType) {
-      throw new RuntimeError('Unable to get instance when target is undefined');
-    }
-
     const { target, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier, resolution);
 
-    const instances = this.#instances.getOrInsert(target, new Map());
-    const instancePromises = this.#instancePromises.getOrInsert(target, new Map());
-
-    if (instancePromises.has(qualifier)) {
-      return castTo(instancePromises.get(qualifier));
-    }
-
-    const instancePromise = this.construct(candidateType, qualifier);
-    instancePromises.set(qualifier, instancePromise);
-
-    try {
-      const instance = await instancePromise;
-      instances.set(qualifier, instance);
-      return instance;
-    } catch (error) {
-      // Clear it out, don't save failed constructions
-      instancePromises.delete(qualifier);
-      throw error;
-    }
-  }
-
-  /**
-   * Destroy an instance
-   */
-  destroyInstance(candidateType: Class, requestedQualifier: symbol): void {
-    const { target, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier);
-
-    this.#resolver.removeClass(candidateType, qualifier);
-    this.#instances.get(target)?.delete(qualifier);
-    this.#instancePromises.get(target)?.delete(qualifier);
-
-    // May not exist
-    console.debug('On uninstall', { id: target, qualifier: qualifier.toString(), classId: target });
+    return castTo(this.#instancePromises
+      .getOrInsert(target, new Map())
+      .getOrInsertComputed(qualifier, () => this.construct(target, qualifier)));
   }
 }

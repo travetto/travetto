@@ -5,7 +5,6 @@ import { SessionModelSymbol } from '@travetto/auth-session';
 import { DynamoDBModelService, DynamoDBModelConfig } from '@travetto/model-dynamodb';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
-import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
 class Config {
   @InjectableFactory(SessionModelSymbol)
@@ -15,8 +14,7 @@ class Config {
 }
 
 @Suite()
-@ModelSuite()
-class DynamoDBAuthSessionServerSuite extends AuthSessionServerSuite {
+class DynamoDBAuthSessionServerSuite extends AuthSessionServerSuite<DynamoDBModelService> {
   timeScale = 1.3;
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
