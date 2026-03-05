@@ -167,7 +167,9 @@ export class DependencyRegistryIndex implements RegistryIndex {
     await this.injectFields(targetType, instance, candidate.class);
 
     // Run post constructors if output is not already as a dependency
-    if (!params.find(param => typeof param === 'object' && param !== null && param.constructor === targetType)) {
+    const isParameterTargetType = params.find(param => typeof param === 'object' && param !== null && param.constructor === targetType);
+
+    if (!isParameterTargetType) {
       // Run post constructors
       const postConstruct = this.store.has(targetType) ? this.getConfig(targetType).postConstruct : [];
       for (const { operation } of postConstruct) {

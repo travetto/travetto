@@ -10,8 +10,6 @@ import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
 type ConfigType = { autoCreate?: boolean, namespace?: string };
 
-const Loaded = Symbol();
-
 class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass: Class }> implements SuitePhaseHandler<T> {
   qualifier?: symbol;
   target: Class<T>;
@@ -20,19 +18,16 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass
     this.target = target;
   }
 
-  async beforeAll(instance: T & { [Loaded]?: boolean }) {
+  async beforeAll(instance: T) {
     await Registry.init();
 
-    if (!instance[Loaded]) {
-      const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
-      if ('namespace' in config) {
-        config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
-      }
-
-      // We manually create
-      config.autoCreate = false;
-      instance[Loaded] = true;
+    const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
+    if ('namespace' in config) {
+      config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
     }
+
+    // We manually create
+    config.autoCreate = false;
   }
 
   async beforeEach(instance: T) {
