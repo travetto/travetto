@@ -6,6 +6,7 @@ import { BinaryMetadataUtil, BinaryUtil, Util } from '@travetto/runtime';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelBlobSupport } from '../../src/types/blob.ts';
+import { ModelBlobUtil } from '../../src/util/blob.ts';
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
@@ -150,8 +151,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(savedMeta.hash === undefined);
   }
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  @Test({ skip: (x: unknown) => !(x as ModelBlobSuite).serviceClass.prototype.getBlobWriteUrl })
+  @Test({ skip: ModelBlobSuite.ifNot(ModelBlobUtil.isWriteUrlSupported) })
   async signedUrl() {
     const service = await this.service;
 

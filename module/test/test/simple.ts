@@ -147,11 +147,9 @@ class Simple {
     assert(c === d);
   }
 
-  @Test({ shouldThrow: TestExecutionError, skip: true })
+  @Test({ shouldThrow: TestExecutionError, timeout: 50, skip: true })
   async testUnhandledPromise() {
-    for (let i = 0; i < 100; i += 1) {
-      timers.setTimeout(10);
-    }
+    await timers.setTimeout(500);
   }
 
   @Test()
