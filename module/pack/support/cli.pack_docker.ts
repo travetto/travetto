@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliFlag, CliUtil } from '@travetto/cli';
-import { Ignore, Required, Validator, type ValidationError } from '@travetto/schema';
+import { Ignore, Max, Min, Required } from '@travetto/schema';
 
 import { DockerPackOperation } from './bin/docker-operation.ts';
 import { BasePackCommand, type PackOperationShape } from './pack.base';
@@ -14,19 +14,6 @@ const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
  * Standard docker support for pack
  */
 @CliCommand()
-@Validator((cmd) => {
-  const errs: ValidationError[] = [];
-  if (cmd.dockerPort?.length) {
-    for (let i = 0; i < cmd.dockerPort.length; i++) {
-      if (cmd.dockerPort[i] < 1) {
-        errs.push({ path: 'dockerPort', source: 'flag', message: `dockerPort[${i}] is less than (1)`, kind: 'range' });
-      } else if (cmd.dockerPort[i] > 65536) {
-        errs.push({ path: 'dockerPort', source: 'flag', message: `dockerPort[${i}] is greater than (65536)`, kind: 'range' });
-      }
-    }
-  }
-  return errs;
-})
 export class PackDockerCommand extends BasePackCommand {
   /**  Docker Factory source */
   @CliFlag({ short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
@@ -46,6 +33,7 @@ export class PackDockerCommand extends BasePackCommand {
   dockerRuntimePackages: string[] = [];
   /**  Docker Image Port */
   @CliFlag({ short: 'dp', envVars: ['PACK_DOCKER_PORT'] })
+  @Min(1) @Max(65536)
   dockerPort: number[] = [];
 
   // Publish flags
