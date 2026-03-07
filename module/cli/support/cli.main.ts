@@ -1,6 +1,6 @@
 import { JSONUtil, Runtime } from '@travetto/runtime';
-import { type CliCommandShape, CliCommand, type ParsedState } from '@travetto/cli';
-import { Ignore, IsPrivate, MethodValidator, type ValidationError } from '@travetto/schema';
+import { type CliCommandShape, CliCommand, CliParseUtil } from '@travetto/cli';
+import { IsPrivate, MethodValidator, type ValidationError } from '@travetto/schema';
 
 async function validateMain(fileOrImport: string): Promise<ValidationError | undefined> {
   try {
@@ -17,15 +17,13 @@ async function validateMain(fileOrImport: string): Promise<ValidationError | und
 @IsPrivate()
 export class MainCommand implements CliCommandShape {
 
-  @Ignore()
-  _parsed: ParsedState;
-
   @MethodValidator(validateMain)
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
+    const parsed = CliParseUtil.getState(this);
     let result: unknown;
     try {
       const module = await Runtime.importFrom<{ main(..._: unknown[]): Promise<unknown> }>(fileOrImport);
-      result = await module.main(...args, ...this._parsed.unknown);
+      result = await module.main(...args, ...parsed?.unknown ?? []);
     } catch (error) {
       result = error;
       process.exitCode = Math.max(process.exitCode ? +process.exitCode : 1, 1);

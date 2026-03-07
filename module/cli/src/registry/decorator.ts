@@ -154,7 +154,10 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
     });
 
     runBeforeMain(cls,
-      (cmd: typeof instance & CliCommandShape) => cmd[property] && CliUtil.runWithDebugIpc(cmd._cfg!.name),
+      (cmd: typeof instance & CliCommandShape) => {
+        const cliConfig = CliCommandRegistryIndex.get(cls);
+        return cmd[property] && CliUtil.runWithDebugIpc(cliConfig.name);
+      },
       true
     );
   };

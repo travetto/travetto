@@ -19,14 +19,6 @@ export type ParsedState = {
  */
 export interface CliCommandShape<T extends unknown[] = unknown[]> {
   /**
-   * Parsed state
-   */
-  _parsed?: ParsedState;
-  /**
-   * Config
-   */
-  _cfg?: CliCommandConfig;
-  /**
    * Action target of the command
    */
   main(...args: T): OrProm<undefined | void>;
@@ -39,28 +31,6 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
    */
   help?(): OrProm<string[]>;
 }
-
-/**
- * Command shape common fields
- */
-export type CliCommandShapeFields = {
-  /**
-   * Profiles to run the application under
-   */
-  profiles?: string[];
-  /**
-   * Should the cli invocation trigger a debug session, via IPC
-   */
-  debugIpc?: boolean;
-  /**
-   * Should the invocation run with auto-restart on source changes
-   */
-  restartOnChange?: boolean;
-  /**
-   * The module to run the command from
-   */
-  module?: string;
-};
 
 type PreMainHandler = (cmd: CliCommandShape) => (unknown | Promise<unknown>);
 

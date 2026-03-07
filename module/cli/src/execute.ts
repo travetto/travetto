@@ -1,4 +1,4 @@
-import { ConsoleManager, Runtime, ShutdownManager, Util } from '@travetto/runtime';
+import { ConsoleManager, getClass, Runtime, ShutdownManager, Util } from '@travetto/runtime';
 
 import { HelpUtil } from './help.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
@@ -36,7 +36,8 @@ export class ExecutionManager {
     const [{ instance: command, schema }] = await CliCommandRegistryIndex.load([cmd]);
     const fullArgs = await CliParseUtil.expandArgs(schema, args);
 
-    const state = command._parsed = await CliParseUtil.parse(schema, fullArgs);
+    const state = await CliParseUtil.parse(schema, fullArgs);
+    CliParseUtil.setState(command, state);
 
     const boundArgs = CliCommandSchemaUtil.bindInput(command, state);
     return { command, boundArgs };
@@ -47,8 +48,9 @@ export class ExecutionManager {
     const { command, boundArgs } = await this.#bindCommand(cmd, args);
 
     await CliCommandSchemaUtil.validate(command, boundArgs);
+    const config = CliCommandRegistryIndex.get(getClass(command));
 
-    for (const preMain of command._cfg!.preMain ?? []) {
+    for (const preMain of config.preMain ?? []) {
       await preMain(command);
     }
     await command.finalize?.();
