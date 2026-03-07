@@ -69,7 +69,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: PACKAGE_MANAGERS.find(item => existsSync(path.resolve(workspace.path, item.lock)))?.type ?? 'npm',
+      manager: PACKAGE_MANAGERS.find(item => existsSync(path.resolve(workspace.path, item.lock)))?.type ?? 'npm'
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,
