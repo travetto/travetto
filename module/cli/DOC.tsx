@@ -1,12 +1,11 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { Runtime, toConcrete } from '@travetto/runtime';
-import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, MaxLength } from '@travetto/schema';
+import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, MaxLength, type ValidationError } from '@travetto/schema';
 
 import { CliCommand } from './src/registry/decorator.ts';
-import type { CliValidationError } from './src/types.ts';
 
-const CliValidationErrorContract = toConcrete<CliValidationError>();
+const ValidationErrorContract = toConcrete<ValidationError>();
 
 const config = { workingDirectory: './doc-exec' };
 
@@ -151,9 +150,9 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Custom Validation'>
-      In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any {CliValidationErrorContract} errors that are returned will be shared with the user, and fail to invoke the {d.method('main')} method.
+      In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any {ValidationErrorContract} errors that are returned will be shared with the user, and fail to invoke the {d.method('main')} method.
 
-      <c.Code title='CliValidationError' src={CliValidationErrorContract} />
+      <c.Code title='ValidationError' src={ValidationErrorContract} />
 
       A simple example of the validation can be found in the {d.input('doc')} command:
       <c.Code title='Simple Validation Example' src='@travetto/doc/support/cli.doc.ts' startRe={/validate\(/} endRe={/^[ ]{2}\}/} />
