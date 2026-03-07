@@ -25,7 +25,7 @@
     "node": ">=25.0.0"
   },
   "dependencies": {
-    "@types/node": "^25.3.3"
+    "@types/node": "^25.3.5"
   },
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",

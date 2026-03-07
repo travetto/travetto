@@ -20,6 +20,8 @@ export const isBoolFlag = (value?: SchemaInputConfig): boolean => value?.type ==
 
 export type AliasesParseResult = Record<'long' | 'short' | 'raw' | 'env', string[]>;
 
+const STATE_SYMBOL = Symbol();
+
 /**
  * Parsing support for the cli
  */
@@ -237,5 +239,35 @@ export class CliParseUtil {
       }
       return result;
     }, { long: [], short: [], raw: [], env: [] });
+  }
+
+  /**
+   * Build aliases for a schema config
+   */
+  static buildAliases(config: { full?: string, short?: string, envVars?: string[] }, ...extraEnvVars: string[]): Partial<SchemaFieldConfig> {
+    const envVars = [...config.envVars ?? [], ...extraEnvVars];
+    return {
+      aliases: [
+        ...(config.full ? [config.full.startsWith('-') ? config.full : `--${config.full}`] : []),
+        ...(config.short ? [config.short.startsWith('-') ? config.short : `-${config.short}`] : []),
+        ...(envVars.length ? envVars.map(CliParseUtil.toEnvField) : [])
+      ]
+    };
+  }
+
+  /**
+   * Get the state from an object
+   */
+  static getState<T extends object>(item: T): ParsedState | undefined {
+    const local: T & { [STATE_SYMBOL]?: ParsedState } = item;
+    return local[STATE_SYMBOL];
+  }
+
+  /**
+   * Set the state
+   */
+  static setState<T extends object>(item: T, state: ParsedState): void {
+    const local: T & { [STATE_SYMBOL]?: ParsedState } = item;
+    local[STATE_SYMBOL] = state;
   }
 }

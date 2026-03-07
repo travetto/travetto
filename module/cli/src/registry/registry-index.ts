@@ -92,9 +92,6 @@ export class CliCommandRegistryIndex implements RegistryIndex {
         continue;
       }
       const result = config.getInstance();
-      if (result.isActive !== undefined && !result.isActive()) {
-        continue;
-      }
       this.#instanceMapping.set(name, result);
       return result;
     }

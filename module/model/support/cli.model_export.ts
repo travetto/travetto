@@ -1,4 +1,5 @@
 import { CliCommand } from '@travetto/cli';
+import { MethodValidator } from '@travetto/schema';
 
 import { BaseModelCommand } from './base-command.ts';
 import { ModelExportUtil } from './bin/export.ts';
@@ -7,11 +8,12 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 /**
  * Exports model schemas
  */
-@CliCommand({ with: { profiles: true, module: true } })
+@CliCommand()
 export class ModelExportCommand extends BaseModelCommand {
 
   getOperation(): 'exportModel' { return 'exportModel'; }
 
+  @MethodValidator(BaseModelCommand.validate.bind(null, 'exportModel'))
   async main(provider: string, models: string[]): Promise<void> {
     const resolved = await ModelCandidateUtil.resolve(provider, models);
     await ModelExportUtil.run(resolved.provider, resolved.models);

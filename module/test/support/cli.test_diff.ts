@@ -4,7 +4,7 @@ import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
-import { runTests, selectConsumer } from './bin/run.ts';
+import { runTests, type TestConsumerType } from './bin/run.ts';
 import type { TestDiffSource } from '../src/model/test.ts';
 
 /**  Direct test invocation */
@@ -12,17 +12,14 @@ import type { TestDiffSource } from '../src/model/test.ts';
 @IsPrivate()
 export class TestDiffCommand {
 
-  format: string = 'tap';
+  /** Output format for test results */
+  format: TestConsumerType = 'tap';
 
   /**
    * Format options
    * @alias o
    */
   formatOptions?: string[];
-
-  async preValidate(): Promise<void> {
-    await selectConsumer(this);
-  }
 
   preMain(): void {
     Env.TRV_ROLE.set('test');

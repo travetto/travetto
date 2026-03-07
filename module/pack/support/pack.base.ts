@@ -1,7 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 
-import { type CliCommandShape, CliFlag, type ParsedState, cliTpl } from '@travetto/cli';
+import { type CliCommandShape, CliFlag, CliModuleFlag, CliParseUtil, cliTpl } from '@travetto/cli';
 import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { Terminal } from '@travetto/terminal';
 import { Ignore, Method, Required, Schema } from '@travetto/schema';
@@ -23,9 +23,6 @@ export abstract class BasePackCommand implements CliCommandShape {
     })
       .map(file => file.import.replace(/[.][^.]+s$/, ''));
   }
-
-  @Ignore()
-  _parsed: ParsedState;
 
   /** Workspace for building */
   @CliFlag({ short: 'b', full: 'buildDir' })
@@ -86,7 +83,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   @CliFlag({ short: 'np', full: 'npm-package', envVars: ['PACK_EXTERNAL_PACKAGES'] })
   externalDependencies: string[] = [];
 
-  @Ignore()
+  @CliModuleFlag({ short: 'm' })
   module: string;
 
   @Ignore()
@@ -144,7 +141,8 @@ export abstract class BasePackCommand implements CliCommandShape {
     this.buildDirectory = path.resolve(this.buildDirectory);
 
     // Update entry points
-    this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
+    const parsed = CliParseUtil.getState(this);
+    this.entryArguments = [...this.entryArguments ?? [], ...args, ...parsed?.unknown ?? []];
     this.module ||= Runtime.main.name;
     this.mainName ??= path.basename(this.module);
     this.mainFile = `${this.mainName}.js`;

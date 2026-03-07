@@ -1,15 +1,21 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { PackageUtil } from '@travetto/manifest';
 import { ExecUtil, Env, Runtime, WatchUtil } from '@travetto/runtime';
-import { type CliCommandShape, CliCommand, type CliValidationError } from '@travetto/cli';
-import { MinLength } from '@travetto/schema';
+import { type CliCommandShape, CliCommand } from '@travetto/cli';
+import { MinLength, Validator } from '@travetto/schema';
+import { PackageUtil } from '@travetto/manifest';
 
 /**
  * Command line support for generating module docs.
  */
 @CliCommand()
+@Validator(async (cmd) => {
+  const docFile = path.resolve(cmd.input);
+  if (!(await fs.stat(docFile).catch(() => false))) {
+    return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
+  }
+})
 export class DocCommand implements CliCommandShape {
 
   /** Input File */
@@ -17,33 +23,17 @@ export class DocCommand implements CliCommandShape {
 
   /** Outputs */
   @MinLength(1)
-  outputs: string[] = [];
+  outputs: string[] = PackageUtil.readPackage(Runtime.workspace.path)?.travetto?.doc?.outputs ?? ['README.md'];
 
   /** Watch? */
   watch = false;
 
-  preMain(): void {
+  finalize(): void {
     Env.DEBUG.set(false);
     Env.TRV_ROLE.set('doc');
     Env.TRV_CLI_IPC.clear();
     Env.TRV_LOG_PLAIN.set(true);
     Env.FORCE_COLOR.set(false);// Prevent restarting
-  }
-
-  preBind(): void {
-    const workspacePkg = PackageUtil.readPackage(Runtime.workspace.path);
-    this.outputs = workspacePkg.travetto?.doc?.outputs ?? ['README.md'];
-  }
-
-  preHelp(): void {
-    this.preBind();
-  }
-
-  async validate(): Promise<CliValidationError | undefined> {
-    const docFile = path.resolve(this.input);
-    if (!(await fs.stat(docFile).catch(() => false))) {
-      return { message: `input: ${this.input} does not exist`, source: 'flag' };
-    }
   }
 
   async runWatch(): Promise<void> {

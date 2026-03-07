@@ -1,18 +1,29 @@
 import { castKey, castTo, getClass } from '@travetto/runtime';
-import { BindUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError, type ValidationError } from '@travetto/schema';
 
-import type { ParsedState, CliCommandShape, CliValidationError } from './types.ts';
+import type { ParsedState, CliCommandShape } from './types.ts';
 import { CliValidationResultError } from './error.ts';
 
-const getSource = (source: string | undefined, def: CliValidationError['source']): CliValidationError['source'] => {
+const getSource = (source: string | undefined, defaultSource: ValidationError['source']): ValidationError['source'] => {
   switch (source) {
     case 'custom':
     case 'arg':
     case 'flag': return source;
-    case undefined: return def;
+    case undefined: return defaultSource;
     default: return 'custom';
   }
 };
+
+const transformErrors = (source: 'arg' | 'flag', error: unknown): ValidationError[] => {
+  if (error instanceof CliValidationResultError || error instanceof ValidationResultError) {
+    return error.details.errors.map(value => ({ source: getSource(value.source, source), ...value }));
+  } else {
+    throw error;
+  }
+};
+
+const transformArgErrors = (error: unknown): ValidationError[] => transformErrors('arg', error);
+const transformFlagErrors = (error: unknown): ValidationError[] => transformErrors('flag', error);
 
 /**
  * Allows binding describing/binding inputs for commands
@@ -59,27 +70,12 @@ export class CliCommandSchemaUtil {
     const cls = getClass(cmd);
     const paramNames = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(config => config.name!);
 
-    const validators = [
-      (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),
-      (): Promise<void> => SchemaValidator.validateMethod(cls, 'main', args, paramNames),
-      async (): Promise<void> => {
-        const result = await cmd.validate?.(...args);
-        if (result) {
-          throw new CliValidationResultError(cmd, Array.isArray(result) ? result : [result]);
-        }
-      },
-    ];
+    const results = await Promise.all([
+      SchemaValidator.validate(cls, cmd).then(() => [], transformFlagErrors),
+      SchemaValidator.validateMethod(cls, 'main', args, paramNames).then(() => [], transformArgErrors),
+    ]);
 
-    const SOURCES = ['flag', 'arg', 'custom'] as const;
-
-    const results = validators.map((validator, i) => validator().catch(error => {
-      if (!(error instanceof CliValidationResultError) && !(error instanceof ValidationResultError)) {
-        throw error;
-      }
-      return error.details.errors.map(value => ({ ...value, source: getSource(value.source, SOURCES[i]) }));
-    }));
-
-    const errors = (await Promise.all(results)).flatMap(result => (result ?? []));
+    const errors = results.flat();
     if (errors.length) {
       throw new CliValidationResultError(cmd, errors);
     }

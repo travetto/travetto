@@ -86,8 +86,8 @@ class SampleRegistryAdapter implements RegistryAdapter<Group> {
 export class SampleRegistryIndex implements RegistryIndex {
   static #instance = Registry.registerIndex(SampleRegistryIndex);
 
-  static getForRegister(cls: Class, allowFinalized = false): SampleRegistryAdapter {
-    return this.#instance.store.getForRegister(cls, allowFinalized);
+  static getForRegister(cls: Class): SampleRegistryAdapter {
+    return this.#instance.store.getForRegister(cls);
   }
 
   store = new RegistryIndexStore(SampleRegistryAdapter);

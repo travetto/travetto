@@ -2,8 +2,6 @@ import { spawn, type ChildProcess } from 'node:child_process';
 
 import { RuntimeError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
-import type { CliCommandShape, CliCommandShapeFields } from './types.ts';
-
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
 const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
@@ -16,24 +14,19 @@ export class CliUtil {
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
     const simple = (module ?? Runtime.main.name).replace(/[\/]/, '_').replace(/@/, '');
-    if (!simple) {
-      return placeholder;
-    } else if (!module && Runtime.monoRoot) {
-      return placeholder;
-    } else {
-      return placeholder.replace('<module>', simple);
-    }
+    const targetModule = !simple || (!module && Runtime.monoRoot) ? '<module>' : simple;
+    return placeholder.replace('<module>', targetModule);
   }
 
   /**
    * Run a command as restartable, linking into self
    */
-  static async runWithRestartOnChange<T extends CliCommandShapeFields>(cmd: T): Promise<void> {
+  static async runWithRestartOnChange(restartOnChange?: boolean): Promise<void> {
     if (Env.TRV_RESTART_TARGET.isTrue) {
       Env.TRV_RESTART_TARGET.clear();
       ShutdownManager.disableInterrupt();
       return;
-    } else if (cmd.restartOnChange !== true) {
+    } else if (restartOnChange !== true) {
       return; // Not restarting, run normal
     }
 
@@ -72,13 +65,14 @@ export class CliUtil {
   /**
    * Dispatch IPC payload
    */
-  static async runWithDebugIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<void> {
-    if (cmd.debugIpc !== true || !Env.TRV_CLI_IPC.isSet) {
+  static async runWithDebugIpc(name: string): Promise<void> {
+    if (!Env.TRV_CLI_IPC.isSet) {
       return; // Not debugging, run normal
     }
 
-    const info = await fetch(Env.TRV_CLI_IPC.value!).catch(() => ({ ok: false }));
+    const doFetch = fetch.bind(null, Env.TRV_CLI_IPC.value!);
 
+    const info = await doFetch().catch(() => ({ ok: false }));
     if (!info.ok) {
       return; // Server not running, run normal
     }
@@ -87,16 +81,16 @@ export class CliUtil {
     const request = {
       type: '@travetto/cli:run',
       data: {
-        name: cmd._cfg!.name,
+        name,
         env,
-        module: cmd.module ?? Runtime.main.name,
+        cwd: process.cwd(),
         args: process.argv.slice(3),
       }
     };
     console.log('Triggering IPC request', request);
 
     Object.entries(process.env).forEach(([key, value]) => validEnv(key) && (env[key] = value!));
-    const sent = await fetch(Env.TRV_CLI_IPC.value!, { method: 'POST', body: JSONUtil.toUTF8(request) });
+    const sent = await doFetch({ method: 'POST', body: JSONUtil.toUTF8(request) });
 
     if (!sent.ok) {
       throw new RuntimeError(`IPC Request failed: ${sent.status} ${await sent.text()}`);

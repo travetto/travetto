@@ -5,13 +5,17 @@ import { Env } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
 
-import { CliCommand, CliParseUtil } from '@travetto/cli';
+import { CliCommand, CliModuleFlag, CliParseUtil } from '@travetto/cli';
 
 /**
  * My command
  */
-@CliCommand({ with: { module: true } })
+@CliCommand()
 class WithModule {
+
+  @CliModuleFlag({ short: 'm' })
+  module: string;
+
   main() { }
 }
 
