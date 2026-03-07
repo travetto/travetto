@@ -1,4 +1,4 @@
-import { CliCommand, CliModuleSupport } from '@travetto/cli';
+import { CliCommand } from '@travetto/cli';
 
 import { BasePackCommand } from './pack.base';
 

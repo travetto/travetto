@@ -1,4 +1,4 @@
-import { CliCommand, CliModuleSupport, CliUtil } from '@travetto/cli';
+import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { PackOperation } from './bin/operation.ts';
 import { BasePackCommand, type PackOperationShape } from './pack.base';
