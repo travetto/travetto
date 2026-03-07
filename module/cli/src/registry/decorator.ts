@@ -1,4 +1,4 @@
-import { type Class, type ClassInstance, Env, Runtime, RuntimeIndex, TypedObject, castKey, castTo, describeFunction, getClass } from '@travetto/runtime';
+import { type Class, type ClassInstance, Env, Runtime, RuntimeIndex, castTo, describeFunction, getClass } from '@travetto/runtime';
 import { SchemaRegistryIndex, type ValidationError } from '@travetto/schema';
 
 import type { CliCommandShape } from '../types.ts';
@@ -72,14 +72,14 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
     });
 
     CliCommandRegistryIndex.getForRegister(cls).register({
-      preMain: [cmd => {
+      preMain: [(cmd): void => {
         const typed: (typeof cmd) & { [property]?: string[] } = castTo(cmd);
         if (property in typed && Array.isArray(typed[property]) && typed[property]!.length > 0) {
           Env.TRV_PROFILES.set([...typed[property]!, ...(Env.TRV_PROFILES.list ?? [])]);
         }
       }]
     });
-  }
+  };
 };
 
 /**
@@ -125,7 +125,7 @@ export function CliModuleFlag(config: CliFlagOptions & { defaultScope?: 'current
         }
       }],
     });
-  }
+  };
 }
 
 /**
@@ -145,12 +145,12 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
 
     CliCommandRegistryIndex.getForRegister(cls).register({
       runTarget: true,
-      preMain: [cmd => {
+      preMain: [(cmd): Promise<void> => {
         const typed: (typeof cmd) & { [property]?: boolean } = castTo(cmd);
         return CliUtil.runWithRestartOnChange(typed[property]);
       }]
     });
-  }
+  };
 }
 
 /**
@@ -172,12 +172,12 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
 
     CliCommandRegistryIndex.getForRegister(cls).register({
       runTarget: true,
-      preMain: [cmd => {
+      preMain: [(cmd): Promise<void> | void => {
         const typed: (typeof cmd) & { [property]?: boolean } = castTo(cmd);
         if (typed[property] === true) {
           return CliUtil.runWithDebugIpc(cmd._cfg!.name);
         }
       }]
     });
-  }
+  };
 }
