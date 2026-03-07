@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { type CliCommandShape, CliCommand } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, CliModuleFlag } from '@travetto/cli';
 import { JSONUtil, Env } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { DependencyRegistryIndex } from '@travetto/di';
@@ -11,6 +11,9 @@ import { DependencyRegistryIndex } from '@travetto/di';
  */
 @CliCommand()
 export class OpenApiSpecCommand implements CliCommandShape {
+
+  @CliModuleFlag()
+  module: string;
 
   /** Output files */
   output?: string;
