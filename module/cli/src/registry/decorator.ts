@@ -10,6 +10,13 @@ import { CliUtil } from '../util.ts';
 type CliCommandConfigOptions = { runTarget?: boolean };
 type CliFlagOptions = { full?: string, short?: string, envVars?: string[] };
 
+function runBeforeMain<T>(cls: Class, handler: (item: T) => (unknown | Promise<unknown>), runTarget?: boolean): void {
+  CliCommandRegistryIndex.getForRegister(cls).register({
+    runTarget,
+    preMain: [async (cmd): Promise<void> => { await handler(castTo(cmd)); }]
+  });
+}
+
 /**
  * Decorator to register a CLI command
  *
@@ -19,10 +26,9 @@ type CliFlagOptions = { full?: string, short?: string, envVars?: string[] };
  */
 export function CliCommand(config: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    if (!target.Ⲑid || describeFunction(target)?.abstract) {
-      return;
+    if (target.Ⲑid && !describeFunction(target)?.abstract) {
+      CliCommandRegistryIndex.getForRegister(target).register(config);
     }
-    CliCommandRegistryIndex.getForRegister(target).register(config);
   };
 }
 
@@ -33,9 +39,8 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
  */
 export function CliFlag(config: CliFlagOptions) {
   return function (instance: ClassInstance, property: string): void {
-    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, {
-      ...CliParseUtil.buildAliases(config)
-    });
+    SchemaRegistryIndex.getForRegister(getClass(instance))
+      .registerField(property, CliParseUtil.buildAliases(config));
   };
 }
 
@@ -65,17 +70,11 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
       ...CliParseUtil.buildAliases(config, Env.TRV_PROFILES.key),
       required: { active: false },
       description: 'Application profiles'
-    }
-    );
-
-    CliCommandRegistryIndex.getForRegister(cls).register({
-      preMain: [(cmd): void => {
-        const typed: (typeof cmd) & { [property]?: string[] } = castTo(cmd);
-        if (property in typed && Array.isArray(typed[property]) && typed[property]!.length > 0) {
-          Env.TRV_PROFILES.set([...typed[property]!, ...(Env.TRV_PROFILES.list ?? [])]);
-        }
-      }]
     });
+
+    runBeforeMain(cls, (cmd: typeof instance) =>
+      Env.TRV_PROFILES.set([...cmd[property] ?? [], ...(Env.TRV_PROFILES.list ?? [])])
+    );
   };
 };
 
@@ -135,13 +134,7 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
       required: { active: false },
     });
 
-    CliCommandRegistryIndex.getForRegister(cls).register({
-      runTarget: true,
-      preMain: [(cmd): Promise<void> => {
-        const typed: (typeof cmd) & { [property]?: boolean } = castTo(cmd);
-        return CliUtil.runWithRestartOnChange(typed[property]);
-      }]
-    });
+    runBeforeMain(cls, (cmd: typeof instance) => CliUtil.runWithRestartOnChange(cmd[property]), true);
   };
 }
 
@@ -160,14 +153,9 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
       required: { active: false },
     });
 
-    CliCommandRegistryIndex.getForRegister(cls).register({
-      runTarget: true,
-      preMain: [(cmd): Promise<void> | void => {
-        const typed: (typeof cmd) & { [property]?: boolean } = castTo(cmd);
-        if (typed[property] === true) {
-          return CliUtil.runWithDebugIpc(cmd._cfg!.name);
-        }
-      }]
-    });
+    runBeforeMain(cls,
+      (cmd: typeof instance & CliCommandShape) => cmd[property] && CliUtil.runWithDebugIpc(cmd._cfg!.name),
+      true
+    );
   };
 }
