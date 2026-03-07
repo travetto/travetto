@@ -17,11 +17,11 @@ export type ParsedState = {
  * CLI Command Contract
  * @concrete
  */
-export interface CliCommandShape<T extends unknown[] = unknown[]> {
+export interface CliCommandShape {
   /**
    * Action target of the command
    */
-  main(...args: T): OrProm<undefined | void>;
+  main(...args: unknown[]): OrProm<undefined | void>;
   /**
    * Run before main runs
    */
