@@ -1,4 +1,4 @@
-import { CliCommand, CliModuleSupport, CliProfilesSupport, cliTpl } from '@travetto/cli';
+import { CliCommand, cliTpl } from '@travetto/cli';
 
 import { BaseModelCommand } from './base-command.ts';
 import { ModelInstallUtil } from './bin/install.ts';
@@ -7,8 +7,6 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 /**
  * Installing models
  */
-@CliProfilesSupport()
-@CliModuleSupport()
 @CliCommand()
 export class ModelInstallCommand extends BaseModelCommand {
 

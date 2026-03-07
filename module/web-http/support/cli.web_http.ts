@@ -1,6 +1,6 @@
 import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { CliCommand, CliDebugIpcSupport, CliModuleSupport, CliProfilesSupport, CliRestartOnChangeSupport, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliDebugIpcFlag, CliModuleFlag, CliProfilesFlag, CliRestartOnChangeFlag, type CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
 import { Registry } from '@travetto/registry';
 
@@ -9,10 +9,6 @@ import type { WebHttpServer } from '../src/types.ts';
 /**
  * Run a web server
  */
-@CliDebugIpcSupport()
-@CliRestartOnChangeSupport(true)
-@CliModuleSupport()
-@CliProfilesSupport()
 @CliCommand({ runTarget: true })
 export class WebHttpCommand implements CliCommandShape {
 
@@ -21,6 +17,18 @@ export class WebHttpCommand implements CliCommandShape {
 
   /** Kill conflicting port owner */
   killConflict?: boolean = Runtime.localDevelopment;
+
+  @CliDebugIpcFlag()
+  debugIpc?: boolean;
+
+  @CliRestartOnChangeFlag()
+  restartOnChange: boolean = true;
+
+  @CliModuleFlag()
+  module?: string;
+
+  @CliProfilesFlag()
+  profiles?: string[];
 
   preMain(): void {
     if (this.port) {

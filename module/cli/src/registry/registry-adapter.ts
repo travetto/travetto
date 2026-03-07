@@ -13,6 +13,7 @@ const toFlagName = (field: string): string => field.replace(/([a-z])([A-Z])/g, (
 
 function combineClasses(base: CliCommandConfig, ...configs: Partial<CliCommandConfig>[]): CliCommandConfig {
   for (const config of configs) {
+    base.moduleField = config.moduleField ?? base.moduleField;
     base.runTarget = config.runTarget ?? base.runTarget;
     if (config.preMain) {
       base.preMain = [...base.preMain ?? [], ...config.preMain ?? []];

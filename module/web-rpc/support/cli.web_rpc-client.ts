@@ -1,10 +1,9 @@
 import path from 'node:path';
 
 import { Env } from '@travetto/runtime';
-import { CliCommand, type CliCommandShape, CliModuleSupport, CliProfilesSupport, CliValidationResultError } from '@travetto/cli';
+import { CliCommand, type CliCommandShape, CliModuleFlag, CliProfilesFlag, CliValidationResultError } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { Ignore } from '@travetto/schema';
 
 import type { WebRpcClient } from '../src/config.ts';
 import { WebRpcClientGeneratorService } from '../src/service.ts';
@@ -12,12 +11,13 @@ import { WebRpcClientGeneratorService } from '../src/service.ts';
 /**
  * Generate the web-rpc client
  */
-@CliProfilesSupport()
-@CliModuleSupport()
 @CliCommand()
 export class CliWebRpcCommand implements CliCommandShape {
 
-  @Ignore()
+  @CliProfilesFlag()
+  profiles: string[];
+
+  @CliModuleFlag()
   module: string;
 
   preMain(): void {

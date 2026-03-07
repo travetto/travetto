@@ -1,11 +1,10 @@
-import { CliCommand, CliModuleSupport, CliUtil } from '@travetto/cli';
+import { CliCommand, CliModuleFlag, CliUtil } from '@travetto/cli';
 import { PackOperation } from '@travetto/pack/support/bin/operation.ts';
 import { BasePackCommand, type PackOperationShape } from '@travetto/pack/support/pack.base.ts';
 
 /**
  * Standard lambda support for pack
  */
-@CliModuleSupport()
 @CliCommand()
 export class PackLambdaCommand extends BasePackCommand {
 

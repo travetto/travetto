@@ -1,5 +1,5 @@
 import { Env } from '@travetto/runtime';
-import { type CliValidationError, type CliCommandShape, cliTpl } from '@travetto/cli';
+import { type CliValidationError, type CliCommandShape, cliTpl, CliModuleFlag, CliProfilesFlag } from '@travetto/cli';
 import { Registry } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
 
@@ -12,6 +12,12 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
  */
 @Schema()
 export abstract class BaseModelCommand implements CliCommandShape {
+
+  @CliProfilesFlag()
+  profiles: string[];
+
+  @CliModuleFlag()
+  module: string;
 
   abstract getOperation(): keyof ModelStorageSupport;
 

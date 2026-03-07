@@ -1,4 +1,4 @@
-import { CliCommand, CliModuleSupport, CliProfilesSupport } from '@travetto/cli';
+import { CliCommand } from '@travetto/cli';
 
 import { BaseModelCommand } from './base-command.ts';
 import { ModelExportUtil } from './bin/export.ts';
@@ -7,8 +7,6 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
 /**
  * Exports model schemas
  */
-@CliProfilesSupport()
-@CliModuleSupport()
 @CliCommand()
 export class ModelExportCommand extends BaseModelCommand {
 

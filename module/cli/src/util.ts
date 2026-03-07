@@ -2,8 +2,6 @@ import { spawn, type ChildProcess } from 'node:child_process';
 
 import { RuntimeError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
-import type { CliCommandShape, CliCommandShapeFields } from './types.ts';
-
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
 const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
@@ -28,12 +26,12 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static async runWithRestartOnChange<T extends { restartOnChange?: boolean | 'optional' }>(cmd: T): Promise<void> {
+  static async runWithRestartOnChange(restartOnChange?: boolean): Promise<void> {
     if (Env.TRV_RESTART_TARGET.isTrue) {
       Env.TRV_RESTART_TARGET.clear();
       ShutdownManager.disableInterrupt();
       return;
-    } else if (cmd.restartOnChange !== true) {
+    } else if (restartOnChange !== true) {
       return; // Not restarting, run normal
     }
 
@@ -72,8 +70,8 @@ export class CliUtil {
   /**
    * Dispatch IPC payload
    */
-  static async runWithDebugIpc<T extends { debugIpc?: boolean | 'optional', module?: string }>(name: string, cmd: T): Promise<void> {
-    if (cmd.debugIpc !== true || !Env.TRV_CLI_IPC.isSet) {
+  static async runWithDebugIpc(name: string, debugIpc: boolean | undefined): Promise<void> {
+    if (debugIpc !== true || !Env.TRV_CLI_IPC.isSet) {
       return; // Not debugging, run normal
     }
 
@@ -89,7 +87,7 @@ export class CliUtil {
       data: {
         name,
         env,
-        module: cmd.module ?? Runtime.main.name,
+        cwd: process.cwd(),
         args: process.argv.slice(3),
       }
     };
