@@ -83,7 +83,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   @CliFlag({ short: 'np', full: 'npm-package', envVars: ['PACK_EXTERNAL_PACKAGES'] })
   externalDependencies: string[] = [];
 
-  @CliModuleFlag()
+  @CliModuleFlag({ short: 'm' })
   module: string;
 
   @Ignore()

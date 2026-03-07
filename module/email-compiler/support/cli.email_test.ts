@@ -14,7 +14,7 @@ import { EditorService } from './bin/editor.ts';
 export class EmailTestCommand implements CliCommandShape {
 
   @CliProfilesFlag()
-  profiles: string[];
+  profile: string[];
 
   finalize(): void {
     Env.TRV_ROLE.set('build');

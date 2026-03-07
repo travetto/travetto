@@ -155,7 +155,7 @@ export const text = <>
       <c.Code title='ValidationError' src={ValidationErrorContract} />
 
       A simple example of the validation can be found in the {d.input('doc')} command:
-      <c.Code title='Simple Validation Example' src='@travetto/doc/support/cli.doc.ts' startRe={/validate\(/} endRe={/^[ ]{2}\}/} />
+      <c.Code title='Simple Validation Example' src='@travetto/doc/support/cli.doc.ts' startRe={/^@Validator\(/} endRe={/^[}]\)/} />
     </c.SubSection>
   </c.Section>
 

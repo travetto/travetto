@@ -13,6 +13,7 @@ import type { TestConsumerType } from './bin/run.ts';
 @CliCommand()
 export class TestCommand implements CliCommandShape {
 
+  /** Output format for test results */
   format: TestConsumerType = 'tap';
 
   /** Number of tests to run concurrently */

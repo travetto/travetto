@@ -1,4 +1,4 @@
-import type { NodePackageManager, Package } from './package.ts';
+import type { NodePackageManager } from './package.ts';
 
 export type ManifestContext = {
   workspace: {
@@ -10,8 +10,6 @@ export type ManifestContext = {
     mono?: boolean;
     /** The package manager of the workspace */
     manager: NodePackageManager;
-    /** The workspace package values */
-    package: Package['travetto'];
   };
   build: {
     /** URL for the compiler server */

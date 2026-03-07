@@ -1,9 +1,9 @@
 import { spawn } from 'node:child_process';
 
-import { CliCommand, type CliCommandShape, type ParsedState } from '@travetto/cli';
+import { CliCommand, CliParseUtil, type CliCommandShape } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Env } from '@travetto/runtime';
-import { Ignore, Max, Min } from '@travetto/schema';
+import { Max, Min } from '@travetto/schema';
 
 import { RepoExecUtil } from './bin/exec.ts';
 
@@ -12,9 +12,6 @@ import { RepoExecUtil } from './bin/exec.ts';
  */
 @CliCommand()
 export class RepoExecCommand implements CliCommandShape {
-
-  @Ignore()
-  _parsed: ParsedState;
 
   /** Only changed modules */
   changed = false;
@@ -34,7 +31,8 @@ export class RepoExecCommand implements CliCommandShape {
   }
 
   async main(cmd: string, args: string[] = []): Promise<void> {
-    const finalArgs = [...args, ...this._parsed.unknown];
+    const parsed = CliParseUtil.getState(this);
+    const finalArgs = [...args, ...parsed?.unknown ?? []];
 
     await RepoExecUtil.execOnModules(
       this.changed ? 'changed' : 'workspace',

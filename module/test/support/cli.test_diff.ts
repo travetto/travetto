@@ -12,6 +12,7 @@ import type { TestDiffSource } from '../src/model/test.ts';
 @IsPrivate()
 export class TestDiffCommand {
 
+  /** Output format for test results */
   format: TestConsumerType = 'tap';
 
   /**

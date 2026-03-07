@@ -13,7 +13,7 @@ import { CliCommand, CliModuleFlag, CliParseUtil } from '@travetto/cli';
 @CliCommand()
 class WithModule {
 
-  @CliModuleFlag()
+  @CliModuleFlag({ short: 'm' })
   module: string;
 
   main() { }

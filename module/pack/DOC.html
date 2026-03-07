@@ -152,6 +152,7 @@ Options:
   --manifest-file <span class="token operator">&lt;</span>string<span class="token operator">></span>               Manifest File Name <span class="token punctuation">(</span>default: <span class="token string">"manifest.json"</span><span class="token punctuation">)</span>
   -wr, --include-workspace-resources     Include workspace resources <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -np, --npm-package <span class="token operator">&lt;</span>string<span class="token operator">></span>            External NPM Packages <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                  Module to run <span class="token keyword">for</span>
   -df, --docker-factory <span class="token operator">&lt;</span>string<span class="token operator">></span>         Docker Factory <span class="token builtin class-name">source</span> <span class="token punctuation">(</span>default: <span class="token string">"@travetto/pack/support/pack.dockerfile.ts"</span><span class="token punctuation">)</span>
   -di, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Image to extend <span class="token punctuation">(</span>default: <span class="token string">"node:25-alpine"</span><span class="token punctuation">)</span>
   -dn, --docker-name <span class="token operator">&lt;</span>string<span class="token operator">></span>            Docker Image Name <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack"</span><span class="token punctuation">)</span>
@@ -163,7 +164,6 @@ Options:
   -dx, --docker-push                     Docker Push Tags <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -db, --docker-build-platform <span class="token operator">&lt;</span>string<span class="token operator">></span>  Docker Build Platform
   -dr, --docker-registry <span class="token operator">&lt;</span>string<span class="token operator">></span>        Docker Registry
-  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                  Module to run <span class="token keyword">for</span>
   -h, <span class="token parameter variable">--help</span>                             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
@@ -289,6 +289,6 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 <span class="token builtin class-name">echo</span> <span class="token string">"Building Docker Container latest"</span>
 
 <span class="token builtin class-name">cd</span> <span class="token variable">$DIST</span>
-<span class="token function">docker</span> build <span class="token parameter variable">-t</span> travetto_todo-app:latest <span class="token builtin class-name">.</span>
+<span class="token function">docker</span> build <span class="token parameter variable">-t</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>:latest <span class="token builtin class-name">.</span>
 <span class="token builtin class-name">cd</span> <span class="token variable">$ROOT</span></code></pre>
   </figure>

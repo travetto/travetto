@@ -59,7 +59,7 @@ This module also has a tight integration with the [VSCode plugin](https://market
 At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
    *  The file must be located in the `support/` folder, and have a name that matches `cli.*.ts`
    *  The file must be a class that has a main method
-   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98) decorator
+   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) decorator
 
 **Code: Basic Command**
 ```typescript
@@ -94,7 +94,7 @@ Examples of mappings:
 The pattern is that underscores(_) translate to colons (:), and the `cli.` prefix, and `.ts` suffix are dropped.
 
 ## Binding Flags
-[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) class. The fields of the class represent the flags that are available to the command.
+[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) class. The fields of the class represent the flags that are available to the command.
 
 **Code: Basic Command with Flag**
 ```typescript
@@ -131,7 +131,7 @@ $ trv basic:flag --loud
 HELLO
 ```
 
-The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98) supports the following data types for flags:
+The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) supports the following data types for flags:
    *  Boolean values
    *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L172), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L179), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L165), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L99) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L110) decorators help provide additional validation.
    *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L99), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L110), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L90) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L64) provide additional constraints
@@ -390,7 +390,7 @@ npx trv call:db --host localhost --port 3306 --username app --password <custom>
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L98) decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -412,47 +412,19 @@ export class RunCommand {
 
 **Code: Anatomy of a Command**
 ```typescript
-export interface CliCommandShape<T extends unknown[] = unknown[]> {
-  /**
-   * Parsed state
-   */
-  _parsed?: ParsedState;
-  /**
-   * Config
-   */
-  _cfg?: CliCommandConfig;
+export interface CliCommandShape {
   /**
    * Action target of the command
    */
-  main(...args: T): OrProm<undefined | void>;
+  main(...args: unknown[]): OrProm<undefined | void>;
   /**
    * Run before main runs
    */
-  preMain?(): OrProm<void>;
+  finalize?(help?: boolean): OrProm<void>;
   /**
    * Extra help
    */
   help?(): OrProm<string[]>;
-  /**
-   * Run before help is displayed
-   */
-  preHelp?(): OrProm<void>;
-  /**
-   * Is the command active/eligible for usage
-   */
-  isActive?(): boolean;
-  /**
-   * Run before binding occurs
-   */
-  preBind?(): OrProm<void>;
-  /**
-   * Run before validation occurs
-   */
-  preValidate?(): OrProm<void>;
-  /**
-   * Validation method
-   */
-  validate?(...args: T): OrProm<CliValidationError | CliValidationError[] | undefined>;
 }
 ```
 
@@ -463,7 +435,7 @@ If the goal is to run a more complex application, which may include depending on
 ```typescript
 import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { CliCommand, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliDebugIpcFlag, CliModuleFlag, CliProfilesFlag, CliRestartOnChangeFlag, type CliCommandShape } from '@travetto/cli';
 import { NetUtil } from '@travetto/web';
 import { Registry } from '@travetto/registry';
 
@@ -472,7 +444,7 @@ import type { WebHttpServer } from '../src/types.ts';
 /**
  * Run a web server
  */
-@CliCommand({ runTarget: true, with: { debugIpc: 'optional', restartOnChange: true, module: true, profiles: true } })
+@CliCommand()
 export class WebHttpCommand implements CliCommandShape {
 
   /** Port to run on */
@@ -481,7 +453,19 @@ export class WebHttpCommand implements CliCommandShape {
   /** Kill conflicting port owner */
   killConflict?: boolean = Runtime.localDevelopment;
 
-  preMain(): void {
+  @CliModuleFlag({ short: 'm' })
+  module: string;
+
+  @CliProfilesFlag()
+  profile: string[];
+
+  @CliRestartOnChangeFlag()
+  restartOnChange: boolean = true;
+
+  @CliDebugIpcFlag()
+  debugIpc?: boolean;
+
+  finalize(): void {
     if (this.port) {
       process.env.WEB_HTTP_PORT = `${this.port}`;
     }
@@ -512,32 +496,56 @@ As noted in the example above, `fields` is specified in this execution, with sup
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 ### Custom Validation
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L20) errors that are returned will be shared with the user, and fail to invoke the `main` method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [ValidationError](https://github.com/travetto/travetto/tree/main/module/schema/src/validate/types.ts#L10) errors that are returned will be shared with the user, and fail to invoke the `main` method.
 
-**Code: CliValidationError**
+**Code: ValidationError**
 ```typescript
-export interface CliValidationError {
+export interface ValidationError {
   /**
    * The error message
    */
   message: string;
   /**
-   * Source of validation
+   * The object path of the error
    */
-  source?: 'flag' | 'arg' | 'custom';
-};
+  path: string;
+  /**
+   * The kind of validation
+   */
+  kind: ValidationKind;
+  /**
+   * The value provided
+   */
+  value?: unknown;
+  /**
+   * Regular expression to match
+   */
+  regex?: string;
+  /**
+   * Number to compare against
+   */
+  limit?: NumericLikeIntrinsic;
+  /**
+   * The type of the field
+   */
+  type?: string;
+  /**
+   * Source of the error
+   */
+  source?: string;
+}
 ```
 
 A simple example of the validation can be found in the `doc` command:
 
 **Code: Simple Validation Example**
 ```typescript
-async validate(): Promise<CliValidationError | undefined> {
-    const docFile = path.resolve(this.input);
-    if (!(await fs.stat(docFile).catch(() => false))) {
-      return { message: `input: ${this.input} does not exist`, source: 'flag' };
-    }
+@Validator(async (cmd) => {
+  const docFile = path.resolve(cmd.input);
+  if (!(await fs.stat(docFile).catch(() => false))) {
+    return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
   }
+})
 ```
 
 ## CLI - service

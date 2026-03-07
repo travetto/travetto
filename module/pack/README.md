@@ -139,6 +139,7 @@ Options:
   --manifest-file <string>               Manifest File Name (default: "manifest.json")
   -wr, --include-workspace-resources     Include workspace resources (default: false)
   -np, --npm-package <string>            External NPM Packages (default: [])
+  -m, --module <module>                  Module to run for
   -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile.ts")
   -di, --docker-image <string>           Docker Image to extend (default: "node:25-alpine")
   -dn, --docker-name <string>            Docker Image Name (default: "travetto_pack")
@@ -150,7 +151,6 @@ Options:
   -dx, --docker-push                     Docker Push Tags (default: false)
   -db, --docker-build-platform <string>  Docker Build Platform
   -dr, --docker-registry <string>        Docker Registry
-  -m, --module <module>                  Module to run for
   -h, --help                             display help for command
 ```
 
@@ -273,6 +273,6 @@ echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
 echo "Building Docker Container latest"
 
 cd $DIST
-docker build -t travetto_todo-app:latest .
+docker build -t <module>:latest .
 cd $ROOT
 ```

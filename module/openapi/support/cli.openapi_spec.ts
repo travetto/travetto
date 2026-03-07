@@ -12,11 +12,11 @@ import { DependencyRegistryIndex } from '@travetto/di';
 @CliCommand()
 export class OpenApiSpecCommand implements CliCommandShape {
 
-  @CliModuleFlag()
-  module: string;
-
   /** Output files */
   output?: string;
+
+  @CliModuleFlag({ short: 'm' })
+  module: string;
 
   finalize(): void {
     Env.DEBUG.set(false);

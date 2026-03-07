@@ -18,11 +18,11 @@ export class WebHttpCommand implements CliCommandShape {
   /** Kill conflicting port owner */
   killConflict?: boolean = Runtime.localDevelopment;
 
-  @CliModuleFlag()
-  module?: string;
+  @CliModuleFlag({ short: 'm' })
+  module: string;
 
   @CliProfilesFlag()
-  profiles?: string[];
+  profile: string[];
 
   @CliRestartOnChangeFlag()
   restartOnChange: boolean = true;

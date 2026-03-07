@@ -83,7 +83,7 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function CliModuleFlag(config: CliFlagOptions & { scope: 'current' | 'command' } = { scope: 'current' }) {
+export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'command' } = { scope: 'current' }) {
   return function <K extends string>(instance: Partial<Record<K, string>>, property: K): void {
     const cls = getClass(instance);
     const description = describeFunction(cls) ?? {};

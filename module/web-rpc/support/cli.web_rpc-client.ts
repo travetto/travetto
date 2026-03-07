@@ -15,9 +15,9 @@ import { WebRpcClientGeneratorService } from '../src/service.ts';
 export class CliWebRpcCommand implements CliCommandShape {
 
   @CliProfilesFlag()
-  profiles: string[];
+  profile: string[];
 
-  @CliModuleFlag()
+  @CliModuleFlag({ short: 'm' })
   module: string;
 
   finalize(): void {

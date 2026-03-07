@@ -25,9 +25,9 @@ export abstract class BaseModelCommand implements CliCommandShape {
   }
 
   @CliProfilesFlag()
-  profiles: string[];
+  profile: string[];
 
-  @CliModuleFlag()
+  @CliModuleFlag({ short: 'm' })
   module: string;
 
   abstract getOperation(): keyof ModelStorageSupport;

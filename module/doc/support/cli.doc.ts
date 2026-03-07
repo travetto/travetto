@@ -4,6 +4,7 @@ import path from 'node:path';
 import { ExecUtil, Env, Runtime, WatchUtil } from '@travetto/runtime';
 import { type CliCommandShape, CliCommand } from '@travetto/cli';
 import { MinLength, Validator } from '@travetto/schema';
+import { PackageUtil } from '@travetto/manifest';
 
 /**
  * Command line support for generating module docs.
@@ -22,7 +23,7 @@ export class DocCommand implements CliCommandShape {
 
   /** Outputs */
   @MinLength(1)
-  outputs: string[] = Runtime.workspace.package?.doc?.outputs ?? ['README.md'];
+  outputs: string[] = PackageUtil.readPackage(Runtime.workspace.path)?.travetto?.doc?.outputs ?? ['README.md'];
 
   /** Watch? */
   watch = false;

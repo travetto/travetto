@@ -9,6 +9,7 @@ import { runTests, type TestConsumerType } from './bin/run.ts';
 @IsPrivate()
 export class TestDirectCommand {
 
+  /** Output format for test results */
   format: TestConsumerType = 'tap';
 
   /**

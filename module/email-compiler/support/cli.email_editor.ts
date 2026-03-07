@@ -10,7 +10,7 @@ import { EditorService } from './bin/editor.ts';
 export class EmailEditorCommand {
 
   @CliProfilesFlag()
-  profiles: string[];
+  profile: string[];
 
   preMain(): void {
     Env.TRV_ROLE.set('build');
