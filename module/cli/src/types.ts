@@ -14,21 +14,6 @@ export type ParsedState = {
 };
 
 /**
- * Constrained version of Schema's Validation Error
- * @concrete
- */
-export interface CliValidationError {
-  /**
-   * The error message
-   */
-  message: string;
-  /**
-   * Source of validation
-   */
-  source?: 'flag' | 'arg' | 'custom';
-};
-
-/**
  * CLI Command Contract
  * @concrete
  */
@@ -48,31 +33,11 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
   /**
    * Run before main runs
    */
-  preMain?(): OrProm<void>;
+  finalize?(help?: boolean): OrProm<void>;
   /**
    * Extra help
    */
   help?(): OrProm<string[]>;
-  /**
-   * Run before help is displayed
-   */
-  preHelp?(): OrProm<void>;
-  /**
-   * Is the command active/eligible for usage
-   */
-  isActive?(): boolean;
-  /**
-   * Run before binding occurs
-   */
-  preBind?(): OrProm<void>;
-  /**
-   * Run before validation occurs
-   */
-  preValidate?(): OrProm<void>;
-  /**
-   * Validation method
-   */
-  validate?(...args: T): OrProm<CliValidationError | CliValidationError[] | undefined>;
 }
 
 /**
@@ -97,6 +62,8 @@ export type CliCommandShapeFields = {
   module?: string;
 };
 
+type PreMainHandler = (cmd: CliCommandShape) => (unknown | Promise<unknown>);
+
 /**
  * CLI Command schema shape
  */
@@ -104,5 +71,5 @@ export interface CliCommandConfig {
   cls: Class<CliCommandShape>;
   name: string;
   runTarget?: boolean;
-  preMain?: (cmd: CliCommandShape) => void | Promise<void>;
+  preMain?: PreMainHandler[];
 }

@@ -31,7 +31,7 @@ export class HelpUtil {
     const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
     const args = schema.methods.main?.parameters ?? [];
 
-    await command.preHelp?.();
+    await command.finalize?.(true);
 
     // Ensure finalized
 

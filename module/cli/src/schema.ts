@@ -1,10 +1,10 @@
 import { castKey, castTo, getClass } from '@travetto/runtime';
-import { BindUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError, type ValidationError } from '@travetto/schema';
 
-import type { ParsedState, CliCommandShape, CliValidationError } from './types.ts';
+import type { ParsedState, CliCommandShape } from './types.ts';
 import { CliValidationResultError } from './error.ts';
 
-const getSource = (source: string | undefined, def: CliValidationError['source']): CliValidationError['source'] => {
+const getSource = (source: string | undefined, def: ValidationError['source']): ValidationError['source'] => {
   switch (source) {
     case 'custom':
     case 'arg':
@@ -62,21 +62,15 @@ export class CliCommandSchemaUtil {
     const validators = [
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),
       (): Promise<void> => SchemaValidator.validateMethod(cls, 'main', args, paramNames),
-      async (): Promise<void> => {
-        const result = await cmd.validate?.(...args);
-        if (result) {
-          throw new CliValidationResultError(cmd, Array.isArray(result) ? result : [result]);
-        }
-      },
     ];
 
-    const SOURCES = ['flag', 'arg', 'custom'] as const;
+    const SOURCES = ['flag', 'arg'] as const;
 
     const results = validators.map((validator, i) => validator().catch(error => {
       if (!(error instanceof CliValidationResultError) && !(error instanceof ValidationResultError)) {
         throw error;
       }
-      return error.details.errors.map(value => ({ ...value, source: getSource(value.source, SOURCES[i]) }));
+      return error.details.errors.map(value => ({ source: getSource(value.source, SOURCES[i]), ...value }));
     }));
 
     const errors = (await Promise.all(results)).flatMap(result => (result ?? []));

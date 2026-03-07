@@ -21,7 +21,7 @@ export class ESLintCommand implements CliCommandShape {
   /** Should we attempt to fix? */
   fix?: boolean;
 
-  preMain(): void {
+  finalize(): void {
     Env.DEBUG.set(false);
   }
 

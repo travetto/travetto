@@ -1,8 +1,8 @@
 import path from 'node:path';
 
 import { RuntimeIndex } from '@travetto/runtime';
-import { CliCommand, CliFlag, CliUtil, type CliValidationError } from '@travetto/cli';
-import { Ignore, Required } from '@travetto/schema';
+import { CliCommand, CliFlag, CliUtil } from '@travetto/cli';
+import { Ignore, Required, Validator, type ValidationError } from '@travetto/schema';
 
 import { DockerPackOperation } from './bin/docker-operation.ts';
 import { BasePackCommand, type PackOperationShape } from './pack.base';
@@ -13,7 +13,20 @@ const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
 /**
  * Standard docker support for pack
  */
-@CliCommand({ with: { module: true } })
+@CliCommand()
+@Validator((cmd) => {
+  const errs: ValidationError[] = [];
+  if (cmd.dockerPort?.length) {
+    for (let i = 0; i < cmd.dockerPort.length; i++) {
+      if (cmd.dockerPort[i] < 1) {
+        errs.push({ path: 'dockerPort', source: 'flag', message: `dockerPort[${i}] is less than (1)`, kind: 'range' });
+      } else if (cmd.dockerPort[i] > 65536) {
+        errs.push({ path: 'dockerPort', source: 'flag', message: `dockerPort[${i}] is greater than (65536)`, kind: 'range' });
+      }
+    }
+  }
+  return errs;
+})
 export class PackDockerCommand extends BasePackCommand {
   /**  Docker Factory source */
   @CliFlag({ short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
@@ -64,25 +77,16 @@ export class PackDockerCommand extends BasePackCommand {
   @Ignore()
   defaultUserId = 2000;
 
-  async validate(): Promise<CliValidationError[] | undefined> {
-    const errs: CliValidationError[] = [];
-    if (this.dockerPort?.length) {
-      for (let i = 0; i < this.dockerPort.length; i++) {
-        if (this.dockerPort[i] < 1) {
-          errs.push({ source: 'flag', message: `dockerPort[${i}] is less than (1)` });
-        } else if (this.dockerPort[i] > 65536) {
-          errs.push({ source: 'flag', message: `dockerPort[${i}] is greater than (65536)` });
-        }
-      }
-    }
-    return errs;
-  }
-
-  preMain(): void {
+  finalize(forHelp?: boolean): void {
     if (this.dockerFactory.startsWith('.')) {
       this.dockerFactory = RuntimeIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
     }
-    this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module || undefined);
+
+    if (forHelp) {
+      this.dockerName = CliUtil.getSimpleModuleName('<module>');
+    } else {
+      this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module);
+    }
 
     // Finalize user/group and ids
     const [userOrUserId, groupOrGroupId = userOrUserId] = (this.dockerRuntimeUser ?? '').split(':');
@@ -109,10 +113,6 @@ export class PackDockerCommand extends BasePackCommand {
         console.warn('Docker Tag is currently ignored due to --docker-build being false');
       }
     }
-  }
-
-  preHelp(): void {
-    this.dockerName = CliUtil.getSimpleModuleName('<module>');
   }
 
   getOperations(): PackOperationShape<this>[] {

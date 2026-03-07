@@ -29,7 +29,7 @@ export class RepoExecCommand implements CliCommandShape {
   /** Show stdout */
   showStdout = true;
 
-  preMain(): void {
+  finalize(): void {
     Env.DEBUG.set(false);
   }
 

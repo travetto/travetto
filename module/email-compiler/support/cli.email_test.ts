@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { Registry } from '@travetto/registry';
-import { type CliCommandShape, CliCommand } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, CliProfilesFlag } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Env } from '@travetto/runtime';
 
@@ -10,10 +10,13 @@ import { EditorService } from './bin/editor.ts';
 /**
  * CLI Entry point for running the email server
  */
-@CliCommand({ with: { profiles: true } })
+@CliCommand()
 export class EmailTestCommand implements CliCommandShape {
 
-  preMain(): void {
+  @CliProfilesFlag()
+  profiles: string[];
+
+  finalize(): void {
     Env.TRV_ROLE.set('build');
   }
 

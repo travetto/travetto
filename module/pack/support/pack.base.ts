@@ -1,7 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 
-import { type CliCommandShape, CliFlag, type ParsedState, cliTpl } from '@travetto/cli';
+import { type CliCommandShape, CliFlag, CliModuleFlag, type ParsedState, cliTpl } from '@travetto/cli';
 import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { Terminal } from '@travetto/terminal';
 import { Ignore, Method, Required, Schema } from '@travetto/schema';
@@ -86,7 +86,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   @CliFlag({ short: 'np', full: 'npm-package', envVars: ['PACK_EXTERNAL_PACKAGES'] })
   externalDependencies: string[] = [];
 
-  @Ignore()
+  @CliModuleFlag()
   module: string;
 
   @Ignore()

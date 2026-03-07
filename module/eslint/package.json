@@ -25,13 +25,13 @@
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",
-    "@stylistic/eslint-plugin": "^5.9.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@travetto/runtime": "^8.0.0-alpha.0",
     "@types/eslint": "^9.6.1",
-    "@typescript-eslint/eslint-plugin": "canary",
-    "@typescript-eslint/parser": "canary",
-    "@typescript-eslint/typescript-estree": "canary",
-    "eslint": "^10.0.2",
+    "@typescript-eslint/eslint-plugin": "8.56.2-alpha.2",
+    "@typescript-eslint/parser": "8.56.2-alpha.2",
+    "@typescript-eslint/typescript-estree": "8.56.2-alpha.2",
+    "eslint": "^10.0.3",
     "eslint-plugin-unused-imports": "^4.4.1"
   },
   "peerDependencies": {

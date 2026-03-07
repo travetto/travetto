@@ -2,24 +2,22 @@ import { Env, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
-import { runTests, selectConsumer } from './bin/run.ts';
+import { runTests } from './bin/run.ts';
+import { TestFormatField } from './bin/decorator.ts';
 
 /**  Direct test invocation */
 @CliCommand()
 @IsPrivate()
 export class TestDirectCommand {
 
-  format: string = 'tap';
+  @TestFormatField()
+  format: string;
 
   /**
    * Format options
    * @alias o
    */
   formatOptions?: string[];
-
-  async preValidate(): Promise<void> {
-    await selectConsumer(this);
-  }
 
   preMain(): void {
     Env.TRV_ROLE.set('test');
