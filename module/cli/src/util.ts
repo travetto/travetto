@@ -70,8 +70,8 @@ export class CliUtil {
   /**
    * Dispatch IPC payload
    */
-  static async runWithDebugIpc(name: string, debugIpc: boolean | undefined): Promise<void> {
-    if (debugIpc !== true || !Env.TRV_CLI_IPC.isSet) {
+  static async runWithDebugIpc(name: string): Promise<void> {
+    if (!Env.TRV_CLI_IPC.isSet) {
       return; // Not debugging, run normal
     }
 

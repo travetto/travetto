@@ -174,7 +174,9 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
       runTarget: true,
       preMain: [cmd => {
         const typed: (typeof cmd) & { [property]?: boolean } = castTo(cmd);
-        return CliUtil.runWithDebugIpc(cmd._cfg!.name, typed[property]);
+        if (typed[property] === true) {
+          return CliUtil.runWithDebugIpc(cmd._cfg!.name);
+        }
       }]
     });
   }
