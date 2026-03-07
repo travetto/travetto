@@ -238,4 +238,18 @@ export class CliParseUtil {
       return result;
     }, { long: [], short: [], raw: [], env: [] });
   }
+
+  /**
+   * Build aliases for a schema config
+   */
+  static buildAliases(config: { full?: string, short?: string, envVars?: string[] }, ...extraEnvVars: string[]): Partial<SchemaFieldConfig> {
+    const envVars = [...config.envVars ?? [], ...extraEnvVars];
+    return {
+      aliases: [
+        ...(config.full ? [config.full.startsWith('-') ? config.full : `--${config.full}`] : []),
+        ...(config.short ? [config.short.startsWith('-') ? config.short : `-${config.short}`] : []),
+        ...(envVars.length ? envVars.map(CliParseUtil.toEnvField) : [])
+      ]
+    };
+  }
 }

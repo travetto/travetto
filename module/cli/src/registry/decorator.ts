@@ -1,5 +1,5 @@
 import { type Class, type ClassInstance, Env, Runtime, RuntimeIndex, castTo, describeFunction, getClass } from '@travetto/runtime';
-import { SchemaRegistryIndex, type SchemaFieldConfig, type ValidationError } from '@travetto/schema';
+import { SchemaRegistryIndex, type ValidationError } from '@travetto/schema';
 
 import type { CliCommandShape } from '../types.ts';
 import { CliCommandRegistryIndex } from './registry-index.ts';
@@ -26,17 +26,6 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
   };
 }
 
-function registerFlag(target: ClassInstance, property: string, config: CliFlagOptions, schemaConfig: Partial<SchemaFieldConfig>): void {
-  SchemaRegistryIndex.getForRegister(getClass(target)).registerField(property, {
-    ...schemaConfig,
-    aliases: [
-      ...(config.full ? [config.full.startsWith('-') ? config.full : `--${config.full}`] : []),
-      ...(config.short ? [config.short.startsWith('-') ? config.short : `-${config.short}`] : []),
-      ...(config.envVars ? config.envVars.map(CliParseUtil.toEnvField) : [])
-    ],
-  });
-}
-
 /**
  * Decorator to register a CLI command flag
  * @augments `@travetto/schema:Input`
@@ -44,7 +33,9 @@ function registerFlag(target: ClassInstance, property: string, config: CliFlagOp
  */
 export function CliFlag(config: CliFlagOptions) {
   return function (instance: ClassInstance, property: string): void {
-    registerFlag(instance, property, config, {});
+    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, {
+      ...CliParseUtil.buildAliases(config)
+    });
   };
 }
 
@@ -55,7 +46,8 @@ export function CliFlag(config: CliFlagOptions) {
  */
 export function CliFileFlag(config: CliFlagOptions & { fileExtensions: string[] }) {
   return function (instance: ClassInstance, property: string): void {
-    registerFlag(instance, property, config, {
+    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, {
+      ...CliParseUtil.buildAliases(config),
       specifiers: ['file', ...config.fileExtensions.map(ext => `ext:${ext.replace(/[*.]/g, '')}`)]
     });
   };
@@ -68,18 +60,15 @@ export function CliFileFlag(config: CliFlagOptions & { fileExtensions: string[] 
  */
 export function CliProfilesFlag(config: CliFlagOptions = {}) {
   return function <K extends string>(instance: Partial<Record<K, string[]>>, property: K): void {
-    registerFlag(instance, property,
-      {
-        ...config,
-        envVars: [...(config.envVars ?? []), Env.TRV_PROFILES.key]
-      },
-      {
-        required: { active: false },
-        description: 'Application profiles'
-      }
+    const cls = getClass(instance);
+    SchemaRegistryIndex.getForRegister(cls).registerField(property, {
+      ...CliParseUtil.buildAliases(config, Env.TRV_PROFILES.key),
+      required: { active: false },
+      description: 'Application profiles'
+    }
     );
 
-    CliCommandRegistryIndex.getForRegister(getClass(instance)).register({
+    CliCommandRegistryIndex.getForRegister(cls).register({
       preMain: [(cmd): void => {
         const typed: (typeof cmd) & { [property]?: string[] } = castTo(cmd);
         if (property in typed && Array.isArray(typed[property]) && typed[property]!.length > 0) {
@@ -98,20 +87,15 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
 export function CliModuleFlag(config: CliFlagOptions & { scope: 'current' | 'command' } = { scope: 'current' }) {
   return function <K extends string>(instance: Partial<Record<K, string>>, property: K): void {
     const cls = getClass(instance);
-    registerFlag(instance, property,
-      {
-        ...config,
-        envVars: [...(config.envVars ?? []), Env.TRV_MODULE.key]
-      },
-      {
-        description: 'Module to run for',
-        specifiers: ['module'],
-        required: { active: Runtime.monoRoot },
-      }
-    );
-
     const description = describeFunction(cls) ?? {};
     const commandModule = description.module;
+
+    SchemaRegistryIndex.getForRegister(cls).registerField(property, {
+      ...CliParseUtil.buildAliases(config, Env.TRV_MODULE.key),
+      description: 'Module to run for',
+      specifiers: ['module'],
+      required: { active: Runtime.monoRoot },
+    });
 
     SchemaRegistryIndex.getForRegister(cls).register({
       validators: [async (cmd: CliCommandShape): Promise<ValidationError | undefined> => {
@@ -143,13 +127,14 @@ export function CliModuleFlag(config: CliFlagOptions & { scope: 'current' | 'com
  */
 export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
   return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
-    registerFlag(instance, property, config, {
+    const cls = getClass(instance);
+    SchemaRegistryIndex.getForRegister(cls).registerField(property, {
+      ...CliParseUtil.buildAliases(config),
       description: 'Should the invocation automatically restart on source changes',
       default: Runtime.localDevelopment,
       required: { active: false },
     });
 
-    const cls = getClass(instance);
     CliCommandRegistryIndex.getForRegister(cls).register({
       runTarget: true,
       preMain: [(cmd): Promise<void> => {
@@ -167,19 +152,14 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
  */
 export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
   return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
-    registerFlag(instance, property,
-      {
-        ...config,
-        envVars: [...(config.envVars ?? []), Env.TRV_DEBUG_IPC.key]
-      },
-      {
-        description: 'Should the invocation automatically restart on source changes',
-        default: Runtime.localDevelopment,
-        required: { active: false },
-      }
-    );
-
     const cls = getClass(instance);
+    SchemaRegistryIndex.getForRegister(cls).registerField(property, {
+      ...CliParseUtil.buildAliases(config, Env.TRV_DEBUG_IPC.key),
+      description: 'Should the invocation automatically restart on source changes',
+      default: Runtime.localDevelopment,
+      required: { active: false },
+    });
+
     CliCommandRegistryIndex.getForRegister(cls).register({
       runTarget: true,
       preMain: [(cmd): Promise<void> | void => {
