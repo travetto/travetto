@@ -68,7 +68,8 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
         ...config,
         envVars: [...(config.envVars ?? []), Env.TRV_PROFILES.key]
       }),
-      required: { active: false }
+      required: { active: false },
+      description: 'Application profiles'
     });
 
     CliCommandRegistryIndex.getForRegister(cls).register({

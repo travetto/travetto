@@ -18,17 +18,17 @@ export class WebHttpCommand implements CliCommandShape {
   /** Kill conflicting port owner */
   killConflict?: boolean = Runtime.localDevelopment;
 
-  @CliDebugIpcFlag()
-  debugIpc?: boolean;
-
-  @CliRestartOnChangeFlag()
-  restartOnChange: boolean = true;
-
   @CliModuleFlag()
   module?: string;
 
   @CliProfilesFlag()
   profiles?: string[];
+
+  @CliRestartOnChangeFlag()
+  restartOnChange: boolean = true;
+
+  @CliDebugIpcFlag()
+  debugIpc?: boolean;
 
   preMain(): void {
     if (this.port) {
