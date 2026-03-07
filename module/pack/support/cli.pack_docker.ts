@@ -73,7 +73,7 @@ export class PackDockerCommand extends BasePackCommand {
     if (forHelp) {
       this.dockerName = CliUtil.getSimpleModuleName('<module>');
     } else {
-      this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module);
+      this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module || undefined);
     }
 
     // Finalize user/group and ids

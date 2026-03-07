@@ -273,6 +273,6 @@ echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
 echo "Building Docker Container latest"
 
 cd $DIST
-docker build -t <module>:latest .
+docker build -t travetto_todo-app:latest .
 cd $ROOT
 ```
