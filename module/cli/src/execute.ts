@@ -38,7 +38,6 @@ export class ExecutionManager {
 
     const state = command._parsed = await CliParseUtil.parse(schema, fullArgs);
 
-    await command.preBind?.();
     const boundArgs = CliCommandSchemaUtil.bindInput(command, state);
     return { command, boundArgs };
   }
@@ -47,13 +46,12 @@ export class ExecutionManager {
   static async #runCommand(cmd: string, args: string[]): Promise<void> {
     const { command, boundArgs } = await this.#bindCommand(cmd, args);
 
-    await command.preValidate?.();
     await CliCommandSchemaUtil.validate(command, boundArgs);
 
     for (const preMain of command._cfg!.preMain ?? []) {
       await preMain(command);
     }
-    await command.preMain?.();
+    await command.finalize?.();
 
     ConsoleManager.debug(Runtime.debug);
     await command.main(...boundArgs);

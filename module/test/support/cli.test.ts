@@ -5,14 +5,16 @@ import { type CliCommandShape, CliCommand, CliUtil } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
 
+import { TestFormatField } from './bin/decorator.ts';
+
 /**
  * Launch test framework and execute tests
  */
 @CliCommand()
 export class TestCommand implements CliCommandShape {
 
-  /** Output format for test results */
-  format: string = 'tap';
+  @TestFormatField()
+  format: string;
 
   /** Number of tests to run concurrently */
   @Min(1) @Max(WorkPool.MAX_SIZE)
@@ -30,17 +32,12 @@ export class TestCommand implements CliCommandShape {
    */
   formatOptions?: string[];
 
-  preMain(): void {
+  finalize(): void {
     EventEmitter.defaultMaxListeners = 1000;
     Env.TRV_ROLE.set('test');
     Env.DEBUG.set(false);
     Env.TRV_LOG_PLAIN.set(true);
     Env.TRV_LOG_TIME.clear();
-  }
-
-  async preValidate(): Promise<void> {
-    const { selectConsumer } = await import('./bin/run.ts');
-    await selectConsumer(this);
   }
 
   async main(first: string = '**/*', globs: string[] = []): Promise<void> {

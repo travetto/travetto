@@ -14,7 +14,7 @@ export class EmailCompileCommand implements CliCommandShape {
   /** Compile in watch mode */
   watch?: boolean;
 
-  preMain(): void {
+  finalize(): void {
     Env.DEBUG.set(false);
     Env.TRV_ROLE.set('build');
   }

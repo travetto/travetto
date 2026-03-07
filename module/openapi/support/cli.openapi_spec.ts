@@ -18,7 +18,7 @@ export class OpenApiSpecCommand implements CliCommandShape {
   /** Output files */
   output?: string;
 
-  preMain(): void {
+  finalize(): void {
     Env.DEBUG.set(false);
   }
 

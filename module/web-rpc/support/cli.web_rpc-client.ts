@@ -20,7 +20,7 @@ export class CliWebRpcCommand implements CliCommandShape {
   @CliModuleFlag()
   module: string;
 
-  preMain(): void {
+  finalize(): void {
     Env.DEBUG.set(false);
   }
 
@@ -35,7 +35,7 @@ export class CliWebRpcCommand implements CliCommandShape {
     } else {
       if (!output) {
         throw new CliValidationResultError(this, [
-          { message: 'output is required when type is not `config`', source: 'arg' }
+          { message: 'output is required when type is not `config`', source: 'arg', kind: 'missing', path: 'output' }
         ]);
       }
       output = path.resolve(output);

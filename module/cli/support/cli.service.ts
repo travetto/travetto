@@ -1,8 +1,18 @@
-import { type CliCommandShape, CliCommand, cliTpl, type CliValidationError } from '@travetto/cli';
+import { type CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
-import { AsyncQueue, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
+import { AsyncQueue, Util } from '@travetto/runtime';
+import { MethodValidator, type ValidationError } from '@travetto/schema';
 
-import { ServiceRunner, type ServiceDescriptor, type ServiceAction } from '../src/service.ts';
+import { ServiceRunner, type ServiceAction } from '../src/service.ts';
+import { getServices } from './bin/util.ts';
+
+async function validateService(action: ServiceAction, services: string[]): Promise<ValidationError | undefined> {
+  const all = await getServices(services);
+
+  if (!all.length) {
+    return { message: 'No services found', source: 'arg', kind: 'invalid', path: 'services' };
+  }
+}
 
 /**
  * Allows for running services
@@ -10,30 +20,8 @@ import { ServiceRunner, type ServiceDescriptor, type ServiceAction } from '../sr
 @CliCommand()
 export class CliServiceCommand implements CliCommandShape {
 
-  async #getServices(services: string[]): Promise<ServiceDescriptor[]> {
-    return (await Promise.all(
-      RuntimeIndex.find({
-        module: module => module.roles.includes('std'),
-        folder: folder => folder === 'support',
-        file: file => /support\/service[.]/.test(file.sourceFile)
-      })
-        .map(file => Runtime.importFrom<{ service: ServiceDescriptor }>(file.import).then(value => value.service))
-    ))
-      .filter(file => !!file)
-      .filter(file => services?.length ? services.includes(file.name) : true)
-      .toSorted((a, b) => a.name.localeCompare(b.name));
-  }
-
-  async validate(action: ServiceAction, services: string[]): Promise<CliValidationError | undefined> {
-    const all = await this.#getServices(services);
-
-    if (!all.length) {
-      return { message: 'No services found' };
-    }
-  }
-
   async help(): Promise<string[]> {
-    const all = await this.#getServices([]);
+    const all = await getServices([]);
     return [
       cliTpl`${{ title: 'Available Services' }}`,
       '-'.repeat(20),
@@ -41,8 +29,9 @@ export class CliServiceCommand implements CliCommandShape {
     ];
   }
 
+  @MethodValidator(validateService)
   async main(action: ServiceAction, services: string[] = []): Promise<void> {
-    const all = await this.#getServices(services);
+    const all = await getServices(services);
     const maxName = Math.max(...all.map(service => service.name.length), 'Service'.length) + 3;
     const maxVersion = Math.max(...all.map(service => `${service.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;

@@ -9,12 +9,12 @@ import { BasePackCommand, type PackOperationShape } from './pack.base';
 @CliCommand()
 export class PackZipCommand extends BasePackCommand {
 
-  preMain(): void {
-    this.output ??= CliUtil.getSimpleModuleName('<module>.zip', this.module);
-  }
-
-  preHelp(): void {
-    this.output = CliUtil.getSimpleModuleName('<module>.zip');
+  finalize(forHelp?: boolean): void {
+    if (forHelp) {
+      this.output = CliUtil.getSimpleModuleName('<module>.zip');
+    } else {
+      this.output ??= CliUtil.getSimpleModuleName('<module>.zip', this.module);
+    }
   }
 
   getOperations(): PackOperationShape<this>[] {

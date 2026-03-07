@@ -16,7 +16,7 @@ export class EmailTestCommand implements CliCommandShape {
   @CliProfilesFlag()
   profiles: string[];
 
-  preMain(): void {
+  finalize(): void {
     Env.TRV_ROLE.set('build');
   }
 

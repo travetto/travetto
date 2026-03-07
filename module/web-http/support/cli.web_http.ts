@@ -30,7 +30,7 @@ export class WebHttpCommand implements CliCommandShape {
   @CliDebugIpcFlag()
   debugIpc?: boolean;
 
-  preMain(): void {
+  finalize(): void {
     if (this.port) {
       process.env.WEB_HTTP_PORT = `${this.port}`;
     }

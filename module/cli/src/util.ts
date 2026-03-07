@@ -14,13 +14,8 @@ export class CliUtil {
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
     const simple = (module ?? Runtime.main.name).replace(/[\/]/, '_').replace(/@/, '');
-    if (!simple) {
-      return placeholder;
-    } else if (!module && Runtime.monoRoot) {
-      return placeholder;
-    } else {
-      return placeholder.replace('<module>', simple);
-    }
+    const targetModule = !simple || (!module && Runtime.monoRoot) ? '<module>' : simple;
+    return placeholder.replace('<module>', targetModule);
   }
 
   /**
