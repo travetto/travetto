@@ -1,7 +1,7 @@
 import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 
-import { TestFormatField } from './bin/decorator.ts';
+import type { TestConsumerType } from './bin/run.ts';
 
 /**
  * Invoke the test watcher
@@ -9,8 +9,7 @@ import { TestFormatField } from './bin/decorator.ts';
 @CliCommand()
 export class TestWatcherCommand {
 
-  @TestFormatField()
-  format: string;
+  format: TestConsumerType = 'tap';
 
   mode: 'all' | 'change' = 'all';
 

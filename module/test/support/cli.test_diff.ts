@@ -4,17 +4,15 @@ import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
-import { runTests } from './bin/run.ts';
+import { runTests, type TestConsumerType } from './bin/run.ts';
 import type { TestDiffSource } from '../src/model/test.ts';
-import { TestFormatField } from './bin/decorator.ts';
 
 /**  Direct test invocation */
 @CliCommand()
 @IsPrivate()
 export class TestDiffCommand {
 
-  @TestFormatField()
-  format: string;
+  format: TestConsumerType = 'tap';
 
   /**
    * Format options

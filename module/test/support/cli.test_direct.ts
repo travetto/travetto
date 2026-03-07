@@ -2,16 +2,14 @@ import { Env, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
-import { runTests } from './bin/run.ts';
-import { TestFormatField } from './bin/decorator.ts';
+import { runTests, type TestConsumerType } from './bin/run.ts';
 
 /**  Direct test invocation */
 @CliCommand()
 @IsPrivate()
 export class TestDirectCommand {
 
-  @TestFormatField()
-  format: string;
+  format: TestConsumerType = 'tap';
 
   /**
    * Format options

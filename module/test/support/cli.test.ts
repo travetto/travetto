@@ -5,7 +5,7 @@ import { type CliCommandShape, CliCommand, CliUtil } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
 
-import { TestFormatField } from './bin/decorator.ts';
+import type { TestConsumerType } from './bin/run.ts';
 
 /**
  * Launch test framework and execute tests
@@ -13,8 +13,7 @@ import { TestFormatField } from './bin/decorator.ts';
 @CliCommand()
 export class TestCommand implements CliCommandShape {
 
-  @TestFormatField()
-  format: string;
+  format: TestConsumerType = 'tap';
 
   /** Number of tests to run concurrently */
   @Min(1) @Max(WorkPool.MAX_SIZE)

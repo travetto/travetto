@@ -16,3 +16,5 @@ export async function runTests(state: TestConsumerConfig, input: TestRunInput): 
     process.exitCode = 1;
   }
 }
+
+export type TestConsumerType = 'tap' | 'tap-summary' | 'json' | 'exec' | 'event' | 'xunit' | 'custom';
