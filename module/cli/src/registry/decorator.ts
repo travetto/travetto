@@ -29,11 +29,11 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
 function registerFlag(target: ClassInstance, property: string, config: CliFlagOptions, schemaConfig: Partial<SchemaFieldConfig>): void {
   SchemaRegistryIndex.getForRegister(getClass(target)).registerField(property, {
     ...schemaConfig,
-    aliases: {
+    aliases: [
       ...(config.full ? [config.full.startsWith('-') ? config.full : `--${config.full}`] : []),
       ...(config.short ? [config.short.startsWith('-') ? config.short : `-${config.short}`] : []),
       ...(config.envVars ? config.envVars.map(CliParseUtil.toEnvField) : [])
-    },
+    ],
   });
 }
 
