@@ -1,4 +1,3 @@
-import type { } from './src/global.d.ts';
 export * from './src/context.ts';
 export * from './src/module.ts';
 export * from './src/delta.ts';
