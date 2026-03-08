@@ -170,13 +170,7 @@ Options:
 ```bash
 $ trv basic:arg 20
 
-Execution failed:
- * Argument volume is greater than (10)
-
-Usage: basic:arg [options] [volume:number]
-
-Options:
-  -h, --help  display help for command
+HELLO
 ```
 
 **Terminal: Basic Command with Loud Arg > 7**
@@ -233,14 +227,7 @@ $ trv basic:arg-list 10 5 3 9 8 1
 ```bash
 $ trv basic:arg-list 10 5 3 9 20 1
 
-Execution failed:
- * Argument volumes[4] is greater than (10)
-
-Usage: basic:arg-list [options] <volumes...:number>
-
-Options:
-  -r, --reverse
-  -h, --help     display help for command
+1 3 5 9 10 20
 ```
 
 **Terminal: Basic Arg List with Reverse**
@@ -558,7 +545,8 @@ $ trv service --help
 Usage: service [options] <action:restart|start|status|stop> [services...:string]
 
 Options:
-  -h, --help  display help for command
+  -q, --quiet   (default: false)
+  -h, --help   display help for command
 
 Available Services
 --------------------

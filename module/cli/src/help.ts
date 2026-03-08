@@ -1,12 +1,11 @@
 import util from 'node:util';
 
 import { castKey, getClass, JSONUtil } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaRegistryIndex, type ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
 import type { CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
-import type { CliValidationResultError } from './error.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
 
 const validationSourceMap: Record<string, string> = {
@@ -30,8 +29,6 @@ export class HelpUtil {
     const schema = SchemaRegistryIndex.getConfig(getClass(command));
     const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
     const args = schema.methods.main?.parameters ?? [];
-
-    await command.finalize?.(true);
 
     // Ensure finalized
 
@@ -132,7 +129,7 @@ export class HelpUtil {
   /**
    * Render validation error to a string
    */
-  static renderValidationError(validationError: CliValidationResultError): string {
+  static renderValidationError(validationError: ValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
       ...validationError.details.errors.map(error => {

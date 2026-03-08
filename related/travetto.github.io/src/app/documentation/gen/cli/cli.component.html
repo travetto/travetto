@@ -195,13 +195,7 @@ Options:
 </figcaption>
     <pre><code class="language-bash">$ trv basic:arg <span class="token number">20</span>
 
-Execution failed:
- * Argument volume is greater than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
-
-Usage: basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
-
-Options:
-  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+HELLO</code></pre>
   </figure>
 
   <figure class="terminal">
@@ -271,14 +265,7 @@ Options:
 </figcaption>
     <pre><code class="language-bash">$ trv basic:arg-list <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">20</span> <span class="token number">1</span>
 
-Execution failed:
- * Argument volumes<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span> is greater than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
-
-Usage: basic:arg-list <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
-
-Options:
-  -r, <span class="token parameter variable">--reverse</span>
-  -h, <span class="token parameter variable">--help</span>     display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+<span class="token number">1</span> <span class="token number">3</span> <span class="token number">5</span> <span class="token number">9</span> <span class="token number">10</span> <span class="token number">20</span></code></pre>
   </figure>
 
   <figure class="terminal">
@@ -648,7 +635,8 @@ The module provides the ability to start/stop/restart services as <a target="_bl
 Usage: <span class="token function">service</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>action:restart<span class="token operator">|</span>start<span class="token operator">|</span>status<span class="token operator">|</span>stop<span class="token operator">></span> <span class="token punctuation">[</span>services<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
 Options:
-  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -q, <span class="token parameter variable">--quiet</span>   <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Services
 --------------------

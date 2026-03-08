@@ -1,3 +1,5 @@
+import { stripVTControlCharacters } from 'node:util';
+
 import { type CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
 import { AsyncQueue, Util } from '@travetto/runtime';
@@ -20,6 +22,8 @@ async function validateService(action: ServiceAction, services: string[]): Promi
 @CliCommand()
 export class CliServiceCommand implements CliCommandShape {
 
+  quiet = false;
+
   async help(): Promise<string[]> {
     const all = await getServices([]);
     return [
@@ -37,6 +41,8 @@ export class CliServiceCommand implements CliCommandShape {
     const maxStatus = 20;
     const queue = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
 
+    const failureMessages: string[] = [];
+
     const jobs = all.map(async (descriptor, i) => {
       const identifier = descriptor.name.padEnd(maxName);
       const type = `${descriptor.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
@@ -44,19 +50,33 @@ export class CliServiceCommand implements CliCommandShape {
       for await (const [valueType, value] of new ServiceRunner(descriptor).action(action)) {
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
         queue.add({ idx: i, text: msg = cliTpl`${{ identifier }} ${{ type }} ${details}` });
+        if (valueType === 'failure') {
+          failureMessages.push(msg);
+        }
       }
       queue.add({ idx: i, done: true, text: msg! });
     });
 
     Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => queue.close());
 
-    const term = new Terminal();
-    await term.writer.writeLines([
-      '',
-      cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
-      ''.padEnd(maxName + maxVersion + maxStatus + 3, '-'),
-    ]).commit();
 
-    await term.streamList(queue);
+    if (this.quiet) {
+      for await (const _ of queue) { }
+      if (failureMessages.length) {
+        console.error('Failure');
+        failureMessages.map(stripVTControlCharacters).map(item => console.error(item));
+      }
+    } else {
+      const term = new Terminal();
+      await term.writer.writeLines([
+        '',
+        cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
+        ''.padEnd(maxName + maxVersion + maxStatus + 3, '-'),
+      ]).commit();
+
+      await term.streamList(queue);
+    }
+
+    process.exitCode = failureMessages.length ? 1 : 0;
   }
 }

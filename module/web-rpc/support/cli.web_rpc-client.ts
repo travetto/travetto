@@ -1,9 +1,10 @@
 import path from 'node:path';
 
 import { Env } from '@travetto/runtime';
-import { CliCommand, type CliCommandShape, CliModuleFlag, CliProfilesFlag, CliValidationResultError } from '@travetto/cli';
+import { CliCommand, type CliCommandShape, CliModuleFlag, CliProfilesFlag } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
+import { ValidationResultError } from '@travetto/schema';
 
 import type { WebRpcClient } from '../src/config.ts';
 import { WebRpcClientGeneratorService } from '../src/service.ts';
@@ -34,7 +35,7 @@ export class CliWebRpcCommand implements CliCommandShape {
       await service.render();
     } else {
       if (!output) {
-        throw new CliValidationResultError(this, [
+        throw new ValidationResultError([
           { message: 'output is required when type is not `config`', source: 'arg', kind: 'missing', path: 'output' }
         ]);
       }

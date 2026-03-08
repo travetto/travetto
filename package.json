@@ -12,7 +12,7 @@
   "license": "MIT",
   "scripts": {
     "prestart": "npm ci",
-    "pretest": "trv service start",
+    "pretest": "trv service start -q",
     "start": "trvc clean; trvc start",
     "test": "trv test -f tap-summary",
     "lint": "trv eslint",

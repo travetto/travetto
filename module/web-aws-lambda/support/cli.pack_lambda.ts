@@ -8,12 +8,15 @@ import { BasePackCommand, type PackOperationShape } from '@travetto/pack/support
 @CliCommand()
 export class PackLambdaCommand extends BasePackCommand {
 
+  constructor() {
+    super();
+    this.entryPoint = '@travetto/web-aws-lambda/support/entry.handler.ts';
+  }
+
   finalize(forHelp?: boolean): void {
     if (forHelp) {
-      this.output = undefined!;
-      this.entryPoint = undefined!;
+      this.output = '<module>.zip';
     }
-    this.entryPoint ??= '@travetto/web-aws-lambda/support/entry.handler.ts';
     this.output ??= CliUtil.getSimpleModuleName('<module>.zip', this.module);
     this.mainScripts = false;
   }

@@ -1,8 +1,6 @@
-import { RuntimeError, Runtime } from '@travetto/runtime';
-import type { ValidationError } from '@travetto/schema';
+import { Runtime } from '@travetto/runtime';
 
 import { cliTpl } from './color.ts';
-import type { CliCommandShape } from './types.ts';
 
 const COMMAND_PACKAGE = [
   [/^test(:watch)?$/, 'test', false],
@@ -43,17 +41,5 @@ ${{ identifier: install }}
 
   get defaultMessage(): string {
     return cliTpl`${{ subtitle: 'Unknown command' }}: ${{ input: this.cmd }}`;
-  }
-}
-
-/**
- * Provides a basic error wrapper for cli validation issues
- */
-export class CliValidationResultError extends RuntimeError<{ errors: ValidationError[] }> {
-  command: CliCommandShape;
-
-  constructor(command: CliCommandShape, errors: ValidationError[]) {
-    super('', { details: { errors } });
-    this.command = command;
   }
 }
