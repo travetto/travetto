@@ -6,10 +6,9 @@ import { AsyncQueue, Util } from '@travetto/runtime';
 import { MethodValidator, type ValidationError } from '@travetto/schema';
 
 import { ServiceRunner, type ServiceAction } from '../src/service.ts';
-import { getServices } from './bin/util.ts';
 
-async function validateService(action: ServiceAction, services: string[]): Promise<ValidationError | undefined> {
-  const all = await getServices(services);
+async function validateService(_: ServiceAction, services: string[]): Promise<ValidationError | undefined> {
+  const all = await ServiceRunner.findServices(services);
 
   if (!all.length) {
     return { message: 'No services found', source: 'arg', kind: 'invalid', path: 'services' };
@@ -25,7 +24,7 @@ export class CliServiceCommand implements CliCommandShape {
   quiet = false;
 
   async help(): Promise<string[]> {
-    const all = await getServices([]);
+    const all = await ServiceRunner.findServices([]);
     return [
       cliTpl`${{ title: 'Available Services' }}`,
       '-'.repeat(20),
@@ -35,7 +34,7 @@ export class CliServiceCommand implements CliCommandShape {
 
   @MethodValidator(validateService)
   async main(action: ServiceAction, services: string[] = []): Promise<void> {
-    const all = await getServices(services);
+    const all = await ServiceRunner.findServices(services);
     const maxName = Math.max(...all.map(service => service.name.length), 'Service'.length) + 3;
     const maxVersion = Math.max(...all.map(service => `${service.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;

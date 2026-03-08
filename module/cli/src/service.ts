@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import rl from 'node:readline/promises';
 import net from 'node:net';
 
-import { ExecUtil, TimeUtil, Util } from '@travetto/runtime';
+import { ExecUtil, Runtime, RuntimeIndex, TimeUtil, Util } from '@travetto/runtime';
 
 const ports = (value: number | `${number}:${number}`): [number, number] =>
   typeof value === 'number' ?
@@ -35,6 +35,23 @@ export type ServiceAction = 'start' | 'stop' | 'status' | 'restart';
  * Service runner
  */
 export class ServiceRunner {
+
+  /**
+   * Find all services
+   */
+  static async findServices(services: string[]): Promise<ServiceDescriptor[]> {
+    return (await Promise.all(
+      RuntimeIndex.find({
+        module: module => module.roles.includes('std'),
+        folder: folder => folder === 'support',
+        file: file => /support\/service[.]/.test(file.sourceFile)
+      })
+        .map(file => Runtime.importFrom<{ service: ServiceDescriptor }>(file.import).then(value => value.service))
+    ))
+      .filter(file => !!file)
+      .filter(file => services?.length ? services.includes(file.name) : true)
+      .toSorted((a, b) => a.name.localeCompare(b.name));
+  }
 
   #descriptor: ServiceDescriptor;
   constructor(descriptor: ServiceDescriptor) { this.#descriptor = descriptor; }
