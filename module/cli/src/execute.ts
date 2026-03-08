@@ -21,7 +21,7 @@ export class ExecutionManager {
     if (command) {
       console.error!(await HelpUtil.renderCommandHelp(command));
     } else if (error === UNKNOWN_COMMAND) {
-      console.error!(HelpUtil.getMissingCommand(cmd));
+      console.error!(HelpUtil.renderUnknownCommandMessage(cmd));
       console.error!('\n', await HelpUtil.renderAllHelp(''));
     } else {
       console.error!(error);

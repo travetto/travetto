@@ -33,7 +33,8 @@ const COMMAND_PACKAGE = [
  */
 export class HelpUtil {
 
-  static getMissingCommand(cmd: string): string | undefined {
+  /** Render the unknown command message */
+  static renderUnknownCommandMessage(cmd: string): string {
     const matchedConfig = COMMAND_PACKAGE.find(([regex]) => regex.test(cmd));
     if (matchedConfig) {
       const [, pkg, production] = matchedConfig;
