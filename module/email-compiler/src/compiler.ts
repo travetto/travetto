@@ -27,7 +27,7 @@ export class EmailCompiler {
   static findAllTemplates(moduleName?: string): string[] {
     return RuntimeIndex
       .find({
-        module: module => !moduleName ? module.roles.includes('std') : moduleName === module.name,
+        module: module => (!moduleName ? module.roles.includes('std') : moduleName === module.name) && module.production,
         folder: folder => folder === 'support',
         file: file => EmailCompileUtil.isTemplateFile(file.sourceFile)
       })

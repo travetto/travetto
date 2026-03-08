@@ -24,7 +24,6 @@
   "dependencies": {
     "@travetto/auth-web": "^8.0.0-alpha.1",
     "@travetto/auth-web-session": "^8.0.0-alpha.1",
-    "@travetto/email-inky": "^8.0.0-alpha.1",
     "@travetto/log": "^8.0.0-alpha.1",
     "@travetto/model-mongo": "^8.0.0-alpha.1",
     "@travetto/openapi": "^8.0.0-alpha.1",
@@ -35,6 +34,7 @@
   "devDependencies": {
     "@travetto/compiler": "^8.0.0-alpha.1",
     "@travetto/email-compiler": "^8.0.0-alpha.1",
+    "@travetto/email-inky": "^8.0.0-alpha.1",
     "@travetto/pack": "^8.0.0-alpha.1"
   },
   "peerDependencies": {
