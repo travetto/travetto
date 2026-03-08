@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { castKey, getClass, JSONUtil } from '@travetto/runtime';
+import { castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex, type ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
@@ -16,10 +16,36 @@ const validationSourceMap: Record<string, string> = {
 const ifDefined = <T>(value: T | null | '' | undefined): T | undefined =>
   (value === null || value === '' || value === undefined) ? undefined : value;
 
+
+const COMMAND_PACKAGE = [
+  [/^test(:watch)?$/, 'test', false],
+  [/^lint(:register)?$/, 'eslint', false],
+  [/^model:(install|export)$/, 'model', true],
+  [/^openapi:(spec|client)$/, 'openapi', true],
+  [/^email:(compile|editor)$/, 'email-compiler', false],
+  [/^pack(:zip|:docker)?$/, 'pack', false],
+  [/^web:http$/, 'web-http', true],
+  [/^web:rpc-client$/, 'web-rpc', true],
+] as const;
+
 /**
  * Utilities for showing help
  */
 export class HelpUtil {
+
+  static getMissingCommand(cmd: string): string | undefined {
+    const matchedConfig = COMMAND_PACKAGE.find(([regex]) => regex.test(cmd));
+    if (matchedConfig) {
+      const [, pkg, production] = matchedConfig;
+      const install = Runtime.getInstallCommand(`@travetto/${pkg}`, production);
+      return cliTpl`
+${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
+${{ identifier: install }}
+`;
+    } else {
+      return cliTpl`${{ subtitle: 'Unknown command' }}: ${{ input: cmd }}`;
+    }
+  }
 
   /**
    * Render command-specific help

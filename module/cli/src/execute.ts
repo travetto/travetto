@@ -2,9 +2,8 @@ import { ConsoleManager, Runtime, ShutdownManager, Util } from '@travetto/runtim
 import { ValidationResultError } from '@travetto/schema';
 
 import { HelpUtil } from './help.ts';
-import { CliCommandRegistryIndex } from './registry/registry-index.ts';
+import { CliCommandRegistryIndex, UNKNOWN_COMMAND } from './registry/registry-index.ts';
 import { CliCommandSchemaUtil } from './schema.ts';
-import { CliUnknownCommandError } from './error.ts';
 import { CliParseUtil } from './parse.ts';
 import type { CliCommandShape } from './types.ts';
 
@@ -14,20 +13,16 @@ import type { CliCommandShape } from './types.ts';
 export class ExecutionManager {
 
   /** Error handler */
-  static async #onError(error: unknown, command?: CliCommandShape): Promise<void> {
+  static async #onError(error: unknown, cmd: string, command?: CliCommandShape): Promise<void> {
     process.exitCode ??= 1;
     if (error instanceof ValidationResultError) {
       console.error!(HelpUtil.renderValidationError(error));
-      if (command) {
-        console.error!(await HelpUtil.renderCommandHelp(command));
-      }
-    } else if (error instanceof CliUnknownCommandError) {
-      if (error.help) {
-        console.error!(error.help);
-      } else {
-        console.error!(error.defaultMessage, '\n');
-        console.error!(await HelpUtil.renderAllHelp(''));
-      }
+    }
+    if (command) {
+      console.error!(await HelpUtil.renderCommandHelp(command));
+    } else if (error === UNKNOWN_COMMAND) {
+      console.error!(HelpUtil.getMissingCommand(cmd));
+      console.error!('\n', await HelpUtil.renderAllHelp(''));
     } else {
       console.error!(error);
     }
@@ -40,12 +35,13 @@ export class ExecutionManager {
    */
   static async run(argv: string[]): Promise<void> {
     let command: CliCommandShape | undefined;
-    try {
-      const { cmd, args, help } = CliParseUtil.getArgs(argv);
-      if (!cmd) {
-        return console.info!(await HelpUtil.renderAllHelp());
-      }
 
+    const { cmd, args, help } = CliParseUtil.getArgs(argv);
+    if (!cmd) {
+      return console.info!(await HelpUtil.renderAllHelp());
+    }
+
+    try {
       const [{ instance, schema, config }] = await CliCommandRegistryIndex.load([cmd]);
       command = instance;
       const fullArgs = await CliParseUtil.expandArgs(schema, args);
@@ -72,7 +68,7 @@ export class ExecutionManager {
       ConsoleManager.debug(Runtime.debug);
       await instance.main(...boundArgs);
     } catch (error) {
-      await this.#onError(error, command);
+      await this.#onError(error, cmd, command);
     } finally {
       await ShutdownManager.shutdown();
     }

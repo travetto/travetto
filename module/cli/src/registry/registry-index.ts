@@ -3,13 +3,14 @@ import { type RegistryAdapter, type RegistryIndex, RegistryIndexStore, Registry 
 import { type SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { CliCommandConfig, CliCommandShape } from '../types.ts';
-import { CliUnknownCommandError } from '../error.ts';
 import { CliCommandRegistryAdapter } from './registry-adapter.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 const getName = (field: string): string => (field.match(CLI_FILE_REGEX)?.groups?.name ?? field).replaceAll('_', ':');
 
 type CliCommandLoadResult = { command: string, config: CliCommandConfig, instance: CliCommandShape, schema: SchemaClassConfig };
+
+export const UNKNOWN_COMMAND = Symbol();
 
 export class CliCommandRegistryIndex implements RegistryIndex {
 
@@ -57,7 +58,7 @@ export class CliCommandRegistryIndex implements RegistryIndex {
    */
   async #getInstance(name: string): Promise<CliCommandShape> {
     if (!this.hasCommand(name)) {
-      throw new CliUnknownCommandError(name);
+      throw UNKNOWN_COMMAND;
     }
 
     if (this.#instanceMapping.has(name)) {
@@ -95,7 +96,7 @@ export class CliCommandRegistryIndex implements RegistryIndex {
       this.#instanceMapping.set(name, result);
       return result;
     }
-    throw new CliUnknownCommandError(name);
+    throw UNKNOWN_COMMAND;
   }
 
   hasCommand(name: string): boolean {

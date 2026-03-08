@@ -1,7 +1,6 @@
 import type { } from './src/trv.d.ts';
 export * from './src/types.ts';
 export * from './src/execute.ts';
-export * from './src/error.ts';
 export * from './src/schema.ts';
 export * from './src/schema-export.ts';
 export * from './src/registry/decorator.ts';
