@@ -60,6 +60,8 @@ export class ExecutionManager {
         return console.log!(await HelpUtil.renderCommandHelp(instance));
       }
 
+      await CliCommandSchemaUtil.validate(command, boundArgs);
+
       // Wait 50ms to allow stdout to flush on shutdown
       ShutdownManager.signal.addEventListener('abort', () => Util.blockingTimeout(50));
 
