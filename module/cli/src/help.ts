@@ -1,11 +1,11 @@
 import util from 'node:util';
 
 import { castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
-import { SchemaRegistryIndex, type ValidationResultError } from '@travetto/schema';
+import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
 import type { CliCommandShape } from './types.ts';
-import { CliCommandRegistryIndex } from './registry/registry-index.ts';
+import { CliCommandRegistryIndex, UNKNOWN_COMMAND } from './registry/registry-index.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
 
 const validationSourceMap: Record<string, string> = {
@@ -168,5 +168,21 @@ ${{ identifier: install }}
       }),
       '',
     ].join('\n');
+  }
+
+  /** Error handler */
+  static async renderError(error: unknown, cmd: string, command?: CliCommandShape): Promise<void> {
+    process.exitCode ??= 1;
+    if (error instanceof ValidationResultError) {
+      console.error!(this.renderValidationError(error));
+    }
+    if (command) {
+      console.error!(await this.renderCommandHelp(command));
+    } else if (error === UNKNOWN_COMMAND) {
+      console.error!(this.renderUnknownCommandMessage(cmd));
+    } else {
+      console.error!(error);
+    }
+    console.error!();
   }
 }
