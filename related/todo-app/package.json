@@ -28,17 +28,17 @@
     "@travetto/model-mongo": "^8.0.0-alpha.1",
     "@travetto/openapi": "^8.0.0-alpha.1",
     "@travetto/web-http": "^8.0.0-alpha.1",
-    "@travetto/web-rpc": "^8.0.0-alpha.1",
+    "@travetto/web-rpc": "^8.0.0-alpha.2",
     "vue": "^3.5.13"
   },
   "devDependencies": {
     "@travetto/compiler": "^8.0.0-alpha.1",
-    "@travetto/email-compiler": "^8.0.0-alpha.1",
-    "@travetto/email-inky": "^8.0.0-alpha.1",
-    "@travetto/pack": "^8.0.0-alpha.1"
+    "@travetto/email-compiler": "^8.0.0-alpha.2",
+    "@travetto/email-inky": "^8.0.0-alpha.2",
+    "@travetto/pack": "^8.0.0-alpha.2"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.1"
+    "@travetto/cli": "^8.0.0-alpha.2"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

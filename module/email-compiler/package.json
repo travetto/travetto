@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-compiler",
-  "version": "8.0.0-alpha.1",
+  "version": "8.0.0-alpha.2",
   "type": "module",
   "description": "Email compiling module",
   "keywords": [
@@ -40,7 +40,7 @@
     "sass": "^1.97.3"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.1"
+    "@travetto/cli": "^8.0.0-alpha.2"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

@@ -33,7 +33,7 @@
     "@travetto/model": "^8.0.0-alpha.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.1"
+    "@travetto/cli": "^8.0.0-alpha.2"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
