@@ -16,17 +16,20 @@ const validationSourceMap: Record<string, string> = {
 const ifDefined = <T>(value: T | null | '' | undefined): T | undefined =>
   (value === null || value === '' || value === undefined) ? undefined : value;
 
+const toItem = (name: string, pkg: string, prod?: boolean) => [name, Runtime.getInstallCommand(pkg, prod)] as const;
 
-const COMMAND_PACKAGE = [
-  [/^test(:watch)?$/, 'test', false],
-  [/^lint(:register)?$/, 'eslint', false],
-  [/^model:(install|export)$/, 'model', true],
-  [/^openapi:(spec|client)$/, 'openapi', true],
-  [/^email:(compile|editor)$/, 'email-compiler', false],
-  [/^pack(:zip|:docker)?$/, 'pack', false],
-  [/^web:http$/, 'web-http', true],
-  [/^web:rpc-client$/, 'web-rpc', true],
-] as const;
+const INSTALL_COMMANDS = new Map<string, string>([
+  ...['test', 'test:watch', 'test:direct'].map(item => toItem(item, '@travetto/test')),
+  ...['lint', 'lint:register', 'eslint', 'eslint:register'].map(item => toItem(item, '@travetto/eslint')),
+  ...['model:install', 'model:export'].map(item => toItem(item, '@travetto/model', true)),
+  ...['openapi:spec', 'openapi:client'].map(item => toItem(item, '@travetto/openapi', true)),
+  ...['email:compile', 'email:test', 'email:editor'].map(item => toItem(item, '@travetto/email-compiler')),
+  ...['pack', 'pack:zip', 'pack:docker'].map(item => toItem(item, '@travetto/pack')),
+  ...['repo:publish', 'repo:version', 'repo:exec', 'repo:list', 'repo:version-sync'].map(item => toItem(item, '@travetto/repo')),
+  toItem('web:http', '@travetto/web-http', true),
+  toItem('doc', '@travetto/doc'),
+  toItem('web:rpc-client', '@travetto/web-rpc', true),
+]);
 
 /**
  * Utilities for showing help
@@ -35,10 +38,8 @@ export class HelpUtil {
 
   /** Render the unknown command message */
   static renderUnknownCommandMessage(cmd: string): string {
-    const matchedConfig = COMMAND_PACKAGE.find(([regex]) => regex.test(cmd));
-    if (matchedConfig) {
-      const [, pkg, production] = matchedConfig;
-      const install = Runtime.getInstallCommand(`@travetto/${pkg}`, production);
+    const install = INSTALL_COMMANDS.get(cmd);
+    if (install) {
       return cliTpl`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
 ${{ identifier: install }}
