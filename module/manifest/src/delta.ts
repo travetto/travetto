@@ -48,7 +48,7 @@ export class ManifestDeltaUtil {
     for (const file of Object.keys(left.files)) {
       const output = ManifestModuleUtil.withOutputExtension(`${outputFolder}/${left.outputFolder}/${file}`);
       const [, , leftTimestamp] = left.files[file];
-      const stat = await fs.stat(output).catch(() => undefined);
+      const stat = await fs.stat(output, { throwIfNoEntry: false });
       right.delete(ManifestModuleUtil.withoutSourceExtension(file));
 
       if (!stat) {

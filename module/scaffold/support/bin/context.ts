@@ -97,7 +97,7 @@ export class Context {
   async initialize(): Promise<void> {
     let base = this.destination();
     while (base) {
-      if (await fs.stat(`${base}/package.json`).catch(() => { })) {
+      if (await fs.stat(`${base}/package.json`, { throwIfNoEntry: false })) {
         throw new Error(`Cannot create project inside of an existing node project ${base}`);
       }
       const next = path.dirname(base);

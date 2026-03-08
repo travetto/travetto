@@ -195,7 +195,7 @@ export class CompilerWatcher {
         return;
       }
       const full = path.resolve(toolRootFolder, file);
-      const stat = await fs.stat(full).catch(() => null);
+      const stat = await fs.stat(full, { throwIfNoEntry: false });
       if (toolFolders.has(full) && !stat) {
         this.#queue.throw(new CompilerReset(`Tooling folder removal ${full}`));
       }
@@ -229,7 +229,7 @@ export class CompilerWatcher {
 
   async #listenGitChanges(): Promise<void> {
     const gitFolder = path.resolve(this.#root, '.git');
-    if (!await fs.stat(gitFolder).catch(() => false)) { return; }
+    if (!await fs.stat(gitFolder, { throwIfNoEntry: false })) { return; }
     log.debug('Starting git canary');
     const listener = watch(gitFolder, { encoding: 'utf8' }, async (event, file) => {
       if (!file) {

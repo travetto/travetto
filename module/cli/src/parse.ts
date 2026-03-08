@@ -95,7 +95,7 @@ export class CliParseUtil {
 
     const file = path.resolve(relativePath);
 
-    if (!await fs.stat(file).catch(() => false)) {
+    if (!await fs.stat(file, { throwIfNoEntry: false })) {
       throw new Error(`Missing flag file: ${key}, unable to proceed`);
     }
 

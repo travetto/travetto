@@ -51,7 +51,7 @@ export class EditorConfig {
 
   static async ensureConfig(): Promise<string> {
     const resolved = Runtime.workspaceRelative(CONFIG_FILE);
-    if (!(await fs.stat(resolved).catch(() => { }))) {
+    if (!(await fs.stat(resolved, { throwIfNoEntry: false }))) {
       await ManifestFileUtil.bufferedFileWrite(resolved, this.getDefaultConfig());
     }
     return resolved;

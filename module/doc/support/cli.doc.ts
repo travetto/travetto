@@ -12,7 +12,7 @@ import { PackageUtil } from '@travetto/manifest';
 @CliCommand()
 @Validator(async (cmd) => {
   const docFile = path.resolve(cmd.input);
-  if (!(await fs.stat(docFile).catch(() => false))) {
+  if (!(await fs.stat(docFile, { throwIfNoEntry: false }))) {
     return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
   }
 })
