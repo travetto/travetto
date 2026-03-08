@@ -97,7 +97,7 @@ Usage: pack:zip [options] [args...:string]
 Options:
   -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                  Clean workspace (default: true)
-  -o, --output <string>                Output location (default: "travetto_pack.zip")
+  -o, --output <string>                Output location (default: "<module>.zip")
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
   -f, --main-name <string>             Main name for build artifact
   -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv.ts")
@@ -142,7 +142,7 @@ Options:
   -m, --module <module>                  Module to run for
   -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile.ts")
   -di, --docker-image <string>           Docker Image to extend (default: "node:25-alpine")
-  -dn, --docker-name <string>            Docker Image Name (default: "travetto_pack")
+  -dn, --docker-name <string>            Docker Image Name (default: "<module>")
   -ru, --runtime-user <string>           Docker Runtime user
   -rp, --runtime-package <string>        Docker Runtime Packages (default: [])
   -dp, --docker-port <number>            Docker Image Port (default: [])
@@ -273,6 +273,6 @@ echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
 echo "Building Docker Container latest"
 
 cd $DIST
-docker build -t travetto_todo-app:latest .
+docker build -t <module>:latest .
 cd $ROOT
 ```

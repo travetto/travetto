@@ -2,7 +2,6 @@ import { castKey, castTo, getClass } from '@travetto/runtime';
 import { BindUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError, type ValidationError } from '@travetto/schema';
 
 import type { ParsedState, CliCommandShape } from './types.ts';
-import { CliValidationResultError } from './error.ts';
 
 const getSource = (source: string | undefined, defaultSource: ValidationError['source']): ValidationError['source'] => {
   switch (source) {
@@ -15,7 +14,7 @@ const getSource = (source: string | undefined, defaultSource: ValidationError['s
 };
 
 const transformErrors = (source: 'arg' | 'flag', error: unknown): ValidationError[] => {
-  if (error instanceof CliValidationResultError || error instanceof ValidationResultError) {
+  if (error instanceof ValidationResultError) {
     return error.details.errors.map(value => ({ source: getSource(value.source, source), ...value }));
   } else {
     throw error;
@@ -32,16 +31,16 @@ export class CliCommandSchemaUtil {
   /**
    * Bind parsed inputs to command
    */
-  static bindInput<T extends CliCommandShape>(cmd: T, state: ParsedState): unknown[] {
+  static bindInput<T extends CliCommandShape>(command: T, state: ParsedState): unknown[] {
     const template: Partial<T> = {};
     const bound: unknown[] = [];
 
-    for (const arg of state.all) {
-      switch (arg.type) {
+    for (const item of state.all) {
+      switch (item.type) {
         case 'flag': {
-          const key = castKey<T>(arg.fieldName);
-          const value = arg.value!;
-          if (arg.array) {
+          const key = castKey<T>(item.fieldName);
+          const value = item.value!;
+          if (item.array) {
             castTo<unknown[]>(template[key] ??= castTo([])).push(value);
           } else {
             template[key] = castTo(value);
@@ -49,36 +48,36 @@ export class CliCommandSchemaUtil {
           break;
         }
         case 'arg': {
-          if (arg.array) {
-            castTo<unknown[]>(bound[arg.index] ??= []).push(arg.input);
+          if (item.array) {
+            castTo<unknown[]>(bound[item.index] ??= []).push(item.input);
           } else {
-            bound[arg.index] = arg.input;
+            bound[item.index] = item.input;
           }
         }
       }
     }
 
-    const cls = getClass(cmd);
-    BindUtil.bindSchemaToObject(cls, cmd, template);
+    const cls = getClass(command);
+    BindUtil.bindSchemaToObject(cls, command, template);
     return BindUtil.coerceMethodParams(cls, 'main', bound);
   }
 
   /**
    * Validate command shape with the given arguments
    */
-  static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
-    const cls = getClass(cmd);
+  static async validate(command: CliCommandShape, args: unknown[]): Promise<typeof command> {
+    const cls = getClass(command);
     const paramNames = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(config => config.name!);
 
     const results = await Promise.all([
-      SchemaValidator.validate(cls, cmd).then(() => [], transformFlagErrors),
+      SchemaValidator.validate(cls, command).then(() => [], transformFlagErrors),
       SchemaValidator.validateMethod(cls, 'main', args, paramNames).then(() => [], transformArgErrors),
     ]);
 
     const errors = results.flat();
     if (errors.length) {
-      throw new CliValidationResultError(cmd, errors);
+      throw new ValidationResultError(errors);
     }
-    return cmd;
+    return command;
   }
 }

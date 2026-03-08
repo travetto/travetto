@@ -1,12 +1,11 @@
 import util from 'node:util';
 
-import { castKey, getClass, JSONUtil } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
+import { SchemaRegistryIndex, type ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
 import type { CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
-import type { CliValidationResultError } from './error.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
 
 const validationSourceMap: Record<string, string> = {
@@ -17,10 +16,37 @@ const validationSourceMap: Record<string, string> = {
 const ifDefined = <T>(value: T | null | '' | undefined): T | undefined =>
   (value === null || value === '' || value === undefined) ? undefined : value;
 
+
+const COMMAND_PACKAGE = [
+  [/^test(:watch)?$/, 'test', false],
+  [/^lint(:register)?$/, 'eslint', false],
+  [/^model:(install|export)$/, 'model', true],
+  [/^openapi:(spec|client)$/, 'openapi', true],
+  [/^email:(compile|editor)$/, 'email-compiler', false],
+  [/^pack(:zip|:docker)?$/, 'pack', false],
+  [/^web:http$/, 'web-http', true],
+  [/^web:rpc-client$/, 'web-rpc', true],
+] as const;
+
 /**
  * Utilities for showing help
  */
 export class HelpUtil {
+
+  /** Render the unknown command message */
+  static renderUnknownCommandMessage(cmd: string): string {
+    const matchedConfig = COMMAND_PACKAGE.find(([regex]) => regex.test(cmd));
+    if (matchedConfig) {
+      const [, pkg, production] = matchedConfig;
+      const install = Runtime.getInstallCommand(`@travetto/${pkg}`, production);
+      return cliTpl`
+${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
+${{ identifier: install }}
+`;
+    } else {
+      return cliTpl`${{ subtitle: 'Unknown command' }}: ${{ input: cmd }}`;
+    }
+  }
 
   /**
    * Render command-specific help
@@ -30,8 +56,6 @@ export class HelpUtil {
     const schema = SchemaRegistryIndex.getConfig(getClass(command));
     const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
     const args = schema.methods.main?.parameters ?? [];
-
-    await command.finalize?.(true);
 
     // Ensure finalized
 
@@ -132,7 +156,7 @@ export class HelpUtil {
   /**
    * Render validation error to a string
    */
-  static renderValidationError(validationError: CliValidationResultError): string {
+  static renderValidationError(validationError: ValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
       ...validationError.details.errors.map(error => {

@@ -11,10 +11,9 @@ export class PackZipCommand extends BasePackCommand {
 
   finalize(forHelp?: boolean): void {
     if (forHelp) {
-      this.output = CliUtil.getSimpleModuleName('<module>.zip');
-    } else {
-      this.output ??= CliUtil.getSimpleModuleName('<module>.zip', this.module);
+      this.output = '<module>.zip';
     }
+    this.output ??= CliUtil.getSimpleModuleName('<module>.zip', this.module);
   }
 
   getOperations(): PackOperationShape<this>[] {

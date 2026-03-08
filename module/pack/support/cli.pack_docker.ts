@@ -9,6 +9,8 @@ import { BasePackCommand, type PackOperationShape } from './pack.base';
 import type { DockerPackConfig } from '../src/types.ts';
 
 const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
+const asNumber = (input?: string): number | undefined => (!input || isNaN(+input)) ? undefined : +input;
+const asString = (input?: string): string | undefined => (input && asNumber(input)) ? input : undefined;
 
 /**
  * Standard docker support for pack
@@ -66,26 +68,25 @@ export class PackDockerCommand extends BasePackCommand {
   defaultUserId = 2000;
 
   finalize(forHelp?: boolean): void {
+    if (forHelp) {
+      this.dockerName = '<module>';
+    }
+
     if (this.dockerFactory.startsWith('.')) {
       this.dockerFactory = RuntimeIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
     }
-
-    if (forHelp) {
-      this.dockerName = CliUtil.getSimpleModuleName('<module>');
-    } else {
-      this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module || undefined);
-    }
+    this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module);
 
     // Finalize user/group and ids
     const [userOrUserId, groupOrGroupId = userOrUserId] = (this.dockerRuntimeUser ?? '').split(':');
-    const groupIsNumber = /^\d+$/.test(groupOrGroupId);
-    const userIsNumber = /^\d+$/.test(userOrUserId);
-
-    const userId = userIsNumber ? +userOrUserId : this.defaultUserId;
-    const groupId = groupIsNumber ? +groupOrGroupId : this.defaultUserId;
-    const group = (!groupIsNumber ? groupOrGroupId : undefined) || this.defaultUser;
-    const user = (!userIsNumber ? userOrUserId : undefined) || this.defaultUser;
-    this.dockerRuntime = { user, userId, group, groupId, folder: `/${this.appFolder}`, packages: this.dockerRuntimePackages };
+    this.dockerRuntime = {
+      user: asString(userOrUserId) ?? this.defaultUser,
+      userId: asNumber(userOrUserId) ?? this.defaultUserId,
+      group: asString(groupOrGroupId) ?? this.defaultUser,
+      groupId: asNumber(groupOrGroupId) ?? this.defaultUserId,
+      folder: `/${this.appFolder}`,
+      packages: this.dockerRuntimePackages
+    };
 
     if (this.dockerStageOnly) {
       if (this.dockerRegistry) {

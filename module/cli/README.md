@@ -558,7 +558,8 @@ $ trv service --help
 Usage: service [options] <action:restart|start|status|stop> [services...:string]
 
 Options:
-  -h, --help  display help for command
+  -q, --quiet   (default: false)
+  -h, --help   display help for command
 
 Available Services
 --------------------
