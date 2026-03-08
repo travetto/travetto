@@ -1,4 +1,4 @@
-import { type Class, describeFunction } from '@travetto/runtime';
+import { castTo, type Class, describeFunction } from '@travetto/runtime';
 import { type SchemaInputConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
@@ -9,7 +9,7 @@ import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
 export type CliCommandInput<K extends string = string> = {
   name: string;
   description?: string;
-  type: 'string' | 'file' | 'number' | 'boolean' | 'date' | 'regex' | 'module';
+  type: 'string' | 'file' | 'number' | 'bigint' | 'boolean' | 'date' | 'regex' | 'module';
   fileExtensions?: string[];
   choices?: unknown[];
   required?: boolean;
@@ -37,11 +37,12 @@ export class CliSchemaExportUtil {
    * Get the base type for a CLI command input
    */
   static baseInputType(config: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
-    switch (config.type) {
+    switch (castTo<Function>(config.type)) {
       case Date: return { type: 'date' };
       case Boolean: return { type: 'boolean' };
       case Number: return { type: 'number' };
       case RegExp: return { type: 'regex' };
+      case BigInt: return { type: 'bigint' };
       case String: {
         switch (true) {
           case config.specifiers?.includes('module'): return { type: 'module' };

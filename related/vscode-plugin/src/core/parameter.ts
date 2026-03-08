@@ -218,6 +218,7 @@ export class ParameterSelector {
    */
   static async getParameter(input: InputWithMeta): Promise<string | undefined> {
     switch (input.param.type) {
+      case 'bigint':
       case 'number': return this.getQuickInput(input);
       case 'boolean': return this.getQuickPickList(input, ['yes', 'no']).then(choice => `${choice === 'yes'}`);
       case 'file': return this.getFile(input);
