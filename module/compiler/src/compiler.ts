@@ -176,6 +176,7 @@ export class Compiler {
         if (event.errors?.length) {
           failures.set(event.file, event.errors);
           EventUtil.sendEvent('log', { level: 'error', message: `${event.file}: ${event.errors.length} errors found`, time: Date.now() });
+          void fs.utimes(event.file, new Date(), new Date()).catch(() => { /* Ignore */ }); // Touch file to trigger watch if failed
         }
         metrics.push(event);
       }
