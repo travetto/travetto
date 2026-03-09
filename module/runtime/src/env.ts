@@ -90,7 +90,7 @@ export class EnvProp<T> {
   }
 }
 
-type AllType = {
+type EnvDataCombinedType = {
   [K in keyof EnvData]: Pick<EnvProp<EnvData[K]>, 'key' | 'export' | 'value' | 'set' | 'clear' | 'isSet' |
     (EnvData[K] extends unknown[] ? 'list' | 'add' : never) |
     (Extract<EnvData[K], object> extends never ? never : 'object') |
@@ -99,7 +99,7 @@ type AllType = {
   >
 };
 
-function delegate<T extends object>(base: T): AllType & T {
+function delegate<T extends object>(base: T): EnvDataCombinedType & T {
   return new Proxy(castTo(base), {
     get(target, property): unknown {
       return typeof property !== 'string' ? undefined :

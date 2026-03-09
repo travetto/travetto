@@ -163,6 +163,8 @@ export class Compiler {
           for (const error of event.errors) {
             log.error(`ERROR ${event.file}:${error}`);
           }
+          // Touch file to ensure recompilation later
+          await fs.utimes(event.file, new Date(), new Date());
         }
         metrics.push(event);
       }
@@ -178,18 +180,12 @@ export class Compiler {
         log.debug('Compilation succeeded');
       }
 
-      // Rebuild manifests if dirty
+      // Rebuild manifests
       const manifest = await ManifestUtil.buildManifest(this.#state.manifestIndex.manifest);
       await ManifestUtil.writeManifest(manifest);
       await ManifestUtil.writeDependentManifests(manifest);
 
       if (failures.size) {
-        // const now = `${Date.now() / 1000}`;
-        await Promise.all([...failures.keys()].map(file => {
-          // Touch file to ensure it will be picked up on recompile
-          log.error(`Touching ${file} to ensure it will be picked up again`);
-          // return fs.utimes(file, now, now).catch(() => { });
-        }));
         return this.#shutdown('error');
       }
 

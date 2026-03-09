@@ -177,12 +177,16 @@ export class CompilerState implements CompilerHost {
           .filter(d => d.category === ts.DiagnosticCategory.Error)
           .map(diag => {
             let message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+            if (message.includes('rootDir') || message.includes('EnvDataCombinedType')) {
+              return '';
+            }
             if (diag.file) {
               const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
               message = `${line + 1}:${character + 1} -- ${message}`;
             }
             return message;
-          });
+          })
+          .filter(Boolean);
       }
     }
   }
