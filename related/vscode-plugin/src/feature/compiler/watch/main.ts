@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ChildProcess } from 'node:child_process';
 
-import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
+import { CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
 import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/src/types.ts';
 
@@ -80,11 +80,11 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      ExecUtil.readLines(subProcess.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
+      CodecUtil.readLines(subProcess.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
     }
 
     if (debug && subProcess.stdout) {
-      ExecUtil.readLines(subProcess.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
+      CodecUtil.readLines(subProcess.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
     }
 
     return subProcess;
@@ -96,7 +96,7 @@ export class CompilerWatchFeature extends BaseFeature {
   async #compilerState(): Promise<CompilerStateType | undefined> {
     const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
-      const event: CompilerStateEvent = JSONUtil.parseSafe(stdout);
+      const event: CompilerStateEvent = JSONUtil.fromUTF8(stdout);
       return event.state;
     } catch { }
   }
@@ -112,8 +112,8 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
-          await ExecUtil.readLines(subProcess.stdout!, line => {
-            const { type, payload }: CompilerEvent = JSONUtil.parseSafe(line);
+          await CodecUtil.readLines(subProcess.stdout!, line => {
+            const { type, payload }: CompilerEvent = JSONUtil.fromUTF8(line);
             switch (type) {
               case 'log': this.#ongLogEvent(payload); break;
               case 'state': this.#onStateEvent(payload); break;

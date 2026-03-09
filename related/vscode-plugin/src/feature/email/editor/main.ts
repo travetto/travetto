@@ -1,7 +1,7 @@
 import { ChildProcess } from 'node:child_process';
 import * as vscode from 'vscode';
 
-import { ExecUtil } from '@travetto/runtime';
+import { CodecUtil } from '@travetto/runtime';
 import type { EmailCompiled } from '@travetto/email';
 
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
@@ -67,10 +67,10 @@ export class EmailCompilerFeature extends BaseFeature {
       });
 
     if (this.#server.stderr) {
-      ExecUtil.readLines(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
+      CodecUtil.readLines(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
     }
     if (this.#server.stdout) {
-      ExecUtil.readLines(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
+      CodecUtil.readLines(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
     }
   }
 

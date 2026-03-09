@@ -3,7 +3,6 @@ import type { ChangeEventType, ManifestModule } from '@travetto/manifest';
 export type CompilerStateType = 'startup' | 'init' | 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' | 'closed';
 export type CompilerLogLevel = 'info' | 'debug' | 'warn' | 'error';
 
-export type CompileEmitter = (file: string, newProgram?: boolean) => Promise<string[] | undefined>;
 export type CompileEmitEvent = { file: string, i: number, total: number, errors?: string[], duration: number };
 export type CompileStateEntry = { sourceFile: string, tscOutputFile: string, outputFile?: string, module: ManifestModule, import: string, moduleFile: string };
 export type CompilerWatchEvent = { action: ChangeEventType, file: string, entry: CompileStateEntry, moduleFile: string };

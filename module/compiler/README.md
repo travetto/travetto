@@ -48,7 +48,7 @@ $ TRV_BUILD=debug trvc build
 2029-03-14T04:00:02.450Z info  [compiler-exec  ] Launching compiler
 2029-03-14T04:00:02.762Z debug [server         ] Compilation started
 2029-03-14T04:00:02.947Z info  [server         ] State changed: init
-2029-03-14T04:00:03.093Z debug [server         ] Compiler loaded
+2029-03-14T04:00:03.093Z debug [server         ] Compiler loaded: 0 files changed
 2029-03-14T04:00:04.003Z info  [server         ] State changed: compile-start
 2029-03-14T04:00:04.495Z info  [server         ] State changed: compile-end
 2029-03-14T04:00:05.066Z debug [server         ] Compiler process shutdown

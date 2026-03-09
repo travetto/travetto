@@ -137,8 +137,9 @@ export class CompilerState implements CompilerHost {
     return this.getBySource(randomSource)!.sourceFile;
   }
 
-  async createProgram(force = false): Promise<Program> {
+  async getProgram(force = false): Promise<Program> {
     if (force || !this.#program) {
+      await this.initializeTypescript();
       this.#program = ts.createProgram({ rootNames: this.getAllFiles(), host: this, options: this.#compilerOptions, oldProgram: this.#program });
       this.#transformerManager.init(this.#program.getTypeChecker());
       await CommonUtil.queueMacroTask();
@@ -152,7 +153,7 @@ export class CompilerState implements CompilerHost {
       return;
     }
 
-    const program = await this.createProgram(needsNewProgram);
+    const program = await this.getProgram(needsNewProgram);
     switch (ManifestModuleUtil.getFileType(sourceFile)) {
       case 'typings':
       case 'package-json':
