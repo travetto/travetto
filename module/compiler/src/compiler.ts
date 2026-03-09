@@ -156,7 +156,7 @@ export class Compiler {
     EventUtil.sendEvent('state', { state: 'init', extra: { processId: process.pid } });
 
     const emitter = this.getCompiler();
-    const failures = new Map<string, string[]>();
+    const failures = new Map<string, number>();
 
     log.debug('Compiler loaded');
 
@@ -174,8 +174,10 @@ export class Compiler {
     if (changedFiles.length) {
       for await (const event of this.emit(changedFiles, emitter)) {
         if (event.errors?.length) {
-          failures.set(event.file, event.errors);
-          EventUtil.sendEvent('log', { level: 'error', message: `${event.file}: ${event.errors.length} errors found`, time: Date.now() });
+          failures.set(event.file, event.errors.length);
+          for (const error of event.errors) {
+            log.debug(`${event.file}:${error}`);
+          }
           void fs.utimes(event.file, new Date(), new Date()).catch(() => { /* Ignore */ }); // Touch file to trigger watch if failed
         }
         metrics.push(event);
@@ -185,7 +187,7 @@ export class Compiler {
       } else if (failures.size) {
         const sortedFailures = [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0]));
         log.debug('Compilation failed',
-          ['', sortedFailures.flatMap(([file, errors]) => [file, errors.map(item => `  - ${item}`)])]
+          ['', sortedFailures.flatMap(([file, count]) => `- ${file}: ${count} errors found`)]
             .flat(3).join('\n')
         );
         return this.#shutdown('error');
