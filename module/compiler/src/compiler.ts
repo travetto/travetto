@@ -178,7 +178,8 @@ export class Compiler {
           for (const error of event.errors) {
             log.debug(`ERROR ${event.file}:${error}`);
           }
-          void fs.utimes(event.file, new Date(), new Date()).catch(() => { /* Ignore */ }); // Touch file to trigger watch if failed
+          // Touch file to ensure it will be picked up on recompile
+          void fs.utimes(event.file, new Date(), new Date()).catch(() => { });
         }
         metrics.push(event);
       }
