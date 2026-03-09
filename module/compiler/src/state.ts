@@ -4,10 +4,9 @@ import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, type 
 import type { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util.ts';
-import type { CompileEmitError, CompileStateEntry } from './types.ts';
+import type { CompileStateEntry } from './types.ts';
 import { CommonUtil } from './common.ts';
 import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
-
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 
@@ -72,9 +71,7 @@ export class CompilerState implements CompilerHost {
     return {
       ...options,
       noEmit: false,
-      emitDeclarationOnly: false,
       allowJs: true,
-      resolveJsonModule: true,
       sourceRoot: this.#manifest.workspace.path,
       rootDir: this.#manifest.workspace.path,
       moduleResolution: ts.ModuleResolutionKind.Bundler,
@@ -149,36 +146,42 @@ export class CompilerState implements CompilerHost {
     return this.#program;
   }
 
-  async compileSourceFile(sourceFile: string, needsNewProgram = false): Promise<CompileEmitError | undefined> {
+  async compileSourceFile(sourceFile: string, needsNewProgram = false): Promise<string[] | undefined> {
     const output = this.#sourceToEntry.get(sourceFile)?.outputFile;
     if (!output) {
       return;
     }
 
     const program = await this.createProgram(needsNewProgram);
-    try {
-      switch (ManifestModuleUtil.getFileType(sourceFile)) {
-        case 'typings':
-        case 'package-json':
-          this.writeFile(output, this.readFile(sourceFile)!, false), undefined;
-          break;
-        case 'js':
-          this.writeFile(output, ts.transpile(this.readFile(sourceFile)!, this.#compilerOptions), false);
-          break;
-        case 'ts': {
-          const result = program.emit(
-            program.getSourceFile(sourceFile)!,
-            (...args) => this.writeFile(args[0], args[1], args[2]), undefined, false,
-            this.#transformerManager.get()
-          );
-          return result?.diagnostics?.length ? result.diagnostics : undefined;
-        }
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        return error;
-      } else {
-        throw error;
+    switch (ManifestModuleUtil.getFileType(sourceFile)) {
+      case 'typings':
+      case 'package-json':
+        this.writeFile(output, this.readFile(sourceFile)!, false), undefined;
+        break;
+      case 'js':
+        this.writeFile(output, ts.transpile(this.readFile(sourceFile)!, this.#compilerOptions), false);
+        break;
+      case 'ts': {
+        const tsSourceFile = program.getSourceFile(sourceFile)!;
+        program.emit(
+          tsSourceFile,
+          (...args) => this.writeFile(args[0], args[1], args[2]), undefined, false,
+          this.#transformerManager.get()
+        );
+        return [
+          ...program.getSemanticDiagnostics(tsSourceFile),
+          ...program.getSyntacticDiagnostics(tsSourceFile),
+          ...program.getDeclarationDiagnostics(tsSourceFile),
+        ]
+          .filter(d => d.category === ts.DiagnosticCategory.Error)
+          .map(diag => {
+            let message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+            if (diag.file) {
+              const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
+              message = `${line + 1}:${character + 1} -- ${message}`;
+            }
+            return message;
+          });
       }
     }
   }

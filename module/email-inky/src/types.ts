@@ -8,6 +8,7 @@ export type RenderState<T extends JSXElement, C> = {
   props: T['props'];
   recurse: () => Promise<string>;
   stack: JSXElement[];
+  // @ts-expect-error - This is a bit of a hack to allow for custom components
   createState: <K extends keyof typeof c>(key: K, props: JSXElementByFn<K>['props']) => RenderState<JSXElementByFn<K>, C>;
   context: C;
 };
@@ -18,4 +19,5 @@ export type RenderState<T extends JSXElement, C> = {
 export type RenderProvider<C> =
   { finalize: (text: string, ctx: C, isRoot?: boolean) => (string | Promise<string>) } &
   { [K in ValidHtmlTags]: (state: RenderState<JSXElement<K>, C>) => Promise<string>; } &
+  // @ts-expect-error - This is a bit of a hack to allow for custom components,
   { [K in keyof typeof c]: (state: RenderState<JSXElementByFn<K>, C>) => Promise<string>; };

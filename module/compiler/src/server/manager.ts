@@ -48,8 +48,9 @@ export class CompilerManager {
 
     yield* queue;
 
-    if (subProcess.exitCode !== 0) {
+    if (subProcess.exitCode !== 0 && subProcess.exitCode) {
       log.error(`Terminated during compilation, code=${subProcess.exitCode}, killed=${subProcess.killed}`);
+      process.exitCode = subProcess.exitCode;
     }
     process.off('SIGINT', kill);
 

@@ -3,7 +3,6 @@ import { setMaxListeners } from 'node:events';
 
 import { getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, type DeltaEvent } from '@travetto/manifest';
 
-import { CompilerUtil } from './util.ts';
 import { CompilerState } from './state.ts';
 import { CompilerWatcher } from './watch.ts';
 import { type CompileEmitEvent, type CompileEmitter, CompilerReset } from './types.ts';
@@ -50,7 +49,7 @@ export class Compiler {
       .on('message', event => (event === 'shutdown') && this.#shutdown('manual'));
   }
 
-  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', error?: Error): void {
+  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', errorMessage?: string): void {
     if (this.#shuttingDown) {
       return;
     }
@@ -64,14 +63,13 @@ export class Compiler {
       }
       case 'error': {
         process.exitCode = 1;
-        if (error) {
-          EventUtil.sendEvent('log', { level: 'error', message: error.toString(), time: Date.now() });
-          log.error('Shutting down due to failure', error.stack);
+        if (errorMessage) {
+          log.error('Shutting down due to failure', errorMessage);
         }
         break;
       }
       case 'reset': {
-        log.info('Reset due to', error?.message);
+        log.info('Reset due to', errorMessage);
         EventUtil.sendEvent('state', { state: 'reset' });
         process.exitCode = 0;
         break;
@@ -128,12 +126,12 @@ export class Compiler {
 
     for (const file of files) {
       const start = Date.now();
-      const error = await emitter(file);
+      const errors = await emitter(file);
       const duration = Date.now() - start;
       const nodeModSeparator = 'node_modules/';
       const nodeModIdx = file.lastIndexOf(nodeModSeparator);
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
-      yield { file: imp, i: i += 1, error, total: files.length, duration };
+      yield { file: imp, i: i += 1, errors, total: files.length, duration };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
         EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
@@ -158,7 +156,7 @@ export class Compiler {
     EventUtil.sendEvent('state', { state: 'init', extra: { processId: process.pid } });
 
     const emitter = this.getCompiler();
-    let failure: Error | undefined;
+    const failures = new Map<string, string[]>();
 
     log.debug('Compiler loaded');
 
@@ -175,18 +173,21 @@ export class Compiler {
 
     if (changedFiles.length) {
       for await (const event of this.emit(changedFiles, emitter)) {
-        if (event.error) {
-          const compileError = CompilerUtil.buildTranspileError(event.file, event.error);
-          failure ??= compileError;
-          EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
+        if (event.errors?.length) {
+          failures.set(event.file, event.errors);
+          EventUtil.sendEvent('log', { level: 'error', message: `${event.file}: ${event.errors.length} errors found`, time: Date.now() });
         }
         metrics.push(event);
       }
       if (this.#signal.aborted) {
         log.debug('Compilation aborted');
-      } else if (failure) {
-        log.debug('Compilation failed');
-        return this.#shutdown('error', failure);
+      } else if (failures.size) {
+        const sortedFailures = [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+        log.debug('Compilation failed',
+          ['', sortedFailures.flatMap(([file, errors]) => [file, errors.map(item => `  - ${item}`)])]
+            .flat(3).join('\n')
+        );
+        return this.#shutdown('error');
       } else {
         log.debug('Compilation succeeded');
       }
@@ -217,7 +218,7 @@ export class Compiler {
           if (event.action !== 'delete') {
             const error = await emitter(event.entry.sourceFile, true);
             if (error) {
-              log.info('Compilation Error', CompilerUtil.buildTranspileError(event.entry.sourceFile, error));
+              log.error('Compilation failed', `${event.entry.sourceFile}: ${error.length} errors found`);
             } else {
               log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
             }
@@ -242,7 +243,7 @@ export class Compiler {
         EventUtil.sendEvent('state', { state: 'watch-end' });
       } catch (error) {
         if (error instanceof Error) {
-          this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error);
+          this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error.message);
         }
       }
     }
