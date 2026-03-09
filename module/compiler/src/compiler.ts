@@ -176,7 +176,7 @@ export class Compiler {
         if (event.errors?.length) {
           failures.set(event.file, event.errors.length);
           for (const error of event.errors) {
-            log.debug(`${event.file}:${error}`);
+            log.debug(`ERROR ${event.file}:${error}`);
           }
           void fs.utimes(event.file, new Date(), new Date()).catch(() => { /* Ignore */ }); // Touch file to trigger watch if failed
         }

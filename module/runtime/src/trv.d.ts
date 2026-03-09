@@ -2,7 +2,7 @@ import { type ManifestModuleRole } from '@travetto/manifest';
 import { type TimeSpan } from './time.ts';
 type Role = Exclude<ManifestModuleRole, 'compile'>;
 
-declare module '@travetto/runtime' {
+declare module './env.ts' {
   interface EnvData {
     /** 
      * The node environment we are running in
