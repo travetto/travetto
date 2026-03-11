@@ -91,7 +91,12 @@ export class WatchUtil {
       error: (...args: unknown[]): void => console.error(...args),
     });
 
-    return this.runWithRetry(async ({ signal }) => {
+    // pre-check
+    if (!await client.isWatching()) { // If we get here, without a watch
+      throw new RuntimeError('Compile Server is not running');
+    }
+
+    void this.runWithRetry(async ({ signal }) => {
       await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
 
       if (!await client.isWatching()) { // If we get here, without a watch
