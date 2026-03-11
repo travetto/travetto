@@ -33,7 +33,11 @@ export class CliUtil {
     ShutdownManager.disableInterrupt();
 
     let child: ChildProcess | undefined;
-    void WatchUtil.watchCompilerEvents('file', () => ShutdownManager.shutdownChild(child!, { reason: 'restart', mode: 'exit' }));
+    void WatchUtil.watchCompilerEvents('file', () => ShutdownManager.shutdownChild(child!, { reason: 'restart', mode: 'exit' })).catch(err => {
+      console.error('Failed to watch for compiler events, shutting down', err);
+      ShutdownManager.shutdownChild(child!, { reason: 'error', mode: 'exit' });
+    });
+
     process
       .on('SIGINT', () => ShutdownManager.shutdownChild(child!, { mode: 'exit' }))
       .on('message', msg => child?.send?.(msg!));
