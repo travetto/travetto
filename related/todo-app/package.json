@@ -35,7 +35,7 @@
     "@travetto/compiler": "^8.0.0-alpha.4",
     "@travetto/email-compiler": "^8.0.0-alpha.4",
     "@travetto/email-inky": "^8.0.0-alpha.4",
-    "@travetto/pack": "^8.0.0-alpha.4"
+    "@travetto/pack": "^8.0.0-alpha.5"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.4"
