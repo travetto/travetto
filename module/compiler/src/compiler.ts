@@ -164,7 +164,9 @@ export class Compiler {
             log.error(`ERROR ${event.file}:${error}`);
           }
           // Touch file to ensure recompilation later
-          await fs.utimes(event.file, new Date(), new Date());
+          if (await fs.stat(event.file, { throwIfNoEntry: false })) {
+            await fs.utimes(event.file, new Date(), new Date());
+          }
         }
         metrics.push(event);
       }

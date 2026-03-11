@@ -177,7 +177,14 @@ export class CompilerState implements CompilerHost {
           .filter(d => d.category === ts.DiagnosticCategory.Error)
           .map(diag => {
             let message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-            if (message.includes('rootDir') || message.includes('EnvDataCombinedType')) {
+            if (
+              message.includes("is not under 'rootDir'")
+              || message.includes("does not exist on type 'EnvDataCombinedType'")
+              || message.startsWith('Could not find a declaration file for module')
+              || message.startsWith("Cannot find module '@travetto")
+              || message.startsWith("This JSX tag requires the module path '@travetto")
+              || message.startsWith("JSX element implicitly has type 'any'")
+            ) {
               return '';
             }
             if (diag.file) {
