@@ -30,7 +30,7 @@ export class FileLoader {
   async resolve(relativePath: string): Promise<string> {
     for (const sub of this.searchPaths) {
       const resolved = path.join(sub, relativePath);
-      if (await fs.stat(resolved).catch(() => false)) {
+      if (await fs.stat(resolved, { throwIfNoEntry: false })) {
         return resolved;
       }
     }

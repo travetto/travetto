@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { RuntimeError } from '@travetto/runtime';
+import { castTo, RuntimeError } from '@travetto/runtime';
 import { BindUtil, SchemaValidator } from '@travetto/schema';
 
 import { Address } from './models/address.ts';
@@ -86,13 +86,11 @@ class DataBinding {
 
   @Test('Should handle aliases')
   validateAliases() {
-    const response = Response.from({
+    const response = Response.from(castTo({
       correct: true,
-      // @ts-expect-error
       status: 'orange',
-      // @ts-expect-error
       valid: 'true'
-    });
+    }));
 
     console.log('Response', { ...response });
 

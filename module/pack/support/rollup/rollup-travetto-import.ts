@@ -1,4 +1,5 @@
 import type { AstNode, Plugin } from 'rollup';
+// @ts-expect-error - This module lacks types
 import { walk } from 'estree-walker';
 import magicString from 'magic-string';
 
@@ -33,16 +34,14 @@ export function travettoImportPlugin(config: CoreRollupConfig): Plugin {
       let ms: magicString | undefined;
 
       walk(parsed, {
-        enter: (node) => {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const impNode = node as TNode;
-          if (impNode.type === 'ImportExpression' && impNode.source?.type !== 'Literal') {
-            if (!/["']/.test(code.substring(impNode.start, impNode.end))) {
-              (ms ??= new magicString(code)).overwrite(impNode.start, impNode.start + 6, GLOBAL_IMPORT);
+        enter: (node: TNode) => {
+          if (node.type === 'ImportExpression' && node.source?.type !== 'Literal') {
+            if (!/["']/.test(code.substring(node.start, node.end))) {
+              (ms ??= new magicString(code)).overwrite(node.start, node.start + 6, GLOBAL_IMPORT);
             }
-          } else if (impNode.type === 'CallExpression' && impNode.callee?.type === 'Identifier' && impNode.callee.name === 'require') {
-            if (!/["']/.test(code.substring(impNode.start, impNode.end))) {
-              (ms ??= new magicString(code)).overwrite(impNode.start, impNode.start + 7, GLOBAL_IMPORT);
+          } else if (node.type === 'CallExpression' && node.callee?.type === 'Identifier' && node.callee.name === 'require') {
+            if (!/["']/.test(code.substring(node.start, node.end))) {
+              (ms ??= new magicString(code)).overwrite(node.start, node.start + 7, GLOBAL_IMPORT);
             }
           }
         }

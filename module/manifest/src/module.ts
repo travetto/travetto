@@ -70,7 +70,7 @@ export class ManifestModuleUtil {
       return this.#scanCache[key];
     }
 
-    if (!await fs.stat(folder).catch(() => false)) {
+    if (!await fs.stat(folder, { throwIfNoEntry: false })) {
       return [];
     }
 
@@ -94,7 +94,7 @@ export class ManifestModuleUtil {
       const [top, depth] = popped;
 
       // Don't navigate into sub-folders with package.json's
-      if (top !== folder && await fs.stat(`${top}/package.json`).catch(() => false)) {
+      if (top !== folder && await fs.stat(`${top}/package.json`, { throwIfNoEntry: false })) {
         continue;
       } else if (exclude.has(top)) {
         continue;
@@ -197,7 +197,7 @@ export class ManifestModuleUtil {
    * Convert file (by ext) to a known file type and also retrieve its latest timestamp
    */
   static async transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
-    const updated = this.#getNewest(await fs.stat(full).catch(() => ({ mtimeMs: 0, ctimeMs: 0 })));
+    const updated = this.#getNewest(await fs.stat(full, { throwIfNoEntry: false }) ?? { mtimeMs: 0, ctimeMs: 0 });
     const moduleFileTuple: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), updated];
     const role = this.getFileRole(moduleFile);
     return role ? [...moduleFileTuple, role] : moduleFileTuple;

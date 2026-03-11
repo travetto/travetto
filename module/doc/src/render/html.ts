@@ -124,7 +124,7 @@ ${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
   Ref: async ({ context, props }) =>
     `<a target="_blank" class="source-link" href="${context.link(props.href, props)}">${props.title}</a>`,
   Image: async ({ context, props }) => {
-    if (!/^https?:/.test(props.href) && !(await fs.stat(props.href).catch(() => false))) {
+    if (!/^https?:/.test(props.href) && !(await fs.stat(props.href, { throwIfNoEntry: false }))) {
       throw new Error(`${props.href} is not a valid location`);
     }
     return `<img src="${context.link(props.href, props)}" alt="${props.title}">`;

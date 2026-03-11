@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
 import type { TestWatchEvent } from '@travetto/test';
-import { Env, ExecUtil } from '@travetto/runtime';
+import { CodecUtil, Env } from '@travetto/runtime';
 
 import { Workspace } from '../../../core/workspace.ts';
 import { Activatible } from '../../../core/activation.ts';
@@ -67,10 +67,10 @@ class TestRunnerFeature extends BaseFeature {
       });
 
     if (this.#server.stderr) {
-      ExecUtil.readLines(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
+      CodecUtil.readLines(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
     }
     if (this.#server.stdout) {
-      ExecUtil.readLines(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
+      CodecUtil.readLines(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
     }
   }
 

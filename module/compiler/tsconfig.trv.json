@@ -7,17 +7,22 @@
     "lib": [
       "ESNext",
     ],
+    "types": [
+      "node"
+    ],
     "jsx": "react-jsx",
     "stableTypeOrdering": true,
     "strict": true,
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": false,
     "noUncheckedSideEffectImports": true,
     "libReplacement": false,
     "strictPropertyInitialization": false,
     "erasableSyntaxOnly": true,
     "experimentalDecorators": true,
     "noEmitOnError": false,
+    "allowJs": true,
     "noErrorTruncation": true,
     "resolveJsonModule": true,
     "sourceMap": true,

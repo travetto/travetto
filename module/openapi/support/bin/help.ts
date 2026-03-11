@@ -12,7 +12,7 @@ export class OpenApiClientHelp {
 
   static async getListOfFormats(dockerImage: string): Promise<string[]> {
     const formatCache = Runtime.toolPath('openapi-formats.json');
-    if (!await fs.stat(formatCache).catch(() => false)) {
+    if (!await fs.stat(formatCache, { throwIfNoEntry: false })) {
       const { stdout } = await ExecUtil.getResult(spawn('docker', ['run', '--rm', dockerImage, 'list']));
       const lines = stdout
         .split('DOCUMENTATION')[0]

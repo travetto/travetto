@@ -1,10 +1,5 @@
 import { ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/manifest';
 
-import type { CompileEmitError } from './types.ts';
-import { tsProxy as ts } from './ts-proxy.ts';
-
-const nativeCwd = process.cwd();
-
 /**
  * Standard utilities for compiler
  */
@@ -36,32 +31,6 @@ export class CompilerUtil {
       }
     }
     return JSON.stringify(pkg, null, 2);
-  }
-
-  /**
-   * Build transpilation error
-   * @param filename The name of the file
-   * @param diagnostics The diagnostic errors
-   */
-  static buildTranspileError(filename: string, diagnostics: CompileEmitError): Error {
-    if (diagnostics instanceof Error) {
-      return diagnostics;
-    }
-
-    const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-      const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-      if (diag.file) {
-        const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
-        return ` @ ${diag.file.fileName.replace(nativeCwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
-      } else {
-        return ` ${message}`;
-      }
-    });
-
-    if (diagnostics.length > 5) {
-      errors.push(`${diagnostics.length - 5} more ...`);
-    }
-    return new Error(`Transpiling ${filename.replace(nativeCwd, '.')} failed: \n${errors.join('\n')}`);
   }
 
   /**

@@ -3,10 +3,9 @@ import { setMaxListeners } from 'node:events';
 
 import { getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, type DeltaEvent } from '@travetto/manifest';
 
-import { CompilerUtil } from './util.ts';
 import { CompilerState } from './state.ts';
 import { CompilerWatcher } from './watch.ts';
-import { type CompileEmitEvent, type CompileEmitter, CompilerReset } from './types.ts';
+import { type CompileEmitEvent, CompilerReset } from './types.ts';
 import { EventUtil } from './event.ts';
 
 import { IpcLogger } from './log.ts';
@@ -50,7 +49,7 @@ export class Compiler {
       .on('message', event => (event === 'shutdown') && this.#shutdown('manual'));
   }
 
-  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', error?: Error): void {
+  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', errorMessage?: string): void {
     if (this.#shuttingDown) {
       return;
     }
@@ -64,14 +63,13 @@ export class Compiler {
       }
       case 'error': {
         process.exitCode = 1;
-        if (error) {
-          EventUtil.sendEvent('log', { level: 'error', message: error.toString(), time: Date.now() });
-          log.error('Shutting down due to failure', error.stack);
+        if (errorMessage) {
+          log.error('Shutting down due to failure', errorMessage);
         }
         break;
       }
       case 'reset': {
-        log.info('Reset due to', error?.message);
+        log.info('Reset due to', errorMessage);
         EventUtil.sendEvent('state', { state: 'reset' });
         process.exitCode = 0;
         break;
@@ -111,29 +109,20 @@ export class Compiler {
   }
 
   /**
-   * Compile in a single pass, only emitting dirty files
-   */
-  getCompiler(): CompileEmitter {
-    return (sourceFile: string, needsNewProgram?: boolean) => this.#state.compileSourceFile(sourceFile, needsNewProgram);
-  }
-
-  /**
    * Emit all files as a stream
    */
-  async * emit(files: string[], emitter: CompileEmitter): AsyncIterable<CompileEmitEvent> {
+  async * emit(files: string[]): AsyncIterable<CompileEmitEvent> {
     let i = 0;
     let lastSent = Date.now();
 
-    await emitter(files[0]); // Prime
-
     for (const file of files) {
       const start = Date.now();
-      const error = await emitter(file);
+      const errors = await this.#state.compileSourceFile(file);
       const duration = Date.now() - start;
       const nodeModSeparator = 'node_modules/';
       const nodeModIdx = file.lastIndexOf(nodeModSeparator);
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
-      yield { file: imp, i: i += 1, error, total: files.length, duration };
+      yield { file: imp, i: i += 1, errors, total: files.length, duration };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
         EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
@@ -157,10 +146,9 @@ export class Compiler {
 
     EventUtil.sendEvent('state', { state: 'init', extra: { processId: process.pid } });
 
-    const emitter = this.getCompiler();
-    let failure: Error | undefined;
+    const failures = new Map<string, number>();
 
-    log.debug('Compiler loaded');
+    log.debug(`Compiler loaded: ${this.#deltaEvents.length} files changed`);
 
     EventUtil.sendEvent('state', { state: 'compile-start' });
 
@@ -168,38 +156,40 @@ export class Compiler {
     const isCompilerChanged = this.#deltaEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
     const changedFiles = (isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile));
 
-    if (this.#watch || changedFiles.length) {
-      await ManifestUtil.writeManifest(this.#state.manifestIndex.manifest);
-      await this.#state.initializeTypescript();
-    }
-
     if (changedFiles.length) {
-      for await (const event of this.emit(changedFiles, emitter)) {
-        if (event.error) {
-          const compileError = CompilerUtil.buildTranspileError(event.file, event.error);
-          failure ??= compileError;
-          EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
+      for await (const event of this.emit(changedFiles)) {
+        if (event.errors?.length) {
+          failures.set(event.file, event.errors.length);
+          for (const error of event.errors) {
+            log.error(`ERROR ${event.file}:${error}`);
+          }
+          // Touch file to ensure recompilation later
+          await fs.utimes(event.file, new Date(), new Date());
         }
         metrics.push(event);
       }
       if (this.#signal.aborted) {
         log.debug('Compilation aborted');
-      } else if (failure) {
-        log.debug('Compilation failed');
-        return this.#shutdown('error', failure);
+      } else if (failures.size) {
+        const sortedFailures = [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+        log.debug('Compilation failed',
+          ['', sortedFailures.flatMap(([file, count]) => `- ${file}: ${count} errors found`)]
+            .flat(3).join('\n')
+        );
       } else {
         log.debug('Compilation succeeded');
       }
 
-      // Rebuild manifests if dirty
+      // Rebuild manifests
       const manifest = await ManifestUtil.buildManifest(this.#state.manifestIndex.manifest);
       await ManifestUtil.writeManifest(manifest);
       await ManifestUtil.writeDependentManifests(manifest);
+
+      if (failures.size) {
+        return this.#shutdown('error');
+      }
+
       this.#state.manifestIndex.reinitForModule(this.#state.manifest.main.name); // Reload
-    } else if (this.#watch) {
-      // Prime compiler before complete
-      const resolved = this.#state.getArbitraryInputFile();
-      await emitter(resolved, true);
     }
 
     EventUtil.sendEvent('state', { state: 'compile-end' });
@@ -209,15 +199,18 @@ export class Compiler {
     }
 
     if (this.#watch && !this.#signal.aborted) {
+      const resolved = this.#state.getArbitraryInputFile();
+      await this.#state.compileSourceFile(resolved);
+
       log.info('Watch is ready');
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {
         for await (const event of new CompilerWatcher(this.#state, this.#signal)) {
           if (event.action !== 'delete') {
-            const error = await emitter(event.entry.sourceFile, true);
-            if (error) {
-              log.info('Compilation Error', CompilerUtil.buildTranspileError(event.entry.sourceFile, error));
+            const errors = await this.#state.compileSourceFile(event.entry.sourceFile, true);
+            if (errors?.length) {
+              log.error('Compilation failed', `${event.entry.sourceFile}: ${errors.length} errors found`);
             } else {
               log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
             }
@@ -242,7 +235,7 @@ export class Compiler {
         EventUtil.sendEvent('state', { state: 'watch-end' });
       } catch (error) {
         if (error instanceof Error) {
-          this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error);
+          this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error.message);
         }
       }
     }

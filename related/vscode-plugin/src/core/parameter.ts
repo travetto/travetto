@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { CliCommandInput } from '@travetto/cli';
-import { ExecUtil } from '@travetto/runtime';
+import { CodecUtil, ExecUtil } from '@travetto/runtime';
 
 import { Workspace } from './workspace.ts';
 
@@ -152,7 +152,7 @@ export class ParameterSelector {
             const subProcess = spawn(ripGrepPath.replaceAll(' ', '\\ '), args, { stdio: [0, 'pipe', 2], shell: true, cwd: workingDirectory, });
 
             if (subProcess.stdout) {
-              ExecUtil.readLines(subProcess.stdout,
+              CodecUtil.readLines(subProcess.stdout,
                 item => items.push({ label: item, description: item.trim().replace(/^[\\/]/, '') }));
             }
             await ExecUtil.getResult(subProcess, { catch: true });

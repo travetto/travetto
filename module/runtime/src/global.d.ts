@@ -65,3 +65,10 @@ declare module 'stream/web' {
    */
   interface ReadableStream { }
 }
+
+// Remove once node 26 types are released
+declare module 'node:fs' {
+  interface StatOptions {
+    throwIfNoEntry?: boolean;
+  }
+}

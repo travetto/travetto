@@ -101,7 +101,7 @@ ${context.cleanText(content.text)}
   },
 
   Image: async ({ props, context }) => {
-    if (!/^https?:/.test(props.href) && !(await fs.stat(props.href).catch(() => false))) {
+    if (!/^https?:/.test(props.href) && !(await fs.stat(props.href, { throwIfNoEntry: false }))) {
       throw new Error(`${props.href} is not a valid location`);
     }
     return `![${props.title}](${context.link(props.href)})`;

@@ -111,7 +111,7 @@ class $Runtime {
   /** Import from a given path */
   async importFrom<T = unknown>(location?: string): Promise<T> {
     const file = path.resolve(this.#idx.mainModule.sourcePath, location!);
-    if (await fs.stat(file).catch(() => false)) {
+    if (await fs.stat(file, { throwIfNoEntry: false })) {
       location = this.#idx.getFromSource(file)?.import;
     }
 
