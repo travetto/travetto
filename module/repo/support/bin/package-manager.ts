@@ -34,8 +34,12 @@ export class PackageManager {
       throw new Error(result.stderr);
     }
 
-    const parsed = JSONUtil.fromUTF8<{ data: { dist?: { integrity?: string } } }>(result.stdout || '{}');
-    return parsed.data?.dist?.integrity !== undefined;
+    type PackageInfo = { dist?: { integrity?: string } };
+    let parsed = JSONUtil.fromUTF8<PackageInfo | { data: PackageInfo }>(result.stdout || '{}');
+    if ('data' in parsed) { // Yarn support
+      parsed = parsed.data;
+    }
+    return parsed.dist?.integrity !== undefined;
   }
 
   /**

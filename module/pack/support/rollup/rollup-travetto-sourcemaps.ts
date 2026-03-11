@@ -18,7 +18,7 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
   return {
     name: 'travetto-source-maps',
     async load(this: PluginContext, id: string): Promise<LoadResult> {
-      if (!id.endsWith('.js')) {
+      if (!id.endsWith('.js') || id.endsWith('@travetto/runtime/support/polyfill.js')) {
         return null;
       }
       try {
@@ -31,7 +31,10 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
           }
           const loader = new FileLoader([path.dirname(id)]);
           const map = await loader.readText(mapPath)
-            .then(JSONUtil.fromBase64<SourceMapInput>);
+            .then(value => value.startsWith('{') ?
+              JSONUtil.fromUTF8<SourceMapInput>(value) :
+              JSONUtil.fromBase64<SourceMapInput>(value)
+            );
           return { code, map };
         }
         return { code, map: null };
