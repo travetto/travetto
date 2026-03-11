@@ -36,7 +36,7 @@
     "mysql2": "^3.19.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.5"
+    "@travetto/cli": "^8.0.0-alpha.6"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

@@ -38,7 +38,7 @@
     "@travetto/pack": "^8.0.0-alpha.5"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.5"
+    "@travetto/cli": "^8.0.0-alpha.6"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

@@ -30,7 +30,7 @@
     "@types/aws-lambda": "^8.10.161"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.5",
+    "@travetto/cli": "^8.0.0-alpha.6",
     "@travetto/pack": "^8.0.0-alpha.5",
     "@travetto/test": "^8.0.0-alpha.3"
   },

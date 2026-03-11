@@ -40,7 +40,7 @@
     "sass": "^1.98.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.5"
+    "@travetto/cli": "^8.0.0-alpha.6"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
