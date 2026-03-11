@@ -37,7 +37,7 @@
     "pg": "^8.20.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.4"
+    "@travetto/cli": "^8.0.0-alpha.5"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
