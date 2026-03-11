@@ -129,9 +129,7 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
     const cls = getClass(instance);
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config),
-      description: 'Should the invocation automatically restart on source changes',
-      default: Runtime.localDevelopment,
-      required: { active: false },
+      description: 'Should the invocation automatically restart on source changes'
     });
 
     runBeforeMain(cls, (cmd: typeof instance) => CliUtil.runWithRestartOnChange(cmd[property]), true);
@@ -148,9 +146,7 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
     const cls = getClass(instance);
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config, Env.TRV_DEBUG_IPC.key),
-      description: 'Should the invocation automatically restart on source changes',
-      default: Runtime.localDevelopment,
-      required: { active: false },
+      description: 'Should the invocation automatically restart on source changes'
     });
 
     runBeforeMain(cls,

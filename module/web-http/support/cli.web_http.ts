@@ -25,7 +25,7 @@ export class WebHttpCommand implements CliCommandShape {
   profile: string[];
 
   @CliRestartOnChangeFlag()
-  restartOnChange: boolean = true;
+  restartOnChange: boolean = Runtime.localDevelopment;
 
   @CliDebugIpcFlag()
   debugIpc?: boolean;
