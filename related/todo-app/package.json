@@ -29,7 +29,7 @@
     "@travetto/openapi": "^8.0.0-alpha.2",
     "@travetto/web-http": "^8.0.0-alpha.2",
     "@travetto/web-rpc": "^8.0.0-alpha.3",
-    "vue": "^3.5.13"
+    "vue": "^3.5.30"
   },
   "devDependencies": {
     "@travetto/compiler": "^8.0.0-alpha.2",
