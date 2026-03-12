@@ -24,3 +24,8 @@ if (majorVersion < 25 || (majorVersion === 25 && minorVersion < 7)) {
     }
   });
 }
+
+const isError = Error.isError.bind(Error);
+Object.defineProperty(Error, 'isError', {
+  value: (input) => isError(input) || (input instanceof Error)
+});

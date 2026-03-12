@@ -98,7 +98,7 @@ export class SqliteConnection extends Connection<DatabaseSync> {
         }
       } catch (error) {
         const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
-        const message = (error && error instanceof Error) ? error.message : undefined;
+        const message = Error.isError(error) ? error.message : undefined;
         switch (code) {
           case 'ERR_SQLITE_ERROR': {
             if (message?.startsWith('UNIQUE')) {
