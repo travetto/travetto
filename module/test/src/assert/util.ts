@@ -54,7 +54,7 @@ export class AssertUtil {
    */
   static generateSuiteTestFailure(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): TestResult {
     const { suite, test, error: errorValue, importLocation } = config;
-    const error = Error.isError(errorValue.cause) ? errorValue.cause : errorValue;
+    const error = (errorValue.cause && errorValue.cause instanceof Error) ? errorValue.cause : errorValue;
     const testImport = importLocation ?? test.import;
     const position = this.getPositionOfError(error);
     const line = position?.line ?? (testImport === suite.import ? suite.lineStart : 1);
@@ -84,8 +84,7 @@ export class AssertUtil {
   /**
    * Generate suite failure
    */
-  static generateSuiteTestFailures(suite: SuiteConfig, errorValue: Error): TestResult[] {
-    const error = errorValue.cause instanceof Error ? errorValue.cause : errorValue;
+  static generateSuiteTestFailures(suite: SuiteConfig, error: Error): TestResult[] {
     return Object.values(suite.tests).map(test => this.generateSuiteTestFailure({ suite, test, error }));
   }
 

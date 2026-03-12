@@ -175,7 +175,7 @@ ${{ identifier: install }}
     process.exitCode ??= 1;
     if (error instanceof ValidationResultError) {
       console.error!(this.renderValidationError(error));
-    } else if (Error.isError(error)) {
+    } else if (error instanceof Error) {
       console.error!(cliTpl`${{ failure: error.stack }}\n`);
     }
     if (command) {
