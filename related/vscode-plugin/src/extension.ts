@@ -17,6 +17,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   await Workspace.init(context, ctx, folder);
 
   for (const ext of RuntimeIndex.find({ file: file => /.*\/feature.*?\/main[.]/.test(file.sourceFile) })) {
+    console.log('Initializing travetto plugin', 'importing', ext.import);
     await Runtime.importFrom(ext.import);
   }
 

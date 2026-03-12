@@ -64,7 +64,7 @@ export class DocumentResultsManager {
       this.#setStyle(test.styles[test.status], [test.decoration]);
       this.#setStyle(test.logStyle, test.logDecorations);
 
-      const out: Record<TestStatus, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
+      const out: Record<TestStatus, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [], errored: [] };
       for (const assertion of test.assertions) {
         out[assertion.status].push(assertion.decoration);
       }
@@ -86,7 +86,7 @@ export class DocumentResultsManager {
     }
     if (isAssertion(level, result)) {
       const state = this.#results.test[key];
-      const groups: Record<TestStatus, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
+      const groups: Record<TestStatus, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [], errored: [] };
       state.assertions.push(result);
 
       for (const a of state.assertions) {
@@ -136,6 +136,7 @@ export class DocumentResultsManager {
   #genStyles(level: TestLevel): Record<TestStatus, vscode.TextEditorDecorationType> {
     return {
       failed: Decorations.buildStyle(level, 'failed'),
+      errored: Decorations.buildStyle(level, 'errored'),
       passed: Decorations.buildStyle(level, 'passed'),
       unknown: Decorations.buildStyle(level, 'unknown'),
       skipped: Decorations.buildStyle(level, 'skipped'),
