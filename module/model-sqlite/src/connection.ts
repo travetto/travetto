@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { DatabaseSync, type DatabaseSyncOptions, type SQLInputValue, } from 'node:sqlite';
 
-import sqlDb, { type Database, type Options } from 'better-sqlite3';
 import { type Pool, createPool } from 'generic-pool';
 
 import { ShutdownManager, Util, Runtime, RuntimeError, castTo } from '@travetto/runtime';
@@ -17,16 +17,16 @@ const isRecoverableError = (error: unknown): error is Error =>
 /**
  * Connection support for Sqlite
  */
-export class SqliteConnection extends Connection<Database> {
+export class SqliteConnection extends Connection<DatabaseSync> {
 
   isolatedTransactions = false;
 
-  #config: SQLModelConfig<Options & { file?: string }>;
-  #pool: Pool<Database>;
+  #config: SQLModelConfig<DatabaseSyncOptions & { file?: string }>;
+  #pool: Pool<DatabaseSync>;
 
   constructor(
     context: AsyncContext,
-    config: SQLModelConfig<Options & { file?: string }>
+    config: SQLModelConfig<DatabaseSyncOptions & { file?: string }>
   ) {
     super(context);
     this.#config = config;
@@ -38,7 +38,6 @@ export class SqliteConnection extends Connection<Database> {
         return await operation();
       } catch (error) {
         if (isRecoverableError(error)) {
-          console.error('Failed, and waiting', retries);
           await Util.blockingTimeout(delay);
         } else {
           throw error;
@@ -48,13 +47,17 @@ export class SqliteConnection extends Connection<Database> {
     throw new RuntimeError('Max retries exceeded');
   }
 
-  async #create(): Promise<Database> {
+  async #create(): Promise<DatabaseSync> {
     const file = path.resolve(this.#config.options.file ?? Runtime.toolPath('@', 'sqlite_db'));
     await fs.mkdir(path.dirname(file), { recursive: true });
-    const db = new sqlDb(file, this.#config.options);
-    await db.pragma('foreign_keys = ON');
-    await db.pragma('journal_mode = WAL');
-    await db.pragma('synchronous = NORMAL');
+    const db = new DatabaseSync(file, this.#config.options);
+    for (const q of [
+      'PRAGMA foreign_keys = ON',
+      'PRAGMA journal_mode = WAL',
+      'PRAGMA synchronous = NORMAL',
+    ]) {
+      await this.#withRetries(async () => db.exec(q));
+    }
     db.function('regexp', (a, b) => new RegExp(`${a}`).test(`${b}`) ? 1 : 0);
     return db;
   }
@@ -68,7 +71,7 @@ export class SqliteConnection extends Connection<Database> {
 
     await this.#create();
 
-    this.#pool = createPool<Database>({
+    this.#pool = createPool<DatabaseSync>({
       create: () => this.#withRetries(() => this.#create()),
       destroy: async db => { db.close(); }
     }, { max: 1 });
@@ -77,29 +80,37 @@ export class SqliteConnection extends Connection<Database> {
     ShutdownManager.signal.addEventListener('abort', () => this.#pool.clear());
   }
 
-  async execute<T = unknown>(connection: Database, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(connection: DatabaseSync, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+    const isSelect = query.trim().startsWith('SELECT');
     return this.#withRetries(async () => {
       console.debug('Executing query', { query });
 
       try {
-        const prepared = connection.prepare<unknown[], T>(query).safeIntegers(true);
-        if (query.trim().startsWith('SELECT')) {
-          const out = prepared.all(...values ?? []);
-          const records: T[] = out.map(item => ({ ...item }));
+        const prepared = connection.prepare(query);
+        prepared.setReadBigInts(true);
+        if (isSelect) {
+          const out = prepared.all(...castTo<SQLInputValue[]>(values ?? []));
+          const records: T[] = out.map(item => ({ ...castTo<T>(item) }));
           return { count: out.length, records };
         } else {
-          const out = prepared.run(...values ?? []);
-          return { count: out.changes, records: [] };
+          const out = prepared.run(...castTo<SQLInputValue[]>(values ?? []));
+          return { count: typeof out.changes === 'number' ? out.changes : +out.changes.toString(), records: [] };
         }
       } catch (error) {
         const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+        const message = (error && error instanceof Error) ? error.message : undefined;
         switch (code) {
+          case 'ERR_SQLITE_ERROR': {
+            if (message?.startsWith('UNIQUE')) {
+              throw new ExistsError('query', query);
+            }
+            break;
+          }
           case 'SQLITE_CONSTRAINT_PRIMARYKEY':
           case 'SQLITE_CONSTRAINT_UNIQUE':
           case 'SQLITE_CONSTRAINT_INDEX': throw new ExistsError('query', query);
         };
-        const message = error instanceof Error ? error.message : '';
-        if (/index.*?already exists/.test(message)) {
+        if (/index.*?already exists/.test(message ?? '')) {
           throw new ExistsError('index', query);
         }
         throw error;
@@ -107,18 +118,18 @@ export class SqliteConnection extends Connection<Database> {
     });
   }
 
-  async acquire(): Promise<sqlDb.Database> {
+  async acquire(): Promise<DatabaseSync> {
     return await this.#pool.acquire();
   }
 
-  async release(db: Database): Promise<void> {
+  async release(db: DatabaseSync): Promise<void> {
     return this.#pool.release(db);
   }
 
   async pragma<T>(query: string): Promise<T> {
     const db = await this.acquire();
     try {
-      const result = db.pragma(query, { simple: false });
+      const result = this.#withRetries(async () => db.prepare(`PRAGMA ${query}`).get());
       return castTo<T>(result);
     } finally {
       await this.release(db);
