@@ -129,7 +129,7 @@ export class SqliteConnection extends Connection<DatabaseSync> {
   async pragma<T>(query: string): Promise<T> {
     const db = await this.acquire();
     try {
-      const result = this.#withRetries(async () => db.exec(`PRAGMA ${query}`));
+      const result = this.#withRetries(async () => db.prepare(`PRAGMA ${query}`).get());
       return castTo<T>(result);
     } finally {
       await this.release(db);
