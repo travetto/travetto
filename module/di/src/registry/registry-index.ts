@@ -8,6 +8,7 @@ import { InjectionError } from '../error.ts';
 import { DependencyRegistryResolver } from './registry-resolver.ts';
 
 const MetadataSymbol = Symbol();
+const PostConstructionRan = Symbol();
 
 function readMetadata(item: { metadata?: Record<symbol, unknown> }): Dependency | undefined {
   return castTo<Dependency | undefined>(item.metadata?.[MetadataSymbol]);
@@ -166,10 +167,11 @@ export class DependencyRegistryIndex implements RegistryIndex {
     // And auto-wire fields
     await this.injectFields(targetType, instance, candidate.class);
 
-    // Run post constructors if output is not already as a dependency
-    const isParameterTargetType = params.find(param => typeof param === 'object' && param !== null && param.constructor === targetType);
+    // Run post constructors if not run yet
+    const constructed: T & { [PostConstructionRan]?: boolean } = instance!;
+    if (!constructed[PostConstructionRan]) {
+      constructed[PostConstructionRan] = true;
 
-    if (!isParameterTargetType) {
       // Run post constructors
       const postConstruct = this.store.has(targetType) ? this.getConfig(targetType).postConstruct : [];
       for (const { operation } of postConstruct) {
