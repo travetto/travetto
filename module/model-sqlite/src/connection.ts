@@ -51,9 +51,13 @@ export class SqliteConnection extends Connection<DatabaseSync> {
     const file = path.resolve(this.#config.options.file ?? Runtime.toolPath('@', 'sqlite_db'));
     await fs.mkdir(path.dirname(file), { recursive: true });
     const db = new DatabaseSync(file, this.#config.options);
-    db.exec('PRAGMA foreign_keys = ON');
-    db.exec('PRAGMA journal_mode = WAL');
-    db.exec('PRAGMA synchronous = NORMAL');
+    for (const q of [
+      'PRAGMA foreign_keys = ON',
+      'PRAGMA journal_mode = WAL',
+      'PRAGMA synchronous = NORMAL',
+    ]) {
+      await this.#withRetries(async () => db.exec(q));
+    }
     db.function('regexp', (a, b) => new RegExp(`${a}`).test(`${b}`) ? 1 : 0);
     return db;
   }
@@ -125,7 +129,7 @@ export class SqliteConnection extends Connection<DatabaseSync> {
   async pragma<T>(query: string): Promise<T> {
     const db = await this.acquire();
     try {
-      const result = db.exec(`PRAGMA ${query}`);
+      const result = this.#withRetries(async () => db.exec(`PRAGMA ${query}`));
       return castTo<T>(result);
     } finally {
       await this.release(db);
