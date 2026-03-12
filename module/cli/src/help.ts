@@ -175,13 +175,13 @@ ${{ identifier: install }}
     process.exitCode ??= 1;
     if (error instanceof ValidationResultError) {
       console.error!(this.renderValidationError(error));
+    } else if (Error.isError(error)) {
+      console.error!(cliTpl`${{ failure: error.stack }}\n`);
     }
     if (command) {
       console.error!(await this.renderCommandHelp(command));
     } else if (error === UNKNOWN_COMMAND) {
       console.error!(this.renderUnknownCommandMessage(cmd));
-    } else {
-      console.error!(error);
     }
     console.error!();
   }

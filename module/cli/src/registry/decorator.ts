@@ -132,7 +132,12 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
       description: 'Should the invocation automatically restart on source changes'
     });
 
-    runBeforeMain(cls, (cmd: typeof instance) => CliUtil.runWithRestartOnChange(cmd[property]), true);
+    runBeforeMain(cls,
+      (cmd: typeof instance) => {
+        if (Runtime.production) { return; }
+        return CliUtil.runWithRestartOnChange(cmd[property]);
+      }, true
+    );
   };
 }
 
@@ -151,6 +156,7 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
 
     runBeforeMain(cls,
       (cmd: typeof instance & CliCommandShape) => {
+        if (Runtime.production) { return; }
         const cliConfig = CliCommandRegistryIndex.get(cls);
         return cmd[property] && CliUtil.runWithDebugIpc(cliConfig.name);
       },
