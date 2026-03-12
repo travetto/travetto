@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import util from 'node:util';
 
 import type { TestResult, Assertion, TestConfig, TestLog, TestStatus } from '@travetto/test';
-import { BinaryUtil, JSONUtil } from '@travetto/runtime';
+import { CodecUtil, JSONUtil } from '@travetto/runtime';
 
 import type { ErrorHoverAssertion, TestLevel } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
@@ -37,6 +37,7 @@ export const Style: {
   COLORS: {
     skipped: new vscode.ThemeColor('editorGutter.modifiedBackground'),
     failed: new vscode.ThemeColor('editorGutter.deletedBackground'),
+    errored: new vscode.ThemeColor('editorGutter.deletedBackground'),
     passed: new vscode.ThemeColor('editorGutter.addedBackground'),
     unknown: new vscode.ThemeColor('editor.inactiveSelectionBackground'),
   },
@@ -103,7 +104,7 @@ export class Decorations {
 
       const getValue = (value: unknown): string => {
         try {
-          return util.inspect(JSONUtil.parseSafe(`${value}`), false, 10).replace(/\n/g, '  \n\t');
+          return util.inspect(JSONUtil.fromUTF8(`${value}`), false, 10).replace(/\n/g, '  \n\t');
         } catch {
           return `${value}`;
         }
@@ -173,7 +174,7 @@ export class Decorations {
 
       new Log('test:decoration').debug(`Generated SVG for state ${state}: ${svg}`);
 
-      this.#imageUris[key] = vscode.Uri.parse(`data:image/svg+xml;base64,${BinaryUtil.utf8ToBase64(svg)}`);
+      this.#imageUris[key] = vscode.Uri.parse(`data:image/svg+xml;base64,${CodecUtil.utf8ToBase64(svg)}`);
     }
     return this.#imageUris[key];
   }

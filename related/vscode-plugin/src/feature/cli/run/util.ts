@@ -115,7 +115,7 @@ export class CliRunUtil {
   static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
     const data = await this.#startCli('repo:list', ['-f', 'json'], 'collect module list');
     try {
-      const result: ModuleGraphItem<string[]>[] = JSONUtil.parseSafe(data.stdout);
+      const result: ModuleGraphItem<string[]>[] = JSONUtil.fromUTF8(data.stdout);
       return result.map(item => ({ name: item.name, children: new Set(item.children), workspace: !!item.workspace }));
     } catch {
       throw new Error(`Unable to collect module list: ${data.stderr || data.stdout}`);
@@ -127,7 +127,7 @@ export class CliRunUtil {
    */
   static async getChoices(): Promise<RunChoice[]> {
     const data = await this.#startCli('cli:schema', [], 'get cli command list');
-    let choices: RunChoice[] = JSONUtil.parseSafe(data.stdout);
+    let choices: RunChoice[] = JSONUtil.fromUTF8(data.stdout);
     let modules: ModuleGraphItem<Set<string>>[];
 
     // Only return `run:* targets
