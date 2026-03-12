@@ -112,7 +112,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
     if (event.type === 'test' && event.phase === 'after') {
       const { test } = event;
       this.#results.add(test);
-      if (test.status === 'failed') {
+      if (test.status !== 'passed' && test.status !== 'skipped') {
         this.#consumer.onEvent(event);
       }
       const tests = this.#timings.getOrInsert('test', new Map<string, Result>());

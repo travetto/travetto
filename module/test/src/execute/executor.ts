@@ -256,7 +256,7 @@ export class TestExecutor {
     process.env = { ...originalEnv };
 
     result.duration = Date.now() - startTime;
-    result.status = TestModelUtil.countsToTestStatus(result);
+    result.status = TestModelUtil.computeTestStatus(result);
 
     // Mark suite complete
     this.#consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
