@@ -1,24 +1,16 @@
 import type { Class } from '@travetto/runtime';
 
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
-import type { Counts, SuiteResult } from '../model/suite.ts';
+import type { ResultsSummary, SuiteResult } from '../model/suite.ts';
 
 /**
  * All suite results
  */
-export interface SuitesSummary extends Counts {
+export interface SuitesSummary extends ResultsSummary {
   /**
    * List of all suites
    */
   suites: SuiteResult[];
-  /**
-   * List of all errors
-   */
-  errors: Error[];
-  /**
-   * Total duration
-   */
-  duration: number;
 }
 
 export type TestRunState = {

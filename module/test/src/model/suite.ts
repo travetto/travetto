@@ -34,29 +34,33 @@ export interface SuiteConfig extends SuiteCore {
 }
 
 /**
- * All counts for the suite summary
+ * Test Counts
  */
-export interface Counts {
+export interface ResultsSummary {
+  /** Passing Test Count  */
   passed: number;
+  /** Skipped Test Count  */
   skipped: number;
+  /** Failed Test Count  */
   failed: number;
+  /** Errored Test Count  */
   errored: number;
+  /** Unknown Test Count  */
   unknown: number;
+  /** Total Test Count  */
   total: number;
+  /** Test Execution Duration  */
+  duration: number;
 }
 
 /**
  * Results of a suite run
  */
-export interface SuiteResult extends Counts, SuiteCore {
+export interface SuiteResult extends ResultsSummary, SuiteCore {
   /**
    * All test results
    */
   tests: Record<string, TestResult>;
-  /**
-   * Suite duration
-   */
-  duration: number;
   /**
    * Overall status
    */

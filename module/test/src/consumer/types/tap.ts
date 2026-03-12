@@ -125,9 +125,10 @@ export class TapEmitter implements TestConsumerShape {
       // Track test result
       let status = `${this.#enhancer.testNumber(++this.#count)} `;
       switch (test.status) {
+        case 'passed': `${this.#enhancer.success('ok')} ${status}`; break;
         case 'skipped': status += ' # SKIP'; break;
-        case 'failed': status = `${this.#enhancer.failure('not ok')} ${status}`; break;
-        default: status = `${this.#enhancer.success('ok')} ${status}`;
+        case 'unknown': break;
+        default: status = `${this.#enhancer.failure('not ok')} ${status}`; break;
       }
       status += header;
 
@@ -167,16 +168,6 @@ export class TapEmitter implements TestConsumerShape {
    */
   onSummary(summary: SuitesSummary): void {
     this.log(`${this.#enhancer.testNumber(1)}..${this.#enhancer.testNumber(summary.total)}`);
-
-    if (summary.errors.length) {
-      this.log('---\n');
-      for (const error of summary.errors) {
-        const msg = this.errorToString(error);
-        if (msg) {
-          this.log(this.#enhancer.failure(msg));
-        }
-      }
-    }
 
     const allPassed = !summary.failed && !summary.errored;
 

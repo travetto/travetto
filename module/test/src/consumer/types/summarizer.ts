@@ -8,26 +8,17 @@ import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 export class TestResultsSummarizer implements TestConsumerShape {
 
   summary: SuitesSummary = {
-    passed: 0,
-    failed: 0,
-    errored: 0,
-    skipped: 0,
-    unknown: 0,
-    total: 0,
-    duration: 0,
-    suites: [],
-    errors: []
+    passed: 0, failed: 0, errored: 0, skipped: 0, unknown: 0,
+    total: 0, duration: 0, suites: []
   };
 
   #merge(result: SuiteResult): void {
-    this.summary.suites.push(result);
-    this.summary.failed += result.failed;
-    this.summary.errored += result.errored;
-    this.summary.passed += result.passed;
-    this.summary.unknown += result.unknown;
-    this.summary.skipped += result.skipped;
-    this.summary.duration += result.duration;
+    for (const test of Object.values(result.tests)) {
+      this.summary[test.status] += 1;
+    }
     this.summary.total += result.total;
+    this.summary.duration += result.duration;
+    this.summary.suites.push(result);
   }
 
   /**
