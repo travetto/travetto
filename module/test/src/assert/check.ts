@@ -178,17 +178,13 @@ export class AssertCheck {
   static #onError(
     positive: boolean,
     message: string | undefined,
-    error: unknown,
+    errorValue: unknown,
     missed: Error | undefined,
     shouldThrow: ThrowableError | undefined,
     assertion: CapturedAssertion
   ): void {
-    if (!(error instanceof Error)) {
-      error = new Error(`${error}`);
-    }
-    if (!(error instanceof Error)) {
-      throw error;
-    }
+    const error = errorValue instanceof Error ? errorValue : new Error(`${errorValue}`);
+
     if (positive) {
       missed = new assert.AssertionError({ message: 'Error thrown, but expected no errors' });
       missed.stack = error.stack;
