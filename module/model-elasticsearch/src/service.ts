@@ -237,7 +237,7 @@ export class ElasticsearchModelService implements
         script,
       });
     } catch (error) {
-      if (error instanceof Error && /document_missing_exception/.test(error.message)) {
+      if (Error.isError(error) && /document_missing_exception/.test(error.message)) {
         throw new NotFoundError(cls, id);
       }
       throw error;

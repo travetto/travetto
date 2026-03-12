@@ -5,7 +5,7 @@ import { AcceptConfig, AcceptInterceptor, WebRequest, WebResponse } from '@trave
 import { Registry } from '@travetto/registry';
 
 function unwrapError(err: unknown): unknown {
-  if (err instanceof WebResponse && err.body instanceof Error) {
+  if (err instanceof WebResponse && Error.isError(err.body)) {
     throw err.body;
   }
   throw err;

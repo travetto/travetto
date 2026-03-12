@@ -69,7 +69,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
       if (input.required?.active === false && error instanceof InjectionError && error.category === 'notfound') {
         return undefined;
       } else {
-        if (error && error instanceof Error) {
+        if (Error.isError(error)) {
           error.message = `${error.message} via=${cls.Ⲑid}[${input.name?.toString() ?? 'constructor'}]`;
         }
         throw error;

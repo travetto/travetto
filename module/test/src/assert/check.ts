@@ -131,8 +131,8 @@ export class AssertCheck {
     } else if (!error) {
       return new assert.AssertionError({ message: 'Expected to throw an error, but got nothing' });
     } else if (typeof shouldThrow === 'string') {
-      if (!(error instanceof Error ? error.message : error).includes(shouldThrow)) {
-        const actual = error instanceof Error ? `'${error.message}'` : `'${error}'`;
+      if (!(Error.isError(error) ? error.message : error).includes(shouldThrow)) {
+        const actual = Error.isError(error) ? `'${error.message}'` : `'${error}'`;
         return new assert.AssertionError({
           message: `Expected error containing text '${shouldThrow}', but got ${actual}`,
           actual,
@@ -141,7 +141,7 @@ export class AssertCheck {
       }
     } else if (shouldThrow instanceof RegExp) {
       if (!shouldThrow.test(typeof error === 'string' ? error : error.message)) {
-        const actual = error instanceof Error ? `'${error.message}'` : `'${error}'`;
+        const actual = Error.isError(error) ? `'${error.message}'` : `'${error}'`;
         return new assert.AssertionError({
           message: `Expected error with message matching '${shouldThrow.source}', but got ${actual}`,
           actual,
@@ -178,17 +178,14 @@ export class AssertCheck {
   static #onError(
     positive: boolean,
     message: string | undefined,
-    error: unknown,
+    errorValue: unknown,
     missed: Error | undefined,
     shouldThrow: ThrowableError | undefined,
     assertion: CapturedAssertion
   ): void {
-    if (!(error instanceof Error)) {
-      error = new Error(`${error}`);
-    }
-    if (!(error instanceof Error)) {
-      throw error;
-    }
+    const error = !Error.isError(errorValue) ?
+      new Error(`${errorValue}`) :
+      errorValue;
     if (positive) {
       missed = new assert.AssertionError({ message: 'Error thrown, but expected no errors' });
       missed.stack = error.stack;

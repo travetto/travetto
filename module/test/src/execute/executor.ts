@@ -269,7 +269,7 @@ export class TestExecutor {
     try {
       await Runtime.importFrom(run.import);
     } catch (error) {
-      if (!(error instanceof Error)) {
+      if (!Error.isError(error)) {
         throw error;
       }
       console.error(error);

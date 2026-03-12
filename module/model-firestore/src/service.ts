@@ -98,7 +98,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     try {
       await this.#getCollection(cls).doc(id).delete({ exists: true });
     } catch (error) {
-      if (error && error instanceof Error && error.message.includes('NOT_FOUND')) {
+      if (error && Error.isError(error) && error.message.includes('NOT_FOUND')) {
         throw new NotFoundError(cls, id);
       }
       throw error;

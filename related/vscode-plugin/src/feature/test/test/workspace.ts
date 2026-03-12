@@ -123,7 +123,7 @@ export class WorkspaceResultsManager {
           return results.getListOfTests().length > 0;
         }
       } catch (error) {
-        if (error instanceof Error) {
+        if (Error.isError(error)) {
           this.#log.error(error.message, error);
         } else {
           throw error;

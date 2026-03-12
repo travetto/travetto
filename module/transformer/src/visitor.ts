@@ -115,7 +115,7 @@ export class VisitorFactory<S extends State = State> {
         }
         return state.finalize(node);
       } catch (error) {
-        if (!(error instanceof Error)) {
+        if (!Error.isError(error)) {
           throw error;
         }
         console!.error('Failed transforming', { error: `${error.message}\n${error.stack}`, file: file.fileName });

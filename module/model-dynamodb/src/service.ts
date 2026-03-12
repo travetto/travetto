@@ -100,7 +100,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         });
       }
     } catch (error) {
-      if (error instanceof Error && error.name === 'ConditionalCheckFailedException') {
+      if (Error.isError(error) && error.name === 'ConditionalCheckFailedException') {
         if (mode === 'create') {
           throw new ExistsError(cls, id);
         } else if (mode === 'update') {

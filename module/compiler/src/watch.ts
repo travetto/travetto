@@ -131,7 +131,7 @@ export class CompilerWatcher {
 
       try {
         if (error) {
-          throw error instanceof Error ? error : new Error(`${error}`);
+          throw Error.isError(error) ? error : new Error(`${error}`);
         } else if (events.length > 25) {
           throw new CompilerReset(`Large influx of file changes: ${events.length}`);
         } else if (events.some(event => packageFiles.has(path.toPosix(event.path)))) {
@@ -170,10 +170,10 @@ export class CompilerWatcher {
           this.#queue.add(item);
         }
       } catch (out) {
-        if (out instanceof Error && out.message.includes('Events were dropped by the FSEvents client.')) {
+        if (Error.isError(out) && out.message.includes('Events were dropped by the FSEvents client.')) {
           out = new CompilerReset('FSEvents failure, requires restart');
         }
-        return this.#queue.throw(out instanceof Error ? out : new Error(`${out} `));
+        return this.#queue.throw(Error.isError(out) ? out : new Error(`${out} `));
       }
     }, { ignore });
 

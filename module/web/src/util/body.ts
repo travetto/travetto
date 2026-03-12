@@ -110,7 +110,7 @@ export class WebBodyUtil {
         text = CodecUtil.fromUTF8String(body);
       } else if (hasToJSON(body)) {
         text = JSONUtil.toBinaryArray(body.toJSON());
-      } else if (body instanceof Error) {
+      } else if (Error.isError(body)) {
         text = JSONUtil.toBinaryArray({ message: body.message });
       } else {
         text = JSONUtil.toBinaryArray(body);
@@ -187,7 +187,7 @@ export class WebBodyUtil {
       all.push(decoder.decode(NULL_TERMINATOR, { stream: false }));
       return { text: all.join(''), read: received };
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
+      if (Error.isError(error) && error.name === 'AbortError') {
         throw WebError.for('Request Aborted', 400, { received });
       } else {
         throw error;

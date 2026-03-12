@@ -77,7 +77,7 @@ export class WebUploadUtil {
         .on('file', (field, stream, filename, _encoding, mimetype) => queue.add({ stream, filename, field, contentType: mimetype }))
         .on('limit', field => queue.throw(new RuntimeError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => queue.close())
-        .on('error', (error) => queue.throw(error instanceof Error ? error : new Error(`${error}`)));
+        .on('error', (error) => queue.throw(Error.isError(error) ? error : new Error(`${error}`)));
 
       // Upload
       void BinaryUtil.pipeline(requestBody, uploadHandler).catch(err => queue.throw(err));

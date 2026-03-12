@@ -99,7 +99,7 @@ export class DocRunUtil {
       }
       final = util.stripVTControlCharacters(result.stdout).trim() || util.stripVTControlCharacters(result.stderr).trim();
     } catch (error) {
-      if (error instanceof Error) {
+      if (Error.isError(error)) {
         final = error.message;
       } else {
         throw error;

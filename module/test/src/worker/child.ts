@@ -20,7 +20,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
       await operation();
       this.send(type); // Respond
     } catch (error) {
-      if (!(error instanceof Error)) {
+      if (!Error.isError(error)) {
         throw error;
       }
       // Mark as errored out

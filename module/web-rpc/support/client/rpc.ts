@@ -153,7 +153,7 @@ export function consumeJSON<T>(input: string | unknown): T {
 }
 
 export async function consumeError(error: unknown): Promise<Error> {
-  if (error instanceof Error) {
+  if (Error.isError(error)) {
     return error;
   } else if (isResponse(error)) {
     const out = new Error(error.statusText);

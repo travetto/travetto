@@ -12,7 +12,7 @@ import { type SQLModelConfig, Connection } from '@travetto/model-sql';
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
 
 const isRecoverableError = (error: unknown): error is Error =>
-  error instanceof Error && RECOVERABLE_MESSAGE.test(error.message);
+  Error.isError(error) && RECOVERABLE_MESSAGE.test(error.message);
 
 /**
  * Connection support for Sqlite
@@ -98,7 +98,7 @@ export class SqliteConnection extends Connection<Database> {
           case 'SQLITE_CONSTRAINT_UNIQUE':
           case 'SQLITE_CONSTRAINT_INDEX': throw new ExistsError('query', query);
         };
-        const message = error instanceof Error ? error.message : '';
+        const message = Error.isError(error) ? error.message : '';
         if (/index.*?already exists/.test(message)) {
           throw new ExistsError('index', query);
         }

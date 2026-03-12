@@ -62,7 +62,7 @@ export class TestPhaseManager {
    */
   async errorPhase(phase: 'all' | 'each', error: unknown, suite: SuiteConfig, test?: TestConfig): Promise<TestResult[]> {
     try { await this.endPhase(phase); } catch { }
-    if (!(error instanceof Error)) { throw error; }
+    if (!Error.isError(error)) { throw error; }
 
     // Don't propagate our own errors
     if (error.message === 'afterAll' || error.message === 'afterEach') {

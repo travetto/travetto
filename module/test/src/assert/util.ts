@@ -84,7 +84,7 @@ export class AssertUtil {
    * Generate suite failure
    */
   static generateSuiteTestFailures(suite: SuiteConfig, error: Error): TestResult[] {
-    const finalError = error.cause instanceof Error ? error.cause : error;
+    const finalError = Error.isError(error.cause) ? error.cause : error;
     return Object.values(suite.tests).map(test => this.generateSuiteTestFailure({ suite, test, error: finalError }));
   }
 

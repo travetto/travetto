@@ -58,7 +58,7 @@ export const Style: {
 };
 
 function isBatchError(value?: Error): value is Error & { details: { errors: (Error | string)[] } } {
-  return !!value && value instanceof Error && 'errors' in value;
+  return !!value && Error.isError(value) && 'errors' in value;
 }
 
 /**

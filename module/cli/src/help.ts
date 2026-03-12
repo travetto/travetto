@@ -139,7 +139,7 @@ ${{ identifier: install }}
           rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.description || '' }}`);
         }
       } catch (error) {
-        if (error instanceof Error) {
+        if (Error.isError(error)) {
           rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure: error.message.split(/\n/)[0] }}`);
         } else {
           throw error;

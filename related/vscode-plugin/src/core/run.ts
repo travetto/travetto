@@ -80,7 +80,7 @@ export class RunUtil {
     try {
       await vscode.debug.startDebugging(Workspace.folder, this.buildDebugConfig(config));
     } catch (error) {
-      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSONUtil.toUTF8(error));
+      vscode.window.showErrorMessage(Error.isError(error) ? error.message : JSONUtil.toUTF8(error));
     }
   }
 }

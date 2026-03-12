@@ -9,7 +9,7 @@ export class NetUtil {
 
   /** Is an error an address in use error */
   static isPortUsedError(error: unknown): error is Error & { port: number } {
-    return !!error && error instanceof Error && error.message.includes('EADDRINUSE') && 'port' in error && typeof error.port === 'number';
+    return Error.isError(error) && error.message.includes('EADDRINUSE') && 'port' in error && typeof error.port === 'number';
   }
 
   /** Get the port process id */

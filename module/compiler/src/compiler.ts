@@ -236,7 +236,7 @@ export class Compiler {
         }
         EventUtil.sendEvent('state', { state: 'watch-end' });
       } catch (error) {
-        if (error instanceof Error) {
+        if (Error.isError(error)) {
           this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error.message);
         }
       }

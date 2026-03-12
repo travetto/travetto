@@ -192,7 +192,7 @@ export class ImportManager {
         ...file.statements.filter((node: ts.Statement & { remove?: boolean }) => !node.remove) // Exclude culled imports
       ]);
     } catch (error) { // Missing import
-      if (!(error instanceof Error)) {
+      if (!Error.isError(error)) {
         throw error;
       }
       const out = new Error(`${error.message} in ${file.fileName.replace(process.cwd(), '.')}`);

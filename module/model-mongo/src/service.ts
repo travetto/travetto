@@ -223,7 +223,7 @@ export class MongoModelService implements
         { upsert: true }
       );
     } catch (error) {
-      if (error instanceof Error && error.message.includes('duplicate key error')) {
+      if (Error.isError(error) && error.message.includes('duplicate key error')) {
         throw new ExistsError(cls, id);
       } else {
         throw error;

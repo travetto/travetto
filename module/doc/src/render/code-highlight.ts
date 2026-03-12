@@ -42,7 +42,7 @@ export function highlight(text: string, lang: string): string | undefined {
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
   } catch (error) {
-    if (error instanceof Error) {
+    if (Error.isError(error)) {
       console.error(error.message, { error });
     } else {
       throw error;

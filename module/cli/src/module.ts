@@ -109,7 +109,7 @@ export class CliModuleUtil {
         const files = await CliScmUtil.findChangedFiles(config.since, 'HEAD');
         return files.filter(file => !file.endsWith('package.json') && !file.endsWith('package-lock.json'));
       } catch (error) {
-        if (config.logError && error instanceof Error) {
+        if (config.logError && Error.isError(error)) {
           console.error(error.message);
         }
         return [];

@@ -43,7 +43,7 @@ export class EditorService {
       const response = await operation;
       if (process.connected) { process.send?.(success(response)); }
     } catch (error) {
-      if (fail && process.connected && error && error instanceof Error) {
+      if (fail && process.connected && Error.isError(error)) {
         process.send?.(fail(error));
       } else {
         console.error(error);

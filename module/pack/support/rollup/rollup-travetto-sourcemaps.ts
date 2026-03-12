@@ -8,7 +8,7 @@ import { JSONUtil, FileLoader } from '@travetto/runtime';
 import type { CoreRollupConfig } from '../../src/types.ts';
 
 function toString(error: unknown): string {
-  return error instanceof Error ? error.stack ?? error.toString() : JSONUtil.toUTF8(error);
+  return Error.isError(error) ? error.stack ?? error.toString() : JSONUtil.toUTF8(error);
 }
 // Pulled from https://github.com/Azure/azure-sdk-for-js/blob/main/common/tools/dev-tool/src/config/rollup.base.config.ts#L128
 export function travettoSourcemaps(config: CoreRollupConfig): Plugin {

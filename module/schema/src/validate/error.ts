@@ -23,5 +23,5 @@ export class TypeMismatchError extends RuntimeError {
 }
 
 export function isValidationError(error: unknown): error is ValidationError {
-  return !!error && error instanceof Error && 'path' in error;
+  return Error.isError(error) && 'path' in error;
 }

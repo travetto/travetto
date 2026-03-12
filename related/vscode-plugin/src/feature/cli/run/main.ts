@@ -52,7 +52,7 @@ export class CliRunFeature extends BaseFeature {
 
       vscode.window.showInformationMessage('Added new configuration to launch.json!');
     } catch (error) {
-      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSONUtil.toUTF8(error));
+      vscode.window.showErrorMessage(Error.isError(error) ? error.message : JSONUtil.toUTF8(error));
     }
   }
 
@@ -72,7 +72,7 @@ export class CliRunFeature extends BaseFeature {
         return this.debugTarget(choice, choice.inputs);
       }
     } catch (error) {
-      vscode.window.showErrorMessage(error instanceof Error ? error.message : JSONUtil.toUTF8(error));
+      vscode.window.showErrorMessage(Error.isError(error) ? error.message : JSONUtil.toUTF8(error));
     }
   }
 

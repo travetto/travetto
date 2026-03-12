@@ -114,7 +114,7 @@ export class WebCommonUtil {
       return error;
     }
 
-    const body = error instanceof Error ? error :
+    const body = Error.isError(error) ? error :
       (!!error && typeof error === 'object' && ('message' in error && typeof error.message === 'string')) ?
         new RuntimeError(error.message, { details: error }) :
         new RuntimeError(`${error}`);

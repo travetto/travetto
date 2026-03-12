@@ -65,7 +65,7 @@ export class AuthService {
         }
         return this.authContext.principal = (await this.authorizer?.authorize(principal)) ?? principal;
       } catch (error) {
-        if (!(error instanceof Error)) {
+        if (!Error.isError(error)) {
           throw error;
         }
         lastError = error;

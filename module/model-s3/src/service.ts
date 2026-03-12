@@ -165,7 +165,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       });
     } catch (error) {
       // Handle GCS
-      if (error instanceof Error && error.name === 'NotImplemented') {
+      if (Error.isError(error) && error.name === 'NotImplemented') {
         for (const item of items) {
           await this.client.deleteObject({
             Bucket: this.config.bucket,

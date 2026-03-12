@@ -45,7 +45,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
       );
       return jwt.body.core;
     } catch (error) {
-      if (error instanceof Error && error.name.startsWith('Jwt')) {
+      if (Error.isError(error) && error.name.startsWith('Jwt')) {
+        throw new AuthenticationError(error.message, { category: 'permissions' });
+      } else if (error instanceof Error && error.name.startsWith('Jwt')) {
         throw new AuthenticationError(error.message, { category: 'permissions' });
       }
       throw error;
