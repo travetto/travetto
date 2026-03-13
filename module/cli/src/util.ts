@@ -102,6 +102,8 @@ export class CliUtil {
     if (!sent.ok) {
       throw new RuntimeError(`IPC Request failed: ${sent.status} ${await sent.text()}`);
     }
+
+    await ShutdownManager.shutdown({ mode: 'exit' });
   }
 
   /**

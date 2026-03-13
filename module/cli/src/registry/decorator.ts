@@ -10,10 +10,14 @@ import { CliUtil } from '../util.ts';
 type CliCommandConfigOptions = { runTarget?: boolean };
 type CliFlagOptions = { full?: string, short?: string, envVars?: string[] };
 
-function runBeforeMain<T>(cls: Class, handler: (item: T) => (unknown | Promise<unknown>), runTarget?: boolean, priority: number = 100): void {
+function runBeforeMain<T>(
+  cls: Class,
+  handler: (item: T) => (unknown | Promise<unknown>),
+  opts?: { runTarget?: boolean, priority?: number }
+): void {
   CliCommandRegistryIndex.getForRegister(cls).register({
-    runTarget,
-    preMain: [{ handler: async (cmd): Promise<void> => { await handler(castTo(cmd)); }, priority }]
+    runTarget: opts?.runTarget ?? false,
+    preMain: [{ handler: castTo(handler), priority: opts?.priority ?? 100 }]
   });
 }
 
@@ -122,8 +126,7 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
           RuntimeIndex.reinitForModule(runModule);
         }
       },
-      false,
-      1
+      { priority: 1 }
     );
   };
 }
@@ -146,8 +149,7 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
         if (Runtime.production) { return; }
         return CliUtil.runWithRestartOnChange(cmd[property]);
       },
-      true,
-      10
+      { runTarget: true, priority: 10 }
     );
   };
 }
@@ -171,8 +173,7 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
         const cliConfig = CliCommandRegistryIndex.get(cls);
         return cmd[property] && CliUtil.runWithDebugIpc(cliConfig.name);
       },
-      true,
-      5
+      { runTarget: true, priority: 5 }
     );
   };
 }
