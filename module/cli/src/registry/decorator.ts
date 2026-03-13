@@ -10,17 +10,6 @@ import { CliUtil } from '../util.ts';
 type CliCommandConfigOptions = { runTarget?: boolean };
 type CliFlagOptions = { full?: string, short?: string, envVars?: string[] };
 
-function runBeforeMain<T>(
-  cls: Class,
-  handler: (item: T) => (unknown | Promise<unknown>),
-  opts?: { runTarget?: boolean, priority?: number }
-): void {
-  CliCommandRegistryIndex.getForRegister(cls).register({
-    runTarget: opts?.runTarget ?? false,
-    preMain: [{ handler: castTo(handler), priority: opts?.priority ?? 100 }]
-  });
-}
-
 /**
  * Decorator to register a CLI command
  *
@@ -76,9 +65,13 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
       description: 'Application profiles'
     });
 
-    runBeforeMain(cls, (cmd: typeof instance) =>
-      Env.TRV_PROFILES.set([...cmd[property] ?? [], ...(Env.TRV_PROFILES.list ?? [])])
-    );
+    CliCommandRegistryIndex.getForRegister(cls).register({
+      preMain: [{
+        handler: (cmd: typeof instance): void =>
+          Env.TRV_PROFILES.set([...cmd[property] ?? [], ...(Env.TRV_PROFILES.list ?? [])]),
+        priority: 1
+      }]
+    });
   };
 };
 
@@ -117,17 +110,19 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
       }],
     });
 
-    runBeforeMain(cls,
-      (cmd: typeof instance) => {
-        const typed: (typeof cmd) & { [property]?: string } = castTo(cmd);
-        const providedModule = typed[property];
-        const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
-        if (runModule !== Runtime.main.name) {
-          RuntimeIndex.reinitForModule(runModule);
-        }
-      },
-      { priority: 1 }
-    );
+    CliCommandRegistryIndex.getForRegister(cls).register({
+      preMain: [{
+        handler: (cmd: typeof instance): void => {
+          const typed: (typeof cmd) & { [property]?: string } = castTo(cmd);
+          const providedModule = typed[property];
+          const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
+          if (runModule !== Runtime.main.name) {
+            RuntimeIndex.reinitForModule(runModule);
+          }
+        },
+        priority: 2
+      }]
+    });
   };
 }
 
@@ -144,13 +139,16 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
       description: 'Should the invocation automatically restart on source changes'
     });
 
-    runBeforeMain(cls,
-      (cmd: typeof instance) => {
-        if (Runtime.production) { return; }
-        return CliUtil.runWithRestartOnChange(cmd[property]);
-      },
-      { runTarget: true, priority: 10 }
-    );
+    CliCommandRegistryIndex.getForRegister(cls).register({
+      runTarget: true,
+      preMain: [{
+        handler: (cmd: typeof instance): unknown => {
+          if (Runtime.production) { return; }
+          return CliUtil.runWithRestartOnChange(cmd[property]);
+        },
+        priority: 10
+      }]
+    });
   };
 }
 
@@ -167,13 +165,16 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
       description: 'Should the invocation automatically restart on source changes'
     });
 
-    runBeforeMain(cls,
-      (cmd: typeof instance & CliCommandShape) => {
-        if (Runtime.production) { return; }
-        const cliConfig = CliCommandRegistryIndex.get(cls);
-        return cmd[property] && CliUtil.runWithDebugIpc(cliConfig.name);
-      },
-      { runTarget: true, priority: 5 }
-    );
+    CliCommandRegistryIndex.getForRegister(cls).register({
+      runTarget: true,
+      preMain: [{
+        handler: (cmd: typeof instance): unknown => {
+          if (Runtime.production) { return; }
+          const cliConfig = CliCommandRegistryIndex.get(cls);
+          return cmd[property] && CliUtil.runWithDebugIpc(cliConfig.name);
+        },
+        priority: 10
+      }]
+    });
   };
 }
