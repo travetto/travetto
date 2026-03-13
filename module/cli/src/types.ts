@@ -32,7 +32,7 @@ export interface CliCommandShape {
   help?(): OrProm<string[]>;
 }
 
-type PreMainHandler = (cmd: CliCommandShape) => (unknown | Promise<unknown>);
+type PreMainHandler = { priority: number, handler: (cmd: CliCommandShape) => (unknown | Promise<unknown>) };
 
 /**
  * CLI Command schema shape
@@ -41,5 +41,5 @@ export interface CliCommandConfig {
   cls: Class<CliCommandShape>;
   name: string;
   runTarget?: boolean;
-  preMain?: PreMainHandler[];
+  preMain: PreMainHandler[];
 }

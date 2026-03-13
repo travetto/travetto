@@ -10,10 +10,10 @@ import { CliUtil } from '../util.ts';
 type CliCommandConfigOptions = { runTarget?: boolean };
 type CliFlagOptions = { full?: string, short?: string, envVars?: string[] };
 
-function runBeforeMain<T>(cls: Class, handler: (item: T) => (unknown | Promise<unknown>), runTarget?: boolean): void {
+function runBeforeMain<T>(cls: Class, handler: (item: T) => (unknown | Promise<unknown>), runTarget?: boolean, priority: number = 100): void {
   CliCommandRegistryIndex.getForRegister(cls).register({
     runTarget,
-    preMain: [async (cmd): Promise<void> => { await handler(castTo(cmd)); }]
+    preMain: [{ handler: async (cmd): Promise<void> => { await handler(castTo(cmd)); }, priority }]
   });
 }
 
@@ -103,12 +103,8 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
         const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
 
         // If we need to run as a specific module
-        if (runModule !== Runtime.main.name) {
-          try {
-            RuntimeIndex.reinitForModule(runModule);
-          } catch {
-            return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: property };
-          }
+        if (runModule !== Runtime.main.name && RuntimeIndex.getModule(runModule) === undefined) {
+          return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: property };
         }
 
         if (!(await CliModuleUtil.moduleHasDependency(runModule, commandModule))) {
@@ -116,6 +112,19 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
         }
       }],
     });
+
+    runBeforeMain(cls,
+      (cmd: typeof instance) => {
+        const typed: (typeof cmd) & { [property]?: string } = castTo(cmd);
+        const providedModule = typed[property];
+        const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
+        if (runModule !== Runtime.main.name) {
+          RuntimeIndex.reinitForModule(runModule);
+        }
+      },
+      false,
+      1
+    );
   };
 }
 
@@ -136,7 +145,9 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
       (cmd: typeof instance) => {
         if (Runtime.production) { return; }
         return CliUtil.runWithRestartOnChange(cmd[property]);
-      }, true
+      },
+      true,
+      10
     );
   };
 }
@@ -160,7 +171,8 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
         const cliConfig = CliCommandRegistryIndex.get(cls);
         return cmd[property] && CliUtil.runWithDebugIpc(cliConfig.name);
       },
-      true
+      true,
+      5
     );
   };
 }

@@ -2,11 +2,17 @@ import { spawn, type ChildProcess } from 'node:child_process';
 
 import { RuntimeError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
-const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
-const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
-const validEnv = (key: string): boolean => IPC_ALLOWED_ENV.has(key) || (
-  !IPC_INVALID_ENV.has(key) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(key) && !/VSCODE/.test(key)
-);
+const IPC_VALID_ENV = new Set(['NODE_OPTIONS', 'PATH', Env.DEBUG.key, Env.NODE_ENV.key]);
+const IPC_INVALID_ENV = new Set([
+  Env.TRV_CLI_IPC.key,
+  Env.TRV_DEBUG_IPC.key,
+  Env.TRV_DEBUG_BREAK.key,
+  Env.TRV_MANIFEST.key,
+  Env.TRV_MODULE.key,
+  Env.TRV_RESTART_TARGET.key
+]);
+const validEnv = ([key]: [key: string, value: unknown]): boolean =>
+  IPC_VALID_ENV.has(key) || (key.startsWith('TRV_') && !IPC_INVALID_ENV.has(key));
 
 export class CliUtil {
   /**
@@ -14,8 +20,7 @@ export class CliUtil {
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
     const simple = (module ?? Runtime.main.name).replace(/[\/]/, '_').replace(/@/, '');
-    const targetModule = !simple || (!module && Runtime.monoRoot) ? '<module>' : simple;
-    return placeholder.replace('<module>', targetModule);
+    return simple ? placeholder.replace('<module>', simple) : placeholder;
   }
 
   /**
@@ -66,7 +71,7 @@ export class CliUtil {
   /**
    * Dispatch IPC payload
    */
-  static async runWithDebugIpc(name: string): Promise<void> {
+  static async runWithDebugIpc(name: string, module?: string): Promise<void> {
     if (!Env.TRV_CLI_IPC.isSet) {
       return; // Not debugging, run normal
     }
@@ -78,19 +83,20 @@ export class CliUtil {
       return; // Server not running, run normal
     }
 
-    const env: Record<string, string> = {};
     const request = {
       type: '@travetto/cli:run',
       data: {
         name,
-        env,
+        env: {
+          ...Object.fromEntries(Object.entries(process.env).filter(validEnv)),
+          ...(module ? { TRV_MODULE: module } : {}),
+        },
         cwd: process.cwd(),
         args: process.argv.slice(3),
       }
     };
-    console.log('Triggering IPC request', request);
 
-    Object.entries(process.env).forEach(([key, value]) => validEnv(key) && (env[key] = value!));
+    console.log('Triggering IPC request', request);
     const sent = await doFetch({ method: 'POST', body: JSONUtil.toUTF8(request) });
 
     if (!sent.ok) {
@@ -102,8 +108,8 @@ export class CliUtil {
    * Write data to channel and ensure its flushed before continuing
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
-    return await new Promise(resolve => process[channel].write(typeof data === 'string' ? data :
-      JSONUtil.toUTF8Pretty(data), () => resolve()));
+    await new Promise<unknown>(resolve => process[channel].write(typeof data === 'string' ? data :
+      JSONUtil.toUTF8Pretty(data), resolve));
   }
 
   /**

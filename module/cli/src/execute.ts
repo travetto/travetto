@@ -43,8 +43,8 @@ export class ExecutionManager {
       // Wait 50ms to allow stdout to flush on shutdown
       ShutdownManager.signal.addEventListener('abort', () => Util.blockingTimeout(50));
 
-      for (const preMain of config.preMain ?? []) {
-        await preMain(instance);
+      for (const { handler } of config.preMain) {
+        await handler(instance);
       }
 
       ConsoleManager.debug(Runtime.debug);
