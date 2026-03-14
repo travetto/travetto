@@ -1,5 +1,5 @@
-import type { ResultsSummary } from './suite.ts';
-import type { TestResult, TestStatus } from './test.ts';
+import type { ResultsSummary, SuiteConfig, SuiteResult } from './suite.ts';
+import type { TestConfig, TestResult, TestStatus } from './test.ts';
 
 export class TestModelUtil {
   static computeTestStatus(summary: ResultsSummary): TestStatus {
@@ -23,5 +23,50 @@ export class TestModelUtil {
       summary.selfDuration += (test.selfDuration ?? 0);
     }
     return summary;
+  }
+
+
+  /**
+   * An empty suite result based on a suite config
+   */
+  static createSuiteResult(suite: SuiteConfig, override?: Partial<SuiteResult>): SuiteResult {
+    return {
+      ...TestModelUtil.buildSummary(),
+      status: 'unknown',
+      lineStart: suite.lineStart,
+      lineEnd: suite.lineEnd,
+      import: suite.import,
+      classId: suite.classId,
+      sourceHash: suite.sourceHash,
+      tests: {},
+      duration: 0,
+      selfDuration: 0,
+      ...override
+    };
+  }
+
+  /**
+   * An empty test result based on a suite and test config
+   */
+  static createTestResult(suite: SuiteConfig, test: TestConfig, override?: Partial<TestResult>): TestResult {
+    return {
+      methodName: test.methodName,
+      description: test.description,
+      classId: test.classId,
+      tags: test.tags,
+      suiteLineStart: suite.lineStart,
+      lineStart: test.lineStart,
+      lineEnd: test.lineEnd,
+      lineBodyStart: test.lineBodyStart,
+      import: test.import,
+      declarationImport: test.declarationImport,
+      sourceHash: test.sourceHash,
+      status: 'unknown',
+      assertions: [],
+      duration: 0,
+      selfDuration: 0,
+      output: [],
+      ...override
+    };
   }
 }

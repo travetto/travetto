@@ -58,51 +58,15 @@ export class TestExecutor {
   }
 
   /**
-   * An empty suite result based on a suite config
-   */
-  createSuiteResult(suite: SuiteConfig, override?: Partial<SuiteResult>): SuiteResult {
-    return {
-      ...TestModelUtil.buildSummary(),
-      status: 'unknown',
-      lineStart: suite.lineStart,
-      lineEnd: suite.lineEnd,
-      import: suite.import,
-      classId: suite.classId,
-      sourceHash: suite.sourceHash,
-      tests: {},
-      duration: 0,
-      selfDuration: 0,
-      ...override
-    };
-  }
-
-  /**
    * Execute the test, capture output, assertions and promises
    */
-  async executeTest(test: TestConfig, suite: SuiteConfig, overrides?: Partial<TestResult>): Promise<TestResult> {
+  async executeTest(test: TestConfig, suite: SuiteConfig, override?: Partial<TestResult>): Promise<TestResult> {
+
+    const result = TestModelUtil.createTestResult(suite, test, override);
 
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
 
-    const result: TestResult = {
-      methodName: test.methodName,
-      description: test.description,
-      classId: test.classId,
-      tags: test.tags,
-      suiteLineStart: suite.lineStart,
-      lineStart: test.lineStart,
-      lineEnd: test.lineEnd,
-      lineBodyStart: test.lineBodyStart,
-      import: test.import,
-      declarationImport: test.declarationImport,
-      sourceHash: test.sourceHash,
-      status: 'unknown',
-      assertions: [],
-      duration: 0,
-      selfDuration: 0,
-      output: [],
-      ...overrides
-    };
 
     // Emit every assertion as it occurs
     const getAssertions = AssertCapture.collector(test, item =>
@@ -150,14 +114,17 @@ export class TestExecutor {
 
     const shouldSkip = await this.#shouldSkip(suite, suite.instance);
 
+    const result: SuiteResult = TestModelUtil.createSuiteResult(suite);
+
     if (shouldSkip) {
       this.#consumer.onEvent({
         phase: 'after', type: 'suite',
-        suite: this.createSuiteResult(suite, {
+        suite: {
+          ...result,
           status: 'skipped',
           skipped: tests.length,
           total: tests.length
-        })
+        }
       });
     }
 
@@ -165,7 +132,6 @@ export class TestExecutor {
       return;
     }
 
-    const result: SuiteResult = this.createSuiteResult(suite);
     const validTestMethodNames = new Set(tests.map(t => t.methodName));
     const testConfigs = Object.fromEntries(
       Object.entries(suite.tests).filter(([key]) => validTestMethodNames.has(key))
