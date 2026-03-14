@@ -34,15 +34,6 @@ export class TestExecutor {
     this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
   }
 
-  #recordSuiteErrors(suiteConfig: SuiteConfig, suiteResult: SuiteResult, testErorrs: TestResult[]): void {
-    const filtered = testErorrs.filter(test => !(test.methodName in suiteResult.tests));
-    for (const test of filtered) {
-      this.#onSuiteTestError(test, suiteConfig.tests[test.methodName]);
-      suiteResult.tests[test.methodName] = test;
-    }
-    TestModelUtil.countTestResult(suiteResult, filtered);
-  }
-
   /**
    * Raw execution, runs the method and then returns any thrown errors as the result.
    *
@@ -72,22 +63,6 @@ export class TestExecutor {
     }
   }
 
-  #skipTest(test: TestConfig, result: SuiteResult): void {
-    // Mark test start
-    this.#consumer.onEvent({ type: 'test', phase: 'before', test });
-    result.skipped += 1;
-    result.total += 1;
-    this.#consumer.onEvent({
-      type: 'test',
-      phase: 'after',
-      test: {
-        ...test,
-        suiteLineStart: result.lineStart,
-        assertions: [], duration: 0, selfDuration: 0, output: [], status: 'skipped'
-      }
-    });
-  }
-
   /**
    * An empty suite result based on a suite config
    */
@@ -101,6 +76,8 @@ export class TestExecutor {
       classId: suite.classId,
       sourceHash: suite.sourceHash,
       tests: {},
+      duration: 0,
+      selfDuration: 0,
       ...override
     };
   }
@@ -112,8 +89,6 @@ export class TestExecutor {
 
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
-
-    const startTime = Date.now();
 
     const result: TestResult = {
       methodName: test.methodName,
@@ -146,15 +121,20 @@ export class TestExecutor {
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
     // Run method and get result
-    const error = await this.#executeTestMethod(test);
-    const [status, finalError] = AssertCheck.validateTestResultError(test, error);
+    if (await this.#shouldSkip(test, suite.instance)) {
+      result.status = 'skipped';
+    } else {
+      const startTime = Date.now();
+      const error = await this.#executeTestMethod(test);
+      const [status, finalError] = AssertCheck.validateTestResultError(test, error);
 
-    result.status = status;
-    result.output = consoleCapture.end();
-    result.assertions = getAssertions();
-    result.selfDuration = Date.now() - startTime;
-    if (finalError) {
-      result.error = finalError;
+      result.status = status;
+      result.output = consoleCapture.end();
+      result.assertions = getAssertions();
+      result.selfDuration = Date.now() - startTime;
+      if (finalError) {
+        result.error = finalError;
+      }
     }
 
     // Mark completion
@@ -193,8 +173,6 @@ export class TestExecutor {
       Object.entries(suite.tests).filter(([key]) => validTestMethodNames.has(key))
     );
 
-    const startTime = Date.now();
-
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
@@ -202,46 +180,60 @@ export class TestExecutor {
 
     const originalEnv = { ...process.env };
 
+    const startTime = Date.now();
+
     try {
       // Handle the BeforeAll calls
       await manager.startPhase('all');
+    } catch (someError) {
+      const suiteError = await manager.onError('all', someError);
+      const failures = AssertUtil.generateSuiteTestFailures(suite, suiteError);
+      for (const test of failures) {
+        this.#onSuiteTestError(test, suite.tests[test.methodName]);
+        result.tests[test.methodName] = test;
+      }
+      TestModelUtil.countTestResult(result, failures);
+      tests = [];
+    }
 
-      const suiteEnv = { ...process.env };
+    const suiteEnv = { ...process.env };
 
-      for (const test of tests ?? suite.tests) {
-        if (await this.#shouldSkip(test, suite.instance)) {
-          this.#skipTest(test, result);
-          continue;
-        }
+    for (const test of tests ?? suite.tests) {
+      const shouldSkipTest = await this.#shouldSkip(test, suite.instance);
 
-        // Reset env before each test
-        process.env = { ...suiteEnv };
+      // Reset env before each test
+      process.env = { ...suiteEnv };
 
-        const testStart = Date.now();
-        try {
-
-          // Handle BeforeEach
-          await manager.startPhase('each');
-
-          // Run test
-          const testResult = await this.executeTest(test, suite);
-          result.tests[testResult.methodName] = testResult;
-
-          // Handle after each
-          await manager.endPhase('each');
-          testResult.duration = Date.now() - testStart;
-          TestModelUtil.countTestResult(result, [testResult]);
-        } catch (testError) {
-          const errors = await manager.errorPhase('each', testError, suite, test);
-          this.#recordSuiteErrors(suite, result, errors);
-        }
+      const testStart = Date.now();
+      let testResult: TestResult;
+      try {
+        // Handle BeforeEach
+        shouldSkipTest || await manager.startPhase('each');
+      } catch (someError) {
+        const testError = await manager.onError('each', someError);
+        testResult = AssertUtil.generateSuiteTestFailure({ suite, error: testError, test });
       }
 
+      // Run test
+      testResult ??= await this.executeTest(test, suite);
+
+      // Handle after each
+      try {
+        shouldSkipTest || await manager.endPhase('each');
+      } catch (testError) {
+        console.error('Failed to properly shutdown test', testError);
+      }
+
+      result.tests[testResult.methodName] = testResult;
+      testResult.duration = Date.now() - testStart;
+      TestModelUtil.countTestResult(result, [testResult]);
+    }
+
+    try {
       // Handle after all
       await manager.endPhase('all');
     } catch (suiteError) {
-      const errors = await manager.errorPhase('all', suiteError, suite);
-      this.#recordSuiteErrors(suite, result, errors);
+      console.error('Failed to properly shutdown test', suiteError);
     }
 
     // Restore env
