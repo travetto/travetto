@@ -1,7 +1,7 @@
 import type { TestConsumerShape } from '../types.ts';
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConfig, TestDiffSource, TestResult } from '../../model/test.ts';
-import type { ResultsSummary, SuiteConfig, SuiteResult } from '../../model/suite.ts';
+import type { SuiteConfig, SuiteResult } from '../../model/suite.ts';
 import { DelegatingConsumer } from './delegating.ts';
 import type { SuiteCore } from '../../model/common.ts';
 import { TestModelUtil } from '../../model/util.ts';
@@ -56,15 +56,8 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   onSuiteAfter(result: SuiteResult): SuiteResult {
     // Reset counts
     const suite = this.getSuite(result);
-    const results: ResultsSummary = {
-      passed: 0, failed: 0, skipped: 0, errored: 0, unknown: 0,
-      total: 0, duration: 0
-    };
-    for (const test of Object.values(suite.tests)) {
-      results[test.status] += 1;
-      results.total += 1;
-      results.duration += test.duration ?? 0;
-    }
+    const results = TestModelUtil.buildSummary();
+    TestModelUtil.countTestResult(results, Object.values(suite.tests));
     return { ...result, ...results, status: TestModelUtil.computeTestStatus(results) };
   }
 

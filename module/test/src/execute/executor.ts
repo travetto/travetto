@@ -34,14 +34,12 @@ export class TestExecutor {
     this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
   }
 
-  #recordSuiteErrors(suiteConfig: SuiteConfig, suiteResult: SuiteResult, errors: TestResult[]): void {
-    for (const test of errors) {
-      if (!suiteResult.tests[test.methodName]) {
-        this.#onSuiteTestError(test, suiteConfig.tests[test.methodName]);
-        suiteResult.errored += 1;
-        suiteResult.total += 1;
-      }
+  #recordSuiteErrors(suiteConfig: SuiteConfig, suiteResult: SuiteResult, testErorrs: TestResult[]): void {
+    const filtered = testErorrs.filter(test => !(test.methodName in suiteResult.tests));
+    for (const test of filtered) {
+      this.#onSuiteTestError(test, suiteConfig.tests[test.methodName]);
     }
+    TestModelUtil.countTestResult(suiteResult, filtered);
   }
 
   /**
@@ -94,19 +92,13 @@ export class TestExecutor {
    */
   createSuiteResult(suite: SuiteConfig, override?: Partial<SuiteResult>): SuiteResult {
     return {
-      passed: 0,
-      failed: 0,
-      errored: 0,
-      skipped: 0,
-      unknown: 0,
-      total: 0,
+      ...TestModelUtil.buildSummary(),
       status: 'unknown',
       lineStart: suite.lineStart,
       lineEnd: suite.lineEnd,
       import: suite.import,
       classId: suite.classId,
       sourceHash: suite.sourceHash,
-      duration: 0,
       tests: {},
       ...override
     };
@@ -233,8 +225,7 @@ export class TestExecutor {
           // Run test
           const testResult = await this.executeTest(test, suite);
           result.tests[testResult.methodName] = testResult;
-          result[testResult.status]++;
-          result.total += 1;
+          TestModelUtil.countTestResult(result, [testResult]);
 
           // Handle after each
           await manager.endPhase('each');

@@ -22,6 +22,7 @@ export class RunnableTestConsumer extends DelegatingConsumer {
 
   async summarizeAsBoolean(): Promise<boolean> {
     await this.summarize(this.#results?.summary);
-    return (this.#results?.summary.failed ?? 0) <= 0;
+    return (this.#results?.summary.failed ?? 0) <= 0 &&
+      (this.#results?.summary.errored ?? 0) <= 0;
   }
 }

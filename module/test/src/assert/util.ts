@@ -95,13 +95,15 @@ export class AssertUtil {
     const name = path.basename(importLocation);
     const classId = `${RuntimeIndex.getFromImport(importLocation)?.id}#${name}`;
     const suite = asFull<SuiteConfig & SuiteResult>({
-      class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: importLocation
+      class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: importLocation,
+      status: 'errored',
+      errored: 1
     });
     error.message = error.message.replaceAll(Runtime.mainSourcePath, '.');
     const result = this.generateSuiteTestFailure({
       suite,
       test: {
-        methodName: 'require',
+        methodName: 'import',
         classId,
         import: importLocation,
         class: suite.class,

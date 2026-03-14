@@ -1,5 +1,4 @@
-import type { ResultsSummary } from './suite.ts';
-import type { TestStatus } from './test.ts';
+import type { ResultsSummary, TestStatus } from '@travetto/test';
 
 export class TestModelUtil {
   static computeTestStatus(summary: ResultsSummary): TestStatus {
