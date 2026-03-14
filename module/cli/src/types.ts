@@ -32,7 +32,7 @@ export interface CliCommandShape {
   help?(): OrProm<string[]>;
 }
 
-type PreMainHandler = { priority: number, handler: (cmd: Any) => Any };
+export type PreMainHandler<T extends Any = Any> = { priority: number, handler: (cmd: T) => Any };
 
 /**
  * CLI Command schema shape

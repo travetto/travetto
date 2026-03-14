@@ -1,8 +1,8 @@
-import { type Class, getClass, getParentClass, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { type Any, type Class, getClass, getParentClass, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { type RegistryAdapter, type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { type SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { CliCommandConfig, CliCommandShape } from '../types.ts';
+import type { CliCommandConfig, CliCommandShape, PreMainHandler } from '../types.ts';
 import { CliCommandRegistryAdapter } from './registry-adapter.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
@@ -26,6 +26,10 @@ export class CliCommandRegistryIndex implements RegistryIndex {
 
   static load(names?: string[]): Promise<CliCommandLoadResult[]> {
     return this.#instance.load(names);
+  }
+
+  static registerPreMain<T = Any>(cls: Class, priority: number, handler: PreMainHandler<T>['handler']): void {
+    CliCommandRegistryIndex.getForRegister(cls).register({ preMain: [{ handler, priority }] });
   }
 
   #fileMapping: Map<string, string>;
