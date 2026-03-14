@@ -51,13 +51,13 @@ export class AssertUtil {
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateAssertion(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): Assertion[] {
+  static generateAssertion(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): Assertion {
     const { suite, test, error: errorValue, importLocation } = config;
     const error = (errorValue.cause && errorValue.cause instanceof Error) ? errorValue.cause : errorValue;
     const testImport = importLocation ?? test.import;
     const position = this.getPositionOfError(error);
     const line = position?.line ?? (testImport === suite.import ? suite.lineStart : 1);
-    return [{
+    return {
       import: position?.import ?? testImport,
       methodName: test.methodName,
       classId: suite.classId,
@@ -66,6 +66,6 @@ export class AssertUtil {
       line,
       message: error.message.split(/\n/)[0],
       text: test.methodName
-    }];
+    };
   }
 }

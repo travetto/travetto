@@ -116,11 +116,11 @@ export class TestExecutor {
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
     // Already finished
-    if (result.status !== 'unknown') {
-      for (const item of result.assertions) {
-        this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: item });
+    if (result.status === 'errored') {
+      if (result.error) {
+        AssertCapture.add(AssertUtil.generateAssertion({ suite, test, error: result.error }));
       }
-    } else {
+    } else if (result.status !== 'unknown') {
       const startTime = Date.now();
       // Run method and get result
       const error = await this.#executeTestMethod(test);
@@ -186,11 +186,8 @@ export class TestExecutor {
       await manager.startPhase('all');
     } catch (someError) {
       const suiteError = await manager.onError('all', someError);
-      for (const [method, testConfig] of Object.entries(tests ?? suite.tests)) {
-        testResultOverrides[method] ??= {
-          status: 'errored',
-          assertions: AssertUtil.generateAssertion({ suite, test: testConfig, error: suiteError })
-        };
+      for (const method of Object.keys(tests ?? suite.tests)) {
+        testResultOverrides[method] ??= { status: 'errored', error: suiteError };
       }
     }
 
@@ -212,7 +209,8 @@ export class TestExecutor {
         !testResultOverride.status || await manager.startPhase('each');
       } catch (someError) {
         const testError = await manager.onError('each', someError);
-        testResultOverride.assertions = AssertUtil.generateAssertion({ suite, error: testError, test });
+        testResultOverride.error = testError;
+        testResultOverride.status = 'errored';
       }
 
       // Run test
