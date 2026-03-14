@@ -1,7 +1,7 @@
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { RuntimeError, type RuntimeErrorOptions } from './error.ts';
-import { castTo } from './types.ts';
+import { castTo, type Any } from './types.ts';
 
 type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
 type JSONOutputConfig = { indent?: number, replacer?: JSONTransformer };
@@ -51,20 +51,11 @@ export class JSONUtil {
 
   /** Convert from JSON object */
   static jsonErrorToError(error: JSONError): Error | RuntimeError {
-    switch (error.$trv) {
-      case 'runtime': {
-        const { $trv: _, ...rest } = error;
-        const result = new RuntimeError(error.message!, castTo<RuntimeErrorOptions<Record<string, unknown>>>(rest));
-        result.stack = error.stack;
-        return result;
-      }
-      case 'plain': {
-        const result = new Error(error.message);
-        result.name = error.name!;
-        result.stack = error.stack ?? result.stack;
-        return result;
-      }
-    }
+    const { $trv, message, stack, name, ...rest } = error;
+    const response = $trv === 'runtime' ? new RuntimeError(message!, castTo<Any>(rest)) : new Error(message!);
+    response.stack = stack;
+    if (name) { response.name = name; }
+    return response;
   }
 
   /**
