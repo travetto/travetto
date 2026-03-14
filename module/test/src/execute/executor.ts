@@ -1,6 +1,4 @@
-import path from 'node:path';
-
-import { Env, TimeUtil, Runtime, castTo, classConstruct, RuntimeIndex, asFull } from '@travetto/runtime';
+import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 
 import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
@@ -216,25 +214,8 @@ export class TestExecutor {
       await Runtime.importFrom(run.import);
     } catch (error) {
       if (!(error instanceof Error)) { throw error; }
+      const suite = TestModelUtil.createImportErrorSuiteResult(run);
       console.error(error);
-
-      const name = path.basename(run.import);
-      const classId = `${RuntimeIndex.getFromImport(run.import)?.id}#${name}`;
-      const common = { classId, duration: 0, lineStart: 1, lineEnd: 1, import: run.import } as const;
-      const suite = asFull<SuiteResult>({
-        ...common,
-        status: 'errored', errored: 1,
-        tests: {
-          impport: asFull<TestResult>({
-            ...common,
-            status: 'errored',
-            assertions: [{
-              ...common, line: common.lineStart,
-              methodName: 'import', operator: 'import', text: `Failed to import ${run.import}`,
-            }]
-          })
-        }
-      });
       this.#consumer.onEvent({ type: 'suite', phase: 'after', suite });
       return;
     }

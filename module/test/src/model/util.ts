@@ -1,5 +1,9 @@
+import path from 'node:path';
+
+import { asFull, RuntimeIndex } from '@travetto/runtime';
+
 import type { ResultsSummary, SuiteConfig, SuiteResult } from './suite.ts';
-import type { TestConfig, TestResult, TestStatus } from './test.ts';
+import type { TestConfig, TestResult, TestRun, TestStatus } from './test.ts';
 
 export class TestModelUtil {
   static computeTestStatus(summary: ResultsSummary): TestStatus {
@@ -68,5 +72,25 @@ export class TestModelUtil {
       output: [],
       ...override
     };
+  }
+
+  static createImportErrorSuiteResult(run: TestRun): SuiteResult {
+    const name = path.basename(run.import);
+    const classId = `${RuntimeIndex.getFromImport(run.import)?.id}#${name}`;
+    const common = { classId, duration: 0, lineStart: 1, lineEnd: 1, import: run.import } as const;
+    return asFull<SuiteResult>({
+      ...common,
+      status: 'errored', errored: 1,
+      tests: {
+        impport: asFull<TestResult>({
+          ...common,
+          status: 'errored',
+          assertions: [{
+            ...common, line: common.lineStart,
+            methodName: 'import', operator: 'import', text: `Failed to import ${run.import}`,
+          }]
+        })
+      }
+    });
   }
 }
