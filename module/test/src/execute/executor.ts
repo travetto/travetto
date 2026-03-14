@@ -1,4 +1,6 @@
-import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
+import path from 'node:path';
+
+import { Env, TimeUtil, Runtime, castTo, classConstruct, RuntimeIndex, asFull } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 
 import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
@@ -24,14 +26,6 @@ export class TestExecutor {
 
   constructor(consumer: TestConsumerShape) {
     this.#consumer = consumer;
-  }
-
-  #onSuiteTestError(result: TestResult, test: TestConfig): void {
-    this.#consumer.onEvent({ type: 'test', phase: 'before', test });
-    for (const assertion of result.assertions) {
-      this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion });
-    }
-    this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
   }
 
   /**
@@ -85,7 +79,7 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  async executeTest(test: TestConfig, suite: SuiteConfig): Promise<TestResult> {
+  async executeTest(test: TestConfig, suite: SuiteConfig, overrides?: Partial<TestResult>): Promise<TestResult> {
 
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
@@ -107,35 +101,39 @@ export class TestExecutor {
       duration: 0,
       selfDuration: 0,
       output: [],
+      ...overrides
     };
 
     // Emit every assertion as it occurs
-    const getAssertions = AssertCapture.collector(test, asrt =>
+    const getAssertions = AssertCapture.collector(test, item =>
       this.#consumer.onEvent({
         type: 'assertion',
         phase: 'after',
-        assertion: asrt
+        assertion: item
       })
     );
 
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
-    // Run method and get result
-    if (await this.#shouldSkip(test, suite.instance)) {
-      result.status = 'skipped';
+    // Already finished
+    if (result.status !== 'unknown') {
+      for (const item of result.assertions) {
+        this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: item });
+      }
     } else {
       const startTime = Date.now();
+      // Run method and get result
       const error = await this.#executeTestMethod(test);
       const [status, finalError] = AssertCheck.validateTestResultError(test, error);
-
       result.status = status;
-      result.output = consoleCapture.end();
-      result.assertions = getAssertions();
       result.selfDuration = Date.now() - startTime;
       if (finalError) {
         result.error = finalError;
       }
     }
+
+    result.output = consoleCapture.end();
+    result.assertions = getAssertions();
 
     // Mark completion
     this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
@@ -181,45 +179,48 @@ export class TestExecutor {
     const originalEnv = { ...process.env };
 
     const startTime = Date.now();
+    const testResultOverrides: Record<string, Partial<TestResult>> = {};
 
     try {
       // Handle the BeforeAll calls
       await manager.startPhase('all');
     } catch (someError) {
       const suiteError = await manager.onError('all', someError);
-      const failures = AssertUtil.generateSuiteTestFailures(suite, suiteError);
-      for (const test of failures) {
-        this.#onSuiteTestError(test, suite.tests[test.methodName]);
-        result.tests[test.methodName] = test;
+      for (const [method, testConfig] of Object.entries(tests ?? suite.tests)) {
+        testResultOverrides[method] ??= {
+          status: 'errored',
+          assertions: AssertUtil.generateSuiteTestFailure({ suite, test: testConfig, error: suiteError })
+        };
       }
-      TestModelUtil.countTestResult(result, failures);
-      tests = [];
     }
 
     const suiteEnv = { ...process.env };
 
     for (const test of tests ?? suite.tests) {
-      const shouldSkipTest = await this.#shouldSkip(test, suite.instance);
-
       // Reset env before each test
       process.env = { ...suiteEnv };
 
       const testStart = Date.now();
-      let testResult: TestResult;
+      const testResultOverride = (testResultOverrides[test.methodName] ??= {});
+
+      if (await this.#shouldSkip(test, suite.instance)) {
+        testResultOverride.status = 'skipped';
+      }
+
       try {
         // Handle BeforeEach
-        shouldSkipTest || await manager.startPhase('each');
+        !testResultOverride.status || await manager.startPhase('each');
       } catch (someError) {
         const testError = await manager.onError('each', someError);
-        testResult = AssertUtil.generateSuiteTestFailure({ suite, error: testError, test });
+        testResultOverride.assertions = AssertUtil.generateSuiteTestFailure({ suite, error: testError, test });
       }
 
       // Run test
-      testResult ??= await this.executeTest(test, suite);
+      const testResult = await this.executeTest(test, suite, testResultOverride);
 
       // Handle after each
       try {
-        shouldSkipTest || await manager.endPhase('each');
+        !testResultOverride.status || await manager.endPhase('each');
       } catch (testError) {
         console.error('Failed to properly shutdown test', testError);
       }
@@ -253,15 +254,26 @@ export class TestExecutor {
     try {
       await Runtime.importFrom(run.import);
     } catch (error) {
-      if (!(error instanceof Error)) {
-        throw error;
-      }
+      if (!(error instanceof Error)) { throw error; }
       console.error(error);
 
-      // Fire import failure as a test failure for each test in the suite
-      const { result, test, suite } = AssertUtil.gernerateImportFailure(run.import, error);
-      this.#consumer.onEvent({ type: 'suite', phase: 'before', suite });
-      this.#onSuiteTestError(result, test);
+      const name = path.basename(run.import);
+      const classId = `${RuntimeIndex.getFromImport(run.import)?.id}#${name}`;
+      const common = { classId, duration: 0, lineStart: 1, lineEnd: 1, import: run.import } as const;
+      const suite = asFull<SuiteResult>({
+        ...common,
+        status: 'errored', errored: 1,
+        tests: {
+          impport: asFull<TestResult>({
+            ...common,
+            status: 'errored',
+            assertions: [{
+              ...common, line: common.lineStart,
+              methodName: 'import', operator: 'import', text: `Failed to import ${run.import}`,
+            }]
+          })
+        }
+      });
       this.#consumer.onEvent({ type: 'suite', phase: 'after', suite });
       return;
     }

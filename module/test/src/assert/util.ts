@@ -1,10 +1,9 @@
 import util from 'node:util';
-import path from 'node:path';
 
-import { asFull, type Class, JSONUtil, hasFunction, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
+import { JSONUtil, hasFunction, RuntimeIndex, Util } from '@travetto/runtime';
 
-import type { TestConfig, TestResult } from '../model/test.ts';
-import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
+import type { Assertion, TestConfig } from '../model/test.ts';
+import type { SuiteConfig } from '../model/suite.ts';
 
 const isCleanable = hasFunction<{ toClean(): unknown }>('toClean');
 
@@ -52,81 +51,21 @@ export class AssertUtil {
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateSuiteTestFailure(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): TestResult {
+  static generateSuiteTestFailure(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): Assertion[] {
     const { suite, test, error: errorValue, importLocation } = config;
     const error = (errorValue.cause && errorValue.cause instanceof Error) ? errorValue.cause : errorValue;
     const testImport = importLocation ?? test.import;
     const position = this.getPositionOfError(error);
     const line = position?.line ?? (testImport === suite.import ? suite.lineStart : 1);
-    const testResult: TestResult = {
-      ...suite.tests[test.methodName],
-      suiteLineStart: suite.lineStart,
-      status: 'errored',
+    return [{
+      import: position?.import ?? testImport,
+      methodName: test.methodName,
+      classId: suite.classId,
+      operator: 'throw',
       error,
-      duration: 0,
-      selfDuration: 0,
-      output: [],
-      assertions: [{
-        import: position?.import ?? testImport,
-        methodName: test.methodName,
-        classId: suite.classId,
-        operator: 'throw',
-        error,
-        line,
-        message: error.message.split(/\n/)[0],
-        text: test.methodName
-      }],
-    };
-
-    return testResult;
-  }
-
-  /**
-   * Generate suite failure
-   */
-  static generateSuiteTestFailures(suite: SuiteConfig, error: Error): TestResult[] {
-    return Object.values(suite.tests).map(test => this.generateSuiteTestFailure({ suite, test, error }));
-  }
-
-  /**
-   * Define import failure as a TestResult
-   */
-  static gernerateImportFailure(importLocation: string, error: Error): { result: TestResult, test: TestConfig, suite: SuiteResult & SuiteConfig } {
-    const name = path.basename(importLocation);
-    const classId = `${RuntimeIndex.getFromImport(importLocation)?.id}#${name}`;
-    const suite = asFull<SuiteConfig & SuiteResult>({
-      class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: importLocation,
-      status: 'errored',
-      errored: 1
-    });
-    error.message = error.message.replaceAll(Runtime.mainSourcePath, '.');
-    const result = this.generateSuiteTestFailure({
-      suite,
-      test: {
-        methodName: 'import',
-        classId,
-        import: importLocation,
-        class: suite.class,
-        lineBodyStart: 1,
-        lineStart: 1,
-        lineEnd: 1,
-        skip: false
-      },
-      error
-    });
-    const test: TestConfig = {
-      methodName: 'import',
-      classId,
-      import: importLocation,
-      declarationImport: importLocation,
-      lineStart: 0,
-      lineEnd: 0,
-      lineBodyStart: 0,
-      tags: [],
-      description: 'Import Failure',
-      skip: false,
-      class: undefined!
-    };
-    return { result, test, suite };
+      line,
+      message: error.message.split(/\n/)[0],
+      text: test.methodName
+    }];
   }
 }
