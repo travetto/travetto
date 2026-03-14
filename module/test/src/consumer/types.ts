@@ -37,6 +37,10 @@ export interface TestConsumerShape {
    */
   setOptions?(options?: Record<string, unknown>): Promise<void> | void;
   /**
+   * Can directly update the known test run state as needed
+   */
+  onTestRunState?(state: TestRunState): Promise<void> | void;
+  /**
    * Listen for start of the test run
    */
   onStart?(testState: TestRunState): Promise<void> | void;

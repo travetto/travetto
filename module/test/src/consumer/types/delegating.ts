@@ -20,6 +20,12 @@ export abstract class DelegatingConsumer implements TestConsumerShape {
     }
   }
 
+  async onTestRunState(state: TestRunState): Promise<void> {
+    for (const consumer of this.#consumers) {
+      await consumer.onTestRunState?.(state);
+    }
+  }
+
   onRemoveEvent(event: TestRemoveEvent): void {
     let result = event;
     if (this.transformRemove) {

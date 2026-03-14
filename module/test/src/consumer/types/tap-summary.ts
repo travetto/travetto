@@ -32,6 +32,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
   #consumer: TapEmitter;
   #enhancer: TestResultsEnhancer;
   #options?: Record<string, unknown>;
+  #state: TestRunState = {};
 
   constructor(terminal: Terminal = new Terminal(process.stderr)) {
     this.#terminal = terminal;
@@ -88,8 +89,14 @@ export class TapSummaryEmitter implements TestConsumerShape {
     this.#consumer.setOptions(options);
   }
 
+  onTestRunState(state: TestRunState): void {
+    Object.assign(this.#state, state);
+  }
+
   async onStart(state: TestRunState): Promise<void> {
     this.#consumer.onStart();
+    this.onTestRunState(state);
+
     const total = TestModelUtil.buildSummary();
     const success = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
     const fail = StyleUtil.getStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
@@ -99,8 +106,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
         (value) => {
           TestModelUtil.countTestResult(total, [value]);
           const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
-          return { value: `Tests %idx/%total [${statusLine}] -- ${value.classId}`, total: state.testCount, idx: total.passed };
-
+          return { value: `Tests %idx/%total [${statusLine}] -- ${value.classId}`, total: this.#state.testCount, idx: total.passed };
         },
         TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: (total.failed || total.errored) ? fail : success }) })
       ),

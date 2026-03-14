@@ -1,8 +1,9 @@
 import path from 'node:path';
+import { AssertionError } from 'node:assert';
 import { stringify } from 'yaml';
 
 import { Terminal, StyleUtil } from '@travetto/terminal';
-import { TimeUtil, RuntimeIndex, JSONUtil } from '@travetto/runtime';
+import { TimeUtil, RuntimeIndex } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
@@ -57,17 +58,14 @@ export class TapEmitter implements TestConsumerShape {
    * @param error
    */
   errorToString(error?: Error): string | undefined {
-    if (error && error.name !== 'AssertionError') {
-      if (JSONUtil.isJSONError(error)) {
-        error = JSONUtil.jsonErrorToError(error);
-      }
-      if (error instanceof Error) {
-        return error.stack ?
-          error.stack.split(/\n/).slice(0, this.#options?.verbose ? -1 : 5).join('\n') :
-          error.message;
-      } else {
-        return `${error}`;
-      }
+    if (error instanceof AssertionError) {
+      return;
+    } else if (error instanceof Error) {
+      return error.stack ?
+        error.stack.split(/\n/).slice(0, this.#options?.verbose ? -1 : 5).join('\n') :
+        error.message;
+    } else {
+      return `${error}`;
     }
   }
 

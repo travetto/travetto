@@ -222,7 +222,7 @@ export class RunUtil {
     }
 
     if (runs.length === 1) {
-      await new TestExecutor(consumer).execute(runs[0]);
+      await new TestExecutor(consumer).execute(runs[0], true);
     } else {
       await WorkPool.run(
         run => buildStandardTestManager(consumer, run),

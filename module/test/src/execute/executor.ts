@@ -208,7 +208,7 @@ export class TestExecutor {
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  async execute(run: TestRun): Promise<void> {
+  async execute(run: TestRun, singleFile?: boolean): Promise<void> {
     try {
       await Runtime.importFrom(run.import);
     } catch (error) {
@@ -226,6 +226,11 @@ export class TestExecutor {
     const suites = SuiteRegistryIndex.getSuiteTests(run);
     if (!suites.length) {
       console.warn('Unable to find suites for ', run);
+    }
+
+    if (singleFile) {
+      const testCount = suites.reduce((acc, suite) => acc + suite.tests.length, 0);
+      this.#consumer.onTestRunState?.({ testCount });
     }
 
     for (const { suite, tests } of suites) {
