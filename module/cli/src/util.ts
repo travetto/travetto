@@ -4,13 +4,8 @@ import { RuntimeError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, 
 
 const IPC_VALID_ENV = new Set(['NODE_OPTIONS', 'PATH', Env.DEBUG.key, Env.NODE_ENV.key]);
 const IPC_INVALID_ENV = new Set([
-  Env.TRV_CLI_IPC.key,
-  Env.TRV_DEBUG_IPC.key,
-  Env.TRV_DEBUG_BREAK.key,
-  Env.TRV_MANIFEST.key,
-  Env.TRV_MODULE.key,
-  Env.TRV_RESTART_TARGET.key
-]);
+  Env.TRV_CLI_IPC, Env.TRV_DEBUG_IPC, Env.TRV_DEBUG_BREAK, Env.TRV_MANIFEST, Env.TRV_MODULE, Env.TRV_RESTART_TARGET
+].map(item => item.key));
 const validEnv = ([key]: [key: string, value: unknown]): boolean =>
   IPC_VALID_ENV.has(key) || (key.startsWith('TRV_') && !IPC_INVALID_ENV.has(key));
 
