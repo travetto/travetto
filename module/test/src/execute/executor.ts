@@ -38,6 +38,7 @@ export class TestExecutor {
     const filtered = testErorrs.filter(test => !(test.methodName in suiteResult.tests));
     for (const test of filtered) {
       this.#onSuiteTestError(test, suiteConfig.tests[test.methodName]);
+      suiteResult.tests[test.methodName] = test;
     }
     TestModelUtil.countTestResult(suiteResult, filtered);
   }
@@ -82,7 +83,7 @@ export class TestExecutor {
       test: {
         ...test,
         suiteLineStart: result.lineStart,
-        assertions: [], duration: 0, durationTotal: 0, output: [], status: 'skipped'
+        assertions: [], duration: 0, selfDuration: 0, output: [], status: 'skipped'
       }
     });
   }
@@ -129,7 +130,7 @@ export class TestExecutor {
       status: 'unknown',
       assertions: [],
       duration: 0,
-      durationTotal: 0,
+      selfDuration: 0,
       output: [],
     };
 
@@ -148,13 +149,13 @@ export class TestExecutor {
     const error = await this.#executeTestMethod(test);
     const [status, finalError] = AssertCheck.validateTestResultError(test, error);
 
-    Object.assign(result, {
-      status,
-      output: consoleCapture.end(),
-      assertions: getAssertions(),
-      duration: Date.now() - startTime,
-      ...(finalError ? { error: finalError } : {})
-    });
+    result.status = status;
+    result.output = consoleCapture.end();
+    result.assertions = getAssertions();
+    result.selfDuration = Date.now() - startTime;
+    if (finalError) {
+      result.error = finalError;
+    }
 
     // Mark completion
     this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
@@ -225,11 +226,11 @@ export class TestExecutor {
           // Run test
           const testResult = await this.executeTest(test, suite);
           result.tests[testResult.methodName] = testResult;
-          TestModelUtil.countTestResult(result, [testResult]);
 
           // Handle after each
           await manager.endPhase('each');
-          testResult.durationTotal = Date.now() - testStart;
+          testResult.duration = Date.now() - testStart;
+          TestModelUtil.countTestResult(result, [testResult]);
         } catch (testError) {
           const errors = await manager.errorPhase('each', testError, suite, test);
           this.#recordSuiteErrors(suite, result, errors);

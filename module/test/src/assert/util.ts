@@ -64,7 +64,7 @@ export class AssertUtil {
       status: 'errored',
       error,
       duration: 0,
-      durationTotal: 0,
+      selfDuration: 0,
       output: [],
       assertions: [{
         import: position?.import ?? testImport,

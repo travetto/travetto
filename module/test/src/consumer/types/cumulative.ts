@@ -9,7 +9,7 @@ import { TestModelUtil } from '../../model/util.ts';
 type ClassId = string;
 type ImportName = string;
 
-type CumulativeTestResult = Pick<TestResult, 'sourceHash' | 'status' | 'duration'>;
+type CumulativeTestResult = Pick<TestResult, 'sourceHash' | 'status' | 'duration' | 'selfDuration'>;
 type CumulativeSuiteResult = Pick<SuiteCore, 'import' | 'classId' | 'sourceHash'> & {
   tests: Record<string, CumulativeTestResult>;
 };
@@ -37,7 +37,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
 
   onTestBefore(config: TestConfig): TestConfig {
     const suite = this.getSuite(config);
-    suite.tests[config.methodName] = { sourceHash: config.sourceHash, status: 'unknown', duration: 0 };
+    suite.tests[config.methodName] = { sourceHash: config.sourceHash, status: 'unknown', duration: 0, selfDuration: 0 };
     return config;
   }
 

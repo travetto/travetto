@@ -1,4 +1,4 @@
-import type { ResultsSummary, TestStatus } from '@travetto/test';
+import type { ResultsSummary, TestResult, TestStatus } from '@travetto/test';
 
 export class TestModelUtil {
   static computeTestStatus(summary: ResultsSummary): TestStatus {
@@ -12,14 +12,14 @@ export class TestModelUtil {
   }
 
   static buildSummary(): ResultsSummary {
-    return { passed: 0, failed: 0, skipped: 0, errored: 0, unknown: 0, total: 0, duration: 0 };
+    return { passed: 0, failed: 0, skipped: 0, errored: 0, unknown: 0, total: 0, duration: 0, selfDuration: 0 };
   }
 
-  static countTestResult<T extends ResultsSummary>(summary: T, tests: { status: TestStatus, duration?: number }[]): T {
+  static countTestResult<T extends ResultsSummary>(summary: T, tests: Pick<TestResult, 'status' | 'selfDuration'>[]): T {
     for (const test of tests) {
       summary[test.status] += 1;
       summary.total += 1;
-      summary.duration += (test.duration ?? 0);
+      summary.selfDuration += (test.selfDuration ?? 0);
     }
     return summary;
   }

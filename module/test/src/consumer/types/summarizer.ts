@@ -15,6 +15,8 @@ export class TestResultsSummarizer implements TestConsumerShape {
 
   #merge(result: SuiteResult): void {
     TestModelUtil.countTestResult(this.summary, Object.values(result.tests));
+    this.summary.duration += result.duration;
+    this.summary.selfDuration += result.selfDuration;
     this.summary.suites.push(result);
   }
 

@@ -17,7 +17,6 @@ export class TapEmitter implements TestConsumerShape {
   #count = 0;
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;
-  #start: number;
   #options?: Record<string, unknown>;
 
   constructor(
@@ -40,7 +39,6 @@ export class TapEmitter implements TestConsumerShape {
    * Preamble
    */
   onStart(): void {
-    this.#start = Date.now();
     this.log(this.#enhancer.suiteName('TAP version 14'));
   }
 
@@ -180,7 +178,7 @@ export class TapEmitter implements TestConsumerShape {
       `${this.#enhancer.total(summary.errored)}`,
       'skipped',
       this.#enhancer.total(summary.skipped),
-      `# (Total Test Time: ${TimeUtil.asClock(summary.duration)}, Total Run Time: ${TimeUtil.asClock(Date.now() - this.#start)})`
+      `# (Total Test Time: ${TimeUtil.asClock(summary.selfDuration)}, Total Run Time: ${TimeUtil.asClock(summary.duration)})`
     ].join(' '));
   }
 }
