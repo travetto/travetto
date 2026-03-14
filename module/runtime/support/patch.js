@@ -1,6 +1,20 @@
 import 'temporal-polyfill-lite/global';
 import fs from 'node:fs/promises';
 
+if (process.env.NODE_ENV !== 'production') {
+  process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
+  process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
+  Error.stackTraceLimit = 50;
+
+  const ogEmitWarning = process.emitWarning;
+  const exclusions = global.processWarningExclusions = [(message) => message.startsWith('stripTypeScriptTypes')];
+  process.emitWarning = (message, category, ...other) => {
+    if (exclusions.length === 0 || !exclusions.some(filter => filter(message, category))) {
+      return ogEmitWarning(message, category, ...other);
+    }
+  };
+}
+
 const [majorVersion, minorVersion] = process.version.replace(/^v/, '').split('.').map(text => parseInt(text, 10));
 
 Map.prototype.getOrInsert ??= function (key, value) {

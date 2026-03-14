@@ -146,4 +146,11 @@ export class Util {
       })
       .filter(item => item !== undefined);
   }
+
+  /**
+   * Only accessible in dev, production ignores this
+   */
+  static registerProcessWarningExclusion(filter: (message: string, category: string) => boolean): void {
+    globalThis.processWarningExclusions?.push(filter);
+  }
 }

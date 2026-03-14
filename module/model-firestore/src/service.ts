@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { JSONUtil, ShutdownManager, Util, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
@@ -40,6 +40,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   @PostConstruct()
   async initializeClient(): Promise<void> {
+    Util.registerProcessWarningExclusion((_, category) => category === 'MetadataLookupWarning');
     this.client = new Firestore({ ...this.config, useBigInt: true });
     ShutdownManager.signal.addEventListener('abort', () => this.client.terminate());
   }

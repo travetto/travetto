@@ -1,6 +1,11 @@
 import './types';
 
 declare const write: unique symbol;
+
+declare global {
+  var processWarningExclusions: ((message: string, category: string) => boolean)[] | undefined;
+}
+
 declare global {
   // https://github.com/microsoft/TypeScript/issues/59012
   interface WritableStreamDefaultWriter<W = any> {
