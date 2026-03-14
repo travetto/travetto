@@ -167,7 +167,7 @@ export class TestExecutor {
 
       try {
         // Handle BeforeEach
-        !testResultOverride.status || await manager.startPhase('each');
+        testResultOverride.status || await manager.startPhase('each');
       } catch (someError) {
         const testError = await manager.onError('each', someError);
         testResultOverride.error = testError;
@@ -179,7 +179,7 @@ export class TestExecutor {
 
       // Handle after each
       try {
-        !testResultOverride.status || await manager.endPhase('each');
+        testResultOverride.status || await manager.endPhase('each');
       } catch (testError) {
         console.error('Failed to properly shutdown test', testError);
       }
