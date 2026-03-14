@@ -70,12 +70,7 @@ export class TestExecutor {
 
     // Emit every assertion as it occurs
     const getAssertions = AssertCapture.collector(test, item =>
-      this.#consumer.onEvent({
-        type: 'assertion',
-        phase: 'after',
-        assertion: item
-      })
-    );
+      this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: item }));
 
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
@@ -84,7 +79,9 @@ export class TestExecutor {
       if (result.error) {
         AssertCapture.add(AssertUtil.generateAssertion({ suite, test, error: result.error }));
       }
-    } else if (result.status !== 'unknown') {
+    }
+
+    if (result.status === 'unknown') {
       const startTime = Date.now();
       // Run method and get result
       const error = await this.#executeTestMethod(test);
