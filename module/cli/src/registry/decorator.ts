@@ -65,8 +65,7 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
       description: 'Application profiles'
     });
 
-    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 1, cmd =>
-      Env.TRV_PROFILES.set([...cmd[property] ?? [], ...(Env.TRV_PROFILES.list ?? [])]));
+    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 1, cmd => Env.TRV_PROFILES.add(...cmd[property] ?? []));
   };
 };
 
