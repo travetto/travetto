@@ -73,15 +73,14 @@ export class TestExecutor {
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
     // Already finished
-    if (result.status === 'errored') {
+    if (result.status !== 'unknown') {
       if (result.error) {
-        AssertCapture.add(AssertUtil.generateAssertion({ suite, test, error: result.error }));
+        result.assertions.push(AssertUtil.generateAssertion({ suite, test, error: result.error }));
       }
-    }
-
-    if (result.status === 'unknown') {
-      const startTime = Date.now();
+      for (const item of result.assertions ?? []) { AssertCapture.add(item); }
+    } else {
       // Run method and get result
+      const startTime = Date.now();
       const error = await this.#executeTestMethod(test);
       const [status, finalError] = AssertCheck.validateTestResultError(test, error);
       result.status = status;
