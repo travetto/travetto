@@ -2,7 +2,7 @@ import path from 'node:path';
 import { stringify } from 'yaml';
 
 import { Terminal, StyleUtil } from '@travetto/terminal';
-import { TimeUtil, RuntimeIndex, hasToJSON, JSONUtil } from '@travetto/runtime';
+import { TimeUtil, RuntimeIndex, JSONUtil } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
@@ -17,7 +17,6 @@ export class TapEmitter implements TestConsumerShape {
   #count = 0;
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;
-  #start: number;
   #options?: Record<string, unknown>;
 
   constructor(
@@ -40,7 +39,6 @@ export class TapEmitter implements TestConsumerShape {
    * Preamble
    */
   onStart(): void {
-    this.#start = Date.now();
     this.log(this.#enhancer.suiteName('TAP version 14'));
   }
 
@@ -60,12 +58,13 @@ export class TapEmitter implements TestConsumerShape {
    */
   errorToString(error?: Error): string | undefined {
     if (error && error.name !== 'AssertionError') {
+      if (JSONUtil.isJSONError(error)) {
+        error = JSONUtil.jsonErrorToError(error);
+      }
       if (error instanceof Error) {
-        let out = JSONUtil.toUTF8(hasToJSON(error) ? error.toJSON() : error, { indent: 2 });
-        if (this.#options?.verbose && error.stack) {
-          out = `${out}\n${error.stack}`;
-        }
-        return out;
+        return error.stack ?
+          error.stack.split(/\n/).slice(0, this.#options?.verbose ? -1 : 5).join('\n') :
+          error.message;
       } else {
         return `${error}`;
       }
@@ -139,9 +138,9 @@ export class TapEmitter implements TestConsumerShape {
         case 'errored':
         case 'failed': {
           if (test.error) {
-            const msg = this.errorToString(test.error);
-            if (msg) {
-              this.logMeta({ error: msg });
+            const message = this.errorToString(test.error);
+            if (message) {
+              this.logMeta({ error: message });
             }
           }
           break;
@@ -180,7 +179,7 @@ export class TapEmitter implements TestConsumerShape {
       `${this.#enhancer.total(summary.errored)}`,
       'skipped',
       this.#enhancer.total(summary.skipped),
-      `# (Total Test Time: ${TimeUtil.asClock(summary.duration)}, Total Run Time: ${TimeUtil.asClock(Date.now() - this.#start)})`
+      `# (Total Test Time: ${TimeUtil.asClock(summary.selfDuration)}, Total Run Time: ${TimeUtil.asClock(summary.duration)})`
     ].join(' '));
   }
 }

@@ -1,16 +1,13 @@
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { RuntimeError, type RuntimeErrorOptions } from './error.ts';
-import { castTo } from './types.ts';
+import { castTo, type Any } from './types.ts';
 
 type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
 type JSONOutputConfig = { indent?: number, replacer?: JSONTransformer };
 type JSONInputConfig = { reviver?: JSONTransformer };
 type JSONCloneConfig = JSONOutputConfig & JSONInputConfig;
-type ErrorShape<T extends string, V> = { $trv: T, message: string, stack?: string } & V;
-type JSONError =
-  ErrorShape<'runtime', RuntimeErrorOptions<Record<string, unknown>>> |
-  ErrorShape<'plain', { name: string }>;
+type JSONError = { $trv: 'plain' | 'runtime', name?: string } & Partial<RuntimeErrorOptions<Record<string, unknown>>>;
 
 Object.defineProperty(BigInt.prototype, 'toJSON', {
   value() { return `${this}n`; },
@@ -54,46 +51,30 @@ export class JSONUtil {
 
   /** Convert from JSON object */
   static jsonErrorToError(error: JSONError): Error | RuntimeError {
-    switch (error.$trv) {
-      case 'runtime': {
-        const { $trv: _, ...rest } = error;
-        const result = new RuntimeError(error.message, castTo<RuntimeErrorOptions<Record<string, unknown>>>(rest));
-        result.stack = error.stack;
-        return result;
-      }
-      case 'plain': {
-        const result = new Error(error.message);
-        result.name = error.name;
-        result.stack = error.stack ?? result.stack;
-        return result;
-      }
-    }
+    const { $trv, message, stack, name, ...rest } = error;
+    const response = $trv === 'runtime' ? new RuntimeError(message!, castTo<Any>(rest)) : new Error(message!);
+    response.stack = stack;
+    if (name) { response.name = name; }
+    return response;
   }
 
   /**
    * Serializes an error to a basic object
    */
-  static errorToJSONError(error: RuntimeError | Error, includeStack?: boolean): JSONError | undefined {
+  static errorToJSONError(error: Error, includeStack?: boolean): JSONError | undefined {
     includeStack ??= JSONUtil.includeStackTraces;
-    if (error instanceof RuntimeError) {
-      return {
-        $trv: 'runtime',
-        message: error.message,
+    return {
+      $trv: error instanceof RuntimeError ? 'runtime' : 'plain',
+      message: error.message,
+      ...(error.cause ? { cause: `${error.cause}` } : undefined),
+      ...(includeStack ? { stack: error.stack } : undefined),
+      ...(error instanceof RuntimeError ? {
         category: error.category,
-        ...(error.cause ? { cause: `${error.cause}` } : undefined),
         type: error.type,
         at: error.at,
         ...(error.details ? { details: error.details } : undefined!),
-        ...(includeStack ? { stack: error.stack } : undefined)
-      };
-    } else {
-      return {
-        $trv: 'plain',
-        message: error.message,
-        name: error.name,
-        ...(includeStack ? { stack: error.stack } : undefined)
-      };
-    }
+      } : {})
+    };
   }
 
   /** UTF8 string to JSON */

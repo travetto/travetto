@@ -114,8 +114,8 @@ export abstract class BasePackCommand implements CliCommandShape {
    */
   async * runOperations(): AsyncIterable<string> {
     for (const operation of this.getOperations()) {
-      for await (const msg of operation(this)) {
-        yield msg.join(' ');
+      for await (const message of operation(this)) {
+        yield message.join(' ');
       }
     }
   }
@@ -162,11 +162,11 @@ export abstract class BasePackCommand implements CliCommandShape {
 
       await term.streamLines(stream);
 
-      let msg = cliTpl`${{ success: 'Success' }} (${{ identifier: TimeUtil.asClock(Date.now() - start) }}) ${{ subtitle: 'module' }}=${{ param: this.module }}`;
+      let message = cliTpl`${{ success: 'Success' }} (${{ identifier: TimeUtil.asClock(Date.now() - start) }}) ${{ subtitle: 'module' }}=${{ param: this.module }}`;
       if (this.output) {
-        msg = cliTpl`${msg} ${{ subtitle: 'output' }}=${{ path: this.output }}`;
+        message = cliTpl`${message} ${{ subtitle: 'output' }}=${{ path: this.output }}`;
       }
-      await term.writer.writeLine(msg).commit();
+      await term.writer.writeLine(message).commit();
     }
   }
 }

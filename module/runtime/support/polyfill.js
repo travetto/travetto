@@ -13,11 +13,11 @@ Map.prototype.getOrInsertComputed ??= function (key, compute) {
 
 // Allow for the throwIfNoEntry if on a version of node that is less than 25.7
 if (majorVersion < 25 || (majorVersion === 25 && minorVersion < 7)) {
-  const og = fs.stat.bind(fs);
+  const og = fs.stat;
   Object.defineProperty(fs, 'stat', {
-    value: (path, options) => {
-      const out = og(path, options);
-      if (options.throwIfNoEntry === false) {
+    value: (...args) => {
+      const out = og.call(fs, ...args);
+      if (typeof args[1] === 'object' && args[1].throwIfNoEntry === false) {
         return out.catch(() => { });
       }
       return out;

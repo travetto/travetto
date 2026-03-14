@@ -1,6 +1,7 @@
 import type { SuiteResult } from '../../model/suite.ts';
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
+import { TestModelUtil } from '../../model/util.ts';
 
 /**
  * Test Result Collector, combines all results into a single Suite Result
@@ -8,16 +9,14 @@ import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 export class TestResultsSummarizer implements TestConsumerShape {
 
   summary: SuitesSummary = {
-    passed: 0, failed: 0, errored: 0, skipped: 0, unknown: 0,
-    total: 0, duration: 0, suites: []
+    ...TestModelUtil.buildSummary(),
+    suites: []
   };
 
   #merge(result: SuiteResult): void {
-    for (const test of Object.values(result.tests)) {
-      this.summary[test.status] += 1;
-    }
-    this.summary.total += result.total;
+    TestModelUtil.countTestResult(this.summary, Object.values(result.tests));
     this.summary.duration += result.duration;
+    this.summary.selfDuration += result.selfDuration;
     this.summary.suites.push(result);
   }
 

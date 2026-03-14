@@ -1,4 +1,4 @@
-import { ConsoleManager, Runtime, ShutdownManager, Util } from '@travetto/runtime';
+import { ConsoleManager, getClass, Runtime, ShutdownManager, Util } from '@travetto/runtime';
 
 import { HelpUtil } from './help.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
@@ -11,20 +11,32 @@ import type { CliCommandShape } from './types.ts';
  */
 export class ExecutionManager {
 
-  /**
-   * Execute the command line
-   * @param args
-   */
-  static async run(argv: string[]): Promise<void> {
+  /** Command Execution */
+  static async execute(instance: CliCommandShape, args: unknown[]): Promise<void> {
+    const config = CliCommandRegistryIndex.get(getClass(instance));
+
+    for (const item of config.preMain) {
+      await item.handler(instance);
+    }
+
+    // Wait 50ms to allow stdout to flush on shutdown
+    ShutdownManager.signal.addEventListener('abort', () => Util.blockingTimeout(50));
+    ConsoleManager.debug(Runtime.debug);
+    await instance.main(...args);
+  }
+
+  /** Extract configuration and show help as needed */
+  static async getExecutionCommand(argv: string[]): Promise<(() => Promise<void>) | undefined> {
     let command: CliCommandShape | undefined;
 
     const { cmd, args, help } = CliParseUtil.getArgs(argv);
     if (!cmd) {
-      return console.info!(await HelpUtil.renderAllHelp());
+      console.info!(await HelpUtil.renderAllHelp());
+      return;
     }
 
     try {
-      const [{ instance, schema, config }] = await CliCommandRegistryIndex.load([cmd]);
+      const [{ instance, schema }] = await CliCommandRegistryIndex.load([cmd]);
       command = instance;
       const fullArgs = await CliParseUtil.expandArgs(schema, args);
 
@@ -35,22 +47,28 @@ export class ExecutionManager {
       await instance.finalize?.(help);
 
       if (help) {
-        return console.log!(await HelpUtil.renderCommandHelp(instance));
+        console.log!(await HelpUtil.renderCommandHelp(instance));
+        return;
       }
 
       await CliCommandSchemaUtil.validate(command, boundArgs);
 
-      // Wait 50ms to allow stdout to flush on shutdown
-      ShutdownManager.signal.addEventListener('abort', () => Util.blockingTimeout(50));
-
-      for (const preMain of config.preMain ?? []) {
-        await preMain(instance);
-      }
-
-      ConsoleManager.debug(Runtime.debug);
-      await instance.main(...boundArgs);
+      return this.execute.bind(this, instance, boundArgs);
     } catch (error) {
       await HelpUtil.renderError(error, cmd, command);
+    }
+  }
+
+  /**
+   * Execute the command line
+   * @param args
+   */
+  static async run(argv: string[]): Promise<void> {
+    try {
+      const execute = await this.getExecutionCommand(argv);
+      await execute?.();
+    } catch (error) {
+      console.error!(error);
     } finally {
       await ShutdownManager.shutdown();
     }

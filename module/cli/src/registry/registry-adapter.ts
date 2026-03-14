@@ -75,6 +75,9 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
         aliases.push(`--no-${long}`);
       }
     }
+
+    // Sort
+    this.#config.preMain = this.#config.preMain.toSorted((left, right) => left.priority - right.priority);
   }
 
   get(): CliCommandConfig {

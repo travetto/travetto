@@ -105,13 +105,13 @@ export interface TestResult extends TestCore {
    */
   assertions: Assertion[];
   /**
-   * Duration for the test
+   * Self Execution Duration
    */
-  duration: number;
+  selfDuration: number;
   /**
    * Total duration including before/after
    */
-  durationTotal: number;
+  duration: number;
   /**
    * Logging output
    */

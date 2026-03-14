@@ -102,7 +102,7 @@ export class CliRunFeature extends BaseFeature {
    * Register command handlers
    */
   activate(context: vscode.ExtensionContext): void {
-    console.log('Registering again?', new Date());
+    this.log.debug('Registering again?', new Date());
     this.#storage = new ActionStorage<RunChoice>('cli.run', context);
 
     this.register('new', () => this.chooseAndRun('Run New Command', { mode: 'all' }));
