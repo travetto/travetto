@@ -189,7 +189,7 @@ export class TestExecutor {
       for (const [method, testConfig] of Object.entries(tests ?? suite.tests)) {
         testResultOverrides[method] ??= {
           status: 'errored',
-          assertions: AssertUtil.generateSuiteTestFailure({ suite, test: testConfig, error: suiteError })
+          assertions: AssertUtil.generateAssertion({ suite, test: testConfig, error: suiteError })
         };
       }
     }
@@ -212,7 +212,7 @@ export class TestExecutor {
         !testResultOverride.status || await manager.startPhase('each');
       } catch (someError) {
         const testError = await manager.onError('each', someError);
-        testResultOverride.assertions = AssertUtil.generateSuiteTestFailure({ suite, error: testError, test });
+        testResultOverride.assertions = AssertUtil.generateAssertion({ suite, error: testError, test });
       }
 
       // Run test

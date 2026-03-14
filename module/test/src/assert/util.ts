@@ -51,7 +51,7 @@ export class AssertUtil {
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateSuiteTestFailure(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): Assertion[] {
+  static generateAssertion(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): Assertion[] {
     const { suite, test, error: errorValue, importLocation } = config;
     const error = (errorValue.cause && errorValue.cause instanceof Error) ? errorValue.cause : errorValue;
     const testImport = importLocation ?? test.import;
