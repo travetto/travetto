@@ -127,6 +127,11 @@ export class TestExecutor {
       return;
     }
 
+    const manager = new TestPhaseManager(suite);
+    const originalEnv = { ...process.env };
+    const startTime = Date.now();
+    const testResultOverrides: Record<string, Partial<TestResult>> = {};
+
     const validTestMethodNames = new Set(tests.map(t => t.methodName));
     const testConfigs = Object.fromEntries(
       Object.entries(suite.tests).filter(([key]) => validTestMethodNames.has(key))
@@ -135,26 +140,19 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
-    const manager = new TestPhaseManager(suite);
-
-    const originalEnv = { ...process.env };
-
-    const startTime = Date.now();
-    const testResultOverrides: Record<string, Partial<TestResult>> = {};
-
     try {
       // Handle the BeforeAll calls
       await manager.startPhase('all');
     } catch (someError) {
       const suiteError = await manager.onError('all', someError);
-      for (const method of Object.keys(tests ?? suite.tests)) {
+      for (const method of validTestMethodNames) {
         testResultOverrides[method] ??= { status: 'errored', error: suiteError };
       }
     }
 
     const suiteEnv = { ...process.env };
 
-    for (const test of tests ?? suite.tests) {
+    for (const test of tests) {
       // Reset env before each test
       process.env = { ...suiteEnv };
 
@@ -181,7 +179,8 @@ export class TestExecutor {
       try {
         testResultOverride.status || await manager.endPhase('each');
       } catch (testError) {
-        console.error('Failed to properly shutdown test', testError);
+        if (!(testError instanceof Error)) { throw testError; };
+        console.error('Failed to properly shutdown test', testError.message);
       }
 
       result.tests[testResult.methodName] = testResult;
@@ -193,7 +192,8 @@ export class TestExecutor {
       // Handle after all
       await manager.endPhase('all');
     } catch (suiteError) {
-      console.error('Failed to properly shutdown test', suiteError);
+      if (!(suiteError instanceof Error)) { throw suiteError; };
+      console.error('Failed to properly shutdown test', suiteError.message);
     }
 
     // Restore env

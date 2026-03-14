@@ -1,4 +1,4 @@
-import { describeFunction, Env, TimeUtil } from '@travetto/runtime';
+import { Env, TimeUtil } from '@travetto/runtime';
 
 import type { SuiteConfig, SuitePhase } from '../model/suite.ts';
 import { Barrier } from './barrier.ts';
@@ -32,9 +32,7 @@ export class TestPhaseManager {
       error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => handler[phase]?.(this.#suite.instance));
 
       if (error) {
-        const toThrow = new Error(phase, { cause: error });
-        Object.assign(toThrow, { import: describeFunction(handler.constructor) ?? undefined });
-        throw toThrow;
+        throw error;
       }
     }
   }
