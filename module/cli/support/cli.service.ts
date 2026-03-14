@@ -45,15 +45,15 @@ export class CliServiceCommand implements CliCommandShape {
     const jobs = all.map(async (descriptor, i) => {
       const identifier = descriptor.name.padEnd(maxName);
       const type = `${descriptor.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
-      let msg: string;
+      let message: string;
       for await (const [valueType, value] of new ServiceRunner(descriptor).action(action)) {
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
-        queue.add({ idx: i, text: msg = cliTpl`${{ identifier }} ${{ type }} ${details}` });
+        queue.add({ idx: i, text: message = cliTpl`${{ identifier }} ${{ type }} ${details}` });
         if (valueType === 'failure') {
-          failureMessages.push(msg);
+          failureMessages.push(message);
         }
       }
-      queue.add({ idx: i, done: true, text: msg! });
+      queue.add({ idx: i, done: true, text: message! });
     });
 
     Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => queue.close());

@@ -37,7 +37,7 @@ export class CliUtil {
 
     process
       .on('SIGINT', () => ShutdownManager.shutdownChild(child!, { mode: 'exit' }))
-      .on('message', msg => child?.send?.(msg!));
+      .on('message', message => child?.send?.(message!));
 
     const env = { ...process.env, ...Env.TRV_RESTART_TARGET.export(true) };
 

@@ -58,6 +58,9 @@ export class TapEmitter implements TestConsumerShape {
    */
   errorToString(error?: Error): string | undefined {
     if (error && error.name !== 'AssertionError') {
+      if (JSONUtil.isJSONError(error)) {
+        error = JSONUtil.jsonErrorToError(error);
+      }
       if (error instanceof Error) {
         let out = JSONUtil.toUTF8(hasToJSON(error) ? error.toJSON() : error, { indent: 2 });
         if (this.#options?.verbose && error.stack) {
@@ -137,9 +140,9 @@ export class TapEmitter implements TestConsumerShape {
         case 'errored':
         case 'failed': {
           if (test.error) {
-            const msg = this.errorToString(test.error);
-            if (msg) {
-              this.logMeta({ error: msg });
+            const message = this.errorToString(test.error);
+            if (message) {
+              this.logMeta({ error: message });
             }
           }
           break;

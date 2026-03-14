@@ -26,10 +26,10 @@ export class DiagnosticManager {
     const clsName = test.classId.split(/[^a-z-/]+/i).at(-1);
     const results: vscode.Diagnostic[] = [];
 
-    const addError = (msg: string, line: number) => {
+    const addError = (message: string, line: number) => {
       const item = new vscode.Diagnostic(
         new vscode.Range(new vscode.Position(line - 1, 0), new vscode.Position(line - 1, 1000)),
-        `${clsName}.${test.methodName} - ${msg}`,
+        `${clsName}.${test.methodName} - ${message}`,
         vscode.DiagnosticSeverity.Error
       );
       item.source = '@travetto/test';
