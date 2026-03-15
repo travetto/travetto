@@ -11,8 +11,6 @@ import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 
-const byteOrderMarkIndicator = '\uFEFF';
-
 export class CompilerState implements CompilerHost {
 
   static fileExists(location: string): boolean {
@@ -60,7 +58,7 @@ export class CompilerState implements CompilerHost {
       ts.sys.writeFile(location, text, bom);
     } catch {
       fs.mkdirSync(path.dirname(location), { recursive: true });
-      fs.writeFileSync(location, bom ? `${byteOrderMarkIndicator}${text}` : text, 'utf8');
+      fs.writeFileSync(location, text, 'utf8');
     }
   }
 
