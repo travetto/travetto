@@ -67,20 +67,16 @@ export class CompilerState implements CompilerHost {
   #fileExists(location: string): boolean {
     try {
       return ts.sys.fileExists(location);
-    } catch {
-      return fs.existsSync(location);
-    }
+    } catch { return fs.existsSync(location); }
   }
 
   #directoryExists(location: string): boolean {
     try {
       return ts.sys.directoryExists(location);
-    } catch {
-      return fs.existsSync(location);
-    }
+    } catch { return fs.existsSync(location); }
   }
 
-  #writeExternalTypings(location: string, text: string, bom: boolean): void {
+  #writeExternalTypings(location: string, text: string, bom?: boolean): void {
     let core = location.replace('.map', '');
     if (!this.#outputToEntry.has(core)) {
       core = core.replace(ManifestModuleUtil.TYPINGS_EXT_REGEX, ManifestModuleUtil.OUTPUT_EXT);
@@ -97,7 +93,7 @@ export class CompilerState implements CompilerHost {
   async #initCompilerOptions(): Promise<CompilerOptions> {
     const tsconfigFile = CommonUtil.resolveWorkspace(this.#manifest, 'tsconfig.json');
     if (!CompilerState.fileExists(tsconfigFile)) {
-      this.#writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2), false);
+      this.#writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2));
     }
 
     const { options } = ts.parseJsonSourceFileConfigFileContent(
@@ -194,10 +190,10 @@ export class CompilerState implements CompilerHost {
     switch (ManifestModuleUtil.getFileType(sourceFile)) {
       case 'typings':
       case 'package-json':
-        this.writeFile(output, this.readFile(sourceFile)!, false), undefined;
+        this.writeFile(output, this.readFile(sourceFile)!);
         break;
       case 'js':
-        this.writeFile(output, ts.transpile(this.readFile(sourceFile)!, this.#compilerOptions), false);
+        this.writeFile(output, this.readFile(sourceFile)!);
         break;
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
@@ -334,7 +330,7 @@ export class CompilerState implements CompilerHost {
   writeFile(
     outputFile: string,
     text: string,
-    bom: boolean
+    bom?: boolean
   ): void {
     if (outputFile.endsWith('package.json')) {
       text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
