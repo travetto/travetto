@@ -150,7 +150,7 @@ export class Util {
   /**
    * Only accessible in dev, production ignores this
    */
-  static registerProcessWarningExclusion(filter: (message: string, category: string) => boolean): void {
-    globalThis.processWarningExclusions?.push(filter);
+  static registerDevProcessWarningExclusion(filter: (message: string, category: string) => boolean): void {
+    globalThis.devProcessWarningExclusions?.push(filter);
   }
 }

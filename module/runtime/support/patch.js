@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== 'production') {
   Error.stackTraceLimit = 50;
 
   const ogEmitWarning = process.emitWarning;
-  const exclusions = global.processWarningExclusions = [(message) => message.startsWith('stripTypeScriptTypes')];
+  const exclusions = global.devProcessWarningExclusions = [(message) => message.startsWith('stripTypeScriptTypes')];
   process.emitWarning = (message, category, ...other) => {
     if (exclusions.length === 0 || !exclusions.some(filter => filter(message, category))) {
       return ogEmitWarning(message, category, ...other);

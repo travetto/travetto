@@ -3,7 +3,7 @@ import './types';
 declare const write: unique symbol;
 
 declare global {
-  var processWarningExclusions: ((message: string, category: string) => boolean)[] | undefined;
+  var devProcessWarningExclusions: ((message: string, category: string) => boolean)[] | undefined;
 }
 
 declare global {
