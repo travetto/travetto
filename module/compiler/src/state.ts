@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import type { CompilerHost, SourceFile, CompilerOptions, Program, ScriptTarget } from 'typescript';
 
 import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, type ManifestIndex, type ManifestModuleFolderType } from '@travetto/manifest';
@@ -10,7 +11,13 @@ import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 
+const byteOrderMarkIndicator = '\uFEFF';
+
 export class CompilerState implements CompilerHost {
+
+  static fileExists(location: string): boolean {
+    return fs.existsSync(location);
+  }
 
   static async get(idx: ManifestIndex): Promise<CompilerState> {
     return new CompilerState().init(idx);
@@ -39,7 +46,38 @@ export class CompilerState implements CompilerHost {
   #program: Program;
 
   #readFile(sourceFile: string): string | undefined {
-    return ts.sys.readFile(this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile);
+    const location = this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile;
+    try {
+      return ts.sys.readFile(location, 'utf8');
+    } catch {
+      try { return fs.readFileSync(location, 'utf8'); } catch { }
+    }
+    return undefined;
+  }
+
+  #writeFile(location: string, text: string, bom?: boolean): void {
+    try {
+      ts.sys.writeFile(location, text, bom);
+    } catch {
+      fs.mkdirSync(path.dirname(location), { recursive: true });
+      fs.writeFileSync(location, bom ? `${byteOrderMarkIndicator}${text}` : text, 'utf8');
+    }
+  }
+
+  #fileExists(location: string): boolean {
+    try {
+      return ts.sys.fileExists(location);
+    } catch {
+      return fs.existsSync(location);
+    }
+  }
+
+  #directoryExists(location: string): boolean {
+    try {
+      return ts.sys.directoryExists(location);
+    } catch {
+      return fs.existsSync(location);
+    }
   }
 
   #writeExternalTypings(location: string, text: string, bom: boolean): void {
@@ -51,15 +89,15 @@ export class CompilerState implements CompilerHost {
     if (entry) {
       const relative = this.#manifestIndex.getFromSource(entry.sourceFile)?.relativeFile;
       if (relative && TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(relative))) {
-        ts.sys.writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
+        this.#writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
       }
     }
   }
 
   async #initCompilerOptions(): Promise<CompilerOptions> {
     const tsconfigFile = CommonUtil.resolveWorkspace(this.#manifest, 'tsconfig.json');
-    if (!ts.sys.fileExists(tsconfigFile)) {
-      ts.sys.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2));
+    if (!CompilerState.fileExists(tsconfigFile)) {
+      this.#writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2), false);
     }
 
     const { options } = ts.parseJsonSourceFileConfigFileContent(
@@ -153,7 +191,6 @@ export class CompilerState implements CompilerHost {
       return;
     }
 
-    const program = await this.getProgram(needsNewProgram);
     switch (ManifestModuleUtil.getFileType(sourceFile)) {
       case 'typings':
       case 'package-json':
@@ -163,6 +200,7 @@ export class CompilerState implements CompilerHost {
         this.writeFile(output, ts.transpile(this.readFile(sourceFile)!, this.#compilerOptions), false);
         break;
       case 'ts': {
+        const program = await this.getProgram(needsNewProgram);
         const tsSourceFile = program.getSourceFile(sourceFile)!;
         program.emit(
           tsSourceFile,
@@ -286,11 +324,11 @@ export class CompilerState implements CompilerHost {
   getDefaultLibLocation(): string { return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions)); }
 
   fileExists(sourceFile: string): boolean {
-    return this.#sourceToEntry.has(sourceFile) || ts.sys.fileExists(sourceFile);
+    return this.#sourceToEntry.has(sourceFile) || this.#fileExists(sourceFile);
   }
 
   directoryExists(sourceDirectory: string): boolean {
-    return this.#sourceDirectory.has(sourceDirectory) || ts.sys.directoryExists(sourceDirectory);
+    return this.#sourceDirectory.has(sourceDirectory) || this.#directoryExists(sourceDirectory);
   }
 
   writeFile(
@@ -311,7 +349,7 @@ export class CompilerState implements CompilerHost {
       this.#writeExternalTypings(location, text, bom);
     }
 
-    ts.sys.writeFile(location, text, bom);
+    return this.#writeFile(location, text, bom);
   }
 
   readFile(sourceFile: string): string | undefined {

@@ -284,7 +284,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L59) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 ## JSON Utilities
-The [JSONUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L31) class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like `Date`, `BigInt`, and `Error` objects seamlessly. Key features include:
+The [JSONUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L33) class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like `Date`, `BigInt`, and `Error` objects seamlessly. Key features include:
    *  `fromUTF8(input, config?)` - Parse JSON from a UTF-8 string
    *  `toUTF8(value, config?)` - Serialize a value to JSON string
    *  `toUTF8Pretty(value)` - Serialize with pretty formatting (2-space indent)
