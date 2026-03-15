@@ -104,7 +104,7 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
       }],
     });
 
-    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 2, cmd => {
+    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 5, cmd => {
       const typed: (typeof cmd) & { [property]?: string } = castTo(cmd);
       const providedModule = typed[property];
       const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
@@ -131,7 +131,7 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
     });
 
     CliCommandRegistryIndex.getForRegister(cls).register({ runTarget: true });
-    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 10, cmd => CliUtil.runWithRestartOnChange(cmd[property]));
+    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 20, cmd => CliUtil.runWithRestartOnChange(cmd[property]));
   };
 }
 

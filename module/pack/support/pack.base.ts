@@ -5,7 +5,7 @@ import { type CliCommandShape, CliFlag, CliModuleFlag, CliParseUtil, cliTpl } fr
 import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { Terminal } from '@travetto/terminal';
 import { Ignore, Method, Required, Schema } from '@travetto/schema';
-import { PackageUtil } from '@travetto/manifest';
+import { PackageUtil, type IndexedModule } from '@travetto/manifest';
 
 import { PackOperation } from './bin/operation.ts';
 import { PackUtil } from './bin/util.ts';
@@ -126,8 +126,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   getBinaryDependencies(): string[] {
     return [...RuntimeIndex.getModuleList('all')]
       .map(name => RuntimeIndex.getModule(name))
-      .filter(module => !!module)
-      .filter(module => module.production)
+      .filter((module): module is IndexedModule => !!module?.production)
       .map(module => PackageUtil.readPackage(module?.sourcePath))
       .map(pkg => pkg?.travetto?.build?.binaryDependencies ?? [])
       .flat();

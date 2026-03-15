@@ -66,7 +66,7 @@ export class CliUtil {
   /**
    * Dispatch IPC payload
    */
-  static async runWithDebugIpc(name: string, module?: string): Promise<void> {
+  static async runWithDebugIpc(name: string): Promise<void> {
     if (!Env.TRV_CLI_IPC.isSet) {
       return; // Not debugging, run normal
     }
@@ -82,10 +82,7 @@ export class CliUtil {
       type: '@travetto/cli:run',
       data: {
         name,
-        env: {
-          ...Object.fromEntries(Object.entries(process.env).filter(validEnv)),
-          ...(module ? { TRV_MODULE: module } : {}),
-        },
+        env: Object.fromEntries(Object.entries(process.env).filter(validEnv)),
         cwd: process.cwd(),
         args: process.argv.slice(3),
       }

@@ -29,7 +29,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     this.#cls = cls;
   }
 
-  finalize(): void {
+  finalize(parent?: CliCommandConfig): void {
     // Add help command
     const schema = SchemaRegistryIndex.getConfig(this.#cls);
 
@@ -74,6 +74,10 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       if (field.type === Boolean) {
         aliases.push(`--no-${long}`);
       }
+    }
+
+    if (parent) {
+      this.#config.preMain = [...this.#config.preMain, ...parent?.preMain ?? []];
     }
 
     // Sort
