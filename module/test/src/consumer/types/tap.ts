@@ -181,10 +181,10 @@ export class TapEmitter implements TestConsumerShape {
       `${this.#enhancer.total(summary.errored)}`, SPACE,
       'skipped', SPACE,
       this.#enhancer.total(summary.skipped), SPACE,
-      '#', SPACE, '(',
-      `Test Time: ${TimeUtil.asClock(summary.selfDuration)}`, ',', SPACE,
-      `Suite Time: ${TimeUtil.asClock(summary.duration)}`, ',', SPACE,
-      `Clock Time: ${TimeUtil.asClock(Date.now() - this.#start)}`,
+      '#', SPACE, '(Timings:', SPACE,
+      'Self=', TimeUtil.asClock(summary.selfDuration), ',', SPACE,
+      'Total=', TimeUtil.asClock(summary.duration), ',', SPACE,
+      'Clock=', TimeUtil.asClock(Date.now() - this.#start),
       ')',
     ].join(''));
   }
