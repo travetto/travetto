@@ -1,7 +1,10 @@
 import * as vscode from 'vscode';
 
+import { JSONUtil } from '@travetto/runtime';
+
 import { Activatible } from '../../../core/activation.ts';
 import { ActionStorage } from '../../../core/storage.ts';
+import { Workspace } from '../../../core/workspace.ts';
 
 import { BaseFeature } from '../../base.ts';
 import { EnvDict, TargetEvent } from '../../../core/types.ts';
@@ -9,7 +12,6 @@ import { RunUtil } from '../../../core/run.ts';
 
 import { RunChoice } from './types.ts';
 import { CliRunUtil } from './util.ts';
-import { JSONUtil } from '@travetto/runtime';
 
 type Recent = { mode: 'recent', count: number };
 type All = { mode: 'all' };
@@ -114,15 +116,16 @@ export class CliRunFeature extends BaseFeature {
   /**
    * On IPC trigger to run a target
    */
-  async onEvent(event: TargetEvent<{ name: string, args: string[], module: string, env: EnvDict }>): Promise<void> {
+  async onEvent(event: TargetEvent<{ name: string, args: string[], cwd: string, env: EnvDict }>): Promise<void> {
     const args = event.data.args;
     await RunUtil.debug({
       name: `[Travetto] ${event.data.name}${args ? `: ${args.join(' ')}` : ''}`,
       useCli: true,
       main: event.data.name,
       args,
-      module: event.data.module,
-      env: event.data.env
+      cwd: event.data.cwd,
+      env: event.data.env,
+      module: Workspace.workspaceIndex.findModuleForArbitraryFile(event.data.cwd)?.name
     });
   }
 }

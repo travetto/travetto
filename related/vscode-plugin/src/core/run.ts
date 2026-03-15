@@ -67,7 +67,7 @@ export class RunUtil {
       internalConsoleOptions: 'openOnSessionStart',
       ...(typeof debugOverrides === 'object' ? debugOverrides : {}),
       program: input.main.replace(Workspace.path, WORKSPACE),
-      cwd: WORKSPACE,
+      cwd: input.cwd ?? WORKSPACE,
       args: (input.args ?? []).map(arg => `${arg}`),
       env: {
         ...this.buildEnv(input.module),
