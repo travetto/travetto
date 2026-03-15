@@ -182,15 +182,16 @@ export class CompilerState implements CompilerHost {
     }
 
     switch (ManifestModuleUtil.getFileType(sourceFile)) {
-      case 'js':
-      case 'typings':
       case 'package-json': {
         const text = this.readFile(sourceFile)!;
-        const finalText = sourceFile.endsWith('package.json') ? CompilerUtil.rewritePackageJSON(this.#manifest, text) : text;
+        const finalText = CompilerUtil.rewritePackageJSON(this.#manifest, text);
         const location = this.#tscOutputFileToOuptut.get(output) ?? output;
-        this.#writeFile(location, finalText, false);
+        this.#writeFile(location, finalText);
+        this.#writeExternalTypings(location, finalText);
         break;
       }
+      case 'js':
+      case 'typings': this.writeFile(output, this.readFile(sourceFile)!); break;
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
         const tsSourceFile = program.getSourceFile(sourceFile)!;
@@ -329,7 +330,7 @@ export class CompilerState implements CompilerHost {
 
     const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
 
-    if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(outputFile) || outputFile.endsWith('package.json')) {
+    if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(outputFile)) {
       this.#writeExternalTypings(location, text, bom);
     }
 
