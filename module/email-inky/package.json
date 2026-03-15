@@ -32,7 +32,7 @@
     "@travetto/di": "^8.0.0-alpha.4",
     "@travetto/email": "^8.0.0-alpha.4",
     "@travetto/runtime": "^8.0.0-alpha.4",
-    "foundation-emails": "^2.4.0"
+    "foundation-emails": "^2.5.1"
   },
   "devDependencies": {
     "@travetto/email-compiler": "^8.0.0-alpha.5"
