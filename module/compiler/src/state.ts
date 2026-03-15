@@ -188,13 +188,15 @@ export class CompilerState implements CompilerHost {
     }
 
     switch (ManifestModuleUtil.getFileType(sourceFile)) {
-      case 'typings':
-      case 'package-json':
-        this.writeFile(output, this.readFile(sourceFile)!);
-        break;
       case 'js':
-        this.writeFile(output, this.readFile(sourceFile)!);
+      case 'typings':
+      case 'package-json': {
+        const text = this.readFile(sourceFile)!;
+        const finalText = sourceFile.endsWith('package.json') ? CompilerUtil.rewritePackageJSON(this.#manifest, text) : text;
+        const location = this.#tscOutputFileToOuptut.get(output) ?? output;
+        this.#writeFile(location, finalText, false);
         break;
+      }
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
         const tsSourceFile = program.getSourceFile(sourceFile)!;
@@ -327,15 +329,7 @@ export class CompilerState implements CompilerHost {
     return this.#sourceDirectory.has(sourceDirectory) || this.#directoryExists(sourceDirectory);
   }
 
-  writeFile(
-    outputFile: string,
-    text: string,
-    bom?: boolean
-  ): void {
-    if (outputFile.endsWith('package.json')) {
-      text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
-    }
-
+  writeFile(outputFile: string, text: string, bom?: boolean): void {
     // JSX runtime shenanigans
     text = text.replace(/support\/jsx-runtime"/g, 'support/jsx-runtime.js"');
 
