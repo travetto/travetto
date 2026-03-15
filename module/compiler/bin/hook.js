@@ -2,6 +2,8 @@ import module from 'node:module';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+globalThis.devProcessWarningExclusions.push((message) => message.startsWith('stripTypeScriptTypes'));
+
 module.registerHooks({
   load: (url, context, nextLoad) => {
     if (/[.]tsx?$/.test(url)) {

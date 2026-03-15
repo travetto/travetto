@@ -7,13 +7,20 @@ if (process.env.NODE_ENV !== 'production') {
   Error.stackTraceLimit = 50;
 
   const ogEmitWarning = process.emitWarning;
-  const exclusions = global.devProcessWarningExclusions = [(message) => message.startsWith('stripTypeScriptTypes')];
+  const exclusions = global.devProcessWarningExclusions = [];
   process.emitWarning = (message, category, ...other) => {
     if (exclusions.length === 0 || !exclusions.some(filter => filter(message, category))) {
       return ogEmitWarning(message, category, ...other);
     }
   };
 }
+
+const isError = Error.isError.bind(Error);
+Object.defineProperty(Error, 'isError', {
+  value: (input) => isError(input) || (input instanceof Error)
+});
+
+// polyfills
 
 const [majorVersion, minorVersion] = process.version.replace(/^v/, '').split('.').map(text => parseInt(text, 10));
 
@@ -38,8 +45,3 @@ if (majorVersion < 25 || (majorVersion === 25 && minorVersion < 7)) {
     }
   });
 }
-
-const isError = Error.isError.bind(Error);
-Object.defineProperty(Error, 'isError', {
-  value: (input) => isError(input) || (input instanceof Error)
-});
