@@ -20,11 +20,12 @@ export class TestModelUtil {
     return { passed: 0, failed: 0, skipped: 0, errored: 0, unknown: 0, total: 0, duration: 0, selfDuration: 0 };
   }
 
-  static countTestResult<T extends ResultsSummary>(summary: T, tests: Pick<TestResult, 'status' | 'selfDuration'>[]): T {
+  static countTestResult<T extends ResultsSummary>(summary: T, tests: Pick<TestResult, 'status' | 'selfDuration' | 'duration'>[]): T {
     for (const test of tests) {
       summary[test.status] += 1;
       summary.total += 1;
       summary.selfDuration += (test.selfDuration ?? 0);
+      summary.duration += (test.duration ?? 0);
     }
     return summary;
   }

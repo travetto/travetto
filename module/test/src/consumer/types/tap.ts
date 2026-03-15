@@ -10,6 +10,8 @@ import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
 import { type TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer.ts';
 
+const SPACE = ' ';
+
 /**
  * TAP Format consumer
  */
@@ -19,6 +21,7 @@ export class TapEmitter implements TestConsumerShape {
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;
   #options?: Record<string, unknown>;
+  #start: number = 0;
 
   constructor(
     terminal = new Terminal(),
@@ -40,6 +43,7 @@ export class TapEmitter implements TestConsumerShape {
    * Preamble
    */
   onStart(): void {
+    this.#start = Date.now();
     this.log(this.#enhancer.suiteName('TAP version 14'));
   }
 
@@ -169,15 +173,19 @@ export class TapEmitter implements TestConsumerShape {
     const allPassed = !summary.failed && !summary.errored;
 
     this.log([
-      this.#enhancer[allPassed ? 'success' : 'failure']('Results'),
-      `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`,
-      allPassed ? 'failed' : this.#enhancer.failure('failed'),
-      `${this.#enhancer.total(summary.failed)}`,
-      allPassed ? 'errored' : this.#enhancer.failure('errored'),
-      `${this.#enhancer.total(summary.errored)}`,
-      'skipped',
-      this.#enhancer.total(summary.skipped),
-      `# (Total Test Time: ${TimeUtil.asClock(summary.selfDuration)}, Total Run Time: ${TimeUtil.asClock(summary.duration)})`
-    ].join(' '));
+      this.#enhancer[allPassed ? 'success' : 'failure']('Results'), SPACE,
+      `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`, SPACE,
+      allPassed ? 'failed' : this.#enhancer.failure('failed'), SPACE,
+      `${this.#enhancer.total(summary.failed)}`, SPACE,
+      allPassed ? 'errored' : this.#enhancer.failure('errored'), SPACE,
+      `${this.#enhancer.total(summary.errored)}`, SPACE,
+      'skipped', SPACE,
+      this.#enhancer.total(summary.skipped), SPACE,
+      '#', SPACE, '(',
+      `Test Time: ${TimeUtil.asClock(summary.selfDuration)}`, ',', SPACE,
+      `Suite Time: ${TimeUtil.asClock(summary.duration)}`, ',', SPACE,
+      `Clock Time: ${TimeUtil.asClock(Date.now() - this.#start)}`,
+      ')',
+    ].join(''));
   }
 }
