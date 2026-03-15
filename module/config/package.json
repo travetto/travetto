@@ -1,6 +1,6 @@
 {
   "name": "@travetto/config",
-  "version": "8.0.0-alpha.4",
+  "version": "8.0.0-alpha.5",
   "type": "module",
   "description": "Configuration support",
   "keywords": [
@@ -27,8 +27,8 @@
     "directory": "module/config"
   },
   "dependencies": {
-    "@travetto/di": "^8.0.0-alpha.4",
-    "@travetto/schema": "^8.0.0-alpha.4",
+    "@travetto/di": "^8.0.0-alpha.5",
+    "@travetto/schema": "^8.0.0-alpha.5",
     "yaml": "^2.8.2"
   },
   "travetto": {

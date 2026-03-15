@@ -1,6 +1,6 @@
 {
   "name": "@travetto/runtime",
-  "version": "8.0.0-alpha.4",
+  "version": "8.0.0-alpha.5",
   "type": "module",
   "description": "Runtime for travetto applications.",
   "keywords": [
@@ -26,13 +26,13 @@
     "directory": "module/runtime"
   },
   "dependencies": {
-    "@travetto/manifest": "^8.0.0-alpha.3",
+    "@travetto/manifest": "^8.0.0-alpha.4",
     "@types/debug": "^4.1.12",
     "debug": "^4.4.3",
     "temporal-polyfill-lite": "^0.3.2"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^8.0.0-alpha.3"
+    "@travetto/transformer": "^8.0.0-alpha.4"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
