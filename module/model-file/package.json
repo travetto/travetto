@@ -32,7 +32,7 @@
     "@travetto/schema": "^8.0.0-alpha.5"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.9",
+    "@travetto/cli": "^8.0.0-alpha.10",
     "@travetto/test": "^8.0.0-alpha.5"
   },
   "peerDependenciesMeta": {

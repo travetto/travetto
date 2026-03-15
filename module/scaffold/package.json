@@ -1,6 +1,6 @@
 {
   "name": "@travetto/scaffold",
-  "version": "8.0.0-alpha.11",
+  "version": "8.0.0-alpha.12",
   "type": "module",
   "description": "App Scaffold for the Travetto framework",
   "keywords": [
@@ -28,7 +28,7 @@
     "trv-scaffold": "bin/trv-scaffold.js"
   },
   "dependencies": {
-    "@travetto/cli": "^8.0.0-alpha.9",
+    "@travetto/cli": "^8.0.0-alpha.10",
     "@travetto/compiler": "^8.0.0-alpha.7",
     "@travetto/runtime": "^8.0.0-alpha.5",
     "enquirer": "^2.4.1",
