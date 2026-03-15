@@ -13,10 +13,6 @@ const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'suppor
 
 export class CompilerState implements CompilerHost {
 
-  static fileExists(location: string): boolean {
-    return fs.existsSync(location);
-  }
-
   static async get(idx: ManifestIndex): Promise<CompilerState> {
     return new CompilerState().init(idx);
   }
@@ -90,7 +86,7 @@ export class CompilerState implements CompilerHost {
 
   async #initCompilerOptions(): Promise<CompilerOptions> {
     const tsconfigFile = CommonUtil.resolveWorkspace(this.#manifest, 'tsconfig.json');
-    if (!CompilerState.fileExists(tsconfigFile)) {
+    if (!ts.sys.fileExists(tsconfigFile)) {
       this.#writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }, null, 2));
     }
 
