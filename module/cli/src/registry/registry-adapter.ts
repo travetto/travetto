@@ -93,7 +93,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
    */
   register(...configs: Partial<CliCommandConfig>[]): CliCommandConfig {
     const metadata = describeFunction(this.#cls);
-    this.#config ??= { cls: this.#cls, name: getName(metadata.import), preMain: [], runTarget: true };
+    this.#config ??= { cls: this.#cls, name: getName(metadata.import), preMain: [], runTarget: false };
     return combineClasses(this.#config, ...configs);
   }
 
