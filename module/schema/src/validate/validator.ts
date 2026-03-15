@@ -199,13 +199,13 @@ export class SchemaValidator {
         delete error.regex;
       }
 
-      const msg = result.message ?? (
+      const message = result.message ?? (
         Messages.get(error.regex ?? '') ??
         Messages.get(error.kind) ??
         Messages.get('default')!
       );
 
-      error.message = msg
+      error.message = message
         .replace(/\{([^}]+)\}/g, (_, key: (keyof ValidationError)) => `${error[key]}`);
 
       out.push(error);

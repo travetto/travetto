@@ -18,7 +18,7 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
   return {
     name: 'travetto-source-maps',
     async load(this: PluginContext, id: string): Promise<LoadResult> {
-      if (!id.endsWith('.js') || id.endsWith('@travetto/runtime/support/polyfill.js')) {
+      if (!id.endsWith('.js') || id.endsWith('@travetto/runtime/support/patch.js')) {
         return null;
       }
       try {

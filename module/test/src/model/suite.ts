@@ -49,7 +49,9 @@ export interface ResultsSummary {
   unknown: number;
   /** Total Test Count  */
   total: number;
-  /** Test Execution Duration  */
+  /** Test Self Execution Duration  */
+  selfDuration: number;
+  /** Total Duration */
   duration: number;
 }
 

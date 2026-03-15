@@ -64,7 +64,7 @@ class $ActivationManager {
   async onTargetEvent(event: TargetEvent): Promise<void> {
     try {
       const handler = await this.#commandRegistry.get(event.type)?.instance;
-      if (handler && handler.onEvent) {
+      if (handler?.onEvent) {
         await handler.onEvent(event);
         await vscode.window.activeTerminal?.show();
       } else {

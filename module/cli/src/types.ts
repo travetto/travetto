@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/runtime';
+import type { Any, Class } from '@travetto/runtime';
 
 type OrProm<T> = T | Promise<T>;
 type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
@@ -32,7 +32,7 @@ export interface CliCommandShape {
   help?(): OrProm<string[]>;
 }
 
-type PreMainHandler = (cmd: CliCommandShape) => (unknown | Promise<unknown>);
+export type PreMainHandler<T extends Any = Any> = { priority: number, handler: (cmd: T) => Any };
 
 /**
  * CLI Command schema shape
@@ -41,5 +41,5 @@ export interface CliCommandConfig {
   cls: Class<CliCommandShape>;
   name: string;
   runTarget?: boolean;
-  preMain?: PreMainHandler[];
+  preMain: PreMainHandler[];
 }

@@ -26,24 +26,6 @@ export class TestExecutor {
     this.#consumer = consumer;
   }
 
-  #onSuiteTestError(result: TestResult, test: TestConfig): void {
-    this.#consumer.onEvent({ type: 'test', phase: 'before', test });
-    for (const assertion of result.assertions) {
-      this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion });
-    }
-    this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
-  }
-
-  #recordSuiteErrors(suiteConfig: SuiteConfig, suiteResult: SuiteResult, errors: TestResult[]): void {
-    for (const test of errors) {
-      if (!suiteResult.tests[test.methodName]) {
-        this.#onSuiteTestError(test, suiteConfig.tests[test.methodName]);
-        suiteResult.errored += 1;
-        suiteResult.total += 1;
-      }
-    }
-  }
-
   /**
    * Raw execution, runs the method and then returns any thrown errors as the result.
    *
@@ -73,96 +55,43 @@ export class TestExecutor {
     }
   }
 
-  #skipTest(test: TestConfig, result: SuiteResult): void {
-    // Mark test start
-    this.#consumer.onEvent({ type: 'test', phase: 'before', test });
-    result.skipped += 1;
-    result.total += 1;
-    this.#consumer.onEvent({
-      type: 'test',
-      phase: 'after',
-      test: {
-        ...test,
-        suiteLineStart: result.lineStart,
-        assertions: [], duration: 0, durationTotal: 0, output: [], status: 'skipped'
-      }
-    });
-  }
-
-  /**
-   * An empty suite result based on a suite config
-   */
-  createSuiteResult(suite: SuiteConfig, override?: Partial<SuiteResult>): SuiteResult {
-    return {
-      passed: 0,
-      failed: 0,
-      errored: 0,
-      skipped: 0,
-      unknown: 0,
-      total: 0,
-      status: 'unknown',
-      lineStart: suite.lineStart,
-      lineEnd: suite.lineEnd,
-      import: suite.import,
-      classId: suite.classId,
-      sourceHash: suite.sourceHash,
-      duration: 0,
-      tests: {},
-      ...override
-    };
-  }
-
   /**
    * Execute the test, capture output, assertions and promises
    */
-  async executeTest(test: TestConfig, suite: SuiteConfig): Promise<TestResult> {
+  async executeTest(test: TestConfig, suite: SuiteConfig, override?: Partial<TestResult>): Promise<TestResult> {
+
+    const result = TestModelUtil.createTestResult(suite, test, override);
 
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
 
-    const startTime = Date.now();
-
-    const result: TestResult = {
-      methodName: test.methodName,
-      description: test.description,
-      classId: test.classId,
-      tags: test.tags,
-      suiteLineStart: suite.lineStart,
-      lineStart: test.lineStart,
-      lineEnd: test.lineEnd,
-      lineBodyStart: test.lineBodyStart,
-      import: test.import,
-      declarationImport: test.declarationImport,
-      sourceHash: test.sourceHash,
-      status: 'unknown',
-      assertions: [],
-      duration: 0,
-      durationTotal: 0,
-      output: [],
-    };
 
     // Emit every assertion as it occurs
-    const getAssertions = AssertCapture.collector(test, asrt =>
-      this.#consumer.onEvent({
-        type: 'assertion',
-        phase: 'after',
-        assertion: asrt
-      })
-    );
+    const getAssertions = AssertCapture.collector(test, item =>
+      this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: item }));
 
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
-    // Run method and get result
-    const error = await this.#executeTestMethod(test);
-    const [status, finalError] = AssertCheck.validateTestResultError(test, error);
+    // Already finished
+    if (result.status !== 'unknown') {
+      if (result.error) {
+        result.assertions.push(AssertUtil.generateAssertion({ suite, test, error: result.error }));
+      }
+      for (const item of result.assertions ?? []) { AssertCapture.add(item); }
+    } else {
+      // Run method and get result
+      const startTime = Date.now();
+      const error = await this.#executeTestMethod(test);
+      const [status, finalError] = AssertCheck.validateTestResultError(test, error);
+      result.status = status;
+      result.selfDuration = Date.now() - startTime;
+      if (finalError) {
+        result.error = finalError;
+      }
+    }
 
-    Object.assign(result, {
-      status,
-      output: consoleCapture.end(),
-      assertions: getAssertions(),
-      duration: Date.now() - startTime,
-      ...(finalError ? { error: finalError } : {})
-    });
+    result.output = consoleCapture.end();
+    result.assertions = getAssertions();
 
     // Mark completion
     this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
@@ -179,14 +108,17 @@ export class TestExecutor {
 
     const shouldSkip = await this.#shouldSkip(suite, suite.instance);
 
+    const result: SuiteResult = TestModelUtil.createSuiteResult(suite);
+
     if (shouldSkip) {
       this.#consumer.onEvent({
         phase: 'after', type: 'suite',
-        suite: this.createSuiteResult(suite, {
+        suite: {
+          ...result,
           status: 'skipped',
           skipped: tests.length,
           total: tests.length
-        })
+        }
       });
     }
 
@@ -194,62 +126,73 @@ export class TestExecutor {
       return;
     }
 
-    const result: SuiteResult = this.createSuiteResult(suite);
+    const manager = new TestPhaseManager(suite);
+    const originalEnv = { ...process.env };
+    const startTime = Date.now();
+    const testResultOverrides: Record<string, Partial<TestResult>> = {};
+
     const validTestMethodNames = new Set(tests.map(t => t.methodName));
     const testConfigs = Object.fromEntries(
       Object.entries(suite.tests).filter(([key]) => validTestMethodNames.has(key))
     );
 
-    const startTime = Date.now();
-
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
-
-    const manager = new TestPhaseManager(suite);
-
-    const originalEnv = { ...process.env };
 
     try {
       // Handle the BeforeAll calls
       await manager.startPhase('all');
+    } catch (someError) {
+      const suiteError = await manager.onError('all', someError);
+      for (const method of validTestMethodNames) {
+        testResultOverrides[method] ??= { status: 'errored', error: suiteError };
+      }
+    }
 
-      const suiteEnv = { ...process.env };
+    const suiteEnv = { ...process.env };
 
-      for (const test of tests ?? suite.tests) {
-        if (await this.#shouldSkip(test, suite.instance)) {
-          this.#skipTest(test, result);
-          continue;
-        }
+    for (const test of tests) {
+      // Reset env before each test
+      process.env = { ...suiteEnv };
 
-        // Reset env before each test
-        process.env = { ...suiteEnv };
+      const testStart = Date.now();
+      const testResultOverride = (testResultOverrides[test.methodName] ??= {});
 
-        const testStart = Date.now();
-        try {
-
-          // Handle BeforeEach
-          await manager.startPhase('each');
-
-          // Run test
-          const testResult = await this.executeTest(test, suite);
-          result.tests[testResult.methodName] = testResult;
-          result[testResult.status]++;
-          result.total += 1;
-
-          // Handle after each
-          await manager.endPhase('each');
-          testResult.durationTotal = Date.now() - testStart;
-        } catch (testError) {
-          const errors = await manager.errorPhase('each', testError, suite, test);
-          this.#recordSuiteErrors(suite, result, errors);
-        }
+      if (await this.#shouldSkip(test, suite.instance)) {
+        testResultOverride.status = 'skipped';
       }
 
+      try {
+        // Handle BeforeEach
+        testResultOverride.status || await manager.startPhase('each');
+      } catch (someError) {
+        const testError = await manager.onError('each', someError);
+        testResultOverride.error = testError;
+        testResultOverride.status = 'errored';
+      }
+
+      // Run test
+      const testResult = await this.executeTest(test, suite, testResultOverride);
+
+      // Handle after each
+      try {
+        testResultOverride.status || await manager.endPhase('each');
+      } catch (testError) {
+        if (!(testError instanceof Error)) { throw testError; };
+        console.error('Failed to properly shutdown test', testError.message);
+      }
+
+      result.tests[testResult.methodName] = testResult;
+      testResult.duration = Date.now() - testStart;
+      TestModelUtil.countTestResult(result, [testResult]);
+    }
+
+    try {
       // Handle after all
       await manager.endPhase('all');
     } catch (suiteError) {
-      const errors = await manager.errorPhase('all', suiteError, suite);
-      this.#recordSuiteErrors(suite, result, errors);
+      if (!(suiteError instanceof Error)) { throw suiteError; };
+      console.error('Failed to properly shutdown test', suiteError.message);
     }
 
     // Restore env
@@ -265,19 +208,13 @@ export class TestExecutor {
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  async execute(run: TestRun): Promise<void> {
+  async execute(run: TestRun, singleFile?: boolean): Promise<void> {
     try {
       await Runtime.importFrom(run.import);
     } catch (error) {
-      if (!(error instanceof Error)) {
-        throw error;
-      }
+      if (!(error instanceof Error)) { throw error; }
+      const suite = TestModelUtil.createImportErrorSuiteResult(run);
       console.error(error);
-
-      // Fire import failure as a test failure for each test in the suite
-      const { result, test, suite } = AssertUtil.gernerateImportFailure(run.import, error);
-      this.#consumer.onEvent({ type: 'suite', phase: 'before', suite });
-      this.#onSuiteTestError(result, test);
       this.#consumer.onEvent({ type: 'suite', phase: 'after', suite });
       return;
     }
@@ -289,6 +226,11 @@ export class TestExecutor {
     const suites = SuiteRegistryIndex.getSuiteTests(run);
     if (!suites.length) {
       console.warn('Unable to find suites for ', run);
+    }
+
+    if (singleFile) {
+      const testCount = suites.reduce((acc, suite) => acc + suite.tests.length, 0);
+      this.#consumer.onTestRunState?.({ testCount });
     }
 
     for (const { suite, tests } of suites) {

@@ -2,6 +2,7 @@
 // @ts-check
 import { resolve } from 'node:path';
 import { writeFileSync, readFileSync } from 'node:fs';
+import '@travetto/runtime/support/patch.js';
 import '@travetto/compiler/bin/hook.js';
 
 const current = process.cwd();

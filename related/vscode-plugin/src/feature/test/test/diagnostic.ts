@@ -4,6 +4,7 @@ import type { TestRemoveEvent, TestResult, TestStatus, TestWatchEvent } from '@t
 
 import { Workspace } from '../../../core/workspace.ts';
 import { Decorations, Style } from './decoration.ts';
+import { TestModelUtil } from './util.ts';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
@@ -25,10 +26,10 @@ export class DiagnosticManager {
     const clsName = test.classId.split(/[^a-z-/]+/i).at(-1);
     const results: vscode.Diagnostic[] = [];
 
-    const addError = (msg: string, line: number) => {
+    const addError = (message: string, line: number) => {
       const item = new vscode.Diagnostic(
         new vscode.Range(new vscode.Position(line - 1, 0), new vscode.Position(line - 1, 1000)),
-        `${clsName}.${test.methodName} - ${msg}`,
+        `${clsName}.${test.methodName} - ${message}`,
         vscode.DiagnosticSeverity.Error
       );
       item.source = '@travetto/test';
@@ -67,23 +68,14 @@ export class DiagnosticManager {
   }
 
   refreshStatus(): void {
-    const { total, passed, failed, errored } = [...this.#tracked.values()]
+    const summary = TestModelUtil.buildSummary();
+    TestModelUtil.countTestResult(summary, [...this.#tracked.values()]
       .flatMap(m => [...m.values()])
       .flatMap(t => [...t.values()])
-      .reduce((acc, t) => {
-        acc.total += 1;
-        acc[t.status] += 1;
-        return acc;
-      }, { total: 0, passed: 0, failed: 0, errored: 0, skipped: 0, unknown: 0 });
+    );
 
-    let status: TestStatus;
-    switch (true) {
-      case errored > 0: status = 'errored'; break;
-      case failed > 0: status = 'failed'; break;
-      case passed === total: status = 'passed'; break;
-      default: status = 'unknown';
-    }
-    this.setStatus(`Tests \$(pass-filled) ${passed} \$(alert) ${failed}`, status);
+    const status = TestModelUtil.computeTestStatus(summary);
+    this.setStatus(`Tests \$(pass-filled) ${summary.passed} \$(alert) ${summary.failed}`, status);
   }
 
   afterTest(test: TestResult): void {

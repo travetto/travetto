@@ -10,13 +10,6 @@ import { CliUtil } from '../util.ts';
 type CliCommandConfigOptions = { runTarget?: boolean };
 type CliFlagOptions = { full?: string, short?: string, envVars?: string[] };
 
-function runBeforeMain<T>(cls: Class, handler: (item: T) => (unknown | Promise<unknown>), runTarget?: boolean): void {
-  CliCommandRegistryIndex.getForRegister(cls).register({
-    runTarget,
-    preMain: [async (cmd): Promise<void> => { await handler(castTo(cmd)); }]
-  });
-}
-
 /**
  * Decorator to register a CLI command
  *
@@ -72,9 +65,7 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
       description: 'Application profiles'
     });
 
-    runBeforeMain(cls, (cmd: typeof instance) =>
-      Env.TRV_PROFILES.set([...cmd[property] ?? [], ...(Env.TRV_PROFILES.list ?? [])])
-    );
+    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 1, cmd => Env.TRV_PROFILES.add(...cmd[property] ?? []));
   };
 };
 
@@ -103,18 +94,23 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
         const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
 
         // If we need to run as a specific module
-        if (runModule !== Runtime.main.name) {
-          try {
-            RuntimeIndex.reinitForModule(runModule);
-          } catch {
-            return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: property };
-          }
+        if (runModule !== Runtime.main.name && RuntimeIndex.getModule(runModule) === undefined) {
+          return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: property };
         }
 
         if (!(await CliModuleUtil.moduleHasDependency(runModule, commandModule))) {
           return { source: 'flag', message: `${runModule} does not have ${commandModule} as a dependency`, kind: 'custom', path: property };
         }
       }],
+    });
+
+    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 2, cmd => {
+      const typed: (typeof cmd) & { [property]?: string } = castTo(cmd);
+      const providedModule = typed[property];
+      const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
+      if (runModule !== Runtime.main.name) {
+        RuntimeIndex.reinitForModule(runModule);
+      }
     });
   };
 }
@@ -127,17 +123,15 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
 export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
   return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
     const cls = getClass(instance);
+    if (Runtime.production) { return; }
+
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config),
       description: 'Should the invocation automatically restart on source changes'
     });
 
-    runBeforeMain(cls,
-      (cmd: typeof instance) => {
-        if (Runtime.production) { return; }
-        return CliUtil.runWithRestartOnChange(cmd[property]);
-      }, true
-    );
+    CliCommandRegistryIndex.getForRegister(cls).register({ runTarget: true });
+    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 10, cmd => CliUtil.runWithRestartOnChange(cmd[property]));
   };
 }
 
@@ -148,19 +142,18 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
  */
 export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
   return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
+    if (Runtime.production) { return; }
+
     const cls = getClass(instance);
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config, Env.TRV_DEBUG_IPC.key),
       description: 'Should the invocation automatically restart on source changes'
     });
 
-    runBeforeMain(cls,
-      (cmd: typeof instance & CliCommandShape) => {
-        if (Runtime.production) { return; }
-        const cliConfig = CliCommandRegistryIndex.get(cls);
-        return cmd[property] && CliUtil.runWithDebugIpc(cliConfig.name);
-      },
-      true
-    );
+    CliCommandRegistryIndex.getForRegister(cls).register({ runTarget: true });
+    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 10, cmd => {
+      const cliConfig = CliCommandRegistryIndex.get(cls);
+      return cmd[property] && CliUtil.runWithDebugIpc(cliConfig.name);
+    });
   };
 }

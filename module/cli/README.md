@@ -59,7 +59,7 @@ This module also has a tight integration with the [VSCode plugin](https://market
 At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
    *  The file must be located in the `support/` folder, and have a name that matches `cli.*.ts`
    *  The file must be a class that has a main method
-   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) decorator
+   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) decorator
 
 **Code: Basic Command**
 ```typescript
@@ -94,7 +94,7 @@ Examples of mappings:
 The pattern is that underscores(_) translate to colons (:), and the `cli.` prefix, and `.ts` suffix are dropped.
 
 ## Binding Flags
-[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) class. The fields of the class represent the flags that are available to the command.
+[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) class. The fields of the class represent the flags that are available to the command.
 
 **Code: Basic Command with Flag**
 ```typescript
@@ -131,7 +131,7 @@ $ trv basic:flag --loud
 HELLO
 ```
 
-The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) supports the following data types for flags:
+The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) supports the following data types for flags:
    *  Boolean values
    *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L172), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L179), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L165), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L99) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L110) decorators help provide additional validation.
    *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L99), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L110), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L90) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L64) provide additional constraints
@@ -390,7 +390,7 @@ npx trv call:db --host localhost --port 3306 --username app --password <custom>
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L27) decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") does expose a cli target `web:http` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -460,7 +460,7 @@ export class WebHttpCommand implements CliCommandShape {
   profile: string[];
 
   @CliRestartOnChangeFlag()
-  restartOnChange: boolean = true;
+  restartOnChange: boolean = Runtime.localDevelopment;
 
   @CliDebugIpcFlag()
   debugIpc?: boolean;

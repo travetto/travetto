@@ -40,6 +40,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   @PostConstruct()
   async initializeClient(): Promise<void> {
+    globalThis.devProcessWarningExclusions?.push((_, category) => category === 'MetadataLookupWarning');
     this.client = new Firestore({ ...this.config, useBigInt: true });
     ShutdownManager.signal.addEventListener('abort', () => this.client.terminate());
   }

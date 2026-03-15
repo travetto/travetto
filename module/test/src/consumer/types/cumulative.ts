@@ -1,7 +1,7 @@
 import type { TestConsumerShape } from '../types.ts';
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
 import type { TestConfig, TestDiffSource, TestResult } from '../../model/test.ts';
-import type { ResultsSummary, SuiteConfig, SuiteResult } from '../../model/suite.ts';
+import type { SuiteConfig, SuiteResult } from '../../model/suite.ts';
 import { DelegatingConsumer } from './delegating.ts';
 import type { SuiteCore } from '../../model/common.ts';
 import { TestModelUtil } from '../../model/util.ts';
@@ -9,7 +9,7 @@ import { TestModelUtil } from '../../model/util.ts';
 type ClassId = string;
 type ImportName = string;
 
-type CumulativeTestResult = Pick<TestResult, 'sourceHash' | 'status' | 'duration'>;
+type CumulativeTestResult = Pick<TestResult, 'sourceHash' | 'status' | 'duration' | 'selfDuration'>;
 type CumulativeSuiteResult = Pick<SuiteCore, 'import' | 'classId' | 'sourceHash'> & {
   tests: Record<string, CumulativeTestResult>;
 };
@@ -37,7 +37,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
 
   onTestBefore(config: TestConfig): TestConfig {
     const suite = this.getSuite(config);
-    suite.tests[config.methodName] = { sourceHash: config.sourceHash, status: 'unknown', duration: 0 };
+    suite.tests[config.methodName] = { sourceHash: config.sourceHash, status: 'unknown', duration: 0, selfDuration: 0 };
     return config;
   }
 
@@ -56,15 +56,8 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   onSuiteAfter(result: SuiteResult): SuiteResult {
     // Reset counts
     const suite = this.getSuite(result);
-    const results: ResultsSummary = {
-      passed: 0, failed: 0, skipped: 0, errored: 0, unknown: 0,
-      total: 0, duration: 0
-    };
-    for (const test of Object.values(suite.tests)) {
-      results[test.status] += 1;
-      results.total += 1;
-      results.duration += test.duration ?? 0;
-    }
+    const results = TestModelUtil.buildSummary();
+    TestModelUtil.countTestResult(results, Object.values(suite.tests));
     return { ...result, ...results, status: TestModelUtil.computeTestStatus(results) };
   }
 

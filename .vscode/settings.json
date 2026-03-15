@@ -1,15 +1,17 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
   "files.exclude": {
     "**/.trv/**": true,
     ".git/**": true
   },
-  "files.watcherExclude": {
-    ".git/**": true,
-    "**/node_modules/**": true,
-    "**/.trv/**": true,
-    "related/vscode-plugin/out/**": true,
-    "**/.angular/**": true,
+  "js/ts.tsserver.watchOptions": {
+    "excludeDirectories": [
+      ".git/**",
+      "**/node_modules/**",
+      "**/.trv/**",
+      "related/vscode-plugin/out/**",
+      "**/.angular/**",
+    ],
   },
   "search.exclude": {
     "**/node_modules": true,

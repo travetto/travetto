@@ -1,13 +1,16 @@
 import path from 'node:path';
+import { AssertionError } from 'node:assert';
 import { stringify } from 'yaml';
 
 import { Terminal, StyleUtil } from '@travetto/terminal';
-import { TimeUtil, RuntimeIndex, hasToJSON, JSONUtil } from '@travetto/runtime';
+import { TimeUtil, RuntimeIndex } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
 import { type TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer.ts';
+
+const SPACE = ' ';
 
 /**
  * TAP Format consumer
@@ -17,8 +20,8 @@ export class TapEmitter implements TestConsumerShape {
   #count = 0;
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;
-  #start: number;
   #options?: Record<string, unknown>;
+  #start: number = 0;
 
   constructor(
     terminal = new Terminal(),
@@ -59,16 +62,14 @@ export class TapEmitter implements TestConsumerShape {
    * @param error
    */
   errorToString(error?: Error): string | undefined {
-    if (error && error.name !== 'AssertionError') {
-      if (error instanceof Error) {
-        let out = JSONUtil.toUTF8(hasToJSON(error) ? error.toJSON() : error, { indent: 2 });
-        if (this.#options?.verbose && error.stack) {
-          out = `${out}\n${error.stack}`;
-        }
-        return out;
-      } else {
-        return `${error}`;
-      }
+    if (error instanceof AssertionError) {
+      return;
+    } else if (error instanceof Error) {
+      return error.stack ?
+        error.stack.split(/\n/).slice(0, this.#options?.verbose ? -1 : 5).join('\n') :
+        error.message;
+    } else {
+      return `${error}`;
     }
   }
 
@@ -139,9 +140,9 @@ export class TapEmitter implements TestConsumerShape {
         case 'errored':
         case 'failed': {
           if (test.error) {
-            const msg = this.errorToString(test.error);
-            if (msg) {
-              this.logMeta({ error: msg });
+            const message = this.errorToString(test.error);
+            if (message) {
+              this.logMeta({ error: message });
             }
           }
           break;
@@ -172,15 +173,19 @@ export class TapEmitter implements TestConsumerShape {
     const allPassed = !summary.failed && !summary.errored;
 
     this.log([
-      this.#enhancer[allPassed ? 'success' : 'failure']('Results'),
-      `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`,
-      allPassed ? 'failed' : this.#enhancer.failure('failed'),
-      `${this.#enhancer.total(summary.failed)}`,
-      allPassed ? 'errored' : this.#enhancer.failure('errored'),
-      `${this.#enhancer.total(summary.errored)}`,
-      'skipped',
-      this.#enhancer.total(summary.skipped),
-      `# (Total Test Time: ${TimeUtil.asClock(summary.duration)}, Total Run Time: ${TimeUtil.asClock(Date.now() - this.#start)})`
-    ].join(' '));
+      this.#enhancer[allPassed ? 'success' : 'failure']('Results'), SPACE,
+      `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`, SPACE,
+      allPassed ? 'failed' : this.#enhancer.failure('failed'), SPACE,
+      `${this.#enhancer.total(summary.failed)}`, SPACE,
+      allPassed ? 'errored' : this.#enhancer.failure('errored'), SPACE,
+      `${this.#enhancer.total(summary.errored)}`, SPACE,
+      'skipped', SPACE,
+      this.#enhancer.total(summary.skipped), SPACE,
+      '#', SPACE, '(Timings:', SPACE,
+      'Self=', TimeUtil.asClock(summary.selfDuration), ',', SPACE,
+      'Total=', TimeUtil.asClock(summary.duration), ',', SPACE,
+      'Clock=', TimeUtil.asClock(Date.now() - this.#start),
+      ')',
+    ].join(''));
   }
 }

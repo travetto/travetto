@@ -2,7 +2,7 @@ import { Util, AsyncQueue } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
-import type { TestResult, TestStatus } from '../../model/test.ts';
+import type { TestResult } from '../../model/test.ts';
 
 import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
@@ -10,6 +10,7 @@ import { TestConsumer } from '../decorator.ts';
 import { TapEmitter } from './tap.ts';
 import { CONSOLE_ENHANCER, type TestResultsEnhancer } from '../enhancer.ts';
 import type { SuiteResult } from '../../model/suite.ts';
+import { TestModelUtil } from '../../model/util.ts';
 
 type Result = {
   key: string;
@@ -31,6 +32,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
   #consumer: TapEmitter;
   #enhancer: TestResultsEnhancer;
   #options?: Record<string, unknown>;
+  #state: TestRunState = {};
 
   constructor(terminal: Terminal = new Terminal(process.stderr)) {
     this.#terminal = terminal;
@@ -87,20 +89,24 @@ export class TapSummaryEmitter implements TestConsumerShape {
     this.#consumer.setOptions(options);
   }
 
+  onTestRunState(state: TestRunState): void {
+    Object.assign(this.#state, state);
+  }
+
   async onStart(state: TestRunState): Promise<void> {
     this.#consumer.onStart();
-    const total: Record<TestStatus | 'count', number> = { errored: 0, failed: 0, passed: 0, skipped: 0, unknown: 0, count: 0 };
+    this.onTestRunState(state);
+
+    const total = TestModelUtil.buildSummary();
     const success = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
     const fail = StyleUtil.getStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
     this.#progress = this.#terminal.streamToBottom(
       Util.mapAsyncIterable(
         this.#results,
         (value) => {
-          total[value.status] += 1;
-          total.count += 1;
+          TestModelUtil.countTestResult(total, [value]);
           const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
-          return { value: `Tests %idx/%total [${statusLine}] -- ${value.classId}`, total: state.testCount, idx: total.passed };
-
+          return { value: `Tests %idx/%total [${statusLine}] -- ${value.classId}`, total: this.#state.testCount, idx: total.passed };
         },
         TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: (total.failed || total.errored) ? fail : success }) })
       ),

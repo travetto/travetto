@@ -4,9 +4,12 @@ import { Env, JSONUtil } from '@travetto/runtime';
 
 import { EnvDict, LaunchConfig } from './types.ts';
 import { Workspace } from './workspace.ts';
+import { Log } from './log.ts';
 
 // eslint-disable-next-line no-template-curly-in-string
 const WORKSPACE = '${workspaceFolder}';
+
+const logger = new Log('run')
 
 export class RunUtil {
 
@@ -64,13 +67,15 @@ export class RunUtil {
       internalConsoleOptions: 'openOnSessionStart',
       ...(typeof debugOverrides === 'object' ? debugOverrides : {}),
       program: input.main.replace(Workspace.path, WORKSPACE),
-      cwd: WORKSPACE,
+      cwd: input.cwd ?? WORKSPACE,
       args: (input.args ?? []).map(arg => `${arg}`),
       env: {
         ...this.buildEnv(input.module),
         ...input.env ?? {},
       },
     };
+
+    logger.debug('Running with configuration', config);
 
     return config;
   }

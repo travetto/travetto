@@ -143,6 +143,10 @@ export class StyleUtil {
 
   /** Make a URL link */
   static link(text: string, url: string): string {
-    return `${ESC}]8;;${url}${ESC}\\${text}${ESC}]8;;${ESC}\\`;
+    if (!process.stdout.isTTY) {
+      return text;
+    } else {
+      return `${ESC}]8;;${url}${ESC}\\${text}${ESC}]8;;${ESC}\\`;
+    }
   }
 }
