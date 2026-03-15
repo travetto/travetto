@@ -32,13 +32,13 @@
     "vue": "^3.5.30"
   },
   "devDependencies": {
-    "@travetto/compiler": "^8.0.0-alpha.5",
+    "@travetto/compiler": "^8.0.0-alpha.6",
     "@travetto/email-compiler": "^8.0.0-alpha.6",
     "@travetto/email-inky": "^8.0.0-alpha.6",
-    "@travetto/pack": "^8.0.0-alpha.7"
+    "@travetto/pack": "^8.0.0-alpha.8"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.8"
+    "@travetto/cli": "^8.0.0-alpha.9"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
