@@ -7,7 +7,8 @@ import { CompilerClient } from '../src/server/client.ts';
 import { CommonUtil } from '../src/common.ts';
 import { EventUtil } from '../src/event.ts';
 
-const color = (code: number) => (value: string): string => process.stdout.isTTY ? `\x1b[${code}m${value}\x1b[0m` : `${value}`;
+const hasColor = (process.stdout.isTTY && /^(0)*$/.test(process.env.NO_COLOR ?? '')) || /1\d*/.test(process.env.FORCE_COLOR ?? '');
+const color = (code: number) => (value: string): string => hasColor ? `\x1b[${code}m${value}\x1b[0m` : `${value}`;
 const STYLE = { error: color(91), title: color(36), main: color(92), command: color(35), arg: color(37), description: color(33), };
 
 async function showHelp(errorMessage?: string): Promise<void> {
