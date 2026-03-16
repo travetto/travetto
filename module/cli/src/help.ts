@@ -4,7 +4,7 @@ import { castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
-import type { CliCommandShape } from './types.ts';
+import { HELP_FLAG, type CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex, UNKNOWN_COMMAND } from './registry/registry-index.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
 
@@ -67,8 +67,8 @@ ${{ identifier: install }}
       usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
     }
 
-    const params: string[] = [];
-    const descriptions: string[] = [];
+    const params: string[] = [cliTpl`${{ param: HELP_FLAG }}`];
+    const descriptions: string[] = ['display help for command'];
 
     for (const field of Object.values(schema.fields)) {
       const key = castKey<CliCommandShape>(field.name);
@@ -76,7 +76,7 @@ ${{ identifier: install }}
       const aliases = (field.aliases ?? [])
         .filter(flag => flag.startsWith('-'))
         .filter(flag =>
-          (field.type !== Boolean) || ((defaultValue !== true || field.name === 'help') ? !flag.startsWith('--no-') : flag.startsWith('--'))
+          (field.type !== Boolean) || (defaultValue !== true ? !flag.startsWith('--no-') : flag.startsWith('--'))
         );
       let type: string | undefined;
 
@@ -86,18 +86,18 @@ ${{ identifier: install }}
         ({ type } = CliSchemaExportUtil.baseInputType(field));
       }
 
-      const param = [
+      const parameter = [
         cliTpl`${{ param: aliases.join(', ') }}`,
         ...(type ? [cliTpl`${{ type: `<${type}>` }}`] : []),
       ];
 
-      params.push(param.join(' '));
-      const desc = [cliTpl`${{ title: field.description }}`];
+      params.push(parameter.join(' '));
+      const parts = [cliTpl`${{ title: field.description }}`];
 
-      if (key !== 'help' && defaultValue !== undefined) {
-        desc.push(cliTpl`(default: ${{ input: JSONUtil.toUTF8(defaultValue) }})`);
+      if (defaultValue !== undefined) {
+        parts.push(cliTpl`(default: ${{ input: JSONUtil.toUTF8(defaultValue) }})`);
       }
-      descriptions.push(desc.join(' '));
+      descriptions.push(parts.join(' '));
     }
 
     const paramWidths = params.map(item => util.stripVTControlCharacters(item).length);
@@ -106,9 +106,9 @@ ${{ identifier: install }}
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
 
-    const helpText = await (command.help?.() ?? []);
-    if (helpText.length && helpText.at(-1) !== '') {
-      helpText.push('');
+    const extendedHelpText = await (command.help?.() ?? []);
+    if (extendedHelpText.length && extendedHelpText.at(-1) !== '') {
+      extendedHelpText.push('');
     }
 
     return [
@@ -119,7 +119,7 @@ ${{ identifier: install }}
         `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descriptions[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
       ),
       '',
-      ...helpText
+      ...extendedHelpText
     ].map(line => line.trimEnd()).join('\n');
   }
 

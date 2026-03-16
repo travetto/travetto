@@ -4,13 +4,12 @@ import path from 'node:path';
 import { Runtime } from '@travetto/runtime';
 import type { SchemaClassConfig, SchemaFieldConfig, SchemaInputConfig } from '@travetto/schema';
 
-import type { ParsedState } from './types.ts';
+import { HELP_FLAG, type ParsedState } from './types.ts';
 
 type ParsedInput = ParsedState['all'][number];
 
 const RAW_SEPARATOR = '--';
 const VALID_FLAG = /^-{1,2}[a-z]/i;
-const HELP_FLAG = /^(-h|--help)$/;
 const LONG_FLAG_WITH_EQ = /^--[a-z][^= ]+=\S+/i;
 const CONFIG_PREFIX = '+=';
 const SPACE = new Set([32, 7, 13, 10]);
@@ -124,9 +123,9 @@ export class CliParseUtil {
     const max = out.includes(RAW_SEPARATOR) ? out.indexOf(RAW_SEPARATOR) : out.length;
     const valid = out.slice(0, max);
     const cmd = valid.length > 0 && !valid[0].startsWith('-') ? valid[0] : undefined;
-    const helpIdx = valid.findIndex(flag => HELP_FLAG.test(flag));
+    const help = valid.includes(HELP_FLAG);
     const args = out.slice(cmd ? 1 : 0);
-    const result = { cmd, args, help: helpIdx >= 0 };
+    const result = { cmd, args, help };
     return result;
   }
 

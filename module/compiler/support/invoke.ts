@@ -37,8 +37,7 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
   Log.root = ctx.workspace.path;
 
   switch (operation) {
-    case undefined:
-    case 'help': console.log(HELP); break;
+    case undefined: console.log(HELP); break;
     case 'start':
     case 'watch': return CompilerManager.compile(ctx, client, { watch: true });
     case 'build': return CompilerManager.compile(ctx, client, { watch: false });
