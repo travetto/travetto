@@ -44,9 +44,9 @@ async function showHelp(errorMessage?: string): Promise<void> {
 /**
  * Invoke the compiler
  */
-export async function invoke(operation?: string, args: string[] = []): Promise<unknown> {
-  if (operation === undefined) {
-    [operation, ...args] = process.argv.slice(2);
+export async function invoke(command?: string, args: string[] = []): Promise<unknown> {
+  if (command === undefined) {
+    [command, ...args] = process.argv.slice(2);
   }
   const ctx = getManifestContext();
   const client = new CompilerClient(ctx, Log.scoped('client'));
@@ -54,7 +54,7 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
   Log.initLevel('error');
   Log.root = ctx.workspace.path;
 
-  switch (operation) {
+  switch (command) {
     case undefined: return showHelp();
     case 'start':
     case 'watch': return CompilerManager.compile(ctx, client, { watch: true });
@@ -76,7 +76,7 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
     case 'manifest:production':
     case 'manifest': {
       let manifest = await ManifestUtil.buildManifest(ctx);
-      if (operation === 'manifest:production') {
+      if (command === 'manifest:production') {
         manifest = ManifestUtil.createProductionManifest(manifest);
       }
       if (args[0]) {
@@ -109,6 +109,6 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
       // Return function to run import on a module
       return import(importTarget);
     }
-    default: return showHelp(`Unknown trvc operation: ${operation}`);
+    default: return showHelp(`Unknown trvc command: ${command}`);
   }
 }
