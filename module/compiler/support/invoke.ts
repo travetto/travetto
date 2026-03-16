@@ -7,21 +7,38 @@ import { CompilerClient } from '../src/server/client.ts';
 import { CommonUtil } from '../src/common.ts';
 import { EventUtil } from '../src/event.ts';
 
-const HELP = `
-trvc [command]
+const color = (code: number) => (value: string): string => process.stdout.isTTY ? `\x1b[${code}m${value}\x1b[0m` : `${value}`;
+const STYLE = { error: color(91), title: color(36), main: color(92), command: color(35), arg: color(37), description: color(33), };
 
-Available Commands:
- * start|watch                  - Run the compiler in watch mode
- * stop                         - Stop the compiler if running
- * restart                      - Restart the compiler in watch mode
- * build                        - Ensure the project is built and upto date
- * clean                        - Clean out the output and compiler caches
- * info                         - Retrieve the compiler information, if running
- * event <log|progress|state>   - Watch events in realtime as newline delimited JSON
- * exec <file> [...args]        - Allow for compiling and executing an entrypoint file
- * manifest [output]            - Generate the project manifest
- * manifest:production [output] - Generate the production project manifest
-`;
+async function showHelp(errorMessage?: string): Promise<void> {
+  const COMMANDS = [
+    { name: 'start', description: 'Run the compiler in watch mode' },
+    { name: 'stop', description: 'Stop the compiler if running' },
+    { name: 'restart', description: 'Restart the compiler in watch mode' },
+    { name: 'build', description: 'Ensure the project is built and upto date' },
+    { name: 'clean', description: 'Clean out the output and compiler caches' },
+    { name: 'info', description: 'Retrieve the compiler information, if running' },
+    { name: 'event', args: ['<log|progress|state>'], description: 'Watch events in realtime as newline delimited JSON' },
+    { name: 'exec', args: ['<file>', '[...args]'], description: 'Allow for compiling and executing an entrypoint file' },
+    { name: 'manifest', args: ['[output]'], description: 'Generate the project manifest' },
+    { name: 'manifest:production', args: ['[output]'], description: 'Generate the production project manifest' }
+  ]
+    .map(config => ({ args: [], ...config }))
+    .map(config => ({ ...config, commandLength: [config.name, ...config.args].join(' ').length }));
+
+  const commandWidth = Math.max(...COMMANDS.map(config => config.commandLength));
+
+  console.log([
+    ...(errorMessage ? ['', STYLE.error(errorMessage)] : []),
+    '', `${STYLE.main('trvc')} ${STYLE.command('[command]')}`,
+    '', STYLE.title('Available Commands'),
+    ...COMMANDS.map(({ name, args, description, commandLength }) => [
+      '*', STYLE.command(name), ...args.map(arg => STYLE.arg(arg)),
+      ' '.repeat(commandWidth - commandLength), STYLE.description(description)
+    ].join(' ')),
+    ''
+  ].join('\n'));
+}
 
 /**
  * Invoke the compiler
@@ -37,7 +54,7 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
   Log.root = ctx.workspace.path;
 
   switch (operation) {
-    case undefined: console.log(HELP); break;
+    case undefined: return showHelp();
     case 'start':
     case 'watch': return CompilerManager.compile(ctx, client, { watch: true });
     case 'build': return CompilerManager.compile(ctx, client, { watch: false });
@@ -91,6 +108,6 @@ export async function invoke(operation?: string, args: string[] = []): Promise<u
       // Return function to run import on a module
       return import(importTarget);
     }
-    default: console.error(`\nUnknown trvc operation: ${operation}\n${HELP}`);
+    default: return showHelp(`Unknown trvc operation: ${operation}`);
   }
 }
