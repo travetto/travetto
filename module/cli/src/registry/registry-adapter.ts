@@ -29,22 +29,10 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     this.#cls = cls;
   }
 
+  // TODO: handle when aliases overlap/conflict
   finalize(parent?: CliCommandConfig): void {
     // Add help command
     const schema = SchemaRegistryIndex.getConfig(this.#cls);
-
-    // Add help to every command
-    (schema.fields ??= {}).help = {
-      type: Boolean,
-      name: 'help',
-      class: this.#cls,
-      description: 'display help for command',
-      required: { active: false },
-      default: false,
-      access: 'readonly',
-      aliases: ['-h', '--help']
-    };
-
     const used = new Set(Object.values(schema.fields)
       .flatMap(field => field.aliases ?? [])
       .filter(alias => !alias.startsWith(ENV_PREFIX))
