@@ -11,29 +11,31 @@ const hasColor = (process.stdout.isTTY && /^(0)*$/.test(process.env.NO_COLOR ?? 
 const color = (code: number) => (value: string): string => hasColor ? `\x1b[${code}m${value}\x1b[0m` : `${value}`;
 const STYLE = { error: color(91), title: color(36), main: color(92), command: color(35), arg: color(37), description: color(33), };
 
-async function showHelp(errorMessage?: string): Promise<void> {
-  const COMMANDS = [
-    { name: 'start', description: 'Run the compiler in watch mode' },
-    { name: 'stop', description: 'Stop the compiler if running' },
-    { name: 'restart', description: 'Restart the compiler in watch mode' },
-    { name: 'build', description: 'Ensure the project is built and upto date' },
-    { name: 'clean', description: 'Clean out the output and compiler caches' },
-    { name: 'info', description: 'Retrieve the compiler information, if running' },
-    { name: 'event', args: ['<log|progress|state>'], description: 'Watch events in realtime as newline delimited JSON' },
-    { name: 'exec', args: ['<file>', '[...args]'], description: 'Allow for compiling and executing an entrypoint file' },
-    { name: 'manifest', args: ['[output]'], description: 'Generate the project manifest' },
-    { name: 'manifest:production', args: ['[output]'], description: 'Generate the production project manifest' }
-  ]
-    .map(config => ({ args: [], ...config }))
+const COMMANDS = {
+  start: { description: 'Run the compiler in watch mode' },
+  stop: { description: 'Stop the compiler if running' },
+  restart: { description: 'Restart the compiler in watch mode' },
+  build: { description: 'Ensure the project is built and upto date' },
+  clean: { description: 'Clean out the output and compiler caches' },
+  info: { description: 'Retrieve the compiler information, if running' },
+  event: { args: ['<log|progress|state>'], description: 'Watch events in realtime as newline delimited JSON' },
+  exec: { args: ['<file>', '[...args]'], description: 'Allow for compiling and executing an entrypoint file' },
+  manifest: { args: ['[output]'], description: 'Generate the project manifest' },
+  'manifest:production': { args: ['[output]'], description: 'Generate the production project manifest' }
+} as const;
+
+function showHelp(errorMessage?: string): void {
+  const PREPARED = Object.entries(COMMANDS)
+    .map(([name, config]) => ({ args: [], ...config, name }))
     .map(config => ({ ...config, commandLength: [config.name, ...config.args].join(' ').length }));
 
-  const commandWidth = Math.max(...COMMANDS.map(config => config.commandLength));
+  const commandWidth = Math.max(...PREPARED.map(config => config.commandLength));
 
   console.log([
     ...(errorMessage ? ['', STYLE.error(errorMessage)] : []),
     '', `${STYLE.main('trvc')} ${STYLE.command('[command]')}`,
     '', STYLE.title('Available Commands'),
-    ...COMMANDS.map(({ name, args, description, commandLength }) => [
+    ...PREPARED.map(({ name, args, description, commandLength }) => [
       '*', STYLE.command(name), ...args.map(arg => STYLE.arg(arg)),
       ' '.repeat(commandWidth - commandLength), STYLE.description(description)
     ].join(' ')),
@@ -41,13 +43,17 @@ async function showHelp(errorMessage?: string): Promise<void> {
   ].join('\n'));
 }
 
+const validateInputs = (value: string[]): value is [keyof typeof COMMANDS, ...string[]] => !!value.length && value[0] in COMMANDS;
+
 /**
  * Invoke the compiler
  */
-export async function invoke(command?: string, args: string[] = []): Promise<unknown> {
-  if (command === undefined) {
-    [command, ...args] = process.argv.slice(2);
+export async function invoke(...input: string[]): Promise<unknown> {
+  if (!validateInputs(input)) {
+    return showHelp(input[0] ? `Unknown trvc command: ${input[0]}` : undefined);;
   }
+
+  const [command, ...args] = input;
   const ctx = getManifestContext();
   const client = new CompilerClient(ctx, Log.scoped('client'));
 
@@ -55,9 +61,7 @@ export async function invoke(command?: string, args: string[] = []): Promise<unk
   Log.root = ctx.workspace.path;
 
   switch (command) {
-    case undefined: return showHelp();
-    case 'start':
-    case 'watch': return CompilerManager.compile(ctx, client, { watch: true });
+    case 'start': return CompilerManager.compile(ctx, client, { watch: true });
     case 'build': return CompilerManager.compile(ctx, client, { watch: false });
     case 'restart': return CompilerManager.compile(ctx, client, { watch: true, forceRestart: true });
     case 'info': {
@@ -109,6 +113,5 @@ export async function invoke(command?: string, args: string[] = []): Promise<unk
       // Return function to run import on a module
       return import(importTarget);
     }
-    default: return showHelp(`Unknown trvc command: ${command}`);
   }
 }

@@ -285,6 +285,27 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
     }
+
+    // Validate if aliases are duplicated
+    const aliasMap: Record<string, SchemaFieldConfig> = {};
+    for (const field of Object.values(config.fields)) {
+      for (const alias of field.aliases ?? []) {
+        if (alias in aliasMap && aliasMap[alias].name !== field.name) {
+          throw new RuntimeError(
+            `Alias ${alias} has been specified multiple times ${this.#cls.name}#(${field.name},${aliasMap[alias].name})`,
+            {
+              details: {
+                alias,
+                class: this.#cls.name,
+                field1: field.name,
+                field2: aliasMap[alias].name
+              }
+            }
+          );
+        }
+        aliasMap[alias] = field;
+      }
+    }
   }
 
   get(): SchemaClassConfig {
