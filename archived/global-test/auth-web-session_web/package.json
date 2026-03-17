@@ -2,11 +2,11 @@
   "name": "@travetto-test/auth-web-session_web",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/auth-session": "^6.0.0-rc.1",
-    "@travetto/auth-web-session": "^6.0.0-rc.3",
-    "@travetto/model-memory": "^6.0.0-rc.1",
-    "@travetto/web-aws-lambda": "^6.0.0-rc.1",
-    "@travetto/web-node": "^6.0.0-rc.1"
+    "@travetto/auth-session": "^7.1.4",
+    "@travetto/auth-web-session": "^7.1.4",
+    "@travetto/model-memory": "^7.1.4",
+    "@travetto/web-aws-lambda": "^7.1.4",
+    "@travetto/web-node": "^6.0.3"
   },
   "travetto": {},
   "private": true
