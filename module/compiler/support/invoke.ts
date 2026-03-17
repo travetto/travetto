@@ -37,7 +37,8 @@ function showHelp(errorMessage?: string): void {
     '', STYLE.title('Available Commands'),
     ...PREPARED.map(({ name, args, description, commandLength }) => [
       '*', STYLE.command(name), ...args.map(arg => STYLE.arg(arg)),
-      ' '.repeat(commandWidth - commandLength), STYLE.description(description)
+      ' '.repeat(commandWidth - commandLength), '-', STYLE.description(description)
+
     ].join(' ')),
     ''
   ].join('\n'));

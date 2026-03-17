@@ -354,7 +354,7 @@ Usage: model:export [options] <provider:string> <models...:string>
 Options:
   -p, --profile <string>  Application profiles
   -m, --module <module>   Module to run for
-  -h, --help              display help for command
+  --help                  display help for command
 
 Providers
 --------------------
@@ -377,7 +377,7 @@ Usage: model:install [options] <provider:string> <models...:string>
 Options:
   -p, --profile <string>  Application profiles
   -m, --module <module>   Module to run for
-  -h, --help              display help for command
+  --help                  display help for command
 
 Providers
 --------------------

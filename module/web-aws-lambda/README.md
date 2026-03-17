@@ -21,7 +21,7 @@ This module provides an adapter between [Web API](https://github.com/travetto/tr
 
 **Terminal: Invoking a Package Build**
 ```bash
-$ trv pack:lambda -h
+$ trv pack:lambda --help
 
 Usage: pack:lambda [options] [args...:string]
 
@@ -42,5 +42,5 @@ Options:
   -wr, --include-workspace-resources   Include workspace resources (default: false)
   -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
-  -h, --help                           display help for command
+  --help                               display help for command
 ```

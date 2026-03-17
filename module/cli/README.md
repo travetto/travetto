@@ -75,12 +75,12 @@ export class BasicCommand {
 
 **Terminal: Basic Command Help**
 ```bash
-$ trv basic -h
+$ trv basic --help
 
 Usage: basic [options]
 
 Options:
-  -h, --help  display help for command
+  --help  display help for command
 ```
 
 ## Command Naming
@@ -113,13 +113,13 @@ export class BasicCommand {
 
 **Terminal: Basic Command with Flag Help**
 ```bash
-$ trv basic:flag -h
+$ trv basic:flag --help
 
 Usage: basic:flag [options]
 
 Options:
   -l, --loud
-  -h, --help  display help for command
+  --help      display help for command
 ```
 
 As you can see the command now has the support of a basic boolean flag to determine if the response should be loud or not.  The default value here is undefined/false, and so is an opt-in experience.
@@ -158,12 +158,12 @@ export class BasicCommand {
 
 **Terminal: Basic Command**
 ```bash
-$ trv basic:arg -h
+$ trv basic:arg --help
 
 Usage: basic:arg [options] [volume:number]
 
 Options:
-  -h, --help  display help for command
+  --help  display help for command
 ```
 
 **Terminal: Basic Command with Invalid Loud Arg**
@@ -176,7 +176,7 @@ Execution failed:
 Usage: basic:arg [options] [volume:number]
 
 Options:
-  -h, --help  display help for command
+  --help  display help for command
 ```
 
 **Terminal: Basic Command with Loud Arg > 7**
@@ -213,13 +213,13 @@ export class BasicCommand {
 
 **Terminal: Basic Command**
 ```bash
-$ trv basic:arg-list -h
+$ trv basic:arg-list --help
 
 Usage: basic:arg-list [options] <volumes...:number>
 
 Options:
   -r, --reverse
-  -h, --help     display help for command
+  --help         display help for command
 ```
 
 **Terminal: Basic Arg List**
@@ -240,7 +240,7 @@ Usage: basic:arg-list [options] <volumes...:number>
 
 Options:
   -r, --reverse
-  -h, --help     display help for command
+  --help         display help for command
 ```
 
 **Terminal: Basic Arg List with Reverse**
@@ -279,13 +279,13 @@ export class CustomCommand {
 
 **Terminal: Custom Command Help**
 ```bash
-$ trv custom:arg -h
+$ trv custom:arg --help
 
 Usage: custom:arg [options] [volume:number]
 
 Options:
   -m, --message <string>  The message to send back to the user (default: "hello")
-  -h, --help              display help for command
+  --help                  display help for command
 ```
 
 **Terminal: Custom Command Help with overridden Text**
@@ -330,13 +330,13 @@ export class CustomCommand {
 
 **Terminal: Custom Command Help**
 ```bash
-$ trv custom:env-arg -h
+$ trv custom:env-arg --help
 
 Usage: custom:env-arg [options] [volume:number]
 
 Options:
   -t, --text <string>  The message to send back to the user (default: "hello")
-  -h, --help           display help for command
+  --help               display help for command
 ```
 
 **Terminal: Custom Command Help with default Text**
@@ -559,7 +559,7 @@ Usage: service [options] <action:restart|start|status|stop> [services...:string]
 
 Options:
   -q, --quiet   (default: false)
-  -h, --help   display help for command
+  --help       display help for command
 
 Available Services
 --------------------

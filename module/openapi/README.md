@@ -128,7 +128,7 @@ Usage: openapi:spec [options]
 Options:
   -o, --output <string>  Output files
   -m, --module <module>  Module to run for
-  -h, --help             display help for command
+  --help                 display help for command
 ```
 
 The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
@@ -150,7 +150,7 @@ Options:
   -i, --input <string>                  Input file (default: "./openapi.yml")
   -o, --output <string>                 Output folder (default: "./api-client")
   -d, --docker-image <string>           Docker Image to user (default: "openapitools/openapi-generator-cli:latest")
-  -h, --help                            display help for command
+  --help                                display help for command
 ```
 
 This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

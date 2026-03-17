@@ -231,7 +231,7 @@ Options:
   -c, --concurrency <number>     Number of tests to run concurrently (default: 9)
   -t, --tags <string>            Tags to target or exclude when using globs
   -o, --format-options <string>  Format options
-  -h, --help                     display help for command
+  --help                         display help for command
 ```
 
 The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.

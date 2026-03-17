@@ -30,7 +30,7 @@ The versioning operation will find all the changed modules (and the modules that
     <figcaption class="terminal">Version execution
 
 </figcaption>
-    <pre><code class="language-bash">$ trv repo:version <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv repo:version <span class="token parameter variable">--help</span>
 
 Usage: repo:version <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>level:major<span class="token operator">|</span>minor<span class="token operator">|</span>patch<span class="token operator">|</span>premajor<span class="token operator">|</span>preminor<span class="token operator">|</span>prepatch<span class="token operator">|</span>prerelease<span class="token operator">></span> <span class="token punctuation">[</span>prefix:string<span class="token punctuation">]</span>
 
@@ -40,7 +40,7 @@ Options:
   --commit, --no-commit        Produce release commit message <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -m, <span class="token parameter variable">--modules</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>       The module when mode is single
   -t, <span class="token parameter variable">--tag</span>                    Should we create a tag <span class="token keyword">for</span> the version
-  -h, <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
@@ -74,13 +74,13 @@ The publish functionality is relatively naive, but consistent.  The code will lo
     <figcaption class="terminal">Publish execution
 
 </figcaption>
-    <pre><code class="language-bash">$ trv repo:publish <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv repo:publish <span class="token parameter variable">--help</span>
 
 Usage: repo:publish <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
   --dry-run, --no-dry-run  Dry Run? <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
-  -h, <span class="token parameter variable">--help</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 By default the tool will execute a dry run only, and requires passing a flag to disable the dry run.
@@ -102,7 +102,7 @@ The listing functionality provides the ability to get the workspace modules in t
     <figcaption class="terminal">List execution
 
 </figcaption>
-    <pre><code class="language-bash">$ trv repo:list <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv repo:list <span class="token parameter variable">--help</span>
 
 Usage: repo:list <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
@@ -111,7 +111,7 @@ Options:
   -f, <span class="token parameter variable">--format</span> <span class="token operator">&lt;</span>graph<span class="token operator">|</span>json<span class="token operator">|</span>list<span class="token operator">></span>  Output <span class="token function">format</span> <span class="token punctuation">(</span>default: <span class="token string">"list"</span><span class="token punctuation">)</span>
   -fh, --from-hash <span class="token operator">&lt;</span>string<span class="token operator">></span>       Start revision to check against
   -th, --to-hash <span class="token operator">&lt;</span>string<span class="token operator">></span>         End revision to check against
-  -h, <span class="token parameter variable">--help</span>                      display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                          display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 <ul> <li><code class="item input">list</code> - Standard text list, each module on its own line</li>
@@ -196,7 +196,7 @@ The exec command allows for running commands on all modules, or just changed mod
     <figcaption class="terminal">Exec execution
 
 </figcaption>
-    <pre><code class="language-bash">$ trv repo:exec <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv repo:exec <span class="token parameter variable">--help</span>
 
 Usage: repo:exec <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>cmd:string<span class="token operator">></span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
@@ -205,7 +205,7 @@ Options:
   -w, <span class="token parameter variable">--workers</span> <span class="token operator">&lt;</span>number<span class="token operator">></span>               Number of concurrent workers <span class="token punctuation">(</span>default: <span class="token number">9</span><span class="token punctuation">)</span>
   --prefix-output, --no-prefix-output  Prefix output by folder <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   --show-stdout, --no-show-stdout      Show stdout <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
-  -h, <span class="token parameter variable">--help</span>                           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 The standard format includes prefixed output to help identify which module produced which output.

@@ -55,9 +55,9 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
     const args = schema.methods.main?.parameters ?? [];
 
-    const params = [cliTpl`${{ param: HELP_FLAG }}`];
-    const descriptions = ['display help for command'];
     const usage = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
+    const params: string[] = [];
+    const descriptions: string[] = [];
 
     // Ensure finalized
     for (const field of args) {
@@ -95,6 +95,10 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
       }
       descriptions.push(parts.join(' '));
     }
+
+    params.push(cliTpl`${{ param: HELP_FLAG }}`);
+    descriptions.push('display help for command');
+
 
     const paramWidths = params.map(item => util.stripVTControlCharacters(item).length);
     const descWidths = descriptions.map(item => util.stripVTControlCharacters(item).length);

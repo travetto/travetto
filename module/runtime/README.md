@@ -70,7 +70,7 @@ class $Runtime {
   /** Import from a given path */
   async importFrom<T = unknown>(location?: string): Promise<T>;
   /** Get an install command for a given npm module */
-  getInstallCommand(pkg: string, production = false): string;
+  getInstallCommand(pkg: string, production?: boolean): string;
 }
 ```
 

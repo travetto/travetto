@@ -9,9 +9,10 @@ export const text = async () => {
   await DocRunUtil.run('trvc', ['build'], { workingDirectory: './doc-exec', spawn: ExecUtil.spawnPackageCommand });
 
   const output =
-    (await DocRunUtil.run('trvc', ['help'], {
+    (await DocRunUtil.run('trvc', [], {
       spawn: ExecUtil.spawnPackageCommand,
       filter: line => HELP_EXTRACT_PATTERN.test(line),
+      env: { NO_COLOR: '1', FORCE_COLOR: '0' }
     }))
       .split('\n')
       .filter(line => !!line.trim())
