@@ -7,6 +7,7 @@ import { RuntimeIndex } from '@travetto/runtime';
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
+import { TestConsumerUtil } from './util.ts';
 
 /**
  * Xunit consumer, compatible with JUnit formatters
@@ -59,9 +60,9 @@ export class XunitEmitter implements TestConsumerShape {
       let body = '';
 
       if (test.error) {
-        const assertion = test.assertions.find(item => !!item.error)!;
+        const errorMessage = TestConsumerUtil.errorToString(test.error);
         const node = test.status === 'failed' ? 'failure' : 'error';
-        body = `<${node} type="${assertion.text}" message="${encodeURIComponent(assertion.message!)}"><![CDATA[${assertion.error!.stack}]]></${node}>`;
+        body = `<${node} type="${test.error.constructor.name}" message="${encodeURIComponent(test.error.message)}"><![CDATA[${errorMessage}]]></${node}>`;
       }
 
       const groupedByLevel: Record<string, string[]> = {};

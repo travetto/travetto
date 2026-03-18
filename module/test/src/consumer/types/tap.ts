@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { AssertionError } from 'node:assert';
 import { stringify } from 'yaml';
 
 import { Terminal, StyleUtil } from '@travetto/terminal';
@@ -9,6 +8,7 @@ import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
 import { type TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer.ts';
+import { TestConsumerUtil } from './util.ts';
 
 const SPACE = ' ';
 
@@ -55,22 +55,6 @@ export class TapEmitter implements TestConsumerShape {
     let body = stringify(metadata, { lineWidth: lineLength, indent: 2 });
     body = body.split('\n').map(line => `  ${line}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
-  }
-
-  /**
-   * Error to string
-   * @param error
-   */
-  errorToString(error?: Error): string | undefined {
-    if (error instanceof AssertionError) {
-      return;
-    } else if (error instanceof Error) {
-      return error.stack ?
-        error.stack.split(/\n/).slice(0, this.#options?.verbose ? -1 : 5).join('\n') :
-        error.message;
-    } else {
-      return `${error}`;
-    }
   }
 
   /**
@@ -140,7 +124,7 @@ export class TapEmitter implements TestConsumerShape {
         case 'errored':
         case 'failed': {
           if (test.error) {
-            const message = this.errorToString(test.error);
+            const message = TestConsumerUtil.errorToString(test.error, !!this.#options?.verbose);
             if (message) {
               this.logMeta({ error: message });
             }

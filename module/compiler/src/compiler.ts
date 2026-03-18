@@ -187,7 +187,7 @@ export class Compiler {
       await ManifestUtil.writeManifest(manifest);
       await ManifestUtil.writeDependentManifests(manifest);
 
-      if (failures.size) {
+      if (!this.#watch && failures.size) {
         return this.#shutdown('error');
       }
 
