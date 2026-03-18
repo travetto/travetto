@@ -1,4 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
+import { HELP_FLAG } from '@travetto/cli';
 import { d, c } from '@travetto/doc';
 
 export const text = <>
@@ -38,7 +39,7 @@ export const text = <>
 
     This module follows the pattern {d.library('Node')} follows with respect to the environment variables: {d.field('NO_COLOR')}, {d.field('FORCE_COLOR')} and {d.field('NODE_DISABLE_COLORS')}
 
-    <c.Execution title='Node help on colors' cmd={process.argv0} args={['-h']} config={{
+    <c.Execution title='Node help on colors' cmd={process.argv0} args={[HELP_FLAG]} config={{
       filter: line => /color/i.test(line),
       formatCommand: (cmd, args) => `node ${args.join(' ')} | grep -i color`
     }} />

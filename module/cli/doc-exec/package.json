@@ -2,7 +2,7 @@
   "name": "@travetto-doc/cli",
   "type": "module",
   "devDependencies": {
-    "@travetto/compiler": "^7.0.0"
+    "@travetto/compiler": "^8.0.0-alpha.0"
   },
   "travetto": {
     "build": {

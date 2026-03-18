@@ -1,5 +1,7 @@
 import type { Any, Class } from '@travetto/runtime';
 
+export const HELP_FLAG = '--help';
+
 type OrProm<T> = T | Promise<T>;
 type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
 type ParsedArg = { type: 'arg', input: string, array?: boolean, index: number };

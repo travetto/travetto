@@ -1,4 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
+import { HELP_FLAG } from '@travetto/cli';
 import { c, d } from '@travetto/doc';
 
 export const text = <>
@@ -8,6 +9,6 @@ export const text = <>
   <strong>NOTE:</strong> The only caveat to consider, is that while the framework supports streams for responses, {d.library('AwsLambda')} does not. Any streaming result will be read and converted into a {d.library('NodeBuffer')} before being sent back.
 
   <c.Section title='CLI - Packaging Lambdas'>
-    <c.Execution title='Invoking a Package Build' cmd='trv' args={['pack:lambda', '-h']} />
+    <c.Execution title='Invoking a Package Build' cmd='trv' args={['pack:lambda', HELP_FLAG]} />
   </c.Section>
 </>;

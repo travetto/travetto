@@ -83,12 +83,12 @@ At it's heart, a cli command is the contract defined by what flags, and what arg
     <figcaption class="terminal">Basic Command Help
 
 </figcaption>
-    <pre><code class="language-bash">$ trv basic <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv basic <span class="token parameter variable">--help</span>
 
 Usage: basic <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 <h2 id="command-naming">Command Naming</h2>
@@ -127,13 +127,13 @@ The pattern is that underscores(_) translate to colons (:), and the <code class=
     <figcaption class="terminal">Basic Command with Flag Help
 
 </figcaption>
-    <pre><code class="language-bash">$ trv basic:flag <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv basic:flag <span class="token parameter variable">--help</span>
 
 Usage: basic:flag <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
   -l, <span class="token parameter variable">--loud</span>
-  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>      display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 As you can see the command now has the support of a basic boolean flag to determine if the response should be loud or not.  The default value here is undefined/false, and so is an opt-in experience.
@@ -181,12 +181,12 @@ The <code class="item method">main()</code> method is the entrypoint for the com
     <figcaption class="terminal">Basic Command
 
 </figcaption>
-    <pre><code class="language-bash">$ trv basic:arg <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv basic:arg <span class="token parameter variable">--help</span>
 
 Usage: basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
 Options:
-  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
   <figure class="terminal">
@@ -201,7 +201,7 @@ Execution failed:
 Usage: basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
 Options:
-  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
   <figure class="terminal">
@@ -247,13 +247,13 @@ Additionally, if you provide a field as an array, it will collect all valid valu
     <figcaption class="terminal">Basic Command
 
 </figcaption>
-    <pre><code class="language-bash">$ trv basic:arg-list <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv basic:arg-list <span class="token parameter variable">--help</span>
 
 Usage: basic:arg-list <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
 
 Options:
   -r, <span class="token parameter variable">--reverse</span>
-  -h, <span class="token parameter variable">--help</span>     display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>         display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
   <figure class="terminal">
@@ -278,7 +278,7 @@ Usage: basic:arg-list <span class="token punctuation">[</span>options<span class
 
 Options:
   -r, <span class="token parameter variable">--reverse</span>
-  -h, <span class="token parameter variable">--help</span>     display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>         display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
   <figure class="terminal">
@@ -325,13 +325,13 @@ By default, all fields are treated as flags and all parameters of <code class="i
     <figcaption class="terminal">Custom Command Help
 
 </figcaption>
-    <pre><code class="language-bash">$ trv custom:arg <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv custom:arg <span class="token parameter variable">--help</span>
 
 Usage: custom:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
 Options:
   -m, <span class="token parameter variable">--message</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
-  -h, <span class="token parameter variable">--help</span>              display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
   <figure class="terminal">
@@ -386,13 +386,13 @@ In addition to standard flag overriding (e.g. <code class="item input">/** @alia
     <figcaption class="terminal">Custom Command Help
 
 </figcaption>
-    <pre><code class="language-bash">$ trv custom:env-arg <span class="token parameter variable">-h</span>
+    <pre><code class="language-bash">$ trv custom:env-arg <span class="token parameter variable">--help</span>
 
 Usage: custom:env-arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
 Options:
   -t, <span class="token parameter variable">--text</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
-  -h, <span class="token parameter variable">--help</span>           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
   <figure class="terminal">
@@ -486,7 +486,7 @@ By default, cli commands do not expose themselves to the VSCode extension, as th
 
   <figure class="code">
     <figcaption class="code">Anatomy of a Command
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L20">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L22">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliCommandShape</span> <span class="token punctuation">{{'{'}}</span>
@@ -649,7 +649,7 @@ Usage: <span class="token function">service</span> <span class="token punctuatio
 
 Options:
   -q, <span class="token parameter variable">--quiet</span>   <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
-  -h, <span class="token parameter variable">--help</span>   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  <span class="token parameter variable">--help</span>       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Services
 --------------------

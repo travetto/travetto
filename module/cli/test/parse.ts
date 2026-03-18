@@ -34,12 +34,12 @@ class ParseSuite {
 
   @Test()
   async testArgs() {
-    const expected = { cmd: 'bob', args: ['-h'], help: true };
-    const expectedWithoutCmd = { cmd: undefined, args: ['-h', 'bob'], help: true };
-    assert.deepStrictEqual(CliParseUtil.getArgs(['-h', 'bob']), expectedWithoutCmd);
-    assert.deepStrictEqual(CliParseUtil.getArgs(['bob', '-h']), expected);
-    assert.deepStrictEqual(CliParseUtil.getArgs([...process.argv.slice(0, 2), 'bob', '-h']), expected);
-    assert.deepStrictEqual(CliParseUtil.getArgs([...process.argv.slice(0, 2), '-h', 'bob']), expectedWithoutCmd);
+    const expected = { cmd: 'bob', args: ['--help'], help: true };
+    const expectedWithoutCmd = { cmd: undefined, args: ['--help', 'bob'], help: true };
+    assert.deepStrictEqual(CliParseUtil.getArgs(['--help', 'bob']), expectedWithoutCmd);
+    assert.deepStrictEqual(CliParseUtil.getArgs(['bob', '--help']), expected);
+    assert.deepStrictEqual(CliParseUtil.getArgs([...process.argv.slice(0, 2), 'bob', '--help']), expected);
+    assert.deepStrictEqual(CliParseUtil.getArgs([...process.argv.slice(0, 2), '--help', 'bob']), expectedWithoutCmd);
     assert.match((CliParseUtil.getArgs(process.argv)).cmd!, /test(:.*)?$/);
   }
 

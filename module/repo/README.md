@@ -24,7 +24,7 @@ The versioning operation will find all the changed modules (and the modules that
 
 **Terminal: Version execution**
 ```bash
-$ trv repo:version -h
+$ trv repo:version --help
 
 Usage: repo:version [options] <level:major|minor|patch|premajor|preminor|prepatch|prerelease> [prefix:string]
 
@@ -34,7 +34,7 @@ Options:
   --commit, --no-commit        Produce release commit message (default: true)
   -m, --modules <string>       The module when mode is single
   -t, --tag                    Should we create a tag for the version
-  -h, --help                   display help for command
+  --help                       display help for command
 ```
 
 Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
@@ -61,13 +61,13 @@ The publish functionality is relatively naive, but consistent.  The code will lo
 
 **Terminal: Publish execution**
 ```bash
-$ trv repo:publish -h
+$ trv repo:publish --help
 
 Usage: repo:publish [options]
 
 Options:
   --dry-run, --no-dry-run  Dry Run? (default: true)
-  -h, --help               display help for command
+  --help                   display help for command
 ```
 
 By default the tool will execute a dry run only, and requires passing a flag to disable the dry run.
@@ -84,7 +84,7 @@ The listing functionality provides the ability to get the workspace modules in t
 
 **Terminal: List execution**
 ```bash
-$ trv repo:list -h
+$ trv repo:list --help
 
 Usage: repo:list [options]
 
@@ -93,7 +93,7 @@ Options:
   -f, --format <graph|json|list>  Output format (default: "list")
   -fh, --from-hash <string>       Start revision to check against
   -th, --to-hash <string>         End revision to check against
-  -h, --help                      display help for command
+  --help                          display help for command
 ```
 
    *  `list` - Standard text list, each module on its own line
@@ -172,7 +172,7 @@ The exec command allows for running commands on all modules, or just changed mod
 
 **Terminal: Exec execution**
 ```bash
-$ trv repo:exec -h
+$ trv repo:exec --help
 
 Usage: repo:exec [options] <cmd:string> [args...:string]
 
@@ -181,7 +181,7 @@ Options:
   -w, --workers <number>               Number of concurrent workers (default: 9)
   --prefix-output, --no-prefix-output  Prefix output by folder (default: true)
   --show-stdout, --no-show-stdout      Show stdout (default: true)
-  -h, --help                           display help for command
+  --help                               display help for command
 ```
 
 The standard format includes prefixed output to help identify which module produced which output.

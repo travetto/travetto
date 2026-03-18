@@ -27,7 +27,7 @@ Usage: web:rpc-client [options] <type:config|node|web> [output:string]
 Options:
   -p, --profile <string>  Application profiles
   -m, --module <module>   Module to run for
-  -h, --help              display help for command
+  --help                  display help for command
 ```
 
 ## Example

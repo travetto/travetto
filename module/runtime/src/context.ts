@@ -138,7 +138,13 @@ class $Runtime {
   }
 
   /** Get an install command for a given npm module */
-  getInstallCommand(pkg: string, production = false): string {
+  getInstallCommand(pkg: string, production?: boolean): string {
+    if (production === undefined) {
+      const module = RuntimeIndex.getModule(pkg);
+      if (module !== undefined) {
+        production = module.production;
+      }
+    }
     switch (this.workspace.manager) {
       case 'npm': return `npm install ${production ? '' : '--save-dev '}${pkg}`;
       case 'yarn': return `yarn add ${production ? '' : '--dev '}${pkg}`;

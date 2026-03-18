@@ -4,32 +4,29 @@ import { castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
-import type { CliCommandShape } from './types.ts';
+import { HELP_FLAG, type CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex, UNKNOWN_COMMAND } from './registry/registry-index.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
 
-const validationSourceMap: Record<string, string> = {
-  arg: 'Argument',
-  flag: 'Flag'
-};
+const validationSourceMap: Record<string, string> = { arg: 'Argument', flag: 'Flag' };
 
 const ifDefined = <T>(value: T | null | '' | undefined): T | undefined =>
   (value === null || value === '' || value === undefined) ? undefined : value;
 
-const toItem = (name: string, pkg: string, prod?: boolean) => [name, Runtime.getInstallCommand(pkg, prod)] as const;
+const MODULE_TO_COMMAND = {
+  '@travetto/doc': ['doc'],
+  '@travetto/email-compiler': ['email:compile', 'email:test', 'email:editor'],
+  '@travetto/eslint': ['eslint', 'eslint:register', 'lint', 'lint:register'],
+  '@travetto/model': ['model:install', 'model:export'],
+  '@travetto/openapi': ['openapi:spec', 'openapi:client'],
+  '@travetto/pack': ['pack', 'pack:zip', 'pack:docker'],
+  '@travetto/repo': ['repo:publish', 'repo:version', 'repo:exec', 'repo:list'],
+  '@travetto/test': ['test', 'test:watch', 'test:direct'],
+  '@travetto/web-http': ['web:http'],
+  '@travetto/web-rpc': ['web:rpc-client'],
+};
 
-const INSTALL_COMMANDS = new Map<string, string>([
-  ...['test', 'test:watch', 'test:direct'].map(item => toItem(item, '@travetto/test')),
-  ...['lint', 'lint:register', 'eslint', 'eslint:register'].map(item => toItem(item, '@travetto/eslint')),
-  ...['model:install', 'model:export'].map(item => toItem(item, '@travetto/model', true)),
-  ...['openapi:spec', 'openapi:client'].map(item => toItem(item, '@travetto/openapi', true)),
-  ...['email:compile', 'email:test', 'email:editor'].map(item => toItem(item, '@travetto/email-compiler')),
-  ...['pack', 'pack:zip', 'pack:docker'].map(item => toItem(item, '@travetto/pack')),
-  ...['repo:publish', 'repo:version', 'repo:exec', 'repo:list', 'repo:version-sync'].map(item => toItem(item, '@travetto/repo')),
-  toItem('web:http', '@travetto/web-http', true),
-  toItem('doc', '@travetto/doc'),
-  toItem('web:rpc-client', '@travetto/web-rpc', true),
-]);
+const COMMAND_TO_MODULE = Object.fromEntries(Object.entries(MODULE_TO_COMMAND).flatMap(([k, v]) => v.map(sv => [sv, k])));
 
 /**
  * Utilities for showing help
@@ -37,15 +34,15 @@ const INSTALL_COMMANDS = new Map<string, string>([
 export class HelpUtil {
 
   /** Render the unknown command message */
-  static renderUnknownCommandMessage(cmd: string): string {
-    const install = INSTALL_COMMANDS.get(cmd);
-    if (install) {
+  static renderUnknownCommandMessage(command: string): string {
+    const module = COMMAND_TO_MODULE[command];
+    if (module) {
       return cliTpl`
-${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
-${{ identifier: install }}
+${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: command }} please run:\n
+${{ identifier: Runtime.getInstallCommand(module) }}
 `;
     } else {
-      return cliTpl`${{ subtitle: 'Unknown command' }}: ${{ input: cmd }}`;
+      return cliTpl`${{ subtitle: 'Unknown command' }}: ${{ input: command }}`;
     }
   }
 
@@ -58,17 +55,16 @@ ${{ identifier: install }}
     const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
     const args = schema.methods.main?.parameters ?? [];
 
-    // Ensure finalized
+    const usage = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
+    const params: string[] = [];
+    const descriptions: string[] = [];
 
-    const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
+    // Ensure finalized
     for (const field of args) {
       const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type.name.toLowerCase();
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
     }
-
-    const params: string[] = [];
-    const descriptions: string[] = [];
 
     for (const field of Object.values(schema.fields)) {
       const key = castKey<CliCommandShape>(field.name);
@@ -76,7 +72,7 @@ ${{ identifier: install }}
       const aliases = (field.aliases ?? [])
         .filter(flag => flag.startsWith('-'))
         .filter(flag =>
-          (field.type !== Boolean) || ((defaultValue !== true || field.name === 'help') ? !flag.startsWith('--no-') : flag.startsWith('--'))
+          (field.type !== Boolean) || (defaultValue !== true ? !flag.startsWith('--no-') : flag.startsWith('--'))
         );
       let type: string | undefined;
 
@@ -86,19 +82,23 @@ ${{ identifier: install }}
         ({ type } = CliSchemaExportUtil.baseInputType(field));
       }
 
-      const param = [
+      const parameter = [
         cliTpl`${{ param: aliases.join(', ') }}`,
         ...(type ? [cliTpl`${{ type: `<${type}>` }}`] : []),
       ];
 
-      params.push(param.join(' '));
-      const desc = [cliTpl`${{ title: field.description }}`];
+      params.push(parameter.join(' '));
+      const parts = [cliTpl`${{ title: field.description }}`];
 
-      if (key !== 'help' && defaultValue !== undefined) {
-        desc.push(cliTpl`(default: ${{ input: JSONUtil.toUTF8(defaultValue) }})`);
+      if (defaultValue !== undefined) {
+        parts.push(cliTpl`(default: ${{ input: JSONUtil.toUTF8(defaultValue) }})`);
       }
-      descriptions.push(desc.join(' '));
+      descriptions.push(parts.join(' '));
     }
+
+    params.push(cliTpl`${{ param: HELP_FLAG }}`);
+    descriptions.push('display help for command');
+
 
     const paramWidths = params.map(item => util.stripVTControlCharacters(item).length);
     const descWidths = descriptions.map(item => util.stripVTControlCharacters(item).length);
@@ -106,9 +106,9 @@ ${{ identifier: install }}
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
 
-    const helpText = await (command.help?.() ?? []);
-    if (helpText.length && helpText.at(-1) !== '') {
-      helpText.push('');
+    const extendedHelpText = await (command.help?.() ?? []);
+    if (extendedHelpText.length && extendedHelpText.at(-1) !== '') {
+      extendedHelpText.push('');
     }
 
     return [
@@ -119,7 +119,7 @@ ${{ identifier: install }}
         `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descriptions[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
       ),
       '',
-      ...helpText
+      ...extendedHelpText
     ].map(line => line.trimEnd()).join('\n');
   }
 

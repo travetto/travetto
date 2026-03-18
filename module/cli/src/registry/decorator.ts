@@ -21,16 +21,6 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
     if (target.Ⲑid && !describeFunction(target)?.abstract) {
       CliCommandRegistryIndex.getForRegister(target).register(config);
-      SchemaRegistryIndex.getForRegister(target).registerField('help', {
-        type: Boolean,
-        name: 'help',
-        class: target,
-        description: 'display help for command',
-        required: { active: false },
-        default: false,
-        access: 'readonly',
-        aliases: ['h', 'help']
-      });
     }
   };
 }

@@ -2,11 +2,11 @@
   "name": "@travetto-doc/web-rpc",
   "type": "module",
   "dependencies": {
-    "@travetto/cli": "^7.0.0",
-    "@travetto/web-rpc": "^7.0.0"
+    "@travetto/cli": "^8.0.0-alpha.0",
+    "@travetto/web-rpc": "^8.0.0-alpha.0"
   },
   "devDependencies": {
-    "@travetto/compiler": "^7.0.0"
+    "@travetto/compiler": "^8.0.0-alpha.0"
   },
   "travetto": {
     "build": {

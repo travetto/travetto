@@ -45,7 +45,7 @@ Options:
   -wr, --include-workspace-resources   Include workspace resources (default: false)
   -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
-  -h, --help                           display help for command
+  --help                               display help for command
 ```
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the `eject-file` flag that will allow for a script to be produced (base on the host operating system). 
@@ -111,7 +111,7 @@ Options:
   -wr, --include-workspace-resources   Include workspace resources (default: false)
   -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
-  -h, --help                           display help for command
+  --help                               display help for command
 ```
 
 ## CLI - pack:docker
@@ -151,7 +151,7 @@ Options:
   -dx, --docker-push                     Docker Push Tags (default: false)
   -db, --docker-build-platform <string>  Docker Build Platform
   -dr, --docker-registry <string>        Docker Registry
-  -h, --help                             display help for command
+  --help                                 display help for command
 ```
 
 The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the `--eject-file`  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. 

@@ -24,7 +24,7 @@ export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
   dockerImage = `node:${NODE_MAJOR}-alpine`;
   /**  Docker Image Name */
-  @CliFlag({ short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
+  @CliFlag({ short: 'dn', envVars: ['PACK_DOCKER_NAME'] })
   @Required(false)
   dockerName: string;
   /**  Docker Runtime user */

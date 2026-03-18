@@ -99,7 +99,7 @@ Options:
   -i, --input <string>    Input File (default: "DOC.tsx")
   -o, --outputs <string>  Outputs (default: ["README.md"])
   -w, --watch             Watch? (default: false)
-  -h, --help              display help for command
+  --help                  display help for command
 ```
 
 By default, running the command will output the [Markdown](https://en.wikipedia.org/wiki/Markdown) content directly to the terminal.
