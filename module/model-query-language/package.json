@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-query-language",
-  "version": "8.0.0-alpha.5",
+  "version": "8.0.0-alpha.6",
   "type": "module",
   "description": "Datastore query language.",
   "keywords": [
@@ -27,12 +27,12 @@
     "directory": "module/model-query"
   },
   "dependencies": {
-    "@travetto/model": "^8.0.0-alpha.5",
-    "@travetto/model-query": "^8.0.0-alpha.5",
-    "@travetto/schema": "^8.0.0-alpha.5"
+    "@travetto/model": "^8.0.0-alpha.6",
+    "@travetto/model-query": "^8.0.0-alpha.6",
+    "@travetto/schema": "^8.0.0-alpha.6"
   },
   "peerDependencies": {
-    "@travetto/test": "^8.0.0-alpha.5"
+    "@travetto/test": "^8.0.0-alpha.6"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

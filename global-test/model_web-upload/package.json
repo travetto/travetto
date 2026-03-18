@@ -3,10 +3,10 @@
   "type": "module",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/model": "^8.0.0-alpha.5",
-    "@travetto/web-aws-lambda": "^8.0.0-alpha.6",
-    "@travetto/web-http": "^8.0.0-alpha.6",
-    "@travetto/web-upload": "^8.0.0-alpha.5"
+    "@travetto/model": "^8.0.0-alpha.6",
+    "@travetto/web-aws-lambda": "^8.0.0-alpha.7",
+    "@travetto/web-http": "^8.0.0-alpha.7",
+    "@travetto/web-upload": "^8.0.0-alpha.6"
   },
   "travetto": {},
   "private": true
