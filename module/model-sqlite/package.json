@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-sqlite",
-  "version": "8.0.0-alpha.6",
+  "version": "8.0.0-alpha.7",
   "type": "module",
   "description": "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
@@ -27,11 +27,11 @@
     "directory": "module/model-sqlite"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.0-alpha.6",
-    "@travetto/context": "^8.0.0-alpha.6",
-    "@travetto/model": "^8.0.0-alpha.6",
-    "@travetto/model-query": "^8.0.0-alpha.6",
-    "@travetto/model-sql": "^8.0.0-alpha.6"
+    "@travetto/config": "^8.0.0-alpha.7",
+    "@travetto/context": "^8.0.0-alpha.7",
+    "@travetto/model": "^8.0.0-alpha.7",
+    "@travetto/model-query": "^8.0.0-alpha.7",
+    "@travetto/model-sql": "^8.0.0-alpha.7"
   },
   "travetto": {
     "displayName": "SQLite Model Service",
