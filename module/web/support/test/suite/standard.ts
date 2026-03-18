@@ -168,4 +168,10 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
     const response = await this.request<{ path: string }>({ context: { httpMethod: 'GET', path: '/test/fun/1/2/3/4' } });
     assert(response.body?.path === '1/2/3/4');
   }
+
+  @Test()
+  async testInheritedPathParam() {
+    const response = await this.request<{ userId: string }>({ context: { httpMethod: 'GET', path: '/users/1234' } });
+    assert(response.body?.userId === '1234');
+  }
 }

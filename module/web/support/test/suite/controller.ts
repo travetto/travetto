@@ -99,3 +99,11 @@ export class TestController {
     throw new RuntimeError('Uh-oh', { category: 'general' });
   }
 }
+
+@Controller('/users/:userId')
+class ParentParamController {
+  @Get('/')
+  async getUser(userId: string) {
+    return { userId };
+  }
+}

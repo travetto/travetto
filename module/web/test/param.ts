@@ -79,12 +79,22 @@ class ParamController {
   }
 }
 
+@Controller('/users/:userId')
+class ParentParamController {
+  @Get('/')
+  async getUser(userId: string) {
+    console.log('Path Param', userId);
+  }
+}
+
 @Suite()
 export class EndpointParameterTest {
   static getEndpoint(path: string, method: HttpMethod) {
     return ControllerRegistryIndex.getConfig(ParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
   }
-
+  static getParentEndpoint(path: string, method: HttpMethod) {
+    return ControllerRegistryIndex.getConfig(ParentParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
+  }
   static async extract(ep: EndpointConfig, request: Partial<WebRequest>): Promise<unknown[]> {
     return await EndpointUtil.extractParameters(ep, new WebRequest({ ...request }));
   }
@@ -174,6 +184,29 @@ export class EndpointParameterTest {
     const items = await EndpointParameterTest.extract(ep, req);
 
     assert(items.length === 0);
+  }
+
+  @Test()
+  async controllerLevelPathParam() {
+    const ep = EndpointParameterTest.getParentEndpoint('/', 'GET');
+
+    // userId lives in the controller base path /users/:userId - should auto-resolve as a path param
+    assert(ep.parameters[0].location === 'path');
+
+    assert.deepStrictEqual(
+      await EndpointParameterTest.extract(ep, {
+        context: { path: '/users/123', pathParams: { userId: '123' } }
+      }),
+      ['123']
+    );
+
+    // Missing userId should fail validation
+    await assert.rejects(
+      () => EndpointParameterTest.extract(ep, {
+        context: { path: '/users/123' }
+      }),
+      ValidationResultError
+    );
   }
 
   @Test()
