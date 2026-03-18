@@ -39,7 +39,6 @@
     "related/todo-app"
   ],
   "overrides": {
-    "whatwg-url": "15.1.0",
     "debug": "4.4.3",
     "typescript": "6.0.1-rc",
     "minimatch": "^10.2.2"
