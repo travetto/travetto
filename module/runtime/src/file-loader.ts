@@ -41,7 +41,7 @@ export class FileLoader {
    * Read a file as utf8 text, after resolving the path
    * @param relativePath The path to read
    */
-  async readText(relativePath: string): Promise<string> {
+  async readUTF8(relativePath: string): Promise<string> {
     const file = await this.resolve(relativePath);
     return fs.readFile(file, 'utf8');
   }

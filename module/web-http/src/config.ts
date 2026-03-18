@@ -62,8 +62,8 @@ export class WebHttpConfig {
       this.tlsKeys = await WebTlsUtil.generateKeyPair();
     } else {
       if (this.tlsKeys.key.length < 100) { // We have files or resources
-        this.tlsKeys.key = await RuntimeResources.readText(this.tlsKeys.key);
-        this.tlsKeys.cert = await RuntimeResources.readText(this.tlsKeys.cert);
+        this.tlsKeys.key = await RuntimeResources.readUTF8(this.tlsKeys.key);
+        this.tlsKeys.cert = await RuntimeResources.readUTF8(this.tlsKeys.cert);
       }
     }
 

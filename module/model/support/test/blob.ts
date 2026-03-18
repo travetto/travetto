@@ -92,7 +92,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const range = BinaryMetadataUtil.enforceRange({ start: 10, end: 20 }, partialMeta);
     assert(subContent.length === (range.end - range.start) + 1);
 
-    const og = await this.fixture.readText('/text.txt');
+    const og = await this.fixture.readUTF8('/text.txt');
 
     assert(subContent === og.substring(10, 21));
 

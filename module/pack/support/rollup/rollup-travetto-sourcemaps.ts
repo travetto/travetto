@@ -30,7 +30,7 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
             return null;
           }
           const loader = new FileLoader([path.dirname(id)]);
-          const map = await loader.readText(mapPath)
+          const map = await loader.readUTF8(mapPath)
             .then(value => value.startsWith('{') ?
               JSONUtil.fromUTF8<SourceMapInput>(value) :
               JSONUtil.fromBase64<SourceMapInput>(value)

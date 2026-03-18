@@ -185,7 +185,7 @@ export class EmailCompileUtil {
   static async applyStyles(html: string, options: EmailTemplateResource): Promise<string> {
     const styles = [
       options.globalStyles ?? '',
-      await options.loader.readText('/email/main.scss').catch(() => '')
+      await options.loader.readUTF8('/email/main.scss').catch(() => '')
     ]
       .filter(line => !!line)
       .join('\n');
