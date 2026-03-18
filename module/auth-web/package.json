@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-web",
-  "version": "8.0.0-alpha.7",
+  "version": "8.0.0-alpha.8",
   "type": "module",
   "description": "Web authentication integration support for the Travetto framework",
   "keywords": [
@@ -29,7 +29,7 @@
   "dependencies": {
     "@travetto/auth": "^8.0.0-alpha.7",
     "@travetto/config": "^8.0.0-alpha.7",
-    "@travetto/web": "^8.0.0-alpha.7",
+    "@travetto/web": "^8.0.0-alpha.8",
     "njwt": "^2.0.1"
   },
   "peerDependencies": {
