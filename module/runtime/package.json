@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@travetto/manifest": "^8.0.0-alpha.4",
-    "@types/debug": "^4.1.12",
+    "@types/debug": "^4.1.13",
     "debug": "^4.4.3",
     "temporal-polyfill-lite": "^0.3.2"
   },

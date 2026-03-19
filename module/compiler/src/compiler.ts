@@ -213,6 +213,9 @@ export class Compiler {
             const errors = await this.#state.compileSourceFile(event.entry.sourceFile, true);
             if (errors?.length) {
               log.error('Compilation failed', `${event.entry.sourceFile}: ${errors.length} errors found`);
+              for (const error of errors) {
+                log.error(`ERROR ${event.file}:${error}`);
+              }
             } else {
               log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
             }
