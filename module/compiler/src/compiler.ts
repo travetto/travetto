@@ -174,7 +174,7 @@ export class Compiler {
         log.debug('Compilation aborted');
       } else if (failures.size) {
         const sortedFailures = [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-        log.debug('Compilation failed',
+        log.error('Compilation failed',
           ['', sortedFailures.flatMap(([file, count]) => `- ${file}: ${count} errors found`)]
             .flat(3).join('\n')
         );

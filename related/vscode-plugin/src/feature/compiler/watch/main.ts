@@ -14,7 +14,7 @@ type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { previous: number, bar: ProgressBar, cleanup: () => void };
 
 const SCOPE_MAX = 15;
-const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?\s+(info|error|debug|warn)/;
+const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
 
 /**
  * Workspace Compilation Support
@@ -72,6 +72,7 @@ export class CompilerWatchFeature extends BaseFeature {
       stdio: ['pipe', starting ? 'ignore' : 'pipe', 'pipe'],
       env: {
         PATH: process.env.PATH,
+        ...Env.TRV_QUIET.export(true),
         ...(debug ? Env.TRV_BUILD.export('debug') : {})
       }
     }).on('exit', (code) => {
