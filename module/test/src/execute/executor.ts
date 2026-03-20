@@ -31,15 +31,13 @@ export class TestExecutor {
    *
    * This method should never throw under any circumstances.
    */
-  async #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
-    const suite = SuiteRegistryIndex.getConfig(test.class);
-
+  async #executeTestMethod(instance: unknown, test: TestConfig): Promise<Error | undefined> {
     // Ensure all the criteria below are satisfied before moving forward
     return Barrier.awaitOperation(test.timeout || TEST_TIMEOUT, async () => {
       const env = process.env;
       process.env = { ...env }; // Created an isolated environment
       try {
-        await castTo<Record<string, Function>>(suite.instance)[test.methodName]();
+        await castTo<Record<string, Function>>(instance)[test.methodName]();
       } finally {
         process.env = env; // Restore
       }
@@ -58,7 +56,7 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  async executeTest(test: TestConfig, suite: SuiteConfig, override?: Partial<TestResult>): Promise<TestResult> {
+  async executeTest(instance: unknown, test: TestConfig, suite: SuiteConfig, override?: Partial<TestResult>): Promise<TestResult> {
 
     const result = TestModelUtil.createTestResult(suite, test, override);
 
@@ -81,7 +79,7 @@ export class TestExecutor {
     } else {
       // Run method and get result
       const startTime = Date.now();
-      const error = await this.#executeTestMethod(test);
+      const error = await this.#executeTestMethod(instance, test);
       const [status, finalError] = AssertCheck.validateTestResultError(test, error);
       result.status = status;
       result.selfDuration = Date.now() - startTime;
@@ -104,9 +102,9 @@ export class TestExecutor {
    */
   async executeSuite(suite: SuiteConfig, tests: TestConfig[]): Promise<void> {
 
-    suite.instance = classConstruct(suite.class);
+    const instance = classConstruct(suite.class);
 
-    const shouldSkip = await this.#shouldSkip(suite, suite.instance);
+    const shouldSkip = await this.#shouldSkip(suite, instance);
 
     const result: SuiteResult = TestModelUtil.createSuiteResult(suite);
 
@@ -126,7 +124,7 @@ export class TestExecutor {
       return;
     }
 
-    const manager = new TestPhaseManager(suite);
+    const manager = new TestPhaseManager(suite, instance);
     const originalEnv = { ...process.env };
     const startTime = Date.now();
     const testResultOverrides: Record<string, Partial<TestResult>> = {};
@@ -158,7 +156,7 @@ export class TestExecutor {
       const testStart = Date.now();
       const testResultOverride = (testResultOverrides[test.methodName] ??= {});
 
-      if (await this.#shouldSkip(test, suite.instance)) {
+      if (await this.#shouldSkip(test, instance)) {
         testResultOverride.status = 'skipped';
       }
 
@@ -172,7 +170,7 @@ export class TestExecutor {
       }
 
       // Run test
-      const testResult = await this.executeTest(test, suite, testResultOverride);
+      const testResult = await this.executeTest(instance, test, suite, testResultOverride);
 
       // Handle after each
       try {

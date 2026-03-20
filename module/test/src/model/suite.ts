@@ -20,10 +20,6 @@ export interface SuiteConfig extends SuiteCore {
    */
   skip: Skip;
   /**
-   * Actual class instance
-   */
-  instance?: unknown;
-  /**
    * Tests to run
    */
   tests: Record<string, TestConfig>;

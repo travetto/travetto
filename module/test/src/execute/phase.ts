@@ -13,9 +13,11 @@ const TEST_PHASE_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_PHASE_TIMEOUT.value ??
 export class TestPhaseManager {
   #progress: ('all' | 'each')[] = [];
   #suite: SuiteConfig;
+  #instance: unknown;
 
-  constructor(suite: SuiteConfig) {
+  constructor(suite: SuiteConfig, instance: unknown) {
     this.#suite = suite;
+    this.#instance = instance;
   }
 
   /**
@@ -29,7 +31,7 @@ export class TestPhaseManager {
       }
 
       // Ensure all the criteria below are satisfied before moving forward
-      error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => handler[phase]?.(this.#suite.instance));
+      error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => handler[phase]?.(this.#instance));
 
       if (error) {
         throw error;

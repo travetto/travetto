@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import path from 'node:path';
 
-import { Env, ExecUtil, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil } from '@travetto/runtime';
+import { Env, ExecUtil, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil, describeFunction } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 import { Registry } from '@travetto/registry';
 
@@ -126,6 +126,7 @@ export class RunUtil {
     const imported = await Registry.manualInit([importPath]);
     const classes = Object.fromEntries(
       imported
+        .filter(cls => !describeFunction(cls).abstract)
         .filter(cls => SuiteRegistryIndex.hasConfig(cls))
         .map(cls => [cls.Ⲑid, SuiteRegistryIndex.getConfig(cls)])
     );
