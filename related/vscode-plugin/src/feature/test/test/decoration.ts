@@ -7,7 +7,6 @@ import { CodecUtil, JSONUtil } from '@travetto/runtime';
 import type { ErrorHoverAssertion, TestLevel } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
 import { ThemeUtil } from '../../../core/theme.ts';
-import { Log } from '../../../core/log.ts';
 
 const MAX_LOG_LENGTH = 60;
 
@@ -172,8 +171,6 @@ export class Decorations {
           <rect x="${offset}" y="${offset}" width="${relativeSize}" height="${relativeSize}" stroke-width="0" fill="${color}" />
         </svg>`;
 
-      new Log('test:decoration').debug(`Generated SVG for state ${state}: ${svg}`);
-
       this.#imageUris[key] = vscode.Uri.parse(`data:image/svg+xml;base64,${CodecUtil.utf8ToBase64(svg)}`);
     }
     return this.#imageUris[key];
@@ -252,22 +249,18 @@ export class Decorations {
    * @param test
    */
   static buildTest(test: TestResult | TestConfig): vscode.DecorationOptions {
-    let error: ErrorHoverAssertion | Assertion | undefined;
+    const output: vscode.DecorationOptions = {
+      ...this.line(test.lineStart),
+    };
     if ('error' in test) {
-      const tt = test;
-      error = (tt.assertions || []).find(assertion => !!assertion.error) ||
-        (tt.error && { error: tt.error, message: tt.error.message });
+      const error = (test.assertions || []).find(assertion => !!assertion.error) ||
+        (test.error && { error: test.error, message: test.error.message });
+      if (error) {
+        const hover = this.buildErrorHover(error);
+        output.hoverMessage = hover.markdown;
+      }
     }
-    if (error) {
-      const hover = this.buildErrorHover(error);
-      const tt = test;
-      return {
-        ...this.line(tt.lineStart),
-        hoverMessage: hover.markdown
-      };
-    } else {
-      return this.line(test.lineStart);
-    }
+    return output;
   }
 
   /**

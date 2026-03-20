@@ -46,6 +46,10 @@ export class Workspace {
 
   /** Resolve an import to a file path */
   static resolveImport(imp: string): string {
+    // Allow resolution to handle non-mono repo fully-qualifed imports
+    if (imp.startsWith(`${this.moduleName}/`)) {
+      imp = imp.replace(`${this.moduleName}/`, './');
+    }
     return PackageUtil.resolveImport(imp, this.path);
   }
 

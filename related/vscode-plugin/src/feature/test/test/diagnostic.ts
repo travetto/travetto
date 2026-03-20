@@ -60,19 +60,20 @@ export class DiagnosticManager {
     const classes = this.#tracked.get(file);
 
     const diagnostics = [...classes?.values() ?? []]
-      .flatMap(m => [...m.values()])
-      .filter(t => t.status === 'failed' || t.status === 'errored')
-      .flatMap(t => this.#buildTestDiagnostics(file, t));
+      .flatMap(suite => [...suite.values()])
+      .filter(test => test.status === 'failed' || test.status === 'errored')
+      .flatMap(test => this.#buildTestDiagnostics(file, test));
 
     testDiagnostics.set(vscode.Uri.file(file), diagnostics);
   }
 
   refreshStatus(): void {
     const summary = TestModelUtil.buildSummary();
-    TestModelUtil.countTestResult(summary, [...this.#tracked.values()]
-      .flatMap(m => [...m.values()])
-      .flatMap(t => [...t.values()])
-    );
+    const tests = [...this.#tracked.values()]
+      .flatMap(file => [...file.values()])
+      .flatMap(suite => [...suite.values()]);
+
+    TestModelUtil.countTestResult(summary, tests);
 
     const status = TestModelUtil.computeTestStatus(summary);
     this.setStatus(`Tests \$(pass-filled) ${summary.passed} \$(alert) ${summary.failed + summary.errored}`, status);
