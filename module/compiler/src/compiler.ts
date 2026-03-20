@@ -31,8 +31,8 @@ export class Compiler {
 
   #state: CompilerState;
   #watch?: boolean;
-  #controller: AbortController;
-  #signal: AbortSignal;
+  #shutdownController: AbortController;
+  #shutdownSignal: AbortSignal;
   #shuttingDown = false;
   #deltaEvents: DeltaEvent[];
 
@@ -41,9 +41,9 @@ export class Compiler {
     this.#watch = watch;
     this.#deltaEvents = deltaEvents;
 
-    this.#controller = new AbortController();
-    this.#signal = this.#controller.signal;
-    setMaxListeners(1000, this.#signal);
+    this.#shutdownController = new AbortController();
+    this.#shutdownSignal = this.#shutdownController.signal;
+    setMaxListeners(1000, this.#shutdownSignal);
     process
       .once('disconnect', () => this.#shutdown('manual'))
       .on('message', event => (event === 'shutdown') && this.#shutdown('manual'));
@@ -78,7 +78,7 @@ export class Compiler {
     // No longer listen to disconnect
     process.removeAllListeners('disconnect');
     process.removeAllListeners('message');
-    this.#controller.abort();
+    this.#shutdownController.abort();
     CommonUtil.nonBlockingTimeout(1000).then(() => process.exit()); // Allow upto 1s to shutdown gracefully
   }
 
@@ -127,7 +127,7 @@ export class Compiler {
         lastSent = Date.now();
         EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
       }
-      if (this.#signal.aborted) {
+      if (this.#shutdownSignal.aborted) {
         break;
       }
     }
@@ -170,7 +170,7 @@ export class Compiler {
         }
         metrics.push(event);
       }
-      if (this.#signal.aborted) {
+      if (this.#shutdownSignal.aborted) {
         log.debug('Compilation aborted');
       } else if (failures.size) {
         const sortedFailures = [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0]));
@@ -200,7 +200,7 @@ export class Compiler {
       this.logStatistics(metrics);
     }
 
-    if (this.#watch && !this.#signal.aborted) {
+    if (this.#watch && !this.#shutdownSignal.aborted) {
       const resolved = this.#state.getArbitraryInputFile();
       await this.#state.compileSourceFile(resolved);
 
@@ -208,7 +208,7 @@ export class Compiler {
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {
-        for await (const event of new CompilerWatcher(this.#state, this.#signal)) {
+        for await (const event of new CompilerWatcher(this.#state, this.#shutdownSignal)) {
           if (event.action !== 'delete') {
             const errors = await this.#state.compileSourceFile(event.entry.sourceFile, true);
             if (errors?.length) {
