@@ -97,7 +97,7 @@ export class WatchUtil {
     }
 
     void this.runWithRetry(async ({ signal }) => {
-      await client.waitForState(['compile-end', 'watch-start'], undefined, signal);
+      await client.waitForState(['watch-start'], undefined, signal);
 
       if (!await client.isWatching()) { // If we get here, without a watch
         return 'error';

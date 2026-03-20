@@ -61,7 +61,7 @@ export class DiagnosticManager {
 
     const diagnostics = [...classes?.values() ?? []]
       .flatMap(m => [...m.values()])
-      .filter(t => t.status === 'failed')
+      .filter(t => t.status === 'failed' || t.status === 'errored')
       .flatMap(t => this.#buildTestDiagnostics(file, t));
 
     testDiagnostics.set(vscode.Uri.file(file), diagnostics);
@@ -75,7 +75,7 @@ export class DiagnosticManager {
     );
 
     const status = TestModelUtil.computeTestStatus(summary);
-    this.setStatus(`Tests \$(pass-filled) ${summary.passed} \$(alert) ${summary.failed}`, status);
+    this.setStatus(`Tests \$(pass-filled) ${summary.passed} \$(alert) ${summary.failed + summary.errored}`, status);
   }
 
   afterTest(test: TestResult): void {

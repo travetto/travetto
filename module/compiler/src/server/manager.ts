@@ -77,7 +77,7 @@ export class CompilerManager {
       log.info('Server already running, waiting for initial compile to complete');
       const controller = new AbortController();
       Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: controller.signal }));
-      await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
+      await client.waitForState(['compile-end'], 'Successfully built');
       controller.abort();
     }
   }
