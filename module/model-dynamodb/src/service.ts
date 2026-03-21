@@ -371,15 +371,15 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
       if (batch.Count && batch.Items) {
         for (const item of batch.Items) {
-          if (position++ < offset) { continue; } else if (position >= offset + limit) { break outer; }
+          position += 1;
+          if (position < offset) { continue; } else if (position >= offset + limit) { break outer; }
           try {
             yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
           } catch (error) {
             if (!(error instanceof NotFoundError)) {
               throw error;
             }
-            // Restore position for skipped item
-            position -= 1;
+            position -= 1; // Don't count expired items against the limit
           }
         }
       }

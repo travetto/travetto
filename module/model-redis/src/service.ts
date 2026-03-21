@@ -1,6 +1,6 @@
 import { createClient } from '@redis/client';
 
-import { castTo, JSONUtil, RuntimeError, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport,
   NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId, type ModelIndexedListOptions,
@@ -40,24 +40,31 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return key;
   }
 
-  async * #streamRangedValues(operation: 'zRange', search: RedisScan, count = 100, offset = 0): AsyncIterable<string[]> {
+  async * #streamValues(operation: 'scan' | 'sScan' | 'zScan', search: RedisScan, options?: ModelIndexedListOptions<ModelType>, count = 100): AsyncIterable<string[]> {
     const key = 'key' in search ? search.key : '';
-    const results = await this.client.zRange(key, -Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, {
-      LIMIT: { count, offset }
-    });
 
-    yield results.slice(0, count);
-  }
+    const offset = options?.offset ?? 0;
+    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    const maxPosition = offset + limit;
 
-  async * #streamValues(operation: 'scan' | 'sScan' | 'zScan', search: RedisScan, count = 100): AsyncIterable<string[]> {
+    if (operation === 'zScan' && (options?.limit || options?.offset) && limit < 1000) {
+      const results = await this.client.zRange(key, -Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, {
+        LIMIT: { count: options.limit ?? Number.MAX_SAFE_INTEGER, offset: options.offset ?? 0 },
+        BY: 'SCORE',
+      });
+
+      yield results.slice(0, count);
+      return;
+    }
+
     let previousCursor = '0';
     let done = false;
 
     const flags = { COUNT: count, ...('match' in search ? { MATCH: search.match } : {}) };
-    const key = 'key' in search ? search.key : '';
+    let position = 0;
 
     while (!done) {
-      const [cursor, results] = await (
+      const response = await (
         operation === 'scan' ?
           this.client.scan(previousCursor, flags).then(result => [result.cursor, result.keys] as const) :
           operation === 'sScan' ?
@@ -65,7 +72,24 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
             this.client.zScan(key, previousCursor, flags).then(result => [result.cursor, result.members.map(item => item.value)] as const)
       );
 
+      const cursor = response[0];
+      let results = response[1];
       previousCursor = cursor;
+
+      if (position + results.length < offset) {
+        position += results.length;
+        continue;
+      } else if (position >= maxPosition) {
+        break;
+      } else if (position < offset) {
+        results = results.slice(0, offset - position);
+        position = offset;
+      } else if (position + results.length > maxPosition) {
+        results = results.slice(maxPosition - position);
+        done = true;
+      } else {
+        position += results.length;
+      }
 
       yield results;
 
@@ -325,7 +349,6 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return this.update(cls, item);
   }
 
-
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
@@ -337,16 +360,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const fullKey = this.#resolveKey(cls, idx, key);
 
     if (idxConfig.type === 'unsorted') {
-      if (options?.limit || options?.offset) {
-        throw new RuntimeError('Pagination is not supported for unsorted indices');
-      }
-      stream = this.#streamValues('sScan', { key: fullKey });
+      stream = this.#streamValues('sScan', { key: fullKey }, options);
     } else {
-      if (options?.limit || options?.offset) {
-        stream = this.#streamRangedValues('zRange', { key: fullKey }, options.limit ?? 100, options.offset ?? 0);
-      } else {
-        stream = this.#streamValues('zScan', { key: fullKey });
-      }
+      stream = this.#streamValues('zScan', { key: fullKey }, options);
     }
 
     for await (const ids of stream) {
