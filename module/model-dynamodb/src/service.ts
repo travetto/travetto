@@ -353,7 +353,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const idxName = DynamoDBUtil.simpleName(idx);
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const offset = options?.offset ?? 0;
-    let position = -1;
+    const maxPosition = offset + limit;
+    let position = 0;
 
     let done = false;
     let token: Record<string, AttributeValue> | undefined;
@@ -371,15 +372,17 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
       if (batch.Count && batch.Items) {
         for (const item of batch.Items) {
-          position += 1;
-          if (position < offset) { continue; } else if (position >= offset + limit) { break outer; }
+          if (position >= maxPosition) {
+            break outer;
+          }
           try {
-            yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
+            const loaded = await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
+            if (position >= offset) { yield loaded; }
+            position += 1;
           } catch (error) {
             if (!(error instanceof NotFoundError)) {
               throw error;
             }
-            position -= 1; // Don't count expired items against the limit
           }
         }
       }

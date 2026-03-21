@@ -401,10 +401,11 @@ export class ElasticsearchModelService implements
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    const offset = options?.offset ?? 0;
+    const maxPosition = offset + limit;
     let search = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,
-      from: options?.offset ?? 0,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, options?.body, { emptySortValue: { $exists: true } }))
@@ -415,11 +416,10 @@ export class ElasticsearchModelService implements
     let position = 0;
     outer: while (search.hits.hits.length > 0) {
       for (const hit of search.hits.hits) {
-        if (position >= limit) {
-          break outer;
-        }
+        if (position >= maxPosition) { break outer; }
         try {
-          yield this.postLoad(cls, hit);
+          const loaded = this.postLoad(cls, hit);
+          if (position >= offset) { yield loaded; }
           position += 1;
         } catch (error) {
           if (!(error instanceof NotFoundError)) {

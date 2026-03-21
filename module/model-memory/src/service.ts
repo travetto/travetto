@@ -336,20 +336,20 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const offset = options?.offset ?? 0;
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const maxPosition = offset + limit;
-    let position = -1;
+    let position = 0;
 
     if (index) {
       if (index instanceof Set) {
         for (const id of index) {
+          if (position >= maxPosition) { break; }
+          else if (position >= offset) { yield this.get(cls, id); }
           position += 1;
-          if (position < offset) { continue; } else if (position >= maxPosition) { break; }
-          yield this.get(cls, id);
         }
       } else {
         for (const id of [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a)) {
+          if (position >= maxPosition) { break; }
+          else if (position >= offset) { yield this.get(cls, id); }
           position += 1;
-          if (position < offset) { continue; } else if (position >= maxPosition) { break; }
-          yield this.get(cls, id);
         }
       }
     }
