@@ -221,4 +221,29 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     const found = await service.getByIndex(User3, 'userAge', { name: 'carol', age: 35 });
     assert(found.color === 'yellow');
   }
+
+  @Test()
+  async paginateByIndex() {
+    const service = await this.service;
+
+    await service.create(User3, User3.from({ name: 'page', age: 10, color: 'a' }));
+    await service.create(User3, User3.from({ name: 'page', age: 20, color: 'b' }));
+    await service.create(User3, User3.from({ name: 'page', age: 30, color: 'c' }));
+    await service.create(User3, User3.from({ name: 'page', age: 40, color: 'd' }));
+    await service.create(User3, User3.from({ name: 'page', age: 50, color: 'e' }));
+
+    const page1 = await this.toArray(service.listByIndex(User3, 'userAge', { body: { name: 'page' }, limit: 2 }));
+    assert(page1.length === 2);
+    assert(page1[0].color === 'a');
+    assert(page1[1].color === 'b');
+
+    const page2 = await this.toArray(service.listByIndex(User3, 'userAge', { body: { name: 'page' }, limit: 2, offset: 2 }));
+    assert(page2.length === 2);
+    assert(page2[0].color === 'c');
+    assert(page2[1].color === 'd');
+
+    const page3 = await this.toArray(service.listByIndex(User3, 'userAge', { body: { name: 'page' }, limit: 2, offset: 4 }));
+    assert(page3.length === 1);
+    assert(page3[0].color === 'e');
+  }
 }
