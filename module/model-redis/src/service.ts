@@ -56,7 +56,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
     const flags = { COUNT: count, ...('match' in search ? { MATCH: search.match } : {}) };
 
-    while (true) {
+    while (cursor && produced < limit) {
       const [nextCursor, results]: [string, string[]] = await (
         operation === 'scan' ?
           this.client.scan(cursor, flags).then(result => [result.cursor, result.keys] as const) :
@@ -70,10 +70,6 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       produced += results.length;
       const sliceEnd = (produced >= limit) ? (results.length - (produced - limit)) : results.length;
       yield { cursor, ids: results.slice(0, sliceEnd) };
-
-      if (!cursor || produced >= limit) {
-        return;
-      }
     }
   }
 
