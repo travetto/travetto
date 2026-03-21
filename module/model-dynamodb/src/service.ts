@@ -35,7 +35,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return table;
   }
 
-  async * #streamIndex<T extends ModelType>(
+  async * #scanIndex<T extends ModelType>(
     cls: Class, idx: string, options: ModelIndexedListPageOptions<T, Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
@@ -393,7 +393,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    for await (const batch of this.#streamIndex(cls, idx, { limit: Number.MAX_SAFE_INTEGER, body })) {
+    for await (const batch of this.#scanIndex(cls, idx, { limit: Number.MAX_SAFE_INTEGER, body })) {
       for (const item of batch.Items ?? []) {
         try {
           yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
@@ -410,7 +410,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const items: T[] = [];
     const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
     let lastOffset: Record<string, AttributeValue> | undefined;
-    for await (const batch of this.#streamIndex(cls, idx, { ...options, offset })) {
+    for await (const batch of this.#scanIndex(cls, idx, { ...options, offset })) {
       lastOffset = batch.LastEvaluatedKey;
       for (const item of batch.Items ?? []) {
         try {
