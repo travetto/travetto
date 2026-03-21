@@ -5,7 +5,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelIndexedSupport, type ModelType, NotFoundError, type OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, type ModelIndexedListOptions,
+  ModelCrudUtil, ModelIndexedUtil, type ModelIndexedListPageOptions, type ModelIndexListPageResult,
 } from '@travetto/model';
 
 import type { FirestoreModelConfig } from './config.ts';
@@ -18,7 +18,7 @@ const setMissingValues = <T>(input: T, missingValue: unknown): T =>
  * A model service backed by Firestore
  */
 @Injectable()
-export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport {
+export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport<number> {
 
   idSource = ModelCrudUtil.uuidSource();
   client: Firestore;
@@ -36,6 +36,20 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   #getCollection(cls: Class): FirebaseFirestore.CollectionReference<DocumentData> {
     return this.client.collection(this.#resolveTable(cls));
+  }
+
+  #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): Query {
+    ModelCrudUtil.ensureNotSubType(cls);
+
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, config, body, { emptySortValue: null });
+    let query = fields.reduce<Query>((result, { path, value }) =>
+      result.where(path.join('.'), '==', value), this.#getCollection(cls));
+
+    if (sorted) {
+      query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');
+    }
+    return query;
   }
 
   @PostConstruct()
@@ -158,28 +172,28 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, config, options?.body, { emptySortValue: null });
-    let query = fields.reduce<Query>((result, { path, value }) =>
-      result.where(path.join('.'), '==', value), this.#getCollection(cls));
-
-    if (sorted) {
-      query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');
-    }
-
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
-
-    if (options?.offset) {
-      query = query.offset(options.offset);
-    }
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+    const query = this.#buildIndexQuery(cls, idx, body);
 
     for (const item of (await query.get()).docs) {
       yield await ModelCrudUtil.load(cls, item.data()!);
     }
+  }
+
+  async listPageByIndex<T extends ModelType>(
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, number>
+  ): Promise<ModelIndexListPageResult<T, number>> {
+    const offset = options.offset ?? 0;
+    const limit = options.limit;
+    const query = this.#buildIndexQuery(cls, idx, options.body)
+      .limit(limit)
+      .offset(offset);
+
+    const items: T[] = [];
+    for (const item of (await query.get()).docs) {
+      items.push(await ModelCrudUtil.load(cls, item.data()!));
+    }
+
+    return { items, nextOffset: items.length ? offset + items.length : undefined };
   }
 }

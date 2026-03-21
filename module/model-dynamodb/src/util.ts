@@ -3,8 +3,8 @@ import type {
   GlobalSecondaryIndexUpdate, KeySchemaElement
 } from '@aws-sdk/client-dynamodb';
 
-import type { Class } from '@travetto/runtime';
-import { ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, NotFoundError, type ModelType } from '@travetto/model';
+import type { Class, DeepPartial } from '@travetto/runtime';
+import { ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelRegistryIndex, NotFoundError, type ModelType } from '@travetto/model';
 
 /**
  * Configuration for DynamoDB indices
@@ -24,6 +24,18 @@ export class DynamoDBUtil {
    */
   static simpleName(idx: string): string {
     return idx.replace(/[^A-Za-z0-9]/g, '');
+  }
+
+  /**
+   * Index key builder
+   */
+  static indexKeyBuilder<T extends ModelType>(cls: Class<T>, idx: string): (item?: DeepPartial<T>) => Record<string, AttributeValue> {
+    const idxName = this.simpleName(idx);
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    return (item?: DeepPartial<T>) => {
+      const { key } = ModelIndexedUtil.computeIndexKey(cls, config, item, { emptySortValue: null });
+      return { [`:${idxName}`]: this.toValue(key) };
+    };
   }
 
   /**

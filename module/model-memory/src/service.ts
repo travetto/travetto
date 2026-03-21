@@ -7,8 +7,8 @@ import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, type ModelIndexedListOptions,
-  IndexNotSupported
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
+  IndexNotSupported, type ModelIndexListPageResult, type ModelIndexedListPageOptions
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -41,7 +41,10 @@ function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | n
  * Standard in-memory support
  */
 @Injectable()
-export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
+export class MemoryModelService implements
+  ModelCrudSupport, ModelBlobSupport,
+  ModelExpirySupport, ModelStorageSupport,
+  ModelIndexedSupport<number> {
 
   #store = new Map<string, StoreType>();
   #indices = {
@@ -129,6 +132,20 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       return id;
     }
     throw new NotFoundError(cls, key);
+  }
+
+  #getIndexIds<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): string[] {
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
+    const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
+
+    if (!index) {
+      throw new IndexNotSupported(cls, config);
+    }
+
+    return index instanceof Set ?
+      [...index] :
+      [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a);
   }
 
   @PostConstruct()
@@ -329,24 +346,24 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, options?.body, { emptySortValue: null });
-    const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
-
-    const offset = options?.offset ?? 0;
-    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
-
-    if (!index) {
-      throw new IndexNotSupported(cls, config);
-    }
-
-    const ids = index instanceof Set ?
-      [...index] :
-      [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a);
-
-    for (const id of ids.slice(offset, offset + limit)) {
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+    const ids = this.#getIndexIds(cls, idx, body);
+    for (const id of ids) {
       yield this.get(cls, id);
     }
+  }
+
+  async listPageByIndex<T extends ModelType>(
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, number>
+  ): Promise<ModelIndexListPageResult<T, number>> {
+    const ids = this.#getIndexIds(cls, idx, options.body);
+    const offset = options.offset ?? 0;
+    const limit = options.limit;
+
+    const items: T[] = [];
+    for (const id of ids.slice(offset, offset + limit)) {
+      items.push(await this.get(cls, id));
+    }
+    return { items, nextOffset: items.length ? offset + items.length : undefined };
   }
 }

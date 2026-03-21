@@ -3,10 +3,15 @@ import type { Class, DeepPartial } from '@travetto/runtime';
 import type { ModelType, OptionalId } from '../types/model.ts';
 import type { ModelBasicSupport } from './basic.ts';
 
-export type ModelIndexedListOptions<T extends ModelType> = {
+export type ModelIndexedListPageOptions<T extends ModelType, O = unknown> = {
   body?: DeepPartial<T>;
-  limit?: number;
-  offset?: number;
+  limit: number;
+  offset?: O;
+};
+
+export type ModelIndexListPageResult<T extends ModelType, O = unknown> = {
+  items: T[];
+  nextOffset?: O;
 };
 
 /**
@@ -14,7 +19,7 @@ export type ModelIndexedListOptions<T extends ModelType> = {
  *
  * @concrete
  */
-export interface ModelIndexedSupport extends ModelBasicSupport {
+export interface ModelIndexedSupport<O = unknown> extends ModelBasicSupport {
   /**
    * Get entity by index as defined by fields of idx and the body fields
    * @param cls The type to search by
@@ -35,9 +40,9 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * List entity by ranged index as defined by fields of idx and the body fields
    * @param cls The type to search by
    * @param idx The index name to search against
-   * @param options The configuration for listing
+   * @param body The configuration for listing
    */
-  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T>;
+  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T>;
 
   /**
    * Upsert by index, allowing the index to act as a primary key
@@ -62,4 +67,12 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param body The partial document to update
    */
   updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T>;
+
+  /**
+   * List entity by ranged index as defined by fields of idx and the body fields
+   * @param cls The type to search by
+   * @param idx The index name to search against
+   * @param options The configuration for listing
+   */
+  listPageByIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, O>): Promise<ModelIndexListPageResult<T, O>>;
 }

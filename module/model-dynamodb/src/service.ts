@@ -1,12 +1,13 @@
-import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
+import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput, type QueryCommandOutput } from '@aws-sdk/client-dynamodb';
 
 import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelIndexedSupport, type ModelType, NotFoundError, ExistsError,
-  IndexNotSupported, type OptionalId, type ModelIndexedListOptions,
+  IndexNotSupported, type OptionalId, type ModelIndexedListPageOptions,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
+  type ModelIndexListPageResult,
 } from '@travetto/model';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -18,7 +19,7 @@ const EXP_ATTR = 'expires_at__';
  * A model service backed by DynamoDB
  */
 @Injectable()
-export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
+export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport<string> {
 
   idSource = ModelCrudUtil.uuidSource();
   client: DynamoDB;
@@ -32,6 +33,53 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       table = `${this.config.namespace}_${table}`;
     }
     return table;
+  }
+
+  async * #streamIndex<T extends ModelType>(
+    cls: Class, idx: string, options: ModelIndexedListPageOptions<T, Record<string, AttributeValue>>
+  ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
+    ModelCrudUtil.ensureNotSubType(cls);
+    const builder = DynamoDBUtil.indexKeyBuilder(cls, idx);
+    const idxName = DynamoDBUtil.simpleName(idx);
+
+    let startKey = options.offset;
+    let produced = 0;
+
+    while (true) {
+      const batch = await this.client.query({
+        TableName: this.#resolveTable(cls),
+        IndexName: idxName,
+        ProjectionExpression: 'body',
+        KeyConditionExpression: `${idxName}__ = :${idxName}`,
+        ExpressionAttributeValues: builder(options.body),
+        ExclusiveStartKey: startKey,
+      });
+
+      if (!batch.Count || !batch.Items) {
+        return;
+      }
+
+      produced += batch.Count;
+
+      if (produced > options.limit) {
+        const remaining = options.limit - (produced - batch.Count);
+        const items = batch.Items.slice(0, remaining);
+        yield {
+          $metadata: batch.$metadata,
+          Items: items,
+          Count: remaining,
+          ScannedCount: batch.ScannedCount,
+          LastEvaluatedKey: builder(items.at(-1)!)
+        };
+        return;
+      } else {
+        yield batch;
+      }
+      startKey = batch.LastEvaluatedKey;
+      if (!startKey) {
+        return;
+      }
+    }
   }
 
   async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
@@ -344,52 +392,43 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, config, options?.body, { emptySortValue: null });
-
-    const idxName = DynamoDBUtil.simpleName(idx);
-    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
-    const offset = options?.offset ?? 0;
-    const maxPosition = offset + limit;
-    let position = 0;
-
-    let done = false;
-    let token: Record<string, AttributeValue> | undefined;
-    outer: while (!done) {
-      const batch = await this.client.query({
-        TableName: this.#resolveTable(cls),
-        IndexName: idxName,
-        ProjectionExpression: 'body',
-        KeyConditionExpression: `${idxName}__ = :${idxName}`,
-        ExpressionAttributeValues: {
-          [`:${idxName}`]: DynamoDBUtil.toValue(key)
-        },
-        ExclusiveStartKey: token,
-      });
-
-      if (batch.Count && batch.Items) {
-        for (const item of batch.Items) {
-          if (position >= maxPosition) { break outer; }
-          try {
-            const loaded = await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
-            if (position >= offset) { yield loaded; }
-            position += 1;
-          } catch (error) {
-            if (!(error instanceof NotFoundError)) {
-              throw error;
-            }
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+    for await (const batch of this.#streamIndex(cls, idx, { limit: Number.MAX_SAFE_INTEGER, body })) {
+      for (const item of batch.Items ?? []) {
+        try {
+          yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
       }
+    }
+  }
 
-      if (!batch.Count || !batch.LastEvaluatedKey) {
-        done = true;
-      } else {
-        token = batch.LastEvaluatedKey;
+  async listPageByIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, string>): Promise<ModelIndexListPageResult<T, string>> {
+    const items: T[] = [];
+    const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
+    let lastOffset: Record<string, AttributeValue> | undefined;
+    for await (const batch of this.#streamIndex(cls, idx, { ...options, offset })) {
+      lastOffset = batch.LastEvaluatedKey;
+      for (const item of batch.Items ?? []) {
+        try {
+          items.push(await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!));
+          if (options?.limit && items.length >= options.limit) {
+            break;
+          }
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
+          }
+        }
       }
     }
+
+    return {
+      items,
+      nextOffset: lastOffset ? JSONUtil.toBase64(lastOffset) : undefined,
+    };
   }
 }

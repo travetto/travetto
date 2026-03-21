@@ -3,13 +3,15 @@ import {
   type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
   type ObjectId, type RootFilterOperators, type Filter,
   type WithId as MongoWithId,
+  type FindCursor,
 } from 'mongodb';
 
 import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport,
   type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
-  NotFoundError, ExistsError, type ModelBlobSupport, type ModelIndexedListOptions,
+  NotFoundError, ExistsError, type ModelBlobSupport,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
+  type ModelIndexedListPageOptions, type ModelIndexListPageResult,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -42,7 +44,7 @@ export const ModelBlobNamespace = '__blobs';
 export class MongoModelService implements
   ModelCrudSupport, ModelStorageSupport,
   ModelBulkSupport, ModelBlobSupport,
-  ModelIndexedSupport, ModelQuerySupport,
+  ModelIndexedSupport<number>, ModelQuerySupport,
   ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySuggestSupport, ModelExpirySupport {
 
@@ -53,6 +55,21 @@ export class MongoModelService implements
   config: MongoModelConfig;
 
   constructor(config: MongoModelConfig) { this.config = config; }
+
+  async #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): Promise<FindCursor> {
+    const store = await this.getStore(cls);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+
+    const where = this.getWhereFilter(
+      cls,
+      castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
+    );
+
+    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxConfig)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxConfig);
+    return store.find(where, { timeout: true })
+      .batchSize(100)
+      .sort(castTo(sort));
+  }
 
   restoreId(item: { id?: string, _id?: unknown }): void {
     if (item._id) {
@@ -448,25 +465,29 @@ export class MongoModelService implements
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
-    const store = await this.getStore(cls);
-    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-
-    const where = this.getWhereFilter(
-      cls,
-      castTo(ModelIndexedUtil.projectIndex(cls, idx, options?.body, { emptySortValue: { $exists: true } }))
-    );
-
-    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxConfig)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxConfig);
-    const cursor = store.find(where, { timeout: true })
-      .batchSize(100)
-      .limit(options?.limit ?? Number.MAX_SAFE_INTEGER)
-      .skip(options?.offset ?? 0)
-      .sort(castTo(sort));
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+    const cursor = await this.#buildIndexQuery(cls, idx, body);
 
     for await (const item of cursor) {
       yield await this.postLoad(cls, item);
     }
+  }
+
+  async listPageByIndex<T extends ModelType>(
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, number>
+  ): Promise<ModelIndexListPageResult<T, number>> {
+    const offset = options.offset ?? 0;
+    const limit = options.limit;
+    const cursor = (await this.#buildIndexQuery(cls, idx, options.body))
+      .limit(limit)
+      .skip(offset);
+
+    const items: T[] = [];
+    for await (const item of cursor) {
+      items.push(await this.postLoad(cls, item));
+    }
+    return { items, nextOffset: items.length ? offset + items.length : undefined };
+
   }
 
   // Query
