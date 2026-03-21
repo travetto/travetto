@@ -226,24 +226,24 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async paginateByIndex() {
     const service = await this.service;
 
-    await service.create(User3, User3.from({ name: 'page', age: 10, color: 'a' }));
-    await service.create(User3, User3.from({ name: 'page', age: 20, color: 'b' }));
-    await service.create(User3, User3.from({ name: 'page', age: 30, color: 'c' }));
-    await service.create(User3, User3.from({ name: 'page', age: 40, color: 'd' }));
-    await service.create(User3, User3.from({ name: 'page', age: 50, color: 'e' }));
+    for (const [i, color] of (['a', 'b', 'c', 'd', 'e']).entries()) {
+      await service.create(User3, User3.from({ name: 'page', age: (i + 1) * 10, color }));
+    }
 
-    const page1 = await this.toArray(service.listByIndex(User3, 'userAge', { name: 'page' }, limit: 2));
-    assert(page1.length === 2);
-    assert(page1[0].color === 'a');
-    assert(page1[1].color === 'b');
+    const limit = 2;
+    const allColors: string[] = [];
+    let offset: string | undefined;
 
-    const page2 = await this.toArray(service.listByIndex(User3, 'userAge', { name: 'page' }, limit: 2, offset: 2));
-    assert(page2.length === 2);
-    assert(page2[0].color === 'c');
-    assert(page2[1].color === 'd');
+    while (true) {
+      const page = await service.listPageByIndex(User3, 'userAge', { body: { name: 'page' }, limit, offset });
+      allColors.push(...page.items.map(u => u.color!));
+      offset = page.nextOffset;
+      if (!offset) {
+        break;
+      }
+    }
 
-    const page3 = await this.toArray(service.listByIndex(User3, 'userAge', { name: 'page' }, limit: 2, offset: 4));
-    assert(page3.length === 1);
-    assert(page3[0].color === 'e');
+    assert(allColors.length === 5);
+    assert.deepEqual(allColors, ['a', 'b', 'c', 'd', 'e']);
   }
 }

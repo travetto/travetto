@@ -23,6 +23,7 @@ import {
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
   castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
+  JSONUtil,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -44,7 +45,7 @@ export const ModelBlobNamespace = '__blobs';
 export class MongoModelService implements
   ModelCrudSupport, ModelStorageSupport,
   ModelBulkSupport, ModelBlobSupport,
-  ModelIndexedSupport<number>, ModelQuerySupport,
+  ModelIndexedSupport, ModelQuerySupport,
   ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySuggestSupport, ModelExpirySupport {
 
@@ -474,9 +475,9 @@ export class MongoModelService implements
   }
 
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, number>
-  ): Promise<ModelIndexListPageResult<T, number>> {
-    const offset = options.offset ?? 0;
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
+  ): Promise<ModelIndexListPageResult<T>> {
+    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
     const cursor = (await this.#buildIndexQuery(cls, idx, options.body))
       .limit(limit)
@@ -486,8 +487,7 @@ export class MongoModelService implements
     for await (const item of cursor) {
       items.push(await this.postLoad(cls, item));
     }
-    return { items, nextOffset: items.length ? offset + items.length : undefined };
-
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
 
   // Query

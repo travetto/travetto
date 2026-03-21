@@ -36,7 +36,7 @@ const ELASTICSEARCH_REPLACER = {
  */
 @Injectable()
 export class ElasticsearchModelService implements
-  ModelCrudSupport, ModelIndexedSupport<string>,
+  ModelCrudSupport, ModelIndexedSupport,
   ModelStorageSupport, ModelBulkSupport,
   ModelExpirySupport,
   ModelQuerySupport, ModelQueryCrudSupport,

@@ -19,7 +19,7 @@ const EXP_ATTR = 'expires_at__';
  * A model service backed by DynamoDB
  */
 @Injectable()
-export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport<string> {
+export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   idSource = ModelCrudUtil.uuidSource();
   client: DynamoDB;

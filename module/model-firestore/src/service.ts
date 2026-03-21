@@ -18,7 +18,7 @@ const setMissingValues = <T>(input: T, missingValue: unknown): T =>
  * A model service backed by Firestore
  */
 @Injectable()
-export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport<number> {
+export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport {
 
   idSource = ModelCrudUtil.uuidSource();
   client: Firestore;
@@ -181,9 +181,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, number>
-  ): Promise<ModelIndexListPageResult<T, number>> {
-    const offset = options.offset ?? 0;
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
+  ): Promise<ModelIndexListPageResult<T>> {
+    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
     const query = this.#buildIndexQuery(cls, idx, options.body)
       .limit(limit)
@@ -194,6 +194,6 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       items.push(await ModelCrudUtil.load(cls, item.data()!));
     }
 
-    return { items, nextOffset: items.length ? offset + items.length : undefined };
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
 }

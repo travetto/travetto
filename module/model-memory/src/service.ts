@@ -44,7 +44,7 @@ function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | n
 export class MemoryModelService implements
   ModelCrudSupport, ModelBlobSupport,
   ModelExpirySupport, ModelStorageSupport,
-  ModelIndexedSupport<number> {
+  ModelIndexedSupport {
 
   #store = new Map<string, StoreType>();
   #indices = {
@@ -354,16 +354,16 @@ export class MemoryModelService implements
   }
 
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, number>
-  ): Promise<ModelIndexListPageResult<T, number>> {
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
+  ): Promise<ModelIndexListPageResult<T>> {
     const ids = this.#getIndexIds(cls, idx, options.body);
-    const offset = options.offset ?? 0;
+    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
 
     const items: T[] = [];
     for (const id of ids.slice(offset, offset + limit)) {
       items.push(await this.get(cls, id));
     }
-    return { items, nextOffset: items.length ? offset + items.length : undefined };
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
 }

@@ -3,13 +3,13 @@ import type { Class, DeepPartial } from '@travetto/runtime';
 import type { ModelType, OptionalId } from '../types/model.ts';
 import type { ModelBasicSupport } from './basic.ts';
 
-export type ModelIndexedListPageOptions<T extends ModelType, O = unknown> = {
+export type ModelIndexedListPageOptions<T extends ModelType, O = string> = {
   body?: DeepPartial<T>;
   limit: number;
   offset?: O;
 };
 
-export type ModelIndexListPageResult<T extends ModelType, O = unknown> = {
+export type ModelIndexListPageResult<T extends ModelType, O = string> = {
   items: T[];
   nextOffset?: O;
 };
@@ -19,7 +19,7 @@ export type ModelIndexListPageResult<T extends ModelType, O = unknown> = {
  *
  * @concrete
  */
-export interface ModelIndexedSupport<O = unknown> extends ModelBasicSupport {
+export interface ModelIndexedSupport extends ModelBasicSupport {
   /**
    * Get entity by index as defined by fields of idx and the body fields
    * @param cls The type to search by
@@ -74,5 +74,5 @@ export interface ModelIndexedSupport<O = unknown> extends ModelBasicSupport {
    * @param idx The index name to search against
    * @param options The configuration for listing
    */
-  listPageByIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, O>): Promise<ModelIndexListPageResult<T, O>>;
+  listPageByIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>): Promise<ModelIndexListPageResult<T>>;
 }
