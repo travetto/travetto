@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
@@ -148,6 +148,16 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
+
+  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
+  }
+
+  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    return this.update(cls, item);
+  }
+
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);

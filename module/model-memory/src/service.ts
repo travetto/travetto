@@ -319,6 +319,16 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
+  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
+  }
+
+  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    return this.update(cls, item);
+  }
+
+
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });

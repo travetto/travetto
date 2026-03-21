@@ -1,6 +1,6 @@
 import { createClient } from '@redis/client';
 
-import { JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport,
   NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId,
@@ -306,6 +306,16 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
+
+  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
+  }
+
+  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    return this.update(cls, item);
+  }
+
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);

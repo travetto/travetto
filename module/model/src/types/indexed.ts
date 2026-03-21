@@ -40,4 +40,20 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param body The document to potentially store
    */
   upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T>;
+
+  /**
+   * Update by index
+   * @param cls The type to update for
+   * @param idx The index to update by
+   * @param body The document to update
+   */
+  updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T>;
+
+  /**
+   * Update partial by index
+   * @param cls The type to update for
+   * @param idx The index to update by
+   * @param body The partial document to update
+   */
+  updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T>;
 }

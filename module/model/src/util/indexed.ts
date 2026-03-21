@@ -130,9 +130,7 @@ export class ModelIndexedUtil {
     cls: Class<T>, idx: string, body: OptionalId<T>
   ): Promise<T> {
     try {
-      const { id } = await service.getByIndex(cls, idx, castTo(body));
-      body.id = id;
-      return await service.update(cls, castTo(body));
+      return await this.naiveUpdate(service, cls, idx, body);
     } catch (error) {
       if (error instanceof NotFoundError) {
         return await service.create(cls, body);
@@ -140,5 +138,21 @@ export class ModelIndexedUtil {
         throw error;
       }
     }
+  }
+
+  /**
+  * Naive update by index
+  * @param service
+  * @param cls
+  * @param idx
+  * @param body
+  */
+  static async naiveUpdate<T extends ModelType>(
+    service: ModelIndexedSupport & ModelCrudSupport,
+    cls: Class<T>, idx: string, body: OptionalId<T>
+  ): Promise<T> {
+    const { id } = await service.getByIndex(cls, idx, castTo(body));
+    body.id = id;
+    return await service.update(cls, castTo(body));
   }
 }

@@ -187,4 +187,42 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(arr3.length === 1);
     assert(arr3[0].id === user4.id);
   }
+
+  @Test()
+  async updateByIndex() {
+    const service = await this.service;
+
+    const created = await service.create(User3, User3.from({ name: 'alice', age: 25, color: 'blue' }));
+
+    const updated = await service.updateByIndex(User3, 'userAge', { ...created, color: 'red' });
+
+    assert(updated.id === created.id);
+    assert(updated.name === 'alice');
+    assert(updated.age === 25);
+    assert(updated.color === 'red');
+
+    const found = await service.getByIndex(User3, 'userAge', { name: 'alice', age: 25 });
+    assert(found.color === 'red');
+
+    await assert.rejects(() => service.updateByIndex(User3, 'userAge', { ...created, name: 'nobody', age: 99 }), NotFoundError);
+  }
+
+  @Test()
+  async updatePartialByIndex() {
+    const service = await this.service;
+
+    const created = await service.create(User3, User3.from({ name: 'carol', age: 35, color: 'green' }));
+
+    const updated = await service.updatePartialByIndex(User3, 'userAge', { name: 'carol', age: 35, color: 'yellow' });
+
+    assert(updated.id === created.id);
+    assert(updated.name === 'carol');
+    assert(updated.age === 35);
+    assert(updated.color === 'yellow');
+
+    const found = await service.getByIndex(User3, 'userAge', { name: 'carol', age: 35 });
+    assert(found.color === 'yellow');
+
+    await assert.rejects(() => service.updatePartialByIndex(User3, 'userAge', { name: 'nobody', age: 99, color: 'purple' }), NotFoundError);
+  }
 }
