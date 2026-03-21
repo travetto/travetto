@@ -3,6 +3,12 @@ import type { Class, DeepPartial } from '@travetto/runtime';
 import type { ModelType, OptionalId } from '../types/model.ts';
 import type { ModelBasicSupport } from './basic.ts';
 
+export type ModelIndexedListOptions<T extends ModelType> = {
+  body?: DeepPartial<T>;
+  limit?: number;
+  offset?: number;
+};
+
 /**
  * Support for simple indexed activity
  *
@@ -29,9 +35,9 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * List entity by ranged index as defined by fields of idx and the body fields
    * @param cls The type to search by
    * @param idx The index name to search against
-   * @param body The payload of fields needed to search
+   * @param options The configuration for listing
    */
-  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T>;
+  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T>;
 
   /**
    * Upsert by index, allowing the index to act as a primary key

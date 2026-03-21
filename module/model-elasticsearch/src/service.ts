@@ -4,7 +4,7 @@ import type * as estypes from '@elastic/elasticsearch/api/types';
 import {
   type ModelCrudSupport, type BulkOperation, type BulkResponse, type ModelBulkSupport, type ModelExpirySupport,
   type ModelIndexedSupport, type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, type ModelIndexedListOptions,
 } from '@travetto/model';
 import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
@@ -398,14 +398,19 @@ export class ElasticsearchModelService implements
   }
 
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const limit = options?.limit ?? 10000;
+    if (limit > 10000) {
+      // TODO: We need to do this differently
+    }
     let search = await this.execSearch<T>(cls, {
       scroll: '2m',
-      size: 100,
+      size: limit,
+      from: options?.offset ?? 0,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
+          ModelIndexedUtil.projectIndex(cls, idx, options?.body, { emptySortValue: { $exists: true } }))
       ),
       sort: ElasticsearchQueryUtil.getSort(config.fields)
     });

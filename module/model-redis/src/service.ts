@@ -1,9 +1,9 @@
 import { createClient } from '@redis/client';
 
-import { castTo, JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { castTo, JSONUtil, RuntimeError, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport,
-  NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId,
+  NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId, type ModelIndexedListOptions,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
 } from '@travetto/model';
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -38,6 +38,15 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       key = `${this.config.namespace}/${key}`;
     }
     return key;
+  }
+
+  async * #streamRangedValues(operation: 'zRange', search: RedisScan, count = 100, offset = 0): AsyncIterable<string[]> {
+    const key = 'key' in search ? search.key : '';
+    const results = await this.client.zRange(key, -Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, {
+      LIMIT: { count, offset }
+    });
+
+    yield results.slice(0, count);
   }
 
   async * #streamValues(operation: 'scan' | 'sScan' | 'zScan', search: RedisScan, count = 100): AsyncIterable<string[]> {
@@ -317,20 +326,27 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     let stream: AsyncIterable<string[]>;
 
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body, { emptySortValue: null });
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, options?.body, { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx, key);
 
     if (idxConfig.type === 'unsorted') {
+      if (options?.limit || options?.offset) {
+        throw new RuntimeError('Pagination is not supported for unsorted indices');
+      }
       stream = this.#streamValues('sScan', { key: fullKey });
     } else {
-      stream = this.#streamValues('zScan', { key: fullKey });
+      if (options?.limit || options?.offset) {
+        stream = this.#streamRangedValues('zRange', { key: fullKey }, options.limit ?? 100, options.offset ?? 0);
+      } else {
+        stream = this.#streamValues('zScan', { key: fullKey });
+      }
     }
 
     for await (const ids of stream) {

@@ -7,7 +7,7 @@ import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, type ModelIndexedListOptions
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -328,19 +328,24 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     return this.update(cls, item);
   }
 
-
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, options?.body, { emptySortValue: null });
     const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
+
+    let position = -1;
+    const offset = options?.offset ?? 0;
+    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
 
     if (index) {
       if (index instanceof Set) {
         for (const id of index) {
+          if (position++ < offset) { continue; } else if (position >= offset + limit) { break; }
           yield this.get(cls, id);
         }
       } else {
         for (const id of [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a)) {
+          if (position++ < offset) { continue; } else if (position >= offset + limit) { break; }
           yield this.get(cls, id);
         }
       }

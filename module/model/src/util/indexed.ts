@@ -36,7 +36,7 @@ export class ModelIndexedUtil {
    * @param item Item to read values from
    */
   static computeIndexParts<T extends ModelType>(
-    cls: Class<T>, idx: IndexConfig<T> | string, item: DeepPartial<T>, opts: ComputeConfig = {}
+    cls: Class<T>, idx: IndexConfig<T> | string, item: DeepPartial<T> = {}, opts: ComputeConfig = {}
   ): { fields: IndexFieldPart[], sorted: IndexSortPart | undefined } {
     const config = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
     const sortField = config.type === 'sorted' ? config.fields.at(-1) : undefined;

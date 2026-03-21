@@ -5,8 +5,8 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelIndexedSupport, type ModelType, NotFoundError, ExistsError,
-  IndexNotSupported, type OptionalId,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
+  IndexNotSupported, type OptionalId, type ModelIndexedListOptions,
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
 } from '@travetto/model';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -344,17 +344,20 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, config, body, { emptySortValue: null });
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, config, options?.body, { emptySortValue: null });
 
     const idxName = DynamoDBUtil.simpleName(idx);
+    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    const offset = options?.offset ?? 0;
+    let position = -1;
 
     let done = false;
     let token: Record<string, AttributeValue> | undefined;
-    while (!done) {
+    outer: while (!done) {
       const batch = await this.client.query({
         TableName: this.#resolveTable(cls),
         IndexName: idxName,
@@ -368,12 +371,15 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
       if (batch.Count && batch.Items) {
         for (const item of batch.Items) {
+          if (position++ < offset) { continue; } else if (position >= offset + limit) { break outer; }
           try {
             yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
           } catch (error) {
             if (!(error instanceof NotFoundError)) {
               throw error;
             }
+            // Restore position for skipped item
+            position -= 1;
           }
         }
       }

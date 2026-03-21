@@ -8,8 +8,8 @@ import {
 import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport,
   type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
-  NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
+  NotFoundError, ExistsError, type ModelBlobSupport, type ModelIndexedListOptions,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -448,17 +448,21 @@ export class MongoModelService implements
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, options?: ModelIndexedListOptions<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
     const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     const where = this.getWhereFilter(
       cls,
-      castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
+      castTo(ModelIndexedUtil.projectIndex(cls, idx, options?.body, { emptySortValue: { $exists: true } }))
     );
 
     const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxConfig)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxConfig);
-    const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
+    const cursor = store.find(where, { timeout: true })
+      .batchSize(100)
+      .limit(options?.limit ?? Number.MAX_SAFE_INTEGER)
+      .skip(options?.offset ?? 0)
+      .sort(castTo(sort));
 
     for await (const item of cursor) {
       yield await this.postLoad(cls, item);
