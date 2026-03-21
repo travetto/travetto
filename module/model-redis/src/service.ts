@@ -48,12 +48,12 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const maxPosition = offset + limit;
 
     if (operation === 'zScan' && (options?.limit || options?.offset) && limit < 1000) {
-      const results = await this.client.zRange(key, -Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, {
-        LIMIT: { count: options.limit ?? Number.MAX_SAFE_INTEGER, offset: options.offset ?? 0 },
+      const results = await this.client.zRange(key, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, {
+        LIMIT: { count: limit, offset },
         BY: 'SCORE',
       });
 
-      yield results.slice(0, count);
+      yield results.slice(0, limit);
       return;
     }
 
@@ -72,28 +72,21 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
             this.client.zScan(key, previousCursor, flags).then(result => [result.cursor, result.members.map(item => item.value)] as const)
       );
 
-      const cursor = response[0];
-      let results = response[1];
+      const [cursor, results] = response;
       previousCursor = cursor;
+      const prevPosition = position;
+      position += results.length;
 
-      if (position + results.length < offset) {
-        position += results.length;
-        continue;
-      } else if (position >= maxPosition) {
-        break;
-      } else if (position < offset) {
-        results = results.slice(0, offset - position);
-        position = offset;
-      } else if (position + results.length > maxPosition) {
-        results = results.slice(maxPosition - position);
-        done = true;
-      } else {
-        position += results.length;
+      const start = prevPosition < offset ? offset - prevPosition : 0;
+      const end = (position < offset) ? 0 :
+        (position > maxPosition) ? maxPosition - prevPosition :
+          results.length;
+
+      if (start !== end) {
+        yield results.slice(start, end);
       }
 
-      yield results;
-
-      if (cursor === '0') {
+      if (cursor === '0' || end > maxPosition) {
         done = true;
       }
     }
