@@ -367,14 +367,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         ExpressionAttributeValues: {
           [`:${idxName}`]: DynamoDBUtil.toValue(key)
         },
-        ExclusiveStartKey: token
+        ExclusiveStartKey: token,
       });
 
       if (batch.Count && batch.Items) {
         for (const item of batch.Items) {
-          if (position >= maxPosition) {
-            break outer;
-          }
+          if (position >= maxPosition) { break outer; }
           try {
             const loaded = await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
             if (position >= offset) { yield loaded; }
