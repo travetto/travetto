@@ -7,7 +7,8 @@ import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, type ModelIndexedListOptions
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, type ModelIndexedListOptions,
+  IndexNotSupported
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -335,23 +336,17 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
     const offset = options?.offset ?? 0;
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
-    const maxPosition = offset + limit;
-    let position = 0;
 
-    if (index) {
-      if (index instanceof Set) {
-        for (const id of index) {
-          if (position >= maxPosition) { break; }
-          else if (position >= offset) { yield this.get(cls, id); }
-          position += 1;
-        }
-      } else {
-        for (const id of [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a)) {
-          if (position >= maxPosition) { break; }
-          else if (position >= offset) { yield this.get(cls, id); }
-          position += 1;
-        }
-      }
+    if (!index) {
+      throw new IndexNotSupported(cls, config);
+    }
+
+    const ids = index instanceof Set ?
+      [...index] :
+      [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a);
+
+    for (const id of ids.slice(offset, offset + limit)) {
+      yield this.get(cls, id);
     }
   }
 }
