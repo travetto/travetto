@@ -112,6 +112,20 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return stream;
   }
 
+  async * #getBodies<T extends ModelType>(cls: Class<T>, ids: string[], transform: (id: string) => string): AsyncIterable<T> {
+    const bodies = (await this.client.mGet(ids.map(transform)))
+      .filter((result): result is string => !!result);
+    for (const body of bodies) {
+      try {
+        yield await ModelCrudUtil.load(cls, body);
+      } catch (error) {
+        if (!(error instanceof NotFoundError)) {
+          throw error;
+        }
+      }
+    }
+  }
+
   #iterate(prefix: Class | string): AsyncIterable<string[]> {
     return this.#streamValues('scan', { match: `${this.#resolveKey(prefix)}*` }, { limit: Number.MAX_SAFE_INTEGER });
   }
@@ -289,23 +303,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     for await (const ids of this.#iterate(cls)) {
-
-      if (!ids.length) {
-        return;
-      }
-
-      const bodies = (await this.client.mGet(ids))
-        .filter((result): result is string => !!result);
-
-      for (const body of bodies) {
-        try {
-          yield await ModelCrudUtil.load(cls, body);
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
+      yield* this.#getBodies(cls, ids, id => id);
     }
   }
 
@@ -364,20 +362,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     for await (const ids of this.#scanIndex(cls, idx, { body, limit: Number.MAX_SAFE_INTEGER })) {
-      const bodies = (await this.client.mGet(
-        ids.map(id => this.#resolveKey(cls, id))
-      ))
-        .filter((result): result is string => !!result);
-
-      for (const full of bodies) {
-        try {
-          yield await ModelCrudUtil.load(cls, full);
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
+      yield* this.#getBodies(cls, ids, id => this.#resolveKey(cls, id));
     }
   }
 
@@ -387,20 +372,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const items: T[] = [];
     const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     for await (const ids of this.#scanIndex(cls, idx, { ...options, offset })) {
-      const bodies = (await this.client.mGet(
-        ids.map(id => this.#resolveKey(cls, id))
-      ))
-        .filter((result): result is string => !!result);
-
-      for (const full of bodies) {
-        try {
-          items.push(await ModelCrudUtil.load(cls, full));
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
+      items.push(
+        ...await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)))
+      );
     }
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }

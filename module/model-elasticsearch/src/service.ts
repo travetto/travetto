@@ -55,14 +55,15 @@ export class ElasticsearchModelService implements
   }> {
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     let search = await this.execSearch<T>(cls, {
-      ...(options.offset ? { scroll: '2m' } : {}),
-      ...(options.offset ? { size: options.limit } : { size: 100 }),
+      ...(options.offset ?
+        { size: options.limit, search_after: options.offset } :
+        { scroll: '2m', size: 100 }
+      ),
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, options?.body, { emptySortValue: { $exists: true } }))
       ),
       sort: ElasticsearchQueryUtil.getSort(config.fields),
-      search_after: options.offset
     });
 
     let produced = 0;
@@ -76,11 +77,17 @@ export class ElasticsearchModelService implements
       }
 
       yield { hits, nextOffset: hits.at(-1)?.sort };
-      search = await this.client.scroll({ scroll_id: search._scroll_id, scroll: '2m' });
+      if (search._scroll_id) {
+        search = await this.client.scroll({ scroll_id: search._scroll_id, scroll: '2m' });
+      } else {
+        break;
+      }
     }
     try {
-      // Clear scroll
-      await this.client.clearScroll({ scroll_id: search._scroll_id });
+      if (search._scroll_id) {
+        // Clear scroll
+        await this.client.clearScroll({ scroll_id: search._scroll_id });
+      }
     } catch { }
   }
 
