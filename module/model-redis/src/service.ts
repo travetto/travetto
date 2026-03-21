@@ -71,7 +71,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       const sliceEnd = (produced >= limit) ? (results.length - (produced - limit)) : results.length;
       yield { cursor, ids: results.slice(0, sliceEnd) };
 
-      if (!cursor) {
+      if (!cursor || produced >= limit) {
         return;
       }
     }
