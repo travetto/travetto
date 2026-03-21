@@ -55,14 +55,14 @@ export class ElasticsearchModelService implements
   }> {
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     let search = await this.execSearch<T>(cls, {
-      scroll: '2m',
-      size: 100,
+      ...(options.offset ? { scroll: '2m' } : {}),
+      ...(options.offset ? { size: options.limit } : { size: 100 }),
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, options?.body, { emptySortValue: { $exists: true } }))
       ),
       sort: ElasticsearchQueryUtil.getSort(config.fields),
-      search_after: options?.offset
+      search_after: options.offset
     });
 
     let produced = 0;
