@@ -10,6 +10,7 @@ import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
+import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -49,6 +50,13 @@ class PostgreSQLExpirySuite extends ModelExpirySuite {
 @WithSuiteContext()
 @Suite()
 class PostgreSQLQueryPolymorphismSuite extends ModelPolymorphismSuite {
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
+}
+
+@WithSuiteContext()
+@Suite()
+class PostgreSQLIndexedSuite extends ModelIndexedSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
