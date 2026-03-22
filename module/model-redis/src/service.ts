@@ -85,7 +85,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, options.body, { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx, key);
-    const isReversed = idxConfig.type === 'sorted' && idxConfig.fields.some(field => Object.values(field)[0] === -1);
+    const isReversed = ModelIndexedUtil.isIndexSimpleReversed(cls, idxConfig);
 
     const operation = idxConfig.type === 'unsorted' ? 'sScan' : 'zRange';
     return this.#streamValues(operation, { key: fullKey, reverse: isReversed }, options);

@@ -44,7 +44,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const idxName = indexConfig.simpleName!;
     const { key } = ModelIndexedUtil.computeIndexKey(cls, indexConfig, options.body, { emptySortValue: null });
     const expression = { [`:${idxName}`]: DynamoDBUtil.toValue(key) };
-    const isReversed = indexConfig.type === 'sorted' && indexConfig.fields.some(field => Object.values(field)[0] === -1);
+    const isReversed = ModelIndexedUtil.isIndexSimpleReversed(cls, indexConfig);
 
     let startKey = options.offset;
     let produced = 0;
