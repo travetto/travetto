@@ -60,7 +60,7 @@ export class DynamoDBUtil {
       if (idx.type === 'sorted') {
         keys.push({
           AttributeName: `${idxName}_sort__`,
-          KeyType: 'RANGE'
+          KeyType: 'RANGE',
         });
         attributes.push({ AttributeName: `${idxName}_sort__`, AttributeType: 'N' });
       }

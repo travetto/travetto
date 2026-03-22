@@ -44,7 +44,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const idxName = indexConfig.simpleName!;
     const { key } = ModelIndexedUtil.computeIndexKey(cls, indexConfig, options.body, { emptySortValue: null });
     const expression = { [`:${idxName}`]: DynamoDBUtil.toValue(key) };
-
+    const isReversed = indexConfig.type === 'sorted' && indexConfig.fields.some(field => Object.values(field)[0] === -1);
 
     let startKey = options.offset;
     let produced = 0;
@@ -59,6 +59,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         ExpressionAttributeValues: expression,
         Limit: Math.min(remaining, 100),
         ExclusiveStartKey: startKey,
+        ScanIndexForward: !isReversed,
       });
 
       if (batch.Count && batch.Items) {
