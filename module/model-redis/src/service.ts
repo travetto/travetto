@@ -54,9 +54,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     let cursor: string | undefined = options.offset ?? '0';
     let produced = 0;
 
-    const flags = { COUNT: count, ...('match' in search ? { MATCH: search.match } : {}) };
+    do {
+      const remaining = limit - produced;
+      const flags = { COUNT: Math.min(remaining, count), ...('match' in search ? { MATCH: search.match } : {}) };
 
-    while (cursor && produced < limit) {
       const [nextCursor, results]: [string, string[]] = await (
         operation === 'scan' ?
           this.client.scan(cursor, flags).then(result => [result.cursor, result.keys] as const) :
@@ -66,11 +67,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       );
 
       cursor = nextCursor === '0' ? undefined : nextCursor;
-
       produced += results.length;
-      const sliceEnd = (produced >= limit) ? (results.length - (produced - limit)) : results.length;
-      yield { cursor, ids: results.slice(0, sliceEnd) };
-    }
+      yield { cursor, ids: results };
+    } while (cursor && produced < limit);
   }
 
   #scanIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, string>): AsyncIterable<{ cursor?: string, ids: string[] }> {
