@@ -70,6 +70,10 @@ export type IndexConfig<T extends ModelType> = {
    */
   name: string;
   /**
+   * Index simple name, filled out 
+   */
+  simpleName?: string;
+  /**
    * Fields and sort order
    */
   fields: IndexClauseRaw<RetainPrimitiveFields<T>>[];

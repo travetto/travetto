@@ -234,14 +234,11 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     const allColors: string[] = [];
     let offset: string | undefined;
 
-    while (true) {
+    do {
       const page = await service.listPageByIndex(User3, 'userAge', { body: { name: 'page' }, limit, offset });
       allColors.push(...page.items.map(u => u.color!));
       offset = page.nextOffset;
-      if (!offset) {
-        break;
-      }
-    }
+    } while (offset);
 
     assert(allColors.length === 5);
     assert.deepEqual(allColors, ['a', 'b', 'c', 'd', 'e']);

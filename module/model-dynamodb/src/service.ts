@@ -39,47 +39,42 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     cls: Class, idx: string, options: ModelIndexedListPageOptions<T, Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const builder = DynamoDBUtil.indexKeyBuilder(cls, idx);
-    const idxName = DynamoDBUtil.simpleName(idx);
+
+    const indexConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxName = indexConfig.simpleName!;
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, indexConfig, options.body, { emptySortValue: null });
+    const expression = { [`:${idxName}`]: DynamoDBUtil.toValue(key) };
+
 
     let startKey = options.offset;
     let produced = 0;
 
-    while (true) {
+    do {
       const batch = await this.client.query({
         TableName: this.#resolveTable(cls),
         IndexName: idxName,
         ProjectionExpression: 'body',
         KeyConditionExpression: `${idxName}__ = :${idxName}`,
-        ExpressionAttributeValues: builder(options.body),
+        ExpressionAttributeValues: expression,
         ExclusiveStartKey: startKey,
       });
 
-      if (!batch.Count || !batch.Items) {
-        return;
-      }
+      if (batch.Count && batch.Items) {
+        produced += batch.Count;
 
-      produced += batch.Count;
-
-      if (produced > options.limit) {
-        const remaining = options.limit - (produced - batch.Count);
-        const items = batch.Items.slice(0, remaining);
-        yield {
-          $metadata: batch.$metadata,
-          Items: items,
-          Count: remaining,
-          ScannedCount: batch.ScannedCount,
-          LastEvaluatedKey: builder(items.at(-1)!)
-        };
-        return;
+        if (produced > options.limit) {
+          const remaining = options.limit - (produced - batch.Count);
+          const items = batch.Items.slice(0, remaining);
+          yield { ...batch, Items: items, };
+          return;
+        } else {
+          yield batch;
+        }
+        startKey = batch.LastEvaluatedKey;
       } else {
-        yield batch;
+        startKey = undefined;
       }
-      startKey = batch.LastEvaluatedKey;
-      if (!startKey) {
-        return;
-      }
-    }
+    } while (startKey);
   }
 
   async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
@@ -98,7 +93,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const property = DynamoDBUtil.simpleName(idx.name);
+          const property = idx.simpleName!;
           indices[`${property}__`] = DynamoDBUtil.toValue(key);
           if (sort) {
             indices[`${property}_sort__`] = DynamoDBUtil.toValue(+sort);
@@ -121,7 +116,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const expr: string[] = [];
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const property = DynamoDBUtil.simpleName(idx.name);
+          const property = idx.simpleName!;
           indices[`:${property}`] = DynamoDBUtil.toValue(key);
           expr.push(`${property}__ = :${property}`);
           if (sort) {
@@ -347,7 +342,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       throw new IndexNotSupported(cls, idxConfig, 'Sorted indices require the sort field');
     }
 
-    const idxName = DynamoDBUtil.simpleName(idx);
+    const idxName = idxConfig.simpleName!;
 
     const query = {
       TableName: this.#resolveTable(cls),
@@ -409,9 +404,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async listPageByIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, string>): Promise<ModelIndexListPageResult<T, string>> {
     const items: T[] = [];
     const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
-    let lastOffset: Record<string, AttributeValue> | undefined;
     for await (const batch of this.#scanIndex(cls, idx, { ...options, offset })) {
-      lastOffset = batch.LastEvaluatedKey;
+      console.error!(batch.LastEvaluatedKey);
       for (const item of batch.Items ?? []) {
         try {
           items.push(await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!));
@@ -426,9 +420,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       }
     }
 
-    return {
-      items,
-      nextOffset: lastOffset ? JSONUtil.toBase64(lastOffset) : undefined,
-    };
+    let nextOffset;
+    if (items.length) {
+      const indexConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+      const { key } = ModelIndexedUtil.computeIndexKey<T>(cls, indexConfig, castTo(items.at(-1)!), { emptySortValue: null });
+      nextOffset = JSONUtil.toBase64(DynamoDBUtil.toValue(key));
+    }
+
+    return { items, nextOffset };
   }
 }

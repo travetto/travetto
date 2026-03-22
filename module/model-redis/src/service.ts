@@ -88,6 +88,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * #getBodies<T extends ModelType>(cls: Class<T>, ids: string[], transform: (id: string) => string): AsyncIterable<T> {
+    if (ids.length === 0) {
+      return;
+    }
     const bodies = (await this.client.mGet(ids.map(transform)))
       .filter((result): result is string => !!result);
     for (const body of bodies) {
